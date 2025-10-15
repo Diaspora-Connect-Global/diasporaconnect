@@ -31,7 +31,7 @@ export default function AuthLayout({
 
                 {/* Right side  */}
                 <div className="lg:flex lg:w-[40%] ">
-                    <div className="w-full bg-white dark:bg-background flex flex-col min-h-screen lg:min-h-0">
+                    <div className="w-full bg-surface-default dark:bg-background flex flex-col min-h-screen lg:min-h-0">
                         <div className="flex-grow p-6">
                             {children}
                         </div>
@@ -41,7 +41,8 @@ export default function AuthLayout({
                             <LocaleSwitcher
                                 selectClassName="appearance-none  pr-4"
                                 optionClassName="text-text-secondary  bg-surface-default"
-                            />                            <span>·</span>
+                            />     
+                            <span>·</span>
                             <InfoLinks />
                         </div>
                     </div>

@@ -77,46 +77,46 @@
   --color-border-info: var(--border-info);
   
   /* Typography - Display */
-  --font-size-display-large: 46px;
-  --line-height-display-large: 48px;
+  --font-size-display-large: 80px;
+  --line-height-display-large: 96px;
   --font-weight-display-large: 700;
   
-  --font-size-display-medium: 32px;
-  --line-height-display-medium: 40px;
+  --font-size-display-medium: 64px;
+  --line-height-display-medium: 76px;
   --font-weight-display-medium: 700;
   
-  --font-size-display-small: 28px;
-  --line-height-display-small: 36px;
+  --font-size-display-small: 56px;
+  --line-height-display-small: 68px;
   --font-weight-display-small: 700;
   
   /* Typography - Heading */
-  --font-size-heading-large: 32px;
-  --line-height-heading-large: 40px;
+  --font-size-heading-large: 40px;
+  --line-height-heading-large: 48px;
   --font-weight-heading-large: 700;
   
-  --font-size-heading-medium: 28px;
-  --line-height-heading-medium: 36px;
+  --font-size-heading-medium: 32px;
+  --line-height-heading-medium: 40px;
   --font-weight-heading-medium: 700;
   
-  --font-size-heading-small: 24px;
-  --line-height-heading-small: 32px;
+  --font-size-heading-small: 28px;
+  --line-height-heading-small: 36px;
   --font-weight-heading-small: 600;
   
-  --font-size-heading-xsmall: 18px;
-  --line-height-heading-xsmall: 26px;
+  --font-size-heading-xsmall: 24px;
+  --line-height-heading-xsmall: 32px;
   --font-weight-heading-xsmall: 600;
   
   /* Typography - Body */
-  --font-size-body-large: 16px;
-  --line-height-body-large: 24px;
+  --font-size-body-large: 18px;
+  --line-height-body-large: 28px;
   --font-weight-body-large: 400;
   
-  --font-size-body-medium: 14px;
-  --line-height-body-medium: 20px;
+  --font-size-body-medium: 16px;
+  --line-height-body-medium: 24px;
   --font-weight-body-medium: 400;
   
-  --font-size-body-small: 12px;
-  --line-height-body-small: 18px;
+  --font-size-body-small: 14px;
+  --line-height-body-small: 20px;
   --font-weight-body-small: 400;
   
   /* Typography - Label */
@@ -130,16 +130,20 @@
   
   --font-size-label-small: 14px;
   --line-height-label-small: 20px;
-  --font-weight-label-small: 800;
+  --font-weight-label-small: 600;
   
   /* Typography - Caption */
-  --font-size-caption-large: 14px;
-  --line-height-caption-large: 20px;
+  --font-size-caption-large: 16px;
+  --line-height-caption-large: 24px;
   --font-weight-caption-large: 500;
   
-  --font-size-caption-medium: 12px;
-  --line-height-caption-medium: 18px;
+  --font-size-caption-medium: 14px;
+  --line-height-caption-medium: 20px;
   --font-weight-caption-medium: 500;
+
+  --font-size-caption-small: 12px;
+  --line-height-caption-small: 18px;
+  --font-weight-caption-small: 500;
 }
 
 :root {
@@ -283,6 +287,14 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
   /* Typography Classes */

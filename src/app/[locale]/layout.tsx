@@ -41,14 +41,14 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
       >
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 
             {children}
             <ThemeToggle />
-            <LocalSwitcher />
+            {/* <LocalSwitcher /> */}
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

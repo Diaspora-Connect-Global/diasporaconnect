@@ -55,7 +55,7 @@ export default function Header() {
 
   return (
     <header className="bg-surface-default sticky top-0 z-50 border-b">
-      <div className="w-[80%] mx-auto ">
+      <div className="w-[90%] mx-auto ">
         <div className="  flex justify-between md:justify-between md:space-x-20 h-16 items-center">
           {/* Logo */}
           <div >

@@ -1,0 +1,44 @@
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  className?: string;
+}
+
+export function ButtonType1({ 
+  children, 
+  onClick, 
+  type = "button", 
+  disabled = false,
+  className = ""
+}: ButtonProps) {
+  return (
+    <button 
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`
+        bg-surface-default 
+        border 
+        border-text-brand 
+        text-text-brand 
+        rounded-full 
+        py-2 
+        px-4 
+        font-label-medium 
+        ring-text-brand
+        cursor-pointer
+        hover:bg-border-brand 
+        hover:text-text-white 
+        transition-colors
+        disabled:opacity-50 
+        disabled:cursor-not-allowed
+        h-fit
+        ${className}
+      `}
+    >
+      {children}
+    </button>
+  );
+}

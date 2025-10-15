@@ -8,7 +8,7 @@ export default function MainLayout({
   return (
     <div >
       <Header />
-      <div className="w-[80%] mx-auto">
+      <div className=" mx-auto">
         {children}
       </div>
     </div>
