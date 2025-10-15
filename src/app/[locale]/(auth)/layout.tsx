@@ -3,6 +3,8 @@ import { ThemeToggle } from "../theme-toggle"
 import { useTranslations } from 'next-intl';
 import Image from "next/image";
 import { BodySmall, DisplayMedium, TextPrimary } from "@/components/utils";
+import { Info } from "lucide-react";
+import InfoLinks from "@/components/custom/infoLinks";
 
 
 export default function AuthLayout({
@@ -18,12 +20,12 @@ export default function AuthLayout({
                 {/* Left side - 60% on large screens, full width on mobile */}
                 <div className="w-full lg:w-[60%] flex  mt-[15%] p-4 lg:p-8">
                     <div className="mx-[10%]">
-                        <Image src="/logo.png" alt="Logo" width={150} height={50} className="mb-8" />
-                            <DisplayMedium>
+                        <Image src="/LOGO.png" alt="Logo" width={150} height={50} className="mb-8" />
+                        <DisplayMedium>
 
-                                {t("info")}
-                            </DisplayMedium>
-                       
+                            {t("info")}
+                        </DisplayMedium>
+
                     </div>
                 </div>
 
@@ -36,46 +38,11 @@ export default function AuthLayout({
 
                         {/* Footer that sticks to bottom */}
                         <div className="text-center text-xs space-x-2 py-4 border-t pb-10 flex justify-center">
-<LocaleSwitcher 
-  selectClassName="appearance-none  pr-4"
-  optionClassName="text-text-secondary  bg-surface-default"
-/>                            <span>·</span>
-                            <a href="#" className="hover:underline text-foreground">
-                                <BodySmall>
-                                    <TextPrimary>
-                                        About
-                                    </TextPrimary>
-                                </BodySmall>
-
-                            </a>
-                            <span>·</span>
-                            <a href="#" className="hover:underline text-foreground">
-                                <BodySmall>
-                                    <TextPrimary>
-                                        Terms
-                                    </TextPrimary>
-                                </BodySmall>
-                            </a>
-                            <span>·</span>
-                            <a href="#" className="hover:underline text-foreground">
-                                <BodySmall>
-                                    <TextPrimary>
-                                        Privacy Policy
-                                    </TextPrimary>
-                                </BodySmall></a>
-                            <span>·</span>
-                            <a href="#" className="hover:underline text-foreground">
-                                <BodySmall>
-                                    <TextPrimary>
-                                        Contact us
-                                    </TextPrimary>
-                                </BodySmall></a>
-                            <span>·</span>
-                            <span>    <BodySmall>
-                                <TextPrimary>
-                                    © DCG 2025
-                                </TextPrimary>
-                            </BodySmall></span>
+                            <LocaleSwitcher
+                                selectClassName="appearance-none  pr-4"
+                                optionClassName="text-text-secondary  bg-surface-default"
+                            />                            <span>·</span>
+                            <InfoLinks />
                         </div>
                     </div>
                 </div>
