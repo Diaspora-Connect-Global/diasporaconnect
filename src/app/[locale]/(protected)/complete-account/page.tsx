@@ -163,7 +163,8 @@ export default  function CompleteAccount() {
             data={formData}
             updateData={updateFormData}
             prevStep={prevStep}
-            submitForm={submitForm}
+            nextStep={nextStep}
+
           />
         );
       default:

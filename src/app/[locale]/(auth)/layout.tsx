@@ -36,8 +36,10 @@ export default function AuthLayout({
 
                         {/* Footer that sticks to bottom */}
                         <div className="text-center text-xs space-x-2 py-4 border-t pb-10 flex justify-center">
-                            <LocaleSwitcher />
-                            <span>·</span>
+<LocaleSwitcher 
+  selectClassName="appearance-none  pr-4"
+  optionClassName="text-text-secondary  bg-surface-default"
+/>                            <span>·</span>
                             <a href="#" className="hover:underline text-foreground">
                                 <BodySmall>
                                     <TextPrimary>

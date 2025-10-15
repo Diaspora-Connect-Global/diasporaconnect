@@ -1,5 +1,6 @@
+"use client"
 import React from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Search } from 'lucide-react';
 import { LabelMedium } from '../utils';
 
 interface PasswordInputProps {
@@ -72,7 +73,7 @@ export const TextInput: React.FC<TextInputProps> = ({
     id = "email"
 }) => {
     return (
-        <div className="space-y-2">
+        <div className="space-y-2 ">
             <label htmlFor={id} className="">
                 <LabelMedium>
                     {label}
@@ -88,6 +89,56 @@ export const TextInput: React.FC<TextInputProps> = ({
                         onChange={(e) => onChange(e.target.value)}
                         className="h-12  placeholder:text-text-secondary w-full  px-3 focus:outline-none"
                     />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+interface SearchInputProps {
+    value: string;
+    onChange: (value: string) => void;
+    onSearch: () => void;
+    placeholder?: string;
+    label?: string;
+    id?: string;
+}
+
+export const SearchInput: React.FC<SearchInputProps> = ({
+    value,
+    onChange,
+    onSearch,
+    placeholder = "Search...",
+    id = "search"
+}) => {
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            onSearch();
+        }
+    };
+
+    return (
+        <div className="space-y-2">
+         
+            <div className=" rounded-md">
+                <div className="relative bg-surface-subtle border-border-subtle border-2 rounded-full flex text-text-secondary">
+                    <input
+                        id={id}
+                        type="text"
+                        placeholder={placeholder}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        className="w-48 pl-10 pr-4 py-2 border text-text-primary rounded-lg outline-none  border-transparent"
+                    />
+                    <button
+                        type="button"
+                        onClick={onSearch}
+                        className=" absolute z-50 left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 "
+                    >
+                        <Search size={20} />
+                    </button>
                 </div>
             </div>
         </div>

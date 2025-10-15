@@ -3,7 +3,17 @@
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale } from 'next-intl';
 
-export default function LocaleSwitcher() {
+interface LocaleSwitcherProps {
+  className?: string;
+  selectClassName?: string;
+  optionClassName?: string;
+}
+
+export default function LocaleSwitcher({
+  className = '',
+  selectClassName = '',
+  optionClassName = ''
+}: LocaleSwitcherProps) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -16,13 +26,16 @@ export default function LocaleSwitcher() {
   };
 
   return (
-    <select
-      className="text-foreground rounded"
-      value={locale}
-      onChange={e => switchLocale(e.target.value)}>
-      <option value="en">English</option>
-      <option value="de">Deutch</option>
-      <option value="it">Italy</option>
-    </select>
+    <div className={className}>
+      <select
+        className={`text-foreground rounded ${selectClassName}`}
+        value={locale}
+        onChange={e => switchLocale(e.target.value)}
+      >
+        <option value="en" className={optionClassName}>English</option>
+        <option value="de" className={optionClassName}>Deutsch</option>
+        <option value="it" className={optionClassName}>Italiano</option>
+      </select>
+    </div>
   );
 }
