@@ -17,11 +17,11 @@ export default function LocaleSwitcher() {
 
   return (
     <select
-      className="p-2 text-foreground bg-background border border-border rounded"
+      className="text-foreground rounded"
       value={locale}
       onChange={e => switchLocale(e.target.value)}>
       <option value="en">English</option>
-      <option value="de">Germany</option>
+      <option value="de">Deutch</option>
       <option value="it">Italy</option>
     </select>
   );

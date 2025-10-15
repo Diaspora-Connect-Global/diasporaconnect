@@ -7,6 +7,10 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Field, FieldSeparator } from '../ui/field';
+import { BodyMedium, HeadingMedium, LabelLarge, LabelMedium } from '../utils';
+import { PasswordInput, TextInput } from '../custom/input';
+import router from 'next/router';
+import { redirect } from 'next/navigation';
 
 
 export default function SignInForm() {
@@ -15,55 +19,54 @@ export default function SignInForm() {
     const [showPassword, setShowPassword] = useState(false);
     const t = useTranslations('home');
 
+    const handleSubmit = (e: { preventDefault: () => void; }) => {
+        e.preventDefault()
+        // Handle form submission logic here
+        console.log('Email:', email);
+        console.log('Password:', password
+        );
+
+        //navigate to complete account page
+        redirect('/complete-account');
+
+    }
+
     return (
-        <div className="w-full  flex items-center justify-center ">
+        <div className="w-full flex items-center justify-center ">
             <div>
                 <div className="space-y-6">
-                    <h1 className="text-3xl font-semibold ">{t("greeting1")}</h1>
+                    <HeadingMedium>
+                        {t("greeting1")}
+                    </HeadingMedium>
                     <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email" className="text-sm font-normal ">
-                                Email
-                            </Label>
+                        <TextInput
+                            value={email}
+                            onChange={setEmail}
+                            type="email"
+                            placeholder="Your email"
+                            label="Email"
+                            id="email"
+                        />
 
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="Your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="h-12"
-                            />
-                        </div>
+                        <PasswordInput
+                            id='password'
+                            password={password}
+                            setPassword={setPassword}
+                            showPassword={showPassword}
+                            setShowPassword={setShowPassword}
+                            placeholder="Your new password"
+                            label="Create password"
+                        />
 
-                        <div className="space-y-2">
-                            <Label htmlFor="password" className="text-sm font-normal ">
-                                Password
-                            </Label>
-                            <div className="relative">
-                                <Input
-                                    id="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="Your new password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="h-12 pr-10"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
-                        </div>
+
 
                         <p className="text-sm  flex justify-between ">
-                            <Link href="#" className="text-primary font-medium hover:underline">
-                                Forgot Password ?
+                            <Link href="#" className="text-text-brand font-medium hover:underline">
+                                <LabelLarge>
+                                    Forgot Password ?
+                                </LabelLarge>
                             </Link>
-                            <Button variant="outline" className=" h-12 px-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full">
+                            <Button onClick={handleSubmit} variant="outline" className="px-8 h-12 bg-surface-brand hover:bg-blue-700 text-white rounded-full">
                                 Login
                             </Button>
                         </p>
@@ -97,16 +100,19 @@ export default function SignInForm() {
                                 X (Twitter)
                             </Button>
                         </div>
-
-<div className='flex justify-between'>
-                        <p className="text-center text-sm mt-1">
-                            New to Diaspora Connect Global?
-                        </p>
-                            <Link href="/signup" className="text-blue-500 font-medium hover:underline">
-                                Create an account
-                            </Link>
-
-</div>
+                         <div className='flex items-center justify-center gap-2'>
+                        
+                                        <BodyMedium className="text-center text-sm ">
+                        
+                                       New to Diaspora Connect Global?
+                                        </BodyMedium>
+                                      <Link href="/signup" className="text-text-brand font-medium hover:underline">
+                                      <LabelLarge>
+                        
+                                        Create an account
+                                      </LabelLarge>
+                                      </Link>
+                                    </div>
                     </div>
                 </div>
             </div>

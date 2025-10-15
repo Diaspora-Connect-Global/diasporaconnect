@@ -1,19 +1,14 @@
-import { useTranslations } from 'next-intl';
-import { use } from 'react';
 import { setRequestLocale } from 'next-intl/server';
+import { redirect } from 'next/navigation';
 
-
-export default function Home({
-  params
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = use(params);
+export default async function Home({ params }: { params: { locale: string } }) {
+  const { locale } = await params;
+  // Set the locale for next-intl on the server
   setRequestLocale(locale);
-    const t = useTranslations('home');
 
-  return (
-   <div>
-   </div>
-  );
+  // Redirect to the signup page for this locale on initial load
+  redirect(`/${locale}/signup`);
+
+  // The redirect will short-circuit rendering; return null for type-safety
+  return null;
 }

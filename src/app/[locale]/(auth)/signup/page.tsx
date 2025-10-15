@@ -3,6 +3,9 @@ import { Link } from '@/i18n/navigation';
 
 export default function SignUpPage() {
   return (
-    <SignupForm/>
+    <div>
+
+      <SignupForm/>
+    </div>
   )
 }

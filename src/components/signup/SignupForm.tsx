@@ -6,6 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { BodyMedium, BorderDefault, HeadingMedium, LabelLarge, LabelMedium, SurfaceSubtle } from '../utils';
+import { PasswordInput, TextInput } from '../custom/input';
+import { redirect } from 'next/navigation';
 
 
 export default function SignupForm() {
@@ -16,86 +19,63 @@ export default function SignupForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const t = useTranslations('home');
 
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
+    e.preventDefault()
+    // Handle form submission logic here
+    console.log('Email:', email);
+    console.log('Password:', password
+    );
+    //navigate to complete account page
+    redirect('/complete-account');
+
+  };
+
   return (
     <div className="w-full  flex items-center justify-center ">
       <div>
         <div className="space-y-6">
-          <h1 className="text-3xl font-semibold ">{t("greeting1")}</h1>
+          <HeadingMedium>{t("greeting1")}</HeadingMedium>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-normal ">
-                Email
-              </Label>
+            <TextInput
+              value={email}
+              onChange={setEmail}
+              type="email"
+              placeholder="Your email"
+              label="Email"
+              id="email"
+            />
 
-              <Input
-                id="email"
-                type="email"
-                placeholder="Your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-12"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-normal ">
-                Create password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Your new password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-normal ">
-                Confirm password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm your new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="h-12 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <p className="text-md ">
+            <PasswordInput
+            id='password'
+              password={password}
+              setPassword={setPassword}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              placeholder="Your new password"
+              label="Create password"
+            />
+            <PasswordInput
+            id='confirmPassword'
+              password={confirmPassword}
+              setPassword={setConfirmPassword}
+              showPassword={showConfirmPassword}
+              setShowPassword={setShowConfirmPassword}
+              placeholder="Your new password"
+              label="Confirm password"
+            />
+            <p className="text-text-primary ">
               By continuing with signup, you agree to our{' '}
-              <a href="#" className="text-[var(--link-secondary)] hover:underline">
+              <a href="#" className="text-text-brand hover:underline">
                 Privacy Policy
               </a>{' '}
               and{' '}
-              <a href="#" className="text-[var(--link-secondary)] hover:underline">
+              <a href="#" className="text-text-brand hover:underline">
                 Terms of Service
               </a>
             </p>
 
             <div className='flex justify-end'>
-              <Button variant="outline" className="px-8 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full">
+              <Button onClick={ handleSubmit} variant="outline" className="px-8 h-12 bg-surface-brand hover:bg-blue-700 text-white rounded-full">
                 Continue
               </Button>
 
@@ -103,7 +83,11 @@ export default function SignupForm() {
 
             <div className="flex items-center gap-4">
               <div className="flex-1 border-t border-gray-300"></div>
-              <span className="text-sm">or continue with</span>
+              <span className="text-sm">
+                <BodyMedium>
+ or continue with
+                </BodyMedium>
+               </span>
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
@@ -132,11 +116,15 @@ export default function SignupForm() {
             </div>
             <div className='flex items-center justify-center gap-2'>
 
-              <p className="text-center text-sm t">
+                <BodyMedium className="text-center text-sm ">
+
                 Already having an account?
-              </p>
-              <Link href="/signin" className="text-blue-500 font-medium hover:underline">
+                </BodyMedium>
+              <Link href="/signin" className="text-text-brand font-medium hover:underline">
+              <LabelLarge>
+
                 Log in
+              </LabelLarge>
               </Link>
             </div>
           </div>
