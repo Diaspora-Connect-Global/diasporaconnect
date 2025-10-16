@@ -24,8 +24,13 @@ export function ButtonType1({
         border-text-brand 
         text-text-brand 
         rounded-full 
-        py-2 
-        px-4 
+        py-1.5 
+        px-3
+        sm:py-2 
+        sm:px-4 
+        text-xs
+        sm:text-sm
+        md:text-base
         font-label-medium 
         ring-text-brand
         cursor-pointer
@@ -35,6 +40,7 @@ export function ButtonType1({
         disabled:opacity-50 
         disabled:cursor-not-allowed
         h-fit
+        whitespace-nowrap
         ${className}
       `}
     >

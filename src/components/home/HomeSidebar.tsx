@@ -3,6 +3,7 @@ import { useState } from 'react';
 import InfoLinks from "../custom/infoLinks";
 import { BodyMedium, BodySmall, CaptionLarge, LabelMedium, TextBrand, TextPrimary, TextSecondary } from "../utils";
 import { ArrowUp, ArrowUp01, ChevronUp } from 'lucide-react';
+import { MyCommunityCard2 } from '../cards/MyCommunityCard2';
 
 // Reusable Section Component
 interface SectionProps {
@@ -76,7 +77,6 @@ function Community() {
         opportunities: false
     });
 
-    const [communities, setCommunities] = useState([]);
 
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections(prev => ({
@@ -85,8 +85,46 @@ function Community() {
         }));
     };
 
+     const communities = [
+        {
+            id: '1',
+            title: 'GhanaConnect:Global',
+            description: 'Connect with professionals and businesses across Ghana and abroad.'
+        },
+        {
+            id: '2',
+            title: 'GhanaTechHub',
+            description: 'A platform for tech enthusiasts to collaborate and innovate.'
+        },
+        {
+            id: '3',
+            title: 'GhanaArtsNetwork',
+            description: 'Showcasing the rich cultural heritage of Ghana.'
+        }
+    ];
+
+    // Handle community change
+    const handleCommunityChange = (community) => {
+        console.log('Switched to:', community.title);
+        // Add your logic here (e.g., fetch community data, update state, etc.)
+    };
+
+    // Handle leave community
+    const handleLeaveCommunity = (community) => {
+        console.log('Leaving:', community.title);
+        // Add your logic here (e.g., show confirmation dialog, remove from list, etc.)
+    };
+
     return (
         <div className="space-y-4">
+
+             <MyCommunityCard2 
+                communities={communities}
+                defaultCommunityId='1'  // Optional: which community to show first
+                onCommunityChange={handleCommunityChange}
+                onLeaveCommunity={handleLeaveCommunity}
+            />
+
             {/* Associations Section */}
             <Section
                 title="Associations"
@@ -141,7 +179,7 @@ function Community() {
                         { name: "Community Meetup", date: "Dec 20", type: "Networking" }
                     ].map((item, index) => (
                         <div key={index}>
-                               <CommunityItem name={item.name} type={item.type} />
+                            <CommunityItem name={item.name} type={item.type} />
                         </div>
                     ))}
                 </div>
@@ -160,7 +198,7 @@ function Community() {
                         { title: "UI/UX Designer", company: "Design Studio", type: "Contract" }
                     ].map((item, index) => (
                         <div key={index} className="border-t border-gray-100 pt-2 first:border-t-0 first:pt-0">
-                               <CommunityItem name={item.title} type={item.type} />
+                            <CommunityItem name={item.title} type={item.type} />
                         </div>
                     ))}
                 </div>

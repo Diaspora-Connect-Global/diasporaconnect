@@ -6,13 +6,13 @@ import { PeopleYouMayKnow } from "@/components/home/PeopleYouMayKnow";
 export default function Home() {
 
     return (
-        <div className="flex space-x-3">
-            <div className="w-[60%] max-h-[500px] overflow-auto scrollbar-hide">
+        <div className="flex space-x-3 h-screen">
+            <div className="w-[60%] h-[calc(100vh-64px)] overflow-auto scrollbar-hide">
                 <div className="flex justify-between mb-4 mx-5 mt-5">
                     <p className="font-caption-large">Discover community</p>
                     <p className="font-label-medium text-text-brand">See more</p>
                 </div>
-                <div className="grid grid-cols-3 gap-3 overflow-auto max-h-[500px] items-start scrollbar-hide">
+                <div className="flex gap-2 overflow-auto scrollbar-hide mb-6">
                     <JoinCommunityCard
                         title="Ghana Innovation "
                         members={1200}
@@ -37,7 +37,7 @@ export default function Home() {
 
                 </div>
 
-                <div className="my-6">
+                <div className="my-6 mb-8">
                     <FeedCard
                         profileImage="/path-to-image.jpg"
                         profileName="The Adansi Times"
@@ -70,7 +70,7 @@ export default function Home() {
 
 
             </div>
-            <div className="w-[40%] mt-5">
+            <div className="w-[40%] mt-5 h-full overflow-auto scrollbar-hide ">
               <PeopleYouMayKnow/>
             </div>
 

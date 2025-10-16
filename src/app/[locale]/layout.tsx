@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
-import { ThemeToggle } from "./theme-toggle";
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import LocalSwitcher from "@/components/LocalSwitcher";
 
 
 const geistSans = Geist({
@@ -47,8 +45,7 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 
             {children}
-            <ThemeToggle />
-            {/* <LocalSwitcher /> */}
+          
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

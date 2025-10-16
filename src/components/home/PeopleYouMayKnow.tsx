@@ -3,7 +3,7 @@ import PeopleYouMayKnowCard from "../cards/PeopleYouMayKnowCard";
 
 export function PeopleYouMayKnow() {
     return (
-        <div className="w-[80%] mx-4">
+        <div className="w-[90%] mx-4">
             <p className="font-caption-large ">People you may know </p>
             <div className=" p-4 space-y-2">
                 <PeopleYouMayKnowCard

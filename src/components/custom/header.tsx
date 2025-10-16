@@ -7,6 +7,7 @@ import { Home, Search, Users, ShoppingCart, Bell, MessageCircle, ChevronDown, Us
 import Image from 'next/image';
 import LocaleSwitcher from '../LocalSwitcher';
 import { SearchInput } from './input';
+import { ThemeToggle } from '@/app/[locale]/theme-toggle';
 
 export default function Header() {
   const pathname = usePathname();
@@ -117,7 +118,11 @@ export default function Header() {
               <LocaleSwitcher
                 selectClassName="appearance-none text-text-primary  pr-4"
                 optionClassName="  bg-surface-default"
-              />              </div>
+              />        
+
+              <ThemeToggle/>      
+              
+              </div>
 
 
             {/* Search Box */}

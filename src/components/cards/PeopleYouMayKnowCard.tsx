@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
-interface UserConnectionCardProps {
+interface PeopleYouMayKnowCardProps {
   profileImage: string;
   name: string;
   mutualConnections: number;
@@ -11,14 +11,14 @@ interface UserConnectionCardProps {
   buttonVariant?: 'primary' | 'secondary' | 'success';
 }
 
-export default function UserConnectionCard({
+export default function PeopleYouMayKnowCard({
   profileImage,
   name,
   mutualConnections,
   onAddFriend,
   buttonText = 'Add friend',
   buttonVariant = 'primary'
-}: UserConnectionCardProps) {
+}: PeopleYouMayKnowCardProps) {
   const [isAdded, setIsAdded] = useState(false);
 
   const handleClick = () => {
