@@ -1,6 +1,195 @@
 {
-  "home": {
-    "greeting1": "Willkommen bei DCG",
-    "info": "Strukturierte, transparente und wirkungsvolle Wege für das Engagement der Diaspora schaffen."
-  }
+    "authentication": {
+        "greetings": {
+            "signup": "Willkommen bei DCG",
+            "login": "Willkommen zurück!"
+        },
+        "description": "Schaffung strukturierter, transparenter und wirkungsvoller Wege für das Engagement der Diaspora.",
+        "form": {
+            "email": {
+                "label": "E-Mail",
+                "placeholder": "Ihre E-Mail"
+            },
+            "password": {
+                "label": "Passwort",
+                "placeholder": "Ihr Passwort"
+            },
+            "createPassword": {
+                "label": "Passwort erstellen",
+                "placeholder": "Erstellen Sie Ihr neues Passwort"
+            },
+            "confirmPassword": {
+                "label": "Passwort bestätigen",
+                "placeholder": "Bestätigen Sie Ihr neues Passwort"
+            }
+        },
+        "policies": {
+            "agreement": "Durch die Fortsetzung der Anmeldung stimmen Sie unseren",
+            "privacyPolicy": "Datenschutzrichtlinien",
+            "and": "und",
+            "termsOfService": "Nutzungsbedingungen zu"
+        },
+        "socialAuth": {
+            "divider": "oder fortfahren mit"
+        },
+        "accountSwitch": {
+            "existingAccount": {
+                "prompt": "Haben Sie bereits ein Konto?",
+                "action": "Anmelden"
+            },
+            "newAccount": {
+                "prompt": "Neu bei Diaspora Connect Global?",
+                "action": "Konto erstellen"
+            }
+        },
+        "forgotPassword": "Passwort vergessen?"
+    },
+    "onboarding": {
+        "personalInfo": {
+            "title": "Wie ist Ihr Name?",
+            "description": "Lernen wir uns kennen! Dies hilft uns, Ihre Erfahrung zu personalisieren und wie andere Sie auf Diasplug sehen.",
+            "firstName": {
+                "label": "Vorname",
+                "placeholder": "Ihr Vorname"
+            },
+            "lastName": {
+                "label": "Nachname",
+                "placeholder": "Ihr Nachname"
+            }
+        },
+        "community": {
+            "title": "Teilen Sie uns Ihre Community mit",
+            "description": "Teilen Sie die Community mit, mit der Sie sich identifizieren. Es hilft uns, Sie mit Menschen und Geschichten zu verbinden, die für Sie wichtig sind.",
+            "options": {
+                "localCitizen": "Lokaler Bürger",
+                "diasporaMember": "Diaspora-Mitglied"
+            }
+        },
+        "location": {
+            "title": "Was ist Ihr Wohnsitzland?",
+            "description": "Teilen Sie uns mit, wo Sie derzeit leben, damit wir Möglichkeiten, Veranstaltungen und Verbindungen in Ihrer Nähe anpassen können.",
+            "country": {
+                "label": "Land",
+                "placeholder": "Wählen Sie Ihr Land"
+            }
+        },
+        "phoneVerification": {
+            "title": "Bestätigen Sie Ihre Telefonnummer",
+            "description": "Wir senden Ihnen einen kurzen Code zur Bestätigung Ihrer Nummer. Dies hilft, Ihr Konto sicher zu halten und erleichtert die Verbindung mit Ihrer Community.",
+            "phoneNumber": {
+                "label": "Telefonnummer",
+                "placeholder": "Handynummer"
+            }
+        },
+        "confirmVerification": {
+            "title": "Bestätigungscode eingeben",
+            "description": "Geben Sie den Bestätigungscode ein, der an {phoneNumber} gesendet wurde",
+            "resend": "Code erneut senden"
+        },
+        "topics": {
+            "title": "Welche Themen möchten Sie auf DCG sehen?",
+            "description": "Wählen Sie Ihre Interessen, damit wir Ihren Feed mit Updates, Diskussionen und Möglichkeiten, die Sie interessieren, personalisieren können."
+        }
+    },
+    "actions": {
+        "continue": "Weiter",
+        "finish": "Abschließen",
+        "sendCode": "Code senden",
+        "submit": "Absenden",
+        "skip": "Überspringen",
+        "setNewPassword": "Neues Passwort festlegen",
+        "like": "Gefällt mir",
+        "share": "Teilen",
+        "comment": "Kommentieren",
+        "save": "Speichern",
+        "seemore": "Mehr anzeigen",
+        "addFriend": "Freund hinzufügen",
+        "join": "Beitreten",
+        "joined": "Beigetreten",
+        "attending": "Nehme teil",
+        "saved": "Gespeichert",
+        "attend": "Teilnehmen",
+        "login": "Anmelden",
+        "postedBy": "Gepostet von {user}"
+    },
+    "legal": {
+        "about": "Über uns",
+        "terms": "Bedingungen",
+        "privacyPolicy": "Datenschutzrichtlinie",
+        "contact": "Kontaktieren Sie uns",
+        "and": "und"
+    },
+    "passwordReset": {
+        "request": {
+            "title": "Passwort zurücksetzen",
+            "description": "Geben Sie Ihre mit Ihrem Konto verknüpfte E-Mail-Adresse ein und wir senden Ihnen einen Bestätigungscode dorthin",
+            "email": {
+                "label": "E-Mail",
+                "placeholder": "Ihre E-Mail"
+            }
+        },
+        "newPassword": {
+            "title": "Geben Sie Ihr neues Passwort ein",
+            "createPassword": {
+                "label": "Neues Passwort erstellen",
+                "placeholder": "Ihr neues Passwort"
+            },
+            "confirmPassword": {
+                "label": "Neues Passwort bestätigen",
+                "placeholder": "Bestätigen Sie Ihr neues Passwort"
+            }
+        }
+    },
+    "toasts": {
+        "errors": {
+            "emailRequired": "E-Mail ist erforderlich",
+            "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+            "passwordTooShort": "Passwort muss mindestens 8 Zeichen lang sein"
+        },
+        "success": {
+            "attendingEvent": "Sie nehmen am {event} Event teil",
+            "savedEvent": "Sie haben das {even} Event gespeichert"
+        }
+    },
+    "home": {
+        "mutualConnections": "gemeinsame Verbindungen",
+        "peopleYouMayKnow": "Personen, die Sie kennen könnten",
+        "header": {
+            "home": "Startseite",
+            "community": "Community",
+            "marketplace": "Marktplatz",
+            "chat": "Chat",
+            "notification": "Benachrichtigung",
+            "searchLabel": "Diasplug durchsuchen ..."
+        },
+        "associations": {
+            "discover": "Verbände entdecken"
+        },
+        "groupchats": {
+            "groupchats": "Gruppenchats",
+            "create": "Gruppenchat erstellen"
+        },
+        "events": {
+            "events": "Veranstaltungen",
+            "near": "Veranstaltungen in Ihrer Nähe"
+        },
+        "opportunities": {
+            "opportunities": "Möglichkeiten"
+        }
+    },
+    "community": {
+        "discover": "Community entdecken",
+        "seeall": "Alle Communities anzeigen",
+        "join": "Treten Sie einer Community bei, um zu sehen, was passiert",
+        "joincommunity": "Community beitreten",
+        "members": "Mitglieder",
+        "myCommunity": "Meine Community",
+        "discoverMore": "Weitere Communities entdecken",
+        "openInHome": "Community zu Hause öffnen",
+        "leaveCommunity": "Community verlassen"
+    },
+    "privacy": {
+        "public": "Öffentlich",
+        "private": "Privat"
+    }
 }

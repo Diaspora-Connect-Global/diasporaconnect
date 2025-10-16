@@ -1,82 +1,63 @@
-// steps/Step4.tsx - Phone Number
+// steps/Step5.tsx - OTP Verification
 import React from 'react';
 import { FormData } from '../page';
-import { Step } from './Step';
-import { HeadingMedium, LabelMedium } from '@/components/utils';
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group';
-import { ArrowLeft } from 'lucide-react';
-import { TextInput } from '@/components/custom/input';
-import { Button } from '@/components/ui/button';
+import { MultiStep } from '@/components/custom/multistep';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { useTranslations } from 'next-intl';
 
-interface Step4Props {
+interface Step5Props {
     data: FormData;
     updateData: (data: Partial<FormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
 }
 
+export const Step5: React.FC<Step5Props> = ({ data, updateData, nextStep, prevStep }) => {
+    const t = useTranslations('onboarding');
+    const tActions = useTranslations('actions');
+    
+    const [value, setValue] = React.useState("");
 
-export const Step5: React.FC<Step4Props> = ({ data, updateData, nextStep, prevStep }) => {
-
-     const [value, setValue] = React.useState("")
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (data.phoneNumber.trim()) {
-            nextStep();
-        }
+    const handleChange = (newValue: string) => {
+        // Only allow numbers
+        const numericValue = newValue.replace(/\D/g, '');
+        setValue(numericValue);
     };
 
+    const isNextDisabled = value.length !== 6;
+
     return (
-        <div className="w-[80%] mx-auto min-h-screen flex  flex-col justify-start">
-            {/* Top Navigation */}
-            <div className="space-y-8   flex justify-between items-center px-8 py-6">
-                <button
-                    type="button"
-                    onClick={prevStep}
-                    className="text-gray-700 hover:text-black flex items-center gap-2"
+        <MultiStep
+            stepNumber={5}
+            totalSteps={7}
+            title={t('confirmVerification.title')}
+            subtitle={t('confirmVerification.description', { phoneNumber: `+233 ${data.phoneNumber}` })}
+            isNextDisabled={isNextDisabled}
+            nextButtonText={tActions('submit')}
+            showBackButton={true}
+            showSkipButton={false}
+            onNext={() => nextStep()}
+            onBack={prevStep}
+        >
+            <div className="w-full">
+                <InputOTP
+                    maxLength={6}
+                    value={value}
+                    onChange={handleChange}
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    className="w-full" 
                 >
-                    <ArrowLeft size={20} />
-                </button>
-                <LabelMedium className='text-text-secondary'>Step 5 of 7</LabelMedium>
+                    <InputOTPGroup className="w-full gap-2 text-text-primary font-body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
+                        <InputOTPSlot index={0} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={1} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={2} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={3} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={4} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={5} className="flex-1 h-12 text-lg rounded-md" />
+                    </InputOTPGroup>
+                </InputOTP>
             </div>
-
-            {/* Main Form */}
-            <form
-                onSubmit={handleSubmit}
-                className="flex flex-col items-start px-8 space-y-8 max-w-3xl"
-            >
-                <HeadingMedium className='space-y-5'>
-                    Enter code sent to {data.phoneNumber}
-                </HeadingMedium>
-                <div className="w-full max-w-md">
-               
-
-             <InputOTP
-        maxLength={6}
-        value={value}
-        onChange={(value) => setValue(value)}
-      >
-        <InputOTPGroup className="justify-center gap-4">
-          <InputOTPSlot index={0} />
-          <InputOTPSlot index={1} />
-          <InputOTPSlot index={2} />
-          <InputOTPSlot index={3} />
-          <InputOTPSlot index={4} />
-          <InputOTPSlot index={5} />
-        </InputOTPGroup>
-      </InputOTP>
-
-            </div>
-
-               
-                <div className="flex justify-end w-full">
-                    <Button type='submit' disabled = {!data.phoneNumber.trim()}  variant="outline" className="px-8 h-12 bg-surface-brand hover:bg-blue-700 text-white rounded-full">
-                        Submit
-                    </Button>
-                    
-                </div>
-            </form>
-        </div>
+        </MultiStep>
     );
 };

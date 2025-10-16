@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Share2, Bookmark, MessageCircleMore } from 'lucid
 import Image from 'next/image';
 import { useState } from 'react';
 import { GoHeartFill } from 'react-icons/go';
+import { useTranslations } from 'next-intl';
 
 interface FeedCardProps {
   profileImage: string;
@@ -36,6 +37,7 @@ export default function FeedCard({
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
+  const t = useTranslations('actions');
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -49,13 +51,13 @@ export default function FeedCard({
   };
 
   return (
-    <div className=" my-4 bg-surface-default rounded-lg border border-gray-200 p-4 max-w-2xl">
+    <div className="my-4 bg-surface-default rounded-lg border border-gray-200 p-4 max-w-2xl">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3">
           <Image
-          width={40}
-          height={40}
+            width={40}
+            height={40}
             src={profileImage} 
             alt={profileName}
             className="w-12 h-12 rounded-lg object-cover"
@@ -65,12 +67,12 @@ export default function FeedCard({
               <h3 className="font-label-large text-text-primary">{profileName}</h3>
               {joinButton && (
                 <button className="text-text-brand font-label-medium">
-                  · Join
+                  · {t('join')}
                 </button>
               )}
             </div>
             <p className="font-body-small text-text-secondary">
-              Posted by Admin · {category} · {postDate}
+              {t('postedBy', { user: 'Admin' })} · {category} · {postDate}
             </p>
           </div>
         </div>
@@ -109,7 +111,7 @@ export default function FeedCard({
             onClick={handleLike}
           >
             <Heart className="w-5 h-5" />
-            <span>Like</span>
+            <span>{t('like')}</span>
           </button>
           
           <button 
@@ -117,7 +119,7 @@ export default function FeedCard({
             onClick={onComment}
           >
             <MessageCircleMore className="w-5 h-5" />
-            <span>Comment</span>
+            <span>{t('comment')}</span>
           </button>
           
           <button 
@@ -125,7 +127,7 @@ export default function FeedCard({
             onClick={onShare}
           >
             <Share2 className="w-5 h-5" />
-            <span>Share</span>
+            <span>{t('share')}</span>
           </button>
         </div>
         
@@ -136,27 +138,9 @@ export default function FeedCard({
           <Bookmark 
             className={`w-5 h-5 font-body-small text-secondary ${isSaved ? 'fill-current' : ''}`}
           />
-          <span>Save</span>
+          <span>{t('save')}</span>
         </button>
       </div>
     </div>
   );
 }
-
-// Example usage:
-/*
-<FeedCard
-  profileImage="/path-to-image.jpg"
-  profileName="The Adansi Times"
-  category="GhanaConnectGlobal"
-  postDate="Oct 1"
-  content="The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots, discover inspiring journeys, and engage in conversations that shape our global community. Follow us for updates on cultural events, business opportunities, and more."
-  likes={3}
-  comments={5}
-  onLike={() => console.log('Liked')}
-  onComment={() => console.log('Comment')}
-  onShare={() => console.log('Share')}
-  onSave={() => console.log('Saved')}
-  joinButton={true}
-/>
-*/

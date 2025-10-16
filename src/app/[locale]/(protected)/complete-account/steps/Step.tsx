@@ -78,8 +78,7 @@ export const Step: React.FC<StepProps> = ({
 
                 {children}
 
-                <div className="flex justify-end w-full">
-                    <Button 
+                <div className="flex justify-between w-full">                    <Button 
                         type="submit" 
                         disabled={isNextDisabled}  
                         variant="outline" 

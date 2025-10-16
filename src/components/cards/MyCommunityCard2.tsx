@@ -46,21 +46,21 @@ export function MyCommunityCard2({
     return (
         <header className="w-full border-b">
             <div className="max-w-7xl mx-auto px-4 py-3">
-                <div className=" border p-2  rounded-2xl  border-border-disabled flex items-center justify-between">
+                <div className="border p-2 rounded-2xl border-border-disabled flex items-center justify-between gap-2">
                     {/* Left section - Logo and selected community title */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-5 h-5  rounded-lg flex items-center justify-center shadow-sm">
-                            <Globe className="w-6 h-6 " />
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-5 h-5 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                            <Globe className="w-6 h-6" />
                         </div>
 
-                        <h1 className="font-body-large text-text-primary">
+                        <h1 className="font-body-large text-text-primary truncate">
                             {selectedCommunity.title}
                         </h1>
                     </div>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button className=' border-0 shadow-none text-text-primary' variant="outline" aria-label="Open menu" size="icon-sm">
+                            <Button className="focus-visible:ring-transparent border-0 shadow-none text-text-primary flex-shrink-0" variant="outline" aria-label="Open menu" size="icon-sm">
                                 <MoreHorizontalIcon />
                             </Button>
                         </DropdownMenuTrigger>
@@ -76,20 +76,15 @@ export function MyCommunityCard2({
                                     onSelect={() => handleCommunitySelect(community)}
                                     className='font-body-large text-text-primary flex items-center justify-between'
                                 >
-                                    <span>{community.title}</span>
+                                    <span className="truncate flex-1">{community.title}</span>
                                     {selectedCommunity.id === community.id && (
-                                        <Check className='w-4 h-4 text-text-brand' />
+                                        <Check className='w-4 h-4 text-text-brand flex-shrink-0 ml-2' />
                                     )}
                                 </DropdownMenuItem>
                             ))}
                             
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                                onSelect={handleLeaveCommunity}
-                                className='text-text-danger font-body-large'
-                            >
-                                Leave {selectedCommunity.title}
-                            </DropdownMenuItem>
+                          
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

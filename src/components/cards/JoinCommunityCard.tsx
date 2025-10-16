@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslations } from 'next-intl';
 
 interface JoinCommunityCardProps {
   title: string;
@@ -31,6 +32,8 @@ export default function JoinCommunityCard({
   iconBgColor = "bg-orange-100",
   iconColor = "text-orange-600"
 }: JoinCommunityCardProps) {
+  const t = useTranslations('community');
+  
   // Check if text is likely truncated (approximate character limits)
   const isTitleTruncated = title.length > 40;
   const isDescriptionTruncated = description && description.length > 80;
@@ -38,7 +41,7 @@ export default function JoinCommunityCard({
   return (
     <TooltipProvider>
       <div 
-        className="bg-surface-default rounded-2xl w-full max-w-[250px] p-6 border border-border-subtle"
+        className="bg-surface-default rounded-2xl w-full min-w-[200px] p-6 border border-border-subtle"
         onClick={onCardClick}
       >
         <div className="flex flex-col items-center text-center gap-2">
@@ -88,7 +91,7 @@ export default function JoinCommunityCard({
           {/* Members */}
           {members !== undefined && (
             <p className="font-caption-medium text-text-primary">
-              {members.toLocaleString()} members
+              {members.toLocaleString()} {t('members')}
             </p>
           )}
 

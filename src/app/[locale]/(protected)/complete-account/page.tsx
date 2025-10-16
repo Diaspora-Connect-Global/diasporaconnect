@@ -15,10 +15,14 @@ export interface FormData {
   lastName: string;
   
   // Step 2
-  community: string;
-  
+community: Array<{ 
+    title: string; 
+    members: number; 
+    description: string; 
+  }>; 
   // Step 3
   country: string;
+  communityType: string
   
   // Step 4
   phoneNumber: string;
@@ -38,7 +42,8 @@ export default  function CompleteAccount() {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    community: '',
+    community: [],
+    communityType: "",
     country: '',
     phoneNumber: '',
     verificationCode: '',
@@ -173,33 +178,8 @@ export default  function CompleteAccount() {
   };
 
   return (
-    <div className="min-h-screen ">
-      <div className="w-[70%] mx-auto">
-        {/* Progress Bar
-        <div className="mb-8">
-          <div className="flex justify-between mb-2">
-            {[1, 2, 3, 4, 5, 6, 7].map(step => (
-              <div
-                key={step}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                  step <= currentStep
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {step}
-              </div>
-            ))}
-          </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / 7) * 100}%` }}
-            />
-          </div>
-        </div> */}
-
-        {/* Current Step Component */}
+    <div className="h-screen  overflow-auto ">
+      <div className="md:w-[90%] mx-auto mb-5">
         {renderStep()}
       </div>
     </div>

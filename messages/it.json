@@ -1,6 +1,195 @@
 {
-  "home": {
-    "greeting1": "Benvenuto in DCG",
-    "info": "Creare percorsi strutturati, trasparenti e impattanti per il coinvolgimento della diaspora."
-  }
+    "authentication": {
+        "greetings": {
+            "signup": "Benvenuto in DCG",
+            "login": "Bentornato!"
+        },
+        "description": "Creazione di percorsi strutturati, trasparenti e impattanti per l'impegno della diaspora.",
+        "form": {
+            "email": {
+                "label": "Email",
+                "placeholder": "La tua email"
+            },
+            "password": {
+                "label": "Password",
+                "placeholder": "La tua password"
+            },
+            "createPassword": {
+                "label": "Crea password",
+                "placeholder": "Crea la tua nuova password"
+            },
+            "confirmPassword": {
+                "label": "Conferma password",
+                "placeholder": "Conferma la tua nuova password"
+            }
+        },
+        "policies": {
+            "agreement": "Continuando con l'iscrizione, accetti la nostra",
+            "privacyPolicy": "Informativa sulla privacy",
+            "and": "e",
+            "termsOfService": "Termini di servizio"
+        },
+        "socialAuth": {
+            "divider": "o continua con"
+        },
+        "accountSwitch": {
+            "existingAccount": {
+                "prompt": "Hai già un account?",
+                "action": "Accedi"
+            },
+            "newAccount": {
+                "prompt": "Sei nuovo su Diaspora Connect Global?",
+                "action": "Crea un account"
+            }
+        },
+        "forgotPassword": "Password dimenticata?"
+    },
+    "onboarding": {
+        "personalInfo": {
+            "title": "Qual è il tuo nome?",
+            "description": "Conosciamoci! Questo ci aiuta a personalizzare la tua esperienza e come gli altri ti vedono su Diasplug.",
+            "firstName": {
+                "label": "Nome",
+                "placeholder": "Il tuo nome"
+            },
+            "lastName": {
+                "label": "Cognome",
+                "placeholder": "Il tuo cognome"
+            }
+        },
+        "community": {
+            "title": "Raccontaci la tua comunità",
+            "description": "Condividi la comunità con cui ti identifichi. Ci aiuta a connetterti con persone e storie che contano per te.",
+            "options": {
+                "localCitizen": "Cittadino locale",
+                "diasporaMember": "Membro della diaspora"
+            }
+        },
+        "location": {
+            "title": "Qual è il tuo paese di residenza?",
+            "description": "Facci sapere dove vivi attualmente così possiamo personalizzare opportunità, eventi e connessioni vicino a te.",
+            "country": {
+                "label": "Paese",
+                "placeholder": "Seleziona il tuo paese"
+            }
+        },
+        "phoneVerification": {
+            "title": "Verifica il tuo numero di telefono",
+            "description": "Ti invieremo un codice breve per confermare il tuo numero. Questo aiuta a mantenere il tuo account sicuro e facilita la connessione con la tua comunità.",
+            "phoneNumber": {
+                "label": "Numero di telefono",
+                "placeholder": "Numero di cellulare"
+            }
+        },
+        "confirmVerification": {
+            "title": "Inserisci il codice di verifica",
+            "description": "Inserisci il codice di verifica inviato a {phoneNumber}",
+            "resend": "Rinvia codice"
+        },
+        "topics": {
+            "title": "Quali argomenti vuoi vedere su DCG?",
+            "description": "Scegli i tuoi interessi per aiutarci a personalizzare il tuo feed con aggiornamenti, discussioni e opportunità che ti interessano."
+        }
+    },
+    "actions": {
+        "continue": "Continua",
+        "finish": "Termina",
+        "sendCode": "Invia codice",
+        "submit": "Invia",
+        "skip": "Salta",
+        "setNewPassword": "Imposta nuova password",
+        "like": "Mi piace",
+        "share": "Condividi",
+        "comment": "Commenta",
+        "save": "Salva",
+        "seemore": "Vedi altro",
+        "addFriend": "Aggiungi amico",
+        "join": "Unisciti",
+        "joined": "Unito",
+        "attending": "Partecipo",
+        "saved": "Salvato",
+        "attend": "Partecipa",
+        "login": "Accedi",
+        "postedBy": "Pubblicato da {user}"
+    },
+    "legal": {
+        "about": "Chi siamo",
+        "terms": "Termini",
+        "privacyPolicy": "Informativa sulla privacy",
+        "contact": "Contattaci",
+        "and": "e"
+    },
+    "passwordReset": {
+        "request": {
+            "title": "Reimposta la password",
+            "description": "Inserisci il tuo indirizzo email associato al tuo account e ti invieremo un codice di verifica lì",
+            "email": {
+                "label": "Email",
+                "placeholder": "La tua email"
+            }
+        },
+        "newPassword": {
+            "title": "Inserisci la tua nuova password",
+            "createPassword": {
+                "label": "Crea nuova password",
+                "placeholder": "La tua nuova password"
+            },
+            "confirmPassword": {
+                "label": "Conferma nuova password",
+                "placeholder": "Conferma la tua nuova password"
+            }
+        }
+    },
+    "toasts": {
+        "errors": {
+            "emailRequired": "L'email è obbligatoria",
+            "invalidEmail": "Inserisci un indirizzo email valido",
+            "passwordTooShort": "La password deve essere di almeno 8 caratteri"
+        },
+        "success": {
+            "attendingEvent": "Parteciperai all'evento {event}",
+            "savedEvent": "Hai salvato l'evento {even}"
+        }
+    },
+    "home": {
+        "mutualConnections": "connessioni in comune",
+        "peopleYouMayKnow": "Persone che potresti conoscere",
+        "header": {
+            "home": "Home",
+            "community": "Community",
+            "marketplace": "Mercato",
+            "chat": "Chat",
+            "notification": "Notifica",
+            "searchLabel": "Cerca Diasplug ..."
+        },
+        "associations": {
+            "discover": "Scopri associazioni"
+        },
+        "groupchats": {
+            "groupchats": "Chat di gruppo",
+            "create": "Crea chat di gruppo"
+        },
+        "events": {
+            "events": "Eventi",
+            "near": "Eventi vicino a te"
+        },
+        "opportunities": {
+            "opportunities": "Opportunità"
+        }
+    },
+    "community": {
+        "discover": "Scopri community",
+        "seeall": "Vedi tutte le community",
+        "join": "Unisciti a una community per vedere cosa succede",
+        "joincommunity": "Unisciti alla community",
+        "members": "membri",
+        "myCommunity": "La mia Community",
+        "discoverMore": "Scopri più community",
+        "openInHome": "Apri community in home",
+        "leaveCommunity": "Lascia community"
+    },
+    "privacy": {
+        "public": "Pubblico",
+        "private": "Privato"
+    }
 }

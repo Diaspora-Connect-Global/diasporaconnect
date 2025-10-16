@@ -1,8 +1,16 @@
 'use client'
 import React from 'react';
 import { FormData } from '../page';
-import { Step } from './Step';
+import { MultiStep } from '@/components/custom/multistep';
 import { LabelMedium } from '@/components/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useTranslations } from 'next-intl';
 
 interface Step3Props {
     data: FormData;
@@ -12,6 +20,8 @@ interface Step3Props {
 }
 
 export const Step3: React.FC<Step3Props> = ({ data, updateData, nextStep, prevStep }) => {
+    const t = useTranslations('onboarding');
+    
     const countries = [
         'United States',
         'Canada',
@@ -27,42 +37,47 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, nextStep, prevSt
 
     const isNextDisabled = !data.country?.trim();
 
+    const handleCountryChange = (value: string) => {
+        updateData({ country: value });
+    };
+
     return (
-        <Step
-            data={data}
-            updateData={updateData}
-            nextStep={nextStep}
-            prevStep={prevStep}
+        <MultiStep
             stepNumber={3}
             totalSteps={7}
-            title="What is your country of residence ?"
+            title={t('location.title')}
             isNextDisabled={isNextDisabled}
+            showBackButton={true}
+            showSkipButton={false}
+            onNext={() => nextStep()}
+            onBack={prevStep}
+            onSkip={() => nextStep()}
         >
-            <div className="w-full max-w-md">
+            <div className="w-full">
                 <label
                     htmlFor="country"
                     className="block text-sm font-medium mb-2"
                 >
                     <LabelMedium>
-                        Country
+                        {t('location.country.label')}
                     </LabelMedium>
                 </label>
-                <select
-                    id="country"
+                <Select
                     value={data.country || ''}
-                    onChange={(e) => updateData({ country: e.target.value })}
-                    className="w-full px-3 py-2 border border-border-subtle rounded-md bg-surface-subtle text-text-primary focus:outline-none focus:ring-2  focus:border-transparent transition"
+                    onValueChange={handleCountryChange}
                 >
-                    <option value="" disabled>
-                        Select your country
-                    </option>
-                    {countries.map((country) => (
-                        <option key={country} value={country}>
-                            {country}
-                        </option>
-                    ))}
-                </select>
+                    <SelectTrigger className="w-full px-3 py-6 border-1 border-border-default rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition">
+                        <SelectValue placeholder={t('location.country.placeholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {countries.map((country) => (
+                            <SelectItem key={country} value={country}>
+                                {country}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
-        </Step>
+        </MultiStep>
     );
 };

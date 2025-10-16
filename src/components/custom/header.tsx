@@ -8,37 +8,37 @@ import Image from 'next/image';
 import LocaleSwitcher from '../LocalSwitcher';
 import { SearchInput } from './input';
 import { ThemeToggle } from '@/app/[locale]/theme-toggle';
+import { useTranslations } from 'next-intl';
 
 export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const t = useTranslations('home.header');
 
   const handleSearch = () => {
     console.log('Searching for:', searchQuery);
     // Add your search logic here
   };
 
-
   const segments = pathname.split('/').filter(segment => segment);
   const currentLocale = segments[0] || 'en';
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'it', name: 'Italiano', flag: '🇪🇸' },
     { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
   ];
 
   const currentLanguage = languages.find(lang => lang.code === currentLocale) || languages[0];
 
   const navigation = [
-    { name: 'Home', href: `/${currentLocale}`, icon: Home },
-    { name: 'Community', href: `/${currentLocale}/community`, icon: Users },
-    { name: 'Marketplace', href: `/${currentLocale}/marketplace`, icon: ShoppingCart },
-    { name: 'Notification', href: `/${currentLocale}/notification`, icon: Bell },
-    { name: 'Chat', href: `/${currentLocale}/chat`, icon: MessageCircle },
+    { name: t('home'), href: `/${currentLocale}`, icon: Home },
+    { name: t('community'), href: `/${currentLocale}/community`, icon: Users },
+    { name: t('marketplace'), href: `/${currentLocale}/marketplace`, icon: ShoppingCart },
+    { name: t('chat'), href: `/${currentLocale}/chat`, icon: MessageCircle },
+    { name: t('notification'), href: `/${currentLocale}/notification`, icon: Bell },
   ];
 
   const isActive = (href: string) => {
@@ -51,8 +51,6 @@ export default function Header() {
 
     return normalizedPathname.startsWith(normalizedHref);
   };
-
-
 
   return (
     <header className="bg-surface-default sticky top-0 z-50 border-b">
@@ -89,8 +87,6 @@ export default function Header() {
           {/* Right Section - Search, Language, Profile */}
           <div className="flex items-center space-x-4">
 
-
-
             {/* User Profile */}
             <div className="hidden md:flex items-center space-x-3">
               <div className="relative">
@@ -110,7 +106,6 @@ export default function Header() {
                   <span className="text-text-success"><User size={20} /></span>
                 </div>
               </div>
-
             </div>
 
             {/* Language Selector */}
@@ -124,21 +119,16 @@ export default function Header() {
               
               </div>
 
-
             {/* Search Box */}
             <div className="hidden md:flex items-center">
-
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
                 onSearch={handleSearch}
-                placeholder="Search Diasplug"
+                placeholder={t('searchLabel')}
                 id="main-search"
               />
-
-
             </div>
-
 
             {/* Mobile menu button */}
             <button
@@ -159,19 +149,17 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
+          <div className="md:hidden py-4 border-t border-border-disabled">
             {/* Mobile Search */}
             <div className="mb-4 px-4">
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
                 onSearch={handleSearch}
-                placeholder="Search Diasplug"
+                placeholder={t('searchLabel')}
                 id="main-search"
               />
             </div>
-
-
 
             {/* Mobile Navigation Links */}
             <nav className="grid grid-cols-2 gap-2">

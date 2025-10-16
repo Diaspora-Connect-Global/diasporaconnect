@@ -110,7 +110,7 @@
         "saved": "Saved",
         "attend": "Attend",
         "login": "Login",
-        "postedBy": "Posted by {user}"
+         "postedBy": "Posted by {user}"
     },
     "legal": {
         "about": "About",
@@ -152,7 +152,7 @@
         }
     },
     "home": {
-        "mutualConnections": "mutual connections",
+         "mutualConnections": "mutual connections",
         "peopleYouMayKnow": "People you may know",
         "header": {
             "home": "Home",

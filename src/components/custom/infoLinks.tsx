@@ -1,12 +1,15 @@
 import { BodySmall, TextPrimary } from "../utils";
+import { useTranslations } from 'next-intl';
 
 export default function InfoLinks() {
+    const t = useTranslations('legal');
+    
     return (
-        < >
+        <>
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
-                        About
+                        {t('about')}
                     </TextPrimary>
                 </BodySmall>
             </a>
@@ -14,7 +17,7 @@ export default function InfoLinks() {
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
-                        Terms
+                        {t('terms')}
                     </TextPrimary>
                 </BodySmall>
             </a>
@@ -22,16 +25,18 @@ export default function InfoLinks() {
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
-                        Privacy Policy
+                        {t('privacyPolicy')}
                     </TextPrimary>
-                </BodySmall></a>
+                </BodySmall>
+            </a>
             <span>·</span>
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
-                        Contact us
+                        {t('contact')}
                     </TextPrimary>
-                </BodySmall></a>
+                </BodySmall>
+            </a>
             <span>·</span>
             <span>
                 <BodySmall>
@@ -41,6 +46,5 @@ export default function InfoLinks() {
                 </BodySmall>
             </span>
         </>
-
     );
 }

@@ -10,6 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../ui/button';
+import { useTranslations } from 'next-intl';
 
 interface GhanaConnectHeaderProps {
     title?: string;
@@ -24,8 +25,10 @@ export function MyCommunityCard({
     logoIcon,
     onMenuClick
 }: GhanaConnectHeaderProps) {
+    const t = useTranslations('community');
+    
     return (
-        <header className="w-full  border-b">
+        <header className="w-full border-b">
             <div className="max-w-7xl mx-auto px-4 py-3">
                 <div className="flex items-center justify-between">
                     {/* Left section - Logo and branding */}
@@ -43,23 +46,23 @@ export function MyCommunityCard({
                             </p>
                         </div>
                     </div>
-                    <DropdownMenu  >
+                    <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button  className='bg-surface-default border-0 shadow-none  text-text-primary ' variant="outline" aria-label="Open menu" size="icon-sm">
+                            <Button className='bg-surface-default border-0 shadow-none text-text-primary' variant="outline" aria-label="Open menu" size="icon-sm">
                                 <MoreHorizontalIcon />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default'>
-                            <DropdownMenuItem onSelect={()=> console.log(title)} className='font-body-large text-text-primary'>
-                                <p>Open community in home</p>
+                            <DropdownMenuItem onSelect={() => console.log(title)} className='font-body-large text-text-primary'>
+                                <p>{t('openInHome')}</p>
                                 <p><ChevronRight/></p>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className='text-text-danger font-body-large'>
-                                Leave community</DropdownMenuItem>
+                                {t('leaveCommunity')}
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                  
                 </div>
             </div>
         </header>

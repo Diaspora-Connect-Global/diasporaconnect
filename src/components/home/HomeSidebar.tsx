@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
 import InfoLinks from "../custom/infoLinks";
-import { BodyMedium, BodySmall, CaptionLarge, LabelMedium, TextBrand, TextPrimary, TextSecondary } from "../utils";
-import { ArrowUp, ArrowUp01, ChevronUp } from 'lucide-react';
+import { BodyMedium, BodySmall, CaptionLarge, LabelMedium, TextBrand,  } from "../utils";
+import {  ChevronUp } from 'lucide-react';
 import { MyCommunityCard2 } from '../cards/MyCommunityCard2';
+import { useTranslations } from 'next-intl';
 
 // Reusable Section Component
 interface SectionProps {
@@ -42,33 +43,41 @@ function Section({ title, isOpen, onToggle, defaultAction, children }: SectionPr
 }
 
 function NoCommunity() {
+    const t = useTranslations('community');
+    
     return (
         <div className="my-4 space-y-4">
             <BodyMedium>
-                Join a community to see what&apos;s happening
+                {t('join')}
             </BodyMedium>
             <LabelMedium>
                 <TextBrand>
-                    Discover community
+                    {t('discover')}
                 </TextBrand>
             </LabelMedium>
         </div>
     )
 }
+
 function CommunityItem({ name, type }: { name: string, type: string }) {
+    const t = useTranslations('privacy');
+    
     return (
-        <div className="text-center  space-x-2  flex flex-wrap 
+        <div className="text-center space-x-2 flex flex-wrap 
         justify-content-center items-center">
             <BodySmall>
                 <span className="text-primary">{name}</span>
             </BodySmall>
             <span>·</span>
             <BodySmall>
-                <span className="text-secondary">{type}</span>
+                <span className="text-secondary">
+                    {type === 'Public' ? t('public') : t('private')}
+                </span>
             </BodySmall>
         </div>
     )
 }
+
 function Community() {
     const [openSections, setOpenSections] = useState({
         associations: false,
@@ -77,6 +86,8 @@ function Community() {
         opportunities: false
     });
 
+    const tPrivacy = useTranslations('privacy');
+    const t= useTranslations('home');
 
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections(prev => ({
@@ -85,7 +96,7 @@ function Community() {
         }));
     };
 
-     const communities = [
+    const communities = [
         {
             id: '1',
             title: 'GhanaConnect:Global',
@@ -104,13 +115,13 @@ function Community() {
     ];
 
     // Handle community change
-    const handleCommunityChange = (community) => {
+    const handleCommunityChange = (community: any) => {
         console.log('Switched to:', community.title);
         // Add your logic here (e.g., fetch community data, update state, etc.)
     };
 
     // Handle leave community
-    const handleLeaveCommunity = (community) => {
+    const handleLeaveCommunity = (community: any) => {
         console.log('Leaving:', community.title);
         // Add your logic here (e.g., show confirmation dialog, remove from list, etc.)
     };
@@ -118,7 +129,7 @@ function Community() {
     return (
         <div className="space-y-4">
 
-             <MyCommunityCard2 
+            <MyCommunityCard2 
                 communities={communities}
                 defaultCommunityId='1'  // Optional: which community to show first
                 onCommunityChange={handleCommunityChange}
@@ -127,10 +138,10 @@ function Community() {
 
             {/* Associations Section */}
             <Section
-                title="Associations"
+                title={t('associations.discover')}
                 isOpen={openSections.associations}
                 onToggle={() => toggleSection('associations')}
-                defaultAction="Discover associations"
+                defaultAction={t('associations.discover')}
             >
                 <div className="space-y-1">
                     {[
@@ -140,7 +151,7 @@ function Community() {
                         { name: "Health & Wellness Journal", type: "Private" }
                     ].map((association, index) => (
                         <div key={index}>
-                            <CommunityItem name={association.name} type={association.type} />
+                            <CommunityItem name={association.name} type={association.type == "Public"? `${tPrivacy("public")}` :`${tPrivacy("public")}`} />
                         </div>
                     ))}
                 </div>
@@ -148,10 +159,10 @@ function Community() {
 
             {/* Group Chats Section */}
             <Section
-                title="Groups chats"
+                title={t('groupchats.groupchats')}
                 isOpen={openSections.groupChats}
                 onToggle={() => toggleSection('groupChats')}
-                defaultAction="Create group chat"
+                defaultAction={t('groupchats.create')}
             >
                 <div className="space-y-2">
                     {[
@@ -160,7 +171,6 @@ function Community() {
                     ].map((item, index) => (
                         <div key={index} >
                             <CommunityItem name={item.name} type={item.type} />
-
                         </div>
                     ))}
                 </div>
@@ -168,10 +178,10 @@ function Community() {
 
             {/* Events Section */}
             <Section
-                title="Events"
+                title={t('events.events')}
                 isOpen={openSections.events}
                 onToggle={() => toggleSection('events')}
-                defaultAction="Discover events"
+                defaultAction={t('events.near')}
             >
                 <div className="space-y-3">
                     {[
@@ -187,10 +197,10 @@ function Community() {
 
             {/* Opportunities Section */}
             <Section
-                title="Opportunities"
+                title={t('opportunities.opportunities')}
                 isOpen={openSections.opportunities}
                 onToggle={() => toggleSection('opportunities')}
-                defaultAction="Find opportunities"
+                defaultAction={t('opportunities.opportunities')}
             >
                 <div className="space-y-3">
                     {[
@@ -206,15 +216,15 @@ function Community() {
         </div>
     )
 }
+
 export default function HomeSidebar() {
     const isCommunity = true;
-
 
     return (
         <div className="p-4">
             {!isCommunity ? <NoCommunity /> : <Community />}
 
-            <div className="text-center text-xs space-x-2 py-4  mt-6 flex flex-wrap">
+            <div className="text-center text-xs space-x-2 py-4 mt-6 flex flex-wrap">
                 <InfoLinks />
             </div>
         </div>
