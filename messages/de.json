@@ -120,6 +120,11 @@
         "and": "und"
     },
     "passwordReset": {
+        "confirmVerification": {
+            "title": "Bestätigungscode eingeben",
+            "description": "Geben Sie den Bestätigungscode ein, der an {email} gesendet wurde",
+            "resend": "Code erneut senden"
+        },
         "request": {
             "title": "Passwort zurücksetzen",
             "description": "Geben Sie Ihre mit Ihrem Konto verknüpfte E-Mail-Adresse ein und wir senden Ihnen einen Bestätigungscode dorthin",

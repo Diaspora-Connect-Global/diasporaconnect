@@ -110,7 +110,7 @@
         "saved": "Saved",
         "attend": "Attend",
         "login": "Login",
-         "postedBy": "Posted by {user}"
+        "postedBy": "Posted by {user}"
     },
     "legal": {
         "about": "About",
@@ -120,6 +120,11 @@
         "and": "and"
     },
     "passwordReset": {
+        "confirmVerification": {
+            "title": "Enter verification code",
+            "description": "Enter the verification code that was sent to {email}",
+            "resend": "Resend code"
+        },
         "request": {
             "title": "Reset your password",
             "description": "Enter your email address associated with your account and we will send a verification code there",
@@ -152,7 +157,7 @@
         }
     },
     "home": {
-         "mutualConnections": "mutual connections",
+        "mutualConnections": "mutual connections",
         "peopleYouMayKnow": "People you may know",
         "header": {
             "home": "Home",

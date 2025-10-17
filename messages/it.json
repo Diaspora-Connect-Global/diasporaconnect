@@ -120,6 +120,11 @@
         "and": "e"
     },
     "passwordReset": {
+        "confirmVerification": {
+            "title": "Inserisci il codice di verifica",
+            "description": "Inserisci il codice di verifica inviato a {email}",
+            "resend": "Rinvia codice"
+        },
         "request": {
             "title": "Reimposta la password",
             "description": "Inserisci il tuo indirizzo email associato al tuo account e ti invieremo un codice di verifica lì",

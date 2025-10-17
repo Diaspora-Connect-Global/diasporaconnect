@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently --raw \"next dev --turbopack\" \"i18nexus listen\" ",
+    "dev": "concurrently --raw \"next dev --turbopack\" ",
     "dev1":"next dev --turbopack",
-    "build": "i18nexus pull && next build --turbopack",
-    "start": "i18nexus pull && next start",
+    "build": "next build --turbopack",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {

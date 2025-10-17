@@ -37,7 +37,7 @@ export default async function RootLayout({
     notFound();
   }
   return (
-    <html lang={locale}>
+    <html lang={locale} >
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
       >
