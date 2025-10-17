@@ -14,6 +14,11 @@ interface SectionProps {
     defaultAction: string;
     children: React.ReactNode;
 }
+interface Community {
+    id: string;
+    title: string;
+    description?: string;
+}
 
 function Section({ title, isOpen, onToggle, defaultAction, children }: SectionProps) {
     return (
@@ -96,6 +101,8 @@ function Community() {
         }));
     };
 
+   
+
     const communities = [
         {
             id: '1',
@@ -115,13 +122,13 @@ function Community() {
     ];
 
     // Handle community change
-    const handleCommunityChange = (community: any) => {
+    const handleCommunityChange = (community: Community) => {
         console.log('Switched to:', community.title);
         // Add your logic here (e.g., fetch community data, update state, etc.)
     };
 
     // Handle leave community
-    const handleLeaveCommunity = (community: any) => {
+    const handleLeaveCommunity = (community: Community) => {
         console.log('Leaving:', community.title);
         // Add your logic here (e.g., show confirmation dialog, remove from list, etc.)
     };

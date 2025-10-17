@@ -10,6 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../ui/button';
+import { useTranslations } from 'next-intl';
 
 interface Community {
     id: string;
@@ -28,8 +29,10 @@ export function MyCommunityCard2({
     communities,
     defaultCommunityId,
     onCommunityChange,
-    onLeaveCommunity
 }: MyCommunityCard2Props) {
+
+        const t = useTranslations('community');
+    
     const [selectedCommunity, setSelectedCommunity] = useState<Community>(
         communities.find(c => c.id === defaultCommunityId) || communities[0]
     );
@@ -39,9 +42,7 @@ export function MyCommunityCard2({
         onCommunityChange?.(community);
     };
 
-    const handleLeaveCommunity = () => {
-        onLeaveCommunity?.(selectedCommunity);
-    };
+ 
 
     return (
         <header className="w-full border-b">
@@ -66,7 +67,8 @@ export function MyCommunityCard2({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default'>
                             <DropdownMenuLabel className='font-body-large text-text-primary'>
-                                Switch Community
+                                                                {t('seeall')}
+
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             

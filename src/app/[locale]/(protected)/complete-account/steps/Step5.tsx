@@ -12,7 +12,7 @@ interface Step5Props {
     prevStep: () => void;
 }
 
-export const Step5: React.FC<Step5Props> = ({ data, updateData, nextStep, prevStep }) => {
+export const Step5: React.FC<Step5Props> = ({ data, nextStep, prevStep }) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
     

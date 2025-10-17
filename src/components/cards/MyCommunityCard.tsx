@@ -1,11 +1,10 @@
 'use client'
 import React from 'react';
-import { ChevronRight, Globe, MoreHorizontalIcon, MoreVertical } from 'lucide-react';
+import { ChevronRight, Globe, MoreHorizontalIcon } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -23,7 +22,6 @@ export function MyCommunityCard({
     title = "GhanaConnect:Global",
     description = "Connect with professionals and businesses across Ghana and abroad.",
     logoIcon,
-    onMenuClick
 }: GhanaConnectHeaderProps) {
     const t = useTranslations('community');
     

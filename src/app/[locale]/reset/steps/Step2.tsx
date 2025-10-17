@@ -12,7 +12,7 @@ interface Step2Props {
     prevStep: () => void;
 }
 
-export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevStep }) => {
+export const Step2: React.FC<Step2Props> = ({ data, nextStep, prevStep }) => {
     const t = useTranslations('passwordReset');
     const tActions = useTranslations('actions');
     

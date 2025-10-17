@@ -1,5 +1,5 @@
 'use client';
-import { Heart, MessageCircle, Share2, Bookmark, MessageCircleMore } from 'lucide-react';
+import { Heart, Share2, Bookmark, MessageCircleMore } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { GoHeartFill } from 'react-icons/go';

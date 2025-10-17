@@ -13,7 +13,7 @@ interface Step7Props {
     prevStep: () => void;
 }
 
-export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevStep }) => {
+export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
     const router = useRouter();
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');

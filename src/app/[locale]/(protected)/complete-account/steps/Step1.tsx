@@ -14,7 +14,6 @@ interface Step1Props {
 
 export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep, prevStep }) => {
     const t = useTranslations('onboarding');
-    const tActions = useTranslations('actions');
     
     const isNextDisabled = !data.firstName.trim() || !data.lastName.trim();
 

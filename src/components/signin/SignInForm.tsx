@@ -1,19 +1,13 @@
 "use client";
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Eye, EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { Field, FieldSeparator } from '../ui/field';
-import { BodyMedium, HeadingMedium, LabelLarge, LabelMedium } from '../utils';
+import { BodyMedium, HeadingMedium, LabelLarge } from '../utils';
 import { PasswordInput, TextInput } from '../custom/input';
-import router from 'next/router';
 import { redirect } from 'next/navigation';
 import SignInProvider from '../home/SignInProvider';
-import LocaleSwitcher from '../LocalSwitcher';
-import InfoLinks from '../custom/infoLinks';
+
 
 export default function SignInForm() {
     const [email, setEmail] = useState('');

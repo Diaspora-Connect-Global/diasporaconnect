@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Step1 } from './steps/Step1';
 import { Step2 } from './steps/Step2';
 import { Step3 } from './steps/Step3';
-import { useRouter } from 'next/navigation';
 
 export interface ResetFormData {
     email: string;
@@ -13,7 +12,6 @@ export interface ResetFormData {
 }
 
 export default function ResetAccount() {
-    const router = useRouter();
     
     const [mounted, setMounted] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
@@ -59,27 +57,7 @@ export default function ResetAccount() {
     };
 
     
-    const submitForm = async () => {
-        try {
-            const response = await fetch('/api/account/setup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (response.ok) {
-                sessionStorage.removeItem('accountFormData');
-                sessionStorage.removeItem('accountFormStep');
-                console.log('Account created successfully!');
-            } else {
-                throw new Error('Failed to create account');
-            }
-        } catch (error) {
-            console.error('Error submitting form:', error);
-        }
-    };
+ 
 
     const renderStep = () => {
         switch (currentStep) {

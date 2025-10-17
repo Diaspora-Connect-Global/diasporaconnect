@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Home, Search, Users, ShoppingCart, Bell, MessageCircle, ChevronDown, User } from 'lucide-react';
+import { Home, Users, ShoppingCart, Bell, MessageCircle, User } from 'lucide-react';
 import Image from 'next/image';
 import LocaleSwitcher from '../LocalSwitcher';
 import { SearchInput } from './input';
@@ -13,7 +13,6 @@ import { useTranslations } from 'next-intl';
 export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const t = useTranslations('home.header');
 
@@ -25,13 +24,7 @@ export default function Header() {
   const segments = pathname.split('/').filter(segment => segment);
   const currentLocale = segments[0] || 'en';
 
-  const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'it', name: 'Italiano', flag: '🇪🇸' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  ];
-
-  const currentLanguage = languages.find(lang => lang.code === currentLocale) || languages[0];
+ 
 
   const navigation = [
     { name: t('home'), href: `/${currentLocale}`, icon: Home },

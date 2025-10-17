@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { HeadingMedium, LabelMedium } from '@/components/utils';
+import { HeadingMedium } from '@/components/utils';
 import { Button } from '@/components/ui/button';
 
 interface StepProps {

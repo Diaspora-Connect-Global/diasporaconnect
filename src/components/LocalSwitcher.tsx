@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale } from 'next-intl';
-import { Globe } from 'lucide-react';
 import {
   Select,
   SelectContent,

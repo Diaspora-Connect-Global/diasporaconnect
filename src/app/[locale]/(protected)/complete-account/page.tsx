@@ -82,30 +82,30 @@ export default  function CompleteAccount() {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const submitForm = async () => {
-    try {
-      // Send data to your NestJS backend
-      const response = await fetch('/api/account/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+  // const submitForm = async () => {
+  //   try {
+  //     // Send data to your NestJS backend
+  //     const response = await fetch('/api/account/setup', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(formData),
+  //     });
 
-      if (response.ok) {
-        // Clear session storage on successful submission
-        sessionStorage.removeItem('accountFormData');
-        sessionStorage.removeItem('accountFormStep');
-        // Handle success (redirect, show success message, etc.)
-        console.log('Account created successfully!');
-      } else {
-        throw new Error('Failed to create account');
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    }
-  };
+  //     if (response.ok) {
+  //       // Clear session storage on successful submission
+  //       sessionStorage.removeItem('accountFormData');
+  //       sessionStorage.removeItem('accountFormStep');
+  //       // Handle success (redirect, show success message, etc.)
+  //       console.log('Account created successfully!');
+  //     } else {
+  //       throw new Error('Failed to create account');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //   }
+  // };
 
   const renderStep = () => {
     switch (currentStep) {

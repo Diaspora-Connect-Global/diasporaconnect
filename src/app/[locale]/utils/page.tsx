@@ -1,6 +1,5 @@
 "use client"
 import JoinCommunityCard from "@/components/cards/JoinCommunityCard"
-import { DesignSystemShowcase } from "@/components/utils"
 export default  function Utils() {
     return (
         <div className="p-4">

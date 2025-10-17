@@ -13,7 +13,7 @@ interface Step3Props {
     prevStep: () => void;
 }
 
-export const Step3: React.FC<Step3Props> = ({ data, updateData, nextStep, prevStep }) => {
+export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
     const t = useTranslations('passwordReset');
     const tActions = useTranslations('actions');
     const router = useRouter();

@@ -22,8 +22,7 @@ interface StepProps {
 }
 
 export const Step: React.FC<StepProps> = ({ 
-    data, 
-    updateData, 
+    data,  
     nextStep, 
     prevStep, 
     stepNumber, 

@@ -2,7 +2,6 @@
 import React from 'react';
 import { ResetFormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useTranslations } from 'next-intl';
 import { TextInput } from '@/components/custom/input';
 

@@ -1,9 +1,7 @@
 import LocaleSwitcher from "@/components/LocalSwitcher"
-import { ThemeToggle } from "../theme-toggle"
 import { useTranslations } from 'next-intl';
 import Image from "next/image";
-import { BodySmall, DisplayMedium, DisplaySmall, HeadingSmall, LabelSmall, TextPrimary } from "@/components/utils";
-import { Info } from "lucide-react";
+import { HeadingSmall } from "@/components/utils";
 import InfoLinks from "@/components/custom/infoLinks";
 
 
