@@ -42,10 +42,10 @@ export default function AuthLayout({
                         {/* Footer that sticks to bottom */}
                         <div className="text-center text-xs space-x-2 py-4 border-t pb-10 flex justify-center flex-shrink-0">
                             <LocaleSwitcher
-                                selectClassName="appearance-none text-text-primary  pr-4"
+                                selectClassName="appearance-none text-text-primary -my-1.5 p-0  "
                                 optionClassName="  bg-surface-default"
                             />
-                            <span>·</span>
+                            <span>.</span>
                             <InfoLinks />
                         </div>
                     </div>

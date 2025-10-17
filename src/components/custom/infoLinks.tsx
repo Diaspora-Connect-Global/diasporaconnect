@@ -13,7 +13,7 @@ export default function InfoLinks() {
                     </TextPrimary>
                 </BodySmall>
             </a>
-            <span>·</span>
+            <span>.</span>
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
@@ -21,7 +21,7 @@ export default function InfoLinks() {
                     </TextPrimary>
                 </BodySmall>
             </a>
-            <span>·</span>
+            <span>.</span>
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
@@ -29,7 +29,7 @@ export default function InfoLinks() {
                     </TextPrimary>
                 </BodySmall>
             </a>
-            <span>·</span>
+            <span>.</span>
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
@@ -37,7 +37,7 @@ export default function InfoLinks() {
                     </TextPrimary>
                 </BodySmall>
             </a>
-            <span>·</span>
+            <span>.</span>
             <span>
                 <BodySmall>
                     <TextPrimary>

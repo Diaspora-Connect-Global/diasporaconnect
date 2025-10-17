@@ -44,8 +44,8 @@ export default function LocaleSwitcher({
   return (
     <div className={className}>
       <Select  value={locale} onValueChange={switchLocale}>
-        <SelectTrigger className={`w-fit border-none shadow-none focus-visible:ring-transparent ${selectClassName}`}>
-          <SelectValue>{currentLanguage?.nativeName}</SelectValue>
+        <SelectTrigger className={`w-fit border-none shadow-none focus-visible:ring-transparent  ${selectClassName}`}>
+          <SelectValue >{currentLanguage?.nativeName}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {languages.map((language) => (
