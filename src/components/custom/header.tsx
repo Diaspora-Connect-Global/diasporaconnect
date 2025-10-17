@@ -24,7 +24,7 @@ export default function Header() {
   const segments = pathname.split('/').filter(segment => segment);
   const currentLocale = segments[0] || 'en';
 
- 
+
 
   const navigation = [
     { name: t('home'), href: `/${currentLocale}`, icon: Home },
@@ -52,8 +52,8 @@ export default function Header() {
           {/* Logo */}
           <div >
             <Link href={`/${currentLocale}`} >
-              <Image src="/LOGO.png" alt="Logo" width={80} height={80} className="" />            
-              </Link>
+              <Image src="/LOGO.png" alt="Logo" width={80} height={80} className="" />
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -86,9 +86,9 @@ export default function Header() {
                 <Image
                   width={24}
                   height={24}
-                  src="/api/placeholder/32/32"
+                  src="/PROFILEee.png"
                   alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                  className="w-8 h-8 rounded-full object-cover border-2 border-border-subtle"
                   onError={(e) => {
                     // Fallback if image fails to load
                     e.currentTarget.style.display = 'none';
@@ -96,7 +96,14 @@ export default function Header() {
                   }}
                 />
                 <div className=" hidden w-8 h-8 bg-surface-subtle  rounded-full  items-center justify-center border-2 ">
-                  <span className="text-text-success"><User size={20} /></span>
+
+                  <Image
+                    width={24}
+                    height={24}
+                    src="/PROFILE.png"
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover border-2 border-border-subtle"
+                  />
                 </div>
               </div>
             </div>
@@ -106,11 +113,11 @@ export default function Header() {
               <LocaleSwitcher
                 selectClassName="appearance-none text-text-primary  pr-4"
                 optionClassName="  bg-surface-default"
-              />        
+              />
 
-              <ThemeToggle/>      
-              
-              </div>
+              <ThemeToggle />
+
+            </div>
 
             {/* Search Box */}
             <div className="hidden md:flex items-center">
@@ -126,7 +133,7 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              className="md:hidden p-2 rounded-md text-text-primary hover:text-text-secondary "
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

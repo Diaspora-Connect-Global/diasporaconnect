@@ -54,7 +54,7 @@ export default function SignInForm() {
                         />
 
                         <p className="text-sm flex justify-between">
-                            <Link href="#" className="text-text-brand font-medium hover:underline">
+                            <Link href="/reset" className="text-text-brand font-medium hover:underline">
                                 <LabelLarge>
                                     {t("forgotPassword")}
                                 </LabelLarge>

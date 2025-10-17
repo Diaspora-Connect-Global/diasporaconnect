@@ -1,15 +1,12 @@
 "use client"
-import JoinCommunityCard from "@/components/cards/JoinCommunityCard"
-export default  function Utils() {
-    return (
-        <div className="p-4">
-<JoinCommunityCard
-  title="Ghana Innovation Hub"
-  description="A platform that promotes innovation in collaboration and empowers innovative individuals."
-  buttonText="Join community"
-  onButtonClick={() => console.log('Join button clicked!')}
-/>            
-            
-        </div>
-    )
+import LoadingScreen from "@/components/custom/LoadingScreen";
+
+export default function Utils() {
+
+  return (
+   <>
+        <LoadingScreen  text="Almost there..."/>    
+        
+        </>
+  )
 }

@@ -7,7 +7,7 @@ export default function HomeLayout({
 }) {
   return (
     <div className="flex">
-      <div className="w-[20%] ">
+      <div className="md:w-[20%] hidden md:block ">
         <HomeSidebar/>
       </div>
       <div className="flex-1">

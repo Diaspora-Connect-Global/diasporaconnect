@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { ChevronRight, Globe, MoreHorizontalIcon } from 'lucide-react';
+import { ChevronRight, MoreHorizontalIcon } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../ui/button';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image'
+
 
 interface GhanaConnectHeaderProps {
     title?: string;
@@ -31,8 +33,16 @@ export function MyCommunityCard({
                 <div className="flex items-center justify-between">
                     {/* Left section - Logo and branding */}
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-red-500 via-yellow-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
-                            {logoIcon || <Globe className="w-6 h-6 text-white" />}
+                        <div className="w-10 h-10  rounded-lg flex items-center justify-center ">
+                            {logoIcon || 
+                             <Image
+                                width={20}
+                                height={20}
+                                src="/GLOBE.png"
+                                alt="Profile"
+                                className="w-8 h-8 rounded-full object-cover border-2 border-border-subtle"
+                            />
+                            }
                         </div>
 
                         <div className="flex flex-col">

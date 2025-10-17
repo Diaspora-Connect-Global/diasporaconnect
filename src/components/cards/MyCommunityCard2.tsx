@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react';
-import { Globe, MoreHorizontalIcon, Check } from 'lucide-react';
+import {  MoreHorizontalIcon, Check } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../ui/button';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image'
 
 interface Community {
     id: string;
@@ -31,8 +32,8 @@ export function MyCommunityCard2({
     onCommunityChange,
 }: MyCommunityCard2Props) {
 
-        const t = useTranslations('community');
-    
+    const t = useTranslations('community');
+
     const [selectedCommunity, setSelectedCommunity] = useState<Community>(
         communities.find(c => c.id === defaultCommunityId) || communities[0]
     );
@@ -42,16 +43,22 @@ export function MyCommunityCard2({
         onCommunityChange?.(community);
     };
 
- 
+
 
     return (
         <header className="w-full border-b">
             <div className="max-w-7xl mx-auto px-4 py-3">
                 <div className="border p-2 rounded-2xl border-border-disabled flex items-center justify-between gap-2">
                     {/* Left section - Logo and selected community title */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex items-center gap-1 min-w-0 flex-1">
                         <div className="w-5 h-5 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                            <Globe className="w-6 h-6" />
+                            <Image
+                                width={10}
+                                height={10}
+                                src="/GLOBE.png"
+                                alt="Profile"
+                                className="w-6 h-6 rounded-full object-cover border-2 border-border-subtle"
+                            />
                         </div>
 
                         <h1 className="font-body-large text-text-primary truncate">
@@ -67,13 +74,13 @@ export function MyCommunityCard2({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default'>
                             <DropdownMenuLabel className='font-body-large text-text-primary'>
-                                                                {t('seeall')}
+                                {t('seeall')}
 
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            
+
                             {communities.map((community) => (
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     key={community.id}
                                     onSelect={() => handleCommunitySelect(community)}
                                     className='font-body-large text-text-primary flex items-center justify-between'
@@ -84,9 +91,9 @@ export function MyCommunityCard2({
                                     )}
                                 </DropdownMenuItem>
                             ))}
-                            
+
                             <DropdownMenuSeparator />
-                          
+
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

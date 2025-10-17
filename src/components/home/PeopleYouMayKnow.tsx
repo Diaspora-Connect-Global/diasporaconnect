@@ -11,17 +11,17 @@ export function PeopleYouMayKnow() {
             <p className="font-caption-large">{t('peopleYouMayKnow')}</p>
             <div className="p-4 space-y-2">
                 <PeopleYouMayKnowCard
-                    profileImage="/path1.jpg"
+                    profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
                     name="Janet Doe"
                     mutualConnections={4}
                 />
                 <PeopleYouMayKnowCard
-                    profileImage="/path2.jpg"
+                    profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
                     name="John Smith"
                     mutualConnections={12}
                 />
                 <PeopleYouMayKnowCard
-                    profileImage="/path3.jpg"
+                    profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
                     name="Sarah Johnson"
                     mutualConnections={7}
                 />

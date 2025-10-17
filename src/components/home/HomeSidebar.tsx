@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 import InfoLinks from "../custom/infoLinks";
-import { BodyMedium, BodySmall, CaptionLarge, LabelMedium, TextBrand,  } from "../utils";
-import {  ChevronUp } from 'lucide-react';
+import { BodyMedium, BodySmall, LabelMedium, TextBrand, } from "../utils";
+import { ChevronUp } from 'lucide-react';
 import { MyCommunityCard2 } from '../cards/MyCommunityCard2';
 import { useTranslations } from 'next-intl';
-
+import Image from 'next/image';
 // Reusable Section Component
 interface SectionProps {
     title: string;
@@ -13,6 +13,7 @@ interface SectionProps {
     onToggle: () => void;
     defaultAction: string;
     children: React.ReactNode;
+    image:string
 }
 interface Community {
     id: string;
@@ -20,21 +21,31 @@ interface Community {
     description?: string;
 }
 
-function Section({ title, isOpen, onToggle, defaultAction, children }: SectionProps) {
+function Section({ image,title, isOpen, onToggle, defaultAction, children }: SectionProps) {
     return (
-        <div className="border-b-1">
+        <div className="border-b-1 border-b-border-subtle">
             <button
                 onClick={onToggle}
-                className="w-full px-4 py-3 flex justify-between items-center hover: "
+                className="w-full px-4 py-3 flex justify-between items-center cursor-pointer"
             >
-                <CaptionLarge className="font-semibold text-text-primary">{title}</CaptionLarge>
-                <span className="text-gray-500">
+                <div className='flex gap-4 text-center justify-center'>
+
+                <Image
+                    width={10}
+                    height={10}
+                    src={image}
+                    alt="Profile"
+                    className="w-5 h-5 rounded-full object-cover "
+                />
+                <span className="text-text-primary font-caption-large truncate">{title}</span>
+                </div>
+                <span className="text-text-primary">
                     {isOpen ? <ChevronUp size={10} /> : ''}
                 </span>
             </button>
 
             {isOpen && (
-                <div className="px-4 pb-3 space-y-3">
+                <div className="pl-6 pb-3 space-y-3">
                     <BodySmall>
                         <TextBrand className="cursor-pointer hover:underline block">
                             {defaultAction}
@@ -49,7 +60,7 @@ function Section({ title, isOpen, onToggle, defaultAction, children }: SectionPr
 
 function NoCommunity() {
     const t = useTranslations('community');
-    
+
     return (
         <div className="my-4 space-y-4">
             <BodyMedium>
@@ -66,7 +77,7 @@ function NoCommunity() {
 
 function CommunityItem({ name, type }: { name: string, type: string }) {
     const t = useTranslations('privacy');
-    
+
     return (
         <div className="text-center space-x-2 flex flex-wrap 
         justify-content-center items-center">
@@ -92,7 +103,7 @@ function Community() {
     });
 
     const tPrivacy = useTranslations('privacy');
-    const t= useTranslations('home');
+    const t = useTranslations('home');
 
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections(prev => ({
@@ -101,7 +112,7 @@ function Community() {
         }));
     };
 
-   
+
 
     const communities = [
         {
@@ -136,7 +147,7 @@ function Community() {
     return (
         <div className="space-y-4">
 
-            <MyCommunityCard2 
+            <MyCommunityCard2
                 communities={communities}
                 defaultCommunityId='1'  // Optional: which community to show first
                 onCommunityChange={handleCommunityChange}
@@ -149,6 +160,7 @@ function Community() {
                 isOpen={openSections.associations}
                 onToggle={() => toggleSection('associations')}
                 defaultAction={t('associations.discover')}
+                image='/ASSOCIATION.png'
             >
                 <div className="space-y-1">
                     {[
@@ -158,7 +170,7 @@ function Community() {
                         { name: "Health & Wellness Journal", type: "Private" }
                     ].map((association, index) => (
                         <div key={index}>
-                            <CommunityItem name={association.name} type={association.type == "Public"? `${tPrivacy("public")}` :`${tPrivacy("public")}`} />
+                            <CommunityItem name={association.name} type={association.type == "Public" ? `${tPrivacy("public")}` : `${tPrivacy("public")}`} />
                         </div>
                     ))}
                 </div>
@@ -170,6 +182,8 @@ function Community() {
                 isOpen={openSections.groupChats}
                 onToggle={() => toggleSection('groupChats')}
                 defaultAction={t('groupchats.create')}
+                                image='/GROUPCHAT.png'
+
             >
                 <div className="space-y-2">
                     {[
@@ -189,6 +203,8 @@ function Community() {
                 isOpen={openSections.events}
                 onToggle={() => toggleSection('events')}
                 defaultAction={t('events.near')}
+                                image='/EVENTS.png'
+
             >
                 <div className="space-y-3">
                     {[
@@ -208,6 +224,8 @@ function Community() {
                 isOpen={openSections.opportunities}
                 onToggle={() => toggleSection('opportunities')}
                 defaultAction={t('opportunities.opportunities')}
+                                image='/OPPORTUNITIES.png'
+
             >
                 <div className="space-y-3">
                     {[

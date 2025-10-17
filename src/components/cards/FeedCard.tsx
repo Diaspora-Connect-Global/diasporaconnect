@@ -1,9 +1,10 @@
 'use client';
-import { Heart, Share2, Bookmark, MessageCircleMore } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
+
 
 interface FeedCardProps {
   profileImage: string;
@@ -51,16 +52,16 @@ export default function FeedCard({
   };
 
   return (
-    <div className="my-4 bg-surface-default rounded-lg border border-gray-200 p-4 max-w-2xl">
+    <div className="my-4 bg-surface-default rounded-lg  shadow-md p-4 max-w-2xl">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3">
           <Image
             width={40}
             height={40}
-            src={profileImage} 
+            src={profileImage}
             alt={profileName}
-            className="w-12 h-12 rounded-lg object-cover"
+            className="w-12 h-12 rounded-full object-cover"
           />
           <div>
             <div className="flex items-center gap-2">
@@ -85,57 +86,81 @@ export default function FeedCard({
 
       {/* Reactions */}
       <div className="flex items-center gap-4 mb-3 pb-3 border-b border-gray-200">
-        <button 
+        <button
           className="flex items-center gap-1.5 text-sm"
           onClick={handleLike}
         >
-          <GoHeartFill 
+          <GoHeartFill
             className={`w-5 h-5 text-border-danger`}
           />
           <span className={'text-text-secondary'}>
             {likeCount}
           </span>
         </button>
-        
-        <button className="flex items-center gap-1.5 text-sm text-gray-600">
-          <MessageCircleMore className="w-5 h-5 text-text-brand" />
-          <span>{comments}</span>
+
+        <button className="flex items-center gap-1.5 text-sm ">
+          <Image
+            width={40}
+            height={40}
+            src="/COMMENTFILLED.svg"
+            alt="comments"
+            className="w-5 h-5 rounded-full object-cover  text-text-brand"
+          />
+          <span className='text-text-secondary'>{comments}</span>
         </button>
       </div>
 
       {/* Actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <button 
+          <button
             className="flex items-center gap-2 font-body-small text-secondary"
             onClick={handleLike}
           >
-            <Heart className="w-5 h-5" />
+                <Image
+              width={40}
+              height={40}
+              src="/LIKE.svg"
+              alt="comments"
+              className="w-5 h-5 rounded-full object-cover  text-text-brand"
+            />
             <span>{t('like')}</span>
           </button>
-          
-          <button 
+
+          <button
             className="flex items-center gap-2 text-sm font-body-small text-secondary"
             onClick={onComment}
           >
-            <MessageCircleMore className="w-5 h-5" />
+            <Image
+              width={40}
+              height={40}
+              src="/COMMENT.svg"
+              alt="comments"
+              className="w-5 h-5 rounded-full object-cover  text-text-brand"
+            />
             <span>{t('comment')}</span>
           </button>
-          
-          <button 
+
+          <button
             className="flex items-center gap-2 text-sm font-body-small text-secondary"
             onClick={onShare}
           >
-            <Share2 className="w-5 h-5" />
+               <Image
+              width={40}
+              height={40}
+              src="/SHARE.svg"
+              alt="comments"
+              className="w-5 h-5 rounded-full object-cover  text-text-brand"
+            />
             <span>{t('share')}</span>
           </button>
         </div>
-        
-        <button 
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+
+        <button
+          className="flex items-center gap-2 text-sm text-text-secondary  cursor-pointer"
           onClick={handleSave}
         >
-          <Bookmark 
+          <Bookmark
             className={`w-5 h-5 font-body-small text-secondary ${isSaved ? 'fill-current' : ''}`}
           />
           <span>{t('save')}</span>

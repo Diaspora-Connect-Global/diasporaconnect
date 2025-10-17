@@ -1,9 +1,11 @@
+"use client"
 import LoadingScreen from "@/components/custom/LoadingScreen";
 
-export default function Loading() {
+export default function Utils() {
+
   return (
    <>
-        <LoadingScreen />    
+        <LoadingScreen text="Almost there..." />    
         
         </>
   )

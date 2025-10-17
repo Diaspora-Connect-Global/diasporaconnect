@@ -4,6 +4,7 @@ import { FormData } from '../page';
 import { TextInput } from '@/components/custom/input';
 import { MultiStep } from "@/components/custom/multistep";
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface Step1Props {
     data: FormData;
@@ -12,8 +13,15 @@ interface Step1Props {
     prevStep?: () => void;
 }
 
-export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep, prevStep }) => {
+export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep }) => {
     const t = useTranslations('onboarding');
+        const router = useRouter();
+
+          const handleBack = async () => {
+            router.push('/signin');
+       
+    };
+
     
     const isNextDisabled = !data.firstName.trim() || !data.lastName.trim();
 
@@ -24,9 +32,9 @@ export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep, prevSt
             showSkipButton={false}
             title={t('personalInfo.title')}
             isNextDisabled={isNextDisabled}
-            showBackButton={false}
+            showBackButton={true}
             onNext={() => nextStep()}
-            onBack={prevStep}
+            onBack={handleBack}
             onSkip={() => nextStep()}
         >
             <div className="space-y-8 flex justify-between gap-6 w-full">

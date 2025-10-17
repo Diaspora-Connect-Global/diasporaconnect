@@ -1,5 +1,4 @@
 'use client';
-import { Globe } from 'lucide-react';
 import { ButtonType1 } from '../custom/button';
 import {
   Tooltip,
@@ -8,6 +7,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslations } from 'next-intl';
+import Image from 'next/image'
+
 
 interface JoinCommunityCardProps {
   title: string;
@@ -29,25 +30,32 @@ export default function JoinCommunityCard({
   onButtonClick,
   onCardClick,
   icon,
-  iconBgColor = "bg-orange-100",
-  iconColor = "text-orange-600"
+
 }: JoinCommunityCardProps) {
   const t = useTranslations('community');
-  
+
   // Check if text is likely truncated (approximate character limits)
   const isTitleTruncated = title.length > 40;
   const isDescriptionTruncated = description && description.length > 80;
 
   return (
     <TooltipProvider>
-      <div 
+      <div
         className="bg-surface-default rounded-2xl w-full min-w-[200px] p-6 border border-border-subtle"
         onClick={onCardClick}
       >
         <div className="flex flex-col items-center text-center gap-2">
           {/* Icon */}
-          <div className={`${iconBgColor} rounded-full p-2`}>
-            {icon || <Globe className={`w-10 h-10 ${iconColor}`} strokeWidth={1.5} />}
+          <div className={`rounded-full p-2`}>
+            {icon ||
+              <Image
+                width={10}
+                height={10}
+                src="/GLOBE.png"
+                alt="Profile"
+                className="w-10 h-10 rounded-full object-cover border-2 border-border-subtle"
+              />
+            }
           </div>
 
           {/* Title - max 2 lines with conditional tooltip */}

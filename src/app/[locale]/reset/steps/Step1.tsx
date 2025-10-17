@@ -4,6 +4,8 @@ import { ResetFormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
 import { useTranslations } from 'next-intl';
 import { TextInput } from '@/components/custom/input';
+import { useRouter } from 'next/navigation';
+
 
 interface Step2Props {
     data: ResetFormData;
@@ -12,11 +14,16 @@ interface Step2Props {
     prevStep: () => void;
 }
 
-export const Step1: React.FC<Step2Props> = ({ data, updateData, nextStep, prevStep }) => {
+export const Step1: React.FC<Step2Props> = ({ data, updateData, nextStep }) => {
     const t = useTranslations('passwordReset');
     const tActions = useTranslations('actions');
+        const router = useRouter();
+    
 
-
+  const handleBack = async () => {
+            router.push('/signin');
+       
+    };
 
     const isNextDisabled = !data.email.trim();
 
@@ -31,7 +38,7 @@ export const Step1: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
             showBackButton={true}
             showSkipButton={false}
             onNext={() => nextStep()}
-            onBack={prevStep}
+            onBack={handleBack}
             showStepLabel={false}
         >
             <div className="w-full">
