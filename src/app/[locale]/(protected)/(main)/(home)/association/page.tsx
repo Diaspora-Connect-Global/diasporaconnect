@@ -43,11 +43,13 @@ export default function Associations() {
     ];
     return (
         <>
-            <div className="w-full  h-[calc(100vh-64px)] overflow-auto scrollbar-hide mx-4  sm:mr-[10%]">
+            <div className="w-full h-[calc(100vh-64px)] overflow-auto scrollbar-hide  ">
+                <div className=" mx-[5%] sm:mx-[10%]">
 
+               
                 <p className="font-heading-large my-5">My associations in GhanaConnectGlobal</p>
 
-                <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px] ">
+                <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
                     {myAssociations.map((association, index) => (
                         <MyAssociationCard
                             key={index}
@@ -58,7 +60,7 @@ export default function Associations() {
                     ))}
                 </div>
 
-                <p className="font-heading-medium my-5">Discover more asscociations in GhanaConnectGlobal</p>
+                <p className="font-heading-medium my-5">Discover more associations in GhanaConnectGlobal</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                     {discoverAssociations.map((community, index) => (
@@ -74,10 +76,8 @@ export default function Associations() {
                         />
                     ))}
                 </div>
-
-
+                 </div>
             </div>
-        </>)
-
-
+        </>
+    );
 }
