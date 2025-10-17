@@ -59,7 +59,7 @@ export default function SignInForm() {
                                     {t("forgotPassword")}
                                 </LabelLarge>
                             </Link>
-                            <Button onClick={handleSubmit} variant="outline" className="px-8 h-12 bg-surface-brand hover:bg-blue-700 text-white rounded-full">
+                            <Button onClick={handleSubmit} variant="outline" className="px-8 h-12 bg-surface-brand  text-white rounded-full cursor-pointer">
                                 {a("login")}
                             </Button>
                         </p>

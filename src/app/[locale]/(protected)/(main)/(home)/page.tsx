@@ -8,8 +8,9 @@ export default function Home() {
     const t = useTranslations('community');
 
     return (
-        <div className="flex flex-col md:flex-row md:space-x-3 h-screen">
-            <div className="w-full md:w-[60%] h-[calc(100vh-64px)] overflow-auto scrollbar-hide">
+        <>
+            <div className="w-full md:w-[50%] h-[calc(100vh-64px)] overflow-auto scrollbar-hide">
+
                 <div className="flex justify-between mb-4 mx-5 mt-5">
                     <p className="font-caption-large">{t('discover')}</p>
                     <p className="font-label-medium text-text-brand">{t('seeall')}</p>
@@ -35,7 +36,49 @@ export default function Home() {
                     />
                 </div>
 
-                <div className="my-6 mb-8 flex flex-col justify-center items-center">
+                <div className="my-6 mb-8 mx-4">
+                    <FeedCard
+                        profileImage="/ADANSI.png"
+                        profileName="The Adansi Times"
+                        category="GhanaConnectGlobal"
+                        postDate="Oct 1"
+                        content="The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots, discover inspiring journeys, and engage in conversations that shape our global community. Follow us for updates on cultural events, business opportunities, and more."
+                        likes={3}
+                        comments={5}
+                        onLike={() => console.log('Liked')}
+                        onComment={() => console.log('Comment')}
+                        onShare={() => console.log('Share')}
+                        onSave={() => console.log('Saved')}
+                        joinButton={true}
+                    />
+                    <FeedCard
+                        profileImage="/ADANSI.png"
+                        profileName="The Adansi Times"
+                        category="GhanaConnectGlobal"
+                        postDate="Oct 1"
+                        content="The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots, discover inspiring journeys, and engage in conversations that shape our global community. Follow us for updates on cultural events, business opportunities, and more."
+                        likes={3}
+                        comments={5}
+                        onLike={() => console.log('Liked')}
+                        onComment={() => console.log('Comment')}
+                        onShare={() => console.log('Share')}
+                        onSave={() => console.log('Saved')}
+                        joinButton={true}
+                    />
+                    <FeedCard
+                        profileImage="/ADANSI.png"
+                        profileName="The Adansi Times"
+                        category="GhanaConnectGlobal"
+                        postDate="Oct 1"
+                        content="The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots, discover inspiring journeys, and engage in conversations that shape our global community. Follow us for updates on cultural events, business opportunities, and more."
+                        likes={3}
+                        comments={5}
+                        onLike={() => console.log('Liked')}
+                        onComment={() => console.log('Comment')}
+                        onShare={() => console.log('Share')}
+                        onSave={() => console.log('Saved')}
+                        joinButton={true}
+                    />
                     <FeedCard
                         profileImage="/ADANSI.png"
                         profileName="The Adansi Times"
@@ -66,9 +109,9 @@ export default function Home() {
                     />
                 </div>
             </div>
-            <div className="hidden md:block md:w-[40%] mt-5 h-full overflow-auto scrollbar-hide">
+            <div className="hidden md:block md:w-[30%] mt-5 h-full overflow-auto scrollbar-hide">
                 <PeopleYouMayKnow />
             </div>
-        </div>
+        </>
     );
 }

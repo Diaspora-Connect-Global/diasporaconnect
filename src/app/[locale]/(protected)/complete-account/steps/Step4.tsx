@@ -5,6 +5,7 @@ import { MultiStep } from '@/components/custom/multistep';
 import { LabelMedium, TextPrimary } from '@/components/utils';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 interface Step4Props {
     data: FormData;
@@ -43,7 +44,10 @@ export const Step4: React.FC<Step4Props> = ({ data, updateData, nextStep, prevSt
 
                 <InputGroup className='px-3 py-6 border-1 border-border-default rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition'>
                     <InputGroupAddon>
-                        <InputGroupText>flag</InputGroupText>
+                        <InputGroupText>
+                                                <Image src="/FLAG.png" alt="Logo" width={15} height={15} className="" />
+                        
+                        </InputGroupText>
                     </InputGroupAddon>
                     <InputGroupAddon>
                         <InputGroupText className='text-text-primary'>

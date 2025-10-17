@@ -66,7 +66,7 @@ export const MultiStep: React.FC<StepProps> = ({
     };
 
     return (
-        <div className="w-[70%] mx-auto min-h-screen flex flex-col justify-start ">
+        <div className="w-[70%] mx-auto h-screen flex flex-col justify-start ">
             {/* Top Navigation */}
             <div className="space-y-4 flex justify-between items-center px-1 py-6 ">
                 {showBackButton ? (

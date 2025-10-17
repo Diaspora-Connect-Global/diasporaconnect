@@ -53,17 +53,17 @@ export const Step6: React.FC<Step6Props> = ({ data, updateData, nextStep, prevSt
             onBack={prevStep}
             onSkip={() => nextStep()}
         >
-            <div className="flex flex-wrap gap-4 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 w-full"> {/* Adjusted grid for better fit */}
                 {topics.map((option) => (
                     <button
                         key={option}
                         type="button"
                         onClick={() => toggleTopic(option)}
-                        className={`px-2 py-2 rounded-md border text-text-primary transition-all cursor-pointer
+                        className={`px-1 py-1 rounded-md border text-text-primary transition-all cursor-pointer text-sm sm:text-base
                             ${
                                 data.topics?.includes(option)
-                                    ? 'bg-surface-brand-light '
-                                    : 'bg-surface-brand-subtle border-border-disabled hover:border-border-disabled hover:bg-surface-brand-subtle'
+                                    ? 'bg-surface-brand-light border-surface-brand-light'
+                                    : 'bg-surface-brand-subtle border-border-disabled hover:border-border-hover hover:bg-surface-hover'
                             }`}
                     >
                         {option}

@@ -17,9 +17,9 @@ export default function Community() {
             description: "A platform for tech enthusiasts to collaborate and innovate in the Ghanaian tech landscape."
         },
         {
-            title: "GhanaArtsNetwork",
-            description: "Showcasing the rich cultural heritage and contemporary art scenes of Ghana."
-        }
+            title: "GhanaTechHub",
+            description: "A platform for tech enthusiasts to collaborate and innovate in the Ghanaian tech landscape."
+        } 
     ];
 
     const discoverCommunities = [
@@ -34,14 +34,14 @@ export default function Community() {
             description: "A space for businesses to exchange services and resources effectively."
         },
         {
-            title: "Ghana Developers Community",
-            members: 2400,
-            description: "Connect with artists and creatives to foster collaboration and projects.Connect with artists and creatives to foster collaboration and projectsConnect with artists and creatives to foster collaboration and projects"
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
         }
     ];
 
     return (
-        <div className="mx-[15%] overflow-auto scrollbar-hide h-[calc(100vh-64px)]">
+        <div className="mx-2 md:mx-[15%] overflow-auto scrollbar-hide h-[calc(100vh-64px)]">
             <p className="font-heading-large my-5">{t('myCommunity')}</p>
 
             <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">

@@ -52,10 +52,10 @@ export default function FeedCard({
   };
 
   return (
-    <div className="my-4 bg-surface-default rounded-lg  shadow-md p-4 max-w-2xl">
+    <div className=" my-4 bg-surface-default  sm:w-full  rounded-lg  shadow-md p-4 max-w-2xl">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 ">
           <Image
             width={40}
             height={40}
@@ -72,7 +72,7 @@ export default function FeedCard({
                 </button>
               )}
             </div>
-            <p className="font-body-small text-text-secondary">
+            <p className="font-body-small text-text-secondary ">
               {t('postedBy', { user: 'Admin' })} · {category} · {postDate}
             </p>
           </div>

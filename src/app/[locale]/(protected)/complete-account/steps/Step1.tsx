@@ -15,14 +15,12 @@ interface Step1Props {
 
 export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep }) => {
     const t = useTranslations('onboarding');
-        const router = useRouter();
+    const router = useRouter();
 
-          const handleBack = async () => {
-            router.push('/signin');
-       
+    const handleBack = async () => {
+        router.push('/signin');
     };
 
-    
     const isNextDisabled = !data.firstName.trim() || !data.lastName.trim();
 
     return (
@@ -37,8 +35,8 @@ export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep }) => {
             onBack={handleBack}
             onSkip={() => nextStep()}
         >
-            <div className="space-y-8 flex justify-between gap-6 w-full">
-                <div className="flex-1">
+            <div className="space-y-6 md:space-y-8 flex flex-col md:flex-row justify-between gap-4 md:gap-6 w-full">
+                <div className="flex-1 w-full">
                     <TextInput
                         label={t('personalInfo.firstName.label')}
                         placeholder={t('personalInfo.firstName.placeholder')}
@@ -48,7 +46,7 @@ export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep }) => {
                     />
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                     <TextInput
                         label={t('personalInfo.lastName.label')}
                         placeholder={t('personalInfo.lastName.placeholder')}

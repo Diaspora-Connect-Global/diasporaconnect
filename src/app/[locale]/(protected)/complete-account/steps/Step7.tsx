@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 import { FormData } from '../page';
-import { MultiStep } from "@/components/custom/multistep";
+import { MultiStep } from '@/components/custom/multistep';
 import JoinCommunityCard from '@/components/cards/JoinCommunityCard';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -71,9 +71,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
             }
             
             console.log('Going to home screen');
-            // Use router.push instead of redirect
             router.push('/');
-            
         } catch (error) {
             console.error('Submission error:', error);
         }
@@ -83,12 +81,10 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
         const isSelected = community.some(c => c.title === communityItem.title);
 
         if (isSelected) {
-            // Remove community if already selected
             updateData({
                 community: community.filter(c => c.title !== communityItem.title)
             });
         } else {
-            // Add community if not selected
             updateData({
                 community: [...community, communityItem]
             });
@@ -119,11 +115,11 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
             onBack={prevStep}
         >
             <div className="w-full space-y-3">
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-y snap-mandatory">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory"> {/* Changed snap-y to snap-x for horizontal scroll */}
                     {availableCommunities.map((communityItem, index) => (
                         <div
                             key={index}
-                            className="flex-shrink-0 w-[280px] snap-start"
+                            className="flex-shrink-0 w-[80vw] sm:w-[280px] snap-start" // Responsive width: 80vw on mobile, 280px on sm+
                         >
                             <JoinCommunityCard
                                 title={communityItem.title}
