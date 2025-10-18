@@ -1,11 +1,12 @@
 import { ChevronRight } from "lucide-react";
 import PeopleYouMayKnowCard from "../cards/PeopleYouMayKnowCard";
 import { useTranslations } from 'next-intl';
+import { Link } from "@/i18n/navigation";
 
 export function PeopleYouMayKnow() {
     const t = useTranslations('home');
     const tActions = useTranslations('actions');
-    
+
     return (
         <div className="w-[90%] mx-4">
             <p className="font-caption-large">{t('peopleYouMayKnow')}</p>
@@ -29,10 +30,12 @@ export function PeopleYouMayKnow() {
 
             <div className="flex justify-between">
                 <p className="font-caption-large text-text-primary">{t('events.near')}</p>
-                <div className="font-label-medium text-text-brand flex text-center justify-center items-center">
-                    <p className="">{tActions('seemore')}</p>
-                    <ChevronRight size={20} />
-                </div>
+                <Link href="/events">
+                    <div className="font-label-medium text-text-brand flex text-center justify-center items-center">
+                        <p className="">{tActions('seemore')}</p>
+                        <ChevronRight size={20} />
+                    </div>
+                </Link>
             </div>
         </div>
     )

@@ -42,7 +42,7 @@ export default function Community() {
 
     return (
         <div className="mx-2 md:mx-[15%] overflow-auto scrollbar-hide h-[calc(100vh-64px)]">
-            <p className="font-heading-large my-5">{t('myCommunity')}</p>
+            <p className="text-2xl font-heading-large my-5">{t('myCommunity')}</p>
 
             <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
                 {myCommunities.map((community, index) => (
@@ -54,7 +54,7 @@ export default function Community() {
                 ))}
             </div>
 
-            <p className="font-heading-medium my-5">{t('discoverMore')}</p>
+            <p className=" text-2xl font-heading-medium my-5">{t('discoverMore')}</p>
 
             <div className="overflow-auto scrollbar-hide flex gap-3 mb-6">
                 {discoverCommunities.map((community, index) => (

@@ -6,14 +6,16 @@ import { ChevronUp } from 'lucide-react';
 import { MyCommunityCard2 } from '../cards/MyCommunityCard2';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { Link } from '@/i18n/navigation';
 // Reusable Section Component
 interface SectionProps {
     title: string;
     isOpen: boolean;
     onToggle: () => void;
-    defaultAction: string;
-    children: React.ReactNode;
-    image:string
+    defaultAction?: string;
+    children?: React.ReactNode;
+    image: string,
+    link?: string;
 }
 interface Community {
     id: string;
@@ -21,26 +23,49 @@ interface Community {
     description?: string;
 }
 
-function Section({ image,title, isOpen, onToggle, defaultAction, children }: SectionProps) {
+function Section({ image, title, isOpen, onToggle, defaultAction, children, link }: SectionProps) {
+    // If link is provided and no defaultAction or children, treat as a navigable link
+    if (link && !defaultAction && !children) {
+        return (
+            <div className="border-b border-b-border-subtle">
+                <Link
+                    href={link}
+                    className="w-full px-4 py-3 flex justify-between items-center cursor-pointer text-text-primary hover:text-text-brand transition-colors"
+                >
+                    <div className="flex gap-4 text-center justify-center">
+                        <Image
+                            width={10}
+                            height={10}
+                            src={image}
+                            alt="Profile"
+                            className="w-5 h-5 rounded-full object-cover"
+                        />
+                        <span className="font-caption-large truncate">{title}</span>
+                    </div>
+                </Link>
+            </div>
+        );
+    }
+
+    // Default expandable section behavior
     return (
-        <div className="border-b-1 border-b-border-subtle">
+        <div className="border-b border-b-border-subtle">
             <button
                 onClick={onToggle}
                 className="w-full px-4 py-3 flex justify-between items-center cursor-pointer"
             >
-                <div className='flex gap-4 text-center justify-center'>
-
-                <Image
-                    width={10}
-                    height={10}
-                    src={image}
-                    alt="Profile"
-                    className="w-5 h-5 rounded-full object-cover "
-                />
-                <span className="text-text-primary font-caption-large truncate">{title}</span>
+                <div className="flex gap-4 text-center justify-center">
+                    <Image
+                        width={10}
+                        height={10}
+                        src={image}
+                        alt="Profile"
+                        className="w-5 h-5 rounded-full object-cover"
+                    />
+                    <span className="text-text-primary font-caption-large truncate">{title}</span>
                 </div>
                 <span className="text-text-primary">
-                    {isOpen ? <ChevronUp size={10} /> : ''}
+                    {isOpen ? <ChevronUp size={10} /> : ""}
                 </span>
             </button>
 
@@ -182,7 +207,7 @@ function Community() {
                 isOpen={openSections.groupChats}
                 onToggle={() => toggleSection('groupChats')}
                 defaultAction={t('groupchats.create')}
-                                image='/GROUPCHAT.png'
+                image='/GROUPCHAT.png'
 
             >
                 <div className="space-y-2">
@@ -202,42 +227,22 @@ function Community() {
                 title={t('events.events')}
                 isOpen={openSections.events}
                 onToggle={() => toggleSection('events')}
-                defaultAction={t('events.near')}
-                                image='/EVENTS.png'
+                image='/EVENTS.png'
+                link="/events"
 
-            >
-                <div className="space-y-3">
-                    {[
-                        { name: "Tech Conference 2024", date: "Dec 15", type: "Conference" },
-                        { name: "Community Meetup", date: "Dec 20", type: "Networking" }
-                    ].map((item, index) => (
-                        <div key={index}>
-                            <CommunityItem name={item.name} type={item.type} />
-                        </div>
-                    ))}
-                </div>
-            </Section>
+            />
+
 
             {/* Opportunities Section */}
             <Section
                 title={t('opportunities.opportunities')}
                 isOpen={openSections.opportunities}
                 onToggle={() => toggleSection('opportunities')}
-                defaultAction={t('opportunities.opportunities')}
-                                image='/OPPORTUNITIES.png'
+                image='/OPPORTUNITIES.png'
+                link='#'
 
-            >
-                <div className="space-y-3">
-                    {[
-                        { title: "Frontend Developer", company: "Tech Corp", type: "Full-time" },
-                        { title: "UI/UX Designer", company: "Design Studio", type: "Contract" }
-                    ].map((item, index) => (
-                        <div key={index} className="border-t border-gray-100 pt-2 first:border-t-0 first:pt-0">
-                            <CommunityItem name={item.title} type={item.type} />
-                        </div>
-                    ))}
-                </div>
-            </Section>
+            />
+
         </div>
     )
 }
