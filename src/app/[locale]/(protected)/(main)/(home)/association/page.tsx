@@ -44,7 +44,7 @@ export default function Associations() {
     return (
         <>
             <div className="w-full h-[calc(100vh-64px)] overflow-auto scrollbar-hide  ">
-                <div className=" mx-[5%] sm:mx-[10%]">
+                <div className="">
 
                
                 <p className="font-heading-large my-5">My associations in GhanaConnectGlobal</p>
