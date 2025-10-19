@@ -79,7 +79,7 @@ export default function FeedCard({
       </div>
 
       {/* Content */}
-      <p className="font-body-medium leading-relaxed mb-4 flex-1 min-w-0 line-clamp-4">
+      <p className="font-body-medium text-text-primary leading-relaxed mb-4 flex-1 min-w-0 line-clamp-4">
         {content}
       </p>
 
