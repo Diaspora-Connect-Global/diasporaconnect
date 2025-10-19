@@ -2,7 +2,6 @@
 import React from 'react';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
-import JoinCommunityCard from '@/components/cards/JoinCommunityCard';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import CommunityCardVariant1 from '@/components/cards/community/CummunityCardVariant1';
