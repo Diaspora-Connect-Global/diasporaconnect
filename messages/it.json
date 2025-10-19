@@ -4,7 +4,7 @@
             "signup": "Benvenuto in DCG",
             "login": "Bentornato!"
         },
-        "description": "Creazione di percorsi strutturati, trasparenti e impattanti per l'impegno della diaspora.",
+        "description": "Creazione di percorsi strutturati, trasparenti e di impatto per l'impegno della diaspora.",
         "form": {
             "email": {
                 "label": "Email",
@@ -24,7 +24,7 @@
             }
         },
         "policies": {
-            "agreement": "Continuando con l'iscrizione, accetti la nostra",
+            "agreement": "Continuando con la registrazione, accetti la nostra",
             "privacyPolicy": "Informativa sulla privacy",
             "and": "e",
             "termsOfService": "Termini di servizio"
@@ -46,7 +46,7 @@
     },
     "onboarding": {
         "personalInfo": {
-            "title": "Qual è il tuo nome?",
+            "title": "Qual è il tuo nome",
             "description": "Conosciamoci! Questo ci aiuta a personalizzare la tua esperienza e come gli altri ti vedono su Diasplug.",
             "firstName": {
                 "label": "Nome",
@@ -59,7 +59,7 @@
         },
         "community": {
             "title": "Raccontaci la tua comunità",
-            "description": "Condividi la comunità con cui ti identifichi. Ci aiuta a connetterti con persone e storie che contano per te.",
+            "description": "Condividi la comunità con cui ti identifichi. Ci aiuta a connetterti con persone e storie importanti per te.",
             "options": {
                 "localCitizen": "Cittadino locale",
                 "diasporaMember": "Membro della diaspora"
@@ -87,7 +87,7 @@
             "resend": "Rinvia codice"
         },
         "topics": {
-            "title": "Quali argomenti vuoi vedere su DCG?",
+            "title": "Quali argomenti vuoi vedere su DCG",
             "description": "Scegli i tuoi interessi per aiutarci a personalizzare il tuo feed con aggiornamenti, discussioni e opportunità che ti interessano."
         }
     },
@@ -105,15 +105,16 @@
         "seemore": "Vedi altro",
         "addFriend": "Aggiungi amico",
         "join": "Unisciti",
-        "joined": "Unito",
-        "attending": "Partecipo",
+        "joined": "Iscritto",
+        "attending": "Parteciperò",
         "saved": "Salvato",
         "attend": "Partecipa",
         "login": "Accedi",
-        "postedBy": "Pubblicato da {user}"
+        "postedBy": "Pubblicato da {user}",
+        "added": "Aggiunto"
     },
     "legal": {
-        "about": "Chi siamo",
+        "about": "Informazioni",
         "terms": "Termini",
         "privacyPolicy": "Informativa sulla privacy",
         "contact": "Contattaci",
@@ -126,8 +127,8 @@
             "resend": "Rinvia codice"
         },
         "request": {
-            "title": "Reimposta la password",
-            "description": "Inserisci il tuo indirizzo email associato al tuo account e ti invieremo un codice di verifica lì",
+            "title": "Reimposta la tua password",
+            "description": "Inserisci il tuo indirizzo email associato al tuo account e ti invieremo un codice di verifica",
             "email": {
                 "label": "Email",
                 "placeholder": "La tua email"
@@ -153,7 +154,7 @@
         },
         "success": {
             "attendingEvent": "Parteciperai all'evento {event}",
-            "savedEvent": "Hai salvato l'evento {even}"
+            "savedEvent": "Hai salvato l'evento {event}"
         }
     },
     "home": {
@@ -162,13 +163,13 @@
         "header": {
             "home": "Home",
             "community": "Community",
-            "marketplace": "Mercato",
+            "marketplace": "Marketplace",
             "chat": "Chat",
-            "notification": "Notifica",
-            "searchLabel": "Cerca Diasplug ..."
+            "notification": "Notifiche",
+            "searchLabel": "Cerca su Diasplug ..."
         },
         "associations": {
-            "discover": "Scopri associazioni"
+            "discover": "Scopri le associazioni"
         },
         "groupchats": {
             "groupchats": "Chat di gruppo",
@@ -189,7 +190,7 @@
         "joincommunity": "Unisciti alla community",
         "members": "membri",
         "myCommunity": "La mia Community",
-        "discoverMore": "Scopri più community",
+        "discoverMore": "Scopri altre community",
         "openInHome": "Apri community in home",
         "leaveCommunity": "Lascia community"
     },

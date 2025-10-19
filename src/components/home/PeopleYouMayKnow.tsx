@@ -8,9 +8,10 @@ export function PeopleYouMayKnow() {
     const tActions = useTranslations('actions');
 
     return (
-        <div className="w-[90%] mx-4">
+        <div className="space-y-[calc(32/922*100vh)]">
+            <div className="space-y-[calc(12/922*100vh)]">
             <p className="font-caption-large">{t('peopleYouMayKnow')}</p>
-            <div className="p-4 space-y-2">
+            <div className="space-y-[calc(16/922*100vh)]">
                 <PeopleYouMayKnowCard
                     profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
                     name="Janet Doe"
@@ -27,7 +28,7 @@ export function PeopleYouMayKnow() {
                     mutualConnections={7}
                 />
             </div>
-
+            </div>
             <div className="flex justify-between">
                 <p className="font-caption-large text-text-primary">{t('events.near')}</p>
                 <Link href="/events">

@@ -24,7 +24,7 @@
             }
         },
         "policies": {
-            "agreement": "Durch die Fortsetzung der Anmeldung stimmen Sie unseren",
+            "agreement": "Durch Fortsetzung der Registrierung stimmen Sie unseren",
             "privacyPolicy": "Datenschutzrichtlinien",
             "and": "und",
             "termsOfService": "Nutzungsbedingungen zu"
@@ -46,7 +46,7 @@
     },
     "onboarding": {
         "personalInfo": {
-            "title": "Wie ist Ihr Name?",
+            "title": "Wie ist Ihr Name",
             "description": "Lernen wir uns kennen! Dies hilft uns, Ihre Erfahrung zu personalisieren und wie andere Sie auf Diasplug sehen.",
             "firstName": {
                 "label": "Vorname",
@@ -58,16 +58,16 @@
             }
         },
         "community": {
-            "title": "Teilen Sie uns Ihre Community mit",
-            "description": "Teilen Sie die Community mit, mit der Sie sich identifizieren. Es hilft uns, Sie mit Menschen und Geschichten zu verbinden, die für Sie wichtig sind.",
+            "title": "Erzählen Sie uns von Ihrer Community",
+            "description": "Teilen Sie die Community, mit der Sie sich identifizieren. Es hilft uns, Sie mit Menschen und Geschichten zu verbinden, die für Sie wichtig sind.",
             "options": {
                 "localCitizen": "Lokaler Bürger",
                 "diasporaMember": "Diaspora-Mitglied"
             }
         },
         "location": {
-            "title": "Was ist Ihr Wohnsitzland?",
-            "description": "Teilen Sie uns mit, wo Sie derzeit leben, damit wir Möglichkeiten, Veranstaltungen und Verbindungen in Ihrer Nähe anpassen können.",
+            "title": "In welchem Land leben Sie?",
+            "description": "Teilen Sie uns mit, wo Sie aktuell leben, damit wir Möglichkeiten, Veranstaltungen und Verbindungen in Ihrer Nähe anpassen können.",
             "country": {
                 "label": "Land",
                 "placeholder": "Wählen Sie Ihr Land"
@@ -87,17 +87,17 @@
             "resend": "Code erneut senden"
         },
         "topics": {
-            "title": "Welche Themen möchten Sie auf DCG sehen?",
+            "title": "Welche Themen möchten Sie auf DCG sehen",
             "description": "Wählen Sie Ihre Interessen, damit wir Ihren Feed mit Updates, Diskussionen und Möglichkeiten, die Sie interessieren, personalisieren können."
         }
     },
     "actions": {
         "continue": "Weiter",
-        "finish": "Abschließen",
+        "finish": "Beenden",
         "sendCode": "Code senden",
         "submit": "Absenden",
         "skip": "Überspringen",
-        "setNewPassword": "Neues Passwort festlegen",
+        "setNewPassword": "Neues Passwort setzen",
         "like": "Gefällt mir",
         "share": "Teilen",
         "comment": "Kommentieren",
@@ -110,12 +110,13 @@
         "saved": "Gespeichert",
         "attend": "Teilnehmen",
         "login": "Anmelden",
-        "postedBy": "Gepostet von {user}"
+        "postedBy": "Gepostet von {user}",
+        "added": "Hinzugefügt"
     },
     "legal": {
         "about": "Über uns",
         "terms": "Bedingungen",
-        "privacyPolicy": "Datenschutzrichtlinie",
+        "privacyPolicy": "Datenschutz",
         "contact": "Kontaktieren Sie uns",
         "and": "und"
     },
@@ -127,14 +128,14 @@
         },
         "request": {
             "title": "Passwort zurücksetzen",
-            "description": "Geben Sie Ihre mit Ihrem Konto verknüpfte E-Mail-Adresse ein und wir senden Ihnen einen Bestätigungscode dorthin",
+            "description": "Geben Sie Ihre E-Mail-Adresse ein, die mit Ihrem Konto verknüpft ist, und wir senden Ihnen einen Bestätigungscode",
             "email": {
                 "label": "E-Mail",
                 "placeholder": "Ihre E-Mail"
             }
         },
         "newPassword": {
-            "title": "Geben Sie Ihr neues Passwort ein",
+            "title": "Neues Passwort eingeben",
             "createPassword": {
                 "label": "Neues Passwort erstellen",
                 "placeholder": "Ihr neues Passwort"
@@ -153,18 +154,18 @@
         },
         "success": {
             "attendingEvent": "Sie nehmen am {event} Event teil",
-            "savedEvent": "Sie haben das {even} Event gespeichert"
+            "savedEvent": "Sie haben das {event} Event gespeichert"
         }
     },
     "home": {
         "mutualConnections": "gemeinsame Verbindungen",
-        "peopleYouMayKnow": "Personen, die Sie kennen könnten",
+        "peopleYouMayKnow": "Personen, die Sie möglicherweise kennen",
         "header": {
             "home": "Startseite",
             "community": "Community",
             "marketplace": "Marktplatz",
             "chat": "Chat",
-            "notification": "Benachrichtigung",
+            "notification": "Benachrichtigungen",
             "searchLabel": "Diasplug durchsuchen ..."
         },
         "associations": {
@@ -190,7 +191,7 @@
         "members": "Mitglieder",
         "myCommunity": "Meine Community",
         "discoverMore": "Weitere Communities entdecken",
-        "openInHome": "Community zu Hause öffnen",
+        "openInHome": "Community auf Startseite öffnen",
         "leaveCommunity": "Community verlassen"
     },
     "privacy": {

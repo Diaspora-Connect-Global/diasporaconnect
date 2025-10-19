@@ -1,7 +1,8 @@
-"use client";
-import Image from "next/image";
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+'use client';
+import Image from 'next/image';
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { LabelMedium } from '../utils';
 
 interface PeopleYouMayKnowCardProps {
   profileImage: string;
@@ -9,7 +10,7 @@ interface PeopleYouMayKnowCardProps {
   mutualConnections: number;
   onAddFriend?: () => void;
   buttonText?: string;
-  buttonVariant?: "primary" | "secondary" | "success";
+  buttonVariant?: 'primary' | 'secondary' | 'success';
 }
 
 export default function PeopleYouMayKnowCard({
@@ -18,11 +19,10 @@ export default function PeopleYouMayKnowCard({
   mutualConnections,
   onAddFriend,
   buttonText,
-  buttonVariant = "primary",
 }: PeopleYouMayKnowCardProps) {
   const [isAdded, setIsAdded] = useState(false);
-  const t = useTranslations("home");
-  const tActions = useTranslations("actions");
+  const t = useTranslations('home');
+  const tActions = useTranslations('actions');
 
   const handleClick = () => {
     if (!isAdded && onAddFriend) {
@@ -31,59 +31,55 @@ export default function PeopleYouMayKnowCard({
     setIsAdded((prev) => !prev);
   };
 
-  const getButtonStyles = () => {
-    const baseStyles = "font-label-medium transition-colors truncate";
-    if (isAdded) {
-      return `${baseStyles} text-primary hover:text-secondary cursor-not-allowed`;
-    }
-    switch (buttonVariant) {
-      case "secondary":
-        return `${baseStyles} text-gray-700 hover:text-gray-900`;
-      case "success":
-        return `${baseStyles} text-green-600 hover:text-green-700`;
-      default:
-        return `${baseStyles} text-brand hover:text-brand-light`;
-    }
-  };
+  // const getButtonStyles = () => {
+  //   const baseStyles = 'px-3 py-1 rounded-md font-label-medium transition-colors w-[80px] text-center';
+  //   if (isAdded) {
+  //     return `${baseStyles} bg-gray-200 text-gray-500 cursor-not-allowed`;
+  //   }
+  //   switch (buttonVariant) {
+  //     case 'secondary':
+  //       return `${baseStyles} bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900`;
+  //     case 'success':
+  //       return `${baseStyles} bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700`;
+  //     default:
+  //       return `${baseStyles} bg-brand-light text-brand hover:bg-brand hover:text-white`;
+  //   }
+  // };
 
-  const buttonLabel = isAdded
-    ? t("added")
-    : buttonText || tActions("addFriend");
+  const buttonLabel = isAdded ? tActions('added') : buttonText || tActions('addFriend');
 
   return (
-    <div className="flex items-center justify-between py-3 px-4 border-b border-border-subtle hover:bg-surface-subtle transition-colors">
+    <div className="w-[288px] lg:w-[calc(288/1512*100vw)] lg:h-[calc(40/922*100vh)] flex justify-between items-center  hover:bg-surface-subtle transition-colors  rounded-lg">
       {/* Left side - Profile info */}
-      <div className="flex items-center gap-4">
-        <Image
-          width={40}
-          height={40}
-          src={profileImage}
-          alt={`${name}'s profile`}
-          className="w-10 h-10 rounded-full object-cover border border-border-subtle"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-            // Fallback could be added here if needed
-          }}
-        />
-        <div className="min-w-0"> {/* Prevents overflow */}
-          <h3 className="font-caption-medium text-text-primary truncate">
-            {name}
-          </h3>
+      <div className="flex items-center gap-2">
+        <div className=" lg:h-[calc(32/922*100vh)] lg:w-[calc(32/1512*100vw)]">
+          <Image
+            width={32}
+            height={32}
+            src={profileImage}
+            alt={`${name}'s profile`}
+            className="w-full h-full rounded-full object-cover "
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-caption-medium text-text-primary truncate">{name}</h3>
           <p className="font-body-small text-text-secondary truncate">
-            {mutualConnections} {t("mutualConnections", { count: mutualConnections })}
+            {mutualConnections} {t('mutualConnections', { count: mutualConnections })}
           </p>
         </div>
       </div>
 
       {/* Right side - Action button */}
-      <button
-        className={`px-3 py-1 rounded-md ${getButtonStyles()}`}
-        onClick={handleClick}
-        disabled={isAdded}
-        aria-label={isAdded ? t("added") : tActions("addFriend")}
-      >
-        {buttonLabel}
-      </button>
+      <div className="flex items-center">
+        <button
+          className="inline-flex text-text-brand cursor-pointer"
+          onClick={handleClick}
+          disabled={isAdded}
+          aria-label={buttonLabel}
+        >
+          <LabelMedium>{buttonLabel}</LabelMedium>
+        </button>
+      </div>
     </div>
   );
 }

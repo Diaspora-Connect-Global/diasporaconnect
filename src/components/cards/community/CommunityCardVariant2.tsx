@@ -33,15 +33,15 @@ export default function CommunityCardVariant1({
     return (
         <TooltipProvider>
             <div
-                className="bg-surface-default rounded-2xl lg:h-[calc(264/922*100vh)] lg:w-[calc(240/1512*100vw)] p-3 border border-border-subtle flex flex-col items-center justify-between"
+                className="bg-surface-default rounded-2xl lg:h-[calc(196/922*100vh)] lg:w-[calc(184/1512*100vw)] p-3 border border-border-subtle flex flex-col items-center justify-between"
                 onClick={onCardClick}
             >
                 {/* Icon */}
                 <div className="flex items-center justify-center lg:h-[calc(64/922*100vh)] lg:w-[calc(64/1512*100vw)]">
                     {icon || (
                         <Image
-                            width={40}
-                            height={40}
+                            width={64}
+                            height={64}
                             src="/GLOBE.png"
                             alt="Profile"
                             className="rounded-full object-contain"
@@ -80,7 +80,7 @@ export default function CommunityCardVariant1({
                 <div className="w-full flex justify-center lg:h-[calc(36/922*100vh)]">
                     <ButtonType1
                         onClick={onButtonClick}
-                        className="lg:w-[calc(140/1512*100vw)]"
+                        className="lg:w-[calc(140/1512*100vw)] "
                     >
                         {t('joincommunity')}
                     </ButtonType1>

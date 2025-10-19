@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 
-
 interface FeedCardProps {
   profileImage: string;
   profileName: string;
@@ -33,7 +32,7 @@ export default function FeedCard({
   onComment,
   onShare,
   onSave,
-  joinButton = true
+  joinButton = true,
 }: FeedCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -52,27 +51,27 @@ export default function FeedCard({
   };
 
   return (
-    <div className=" my-4 bg-surface-default  sm:w-full  rounded-lg  shadow-md p-4 max-w-2xl">
+    <div className=" lg:w-[calc(568/1512*100vw)] lg:h-[calc(324/922*100vh)] bg-surface-default border border-border-subtle rounded-lg p-4 flex flex-col my-2">
       {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-start gap-3 ">
+      <div className="flex items-center justify-between mb-4">
+        <div className="lg:flex items-center gap-3">
           <Image
             width={40}
             height={40}
             src={profileImage}
             alt={profileName}
-            className="w-12 h-12 rounded-full object-cover"
+            className="w-12 h-12 rounded-full object-cover border border-border-subtle"
           />
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-label-large text-text-primary">{profileName}</h3>
+          <div className="lg:flex-1">
+            <div className="flex items-center ">
+              <h3 className="font-label-large text-text-primary truncate">{profileName} ·</h3>
               {joinButton && (
-                <button className="text-text-brand font-label-medium">
-                  · {t('join')}
+                <button className="inline-flex items-center justify-center  py-1 rounded-md bg-brand-light text-text-brand hover:bg-brand hover:text- font-label-medium min-w-[60px]">
+                  {t('join')}
                 </button>
               )}
             </div>
-            <p className="font-body-small text-text-secondary ">
+            <p className="font-body-small text-text-secondary truncate">
               {t('postedBy', { user: 'Admin' })} · {category} · {postDate}
             </p>
           </div>
@@ -80,88 +79,85 @@ export default function FeedCard({
       </div>
 
       {/* Content */}
-      <p className="font-body-medium leading-relaxed mb-4">
+      <p className="font-body-medium leading-relaxed mb-4 flex-1 min-w-0 line-clamp-4">
         {content}
       </p>
 
       {/* Reactions */}
-      <div className="flex items-center gap-4 mb-3 pb-3 border-b border-gray-200">
+      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-border-default">
         <button
-          className="flex items-center gap-1.5 text-sm"
+          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary min-w-[60px]"
           onClick={handleLike}
         >
           <GoHeartFill
-            className={`w-5 h-5 text-border-danger`}
+            className={`w-5 h-5 ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`}
           />
-          <span className={'text-text-secondary'}>
-            {likeCount}
-          </span>
+          <span>{likeCount}</span>
         </button>
-
-        <button className="flex items-center gap-1.5 text-sm ">
+        <button
+          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary min-w-[60px]"
+          onClick={onComment}
+        >
           <Image
-            width={40}
-            height={40}
+            width={20}
+            height={20}
             src="/COMMENTFILLED.svg"
             alt="comments"
-            className="w-5 h-5 rounded-full object-cover  text-text-brand"
+            className="w-5 h-5 object-contain"
           />
-          <span className='text-text-secondary'>{comments}</span>
+          <span>{comments}</span>
         </button>
       </div>
 
       {/* Actions */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <button
-            className="flex items-center gap-2 font-body-small text-secondary"
+            className="inline-flex items-center gap-2 text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[60px]"
             onClick={handleLike}
           >
-                <Image
-              width={40}
-              height={40}
+            <Image
+              width={20}
+              height={20}
               src="/LIKE.svg"
-              alt="comments"
-              className="w-5 h-5 rounded-full object-cover  text-text-brand"
+              alt="like"
+              className="w-5 h-5 object-contain"
             />
             <span>{t('like')}</span>
           </button>
-
           <button
-            className="flex items-center gap-2 text-sm font-body-small text-secondary"
+            className="inline-flex items-center gap-2 text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[60px]"
             onClick={onComment}
           >
             <Image
-              width={40}
-              height={40}
+              width={20}
+              height={20}
               src="/COMMENT.svg"
-              alt="comments"
-              className="w-5 h-5 rounded-full object-cover  text-text-brand"
+              alt="comment"
+              className="w-5 h-5 object-contain"
             />
             <span>{t('comment')}</span>
           </button>
-
           <button
-            className="flex items-center gap-2 text-sm font-body-small text-secondary"
+            className="inline-flex items-center gap-2 text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[60px]"
             onClick={onShare}
           >
-               <Image
-              width={40}
-              height={40}
+            <Image
+              width={20}
+              height={20}
               src="/SHARE.svg"
-              alt="comments"
-              className="w-5 h-5 rounded-full object-cover  text-text-brand"
+              alt="share"
+              className="w-5 h-5 object-contain"
             />
             <span>{t('share')}</span>
           </button>
         </div>
-
         <button
-          className="flex items-center gap-2 text-sm text-text-secondary  cursor-pointer"
+          className="inline-flex items-center gap-2 text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[60px]"
           onClick={handleSave}
         >
           <Bookmark
-            className={`w-5 h-5 font-body-small text-secondary ${isSaved ? 'fill-current' : ''}`}
+            className={`w-5 h-5 ${isSaved ? 'fill-current text-text-primary' : 'text-text-secondary'}`}
           />
           <span>{t('save')}</span>
         </button>

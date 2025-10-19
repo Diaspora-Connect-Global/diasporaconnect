@@ -27,10 +27,10 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
     // If link is provided and no defaultAction or children, treat as a navigable link
     if (link && !defaultAction && !children) {
         return (
-            <div className="border-b border-b-border-subtle">
+            <div className="border-b border-b-border-subtle ">
                 <Link
                     href={link}
-                    className="w-full px-4 py-3 flex justify-between items-center cursor-pointer text-text-primary hover:text-text-brand transition-colors"
+                    className="w-full py-3 flex justify-between items-center cursor-pointer text-text-primary hover:text-text-brand transition-colors"
                 >
                     <div className="flex gap-4 text-center justify-center">
                         <Image
@@ -52,7 +52,7 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
         <div className="border-b border-b-border-subtle">
             <button
                 onClick={onToggle}
-                className="w-full px-4 py-3 flex justify-between items-center cursor-pointer"
+                className="w-full  py-3 flex justify-between items-center cursor-pointer"
             >
                 <div className="flex gap-4 text-center justify-center">
                     <Image
@@ -251,7 +251,7 @@ export default function HomeSidebar() {
     const isCommunity = true;
 
     return (
-        <div className="p-4">
+        <div>
             {!isCommunity ? <NoCommunity /> : <Community />}
 
             <div className="text-center text-xs space-x-2 py-4 mt-6 flex flex-wrap">

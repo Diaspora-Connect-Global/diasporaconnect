@@ -43,7 +43,7 @@ export default function AuthLayout({
                                 selectClassName="appearance-none text-text-primary"
                                 optionClassName=" bg-surface-default"
                             />
-                            <span>.</span>
+                            <span>·</span>
                             <InfoLinks />
                         </div>
                     </div>

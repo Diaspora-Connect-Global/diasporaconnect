@@ -6,14 +6,12 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:flex h-screen">
-      <div className="flex flex-col md:flex-row w-full h-full">
-        <div className="hidden md:block w-[20%] h-full overflow-auto scrollbar-hide  p-2">
-          <HomeSidebar />
-        </div>
-        <div className="w-full md:w-[80%] h-full overflow-auto scrollbar-hide">
-          {children}
-        </div>
+    <div className="lg:w-[calc(1200/1512*100vw)]  lg:flex lg:mx-auto lg:space-x-[calc(28/1512*100vw)] ">
+      <div className="lg:w-[calc(288/1512*100vw)]  ">
+      <HomeSidebar />
+      </div>
+      <div className="lg:w-[calc(912/1512*100vw)] ">
+        {children}
       </div>
     </div>
   );

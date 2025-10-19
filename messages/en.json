@@ -110,7 +110,8 @@
         "saved": "Saved",
         "attend": "Attend",
         "login": "Login",
-        "postedBy": "Posted by {user}"
+        "postedBy": "Posted by {user}",
+        "added": "Added"
     },
     "legal": {
         "about": "About",
