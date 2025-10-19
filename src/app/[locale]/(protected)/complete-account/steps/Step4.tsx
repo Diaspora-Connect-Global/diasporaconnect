@@ -25,6 +25,8 @@ export const Step4: React.FC<Step4Props> = ({ data, updateData, nextStep, prevSt
             stepNumber={4}
             totalSteps={7}
             title={t('phoneVerification.title')}
+                        subtitle={t('phoneVerification.description')}
+
             isNextDisabled={isNextDisabled}
             nextButtonText={tActions('sendCode')}
             showBackButton={true}

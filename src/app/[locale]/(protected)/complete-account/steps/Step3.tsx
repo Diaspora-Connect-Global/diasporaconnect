@@ -46,6 +46,8 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, nextStep, prevSt
             stepNumber={3}
             totalSteps={7}
             title={t('location.title')}
+                        subtitle={t('location.description')}
+
             isNextDisabled={isNextDisabled}
             showBackButton={true}
             showSkipButton={false}

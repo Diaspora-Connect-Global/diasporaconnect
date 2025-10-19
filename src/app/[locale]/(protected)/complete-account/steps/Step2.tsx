@@ -26,6 +26,8 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
       stepNumber={2}
       totalSteps={7}
       title={t('community.title')}
+      subtitle={t('community.description')}
+
       showSkipButton={false}
       isNextDisabled={isNextDisabled}
       showBackButton={true}
@@ -39,10 +41,10 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
             key={option.value}
             type="button"
             onClick={() => updateData({ communityType: option.value })}
-            className={`px-6 py-3 rounded-md border text-text-secondary transition-all
+            className={`px-6 py-3 rounded-md border  transition-all cursor-pointer
               ${data.communityType === option.value
-                ? 'bg-surface-brand border-border-brand'
-                : 'bg-surface-brand-subtle border-border-brand hover:border-blue-500 hover:text-blue-600'
+                ? ' border-border-brand text-text-primary'
+                : 'bg-surface-brand-subtle  text-text-primary '
               }`}
           >
             {option.label}

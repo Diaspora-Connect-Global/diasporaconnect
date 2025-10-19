@@ -18,7 +18,10 @@ export default function AuthLayout({
                 {/* Left side*/}
                 <div className="lg:w-[calc(912/1512*100vw)]  lg:h-[calc(922/922*100vh)] ">
                     <div className="lg:w-[calc(712/1512*100vw)] lg:h-[calc(195/922*100vh)] lg:mx-auto lg:mt-[21.69%] ">
-                        <Image src="/LOGO.png" alt="Logo" width={150} height={50} className="lg:w-[calc(196/1512*100vw)] lg:h-[calc(93/922*100vh)]" />
+                    <div className="lg:w-[calc(196/1512*100vw)] lg:h-[calc(93/922*100vh)]">
+                        <Image src="/LOGO.png" alt="Logo" width={196} height={93} className=" object-contain" />
+
+                    </div>
                         <HeadingSmall>
                             {t("description")}
                         </HeadingSmall>

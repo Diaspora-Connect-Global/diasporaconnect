@@ -62,8 +62,8 @@ export const Step6: React.FC<Step6Props> = ({ data, updateData, nextStep, prevSt
                         className={`px-1 py-1 rounded-md border text-text-primary transition-all cursor-pointer text-sm sm:text-base
                             ${
                                 data.topics?.includes(option)
-                                    ? 'bg-surface-brand-light border-surface-brand-light'
-                                    : 'bg-surface-brand-subtle border-border-disabled hover:border-border-hover hover:bg-surface-hover'
+                                    ? 'border-border-brand text-text-primary'
+                                    : 'bg-surface-brand-subtle  text-text-primary'
                             }`}
                     >
                         {option}

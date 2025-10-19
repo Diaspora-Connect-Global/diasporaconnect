@@ -178,11 +178,9 @@ export default  function CompleteAccount() {
   };
 
   return (
-    <div className="h-screen  overflow-auto ">
-      <div className="md:w-[90%] mx-auto mb-5">
+    <>
         {renderStep()}
-      </div>
-    </div>
+    </>
   );
 };
 

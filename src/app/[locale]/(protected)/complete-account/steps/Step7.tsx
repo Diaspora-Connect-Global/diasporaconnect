@@ -5,6 +5,7 @@ import { MultiStep } from '@/components/custom/multistep';
 import JoinCommunityCard from '@/components/cards/JoinCommunityCard';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import CommunityCardVariant1 from '@/components/cards/community/CummunityCardVariant1';
 
 interface Step7Props {
     data: FormData;
@@ -17,7 +18,9 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
     const router = useRouter();
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
-    
+    const tC = useTranslations('community');
+
+
     const availableCommunities = [
         {
             title: "Ghana Innovation Hub",
@@ -45,7 +48,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
             description: "A community for artists, designers, and creative professionals."
         },
         {
-            title: "Tech Entrepreneurs Ghana",
+            title: "Tech Entrepreneurs Ghana I am just testing for long user data",
             members: 920,
             description: "Connect with fellow tech entrepreneurs and startups."
         },
@@ -69,7 +72,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
             if (e) {
                 e.preventDefault();
             }
-            
+
             console.log('Going to home screen');
             router.push('/');
         } catch (error) {
@@ -94,7 +97,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
     const getButtonText = (communityTitle: string) => {
         return community.some(c => c.title === communityTitle)
             ? tActions('joined')
-            : tActions('join');
+            : tC('joincommunity');
     };
 
     // No need to disable next button since users can skip communities
@@ -114,20 +117,20 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
             onNext={handleSubmit}
             onBack={prevStep}
         >
-            <div className="w-full space-y-3">
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory"> {/* Changed snap-y to snap-x for horizontal scroll */}
+            <div className="w-full">
+                <div className="flex gap-8 overflow-x-auto pb-4 px-4 scrollbar-hide snap-x snap-mandatory">
+                    {/* Increased gap-6 to gap-8 and added px-4 for container padding */}
                     {availableCommunities.map((communityItem, index) => (
                         <div
                             key={index}
-                            className="flex-shrink-0 w-[80vw] sm:w-[280px] snap-start" // Responsive width: 80vw on mobile, 280px on sm+
+                            className="flex-shrink-0 sm:w-[280px] snap-start mx-3" // Changed px-2 to mx-3 for more spacing
                         >
-                            <JoinCommunityCard
+                            <CommunityCardVariant1
                                 title={communityItem.title}
                                 members={communityItem.members}
                                 onButtonClick={() => handleCommunityToggle(communityItem)}
-                                buttonText={getButtonText(communityItem.title)}
                                 description={communityItem.description}
-                            />
+                                buttonText={getButtonText(communityItem.title)} />
                         </div>
                     ))}
                 </div>
