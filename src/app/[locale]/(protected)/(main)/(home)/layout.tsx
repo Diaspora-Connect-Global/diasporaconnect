@@ -8,10 +8,10 @@ export default function HomeLayout({
   return (
     <div className="md:flex h-screen">
       <div className="flex flex-col md:flex-row w-full h-full">
-        <div className="hidden md:block w-[25%] h-full overflow-auto scrollbar-hide  p-2">
+        <div className="hidden md:block w-[20%] h-full overflow-auto scrollbar-hide  p-2">
           <HomeSidebar />
         </div>
-        <div className="w-full md:w-[75%] h-full overflow-auto scrollbar-hide">
+        <div className="w-full md:w-[80%] h-full overflow-auto scrollbar-hide">
           {children}
         </div>
       </div>

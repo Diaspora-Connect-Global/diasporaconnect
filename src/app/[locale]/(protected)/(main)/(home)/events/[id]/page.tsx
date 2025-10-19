@@ -1,3 +1,4 @@
+"use client"
 import EventCard2 from "@/components/cards/EventCard2";
 
 export default function EventsId() {

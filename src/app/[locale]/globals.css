@@ -77,73 +77,73 @@
   --color-border-info: var(--border-info);
   
   /* Typography - Display */
-  --font-size-display-large: 80px;
-  --line-height-display-large: 96px;
-  --font-weight-display-large: 700;
-  
-  --font-size-display-medium: 64px;
-  --line-height-display-medium: 76px;
-  --font-weight-display-medium: 700;
-  
-  --font-size-display-small: 56px;
-  --line-height-display-small: 68px;
-  --font-weight-display-small: 700;
-  
-  /* Typography - Heading */
-  --font-size-heading-large: 40px;
-  --line-height-heading-large: 48px;
-  --font-weight-heading-large: 700;
-  
-  --font-size-heading-medium: 32px;
-  --line-height-heading-medium: 40px;
-  --font-weight-heading-medium: 700;
-  
-  --font-size-heading-small: 28px;
-  --line-height-heading-small: 36px;
-  --font-weight-heading-small: 600;
-  
-  --font-size-heading-xsmall: 24px;
-  --line-height-heading-xsmall: 32px;
-  --font-weight-heading-xsmall: 600;
-  
-  /* Typography - Body */
-  --font-size-body-large: 18px;
-  --line-height-body-large: 28px;
-  --font-weight-body-large: 400;
-  
-  --font-size-body-medium: 16px;
-  --line-height-body-medium: 24px;
-  --font-weight-body-medium: 400;
-  
-  --font-size-body-small: 14px;
-  --line-height-body-small: 20px;
-  --font-weight-body-small: 400;
-  
-  /* Typography - Label */
-  --font-size-label-large: 18px;
-  --line-height-label-large: 28px;
-  --font-weight-label-large: 600;
-  
-  --font-size-label-medium: 16px;
-  --line-height-label-medium: 24px;
-  --font-weight-label-medium: 600;
-  
-  --font-size-label-small: 14px;
-  --line-height-label-small: 20px;
-  --font-weight-label-small: 600;
-  
-  /* Typography - Caption */
-  --font-size-caption-large: 16px;
-  --line-height-caption-large: 24px;
-  --font-weight-caption-large: 500;
-  
-  --font-size-caption-medium: 14px;
-  --line-height-caption-medium: 20px;
-  --font-weight-caption-medium: 500;
+--font-size-display-large: calc(80/1512 * 100vw);
+--line-height-display-large: calc(96/1512 * 100vw);
+--font-weight-display-large: 700;
 
-  --font-size-caption-small: 12px;
-  --line-height-caption-small: 18px;
-  --font-weight-caption-small: 500;
+--font-size-display-medium: calc(64/1512 * 100vw);
+--line-height-display-medium: calc(76/1512 * 100vw);
+--font-weight-display-medium: 700;
+
+--font-size-display-small: calc(56/1512 * 100vw);
+--line-height-display-small: calc(68/1512 * 100vw);
+--font-weight-display-small: 700;
+
+/* Typography - Heading */
+--font-size-heading-large: calc(40/1512 * 100vw);
+--line-height-heading-large: calc(48/1512 * 100vw);
+--font-weight-heading-large: 700;
+
+--font-size-heading-medium: calc(32/1512 * 100vw);
+--line-height-heading-medium: calc(40/1512 * 100vw);
+--font-weight-heading-medium: 700;
+
+--font-size-heading-small: calc(28/1512 * 100vw);
+--line-height-heading-small: calc(36/1512 * 100vw);
+--font-weight-heading-small: 600;
+
+--font-size-heading-xsmall: calc(24/1512 * 100vw);
+--line-height-heading-xsmall: calc(32/1512 * 100vw);
+--font-weight-heading-xsmall: 600;
+
+/* Typography - Body */
+--font-size-body-large: calc(18/1512 * 100vw);
+--line-height-body-large: calc(28/1512 * 100vw);
+--font-weight-body-large: 400;
+
+--font-size-body-medium: calc(16/1512 * 100vw);
+--line-height-body-medium: calc(24/1512 * 100vw);
+--font-weight-body-medium: 400;
+
+--font-size-body-small: calc(14/1512 * 100vw);
+--line-height-body-small: calc(20/1512 * 100vw);
+--font-weight-body-small: 400;
+
+/* Typography - Label */
+--font-size-label-large: calc(18/1512 * 100vw);
+--line-height-label-large: calc(28/1512 * 100vw);
+--font-weight-label-large: 600;
+
+--font-size-label-medium: calc(16/1512 * 100vw);
+--line-height-label-medium: calc(24/1512 * 100vw);
+--font-weight-label-medium: 600;
+
+--font-size-label-small: calc(14/1512 * 100vw);
+--line-height-label-small: calc(20/1512 * 100vw);
+--font-weight-label-small: 600;
+
+/* Typography - Caption */
+--font-size-caption-large: calc(16/1512 * 100vw);
+--line-height-caption-large: calc(24/1512 * 100vw);
+--font-weight-caption-large: 500;
+
+--font-size-caption-medium: calc(14/1512 * 100vw);
+--line-height-caption-medium: calc(20/1512 * 100vw);
+--font-weight-caption-medium: 500;
+
+--font-size-caption-small: calc(12/1512 * 100vw);
+--line-height-caption-small: calc(18/1512 * 100vw);
+--font-weight-caption-small: 500;
 }
 
 :root {

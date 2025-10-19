@@ -39,7 +39,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

@@ -25,22 +25,27 @@ export default function SignUpForm() {
 
         //navigate to complete account page
         redirect('/complete-account');
-    } 
+    }
 
     return (
-        <div className="w-full mx-auto flex items-center justify-center">
-            <div>
-                <div className="space-y-4 p-6">
+        <div className='lg:pb-[calc(32/922*100vh)]'>
+            <div className='lg:space-y-[calc(32/922*100vh)]'>
+
+                <div className=' lg:h-[calc(40/922*100vh)] '>
                     <HeadingMedium>
                         {t("greetings.signup")}
                     </HeadingMedium>
-                    <div className="space-y-4">
+                </div>
+
+                <div className='lg:h-[calc(452/922*100vh)]  space-y-[calc(24/922*100vh)]'>
+
+                    <div className='lg:space-y-[calc(16/922*100vh)]'>
                         <TextInput
                             value={email}
                             onChange={setEmail}
                             type="email"
                             placeholder={t("form.email.placeholder")}
-                            label={t("form.email.label")}
+                            // label={t("form.email.label")}
                             id="email"
                         />
 
@@ -63,41 +68,49 @@ export default function SignUpForm() {
                             placeholder={t("form.confirmPassword.placeholder")}
                             label={t("form.confirmPassword.label")}
                         />
-                        <p className="text-text-primary text-sm">
-                            {t("policies.agreement")}{' '}
-                            <a href="#" className="text-text-brand hover:underline">
-                                {t("policies.privacyPolicy")}
-                            </a>{' '}
-                            {t("policies.and")}{' '}
-                            <a href="#" className="text-text-brand hover:underline">
-                                {t("policies.termsOfService")}
-                            </a>
-                        </p>
-
-                        <div className='flex justify-end'>
-                            <Button onClick={handleSubmit} variant="outline" className="px-8 h-12 bg-surface-brand hover:bg-surface-brand-light text-white rounded-full">
-                                {a("continue")}
-                            </Button>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <div className="flex-1 border-t border-border-disabled"></div>
-                            <span className="text-sm">{t("socialAuth.divider")}</span>
-                            <div className="flex-1 border-t border-border-disabled"></div>
-                        </div>
-
-                        <SignInProvider />
-                        <div className='flex items-center justify-center gap-2'>
-                            <BodyMedium className="text-center text-sm">
-                                {t("accountSwitch.existingAccount.prompt")}
-                            </BodyMedium>
-                            <Link href="/signin" className="text-text-brand font-medium hover:underline">
-                                <LabelLarge>
-                                    {t("accountSwitch.existingAccount.action")}
-                                </LabelLarge>
-                            </Link>
-                        </div>
                     </div>
+                    <p className="lg:h-[calc(48/922*100vh)] text-text-primary text-sm">
+                        {t("policies.agreement")}{' '}
+                        <a href="#" className="text-text-brand hover:underline">
+                            {t("policies.privacyPolicy")}
+                        </a>{' '}
+                        {t("policies.and")}{' '}
+                        <a href="#" className="text-text-brand hover:underline">
+                            {t("policies.termsOfService")}
+                        </a>
+                    </p>
+                    <div className='lg:h-[calc(60/922*100vh)] lg:flex lg:justify-end'>
+                        <Button onClick={handleSubmit} variant="outline" className="px-8 h-full bg-surface-brand hover:bg-surface-brand-light text-white rounded-full">
+                            {a("continue")}
+                        </Button>
+                    </div>
+                </div>
+
+
+                <div className='lg:h-[calc(24/922*100vh)]'>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1 border-t border-border-disabled"></div>
+                        <span className="text-sm">{t("socialAuth.divider")}</span>
+                        <div className="flex-1 border-t border-border-disabled"></div>
+                    </div>
+
+                </div>
+                <div className='lg:max-h-[calc(48/922*100vh)]'>
+                    <SignInProvider />
+                </div>
+
+
+                <div className='lg:h-[calc(60/922*100vh)] mx-auto flex items-center justify-center '>
+                    <BodyMedium className="">
+                        {t("accountSwitch.existingAccount.prompt")}
+                    </BodyMedium>
+                    <Link href="/signin" className="text-text-brand font-medium hover:underline">
+                        <LabelLarge>
+                            {t("accountSwitch.existingAccount.action")}
+                        </LabelLarge>
+                    </Link>
+
                 </div>
             </div>
         </div>

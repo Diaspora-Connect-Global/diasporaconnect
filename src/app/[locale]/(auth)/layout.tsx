@@ -13,40 +13,38 @@ export default function AuthLayout({
     const t = useTranslations('authentication');
 
     return (
-        <div className="h-screen overflow-auto">
-            <div className="flex flex-col lg:flex-row min-h-screen">
-                {/* Left side - 60% on large screens, full width on mobile */}
-                <div className="w-full lg:w-[60%] flex mt-[15%] p-4 lg:p-8 ">
-                    <div className="mx-[10%]">
-                        <Image src="/LOGO.png" alt="Logo" width={150} height={50} className="mb-8" />
-                        
+        <div className="">
+            <div className="lg:flex">
+                {/* Left side*/}
+                <div className="lg:w-[calc(912/1512*100vw)]  lg:h-[calc(922/922*100vh)] ">
+                    <div className="lg:w-[calc(712/1512*100vw)] lg:h-[calc(195/922*100vh)] lg:mx-auto lg:mt-[21.69%] ">
+                        <Image src="/LOGO.png" alt="Logo" width={150} height={50} className="lg:w-[calc(196/1512*100vw)] lg:h-[calc(93/922*100vh)]" />
                         <HeadingSmall>
                             {t("description")}
                         </HeadingSmall>
-                   
+
                     </div>
                 </div>
 
                 {/* Right side  */}
-                <div className="lg:flex lg:w-[40%] h-fit
+                <div className="lg:w-[calc(600/1512*100vw)] lg:h-[calc(922/922*100vh)]  bg-surface-default
                 ">
-                    <div className="w-full bg-surface-default dark:bg-background flex flex-col min-h-screen">
-                        <div className="flex-grow p-6 overflow-auto flex items-center justify-center">
-                            <div className="w-full max-w-md">
-                                {children}
-                            </div>
+                    <div className="lg:h-[calc(868/922*100vh)]" >
+                        <div className="lg:border-b-border-default lg:border-b lg:h-[calc(824/922*100vh)] lg:mb-[calc(24/922*100vh)] lg:px-[calc(40/1512*100vw)]  lg:pt-[calc(40/922*100vh)] ">
+                            {children}
                         </div>
 
                         {/* Footer that sticks to bottom */}
-                        <div className="text-center text-xs space-x-2 py-4 border-t pb-10 flex justify-center flex-shrink-0">
+                        <div className="lg:h-[calc(20/922*100vh)]  lg:flex justify-center items-center text-center">
                             <LocaleSwitcher
-                                selectClassName="appearance-none text-text-primary -my-1.5 p-0  "
-                                optionClassName="  bg-surface-default"
+                                selectClassName="appearance-none text-text-primary"
+                                optionClassName=" bg-surface-default"
                             />
                             <span>.</span>
                             <InfoLinks />
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>

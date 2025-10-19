@@ -27,13 +27,18 @@ export default function SignInForm() {
     }
 
     return (
-        <div className="w-full flex items-center justify-center px-4">
-            <div className="w-full max-w-md">
-                <div className="space-y-6">
+        <div className='lg:pb-[calc(80/922*100vh)]'> 
+            <div className="lg:space-y-[calc(32/922*100vh)]">
+
+                <div className=' lg:h-[calc(40/922*100vh)] '>
                     <HeadingMedium>
                         {t("greetings.login")}
                     </HeadingMedium>
-                    <div className="space-y-4">
+                </div>
+
+                <div className='lg:h-[calc(276/922*100vh)]  space-y-[calc(24/922*100vh)]'>
+
+                    <div className='lg:space-y-[calc(16/922*100vh)]'>
                         <TextInput
                             value={email}
                             onChange={setEmail}
@@ -52,37 +57,43 @@ export default function SignInForm() {
                             placeholder={t("form.password.placeholder")}
                             label={t("form.password.label")}
                         />
-
-                        <p className="text-sm flex justify-between">
-                            <Link href="/reset" className="text-text-brand font-medium hover:underline">
-                                <LabelLarge>
-                                    {t("forgotPassword")}
-                                </LabelLarge>
-                            </Link>
-                            <Button onClick={handleSubmit} variant="outline" className="px-8 h-12 bg-surface-brand  text-white rounded-full cursor-pointer">
-                                {a("login")}
-                            </Button>
-                        </p>
-
-                        <div className="flex items-center gap-4">
-                            <div className="flex-1 border-t border-gray-300"></div>
-                            <span className="text-sm">{t("socialAuth.divider")}</span>
-                            <div className="flex-1 border-t border-gray-300"></div>
-                        </div>
-
-                        <SignInProvider/>
-                        
-                        <div className='flex items-center justify-center gap-2'>
-                            <BodyMedium className="text-center text-sm">
-                                {t("accountSwitch.newAccount.prompt")}
-                            </BodyMedium>
-                            <Link href="/signup" className="text-text-brand font-medium hover:underline">
-                                <LabelLarge>
-                                    {t("accountSwitch.newAccount.action")}
-                                </LabelLarge>
-                            </Link>
-                        </div>
                     </div>
+
+
+                    <div className="lg:h-[calc(60/922*100vh)] lg:flex lg:justify-between">
+                        <Link href="/reset" className="text-text-brand font-medium hover:underline">
+                            <LabelLarge>
+                                {t("forgotPassword")}
+                            </LabelLarge>
+                        </Link>
+                        <Button onClick={handleSubmit} variant="outline" className="px-8  h-full bg-surface-brand  text-white rounded-full cursor-pointer">
+                            {a("login")}
+                        </Button>
+                    </div>
+                </div>
+                <div className='lg:h-[calc(24/922*100vh)]'>
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1 border-t border-gray-300"></div>
+                        <span className="text-sm">{t("socialAuth.divider")}</span>
+                        <div className="flex-1 border-t border-gray-300"></div>
+                    </div>
+                </div>
+
+                <div className='lg:h-[calc(48/922*100vh)]'>
+                    <SignInProvider />
+                </div>
+
+
+
+                <div className='lg:h-[calc(60/922*100vh)] mx-auto flex items-center justify-center '>
+                    <BodyMedium className=" ">
+                        {t("accountSwitch.newAccount.prompt")}
+                    </BodyMedium>
+                    <Link href="/signup" className="text-text-brand font-medium hover:underline">
+                        <LabelLarge>
+                            {t("accountSwitch.newAccount.action")}
+                        </LabelLarge>
+                    </Link>
                 </div>
             </div>
         </div>

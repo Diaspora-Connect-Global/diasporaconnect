@@ -121,8 +121,8 @@ function CommunityItem({ name, type }: { name: string, type: string }) {
 
 function Community() {
     const [openSections, setOpenSections] = useState({
-        associations: false,
-        groupChats: false,
+        associations: true,
+        groupChats: true,
         events: false,
         opportunities: false
     });
