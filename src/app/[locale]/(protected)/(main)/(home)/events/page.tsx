@@ -1,6 +1,18 @@
 "use client";
 import EventCard1 from "@/components/cards/EventCard1";
+import EventCardSmall from "@/components/cards/events/EventCardSmall";
 import { useState } from "react";
+
+const TABS = [
+    {
+        name: "Attending",
+        status: "events"
+    },
+    {
+        name: "Saved",
+        status: "saved"
+    },
+]
 
 interface Event {
     title: string;
@@ -13,45 +25,111 @@ interface Event {
 const AttendingComponent = ({ attendingEvents }: { attendingEvents: Event[] }) => {
 
     return (
-        <div className="p-4 rounded-md mt-4">
+        <>
             {attendingEvents.length === 0 ? (
                 <p className="text-text-primary">
                     You are not attending any event now.
                 </p>
             ) : (
-                <p className="text-text-primary">
-                    {/* Add rendering for events if needed */}
-                </p>
+                <>
+                    {attendingEvents.map((event, index) => (
+                        <EventCardSmall
+                            key={index}
+                            title={event.title}
+                            date={event.date}
+                            location={event.location}
+                            attendees={event.attendees}
+                            imageUrl={event.imageUrl}
+                        />
+                    ))}
+                </>
             )}
-            {/* Add your events data rendering here if array has items */}
-        </div>
+        </>
     );
 };
 
 const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
 
     return (
-        <div className="p-4 rounded-md mt-4">
+        <>
             {savedEvents.length === 0 ? (
                 <p className="text-text-primary">
                     You have no saved events.
                 </p>
             ) : (
-                <p className="text-text-primary">
-                    {/* Add rendering for events if needed */}
-                </p>
+                <>
+                    {savedEvents.map((event, index) => (
+                        <EventCardSmall
+                            key={index}
+                            title={event.title}
+                            date={event.date}
+                            location={event.location}
+                            attendees={event.attendees}
+                            imageUrl={event.imageUrl}
+                        />
+                    ))}
+                </>
             )}
-            {/* Add your saved data rendering here if array has items */}
-        </div>
+        </>
     );
 };
 
 export default function Events() {
-    const [activeTab, setActiveTab] = useState<"events" | "saved">("events"); // Type the state
+    const [activeTab, setActiveTab] = useState<string>("events"); // Type the state
 
-    const attendingEvents: Event[] = []; // Typed array
-    const savedEvents: Event[] = []; // Typed array
-    // Sample events data for More events section
+    const attendingEvents: Event[] = [
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+    ];
+    const savedEvents: Event[] = [
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+    ];
     const moreEvents: Event[] = [
         {
             title: "Accra Arts Festival",
@@ -70,36 +148,33 @@ export default function Events() {
     ];
 
     return (
-        <div className="w-full h-[calc(100vh-64px)] overflow-auto scrollbar-hide p-4">
-            <div className="max-w-[90%] mx-auto"> {/* Constrain width and center with margin */}
+        <div className="lg:w-[calc(885/1512*100vw)] h-[calc(100vh-64px)] overflow-auto scrollbar-hide ">
+            <div className=" mx-auto"> {/* Constrain width and center with margin */}
                 <p className=" text-2xl font-heading-large my-5">Your events</p>
 
                 {/* Toggle Buttons */}
-                <div className="flex justify-start border-b border-border-subtle w-fit mb-6">
-                    <button
-                        onClick={() => setActiveTab("events")}
-                        className={`px-4 py-2 text-center transition-all duration-200 relative -mb-px ${
-                            activeTab === "events"
-                                ? "text-text-brand font-medium border-b-2 border-text-brand"
-                                : "text-text-secondary hover:text-text-primary"
-                        }`}
-                    >
-                        Attending
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("saved")}
-                        className={`px-4 py-2 text-center transition-all duration-200 relative -mb-px ${
-                            activeTab === "saved"
-                                ? "text-text-brand font-medium border-b-2 border-text-brand"
-                                : "text-text-secondary hover:text-text-primary"
-                        }`}
-                    >
-                        Saved
-                    </button>
+                <div className="flex lg:h-[calc(52/1512*100vh)] justify-start border-b-2 border-border-subtle w-fit mb-2">
+
+                    {
+                        TABS.map((tab, idx) => (
+                            <div key={idx} className="lg:w-[calc(102/1512*100vw)] lg:h-[calc(52/1512*100vh)]">
+                                <button
+                                    onClick={() => setActiveTab(`${tab.status}`)}
+                                    className={`h-full px-2 text-center transition-all duration-200 relative cursor-pointer font-label-large ${activeTab === `${tab.status}`
+                                        ? "text-text-brand border-b-2 border-text-brand"
+                                        : "text-text-secondary hover:text-text-primary border-b-2"
+                                        }`}
+                                >
+                                    {tab.name}
+                                </button>
+                            </div>
+
+                        ))
+                    }
                 </div>
 
                 {/* Events Content */}
-                <div className="rounded-md overflow-auto scrollbar-hide max-h-[300px]">
+                <div className="overflow-auto scrollbar-hide flex gap-2">
                     {activeTab === "events" ? (
                         <AttendingComponent attendingEvents={attendingEvents} />
                     ) : (
