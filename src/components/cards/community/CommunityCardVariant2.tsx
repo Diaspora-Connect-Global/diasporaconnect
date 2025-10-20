@@ -9,7 +9,7 @@ import {
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
-interface CommunityCardVariant1Props {
+interface CommunityCardVariant2Props {
     title: string;
     description?: string;
     onButtonClick?: () => void;
@@ -19,13 +19,13 @@ interface CommunityCardVariant1Props {
     buttonText: string;
 }
 
-export default function CommunityCardVariant1({
+export default function CommunityCardVariant2({
     title,
     members,
     onButtonClick,
     onCardClick,
     icon,
-}: CommunityCardVariant1Props) {
+}: CommunityCardVariant2Props) {
     const t = useTranslations('community');
 
     const isTitleTruncated = title.length > 40; 
