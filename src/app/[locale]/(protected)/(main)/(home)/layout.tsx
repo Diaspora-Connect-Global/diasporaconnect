@@ -10,7 +10,7 @@ export default function HomeLayout({
       <div className="lg:max-w-[18rem]"> {/* 288px equivalent */}
         <HomeSidebar />
       </div>
-      <div className="lg:max-w-[57rem]"> {/* 912px equivalent */}
+      <div className="lg:min-w-[57rem] "> {/* 912px equivalent */}
         {children}
       </div>
     </div>

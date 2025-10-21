@@ -8,7 +8,7 @@ export function PeopleYouMayKnow() {
     const tActions = useTranslations('actions');
 
     return (
-        <div className="space-y-[3.2rem]"> {/* 32px equivalent */}
+        <div className="space-y-[3.2rem] w-full  " > {/* 32px equivalent */}
             <div className="space-y-[1.2rem]"> {/* 12px equivalent */}
                 <p className="font-caption-large">{t('peopleYouMayKnow')}</p>
                 <div className="space-y-[1.6rem]"> {/* 16px equivalent */}
