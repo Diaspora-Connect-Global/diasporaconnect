@@ -19,7 +19,6 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
     const tActions = useTranslations('actions');
     const tC = useTranslations('community');
 
-
     const availableCommunities = [
         {
             title: "Ghana Innovation Hub",
@@ -117,19 +116,20 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
             onBack={prevStep}
         >
             <div className="w-full">
-                <div className="flex gap-8 overflow-x-auto pb-4 px-4 scrollbar-hide snap-x snap-mandatory">
-                    {/* Increased gap-6 to gap-8 and added px-4 for container padding */}
+                <div className="flex gap-[2rem] overflow-x-auto  scrollbar-hide snap-x snap-mandatory">
+                    {/* 32px gap, 16px padding */}
                     {availableCommunities.map((communityItem, index) => (
                         <div
                             key={index}
-                            className="flex-shrink-0 sm:w-[280px] snap-start mx-3" // Changed px-2 to mx-3 for more spacing
+                            className="flex-shrink-0 sm:w-[17.5rem] snap-start mx-[0.75rem]" 
                         >
                             <CommunityCardVariant1
                                 title={communityItem.title}
                                 members={communityItem.members}
                                 onButtonClick={() => handleCommunityToggle(communityItem)}
                                 description={communityItem.description}
-                                buttonText={getButtonText(communityItem.title)} />
+                                buttonText={getButtonText(communityItem.title)} 
+                            />
                         </div>
                     ))}
                 </div>

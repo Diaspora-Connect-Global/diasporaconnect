@@ -6,11 +6,11 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="lg:w-[calc(1200/1512*100vw)]  lg:flex lg:mx-auto lg:space-x-[calc(28/1512*100vw)] ">
-      <div className="lg:w-[calc(288/1512*100vw)]  ">
-      <HomeSidebar />
+    <div className="lg:max-w-[75rem] lg:flex lg:mx-auto "> {/* 1200px, 28px equivalent */}
+      <div className="lg:max-w-[18rem]"> {/* 288px equivalent */}
+        <HomeSidebar />
       </div>
-      <div className="lg:w-[calc(912/1512*100vw)] ">
+      <div className="lg:max-w-[57rem]"> {/* 912px equivalent */}
         {children}
       </div>
     </div>

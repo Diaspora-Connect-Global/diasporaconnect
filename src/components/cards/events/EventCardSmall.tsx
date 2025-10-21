@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
+
 interface EventCardProps {
     title: string;
     date: string;
@@ -7,10 +8,15 @@ interface EventCardProps {
     attendees: number;
     imageUrl: string; // Required background image URL
 }
+
 export default function EventCardSmall({ title, date, location, attendees, imageUrl }: EventCardProps) {
     return (
-        <div className="lg:w-[calc(293/1512*100vw)] lg:h-[calc(100/922*100vh)] flex lg:space-x-[calc(8/1512*100vw)] bg-surface-default rounded-lg">
-            <div className="relative rounded-l-lg overflow-hidden lg:w-[calc(75/1512*100vw)] lg:h-[calc(100/922*100vh)] ">
+        <div className="lg:w-[18.3125rem]  flex lg:space-x-[0.5rem] bg-surface-default rounded-lg ">
+            {/* 293px, 100px, 8px equivalent */}
+            
+            {/* Image Container */}
+            <div className="relative rounded-l-lg overflow-hidden lg:w-[4.6875rem] ">
+                {/* 75px, 100px equivalent */}
                 <Image
                     src={imageUrl}
                     alt={`${title} background`}
@@ -32,17 +38,21 @@ export default function EventCardSmall({ title, date, location, attendees, image
                     />
                 </div>
             </div>
-            <div className="lg:w-[calc(210/1512*100vw)] lg:h-[calc(100/922*100vh)] ">
+            
+            {/* Content Container */}
+            <div className="lg:w-[13.125rem]  py-[0.5rem] pr-[0.5rem] ">
+                {/* 210px, 100px equivalent with 8px padding */}
                 <Link href="/events/1">
-                    <h2 className="text-2xl font-caption-large text-primary ">{title}</h2>
+                    <h2 className=" font-caption-large text-primary truncate">{title}</h2>
                 </Link>
-                <p className="text-lg font-caption-medium text-primary ">{date}</p>
-                <div className="lg:flex flex-wrap flex-start">
-                    <span className="text-secondary font-caption-small ">{location} | </span>
-                    <p className="text-secondary  font-caption-small  "> {attendees} going</p>
+                <p className=" font-caption-medium text-primary mt-[0.25rem]">{date}</p>
+                {/* 4px margin */}
+                <div className="lg:flex flex-wrap flex-start mt-[0.25rem]">
+                    {/* 4px margin */}
+                    <span className="text-secondary font-caption-small">{location} | </span>
+                    <p className="text-secondary font-caption-small"> {attendees} going</p>
                 </div>
             </div>
         </div>
     );
-
 }

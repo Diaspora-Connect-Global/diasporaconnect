@@ -11,8 +11,8 @@ export default function EventsId() {
     }
     return (
 
-        <div className="w-full h-[calc(100vh-64px)] overflow-auto scrollbar-hide p-4">
-            <div className="max-w-[90%] mx-auto">
+        <div className="w-full h-[53.625rem] overflow-auto scrollbar-hide p-4">
+            <div className=" mx-auto">
                 <EventCard2
                     title={event.title}
                     date={event.date}

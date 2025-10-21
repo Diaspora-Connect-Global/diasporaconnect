@@ -170,7 +170,7 @@ function Community() {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 p-1">
 
             <MyCommunityCard2
                 communities={communities}

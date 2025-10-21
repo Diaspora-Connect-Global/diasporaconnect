@@ -80,57 +80,47 @@
 
 
 /* Typography - Display */
---font-size-display-large: clamp(40px, calc(80/1512 * 100vw), 96px);
---line-height-display-large: clamp(48px, calc(96/1512 * 100vw), 112px);
+  --font-size-display-large: 5rem; /* 80px ÷ 16 */
+  --line-height-display-large: 6rem; /* 96px ÷ 16 */
+  --font-size-display-medium: 4rem; /* 64px ÷ 16 */
+  --line-height-display-medium: 4.75rem; /* 76px ÷ 16 */
+  --font-size-display-small: 3.5rem; /* 56px ÷ 16 */
+  --line-height-display-small: 4.25rem; /* 68px ÷ 16 */
 
---font-size-display-medium: clamp(32px, calc(64/1512 * 100vw), 80px);
---line-height-display-medium: clamp(38px, calc(76/1512 * 100vw), 90px);
+  /* Typography - Heading */
+  --font-size-heading-large: 2.5rem; /* 40px ÷ 16 */
+  --line-height-heading-large: 3rem; /* 48px ÷ 16 */
+  --font-size-heading-medium: 2rem; /* 32px ÷ 16 */
+  --line-height-heading-medium: 2.5rem; /* 40px ÷ 16 */
+  --font-size-heading-small: 1.75rem; /* 28px ÷ 16 */
+  --line-height-heading-small: 2.25rem; /* 36px ÷ 16 */
+  --font-size-heading-xsmall: 1.5rem; /* 24px ÷ 16 */
+  --line-height-heading-xsmall: 2rem; /* 32px ÷ 16 */
 
---font-size-display-small: clamp(28px, calc(56/1512 * 100vw), 68px);
---line-height-display-small: clamp(34px, calc(68/1512 * 100vw), 78px);
+  /* Typography - Body */
+  --font-size-body-large: 1.125rem; /* 18px ÷ 16 */
+  --line-height-body-large: 1.75rem; /* 28px ÷ 16 */
+  --font-size-body-medium: 1rem; /* 16px ÷ 16 */
+  --line-height-body-medium: 1.5rem; /* 24px ÷ 16 */
+  --font-size-body-small: 0.875rem; /* 14px ÷ 16 */
+  --line-height-body-small: 1.25rem; /* 20px ÷ 16 */
 
-/* Typography - Heading */
---font-size-heading-large: clamp(24px, calc(40/1512 * 100vw), 48px);
---line-height-heading-large: clamp(32px, calc(48/1512 * 100vw), 56px);
+  /* Typography - Label */
+  --font-size-label-large: 1.125rem; /* 18px ÷ 16 */
+  --line-height-label-large: 1.75rem; /* 28px ÷ 16 */
+  --font-size-label-medium: 1rem; /* 16px ÷ 16 */
+  --line-height-label-medium: 1.5rem; /* 24px ÷ 16 */
+  --font-size-label-small: 0.875rem; /* 14px ÷ 16 */
+  --line-height-label-small: 1.25rem; /* 20px ÷ 16 */
 
---font-size-heading-medium: clamp(20px, calc(32/1512 * 100vw), 40px);
---line-height-heading-medium: clamp(28px, calc(40/1512 * 100vw), 48px);
+  /* Typography - Caption */
+  --font-size-caption-large: 1rem; /* 16px ÷ 16 */
+  --line-height-caption-large: 1.5rem; /* 24px ÷ 16 */
+  --font-size-caption-medium: 0.875rem; /* 14px ÷ 16 */
+  --line-height-caption-medium: 1.25rem; /* 20px ÷ 16 */
+  --font-size-caption-small: 0.75rem; /* 12px ÷ 16 */
+  --line-height-caption-small: 1.125rem; /* 18px ÷ 16 */
 
---font-size-heading-small: clamp(18px, calc(28/1512 * 100vw), 36px);
---line-height-heading-small: clamp(24px, calc(36/1512 * 100vw), 40px);
-
---font-size-heading-xsmall: clamp(16px, calc(24/1512 * 100vw), 32px);
---line-height-heading-xsmall: clamp(20px, calc(32/1512 * 100vw), 36px);
-
-/* Typography - Body */
---font-size-body-large: clamp(16px, calc(18/1512 * 100vw), 20px);
---line-height-body-large: clamp(24px, calc(28/1512 * 100vw), 32px);
-
---font-size-body-medium: clamp(14px, calc(16/1512 * 100vw), 18px);
---line-height-body-medium: clamp(20px, calc(24/1512 * 100vw), 28px);
-
---font-size-body-small: clamp(12px, calc(14/1512 * 100vw), 16px);
---line-height-body-small: clamp(18px, calc(20/1512 * 100vw), 24px);
-
-/* Typography - Label */
---font-size-label-large: clamp(16px, calc(18/1512 * 100vw), 20px);
---line-height-label-large: clamp(24px, calc(28/1512 * 100vw), 32px);
-
---font-size-label-medium: clamp(14px, calc(16/1512 * 100vw), 18px);
---line-height-label-medium: clamp(20px, calc(24/1512 * 100vw), 28px);
-
---font-size-label-small: clamp(12px, calc(14/1512 * 100vw), 16px);
---line-height-label-small: clamp(18px, calc(20/1512 * 100vw), 24px);
-
-/* Typography - Caption */
---font-size-caption-large: clamp(14px, calc(16/1512 * 100vw), 18px);
---line-height-caption-large: clamp(20px, calc(24/1512 * 100vw), 28px);
-
---font-size-caption-medium: clamp(12px, calc(14/1512 * 100vw), 16px);
---line-height-caption-medium: clamp(18px, calc(20/1512 * 100vw), 24px);
-
---font-size-caption-small: clamp(10px, calc(12/1512 * 100vw), 14px);
---line-height-caption-small: clamp(14px, calc(18/1512 * 100vw), 20px);
 
 }
 

@@ -37,24 +37,24 @@ export default function CommunityCardVariant1({
   return (
     <TooltipProvider>
       <div
-        className="bg-surface-default rounded-2xl lg:h-[calc(264/922*100vh)] lg:w-[calc(240/1512*100vw)] p-3 border border-border-subtle flex flex-col items-center justify-between"
+        className="bg-surface-default rounded-2xl lg:h-[16.5rem] lg:w-[15rem] p-[0.75rem] border border-border-subtle flex flex-col items-center justify-between"
         onClick={onCardClick}
       >
         {/* Icon */}
-        <div className="flex items-center justify-center lg:h-[calc(64/922*100vh)] lg:w-[calc(64/1512*100vw)]">
+        <div className="flex items-center justify-center lg:h-[4rem] lg:w-[4rem]">
           {icon || (
             <Image
               width={40}
               height={40}
               src="/GLOBE.png"
               alt="Profile"
-              className="rounded-full object-contain"
+              className="rounded-full object-contain w-full h-full"
             />
           )}
         </div>
 
         {/* Title - max 2 lines with conditional tooltip */}
-        <div className="w-full text-center lg:h-[calc(24/922*100vh)]">
+        <div className="w-full text-center lg:h-[1.5rem]">
           {isTitleTruncated ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -72,7 +72,7 @@ export default function CommunityCardVariant1({
         </div>
 
         {/* Description - max 3 lines with conditional tooltip */}
-        <div className="w-full text-center lg:h-[calc(60/922*100vh)]">
+        <div className="w-full text-center lg:h-[3.75rem]">
           {description && (
             isDescriptionTruncated ? (
               <Tooltip>
@@ -94,7 +94,7 @@ export default function CommunityCardVariant1({
         </div>
 
         {/* Members */}
-        <div className="w-full text-center lg:h-[calc(16/922*100vh)]">
+        <div className="w-full text-center lg:h-[1rem]">
           {members !== undefined && (
             <p className="font-caption-medium text-text-primary">
               {members.toLocaleString()} {t('members')}
@@ -103,10 +103,10 @@ export default function CommunityCardVariant1({
         </div>
 
         {/* Button */}
-        <div className="w-full flex justify-center lg:h-[calc(36/922*100vh)]">
+        <div className="w-full flex justify-center lg:h-[2.25rem]">
           <ButtonType1
             onClick={onButtonClick}
-            className="lg:w-[calc(140/1512*100vw)]"
+            className="lg:w-[8.75rem]"
           >
             {buttonText}
           </ButtonType1>

@@ -43,7 +43,7 @@ export default function Associations() {
     ];
     return (
         <>
-            <div className="w-full h-[calc(100vh-64px)] overflow-auto scrollbar-hide  ">
+            <div className="w-full h-[53.625rem] p-4 overflow-auto scrollbar-hide  ">
                 <div className="">
 
                

@@ -75,7 +75,7 @@ const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
 };
 
 export default function Events() {
-    const [activeTab, setActiveTab] = useState<string>("events"); // Type the state
+    const [activeTab, setActiveTab] = useState<string>("events");
 
     const attendingEvents: Event[] = [
         {
@@ -148,19 +148,20 @@ export default function Events() {
     ];
 
     return (
-        <div className="lg:w-[calc(885/1512*100vw)] h-[calc(100vh-64px)] overflow-auto scrollbar-hide ">
-            <div className=" mx-auto"> {/* Constrain width and center with margin */}
-                <p className=" text-2xl font-heading-large my-5">Your events</p>
+        <div className="lg:w-[55.3125rem] h-[53.625rem] p-4 overflow-auto scrollbar-hide">
+            {/* 885px equivalent, 64px header height */}
+            <div className="mx-auto">
+                <p className="text-2xl font-heading-large my-[1.25rem]">Your events</p> {/* 20px equivalent */}
 
                 {/* Toggle Buttons */}
-                <div className="flex lg:h-[calc(52/1512*100vh)] justify-start border-b-2 border-border-subtle w-fit mb-2">
-
+                <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
+                    {/* 52px height, 8px margin */}
                     {
                         TABS.map((tab, idx) => (
-                            <div key={idx} className="lg:w-[calc(102/1512*100vw)] lg:h-[calc(52/1512*100vh)]">
+                            <div key={idx} className="lg:w-[6.375rem] lg:h-[3.25rem]"> {/* 102px, 52px equivalent */}
                                 <button
                                     onClick={() => setActiveTab(`${tab.status}`)}
-                                    className={`h-full px-2 text-center transition-all duration-200 relative cursor-pointer font-label-large ${activeTab === `${tab.status}`
+                                    className={`h-full px-[0.5rem] text-center transition-all duration-200 relative cursor-pointer font-label-large ${activeTab === `${tab.status}`
                                         ? "text-text-brand border-b-2 border-text-brand"
                                         : "text-text-secondary hover:text-text-primary border-b-2"
                                         }`}
@@ -174,7 +175,7 @@ export default function Events() {
                 </div>
 
                 {/* Events Content */}
-                <div className="overflow-auto scrollbar-hide flex gap-2">
+                <div className="overflow-auto scrollbar-hide flex gap-[0.5rem] "> {/* 8px equivalent */}
                     {activeTab === "events" ? (
                         <AttendingComponent attendingEvents={attendingEvents} />
                     ) : (
@@ -182,9 +183,9 @@ export default function Events() {
                     )}
                 </div>
 
-                <h2 className="font-heading-medium my-5 text-2xl">More events</h2>
+                <h2 className="font-heading-medium my-[1.25rem] text-2xl">More events</h2> {/* 20px equivalent */}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.75rem] "> {/* 12px, 24px equivalent */}
                     {moreEvents.map((event, index) => (
                         <EventCard1
                             key={index}

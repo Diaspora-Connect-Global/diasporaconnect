@@ -8,7 +8,6 @@ import { PasswordInput, TextInput } from '../custom/input';
 import { redirect } from 'next/navigation';
 import SignInProvider from '../home/SignInProvider';
 
-
 export default function SignInForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -27,18 +26,18 @@ export default function SignInForm() {
     }
 
     return (
-        <div className='lg:pb-[calc(80/922*100vh)]'> 
-            <div className="lg:space-y-[calc(32/922*100vh)]">
+        <div className=''> {/* 80px equivalent */}
+            <div className="lg:space-y-[2rem]"> {/* 32px equivalent */}
 
-                <div className=' lg:h-[calc(40/922*100vh)] '>
+                <div className='lg:h-[2.5rem]'> {/* 40px equivalent */}
                     <HeadingMedium>
                         {t("greetings.login")}
                     </HeadingMedium>
                 </div>
 
-                <div className='lg:h-[calc(276/922*100vh)]  space-y-[calc(24/922*100vh)]'>
+                <div className='lg:h-[17.25rem] space-y-[1.5rem]'> {/* 276px, 24px equivalent */}
 
-                    <div className='lg:space-y-[calc(16/922*100vh)]'>
+                    <div className='lg:space-y-[1rem]'> {/* 16px equivalent */}
                         <TextInput
                             value={email}
                             onChange={setEmail}
@@ -59,34 +58,32 @@ export default function SignInForm() {
                         />
                     </div>
 
-
-                    <div className="lg:h-[calc(60/922*100vh)] lg:flex lg:justify-between">
+                    <div className="lg:h-[3.75rem] lg:flex lg:justify-between"> {/* 60px equivalent */}
                         <Link href="/reset" className="text-text-brand font-medium hover:underline">
                             <LabelLarge>
                                 {t("forgotPassword")}
                             </LabelLarge>
                         </Link>
-                        <Button onClick={handleSubmit} variant="outline" className="px-8  h-full bg-surface-brand  text-white rounded-full cursor-pointer">
+                        <Button onClick={handleSubmit} variant="outline" className="px-8 h-full bg-surface-brand text-white rounded-full cursor-pointer">
                             {a("login")}
                         </Button>
                     </div>
                 </div>
-                <div className='lg:h-[calc(24/922*100vh)]'>
-                    <div className="flex items-center gap-4">
+                
+                <div className='lg:max-h-[1.5rem]'> {/* 24px equivalent */}
+                    <div className="flex items-center gap-[1rem]"> {/* 16px equivalent */}
                         <div className="flex-1 border-t border-gray-300"></div>
                         <span className="text-sm">{t("socialAuth.divider")}</span>
                         <div className="flex-1 border-t border-gray-300"></div>
                     </div>
                 </div>
 
-                <div className='lg:h-[calc(48/922*100vh)]'>
+                <div className='lg:max-h-[3rem]'> {/* 48px equivalent */}
                     <SignInProvider />
                 </div>
 
-
-
-                <div className='lg:h-[calc(60/922*100vh)] mx-auto flex items-center justify-center '>
-                    <BodyMedium className=" ">
+                <div className='lg:max-h-[3.75rem] mx-auto flex items-center justify-center gap-[0.5rem]'> {/* 60px, 8px equivalent */}
+                    <BodyMedium className="">
                         {t("accountSwitch.newAccount.prompt")}
                     </BodyMedium>
                     <Link href="/signup" className="text-text-brand font-medium hover:underline">

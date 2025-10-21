@@ -44,8 +44,8 @@ export default function Header() {
 
   return (
     <header className="bg-surface-default sticky top-0 z-50 border-b">
-      <div className="lg:w-[calc(1206/1512*100vw)] mx-auto">
-        <div className="flex justify-between md:justify-between md:space-x-20 h-16 items-center">
+      <div className="lg:max-w-[75.375rem] mx-auto"> {/* 1206px equivalent */}
+        <div className="flex justify-between md:justify-between md:space-x-[5rem] h-[4rem] items-center"> {/* 80px space, 64px height */}
           {/* Logo */}
           <div>
             <Link href={`/${currentLocale}`}>
@@ -54,56 +54,58 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-5 items-center">
+          <nav className="hidden md:flex space-x-[1.25rem] items-center"> {/* 20px equivalent */}
             {navigation.map((item) => {
               const active = isActive(item.href);
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative px-2 py-2 flex flex-col justify-center items-center transition-all duration-200 ${active
-                    ? 'text-text-brand border-b-3 border-border-brand'
+                  className={`relative px-[0.5rem] py-[0.5rem] flex flex-col justify-center items-center transition-all duration-200 ${active
+                    ? 'text-text-brand border-b-[0.1875rem] border-border-brand' /* 3px equivalent */
                     : 'text-text-secondary hover:text-text-primary'
                     }`}
                 >
-                  <div className="w-5 h-5">
+                  <div className="w-[1.25rem] h-[1.25rem]"> {/* 20px equivalent */}
                     <Image
                       width={24}
                       height={24}
                       src={item.icon}
                       alt={`${item.name} Icon`}
-                      className="w-full h-full object-contain" // object-contain to respect aspect ratio
+                      className="w-full h-full object-contain"
                     />
                   </div>
-                  <p className="text-sm mt-1">{item.name}</p>
+                  <p className="text-sm mt-[0.25rem]"> {/* 4px equivalent */}
+                    {item.name}
+                  </p>
                 </Link>
               );
             })}
           </nav>
 
           {/* Right Section - Search, Language, Profile */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-[1rem]"> {/* 16px equivalent */}
             {/* User Profile */}
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-[0.75rem]"> {/* 12px equivalent */}
               <div className="relative">
                 <Image
                   width={24}
                   height={24}
                   src="/PROFILE.png"
                   alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-border-subtle"
+                  className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle" /* 32px equivalent */
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
                   }}
                 />
-                <div className="hidden w-8 h-8 bg-surface-subtle rounded-full items-center justify-center border-2">
+                <div className="hidden w-[2rem] h-[2rem] bg-surface-subtle rounded-full items-center justify-center border-2">
                   <Image
                     width={24}
                     height={24}
                     src="/PROFILE.png"
                     alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover border-2 border-border-subtle"
+                    className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle"
                   />
                 </div>
               </div>
@@ -112,7 +114,7 @@ export default function Header() {
             {/* Language Selector */}
             <div className="hidden md:flex relative">
               <LocaleSwitcher
-                selectClassName="appearance-none text-text-primary pr-4"
+                selectClassName="appearance-none text-text-primary pr-[1rem]" /* 16px equivalent */
                 optionClassName="bg-surface-default"
               />
               <ThemeToggle />
@@ -132,9 +134,9 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-md text-text-primary hover:text-text-secondary"
+              className="md:hidden p-[0.5rem] rounded-md text-text-primary hover:text-text-secondary" /* 8px equivalent */
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-[1.5rem] h-[1.5rem]" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -148,9 +150,9 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border-disabled">
+          <div className="md:hidden py-[1rem] border-t border-border-disabled"> {/* 16px equivalent */}
             {/* Mobile Search */}
-            <div className="mb-4 px-4">
+            <div className="mb-[1rem] px-[1rem]"> {/* 16px equivalent */}
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -161,7 +163,7 @@ export default function Header() {
             </div>
 
             {/* Mobile Navigation Links */}
-            <nav className="grid grid-cols-2 gap-2">
+            <nav className="grid grid-cols-2 gap-[0.5rem]"> {/* 8px equivalent */}
               {navigation.map((item) => {
                 const active = isActive(item.href);
                 return (
@@ -169,13 +171,13 @@ export default function Header() {
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all duration-200 ${active
+                    className={`flex items-center space-x-[0.5rem] px-[1rem] py-[0.75rem] rounded-lg transition-all duration-200 ${active
                       ? 'bg-surface-brand-light text-text-brand font-medium border border-border-brand-light'
                       : 'text-text-secondary hover:text-text-primary hover:bg-surface-brand-light'
                       }`}
-                      style={{ color: active ? 'var(--text-brand)' : 'var(--text-secondary)' }} // Explicit color
+                    style={{ color: active ? 'var(--text-brand)' : 'var(--text-secondary)' }}
                   >
-                    <div className="w-5 h-5">
+                    <div className="w-[1.25rem] h-[1.25rem]"> {/* 20px equivalent */}
                       <Image
                         width={24}
                         height={24}
@@ -186,7 +188,7 @@ export default function Header() {
                     </div>
                     <span>{item.name}</span>
                     {active && (
-                      <div className="ml-auto w-2 h-2 bg-surface-brand rounded-full" />
+                      <div className="ml-auto w-[0.5rem] h-[0.5rem] bg-surface-brand rounded-full" /> /* 8px equivalent */
                     )}
                   </Link>
                 );
@@ -194,33 +196,33 @@ export default function Header() {
             </nav>
 
             {/* Mobile user info */}
-            <div className="mt-4 pt-4 border-t border-border-subtle flex items-center space-x-3 px-4">
+            <div className="mt-[1rem] pt-[1rem] border-t border-border-subtle flex items-center space-x-[0.75rem] px-[1rem]"> {/* 16px, 12px equivalent */}
               <div className="relative">
                 <Image
                   width={24}
                   height={24}
                   src="/PROFILE.png"
                   alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-border-subtle"
+                  className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle" /* 32px equivalent */
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
                   }}
                 />
-                <div className="hidden w-8 h-8 bg-surface-subtle rounded-full items-center justify-center border-2">
+                <div className="hidden w-[2rem] h-[2rem] bg-surface-subtle rounded-full items-center justify-center border-2">
                   <Image
                     width={24}
                     height={24}
                     src="/PROFILE.png"
                     alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover border-2 border-border-subtle"
+                    className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle"
                   />
                 </div>
               </div>
               {/* Mobile Language Selector */}
-              <div className="px-4">
+              <div className="px-[1rem]"> {/* 16px equivalent */}
                 <LocaleSwitcher
-                  selectClassName="appearance-none text-text-primary pr-4"
+                  selectClassName="appearance-none text-text-primary pr-[1rem]" /* 16px equivalent */
                   optionClassName="bg-surface-default"
                 />
               </div>

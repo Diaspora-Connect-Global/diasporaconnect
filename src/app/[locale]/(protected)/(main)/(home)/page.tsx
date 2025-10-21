@@ -28,7 +28,6 @@ export default function Home() {
       onButtonClick: () => console.log("Join button clicked!"),
       buttonText: t("joincommunity"),
     },
-    
   ];
 
   // Feed post data array
@@ -98,18 +97,18 @@ export default function Home() {
   return (
     <div>
       {/* Main Section (2/3 width on desktop, scrolls independently) */}
-      <div className="lg:flex space-x-[calc(28/1512*100vw)]">
+      <div className="lg:flex  "> {/* 28px equivalent */}
         {/* Scrolling container for both JoinCommunityCard and FeedCard */}
-        <div className="overflow-auto h-[calc(100vh-64px)] lg:w-[calc(568/1512*100vw)] scrollbar-hide">
+        <div className="overflow-auto h-[53.625rem] lg:max-w-[35.5rem] mx-auto scrollbar-hide p-1"> {/* 568px equivalent */}
           <div>
-            <div className="lg:flex justify-between mb-4">
+            <div className="lg:flex justify-between mb-[1rem]"> {/* 16px equivalent */}
               <p className="text-2xl font-caption-large">{t("discover")}</p>
               <Link href="/community">
                 <p className="font-label-medium text-text-brand">{t("seeall")}</p>
               </Link>
             </div>
           </div>
-          <div className="flex gap-2 overflow-auto scrollbar-hide mb-6">
+          <div className="flex gap-[0.5rem] overflow-auto scrollbar-hide mb-[1.5rem]"> {/* 8px gap, 24px margin */}
             {communities.map((community, index) => (
               <CommunityCardVariant2
                 key={index}
@@ -121,7 +120,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mb-8">
+          <div className="mb-[2rem]"> {/* 32px equivalent */}
             {posts.map((post, index) => (
               <FeedCard
                 key={index}
@@ -142,7 +141,7 @@ export default function Home() {
           </div>
         </div>
         {/* PeopleYouMayKnow Section (1/3 width on desktop, sticky) */}
-        <div className="lg:w-[calc(288/1512*100vw)]">
+        <div className="lg:w-[18rem] mx-auto p-1"> {/* 288px equivalent */}
           <div className="">
             <PeopleYouMayKnow />
           </div>

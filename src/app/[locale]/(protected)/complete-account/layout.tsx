@@ -4,10 +4,10 @@ export default function CompleteAccountLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div  className="h-screen w-screen ">
-    <div className="lg:w-[calc(800/1512*100vw)] lg:px-[calc(40/1512*100vw)] lg:pt-[calc(40/1512*100vh)]  lg:pb-[calc(32/1512*100vh)] lg:mx-auto ">
+    <div className="h-screen w-screen">
+      <div className="lg:w-[50rem] lg:px-[2.5rem] lg:pt-[2.5rem] lg:pb-[2rem] lg:mx-auto">
         {children}
-    </div>
+      </div>
     </div>
   );
 }

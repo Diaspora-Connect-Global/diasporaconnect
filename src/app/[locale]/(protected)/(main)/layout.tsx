@@ -6,11 +6,11 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-screen" >
-      <div className="lg:h-[calc(64/922*100vh)]">
-      <Header />
+    <div className="">
+      <div className="lg:max-h-[4rem]"> {/* 64px equivalent */}
+        <Header />
       </div>
-      <div >
+      <div>
         {children}
       </div>
     </div>
