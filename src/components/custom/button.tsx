@@ -24,13 +24,6 @@ export function ButtonType1({
         border-text-brand 
         text-text-brand 
         rounded-full 
-        py-1.5 
-        px-3
-        sm:py-2 
-        sm:px-4 
-        text-xs
-        sm:text-sm
-        md:text-base
         font-label-medium 
         ring-text-brand
         cursor-pointer

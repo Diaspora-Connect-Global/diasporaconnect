@@ -39,12 +39,61 @@ export default function Associations() {
             title: "Ghana Business Network",
             members: 850,
             description: "A space for businesses to exchange services and resources effectively."
-        }
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
+        {
+            title: "Ghana Business Network",
+            members: 850,
+            description: "A space for businesses to exchange services and resources effectively."
+        },
     ];
     return (
         <>
-            <div className="w-full h-[53.625rem] p-4 overflow-auto scrollbar-hide  ">
-                <div className="">
+            <div className="w-full h-[53.625rem] p-4 overflow-auto scrollbar-hide ">
 
                
                 <p className="font-heading-large my-5">My associations in GhanaConnectGlobal</p>
@@ -77,7 +126,6 @@ export default function Associations() {
                     ))}
                 </div>
                  </div>
-            </div>
         </>
     );
 }
