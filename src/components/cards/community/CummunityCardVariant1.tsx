@@ -103,10 +103,10 @@ export default function CommunityCardVariant1({
         </div>
 
         {/* Button */}
-        <div className="w-full flex justify-center lg:h-[2.25rem]">
+        <div className=" flex justify-center lg:min-h-[2.25rem] ">
           <ButtonType1
             onClick={onButtonClick}
-            className="lg:w-[8.75rem] px-2 py-1"
+            className=" py-3 px-6 "
           >
             {buttonText}
           </ButtonType1>

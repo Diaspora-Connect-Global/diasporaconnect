@@ -33,6 +33,8 @@ export function ButtonType1({
         disabled:opacity-50 
         disabled:cursor-not-allowed
         h-fit
+        w-fit
+        py-1 px-2
         whitespace-nowrap
         ${className}
       `}

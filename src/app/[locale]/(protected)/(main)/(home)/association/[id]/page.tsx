@@ -1,38 +1,13 @@
 'use client';
 import AboutAssociation from "@/components/cards/association/AboutAssociation";
-import CommunityCardVariant2 from "@/components/cards/community/CommunityCardVariant2";
 import FeedCard from "@/components/cards/FeedCard";
-import { ButtonType1, ButtonType2 } from "@/components/custom/button";
+import { ButtonType1 } from "@/components/custom/button";
 import { PeopleYouMayKnow } from "@/components/home/PeopleYouMayKnow";
 import { HeadingMedium } from "@/components/utils";
-import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 export default function Home() {
-    const t = useTranslations("community");
 
-    // Community data array
-    const communities = [
-        {
-            title: "Ghana Innovation",
-            members: 1200,
-            onButtonClick: () => console.log("Join button clicked!"),
-            buttonText: t("joincommunity"),
-        },
-        {
-            title: "Ghana Innovation",
-            members: 1200,
-            onButtonClick: () => console.log("Join button clicked!"),
-            buttonText: t("joincommunity"),
-        },
-        {
-            title: "Ghana Innovation",
-            members: 1200,
-            onButtonClick: () => console.log("Join button clicked!"),
-            buttonText: t("joincommunity"),
-        },
-    ];
 
     // Feed post data array
     const posts = [

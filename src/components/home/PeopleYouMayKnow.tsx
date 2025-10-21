@@ -8,7 +8,7 @@ export function PeopleYouMayKnow() {
     const tActions = useTranslations('actions');
 
     return (
-        <div className="space-y-[3.2rem] w-full  " > {/* 32px equivalent */}
+        <div className="space-y-[3.2rem] w-full  mx-auto " > {/* 32px equivalent */}
             <div className="space-y-[1.2rem]"> {/* 12px equivalent */}
                 <p className="font-caption-large">{t('peopleYouMayKnow')}</p>
                 <div className="space-y-[1.6rem]"> {/* 16px equivalent */}
@@ -27,13 +27,15 @@ export function PeopleYouMayKnow() {
                         name="Sarah Johnson"
                         mutualConnections={7}
                     />
+
+                  
                 </div>
             </div>
-            <div className="flex justify-between">
-                <p className="font-caption-large text-text-primary">{t('events.near')}</p>
+            <div className="flex justify-between space-x-1">
+                <p className="font-caption-large text-text-primary  whitespace-nowrap">{t('events.near')}</p>
                 <Link href="/events">
                     <div className="font-label-medium text-text-brand flex text-center justify-center items-center">
-                        <p className="">{tActions('seemore')}</p>
+                        <p className="w-fit whitespace-nowrap">{tActions('seemore')}</p>
                         <ChevronRight size={20} />
                     </div>
                 </Link>

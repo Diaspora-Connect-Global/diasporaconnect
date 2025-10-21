@@ -120,7 +120,7 @@ export const MultiStep: React.FC<StepProps> = ({
                         type="submit"
                         disabled={isNextDisabled}
                         variant="outline"
-                        className={`lg:h-full lg:w-[11.25rem] ml-auto px-8 hover:bg-surface-brand-light rounded-full ${isNextDisabled ? "bg-surface-disabled text-text-secondary cursor-not-allowed" : "bg-surface-brand text-text-white cursor-pointer"}`} /* 180px equivalent */
+                        className={`lg:h-full whitespace-nowrap  ml-auto px-8 hover:bg-surface-brand-light rounded-full ${isNextDisabled ? "bg-surface-disabled text-text-secondary cursor-not-allowed" : "bg-surface-brand text-text-white cursor-pointer"}`} /* 180px equivalent */
                     >
                         {nextButtonText}
                     </Button>

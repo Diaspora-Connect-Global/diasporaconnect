@@ -56,7 +56,7 @@ export default function Community() {
 
             <p className=" text-2xl font-heading-medium my-5">{t('discoverMore')}</p>
 
-            <div className="overflow-auto scrollbar-hide flex gap-3 mb-6">
+            <div className="overflow-auto scrollbar-hide flex gap-1 mb-6">
                 {discoverCommunities.map((community, index) => (
                     <JoinCommunityCard
                         key={index}

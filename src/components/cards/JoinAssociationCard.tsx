@@ -53,7 +53,7 @@ export default function JoinAssociationCard({
         </div>
         <ButtonType2
           onClick={onButtonClick}
-          className="ml-2 sm:ml-4 p-1 sm:p-2 text-xs sm:text-sm rounded-full"
+          className="ml-2 sm:ml-4 py-3 px-6 text-xs sm:text-sm rounded-full"
         >
           {buttonText}
         </ButtonType2>

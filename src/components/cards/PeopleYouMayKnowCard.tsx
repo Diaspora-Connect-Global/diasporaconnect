@@ -57,7 +57,7 @@ export default function PeopleYouMayKnowCard({
       {/* Right side - Action button */}
       <div className="flex items-center ">
         <button
-          className="inline-flex text-text-brand cursor-pointer"
+          className="inline-flex text-text-brand cursor-pointer  whitespace-nowrap"
           onClick={handleClick}
           disabled={isAdded}
           aria-label={buttonLabel}

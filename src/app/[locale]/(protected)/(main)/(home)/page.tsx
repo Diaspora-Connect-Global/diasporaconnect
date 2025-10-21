@@ -97,9 +97,9 @@ export default function Home() {
   return (
     <div>
       {/* Main Section (2/3 width on desktop, scrolls independently) */}
-      <div className="lg:flex   "> {/* 28px equivalent */}
+      <div className="lg:flex "> {/* 28px equivalent */}
         {/* Scrolling container for both JoinCommunityCard and FeedCard */}
-        <div className="overflow-auto h-[53.625rem] lg:max-w-[35.5rem] mx-auto scrollbar-hide p-1"> {/* 568px equivalent */}
+        <div className="overflow-auto h-[53.625rem] lg:max-w-[35.5rem] mx-auto scrollbar-hide p-[1rem]"> {/* 568px equivalent */}
           <div>
             <div className="lg:flex justify-between mb-[1rem]"> {/* 16px equivalent */}
               <p className="text-2xl font-caption-large">{t("discover")}</p>
@@ -141,7 +141,7 @@ export default function Home() {
           </div>
         </div>
         
-        <div className="lg:w-[18rem]  "> {/* 288px equivalent */}
+        <div className="lg:w-[18rem]  ml-1 "> {/* 288px equivalent */}
             <PeopleYouMayKnow />
         </div>
       </div>

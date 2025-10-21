@@ -104,7 +104,7 @@ export default function JoinCommunityCard({
           )}
 
           {/* Button */}
-          <ButtonType1 onClick={onButtonClick}>
+          <ButtonType1 onClick={onButtonClick} className='py-3 px-6'>
             {buttonText}
           </ButtonType1>
         </div>

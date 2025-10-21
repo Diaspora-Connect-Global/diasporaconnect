@@ -121,7 +121,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
                     {availableCommunities.map((communityItem, index) => (
                         <div
                             key={index}
-                            className="flex-shrink-0 sm:w-[17.5rem] snap-start mx-[0.75rem]" 
+                            className=" sm:w-[17.5rem] snap-start mx-[0.75rem]" 
                         >
                             <CommunityCardVariant1
                                 title={communityItem.title}

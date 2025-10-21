@@ -43,9 +43,9 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-surface-default sticky top-0 z-50 border-b">
+    <header className="mx-auto border-b">
       <div className="lg:max-w-[75.375rem] mx-auto"> {/* 1206px equivalent */}
-        <div className="flex justify-between md:justify-between md:space-x-[5rem] h-[4rem] items-center"> {/* 80px space, 64px height */}
+        <div className="flex justify-between lg:justify-between lg:space-x-[5rem] h-[4rem] items-center"> {/* 80px space, 64px height */}
           {/* Logo */}
           <div>
             <Link href={`/${currentLocale}`}>
@@ -54,7 +54,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-[1.25rem] items-center"> {/* 20px equivalent */}
+          <nav className="hidden lg:flex space-x-[1.25rem] items-center"> {/* 20px equivalent */}
             {navigation.map((item) => {
               const active = isActive(item.href);
               return (
@@ -86,7 +86,7 @@ export default function Header() {
           {/* Right Section - Search, Language, Profile */}
           <div className="flex items-center space-x-[1rem]"> {/* 16px equivalent */}
             {/* User Profile */}
-            <div className="hidden md:flex items-center space-x-[0.75rem]"> {/* 12px equivalent */}
+            <div className="hidden lg:flex items-center space-x-[0.75rem]"> {/* 12px equivalent */}
               <div className="relative">
                 <Image
                   width={24}
@@ -112,7 +112,7 @@ export default function Header() {
             </div>
 
             {/* Language Selector */}
-            <div className="hidden md:flex relative">
+            <div className="hidden lg:flex relative">
               <LocaleSwitcher
                 selectClassName="appearance-none text-text-primary pr-[1rem]" /* 16px equivalent */
                 optionClassName="bg-surface-default"
@@ -121,7 +121,7 @@ export default function Header() {
             </div>
 
             {/* Search Box */}
-            <div className="hidden md:flex items-center">
+            <div className="hidden lg:flex items-center">
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -134,7 +134,7 @@ export default function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-[0.5rem] rounded-md text-text-primary hover:text-text-secondary" /* 8px equivalent */
+              className="lg:hidden p-[0.5rem] rounded-md text-text-primary hover:text-text-secondary" /* 8px equivalent */
             >
               <svg className="w-[1.5rem] h-[1.5rem]" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
                 <path
@@ -150,7 +150,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-[1rem] border-t border-border-disabled"> {/* 16px equivalent */}
+          <div className="lg:hidden py-[1rem] border-t border-border-disabled"> {/* 16px equivalent */}
             {/* Mobile Search */}
             <div className="mb-[1rem] px-[1rem]"> {/* 16px equivalent */}
               <SearchInput
