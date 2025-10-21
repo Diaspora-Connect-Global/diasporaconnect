@@ -36,7 +36,7 @@ export default function AuthLayout({
                 <div className="lg:w-[40%] flex-1 flex flex-col bg-surface-default">
                     <div className="h-full flex flex-col"> 
                         <div className="flex-1 border-b  "> 
-                            <div className="p-4">
+                            <div className="px-6 py-2">
 
                             {children} 
                             </div>

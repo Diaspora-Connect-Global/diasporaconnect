@@ -7,7 +7,7 @@ export default function MainLayout({
 }) {
   return (
     <div className="">
-      <div className="lg:h-[4rem] bg-surface-default  sticky top-0 z-50"> {/* 64px equivalent */}
+      <div className="lg:h-[4rem] w-full bg-surface-default  sticky top-0 z-50"> {/* 64px equivalent */}
         <Header />
       </div>
       <div>

@@ -60,45 +60,17 @@ export default function Associations() {
             members: 850,
             description: "A space for businesses to exchange services and resources effectively."
         },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
+       
+        
     ];
     return (
         <>
-            <div className="w-full h-[53.625rem] p-4 overflow-auto scrollbar-hide ">
+            <div className="min-w-[35rem] max-h-[53.625rem] p-4 overflow-auto scrollbar-hide ">
 
                
                 <p className="font-heading-large my-5">My associations in GhanaConnectGlobal</p>
 
-                <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
+                <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[18rem]  ">
                     {myAssociations.map((association, index) => (
                         <MyAssociationCard
                             key={index}

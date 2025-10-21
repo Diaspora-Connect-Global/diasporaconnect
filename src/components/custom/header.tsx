@@ -43,10 +43,9 @@ export default function Header() {
   };
 
   return (
-    <header className="mx-auto border-b">
-      <div className="lg:max-w-[75.375rem] mx-auto"> {/* 1206px equivalent */}
-        <div className="flex justify-between lg:justify-between lg:space-x-[5rem] h-[4rem] items-center"> {/* 80px space, 64px height */}
-          {/* Logo */}
+   <header className="mx-auto border-b w-full "> {/* ✅ Full width header */}
+      <div className="lg:max-w-[75.375rem] mx-auto px-4"> {/* ✅ Content centered with padding */}
+        <div className="flex justify-between lg:justify-between lg:space-x-[5rem] h-[4rem] items-center">  {/* Logo */}
           <div>
             <Link href={`/${currentLocale}`}>
               <Image src="/LOGO.png" alt="Logo" width={80} height={80} className="" />
@@ -93,7 +92,7 @@ export default function Header() {
                   height={24}
                   src="/PROFILE.png"
                   alt="Profile"
-                  className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle" /* 32px equivalent */
+                  className="w-[32px] h-[32px] rounded-full object-cover border-2 border-border-subtle" /* 32px equivalent */
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
@@ -105,7 +104,7 @@ export default function Header() {
                     height={24}
                     src="/PROFILE.png"
                     alt="Profile"
-                    className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle"
+                    className="w-[32px] h-[32px] rounded-full object-cover border-2 border-border-subtle"
                   />
                 </div>
               </div>
