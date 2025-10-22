@@ -1,4 +1,3 @@
-import { Bookmark } from "lucide-react";
 import Image from "next/image";
 import { ButtonType1, ButtonType2 } from "../custom/button";
 import Link from "next/link";
