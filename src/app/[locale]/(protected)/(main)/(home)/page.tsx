@@ -28,6 +28,12 @@ export default function Home() {
       onButtonClick: () => console.log("Join button clicked!"),
       buttonText: t("joincommunity"),
     },
+    {
+      title: "Ghana Innovation",
+      members: 1200,
+      onButtonClick: () => console.log("Join button clicked!"),
+      buttonText: t("joincommunity"),
+    },
   ];
 
   // Feed post data array
@@ -95,11 +101,11 @@ export default function Home() {
   ];
 
   return (
-    <div>
+    <div className="h-[calc(100vh-4rem)]">
       {/* Main Section (2/3 width on desktop, scrolls independently) */}
-      <div className="lg:flex "> {/* 28px equivalent */}
+      <div className="lg:flex h-full"> {/* 28px equivalent */}
         {/* Scrolling container for both JoinCommunityCard and FeedCard */}
-        <div className="overflow-auto h-[53.625rem] lg:max-w-[35.5rem] mx-auto scrollbar-hide p-[1rem]"> {/* 568px equivalent */}
+        <div className="overflow-y-auto h-full lg:max-w-[37.2rem] mx-auto scrollbar-hide p-4"> {/* Adjusted for full height and proper padding */}
           <div>
             <div className="lg:flex justify-between mb-[1rem]"> {/* 16px equivalent */}
               <p className="text-2xl font-caption-large">{t("discover")}</p>
@@ -108,7 +114,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="flex gap-[0.5rem] overflow-auto scrollbar-hide mb-[1.5rem]"> {/* 8px gap, 24px margin */}
+          <div className="flex gap-[0.3rem] overflow-auto scrollbar-hide mb-[1.5rem]"> {/* 8px gap, 24px margin */}
             {communities.map((community, index) => (
               <CommunityCardVariant2
                 key={index}
@@ -120,7 +126,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mb-[2rem]"> {/* 32px equivalent */}
+          <div className="mb-[1rem]"> {/* 32px equivalent */}
             {posts.map((post, index) => (
               <FeedCard
                 key={index}
@@ -141,7 +147,7 @@ export default function Home() {
           </div>
         </div>
         
-        <div className="lg:w-[18rem]  ml-1 "> {/* 288px equivalent */}
+        <div className="lg:w-[18rem] h-full p-4"> {/* Adjusted sidebar */}
             <PeopleYouMayKnow />
         </div>
       </div>
