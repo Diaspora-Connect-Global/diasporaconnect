@@ -45,7 +45,7 @@ export default function AssociationPage() {
             id: 'adansi-times',
             name: 'The Adansi Times',
             visibility: 'Public',
-            avatar: 'https://media.istockphoto.com/id/1183325543/vector/heart-isometric-health-care-concept-red-shape-and-heartbeat.jpg?s=612x612&w=0&k=20&c=mBkVFXUpbkpoSrP1lEbcWRQP94wzjyBkYGLTkI0i7RA=',
+            avatar: 'https://t4.ftcdn.net/jpg/03/08/69/75/360_F_308697506_9dsBYHXm9FwuW0qcEqimAEXUvzTwfzwe.jpg',
             members: 2000,
             createdDate: 'October 2023',
             description:
@@ -63,14 +63,14 @@ export default function AssociationPage() {
                 onComment: () => console.log("Comment"),
                 onShare: () => console.log("Share"),
                 onSave: () => console.log("Saved"),
-                joinButton: true,
+                joinButton: false,
             }]
         },
         {
             id: 'tech-innovations-daily',
             name: 'Tech Innovations Daily',
             visibility: 'Private',
-            avatar: '/tech-innovations.png',
+            avatar: 'https://previews.123rf.com/images/rawpixel/rawpixel1507/rawpixel150710696/42883433-digital-media-information-medium-news-concept.jpg',
             members: 1500,
             createdDate: 'September 2023',
             description: 'Daily updates on technology, startups, and product innovation around the world.',

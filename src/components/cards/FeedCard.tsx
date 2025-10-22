@@ -64,11 +64,13 @@ export default function FeedCard({
           />
           <div className="lg:flex-1">
             <div className="flex items-center">
-              <h3 className="font-label-large text-text-primary truncate">{profileName} ·</h3>
+              <h3 className="font-label-large text-text-primary truncate  l-[0.2rem]">{profileName} </h3>
+              {joinButton && <p className=' ml-[0.5rem]'> ·</p>}
               {joinButton && (
-                <button className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light text-text-brand hover:bg-brand cursor-pointer font-label-medium min-w-[3.75rem] ml-[0.5rem]">
-                  {t('join')}
-                </button>
+                <>
+                  <button className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light text-text-brand hover:bg-brand cursor-pointer font-label-medium min-w-[3.75rem] ml-[0.1rem]">
+                   {t('join')}
+                  </button></>
               )}
             </div>
             <p className="font-body-small text-text-secondary truncate">
