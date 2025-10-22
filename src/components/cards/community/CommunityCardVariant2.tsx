@@ -33,7 +33,7 @@ export default function CommunityCardVariant2({
     return (
         <TooltipProvider>
             <div
-                className="bg-surface-default rounded-2xl h-[12.25rem] w-[11.5rem] p-[0.75rem] border border-border-subtle flex flex-col items-center justify-between"
+                className="bg-surface-default rounded-2xl h-[12.25rem] min-w-[11.5rem] w-fit p-[0.75rem] border border-border-subtle flex flex-col items-center justify-between overflow-hidden"
                 onClick={onCardClick}
             >
                 {/* Icon */}
