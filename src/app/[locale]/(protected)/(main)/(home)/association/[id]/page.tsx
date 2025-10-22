@@ -95,7 +95,7 @@ export default function Home() {
 
 
                 {/* Scrolling container for both JoinCommunityCard and FeedCard */}
-                <div className="lg:max-w-[35.5rem] mx-auto p-1"> {/* 568px equivalent */}
+                <div className=" lg:max-w-[35.5rem] mx-auto p-1"> {/* 568px equivalent */}
 
 
                     <div className="min-h-[6rem] flex space-x-4 my-4 p-1 border-b "> {/* Adansi header */}

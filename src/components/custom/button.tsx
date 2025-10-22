@@ -62,10 +62,7 @@ export function ButtonType2({
         border-text-brand 
         text-text-white 
         rounded-full 
-        py-1.5 
-        px-3
-        sm:py-2 
-        sm:px-4 
+       
         text-xs
         sm:text-sm
         md:text-base
@@ -78,6 +75,9 @@ export function ButtonType2({
         disabled:opacity-50 
         disabled:cursor-not-allowed
         h-fit
+        w-fit
+       
+        py-1 px-2
         whitespace-nowrap
         ${className}
       `}

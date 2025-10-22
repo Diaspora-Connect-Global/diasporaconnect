@@ -14,7 +14,7 @@ interface EventCardProps {
 
 export default function EventCard2({ title, date, location, attendees, imageUrl }: EventCardProps) {
     return (
-        <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
+        <div className="w-full  bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
             <div className="relative h-64 rounded-t-lg overflow-hidden">
                 <Image
@@ -42,20 +42,41 @@ export default function EventCard2({ title, date, location, attendees, imageUrl 
             {/* Event Details */}
             <div className="p-6">
                 <Link href="/events/1">
-                <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
+                    <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
                 </Link>
                 <p className="text-lg font-semibold text-primary mb-1">{date}</p>
                 <p className="text-secondary mb-1">{location}</p>
                 <p className="text-secondary text-sm mb-6">{attendees} going</p>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 items-center">
-                    <ButtonType1 className="flex items-center justify-center w-14 h-14 rounded-full overflow-hidden">
-                        <Bookmark className="w-4 h-4 " />
+                <div className="flex gap-3 justify-between">
+                    <div className="flex items-center gap-4">
+                        <ButtonType2 className=" py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
+                            Attend
+                        </ButtonType2>
+                        <ButtonType1 className="flex items-center justify-center  py-3 px-6 rounded-full overflow-hidden">
+                            Saved
+                        </ButtonType1>
+
+                    </div>
+                    <ButtonType1 className="flex items-center justify-center py-3 px-6 rounded-full overflow-hidden">
+                        <Image
+                            src="/SHARE.svg"
+                            alt="Share Icon"
+                            width={24}
+                            height={24}
+                            className="object-contain"
+                        />
                     </ButtonType1>
-                    <ButtonType2 className="flex-1 py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
-                        Attend
-                    </ButtonType2>
+                </div>
+
+                <div className="mt-6 border-t pt-4">
+                    <p className="text-xl font-bold text-primary">About</p>
+                    <p className="text-primary mt-2 text-justify">
+                        Join us for the Accra Arts Festival, a vibrant celebration of Ghanaian culture and creativity. Experience captivating performances, stunning art exhibitions, and engaging workshops that showcase the rich heritage of Ghana. Whether you&apos;re an art enthusiast or simply looking for a fun day out, this festival promises something for everyone. Don&apos;t miss out on this unforgettable event!
+                        
+
+                    </p>
                 </div>
             </div>
         </div>
