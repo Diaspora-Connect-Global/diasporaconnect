@@ -7,7 +7,7 @@ export default function HomeLayout({
 }) {
   return (
     <div className="lg:min-w-[75rem] lg:flex lg:mx-auto justify-center min-h-[calc(100vh-4rem)]">
-      <div className="lg:max-w-[18rem] sticky top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
+      <div className="lg:max-w-[18rem] lg:sticky top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
         <HomeSidebar />
       </div>
       <div className="lg:max-w-[57rem] w-full scrollbar-hide">
