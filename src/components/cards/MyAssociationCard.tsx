@@ -20,7 +20,6 @@ export function MyAssociationCard({
     logoIcon,
     buttonText,id
 }: MyAssociationCardProps) {
-   
 
     return (
         <header className="w-full border-b">

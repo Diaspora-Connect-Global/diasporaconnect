@@ -5,8 +5,7 @@ import { useTranslations } from "next-intl";
 
 export default function Associations() {
     const tActions = useTranslations('actions');
-
-
+    const tAssociations = useTranslations('home.associations');
     const myAssociations = [
         {
             id: 'adansi-times',
@@ -60,7 +59,7 @@ export default function Associations() {
     return (
         <>
             <div className="w-full p-4 overflow-y-auto scrollbar-hide">
-                <p className="font-heading-large my-5">My associations in GhanaConnectGlobal</p>
+                <p className="font-heading-large my-5">{tAssociations("myassociations", { association: "GhanaConnectGlobal" })}</p>
 
                 <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[18rem]  ">
                     {myAssociations.map((association, index) => (
@@ -69,12 +68,12 @@ export default function Associations() {
                             id={association.id}
                             title={association.title}
                             description={association.description}
-                            buttonText={association.status}
+                            buttonText={association.status  == "Joined"? tActions('joined') : tActions('pending')}
                         />
                     ))}
                 </div>
 
-                <p className="font-heading-medium my-5">Discover more associations in GhanaConnectGlobal</p>
+                <p className="font-heading-medium my-5">{tAssociations("discovermore", { association: "GhanaConnectGlobal" })}</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                     {discoverAssociations.map((community, index) => (

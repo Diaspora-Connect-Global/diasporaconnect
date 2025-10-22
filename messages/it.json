@@ -4,7 +4,7 @@
             "signup": "Benvenuto in DCG",
             "login": "Bentornato!"
         },
-        "description": "Creazione di percorsi strutturati, trasparenti e di impatto per l'impegno della diaspora.",
+        "description": "Creazione di percorsi strutturati, trasparenti e di impatto per il coinvolgimento della diaspora.",
         "form": {
             "email": {
                 "label": "Email",
@@ -24,7 +24,7 @@
             }
         },
         "policies": {
-            "agreement": "Continuando con la registrazione, accetti la nostra",
+            "agreement": "Continuando con l'iscrizione, accetti la nostra",
             "privacyPolicy": "Informativa sulla privacy",
             "and": "e",
             "termsOfService": "Termini di servizio"
@@ -46,7 +46,7 @@
     },
     "onboarding": {
         "personalInfo": {
-            "title": "Qual è il tuo nome",
+            "title": "Come ti chiami?",
             "description": "Conosciamoci! Questo ci aiuta a personalizzare la tua esperienza e come gli altri ti vedono su Diasplug.",
             "firstName": {
                 "label": "Nome",
@@ -58,8 +58,8 @@
             }
         },
         "community": {
-            "title": "Raccontaci la tua comunità",
-            "description": "Condividi la comunità con cui ti identifichi. Ci aiuta a connetterti con persone e storie importanti per te.",
+            "title": "Raccontaci la tua community",
+            "description": "Condividi la community con cui ti identifichi. Ci aiuta a connetterti con persone e storie importanti per te.",
             "options": {
                 "localCitizen": "Cittadino locale",
                 "diasporaMember": "Membro della diaspora"
@@ -75,7 +75,7 @@
         },
         "phoneVerification": {
             "title": "Verifica il tuo numero di telefono",
-            "description": "Ti invieremo un codice breve per confermare il tuo numero. Questo aiuta a mantenere il tuo account sicuro e facilita la connessione con la tua comunità.",
+            "description": "Ti invieremo un codice breve per confermare il tuo numero. Questo aiuta a proteggere il tuo account e facilita la connessione con la tua community.",
             "phoneNumber": {
                 "label": "Numero di telefono",
                 "placeholder": "Numero di cellulare"
@@ -84,12 +84,16 @@
         "confirmVerification": {
             "title": "Inserisci il codice di verifica",
             "description": "Inserisci il codice di verifica inviato a {phoneNumber}",
-            "resend": "Rinvia codice"
+            "resend": "Riinvia codice"
         },
         "topics": {
             "title": "Quali argomenti vuoi vedere su DCG",
             "description": "Scegli i tuoi interessi per aiutarci a personalizzare il tuo feed con aggiornamenti, discussioni e opportunità che ti interessano."
         }
+    },
+    "static": {
+        "about": "Informazioni",
+        "members": "membri"
     },
     "actions": {
         "continue": "Continua",
@@ -102,10 +106,11 @@
         "share": "Condividi",
         "comment": "Commenta",
         "save": "Salva",
-        "seemore": "Vedi altro",
+        "seemore": "Vedi di più",
         "addFriend": "Aggiungi amico",
         "join": "Unisciti",
         "joined": "Iscritto",
+        "pending": "In attesa",
         "attending": "Parteciperò",
         "saved": "Salvato",
         "attend": "Partecipa",
@@ -124,11 +129,11 @@
         "confirmVerification": {
             "title": "Inserisci il codice di verifica",
             "description": "Inserisci il codice di verifica inviato a {email}",
-            "resend": "Rinvia codice"
+            "resend": "Riinvia codice"
         },
         "request": {
             "title": "Reimposta la tua password",
-            "description": "Inserisci il tuo indirizzo email associato al tuo account e ti invieremo un codice di verifica",
+            "description": "Inserisci il tuo indirizzo email associato al tuo account e ti invieremo un codice di verifica lì",
             "email": {
                 "label": "Email",
                 "placeholder": "La tua email"
@@ -163,13 +168,15 @@
         "header": {
             "home": "Home",
             "community": "Community",
-            "marketplace": "Marketplace",
+            "marketplace": "Mercato",
             "chat": "Chat",
             "notification": "Notifiche",
             "searchLabel": "Cerca su Diasplug ..."
         },
         "associations": {
-            "discover": "Scopri le associazioni"
+            "discover": "Scopri le associazioni",
+            "myassociations": "Le mie associazioni in {association}",
+            "discovermore": "Scopri più associazioni in {association}"
         },
         "groupchats": {
             "groupchats": "Chat di gruppo",
@@ -177,7 +184,11 @@
         },
         "events": {
             "events": "Eventi",
-            "near": "Eventi vicino a te"
+            "near": "Eventi vicino a te",
+            "yourevents": "I tuoi eventi",
+            "moreevents": "Altri eventi",
+            "noevents": "Non hai eventi salvati",
+            "noattending": "Non stai partecipando a nessun evento al momento"
         },
         "opportunities": {
             "opportunities": "Opportunità"
@@ -190,8 +201,8 @@
         "joincommunity": "Unisciti alla community",
         "members": "membri",
         "myCommunity": "La mia Community",
-        "discoverMore": "Scopri altre community",
-        "openInHome": "Apri community in home",
+        "discoverMore": "Scopri più community",
+        "openInHome": "Apri community nella home",
         "leaveCommunity": "Lascia community"
     },
     "privacy": {

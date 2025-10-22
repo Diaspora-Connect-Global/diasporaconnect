@@ -91,6 +91,12 @@
             "description": "Choose your interests to help us personalize your feed with updates, discussions, and opportunities you care about."
         }
     },
+
+    "static": {
+        "about":"About",
+        "members":"members"
+
+    },
     "actions": {
         "continue": "Continue",
         "finish": "Finish",
@@ -106,6 +112,7 @@
         "addFriend": "Add Friend",
         "join": "Join",
         "joined": "Joined",
+        "pending":"Pending",
         "attending": "Attending",
         "saved": "Saved",
         "attend": "Attend",
@@ -154,7 +161,7 @@
         },
         "success": {
             "attendingEvent": "You are attending {event} event",
-            "savedEvent": "You have saved {even} event"
+            "savedEvent": "You have saved {event} event"
         }
     },
     "home": {
@@ -169,7 +176,10 @@
             "searchLabel": "Search Diasplug ..."
         },
         "associations": {
-            "discover":"Discover associations"
+            "discover":"Discover associations",
+            "myassociations": "My associations in {association}",
+            "discovermore": "Discover more associations in {association}"
+
         },
         "groupchats": {
             "groupchats":"Group chats",
@@ -177,7 +187,11 @@
         },
         "events": {
             "events":"Events",
-            "near":"Events near you"
+            "near":"Events near you",
+            "yourevents": "Your events",
+            "moreevents": "More events",
+            "noevents": "You have no saved events",
+            "noattending":" You are not attending any event now"
         },
         "opportunities": {
             "opportunities": "Opportunities"

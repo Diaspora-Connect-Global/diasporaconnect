@@ -2,17 +2,10 @@
 import EventCard1 from "@/components/cards/EventCard1";
 import EventCardSmall from "@/components/cards/events/EventCardSmall";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-const TABS = [
-    {
-        name: "Attending",
-        status: "events"
-    },
-    {
-        name: "Saved",
-        status: "saved"
-    },
-]
+
+
 
 interface Event {
     title: string;
@@ -23,12 +16,14 @@ interface Event {
 }
 
 const AttendingComponent = ({ attendingEvents }: { attendingEvents: Event[] }) => {
+    const t =  useTranslations("home.events")
+
 
     return (
         <>
             {attendingEvents.length === 0 ? (
                 <p className="text-text-primary">
-                    You are not attending any event now.
+                    {t("noattending")}
                 </p>
             ) : (
                 <>
@@ -49,12 +44,14 @@ const AttendingComponent = ({ attendingEvents }: { attendingEvents: Event[] }) =
 };
 
 const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
+    const t =  useTranslations("home.events")
+
 
     return (
         <>
             {savedEvents.length === 0 ? (
                 <p className="text-text-primary">
-                    You have no saved events.
+                    {t("noevents")}
                 </p>
             ) : (
                 <>
@@ -76,6 +73,20 @@ const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
 
 export default function Events() {
     const [activeTab, setActiveTab] = useState<string>("events");
+        const tActions =  useTranslations("actions")
+
+const TABS = [
+    {
+        name: `${tActions("attending")}`,
+        status: "events"
+    },
+    {
+        name:  `${tActions("saved")}`,
+        status: "saved"
+    },
+]
+
+const t =  useTranslations("home.events")
 
     const attendingEvents: Event[] = [
         {
@@ -151,7 +162,7 @@ export default function Events() {
         <div className="lg:w-[55.3125rem] h-[53.625rem] p-4 overflow-auto scrollbar-hide">
             {/* 885px equivalent, 64px header height */}
             <div className="mx-auto">
-                <p className="text-2xl font-heading-large my-[1.25rem]">Your events</p> {/* 20px equivalent */}
+                <p className="text-2xl font-heading-large my-[1.25rem]">{t("yourevents")}</p> {/* 20px equivalent */}
 
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
@@ -183,7 +194,7 @@ export default function Events() {
                     )}
                 </div>
 
-                <h2 className="font-heading-medium my-[1.25rem] text-2xl">More events</h2> {/* 20px equivalent */}
+                <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreevents")}</h2> {/* 20px equivalent */}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.75rem] "> {/* 12px, 24px equivalent */}
                     {moreEvents.map((event, index) => (
