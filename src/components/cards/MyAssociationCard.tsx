@@ -1,10 +1,12 @@
 'use client'
 import React from 'react';
 import Image from 'next/image'
+import { Link } from '@/i18n/navigation';
 import { ButtonType1 } from '../custom/button';
 
 
 interface MyAssociationCardProps {
+    id: string;
     title?: string;
     description?: string;
     logoIcon?: React.ReactNode;
@@ -16,7 +18,7 @@ export function MyAssociationCard({
     title = "GhanaConnect:Global",
     description = "Connect with professionals and businesses across Ghana and abroad.",
     logoIcon,
-    buttonText
+    buttonText,id
 }: MyAssociationCardProps) {
    
 
@@ -39,9 +41,13 @@ export function MyAssociationCard({
                         </div>
 
                         <div className="flex flex-col min-w-0 flex-1"> {/* Allow text truncation */}
-                            <h1 className="text-text-primary font-label-large text-sm sm:text-base truncate"> {/* Responsive font and truncate long titles */}
+
+                            <Link href={`/association/${id}`} >
+                            <h1 className="text-text-primary font-label-large hover:text-text-brand truncate"> {/* Responsive font and truncate long titles */}
                                 {title}
                             </h1>
+
+                            </Link>
                             <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-1"> {/* Smaller font, clamp description on small screens */}
                                 {description}
                             </p>

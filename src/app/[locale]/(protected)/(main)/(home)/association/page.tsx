@@ -6,20 +6,30 @@ import { useTranslations } from "next-intl";
 export default function Associations() {
     const tActions = useTranslations('actions');
 
+
     const myAssociations = [
         {
-            title: "GhanaConnect:Global",
-            description: "Connect with professionals and businesses across Ghana and abroad.",
+            id: 'adansi-times',
+            title: "The Adansi Times",
+            description: "Community news and stories from the Ghanaian diaspora. Stay connected with your roots and discover inspiring journeys",
             status: "Joined"
         },
         {
-            title: "GhanaTechHub",
-            description: "A platform for tech enthusiasts to collaborate and innovate in the Ghanaian tech landscape.",
+            id: 'tech-innovations-daily',
+            title: "Tech Innovations Daily",
+            description: "Daily updates on technology, startups, and product innovation around the world.",
             status: "Joined"
         },
         {
-            title: "GhanaTechHub",
-            description: "A platform for tech enthusiasts to collaborate and innovate in the Ghanaian tech landscape.",
+            id: 'global-finance-report',
+            title: "Global Finance Report",
+            description: "Coverage of global markets, macro trends, and finance insights for professionals and enthusiasts.",
+            status: "Pending"
+        },
+        {
+            id: 'health-wellness-journal',
+            title: "Health & Wellness Journal",
+            description: "Articles and tips on physical and mental wellbeing, lifestyle, and healthy living.",
             status: "Pending"
         }
     ];
@@ -45,35 +55,18 @@ export default function Associations() {
             members: 850,
             description: "A space for businesses to exchange services and resources effectively."
         },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-       
-        
+
     ];
     return (
         <>
-            <div className="min-w-[35rem] max-h-[53.625rem] p-4 overflow-auto scrollbar-hide ">
-
-               
+            <div className="w-full p-4 overflow-y-auto scrollbar-hide">
                 <p className="font-heading-large my-5">My associations in GhanaConnectGlobal</p>
 
                 <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[18rem]  ">
                     {myAssociations.map((association, index) => (
                         <MyAssociationCard
                             key={index}
+                            id={association.id}
                             title={association.title}
                             description={association.description}
                             buttonText={association.status}
@@ -97,7 +90,7 @@ export default function Associations() {
                         />
                     ))}
                 </div>
-                 </div>
+            </div>
         </>
     );
 }
