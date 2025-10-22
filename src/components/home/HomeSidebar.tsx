@@ -173,7 +173,7 @@ function Community() {
     };
 
     return (
-        <div className="space-y-4 p-1">
+        <div className="space-y-4  ">
 
             <MyCommunityCard2
                 communities={communities}
@@ -256,7 +256,7 @@ export default function HomeSidebar() {
     const isCommunity = true;
 
     return (
-        <div>
+        <div className='min-w-[18rem] h-[calc(100vh-4rem)] sticky top-[4rem] overflow-y-auto'>
             {!isCommunity ? <NoCommunity /> : <Community />}
 
             <div className="text-center text-xs space-x-2 py-4 mt-6 flex flex-wrap">
@@ -264,4 +264,4 @@ export default function HomeSidebar() {
             </div>
         </div>
     );
-}
+} 
