@@ -11,6 +11,7 @@ import {
 import { Button } from '../../ui/button';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image'
+import { formatDateProximity } from '@/macros/time';
 
 interface NotificationCardProps {
     title?: string;
@@ -74,7 +75,9 @@ export function NotificationCard({
                                 {description}
                             </p>
                             <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-1">
-                                {time}
+                                {
+                                 formatDateProximity(time)
+                                }
                             </p>
                         </div>
                     </div>

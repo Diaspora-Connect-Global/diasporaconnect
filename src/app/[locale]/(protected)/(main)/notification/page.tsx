@@ -10,52 +10,116 @@ interface Notification {
     description: string;
     type: 'associations' | 'opportunities' | 'events';
     read: boolean;
+    date: string; 
 }
 
 const notificationsFromApi: Notification[] = [
     {
         id: "1",
-        title: "GhanaConnect:Global",
-        description: "Connect with professionals and businesses across Ghana and abroad.",
+        title: "GhanaConnect:Global Monthly Meetup",
+        description: "Join our virtual networking session with diaspora professionals this Friday at 6 PM GMT.",
         type: 'associations',
-        read: true
+        read: true,
+        date: new Date(Date.now() - 30 * 1000).toISOString(), // 30 seconds ago - "Just now"
     },
     {
         id: "2",
-        title: "New Job Opportunity at TechCorp",
-        description: "TechCorp is hiring a Senior Software Engineer. Apply now to join our innovative team!",
+        title: "Senior Frontend Developer at FinTech Startup",
+        description: "Remote position available for React/TypeScript developer with 5+ years experience.",
         type: 'opportunities',
-        read: false
+        read: false,
+        date: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 minutes ago - "2m ago"
     },
     {
         id: "3",
-        title: "Upcoming Webinar: The Future of Tech in Africa",
-        description: "Join us for an insightful webinar discussing the future of technology in Africa with industry experts.",
+        title: "African Tech Innovation Summit 2024",
+        description: "Register for our annual conference featuring top innovators and investors across Africa.",
         type: 'events',
-        read: true
+        read: true,
+        date: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago - "45m ago"
     },
     {
         id: "4",
-        title: "Upcoming Webinar: The Future of Tech in Africa",
-        description: "Join us for an insightful webinar discussing the future of technology in Africa with industry experts.",
-        type: 'events',
-        read: true
+        title: "Diaspora Business Association Election",
+        description: "Voting opens tomorrow for the new executive board members. Make your voice heard!",
+        type: 'associations',
+        read: false,
+        date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago - "3h ago"
     },
     {
         id: "5",
-        title: "Upcoming Webinar: The Future of Tech in Africa",
-        description: "Join us for an insightful webinar discussing the future of technology in Africa with industry experts.",
-        type: 'events',
-        read: true
+        title: "Marketing Manager - Remote Position",
+        description: "Global company seeking marketing professional with African market experience.",
+        type: 'opportunities',
+        read: false,
+        date: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago - "12h ago"
     },
     {
         id: "6",
-        title: "Upcoming Webinar: The Future of Tech in Africa",
-        description: "Join us for an insightful webinar discussing the future of technology in Africa with industry experts.",
+        title: "Cultural Exchange Festival",
+        description: "Celebrate African heritage with food, music, and networking in London next month.",
         type: 'events',
-        read: true
+        read: true,
+        date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago - "Yesterday"
     },
+    {
+        id: "7",
+        title: "Ghanaian Professionals Network Update",
+        description: "New membership benefits announced including mentorship programs and career resources.",
+        type: 'associations',
+        read: false,
+        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago - "3d ago"
+    },
+    {
+        id: "8",
+        title: "Data Scientist Opportunity",
+        description: "Join our AI research team working on solutions for African agricultural challenges.",
+        type: 'opportunities',
+        read: true,
+        date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago - "1w ago"
+    },
+    {
+        id: "9",
+        title: "Startup Pitch Competition",
+        description: "Submit your business idea for a chance to win $50,000 in funding and mentorship.",
+        type: 'events',
+        read: false,
+        date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), // 21 days ago - "3w ago"
+    },
+    {
+        id: "10",
+        title: "Diaspora Investment Group Meeting",
+        description: "Quarterly meeting to discuss new investment opportunities in West Africa.",
+        type: 'associations',
+        read: true,
+        date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days ago - "1mo ago"
+    },
+    {
+        id: "11",
+        title: "Product Manager - E-commerce Platform",
+        description: "Lead product development for fast-growing African online marketplace.",
+        type: 'opportunities',
+        read: false,
+        date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days ago - "3mo ago"
+    },
+    {
+        id: "12",
+        title: "Annual Diaspora Homecoming Gala",
+        description: "Formal event celebrating diaspora achievements and fostering connections.",
+        type: 'events',
+        read: true,
+        date: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000).toISOString(), // 400 days ago - "1y ago"
+    },
+    {
+        id: "13",
+        title: "Tech Conference 2025",
+        description: "Save the date for our biggest tech conference next year.",
+        type: 'events',
+        read: false,
+        date: new Date(Date.now() - 800 * 24 * 60 * 60 * 1000).toISOString(), // 800 days ago - "2y ago"
+    }
 ];
+
 
 interface Tab {
     label: string;
@@ -123,7 +187,7 @@ export default function Notification() {
         setNotifications(updatedNotifications);
     };
 
-  
+
 
     // Get empty state message based on current filter
     const getEmptyStateMessage = () => {
@@ -154,8 +218,8 @@ export default function Notification() {
                 </p>
 
                 <div className="flex items-center gap-4">
-                    <button 
-                       className="flex items-center gap-2 text-text-brand hover:text-text-brand-dark transition-colors cursor-pointer"
+                    <button
+                        className="flex items-center gap-2 text-text-brand hover:text-text-brand-dark transition-colors cursor-pointer"
                         onClick={markAllAsRead}
                     >
                         <Check size={16} />
@@ -177,11 +241,10 @@ export default function Notification() {
                         <button
                             key={tab.value}
                             onClick={() => handleFilterChange(tab.value)}
-                            className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-300 ${
-                                tab.value === filter
+                            className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-300 ${tab.value === filter
                                     ? 'bg-surface-brand text-white'
                                     : 'bg-surface-default text-text-secondary hover:bg-surface-tertiary'
-                            }`}
+                                }`}
                         >
                             {tab.label}
                         </button>
@@ -202,7 +265,7 @@ export default function Notification() {
                             key={not.id}
                             title={not.title}
                             description={not.description}
-                            time="4d"
+                            time={not.date}
                             read={not.read}
                             onMarkAsRead={() => markAsRead(not.id)}
                             onRemove={() => removeNotification(not.id)}
