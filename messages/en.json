@@ -206,6 +206,24 @@
     "discoverMore": "Discover more communities", "openInHome": "Open community in home",
     "leaveCommunity": "Leave community"
     },
+    "notification": {
+        "notifications": "Notifications",
+        "opportunities":"Opportunities",
+        "events":"Events",
+        "allnotifications":"All Notifications",
+        "associations":"Associations",
+        "markasread": "Mark as read",
+        "remove": "Remove notification",
+        "markall": "Mark all as read",
+        "preference": "Notifications preference",
+        "none": {
+            "all": "No notifications available",
+            "opportunities": "No job opportunities at the moment",
+            "events": "No events at the moment",
+            "associations": "No association notifications at the moment"
+        }
+
+    },
     "privacy": {
         "public": "Public",
         "private": "Private"

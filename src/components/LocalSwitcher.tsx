@@ -20,6 +20,7 @@ const languages = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'it', name: 'Italian', nativeName: 'Italiano' },
+  { code: 'fr', name: 'French', nativeName: 'Français' },
 ];
 
 export default function LocaleSwitcher({

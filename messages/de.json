@@ -4,7 +4,7 @@
             "signup": "Willkommen bei DCG",
             "login": "Willkommen zurück!"
         },
-        "description": "Strukturierte, transparente und wirkungsvolle Wege für die Diaspora-Beteiligung schaffen.",
+        "description": "Schaffung strukturierter, transparenter und wirkungsvoller Wege für die Diaspora-Beteiligung.",
         "form": {
             "email": {
                 "label": "E-Mail",
@@ -24,10 +24,10 @@
             }
         },
         "policies": {
-            "agreement": "Wenn Sie sich anmelden, stimmen Sie unseren",
+            "agreement": "Durch die Fortsetzung der Registrierung stimmen Sie unseren",
             "privacyPolicy": "Datenschutzrichtlinien",
             "and": "und",
-            "termsOfService": "Nutzungsbedingungen"
+            "termsOfService": "Nutzungsbedingungen zu"
         },
         "socialAuth": {
             "divider": "oder fortfahren mit"
@@ -46,7 +46,7 @@
     },
     "onboarding": {
         "personalInfo": {
-            "title": "Wie heißen Sie?",
+            "title": "Wie ist Ihr Name",
             "description": "Lernen wir uns kennen! Dies hilft uns, Ihre Erfahrung zu personalisieren und wie andere Sie auf Diasplug sehen.",
             "firstName": {
                 "label": "Vorname",
@@ -67,7 +67,7 @@
         },
         "location": {
             "title": "In welchem Land leben Sie?",
-            "description": "Teilen Sie uns mit, wo Sie aktuell wohnen, damit wir Möglichkeiten, Veranstaltungen und Kontakte in Ihrer Nähe anpassen können.",
+            "description": "Teilen Sie uns mit, wo Sie aktuell leben, damit wir Möglichkeiten, Veranstaltungen und Verbindungen in Ihrer Nähe anpassen können.",
             "country": {
                 "label": "Land",
                 "placeholder": "Wählen Sie Ihr Land"
@@ -75,7 +75,7 @@
         },
         "phoneVerification": {
             "title": "Bestätigen Sie Ihre Telefonnummer",
-            "description": "Wir senden Ihnen einen Kurzcode zur Bestätigung Ihrer Nummer. Dies hilft, Ihr Konto zu schützen und erleichtert die Verbindung mit Ihrer Community.",
+            "description": "Wir senden Ihnen einen Kurzcode zur Bestätigung Ihrer Nummer. Dies hilft, Ihr Konto sicher zu halten und erleichtert die Verbindung mit Ihrer Community.",
             "phoneNumber": {
                 "label": "Telefonnummer",
                 "placeholder": "Handynummer"
@@ -87,7 +87,7 @@
             "resend": "Code erneut senden"
         },
         "topics": {
-            "title": "Welche Themen möchten Sie auf DCG sehen?",
+            "title": "Welche Themen möchten Sie auf DCG sehen",
             "description": "Wählen Sie Ihre Interessen, damit wir Ihren Feed mit Updates, Diskussionen und Möglichkeiten, die Sie interessieren, personalisieren können."
         }
     },
@@ -121,7 +121,7 @@
     "legal": {
         "about": "Über uns",
         "terms": "Bedingungen",
-        "privacyPolicy": "Datenschutzrichtlinien",
+        "privacyPolicy": "Datenschutzrichtlinie",
         "contact": "Kontaktieren Sie uns",
         "and": "und"
     },
@@ -133,7 +133,7 @@
         },
         "request": {
             "title": "Setzen Sie Ihr Passwort zurück",
-            "description": "Geben Sie Ihre mit Ihrem Konto verknüpfte E-Mail-Adresse ein und wir senden Ihnen dorthin einen Bestätigungscode",
+            "description": "Geben Sie Ihre E-Mail-Adresse ein, die mit Ihrem Konto verknüpft ist, und wir senden einen Bestätigungscode dorthin",
             "email": {
                 "label": "E-Mail",
                 "placeholder": "Ihre E-Mail"
@@ -158,25 +158,25 @@
             "passwordTooShort": "Passwort muss mindestens 8 Zeichen lang sein"
         },
         "success": {
-            "attendingEvent": "Sie nehmen an der Veranstaltung {event} teil",
-            "savedEvent": "Sie haben die Veranstaltung {event} gespeichert"
+            "attendingEvent": "Sie nehmen am {event} Event teil",
+            "savedEvent": "Sie haben das {event} Event gespeichert"
         }
     },
     "home": {
         "mutualConnections": "gemeinsame Verbindungen",
-        "peopleYouMayKnow": "Personen, die Sie möglicherweise kennen",
+        "peopleYouMayKnow": "Personen, die Sie kennen könnten",
         "header": {
             "home": "Startseite",
             "community": "Community",
             "marketplace": "Marktplatz",
             "chat": "Chat",
-            "notification": "Benachrichtigung",
+            "notification": "Benachrichtigungen",
             "searchLabel": "Diasplug durchsuchen ..."
         },
         "associations": {
             "discover": "Vereine entdecken",
             "myassociations": "Meine Vereine in {association}",
-            "discovermore": "Entdecken Sie mehr Vereine in {association}"
+            "discovermore": "Weitere Vereine in {association} entdecken"
         },
         "groupchats": {
             "groupchats": "Gruppenchats",
@@ -204,6 +204,23 @@
         "discoverMore": "Weitere Communities entdecken",
         "openInHome": "Community auf der Startseite öffnen",
         "leaveCommunity": "Community verlassen"
+    },
+    "notification": {
+        "notifications": "Benachrichtigungen",
+        "opportunities": "Möglichkeiten",
+        "events": "Veranstaltungen",
+        "allnotifications": "Alle Benachrichtigungen",
+        "associations": "Vereine",
+        "markasread": "Als gelesen markieren",
+        "remove": "Benachrichtigung entfernen",
+        "markall": "Alle als gelesen markieren",
+        "preference": "Benachrichtigungseinstellungen",
+        "none": {
+            "all": "Keine Benachrichtigungen verfügbar",
+            "opportunities": "Derzeit keine Stellenangebote",
+            "events": "Derzeit keine Veranstaltungen",
+            "associations": "Derzeit keine Vereinsbenachrichtigungen"
+        }
     },
     "privacy": {
         "public": "Öffentlich",

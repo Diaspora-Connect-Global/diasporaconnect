@@ -1,0 +1,229 @@
+{
+    "authentication": {
+        "greetings": {
+            "signup": "Bienvenue sur DCG",
+            "login": "Bon retour !"
+        },
+        "description": "Création de voies structurées, transparentes et impactantes pour l'engagement de la diaspora.",
+        "form": {
+            "email": {
+                "label": "E-mail",
+                "placeholder": "Votre e-mail"
+            },
+            "password": {
+                "label": "Mot de passe",
+                "placeholder": "Votre mot de passe"
+            },
+            "createPassword": {
+                "label": "Créer un mot de passe",
+                "placeholder": "Créez votre nouveau mot de passe"
+            },
+            "confirmPassword": {
+                "label": "Confirmer le mot de passe",
+                "placeholder": "Confirmez votre nouveau mot de passe"
+            }
+        },
+        "policies": {
+            "agreement": "En continuant l'inscription, vous acceptez notre",
+            "privacyPolicy": "Politique de confidentialité",
+            "and": "et",
+            "termsOfService": "Conditions d'utilisation"
+        },
+        "socialAuth": {
+            "divider": "ou continuer avec"
+        },
+        "accountSwitch": {
+            "existingAccount": {
+                "prompt": "Vous avez déjà un compte ?",
+                "action": "Se connecter"
+            },
+            "newAccount": {
+                "prompt": "Nouveau sur Diaspora Connect Global ?",
+                "action": "Créer un compte"
+            }
+        },
+        "forgotPassword": "Mot de passe oublié ?"
+    },
+    "onboarding": {
+        "personalInfo": {
+            "title": "Quel est votre nom",
+            "description": "Faisons connaissance ! Cela nous aide à personnaliser votre expérience et la façon dont les autres vous voient sur Diasplug.",
+            "firstName": {
+                "label": "Prénom",
+                "placeholder": "Votre prénom"
+            },
+            "lastName": {
+                "label": "Nom",
+                "placeholder": "Votre nom"
+            }
+        },
+        "community": {
+            "title": "Parlez-nous de votre communauté",
+            "description": "Partagez la communauté avec laquelle vous vous identifiez. Cela nous aide à vous connecter avec des personnes et des histoires qui comptent pour vous.",
+            "options": {
+                "localCitizen": "Citoyen local",
+                "diasporaMember": "Membre de la diaspora"
+            }
+        },
+        "location": {
+            "title": "Quel est votre pays de résidence ?",
+            "description": "Dites-nous où vous vivez actuellement afin que nous puissions adapter les opportunités, événements et connexions près de chez vous.",
+            "country": {
+                "label": "Pays",
+                "placeholder": "Sélectionnez votre pays"
+            }
+        },
+        "phoneVerification": {
+            "title": "Vérifiez votre numéro de téléphone",
+            "description": "Nous vous enverrons un code court pour confirmer votre numéro. Cela aide à sécuriser votre compte et facilite la connexion avec votre communauté.",
+            "phoneNumber": {
+                "label": "Numéro de téléphone",
+                "placeholder": "Numéro de mobile"
+            }
+        },
+        "confirmVerification": {
+            "title": "Entrez le code de vérification",
+            "description": "Entrez le code de vérification qui a été envoyé à {phoneNumber}",
+            "resend": "Renvoyer le code"
+        },
+        "topics": {
+            "title": "Quels sujets souhaitez-vous voir sur DCG",
+            "description": "Choisissez vos centres d'intérêt pour nous aider à personnaliser votre fil d'actualité avec des mises à jour, discussions et opportunités qui vous intéressent."
+        }
+    },
+    "static": {
+        "about": "À propos",
+        "members": "membres"
+    },
+    "actions": {
+        "continue": "Continuer",
+        "finish": "Terminer",
+        "sendCode": "Envoyer le code",
+        "submit": "Soumettre",
+        "skip": "Passer",
+        "setNewPassword": "Définir un nouveau mot de passe",
+        "like": "J'aime",
+        "share": "Partager",
+        "comment": "Commenter",
+        "save": "Sauvegarder",
+        "seemore": "Voir plus",
+        "addFriend": "Ajouter un ami",
+        "join": "Rejoindre",
+        "joined": "Rejoint",
+        "pending": "En attente",
+        "attending": "Participe",
+        "saved": "Sauvegardé",
+        "attend": "Participer",
+        "login": "Se connecter",
+        "postedBy": "Publié par {user}",
+        "added": "Ajouté"
+    },
+    "legal": {
+        "about": "À propos",
+        "terms": "Conditions",
+        "privacyPolicy": "Politique de confidentialité",
+        "contact": "Contactez-nous",
+        "and": "et"
+    },
+    "passwordReset": {
+        "confirmVerification": {
+            "title": "Entrez le code de vérification",
+            "description": "Entrez le code de vérification qui a été envoyé à {email}",
+            "resend": "Renvoyer le code"
+        },
+        "request": {
+            "title": "Réinitialisez votre mot de passe",
+            "description": "Entrez votre adresse e-mail associée à votre compte et nous y enverrons un code de vérification",
+            "email": {
+                "label": "E-mail",
+                "placeholder": "Votre e-mail"
+            }
+        },
+        "newPassword": {
+            "title": "Entrez votre nouveau mot de passe",
+            "createPassword": {
+                "label": "Créer un nouveau mot de passe",
+                "placeholder": "Votre nouveau mot de passe"
+            },
+            "confirmPassword": {
+                "label": "Confirmer le nouveau mot de passe",
+                "placeholder": "Confirmez votre nouveau mot de passe"
+            }
+        }
+    },
+    "toasts": {
+        "errors": {
+            "emailRequired": "L'e-mail est requis",
+            "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+            "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères"
+        },
+        "success": {
+            "attendingEvent": "Vous participez à l'événement {event}",
+            "savedEvent": "Vous avez sauvegardé l'événement {event}"
+        }
+    },
+    "home": {
+        "mutualConnections": "connexions mutuelles",
+        "peopleYouMayKnow": "Personnes que vous pourriez connaître",
+        "header": {
+            "home": "Accueil",
+            "community": "Communauté",
+            "marketplace": "Marketplace",
+            "chat": "Chat",
+            "notification": "Notifications",
+            "searchLabel": "Rechercher sur Diasplug ..."
+        },
+        "associations": {
+            "discover": "Découvrir des associations",
+            "myassociations": "Mes associations à {association}",
+            "discovermore": "Découvrir plus d'associations à {association}"
+        },
+        "groupchats": {
+            "groupchats": "Chats de groupe",
+            "create": "Créer un chat de groupe"
+        },
+        "events": {
+            "events": "Événements",
+            "near": "Événements près de chez vous",
+            "yourevents": "Vos événements",
+            "moreevents": "Plus d'événements",
+            "noevents": "Vous n'avez aucun événement sauvegardé",
+            "noattending": "Vous ne participez à aucun événement pour le moment"
+        },
+        "opportunities": {
+            "opportunities": "Opportunités"
+        }
+    },
+    "community": {
+        "discover": "Découvrir la communauté",
+        "seeall": "Voir toute la communauté",
+        "join": "Rejoignez une communauté pour voir ce qui se passe",
+        "joincommunity": "Rejoindre la communauté",
+        "members": "membres",
+        "myCommunity": "Ma Communauté",
+        "discoverMore": "Découvrir plus de communautés",
+        "openInHome": "Ouvrir la communauté dans l'accueil",
+        "leaveCommunity": "Quitter la communauté"
+    },
+    "notification": {
+        "notifications": "Notifications",
+        "opportunities": "Opportunités",
+        "events": "Événements",
+        "allnotifications": "Toutes les notifications",
+        "associations": "Associations",
+        "markasread": "Marquer comme lu",
+        "remove": "Supprimer la notification",
+        "markall": "Tout marquer comme lu",
+        "preference": "Préférences de notifications",
+        "none": {
+            "all": "Aucune notification disponible",
+            "opportunities": "Aucune opportunité d'emploi pour le moment",
+            "events": "Aucun événement pour le moment",
+            "associations": "Aucune notification d'association pour le moment"
+        }
+    },
+    "privacy": {
+        "public": "Public",
+        "private": "Privé"
+    }
+}
