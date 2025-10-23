@@ -33,7 +33,7 @@ export default function CommunityCardVariant2({
     return (
         <TooltipProvider>
             <div
-                className="bg-surface-default rounded-2xl h-[12.25rem] min-w-[11.5rem] w-fit p-[0.75rem] border border-border-subtle flex flex-col items-center justify-between overflow-hidden"
+                className="bg-surface-default rounded-2xl h-[12.25rem] lg:min-w-[14.5rem]  lg:max-w-[15.5rem]  p-[0.75rem] border border-border-subtle flex flex-col items-center justify-between overflow-hidden "
                 onClick={onCardClick}
             >
                 {/* Icon */}
@@ -77,10 +77,10 @@ export default function CommunityCardVariant2({
                 </div>
 
                 {/* Button */}
-                <div className="w-full flex justify-center h-[2.25rem]">
+                <div className="w-full flex justify-center h-[2.25rem] ">
                     <ButtonType1
                         onClick={onButtonClick}
-                        className="w-[8.75rem]"
+                        className="w-[8.75rem]  shrink"
                     >
                         {t('joincommunity')}
                     </ButtonType1>

@@ -114,7 +114,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="flex gap-[0.3rem] overflow-auto scrollbar-hide mb-[1.5rem]"> {/* 8px gap, 24px margin */}
+          <div className="flex gap-[0.3rem]  overflow-auto scrollbar-hide mb-[1.5rem]"> {/* 8px gap, 24px margin */}
             {communities.map((community, index) => (
               <CommunityCardVariant2
                 key={index}
