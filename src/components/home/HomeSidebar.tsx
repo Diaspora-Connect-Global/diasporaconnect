@@ -71,12 +71,12 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
 
             {isOpen && (
                 <div className="pl-6 pb-3 space-y-3">
-                    <Link href = {`${link}`}>
-                    <BodySmall>
-                        <TextBrand className="cursor-pointer hover:underline block">
-                            {defaultAction}
-                        </TextBrand>
-                    </BodySmall>
+                    <Link href={`${link}`}>
+                        <BodySmall>
+                            <TextBrand className="cursor-pointer hover:underline block">
+                                {defaultAction}
+                            </TextBrand>
+                        </BodySmall>
                     </Link>
 
                     {children}
@@ -189,7 +189,7 @@ function Community() {
                 onToggle={() => toggleSection('associations')}
                 defaultAction={t('associations.discover')}
                 image='/ASSOCIATION.png'
-                                link="/association"
+                link="/association"
 
             >
                 <div className="space-y-1">
@@ -213,6 +213,8 @@ function Community() {
                 onToggle={() => toggleSection('groupChats')}
                 defaultAction={t('groupchats.create')}
                 image='/GROUPCHAT.png'
+                link="#"
+
 
             >
                 <div className="space-y-2">
