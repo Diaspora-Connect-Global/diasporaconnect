@@ -86,7 +86,7 @@ export default function FeedCard({
       </p>
 
       {/* Reactions */}
-      <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b border-border-default">
+      <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
         <button
           className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem]"
           onClick={handleLike}
