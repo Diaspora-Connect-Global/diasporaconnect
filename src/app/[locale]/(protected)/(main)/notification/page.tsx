@@ -211,7 +211,7 @@ export default function Notification() {
     const emptyStateMessage = getEmptyStateMessage();
 
     return (
-        <div className="lg:max-w-[63rem] mx-2 lg:mx-[15%] h-[calc(100vh-4rem)] py-4">
+        <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-[calc(100vh-4rem)] py-4">
             <div className="flex justify-between items-center mb-4">
                 <p className="text-2xl font-heading-large">
                     {t('notifications')}
