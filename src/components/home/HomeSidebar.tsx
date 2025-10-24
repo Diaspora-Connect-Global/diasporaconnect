@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import InfoLinks from "../custom/infoLinks";
 import { BodyMedium, BodySmall, LabelMedium, TextBrand, } from "../utils";
-import { ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { MyCommunityCard2 } from '../cards/MyCommunityCard2';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -65,7 +65,7 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
                     <span className="text-text-primary font-caption-large truncate">{title}</span>
                 </div>
                 <span className="text-text-primary">
-                    {isOpen ? <ChevronUp size={10} /> : ""}
+                    {isOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
                 </span>
             </button>
 
