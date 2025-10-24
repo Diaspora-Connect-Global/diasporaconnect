@@ -108,7 +108,7 @@ export default function Home() {
         <div className="overflow-y-auto h-full lg:max-w-[37.2rem] mx-auto scrollbar-hide p-4"> {/* Adjusted for full height and proper padding */}
           <div>
             <div className="lg:flex justify-between mb-[1rem]"> {/* 16px equivalent */}
-              <p className="text-2xl font-caption-large">{t("discover")}</p>
+              <h2 className="font-display-large">{t("discover")}</h2>
               <Link href="/community">
                 <p className="font-label-medium text-text-brand">{t("seeall")}</p>
               </Link>
