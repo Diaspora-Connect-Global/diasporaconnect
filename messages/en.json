@@ -91,11 +91,9 @@
             "description": "Choose your interests to help us personalize your feed with updates, discussions, and opportunities you care about."
         }
     },
-
     "static": {
-        "about":"About",
-        "members":"members"
-
+        "about": "About",
+        "members": "members"
     },
     "actions": {
         "continue": "Continue",
@@ -112,13 +110,14 @@
         "addFriend": "Add Friend",
         "join": "Join",
         "joined": "Joined",
-        "pending":"Pending",
+        "pending": "Pending",
         "attending": "Attending",
         "saved": "Saved",
         "attend": "Attend",
         "login": "Login",
         "postedBy": "Posted by {user}",
-        "added": "Added"
+        "added": "Added",
+        "applied": "Applied"
     },
     "legal": {
         "about": "About",
@@ -176,25 +175,35 @@
             "searchLabel": "Search Diasplug ..."
         },
         "associations": {
-            "discover":"Discover associations",
+            "discover": "Discover associations",
             "myassociations": "My associations in {association}",
-            "discovermore": "Discover more associations in {association}"
-
+            "discovermore": "Discover more associations in {association}",
+            "notfound":{
+                "title": "Association not found",
+                "description": " We couldn't find the association you're looking for. It may have been removed or the link is incorrect.",
+                "browse": "Browse associations"
+            }
         },
         "groupchats": {
-            "groupchats":"Group chats",
+            "groupchats": "Group chats",
             "create": "Create group chat"
         },
         "events": {
-            "events":"Events",
-            "near":"Events near you",
+            "events": "Events",
+            "near": "Events near you",
             "yourevents": "Your events",
             "moreevents": "More events",
             "noevents": "You have no saved events",
-            "noattending":" You are not attending any event now"
+            "noattending": " You are not attending any event now"
         },
         "opportunities": {
-            "opportunities": "Opportunities"
+            "opportunities": "Opportunities",
+            "youropp": "Your opportunities",
+            "moreopp": "Explore opportunities",
+            "none": {
+                "applied": "You have not applied to any opportunities yet",
+                "saved": "You have no saved opportunities"
+            }
         }
     },
     "community": {
@@ -202,16 +211,18 @@
         "seeall": "See all community",
         "join": "Join a community to see whats's happening",
         "joincommunity": "Join community",
-        "members": "members", "myCommunity": "My Community",
-    "discoverMore": "Discover more communities", "openInHome": "Open community in home",
-    "leaveCommunity": "Leave community"
+        "members": "members",
+        "myCommunity": "My Community",
+        "discoverMore": "Discover more communities",
+        "openInHome": "Open community in home",
+        "leaveCommunity": "Leave community"
     },
     "notification": {
         "notifications": "Notifications",
-        "opportunities":"Opportunities",
-        "events":"Events",
-        "allnotifications":"All Notifications",
-        "associations":"Associations",
+        "opportunities": "Opportunities",
+        "events": "Events",
+        "allnotifications": "All Notifications",
+        "associations": "Associations",
         "markasread": "Mark as read",
         "remove": "Remove notification",
         "markall": "Mark all as read",
@@ -222,7 +233,6 @@
             "events": "No events at the moment",
             "associations": "No association notifications at the moment"
         }
-
     },
     "privacy": {
         "public": "Public",

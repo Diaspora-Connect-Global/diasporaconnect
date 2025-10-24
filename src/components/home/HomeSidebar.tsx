@@ -244,7 +244,7 @@ function Community() {
                 isOpen={openSections.opportunities}
                 onToggle={() => toggleSection('opportunities')}
                 image='/OPPORTUNITIES.png'
-                link='#'
+                link='/opportunities'
 
             />
 

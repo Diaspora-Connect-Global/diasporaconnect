@@ -7,10 +7,13 @@ import { HeadingMedium } from "@/components/utils";
 import { useParams } from 'next/navigation';
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 export default function AssociationPage() {
     const params = useParams();
     const associationId = params.id;
+
+    const t = useTranslations("home.associations")
 
     type Association = {
         id: string;
@@ -63,7 +66,6 @@ export default function AssociationPage() {
                 joinButton: false,
             }]
         },
-        // ... andere Associations
     ];
 
     const currentAssociation = associations.find(a => a.id === associationId);
@@ -81,13 +83,15 @@ export default function AssociationPage() {
                             className="rounded-full object-cover"
                         />
                     </div>
-                    <h2 className="text-2xl font-semibold mb-2">Association not found</h2>
+                    <h2 className="text-2xl font-semibold mb-2"> {t("notfound.title")} </h2>
                     <p className="text-sm text-text-primary mb-6">
-                        We couldn&apos;t find the association you&apos;re looking for. It may have been removed or the link is incorrect.
+                        {t("notfound.description")}
                     </p>
                     <div className="flex justify-center gap-3">
                         <Link href="/association">
-                            <ButtonType1>Browse associations</ButtonType1>
+                            <ButtonType1>
+                                {t("notfound.browse")}
+                            </ButtonType1>
                         </Link>
                     </div>
                 </div>
@@ -145,19 +149,19 @@ export default function AssociationPage() {
                 </div>
             </div>
 
-        {/* Sidebar - Sticky Section */}
-<div className="lg:min-w-[26rem] lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto scrollbar-hide">
-    <div className="space-y-6 w-fit ">
-        <AboutAssociation
-            members={currentAssociation.members}
-            createdDate={currentAssociation.createdDate}
-            visibility={currentAssociation.visibility}
-            description={currentAssociation.description}
-        />
-        {/* Remove any overflow containers */}
-        <PeopleYouMayKnow />
-    </div>
-</div>
+            {/* Sidebar - Sticky Section */}
+            <div className="lg:min-w-[26rem] lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto scrollbar-hide">
+                <div className="space-y-6 w-fit ">
+                    <AboutAssociation
+                        members={currentAssociation.members}
+                        createdDate={currentAssociation.createdDate}
+                        visibility={currentAssociation.visibility}
+                        description={currentAssociation.description}
+                    />
+                    {/* Remove any overflow containers */}
+                    <PeopleYouMayKnow />
+                </div>
+            </div>
         </div>
     );
 }
