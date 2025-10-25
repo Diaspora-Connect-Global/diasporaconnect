@@ -1,12 +1,19 @@
 'use client';
 
+import { ButtonType1, ButtonType2 } from "@/components/custom/button";
+import { TextInput } from "@/components/custom/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LabelMedium } from "@/components/utils";
 import { Bookmark, Clock, ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 interface OpportunityItemProps {
@@ -22,6 +29,21 @@ interface OpportunityItemProps {
 
 export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const t = useTranslations('authentication');
+    const tO = useTranslations('onboarding');
+
+
+    const RequiredAsterisk = () => <span className="text-red-500">*</span>;
+    const scrollToForm = () => {
+        const formHeader = document.getElementById('form-header');
+        if (formHeader) {
+            formHeader.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    };
+
 
     return (
         <>
@@ -122,6 +144,113 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
                                 </ul>
                             </section>
+
+
+
+                            <section className="" id="form-header">
+                                <p className="font-heading-xsmall">Apply for this job</p>
+                                <p> <RequiredAsterisk />Required</p>
+                                <form className="space-y-4 mt-4">
+                                    <p>Resume/CV<RequiredAsterisk /></p>
+
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            accept=".pdf,.doc,.docx,.txt,.rtf"
+                                            required
+                                        />
+
+
+
+
+
+                                        <div className=" rounded-md   hover:bg-surface-tertiary transition-colors cursor-pointer">
+      <span className="text-text-brand underline underline-offset-2 hover:text-text-brand-dark transition-colors">
+        Choose file
+      </span>
+    </div>
+                                    </div>
+
+
+                                    <p>(File types: pdf,doc,docx,txt,rtf)</p>
+
+                                    <TextInput
+                                        value={``}
+                                        onChange={() => console.log("Email")}
+                                        label="Email"
+                                        placeholder="Enter your email"
+                                        required={true}
+                                    />
+                                    <TextInput
+                                        value=""
+                                        onChange={() => console.log("Email")}
+                                        type="text"
+                                        placeholder={t("form.email.placeholder")}
+                                        label="First Name"
+                                        id="email"
+                                        required={true}
+                                    />
+
+
+
+                                    <TextInput
+                                        value=""
+                                        onChange={() => console.log("Email")}
+                                        type="phone"
+                                        placeholder={t("form.email.placeholder")}
+                                        label="Phone Number"
+                                        id="phone"
+                                        required={true}
+                                    />
+
+
+
+                                    <div className="w-full">
+                                        <label
+                                            htmlFor="country"
+                                            className="block text-sm font-medium mb-2"
+                                        >
+                                            <LabelMedium>
+                                                {`${tO('location.country.label')} `} <RequiredAsterisk />
+                                            </LabelMedium>
+                                        </label>
+                                        <Select
+                                            value={''}
+                                            onValueChange={() => { }}
+                                        >
+                                            <SelectTrigger className="w-full px-3 py-6 border-1 border-border-default rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition">
+                                                <SelectValue placeholder={tO('location.country.placeholder')} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {/* {countries.map((country) => (
+                            <SelectItem key={country} value={country}>
+                                {country}
+                            </SelectItem>
+                        ))} */}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+
+
+
+                                    <div className="flex items-center gap-3">
+                                        <Checkbox id="terms"
+                                            className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-surface-brand data-[state=checked]:text-white "
+
+                                        />
+                                        <Label htmlFor="terms " className="text-text-primary"> By using this form you agree with the storage and handling of your data by this website</Label>
+                                    </div>
+
+                                    <ButtonType2 className="px-4 py-2">
+                                        <span>Submit</span>
+                                    </ButtonType2>
+
+                                </form>
+
+
+                            </section>
                         </div>
 
                         {/* Right Column - Job Meta Information */}
@@ -134,9 +263,9 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                             <strong>Posted by</strong> GhanaConnectGlobal Admin
                                         </div>
 
-                                            <div className="flex items-center gap-2 text-text-primary text-sm">
-                                                Remote |  Full-time |  Apply before Nov 1, 2025
-                                            </div>
+                                        <div className="flex items-center gap-2 text-text-primary text-sm">
+                                            Remote |  Full-time |  Apply before Nov 1, 2025
+                                        </div>
 
                                         <div className="flex items-center gap-2 text-text-secondary text-sm">
                                             <Clock className="w-4 h-4" />
@@ -179,7 +308,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                             className="flex-1 px-6 py-3 text-text-white border bg-surface-brand font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-full"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                               window.open('https://gh.linkedin.com/jobs/easy-apply-jobs?countryRedirected=1', '_blank');
+                                                window.open('https://gh.linkedin.com/jobs/easy-apply-jobs?countryRedirected=1', '_blank');
                                             }}
                                         >
                                             <span>Apply now</span>
@@ -187,7 +316,13 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                         </button>
 
 
-                                        <button className="flex-1 px-6 py-3 bg-surface-brand text-text-white font-medium hover:bg-surface-brand transition-colors cursor-pointer flex items-center justify-center  rounded-full">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                scrollToForm();
+                                            }}
+                                            id="form-header-trigger"
+                                            className="flex-1 px-6 py-3 bg-surface-brand text-text-white font-medium hover:bg-surface-brand transition-colors cursor-pointer flex items-center justify-center  rounded-full">
                                             Apply now
                                         </button>
                                         <button

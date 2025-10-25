@@ -11,6 +11,7 @@ interface PasswordInputProps {
     placeholder?: string;
     label?: string;
     id: string;
+    required?: boolean;
 }
 
 export const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -20,7 +21,8 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
     setShowPassword,
     placeholder = "Your new password",
     label = "Create password",
-    id = "password"
+    id = "password",
+    required = false
 
 }) => {
     return (
@@ -28,6 +30,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
             <label htmlFor={id} className="text-sm font-normal">
                 <LabelMedium>
                     {label}
+                    {required && <span className="text-red-500 ml-1">*</span>}
                 </LabelMedium>
             </label>
             <div className="relative">
@@ -40,6 +43,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="h-12 pr-10  placeholder:text-text-secondary w-full bg-transparent px-3 focus:outline-none"
+                            required={required}
                         />
                         <button
                             type="button"
@@ -62,6 +66,7 @@ interface TextInputProps {
     placeholder?: string;
     label?: string;
     id?: string;
+    required?: boolean;
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
@@ -70,13 +75,15 @@ export const TextInput: React.FC<TextInputProps> = ({
     type = "text",
     placeholder = "Your email",
     label = "Email",
-    id = "email"
+    id = "email",
+    required = false
 }) => {
     return (
         <div className="space-y-2 ">
             <label htmlFor={id} className="">
                 <LabelMedium>
                     {label}
+                    {required && <span className="text-red-500 ml-1">*</span>}
                 </LabelMedium>
             </label>
             <div className="bg-surface-subtle rounded-md">
@@ -88,13 +95,13 @@ export const TextInput: React.FC<TextInputProps> = ({
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         className="h-12  placeholder:text-text-secondary w-full  px-3 focus:outline-none"
+                        required={required}
                     />
                 </div>
             </div>
         </div>
     );
 };
-
 
 interface SearchInputProps {
     value: string;
