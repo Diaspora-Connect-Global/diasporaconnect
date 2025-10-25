@@ -1,6 +1,6 @@
 'use client';
 
-import { ButtonType1, ButtonType2 } from "@/components/custom/button";
+import {  ButtonType2 } from "@/components/custom/button";
 import { TextInput } from "@/components/custom/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -10,7 +10,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LabelMedium } from "@/components/utils";
 import { Bookmark, Clock, ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
