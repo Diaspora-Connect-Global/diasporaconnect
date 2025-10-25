@@ -110,6 +110,12 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                 </div>
                             </DialogHeader>
 
+
+
+                        <div className="border-b border-b-border-subtle py-4">
+
+
+
                             {/* Job Description */}
                             <section>
                                 <h3 className="text-lg font-semibold text-text-primary mb-3">
@@ -132,7 +138,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                             </section>
 
                             {/* Job Requirements */}
-                            <section>
+                            <section >
                                 <h3 className="text-lg font-semibold text-text-primary mb-3">
                                     Job requirements
                                 </h3>
@@ -147,7 +153,20 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
 
 
-                            <section className="" id="form-header">
+                                                 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+                            <section className=" py-4" id="form-header">
                                 <p className="font-heading-xsmall">Apply for this job</p>
                                 <p> <RequiredAsterisk />Required</p>
                                 <form className="space-y-4 mt-4">
@@ -166,16 +185,17 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
 
                                         <div className=" rounded-md   hover:bg-surface-tertiary transition-colors cursor-pointer">
-      <span className="text-text-brand underline underline-offset-2 hover:text-text-brand-dark transition-colors">
-        Choose file
-      </span>
-    </div>
+                                            <span className="text-text-brand underline underline-offset-2 hover:text-text-brand-dark transition-colors">
+                                                Choose file
+                                            </span>
+                                        </div>
                                     </div>
 
 
                                     <p>(File types: pdf,doc,docx,txt,rtf)</p>
 
                                     <TextInput
+                                    id="rmail"
                                         value={``}
                                         onChange={() => console.log("Email")}
                                         label="Email"
@@ -188,7 +208,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                         type="text"
                                         placeholder={t("form.email.placeholder")}
                                         label="First Name"
-                                        id="email"
+                                        id="firstName"
                                         required={true}
                                     />
 
@@ -252,6 +272,8 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
                             </section>
                         </div>
+
+                        
 
                         {/* Right Column - Job Meta Information */}
                         <div className="lg:col-span-1">
