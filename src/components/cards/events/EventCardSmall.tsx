@@ -21,8 +21,8 @@ export default function EventCardSmall({ title, date, location, attendees, image
                     src={imageUrl}
                     alt={`${title} background`}
                     layout="fill"
-                    objectFit="center"
-                    className="w-full h-full object-center"
+                    objectFit="fill"
+                    className="w-full h-full object-fill"
                     onError={(e) => {
                         e.currentTarget.style.display = "none";
                         e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
@@ -33,8 +33,8 @@ export default function EventCardSmall({ title, date, location, attendees, image
                         src="/EVENT.png"
                         alt="Fallback event background"
                         layout="fill"
-                        objectFit="cover"
-                        className="w-full h-full object-contain"
+                        objectFit="fill"
+                        className="w-full h-full object-fill"
                     />
                 </div>
             </div>

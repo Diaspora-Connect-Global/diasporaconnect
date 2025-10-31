@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { ButtonType1, ButtonType2 } from "../custom/button";
-import Link from "next/link";
+import { ButtonType1, ButtonType2 } from "../../custom/button";
 
 // EventCard1 Component with Props
 interface EventCardProps {
@@ -8,10 +7,11 @@ interface EventCardProps {
     date: string;
     location: string;
     attendees: number;
-    imageUrl: string; // Required background image URL
+    imageUrl: string; 
+onBuyClick?: () => void;
 }
 
-export default function EventCard2({ title, date, location, attendees, imageUrl }: EventCardProps) {
+export default function EventCard2({ title, date, location, attendees, imageUrl, onBuyClick }: EventCardProps) {
     return (
         <div className="w-full  bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -20,8 +20,7 @@ export default function EventCard2({ title, date, location, attendees, imageUrl 
                     src={imageUrl}
                     alt={`${title} background`}
                     layout="fill"
-                    objectFit="cover"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-fill"
                     onError={(e) => {
                         e.currentTarget.style.display = "none";
                         e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
@@ -40,9 +39,12 @@ export default function EventCard2({ title, date, location, attendees, imageUrl 
 
             {/* Event Details */}
             <div className="p-6">
-                <Link href="/events/1">
-                    <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
-                </Link>
+                <div className="flex justify-between">
+
+                    <h2 className="text-2xl font-heading-small text-primary mb-2">{title}</h2>
+                    <p className="text-text-primary "><span className="text-lg font-heading-small text-primary">GHC300.00/</span> <span className="text-sm">ticket</span></p>
+
+                </div>
                 <p className="text-lg font-semibold text-primary mb-1">{date}</p>
                 <p className="text-secondary mb-1">{location}</p>
                 <p className="text-secondary text-sm mb-6">{attendees} going</p>
@@ -50,7 +52,7 @@ export default function EventCard2({ title, date, location, attendees, imageUrl 
                 {/* Action Buttons */}
                 <div className="flex gap-3 justify-between">
                     <div className="flex items-center gap-4">
-                        <ButtonType2 className=" py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
+                        <ButtonType2 onClick={onBuyClick} className=" py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
                             Attend
                         </ButtonType2>
                         <ButtonType1 className="flex items-center justify-center  py-3 px-6 rounded-full overflow-hidden">
@@ -73,7 +75,7 @@ export default function EventCard2({ title, date, location, attendees, imageUrl 
                     <p className="text-xl font-bold text-primary">About</p>
                     <p className="text-primary mt-2 text-justify">
                         Join us for the Accra Arts Festival, a vibrant celebration of Ghanaian culture and creativity. Experience captivating performances, stunning art exhibitions, and engaging workshops that showcase the rich heritage of Ghana. Whether you&apos;re an art enthusiast or simply looking for a fun day out, this festival promises something for everyone. Don&apos;t miss out on this unforgettable event!
-                        
+
 
                     </p>
                 </div>

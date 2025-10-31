@@ -27,8 +27,6 @@ export function ButtonType1({
         font-label-medium 
         ring-text-brand
         cursor-pointer
-        hover:bg-border-brand 
-        hover:text-text-white 
         transition-colors
         disabled:opacity-50 
         disabled:cursor-not-allowed

@@ -1,5 +1,5 @@
 "use client";
-import EventCard1 from "@/components/cards/EventCard1";
+import EventCard1 from "@/components/cards/events/EventCard1";
 import EventCardSmall from "@/components/cards/events/EventCardSmall";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -156,6 +156,20 @@ const t =  useTranslations("home.events")
             attendees: 32,
             imageUrl: "/EVENT.png",
         },
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
+        {
+            title: "Accra Arts Festival",
+            date: "Oct 21, 2025, 3:00PM",
+            location: "Ghana Embassy, Belgium",
+            attendees: 32,
+            imageUrl: "/EVENT.png",
+        },
     ];
 
     return (
@@ -196,7 +210,7 @@ const t =  useTranslations("home.events")
 
                 <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreevents")}</h2> {/* 20px equivalent */}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.75rem] "> {/* 12px, 24px equivalent */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.4rem] w-full "> {/* 12px, 24px equivalent */}
                     {moreEvents.map((event, index) => (
                         <EventCard1
                             key={index}

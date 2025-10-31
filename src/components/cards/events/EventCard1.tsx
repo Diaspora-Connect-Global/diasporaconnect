@@ -1,6 +1,6 @@
 import { Bookmark } from "lucide-react";
 import Image from "next/image";
-import { ButtonType1, ButtonType2 } from "../custom/button";
+import { ButtonType1, ButtonType2 } from "../../custom/button";
 import Link from "next/link";
 
 // EventCard1 Component with Props
@@ -16,13 +16,13 @@ export default function EventCard1({ title, date, location, attendees, imageUrl 
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
-            <div className="relative h-64 rounded-t-lg overflow-hidden">
+            <div className="relative h-64 rounded-t-sm overflow-hidden">
                 <Image
                     src={imageUrl}
                     alt={`${title} background`}
                     layout="fill"
-                    objectFit="cover"
-                    className="w-full h-full object-contain"
+                    objectFit="fill"
+                    className="w-full h-full object-fill"
                     onError={(e) => {
                         e.currentTarget.style.display = "none";
                         e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
@@ -33,8 +33,8 @@ export default function EventCard1({ title, date, location, attendees, imageUrl 
                         src="/EVENT.png"
                         alt="Fallback event background"
                         layout="fill"
-                        objectFit="contain"
-                        className="w-full h-full object-contain"
+                        objectFit="fill"
+                        className="w-full h-full object-fill"
                     />
                 </div>
             </div>
@@ -50,10 +50,10 @@ export default function EventCard1({ title, date, location, attendees, imageUrl 
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 items-center">
-                    <ButtonType1 className="flex items-center justify-center w-14 h-14 rounded-full overflow-hidden">
-                        <Bookmark className="w-4 h-4 " />
+                    <ButtonType1 className="flex items-center justify-center py-3 px-6 rounded-full overflow-hidden">
+                        <Bookmark className="w-6 h-6 " />
                     </ButtonType1>
-                    <ButtonType2 className="flex-1 py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
+                    <ButtonType2 className="flex py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
                         Attend
                     </ButtonType2>
                 </div>
