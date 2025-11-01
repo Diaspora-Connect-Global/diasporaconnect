@@ -1,11 +1,10 @@
 "use client"
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ButtonType2 } from "@/components/custom/button";
 import { SquarePen } from "lucide-react";
-import { formatDateProximity } from "@/macros/time";
 import { useChatStore } from "@/store/ChatStore";
-import Image from "next/image";
-import { MessageInput } from "@/components/chats/MessageInput";
+import DirectMessageChat from "@/components/chats/DirectMessageChat";
+import GroupChat from "@/components/chats/GroupChat";
 
 
 
@@ -165,7 +164,7 @@ const mockGroups = [
 
 
 
-interface Message {
+export interface Message {
     id: string;
     text: string;
     senderId: string;
@@ -174,7 +173,7 @@ interface Message {
     imageUrl?: string;
 }
 
-interface ChatInfo {
+export interface ChatInfo {
     id: string;
     name: string;
     type: 'direct' | 'group';
@@ -202,223 +201,9 @@ function EmptyMessage() {
 
 
 
-// Direct Message Component
-function DirectMessageChat({ chat, messages }: { chat: ChatInfo; messages: Message[] }) {
-    const [newMessage, setNewMessage] = useState('');
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    // Auto-scroll to bottom when messages change
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    const handleSendMessage = () => {
-        if (newMessage.trim() || imagePreview) {
-            const newMsg: Message = {
-                id: Date.now().toString(),
-                text: newMessage,
-                senderId: 'current-user',
-                timestamp: new Date().toISOString(),
-                type: imagePreview ? 'image' : 'text',
-                imageUrl: imagePreview || undefined,
-            };
-
-            // Update messages in parent component (you'll need to pass a callback)
-            // For now, we'll just log it
-            console.log('New message:', newMsg);
-
-            setNewMessage('');
-            setImagePreview(null);
-        }
-    };
-
-   
-
-    return (
-        <div className="flex flex-col h-full">
-            {/* Chat Header */}
-            <div className="border-b border-border-subtle p-4 bg-surface-default">
-                <div className="flex items-center space-x-3">
-                    <div className="relative">
-                        <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-text-primary">{chat.avatar}</span>
-                        </div>
-                        {chat.online && (
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-text-success border-2 border-white rounded-full" />
-                        )}
-                    </div>
-                    <div>
-                        <h2 className="font-semibold text-text-primary">{chat.name}</h2>
-                        <p className="text-sm text-text-secondary">
-                            {chat.online ? 'Online' : 'Last seen ' + formatDateProximity(chat.lastMessageTime)}
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                    <div
-                        key={message.id}
-                        className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                        <div className={`max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
-                            {message.type === 'image' && message.imageUrl ? (
-                                <div className="mb-2">
-                                    <Image
-                                        src={message.imageUrl}
-                                        alt="Shared image"
-                                        className="rounded-2xl max-w-full h-auto"
-                                    />
-                                    {message.text && (
-                                        <p className="text-sm text-text-primary mt-2">{message.text}</p>
-                                    )}
-                                </div>
-                            ) : (
-                                <div
-                                    className={`px-4 py-2 rounded-2xl ${message.senderId === 'current-user'
-                                        ? 'bg-text-brand text-white rounded-br-none'
-                                        : 'bg-surface-hover text-text-primary rounded-bl-none'
-                                        }`}
-                                >
-                                    {message.text}
-                                </div>
-                            )}
-                            <p className="text-xs text-text-tertiary mt-1 text-right">
-                                {formatDateProximity(message.timestamp)}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
-
-            <MessageInput
-                onSendMessage={handleSendMessage}
-                placeholder="Type a message..."
-            />
-        </div>
-    );
-}
-
-// Group Chat Component (similar updates as DirectMessageChat)
-function GroupChat({ chat, messages }: { chat: ChatInfo; messages: Message[] }) {
-    const [newMessage, setNewMessage] = useState('');
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    const handleSendMessage = () => {
-        if (newMessage.trim() || imagePreview) {
-            const newMsg: Message = {
-                id: Date.now().toString(),
-                text: newMessage,
-                senderId: 'current-user',
-                timestamp: new Date().toISOString(),
-                type: imagePreview ? 'image' : 'text',
-                imageUrl: imagePreview || undefined,
-            };
-
-            console.log('New message:', newMsg);
-
-            setNewMessage('');
-            setImagePreview(null);
-        }
-    };
 
 
 
-    return (
-        <div className="flex flex-col h-full">
-            {/* Group Header */}
-            <div className="border-b border-border-subtle p-4 bg-surface-default">
-                <div className="flex items-center space-x-3">
-                    <div className="relative">
-                        <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-white">{chat.avatar}</span>
-                        </div>
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
-                            <span className="text-white text-xs">👥</span>
-                        </div>
-                    </div>
-                    <div>
-                        <h2 className="font-semibold text-text-primary">{chat.name}</h2>
-                        <p className="text-sm text-text-secondary">{chat.memberCount} members</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                    <div
-                        key={message.id}
-                        className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                        <div className={`max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
-                            {message.senderId !== 'current-user' && (
-                                <p className="text-xs text-text-secondary mb-1 ml-1">{getSenderName(message.senderId)}</p>
-                            )}
-
-                            {message.type === 'image' && message.imageUrl ? (
-                                <div className="mb-2">
-                                    <Image
-                                        src={message.imageUrl}
-                                        alt="Shared image"
-                                        className="rounded-2xl max-w-full h-auto"
-                                    />
-                                    {message.text && (
-                                        <p className="text-sm text-text-primary mt-2">{message.text}</p>
-                                    )}
-                                </div>
-                            ) : (
-                                <div
-                                    className={`px-4 py-2 rounded-2xl ${message.senderId === 'current-user'
-                                        ? 'bg-text-brand text-white rounded-br-none'
-                                        : 'bg-surface-hover text-text-primary rounded-bl-none'
-                                        }`}
-                                >
-                                    {message.text}
-                                </div>
-                            )}
-                            <p className="text-xs text-text-tertiary mt-1 text-right">
-                                {formatDateProximity(message.timestamp)}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
-
-            <MessageInput
-                onSendMessage={handleSendMessage}
-                placeholder={`Message ${chat.name}`}
-            />
-        </div>
-    );
-}
-
-// Helper function to get sender names for groups
-function getSenderName(senderId: string): string {
-    const senderNames: { [key: string]: string } = {
-        'sarah': 'Sarah',
-        'mike': 'Mike',
-        'alex': 'Alex',
-        'tom': 'Tom',
-        'mom': 'Mom',
-        '1': 'John Doe',
-        '2': 'Jane Smith',
-        '3': 'Mike Johnson',
-        '7': 'Sarah Wilson',
-        '8': 'Alex Brown',
-    };
-    return senderNames[senderId] || 'Unknown';
-}
 
 export default function Chat() {
     const { activeChat } = useChatStore();
@@ -441,9 +226,9 @@ export default function Chat() {
         }
     }, [activeChat]);
 
-    const addNewMessage = (newMessage: Message) => {
-        setMessages(prev => [...prev, newMessage]);
-    };
+    // const addNewMessage = (newMessage: Message) => {
+    //     setMessages(prev => [...prev, newMessage]);
+    // };
 
     if (!activeChat || !chatInfo) {
         return (

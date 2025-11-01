@@ -146,7 +146,7 @@ export function MessageInput({
 
                     </div>
 
-                    <div className={` border border-border-subtle  ${imagePreview ? "rounded-md" : "rounded-full"}  p-2 flex flex-col`}>
+                    <div className={` border border-border-subtle  ${imagePreview ? "rounded-md" : "rounded-full"}  p-2 flex-1 flex-col`}>
 
                         {/* Image Preview */}
                         {imagePreview && (
@@ -174,7 +174,7 @@ export function MessageInput({
                             </div>
                         )}
 
-                        <div className="flex relative   ">
+                        <div className="flex justify-between relative  ">
                             <textarea
                                 ref={textareaRef}
                                 value={newMessage}
@@ -182,16 +182,12 @@ export function MessageInput({
                                 onKeyPress={handleKeyPress}
                                 placeholder={disabled ? "Cannot send messages..." : placeholder}
                                 disabled={disabled}
-                                className="lg:w-[40rem] rounded-full px-4 py-2 focus:outline-none focus:border-text-brand resize-none bg-surface-default disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="lg:max-w-[40rem] flex-1 rounded-full px-4 py-2 focus:outline-none focus:border-text-brand resize-none bg-surface-default disabled:opacity-50 disabled:cursor-not-allowed"
                                 rows={1}
-                                style={{
-                                    minHeight: '40px',
-                                    scrollbarWidth: 'none',
-                                    msOverflowStyle: 'none'
-                                }}
+
                             />
                             <style jsx>{`
-              textarea::-webkit-scrollbar {
+                                     textarea::-webkit-scrollbar {
                 display: none;
               }
             `}</style>
@@ -208,7 +204,6 @@ export function MessageInput({
 
                     </div>
 
-                    {/* Message Input */}
 
                 </div>
             </div>
