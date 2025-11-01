@@ -213,7 +213,7 @@ function Community() {
                 onToggle={() => toggleSection('groupChats')}
                 defaultAction={t('groupchats.create')}
                 image='/GROUPCHAT.png'
-                link="/chat"
+                link="#"
 
 
             >
