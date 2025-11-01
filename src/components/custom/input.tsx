@@ -110,6 +110,7 @@ interface SearchInputProps {
     placeholder?: string;
     label?: string;
     id?: string;
+    bg?:string;
 }
 
 export const SearchInput: React.FC<SearchInputProps> = ({
@@ -117,7 +118,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     onChange,
     onSearch,
     placeholder = "Search...",
-    id = "search"
+    id = "search",
+    bg = "bg-surface-subtle"
 }) => {
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -128,8 +130,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     return (
         <div className="space-y-2">
          
-            <div className=" rounded-md">
-                <div className="relative bg-surface-subtle border-border-subtle border-2 rounded-full flex text-text-secondary">
+            <div className={`${bg} rounded-full`}>
+                <div className="relative ${bg} border-border-subtle border-2 rounded-full flex text-text-secondary">
                     <input
                         id={id}
                         type="text"

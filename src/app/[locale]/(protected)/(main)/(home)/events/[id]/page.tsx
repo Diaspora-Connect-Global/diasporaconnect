@@ -237,7 +237,7 @@ export default function EventsId() {
                                                         {isProcessingPayment ? (
                                                             <>
                                                                 <Spinner className="h-5 w-5" />
-                                                                
+
                                                             </>
                                                         ) : (
                                                             <>Pay GH¢ {totalAmount.toFixed(2)}</>
