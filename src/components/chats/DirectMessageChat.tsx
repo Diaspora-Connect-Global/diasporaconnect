@@ -2,12 +2,12 @@ import { formatChatTimestamp } from "@/macros/time";
 import { ChevronRight, InfoIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
-import { ChatInfo, Message } from "@/app/[locale]/(protected)/(main)/chat/page";
 import Image from "next/image";
-import { mockUsers } from "@/data/chats";
+import { Message, mockUsers } from "@/data/chats";
 import { useChatStore } from "@/store/ChatStore";
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 
 export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const messagesEndRef = useRef<HTMLDivElement>(null);

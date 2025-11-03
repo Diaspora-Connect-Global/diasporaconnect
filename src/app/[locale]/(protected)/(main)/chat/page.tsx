@@ -7,16 +7,6 @@ import GroupChat from "@/components/chats/GroupChat";
 import { EmptyMessage } from "@/components/chats/EmptyMessage";
 import {  mockDirectMessages, mockGroups } from "@/data/chats";
 
-export interface Message {
-    id: string;
-    text: string;
-    senderId: string;
-    timestamp: string;
-    type: 'text' | 'image' | 'file';
-    imageUrl?: string;
-    conversationId?: string;
-    status?:string;
-}
 
 export interface ChatInfo {
     id: string;
