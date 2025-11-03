@@ -8,26 +8,25 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { X, Check } from 'lucide-react';
+
+import { Check } from 'lucide-react';
 import { User, ConversationStartData } from '@/types/chat';
 import { ConfirmationModal } from './StartConversationConfirmationModal';
 import { SearchInput } from '@/components/custom/input';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { mockUsers } from '@/data/chats';
+import { StartGroupConfirmationModal } from './StartGroupConfirmationModal';
 
 interface StartConversationModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
+    type: "direct" | "group"
 }
-
-
-
 
 export function StartConversationModal({
     isOpen,
     onOpenChange,
+    type = "direct"
 }: StartConversationModalProps) {
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -61,7 +60,7 @@ export function StartConversationModal({
     const startConversation = async (data: ConversationStartData) => {
         try {
             console.log('Starting conversation with:', data);
-            
+
             // For now, just log and close the modal
             // You can add your actual API call later
             if (data.type === 'direct') {
@@ -71,10 +70,10 @@ export function StartConversationModal({
                 console.log('Creating group:', data.groupName, 'with users:', data.userIds);
                 // window.location.href = `/chat/group/${conversation.id}`;
             }
-            
+
             // Simulate API call delay
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             return { id: 'temp-id', ...data };
         } catch (error) {
             console.error('Error starting conversation:', error);
@@ -96,24 +95,41 @@ export function StartConversationModal({
         }
     };
 
-    const handleRemoveUser = (userId: string) => {
-        setSelectedUsers(selectedUsers.filter((u) => u.id !== userId));
-    };
+   
 
     const handleStartClick = () => {
         if (selectedUsers.length === 0) return;
 
-        if (selectedUsers.length === 1) {
-            // Directly start one-on-one conversation
-            const conversationData: ConversationStartData = {
-                userIds: selectedUsers.map((u) => u.id),
-                type: 'direct',
-            };
-            handleStartConversation(conversationData);
+        if (type === "direct") {
+            // For direct messages, show confirmation only when multiple users are selected
+            if (selectedUsers.length === 1) {
+                // Directly start one-on-one conversation
+                const conversationData: ConversationStartData = {
+                    userIds: selectedUsers.map((u) => u.id),
+                    type: "direct",
+                };
+                handleStartConversation(conversationData);
+            } else {
+                // Show confirmation modal when more than one user is selected for direct messages
+                setShowConfirmation(true);
+            }
         } else {
-            // Show confirmation modal ONLY when more than one user is selected
+            // For group messages, always show group confirmation modal regardless of user count
             setShowConfirmation(true);
         }
+    };
+
+     const handleGroupCreate = (groupName: string, groupPhoto?: string, selectedUsers?: User[]) => {
+        console.log('Creating group:', { groupName, groupPhoto, selectedUsers });
+        
+        // Create conversation data for group
+        const conversationData: ConversationStartData = {
+            userIds: selectedUsers ? selectedUsers.map(u => u.id) : [],
+            type: 'group',
+            groupName: groupName,
+        };
+
+        handleStartConversation(conversationData);
     };
 
     const handleStartConversation = async (conversationData: ConversationStartData) => {
@@ -154,14 +170,16 @@ export function StartConversationModal({
     console.log('Modal isOpen:', isOpen);
     console.log('Selected users:', selectedUsers.length);
     console.log('Total users:', users.length);
-
+    console.log('Modal type:', type);
 
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 <DialogContent className="lg:min-w-[45rem]">
                     <DialogHeader>
-                        <DialogTitle>Start Conversation</DialogTitle>
+                        <DialogTitle>
+                            {type === "group" ? "Create Group" : "Start Conversation"}
+                        </DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-4">
@@ -171,37 +189,34 @@ export function StartConversationModal({
                                 placeholder="Search people..."
                                 value={searchTerm}
                                 onChange={handleSearchChange}
-                                onSearch={() => {}} // You can implement search if needed
+                                onSearch={() => { }} // You can implement search if needed
                             />
                         </div>
 
-                        {/* Selected Users */}
+                        {/* 
                         {selectedUsers.length > 0 && (
-                            <div className="space-y-2">
-                                <Label>Selected ({selectedUsers.length})</Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {selectedUsers.map((user) => (
-                                        <Badge
-                                            key={user.id}
-                                            variant="secondary"
-                                            className="px-3 py-1 text-sm"
-                                        >
-                                            {user.name}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveUser(user.id)}
-                                                className="ml-1 hover:text-destructive"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </Badge>
-                                    ))}
-                                </div>
+                            <div className="flex flex-wrap gap-2">
+                                {selectedUsers.map((user) => (
+                                    <Badge
+                                        key={user.id}
+                                        variant="secondary"
+                                        className="flex items-center gap-1 py-1 px-2"
+                                    >
+                                        {user.name}
+                                        <X
+                                            className="w-3 h-3 cursor-pointer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRemoveUser(user.id);
+                                            }}
+                                        />
+                                    </Badge>
+                                ))}
                             </div>
-                        )}
+                        )} */}
 
                         {/* Users List */}
-                        <div className="max-h-120 overflow-y-auto">
+                        <div className="lg:h-120 overflow-y-auto">
                             {isLoading ? (
                                 <div className="p-4 text-center text-muted-foreground">
                                     Loading users...
@@ -227,7 +242,6 @@ export function StartConversationModal({
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium truncate">{user.name}</p>
-                                                    
                                                 </div>
                                             </div>
                                         );
@@ -255,20 +269,29 @@ export function StartConversationModal({
                                 onClick={handleStartClick}
                                 disabled={!isFormValid || isLoading}
                             >
-                                {selectedUsers.length === 1 ? 'Start Conversation' : 'Continue'}
+                                {type === "group" ? "Create Group" : "Start Conversation"}
                             </ButtonType2>
                         </div>
                     </div>
                 </DialogContent>
             </Dialog>
 
-            {/* Confirmation Modal - Only shown when multiple users are selected */}
-            <ConfirmationModal
-                isOpen={showConfirmation}
-                onClose={() => setShowConfirmation(false)}
-                selectedUsers={selectedUsers}
-                onConfirm={handleConfirmation}
-            />
+            {/* Show appropriate confirmation modal based on type */}
+            {type === "direct" ? (
+                <ConfirmationModal
+                    isOpen={showConfirmation}
+                    onClose={() => setShowConfirmation(false)}
+                    selectedUsers={selectedUsers}
+                    onConfirm={handleConfirmation}
+                />
+            ) : (
+                <StartGroupConfirmationModal
+                    isOpen={showConfirmation}
+                    onClose={() => setShowConfirmation(false)}
+                    selectedUsers={selectedUsers}
+                    onGroupCreate={handleGroupCreate}
+                />
+            )}
         </>
     );
 }

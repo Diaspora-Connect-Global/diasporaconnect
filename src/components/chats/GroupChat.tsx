@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { InfoIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";

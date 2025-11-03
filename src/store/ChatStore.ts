@@ -21,7 +21,6 @@ interface ChatStore {
   initializeFromMockData: () => void;
   setUsers: (users: User[]) => void;
   setGroups: (groups: Group[]) => void;
-  setGroupMembers: (members: GroupMember[]) => void;
   
   // New actions for enhanced functionality
   sendMessage: (conversationId: string, text: string, senderId?: string, type?: 'text' | 'image' | 'file') => void;
@@ -47,7 +46,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   // Basic setters
   setUsers: (users: User[]) => set({ users }),
   setGroups: (groups: Group[]) => set({ groups }),
-  setGroupMembers: (members: GroupMember[]) => set({ groupMembers }),
   setActiveChat: (activeChat) => set({ activeChat }),
 
   // Initialize with mock data
@@ -180,7 +178,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   // Create a new conversation
   createConversation: (type: 'direct' | 'group', participants: string[], groupInfo?: Partial<Group>) => {
-    const { conversations, preferences, groups, groupMembers, setConversations, setPreferences, setGroups, setGroupMembers } = get();
     
     const conversationId = Date.now().toString();
     

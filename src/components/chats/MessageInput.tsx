@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"
 import { useState, useRef, useEffect } from "react";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
@@ -220,6 +221,7 @@ export function MessageInput({
                             <div className="p-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center relative">
+                                
                                         <img
                                             src={imagePreview}
                                             alt="Preview"

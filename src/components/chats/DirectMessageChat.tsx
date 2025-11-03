@@ -13,7 +13,6 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     
     // Use Zustand store
     const { 
-        messages, 
         addMessage, 
         updateConversation, 
         updatePreference,
@@ -45,10 +44,9 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 type: image ? 'image' as const : 'text' as const,
                 timestamp: new Date().toISOString(),
                 status: 'sent' as const,
-                imageUrl: image, // For your component compatibility
+                imageUrl: image, 
             };
 
-            // Add message to store
             addMessage(newMsg);
 
             // Update conversation's updatedAt timestamp
@@ -180,8 +178,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                     <div className="flex items-center mt-2">
                                         <div className={`w-2 h-2 rounded-full mr-2 ${
                                             userInfo.status === 'online' ? 'bg-text-success' :
-                                            userInfo.status === 'away' ? 'bg-text-warning' :
-                                            userInfo.status === 'dnd' ? 'bg-text-error' : 'bg-text-tertiary'
+                                            'bg-text-tertiary'
                                         }`} />
                                         <span className="text-sm text-text-secondary capitalize">{userInfo.status}</span>
                                     </div>

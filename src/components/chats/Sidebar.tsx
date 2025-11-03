@@ -26,6 +26,7 @@ export default function ChatSideBar() {
     const [activeTab, setActiveTab] = useState<TabType>('direct');
     const { activeChat, setActiveChat, conversations, preferences, messages, initializeFromMockData } = useChatStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalType, setModalType] = useState<'direct' | 'group'>('direct'); // Add state for modal type
     const [directChats, setDirectChats] = useState<ChatItem[]>([]);
     const [groupChats, setGroupChats] = useState<ChatItem[]>([]);
 
@@ -41,6 +42,7 @@ export default function ChatSideBar() {
         
         setDirectChats(computedDirectChats);
         setGroupChats(computedGroupChats);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversations, preferences, messages]);
 
     const computeDirectChats = (): ChatItem[] => {
@@ -126,6 +128,17 @@ export default function ChatSideBar() {
         }
     };
 
+    // Handle opening modal with specific type
+    const handleOpenModal = (type: 'direct' | 'group') => {
+        setModalType(type);
+        setIsModalOpen(true);
+    };
+
+    // Handle Create Group button click
+    const handleCreateGroup = () => {
+        handleOpenModal('group');
+    };
+
     return (
         <>
             <div className="w-full h-full flex flex-col">
@@ -134,7 +147,7 @@ export default function ChatSideBar() {
                     <p className="text-2xl font-heading-large">Chats</p>
                     <ButtonType3
                         className="px-4 py-3 flex items-center"
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => handleOpenModal('direct')} // Open with direct type
                     >
                         <SquarePen className="mr-2 h-4 w-4" />
                         New message
@@ -174,7 +187,10 @@ export default function ChatSideBar() {
                 {/* Create Group Button - Only show when Groups tab is active */}
                 {activeTab === 'groups' && (
                     <div className="px-4 py-3">
-                        <div className="text-text-brand flex items-center cursor-pointer">
+                        <div 
+                            className="text-text-brand flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={handleCreateGroup} // Add click handler
+                        >
                             <Plus className="mr-2 h-4 w-4" />
                             <p>Create Group</p>
                         </div>
@@ -202,11 +218,11 @@ export default function ChatSideBar() {
             <StartConversationModal
                 isOpen={isModalOpen}
                 onOpenChange={setIsModalOpen}
+                type={modalType} // Use dynamic modal type
             />
         </>
     );
 }
-
 // Tab Button Component
 interface TabButtonProps {
     active: boolean;

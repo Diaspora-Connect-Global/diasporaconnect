@@ -5,7 +5,7 @@ import { useChatStore } from "@/store/ChatStore";
 import DirectMessageChat from "@/components/chats/DirectMessageChat";
 import GroupChat from "@/components/chats/GroupChat";
 import { EmptyMessage } from "@/components/chats/EmptyMessage";
-import { mockChatMessages, mockDirectMessages, mockGroups } from "@/data/chats";
+import {  mockDirectMessages, mockGroups } from "@/data/chats";
 
 export interface Message {
     id: string;
@@ -14,6 +14,8 @@ export interface Message {
     timestamp: string;
     type: 'text' | 'image' | 'file';
     imageUrl?: string;
+    conversationId?: string;
+    status?:string;
 }
 
 export interface ChatInfo {
@@ -32,7 +34,6 @@ export interface ChatInfo {
 export default function Chat() {
     const { activeChat } = useChatStore();
     const [chatInfo, setChatInfo] = useState<ChatInfo | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
 
     useEffect(() => {
         if (activeChat) {
@@ -41,25 +42,14 @@ export default function Chat() {
 
             if (chat) {
                 setChatInfo(chat);
-                const chatMessages = mockChatMessages[activeChat.id as keyof typeof mockChatMessages] || [];
-                setMessages(chatMessages);
+               
             }
         } else {
             setChatInfo(null);
-            setMessages([]);
         }
     }, [activeChat]);
 
-    const handleStartConversation = async () => {
-    try {
-      
-      
-      // Handle the new conversation(s) in your state
-    } catch (error) {
-        console.error('Error starting conversation:', error);
-    }
-  };
-
+  
     // const addNewMessage = (newMessage: Message) => {
     //     setMessages(prev => [...prev, newMessage]);
     // };
@@ -78,12 +68,10 @@ export default function Chat() {
             {chatInfo.type === 'direct' ? (
                 <DirectMessageChat
                     chat={chatInfo}
-                    messages={messages}
                 />
             ) : (
                 <GroupChat
                     chat={chatInfo}
-                    messages={messages}
                 />
             )}
         </div>

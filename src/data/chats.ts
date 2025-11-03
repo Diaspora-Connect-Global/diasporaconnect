@@ -1,5 +1,5 @@
 // Local Type Declarations
-export type UserStatus = 'online' | 'away' | 'offline' | 'dnd';
+export type UserStatus = 'online' | 'offline' ;
 
 export interface User {
   id: string;
@@ -18,6 +18,7 @@ export interface Message {
   type: 'text' | 'image' | 'file';
   timestamp: string;
   status?: 'sent' | 'delivered' | 'read';
+  imageUrl?:string
 }
 
 export interface MessageWithSender extends Message {
@@ -96,7 +97,7 @@ export const mockUsers: User[] = [
     id: '3',
     name: 'Mike Johnson',
     email: 'mike@example.com',
-    status: 'away',
+    status: 'offline',
     avatar: 'MJ',
     lastSeen: new Date(Date.now() - 1000 * 60 * 30).toISOString()
   },
