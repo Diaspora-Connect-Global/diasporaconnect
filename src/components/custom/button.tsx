@@ -84,3 +84,37 @@ export function ButtonType2({
     </button>
   );
 }
+
+export function ButtonType3({ 
+  children, 
+  onClick, 
+  type = "button", 
+  disabled = false,
+  className = ""
+}: ButtonProps) {
+  return (
+    <button 
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`
+        bg-transparent
+        text-text-brand 
+        rounded-full 
+        font-label-medium 
+        ring-text-brand
+        cursor-pointer
+        transition-colors
+        disabled:opacity-50 
+        disabled:cursor-not-allowed
+        h-fit
+        w-fit
+        py-1 px-2
+        whitespace-nowrap
+        ${className}
+      `}
+    >
+      {children}
+    </button>
+  );
+}

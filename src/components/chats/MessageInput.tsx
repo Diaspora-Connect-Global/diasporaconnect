@@ -2,21 +2,23 @@
 import { useState, useRef, useEffect } from "react";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
+import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 
 
 interface MessageInputProps {
     onSendMessage: (message: string, image?: string) => void;
     placeholder?: string;
     disabled?: boolean;
+    conversationId?: string;
+    senderId?: string;
 }
-
-
 
 export function MessageInput({
     onSendMessage,
-
     placeholder = "Type a message...",
-    disabled = false
+    disabled = false,
+    conversationId,
+    senderId = 'current-user'
 }: MessageInputProps) {
     const [newMessage, setNewMessage] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -25,9 +27,81 @@ export function MessageInput({
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+    const updateMockData = (messageText: string, image?: string) => {
+        if (!conversationId) return;
+
+        // Create new message object
+        const newMessageObj = {
+            id: Date.now().toString(),
+            conversationId: conversationId,
+            senderId: senderId,
+            text: messageText,
+            type: image ? 'image' as const : 'text' as const,
+            timestamp: new Date().toISOString(),
+            status: 'sent' as const
+        };
+
+        // Add to mockMessages array
+        mockMessages.push(newMessageObj);
+
+        // Update conversation's updatedAt timestamp
+        const conversation = mockConversations.find(conv => conv.id === conversationId);
+        if (conversation) {
+            conversation.updatedAt = new Date().toISOString();
+        }
+
+        // Update user conversation preferences (reset unread count for current user)
+        const preference = mockUserConversationPreferences.find(pref => 
+            pref.conversationId === conversationId && pref.userId === senderId
+        );
+        if (preference) {
+            preference.unreadCount = 0;
+            preference.lastReadMessageId = newMessageObj.id;
+        }
+
+        // Update other users' unread counts in the conversation
+        if (conversation?.type === 'direct') {
+            // For direct messages, increment unread count for the other user
+            const otherUserPreference = mockUserConversationPreferences.find(pref => 
+                pref.conversationId === conversationId && pref.userId !== senderId
+            );
+            if (otherUserPreference) {
+                otherUserPreference.unreadCount += 1;
+            }
+        } else if (conversation?.type === 'group') {
+            // For group messages, increment unread count for all other members
+            mockUserConversationPreferences
+                .filter(pref => 
+                    pref.conversationId === conversationId && 
+                    pref.userId !== senderId
+                )
+                .forEach(pref => {
+                    pref.unreadCount += 1;
+                });
+        }
+
+        // Dispatch custom event to notify other components about the data update
+        window.dispatchEvent(new CustomEvent('chatDataUpdated', {
+            detail: { 
+                conversationId, 
+                newMessage: newMessageObj,
+                updatedConversations: mockConversations,
+                updatedPreferences: mockUserConversationPreferences
+            }
+        }));
+
+        console.log('Message added to mock data:', newMessageObj);
+    };
+
     const handleSendMessage = () => {
         if ((newMessage.trim() || imagePreview) && !disabled) {
+            // Call the original onSendMessage prop
             onSendMessage(newMessage, imagePreview || undefined);
+            
+            // Update mock data
+            updateMockData(newMessage, imagePreview || undefined);
+            
+            // Reset state
             setNewMessage('');
             setImagePreview(null);
             setShowEmojiPicker(false);
@@ -40,7 +114,6 @@ export function MessageInput({
             handleSendMessage();
         }
     };
-
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -98,16 +171,12 @@ export function MessageInput({
 
     return (
         <>
-
-
             {/* Message Input */}
             <div className="border-t border-border-subtle p-4 bg-surface-default">
-                <div className="flex space-x-2 items-center   justify-center">
-
-                    <div className=" flex space-x-1">
-
+                <div className="flex space-x-2 items-center justify-center">
+                    <div className="flex space-x-1">
                         {/* Image Upload Button */}
-                        <div >
+                        <div>
                             <button
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={disabled}
@@ -139,42 +208,35 @@ export function MessageInput({
                             </button>
                             {showEmojiPicker && (
                                 <div className="absolute bottom-full mb-2 z-50 shadow-xl rounded-lg overflow-hidden">
-
+                                    {/* Emoji picker content */}
                                 </div>
                             )}
                         </div>
-
                     </div>
 
-                    <div className={` border border-border-subtle  ${imagePreview ? "rounded-md" : "rounded-full"}  p-2 flex-1 flex-col`}>
-
+                    <div className={`border border-border-subtle ${imagePreview ? "rounded-md" : "rounded-full"} p-2 flex-1 flex-col`}>
                         {/* Image Preview */}
                         {imagePreview && (
-                            <div className=" p-4 ">
-                                <div className="flex items-center justify-between ">
+                            <div className="p-4">
+                                <div className="flex items-center justify-between">
                                     <div className="flex items-center relative">
-
                                         <img
                                             src={imagePreview}
                                             alt="Preview"
                                             className="w-16 h-16 rounded-lg object-cover"
                                         />
-
                                         <button
                                             onClick={removeImagePreview}
-                                            className=" cursor-pointer p-1 bg-surface-brand rounded-full text-text-white transition-colors absolute -top-2 -right-2 "
+                                            className="cursor-pointer p-1 bg-surface-brand rounded-full text-text-white transition-colors absolute -top-2 -right-2"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
-
-
                                     </div>
-
                                 </div>
                             </div>
                         )}
 
-                        <div className="flex justify-between relative  ">
+                        <div className="flex justify-between relative">
                             <textarea
                                 ref={textareaRef}
                                 value={newMessage}
@@ -184,13 +246,12 @@ export function MessageInput({
                                 disabled={disabled}
                                 className="lg:max-w-[40rem] flex-1 rounded-full px-4 py-2 focus:outline-none focus:border-text-brand resize-none bg-surface-default disabled:opacity-50 disabled:cursor-not-allowed"
                                 rows={1}
-
                             />
                             <style jsx>{`
-                                     textarea::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
+                                textarea::-webkit-scrollbar {
+                                    display: none;
+                                }
+                            `}</style>
                             {/* Send Button */}
                             <ButtonType2
                                 onClick={handleSendMessage}
@@ -200,11 +261,7 @@ export function MessageInput({
                                 <Send className="w-5 h-5" />
                             </ButtonType2>
                         </div>
-
-
                     </div>
-
-
                 </div>
             </div>
         </>
