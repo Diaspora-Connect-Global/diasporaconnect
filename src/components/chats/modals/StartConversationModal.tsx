@@ -10,11 +10,11 @@ import {
 } from '@/components/ui/dialog';
 
 import { Check } from 'lucide-react';
-import { User, ConversationStartData } from '@/types/chat';
+import { ConversationStartData } from '@/types/chat';
 import { ConfirmationModal } from './StartConversationConfirmationModal';
 import { SearchInput } from '@/components/custom/input';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
-import { mockUsers } from '@/data/chats';
+import { mockUsers, User } from '@/data/chats'; // Import User from data/chats
 import { StartGroupConfirmationModal } from './StartGroupConfirmationModal';
 
 interface StartConversationModalProps {
@@ -94,8 +94,6 @@ export function StartConversationModal({
             setSelectedUsers([...selectedUsers, user]);
         }
     };
-
-   
 
     const handleStartClick = () => {
         if (selectedUsers.length === 0) return;
@@ -192,28 +190,6 @@ export function StartConversationModal({
                                 onSearch={() => { }} // You can implement search if needed
                             />
                         </div>
-
-                        {/* 
-                        {selectedUsers.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                                {selectedUsers.map((user) => (
-                                    <Badge
-                                        key={user.id}
-                                        variant="secondary"
-                                        className="flex items-center gap-1 py-1 px-2"
-                                    >
-                                        {user.name}
-                                        <X
-                                            className="w-3 h-3 cursor-pointer"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRemoveUser(user.id);
-                                            }}
-                                        />
-                                    </Badge>
-                                ))}
-                            </div>
-                        )} */}
 
                         {/* Users List */}
                         <div className="lg:h-120 overflow-y-auto">
