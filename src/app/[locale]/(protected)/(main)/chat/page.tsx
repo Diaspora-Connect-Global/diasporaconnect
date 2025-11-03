@@ -64,7 +64,7 @@ export default function Chat() {
     }
 
     return (
-        <div className="bg-surface-default rounded-md h-full">
+        <div className="  rounded-md h-full">
             {chatInfo.type === 'direct' ? (
                 <DirectMessageChat
                     chat={chatInfo}

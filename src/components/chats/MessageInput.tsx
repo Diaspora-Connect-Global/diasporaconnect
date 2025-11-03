@@ -173,7 +173,7 @@ export function MessageInput({
     return (
         <>
             {/* Message Input */}
-            <div className="border-t border-border-subtle p-4 bg-surface-default">
+            <div className="border-t border-border-subtle p-4 ">
                 <div className="flex space-x-2 items-center justify-center">
                     <div className="flex space-x-1">
                         {/* Image Upload Button */}

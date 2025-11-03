@@ -1,23 +1,25 @@
 import { formatDateProximity } from "@/macros/time";
-import { InfoIcon } from "lucide-react";
+import { ChevronRight, InfoIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { ChatInfo, Message } from "@/app/[locale]/(protected)/(main)/chat/page";
 import Image from "next/image";
 import { mockUsers } from "@/data/chats";
 import { useChatStore } from "@/store/ChatStore";
+import { ButtonType3 } from "../custom/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    
+
     // Use Zustand store
-    const { 
-        addMessage, 
-        updateConversation, 
+    const {
+        addMessage,
+        updateConversation,
         updatePreference,
         getMessagesByConversation,
-        initializeFromMockData 
+        initializeFromMockData
     } = useChatStore();
 
     // Get messages for current conversation
@@ -44,7 +46,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 type: image ? 'image' as const : 'text' as const,
                 timestamp: new Date().toISOString(),
                 status: 'sent' as const,
-                imageUrl: image, 
+                imageUrl: image,
             };
 
             addMessage(newMsg);
@@ -61,7 +63,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             });
 
             // For direct messages, increment unread count for the other user
-            const otherUserPreference = useChatStore.getState().preferences.find(pref => 
+            const otherUserPreference = useChatStore.getState().preferences.find(pref =>
                 pref.conversationId === chat.id && pref.userId !== 'current-user'
             );
             if (otherUserPreference) {
@@ -85,16 +87,19 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const userInfo = getUserInfo();
 
     return (
-        <div className="flex flex-row h-full w-full">
+        <div className="flex flex-row h-full w-full space-x-2">
             {/* Main Chat Area */}
-            <div className="lg:min-w-[30rem] flex flex-col h-full flex-1">
+            <div className="lg:min-w-[30rem] bg-surface-default rounded-lg border border-border-subtle flex flex-col h-full flex-1 ">
                 {/* Chat Header */}
-                <div className="border-b border-border-subtle p-4 bg-surface-default flex justify-between">
+                <div className="border-b border-border-subtle p-4  flex justify-between">
                     <div className="flex items-center space-x-3">
                         <div className="relative">
-                            <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-text-primary">{chat.avatar}</span>
-                            </div>
+                          
+
+                            <Avatar className="w-12 h-12">
+                                <AvatarImage src={chat.avatar} alt="avator" />
+                                <AvatarFallback>U</AvatarFallback>
+                            </Avatar>
                             {chat.online && (
                                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-text-success border-2 border-white rounded-full" />
                             )}
@@ -108,7 +113,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     </div>
 
                     <button onClick={() => setSidebarOpen(!sidebarOpen)}>
-                        <InfoIcon className="w-5 h-5 cursor-pointer text-text-primary" />
+                        <InfoIcon className={`w-6 h-6 cursor-pointer  ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full" : "text-text-brand "}`} />
                     </button>
                 </div>
 
@@ -135,9 +140,9 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                     </div>
                                 ) : (
                                     <div
-                                        className={`px-4 py-2 rounded-2xl ${message.senderId === 'current-user'
-                                            ? 'bg-text-brand text-white rounded-br-none'
-                                            : 'bg-surface-hover text-text-primary rounded-bl-none'
+                                        className={`px-4 py-4 rounded-full ${message.senderId === 'current-user'
+                                            ? 'bg-text-brand text-white '
+                                            : 'bg-surface-brand-light text-text-primary '
                                             }`}
                                     >
                                         {message.text}
@@ -162,38 +167,41 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
             {/* Sidebar */}
             {sidebarOpen && (
-                <div className="lg:min-w-[20rem] bg-surface-default border-l border-border-subtle">
-                    <div className="p-4">
-                        <h3 className="font-semibold text-text-primary mb-4">Chat Info</h3>
-                        
+                <div className="lg:min-w-[20rem] bg-surface-default border rounded-lg border-border-subtle flex flex-col">
+                    <div className="p-4 flex-1">
                         {/* User/Group Info */}
                         <div className="flex flex-col items-center mb-6">
-                            <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mb-3">
-                                <span className="text-lg font-medium text-text-primary">{chat.avatar}</span>
-                            </div>
+                            
+                            <Avatar className="w-20 h-20">
+                                <AvatarImage src={chat.avatar} alt="avator" />
+                                <AvatarFallback>U</AvatarFallback>
+                            </Avatar>
                             <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
-                            {userInfo && (
-                                <>
-                                    <p className="text-sm text-text-secondary mt-1">{userInfo.email}</p>
-                                    <div className="flex items-center mt-2">
-                                        <div className={`w-2 h-2 rounded-full mr-2 ${
-                                            userInfo.status === 'online' ? 'bg-text-success' :
-                                            'bg-text-tertiary'
-                                        }`} />
-                                        <span className="text-sm text-text-secondary capitalize">{userInfo.status}</span>
-                                    </div>
-                                </>
-                            )}
                         </div>
 
-                        {/* Chat Statistics */}
-                        <div className="space-y-4">
-                            <div>
-                                <h5 className="text-sm font-medium text-text-primary mb-2">Chat Details</h5>
-                                <div className="text-sm text-text-secondary space-y-1">
-                                    <p>Messages: {conversationMessages.length}</p>
-                                    <p>Last active: {formatDateProximity(chat.lastMessageTime)}</p>
-                                </div>
+                        <div className="flex items-center justify-center">
+                            <ButtonType3>
+                                View profile
+                            </ButtonType3>
+                        </div>
+                    </div>
+
+                    {/* Quick Actions - Now at the bottom */}
+                    <div className="mt-auto border-t border-border-subtle p-4">
+                        <div className="space-y-3">
+                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                <p className="text-sm">Report</p>
+                                <ChevronRight className="w-4 h-4" />
+                            </div>
+
+                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                <p className="text-sm">Block</p>
+                                <ChevronRight className="w-4 h-4" />
+                            </div>
+
+                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                <p className="text-sm">Delete Conversation</p>
+                                <ChevronRight className="w-4 h-4" />
                             </div>
                         </div>
                     </div>

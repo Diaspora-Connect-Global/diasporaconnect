@@ -167,6 +167,10 @@ export const mockGroupMembers: GroupMember[] = [
   { id: '3', groupId: '4', userId: '4', role: 'owner', joinedAt: new Date().toISOString() },
   { id: '4', groupId: '4', userId: 'current-user', role: 'member', joinedAt: new Date().toISOString() },
   { id: '5', groupId: '4', userId: '6', role: 'member', joinedAt: new Date().toISOString() },
+  { id: '21', groupId: '4', userId: '1', role: 'member', joinedAt: new Date().toISOString() },
+  { id: '22', groupId: '4', userId: '3', role: 'admin', joinedAt: new Date().toISOString() },
+  { id: '23', groupId: '4', userId: '4', role: 'owner', joinedAt: new Date().toISOString() },
+  { id: '24', groupId: '4', userId: '6', role: 'member', joinedAt: new Date().toISOString() },
 
   // Project Alpha (5) members
   { id: '6', groupId: '5', userId: '3', role: 'owner', joinedAt: new Date().toISOString() },

@@ -33,6 +33,7 @@ export function EmptyMessage() {
       <StartConversationModal
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
+        type='direct'
       />
     </>
   );
