@@ -1,4 +1,4 @@
-import { formatDateProximity } from "@/macros/time";
+import { formatChatTimestamp } from "@/macros/time";
 import { ChevronRight, InfoIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
@@ -107,7 +107,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                         <div>
                             <h2 className="font-semibold text-text-primary">{chat.name}</h2>
                             <p className="text-sm text-text-secondary">
-                                {chat.online ? 'Online' : `Last seen ${formatDateProximity(userInfo?.lastSeen || chat.lastMessageTime)}`}
+                                {chat.online ? 'Online' : `Last seen ${formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime)}`}
                             </p>
                         </div>
                     </div>
@@ -149,7 +149,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                     </div>
                                 )}
                                 <p className="text-xs text-text-tertiary mt-1 text-right">
-                                    {formatDateProximity(message.timestamp)}
+                                    {formatChatTimestamp(message.timestamp)}
                                 </p>
                             </div>
                         </div>

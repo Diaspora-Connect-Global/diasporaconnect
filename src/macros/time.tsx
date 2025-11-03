@@ -42,3 +42,16 @@ export const formatDateProximity = (dateString: string) => {
         return `${years}y ago`;
     }
 };
+
+export function formatChatTimestamp(dateString: string | Date): string {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    
+    return date.toLocaleString('en', {
+        day: 'numeric',
+        month: 'short',
+        year: '2-digit',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+}
