@@ -43,8 +43,8 @@ export default function Header() {
   };
 
   return (
-   <header className="mx-auto border-b w-full "> {/* ✅ Full width header */}
-      <div className="lg:max-w-[75.375rem] mx-auto px-4"> {/* ✅ Content centered with padding */}
+   <header className="lg:max-w-[80vw] mx-auto border-b w-full "> {/* ✅ Full width header */}
+      <div className=" mx-auto px-4"> {/* ✅ Content centered with padding */}
         <div className="flex justify-between lg:justify-between lg:space-x-[5rem] h-[4rem] items-center">  {/* Logo */}
           <div>
             <Link href={`/${currentLocale}`}>
