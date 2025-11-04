@@ -49,7 +49,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         markAsRead(chat.id);
     }, [chat.id, markAsRead]);
 
-    // Mock replies data - in a real app, this would come from your store/API
+    // Mock replies data
     const mockReplies: Reply[] = [
         {
             id: '1',
@@ -138,11 +138,11 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
     };
 
     return (
-        <div className="flex flex-row h-full w-full space-x-2">
+        <div className="flex flex-row h-full min-h-0 space-x-2"> {/* Changed to h-full min-h-0 */}
             {/* Main Chat Area */}
-            <div className="lg:min-w-[30rem] bg-surface-default rounded-lg border border-border-subtle flex flex-col h-full flex-1">
+            <div className="flex-1 bg-surface-default rounded-lg border border-border-subtle flex flex-col h-full min-h-0"> {/* Removed fixed width, added min-h-0 */}
                 {/* Group Header */}
-                <div className="border-b border-border-subtle p-4 flex justify-between">
+                <div className="flex-shrink-0 border-b border-border-subtle p-4 flex justify-between"> {/* Added flex-shrink-0 */}
                     <div className="flex items-center space-x-3">
                         <div className="relative">
                             <Avatar className="w-12 h-12">
@@ -163,7 +163,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4"> {/* Added min-h-0 */}
                     {conversationMessages.map((message) => {
                         const replyCount = getReplyCount(message.id);
                         return (
@@ -172,15 +172,13 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                 className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div className={`max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
-                                   
-
                                     {message.type === 'image' && (message as any).imageUrl ? (
                                         <div className="mb-2">
-                                             {message.senderId !== 'current-user' && (
-                                        <p className="text-xs text-text-primary mb-1 ml-1">
-                                            {getSenderName(message.senderId)}
-                                        </p>
-                                    )}
+                                            {message.senderId !== 'current-user' && (
+                                                <p className="text-xs text-text-primary mb-1 ml-1">
+                                                    {getSenderName(message.senderId)}
+                                                </p>
+                                            )}
                                             <Image
                                                 src={(message as any).imageUrl}
                                                 alt="Shared image"
@@ -199,21 +197,20 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                                 : 'bg-surface-brand-light text-text-primary'
                                                 }`}
                                         >
-                                             {message.senderId !== 'current-user' && (
-                                        <p className="text-xs text-text-primary mb-1 ml-1">
-                                            {getSenderName(message.senderId)}
-                                        </p>
-                                    )}
+                                            {message.senderId !== 'current-user' && (
+                                                <p className="text-xs text-text-primary mb-1 ml-1">
+                                                    {getSenderName(message.senderId)}
+                                                </p>
+                                            )}
                                             {message.text}
                                         </div>
                                     )}
 
-                                    <div className=" space-x-2 flex items-center justify-start mt-1">
-
-                                         <Avatar className="w-6 h-6">
-                                <AvatarImage src={chat.avatar} alt="avatar" />
-                                <AvatarFallback>U</AvatarFallback>
-                            </Avatar>
+                                    <div className="space-x-2 flex items-center justify-start mt-1">
+                                        <Avatar className="w-6 h-6">
+                                            <AvatarImage src={chat.avatar} alt="avatar" />
+                                            <AvatarFallback>U</AvatarFallback>
+                                        </Avatar>
                                         <p className="text-xs text-text-tertiary">
                                             {formatChatTimestamp(message.timestamp)}
                                         </p>
@@ -221,7 +218,6 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                             onClick={() => handleViewReplies(message)}
                                             className="flex items-center space-x-1 text-xs text-text-brand hover:text-text-brand-dark transition-colors ml-2"
                                         >
-                                          
                                             <span>
                                                 {replyCount > 0 ? `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'} | reply` : 'Reply'}
                                             </span>
@@ -236,21 +232,23 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
                 {/* Main Message Input - Hidden when replies sidebar is open */}
                 {!repliesSidebarOpen && (
-                    <MessageInput
-                        onSendMessage={handleSendMessage}
-                        placeholder={`Message ${chat.name}`}
-                        conversationId={chat.id}
-                        senderId="current-user"
-                    />
+                    <div className="flex-shrink-0"> {/* Added flex-shrink-0 wrapper */}
+                        <MessageInput
+                            onSendMessage={handleSendMessage}
+                            placeholder={`Message ${chat.name}`}
+                            conversationId={chat.id}
+                            senderId="current-user"
+                        />
+                    </div>
                 )}
             </div>
 
             {/* Group Info Sidebar */}
             {sidebarOpen && (
-                <div className="lg:min-w-[20rem] bg-surface-default border rounded-lg border-border-subtle flex flex-col">
-                    <div className="p-4 flex-1 flex flex-col">
+                <div className="w-80 bg-surface-default border rounded-lg border-border-subtle flex flex-col min-h-0"> {/* Fixed width, added min-h-0 */}
+                    <div className="p-4 flex-1 min-h-0 flex flex-col"> {/* Added min-h-0 */}
                         {/* Group Info */}
-                        <div className="flex flex-col items-center mb-6">
+                        <div className="flex-shrink-0 flex flex-col items-center mb-6"> {/* Added flex-shrink-0 */}
                             <Avatar className="w-20 h-20">
                                 <AvatarImage src={chat.avatar} alt="avatar" />
                                 <AvatarFallback>U</AvatarFallback>
@@ -258,15 +256,15 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                             <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
                         </div>
 
-                        <div className="flex items-center justify-center mb-6">
+                        <div className="flex-shrink-0 flex items-center justify-center mb-6"> {/* Added flex-shrink-0 */}
                             <ButtonType3>
                                 Edit
                             </ButtonType3>
                         </div>
 
                         {/* Group Members */}
-                        <div className="mb-6">
-                            <div className="flex justify-between items-center mb-3">
+                        <div className="flex-1 min-h-0 mb-6"> {/* Added flex-1 min-h-0 */}
+                            <div className="flex-shrink-0 flex justify-between items-center mb-3"> {/* Added flex-shrink-0 */}
                                 <h5 className="text-sm font-medium text-text-primary">
                                     Members
                                 </h5>
@@ -274,7 +272,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                     Add people
                                 </ButtonType3>
                             </div>
-                            <div className="space-y-1 h-80 overflow-y-auto scrollbar-hide">
+                            <div className="h-full min-h-0 overflow-y-auto scrollbar-hide"> {/* Changed to h-full min-h-0 */}
                                 {membersWithDetails.map((member) => (
                                     <div key={member.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-surface-hover">
                                         <Avatar className="w-12 h-12">
@@ -298,7 +296,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     </div>
 
                     {/* Quick Actions - At the bottom */}
-                    <div className="mt-auto border-t border-border-subtle p-4">
+                    <div className="flex-shrink-0 border-t border-border-subtle p-4"> {/* Added flex-shrink-0 */}
                         <div className="space-y-3">
                             <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
                                 <p className="text-sm">Leave Group</p>
@@ -316,12 +314,11 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
             {/* Replies Sidebar */}
             {repliesSidebarOpen && (
-                <div className="lg:min-w-[20rem] bg-surface-default border rounded-lg border-border-subtle flex flex-col">
+                <div className="w-80 bg-surface-default border rounded-lg border-border-subtle flex flex-col min-h-0"> {/* Fixed width, added min-h-0 */}
                     {/* Replies Header */}
-                    <div className=" p-4 flex justify-between items-center">
+                    <div className="flex-shrink-0 p-4 flex justify-between items-center"> {/* Added flex-shrink-0 */}
                         <div>
                             <h3 className="font-semibold text-text-primary">Replies</h3>
-
                         </div>
                         <button
                             onClick={handleCloseReplies}
@@ -333,14 +330,14 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
                     {/* Original Message */}
                     {selectedMessage && (
-                        <div className="p-4 border-b border-border-subtle bg-surface-hover">
+                        <div className="flex-shrink-0 p-4 border-b border-border-subtle bg-surface-hover"> {/* Added flex-shrink-0 */}
                             <div className="bg-surface-brand-light px-4 py-4 rounded-4xl items-center min-w-0 mb-2">
                                 <span className="text-sm font-medium text-text-primary">
                                     {getSenderName(selectedMessage.senderId)}
                                 </span>
                                 <p className="text-sm text-text-primary">{selectedMessage.text}</p>
                             </div>
-                            <p className="text-xs text-text-tertiary flex  items-center space-x-4 mt-1">
+                            <p className="text-xs text-text-tertiary flex items-center space-x-4 mt-1">
                                 <Avatar className="w-6 h-6">
                                     <AvatarImage src={getUserById(selectedMessage.senderId)?.avatar} alt="avatar" />
                                     <AvatarFallback>{getSenderName(selectedMessage.senderId).charAt(0)}</AvatarFallback>
@@ -352,11 +349,10 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     )}
 
                     {/* Replies List */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4"> {/* Added min-h-0 */}
                         {replies.length > 0 ? (
                             replies.map((reply) => (
                                 <div key={reply.id} className="">
-
                                     <div className="flex-1 min-w-0 bg-surface-brand-light rounded-4xl px-4 py-4">
                                         <div className="mb-1">
                                             <span className="text-sm font-medium text-text-primary">
@@ -376,7 +372,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                                     )}
                                                 </div>
                                             ) : (
-                                                <p className="text-sm text-text-primary bg-surface-hover rounded-lg ">
+                                                <p className="text-sm text-text-primary bg-surface-hover rounded-lg">
                                                     {reply.text}
                                                 </p>
                                             )}
@@ -392,7 +388,6 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                             {formatChatTimestamp(reply.timestamp)}
                                         </span>
                                     </div>
-
                                 </div>
                             ))
                         ) : (
@@ -405,7 +400,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     </div>
 
                     {/* Reply Input in Replies Sidebar */}
-                    <div className="">
+                    <div className="flex-shrink-0"> {/* Added flex-shrink-0 */}
                         <MessageInput
                             onSendMessage={handleSendMessage}
                             placeholder="Write a reply..."

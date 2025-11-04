@@ -2,6 +2,7 @@
 // components/NavigationTabs.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from 'react';
+import { ButtonType3 } from "../custom/button";
 
 interface PersonalDetailsData {
   bio: string;
@@ -78,26 +79,26 @@ export function NavigationTabs({
     switch (activeTab) {
       case 'about':
         return (
-          <div className="flex space-x-6 mt-4">
+          <div className="flex ">
             {/* Left Column - Vertical Tabs */}
-            <div className="w-1/3 space-y-2">
+            <div className="w-1/5 h-full ">
               {aboutSubTabs.map((tab) => (
-                <button
+                <div
                   key={tab.id}
-                  className={`w-full text-left p-3 rounded-md transition-colors ${
+                  className={`w-full border-t text-left p-3 transition-colors ${
                     activeSubTab === tab.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-muted'
+                      ? 'text-brand'
+                      : ''
                   }`}
                   onClick={() => setActiveSubTab(tab.id)}
                 >
                   <span className="text-sm font-medium">{tab.label}</span>
-                </button>
+                </div>
               ))}
             </div>
 
             {/* Right Column - Content */}
-            <div className="flex-1">
+            <div className="flex-1 border-l p-1">
               {activeSubTab === 'personal-details' && (
                 <PersonalDetailsContent data={aboutData.personalDetails} />
               )}
@@ -155,10 +156,10 @@ export function NavigationTabs({
   };
 
   return (
-    <Card className="lg:h-[32.3rem]">
-      <CardContent className="p-6">
+    <Card className="lg:h-[32.3rem] p-0 ">
+      <CardContent className="p-0">
         {/* Main Horizontal Tabs */}
-        <div className="flex border-b">
+        <div className="flex border-b bg-surface-subtle rounded-t-lg">
           {mainTabs.map((tab) => (
             <button
               key={tab.id}

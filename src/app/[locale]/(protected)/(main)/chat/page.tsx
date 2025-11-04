@@ -32,29 +32,22 @@ export default function Chat() {
 
             if (chat) {
                 setChatInfo(chat);
-               
             }
         } else {
             setChatInfo(null);
         }
     }, [activeChat]);
 
-  
-    // const addNewMessage = (newMessage: Message) => {
-    //     setMessages(prev => [...prev, newMessage]);
-    // };
-
     if (!activeChat || !chatInfo) {
         return (
-            <div className="bg-surface-default rounded-md h-full">
-                <EmptyMessage
-                    />
+            <div className="bg-surface-default rounded-md h-full overflow-hidden"> {/* Added overflow-hidden */}
+                <EmptyMessage />
             </div>
         );
     }
 
     return (
-        <div className="  rounded-md h-full">
+        <div className="rounded-md h-full overflow-hidden"> {/* Added overflow-hidden */}
             {chatInfo.type === 'direct' ? (
                 <DirectMessageChat
                     chat={chatInfo}

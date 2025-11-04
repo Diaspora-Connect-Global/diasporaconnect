@@ -87,15 +87,13 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const userInfo = getUserInfo();
 
     return (
-        <div className="flex flex-row h-full w-full space-x-2">
+        <div className="flex flex-row h-full min-h-0 space-x-2"> {/* Changed to h-full min-h-0 */}
             {/* Main Chat Area */}
-            <div className="lg:min-w-[30rem] bg-surface-default rounded-lg border border-border-subtle flex flex-col h-full flex-1 ">
+            <div className="flex-1 bg-surface-default rounded-lg border border-border-subtle flex flex-col h-full min-h-0"> {/* Removed fixed width, added min-h-0 */}
                 {/* Chat Header */}
-                <div className="border-b border-border-subtle p-4  flex justify-between">
+                <div className="flex-shrink-0 border-b border-border-subtle p-4 flex justify-between"> {/* Added flex-shrink-0, removed fixed height */}
                     <div className="flex items-center space-x-3">
                         <div className="relative">
-                          
-
                             <Avatar className="w-12 h-12">
                                 <AvatarImage src={chat.avatar} alt="avator" />
                                 <AvatarFallback>U</AvatarFallback>
@@ -118,7 +116,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4"> {/* Added min-h-0, removed fixed height */}
                     {conversationMessages.map((message) => (
                         <div
                             key={message.id}
@@ -157,21 +155,23 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     <div ref={messagesEndRef} />
                 </div>
 
-                <MessageInput
-                    onSendMessage={handleSendMessage}
-                    placeholder="Type a message..."
-                    conversationId={chat.id}
-                    senderId="current-user"
-                />
+                {/* Message Input */}
+                <div className="flex-shrink-0"> {/* Added flex-shrink-0 wrapper, removed fixed height */}
+                    <MessageInput
+                        onSendMessage={handleSendMessage}
+                        placeholder="Type a message..."
+                        conversationId={chat.id}
+                        senderId="current-user"
+                    />
+                </div>
             </div>
 
             {/* Sidebar */}
             {sidebarOpen && (
-                <div className="lg:min-w-[20rem] bg-surface-default border rounded-lg border-border-subtle flex flex-col">
-                    <div className="p-4 flex-1">
+                <div className="w-80 bg-surface-default border rounded-lg border-border-subtle flex flex-col min-h-0"> {/* Fixed width, added min-h-0 */}
+                    <div className="p-4 flex-1 min-h-0 flex flex-col"> {/* Added min-h-0 */}
                         {/* User/Group Info */}
-                        <div className="flex flex-col items-center mb-6">
-                            
+                        <div className="flex-shrink-0 flex flex-col items-center mb-6"> {/* Added flex-shrink-0 */}
                             <Avatar className="w-20 h-20">
                                 <AvatarImage src={chat.avatar} alt="avator" />
                                 <AvatarFallback>U</AvatarFallback>
@@ -179,7 +179,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                             <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
                         </div>
 
-                        <div className="flex items-center justify-center">
+                        <div className="flex-shrink-0 flex items-center justify-center"> {/* Added flex-shrink-0 */}
                             <ButtonType3>
                                 View profile
                             </ButtonType3>
@@ -187,7 +187,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     </div>
 
                     {/* Quick Actions - Now at the bottom */}
-                    <div className="mt-auto border-t border-border-subtle p-4">
+                    <div className="flex-shrink-0 mt-auto border-t border-border-subtle p-4"> {/* Added flex-shrink-0 */}
                         <div className="space-y-3">
                             <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
                                 <p className="text-sm">Report</p>
