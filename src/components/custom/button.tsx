@@ -57,24 +57,21 @@ export function ButtonType2({
       className={`
         bg-surface-brand 
         border 
-        border-text-brand 
         text-text-white 
         rounded-full 
-       
         text-xs
         sm:text-sm
         md:text-base
         font-label-medium 
-        ring-text-brand
         cursor-pointer
         hover:bg-border-brand 
         hover:text-text-white 
         transition-colors
-        disabled:opacity-50 
+        disabled:text-text-secondary 
         disabled:cursor-not-allowed
+        disabled:bg-surface-disabled
         h-fit
         w-fit
-       
         py-1 px-2
         whitespace-nowrap
         ${className}

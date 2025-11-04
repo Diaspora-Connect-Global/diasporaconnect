@@ -8,6 +8,7 @@ import LocaleSwitcher from '../LocalSwitcher';
 import { SearchInput } from './input';
 import { ThemeToggle } from '@/app/[locale]/theme-toggle';
 import { useTranslations } from 'next-intl';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 export default function Header() {
   const pathname = usePathname();
@@ -29,7 +30,7 @@ export default function Header() {
     { name: t('marketplace'), href: "#", icon: "/MARKETPLACE.svg", disabled: true },
     { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT.svg", disabled: true },
     { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION.svg" },
-];
+  ];
 
   const isActive = (href: string) => {
     const normalizedPathname = pathname.replace(/\/$/, '');
@@ -43,84 +44,53 @@ export default function Header() {
   };
 
   return (
-   <header className="lg:max-w-[80vw] mx-auto border-b w-full "> {/* ✅ Full width header */}
-      <div className=" mx-auto px-4"> {/* ✅ Content centered with padding */}
-        <div className="flex justify-between lg:justify-between lg:space-x-[5rem] h-[4rem] items-center">  {/* Logo */}
-          <div>
+    <header className="max-w-[80vw] mx-auto border-b border-border-subtle bg-surface-default"> {/* Full width header */}
+      <div className="mx-auto px-4 sm:px-6 lg:px-8"> {/* Responsive padding */}
+        <div className="flex justify-between items-center h-16"> {/* Standard header height */}
+          {/* Logo */}
+          <div className="">
             <Link href={`/${currentLocale}`}>
-              <Image src="/LOGO.png" alt="Logo" width={80} height={80} className="" />
+              <p className='text-text-brand font-heading-small'>diaspoplug</p>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex space-x-[1.25rem] items-center"> {/* 20px equivalent */}
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden lg:flex flex-1 justify-center items-center space-x-6"> {/* Centered navigation */}
             {navigation.map((item) => {
               const active = isActive(item.href);
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative px-[0.5rem] py-[0.5rem] flex flex-col justify-center items-center transition-all duration-200 ${active
-                    ? 'text-text-brand border-b-[0.1875rem] border-border-brand' /* 3px equivalent */
+                  className={`relative px-3 py-2 flex flex-col items-center transition-all duration-200 min-w-0 ${active
+                    ? 'text-text-brand'
                     : 'text-text-secondary hover:text-text-primary'
                     }`}
                 >
-                  <div className="w-[1.25rem] h-[1.25rem]"> {/* 20px equivalent */}
+                  <div className="w-5 h-5 mb-1"> {/* Icon container */}
                     <Image
-                      width={24}
-                      height={24}
+                      width={20}
+                      height={20}
                       src={item.icon}
                       alt={`${item.name} Icon`}
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <p className="text-sm mt-[0.25rem]"> {/* 4px equivalent */}
+                  <p className="text-xs font-medium whitespace-nowrap">
                     {item.name}
                   </p>
+                  {active && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-brand" />
+                  )}
                 </Link>
               );
             })}
           </nav>
 
           {/* Right Section - Search, Language, Profile */}
-          <div className="flex items-center space-x-[1rem]"> {/* 16px equivalent */}
-            {/* User Profile */}
-            <div className="hidden lg:flex items-center space-x-[0.75rem]"> {/* 12px equivalent */}
-              <div className="relative">
-                <Image
-                  width={24}
-                  height={24}
-                  src="/PROFILE.png"
-                  alt="Profile"
-                  className="w-[32px] h-[32px] rounded-full object-cover border-2 border-border-subtle" /* 32px equivalent */
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
-                  }}
-                />
-                <div className="hidden w-[2rem] h-[2rem] bg-surface-subtle rounded-full items-center justify-center border-2">
-                  <Image
-                    width={24}
-                    height={24}
-                    src="/PROFILE.png"
-                    alt="Profile"
-                    className="w-[32px] h-[32px] rounded-full object-cover border-2 border-border-subtle"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Language Selector */}
-            <div className="hidden lg:flex relative">
-              <LocaleSwitcher
-                selectClassName="appearance-none text-text-primary pr-[1rem]" /* 16px equivalent */
-                optionClassName="bg-surface-default"
-              />
-              <ThemeToggle />
-            </div>
-
-            {/* Search Box */}
-            <div className="hidden lg:flex items-center">
+          <div className="flex items-center space-x-4"> {/* Standard spacing */}
+            {/* Search Box - Hidden on mobile */}
+            <div className="hidden lg:flex items-center min-w-0 flex-1 max-w-xs">
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -130,12 +100,24 @@ export default function Header() {
               />
             </div>
 
+            {/* Language Selector and Theme Toggle */}
+            {/* <div className="hidden lg:flex items-center space-x-2">
+              <LocaleSwitcher
+                selectClassName="appearance-none text-text-primary pr-8"
+                optionClassName="bg-surface-default"
+              />
+              <ThemeToggle />
+            </div> */}
+
+            {/* User Profile */}
+           <MyAvatar/>
+
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-[0.5rem] rounded-md text-text-primary hover:text-text-secondary" /* 8px equivalent */
+              className="lg:hidden p-2 rounded-md text-text-primary hover:bg-surface-hover transition-colors"
             >
-              <svg className="w-[1.5rem] h-[1.5rem]" fill="none" stroke="currentColor" viewBox="0 0 24 24"> 
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -149,20 +131,20 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden py-[1rem] border-t border-border-disabled"> {/* 16px equivalent */}
+          <div className="lg:hidden py-4 border-t border-border-subtle">
             {/* Mobile Search */}
-            <div className="mb-[1rem] px-[1rem]"> {/* 16px equivalent */}
+            <div className="mb-4 px-2">
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
                 onSearch={handleSearch}
                 placeholder={t('searchLabel')}
-                id="main-search"
+                id="mobile-search"
               />
             </div>
 
             {/* Mobile Navigation Links */}
-            <nav className="grid grid-cols-2 gap-[0.5rem]"> {/* 8px equivalent */}
+            <nav className="grid grid-cols-2 gap-2 mb-4">
               {navigation.map((item) => {
                 const active = isActive(item.href);
                 return (
@@ -170,60 +152,41 @@ export default function Header() {
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-[0.5rem] px-[1rem] py-[0.75rem] rounded-lg transition-all duration-200 ${active
+                    className={`flex items-center space-x-2 px-3 py-3 rounded-lg transition-all duration-200 ${active
                       ? 'bg-surface-brand-light text-text-brand font-medium border border-border-brand-light'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-brand-light'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
                       }`}
-                    style={{ color: active ? 'var(--text-brand)' : 'var(--text-secondary)' }}
                   >
-                    <div className="w-[1.25rem] h-[1.25rem]"> {/* 20px equivalent */}
+                    <div className="w-5 h-5">
                       <Image
-                        width={24}
-                        height={24}
+                        width={20}
+                        height={20}
                         src={item.icon}
                         alt={`${item.name} Icon`}
-                        className="w-full h-full object-contain fill-amber-400"
+                        className="w-full h-full object-contain"
                       />
                     </div>
-                    <span>{item.name}</span>
+                    <span className="text-sm font-medium">{item.name}</span>
                     {active && (
-                      <div className="ml-auto w-[0.5rem] h-[0.5rem] bg-surface-brand rounded-full" /> /* 8px equivalent */
+                      <div className="ml-auto w-2 h-2 bg-text-brand rounded-full" />
                     )}
                   </Link>
                 );
               })}
             </nav>
 
-            {/* Mobile user info */}
-            <div className="mt-[1rem] pt-[1rem] border-t border-border-subtle flex items-center space-x-[0.75rem] px-[1rem]"> {/* 16px, 12px equivalent */}
-              <div className="relative">
-                <Image
-                  width={24}
-                  height={24}
-                  src="/PROFILE.png"
-                  alt="Profile"
-                  className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle" /* 32px equivalent */
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.setAttribute('style', 'display: flex');
-                  }}
-                />
-                <div className="hidden w-[2rem] h-[2rem] bg-surface-subtle rounded-full items-center justify-center border-2">
-                  <Image
-                    width={24}
-                    height={24}
-                    src="/PROFILE.png"
-                    alt="Profile"
-                    className="w-[2rem] h-[2rem] rounded-full object-cover border-2 border-border-subtle"
-                  />
-                </div>
+            {/* Mobile user info and language selector */}
+            <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
+              <div className="flex items-center space-x-3">
+               <MyAvatar/>
+                <span className="text-sm text-text-primary">Profile</span>
               </div>
-              {/* Mobile Language Selector */}
-              <div className="px-[1rem]"> {/* 16px equivalent */}
+              <div className="flex items-center space-x-2">
                 <LocaleSwitcher
-                  selectClassName="appearance-none text-text-primary pr-[1rem]" /* 16px equivalent */
+                  selectClassName="appearance-none text-text-primary text-sm"
                   optionClassName="bg-surface-default"
                 />
+                <ThemeToggle />
               </div>
             </div>
           </div>
@@ -231,4 +194,22 @@ export default function Header() {
       </div>
     </header>
   );
+}
+
+
+export function MyAvatar() {
+  return (
+    <Avatar>
+      <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+      <AvatarFallback>
+        <Image
+          width={32}
+          height={32}
+          src="/PROFILE.png"
+          alt="Profile" />
+
+      </AvatarFallback>
+    </Avatar>
+
+  )
 }
