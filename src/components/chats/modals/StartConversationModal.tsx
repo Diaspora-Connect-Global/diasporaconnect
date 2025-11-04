@@ -14,7 +14,7 @@ import { ConversationStartData } from '@/types/chat';
 import { ConfirmationModal } from './StartConversationConfirmationModal';
 import { SearchInput } from '@/components/custom/input';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
-import { mockUsers, User } from '@/data/chats'; // Import User from data/chats
+import { mockUsers, User } from '@/data/chats';
 import { StartGroupConfirmationModal } from './StartGroupConfirmationModal';
 
 interface StartConversationModalProps {
@@ -117,7 +117,7 @@ export function StartConversationModal({
         }
     };
 
-     const handleGroupCreate = (groupName: string, groupPhoto?: string, selectedUsers?: User[]) => {
+    const handleGroupCreate = (groupName: string, groupPhoto?: string, selectedUsers?: User[]) => {
         console.log('Creating group:', { groupName, groupPhoto, selectedUsers });
         
         // Create conversation data for group
@@ -164,35 +164,29 @@ export function StartConversationModal({
 
     const isFormValid = selectedUsers.length > 0;
 
-    // Add debug logging
-    console.log('Modal isOpen:', isOpen);
-    console.log('Selected users:', selectedUsers.length);
-    console.log('Total users:', users.length);
-    console.log('Modal type:', type);
-
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onOpenChange}>
-                <DialogContent className="lg:min-w-[45rem]">
+                <DialogContent className="max-w-2xl w-[90vw] max-h-[85vh] flex flex-col"> {/* Responsive sizing */}
                     <DialogHeader>
                         <DialogTitle>
                             {type === "group" ? "Create Group" : "Start Conversation"}
                         </DialogTitle>
                     </DialogHeader>
 
-                    <div className="space-y-4">
+                    <div className="flex-1 min-h-0 flex flex-col space-y-4"> {/* Added min-h-0 and flex-col */}
                         {/* Search Input */}
-                        <div className="relative">
+                        <div className="flex-shrink-0"> {/* Added flex-shrink-0 */}
                             <SearchInput
                                 placeholder="Search people..."
                                 value={searchTerm}
                                 onChange={handleSearchChange}
-                                onSearch={() => { }} // You can implement search if needed
+                                onSearch={() => { }}
                             />
                         </div>
 
                         {/* Users List */}
-                        <div className="lg:h-120 overflow-y-auto">
+                        <div className="flex-1 min-h-0 overflow-y-auto"> {/* Added min-h-0, removed fixed height */}
                             {isLoading ? (
                                 <div className="p-4 text-center text-muted-foreground">
                                     Loading users...
@@ -233,15 +227,15 @@ export function StartConversationModal({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex justify-end items-center space-x-2 pt-4">
+                        <div className="flex-shrink-0 flex justify-end items-center space-x-2 pt-4 border-t border-border-subtle"> {/* Added flex-shrink-0 */}
                             <ButtonType3
-                                className='p-3'
+                                className='px-4 py-2'
                                 onClick={handleClose}
                             >
                                 Cancel
                             </ButtonType3>
                             <ButtonType2
-                                className='px-3 py-3'
+                                className='px-4 py-2'
                                 onClick={handleStartClick}
                                 disabled={!isFormValid || isLoading}
                             >

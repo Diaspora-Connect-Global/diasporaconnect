@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {  ButtonType2, ButtonType3 } from '@/components/custom/button';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { Camera, Plus, X } from 'lucide-react';
 import Image from 'next/image';
 import { User } from '@/data/chats';
@@ -19,8 +19,7 @@ interface AddGroupPhotoModalProps {
   onClose: () => void;
   onGroupCreate: (groupName: string, groupPhoto?: string) => void;
   initialGroupName?: string;
-selectedUsers: User[];
-  
+  selectedUsers: User[];
 }
 
 export function StartGroupConfirmationModal({
@@ -29,15 +28,14 @@ export function StartGroupConfirmationModal({
   onGroupCreate,
   initialGroupName = '',
   selectedUsers,
-
 }: AddGroupPhotoModalProps) {
   const [groupName, setGroupName] = useState(initialGroupName);
   const [groupPhoto, setGroupPhoto] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  console.log("Selected users for group", selectedUsers);
 
-   console.log("Selected users for group", selectedUsers);
   const handlePhotoSelect = (file: File) => {
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
@@ -96,22 +94,22 @@ export function StartGroupConfirmationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="lg:min-w-[45rem]">
+      <DialogContent className="max-w-md w-[90vw] max-h-[90vh] flex flex-col"> {/* Responsive sizing */}
         <DialogHeader>
-          <DialogTitle className="">Create  Group</DialogTitle>
+          <DialogTitle className="text-center">Create Group</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 min-h-0 flex flex-col space-y-6"> {/* Added min-h-0 and flex-col */}
           {/* Group Photo Section */}
-          <div className="flex flex-col items-center space-y-4">
+          <div className="flex-shrink-0 flex flex-col items-center space-y-4"> {/* Added flex-shrink-0 */}
             <div
               className={`
-                relative min-w-40 min-h-40 rounded-full  flex items-center justify-center cursor-pointer transition-colors
+                relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer transition-colors
                 ${isDragging 
-                  ? 'border-border-brand ' 
+                  ? 'border-border-brand bg-surface-brand-light' 
                   : groupPhoto 
                     ? '' 
-                    : 'border-border-brand   border-2 border-dashed'
+                    : 'border-border-brand border-2 border-dashed bg-surface-subtle'
                 }
               `}
               onDragOver={handleDragOver}
@@ -136,13 +134,13 @@ export function StartGroupConfirmationModal({
                   >
                     <X className="w-3 h-3" />
                   </button>
-                  <div className="absolute inset-0 bg-opacity-0 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all">
+                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all">
                     <Camera className="w-6 h-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center space-y-1">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-surface-brand-light flex items-center justify-center">
                     <Plus className="w-6 h-6 text-text-brand" />
                   </div>
                   <span className="text-sm text-text-brand text-center px-2">
@@ -159,39 +157,26 @@ export function StartGroupConfirmationModal({
               onChange={handleFileInputChange}
               className="hidden"
             />
-
-            {/* {!groupPhoto && (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center space-x-2 text-text-brand hover:text-text-brand-dark transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                <span className="text-sm font-medium">Upload photo</span>
-              </button>
-            )} */}
           </div>
 
           {/* Group Name Section */}
-          <div className="space-y-3">
-
+          <div className="flex-shrink-0 space-y-3"> {/* Added flex-shrink-0 */}
             <TextInput
-             id="groupName"
+              id="groupName"
               type="text"
               value={groupName}
-              onChange={ setGroupName}
+              onChange={setGroupName}
               placeholder="Enter group name"   
               label='Group Name'
-            
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end items-center space-x-3 pt-4 border-t border-border-subtle mt-6">
+        <div className="flex-shrink-0 flex justify-end items-center space-x-3 pt-4 border-t border-border-subtle mt-6"> {/* Added flex-shrink-0 */}
           <ButtonType3
             onClick={onClose}
-            className="px-6 py-2 
-              "
+            className="px-6 py-2"
           >
             Cancel
           </ButtonType3>
