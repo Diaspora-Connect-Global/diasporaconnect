@@ -1,0 +1,268 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// components/NavigationTabs.tsx
+import { Card, CardContent } from "@/components/ui/card";
+import { useState } from 'react';
+
+interface PersonalDetailsData {
+  bio: string;
+  fullName: string;
+  dateOfBirth: string;
+  residence: string;
+  homeCountry: string;
+}
+
+interface WorkExperienceData {
+  title: string;
+  company: string;
+  period: string;
+  description: string;
+}
+
+interface EducationData {
+  degree: string;
+  institution: string;
+  period: string;
+}
+
+interface AboutData {
+  personalDetails: PersonalDetailsData;
+  workExperience: WorkExperienceData[];
+  education: EducationData[];
+}
+
+interface PostsData {
+  // Define posts data structure as needed
+  items: any[];
+}
+
+interface CommunitiesData {
+  // Define communities data structure as needed
+  items: any[];
+}
+
+interface NavigationTabsProps {
+  initialMainTab?: string;
+  initialSubTab?: string;
+  aboutData: AboutData;
+  postsData: PostsData;
+  communitiesData: CommunitiesData;
+}
+
+export function NavigationTabs({ 
+  initialMainTab = 'about', 
+  initialSubTab = 'personal-details',
+  aboutData,
+  postsData,
+  communitiesData
+}: NavigationTabsProps) {
+  // State for main tabs and sub-tabs
+  const [activeTab, setActiveTab] = useState(initialMainTab);
+  const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
+
+  // Main horizontal tabs
+  const mainTabs = [
+    { id: 'about', label: 'About' },
+    { id: 'posts', label: 'Posts' },
+    { id: 'communities', label: 'Communities' },
+  ];
+
+  // About sub-tabs (vertical)
+  const aboutSubTabs = [
+    { id: 'personal-details', label: 'Personal details' },
+    { id: 'work-experience', label: 'Work experience' },
+    { id: 'education', label: 'Education' },
+  ];
+
+  // Render content based on active main tab
+  const renderMainContent = () => {
+    switch (activeTab) {
+      case 'about':
+        return (
+          <div className="flex space-x-6 mt-4">
+            {/* Left Column - Vertical Tabs */}
+            <div className="w-1/3 space-y-2">
+              {aboutSubTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`w-full text-left p-3 rounded-md transition-colors ${
+                    activeSubTab === tab.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                  onClick={() => setActiveSubTab(tab.id)}
+                >
+                  <span className="text-sm font-medium">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Right Column - Content */}
+            <div className="flex-1">
+              {activeSubTab === 'personal-details' && (
+                <PersonalDetailsContent data={aboutData.personalDetails} />
+              )}
+              {activeSubTab === 'work-experience' && (
+                <WorkExperienceContent data={aboutData.workExperience} />
+              )}
+              {activeSubTab === 'education' && (
+                <EducationContent data={aboutData.education} />
+              )}
+            </div>
+          </div>
+        );
+
+      case 'posts':
+        return (
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold mb-4">Posts</h3>
+            {postsData.items.length === 0 ? (
+              <p className="text-muted-foreground">No posts yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {/* Render posts data here */}
+                {postsData.items.map((post, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
+                    {/* Post content */}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'communities':
+        return (
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold mb-4">Communities</h3>
+            {communitiesData.items.length === 0 ? (
+              <p className="text-muted-foreground">No communities joined yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {/* Render communities data here */}
+                {communitiesData.items.map((community, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
+                    {/* Community content */}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="lg:h-[32.3rem]">
+      <CardContent className="p-6">
+        {/* Main Horizontal Tabs */}
+        <div className="flex border-b">
+          {mainTabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`px-6 py-3 text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              onClick={() => {
+                setActiveTab(tab.id);
+                // Reset to default sub-tab when switching to about
+                if (tab.id === 'about') {
+                  setActiveSubTab('personal-details');
+                }
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        {renderMainContent()}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Personal Details Content Component
+interface PersonalDetailsContentProps {
+  data: PersonalDetailsData;
+}
+
+function PersonalDetailsContent({ data }: PersonalDetailsContentProps) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Personal details</h3>
+      <table className="w-full">
+        <tbody>
+          <tr>
+            <td className="w-1/3 py-2 text-muted-foreground align-top">Bio</td>
+            <td className="py-2">{data.bio}</td>
+          </tr>
+          <tr>
+            <td className="w-1/3 py-2 text-muted-foreground">Full name</td>
+            <td className="py-2">{data.fullName}</td>
+          </tr>
+          <tr>
+            <td className="w-1/3 py-2 text-muted-foreground">Date of Birth</td>
+            <td className="py-2">{data.dateOfBirth}</td>
+          </tr>
+          <tr>
+            <td className="w-1/3 py-2 text-muted-foreground">Residence address</td>
+            <td className="py-2">{data.residence}</td>
+          </tr>
+          <tr>
+            <td className="w-1/3 py-2 text-muted-foreground">Home country</td>
+            <td className="py-2">{data.homeCountry}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Work Experience Content Component
+interface WorkExperienceContentProps {
+  data: WorkExperienceData[];
+}
+
+function WorkExperienceContent({ data }: WorkExperienceContentProps) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Work Experience</h3>
+      <div className="space-y-4">
+        {data.map((experience, index) => (
+          <div key={index} className="p-4 border rounded-lg">
+            <h4 className="font-semibold">{experience.title}</h4>
+            <p className="text-sm text-muted-foreground">{experience.company} • {experience.period}</p>
+            <p className="text-sm mt-2">{experience.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Education Content Component
+interface EducationContentProps {
+  data: EducationData[];
+}
+
+function EducationContent({ data }: EducationContentProps) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Education</h3>
+      <div className="space-y-4">
+        {data.map((education, index) => (
+          <div key={index} className="p-4 border rounded-lg">
+            <h4 className="font-semibold">{education.degree}</h4>
+            <p className="text-sm text-muted-foreground">{education.institution} • {education.period}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -27,7 +27,7 @@ export default function Header() {
     { name: t('home'), href: `/${currentLocale}`, icon: "/HOME.svg" },
     { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY.svg" },
     { name: t('marketplace'), href: "#", icon: "/MARKETPLACE.svg", disabled: true },
-    { name: t('chat'), href: "/chat", icon: "/CHAT.svg", disabled: true },
+    { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT.svg", disabled: true },
     { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION.svg" },
 ];
 
