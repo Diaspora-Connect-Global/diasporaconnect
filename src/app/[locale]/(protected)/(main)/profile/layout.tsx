@@ -4,7 +4,7 @@ export default function NotificationLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="lg:w-[75rem] lg:h-[48rem] mx-auto">
+    <div className="lg:w-[80vw] lg:h-[90vh]  overflow-y-auto scrollbar-hide m-auto">
         {children}
     </div>
   );

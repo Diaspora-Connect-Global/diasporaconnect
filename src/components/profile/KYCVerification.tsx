@@ -12,19 +12,21 @@ interface KYCVerificationProps {
 
 export function KYCVerification({ data, onVerify }: KYCVerificationProps) {
   return (
-    <Card className="lg:h-[5.75rem]">
-      <CardContent className="">
-        <div className="space-y-2">
-          <div onClick={onVerify} className="flex items-center justify-between cursor-pointer">
+    <Card className="h-full ">
+      <CardContent className=" h-full flex flex-col">
+        <div className="flex-1 min-h-0 flex flex-col justify-between">
+          <div 
+            onClick={onVerify} 
+            className="flex items-center justify-between cursor-pointer"
+          >
             <span className="text-sm font-medium">KYC verification</span>
-            <ChevronRight/>
-       
+            <ChevronRight className="w-4 h-4"/>
           </div>
-          <div className="flex items-center justify-between">
-           
-            <span className={`text-sm  text-text-${data.verified? "success": "warning"}`}>  {data.verified? "Verified" : "Not verified"}</span>
+          <div className="flex items-center justify-between mt-2">
+            <span className={`text-sm ${data.verified ? "text-text-success" : "text-text-warning"}`}>
+              {data.verified ? "Verified" : "Not verified"}
+            </span>
           </div>
-         
         </div>
       </CardContent>
     </Card>

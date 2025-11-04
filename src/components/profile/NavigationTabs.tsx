@@ -2,7 +2,7 @@
 // components/NavigationTabs.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from 'react';
-import { ButtonType3 } from "../custom/button";
+import { PersonalDetailsContent } from "./PersonalDetailsContent";
 
 interface PersonalDetailsData {
   bio: string;
@@ -79,9 +79,9 @@ export function NavigationTabs({
     switch (activeTab) {
       case 'about':
         return (
-          <div className="flex ">
+          <div className="flex">
             {/* Left Column - Vertical Tabs */}
-            <div className="w-1/5 h-full ">
+            <div className=" ">
               {aboutSubTabs.map((tab) => (
                 <div
                   key={tab.id}
@@ -98,9 +98,9 @@ export function NavigationTabs({
             </div>
 
             {/* Right Column - Content */}
-            <div className="flex-1 border-l p-1">
+            <div className="flex-1 border-l p-4">
               {activeSubTab === 'personal-details' && (
-                <PersonalDetailsContent data={aboutData.personalDetails} />
+                <PersonalDetailsContent  />
               )}
               {activeSubTab === 'work-experience' && (
                 <WorkExperienceContent data={aboutData.workExperience} />
@@ -156,7 +156,7 @@ export function NavigationTabs({
   };
 
   return (
-    <Card className="lg:h-[32.3rem] p-0 ">
+    <Card className=" p-0 ">
       <CardContent className="p-0">
         {/* Main Horizontal Tabs */}
         <div className="flex border-b bg-surface-subtle rounded-t-lg">
@@ -188,42 +188,8 @@ export function NavigationTabs({
   );
 }
 
-// Personal Details Content Component
-interface PersonalDetailsContentProps {
-  data: PersonalDetailsData;
-}
 
-function PersonalDetailsContent({ data }: PersonalDetailsContentProps) {
-  return (
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Personal details</h3>
-      <table className="w-full">
-        <tbody>
-          <tr>
-            <td className="w-1/3 py-2 text-muted-foreground align-top">Bio</td>
-            <td className="py-2">{data.bio}</td>
-          </tr>
-          <tr>
-            <td className="w-1/3 py-2 text-muted-foreground">Full name</td>
-            <td className="py-2">{data.fullName}</td>
-          </tr>
-          <tr>
-            <td className="w-1/3 py-2 text-muted-foreground">Date of Birth</td>
-            <td className="py-2">{data.dateOfBirth}</td>
-          </tr>
-          <tr>
-            <td className="w-1/3 py-2 text-muted-foreground">Residence address</td>
-            <td className="py-2">{data.residence}</td>
-          </tr>
-          <tr>
-            <td className="w-1/3 py-2 text-muted-foreground">Home country</td>
-            <td className="py-2">{data.homeCountry}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-}
+
 
 // Work Experience Content Component
 interface WorkExperienceContentProps {

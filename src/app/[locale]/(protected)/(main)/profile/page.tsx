@@ -9,7 +9,6 @@ import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { KYCVerification } from '@/components/profile/KYCVerification';
 import { TrustScore } from '@/components/profile/TrustScore';
 
-
 export default function Profile() {
     // State for all component data
     const [profileData,] = useState({
@@ -88,12 +87,10 @@ export default function Profile() {
     // Event handlers
     const handleCompleteProfile = () => {
         setProfileCompletion(prev => ({ ...prev, percentage: 100 }));
-        // In a real app, you might open a modal or navigate to profile completion page
     };
 
     const handleVerifyKYC = () => {
         setKycStatus(prev => ({ ...prev, verified: true }));
-        // In a real app, you might open a verification modal
     };
 
     const handleLevelChange = (level: keyof typeof trustScore.levels, checked: boolean) => {
@@ -106,45 +103,47 @@ export default function Profile() {
         }));
     };
 
-    const handleDescriptionToggle = (checked: boolean) => {
-        setTrustScore(prev => ({
-            ...prev,
-            showDescription: checked,
-        }));
-    };
+
 
     return (
-        <div className=" pt-8">
-                <div className="flex space-x-3">
-                    {/* Left Column */}
-                    <div className="lg:col-span-2 space-y-6 lg:w-[56rem]">
-                        <ProfileHeader data={profileData} />
-                        <NavigationTabs
-                            aboutData={aboutData}
-                            postsData={postsData}
-                            communitiesData={communitiesData}
-                        />
+        <div className="flex space-x-5 my-2">
+            {/* Left Column */}
+            <div className="lg:w-[50vw] space-y-2">
+                <ProfileHeader data={profileData} />
+                <NavigationTabs
+                    aboutData={aboutData}
+                    postsData={postsData}
+                    communitiesData={communitiesData}
+                />
+            </div>
 
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="space-y-3 lg:w-[17.5rem]">
-                        <ProfileCompletion
-                            data={profileCompletion}
-                            onCompleteProfile={handleCompleteProfile}
-                        />
-                        <KYCVerification
-                            data={kycStatus}
-                            onVerify={handleVerifyKYC}
-                        />
-                        <PersonalDetails />
-                        <TrustScore
-                            data={trustScore}
-                            onLevelChange={handleLevelChange}
-                            onDescriptionToggle={handleDescriptionToggle}
-                        />
-                    </div>
+            {/* Right Column */}
+            <div className="lg:w-[20vw] lg:h-[80vh] space-y-2 mb-1">
+                <div className=' min-h-0'>
+                    <ProfileCompletion
+                        data={profileCompletion}
+                        onCompleteProfile={handleCompleteProfile}
+                    />
                 </div>
+
+                <div className=' min-h-0'>
+                    <KYCVerification
+                        data={kycStatus}
+                        onVerify={handleVerifyKYC}
+                    />
+                </div>
+
+                <div className=' min-h-0'>
+                    <PersonalDetails data={{ joinDate: "1st November, 2025" }} />
+                </div>
+
+                <div className='min-h-0'>
+                    <TrustScore
+                        data={trustScore}
+                        onLevelChange={handleLevelChange}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
