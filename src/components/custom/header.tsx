@@ -2,13 +2,29 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import Image from 'next/image';
 import LocaleSwitcher from '../LocalSwitcher';
 import { SearchInput } from './input';
 import { ThemeToggle } from '@/app/[locale]/theme-toggle';
 import { useTranslations } from 'next-intl';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronRight as CR, SettingsIcon} from 'lucide-react';
+import { LogoutCurve, Wallet3 } from 'iconsax-reactjs';
+import { QuestionIcon, StorefrontIcon } from "@phosphor-icons/react";
+import { IconFileDollar } from '@tabler/icons-react';
+
+
 
 export default function Header() {
   const pathname = usePathname();
@@ -110,7 +126,7 @@ export default function Header() {
             </div> */}
 
             {/* User Profile */}
-           <MyAvatar/>
+            <DropdownMenuAvatar />
 
             {/* Mobile menu button */}
             <button
@@ -178,7 +194,7 @@ export default function Header() {
             {/* Mobile user info and language selector */}
             <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
               <div className="flex items-center space-x-3">
-               <MyAvatar/>
+                <DropdownMenuAvatar />
                 <span className="text-sm text-text-primary">Profile</span>
               </div>
               <div className="flex items-center space-x-2">
@@ -211,5 +227,89 @@ export function MyAvatar() {
       </AvatarFallback>
     </Avatar>
 
+  )
+}
+
+
+interface DMItemProps {
+  icon: ReactNode;
+  text: string;
+  onClick?: () => void;
+}
+
+export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
+  return (
+    <div
+      onClick={onClick}
+      className="flex items-center gap-3 cursor-pointer"
+    >
+      {Icon}
+      <span className="flex-1">{text}</span>
+    </div>
+  );
+}
+
+
+
+export function DropdownMenuAvatar() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="focus:outline-none">
+          <MyAvatar />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="start">
+        <DropdownMenuLabel>
+
+
+          <Link href={"/profile"} className='flex items-center justify-between'>
+            <div className='flex space-x-2 items-center'>
+              <MyAvatar />
+              <p>John Doe</p>
+            </div>
+            <CR />
+          </Link>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+
+            <DMItem icon={<StorefrontIcon />} text={'Become a vendor'} />
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+
+            <DMItem icon={<IconFileDollar />} text={'Become a vendor'} />
+          </DropdownMenuItem>
+
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+
+            <DMItem icon={<Wallet3
+              size="32"
+            />} text={'Wallet'} />
+
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <DMItem icon={<SettingsIcon size="32"
+            />} text={'Settings & Privacy'} />
+
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <DMItem icon={<QuestionIcon size={32} />} text={'Help & Support'} />
+
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem>
+          <DMItem icon={<LogoutCurve
+            size="32"
+          />} text={'Logout'} />        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
