@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // components/TrustScore.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { UserBadge } from "../custom/userBadge";

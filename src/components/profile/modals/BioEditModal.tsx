@@ -56,13 +56,13 @@ export function BioEditModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Edit Bio</DialogTitle>
+          <DialogTitle>Bio</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 min-h-0 flex flex-col space-y-4">
           <div className="flex-shrink-0">
             <label htmlFor="bio" className="block text-sm font-medium text-text-primary mb-2">
-              About you
+              Bio
             </label>
             <textarea
               id="bio"
@@ -97,7 +97,7 @@ export function BioEditModal({
             className="px-6 py-2"
             disabled={!bio.trim() || isLoading}
           >
-            {isLoading ? 'Saving...' : 'Save Bio'}
+            {isLoading ? 'Saving...' : 'Save'}
           </ButtonType2>
         </div>
       </DialogContent>

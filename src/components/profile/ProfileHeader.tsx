@@ -1,9 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Edit2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { UserBadge } from "../custom/userBadge";
-import { PencilSimple, PencilSimpleIcon, UsersThree, UsersThreeIcon } from "@phosphor-icons/react";
+import {  PencilSimpleIcon, UsersThreeIcon } from "@phosphor-icons/react";
 
 interface ProfileHeaderProps {
   data: {
