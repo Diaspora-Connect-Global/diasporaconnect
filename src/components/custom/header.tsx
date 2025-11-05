@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ReactNode, useState } from 'react';
+import { cloneElement, isValidElement, ReactNode, useState } from 'react';
 import Image from 'next/image';
 import LocaleSwitcher from '../LocalSwitcher';
 import { SearchInput } from './input';
@@ -18,10 +19,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronRight as CR, SettingsIcon} from 'lucide-react';
+import { ChevronRight as CR, SettingsIcon } from 'lucide-react';
 import { LogoutCurve, Wallet3 } from 'iconsax-reactjs';
 import { QuestionIcon, StorefrontIcon } from "@phosphor-icons/react";
 import { IconFileDollar } from '@tabler/icons-react';
+import React from 'react';
 
 
 
@@ -116,13 +118,13 @@ export default function Header() {
             </div>
 
             {/* Language Selector and Theme Toggle */}
-            {/* <div className="hidden lg:flex items-center space-x-2">
-              <LocaleSwitcher
+            <div className="hidden lg:flex items-center space-x-2">
+              {/* <LocaleSwitcher
                 selectClassName="appearance-none text-text-primary pr-8"
                 optionClassName="bg-surface-default"
-              />
+              /> */}
               <ThemeToggle />
-            </div> */}
+            </div>
 
             {/* User Profile */}
             <DropdownMenuAvatar />
@@ -237,13 +239,33 @@ interface DMItemProps {
 }
 
 export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
+  const renderIcon = () => {
+    if (!isValidElement(Icon)) return Icon;
+
+    const props: any = {
+      className: "w-full h-full text-primary",
+    };
+
+    // Only add `size` if the icon likely supports it
+    const iconName = (Icon.type as any)?.displayName || '';
+    const supportsSize = /Wallet|Logout|Storefront|Question|FileDollar/.test(iconName);
+
+    if (supportsSize) {
+      props.size = 20;
+    }
+
+    return cloneElement(Icon, props);
+  };
+
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 cursor-pointer"
+      className="flex items-center space-x-3 my-2 cursor-pointer select-none"
     >
-      {Icon}
-      <span className="flex-1">{text}</span>
+      <div className="w-6 h-6 rounded flex items-center justify-center p-1">
+        {renderIcon()}
+      </div>
+      <span className="text-sm">{text}</span>
     </div>
   );
 }
@@ -252,26 +274,23 @@ export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
 
 export function DropdownMenuAvatar() {
   return (
-    <DropdownMenu>
+    <DropdownMenu >
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none">
           <MyAvatar />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="start">
+      <DropdownMenuContent className="w-100 mx-20 mt-4" align="start">
         <DropdownMenuLabel>
-
-
           <Link href={"/profile"} className='flex items-center justify-between'>
-            <div className='flex space-x-2 items-center'>
+            <div className='flex space-x-4 items-center my-2'>
               <MyAvatar />
-              <p>John Doe</p>
+              <p className='text-xl'>John Doe</p>
             </div>
             <CR />
           </Link>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-
         <DropdownMenuGroup>
           <DropdownMenuItem>
 
@@ -281,19 +300,18 @@ export function DropdownMenuAvatar() {
 
             <DMItem icon={<IconFileDollar />} text={'Become a vendor'} />
           </DropdownMenuItem>
-
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
 
             <DMItem icon={<Wallet3
-              size="32"
+              size="80"
             />} text={'Wallet'} />
 
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <DMItem icon={<SettingsIcon size="32"
+            <DMItem icon={<SettingsIcon className='w-full h-full'
             />} text={'Settings & Privacy'} />
 
           </DropdownMenuItem>
@@ -303,11 +321,11 @@ export function DropdownMenuAvatar() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-
         <DropdownMenuItem>
           <DMItem icon={<LogoutCurve
-            size="32"
-          />} text={'Logout'} />        </DropdownMenuItem>
+            size={40}
+          />} text={'Logout'} />
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

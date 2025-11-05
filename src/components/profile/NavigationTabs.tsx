@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/NavigationTabs.tsx
+
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from 'react';
 import { PersonalDetailsContent } from "./PersonalDetailsContent";
@@ -79,13 +79,13 @@ export function NavigationTabs({
     switch (activeTab) {
       case 'about':
         return (
-          <div className="flex">
+          <div className="flex lg:h-[60vh]">
             {/* Left Column - Vertical Tabs */}
-            <div className=" ">
+            <div className="w-[12vw] h-full overflow-y-auto ">
               {aboutSubTabs.map((tab) => (
                 <div
                   key={tab.id}
-                  className={`w-full border-t text-left p-3 transition-colors ${
+                  className={`w-full border-t text-left p-3 transition-colors cursor-pointer ${
                     activeSubTab === tab.id
                       ? 'text-brand'
                       : ''
@@ -98,7 +98,7 @@ export function NavigationTabs({
             </div>
 
             {/* Right Column - Content */}
-            <div className="flex-1 border-l p-4">
+            <div className="flex-1 border-l p-4 overflow-y-auto scrollbar-hide">
               {activeSubTab === 'personal-details' && (
                 <PersonalDetailsContent  />
               )}
@@ -163,9 +163,9 @@ export function NavigationTabs({
           {mainTabs.map((tab) => (
             <button
               key={tab.id}
-              className={`px-6 py-3 text-sm font-medium transition-colors ${
+              className={`px-6 py-3 text-sm font-medium cursor-pointer transition-colors ${
                 activeTab === tab.id
-                  ? 'text-primary border-b-2 border-primary'
+                  ? 'text-primary border-b-2 border-border-brand'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
               onClick={() => {
@@ -181,8 +181,10 @@ export function NavigationTabs({
           ))}
         </div>
 
-        {/* Tab Content */}
+<div>
         {renderMainContent()}
+
+</div>
       </CardContent>
     </Card>
   );

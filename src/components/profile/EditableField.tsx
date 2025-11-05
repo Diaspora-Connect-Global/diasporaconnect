@@ -1,5 +1,6 @@
 'use client';
 
+import { PencilSimpleIcon } from '@phosphor-icons/react';
 import { Pencil } from 'lucide-react';
 
 interface EditableFieldProps {
@@ -23,7 +24,8 @@ export function EditableField({
                         className="ml-4 p-1 text-text-tertiary hover:text-text-brand hover:bg-surface-hover rounded-md transition-colors "
                         title={`Edit ${title}`}
                     >
-                        <Pencil className="w-3 h-3 text-text-primary" />
+                        <PencilSimpleIcon size={32} className="w-3 h-3 text-text-primary" />
+
                     </button>
 
                 </div>

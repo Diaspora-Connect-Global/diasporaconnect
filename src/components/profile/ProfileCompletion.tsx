@@ -26,13 +26,13 @@ export function ProfileCompletion({ data, onCompleteProfile }: ProfileCompletion
                 <h2 className="text-lg font-semibold ">Profile completion</h2>
                 <div className="flex-1 min-h-0 flex flex-col justify-between">
                     <div className="space-y-2">
-                        <Progress value={progress} className="w-full" />
+                        <Progress value={progress} className="w-full [&>div]:bg-text-success" />
                         <div className="flex items-center justify-between">
                             <span className="text-sm">{data.percentage}% complete</span>
                         </div>
                     </div>
-                    <div 
-                        onClick={onCompleteProfile} 
+                    <div
+                        onClick={onCompleteProfile}
                         className="flex items-center justify-between cursor-pointer text-text-brand mt-2 pt-2  border-border-subtle"
                     >
                         <p className="text-sm">Complete profile</p>

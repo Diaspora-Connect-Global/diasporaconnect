@@ -118,7 +118,7 @@ export default function Profile() {
             </div>
 
             {/* Right Column */}
-            <div className="lg:w-[20vw] lg:h-[80vh] space-y-2 mb-1">
+            <div className="lg:w-[25vw] lg:h-[80vh] space-y-2 mb-1">
                 <div className=' min-h-0'>
                     <ProfileCompletion
                         data={profileCompletion}
