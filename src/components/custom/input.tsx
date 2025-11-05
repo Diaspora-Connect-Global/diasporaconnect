@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { Eye, EyeOff, Search } from 'lucide-react';
+import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
 import { LabelMedium } from '../utils';
 
 interface PasswordInputProps {
@@ -83,11 +83,11 @@ export const TextInput: React.FC<TextInputProps> = ({
             <label htmlFor={id} className="">
                 <LabelMedium>
                     {label}
-                    {required && <span className="text-red-500 ml-1">*</span>}
+                    {required && <span className="text-text-danger ml-1">*</span>}
                 </LabelMedium>
             </label>
             <div className="bg-surface-subtle rounded-md">
-                <div className="border-border-subtle border-2  rounded-md">
+                <div className="border-border-subtle border-2 rounded-md">
                     <input
                         id={id}
                         type={type}
@@ -151,5 +151,180 @@ export const SearchInput: React.FC<SearchInputProps> = ({
                 </div>
             </div>
         </div>
+    );
+};
+
+
+
+interface SelectProps {
+    value: string;
+    onChange: (value: string) => void;
+    options: { value: string; label: string }[];
+    placeholder?: string;
+    label?: string;
+    id?: string;
+    required?: boolean;
+}
+
+export const Select: React.FC<SelectProps> = ({
+    value,
+    onChange,
+    options,
+    placeholder = "Select an option",
+    label,
+    id = "select",
+    required = false
+}) => {
+    return (
+        <div className="space-y-2">
+            {label && (
+                <label htmlFor={id} className="text-sm font-normal">
+                    <LabelMedium>
+                        {label}
+                        {required && <span className="text-red-500 ml-1">*</span>}
+                    </LabelMedium>
+                </label>
+            )}
+            <div className="bg-surface-subtle rounded-md">
+                <div className="border-border-subtle border-2 rounded-md relative">
+                    <select
+                        id={id}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        className="h-12 w-full bg-transparent px-3 pr-10 appearance-none focus:outline-none text-text-primary cursor-pointer"
+                        required={required}
+                    >
+                        <option value="" disabled className="text-text-secondary">
+                            {placeholder}
+                        </option>
+                        {options.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                    <ChevronDown 
+                        size={20} 
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+interface MonthSelectProps {
+    value: string;
+    onChange: (value: string) => void;
+    label?: string;
+    id?: string;
+    required?: boolean;
+}
+
+export const MonthSelect: React.FC<MonthSelectProps> = ({
+    value,
+    onChange,
+    label = "Month",
+    id = "month",
+    required = false
+}) => {
+    const months = [
+        { value: "01", label: "January" },
+        { value: "02", label: "February" },
+        { value: "03", label: "March" },
+        { value: "04", label: "April" },
+        { value: "05", label: "May" },
+        { value: "06", label: "June" },
+        { value: "07", label: "July" },
+        { value: "08", label: "August" },
+        { value: "09", label: "September" },
+        { value: "10", label: "October" },
+        { value: "11", label: "November" },
+        { value: "12", label: "December" }
+    ];
+
+    return (
+        <Select
+            value={value}
+            onChange={onChange}
+            options={months}
+            placeholder="Select month"
+            label={label}
+            id={id}
+            required={required}
+        />
+    );
+};
+
+interface CountrySelectProps {
+    value: string;
+    onChange: (value: string) => void;
+    label?: string;
+    id?: string;
+    required?: boolean;
+}
+
+export const CountrySelect: React.FC<CountrySelectProps> = ({
+    value,
+    onChange,
+    label = "Country",
+    id = "country",
+    required = false
+}) => {
+    const countries = [
+        { value: "US", label: "United States" },
+        { value: "GB", label: "United Kingdom" },
+        { value: "CA", label: "Canada" },
+        { value: "AU", label: "Australia" },
+        { value: "DE", label: "Germany" },
+        { value: "FR", label: "France" },
+        { value: "ES", label: "Spain" },
+        { value: "IT", label: "Italy" },
+        { value: "NL", label: "Netherlands" },
+        { value: "BE", label: "Belgium" },
+        { value: "CH", label: "Switzerland" },
+        { value: "AT", label: "Austria" },
+        { value: "SE", label: "Sweden" },
+        { value: "NO", label: "Norway" },
+        { value: "DK", label: "Denmark" },
+        { value: "FI", label: "Finland" },
+        { value: "PL", label: "Poland" },
+        { value: "CZ", label: "Czech Republic" },
+        { value: "GR", label: "Greece" },
+        { value: "PT", label: "Portugal" },
+        { value: "IE", label: "Ireland" },
+        { value: "NZ", label: "New Zealand" },
+        { value: "SG", label: "Singapore" },
+        { value: "HK", label: "Hong Kong" },
+        { value: "JP", label: "Japan" },
+        { value: "KR", label: "South Korea" },
+        { value: "CN", label: "China" },
+        { value: "IN", label: "India" },
+        { value: "BR", label: "Brazil" },
+        { value: "MX", label: "Mexico" },
+        { value: "AR", label: "Argentina" },
+        { value: "ZA", label: "South Africa" },
+        { value: "NG", label: "Nigeria" },
+        { value: "KE", label: "Kenya" },
+        { value: "EG", label: "Egypt" },
+        { value: "GH", label: "Ghana" },
+        { value: "AE", label: "United Arab Emirates" },
+        { value: "SA", label: "Saudi Arabia" },
+        { value: "IL", label: "Israel" },
+        { value: "TR", label: "Turkey" },
+        { value: "RU", label: "Russia" },
+        { value: "UA", label: "Ukraine" }
+    ].sort((a, b) => a.label.localeCompare(b.label));
+
+    return (
+        <Select
+            value={value}
+            onChange={onChange}
+            options={countries}
+            placeholder="Select country"
+            label={label}
+            id={id}
+            required={required}
+        />
     );
 };
