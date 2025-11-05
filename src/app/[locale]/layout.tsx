@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
+import GraphQLProvider from "@/components/provider/apollo-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,9 +39,10 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <GraphQLProvider>
+              {children}
+            </GraphQLProvider>
 
-            {children}
-          
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
