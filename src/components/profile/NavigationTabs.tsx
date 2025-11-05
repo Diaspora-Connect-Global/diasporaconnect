@@ -79,9 +79,9 @@ export function NavigationTabs({
     switch (activeTab) {
       case 'about':
         return (
-          <div className="flex lg:h-[60vh]">
+          <div className="flex">
             {/* Left Column - Vertical Tabs */}
-            <div className="w-[12vw] h-full overflow-y-auto ">
+            <div className="w-[12vw] h-full  ">
               {aboutSubTabs.map((tab) => (
                 <div
                   key={tab.id}
@@ -98,7 +98,7 @@ export function NavigationTabs({
             </div>
 
             {/* Right Column - Content */}
-            <div className="flex-1 border-l p-4 overflow-y-auto scrollbar-hide">
+            <div className="flex-1 border-l p-4 ">
               {activeSubTab === 'personal-details' && (
                 <PersonalDetailsContent  />
               )}
