@@ -103,7 +103,7 @@ export default function FeedCard({
           <Image
             width={20}
             height={20}
-            src="/COMMENTFILLED.svg"
+            src="/COMMENT.svg"
             alt="comments"
             className="w-[1.25rem] h-[1.25rem] object-contain"
           />
