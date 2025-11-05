@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from 'react';
 import { PersonalDetailsContent } from "./PersonalDetailsContent";
+import WorkExperience from "./WorkExperience";
 
 interface PersonalDetailsData {
   bio: string;
@@ -103,7 +104,7 @@ export function NavigationTabs({
                 <PersonalDetailsContent  />
               )}
               {activeSubTab === 'work-experience' && (
-                <WorkExperienceContent data={aboutData.workExperience} />
+                <WorkExperience />
               )}
               {activeSubTab === 'education' && (
                 <EducationContent data={aboutData.education} />
@@ -192,28 +193,6 @@ export function NavigationTabs({
 
 
 
-
-// Work Experience Content Component
-interface WorkExperienceContentProps {
-  data: WorkExperienceData[];
-}
-
-function WorkExperienceContent({ data }: WorkExperienceContentProps) {
-  return (
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Work Experience</h3>
-      <div className="space-y-4">
-        {data.map((experience, index) => (
-          <div key={index} className="p-4 border rounded-lg">
-            <h4 className="font-semibold">{experience.title}</h4>
-            <p className="text-sm text-muted-foreground">{experience.company} • {experience.period}</p>
-            <p className="text-sm mt-2">{experience.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // Education Content Component
 interface EducationContentProps {
