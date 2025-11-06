@@ -46,7 +46,7 @@ export default function WorkExperience() {
         { id: '15', name: 'NativeScript' },
     ]);
 
-    const [experiences, setExperiences] = useState<Experience[]>([
+    const [experiences, ] = useState<Experience[]>([
         {
             id: '1',
             company: 'Grete Solutions',
@@ -62,7 +62,7 @@ export default function WorkExperience() {
     const [showSkillModal, setShowSkillModal] = useState(false);
     const [showExperienceModal, setShowExperienceModal] = useState(false);
     const [newSkill, setNewSkill] = useState('');
-    const [newExperience, setNewExperience] = useState({
+    const [newExperience, ] = useState({
         company: '',
         role: '',
         startDate: '',
@@ -79,16 +79,6 @@ export default function WorkExperience() {
         }
     };
 
-    const addExperience = () => {
-        if (newExperience.company && newExperience.role) {
-            setExperiences([...experiences, {
-                ...newExperience, id: Date.now().toString(), skills: [],
-                description: ''
-            }]);
-            setNewExperience({ company: '', role: '', startDate: '', endDate: '', contract: false,description:'' });
-            setShowExperienceModal(false);
-        }
-    };
 
     return (
         <>
