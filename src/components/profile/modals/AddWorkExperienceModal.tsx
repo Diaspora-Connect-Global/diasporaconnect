@@ -11,6 +11,7 @@ import {
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { MonthSelect, TextArea, TextInput } from '@/components/custom/input';
 import { LabelLarge } from '@/components/utils';
+import { AutocompleteAsync } from '@/components/custom/autoCompleteAsync';
 
 interface WorkExperience {
   company: string;
@@ -29,6 +30,65 @@ interface AddWorkExperienceModalProps {
   onClose: () => void;
   initialData?: Partial<WorkExperience>;
 }
+
+
+interface Option {
+  id: string;
+  label: string;
+}
+
+/* -------------------------------------------------
+   Mock data – replace these with real API later
+   ------------------------------------------------- */
+const ALL_SKILLS: Option[] = [
+  { id: '1', label: 'React' },
+  { id: '2', label: 'Angular' },
+  { id: '3', label: 'Vue.js' },
+  { id: '4', label: 'Svelte' },
+  { id: '5', label: 'Ember' },
+  { id: '6', label: 'Backbone.js' },
+  { id: '7', label: 'jQuery' },
+  { id: '8', label: 'Django' },
+  { id: '9', label: 'Flask' },
+  { id: '10', label: 'Ruby on Rails' },
+  { id: '11', label: 'ASP.NET' },
+  { id: '12', label: 'Spring' },
+  { id: '13', label: 'Laravel' },
+  { id: '14', label: 'Express' },
+  { id: '15', label: 'NativeScript' },
+  { id: '16', label: 'React Native' },
+  { id: '17', label: 'Flutter' },
+  { id: '18', label: 'Xamarin' },
+  { id: '19', label: 'Ionic' },
+  { id: '20', label: 'Cordova' },
+  { id: '21', label: 'SwiftUI' },
+  { id: '22', label: 'Jetpack Compose' },
+  { id: '23', label: 'Apache Cordova' },
+];
+
+/* Simulated async search */
+const fetchSkills = (query: string): Promise<Option[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const lower = query.toLowerCase();
+      const matches = ALL_SKILLS.filter((s) =>
+        s.label.toLowerCase().includes(lower)
+      );
+      resolve(matches);
+    }, 200); // fake network delay
+  });
+};
+
+/* Simulated create */
+const createSkill = (label: string): Promise<Option> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newId = `custom-${Date.now()}`;
+      resolve({ id: newId, label });
+    }, 300);
+  });
+};
+
 
 export function AddWorkExperienceModal({
   isOpen,
@@ -49,6 +109,34 @@ export function AddWorkExperienceModal({
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [skills, setSkills] = useState<string[]>(
+[
+  'React',
+  'Angular',
+  'Vue.js',
+  'Svelte',
+  'Ember',
+  'Backbone.js',
+  'jQuery',
+  'Django',
+  'Flask',
+  'Ruby on Rails',
+  'ASP.NET',
+  'Spring',
+  'Laravel',
+  'Express',
+  'NativeScript',
+  'React Native',
+  'Flutter',
+  'Xamarin',
+  'Ionic',
+  'Cordova',
+  'SwiftUI',
+  'Jetpack Compose',
+  'Apache Cordova'
+]
+
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -184,6 +272,15 @@ export function AddWorkExperienceModal({
               maxLength={500}
               rows={5}
             />
+
+<AutocompleteAsync
+      label="Skills"
+      value={skills}
+      onChange={setSkills}
+      fetchOptions={fetchSkills}
+      onCreate={createSkill}
+      placeholder="Type to search or add new skill..."
+    />
         </div>
 
         {/* Sticky Footer */}
@@ -201,7 +298,7 @@ export function AddWorkExperienceModal({
               !form.startYear
             }
           >
-            {isLoading ? 'Saving...' : 'Save Experience'}
+            {isLoading ? 'Saving...' : 'Save'}
           </ButtonType2>
         </div>
       </DialogContent>
