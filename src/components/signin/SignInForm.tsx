@@ -14,7 +14,7 @@ export default function SignInForm() {
     const [showPassword, setShowPassword] = useState(false);
     const t = useTranslations('authentication');
     const a = useTranslations('actions');
-
+    
     const handleSubmit = (e: { preventDefault: () => void; }) => {
         e.preventDefault()
         // Handle form submission logic here

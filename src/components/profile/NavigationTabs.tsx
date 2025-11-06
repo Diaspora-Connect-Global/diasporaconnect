@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState } from 'react';
 import { PersonalDetailsContent } from "./PersonalDetailsContent";
 import WorkExperience from "./WorkExperience";
+import EducationContent from "./EducationContent";
 
 interface PersonalDetailsData {
   bio: string;
@@ -50,8 +51,8 @@ interface NavigationTabsProps {
   communitiesData: CommunitiesData;
 }
 
-export function NavigationTabs({ 
-  initialMainTab = 'about', 
+export function NavigationTabs({
+  initialMainTab = 'about',
   initialSubTab = 'personal-details',
   aboutData,
   postsData,
@@ -74,6 +75,12 @@ export function NavigationTabs({
     { id: 'work-experience', label: 'Work experience' },
     { id: 'education', label: 'Education' },
   ];
+  // Post sub-tabs (vertical)
+  const postsSubTabs = [
+    { id: 'post-saved', label: 'Saved' },
+    { id: 'post-liked', label: 'Liked' },
+    { id: 'post-commented', label: 'Commented' },
+  ];
 
   // Render content based on active main tab
   const renderMainContent = () => {
@@ -86,11 +93,10 @@ export function NavigationTabs({
               {aboutSubTabs.map((tab) => (
                 <div
                   key={tab.id}
-                  className={`w-full border-t text-left p-3 transition-colors cursor-pointer ${
-                    activeSubTab === tab.id
+                  className={`w-full border-t text-left p-3 transition-colors cursor-pointer ${activeSubTab === tab.id
                       ? 'text-brand'
                       : ''
-                  }`}
+                    }`}
                   onClick={() => setActiveSubTab(tab.id)}
                 >
                   <span className="text-sm font-medium">{tab.label}</span>
@@ -101,13 +107,13 @@ export function NavigationTabs({
             {/* Right Column - Content */}
             <div className="flex-1 border-l p-4 ">
               {activeSubTab === 'personal-details' && (
-                <PersonalDetailsContent  />
+                <PersonalDetailsContent />
               )}
               {activeSubTab === 'work-experience' && (
                 <WorkExperience />
               )}
               {activeSubTab === 'education' && (
-                <EducationContent data={aboutData.education} />
+                <EducationContent/>
               )}
             </div>
           </div>
@@ -115,20 +121,27 @@ export function NavigationTabs({
 
       case 'posts':
         return (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold mb-4">Posts</h3>
-            {postsData.items.length === 0 ? (
-              <p className="text-muted-foreground">No posts yet.</p>
-            ) : (
-              <div className="space-y-4">
-                {/* Render posts data here */}
-                {postsData.items.map((post, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    {/* Post content */}
-                  </div>
-                ))}
-              </div>
-            )}
+                   <div className="flex">
+            {/* Left Column - Vertical Tabs */}
+            <div className="w-[12vw] h-full  ">
+              {postsSubTabs.map((tab) => (
+                <div
+                  key={tab.id}
+                  className={`w-full border-t text-left p-3 transition-colors cursor-pointer ${activeSubTab === tab.id
+                      ? 'text-brand'
+                      : ''
+                    }`}
+                  onClick={() => setActiveSubTab(tab.id)}
+                >
+                  <span className="text-sm font-medium">{tab.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Column - Content */}
+            <div className="flex-1 border-l p-4 ">
+             
+            </div>
           </div>
         );
 
@@ -164,11 +177,10 @@ export function NavigationTabs({
           {mainTabs.map((tab) => (
             <button
               key={tab.id}
-              className={`px-6 py-3 text-sm font-medium cursor-pointer transition-colors ${
-                activeTab === tab.id
+              className={`px-6 py-3 text-sm font-medium cursor-pointer transition-colors ${activeTab === tab.id
                   ? 'text-primary border-b-2 border-border-brand'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
               onClick={() => {
                 setActiveTab(tab.id);
                 // Reset to default sub-tab when switching to about
@@ -182,35 +194,11 @@ export function NavigationTabs({
           ))}
         </div>
 
-<div>
-        {renderMainContent()}
-
-</div>
+        <div>
+          {renderMainContent()}
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-
-
-
-// Education Content Component
-interface EducationContentProps {
-  data: EducationData[];
-}
-
-function EducationContent({ data }: EducationContentProps) {
-  return (
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Education</h3>
-      <div className="space-y-4">
-        {data.map((education, index) => (
-          <div key={index} className="p-4 border rounded-lg">
-            <h4 className="font-semibold">{education.degree}</h4>
-            <p className="text-sm text-muted-foreground">{education.institution} • {education.period}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}

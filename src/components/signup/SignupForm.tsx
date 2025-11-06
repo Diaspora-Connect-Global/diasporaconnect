@@ -7,6 +7,8 @@ import { BodyMedium, HeadingMedium, LabelLarge } from '../utils';
 import { PasswordInput, TextInput } from '../custom/input';
 import { redirect } from 'next/navigation';
 import SignInProvider from '../home/SignInProvider';
+import { useQuery } from '@apollo/client/react';
+
 
 export default function SignUpForm() {
     const [email, setEmail] = useState('');
@@ -18,6 +20,7 @@ export default function SignUpForm() {
     const a = useTranslations('actions');
 
     const handleSubmit = (e: { preventDefault: () => void; }) => {
+
         e.preventDefault()
         // Handle form submission logic here
         console.log('Email:', email);
