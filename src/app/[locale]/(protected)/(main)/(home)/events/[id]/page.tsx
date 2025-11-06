@@ -115,19 +115,18 @@ export default function EventsId() {
     return (
 
         <>
-            <div className="w-full h-[53.625rem]  overflow-y-auto scrollbar-hide p-4">
-                <div className=" min-w-[40rem]  max-h-[53.625rem]  mx-auto">
-                    <EventCard2
-                        title={event.title}
-                        date={event.date}
-                        location={event.location}
-                        attendees={event.attendees}
-                        imageUrl={event.imageUrl}
-
-                        onBuyClick={openDialog}
-                    />
-                </div>
-            </div>
+          <div className="w-full min-h-screen overflow-y-auto scrollbar-hide p-4">
+  <div className="min-w-[40rem] mx-auto">
+    <EventCard2
+      title={event.title}
+      date={event.date}
+      location={event.location}
+      attendees={event.attendees}
+      imageUrl={event.imageUrl}
+      onBuyClick={openDialog}
+    />
+  </div>
+</div>
             <div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogContent className="lg:min-w-[70rem] h-[90vh] p-0">

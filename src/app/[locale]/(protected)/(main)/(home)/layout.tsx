@@ -10,7 +10,7 @@ export default function HomeLayout({
       <div className="lg:max-w-[18rem] lg:sticky top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
         <HomeSidebar />
       </div>
-      <div className="lg:max-w-[57rem] w-full scrollbar-hide">
+      <div className="lg:max-w-[57rem] h-[calc(100vh-4rem)] w-full overflow-y-auto scrollbar-hide">
         {children}
       </div>
     </div>
