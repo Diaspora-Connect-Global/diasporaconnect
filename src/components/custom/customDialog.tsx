@@ -47,7 +47,7 @@ export default function CustomDialog({
             />
           </DialogTitle>
         </DialogHeader>
-         <div className={` overflow-y-auto px-6 `}>
+         <div className={` overflow-y-auto px-6 scrollbar-hide`}>
         {children}
          </div>
 
