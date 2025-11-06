@@ -21,23 +21,13 @@ interface Education {
 
 export default function EducationContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEducation, setEditingEducation] = useState<Education | null>(null);
+  const [, setEditingEducation] = useState<Education | null>(null);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingEducation(null);
   };
 
-  const handleEdit = (edu: Education) => {
-    setEditingEducation(edu);
-    setIsModalOpen(true);
-  };
-
-  // Optional: Refresh data if modal saves externally
-  const handleSaveSuccess = () => {
-    // Could trigger a refetch here if needed
-    handleCloseModal();
-  };
 
   return (
     <div className="max-w-4xl mx-auto p-6">

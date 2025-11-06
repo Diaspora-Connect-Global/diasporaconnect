@@ -108,8 +108,6 @@ export function AddEducationModal({
             saveText="Save"
             cancelText="Cancel"
         >
-            {/* Scrollable Form Content */}
-            <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
                 <div className="space-y-5">
                     <TextInput
                         label="Institution"
@@ -185,7 +183,6 @@ export function AddEducationModal({
                         rows={5}
                     />
                 </div>
-            </div>
         </CustomDialog>
     );
 }

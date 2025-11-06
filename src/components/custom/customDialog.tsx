@@ -14,6 +14,7 @@ interface CustomDialogProps {
   disabled?: boolean;
   saveText?: string;
   cancelText?: string;
+  contentClassName?: string;
 }
 
 export default function CustomDialog({
@@ -27,6 +28,7 @@ export default function CustomDialog({
   disabled = false,
   saveText = "Save",
   cancelText = "Cancel",
+  contentClassName='min-w-[70vw] h-[90vh]'
 }: CustomDialogProps) {
   const handleCancel = () => {
     onCancel?.();
@@ -35,8 +37,8 @@ export default function CustomDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0">
-        <DialogHeader className="rounded-md p-6 pb-4 border-b border-border-subtle sticky top-0 bg-background z-10 flex">
+      <DialogContent className={`p-0 ${contentClassName}`}>
+        <DialogHeader className="rounded-t-md p-6  border-b border-border-subtle sticky top-0 bg-background z-10 flex">
           <DialogTitle className="text-xl font-semibold flex justify-between w-full">
             {title}
             <XIcon
@@ -45,18 +47,20 @@ export default function CustomDialog({
             />
           </DialogTitle>
         </DialogHeader>
-        
+         <div className={` overflow-y-auto px-6 `}>
         {children}
+         </div>
 
-        <DialogFooter>
-          <div className="flex justify-end gap-3 px-6 py-4 border-t bg-background sticky bottom-0">
-            <ButtonType3 onClick={handleCancel} disabled={isLoading}>
+        <DialogFooter className=" border-t">
+          <div className="flex items-end gap-3 px-6 py-4  sticky bottom-0">
+            <ButtonType3 className="px-6 py-3" onClick={handleCancel} disabled={isLoading}>
               {cancelText}
             </ButtonType3>
-            <ButtonType2 onClick={onSave} disabled={disabled || isLoading}>
+            <ButtonType2 className="px-6 py-3" onClick={onSave} disabled={disabled || isLoading}>
               {isLoading ? 'Saving...' : saveText}
             </ButtonType2>
           </div>
+
 
         </DialogFooter>
       </DialogContent>
