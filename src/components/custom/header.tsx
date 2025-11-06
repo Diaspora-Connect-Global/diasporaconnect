@@ -63,46 +63,52 @@ export default function Header() {
   return (
     <header className="max-w-[80vw] mx-auto border-b border-border-subtle bg-surface-default"> {/* Full width header */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8"> {/* Responsive padding */}
-        <div className="flex justify-between items-center h-16"> {/* Standard header height */}
+        <div className="flex justify-between  h-16 "> {/* Standard header height */}
           {/* Logo */}
-          <div className="">
+          <div className=" flex text-center justify-center items-center">
             <Link href={`/${currentLocale}`}>
               <p className='text-text-brand font-heading-small'>diaspoplug</p>
             </Link>
           </div>
 
           {/* Desktop Navigation - Centered */}
-          <nav className="hidden lg:flex flex-1 justify-center items-center space-x-6"> {/* Centered navigation */}
-            {navigation.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`relative px-3 py-2 flex flex-col items-center transition-all duration-200 min-w-0 ${active
-                    ? 'text-text-brand'
-                    : 'text-text-secondary hover:text-text-primary'
-                    }`}
-                >
-                  <div className="w-5 h-5 mb-1"> {/* Icon container */}
-                    <Image
-                      width={20}
-                      height={20}
-                      src={item.icon}
-                      alt={`${item.name} Icon`}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <p className="text-xs font-medium whitespace-nowrap">
-                    {item.name}
-                  </p>
-                  {active && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-brand" />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+<nav className="hidden lg:flex space-x-8">
+  {navigation.map((item) => {
+    const active = isActive(item.href);
+    return (
+      <Link
+        key={item.name}
+        href={item.href}
+        className={`
+          group relative flex flex-col items-center justify-center
+          px-3 py-2 transition-all duration-200
+          ${active ? 'text-text-brand' : 'text-text-secondary hover:text-text-primary'}
+        `}
+      >
+        {/* Icon - Slightly raised above text */}
+        <div className="-mt-1">
+          <Image
+            width={60}
+            height={60}
+            src={item.icon}
+            alt={`${item.name} Icon`}
+            className="w-6 h-6 object-contain "
+          />
+        </div>
+
+        {/* Label */}
+        <p className="text-xs font-medium whitespace-nowrap">
+          {item.name}
+        </p>
+
+        {/* Active Indicator - Bottom border under text */}
+        {active && (
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-brand" />
+        )}
+      </Link>
+    );
+  })}
+</nav>
 
           {/* Right Section - Search, Language, Profile */}
           <div className="flex items-center space-x-4"> {/* Standard spacing */}
