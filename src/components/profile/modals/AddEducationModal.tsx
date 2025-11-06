@@ -1,18 +1,11 @@
-
 'use client';
-
 import { useState, useEffect } from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { ButtonType2, ButtonType3 } from '@/components/custom/button';
+import CustomDialog from '@/components/custom/customDialog';
 import { MonthSelect, TextArea, TextInput } from '@/components/custom/input';
 import { LabelLarge } from '@/components/utils';
 
-interface EducationExperience {
+interface Education {
+    id?: string;
     institution: string;
     program: string;
     degree: string;
@@ -27,187 +20,172 @@ interface EducationExperience {
 interface AddEducationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    initialData?: Partial<EducationExperience>;
+    initialData?: Education | null;
+    onSaveSuccess?: () => void;
 }
 
 export function AddEducationModal({
     isOpen,
     onClose,
-    initialData = {},
+    initialData = null,
+    onSaveSuccess,
 }: AddEducationModalProps) {
-    const [form, setForm] = useState<EducationExperience>({
+    const [form, setForm] = useState<Omit<Education, 'id'>>({
         institution: '',
+        program: '',
+        degree: '',
+        startMonth: '',
+        startYear: '',
+        endMonth: '',
+        endYear: '',
         activities: '',
-        degree :"",
-        endMonth :"",
-        endYear:"",
-        isCurrent:false,
-        program :"",
-        startMonth :"",
-        startYear:"",
-        ...initialData,
+        isCurrent: false,
     });
 
     const [isLoading, setIsLoading] = useState(false);
-  
 
+    // Sync form with initialData when modal opens
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && initialData) {
+            const { ...data } = initialData;
+            setForm(data);
+        } else if (isOpen) {
             setForm({
-                 institution: '',
-        activities: '',
-        degree :"",
-        endMonth :"",
-        endYear:"",
-        isCurrent:false,
-        program :"",
-        startMonth :"",
-        startYear:"",
-                ...initialData,
+                institution: '',
+                program: '',
+                degree: '',
+                startMonth: '',
+                startYear: '',
+                endMonth: '',
+                endYear: '',
+                activities: '',
+                isCurrent: false,
             });
         }
     }, [isOpen, initialData]);
+
+    const updateForm = <K extends keyof typeof form>(
+        key: K,
+        value: (typeof form)[K]
+    ) => {
+        setForm((prev) => ({ ...prev, [key]: value }));
+    };
 
     const handleSave = async () => {
         setIsLoading(true);
         try {
             // Simulate API call
             await new Promise((resolve) => setTimeout(resolve, 800));
+            console.log('Saving education:', form);
+            onSaveSuccess?.();
             onClose();
         } catch (error) {
-            console.error('Failed to save experience:', error);
+            console.error('Save failed:', error);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const updateForm = (key: keyof EducationExperience, value: string | boolean) => {
-        setForm((prev) => ({ ...prev, [key]: value }));
-    };
+    // Validation: Save button disabled if required fields are empty
+    const isSaveDisabled =
+        isLoading ||
+        !form.institution.trim() ||
+        !form.degree.trim() ||
+        !form.program.trim() ||
+        !form.startMonth ||
+        !form.startYear ||
+        (!form.isCurrent && (!form.endMonth || !form.endYear));
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent
-                className=" min-w-[60vw] max-h-[90vh] flex flex-col p-0 overflow-hidden"
-                onOpenAutoFocus={(e) => e.preventDefault()}
-            >
-                {/* Sticky Header */}
-                <DialogHeader className="p-6 pb-4 border-b border-border-subtle sticky top-0 bg-background z-10">
-                    <DialogTitle className="text-xl font-semibold">
-                        Add Education
-                    </DialogTitle>
-                </DialogHeader>
+        <CustomDialog
+            open={isOpen}
+            onOpenChange={(open) => !open && onClose()}
+            title={initialData ? 'Edit Education' : 'Add Education'}
+            onSave={handleSave}
+            onCancel={onClose}
+            isLoading={isLoading}
+            disabled={isSaveDisabled}
+            saveText="Save"
+            cancelText="Cancel"
+        >
+            {/* Scrollable Form Content */}
+            <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
+                <div className="space-y-5">
+                    <TextInput
+                        label="Institution"
+                        placeholder="e.g. Drexel University"
+                        value={form.institution}
+                        onChange={(v) => updateForm('institution', v)}
+                    />
+                    <TextInput
+                        label="Degree"
+                        placeholder="e.g. Bachelor of Science"
+                        value={form.degree}
+                        onChange={(v) => updateForm('degree', v)}
+                    />
+                    <TextInput
+                        label="Program"
+                        placeholder="e.g. Information Technology"
+                        value={form.program}
+                        onChange={(v) => updateForm('program', v)}
+                    />
 
-                {/* Scrollable Body */}
-                <div className="flex-1 overflow-y-auto px-6 py-4">
-                    <div className="space-y-5">
-                        <TextInput
-                            label="Institution"
-                            placeholder="e.g. Google, Microsoft"
-                            value={form.institution}
-                            onChange={(v) => updateForm('institution', v)}
-                        />
-                        <TextInput
-                            label="Degree"
-                            placeholder="e.g. Senior Frontend Engineer"
-                            value={form.degree}
-                            onChange={(v) => updateForm('degree', v)}
-                        />
-
-
-                        {/* Employment Type */}
-                        <TextInput
-                            label="Program"
-                            placeholder="Full-time, Part-time, Contract, Internship"
-                            value={form.program}
-                            onChange={(v) => updateForm('program', v)}
-                        />
-
-                        <div className={`${form.isCurrent ? "" : "grid lg:grid-cols-2 gap-6"} `}>
-                            {/* Start Date */}
-                            <div>
-                                <LabelLarge>Start Date</LabelLarge>
-                                <div className="grid grid-cols-2 gap-3 mt-2">
-                                    <MonthSelect
-                                        value={form.startMonth}
-                                        onChange={(v) => updateForm('startMonth', v)}
-                                        label="Month"
-                                    />
-                                    <TextInput
-                                        label="Year"
-                                        placeholder="2024"
-                                        value={form.startYear}
-                                        onChange={(v) => updateForm('startYear', v)}
-                                    />
-                                </div>
+                    <div className={form.isCurrent ? '' : 'grid lg:grid-cols-2 gap-6'}>
+                        <div>
+                            <LabelLarge>Start Date</LabelLarge>
+                            <div className="grid grid-cols-2 gap-3 mt-2">
+                                <MonthSelect
+                                    value={form.startMonth}
+                                    onChange={(v) => updateForm('startMonth', v)}
+                                />
+                                <TextInput
+                                    label="Year"
+                                    placeholder="2022"
+                                    value={form.startYear}
+                                    onChange={(v) => updateForm('startYear', v)}
+                                />
                             </div>
+                        </div>
 
-
-
-                            {/* End Date */}
-                            <div className={`${form.isCurrent ? "hidden" : ""}`}>
-                                <LabelLarge>Expected completion Date</LabelLarge>
+                        {!form.isCurrent && (
+                            <div>
+                                <LabelLarge>Expected Completion</LabelLarge>
                                 <div className="grid grid-cols-2 gap-3 mt-2">
                                     <MonthSelect
                                         value={form.endMonth}
                                         onChange={(v) => updateForm('endMonth', v)}
-                                        label="Month"
                                     />
                                     <TextInput
                                         label="Year"
-                                        placeholder="Present"
-                                        value={form.isCurrent ? 'Present' : form.endYear}
+                                        placeholder="2026"
+                                        value={form.endYear}
                                         onChange={(v) => updateForm('endYear', v)}
                                     />
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
-                    <div className="flex items-center gap-3 my-4">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={form.isCurrent}
-                                onChange={(e) => updateForm('isCurrent', e.target.checked)}
-                                className="w-4 h-4 text-text-brand rounded"
-                            />
-                            <span className="text-sm">I currently school here</span>
-                        </label>
+                    <div className="flex items-center gap-2 my-4">
+                        <input
+                            type="checkbox"
+                            checked={form.isCurrent || false}
+                            onChange={(e) => updateForm('isCurrent', e.target.checked)}
+                            className="w-4 h-4 text-text-brand rounded"
+                        />
+                        <span className="text-sm">I currently study here</span>
                     </div>
 
-                    {/* Description */}
                     <TextArea
-                        label="Activities"
-                        placeholder="What did you do? Technologies used? Achievements?"
+                        label="Activities & Achievements"
+                        placeholder="Clubs, GPA, projects, honors..."
                         value={form.activities}
                         onChange={(v) => updateForm('activities', v)}
                         maxLength={500}
                         rows={5}
                     />
-
-
                 </div>
-
-                {/* Sticky Footer */}
-                <div className="flex justify-end items-center gap-3 p-6 pt-4 border-t border-border-subtle bg-background sticky bottom-0 z-10">
-                    <ButtonType3 onClick={onClose} disabled={isLoading}>
-                        Cancel
-                    </ButtonType3>
-                    <ButtonType2
-                        onClick={handleSave}
-                        disabled={
-                            isLoading ||
-                            !form.activities.trim() ||
-                            !form.degree.trim() ||
-                            !form.startMonth ||
-                            !form.startYear
-                        }
-                    >
-                        {isLoading ? 'Saving...' : 'Save'}
-                    </ButtonType2>
-                </div>
-            </DialogContent>
-        </Dialog>
+            </div>
+        </CustomDialog>
     );
 }
