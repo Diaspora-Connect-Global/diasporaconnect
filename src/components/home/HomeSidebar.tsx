@@ -28,11 +28,10 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
     if (link && !defaultAction && !children) {
         return (
             <div className="border-b border-b-border-subtle ">
-                <Link
-                    href={link}
-                    className="w-full py-3 flex justify-between items-center cursor-pointer text-text-primary hover:text-text-brand transition-colors"
+                <div
+                    className="w-full py-4 flex justify-between items-center  text-text-primary  transition-colors"
                 >
-                    <div className="flex gap-4 text-center justify-center">
+                    <Link href={link} className=" hover:text-text-brand flex space-x-3 items-center text-center justify-center ">
                         <Image
                             width={10}
                             height={10}
@@ -41,20 +40,20 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
                             className="w-5 h-5 rounded-full object-cover"
                         />
                         <span className="font-caption-large truncate">{title}</span>
-                    </div>
-                </Link>
+                    </Link>
+                </div>
             </div>
         );
     }
 
     // Default expandable section behavior
     return (
-        <div className="border-b border-b-border-subtle">
+        <div className="border-b border-b-border-subtle ">
             <button
                 onClick={onToggle}
-                className="w-full  py-3 flex justify-between items-center cursor-pointer"
+                className="w-full  py-4 flex justify-between text-center items-center cursor-pointer"
             >
-                <div className="flex gap-4 text-center justify-center">
+                <div className="flex space-x-3 items-center text-center justify-center ">
                     <Image
                         width={10}
                         height={10}
@@ -70,7 +69,7 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
             </button>
 
             {isOpen && (
-                <div className="pl-6 pb-3 space-y-3">
+                <div className="pl-8 pb-3 space-y-3">
                     <Link href={`${link}`}>
                         <BodySmall>
                             <TextBrand className="cursor-pointer hover:underline block">
@@ -173,7 +172,7 @@ function Community() {
     };
 
     return (
-        <div className="space-y-4  ">
+        <div className=" ">
 
             <MyCommunityCard2
                 communities={communities}

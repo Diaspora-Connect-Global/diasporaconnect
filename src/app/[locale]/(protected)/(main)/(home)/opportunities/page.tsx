@@ -17,8 +17,8 @@ interface ExploreOpportunitiesProps {
 
 const ExploreOpportunities = ({ name, imageUrl, icon: Icon, id }: ExploreOpportunitiesProps) => {
     return (
-        <Link href={`/opportunities/${id}`} className="flex items-start gap-4 bg-surface-default rounded-lg p-4 border border-border-subtle hover:border-border-brand hover:shadow-sm transition-all duration-200 cursor-pointer w-[17.75rem] h-[4rem]">
-            <div className="flex-shrink-0 mt-0.5">
+        <Link href={`/opportunities/${id}`} className="flex  text-center justify-center items-center gap-4 bg-surface-default rounded-lg p-4 border border-border-subtle hover:border-border-brand hover:shadow-sm transition-all duration-200 cursor-pointer w-[17.75rem] h-[4rem] ">
+            <div className="flex-shrink-0 ">
                 {imageUrl ? (
                     <Image
                         src={imageUrl}
@@ -30,7 +30,7 @@ const ExploreOpportunities = ({ name, imageUrl, icon: Icon, id }: ExploreOpportu
                 ) : Icon ? (
                     <Icon className="w-5 h-5 text-text-primary" />
                 ) : (
-                    <div className="w-5 h-5 bg-gray-200 rounded-md" />
+                    <div className="w-5 h-5 bg-text-primary rounded-md" />
                 )}
             </div>
             <p className="text-text-primary font-medium text-sm line-clamp-2 break-words leading-tight">
