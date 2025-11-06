@@ -30,7 +30,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
             <label htmlFor={id} className="text-sm font-normal">
                 <LabelMedium>
                     {label}
-                    {required && <span className="text-red-500 ml-1">*</span>}
+                    {required && <span className="text-text-danger ml-1">*</span>}
                 </LabelMedium>
             </label>
             <div className="relative">
@@ -110,7 +110,7 @@ interface SearchInputProps {
     placeholder?: string;
     label?: string;
     id?: string;
-    bg?:string;
+    bg?: string;
 }
 
 export const SearchInput: React.FC<SearchInputProps> = ({
@@ -129,7 +129,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
     return (
         <div className="space-y-2">
-         
+
             <div className={`${bg} rounded-full`}>
                 <div className="relative ${bg} border-border-subtle border-2 rounded-full flex text-text-secondary">
                     <input
@@ -203,8 +203,8 @@ export const Select: React.FC<SelectProps> = ({
                             </option>
                         ))}
                     </select>
-                    <ChevronDown 
-                        size={20} 
+                    <ChevronDown
+                        size={20}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
                     />
                 </div>
@@ -326,5 +326,61 @@ export const CountrySelect: React.FC<CountrySelectProps> = ({
             id={id}
             required={required}
         />
+    );
+};
+
+
+/* ========== NEW: TextArea Component ========== */
+interface TextAreaProps {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    label?: string;
+    id?: string;
+    required?: boolean;
+    rows?: number;
+    maxLength?: number;
+}
+
+export const TextArea: React.FC<TextAreaProps> = ({
+    value,
+    onChange,
+    placeholder = "Enter your message...",
+    label,
+    id = "textarea",
+    required = false,
+    rows = 4,
+    maxLength
+}) => {
+    return (
+        <div className="space-y-2">
+            {label && (
+                <label htmlFor={id} className="text-sm font-normal">
+                    <LabelMedium>
+                        {label}
+                        {required && <span className="text-text-danger ml-1">*</span>}
+                    </LabelMedium>
+                </label>
+            )}
+            <div className="bg-surface-subtle rounded-md">
+                <div className="border-border-subtle border-2 rounded-md">
+                    <textarea
+                        id={id}
+                        placeholder={placeholder}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        rows={rows}
+                        maxLength={maxLength}
+                        className="w-full px-3 py-2 bg-transparent placeholder:text-text-secondary resize-none focus:outline-none"
+                        required={required}
+                    />
+                    {maxLength && (
+                        <div className="px-3 pb-1 text-xs text-text-secondary text-right">
+                            {value.length} / {maxLength}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 };

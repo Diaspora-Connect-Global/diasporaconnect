@@ -5,7 +5,7 @@ import { BioEditModal } from './modals/BioEditModal';
 import { DOBEditModal } from './modals/DOBEditModal';
 import { NameEditModal } from './modals/NameEditModal';
 import { ResidenceEditModal } from './modals/ResidenceEdit.tsx';
-import { HomeCountryEditModal } from './modals/HomeCountryModal';
+import { HomeCountryEditModal } from './modals/HomeCountryEditModal';
 
 export function PersonalDetailsContent() {
   const [userData, setUserData] = useState({

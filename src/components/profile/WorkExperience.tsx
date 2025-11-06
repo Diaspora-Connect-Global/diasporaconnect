@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { ButtonType3 } from '../custom/button';
 import {
@@ -9,6 +9,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordionA';
+import { AddWorkExperienceModal } from './modals/AddWorkExperienceModal';
 
 interface Skill {
     id: string;
@@ -126,8 +127,8 @@ export default function WorkExperience() {
                     </ButtonType3>
 
                     <Accordion type="single" collapsible className="w-full">
-                        {experiences.map((exp) => (
-                            <>
+                        {experiences.map((exp,idx) => (
+                            <Fragment key={idx}>
                                 <AccordionItem className='border-b-0' key={exp.id} value={exp.id}>
                                      <h3 className="text-lg font-semibold text-text-primary">{exp.company}</h3>
                                     <AccordionTrigger className="hover:no-underline">
@@ -140,15 +141,13 @@ export default function WorkExperience() {
                                                     </span> 
                                                     <span className="text-text-secondary">
                                                     ({exp.startDate} - {exp.endDate})
-
                                                     </span>
                                                 </p>
-
                                             </div>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <p>A Frontend Developer is responsible for creating the visual elements of a website or application that users interact with. They use languages like HTML, CSS, and JavaScript to build responsive and engaging user interfaces, ensuring a seamless experience across different devices. Their role involves collaborating with designers and backend developers to implement design concepts and optimize performance.</p>
+                                        <p>{exp.description}</p>
                                     </AccordionContent>
                                 </AccordionItem>
                                 {exp.contract && (
@@ -167,7 +166,7 @@ export default function WorkExperience() {
                                         </span>
                                     ))}
                                 </div>
-                            </>
+                            </Fragment>
                         ))}
                     </Accordion>
                 </section>
@@ -175,7 +174,7 @@ export default function WorkExperience() {
 
             {/* Skill Modal */}
             {showSkillModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0  bg-transparent flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md">
                         <h3 className="text-lg font-semibold mb-4">Add New Skill</h3>
                         <input
@@ -204,69 +203,12 @@ export default function WorkExperience() {
                 </div>
             )}
 
-            {/* Experience Modal */}
-            {showExperienceModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-                        <h3 className="text-lg font-semibold mb-4">Add Work Experience</h3>
-                        <div className="space-y-3">
-                            <input
-                                type="text"
-                                placeholder="Company"
-                                value={newExperience.company}
-                                onChange={(e) => setNewExperience({ ...newExperience, company: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Role"
-                                value={newExperience.role}
-                                onChange={(e) => setNewExperience({ ...newExperience, role: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-                            />
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="Start Date (e.g., Jan 2020)"
-                                    value={newExperience.startDate}
-                                    onChange={(e) => setNewExperience({ ...newExperience, startDate: e.target.value })}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="End Date (e.g., Present)"
-                                    value={newExperience.endDate}
-                                    onChange={(e) => setNewExperience({ ...newExperience, endDate: e.target.value })}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
-                                />
-                            </div>
-                            <label className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={newExperience.contract}
-                                    onChange={(e) => setNewExperience({ ...newExperience, contract: e.target.checked })}
-                                    className="w-4 h-4 rounded"
-                                />
-                                <span className="text-sm text-gray-700">Contract position</span>
-                            </label>
-                        </div>
-                        <div className="flex justify-end gap-2 mt-6">
-                            <button
-                                onClick={() => setShowExperienceModal(false)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={addExperience}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                            >
-                                Add Experience
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+             <AddWorkExperienceModal
+                    isOpen={showExperienceModal}
+                    onClose={() => setShowExperienceModal(false)}
+                    initialData={newExperience}
+                  />
+            
         </>
     );
 }

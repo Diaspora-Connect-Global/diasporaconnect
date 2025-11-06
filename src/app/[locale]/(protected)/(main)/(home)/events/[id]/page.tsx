@@ -12,6 +12,7 @@ import Step2 from "./Step2";
 import Step3 from "./Step3";
 import { ButtonType2 } from "@/components/custom/button";
 import { Spinner } from "@/components/ui/spinner";
+import {  XIcon } from "@phosphor-icons/react";
 
 
 export default function EventsId() {
@@ -129,19 +130,16 @@ export default function EventsId() {
             </div>
             <div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent className="lg:min-w-[70rem] h-[90vh] overflow-y-auto">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <DialogContent className="lg:min-w-[70rem] h-[90vh] p-0">
+                                <DialogHeader className="p-6 pb-4 border-b border-border-subtle sticky top-0 bg-background z-10 rounded-md flex ">
+                                    <DialogTitle className="text-xl font-semibold flex justify-between">
+                                        Pay for tickets
+                                    <XIcon className="cursor-pointer" onClick={()=>setIsDialogOpen(false)}/>
+                                    </DialogTitle>
+                                </DialogHeader>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto p-6">
                             {/* Left Column - Main Content */}
                             <div className="lg:col-span-2 space-y-6">
-                                <DialogHeader className="text-left">
-
-                                    {/* Job Title */}
-                                    <DialogTitle className="text-2xl font-bold text-text-primary">
-                                        Pay for tickets
-                                    </DialogTitle>
-
-
-                                </DialogHeader>
 
 
 

@@ -23,14 +23,14 @@ export function ProfileHeader({ data, onEditAvatar }: ProfileHeaderProps) {
     .slice(0, 2); // Limit to 2 chars
 
   return (
-    <Card className="lg:h-[14rem]">
+    <Card className="lg:min-h-[10rem] p-1">
       <CardContent className="p-4">
         <div className="flex items-start  space-x-4">
           {/* Avatar with Edit Icon */}
           <div className="relative group">
             <Avatar className="h-25 w-25 ring-4 ring-background">
               <AvatarImage src={data.avatarUrl} alt={data.name} />
-              <AvatarFallback className="text-lg font-medium">{initials}</AvatarFallback>
+              <AvatarFallback className="text-4xl font-medium">{initials}</AvatarFallback>
             </Avatar>
 
             {/* Edit Icon (Bottom-Right, Overlap) */}
