@@ -25,7 +25,7 @@ export function ResidenceEditModal({
     initialData,
 }: BioEditModalProps) {
     const [month, setMonth] = useState("");
-    const [day, setDay] = useState("");
+    const [city, setCity] = useState("");
     const [year, setYear] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
@@ -70,10 +70,10 @@ export function ResidenceEditModal({
                         />
 
                         <TextInput
-                            label='Day'
-                            placeholder='Day'
-                            value={day}
-                            onChange={setDay}
+                            label='City'
+                            placeholder='City'
+                            value={city}
+                            onChange={setCity}
                         />
                         <LabelLarge>
                             Living here since
