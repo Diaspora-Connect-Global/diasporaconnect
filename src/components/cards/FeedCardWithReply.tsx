@@ -256,7 +256,7 @@ export default function FeedCardWithReply({
     /*  Main Render                                                    */
     /* --------------------------------------------------------------- */
     return (
-        <div className="w-fit lg:w-[35rem] bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
+        <div className="w-fit  bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
             {/* Header */}
             <div className="flex items-center justify-between mb-[1rem]">
                 <div className="lg:flex items-center gap-[0.75rem]">
