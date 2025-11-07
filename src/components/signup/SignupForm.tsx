@@ -7,15 +7,13 @@ import { PasswordInput, TextInput } from '../custom/input';
 import SignInProvider from '../home/SignInProvider';
 import { BodyMedium, HeadingMedium, LabelLarge } from '../utils';
 
-import { CHECK_EMAIL_AVAILABILITY } from '@/services/gql/authentication';
+import { CHECK_EMAIL_AVAILABILITY, CheckEmailAvailabilityResponse } from '@/services/gql/authentication';
 import { useApolloClient } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { ButtonType2 } from '../custom/button';
 
 
-interface CheckEmailAvailabilityResponse {
-  checkEmailAvailability: boolean;
-}
+
 export default function SignUpForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
