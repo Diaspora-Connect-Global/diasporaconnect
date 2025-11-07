@@ -34,9 +34,9 @@ export default function PeopleYouMayKnowCard({
   const buttonLabel = isAdded ? tActions('added') : buttonText || tActions('addFriend');
 
   return (
-    <div className=" h-[2.5rem] flex justify-between items-center  hover:bg-surface-subtle transition-colors rounded-lg ">
+    <div className=" h-[2.5rem] flex  items-center space-x-1 hover:bg-surface-subtle transition-colors rounded-lg ">
       {/* Left side - Profile info */}
-      <div className="flex items-center gap-[0.5rem]">
+      <div className="flex items-center gap-[0.5rem] w-[15vw]">
         <div className="h-[1.5rem] w-[1.5rem]">
           <Image
             width={32}
