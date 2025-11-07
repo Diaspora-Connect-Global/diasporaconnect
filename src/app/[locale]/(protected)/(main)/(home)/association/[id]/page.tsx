@@ -1,6 +1,5 @@
 'use client';
 import AboutAssociation from "@/components/cards/association/AboutAssociation";
-import FeedCard from "@/components/cards/FeedCard";
 import { ButtonType1 } from "@/components/custom/button";
 import { PeopleYouMayKnow } from "@/components/home/PeopleYouMayKnow";
 import { HeadingMedium } from "@/components/utils";
@@ -8,6 +7,7 @@ import { useParams } from 'next/navigation';
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+    import FeedCardWithReply from "@/components/cards/FeedCardWithReply";
 
 export default function AssociationPage() {
     const params = useParams();
@@ -129,7 +129,7 @@ export default function AssociationPage() {
                 <div className="overflow-auto lg:max-h-[calc(100vh-8rem)] scrollbar-hide">
                     <div className="mb-8">
                         {currentAssociation.posts && currentAssociation.posts.map((post, index) => (
-                            <FeedCard
+                            <FeedCardWithReply
                                 key={index}
                                 profileImage={currentAssociation.avatar}
                                 profileName={post.profileName}
@@ -150,7 +150,7 @@ export default function AssociationPage() {
             </div>
 
             {/* Sidebar - Sticky Section */}
-            <div className="lg:min-w-[26rem] lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto scrollbar-hide">
+            <div className="lg:min-w-[20rem] lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto scrollbar-hide">
                 <div className="space-y-6 w-fit ">
                     <AboutAssociation
                         members={currentAssociation.members}
