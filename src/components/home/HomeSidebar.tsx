@@ -102,14 +102,16 @@ function NoCommunity() {
     )
 }
 
-function CommunityItem({ name, type }: { name: string, type: string }) {
+function CommunityItem({ name, type,link }: { name: string, type: string ,link :string}) {
     const t = useTranslations('privacy');
 
     return (
         <div className="text-center space-x-2 flex flex-wrap 
         justify-content-center items-center">
             <BodySmall>
+                <Link href={`${link}`}>
                 <span className="text-primary">{name}</span>
+                </Link>
             </BodySmall>
             <span>·</span>
             <BodySmall>
@@ -193,13 +195,13 @@ function Community() {
             >
                 <div className="space-y-1">
                     {[
-                        { name: "The Adansi Times", type: "Public" },
-                        { name: "Tech Innovations Daily", type: "Private" },
-                        { name: "Global Finance Report", type: "Public" },
-                        { name: "Health & Wellness Journal", type: "Private" }
+                        { name: "The Adansi Times", type: "Public", link: "/association/adansi-times" },
+                        { name: "Tech Innovations Daily", type: "Private" , link: "/association/adansi-times"},
+                        { name: "Global Finance Report", type: "Public" , link: "/association/adansi-times"},
+                        { name: "Health & Wellness Journal", type: "Private", link: "/association/adansi-times" }
                     ].map((association, index) => (
                         <div key={index}>
-                            <CommunityItem name={association.name} type={association.type == "Public" ? `${tPrivacy("public")}` : `${tPrivacy("public")}`} />
+                            <CommunityItem link={association.link}  name={association.name} type={association.type == "Public" ? `${tPrivacy("public")}` : `${tPrivacy("public")}`} />
                         </div>
                     ))}
                 </div>
@@ -218,11 +220,11 @@ function Community() {
             >
                 <div className="space-y-2">
                     {[
-                        { name: "The Adansi Times", type: "Public" },
-                        { name: "Tech Innovations Daily", type: "Private" }
+                        { name: "The Adansi Times", type: "Public", link: "/chat" },
+                        { name: "Tech Innovations Daily", type: "Private", link: "/chat" }
                     ].map((item, index) => (
                         <div key={index} >
-                            <CommunityItem name={item.name} type={item.type} />
+                            <CommunityItem link={item.link} name={item.name} type={item.type} />
                         </div>
                     ))}
                 </div>
