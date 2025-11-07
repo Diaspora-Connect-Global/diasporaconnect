@@ -1,4 +1,3 @@
-// src/graphql/mutations.ts
 import { gql } from '@apollo/client';
 
 export const REGISTER_USER = gql`
@@ -42,5 +41,18 @@ export const VERIFY_OTP = gql`
         deviceId
       }
     }
+  }
+`;
+
+
+export const CHECK_EMAIL_AVAILABILITY = gql`
+  query CheckEmailAvailability($email: String!) {
+    isEmailAvailable(email: $email)
+  }
+`;
+
+export const CHECK_PHONE_AVAILABILITY = gql`
+  query CheckPhoneAvailability($phoneNumber: String!) {
+    isPhoneAvailable(phoneNumber: $phoneNumber)
   }
 `;

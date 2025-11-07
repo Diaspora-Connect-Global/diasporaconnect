@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import GraphQLProvider from "@/components/provider/apollo-provider";
+import { Toaster } from 'sonner';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,6 +42,11 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <GraphQLProvider>
               {children}
+              <Toaster 
+          position="top-center"
+          richColors
+          
+        />
             </GraphQLProvider>
 
           </ThemeProvider>
