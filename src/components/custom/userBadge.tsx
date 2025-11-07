@@ -6,7 +6,7 @@ type Tier = "starter" | "trusted" | "reliable" | "elite";
 interface UserBadgeProps {
     tier: Tier;
     /** sm = 20px, md = 32px, lg = 44px */
-    size?: "sm" | "md" | "lg";
+    size?: "xs"|"sm" | "md" | "lg";
     /** Show the text next to the badge */
     showLabel?: boolean;
     className?: string;
@@ -21,6 +21,7 @@ const tierFill: Record<Tier, string> = {
 };
 
 const sizeMap = {
+    xs:10,
     sm: 20,
     md: 32,
     lg: 44,
