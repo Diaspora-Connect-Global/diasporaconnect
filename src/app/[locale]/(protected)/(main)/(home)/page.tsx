@@ -61,89 +61,178 @@ export default function Home() {
     },
   ];
 
-  // Initial posts with full data
-  const initialPosts: Post[] = [
-    {
-      id: '1',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Oct 1',
-      content:
-        'The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots, discover inspiring journeys, and engage in conversations that shape our global community. Follow us for updates on cultural events, business opportunities, and more.',
-      images: ['/image1.jpg', '/image2.jpg'],
-      likes: 3,
-      comments: 5,
-      commentsData: [
-        {
-          id: 'c1',
-          author: 'Kwame',
-          authorImage: '/avatar1.png',
-          content: 'This is inspiring!',
-          createdAt: '2h ago',
-          likes: 2,
-        },
-        {
-          id: 'c2',
-          author: 'Abena',
-          authorImage: '/avatar2.png',
-          content: 'Love the updates!',
-          createdAt: '1h ago',
-          likes: 1,
-        },
-      ],
-      joinButton: true,
-    },
-    {
-      id: '2',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Oct 1',
-      content:
-        'Breaking: New cultural festival announced in Accra! Join us to celebrate heritage, music, and food from across the diaspora.',
-      likes: 8,
-      comments: 3,
-      commentsData: [],
-      joinButton: true,
-    },
-    {
-      id: '3',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Sep 30',
-      content:
-        'Business spotlight: A Ghanaian startup just raised $2M to expand solar solutions in rural communities. Read the full story.',
-      images: ['/solar.jpg'],
-      likes: 15,
-      comments: 7,
-      commentsData: [
-        {
-          id: 'c3',
-          author: 'Kofi',
-          authorImage: '/kofi.jpg',
-          content: 'This is game-changing!',
-          createdAt: '3h ago',
-          likes: 5,
-        },
-      ],
-      joinButton: true,
-    },
-    {
-      id: '4',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Sep 29',
-      content:
-        'Throwback Thursday: Remembering the legends who paved the way for Ghanaian music globally. Who’s your favorite?',
-      likes: 22,
-      comments: 12,
-      commentsData: [],
-      joinButton: true,
-    },
-  ];
+// Initial posts with full data
+const initialPosts: Post[] = [
+  {
+    id: '1',
+    profileImage: '/ADANSI.png',
+    profileName: 'The Adansi Times',
+    category: 'GhanaConnectGlobal',
+    postDate: 'Oct 1',
+    content:
+      'The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots, discover inspiring journeys, and engage in conversations that shape our global community. Follow us for updates on cultural events, business opportunities, and more.',
+    images: [
+      'https://img.freepik.com/free-vector/flat-design-travel-background_23-2149193475.jpg?semt=ais_hybrid&w=740&q=80',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmtm8g4xFqFS0gyk3bWfr0erUeVJrDy6DAMA&s',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0m6xP62VCldBhh7AmbWi6_DNH9SBGd0t-PA&s',
+      'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fHRyYXZlbHxlbnwwfHwwfHx8MA%3D%3D&fm=jpg&q=60&w=3000',
+      'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dHJhdmVsfGVufDB8fDB8fHww&fm=jpg&q=60&w=3000',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqxK9dBtEZiDmir9AosAMr1709tDGdBNG7ug&s',
+    ],
+    likes: 3,
+    comments: 5,
+    commentsData: [
+      {
+        id: 'c1',
+        author: 'Kwame',
+        authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT73Hx3joXluMeacnnC_5P92ZM4zbZq6-VYvWGrgPwLmEWlLRepRH1jYOGoQyHJYbviEnU&usqp=CAU',
+        content: 'This is inspiring!',
+        createdAt: '2h ago',
+        likes: 2,
+      },
+      {
+        id: 'c2',
+        author: 'Abena',
+        authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1zwhySGCEBxRRFYIcQgvOLOpRGqrT3d7Qng&s',
+        content: 'Love the updates!',
+        createdAt: '1h ago',
+        likes: 1,
+      },
+    ],
+    joinButton: true,
+  },
+  {
+    id: '2',
+    profileImage: '/ADANSI.png',
+    profileName: 'The Adansi Times',
+    category: 'GhanaConnectGlobal',
+    postDate: 'Oct 2',
+    content:
+      'Breaking: New cultural festival announced in Accra! Join us to celebrate heritage, music, and food from across the diaspora.',
+    images: [
+      'https://cdn.prod.website-files.com/652ed40a5b50682220b9eb86/6760d12ecaab156dcb8d0d7a_image_travel-insights.webp',
+    ],
+    likes: 8,
+    comments: 3,
+    commentsData: [],
+    joinButton: true,
+  },
+  {
+    id: '3',
+    profileImage: '/ADANSI.png',
+    profileName: 'The Adansi Times',
+    category: 'GhanaConnectGlobal',
+    postDate: 'Sep 30',
+    content:
+      'Business spotlight: A Ghanaian startup just raised $2M to expand solar solutions in rural communities. Read the full story.',
+    images: [
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7FzecHSou7npNbaFUiAmtx0Q60vFi2JcPOw&s',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRkkr7F8iZZpRWR0Ic-TzjaH_rpeTqMIUdTg&s',
+    ],
+    likes: 15,
+    comments: 7,
+    commentsData: [
+      {
+        id: 'c3',
+        author: 'Kofi',
+        authorImage: '/kofi.jpg',
+        content: 'This is game-changing!',
+        createdAt: '3h ago',
+        likes: 5,
+      },
+    ],
+    joinButton: true,
+  },
+  {
+    id: '4',
+    profileImage: '/ADANSI.png',
+    profileName: 'The Adansi Times',
+    category: 'GhanaConnectGlobal',
+    postDate: 'Sep 29',
+    content:
+      "Throwback Thursday: Remembering the legends who paved the way for Ghanaian music globally. Who's your favorite?",
+    likes: 22,
+    comments: 12,
+    commentsData: [],
+    joinButton: true,
+  },
+  {
+    id: '5',
+    profileImage: '/ADANSI.png',
+    profileName: 'The Adansi Times',
+    category: 'Travel & Tourism',
+    postDate: 'Oct 3',
+    content:
+      'Explore the hidden gems of Ghana! From pristine beaches to lush rainforests, discover destinations that will take your breath away. 🌴✈️',
+    images: [
+      'https://res.cloudinary.com/worldpackers/image/upload/c_fill,f_auto,q_auto,w_1024/v1/guides/article_cover/pxutrrxynm6aegghgsoy?_a=BACADKGT',
+      'https://www.imagetours.com/__media/tours/PR/cover.jpg',
+      'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dHJhdmVsfGVufDB8fDB8fHww&fm=jpg&q=60&w=3000',
+    ],
+    likes: 45,
+    comments: 18,
+    commentsData: [
+      {
+        id: 'c4',
+        author: 'Ama',
+        authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1zwhySGCEBxRRFYIcQgvOLOpRGqrT3d7Qng&s',
+        content: 'Added to my bucket list!',
+        createdAt: '1h ago',
+        likes: 8,
+      },
+      {
+        id: 'c5',
+        author: 'Yaw',
+        authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT73Hx3joXluMeacnnC_5P92ZM4zbZq6-VYvWGrgPwLmEWlLRepRH1jYOGoQyHJYbviEnU&usqp=CAU',
+        content: 'Ghana is beautiful! 🇬🇭',
+        createdAt: '45m ago',
+        likes: 12,
+      },
+    ],
+    joinButton: true,
+  },
+  {
+    id: '6',
+    profileImage: '/ADANSI.png',
+    profileName: 'The Adansi Times',
+    category: 'Community Events',
+    postDate: 'Oct 4',
+    content:
+      'Join us this weekend for the annual Diaspora Connect meetup! Network with fellow Ghanaians, enjoy traditional cuisine, and celebrate our culture together.',
+    images: [
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqxK9dBtEZiDmir9AosAMr1709tDGdBNG7ug&s',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0m6xP62VCldBhh7AmbWi6_DNH9SBGd0t-PA&s',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmtm8g4xFqFS0gyk3bWfr0erUeVJrDy6DAMA&s',
+      'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fHRyYXZlbHxlbnwwfHwwfHx8MA%3D%3D&fm=jpg&q=60&w=3000',
+    ],
+    likes: 67,
+    comments: 24,
+    commentsData: [
+      {
+        id: 'c6',
+        author: 'Efua',
+        authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1zwhySGCEBxRRFYIcQgvOLOpRGqrT3d7Qng&s',
+        content: "Can't wait! See you there!",
+        createdAt: '30m ago',
+        likes: 15,
+      },
+    ],
+    joinButton: true,
+  },
+  {
+    id: '7',
+    profileImage: '/ADANSI.png',
+    profileName: 'The Adansi Times',
+    category: 'Arts & Culture',
+    postDate: 'Oct 5',
+    content:
+      'Celebrating Ghanaian artisans who are keeping traditional crafts alive while innovating for the modern world. Swipe to see their incredible work! 🎨',
+    likes: 34,
+    comments: 9,
+    commentsData: [],
+    joinButton: true,
+  },
+];
 
   const [posts, setPosts] = useState<Post[]>(initialPosts);
 
@@ -175,26 +264,26 @@ export default function Home() {
       prev.map((p) =>
         p.id === postId
           ? {
-              ...p,
-              comments: p.comments + 1,
-              commentsData: [
-                ...(p.commentsData || []),
-                {
-                  id: `${postId}-${Date.now()}`,
-                  author: 'You', // Replace with current user
-                  authorImage: '/ADANSI.png', // Replace with user avatar
-                  content,
-                  createdAt: now,
-                  likes: 0,
-                },
-              ],
-            }
+            ...p,
+            comments: p.comments + 1,
+            commentsData: [
+              ...(p.commentsData || []),
+              {
+                id: `${postId}-${Date.now()}`,
+                author: 'You', // Replace with current user
+                authorImage: '/ADANSI.png', // Replace with user avatar
+                content,
+                createdAt: now,
+                likes: 0,
+              },
+            ],
+          }
           : p
       )
     );
   };
 
-return (
+  return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden">
       <div className="flex h-full">
         {/* Main Feed - Orange - Independent Scroll */}

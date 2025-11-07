@@ -125,30 +125,73 @@ export default function FeedCardWithReply({
         );
     };
 
-    const renderImages = () => {
-        if (!images?.length) return null;
+  const renderImages = () => {
+    if (!images?.length) return null;
 
-        return (
-            <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
-                {images.length === 1 ? (
-                    <div className="relative w-full h-[15rem] rounded-lg overflow-hidden">
-                        <Image src={images[0]} alt="post" fill className="object-cover" />
+    const imageCount = images.length;
+    const maxDisplay = 4;
+    const excessCount = imageCount > maxDisplay ? imageCount - maxDisplay : 0;
+
+    return (
+        <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
+            {imageCount === 1 ? (
+                // Single image - full width
+                <div className="relative w-full h-[15rem] rounded-lg overflow-hidden">
+                    <Image src={images[0]} alt="post" fill className="object-cover" />
+                </div>
+            ) : imageCount === 2 ? (
+                // Two images - two columns
+                <div className="grid grid-cols-2 gap-[0.5rem]">
+                    {images.map((src, i) => (
+                        <div key={i} className="relative h-[15rem] rounded-lg overflow-hidden">
+                            <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
+                        </div>
+                    ))}
+                </div>
+            ) : imageCount === 3 ? (
+                // Three images - 1 left, 2 right stacked
+                <div className="grid grid-cols-2 gap-[0.5rem]">
+                    <div className="relative h-[30.5rem] rounded-lg overflow-hidden">
+                        <Image src={images[0]} alt="post 1" fill className="object-cover" />
                     </div>
-                ) : (
-                    <div
-                        className="grid gap-[0.5rem]"
-                        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}
-                    >
-                        {images.map((src, i) => (
-                            <div key={i} className="relative h-[10rem] rounded-lg overflow-hidden">
-                                <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
-                            </div>
-                        ))}
+                    <div className="flex flex-col gap-[0.5rem]">
+                        <div className="relative h-[15rem] rounded-lg overflow-hidden">
+                            <Image src={images[1]} alt="post 2" fill className="object-cover" />
+                        </div>
+                        <div className="relative h-[15rem] rounded-lg overflow-hidden">
+                            <Image src={images[2]} alt="post 3" fill className="object-cover" />
+                        </div>
                     </div>
-                )}
-            </div>
-        );
-    };
+                </div>
+            ) : (
+                // Four or more images - 2x2 grid, with overlay on last image if more than 4
+                <div className="grid grid-cols-2 gap-[0.5rem]">
+                    {images.slice(0, maxDisplay).map((src, i) => (
+                        <div
+                            key={i}
+                            className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
+                            onClick={() => {
+                                if (i === maxDisplay - 1 && excessCount > 0) {
+                                    // Handle showing all images
+                                    console.log('Show all images');
+                                }
+                            }}
+                        >
+                            <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
+                            {i === maxDisplay - 1 && excessCount > 0 && (
+                                <div className="absolute inset-0 bg-black/10 bg-opacity-60 flex items-center justify-center">
+                                    <span className="text-white text-3xl font-semibold">
+                                        +{excessCount}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
     const renderCommentInput = () => {
         if (!showCommentInput) return null;
