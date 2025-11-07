@@ -117,7 +117,14 @@
         "login": "Login",
         "postedBy": "Posted by {user}",
         "added": "Added",
-        "applied": "Applied"
+        "applied": "Applied",
+        "showMore": "Show more",
+        "showLess": "Show less",
+        "addComment": "Add a comment...",
+        "noComments": "No comments yet. Be the first to comment!",
+        "likes": "Likes",
+        "replies": "Replies",
+        "reply":"Reply"
     },
     "legal": {
         "about": "About",
@@ -178,7 +185,7 @@
             "discover": "Discover associations",
             "myassociations": "My associations in {association}",
             "discovermore": "Discover more associations in {association}",
-            "notfound":{
+            "notfound": {
                 "title": "Association not found",
                 "description": " We couldn't find the association you're looking for. It may have been removed or the link is incorrect.",
                 "browse": "Browse associations"
