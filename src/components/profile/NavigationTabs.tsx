@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { PersonalDetailsContent } from "./PersonalDetailsContent";
 import WorkExperience from "./WorkExperience";
 import EducationContent from "./EducationContent";
+import FilteredPosts from "./FilteredPosts";
 
 interface PersonalDetailsData {
   bio: string;
@@ -121,28 +122,7 @@ export function NavigationTabs({
 
       case 'posts':
         return (
-                   <div className="flex">
-            {/* Left Column - Vertical Tabs */}
-            <div className="w-[12vw] h-full  ">
-              {postsSubTabs.map((tab) => (
-                <div
-                  key={tab.id}
-                  className={`w-full border-t text-left p-3 transition-colors cursor-pointer ${activeSubTab === tab.id
-                      ? 'text-brand'
-                      : ''
-                    }`}
-                  onClick={() => setActiveSubTab(tab.id)}
-                >
-                  <span className="text-sm font-medium">{tab.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Right Column - Content */}
-            <div className="flex-1 border-l p-4 ">
-             
-            </div>
-          </div>
+          <FilteredPosts/>
         );
 
       case 'communities':
