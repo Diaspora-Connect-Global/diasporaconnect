@@ -12,9 +12,10 @@ interface Step4Props {
     updateData: (data: Partial<FormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
+    loading: boolean;
 }
 
-export const Step4: React.FC<Step4Props> = ({ data, updateData, nextStep, prevStep }) => {
+export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextStep, prevStep }) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
     
@@ -22,6 +23,7 @@ export const Step4: React.FC<Step4Props> = ({ data, updateData, nextStep, prevSt
 
     return (
         <MultiStep
+        isLoading={loading}
             stepNumber={4}
             totalSteps={7}
             title={t('phoneVerification.title')}

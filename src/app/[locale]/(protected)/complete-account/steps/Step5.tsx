@@ -10,24 +10,27 @@ interface Step5Props {
     updateData: (data: Partial<FormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
+    loading: boolean;
 }
 
-export const Step5: React.FC<Step5Props> = ({ data, nextStep, prevStep }) => {
+export const Step5: React.FC<Step5Props> = ({ data, loading, nextStep, prevStep,updateData }) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
-    
+
     const [value, setValue] = React.useState("");
 
     const handleChange = (newValue: string) => {
         // Only allow numbers
         const numericValue = newValue.replace(/\D/g, '');
         setValue(numericValue);
+        updateData({ verificationCode: numericValue })
     };
 
     const isNextDisabled = value.length !== 6;
 
     return (
         <MultiStep
+            isLoading={loading}
             stepNumber={5}
             totalSteps={7}
             title={t('confirmVerification.title')}
@@ -46,7 +49,7 @@ export const Step5: React.FC<Step5Props> = ({ data, nextStep, prevStep }) => {
                     onChange={handleChange}
                     pattern="[0-9]*"
                     inputMode="numeric"
-                    className="w-full" 
+                    className="w-full"
                 >
                     <InputOTPGroup className="w-full gap-2 text-text-primary font-body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
                         <InputOTPSlot index={0} className="flex-1 h-12 text-lg rounded-md" />

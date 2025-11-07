@@ -13,31 +13,31 @@ export interface FormData {
   // Step 1
   firstName: string;
   lastName: string;
-  
+
   // Step 2
-community: Array<{ 
-    title: string; 
-    members: number; 
-    description: string; 
-  }>; 
+  community: Array<{
+    title: string;
+    members: number;
+    description: string;
+  }>;
   // Step 3
   country: string;
   communityType: string
-  
+
   // Step 4
   phoneNumber: string;
-  
+
   // Step 5
   verificationCode: string;
-  
+
   // Step 6
   topics: string[];
-  
+
   // Step 7
   recommendations: string[];
 }
 
-export default  function CompleteAccount() {
+export default function CompleteAccount() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -50,12 +50,14 @@ export default  function CompleteAccount() {
     topics: [],
     recommendations: []
   });
+  const [sendCodeLoading ,setSendCodeLoading] = useState(false)
+  const [verifyOTPLoading ,setVerifyOTPLoading] = useState(false)
 
   // Load from session storage on component mount
   useEffect(() => {
     const savedData = sessionStorage.getItem('accountFormData');
     const savedStep = sessionStorage.getItem('accountFormStep');
-    
+
     if (savedData) {
       setFormData(JSON.parse(savedData));
     }
@@ -64,7 +66,6 @@ export default  function CompleteAccount() {
     }
   }, []);
 
-  // Save to session storage whenever formData or currentStep changes
   useEffect(() => {
     sessionStorage.setItem('accountFormData', JSON.stringify(formData));
     sessionStorage.setItem('accountFormStep', currentStep.toString());
@@ -82,30 +83,41 @@ export default  function CompleteAccount() {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  // const submitForm = async () => {
-  //   try {
-  //     // Send data to your NestJS backend
-  //     const response = await fetch('/api/account/setup', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(formData),
-  //     });
+const submitFormA = async () => {
+  try {
+    setSendCodeLoading(true);
+    console.log("Sending OTP..." ,formData);
 
-  //     if (response.ok) {
-  //       // Clear session storage on successful submission
-  //       sessionStorage.removeItem('accountFormData');
-  //       sessionStorage.removeItem('accountFormStep');
-  //       // Handle success (redirect, show success message, etc.)
-  //       console.log('Account created successfully!');
-  //     } else {
-  //       throw new Error('Failed to create account');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting form:', error);
-  //   }
-  // };
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // OTP sent → move to next step
+    nextStep();
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    // Optionally show error toast
+  } finally {
+    setSendCodeLoading(false);
+  }
+};
+
+
+  const submitFormB = async () => {
+  try {
+    console.log("Verifying OTP...",formData);
+    setVerifyOTPLoading(true)
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // nextStep(); 
+  } catch (error) {
+    console.error('OTP verification failed:', error);
+    // Show error in UI
+  }finally{
+        setVerifyOTPLoading(false)
+
+  }
+};
 
   const renderStep = () => {
     switch (currentStep) {
@@ -140,7 +152,8 @@ export default  function CompleteAccount() {
           <Step4
             data={formData}
             updateData={updateFormData}
-            nextStep={nextStep}
+            nextStep={submitFormA}
+            loading={sendCodeLoading}
             prevStep={prevStep}
           />
         );
@@ -149,7 +162,8 @@ export default  function CompleteAccount() {
           <Step5
             data={formData}
             updateData={updateFormData}
-            nextStep={nextStep}
+            nextStep={submitFormB}
+            loading={verifyOTPLoading}
             prevStep={prevStep}
           />
         );
@@ -179,7 +193,7 @@ export default  function CompleteAccount() {
 
   return (
     <>
-        {renderStep()}
+      {renderStep()}
     </>
   );
 };

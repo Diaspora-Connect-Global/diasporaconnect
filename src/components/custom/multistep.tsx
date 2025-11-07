@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { HeadingMedium } from '@/components/utils';
 import { Button } from '@/components/ui/button';
 
@@ -10,7 +10,10 @@ interface StepProps {
     title: string;
     subtitle?: string;
     children: React.ReactNode;
+
+    /** Button state */
     isNextDisabled?: boolean;
+    isLoading?: boolean;           // NEW: shows spinner only
     nextButtonText?: string;
 
     /** Show/hide components */
@@ -31,6 +34,7 @@ export const MultiStep: React.FC<StepProps> = ({
     subtitle,
     children,
     isNextDisabled = false,
+    isLoading = false,
     nextButtonText = "Continue",
     showBackButton = true,
     showStepLabel = true,
@@ -41,8 +45,7 @@ export const MultiStep: React.FC<StepProps> = ({
 }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (isNextDisabled) return;
+        if (isNextDisabled || isLoading) return;
 
         if (onNext) {
             try {
@@ -53,27 +56,20 @@ export const MultiStep: React.FC<StepProps> = ({
         }
     };
 
-    const handleBack = () => {
-        if (onBack) {
-            onBack();
-        }
-    };
+    const handleBack = () => onBack?.();
+    const handleSkip = () => onSkip?.();
 
-    const handleSkip = () => {
-        if (onSkip) {
-            onSkip();
-        }
-    };
+    const isButtonDisabled = isNextDisabled || isLoading;
 
     return (
-        <div className='space-y-[2rem]'> {/* 32px equivalent */}
+        <div className="space-y-[2rem]">
             {/* Top Navigation */}
-            <div className="lg:h-[1.5rem] lg:flex lg:justify-between"> {/* 24px equivalent */}
+            <div className="lg:h-[1.5rem] lg:flex lg:justify-between">
                 {showBackButton ? (
                     <button
                         type="button"
                         onClick={handleBack}
-                        className="text-text-primary cursor-pointer flex items-center gap-[0.5rem]" /* 8px equivalent */
+                        className="text-text-primary cursor-pointer flex items-center gap-[0.5rem]"
                     >
                         <ArrowLeft size={20} />
                     </button>
@@ -82,31 +78,30 @@ export const MultiStep: React.FC<StepProps> = ({
                 )}
 
                 {showStepLabel && stepNumber && totalSteps && (
-                    <p className="font-label-medium text-text-secondary lg:h-[1.5rem] lg:w-[5.125rem]"> {/* 24px, 82px equivalent */}
+                    <p className="font-label-medium text-text-secondary lg:h-[1.5rem] lg:w-[5.125rem]">
                         Step {stepNumber} of {totalSteps}
                     </p>
                 )}
             </div>
 
-            <div className='lg:h-[6.25rem] space-y-[0.25rem]'> {/* 100px, 4px equivalent */}
-                <div className='lg:h-[2.5rem]'> {/* 40px equivalent */}
+            {/* Title & Subtitle */}
+            <div className="lg:h-[6.25rem] space-y-[0.25rem]">
+                <div className="lg:h-[2.5rem]">
                     <HeadingMedium>{title}</HeadingMedium>
                 </div>
-                <div className='lg:h-[3.5rem]'> {/* 56px equivalent */}
-                    <p className="text-text-secondary">
-                        {subtitle}
-                    </p>
-                </div>
+                {subtitle && (
+                    <div className="lg:h-[3.5rem]">
+                        <p className="text-text-secondary">{subtitle}</p>
+                    </div>
+                )}
             </div>
 
             {/* Main Form */}
-            <form
-                onSubmit={handleSubmit}
-                className="flex flex-col items-start"
-            >
+            <form onSubmit={handleSubmit} className="flex flex-col items-start">
                 {children}
 
-                <div className="lg:mt-[1.5625rem] lg:flex lg:w-full lg:h-[3.75rem] lg:justify-between"> {/* 25px, 60px equivalent */}
+                {/* Bottom actions */}
+                <div className="lg:mt-[1.5625rem] lg:flex lg:w-full lg:h-[3.75rem] lg:justify-between">
                     {showSkipButton && (
                         <button
                             type="button"
@@ -116,13 +111,27 @@ export const MultiStep: React.FC<StepProps> = ({
                             Skip
                         </button>
                     )}
+
                     <Button
                         type="submit"
-                        disabled={isNextDisabled}
+                        disabled={isButtonDisabled}
                         variant="outline"
-                        className={`lg:h-full whitespace-nowrap  ml-auto px-8 hover:bg-surface-brand-light rounded-full ${isNextDisabled ? "bg-surface-disabled text-text-secondary cursor-not-allowed" : "bg-surface-brand text-text-white cursor-pointer"}`} /* 180px equivalent */
+                        className={`
+      lg:h-full whitespace-nowrap ml-auto px-8 rounded-full
+      min-w-[140px] flex items-center justify-center
+      ${isButtonDisabled
+                                ? "bg-surface-disabled text-text-secondary cursor-not-allowed"
+                                : "bg-surface-brand text-text-white cursor-pointer hover:bg-surface-brand-light"
+                            }
+    `}
                     >
-                        {nextButtonText}
+                        <span className="flex w-full items-center justify-center gap-2">
+                            {isLoading ? (
+                                <Loader2 className="h-6 w-6 animate-spin" />
+                            ) : (
+                                nextButtonText
+                            )}
+                        </span>
                     </Button>
                 </div>
             </form>
