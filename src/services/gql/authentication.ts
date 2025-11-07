@@ -45,11 +45,20 @@ export const VERIFY_OTP = gql`
 `;
 
 
+export interface CheckEmailAvailabilityResponse {
+  checkEmailAvailability: boolean;
+}
+
 export const CHECK_EMAIL_AVAILABILITY = gql`
   query CheckEmailAvailability($email: String!) {
     isEmailAvailable(email: $email)
   }
 `;
+
+
+export interface CheckPhoneAvailabilityResponse {
+  isPhoneAvailable: boolean;
+}
 
 export const CHECK_PHONE_AVAILABILITY = gql`
   query CheckPhoneAvailability($phoneNumber: String!) {
