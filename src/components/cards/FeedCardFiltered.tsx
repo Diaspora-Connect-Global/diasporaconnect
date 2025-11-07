@@ -254,21 +254,30 @@ const renderComments = () => {
         ) : (
           userComments.map((c, index) => {
             const isLastComment = index === userComments.length - 1;
-            
+
             return (
               <div key={c.id} className="relative">
-                {/* L-Shape Thread Line */}
-                {/* Vertical line - only show if NOT the last comment */}
+                {/* L-Shape Thread Line – CURVED VERSION */}
+                {/* Full vertical line between comments (except last) */}
                 {!isLastComment && (
                   <div className="absolute left-4 top-0 bottom-0 w-[2px] bg-surface-subtle" />
                 )}
-                {/* Vertical line for current comment only - stops at horizontal line */}
+
+                {/* Short vertical stub leading into the curve */}
                 <div className="absolute left-4 top-0 h-4 w-[2px] bg-surface-subtle" />
-                {/* Horizontal line */}
-                <div className="absolute left-4 top-4 w-8 h-[2px] bg-surface-subtle" />
-                
+
+                {/* Curved corner + horizontal line */}
+                <div className="absolute left-4 top-4 w-8 h-8">
+                  {/* Quarter-circle curve */}
+                  <div
+                    className="absolute left-0 top-0 w-8 h-4 border-l-2 border-b-2 border-surface-subtle rounded-bl-full"
+                    style={{ boxSizing: 'border-box' }}
+                  />
+                 
+                </div>
+
                 {/* Comment Content */}
-                <div className="ml-14">
+                <div className="ml-14 pt-4">
                   <div className="flex items-center justify-between gap-[0.5rem] mb-[0.25rem]">
                     <div className="flex items-center space-x-2">
                       <Image
@@ -304,7 +313,7 @@ const renderComments = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Reply Input (inside the same container) */}
                 {renderReplyInput(c.id)}
               </div>
