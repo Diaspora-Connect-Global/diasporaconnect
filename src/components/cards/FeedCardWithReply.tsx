@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal'
+import { UserBadge } from "@/components/custom/userBadge";
+
 
 /* --------------------------------------------------------------- */
 /*  Types (unchanged – kept for reference)                        */
@@ -110,15 +112,15 @@ export default function FeedCardWithReply({
             <>
                 <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem]">
                     {truncated ? `${content.slice(0, max)}...` : content}
-                </p>
                 {truncated && (
                     <span
                         onClick={toggleExpand}
-                        className="text-text-brand hover:text-brand font-body-medium cursor-pointer"
+                        className="text-text-brand  text-xs cursor-pointer"
                     >
                         {isExpanded ? t('showLess') : t('showMore')}
                     </span>
                 )}
+                </p>
             </>
         );
     };
@@ -161,12 +163,12 @@ export default function FeedCardWithReply({
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <div className='flex-1'>
-                <MessageInputGlobal
-                    onSendMessage={(txt: string) => handleSend(txt)}
-                    placeholder={"Type comment..."}
-                    reversed={true}
-                    reversedText="Comment"
-                />
+                    <MessageInputGlobal
+                        onSendMessage={(txt: string) => handleSend(txt)}
+                        placeholder={"Type comment..."}
+                        reversed={true}
+                        reversedText="Comment"
+                    />
 
                 </div>
             </div>
@@ -210,34 +212,44 @@ export default function FeedCardWithReply({
                             <div key={c.id}>
                                 {/* ----- Comment ----- */}
                                 <div className="flex gap-[0.75rem]">
-                                    <Image
-                                        src={c.authorImage}
-                                        alt={c.author}
-                                        width={40}
-                                        height={40}
-                                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                                    />
+
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
-                                            <span className="font-semibold text-text-primary text-sm">{c.author}</span>
+                                        <div className=" flex items-center justify-between gap-[0.5rem] mb-[0.25rem]">
+                                            <div className='flex text-center items-center justify-center space-x-2'>
+                                                <Image
+                                                    src={c.authorImage}
+                                                    alt={c.author}
+                                                    width={40}
+                                                    height={40}
+                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                                />
+
+                                                <span className="font-semibold text-text-primary text-sm">{c.author}</span>
+                                                <span>
+                                                    <UserBadge tier="starter" size="xs" />
+                                                </span>
+                                            </div>
                                             <span className="text-text-secondary text-xs">{c.createdAt}</span>
                                         </div>
+                                        <div className='ml-10'>
+
                                         <p className="font-body-small text-text-primary break-words mb-[0.5rem]">
                                             {c.content}
                                         </p>
                                         <div className="flex items-center gap-[1rem]">
-                                            <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                            <button className="text-sm font-semibold text-text-brand">
                                                 {t('like')}
                                             </button>
                                             <button
                                                 onClick={() => handleReplyClick(c.id)}
-                                                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                                                className="text-sm font-semibold text-text-brand"
                                             >
                                                 {t('reply')}
                                             </button>
                                             <span className="text-text-secondary text-xs">|</span>
                                             <span className="text-text-secondary text-xs">{c.likes} {t('likes')}</span>
                                             <span className="text-text-secondary text-xs">5 {t('replies')}</span>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>
