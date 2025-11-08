@@ -6,11 +6,11 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto lg:flex items-center lg:mx-24 justify-center min-h-[calc(100vh-4rem)]">
+    <div className="mx-auto lg:flex items-center  justify-center min-h-[calc(100vh-4rem)]">
       <div className="lg:sticky w-[20vw] top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
         <HomeSidebar />
       </div>
-      <div className="h-[calc(100vh-4rem)] w-full overflow-y-auto  scrollbar-hide">
+      <div className="h-[calc(100vh-4rem)] min-w-0 overflow-y-auto scrollbar-hide">
         {children}
       </div>
     </div>
