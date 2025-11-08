@@ -26,6 +26,8 @@ export default function FriendListModal() {
   const handleAccept = () => toast.success("Friend accepted!");
   const handleIgnore = () => toast("Request ignored.");
   const handleCancelRequest = () => toast("Request cancelled.");
+  const handleRemoveFriend = () => toast.error("Friend removed.");
+  const handleBlockFriend = () => toast.error("Friend blocked.");
 
   /* --------------------- Mock data --------------------- */
   const allFriends: Friend[] = [
@@ -106,8 +108,8 @@ export default function FriendListModal() {
 
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
+    const key = `${friend.status}-${friend.name}`;
     const common = {
-      key: `${friend.status}-${friend.name}`, // <-- unique key for React
       name: friend.name,
       imageSrc: friend.imageSrc,
       mutualConnections: friend.mutualConnections,
@@ -120,14 +122,18 @@ export default function FriendListModal() {
       case "all":
         return (
           <FriendsCard
+            key={key}
             {...common}
             status="all-friends"
             onMessage={handleMessage}
+            onRemoveFriend={handleRemoveFriend}
+            onBlockFriend={handleBlockFriend}
           />
         );
       case "suggested":
         return (
           <FriendsCard
+            key={key}
             {...common}
             status="suggested"
             onAddFriend={handleAddFriend}
@@ -136,6 +142,7 @@ export default function FriendListModal() {
       case "request-received":
         return (
           <FriendsCard
+            key={key}
             {...common}
             status="request-received"
             onAccept={handleAccept}
@@ -145,6 +152,7 @@ export default function FriendListModal() {
       case "request-sent":
         return (
           <FriendsCard
+            key={key}
             {...common}
             status="request-sent"
             onCancelRequest={handleCancelRequest}
