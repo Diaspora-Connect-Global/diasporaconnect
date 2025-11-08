@@ -1,7 +1,7 @@
 // components/UserBadge.tsx
 import { ReactNode } from "react";
 
-type Tier = "starter" | "trusted" | "reliable" | "elite";
+export type Tier = "starter" | "trusted" | "reliable" | "elite";
 
 interface UserBadgeProps {
     tier: Tier;
@@ -22,7 +22,7 @@ const tierFill: Record<Tier, string> = {
 
 const sizeMap = {
     xs:10,
-    sm: 20,
+    sm: 16,
     md: 32,
     lg: 44,
 };
