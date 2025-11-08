@@ -11,6 +11,7 @@ interface CustomDialogProps {
   onSave?: () => void;
   onCancel?: () => void;
   isLoading?: boolean;
+  showFooter?: boolean;
   disabled?: boolean;
   saveText?: string;
   cancelText?: string;
@@ -24,11 +25,12 @@ export default function CustomDialog({
   children,
   onSave,
   onCancel,
+  showFooter = true,
   isLoading = false,
   disabled = false,
   saveText = "Save",
   cancelText = "Cancel",
-  contentClassName='min-w-[70vw] h-[90vh]'
+  contentClassName = 'min-w-[70vw] h-[90vh]'
 }: CustomDialogProps) {
   const handleCancel = () => {
     onCancel?.();
@@ -37,8 +39,8 @@ export default function CustomDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`p-0 ${contentClassName}`}>
-        <DialogHeader className="rounded-t-md p-6  border-b border-border-subtle sticky top-0 bg-background z-10 flex">
+      <DialogContent className={`p-0 gap-0 flex flex-col ${contentClassName}`}>
+        <DialogHeader className="rounded-t-md px-6 py-3 h-[10vh]  border-b  sticky top-0 bg-surface-default z-10 flex">
           <DialogTitle className="text-xl font-semibold flex justify-between w-full">
             {title}
             <XIcon
@@ -47,22 +49,24 @@ export default function CustomDialog({
             />
           </DialogTitle>
         </DialogHeader>
-         <div className={` overflow-y-auto px-6 scrollbar-hide`}>
-        {children}
-         </div>
+        <div className={` overflow-hidden`}>
+          {children}
+        </div>
 
-        <DialogFooter className=" border-t">
-          <div className="flex items-end gap-3 px-6 py-4  sticky bottom-0">
-            <ButtonType3 className="px-6 py-3" onClick={handleCancel} disabled={isLoading}>
-              {cancelText}
-            </ButtonType3>
-            <ButtonType2 className="px-6 py-3" onClick={onSave} disabled={disabled || isLoading}>
-              {isLoading ? 'Saving...' : saveText}
-            </ButtonType2>
-          </div>
-
-
-        </DialogFooter>
+        {
+          showFooter ? (
+            <DialogFooter className="h-[10vh] border-t">
+              <div className="flex items-end gap-3 px-6 py-4  sticky bottom-0">
+                <ButtonType3 className="px-6 py-3" onClick={handleCancel} disabled={isLoading}>
+                  {cancelText}
+                </ButtonType3>
+                <ButtonType2 className="px-6 py-3" onClick={onSave} disabled={disabled || isLoading}>
+                  {isLoading ? 'Saving...' : saveText}
+                </ButtonType2>
+              </div>
+            </DialogFooter>
+          ) : ""
+        }
       </DialogContent>
     </Dialog>
   );

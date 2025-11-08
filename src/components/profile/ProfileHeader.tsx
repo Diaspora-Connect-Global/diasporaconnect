@@ -3,6 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { UserBadge } from "../custom/userBadge";
 import {  PencilSimpleIcon, UsersThreeIcon } from "@phosphor-icons/react";
+import { useState } from "react";
+import CustomDialog from "../custom/customDialog";
+import FriendListModal from "./FriendListModal";
 
 interface ProfileHeaderProps {
   data: {
@@ -22,6 +25,7 @@ export function ProfileHeader({ data, onEditAvatar }: ProfileHeaderProps) {
     .toUpperCase()
     .slice(0, 2); // Limit to 2 chars
 
+    const [friendList,setFriendListOpen]= useState(false)
   return (
     <Card className="lg:min-h-[10rem] p-1">
       <CardContent className="p-4">
@@ -60,7 +64,7 @@ export function ProfileHeader({ data, onEditAvatar }: ProfileHeaderProps) {
               <h1 className="text-2xl font-bold ">{data.name} </h1>
               <UserBadge tier="starter" size="sm" />
             </div>
-            <div className="flex items-center font-label-large justify-center space-x-2 text-text-brand">
+            <div onClick={()=>setFriendListOpen(true)} className="flex items-center font-label-large justify-center space-x-2 text-text-brand cursor-pointer">
               <UsersThreeIcon size={20} />
               <p >{data.friendCount} friends</p>
             </div>
@@ -68,6 +72,10 @@ export function ProfileHeader({ data, onEditAvatar }: ProfileHeaderProps) {
         </div>
         <p className="mt-2 text-sm">{data.bio}</p>
       </CardContent>
+
+      <CustomDialog contentClassName="min-w-[100vw] h-[100vh]" title="Friend List" open={friendList} onOpenChange={()=>setFriendListOpen(false) }  showFooter= {false}>
+        <FriendListModal/>
+      </CustomDialog>
     </Card>
   );
 }

@@ -15,7 +15,7 @@ interface Friend {
   status: TabKey;
 }
 
-export default function FriendList() {
+export default function FriendListModal() {
   /* --------------------- State --------------------- */
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,17 +69,17 @@ export default function FriendList() {
   /* --------------------- Filtering --------------------- */
   const filteredFriends = useMemo(() => {
     return allFriends.filter((f) => {
-      // Tab filter
-      if (activeTab !== "all" && f.status !== activeTab) return false;
-      // Search filter
+      // Search filter first
       if (
         searchTerm &&
         !f.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
         return false;
-      return true;
+      
+      // Tab filter: match the status
+      return f.status === activeTab;
     });
-  }, [allFriends, activeTab, searchTerm]);
+  }, [activeTab, searchTerm]);
 
   /* --------------------- Dynamic counts --------------------- */
   const counts = useMemo(() => {
@@ -95,7 +95,7 @@ export default function FriendList() {
     });
 
     return byStatus;
-  }, [allFriends]);
+  }, []);
 
   const tabTitle = {
     all: `${counts.all} friends`,
@@ -156,9 +156,9 @@ export default function FriendList() {
 
   /* --------------------- UI (styles untouched) --------------------- */
   return (
-    <div className="flex bg-surface-default">
+    <div className="flex bg-surface-default h-[90vh] ">
       {/* ---------- LEFT SIDEBAR (tabs) ---------- */}
-      <div className="w-[20vw] p-4 border-r min-h-[100vh]">
+      <div className="w-[20vw] p-4 border-r min-h-[90vh] overflow-y-auto">
         <div className="mt-4 space-y-2">
           {(
             [
@@ -189,7 +189,7 @@ export default function FriendList() {
       </div>
 
       {/* ---------- RIGHT CONTENT ---------- */}
-      <div className="w-[80vw]">
+      <div className="w-[80vw] overflow-y-auto">
         <div className="w-[75vw] m-auto">
           <div className="flex justify-between items-center my-4">
             {/* DYNAMIC heading */}
