@@ -179,7 +179,7 @@ export default function FeedCardWithReply({
                         >
                             <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
                             {i === maxDisplay - 1 && excessCount > 0 && (
-                                <div className="absolute inset-0 bg-black/10 bg-opacity-60 flex items-center justify-center">
+                                <div className="absolute inset-0 bg-black/40 bg-opacity-60 flex items-center justify-center">
                                     <span className="text-white text-3xl font-semibold">
                                         +{excessCount}
                                     </span>
@@ -395,9 +395,9 @@ export default function FeedCardWithReply({
                     onClick={handleSave}
                 >
                     <Bookmark
-                        className={`w-[1.25rem] h-[1.25rem] ${isSaved ? 'fill-current text-text-primary' : 'text-text-secondary'}`}
+                        className={`w-[1.25rem] h-[1.25rem] ${isSaved ? 'fill-current text-text-brand' : 'text-text-secondary'}`}
                     />
-                    <span>{t('save')}</span>
+                    <span className={`${isSaved ? "text-text-brand" : ""}`}>{ isSaved ?  t('saved') : t('save')}</span>
                 </button>
             </div>
 
