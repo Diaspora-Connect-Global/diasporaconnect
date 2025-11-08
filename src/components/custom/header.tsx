@@ -42,11 +42,11 @@ export default function Header() {
   const currentLocale = segments[0] || 'en';
 
   const navigation = [
-    { name: t('home'), href: `/${currentLocale}`, icon: "/HOME.svg" },
-    { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY.svg" },
-    { name: t('marketplace'), href: "#", icon: "/MARKETPLACE.svg", disabled: true },
-    { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT.svg", disabled: true },
-    { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION.svg" },
+    { name: t('home'), href: `/${currentLocale}`, icon: "/HOME" },
+    { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY" },
+    { name: t('marketplace'), href: "#", icon: "/MARKETPLACE", disabled: true },
+    { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT", disabled: true },
+    { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION" },
   ];
 
   const isActive = (href: string) => {
@@ -90,9 +90,9 @@ export default function Header() {
           <Image
             width={60}
             height={60}
-            src={item.icon}
+            src={`${item.icon}${active?"active":""}.svg`}
             alt={`${item.name} Icon`}
-            className="w-6 h-6 object-contain "
+            className="w-6 h-6 object-contain"
           />
         </div>
 

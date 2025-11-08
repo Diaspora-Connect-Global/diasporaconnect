@@ -20,7 +20,7 @@ export function PeopleYouMayKnow() {
                     <PeopleYouMayKnowCard
                         profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
                         name="John Smith"
-                        mutualConnections={12}
+                        mutualConnections={120}
                     />
                     <PeopleYouMayKnowCard
                         profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
