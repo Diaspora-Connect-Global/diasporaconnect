@@ -11,6 +11,7 @@ import {
 
 import { User, ConversationType } from '@/types/chat';
 import { ButtonType1, ButtonType2 } from '@/components/custom/button';
+import { useTranslations } from 'next-intl';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export function ConfirmationModal({
   onClose,
   selectedUsers,
 }: ConfirmationModalProps) {
+  const t = useTranslations('chat.conversation');
 
   // Set default group name when modal opens
   useEffect(() => {
@@ -36,13 +38,13 @@ export function ConfirmationModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg w-full mx-4 flex flex-col"> {/* Responsive sizing */}
         <DialogHeader>
-          <DialogTitle>Choose how you want to message</DialogTitle>
+          <DialogTitle>{t('chooseHowToMessage')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 flex items-center justify-center p-4"> {/* Added padding */}
           <div className="text-center">
             <p className="text-text-primary">
-              You selected {selectedUsers.length} contacts. Would you like to start a group chat or send the message to each person individually?
+              {t('selectedContacts', { count: selectedUsers.length })}
             </p>
           </div>
         </div>
@@ -53,13 +55,13 @@ export function ConfirmationModal({
             className='px-6 py-2'
             onClick={() => { }}
           >
-            Create Group
+            {t('createGroup')}
           </ButtonType1>
           <ButtonType2
             onClick={() => { }}
             className='px-6 py-2'
           >
-            Send individually
+            {t('sendIndividually')}
           </ButtonType2>
         </div>
       </DialogContent>

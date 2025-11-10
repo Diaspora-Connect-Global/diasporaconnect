@@ -5,6 +5,7 @@ import { AddEducationModal } from './modals/AddEducationModal';
 import { Plus } from 'lucide-react';
 import { ButtonType3 } from '../custom/button';
 import { BodySmall, CaptionLarge } from '../utils';
+import { useTranslations } from 'next-intl';
 
 interface Education {
   id: string;
@@ -20,6 +21,7 @@ interface Education {
 }
 
 export default function EducationContent() {
+  const t = useTranslations('profile.education');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [, setEditingEducation] = useState<Education | null>(null);
 
@@ -32,13 +34,13 @@ export default function EducationContent() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <section>
-        <h2 className="text-2xl font-bold mb-4 text-text-primary">Education history</h2>
+        <h2 className="text-2xl font-bold mb-4 text-text-primary">{t('title')}</h2>
         <ButtonType3
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-1 mb-6 text-text-brand font-medium text-sm hover:text-text-brand"
         >
           <Plus className="w-4 h-4" />
-          Add Education
+          {t('addEducation')}
         </ButtonType3>
       </section>
 

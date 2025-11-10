@@ -202,7 +202,7 @@ export default function Header() {
             <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
               <div className="flex items-center space-x-3">
                 <DropdownMenuAvatar />
-                <span className="text-sm text-text-primary">Profile</span>
+                <span className="text-sm text-text-primary">{t('profile')}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <LocaleSwitcher
@@ -279,6 +279,8 @@ export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
 
 
 export function DropdownMenuAvatar() {
+  const t = useTranslations('home.header');
+  
   return (
     <DropdownMenu >
       <DropdownMenuTrigger asChild>
@@ -300,7 +302,7 @@ export function DropdownMenuAvatar() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
 
-            <DMItem icon={<StorefrontIcon />} text={'Become a vendor'} />
+            <DMItem icon={<StorefrontIcon />} text={t('becomeVendor')} />
           </DropdownMenuItem>
           <DropdownMenuItem>
 
@@ -313,16 +315,16 @@ export function DropdownMenuAvatar() {
 
             <DMItem icon={<Wallet3
               size="80"
-            />} text={'Wallet'} />
+            />} text={t('wallet')} />
 
           </DropdownMenuItem>
           <DropdownMenuItem>
             <DMItem icon={<SettingsIcon className='w-full h-full'
-            />} text={'Settings & Privacy'} />
+            />} text={t('settingsPrivacy')} />
 
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <DMItem icon={<QuestionIcon size={32} />} text={'Help & Support'} />
+            <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
 
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -330,7 +332,7 @@ export function DropdownMenuAvatar() {
         <DropdownMenuItem>
           <DMItem icon={<LogoutCurve
             size={40}
-          />} text={'Logout'} />
+          />} text={t('logout')} />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

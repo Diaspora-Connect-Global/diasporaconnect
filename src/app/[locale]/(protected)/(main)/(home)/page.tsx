@@ -33,6 +33,7 @@ interface Post {
 
 export default function Home() {
   const t = useTranslations('community');
+  const tCommon = useTranslations('common');
 
   // Community data
   const communities = [
@@ -340,7 +341,7 @@ export default function Home() {
                            flex h-10 w-10 items-center justify-center
                            rounded-full bg-white/80 shadow-md
                            hover:bg-white transition-colors"
-                aria-label="Scroll left"
+                aria-label={tCommon('scrollLeft')}
               >
                 <ChevronLeftIcon className="h-6 w-6 text-gray-800" />
               </button>
@@ -354,7 +355,7 @@ export default function Home() {
                            flex h-10 w-10 items-center justify-center
                            rounded-full bg-white/80 shadow-md
                            hover:bg-white transition-colors"
-                aria-label="Scroll right"
+                aria-label={tCommon('scrollRight')}
               >
                 <ChevronRightIcon className="h-6 w-6 text-gray-800" />
               </button>

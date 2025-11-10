@@ -88,7 +88,19 @@
         },
         "topics": {
             "title": "Quels sujets souhaitez-vous voir sur DCG",
-            "description": "Choisissez vos centres d'intérêt pour nous aider à personnaliser votre fil d'actualité avec des mises à jour, discussions et opportunités qui vous intéressent."
+            "description": "Choisissez vos centres d'intérêt pour nous aider à personnaliser votre fil d'actualité avec des mises à jour, discussions et opportunités qui vous intéressent.",
+            "technology": "Technologie",
+            "science": "Science",
+            "artsCulture": "Arts et Culture",
+            "sports": "Sports",
+            "healthWellness": "Santé et Bien-être",
+            "business": "Entreprise",
+            "entertainment": "Divertissement",
+            "education": "Éducation",
+            "travel": "Voyage",
+            "foodCooking": "Cuisine et Gastronomie",
+            "politics": "Politique",
+            "environment": "Environnement"
         }
     },
     "static": {
@@ -116,7 +128,16 @@
         "attend": "Participer",
         "login": "Se connecter",
         "postedBy": "Publié par {user}",
-        "added": "Ajouté"
+        "added": "Ajouté",
+        "applied": "Appliqué",
+        "showMore": "Afficher plus",
+        "showLess": "Afficher moins",
+        "addComment": "Ajouter un commentaire...",
+        "noComments": "Aucun commentaire pour le moment. Soyez le premier à commenter !",
+        "likes": "J'aime",
+        "replies": "Réponses",
+        "reply": "Répondre",
+        "replyPlaceholder": "Tapez une réponse..."
     },
     "legal": {
         "about": "À propos",
@@ -188,10 +209,50 @@
             "yourevents": "Vos événements",
             "moreevents": "Plus d'événements",
             "noevents": "Vous n'avez aucun événement sauvegardé",
-            "noattending": "Vous ne participez à aucun événement pour le moment"
+            "noattending": "Vous ne participez à aucun événement pour le moment",
+            "payment": {
+                "title": "Payer les billets",
+                "ticketSummary": "Résumé des billets",
+                "ticketType": "type de billet",
+                "subtotal": "Sous-total",
+                "serviceFee": "Frais de service",
+                "total": "Total",
+                "payToAttend": "Payer pour participer",
+                "payAmount": "Payer GH¢ {amount}",
+                "paymentFailed": "Le paiement a échoué. Veuillez réessayer.",
+                "ticketTypeRegular": "Billet régulier",
+                "ticketDescription": "Accès standard à l'événement",
+                "billingInformation": "Informations de facturation",
+                "payWith": "Payer avec",
+                "creditCard": "Carte de crédit",
+                "mobilePayment": "Paiement mobile",
+                "cardNumber": "Numéro de carte",
+                "cardNumberPlaceholder": "0000 0000 0000 0000",
+                "expDate": "Date d'expiration",
+                "expDatePlaceholder": "MM/AA",
+                "cvv": "CVV",
+                "cvvPlaceholder": "***",
+                "phoneNumber": "Numéro de téléphone",
+                "phoneNumberPlaceholder": "24 000 0000",
+                "success": {
+                    "title": "Achat de billet réussi",
+                    "viewTicket": "Voir le billet",
+                    "browseMore": "Parcourir plus d'événements"
+                }
+            }
         },
         "opportunities": {
-            "opportunities": "Opportunités"
+            "opportunities": "Opportunités",
+            "youropp": "Vos opportunités",
+            "moreopp": "Explorer les opportunités",
+            "none": {
+                "applied": "Vous n'avez pas encore postulé à des opportunités",
+                "saved": "Vous n'avez aucune opportunité sauvegardée"
+            },
+            "notFound": {
+                "title": "Opportunité introuvable",
+                "description": "L'opportunité avec l'ID `{id}` n'existe pas."
+            }
         }
     },
     "community": {
@@ -225,5 +286,149 @@
     "privacy": {
         "public": "Public",
         "private": "Privé"
+    },
+    "friends": {
+        "tabs": {
+            "all": "Tous les amis",
+            "suggested": "Suggestions d'amis",
+            "requestReceived": "Demande d'ami",
+            "requestSent": "Demande envoyée"
+        },
+        "titles": {
+            "all": "{count} amis",
+            "suggested": "Amis suggérés",
+            "requestReceived": "Demandes d'amis ({count})",
+            "requestSent": "Demande envoyée"
+        },
+        "toasts": {
+            "openingChat": "Ouverture du chat…",
+            "requestSent": "Demande d'ami envoyée !",
+            "friendAccepted": "Ami accepté !",
+            "requestIgnored": "Demande ignorée.",
+            "requestCancelled": "Demande annulée.",
+            "friendRemoved": "Ami supprimé.",
+            "friendBlocked": "Ami bloqué."
+        },
+        "empty": "Aucun ami ne correspond au filtre actuel.",
+        "friendList": "Liste d'amis",
+        "friends": "amis",
+        "changeProfilePicture": "Changer la photo de profil",
+        "editProfilePicture": "Modifier la photo de profil"
+    },
+    "profile": {
+        "workExperience": {
+            "title": "Expérience professionnelle",
+            "addExperience": "Ajouter une expérience",
+            "skill": "Compétence",
+            "addSkill": "Ajouter une compétence",
+            "addNewSkill": "Ajouter une nouvelle compétence",
+            "contract": "Contrat",
+            "addWorkExperience": "Ajouter une expérience professionnelle",
+            "company": "Entreprise",
+            "companyPlaceholder": "ex. Google, Microsoft",
+            "role": "Rôle",
+            "rolePlaceholder": "ex. Ingénieur Frontend Senior",
+            "employmentType": "Type d'emploi",
+            "employmentTypePlaceholder": "Temps plein, Temps partiel, Contrat, Stage",
+            "startDate": "Date de début",
+            "endDate": "Date de fin",
+            "month": "Mois",
+            "year": "Année",
+            "yearPlaceholder": "2024",
+            "present": "Présent",
+            "currentlyWorkHere": "Je travaille actuellement ici",
+            "description": "Description",
+            "descriptionPlaceholder": "Qu'avez-vous fait ? Technologies utilisées ? Réalisations ?",
+            "skills": "Compétences",
+            "skillsPlaceholder": "Tapez pour rechercher ou ajouter une nouvelle compétence...",
+            "skillPlaceholder": "ex. TypeScript",
+            "saving": "Enregistrement...",
+            "cancel": "Annuler",
+            "save": "Enregistrer"
+        },
+        "education": {
+            "title": "Historique de formation",
+            "addEducation": "Ajouter une formation",
+            "editEducation": "Modifier la formation",
+            "institution": "Établissement",
+            "institutionPlaceholder": "ex. Université Drexel",
+            "degree": "Diplôme",
+            "degreePlaceholder": "ex. Baccalauréat ès sciences",
+            "program": "Programme",
+            "programPlaceholder": "ex. Technologies de l'information",
+            "startDate": "Date de début",
+            "expectedCompletion": "Date de fin prévue",
+            "year": "Année",
+            "yearPlaceholder": "2022",
+            "endYearPlaceholder": "2026",
+            "currentlyStudyHere": "J'étudie actuellement ici",
+            "activities": "Activités et réalisations",
+            "activitiesPlaceholder": "Clubs, GPA, projets, distinctions..."
+        },
+        "personalDetails": {
+            "bio": "Biographie",
+            "fullName": "Nom complet",
+            "dateOfBirth": "Date de naissance",
+            "residenceAddress": "Adresse de résidence",
+            "homeCountry": "Pays d'origine",
+            "firstName": "Prénom",
+            "firstNamePlaceholder": "Entrez le prénom",
+            "middleName": "Deuxième prénom",
+            "middleNamePlaceholder": "Entrez le deuxième prénom",
+            "lastName": "Nom",
+            "lastNamePlaceholder": "Entrez le nom",
+            "bioPlaceholder": "Parlez-nous de vous, de vos intérêts et de ce qui vous passionne...",
+            "characters": "caractères",
+            "words": "mots",
+            "notProvided": "Non fourni",
+            "edit": "Modifier {title}",
+            "saving": "Enregistrement...",
+            "save": "Enregistrer",
+            "cancel": "Annuler",
+            "day": "Jour",
+            "dayPlaceholder": "Jour",
+            "countryOfResidence": "Pays de résidence",
+            "city": "Ville",
+            "cityPlaceholder": "Ville",
+            "livingHereSince": "Réside ici depuis",
+            "country": "Pays",
+            "whenJoined": "Date d'inscription"
+        },
+        "navigation": {
+            "about": "À propos",
+            "posts": "Publications",
+            "communities": "Communautés",
+            "personalDetails": "Détails personnels",
+            "workExperience": "Expérience professionnelle",
+            "education": "Formation",
+            "saved": "Enregistré",
+            "liked": "Aimé",
+            "commented": "Commenté",
+            "noCommunities": "Aucune communauté rejointe pour le moment.",
+            "noPosts": "Aucune publication {type} pour le moment."
+        },
+        "profileCompletion": {
+            "title": "Complétion du profil",
+            "complete": "complété",
+            "completeProfile": "Compléter le profil"
+        },
+        "trustScore": {
+            "title": "Score de confiance",
+            "description": "Description du score de confiance"
+        },
+        "kyc": {
+            "title": "Vérification KYC",
+            "verified": "Vérifié",
+            "notVerified": "Non vérifié"
+        }
+    },
+    "common": {
+        "scrollLeft": "Défiler vers la gauche",
+        "scrollRight": "Défiler vers la droite",
+        "almostThere": "Presque terminé..."
+    },
+    "metadata": {
+        "title": "Diaspora Connect Global",
+        "description": "Connecter les communautés de la diaspora dans le monde entier"
     }
 }

@@ -8,6 +8,7 @@ import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ButtonType3 } from "../custom/button";
+import { useTranslations } from 'next-intl';
 
 interface Reply {
     id: string;
@@ -20,6 +21,8 @@ interface Reply {
 }
 
 export default function GroupChat({ chat }: { chat: ChatInfo }) {
+    const t = useTranslations('chat.group');
+    const tActions = useTranslations('actions');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [repliesSidebarOpen, setRepliesSidebarOpen] = useState(false);
@@ -219,7 +222,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                             className="flex items-center space-x-1 text-xs text-text-brand hover:text-text-brand-dark transition-colors ml-2"
                                         >
                                             <span>
-                                                {replyCount > 0 ? `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'} | reply` : 'Reply'}
+                                                {replyCount > 0 ? t('repliesCount', { count: replyCount }) + ' | ' + t('reply') : t('reply')}
                                             </span>
                                         </button>
                                     </div>
@@ -235,7 +238,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     <div className="flex-shrink-0"> {/* Added flex-shrink-0 wrapper */}
                         <MessageInput
                             onSendMessage={handleSendMessage}
-                            placeholder={`Message ${chat.name}`}
+                            placeholder={t('message', { name: chat.name })}
                             conversationId={chat.id}
                             senderId="current-user"
                         />
@@ -258,7 +261,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
                         <div className="flex-shrink-0 flex items-center justify-center mb-6"> {/* Added flex-shrink-0 */}
                             <ButtonType3>
-                                Edit
+                                {t('edit')}
                             </ButtonType3>
                         </div>
 
@@ -266,10 +269,10 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                         <div className="flex-1 min-h-0 mb-6"> {/* Added flex-1 min-h-0 */}
                             <div className="flex-shrink-0 flex justify-between items-center mb-3"> {/* Added flex-shrink-0 */}
                                 <h5 className="text-sm font-medium text-text-primary">
-                                    Members
+                                    {t('members')}
                                 </h5>
                                 <ButtonType3 className="text-xs py-1 px-2">
-                                    Add people
+                                    {t('addPeople')}
                                 </ButtonType3>
                             </div>
                             <div className="h-full min-h-0 overflow-y-auto scrollbar-hide"> {/* Changed to h-full min-h-0 */}
@@ -283,7 +286,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium text-text-primary truncate">
                                                 {member.user?.name}
-                                                {member.userId === 'current-user' && ' (You)'}
+                                                {member.userId === 'current-user' && t('you')}
                                             </p>
                                             <p className="text-xs text-text-secondary capitalize">
                                                 {member.role} • {member.user?.status || 'offline'}
@@ -299,12 +302,12 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     <div className="flex-shrink-0 border-t border-border-subtle p-4"> {/* Added flex-shrink-0 */}
                         <div className="space-y-3">
                             <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">Leave Group</p>
+                                <p className="text-sm">{t('leaveGroup')}</p>
                                 <ChevronRight className="w-4 h-4" />
                             </div>
 
                             <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">Delete Group</p>
+                                <p className="text-sm">{t('deleteGroup')}</p>
                                 <ChevronRight className="w-4 h-4" />
                             </div>
                         </div>
@@ -318,7 +321,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     {/* Replies Header */}
                     <div className="flex-shrink-0 p-4 flex justify-between items-center"> {/* Added flex-shrink-0 */}
                         <div>
-                            <h3 className="font-semibold text-text-primary">Replies</h3>
+                            <h3 className="font-semibold text-text-primary">{t('replies')}</h3>
                         </div>
                         <button
                             onClick={handleCloseReplies}
@@ -393,8 +396,8 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                         ) : (
                             <div className="text-center text-text-secondary py-8">
                                 <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p className="text-sm">No replies yet</p>
-                                <p className="text-xs">Be the first to reply</p>
+                                <p className="text-sm">{t('noReplies')}</p>
+                                <p className="text-xs">{t('beFirstToReply')}</p>
                             </div>
                         )}
                     </div>
@@ -403,7 +406,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     <div className="flex-shrink-0"> {/* Added flex-shrink-0 */}
                         <MessageInput
                             onSendMessage={handleSendMessage}
-                            placeholder="Write a reply..."
+                            placeholder={t('writeReply')}
                             conversationId={chat.id}
                             senderId="current-user"
                         />

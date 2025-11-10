@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { UserBadge } from "../custom/userBadge";
 import {  InfoIcon } from "@phosphor-icons/react";
 import { LevelGauge } from "../custom/levelGauge";
+import { useTranslations } from 'next-intl';
 
 interface TrustScoreProps {
   data: {
@@ -21,10 +22,12 @@ interface TrustScoreProps {
 }
 
 export function TrustScore({ data, onLevelChange }: TrustScoreProps) {
+  const t = useTranslations('profile.trustScore');
+  
   return (
     <Card className="h-full p-0">
       <CardContent className="p-4 h-full flex flex-col">
-        <h2 className="text-lg font-semibold mb-3">Trust score</h2>
+        <h2 className="text-lg font-semibold mb-3">{t('title')}</h2>
         <div className="flex-1 min-h-0 flex flex-col justify-between">
           <div className="space-y-3">
             
@@ -44,7 +47,7 @@ export function TrustScore({ data, onLevelChange }: TrustScoreProps) {
             </div>
             <div className="bg-surface-info text-text-info flex p-2 space-x-2 rounded-md">
               <InfoIcon size={32} />
-              <p> Description of the trust score</p>
+              <p>{t('description')}</p>
             </div>
 
           </div>

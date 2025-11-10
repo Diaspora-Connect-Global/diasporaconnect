@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import CustomDialog from '@/components/custom/customDialog';
 import { MonthSelect, TextArea, TextInput } from '@/components/custom/input';
 import { LabelLarge } from '@/components/utils';
+import { useTranslations } from 'next-intl';
 
 interface Education {
     id?: string;
@@ -30,6 +31,7 @@ export function AddEducationModal({
     initialData = null,
     onSaveSuccess,
 }: AddEducationModalProps) {
+    const t = useTranslations('profile.education');
     const [form, setForm] = useState<Omit<Education, 'id'>>({
         institution: '',
         program: '',
@@ -100,45 +102,45 @@ export function AddEducationModal({
         <CustomDialog
             open={isOpen}
             onOpenChange={(open) => !open && onClose()}
-            title={initialData ? 'Edit Education' : 'Add Education'}
+            title={initialData ? t('editEducation') : t('addEducation')}
             onSave={handleSave}
             onCancel={onClose}
             isLoading={isLoading}
             disabled={isSaveDisabled}
-            saveText="Save"
-            cancelText="Cancel"
+            saveText={t('save')}
+            cancelText={t('cancel')}
         >
                 <div className="space-y-5">
                     <TextInput
-                        label="Institution"
-                        placeholder="e.g. Drexel University"
+                        label={t('institution')}
+                        placeholder={t('institutionPlaceholder')}
                         value={form.institution}
                         onChange={(v) => updateForm('institution', v)}
                     />
                     <TextInput
-                        label="Degree"
-                        placeholder="e.g. Bachelor of Science"
+                        label={t('degree')}
+                        placeholder={t('degreePlaceholder')}
                         value={form.degree}
                         onChange={(v) => updateForm('degree', v)}
                     />
                     <TextInput
-                        label="Program"
-                        placeholder="e.g. Information Technology"
+                        label={t('program')}
+                        placeholder={t('programPlaceholder')}
                         value={form.program}
                         onChange={(v) => updateForm('program', v)}
                     />
 
                     <div className={form.isCurrent ? '' : 'grid lg:grid-cols-2 gap-6'}>
                         <div>
-                            <LabelLarge>Start Date</LabelLarge>
+                            <LabelLarge>{t('startDate')}</LabelLarge>
                             <div className="grid grid-cols-2 gap-3 mt-2">
                                 <MonthSelect
                                     value={form.startMonth}
                                     onChange={(v) => updateForm('startMonth', v)}
                                 />
                                 <TextInput
-                                    label="Year"
-                                    placeholder="2022"
+                                    label={t('year')}
+                                    placeholder={t('yearPlaceholder')}
                                     value={form.startYear}
                                     onChange={(v) => updateForm('startYear', v)}
                                 />
@@ -147,15 +149,15 @@ export function AddEducationModal({
 
                         {!form.isCurrent && (
                             <div>
-                                <LabelLarge>Expected Completion</LabelLarge>
+                                <LabelLarge>{t('expectedCompletion')}</LabelLarge>
                                 <div className="grid grid-cols-2 gap-3 mt-2">
                                     <MonthSelect
                                         value={form.endMonth}
                                         onChange={(v) => updateForm('endMonth', v)}
                                     />
                                     <TextInput
-                                        label="Year"
-                                        placeholder="2026"
+                                        label={t('year')}
+                                        placeholder={t('endYearPlaceholder')}
                                         value={form.endYear}
                                         onChange={(v) => updateForm('endYear', v)}
                                     />
@@ -171,12 +173,12 @@ export function AddEducationModal({
                             onChange={(e) => updateForm('isCurrent', e.target.checked)}
                             className="w-4 h-4 text-text-brand rounded"
                         />
-                        <span className="text-sm">I currently study here</span>
+                        <span className="text-sm">{t('currentlyStudyHere')}</span>
                     </div>
 
                     <TextArea
-                        label="Activities & Achievements"
-                        placeholder="Clubs, GPA, projects, honors..."
+                        label={t('activities')}
+                        placeholder={t('activitiesPlaceholder')}
                         value={form.activities}
                         onChange={(v) => updateForm('activities', v)}
                         maxLength={500}

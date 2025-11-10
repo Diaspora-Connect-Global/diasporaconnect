@@ -1,6 +1,7 @@
 // components/KYCVerification.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface KYCVerificationProps {
   data: {
@@ -11,6 +12,8 @@ interface KYCVerificationProps {
 }
 
 export function KYCVerification({ data, onVerify }: KYCVerificationProps) {
+  const t = useTranslations('profile.kyc');
+  
   return (
     <Card className="h-full ">
       <CardContent className=" h-full flex flex-col">
@@ -19,12 +22,12 @@ export function KYCVerification({ data, onVerify }: KYCVerificationProps) {
             onClick={onVerify} 
             className="flex items-center justify-between cursor-pointer"
           >
-            <span className="text-sm font-medium">KYC verification</span>
+            <span className="text-sm font-medium">{t('title')}</span>
             <ChevronRight className="w-4 h-4"/>
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className={`text-sm ${data.verified ? "text-text-success" : "text-text-warning"}`}>
-              {data.verified ? "Verified" : "Not verified"}
+              {data.verified ? t('verified') : t('notVerified')}
             </span>
           </div>
         </div>

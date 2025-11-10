@@ -2,6 +2,7 @@ import { XIcon } from "@phosphor-icons/react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { ReactNode } from "react";
 import { ButtonType2, ButtonType3 } from "./button";
+import { useTranslations } from 'next-intl';
 
 interface CustomDialogProps {
   open: boolean;
@@ -21,17 +22,22 @@ interface CustomDialogProps {
 export default function CustomDialog({
   open,
   onOpenChange,
-  title = "Title",
+  title,
   children,
   onSave,
   onCancel,
   showFooter = true,
   isLoading = false,
   disabled = false,
-  saveText = "Save",
-  cancelText = "Cancel",
+  saveText,
+  cancelText,
   contentClassName = 'min-w-[70vw] h-[90vh]'
 }: CustomDialogProps) {
+  const t = useTranslations('dialog');
+  const defaultTitle = title || t('title');
+  const defaultSaveText = saveText || t('save');
+  const defaultCancelText = cancelText || t('cancel');
+  
   const handleCancel = () => {
     onCancel?.();
     onOpenChange(false);
@@ -42,7 +48,7 @@ export default function CustomDialog({
       <DialogContent className={`p-0 gap-0 flex flex-col ${contentClassName}`}>
         <DialogHeader className="rounded-t-md px-6 py-3 h-[10vh]  border-b  sticky top-0 bg-surface-default z-10 flex">
           <DialogTitle className="text-xl font-semibold flex justify-between w-full">
-            {title}
+            {defaultTitle}
             <XIcon
               className="cursor-pointer h-5 w-5"
               onClick={() => onOpenChange(false)}
@@ -58,10 +64,10 @@ export default function CustomDialog({
             <DialogFooter className="h-[10vh] border-t">
               <div className="flex items-end gap-3 px-6 py-4  sticky bottom-0">
                 <ButtonType3 className="px-6 py-3" onClick={handleCancel} disabled={isLoading}>
-                  {cancelText}
+                  {defaultCancelText}
                 </ButtonType3>
                 <ButtonType2 className="px-6 py-3" onClick={onSave} disabled={disabled || isLoading}>
-                  {isLoading ? 'Saving...' : saveText}
+                  {isLoading ? t('saving') : defaultSaveText}
                 </ButtonType2>
               </div>
             </DialogFooter>

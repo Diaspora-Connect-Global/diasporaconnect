@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { CountrySelect, } from '@/components/custom/input';
+import { useTranslations } from 'next-intl';
 
 interface BioEditModalProps {
     isOpen: boolean;
@@ -23,6 +24,8 @@ export function HomeCountryEditModal({
     onSave,
     initialData,
 }: BioEditModalProps) {
+    const t = useTranslations('profile.personalDetails');
+    const tWork = useTranslations('profile.workExperience');
     const [month, setMonth] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
@@ -54,7 +57,7 @@ export function HomeCountryEditModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Home country</DialogTitle>
+                    <DialogTitle>{t('homeCountry')}</DialogTitle>
                 </DialogHeader>
 
                 <div className="flex-1 min-h-0 flex flex-col space-y-4">
@@ -63,7 +66,7 @@ export function HomeCountryEditModal({
                         <CountrySelect
                             value={month}
                             onChange={setMonth}
-                            label="Country"
+                            label={t('country')}
                         />
                     </div>
                 </div>
@@ -74,14 +77,14 @@ export function HomeCountryEditModal({
                         className="px-6 py-2"
                         disabled={isLoading}
                     >
-                        Cancel
+                        {t('cancel')}
                     </ButtonType3>
                     <ButtonType2
                         onClick={handleSave}
                         className="px-6 py-2"
                         disabled={!month.trim() || isLoading}
                     >
-                        {isLoading ? 'Saving...' : 'Save'}
+                        {isLoading ? t('saving') : t('save')}
                     </ButtonType2>
                 </div>
             </DialogContent>

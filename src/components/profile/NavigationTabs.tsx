@@ -7,6 +7,7 @@ import { PersonalDetailsContent } from "./PersonalDetailsContent";
 import WorkExperience from "./WorkExperience";
 import EducationContent from "./EducationContent";
 import FilteredPosts from "./FilteredPosts";
+import { useTranslations } from 'next-intl';
 
 interface PersonalDetailsData {
   bio: string;
@@ -60,28 +61,31 @@ export function NavigationTabs({
   postsData,
   communitiesData
 }: NavigationTabsProps) {
+  const t = useTranslations('profile.navigation');
+  const tActions = useTranslations('actions');
+  
   // State for main tabs and sub-tabs
   const [activeTab, setActiveTab] = useState(initialMainTab);
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
 
   // Main horizontal tabs
   const mainTabs = [
-    { id: 'about', label: 'About' },
-    { id: 'posts', label: 'Posts' },
-    { id: 'communities', label: 'Communities' },
+    { id: 'about', label: t('about') },
+    { id: 'posts', label: t('posts') },
+    { id: 'communities', label: t('communities') },
   ];
 
   // About sub-tabs (vertical)
   const aboutSubTabs = [
-    { id: 'personal-details', label: 'Personal details' },
-    { id: 'work-experience', label: 'Work experience' },
-    { id: 'education', label: 'Education' },
+    { id: 'personal-details', label: t('personalDetails') },
+    { id: 'work-experience', label: t('workExperience') },
+    { id: 'education', label: t('education') },
   ];
   // Post sub-tabs (vertical)
   const postsSubTabs = [
-    { id: 'post-saved', label: 'Saved' },
-    { id: 'post-liked', label: 'Liked' },
-    { id: 'post-commented', label: 'Commented' },
+    { id: 'post-saved', label: t('saved') },
+    { id: 'post-liked', label: t('liked') },
+    { id: 'post-commented', label: t('commented') },
   ];
 
   // Render content based on active main tab
@@ -129,9 +133,9 @@ export function NavigationTabs({
       case 'communities':
         return (
           <div className="mt-4">
-            <h3 className="text-lg font-semibold mb-4">Communities</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('communities')}</h3>
             {communitiesData.items.length === 0 ? (
-              <p className="text-muted-foreground">No communities joined yet.</p>
+              <p className="text-muted-foreground">{t('noCommunities')}</p>
             ) : (
               <div className="space-y-4">
                 {/* Render communities data here */}

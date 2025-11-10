@@ -32,11 +32,11 @@ export default function SignUpForm() {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      toast.error( 'Email is required');
+      toast.error(t('form.email.label') + ' is required');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      toast.error( 'Invalid email');
+      toast.error(t('form.email.label') + ' is invalid');
       return;
     }
 
@@ -49,7 +49,7 @@ export default function SignUpForm() {
       });
 
       if (data?.checkEmailAvailability === false) {
-        toast.error(t('form.email.exists') || 'Email already exists');
+        toast.error(t('form.email.exists'));
         return;
       }
 
@@ -58,11 +58,11 @@ export default function SignUpForm() {
         return;
       }
 
-      toast.success(t('form.signup.success') || 'Account created successfully!');
+      toast.success(t('form.signup.success'));
       redirect('/complete-account');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      toast.error(err.message || t('form.email.checkFailed') || 'Failed to check email');
+      toast.error(err.message || t('form.email.checkFailed'));
     } finally {
       setIsChecking(false);
     }
@@ -125,7 +125,7 @@ export default function SignUpForm() {
               disabled={isChecking}
               className="px-8 py-4"
             >
-              {isChecking ? 'Checking...' : a("continue")}
+              {isChecking ? t('form.email.checkFailed') : a("continue")}
             </ButtonType2>
           </div>
         </div>

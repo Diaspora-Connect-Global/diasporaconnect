@@ -13,7 +13,8 @@ export default function AssociationPage() {
     const params = useParams();
     const associationId = params.id;
 
-    const t = useTranslations("home.associations")
+    const t = useTranslations("home.associations");
+    const tActions = useTranslations("actions");
 
     type Association = {
         id: string;
@@ -119,7 +120,7 @@ export default function AssociationPage() {
                         <div className="flex justify-between items-center w-full">
                             <HeadingMedium>{currentAssociation.name}</HeadingMedium>
                             <ButtonType1 className="py-1 px-3 ml-4">
-                                {currentAssociation.joined ? "Joined" : "Join"}
+                                {currentAssociation.joined ? tActions("joined") : tActions("join")}
                             </ButtonType1>
                         </div>
                     </div>

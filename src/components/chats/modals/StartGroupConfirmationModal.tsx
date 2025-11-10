@@ -13,6 +13,7 @@ import { Camera, Plus, X } from 'lucide-react';
 import Image from 'next/image';
 import { User } from '@/data/chats';
 import { TextInput } from '@/components/custom/input';
+import { useTranslations } from 'next-intl';
 
 interface AddGroupPhotoModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export function StartGroupConfirmationModal({
   initialGroupName = '',
   selectedUsers,
 }: AddGroupPhotoModalProps) {
+  const t = useTranslations('chat.conversation');
   const [groupName, setGroupName] = useState(initialGroupName);
   const [groupPhoto, setGroupPhoto] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -96,7 +98,7 @@ export function StartGroupConfirmationModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md w-[90vw] max-h-[90vh] flex flex-col"> {/* Responsive sizing */}
         <DialogHeader>
-          <DialogTitle className="text-center">Create Group</DialogTitle>
+          <DialogTitle className="text-center">{t('createGroup')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 min-h-0 flex flex-col space-y-6"> {/* Added min-h-0 and flex-col */}
@@ -144,7 +146,7 @@ export function StartGroupConfirmationModal({
                     <Plus className="w-6 h-6 text-text-brand" />
                   </div>
                   <span className="text-sm text-text-brand text-center px-2">
-                    {isDragging ? 'Drop photo here' : 'Add group photo'}
+                    {isDragging ? t('dropPhotoHere') : t('addGroupPhoto')}
                   </span>
                 </div>
               )}
@@ -166,8 +168,8 @@ export function StartGroupConfirmationModal({
               type="text"
               value={groupName}
               onChange={setGroupName}
-              placeholder="Enter group name"   
-              label='Group Name'
+              placeholder={t('enterGroupName')}   
+              label={t('groupName')}
             />
           </div>
         </div>
@@ -178,14 +180,14 @@ export function StartGroupConfirmationModal({
             onClick={onClose}
             className="px-6 py-2"
           >
-            Cancel
+            {t('cancel')}
           </ButtonType3>
           <ButtonType2
             onClick={handleCreate}
             className="px-6 py-2"
             disabled={!isFormValid}
           >
-            Create Group
+            {t('createGroup')}
           </ButtonType2>
         </div>
       </DialogContent>

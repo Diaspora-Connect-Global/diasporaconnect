@@ -32,7 +32,7 @@ export const Step1: React.FC<Step2Props> = ({ data, updateData, nextStep }) => {
             stepNumber={1}
             totalSteps={3}
             title={t('request.title')}
-            subtitle={t('request.description', { phoneNumber: ` ${data.email}` })}
+            subtitle={t('request.description')}
             isNextDisabled={isNextDisabled}
             nextButtonText={tActions('submit')}
             showBackButton={true}

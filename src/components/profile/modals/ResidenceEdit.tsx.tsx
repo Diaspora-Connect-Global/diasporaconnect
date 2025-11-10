@@ -10,6 +10,7 @@ import {
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { CountrySelect, MonthSelect, TextInput } from '@/components/custom/input';
 import { LabelLarge } from '@/components/utils';
+import { useTranslations } from 'next-intl';
 
 interface BioEditModalProps {
     isOpen: boolean;
@@ -24,6 +25,8 @@ export function ResidenceEditModal({
     onSave,
     initialData,
 }: BioEditModalProps) {
+    const t = useTranslations('profile.personalDetails');
+    const tWork = useTranslations('profile.workExperience');
     const [month, setMonth] = useState("");
     const [city, setCity] = useState("");
     const [year, setYear] = useState("");
@@ -57,7 +60,7 @@ export function ResidenceEditModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Country of residence</DialogTitle>
+                    <DialogTitle>{t('countryOfResidence')}</DialogTitle>
                 </DialogHeader>
 
                 <div className="flex-1 min-h-0 flex flex-col space-y-4">
@@ -66,28 +69,28 @@ export function ResidenceEditModal({
                         <CountrySelect
                             value={month}
                             onChange={setMonth}
-                            label="Country"
+                            label={t('country')}
                         />
 
                         <TextInput
-                            label='City'
-                            placeholder='City'
+                            label={t('city')}
+                            placeholder={t('cityPlaceholder')}
                             value={city}
                             onChange={setCity}
                         />
                         <LabelLarge>
-                            Living here since
+                            {t('livingHereSince')}
                         </LabelLarge>
                         <div className='grid grid-cols-2 gap-1'>
                             <MonthSelect
                                 value={month}
                                 onChange={setMonth}
-                                label="Month"
+                                label={tWork('month')}
                             />
 
                             <TextInput
-                                label='Year'
-                                placeholder='Year'
+                                label={tWork('year')}
+                                placeholder={tWork('yearPlaceholder')}
                                 value={year}
                                 onChange={setYear}
                             />
@@ -102,14 +105,14 @@ export function ResidenceEditModal({
                         className="px-6 py-2"
                         disabled={isLoading}
                     >
-                        Cancel
+                        {t('cancel')}
                     </ButtonType3>
                     <ButtonType2
                         onClick={handleSave}
                         className="px-6 py-2"
                         disabled={!month.trim() || isLoading}
                     >
-                        {isLoading ? 'Saving...' : 'Save'}
+                        {isLoading ? t('saving') : t('save')}
                     </ButtonType2>
                 </div>
             </DialogContent>

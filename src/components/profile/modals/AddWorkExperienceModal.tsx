@@ -12,6 +12,7 @@ import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { MonthSelect, TextArea, TextInput } from '@/components/custom/input';
 import { LabelLarge } from '@/components/utils';
 import { AutocompleteAsync } from '@/components/custom/autoCompleteAsync';
+import { useTranslations } from 'next-intl';
 
 interface WorkExperience {
   company: string;
@@ -95,6 +96,7 @@ export function AddWorkExperienceModal({
   onClose,
   initialData = {},
 }: AddWorkExperienceModalProps) {
+  const t = useTranslations('profile.workExperience');
   const [form, setForm] = useState<WorkExperience>({
     company: '',
     role: '',
@@ -181,7 +183,7 @@ export function AddWorkExperienceModal({
         {/* Sticky Header */}
         <DialogHeader className="p-6 pb-4 border-b border-border-subtle sticky top-0 bg-background z-10">
           <DialogTitle className="text-xl font-semibold">
-            Add Work Experience
+            {t('addWorkExperience')}
           </DialogTitle>
         </DialogHeader>
 
@@ -189,14 +191,14 @@ export function AddWorkExperienceModal({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="space-y-5">
               <TextInput
-                label="Company"
-                placeholder="e.g. Google, Microsoft"
+                label={t('company')}
+                placeholder={t('companyPlaceholder')}
                 value={form.company}
                 onChange={(v) => updateForm('company', v)}
               />
               <TextInput
-                label="Role"
-                placeholder="e.g. Senior Frontend Engineer"
+                label={t('role')}
+                placeholder={t('rolePlaceholder')}
                 value={form.role}
                 onChange={(v) => updateForm('role', v)}
               />
@@ -204,8 +206,8 @@ export function AddWorkExperienceModal({
 
             {/* Employment Type */}
             <TextInput
-              label="Employment type"
-              placeholder="Full-time, Part-time, Contract, Internship"
+              label={t('employmentType')}
+              placeholder={t('employmentTypePlaceholder')}
               value={form.employmentType}
               onChange={(v) => updateForm('employmentType', v)}
             />
@@ -213,16 +215,16 @@ export function AddWorkExperienceModal({
               <div className={`${form.isCurrent ? "" : "grid lg:grid-cols-2 gap-6"} `}>
                 {/* Start Date */}
                 <div>
-                  <LabelLarge>Start Date</LabelLarge>
+                  <LabelLarge>{t('startDate')}</LabelLarge>
                   <div className="grid grid-cols-2 gap-3 mt-2">
                     <MonthSelect
                       value={form.startMonth}
                       onChange={(v) => updateForm('startMonth', v)}
-                      label="Month"
+                      label={t('month')}
                     />
                     <TextInput
-                      label="Year"
-                      placeholder="2024"
+                      label={t('year')}
+                      placeholder={t('yearPlaceholder')}
                       value={form.startYear}
                       onChange={(v) => updateForm('startYear', v)}
                     />
@@ -233,17 +235,17 @@ export function AddWorkExperienceModal({
 
                 {/* End Date */}
                 <div className={`${form.isCurrent ? "hidden" : ""}`}>
-                  <LabelLarge>End Date</LabelLarge>
+                  <LabelLarge>{t('endDate')}</LabelLarge>
                   <div className="grid grid-cols-2 gap-3 mt-2">
                     <MonthSelect
                       value={form.endMonth}
                       onChange={(v) => updateForm('endMonth', v)}
-                      label="Month"
+                      label={t('month')}
                     />
                     <TextInput
-                      label="Year"
-                      placeholder="Present"
-                      value={form.isCurrent ? 'Present' : form.endYear}
+                      label={t('year')}
+                      placeholder={t('present')}
+                      value={form.isCurrent ? t('present') : form.endYear}
                       onChange={(v) => updateForm('endYear', v)}
                     />
                   </div>
@@ -259,14 +261,14 @@ export function AddWorkExperienceModal({
                     onChange={(e) => updateForm('isCurrent', e.target.checked)}
                     className="w-4 h-4 text-text-brand rounded"
                   />
-                  <span className="text-sm">I currently work here</span>
+                  <span className="text-sm">{t('currentlyWorkHere')}</span>
                 </label>
               </div>
 
             {/* Description */}
             <TextArea
-              label="Description"
-              placeholder="What did you do? Technologies used? Achievements?"
+              label={t('description')}
+              placeholder={t('descriptionPlaceholder')}
               value={form.description}
               onChange={(v) => updateForm('description', v)}
               maxLength={500}
@@ -274,19 +276,19 @@ export function AddWorkExperienceModal({
             />
 
 <AutocompleteAsync
-      label="Skills"
+      label={t('skills')}
       value={skills}
       onChange={setSkills}
       fetchOptions={fetchSkills}
       onCreate={createSkill}
-      placeholder="Type to search or add new skill..."
+      placeholder={t('skillsPlaceholder')}
     />
         </div>
 
         {/* Sticky Footer */}
         <div className="flex justify-end items-center gap-3 p-6 pt-4 border-t border-border-subtle bg-background sticky bottom-0 z-10">
           <ButtonType3 onClick={onClose} disabled={isLoading}>
-            Cancel
+            {t('cancel')}
           </ButtonType3>
           <ButtonType2
             onClick={handleSave}
@@ -298,7 +300,7 @@ export function AddWorkExperienceModal({
               !form.startYear
             }
           >
-            {isLoading ? 'Saving...' : 'Save'}
+            {isLoading ? t('saving') : t('save')}
           </ButtonType2>
         </div>
       </DialogContent>

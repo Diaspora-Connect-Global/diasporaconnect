@@ -6,6 +6,7 @@ import { formatDateProximity } from "@/macros/time";
 import { useChatStore } from "@/store/ChatStore";
 import { ButtonType3 } from "../custom/button";
 import { StartConversationModal } from "./modals/StartConversationModal";
+import { useTranslations } from 'next-intl';
 
 type TabType = 'direct' | 'groups';
 
@@ -22,6 +23,8 @@ interface ChatItem {
 }
 
 export default function ChatSideBar() {
+    const t = useTranslations('chat');
+    const tActions = useTranslations('actions');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<TabType>('direct');
     const { activeChat, setActiveChat, conversations, preferences, messages, initializeFromMockData } = useChatStore();
@@ -67,7 +70,7 @@ export default function ChatSideBar() {
                     id: conv.id,
                     name: user.name,
                     type: 'direct' as const,
-                    lastMessage: lastMessage?.text || 'No messages yet',
+                    lastMessage: lastMessage?.text || t('empty.title'),
                     lastMessageTime: lastMessage?.timestamp || conv.createdAt,
                     unread: preference?.unreadCount || 0,
                     online: user.status === 'online',
@@ -90,7 +93,7 @@ export default function ChatSideBar() {
                     id: conv.id,
                     name: group?.name || 'Unknown Group',
                     type: 'group' as const,
-                    lastMessage: lastMessage?.text || 'No messages yet',
+                    lastMessage: lastMessage?.text || t('empty.title'),
                     lastMessageTime: lastMessage?.timestamp || conv.createdAt,
                     unread: preference?.unreadCount || 0,
                     memberCount,
@@ -144,13 +147,13 @@ export default function ChatSideBar() {
             <div className="w-full h-full flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center p-4">
-                    <p className="text-2xl font-heading-large">Chats</p>
+                    <p className="text-2xl font-heading-large">{t('chats')}</p>
                     <ButtonType3
                         className="px-4 py-3 flex items-center"
                         onClick={() => handleOpenModal('direct')} // Open with direct type
                     >
                         <SquarePen className="mr-2 h-4 w-4" />
-                        New message
+                        {t('newMessage')}
                     </ButtonType3>
                 </div>
 
@@ -160,7 +163,7 @@ export default function ChatSideBar() {
                         value={searchQuery}
                         onChange={setSearchQuery}
                         onSearch={() => { }}
-                        placeholder={"Search messages"}
+                        placeholder={t('searchMessages')}
                         id="main-search"
                         bg="bg-surface-default"
                     />
@@ -172,13 +175,13 @@ export default function ChatSideBar() {
                         <TabButton
                             active={activeTab === 'direct'}
                             onClick={() => setActiveTab('direct')}
-                            label="Direct Messages"
+                            label={t('directMessages')}
                             notificationCount={directUnreadCount}
                         />
                         <TabButton
                             active={activeTab === 'groups'}
                             onClick={() => setActiveTab('groups')}
-                            label="Groups"
+                            label={t('groups')}
                             notificationCount={groupsUnreadCount}
                         />
                     </div>
@@ -192,7 +195,7 @@ export default function ChatSideBar() {
                             onClick={handleCreateGroup} // Add click handler
                         >
                             <Plus className="mr-2 h-4 w-4" />
-                            <p>Create Group</p>
+                            <p>{t('createGroup')}</p>
                         </div>
                     </div>
                 )}
@@ -320,11 +323,13 @@ interface DirectMessagesListProps {
 }
 
 function DirectMessagesList({ chats, activeChat, onChatClick }: DirectMessagesListProps) {
+    const t = useTranslations('chat');
+    
     if (chats.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
-                <p className="text-center">No direct messages found</p>
-                <p className="text-sm text-text-tertiary mt-2">Try adjusting your search</p>
+                <p className="text-center">{t('noDirectMessages')}</p>
+                <p className="text-sm text-text-tertiary mt-2">{t('tryAdjustingSearch')}</p>
             </div>
         );
     }
@@ -351,11 +356,13 @@ interface GroupsListProps {
 }
 
 function GroupsList({ groups, activeChat, onChatClick }: GroupsListProps) {
+    const t = useTranslations('chat');
+    
     if (groups.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
-                <p className="text-center">No groups found</p>
-                <p className="text-sm text-text-tertiary mt-2">Try adjusting your search</p>
+                <p className="text-center">{t('noGroups')}</p>
+                <p className="text-sm text-text-tertiary mt-2">{t('tryAdjustingSearch')}</p>
             </div>
         );
     }

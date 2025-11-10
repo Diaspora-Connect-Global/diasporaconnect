@@ -2,6 +2,7 @@
 
 import TicketTypeCard from "@/components/cards/events/TicketTypeCard";
 import Image from "next/image";
+import { useTranslations } from 'next-intl';
 
 interface Step1Props {
   quantity: number;               // <-- controlled from parent
@@ -9,6 +10,8 @@ interface Step1Props {
 }
 
 export default function Step1({ quantity, onQuantityChange }: Step1Props) {
+  const t = useTranslations('home.events.payment');
+  
   return (
     <div>
       <section className="pb-4 mb-4">
@@ -22,9 +25,9 @@ export default function Step1({ quantity, onQuantityChange }: Step1Props) {
       <section>
         {/* Pass the *exact* values that come from EventsId */}
         <TicketTypeCard
-          title="Regular Ticket"
+          title={t('ticketTypeRegular')}
           price="GH¢300.00"
-          description="Standard access to the event"
+          description={t('ticketDescription')}
           quantity={quantity}               // <-- controlled
           onQuantityChange={onQuantityChange} // <-- updates parent
         />

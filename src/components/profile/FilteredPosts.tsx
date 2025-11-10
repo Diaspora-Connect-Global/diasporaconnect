@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import FeedCardFiltered, { FeedCardFilteredProps } from '../cards/FeedCardFiltered';
+import { useTranslations } from 'next-intl';
 
 export default function FilteredPosts() {
+  const t = useTranslations('profile.navigation');
+  
   const postsSubTabs: { id: 'saved' | 'liked' | 'commented'; label: string }[] = [
-    { id: 'saved', label: 'Saved' },
-    { id: 'liked', label: 'Liked' },
-    { id: 'commented', label: 'Commented' },
+    { id: 'saved', label: t('saved') },
+    { id: 'liked', label: t('liked') },
+    { id: 'commented', label: t('commented') },
   ];
   const [activeTab, setActiveTab] = useState<'saved' | 'liked' | 'commented'>('saved');
 
@@ -131,7 +134,7 @@ export default function FilteredPosts() {
       <div className="flex-1 overflow-y-auto bg-surface-default p-4 space-y-4">
         {filteredPosts.length === 0 ? (
           <p className="text-center text-text-secondary py-8">
-            No {activeTab} posts yet.
+            {t('noPosts', { type: t(activeTab) })}
           </p>
         ) : (
           filteredPosts.map((post) => (

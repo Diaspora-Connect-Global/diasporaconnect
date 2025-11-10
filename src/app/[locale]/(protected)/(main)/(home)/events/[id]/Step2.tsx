@@ -72,7 +72,8 @@ export default function Step2({
   onMobileProviderChange,
   onPhoneNumberChange,
 }: Step2Props) {
-  const t = useTranslations('onboarding');
+  const t = useTranslations('home.events.payment');
+  const tOnboarding = useTranslations('onboarding');
   const tAuth = useTranslations('authentication');
 
   // Local UI state for accordion (syncs with parent)
@@ -94,19 +95,19 @@ export default function Step2({
     <div className="max-w-2xl mx-auto space-y-8 p-4">
       {/* ---------- Billing Information ---------- */}
       <section className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900">Billing information</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t('billingInformation')}</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextInput
-            label={t('personalInfo.firstName.label')}
-            placeholder={t('personalInfo.firstName.placeholder')}
+            label={tOnboarding('personalInfo.firstName.label')}
+            placeholder={tOnboarding('personalInfo.firstName.placeholder')}
             value={firstName}
             onChange={onFirstNameChange}
             id="firstName"
           />
           <TextInput
-            label={t('personalInfo.lastName.label')}
-            placeholder={t('personalInfo.lastName.placeholder')}
+            label={tOnboarding('personalInfo.lastName.label')}
+            placeholder={tOnboarding('personalInfo.lastName.placeholder')}
             value={lastName}
             onChange={onLastNameChange}
             id="lastName"
@@ -125,7 +126,7 @@ export default function Step2({
 
       {/* ---------- Pay with ---------- */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-gray-900">Pay with</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t('payWith')}</h2>
 
         {/* ---- Credit Card ---- */}
         <div
@@ -140,7 +141,7 @@ export default function Step2({
           >
             <div className="flex items-center gap-3">
               <CreditCard className="w-5 h-5 text-gray-700" />
-              <span className="font-medium text-gray-900">Credit card</span>
+              <span className="font-medium text-gray-900">{t('creditCard')}</span>
             </div>
             {localOpenMethod === 'card' ? null : <ChevronRight className="w-5 h-5 text-gray-500" />}
           </div>
@@ -150,7 +151,7 @@ export default function Step2({
               {/* Card number */}
               <div>
                 <label className="block font-label-medium text-gray-700 mb-1">
-                  Card number
+                  {t('cardNumber')}
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2">
@@ -158,7 +159,7 @@ export default function Step2({
                   </div>
                   <input
                     type="text"
-                    placeholder="0000 0000 0000 0000"
+                    placeholder={t('cardNumberPlaceholder')}
                     value={cardNumber}
                     onChange={(e) => onCardNumberChange(e.target.value)}
                     className="w-full pl-12 pr-4 py-3 rounded-lg border bg-surface-subtle text-text-primary placeholder-text-secondary focus:border-border-brand focus:ring-0 outline-none"
@@ -170,8 +171,8 @@ export default function Step2({
               <div className="grid grid-cols-2 gap-4">
                 {/* Exp date */}
                 <TextInput
-                  label="Exp. date"
-                  placeholder="MM/YY"
+                  label={t('expDate')}
+                  placeholder={t('expDatePlaceholder')}
                   value={expDate}
                   onChange={onExpDateChange}
                   id="expDate"
@@ -180,12 +181,12 @@ export default function Step2({
                 {/* CVV */}
                 <div>
                   <label className="block font-label-medium text-text-primary mb-1">
-                    CVV
+                    {t('cvv')}
                   </label>
                   <div className="relative">
                     <input
                       type="password"
-                      placeholder="***"
+                      placeholder={t('cvvPlaceholder')}
                       value={cvv}
                       onChange={(e) => onCvvChange(e.target.value)}
                       maxLength={4}
@@ -219,7 +220,7 @@ export default function Step2({
           >
             <div className="flex items-center gap-3">
               <Smartphone className="w-5 h-5 text-gray-700" />
-              <span className="font-medium text-gray-900">Mobile payment</span>
+              <span className="font-medium text-gray-900">{t('mobilePayment')}</span>
             </div>
             {localOpenMethod === 'mobile' ? null : <ChevronRight className="w-5 h-5 text-text-primary" />}
           </div>
@@ -256,7 +257,7 @@ export default function Step2({
               {/* Phone number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone number
+                  {t('phoneNumber')}
                 </label>
                 <InputGroup className="px-3 py-6 border border-border-default rounded-sm bg-surface-subtle focus-within:border-border-brand">
                   <InputGroupAddon>
@@ -272,7 +273,7 @@ export default function Step2({
                   <InputGroupInput
                     value={phoneNumber}
                     onChange={(e) => onPhoneNumberChange(e.target.value)}
-                    placeholder="24 000 0000"
+                    placeholder={t('phoneNumberPlaceholder')}
                     className="text-text-primary font-body-large px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0"
                     maxLength={10}
                   />

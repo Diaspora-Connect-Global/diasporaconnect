@@ -4,6 +4,7 @@ import { SearchInput } from "@/components/custom/input";
 import FriendsCard from "@/components/home/FriendsCard";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type TabKey = "all" | "suggested" | "request-received" | "request-sent";
 
@@ -16,18 +17,20 @@ interface Friend {
 }
 
 export default function FriendListModal() {
+  const t = useTranslations("friends");
+  
   /* --------------------- State --------------------- */
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [searchTerm, setSearchTerm] = useState("");
 
   /* --------------------- Callbacks --------------------- */
-  const handleMessage = () => toast.success("Opening chat…");
-  const handleAddFriend = () => toast.success("Friend request sent!");
-  const handleAccept = () => toast.success("Friend accepted!");
-  const handleIgnore = () => toast("Request ignored.");
-  const handleCancelRequest = () => toast("Request cancelled.");
-  const handleRemoveFriend = () => toast.error("Friend removed.");
-  const handleBlockFriend = () => toast.error("Friend blocked.");
+  const handleMessage = () => toast.success(t("toasts.openingChat"));
+  const handleAddFriend = () => toast.success(t("toasts.requestSent"));
+  const handleAccept = () => toast.success(t("toasts.friendAccepted"));
+  const handleIgnore = () => toast(t("toasts.requestIgnored"));
+  const handleCancelRequest = () => toast(t("toasts.requestCancelled"));
+  const handleRemoveFriend = () => toast.error(t("toasts.friendRemoved"));
+  const handleBlockFriend = () => toast.error(t("toasts.friendBlocked"));
 
   /* --------------------- Mock data --------------------- */
   const allFriends: Friend[] = [
@@ -97,13 +100,13 @@ export default function FriendListModal() {
     });
 
     return byStatus;
-  }, []);
+  }, [allFriends]);
 
   const tabTitle = {
-    all: `${counts.all} friends`,
-    suggested: "Suggested friends",
-    "request-received": `Friend requests (${counts["request-received"]})`,
-    "request-sent": "Sent request",
+    all: t("titles.all", { count: counts.all }),
+    suggested: t("titles.suggested"),
+    "request-received": t("titles.requestReceived", { count: counts["request-received"] }),
+    "request-sent": t("titles.requestSent"),
   }[activeTab];
 
   /* --------------------- Card renderer --------------------- */
@@ -170,10 +173,10 @@ export default function FriendListModal() {
         <div className="mt-4 space-y-2">
           {(
             [
-              { key: "all", label: "All friends" },
-              { key: "suggested", label: "Friend Suggestions" },
-              { key: "request-received", label: "Friend request" },
-              { key: "request-sent", label: "Sent request" },
+              { key: "all", label: t("tabs.all") },
+              { key: "suggested", label: t("tabs.suggested") },
+              { key: "request-received", label: t("tabs.requestReceived") },
+              { key: "request-sent", label: t("tabs.requestSent") },
             ] as const
           ).map(({ key, label }) => (
             <div
@@ -220,7 +223,7 @@ export default function FriendListModal() {
           {/* Empty state */}
           {filteredFriends.length === 0 && (
             <p className="text-center text-muted-foreground col-span-2">
-              No friends match the current filter.
+              {t("empty")}
             </p>
           )}
         </div>

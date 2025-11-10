@@ -8,8 +8,10 @@ import { useChatStore } from "@/store/ChatStore";
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
+import { useTranslations } from 'next-intl';
 
 export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
+    const t = useTranslations('chat.direct');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -105,7 +107,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                         <div>
                             <h2 className="font-semibold text-text-primary">{chat.name}</h2>
                             <p className="text-sm text-text-secondary">
-                                {chat.online ? 'Online' : `Last seen ${formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime)}`}
+                                {chat.online ? t('online') : t('lastSeen', { time: formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime) })}
                             </p>
                         </div>
                     </div>
@@ -159,7 +161,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 <div className="flex-shrink-0"> {/* Added flex-shrink-0 wrapper, removed fixed height */}
                     <MessageInput
                         onSendMessage={handleSendMessage}
-                        placeholder="Type a message..."
+                        placeholder={t('typeMessage')}
                         conversationId={chat.id}
                         senderId="current-user"
                     />
@@ -181,7 +183,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
                         <div className="flex-shrink-0 flex items-center justify-center"> {/* Added flex-shrink-0 */}
                             <ButtonType3>
-                                View profile
+                                {t('viewProfile')}
                             </ButtonType3>
                         </div>
                     </div>
@@ -190,17 +192,17 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     <div className="flex-shrink-0 mt-auto border-t border-border-subtle p-4"> {/* Added flex-shrink-0 */}
                         <div className="space-y-3">
                             <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">Report</p>
+                                <p className="text-sm">{t('report')}</p>
                                 <ChevronRight className="w-4 h-4" />
                             </div>
 
                             <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">Block</p>
+                                <p className="text-sm">{t('block')}</p>
                                 <ChevronRight className="w-4 h-4" />
                             </div>
 
                             <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">Delete Conversation</p>
+                                <p className="text-sm">{t('deleteConversation')}</p>
                                 <ChevronRight className="w-4 h-4" />
                             </div>
                         </div>

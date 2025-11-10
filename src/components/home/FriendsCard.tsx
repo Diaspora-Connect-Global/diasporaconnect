@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Button } from "../ui/button";
 import { BanIcon, MoreHorizontalIcon } from "lucide-react";
 import { Trash } from "iconsax-reactjs";
+import { useTranslations } from 'next-intl';
 
 type FriendStatus =
     | "all-friends"
@@ -42,7 +43,8 @@ const renderActions = (
     callbacks: Pick<
         FriendsCardProps,
         "onMessage" | "onAddFriend" | "onAccept" | "onIgnore" | "onCancelRequest" | "onRemoveFriend" | "onBlockFriend"
-    >
+    >,
+    t: ReturnType<typeof useTranslations<'friends'>>
 ) => {
     const {
         onMessage,
@@ -58,7 +60,7 @@ const renderActions = (
         case "all-friends":
             return (
                 <>
-                    <ButtonType1 onClick={onMessage}>Message</ButtonType1>
+                    <ButtonType1 onClick={onMessage}>{t('message')}</ButtonType1>
 
                     <DropdownMenu >
                         <DropdownMenuTrigger asChild>
@@ -71,12 +73,12 @@ const renderActions = (
                                 <Trash
                                     size="32"
                                 />
-                                <span>Remove friend</span>
+                                <span>{t('removeFriend')}</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onSelect={onBlockFriend} className='font-body-large flex items-center'>
                                 <BanIcon />
-                                <span>Block friend</span>
+                                <span>{t('blockFriend')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -86,19 +88,19 @@ const renderActions = (
 
         case "suggested":
         case "stranger":
-            return <ButtonType2 onClick={onAddFriend}>Add friend</ButtonType2>;
+            return <ButtonType2 onClick={onAddFriend}>{t('addFriend')}</ButtonType2>;
 
         case "request-received":
             return (
                 <>
-                    <ButtonType2 onClick={onAccept}>Accept</ButtonType2>
-                    <ButtonType1 onClick={onIgnore}>Ignore</ButtonType1>
+                    <ButtonType2 onClick={onAccept}>{t('accept')}</ButtonType2>
+                    <ButtonType1 onClick={onIgnore}>{t('ignore')}</ButtonType1>
                 </>
             );
 
         case "request-sent":
             return (
-                <ButtonType1 onClick={onCancelRequest}>Cancel request</ButtonType1>
+                <ButtonType1 onClick={onCancelRequest}>{t('cancelRequest')}</ButtonType1>
             );
 
         default:
@@ -120,6 +122,8 @@ const FriendsCard: FC<FriendsCardProps> = ({
     onRemoveFriend,
     onBlockFriend,
 }) => {
+    const t = useTranslations('friends');
+    
     return (
         <div className="flex items-center justify-between border border-border-subtle px-3 py-6 rounded-2xl">
             {/* ---- Avatar + Info ---- */}
@@ -142,8 +146,10 @@ const FriendsCard: FC<FriendsCardProps> = ({
 
                     {mutualConnections !== undefined && (
                         <span className="text-sm text-text-secondary">
-                            {mutualConnections} mutual connection
-                            {mutualConnections !== 1 ? "s" : ""}
+                            {mutualConnections === 1 
+                                ? t('mutualConnection', { count: mutualConnections })
+                                : t('mutualConnections', { count: mutualConnections })
+                            }
                         </span>
                     )}
                 </div>
@@ -159,7 +165,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
                     onCancelRequest,
                     onRemoveFriend,
                     onBlockFriend,
-                })}
+                }, t)}
             </div>
         </div>
     );

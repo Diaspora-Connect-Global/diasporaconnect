@@ -6,6 +6,7 @@ import {  PencilSimpleIcon, UsersThreeIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import CustomDialog from "../custom/customDialog";
 import FriendListModal from "./FriendListModal";
+import { useTranslations } from "next-intl";
 
 interface ProfileHeaderProps {
   data: {
@@ -18,6 +19,7 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ data, onEditAvatar }: ProfileHeaderProps) {
+  const t = useTranslations('friends');
   const initials = data.name
     .split(' ')
     .map(word => word[0])
@@ -48,11 +50,11 @@ export function ProfileHeader({ data, onEditAvatar }: ProfileHeaderProps) {
                     <PencilSimpleIcon size={32} className="h-3.5 w-3.5 text-text-white" />
 
 
-                    <span className="sr-only">Edit profile picture</span>
+                    <span className="sr-only">{t('editProfilePicture')}</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Change profile picture</p>
+                  <p>{t('changeProfilePicture')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -66,14 +68,14 @@ export function ProfileHeader({ data, onEditAvatar }: ProfileHeaderProps) {
             </div>
             <div onClick={()=>setFriendListOpen(true)} className="flex items-center font-label-large justify-center space-x-2 text-text-brand cursor-pointer">
               <UsersThreeIcon size={20} />
-              <p >{data.friendCount} friends</p>
+              <p >{data.friendCount} {t('friends')}</p>
             </div>
           </div>
         </div>
         <p className="mt-2 text-sm">{data.bio}</p>
       </CardContent>
 
-      <CustomDialog contentClassName="min-w-[100vw] h-[100vh]" title="Friend List" open={friendList} onOpenChange={()=>setFriendListOpen(false) }  showFooter= {false}>
+      <CustomDialog contentClassName="min-w-[100vw] h-[100vh]" title={t('friendList')} open={friendList} onOpenChange={()=>setFriendListOpen(false) }  showFooter= {false}>
         <FriendListModal/>
       </CustomDialog>
     </Card>

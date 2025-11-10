@@ -88,7 +88,19 @@
         },
         "topics": {
             "title": "Quali argomenti vuoi vedere su DCG",
-            "description": "Scegli i tuoi interessi per aiutarci a personalizzare il tuo feed con aggiornamenti, discussioni e opportunità che ti interessano."
+            "description": "Scegli i tuoi interessi per aiutarci a personalizzare il tuo feed con aggiornamenti, discussioni e opportunità che ti interessano.",
+            "technology": "Tecnologia",
+            "science": "Scienza",
+            "artsCulture": "Arte e Cultura",
+            "sports": "Sport",
+            "healthWellness": "Salute e Benessere",
+            "business": "Business",
+            "entertainment": "Intrattenimento",
+            "education": "Istruzione",
+            "travel": "Viaggi",
+            "foodCooking": "Cibo e Cucina",
+            "politics": "Politica",
+            "environment": "Ambiente"
         }
     },
     "static": {
@@ -116,7 +128,16 @@
         "attend": "Partecipa",
         "login": "Accedi",
         "postedBy": "Pubblicato da {user}",
-        "added": "Aggiunto"
+        "added": "Aggiunto",
+        "applied": "Candidato",
+        "showMore": "Mostra di più",
+        "showLess": "Mostra di meno",
+        "addComment": "Aggiungi un commento...",
+        "noComments": "Nessun commento ancora. Sii il primo a commentare!",
+        "likes": "Mi piace",
+        "replies": "Risposte",
+        "reply": "Rispondi",
+        "replyPlaceholder": "Digita una risposta..."
     },
     "legal": {
         "about": "Informazioni",
@@ -188,10 +209,50 @@
             "yourevents": "I tuoi eventi",
             "moreevents": "Altri eventi",
             "noevents": "Non hai eventi salvati",
-            "noattending": "Non stai partecipando a nessun evento al momento"
+            "noattending": "Non stai partecipando a nessun evento al momento",
+            "payment": {
+                "title": "Paga i biglietti",
+                "ticketSummary": "Riepilogo biglietti",
+                "ticketType": "tipo di biglietto",
+                "subtotal": "Subtotale",
+                "serviceFee": "Tassa di servizio",
+                "total": "Totale",
+                "payToAttend": "Paga per partecipare",
+                "payAmount": "Paga GH¢ {amount}",
+                "paymentFailed": "Pagamento fallito. Riprova.",
+                "ticketTypeRegular": "Biglietto regolare",
+                "ticketDescription": "Accesso standard all'evento",
+                "billingInformation": "Informazioni di fatturazione",
+                "payWith": "Paga con",
+                "creditCard": "Carta di credito",
+                "mobilePayment": "Pagamento mobile",
+                "cardNumber": "Numero carta",
+                "cardNumberPlaceholder": "0000 0000 0000 0000",
+                "expDate": "Data scadenza",
+                "expDatePlaceholder": "MM/AA",
+                "cvv": "CVV",
+                "cvvPlaceholder": "***",
+                "phoneNumber": "Numero di telefono",
+                "phoneNumberPlaceholder": "24 000 0000",
+                "success": {
+                    "title": "Acquisto biglietto riuscito",
+                    "viewTicket": "Visualizza biglietto",
+                    "browseMore": "Sfoglia altri eventi"
+                }
+            }
         },
         "opportunities": {
-            "opportunities": "Opportunità"
+            "opportunities": "Opportunità",
+            "youropp": "Le tue opportunità",
+            "moreopp": "Esplora opportunità",
+            "none": {
+                "applied": "Non hai ancora fatto domanda per nessuna opportunità",
+                "saved": "Non hai opportunità salvate"
+            },
+            "notFound": {
+                "title": "Opportunità non trovata",
+                "description": "L'opportunità con ID `{id}` non esiste."
+            }
         }
     },
     "community": {
@@ -225,5 +286,149 @@
     "privacy": {
         "public": "Pubblico",
         "private": "Privato"
+    },
+    "friends": {
+        "tabs": {
+            "all": "Tutti gli amici",
+            "suggested": "Suggerimenti di amici",
+            "requestReceived": "Richiesta di amicizia",
+            "requestSent": "Richiesta inviata"
+        },
+        "titles": {
+            "all": "{count} amici",
+            "suggested": "Amici suggeriti",
+            "requestReceived": "Richieste di amicizia ({count})",
+            "requestSent": "Richiesta inviata"
+        },
+        "toasts": {
+            "openingChat": "Apertura chat…",
+            "requestSent": "Richiesta di amicizia inviata!",
+            "friendAccepted": "Amico accettato!",
+            "requestIgnored": "Richiesta ignorata.",
+            "requestCancelled": "Richiesta annullata.",
+            "friendRemoved": "Amico rimosso.",
+            "friendBlocked": "Amico bloccato."
+        },
+        "empty": "Nessun amico corrisponde al filtro corrente.",
+        "friendList": "Lista amici",
+        "friends": "amici",
+        "changeProfilePicture": "Cambia foto profilo",
+        "editProfilePicture": "Modifica foto profilo"
+    },
+    "profile": {
+        "workExperience": {
+            "title": "Esperienza lavorativa",
+            "addExperience": "Aggiungi esperienza",
+            "skill": "Competenza",
+            "addSkill": "Aggiungi competenza",
+            "addNewSkill": "Aggiungi nuova competenza",
+            "contract": "Contratto",
+            "addWorkExperience": "Aggiungi esperienza lavorativa",
+            "company": "Azienda",
+            "companyPlaceholder": "es. Google, Microsoft",
+            "role": "Ruolo",
+            "rolePlaceholder": "es. Senior Frontend Engineer",
+            "employmentType": "Tipo di impiego",
+            "employmentTypePlaceholder": "Tempo pieno, Part-time, Contratto, Stage",
+            "startDate": "Data di inizio",
+            "endDate": "Data di fine",
+            "month": "Mese",
+            "year": "Anno",
+            "yearPlaceholder": "2024",
+            "present": "Presente",
+            "currentlyWorkHere": "Lavoro attualmente qui",
+            "description": "Descrizione",
+            "descriptionPlaceholder": "Cosa hai fatto? Tecnologie utilizzate? Risultati?",
+            "skills": "Competenze",
+            "skillsPlaceholder": "Digita per cercare o aggiungere una nuova competenza...",
+            "skillPlaceholder": "es. TypeScript",
+            "saving": "Salvataggio...",
+            "cancel": "Annulla",
+            "save": "Salva"
+        },
+        "education": {
+            "title": "Storico istruzione",
+            "addEducation": "Aggiungi istruzione",
+            "editEducation": "Modifica istruzione",
+            "institution": "Istituzione",
+            "institutionPlaceholder": "es. Università Drexel",
+            "degree": "Laurea",
+            "degreePlaceholder": "es. Laurea in Scienze",
+            "program": "Programma",
+            "programPlaceholder": "es. Tecnologie dell'informazione",
+            "startDate": "Data di inizio",
+            "expectedCompletion": "Completamento previsto",
+            "year": "Anno",
+            "yearPlaceholder": "2022",
+            "endYearPlaceholder": "2026",
+            "currentlyStudyHere": "Studio attualmente qui",
+            "activities": "Attività e risultati",
+            "activitiesPlaceholder": "Club, GPA, progetti, riconoscimenti..."
+        },
+        "personalDetails": {
+            "bio": "Biografia",
+            "fullName": "Nome completo",
+            "dateOfBirth": "Data di nascita",
+            "residenceAddress": "Indirizzo di residenza",
+            "homeCountry": "Paese di origine",
+            "firstName": "Nome",
+            "firstNamePlaceholder": "Inserisci il nome",
+            "middleName": "Secondo nome",
+            "middleNamePlaceholder": "Inserisci il secondo nome",
+            "lastName": "Cognome",
+            "lastNamePlaceholder": "Inserisci il cognome",
+            "bioPlaceholder": "Raccontaci di te, dei tuoi interessi e di ciò che ti appassiona...",
+            "characters": "caratteri",
+            "words": "parole",
+            "notProvided": "Non fornito",
+            "edit": "Modifica {title}",
+            "saving": "Salvataggio...",
+            "save": "Salva",
+            "cancel": "Annulla",
+            "day": "Giorno",
+            "dayPlaceholder": "Giorno",
+            "countryOfResidence": "Paese di residenza",
+            "city": "Città",
+            "cityPlaceholder": "Città",
+            "livingHereSince": "Vive qui dal",
+            "country": "Paese",
+            "whenJoined": "Data di iscrizione"
+        },
+        "navigation": {
+            "about": "Informazioni",
+            "posts": "Post",
+            "communities": "Community",
+            "personalDetails": "Dettagli personali",
+            "workExperience": "Esperienza lavorativa",
+            "education": "Istruzione",
+            "saved": "Salvato",
+            "liked": "Mi piace",
+            "commented": "Commentato",
+            "noCommunities": "Nessuna community ancora.",
+            "noPosts": "Nessun post {type} ancora."
+        },
+        "profileCompletion": {
+            "title": "Completamento profilo",
+            "complete": "completo",
+            "completeProfile": "Completa profilo"
+        },
+        "trustScore": {
+            "title": "Punteggio di fiducia",
+            "description": "Descrizione del punteggio di fiducia"
+        },
+        "kyc": {
+            "title": "Verifica KYC",
+            "verified": "Verificato",
+            "notVerified": "Non verificato"
+        }
+    },
+    "common": {
+        "scrollLeft": "Scorri a sinistra",
+        "scrollRight": "Scorri a destra",
+        "almostThere": "Quasi fatto..."
+    },
+    "metadata": {
+        "title": "Diaspora Connect Global",
+        "description": "Collegare le comunità della diaspora in tutto il mondo"
     }
 }

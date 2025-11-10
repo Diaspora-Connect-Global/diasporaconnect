@@ -13,9 +13,13 @@ import Step3 from "./Step3";
 import { ButtonType2 } from "@/components/custom/button";
 import { Spinner } from "@/components/ui/spinner";
 import {  XIcon } from "@phosphor-icons/react";
+import { useTranslations } from 'next-intl';
 
 
 export default function EventsId() {
+    const t = useTranslations('home.events.payment');
+    const tCommon = useTranslations('common');
+    
     const event = {
         title: "Accra Arts Festival",
         date: "Oct 21, 2025, 3:00PM",
@@ -76,7 +80,7 @@ export default function EventsId() {
             setIsDialogSuccessOpen(true);
         } catch (error) {
             console.error("Payment failed:", error);
-            alert("Payment failed. Please try again.");
+            alert(t('paymentFailed'));
         } finally {
             setIsProcessingPayment(false); // Always reset
         }
@@ -132,7 +136,7 @@ export default function EventsId() {
                     <DialogContent className="lg:min-w-[70rem] h-[90vh] p-0">
                                 <DialogHeader className="p-6 pb-4 border-b border-border-subtle sticky top-0 bg-background z-10 rounded-md flex ">
                                     <DialogTitle className="text-xl font-semibold flex justify-between">
-                                        Pay for tickets
+                                        {t('title')}
                                     <XIcon className="cursor-pointer" onClick={()=>setIsDialogOpen(false)}/>
                                     </DialogTitle>
                                 </DialogHeader>
@@ -184,22 +188,22 @@ export default function EventsId() {
                                     <div className="bg-surface-tertiary w-[20rem] rounded-lg p-4 border border-border-subtle space-y-12">
                                         <div className="space-y-4">
                                             <div className="text-text-primary font-caption-large">
-                                                Ticket Summary
+                                                {t('ticketSummary')}
                                             </div>
 
                                             <div className="flex items-center gap-2 text-text-primary border-b py-2 border-b-border-subtle justify-between">
-                                                <p> {ticketQty} x ticket type</p> <p>GH¢ {(ticketQty * 300).toFixed(2)}</p>
+                                                <p> {ticketQty} x {t('ticketType')}</p> <p>GH¢ {(ticketQty * 300).toFixed(2)}</p>
                                             </div>
                                             <div className=" items-center gap-2 text-text-primary border-b py-1 border-b-border-subtle">
                                                 <div className="flex justify-between">
-                                                    <p>Subtotal</p> <p>GH¢ {(ticketQty * 300).toFixed(2)}</p>
+                                                    <p>{t('subtotal')}</p> <p>GH¢ {(ticketQty * 300).toFixed(2)}</p>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <p>Service fee</p> <p> GH¢ {(ticketQty * 30).toFixed(2)}</p>
+                                                    <p>{t('serviceFee')}</p> <p> GH¢ {(ticketQty * 30).toFixed(2)}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2 text-text-primary font-caption-large  py-2 justify-between">
-                                                <p>Total</p> <p>GH¢ {totalAmount.toFixed(2)}</p>
+                                                <p>{t('total')}</p> <p>GH¢ {totalAmount.toFixed(2)}</p>
                                             </div>
 
 
@@ -215,7 +219,7 @@ export default function EventsId() {
                                                         disabled={ticketQty === 0}
                                                         className="w-full px-6 py-3 bg-surface-brand text-text-white font-medium rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
-                                                        Pay to attend
+                                                        {t('payToAttend')}
                                                     </ButtonType2>
                                                 )}
                                                 {currentStep === 2 && (
@@ -237,7 +241,7 @@ export default function EventsId() {
 
                                                             </>
                                                         ) : (
-                                                            <>Pay GH¢ {totalAmount.toFixed(2)}</>
+                                                            <>{t('payAmount', { amount: totalAmount.toFixed(2) })}</>
                                                         )}
                                                     </ButtonType2>
                                                 )}
@@ -260,7 +264,7 @@ export default function EventsId() {
                 <Dialog open={isDialogSuccessOpen} onOpenChange={setIsDialogSuccessOpen}>
                     <DialogContent className="lg:min-w-[70rem] h-[90vh]  overflow-y-auto">
                         <p className="font-display-large">
-                            Pay for tickets
+                            {t('title')}
                         </p>
                         <Step3 />
                     </DialogContent>

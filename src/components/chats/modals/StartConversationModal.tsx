@@ -16,6 +16,7 @@ import { SearchInput } from '@/components/custom/input';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { mockUsers, User } from '@/data/chats';
 import { StartGroupConfirmationModal } from './StartGroupConfirmationModal';
+import { useTranslations } from 'next-intl';
 
 interface StartConversationModalProps {
     isOpen: boolean;
@@ -28,6 +29,8 @@ export function StartConversationModal({
     onOpenChange,
     type = "direct"
 }: StartConversationModalProps) {
+    const t = useTranslations('chat.conversation');
+    const tActions = useTranslations('actions');
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -170,7 +173,7 @@ export function StartConversationModal({
                 <DialogContent className="max-w-2xl w-[90vw] max-h-[85vh] flex flex-col"> {/* Responsive sizing */}
                     <DialogHeader>
                         <DialogTitle>
-                            {type === "group" ? "Create Group" : "Start Conversation"}
+                            {type === "group" ? t('createGroup') : t('startConversation')}
                         </DialogTitle>
                     </DialogHeader>
 
@@ -178,7 +181,7 @@ export function StartConversationModal({
                         {/* Search Input */}
                         <div className="flex-shrink-0"> {/* Added flex-shrink-0 */}
                             <SearchInput
-                                placeholder="Search people..."
+                                placeholder={t('searchPeople')}
                                 value={searchTerm}
                                 onChange={handleSearchChange}
                                 onSearch={() => { }}
@@ -189,7 +192,7 @@ export function StartConversationModal({
                         <div className="flex-1 min-h-0 overflow-y-auto"> {/* Added min-h-0, removed fixed height */}
                             {isLoading ? (
                                 <div className="p-4 text-center text-muted-foreground">
-                                    Loading users...
+                                    {t('loadingUsers')}
                                 </div>
                             ) : (
                                 <>
@@ -219,7 +222,7 @@ export function StartConversationModal({
 
                                     {filteredUsers.length === 0 && !isLoading && (
                                         <div className="p-4 text-center text-muted-foreground">
-                                            No users found
+                                            {t('noUsersFound')}
                                         </div>
                                     )}
                                 </>
@@ -232,14 +235,14 @@ export function StartConversationModal({
                                 className='px-4 py-2'
                                 onClick={handleClose}
                             >
-                                Cancel
+                                {t('cancel')}
                             </ButtonType3>
                             <ButtonType2
                                 className='px-4 py-2'
                                 onClick={handleStartClick}
                                 disabled={!isFormValid || isLoading}
                             >
-                                {type === "group" ? "Create Group" : "Start Conversation"}
+                                {type === "group" ? t('createGroup') : t('startConversation')}
                             </ButtonType2>
                         </div>
                     </div>

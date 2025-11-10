@@ -88,7 +88,19 @@
         },
         "topics": {
             "title": "Welche Themen möchten Sie auf DCG sehen",
-            "description": "Wählen Sie Ihre Interessen, damit wir Ihren Feed mit Updates, Diskussionen und Möglichkeiten, die Sie interessieren, personalisieren können."
+            "description": "Wählen Sie Ihre Interessen, damit wir Ihren Feed mit Updates, Diskussionen und Möglichkeiten, die Sie interessieren, personalisieren können.",
+            "technology": "Technologie",
+            "science": "Wissenschaft",
+            "artsCulture": "Kunst & Kultur",
+            "sports": "Sport",
+            "healthWellness": "Gesundheit & Wellness",
+            "business": "Wirtschaft",
+            "entertainment": "Unterhaltung",
+            "education": "Bildung",
+            "travel": "Reisen",
+            "foodCooking": "Essen & Kochen",
+            "politics": "Politik",
+            "environment": "Umwelt"
         }
     },
     "static": {
@@ -116,7 +128,16 @@
         "attend": "Teilnehmen",
         "login": "Anmelden",
         "postedBy": "Gepostet von {user}",
-        "added": "Hinzugefügt"
+        "added": "Hinzugefügt",
+        "applied": "Beworben",
+        "showMore": "Mehr anzeigen",
+        "showLess": "Weniger anzeigen",
+        "addComment": "Kommentar hinzufügen...",
+        "noComments": "Noch keine Kommentare. Seien Sie der Erste, der kommentiert!",
+        "likes": "Gefällt mir",
+        "replies": "Antworten",
+        "reply": "Antworten",
+        "replyPlaceholder": "Antwort eingeben..."
     },
     "legal": {
         "about": "Über uns",
@@ -188,10 +209,50 @@
             "yourevents": "Ihre Veranstaltungen",
             "moreevents": "Weitere Veranstaltungen",
             "noevents": "Sie haben keine gespeicherten Veranstaltungen",
-            "noattending": "Sie nehmen derzeit an keiner Veranstaltung teil"
+            "noattending": "Sie nehmen derzeit an keiner Veranstaltung teil",
+            "payment": {
+                "title": "Tickets bezahlen",
+                "ticketSummary": "Ticket-Zusammenfassung",
+                "ticketType": "Ticket-Typ",
+                "subtotal": "Zwischensumme",
+                "serviceFee": "Servicegebühr",
+                "total": "Gesamt",
+                "payToAttend": "Bezahlen, um teilzunehmen",
+                "payAmount": "GH¢ {amount} bezahlen",
+                "paymentFailed": "Zahlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+                "ticketTypeRegular": "Standard-Ticket",
+                "ticketDescription": "Standardzugang zur Veranstaltung",
+                "billingInformation": "Rechnungsinformationen",
+                "payWith": "Bezahlen mit",
+                "creditCard": "Kreditkarte",
+                "mobilePayment": "Mobilzahlung",
+                "cardNumber": "Kartennummer",
+                "cardNumberPlaceholder": "0000 0000 0000 0000",
+                "expDate": "Ablaufdatum",
+                "expDatePlaceholder": "MM/JJ",
+                "cvv": "CVV",
+                "cvvPlaceholder": "***",
+                "phoneNumber": "Telefonnummer",
+                "phoneNumberPlaceholder": "24 000 0000",
+                "success": {
+                    "title": "Ticket-Kauf erfolgreich",
+                    "viewTicket": "Ticket anzeigen",
+                    "browseMore": "Weitere Veranstaltungen durchsuchen"
+                }
+            }
         },
         "opportunities": {
-            "opportunities": "Möglichkeiten"
+            "opportunities": "Möglichkeiten",
+            "youropp": "Ihre Möglichkeiten",
+            "moreopp": "Möglichkeiten erkunden",
+            "none": {
+                "applied": "Sie haben sich noch nicht auf Möglichkeiten beworben",
+                "saved": "Sie haben keine gespeicherten Möglichkeiten"
+            },
+            "notFound": {
+                "title": "Möglichkeit nicht gefunden",
+                "description": "Die Möglichkeit mit der ID `{id}` existiert nicht."
+            }
         }
     },
     "community": {
@@ -225,5 +286,149 @@
     "privacy": {
         "public": "Öffentlich",
         "private": "Privat"
+    },
+    "friends": {
+        "tabs": {
+            "all": "Alle Freunde",
+            "suggested": "Freundesvorschläge",
+            "requestReceived": "Freundschaftsanfrage",
+            "requestSent": "Anfrage gesendet"
+        },
+        "titles": {
+            "all": "{count} Freunde",
+            "suggested": "Vorgeschlagene Freunde",
+            "requestReceived": "Freundschaftsanfragen ({count})",
+            "requestSent": "Anfrage gesendet"
+        },
+        "toasts": {
+            "openingChat": "Chat wird geöffnet…",
+            "requestSent": "Freundschaftsanfrage gesendet!",
+            "friendAccepted": "Freund akzeptiert!",
+            "requestIgnored": "Anfrage ignoriert.",
+            "requestCancelled": "Anfrage storniert.",
+            "friendRemoved": "Freund entfernt.",
+            "friendBlocked": "Freund blockiert."
+        },
+        "empty": "Keine Freunde entsprechen dem aktuellen Filter.",
+        "friendList": "Freundesliste",
+        "friends": "Freunde",
+        "changeProfilePicture": "Profilbild ändern",
+        "editProfilePicture": "Profilbild bearbeiten"
+    },
+    "profile": {
+        "workExperience": {
+            "title": "Berufserfahrung",
+            "addExperience": "Erfahrung hinzufügen",
+            "skill": "Fähigkeit",
+            "addSkill": "Fähigkeit hinzufügen",
+            "addNewSkill": "Neue Fähigkeit hinzufügen",
+            "contract": "Vertrag",
+            "addWorkExperience": "Berufserfahrung hinzufügen",
+            "company": "Unternehmen",
+            "companyPlaceholder": "z.B. Google, Microsoft",
+            "role": "Rolle",
+            "rolePlaceholder": "z.B. Senior Frontend Engineer",
+            "employmentType": "Beschäftigungsart",
+            "employmentTypePlaceholder": "Vollzeit, Teilzeit, Vertrag, Praktikum",
+            "startDate": "Startdatum",
+            "endDate": "Enddatum",
+            "month": "Monat",
+            "year": "Jahr",
+            "yearPlaceholder": "2024",
+            "present": "Aktuell",
+            "currentlyWorkHere": "Ich arbeite derzeit hier",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Was haben Sie gemacht? Verwendete Technologien? Erfolge?",
+            "skills": "Fähigkeiten",
+            "skillsPlaceholder": "Tippen Sie, um zu suchen oder eine neue Fähigkeit hinzuzufügen...",
+            "skillPlaceholder": "z.B. TypeScript",
+            "saving": "Wird gespeichert...",
+            "cancel": "Abbrechen",
+            "save": "Speichern"
+        },
+        "education": {
+            "title": "Bildungsverlauf",
+            "addEducation": "Bildung hinzufügen",
+            "editEducation": "Bildung bearbeiten",
+            "institution": "Institution",
+            "institutionPlaceholder": "z.B. Drexel University",
+            "degree": "Abschluss",
+            "degreePlaceholder": "z.B. Bachelor of Science",
+            "program": "Programm",
+            "programPlaceholder": "z.B. Informationstechnologie",
+            "startDate": "Startdatum",
+            "expectedCompletion": "Erwarteter Abschluss",
+            "year": "Jahr",
+            "yearPlaceholder": "2022",
+            "endYearPlaceholder": "2026",
+            "currentlyStudyHere": "Ich studiere derzeit hier",
+            "activities": "Aktivitäten & Erfolge",
+            "activitiesPlaceholder": "Vereine, GPA, Projekte, Auszeichnungen..."
+        },
+        "personalDetails": {
+            "bio": "Biografie",
+            "fullName": "Vollständiger Name",
+            "dateOfBirth": "Geburtsdatum",
+            "residenceAddress": "Wohnadresse",
+            "homeCountry": "Heimatland",
+            "firstName": "Vorname",
+            "firstNamePlaceholder": "Vorname eingeben",
+            "middleName": "Zweiter Vorname",
+            "middleNamePlaceholder": "Zweiten Vornamen eingeben",
+            "lastName": "Nachname",
+            "lastNamePlaceholder": "Nachname eingeben",
+            "bioPlaceholder": "Erzählen Sie uns von sich, Ihren Interessen und wofür Sie sich begeistern...",
+            "characters": "Zeichen",
+            "words": "Wörter",
+            "notProvided": "Nicht angegeben",
+            "edit": "{title} bearbeiten",
+            "saving": "Wird gespeichert...",
+            "save": "Speichern",
+            "cancel": "Abbrechen",
+            "day": "Tag",
+            "dayPlaceholder": "Tag",
+            "countryOfResidence": "Wohnsitzland",
+            "city": "Stadt",
+            "cityPlaceholder": "Stadt",
+            "livingHereSince": "Wohnt hier seit",
+            "country": "Land",
+            "whenJoined": "Beitrittsdatum"
+        },
+        "navigation": {
+            "about": "Über",
+            "posts": "Beiträge",
+            "communities": "Communities",
+            "personalDetails": "Persönliche Angaben",
+            "workExperience": "Berufserfahrung",
+            "education": "Bildung",
+            "saved": "Gespeichert",
+            "liked": "Gefällt mir",
+            "commented": "Kommentiert",
+            "noCommunities": "Noch keine Communities beigetreten.",
+            "noPosts": "Noch keine {type} Beiträge."
+        },
+        "profileCompletion": {
+            "title": "Profilvollständigkeit",
+            "complete": "vollständig",
+            "completeProfile": "Profil vervollständigen"
+        },
+        "trustScore": {
+            "title": "Vertrauenswertung",
+            "description": "Beschreibung der Vertrauenswertung"
+        },
+        "kyc": {
+            "title": "KYC-Verifizierung",
+            "verified": "Verifiziert",
+            "notVerified": "Nicht verifiziert"
+        }
+    },
+    "common": {
+        "scrollLeft": "Nach links scrollen",
+        "scrollRight": "Nach rechts scrollen",
+        "almostThere": "Fast geschafft..."
+    },
+    "metadata": {
+        "title": "Diaspora Connect Global",
+        "description": "Diaspora-Gemeinschaften weltweit verbinden"
     }
 }

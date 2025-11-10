@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {  ButtonType2, ButtonType3 } from '@/components/custom/button';
+import { useTranslations } from 'next-intl';
 
 interface BioEditModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export function BioEditModal({
   onSave,
   initialData,
 }: BioEditModalProps) {
+  const t = useTranslations('profile.personalDetails');
   const [bio, setBio] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -56,29 +58,29 @@ export function BioEditModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Bio</DialogTitle>
+          <DialogTitle>{t('bio')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 min-h-0 flex flex-col space-y-4">
           <div className="flex-shrink-0">
             <label htmlFor="bio" className="block text-sm font-medium text-text-primary mb-2">
-              Bio
+              {t('bio')}
             </label>
             <textarea
               id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell us about yourself, your interests, and what you're passionate about..."
+              placeholder={t('bioPlaceholder')}
               className="w-full px-4 py-3 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand focus:border-transparent resize-none bg-surface-default text-text-primary"
               rows={6}
               maxLength={maxCharacters}
             />
             <div className="flex justify-between items-center mt-2">
               <p className="text-xs text-text-tertiary">
-                {characterCount}/{maxCharacters} characters
+                {characterCount}/{maxCharacters} {t('characters')}
               </p>
               <p className="text-xs text-text-tertiary">
-                {bio.trim().split(/\s+/).filter(word => word.length > 0).length} words
+                {bio.trim().split(/\s+/).filter(word => word.length > 0).length} {t('words')}
               </p>
             </div>
           </div>
@@ -90,14 +92,14 @@ export function BioEditModal({
             className="px-6 py-2"
             disabled={isLoading}
           >
-            Cancel
+            {t('cancel')}
           </ButtonType3>
           <ButtonType2
             onClick={handleSave} 
             className="px-6 py-2"
             disabled={!bio.trim() || isLoading}
           >
-            {isLoading ? 'Saving...' : 'Save'}
+            {isLoading ? t('saving') : t('save')}
           </ButtonType2>
         </div>
       </DialogContent>

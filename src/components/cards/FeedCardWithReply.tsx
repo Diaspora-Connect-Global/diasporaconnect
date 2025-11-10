@@ -208,9 +208,9 @@ export default function FeedCardWithReply({
                 <div className='flex-1'>
                     <MessageInputGlobal
                         onSendMessage={(txt: string) => handleSend(txt)}
-                        placeholder={"Type comment..."}
+                        placeholder={t('addComment')}
                         reversed={true}
-                        reversedText="Comment"
+                        reversedText={t('comment')}
                     />
 
                 </div>
@@ -232,9 +232,9 @@ export default function FeedCardWithReply({
                 />
                 <MessageInputGlobal
                     onSendMessage={(txt: string) => handleSend(txt, commentId)}
-                    placeholder={"Type a reply..."}
+                    placeholder={t('replyPlaceholder')}
                     reversed={true}
-                    reversedText="Reply"
+                    reversedText={t('reply')}
                 />
             </div>
         );

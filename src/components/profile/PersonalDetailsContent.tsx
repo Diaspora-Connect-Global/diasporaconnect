@@ -6,8 +6,10 @@ import { DOBEditModal } from './modals/DOBEditModal';
 import { NameEditModal } from './modals/NameEditModal';
 import { ResidenceEditModal } from './modals/ResidenceEdit.tsx';
 import { HomeCountryEditModal } from './modals/HomeCountryEditModal';
+import { useTranslations } from 'next-intl';
 
 export function PersonalDetailsContent() {
+  const t = useTranslations('profile.personalDetails');
   const [userData, setUserData] = useState({
     bio: "I am known to be a software developer who enjoys hiking and coding.",
     fullName: "John Doe",
@@ -43,35 +45,35 @@ export function PersonalDetailsContent() {
     <div className="space-y-6">
       {/* Bio Field */}
       <EditableField
-        title="Bio"
+        title={t('bio')}
         data={userData.bio}
         onEdit={() => setIsBioModalOpen(true)}
       />
 
       {/* Full Name Field */}
       <EditableField
-        title="Full name"
+        title={t('fullName')}
         data={userData.fullName}
         onEdit={() => setIsNameModalOpen(true)}
       />
 
       {/* Date of Birth Field */}
       <EditableField
-        title="Date of Birth"
+        title={t('dateOfBirth')}
         data={userData.dateOfBirth}
         onEdit={() => setIsDobModalOpen(true)}
       />
 
       {/* Residence Field */}
       <EditableField
-        title="Residence address"
+        title={t('residenceAddress')}
         data={userData.residence}
         onEdit={() => setIsResidenceModalOpen(true)}
       />
 
       {/* Home Country Field */}
       <EditableField
-        title="Home country"
+        title={t('homeCountry')}
         data={userData.homeCountry}
         onEdit={() => setIsHomeCountryModalOpen(true)}
       />

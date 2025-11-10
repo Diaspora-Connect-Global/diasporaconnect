@@ -1,6 +1,7 @@
 'use client';
 
 import { PencilSimpleIcon } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 interface EditableFieldProps {
     title: string;
@@ -13,6 +14,8 @@ export function EditableField({
     data,
     onEdit,
 }: EditableFieldProps) {
+    const t = useTranslations('profile.personalDetails');
+    
     return (
         <div className="flex justify-between items-start group">
             <div className="flex-1 min-w-0">
@@ -21,7 +24,7 @@ export function EditableField({
                     <button
                         onClick={onEdit}
                         className="ml-4 p-1 text-text-tertiary hover:text-text-brand hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
-                        title={`Edit ${title}`}
+                        title={t('edit', { title })}
                     >
                         <PencilSimpleIcon size={32} className="w-3 h-3 text-text-primary" />
 
@@ -29,7 +32,7 @@ export function EditableField({
 
                 </div>
                 <p className="text-sm text-text-secondary whitespace-pre-wrap break-words">
-                    {data || 'Not provided'}
+                    {data || t('notProvided')}
                 </p>
             </div>
         </div>

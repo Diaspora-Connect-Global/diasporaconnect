@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { TextInput } from '@/components/custom/input';
+import { useTranslations } from 'next-intl';
 
 interface NameEditModalProps {
     isOpen: boolean;
@@ -23,6 +24,7 @@ export function NameEditModal({
     onSave,
     initialData,
 }: NameEditModalProps) {
+    const t = useTranslations('profile.personalDetails');
     const [bio, setBio] = useState(initialData);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -55,30 +57,30 @@ export function NameEditModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Full Name</DialogTitle>
+                    <DialogTitle>{t('fullName')}</DialogTitle>
                 </DialogHeader>
 
                 <div className="flex-1 min-h-0 flex flex-col space-y-4">
                     <div className="flex-shrink-0">
                         <TextInput
-                            label='First Name'
-                            placeholder='Enter first name'
+                            label={t('firstName')}
+                            placeholder={t('firstNamePlaceholder')}
                             value={'name'}
                             onChange={function (): void {
                                 throw new Error('Function not implemented.');
                             }}
                         />
                         <TextInput
-                            label='Middle Name'
-                            placeholder='Enter middle name'
+                            label={t('middleName')}
+                            placeholder={t('middleNamePlaceholder')}
                             value={'name'}
                             onChange={function (): void {
                                 throw new Error('Function not implemented.');
                             }}
                         />
                         <TextInput
-                            label='Last Name'
-                            placeholder='Enter last name'
+                            label={t('lastName')}
+                            placeholder={t('lastNamePlaceholder')}
                             value={'name'}
                             onChange={function (): void {
                                 throw new Error('Function not implemented.');
@@ -93,14 +95,14 @@ export function NameEditModal({
                         className="px-6 py-2"
                         disabled={isLoading}
                     >
-                        Cancel
+                        {t('cancel')}
                     </ButtonType3>
                     <ButtonType2
                         onClick={handleSave}
                         className="px-6 py-2"
                         disabled={!bio.trim() || isLoading}
                     >
-                        {isLoading ? 'Saving...' : 'Save'}
+                        {isLoading ? t('saving') : t('save')}
                     </ButtonType2>
                 </div>
             </DialogContent>

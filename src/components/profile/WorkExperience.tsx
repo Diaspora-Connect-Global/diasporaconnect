@@ -10,6 +10,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordionA';
 import { AddWorkExperienceModal } from './modals/AddWorkExperienceModal';
+import { useTranslations } from 'next-intl';
 
 interface Skill {
     id: string;
@@ -28,6 +29,9 @@ interface Experience {
 }
 
 export default function WorkExperience() {
+    const t = useTranslations('profile.workExperience');
+    const tActions = useTranslations('actions');
+    
     const [skills, setSkills] = useState<Skill[]>([
         { id: '1', name: 'React' },
         { id: '2', name: 'Angular' },
@@ -85,7 +89,7 @@ export default function WorkExperience() {
             <div className="mx-auto font-sans">
                 {/* Skills Section */}
                 <section className="mb-10">
-                    <h2 className="font-bold mb-4">Skill</h2>
+                    <h2 className="font-bold mb-4">{t('skill')}</h2>
                     <div className="flex flex-wrap gap-2 mb-2">
                         {skills.map((skill) => (
                             <span
@@ -100,20 +104,20 @@ export default function WorkExperience() {
                             className="flex items-center gap-1 px-2 py-1 text-text-brand font-medium text-sm rounded-full transition"
                         >
                             <Plus className="w-4 h-4" />
-                            Add skill
+                            {t('addSkill')}
                         </ButtonType3>
                     </div>
                 </section>
 
                 {/* Work Experience Section */}
                 <section>
-                    <h2 className="font-bold mb-4">Work experience</h2>
+                    <h2 className="font-bold mb-4">{t('title')}</h2>
                     <ButtonType3
                         onClick={() => setShowExperienceModal(true)}
                         className="flex items-center gap-1 mb-6 text-text-brand font-medium text-sm"
                     >
                         <Plus className="w-4 h-4" />
-                        Add experience
+                        {t('addExperience')}
                     </ButtonType3>
 
                     <Accordion type="single" collapsible className="w-full">
@@ -142,7 +146,7 @@ export default function WorkExperience() {
                                 </AccordionItem>
                                 {exp.contract && (
                                     <span className="px-2 py-1 text-text-secondary text-center  text-sm font-medium">
-                                        Contract
+                                        {t('contract')}
                                     </span>
                                 )}
 
@@ -166,12 +170,12 @@ export default function WorkExperience() {
             {showSkillModal && (
                 <div className="fixed inset-0  bg-transparent flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                        <h3 className="text-lg font-semibold mb-4">Add New Skill</h3>
+                        <h3 className="text-lg font-semibold mb-4">{t('addNewSkill')}</h3>
                         <input
                             type="text"
                             value={newSkill}
                             onChange={(e) => setNewSkill(e.target.value)}
-                            placeholder="e.g., TypeScript"
+                            placeholder={t('skillPlaceholder')}
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             autoFocus
                         />
@@ -180,13 +184,13 @@ export default function WorkExperience() {
                                 onClick={() => setShowSkillModal(false)}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
                             >
-                                Cancel
+                                {t('cancel')}
                             </button>
                             <button
                                 onClick={addSkill}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                             >
-                                Add Skill
+                                {t('addSkill')}
                             </button>
                         </div>
                     </div>

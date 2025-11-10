@@ -3,6 +3,7 @@ import { FilterableList } from '@/components/custom/filterableList';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { moreOpportunitiesIDList } from './data';
+import { useTranslations } from 'next-intl';
 
 const employmentCareerItems = [
     {
@@ -62,6 +63,7 @@ const educationTrainingItems = [
 ];
 
 export default function EmploymentCareerPage() {
+    const t = useTranslations('home.opportunities.notFound');
     const params = useParams();
     const opportunityId = params.id as string;
     const listConfig = moreOpportunitiesIDList.find(config => config.id === opportunityId);
@@ -83,8 +85,8 @@ export default function EmploymentCareerPage() {
         return (
             <div className="lg:max-w-[63rem] mx-2 lg:mx-[15%] h-[calc(100vh-4rem)] py-4 flex items-center justify-center">
                 <div className="text-text-secondary font-medium text-center">
-                    <p className="text-2xl mb-2">Opportunity not found</p>
-                    <p>The opportunity with ID `{opportunityId}` does not exist.</p>
+                    <p className="text-2xl mb-2">{t('title')}</p>
+                    <p>{t('description', { id: opportunityId })}</p>
                 </div>
             </div>
         );

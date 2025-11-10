@@ -207,9 +207,9 @@ export default function FeedCardFiltered({
                 <div className="flex-1">
                     <MessageInputGlobal
                         onSendMessage={(txt) => handleSend(txt)}
-                        placeholder="Type comment..."
+                        placeholder={t('addComment')}
                         reversed={true}
-                        reversedText="Comment"
+                        reversedText={t('comment')}
                     />
                 </div>
             </div>
@@ -229,9 +229,9 @@ export default function FeedCardFiltered({
                 />
                 <MessageInputGlobal
                     onSendMessage={(txt) => handleSend(txt, commentId)}
-                    placeholder="Type a reply..."
+                    placeholder={t('replyPlaceholder')}
                     reversed={true}
-                    reversedText="Reply"
+                    reversedText={t('reply')}
                 />
             </div>
         );

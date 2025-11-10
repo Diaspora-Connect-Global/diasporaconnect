@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { MonthSelect, TextInput } from '@/components/custom/input';
+import { useTranslations } from 'next-intl';
 
 interface BioEditModalProps {
     isOpen: boolean;
@@ -23,6 +24,8 @@ export function DOBEditModal({
     onSave,
     initialData,
 }: BioEditModalProps) {
+    const t = useTranslations('profile.personalDetails');
+    const tWork = useTranslations('profile.workExperience');
     const [month, setMonth] = useState("");
     const [day, setDay] = useState("");
     const [year, setYear] = useState("");
@@ -56,7 +59,7 @@ export function DOBEditModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Full Name</DialogTitle>
+                    <DialogTitle>{t('dateOfBirth')}</DialogTitle>
                 </DialogHeader>
 
                 <div className="flex-1 min-h-0 flex flex-col space-y-4">
@@ -64,17 +67,17 @@ export function DOBEditModal({
                         <MonthSelect
                             value={month}
                             onChange={setMonth}
-                            label="Month"
+                            label={tWork('month')}
                         />
                         <TextInput
-                            label='Day'
-                            placeholder='Day'
+                            label={t('day')}
+                            placeholder={t('dayPlaceholder')}
                             value={day}
                             onChange={setDay}
                         />
                         <TextInput
-                            label='Year'
-                            placeholder='Year'
+                            label={tWork('year')}
+                            placeholder={tWork('yearPlaceholder')}
                             value={year}
                             onChange={setYear}
                         />
@@ -87,14 +90,14 @@ export function DOBEditModal({
                         className="px-6 py-2"
                         disabled={isLoading}
                     >
-                        Cancel
+                        {t('cancel')}
                     </ButtonType3>
                     <ButtonType2
                         onClick={handleSave}
                         className="px-6 py-2"
                         disabled={!month.trim() || isLoading}
                     >
-                        {isLoading ? 'Saving...' : 'Save'}
+                        {isLoading ? t('saving') : t('save')}
                     </ButtonType2>
                 </div>
             </DialogContent>

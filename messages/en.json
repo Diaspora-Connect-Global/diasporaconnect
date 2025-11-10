@@ -20,7 +20,15 @@
             },
             "confirmPassword": {
                 "label": "Confirm password",
-                "placeholder": "Confirm your new password"
+                "placeholder": "Confirm your new password",
+                "mismatch": "Passwords do not match"
+            },
+            "email": {
+                "exists": "Email already exists",
+                "checkFailed": "Failed to check email"
+            },
+            "signup": {
+                "success": "Account created successfully!"
             }
         },
         "policies": {
@@ -88,7 +96,19 @@
         },
         "topics": {
             "title": "What topics do you want to see on DCG",
-            "description": "Choose your interests to help us personalize your feed with updates, discussions, and opportunities you care about."
+            "description": "Choose your interests to help us personalize your feed with updates, discussions, and opportunities you care about.",
+            "technology": "Technology",
+            "science": "Science",
+            "artsCulture": "Arts & Culture",
+            "sports": "Sports",
+            "healthWellness": "Health & Wellness",
+            "business": "Business",
+            "entertainment": "Entertainment",
+            "education": "Education",
+            "travel": "Travel",
+            "foodCooking": "Food & Cooking",
+            "politics": "Politics",
+            "environment": "Environment"
         }
     },
     "static": {
@@ -124,7 +144,8 @@
         "noComments": "No comments yet. Be the first to comment!",
         "likes": "Likes",
         "replies": "Replies",
-        "reply":"Reply"
+        "reply":"Reply",
+        "replyPlaceholder": "Type a reply..."
     },
     "legal": {
         "about": "About",
@@ -179,7 +200,13 @@
             "marketplace": "Marketplace",
             "chat": "Chat",
             "notification": "Notification",
-            "searchLabel": "Search Diasplug ..."
+            "searchLabel": "Search Diasplug ...",
+            "profile": "Profile",
+            "becomeVendor": "Become a vendor",
+            "wallet": "Wallet",
+            "settingsPrivacy": "Settings & Privacy",
+            "helpSupport": "Help & Support",
+            "logout": "Logout"
         },
         "associations": {
             "discover": "Discover associations",
@@ -201,7 +228,37 @@
             "yourevents": "Your events",
             "moreevents": "More events",
             "noevents": "You have no saved events",
-            "noattending": " You are not attending any event now"
+            "noattending": " You are not attending any event now",
+            "payment": {
+                "title": "Pay for tickets",
+                "ticketSummary": "Ticket Summary",
+                "ticketType": "ticket type",
+                "subtotal": "Subtotal",
+                "serviceFee": "Service fee",
+                "total": "Total",
+                "payToAttend": "Pay to attend",
+                "payAmount": "Pay GH¢ {amount}",
+                "paymentFailed": "Payment failed. Please try again.",
+                "ticketTypeRegular": "Regular Ticket",
+                "ticketDescription": "Standard access to the event",
+                "billingInformation": "Billing information",
+                "payWith": "Pay with",
+                "creditCard": "Credit card",
+                "mobilePayment": "Mobile payment",
+                "cardNumber": "Card number",
+                "cardNumberPlaceholder": "0000 0000 0000 0000",
+                "expDate": "Exp. date",
+                "expDatePlaceholder": "MM/YY",
+                "cvv": "CVV",
+                "cvvPlaceholder": "***",
+                "phoneNumber": "Phone number",
+                "phoneNumberPlaceholder": "24 000 0000",
+                "success": {
+                    "title": "Ticket purchase successfully",
+                    "viewTicket": "View ticket",
+                    "browseMore": "Browse more events"
+                }
+            }
         },
         "opportunities": {
             "opportunities": "Opportunities",
@@ -210,6 +267,10 @@
             "none": {
                 "applied": "You have not applied to any opportunities yet",
                 "saved": "You have no saved opportunities"
+            },
+            "notFound": {
+                "title": "Opportunity not found",
+                "description": "The opportunity with ID `{id}` does not exist."
             }
         }
     },
@@ -244,5 +305,219 @@
     "privacy": {
         "public": "Public",
         "private": "Private"
-    }
+    },
+    "friends": {
+        "tabs": {
+            "all": "All friends",
+            "suggested": "Friend Suggestions",
+            "requestReceived": "Friend request",
+            "requestSent": "Sent request"
+        },
+        "titles": {
+            "all": "{count} friends",
+            "suggested": "Suggested friends",
+            "requestReceived": "Friend requests ({count})",
+            "requestSent": "Sent request"
+        },
+        "toasts": {
+            "openingChat": "Opening chat…",
+            "requestSent": "Friend request sent!",
+            "friendAccepted": "Friend accepted!",
+            "requestIgnored": "Request ignored.",
+            "requestCancelled": "Request cancelled.",
+            "friendRemoved": "Friend removed.",
+            "friendBlocked": "Friend blocked."
+        },
+        "empty": "No friends match the current filter.",
+        "friendList": "Friend List",
+        "friends": "friends",
+        "changeProfilePicture": "Change profile picture",
+        "editProfilePicture": "Edit profile picture"
+    },
+    "profile": {
+        "workExperience": {
+            "title": "Work experience",
+            "addExperience": "Add experience",
+            "skill": "Skill",
+            "addSkill": "Add skill",
+            "addNewSkill": "Add New Skill",
+            "contract": "Contract",
+            "addWorkExperience": "Add Work Experience",
+            "company": "Company",
+            "companyPlaceholder": "e.g. Google, Microsoft",
+            "role": "Role",
+            "rolePlaceholder": "e.g. Senior Frontend Engineer",
+            "employmentType": "Employment type",
+            "employmentTypePlaceholder": "Full-time, Part-time, Contract, Internship",
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "month": "Month",
+            "year": "Year",
+            "yearPlaceholder": "2024",
+            "present": "Present",
+            "currentlyWorkHere": "I currently work here",
+            "description": "Description",
+            "descriptionPlaceholder": "What did you do? Technologies used? Achievements?",
+            "skills": "Skills",
+            "skillsPlaceholder": "Type to search or add new skill...",
+            "skillPlaceholder": "e.g., TypeScript",
+            "saving": "Saving...",
+            "cancel": "Cancel",
+            "save": "Save"
+        },
+        "education": {
+            "title": "Education history",
+            "addEducation": "Add Education",
+            "editEducation": "Edit Education",
+            "institution": "Institution",
+            "institutionPlaceholder": "e.g. Drexel University",
+            "degree": "Degree",
+            "degreePlaceholder": "e.g. Bachelor of Science",
+            "program": "Program",
+            "programPlaceholder": "e.g. Information Technology",
+            "startDate": "Start Date",
+            "expectedCompletion": "Expected Completion",
+            "year": "Year",
+            "yearPlaceholder": "2022",
+            "endYearPlaceholder": "2026",
+            "currentlyStudyHere": "I currently study here",
+            "activities": "Activities & Achievements",
+            "activitiesPlaceholder": "Clubs, GPA, projects, honors..."
+        },
+        "personalDetails": {
+            "bio": "Bio",
+            "fullName": "Full name",
+            "dateOfBirth": "Date of Birth",
+            "residenceAddress": "Residence address",
+            "homeCountry": "Home country",
+            "firstName": "First Name",
+            "firstNamePlaceholder": "Enter first name",
+            "middleName": "Middle Name",
+            "middleNamePlaceholder": "Enter middle name",
+            "lastName": "Last Name",
+            "lastNamePlaceholder": "Enter last name",
+            "bioPlaceholder": "Tell us about yourself, your interests, and what you're passionate about...",
+            "characters": "characters",
+            "words": "words",
+            "notProvided": "Not provided",
+            "edit": "Edit {title}",
+            "saving": "Saving...",
+            "save": "Save",
+            "cancel": "Cancel",
+            "day": "Day",
+            "dayPlaceholder": "Day",
+            "countryOfResidence": "Country of residence",
+            "city": "City",
+            "cityPlaceholder": "City",
+            "livingHereSince": "Living here since",
+            "country": "Country",
+            "whenJoined": "When joined"
+        },
+        "navigation": {
+            "about": "About",
+            "posts": "Posts",
+            "communities": "Communities",
+            "personalDetails": "Personal details",
+            "workExperience": "Work experience",
+            "education": "Education",
+            "saved": "Saved",
+            "liked": "Liked",
+            "commented": "Commented",
+            "noCommunities": "No communities joined yet.",
+            "noPosts": "No {type} posts yet."
+        },
+        "profileCompletion": {
+            "title": "Profile completion",
+            "complete": "complete",
+            "completeProfile": "Complete profile"
+        },
+        "trustScore": {
+            "title": "Trust score",
+            "description": "Description of the trust score"
+        },
+        "kyc": {
+            "title": "KYC verification",
+            "verified": "Verified",
+            "notVerified": "Not verified"
+        }
+    },
+    "common": {
+        "scrollLeft": "Scroll left",
+        "scrollRight": "Scroll right",
+        "almostThere": "Almost there..."
+    },
+    "metadata": {
+        "title": "Diaspora Connect Global",
+        "description": "Connecting diaspora communities worldwide"
+    },
+    "chat": {
+        "chats": "Chats",
+        "newMessage": "New message",
+        "searchMessages": "Search messages",
+        "directMessages": "Direct Messages",
+        "groups": "Groups",
+        "createGroup": "Create Group",
+        "noDirectMessages": "No direct messages found",
+        "noGroups": "No groups found",
+        "tryAdjustingSearch": "Try adjusting your search",
+        "empty": {
+            "title": "You have no messages here. Start a conversation to see their messages"
+        },
+        "conversation": {
+            "startConversation": "Start Conversation",
+            "createGroup": "Create Group",
+            "searchPeople": "Search people...",
+            "loadingUsers": "Loading users...",
+            "noUsersFound": "No users found",
+            "cancel": "Cancel",
+            "groupName": "Group Name",
+            "enterGroupName": "Enter group name",
+            "addGroupPhoto": "Add group photo",
+            "dropPhotoHere": "Drop photo here",
+            "chooseHowToMessage": "Choose how you want to message",
+            "selectedContacts": "You selected {count} contacts. Would you like to start a group chat or send the message to each person individually?",
+            "sendIndividually": "Send individually"
+        },
+        "direct": {
+            "online": "Online",
+            "lastSeen": "Last seen {time}",
+            "viewProfile": "View profile",
+            "report": "Report",
+            "block": "Block",
+            "deleteConversation": "Delete Conversation",
+            "typeMessage": "Type a message..."
+        },
+        "group": {
+            "message": "Message {name}",
+            "edit": "Edit",
+            "members": "Members",
+            "addPeople": "Add people",
+            "you": " (You)",
+            "leaveGroup": "Leave Group",
+            "deleteGroup": "Delete Group",
+            "replies": "Replies",
+            "reply": "Reply",
+            "repliesCount": "{count} {count, plural, =1 {reply} other {replies}}",
+            "writeReply": "Write a reply...",
+            "noReplies": "No replies yet",
+            "beFirstToReply": "Be the first to reply"
+        }
+    },
+    "friends": {
+        "message": "Message",
+        "addFriend": "Add friend",
+        "accept": "Accept",
+        "ignore": "Ignore",
+        "cancelRequest": "Cancel request",
+        "removeFriend": "Remove friend",
+        "blockFriend": "Block friend",
+        "mutualConnection": "{count} mutual connection",
+        "mutualConnections": "{count} mutual connections"
+    },
+    "dialog": {
+        "title": "Title",
+        "save": "Save",
+        "cancel": "Cancel",
+        "saving": "Saving..."
+    },
 }
