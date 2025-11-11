@@ -8,7 +8,9 @@
         "form": {
             "email": {
                 "label": "Email",
-                "placeholder": "Your email"
+                "placeholder": "Your email",
+                "exists": "Email already exists",
+                "checkFailed": "Failed to check email"
             },
             "password": {
                 "label": "Password",
@@ -22,10 +24,6 @@
                 "label": "Confirm password",
                 "placeholder": "Confirm your new password",
                 "mismatch": "Passwords do not match"
-            },
-            "email": {
-                "exists": "Email already exists",
-                "checkFailed": "Failed to check email"
             },
             "signup": {
                 "success": "Account created successfully!"
@@ -144,7 +142,7 @@
         "noComments": "No comments yet. Be the first to comment!",
         "likes": "Likes",
         "replies": "Replies",
-        "reply":"Reply",
+        "reply": "Reply",
         "replyPlaceholder": "Type a reply..."
     },
     "legal": {
@@ -307,6 +305,15 @@
         "private": "Private"
     },
     "friends": {
+        "message": "Message",
+        "addFriend": "Add friend",
+        "accept": "Accept",
+        "ignore": "Ignore",
+        "cancelRequest": "Cancel request",
+        "removeFriend": "Remove friend",
+        "blockFriend": "Block friend",
+        "mutualConnection": "{count} mutual connection",
+        "mutualConnections": "{count} mutual connections",
         "tabs": {
             "all": "All friends",
             "suggested": "Friend Suggestions",
@@ -503,21 +510,10 @@
             "beFirstToReply": "Be the first to reply"
         }
     },
-    "friends": {
-        "message": "Message",
-        "addFriend": "Add friend",
-        "accept": "Accept",
-        "ignore": "Ignore",
-        "cancelRequest": "Cancel request",
-        "removeFriend": "Remove friend",
-        "blockFriend": "Block friend",
-        "mutualConnection": "{count} mutual connection",
-        "mutualConnections": "{count} mutual connections"
-    },
     "dialog": {
         "title": "Title",
         "save": "Save",
         "cancel": "Cancel",
         "saving": "Saving..."
-    },
+    }
 }
