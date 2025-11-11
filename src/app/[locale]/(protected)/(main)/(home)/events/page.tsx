@@ -1,8 +1,9 @@
 "use client";
 import EventCard1 from "@/components/cards/events/EventCard1";
 import EventCardSmall from "@/components/cards/events/EventCardSmall";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 
 
 
@@ -74,6 +75,8 @@ const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
 export default function Events() {
     const [activeTab, setActiveTab] = useState<string>("events");
         const tActions =  useTranslations("actions")
+            const modalRef = useRef<PaidEventsModalRef>(null);
+        
 
 const TABS = [
     {
@@ -219,10 +222,13 @@ const t =  useTranslations("home.events")
                             location={event.location}
                             attendees={event.attendees}
                             imageUrl={event.imageUrl}
+                            onAttendClick={() => modalRef.current?.open()}
+
                         />
                     ))}
                 </div>
             </div>
+             <PaidEventsModal ref={modalRef} />
         </div>
     );
 }

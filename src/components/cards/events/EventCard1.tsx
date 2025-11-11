@@ -10,9 +10,11 @@ interface EventCardProps {
     location: string;
     attendees: number;
     imageUrl: string; // Required background image URL
+    onAttendClick?: () => void;
+
 }
 
-export default function EventCard1({ title, date, location, attendees, imageUrl }: EventCardProps) {
+export default function EventCard1({ title, date, location, attendees, imageUrl,onAttendClick }: EventCardProps) {
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -53,7 +55,9 @@ export default function EventCard1({ title, date, location, attendees, imageUrl 
                     <ButtonType1 className="flex items-center justify-center py-3 px-6 rounded-full overflow-hidden">
                         <Bookmark className="w-6 h-6 " />
                     </ButtonType1>
-                    <ButtonType2 className="flex py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
+                    <ButtonType2 
+                    onClick={onAttendClick}
+                    className="flex py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
                         Attend
                     </ButtonType2>
                 </div>

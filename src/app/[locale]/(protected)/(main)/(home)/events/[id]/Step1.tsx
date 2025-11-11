@@ -13,7 +13,7 @@ export default function Step1({ quantity, onQuantityChange }: Step1Props) {
   const t = useTranslations('home.events.payment');
   
   return (
-    <div>
+    <div className="bg-surface-default overflow-y-auto scrollbar-hide">
       <section className="pb-4 mb-4">
         <p className="font-heading-small text-primary">Accra Arts Events</p>
         <div className="flex gap-2 items-center text-text-secondary">

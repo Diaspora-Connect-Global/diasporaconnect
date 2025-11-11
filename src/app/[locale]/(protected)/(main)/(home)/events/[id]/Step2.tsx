@@ -92,7 +92,7 @@ export default function Step2({
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 p-4">
+    <div className="max-w-2xl mx-auto space-y-8 p-4 bg-surface-default">
       {/* ---------- Billing Information ---------- */}
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold text-gray-900">{t('billingInformation')}</h2>
