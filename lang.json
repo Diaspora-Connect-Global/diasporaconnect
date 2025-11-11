@@ -168,15 +168,15 @@
             "searchLabel": "Search Diasplug ..."
         },
         "associations": {
-            "discover":"Discover associations"
+            "discover": "Discover associations"
         },
         "groupchats": {
-            "groupchats":"Group chats",
+            "groupchats": "Group chats",
             "create": "Create group chat"
         },
         "events": {
-            "events":"Events",
-            "near":"Events near you"
+            "events": "Events",
+            "near": "Events near you"
         },
         "opportunities": {
             "opportunities": "Opportunities"
@@ -187,9 +187,11 @@
         "seeall": "See all community",
         "join": "Join a community to see whats's happening",
         "joincommunity": "Join community",
-        "members": "members", "myCommunity": "My Community",
-    "discoverMore": "Discover more communities", "openInHome": "Open community in home",
-    "leaveCommunity": "Leave community"
+        "members": "members",
+        "myCommunity": "My Community",
+        "discoverMore": "Discover more communities",
+        "openInHome": "Open community in home",
+        "leaveCommunity": "Leave community"
     },
     "privacy": {
         "public": "Public",
