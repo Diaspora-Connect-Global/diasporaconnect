@@ -16,7 +16,7 @@ export default function EventsId() {
 
     return (
         <>
-            <div className="w-full min-h-screen overflow-y-auto scrollbar-hide p-4">
+            <div className="h-[calc(100vh-4rem)] w-[60vw] overflow-y-auto scrollbar-hide p-4">
                 <div className="min-w-[40rem] mx-auto">
                     <EventCard2
                         title={event.title}

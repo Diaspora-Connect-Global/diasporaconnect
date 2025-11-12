@@ -58,8 +58,8 @@ export default function Associations() {
     ];
     return (
         <>
-            <div className="w-full p-4 overflow-y-auto scrollbar-hide">
-                <p className="font-heading-large my-5">{tAssociations("myassociations", { association: "GhanaConnectGlobal" })}</p>
+            <div className="w-[60vw] px-4 py-2 overflow-y-auto scrollbar-hide">
+                <p className="heading-small mb-2">{tAssociations("myassociations", { association: "GhanaConnectGlobal" })}</p>
 
                 <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[18rem]  ">
                     {myAssociations.map((association, index) => (
@@ -73,7 +73,7 @@ export default function Associations() {
                     ))}
                 </div>
 
-                <p className="font-heading-medium my-5">{tAssociations("discovermore", { association: "GhanaConnectGlobal" })}</p>
+                <p className="heading-small my-5">{tAssociations("discovermore", { association: "GhanaConnectGlobal" })}</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                     {discoverAssociations.map((community, index) => (

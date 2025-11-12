@@ -325,9 +325,9 @@ export default function Home() {
         <div className=" lg:max-w-[40vw] overflow-y-auto scrollbar-hide m-4 flex flex-col">
           {/* Discover Section */}
           <div className="flex justify-between mb-4 shrink-0">
-            <h2 className="font-display-large">{t('discover')}</h2>
+            <h2 className="label-medium">{t('discover')}</h2>
             <Link href="/community">
-              <p className="font-label-medium text-text-brand">{t('seeall')}</p>
+              <p className="label-medium text-text-brand">{t('seeall')}</p>
             </Link>
           </div>
 

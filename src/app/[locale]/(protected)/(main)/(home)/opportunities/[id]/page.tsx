@@ -62,7 +62,7 @@ const educationTrainingItems = [
 
 ];
 
-export default function EmploymentCareerPage() {
+export default function OpportunityId() {
     const t = useTranslations('home.opportunities.notFound');
     const params = useParams();
     const opportunityId = params.id as string;
@@ -83,7 +83,7 @@ export default function EmploymentCareerPage() {
 
     if (!listConfig) {
         return (
-            <div className="lg:max-w-[63rem] mx-2 lg:mx-[15%] h-[calc(100vh-4rem)] py-4 flex items-center justify-center">
+            <div className="lg:max-w-[60vw] mx-2  h-[calc(100vh-4rem)] py-4 flex items-center justify-center">
                 <div className="text-text-secondary font-medium text-center">
                     <p className="text-2xl mb-2">{t('title')}</p>
                     <p>{t('description', { id: opportunityId })}</p>

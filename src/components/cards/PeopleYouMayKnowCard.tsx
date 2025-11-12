@@ -47,8 +47,8 @@ export default function PeopleYouMayKnowCard({
           />
         </div>
         <div className="flex-1 ">
-          <h3 className="font-caption-medium text-text-primary truncate">{name}</h3>
-          <p className="font-body-small text-text-secondary truncate">
+          <h3 className="caption-medium text-text-primary truncate">{name}</h3>
+          <p className="body-small text-text-secondary truncate">
             {mutualConnections} {t('mutualConnections', { count: mutualConnections })}
           </p>
         </div>
@@ -62,7 +62,7 @@ export default function PeopleYouMayKnowCard({
           disabled={isAdded}
           aria-label={buttonLabel}
         >
-          <LabelMedium>{buttonLabel}</LabelMedium>
+          <p className='label-medium'>{buttonLabel}</p>
         </button>
       </div>
     </div>

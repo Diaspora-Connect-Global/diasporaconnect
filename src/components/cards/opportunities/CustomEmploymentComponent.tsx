@@ -1,6 +1,6 @@
 'use client';
 
-import {  ButtonType2 } from "@/components/custom/button";
+import { ButtonType2 } from "@/components/custom/button";
 import { TextInput } from "@/components/custom/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -49,38 +49,42 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
         <>
             {/* Clickable card that opens dialog */}
             <div
-                className="flex items-start gap-4 p-4 border border-border-subtle rounded-lg hover:border-border-brand hover:shadow-sm transition-all duration-200 cursor-pointer bg-surface-default"
+                className=" p-4 border border-border-subtle rounded-lg hover:border-border-brand hover:shadow-sm transition-all duration-200 cursor-pointer bg-surface-default"
                 onClick={() => setIsDialogOpen(true)}
             >
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-text-primary mb-1">
-                        {item.title}
-                    </h3>
+                <div className="">
+                    <div className="flex justify-between text-center">
+                        <p className="heading-xsmall text-text-primary mb-1">
+                            {item.title}
+                        </p>
+                        <p className=" body-small inline-flex items-center gap-1">
+                            {item.date}
+                        </p>
 
-                    <div className="flex items-center gap-2 text-text-primary text-sm mb-2">
+                    </div>
+
+                    <div className=" body-medium flex items-center gap-2 text-text-primary text-sm mb-2">
                         {item.company && (
-                            <span className="font-medium">{item.company}</span>
+                            <span className="">{item.company}</span>
                         )}
                         {item.company && item.location && (
-                            <span className="text-border-strong">,</span>
+                            <span className="">,</span>
                         )}
                         {item.location && (
-                            <span>{item.location}</span>
+                            <p className="">{item.location}</p>
                         )}
                     </div>
 
                     <div className="flex items-center gap-3 text-text-primary text-sm">
                         {item.type && (
-                            <span className="inline-flex items-center gap-1">
+                            <span className=" body-small inline-flex items-center gap-1">
                                 {item.type}
                             </span>
                         )}
                     </div>
                 </div>
 
-                <span className="inline-flex items-center gap-1">
-                    {item.date}
-                </span>
+
             </div>
 
             {/* Dialog */}
@@ -112,48 +116,48 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
 
 
-                        <div className="border-b border-b-border-subtle py-4">
+                            <div className="border-b border-b-border-subtle py-4">
 
 
 
-                            {/* Job Description */}
-                            <section>
-                                <h3 className="text-lg font-semibold text-text-primary mb-3">
-                                    Job description
-                                </h3>
-                                <p className="text-text-primary text-sm leading-relaxed">
-                                    The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.
-                                </p>
-                            </section>
+                                {/* Job Description */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-text-primary mb-3">
+                                        Job description
+                                    </h3>
+                                    <p className="text-text-primary text-sm leading-relaxed">
+                                        The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.
+                                    </p>
+                                </section>
 
-                            {/* Job Responsibilities */}
-                            <section>
-                                <h3 className="text-lg font-semibold text-text-primary mb-3">
-                                    Job responsibilities
-                                </h3>
-                                <ul className="text-text-primary ml-[2%] text-sm space-y-2 list-disc list-inside">
-                                    <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                    <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                </ul>
-                            </section>
+                                {/* Job Responsibilities */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-text-primary mb-3">
+                                        Job responsibilities
+                                    </h3>
+                                    <ul className="text-text-primary ml-[2%] text-sm space-y-2 list-disc list-inside">
+                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
+                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
+                                    </ul>
+                                </section>
 
-                            {/* Job Requirements */}
-                            <section >
-                                <h3 className="text-lg font-semibold text-text-primary mb-3">
-                                    Job requirements
-                                </h3>
-                                <ul className="text-text-primary ml-[2%] text-sm space-y-2 list-disc list-inside">
-                                    <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                    <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                    <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                    <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
+                                {/* Job Requirements */}
+                                <section >
+                                    <h3 className="text-lg font-semibold text-text-primary mb-3">
+                                        Job requirements
+                                    </h3>
+                                    <ul className="text-text-primary ml-[2%] text-sm space-y-2 list-disc list-inside">
+                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
+                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
+                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
+                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
 
-                                </ul>
-                            </section>
+                                    </ul>
+                                </section>
 
 
 
-                                                 </div>
+                            </div>
 
 
 
@@ -195,7 +199,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                     <p>(File types: pdf,doc,docx,txt,rtf)</p>
 
                                     <TextInput
-                                    id="rmail"
+                                        id="rmail"
                                         value={``}
                                         onChange={() => console.log("Email")}
                                         label="Email"
@@ -273,7 +277,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                             </section>
                         </div>
 
-                        
+
 
                         {/* Right Column - Job Meta Information */}
                         <div className="lg:col-span-1">

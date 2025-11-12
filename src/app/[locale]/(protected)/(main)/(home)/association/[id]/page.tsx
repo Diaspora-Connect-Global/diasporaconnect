@@ -101,9 +101,9 @@ export default function AssociationPage() {
     }
 
     return (
-        <div className="lg:flex lg:gap-6">
+        <div className="lg:flex  ">
             {/* Main Content Section (2/3 width) */}
-            <div className="lg:flex-1 max-w-[35.5rem] mx-auto">
+            <div className="overflow-auto lg:max-h-[calc(100vh-64px)] scrollbar-hide w-[40vw] px-3">
                 {/* Association Header */}
                 <div className="min-h-[6rem] flex space-x-4 my-4 p-1 border-b">
                     <div className="h-[6rem] w-[6rem] flex-shrink-0">
@@ -118,8 +118,8 @@ export default function AssociationPage() {
                     <div className="flex flex-col justify-between w-full">
                         <div></div>
                         <div className="flex justify-between items-center w-full">
-                            <HeadingMedium>{currentAssociation.name}</HeadingMedium>
-                            <ButtonType1 className="py-1 px-3 ml-4">
+                            <p className="heading-medium">{currentAssociation.name}</p>
+                            <ButtonType1 className="py-1 px-3 ml-4 label-medium">
                                 {currentAssociation.joined ? tActions("joined") : tActions("join")}
                             </ButtonType1>
                         </div>
@@ -127,8 +127,8 @@ export default function AssociationPage() {
                 </div>
 
                 {/* Scrollable Feed */}
-                <div className="overflow-auto lg:max-h-[calc(100vh-8rem)] scrollbar-hide">
-                    <div className="mb-8">
+                <div className="overflow-auto lg:max-h-[calc(100vh-64px)] scrollbar-hide">
+                    <div className="">
                         {currentAssociation.posts && currentAssociation.posts.map((post, index) => (
                             <FeedCardWithReply
                                 key={index}
@@ -151,8 +151,8 @@ export default function AssociationPage() {
             </div>
 
             {/* Sidebar - Sticky Section */}
-            <div className="lg:min-w-[20rem] lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto scrollbar-hide">
-                <div className="space-y-6 w-fit ">
+            <div className="lg:self-start lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto scrollbar-hide">
+                <div className="space-y-6 flex-1 ">
                     <AboutAssociation
                         members={currentAssociation.members}
                         createdDate={currentAssociation.createdDate}

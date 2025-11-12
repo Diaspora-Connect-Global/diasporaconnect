@@ -13,9 +13,9 @@ onBuyClick?: () => void;
 
 export default function EventCard2({ title, date, location, attendees, imageUrl, onBuyClick }: EventCardProps) {
     return (
-        <div className="w-full  bg-surface-default rounded-lg overflow-hidden shadow-lg">
+        <div className="w-full  bg-surface-default rounded-3xl overflow-hidden shadow-lg">
             {/* Header Image */}
-            <div className="relative h-64 rounded-t-lg overflow-hidden">
+            <div className="relative h-64 rounded-t-3xl overflow-hidden">
                 <Image
                     src={imageUrl}
                     alt={`${title} background`}
@@ -50,7 +50,7 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                 <p className="text-secondary text-sm mb-6">{attendees} going</p>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 justify-between">
+                <div className="flex gap-3 text-center items-center justify-between">
                     <div className="flex items-center gap-4">
                         <ButtonType2 onClick={onBuyClick} className=" py-3 px-6 rounded-full"> {/* Added px-6 for balance */}
                             Attend
@@ -60,7 +60,7 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                         </ButtonType1>
 
                     </div>
-                    <ButtonType1 className="flex items-center justify-center py-3 px-6 rounded-full overflow-hidden">
+                    <ButtonType1 className="flex items-center justify-center  rounded-full overflow-hidden">
                         <Image
                             src="/SHARE.svg"
                             alt="Share Icon"

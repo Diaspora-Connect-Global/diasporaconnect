@@ -10,7 +10,7 @@ export function PeopleYouMayKnow() {
     return (
         <div className="space-y-[3.2rem] " > {/* 32px equivalent */}
             <div className="space-y-[1.2rem]"> {/* 12px equivalent */}
-                <p className="font-caption-large">{t('peopleYouMayKnow')}</p>
+                <p className="caption-large">{t('peopleYouMayKnow')}</p>
                 <div className="space-y-[1.6rem]"> {/* 16px equivalent */}
                     <PeopleYouMayKnowCard
                         profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
@@ -31,11 +31,11 @@ export function PeopleYouMayKnow() {
                   
                 </div>
             </div>
-            <div className="flex  justify-between space-x-5">
-                <p className="font-caption-large text-text-primary  whitespace-nowrap">{t('events.near')}</p>
+            <div className="flex justify-between ">
+                <p className="caption-large text-text-primary  whitespace-nowrap">{t('events.near')}</p>
                 <Link href="/events">
-                    <div className="font-label-medium text-text-brand flex text-center justify-center items-center">
-                        <p className="w-fit whitespace-nowrap">{tActions('seemore')}</p>
+                    <div className="label-medium text-text-brand flex text-center justify-end items-end">
+                        <p className=" whitespace-nowrap">{tActions('seemore')}</p>
                         <ChevronRight size={20} />
                     </div>
                 </Link>

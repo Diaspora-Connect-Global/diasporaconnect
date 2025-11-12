@@ -56,7 +56,7 @@ export function ProfileHeader({
           <div className="relative group">
             <Avatar className="h-25 w-25 ring-4 ring-background">
               <AvatarImage src={userData.avatarUrl} alt={userData.name} />
-              <AvatarFallback className="text-4xl font-medium">{initials}</AvatarFallback>
+              <AvatarFallback className="text-4xl">{initials}</AvatarFallback>
             </Avatar>
 
             {/* Edit Icon (Bottom-Right, Overlap) */}
@@ -82,16 +82,16 @@ export function ProfileHeader({
 
           {/* User Info */}
           <div className="mt-auto">
-            <div className="flex items-center text-center justify-center space-x-2">
-              <h1 className="text-2xl font-bold">{userData.name}</h1>
+            <div className="flex items-center  space-x-2">
+              <h1 className=" text-text-primary heading-large">{userData.name}</h1>
               <UserBadge tier={userData.tier as Tier} size="sm" />
             </div>
             <div
               onClick={() => setFriendListOpen(!showFriendActions)}
-              className="flex items-start  font-label-large justify-start space-x-2 text-text-brand cursor-pointer"
+              className="flex items-center space-x-1 text-text-brand cursor-pointer"
             >
               <UsersThreeIcon size={20} />
-              <p>{userData.friendCount} {t('friends')}</p>
+              <p className="label-large">{userData.friendCount} {t('friends')}</p>
             </div>
           </div>
         </div>

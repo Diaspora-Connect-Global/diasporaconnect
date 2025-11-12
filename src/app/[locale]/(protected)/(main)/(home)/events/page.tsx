@@ -4,6 +4,7 @@ import EventCardSmall from "@/components/cards/events/EventCardSmall";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
+import PaidEventCard from "@/components/cards/events/PaidEventsCard";
 
 
 
@@ -166,20 +167,12 @@ const t =  useTranslations("home.events")
             attendees: 32,
             imageUrl: "/EVENT.png",
         },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
     ];
 
     return (
-        <div className="lg:w-[55.3125rem] h-[53.625rem] p-4 overflow-auto scrollbar-hide">
-            {/* 885px equivalent, 64px header height */}
+        <div className="lg:w-[60vw] lg:h-[calc(100vh-4rem)] p-4 overflow-auto scrollbar-hide">
             <div className="mx-auto">
-                <p className="text-2xl font-heading-large my-[1.25rem]">{t("yourevents")}</p> {/* 20px equivalent */}
+                <p className="heading-small ">{t("yourevents")}</p> {/* 20px equivalent */}
 
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
@@ -211,9 +204,25 @@ const t =  useTranslations("home.events")
                     )}
                 </div>
 
-                <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreevents")}</h2> {/* 20px equivalent */}
+                <p className="heading-small my-4">Paid Events</p> {/* 20px equivalent */}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.4rem] w-full "> {/* 12px, 24px equivalent */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 w-full "> {/* 12px, 24px equivalent */}
+                    {moreEvents.map((event, index) => (
+                        <PaidEventCard
+                            key={index}
+                            title={event.title}
+                            date={event.date}
+                            location={event.location}
+                            attendees={event.attendees}
+                            imageUrl={event.imageUrl}
+                            onAttendClick={() => modalRef.current?.open()}
+
+                        />
+                    ))}
+                </div>
+                <p className="heading-small my-2">{t("moreevents")}</p> {/* 20px equivalent */}
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full "> {/* 12px, 24px equivalent */}
                     {moreEvents.map((event, index) => (
                         <EventCard1
                             key={index}
@@ -222,7 +231,7 @@ const t =  useTranslations("home.events")
                             location={event.location}
                             attendees={event.attendees}
                             imageUrl={event.imageUrl}
-                            onAttendClick={() => modalRef.current?.open()}
+                            onAttendClick={()=>{}}
 
                         />
                     ))}

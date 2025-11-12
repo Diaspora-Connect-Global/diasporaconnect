@@ -1,4 +1,3 @@
-import { CustomEducationComponent } from "@/components/cards/opportunities/CustomeEducationComponent";
 import { CustomEmploymentComponent } from "@/components/cards/opportunities/CustomEmploymentComponent";
 
 
@@ -26,12 +25,12 @@ export const moreOpportunitiesIDList = [
             {
                 name: "Graduate Trainee Programs",
                 filter: "graduate-trainee-programs",
-                emptystateMessage: "No job openings available."
+                emptystateMessage: "No Graduate Trainee Programs available."
             },
             {
                 name: "Career Fairs",
                 filter: "carreer-fairs",
-                emptystateMessage: "No job openings available."
+                emptystateMessage: "No Career Fairs available."
             },
           
         ],
@@ -41,7 +40,7 @@ export const moreOpportunitiesIDList = [
     {
     "id": "education-training",
     "title": "Education & Training",
-    "customComponent": CustomEducationComponent,
+    "customComponent": CustomEmploymentComponent,
     "tabs": [
         {
             "name": "All",

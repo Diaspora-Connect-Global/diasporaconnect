@@ -1,6 +1,6 @@
+import { ButtonType1, ButtonType2 } from "@/components/custom/button";
 import { Bookmark } from "lucide-react";
 import Image from "next/image";
-import { ButtonType1, ButtonType2 } from "../../custom/button";
 import Link from "next/link";
 
 // EventCard1 Component with Props
@@ -14,11 +14,11 @@ interface EventCardProps {
 
 }
 
-export default function EventCard1({ title, date, location, attendees, imageUrl,onAttendClick }: EventCardProps) {
+export default function PaidEventCard({ title, date, location, attendees, imageUrl,onAttendClick }: EventCardProps) {
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
-            <div className="relative h-64 rounded-t-sm overflow-hidden">
+            <div className="relative h-32 rounded-t-sm overflow-hidden">
                 <Image
                     src={imageUrl}
                     alt={`${title} background`}
@@ -42,18 +42,18 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
             </div>
 
             {/* Event Details */}
-            <div className="p-6">
+            <div className="px-4 py-2">
                 <Link href="/events/1">
-                <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
+                <h2 className="text-2xl font-bold text-primary ">{title}</h2>
                 </Link>
-                <p className="text-lg font-semibold text-primary mb-1">{date}</p>
-                <p className="text-secondary mb-1">{location}</p>
-                <p className="text-secondary text-sm mb-6">{attendees} going</p>
+                <p className="text-lg font-semibold text-primary ">{date}</p>
+                <p className="text-secondary ">{location}</p>
+                <p className="text-secondary text-sm ">{attendees} going</p>
 
                 {/* Action Buttons */}
-                  <div className="flex mt-1 space-x-2">
+                <div className="flex mt-1 space-x-2">
                     <ButtonType1 className=" flex items-center justify-center py-3 px-6 rounded-full overflow-hidden">
-                        <Bookmark className="w-6 h-6 " />
+                        <Bookmark className="w-8 h-8 " />
                     </ButtonType1>
                     <ButtonType2 
                     onClick={onAttendClick}
