@@ -280,17 +280,18 @@ export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
 
 export function DropdownMenuAvatar() {
   const t = useTranslations('home.header');
+  const [open, setOpen] = useState(false);
   
   return (
-    <DropdownMenu >
+    <DropdownMenu  open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button className="focus:outline-none">
+        <button className="focus:outline-none cursor-pointer">
           <MyAvatar />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-100 mx-20 mt-4" align="start">
         <DropdownMenuLabel>
-          <Link href={"/profile"} className='flex items-center justify-between'>
+          <Link  onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
             <div className='flex space-x-4 items-center my-2'>
               <MyAvatar />
               <p className='text-xl'>John Doe</p>
