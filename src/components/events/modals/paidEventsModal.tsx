@@ -82,6 +82,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
             openSuccess();
         } catch (error) {
             alert(t('paymentFailed'));
+            console.log(error)
         } finally {
             setIsProcessingPayment(false);
         }

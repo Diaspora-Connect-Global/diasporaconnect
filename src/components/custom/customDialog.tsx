@@ -55,7 +55,7 @@ export default function CustomDialog({
             />
           </DialogTitle>
         </DialogHeader>
-        <div className={` overflow-hidden`}>
+        <div className={``}>
           {children}
         </div>
 

@@ -2,6 +2,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from 'next-intl';
+import CompleteKYCModal, { CompleteKYCModalRef } from "./modals/CompleteKYCModal";
+import { useRef } from "react";
 
 interface KYCVerificationProps {
   data: {
@@ -13,13 +15,19 @@ interface KYCVerificationProps {
 
 export function KYCVerification({ data, onVerify }: KYCVerificationProps) {
   const t = useTranslations('profile.kyc');
+
+  const modalRef = useRef<CompleteKYCModalRef>(null);
+
+
   
+
   return (
+    <>
     <Card className="h-full ">
       <CardContent className=" h-full flex flex-col">
         <div className="flex-1 min-h-0 flex flex-col justify-between">
           <div 
-            onClick={onVerify} 
+            onClick={()=>modalRef.current?.open()} 
             className="flex items-center justify-between cursor-pointer"
           >
             <span className="text-sm font-medium">{t('title')}</span>
@@ -33,5 +41,8 @@ export function KYCVerification({ data, onVerify }: KYCVerificationProps) {
         </div>
       </CardContent>
     </Card>
+    
+    <CompleteKYCModal ref={modalRef}/>
+    </>
   );
 }
