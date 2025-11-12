@@ -1,40 +1,29 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// components/TrustScore.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { UserBadge } from "../custom/userBadge";
-import {  InfoIcon } from "@phosphor-icons/react";
+import { InfoIcon } from "@phosphor-icons/react";
 import { LevelGauge } from "../custom/levelGauge";
 import { useTranslations } from 'next-intl';
 
 interface TrustScoreProps {
-  data: {
-    score: number;
-    maxScore: number;
-    levels: {
-      starter: boolean;
-      trusted: boolean;
-      reliable: boolean;
-      elite: boolean;
-    };
-    showDescription: boolean;
-  };
-  onLevelChange?: (level: keyof TrustScoreProps['data']['levels'], checked: boolean) => void;
+
+  trustScore: number;
+
 }
 
-export function TrustScore({ data, onLevelChange }: TrustScoreProps) {
+export function TrustScore({ trustScore }: TrustScoreProps) {
   const t = useTranslations('profile.trustScore');
-  
+
   return (
     <Card className="h-full p-0">
       <CardContent className="p-4 h-full flex flex-col">
         <h2 className="text-lg font-semibold mb-3">{t('title')}</h2>
         <div className="flex-1 min-h-0 flex flex-col justify-between">
           <div className="space-y-3">
-            
+
 
             <div className="p-1">
-              {/* 10 points → Starter */}
-              <LevelGauge score={99} />
+              
+              <LevelGauge score={trustScore} />
 
 
             </div>

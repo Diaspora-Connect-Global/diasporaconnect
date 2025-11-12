@@ -6,21 +6,19 @@ import { ChevronRight } from "lucide-react";
 import { useTranslations } from 'next-intl';
 
 interface ProfileCompletionProps {
-    data: {
-        percentage: number;
-        joinDate: string;
-    };
+    percentage: number;
+    
     onCompleteProfile?: () => void;
 }
 
-export function ProfileCompletion({ data, onCompleteProfile }: ProfileCompletionProps) {
+export function ProfileCompletion({ percentage, onCompleteProfile }: ProfileCompletionProps) {
     const t = useTranslations('profile.profileCompletion');
     const [progress, setProgress] = useState(0)
 
     useEffect(() => {
-        const timer = setTimeout(() => setProgress(data.percentage), 500)
+        const timer = setTimeout(() => setProgress(percentage), 500)
         return () => clearTimeout(timer)
-    }, [data.percentage])
+    }, [percentage])
 
     return (
         <Card className="h-full ">
@@ -28,9 +26,9 @@ export function ProfileCompletion({ data, onCompleteProfile }: ProfileCompletion
                 <h2 className="text-lg font-semibold ">{t('title')}</h2>
                 <div className="flex-1 min-h-0 flex flex-col justify-between">
                     <div className="space-y-2">
-                        <Progress value={progress} className="w-full [&>div]:bg-text-success" />
+                        <Progress value={progress} className="w-full [&>div]:bg-text-success [&>div]:rounded-2xl" />
                         <div className="flex items-center justify-between">
-                            <span className="text-sm">{data.percentage}% {t('complete')}</span>
+                            <span className="text-sm">{percentage}% {t('complete')}</span>
                         </div>
                     </div>
                     <div

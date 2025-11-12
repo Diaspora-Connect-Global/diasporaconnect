@@ -32,6 +32,7 @@ export function AddEducationModal({
     onSaveSuccess,
 }: AddEducationModalProps) {
     const t = useTranslations('profile.education');
+    const tActions = useTranslations('actions');
     const [form, setForm] = useState<Omit<Education, 'id'>>({
         institution: '',
         program: '',
@@ -107,8 +108,8 @@ export function AddEducationModal({
             onCancel={onClose}
             isLoading={isLoading}
             disabled={isSaveDisabled}
-            saveText={t('save')}
-            cancelText={t('cancel')}
+            saveText={tActions('save')}
+            cancelText={tActions('cancel')}
         >
                 <div className="space-y-5">
                     <TextInput

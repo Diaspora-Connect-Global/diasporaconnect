@@ -1,128 +1,94 @@
-import { ButtonType1, ButtonType2 } from "../custom/button";
 import { Tier, UserBadge } from "../custom/userBadge";
 import Image from "next/image";
 import { FC } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
-import { BanIcon, MoreHorizontalIcon } from "lucide-react";
-import { Trash } from "iconsax-reactjs";
 import { useTranslations } from 'next-intl';
+import { FriendActionButtons, FriendButtonType } from "@/components/friends/FriendActionButtons";
+import { FriendType } from "../friends/TypeOfFriend";
 
-type FriendStatus =
-    | "all-friends"
-    | "suggested"
-    | "request-received"
-    | "request-sent"
-    | "stranger";
+interface DropdownOption {
+    type: "removeFriend" | "blockFriend";
+    separator?: boolean;
+}
 
 interface FriendsCardProps {
     /** User data */
+    userId: string;
     name: string;
     imageSrc: string;
     mutualConnections?: number;
     tier: Tier;
 
     /** Current relationship status */
-    status: FriendStatus;
+    status: FriendType;
 
-    /** Action callbacks – only the ones that make sense for the current status */
-    onMessage?: () => void;
-    onAddFriend?: () => void;
-    onAccept?: () => void;
-    onIgnore?: () => void;
-    onCancelRequest?: () => void;
-    onRemoveFriend?: () => void;
-    onBlockFriend?: () => void;
+    /** Optional: Override default buttons for this status */
+    customButtons?: FriendButtonType[];
+    customDropdownOptions?: DropdownOption[];
+    
+    /** New prop for handling name click */
+    onNameClick?: (userId: string) => void;
 }
 
 /**
- * Renders the correct button(s) and wires them to the supplied callbacks.
+ * Returns default button configuration based on friend status
  */
-const renderActions = (
-    status: FriendStatus,
-    callbacks: Pick<
-        FriendsCardProps,
-        "onMessage" | "onAddFriend" | "onAccept" | "onIgnore" | "onCancelRequest" | "onRemoveFriend" | "onBlockFriend"
-    >,
-    t: ReturnType<typeof useTranslations<'friends'>>
-) => {
-    const {
-        onMessage,
-        onAddFriend,
-        onAccept,
-        onIgnore,
-        onCancelRequest,
-        onRemoveFriend,
-        onBlockFriend,
-    } = callbacks;
-
+const getDefaultButtonConfig = (status: FriendType): {
+    buttons: FriendButtonType[];
+    dropdownOptions?: DropdownOption[];
+} => {
     switch (status) {
-        case "all-friends":
-            return (
-                <>
-                    <ButtonType1 onClick={onMessage}>{t('message')}</ButtonType1>
-
-                    <DropdownMenu >
-                        <DropdownMenuTrigger asChild>
-                            <Button className='cursor-pointer bg-surface-default border-0 shadow-none text-text-primary p-1' variant="outline" aria-label="Open menu" size="icon-sm">
-                                <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" /> {/* Smaller icon on mobile */}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className='bg-surface-default min-w-[200px]'> {/* Wider menu for touch targets */}
-                            <DropdownMenuItem onSelect={onRemoveFriend} className='font-body-large text-text-primary flex items-center'>
-                                <Trash
-                                    size="32"
-                                />
-                                <span>{t('removeFriend')}</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={onBlockFriend} className='font-body-large flex items-center'>
-                                <BanIcon />
-                                <span>{t('blockFriend')}</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </>
-
-            )
-
+        case "friends":
+            return {
+                buttons: ["message", "dropdown"],
+                dropdownOptions: [
+                    { type: "removeFriend", separator: true },
+                    { type: "blockFriend" }
+                ]
+            };
+        
         case "suggested":
-        case "stranger":
-            return <ButtonType2 onClick={onAddFriend}>{t('addFriend')}</ButtonType2>;
-
+            return {
+                buttons: ["addFriend"]
+            };
+        
         case "request-received":
-            return (
-                <>
-                    <ButtonType2 onClick={onAccept}>{t('accept')}</ButtonType2>
-                    <ButtonType1 onClick={onIgnore}>{t('ignore')}</ButtonType1>
-                </>
-            );
-
+            return {
+                buttons: ["accept", "ignore"]
+            };
+        
         case "request-sent":
-            return (
-                <ButtonType1 onClick={onCancelRequest}>{t('cancelRequest')}</ButtonType1>
-            );
-
+            return {
+                buttons: ["cancelRequest"]
+            };
+        
         default:
-            return null;
+            return { buttons: [] };
     }
 };
 
 const FriendsCard: FC<FriendsCardProps> = ({
+    userId,
     name,
     imageSrc = "https://github.com/shadcn.png",
     mutualConnections,
     tier = "starter",
     status,
-    onMessage,
-    onAddFriend,
-    onAccept,
-    onIgnore,
-    onCancelRequest,
-    onRemoveFriend,
-    onBlockFriend,
+    customButtons,
+    customDropdownOptions,
+    onNameClick,
 }) => {
     const t = useTranslations('friends');
+    
+    // Use custom buttons if provided, otherwise use defaults based on status
+    const defaultConfig = getDefaultButtonConfig(status);
+    const buttons = customButtons ?? defaultConfig.buttons;
+    const dropdownOptions = customDropdownOptions ?? defaultConfig.dropdownOptions;
+    
+    const handleNameClick = () => {
+        if (onNameClick) {
+            onNameClick(userId);
+        }
+    };
     
     return (
         <div className="flex items-center justify-between border border-border-subtle px-3 py-6 rounded-2xl">
@@ -138,7 +104,10 @@ const FriendsCard: FC<FriendsCardProps> = ({
 
                 <div>
                     <div className="flex items-center space-x-2">
-                        <span className="font-body-large text-text-primary text-sm">
+                        <span 
+                            onClick={handleNameClick}
+                            className="font-body-large text-text-primary text-sm cursor-pointer hover:text-text-brand transition-colors"
+                        >
                             {name}
                         </span>
                         {tier && <UserBadge tier={tier} size="sm" />}
@@ -156,17 +125,11 @@ const FriendsCard: FC<FriendsCardProps> = ({
             </div>
 
             {/* ---- Dynamic Action Buttons ---- */}
-            <div className="flex space-x-2">
-                {renderActions(status, {
-                    onMessage,
-                    onAddFriend,
-                    onAccept,
-                    onIgnore,
-                    onCancelRequest,
-                    onRemoveFriend,
-                    onBlockFriend,
-                }, t)}
-            </div>
+            <FriendActionButtons 
+                userId={userId}
+                buttonsToShow={buttons}
+                dropdownOptions={dropdownOptions}
+            />
         </div>
     );
 };

@@ -1,4 +1,3 @@
-// components/UserBadge.tsx
 import { ReactNode } from "react";
 
 export type Tier = "starter" | "trusted" | "reliable" | "elite";

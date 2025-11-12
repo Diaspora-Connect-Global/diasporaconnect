@@ -143,7 +143,8 @@
         "likes": "Likes",
         "replies": "Replies",
         "reply": "Reply",
-        "replyPlaceholder": "Type a reply..."
+        "replyPlaceholder": "Type a reply...",
+        "cancel": "Cancel"
     },
     "legal": {
         "about": "About",

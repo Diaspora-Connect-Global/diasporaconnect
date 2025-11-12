@@ -3,11 +3,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from 'react';
-import { PersonalDetailsContent } from "./PersonalDetailsContent";
-import WorkExperience from "./WorkExperience";
-import EducationContent from "./EducationContent";
+
 import FilteredPosts from "./FilteredPosts";
 import { useTranslations } from 'next-intl';
+import AboutContent from "./AboutContent";
 
 interface PersonalDetailsData {
   bio: string;
@@ -47,26 +46,20 @@ interface CommunitiesData {
 }
 
 interface NavigationTabsProps {
-  initialMainTab?: string;
-  initialSubTab?: string;
-  aboutData: AboutData;
-  postsData: PostsData;
-  communitiesData: CommunitiesData;
+  userId: string;
+    isOwnProfile:boolean
+
 }
 
 export function NavigationTabs({
-  initialMainTab = 'about',
-  initialSubTab = 'personal-details',
-  aboutData,
-  postsData,
-  communitiesData
+userId,
+isOwnProfile =false
 }: NavigationTabsProps) {
   const t = useTranslations('profile.navigation');
   const tActions = useTranslations('actions');
   
   // State for main tabs and sub-tabs
-  const [activeTab, setActiveTab] = useState(initialMainTab);
-  const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
+  const [activeTab, setActiveTab] = useState("about");
 
   // Main horizontal tabs
   const mainTabs = [
@@ -75,77 +68,28 @@ export function NavigationTabs({
     { id: 'communities', label: t('communities') },
   ];
 
-  // About sub-tabs (vertical)
-  const aboutSubTabs = [
-    { id: 'personal-details', label: t('personalDetails') },
-    { id: 'work-experience', label: t('workExperience') },
-    { id: 'education', label: t('education') },
-  ];
-  // Post sub-tabs (vertical)
-  const postsSubTabs = [
-    { id: 'post-saved', label: t('saved') },
-    { id: 'post-liked', label: t('liked') },
-    { id: 'post-commented', label: t('commented') },
-  ];
 
   // Render content based on active main tab
   const renderMainContent = () => {
     switch (activeTab) {
       case 'about':
         return (
-          <div className="flex">
-            {/* Left Column - Vertical Tabs */}
-            <div className="w-[12vw] h-full  ">
-              {aboutSubTabs.map((tab) => (
-                <div
-                  key={tab.id}
-                  className={`w-full border-t text-left p-3 transition-colors cursor-pointer ${activeSubTab === tab.id
-                      ? 'text-brand'
-                      : ''
-                    }`}
-                  onClick={() => setActiveSubTab(tab.id)}
-                >
-                  <span className="text-sm font-medium">{tab.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Right Column - Content */}
-            <div className="flex-1 border-l p-4 ">
-              {activeSubTab === 'personal-details' && (
-                <PersonalDetailsContent />
-              )}
-              {activeSubTab === 'work-experience' && (
-                <WorkExperience />
-              )}
-              {activeSubTab === 'education' && (
-                <EducationContent/>
-              )}
-            </div>
-          </div>
+         <AboutContent isOwnProfile={isOwnProfile} userId= {userId}/>
         );
 
       case 'posts':
         return (
-          <FilteredPosts/>
+          <FilteredPosts />
         );
 
       case 'communities':
         return (
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-4">{t('communities')}</h3>
-            {communitiesData.items.length === 0 ? (
+          
               <p className="text-muted-foreground">{t('noCommunities')}</p>
-            ) : (
-              <div className="space-y-4">
-                {/* Render communities data here */}
-                {communitiesData.items.map((community, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    {/* Community content */}
-                  </div>
-                ))}
-              </div>
-            )}
+           
+            
           </div>
         );
 
@@ -168,10 +112,7 @@ export function NavigationTabs({
                 }`}
               onClick={() => {
                 setActiveTab(tab.id);
-                // Reset to default sub-tab when switching to about
-                if (tab.id === 'about') {
-                  setActiveSubTab('personal-details');
-                }
+               
               }}
             >
               {tab.label}
