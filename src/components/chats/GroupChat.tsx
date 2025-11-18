@@ -117,6 +117,8 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         setReplies(getRepliesForMessage(message.id));
         setRepliesSidebarOpen(true);
         setReplyingTo(message.id);
+        setSidebarOpen(false)
+
     };
 
     const handleCloseReplies = () => {
@@ -140,6 +142,13 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         return user?.name || 'Unknown User';
     };
 
+
+    const handleSideBarToggle = () =>{
+        setSidebarOpen(!sidebarOpen)
+        setRepliesSidebarOpen(false)
+    }
+
+
     return (
         <div className="flex flex-row h-full min-h-0 space-x-2"> {/* Changed to h-full min-h-0 */}
             {/* Main Chat Area */}
@@ -160,7 +169,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                             <h2 className="font-semibold text-text-primary">{chat.name}</h2>
                         </div>
                     </div>
-                    <button onClick={() => setSidebarOpen(!sidebarOpen)}>
+                    <button onClick={handleSideBarToggle}>
                         <InfoIcon className={`w-6 h-6 cursor-pointer ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full" : "text-text-brand"}`} />
                     </button>
                 </div>
