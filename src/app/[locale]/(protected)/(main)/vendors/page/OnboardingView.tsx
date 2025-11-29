@@ -34,16 +34,13 @@ export default function OnboardingView() {
         switch (currentStep) {
             case 1:
                 return (
-                    <div className='lg:w-[40vw] mx-auto'>
 
                         <Onboarding onFinish={() => {
                             nextStep();
                         }} />
-                    </div>
                 );
             case 2:
                 return (
-                    <div className='lg:w-[40vw] mx-auto py-8'>
 
                         <Step1
                             data={formData}
@@ -51,13 +48,11 @@ export default function OnboardingView() {
                             nextStep={nextStep}
                             prevStep={prevStep}
                         />
-                    </div>
                 );
             case 3:
                 return (
 
-                    <div className='lg:w-[40vw] lg:h-[80vh] m-auto py-8'>
-
+                    
                         <Step2
                             data={formData}
                             updateData={updateFormData}
@@ -65,7 +60,6 @@ export default function OnboardingView() {
                             prevStep={prevStep}
                         />
 
-                    </div>
 
                 );
             default:
@@ -74,8 +68,10 @@ export default function OnboardingView() {
     };
 
     return (
-        <>
+        <div className='lg:w-[40vw] h-[calc(100vh-4rem)] m-auto  overflow-auto scrollbar-hide'>
+            <div className='py-2 lg:py-4 '>
             {renderStep()}
-        </>
+            </div>
+        </div>
     );
 }

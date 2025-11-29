@@ -48,7 +48,7 @@ export default function Onboarding({ onFinish }: OnboardingProps) {
   };
 
   return (
-    <div className="w-full mt-8  flex flex-col justify-center  ">
+    <div className="w-full h-full my-auto flex flex-col justify-center  ">
 
       {/* Image / Top */}
       <div className="lg:h-[45vh] flex items-center p-5   rounded-xl border border-surface-brand-light justify-center">
