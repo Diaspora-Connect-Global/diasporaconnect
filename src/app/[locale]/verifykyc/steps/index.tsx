@@ -11,13 +11,13 @@ export function StartStep({ onNext }: { onNext: () => void }) {
     return (
         <div className="flex flex-col justify-between h-screen p-6">
             <div className="flex-1 overflow-y-auto">
-                <h1 className="text-2xl font-bold mb-2">Verify your identity</h1>
-                <p className="text-gray-600 mb-6">
+                <h1 className="text-primary heading-small">Verify your identity</h1>
+                <p className="text-secondary body-small mb-5">
                     We need to make sure it&apos;s really you. This will take less than a minute
                 </p>
 
-                <p className="font-semibold mb-3">What we will need</p>
-                <ul className="list-disc list-inside text-left space-y-2">
+                <p className="caption-large text-primary mb-1">What we will need</p>
+                <ul className="list-disc list-inside text-left space-y-2 body-small" >
                     <li>Passport / National ID number</li>
                     <li>Photo of Passport / National ID</li>
                     <li>Photo of you holding Passport / National ID</li>
@@ -51,15 +51,15 @@ export function CountryStep({
             <div className="flex-1 overflow-y-auto">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                    className="flex items-center gap-2 text-text-primary mb-4 hover:text-gray-900"
                 >
                     <ArrowLeft size={20} />
                 </button>
 
-                <p className="font-semibold text-lg mb-2">Pick a document for verification</p>
-                <p className="text-gray-600 mb-4">We need a valid document and the country that issued the document.</p>
+                <p className="heading-small text-primary mb-2">Pick a document for verification</p>
+                <p className="body-small text-secondary mb-4">We need a valid document and the country that issued the document.</p>
 
-                <label className="block text-sm font-medium mb-2">ID issuing country</label>
+                <label className="block label-medium text-primary mb-2">ID issuing country</label>
                 <select
                     value={value}
                     onChange={(e) => onSelect(e.target.value)}
@@ -71,18 +71,36 @@ export function CountryStep({
                     <option value="uk">United Kingdom</option>
                 </select>
 
-                <p className="block text-sm font-medium mb-3">Document type</p>
+                <p className="block label-medium text-primary mb-3">Document type</p>
 
                 <RadioGroup value={docType} onValueChange={onDocTypeChange}>
-                    <div className="flex items-center gap-3 p-3 border rounded-lg mb-2">
-                        <RadioGroupItem value="passport" id="r1" />
-                        <Label htmlFor="r1">Passport (Photo page)</Label>
+                    <div className="flex items-center gap-3 p-3  rounded-lg mb-2">
+                        <RadioGroupItem
+                            value="passport"
+                            id="r1"
+                            className="border-border-brand 
+                 data-[state=checked]:text-surface-brand 
+                 data-[state=checked]:border-border-brand"
+                        />
+                        <Label htmlFor="r1" className="body-large text-primary">
+                            Passport (Photo page)
+                        </Label>
                     </div>
-                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                        <RadioGroupItem value="national_id" id="r2" />
-                        <Label htmlFor="r2">National ID card (Front and back)</Label>
+
+                    <div className="flex items-center gap-3 p-3  rounded-lg">
+                        <RadioGroupItem
+                            value="national_id"
+                            id="r2"
+                            className="border-border-brand 
+                 data-[state=checked]:text-surface-brand 
+                 data-[state=checked]:border-border-brand"
+                        />
+                        <Label htmlFor="r2" className="body-large text-primary">
+                            National ID card (Front and back)
+                        </Label>
                     </div>
                 </RadioGroup>
+
             </div>
 
             <ButtonType2
@@ -117,18 +135,22 @@ export function IdStep({
             <div className="flex-1 overflow-y-auto">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                    className="flex items-center gap-2 text-text-primary mb-4 hover:text-gray-900"
                 >
                     <ArrowLeft size={20} />
-                    
+
                 </button>
 
-                <h2 className="text-xl font-semibold mb-2">{documentName} number</h2>
-                <p className="text-gray-600 mb-6">
-                    Provide the {documentName.toLowerCase()} number on the valid {documentName}
+                <h2 className="heading-small text-primary  mb-2">{documentName} number</h2>
+                <p className="body-small text-secondary mb-6">
+                    Provide the {documentName.toLowerCase()} number on the valid {documentName} card
                 </p>
 
+
+                <label htmlFor="id-number" className="block label-medium text-primary mb-2">{documentName} number</label>
+
                 <input
+                    id="id-number"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={`Enter your ${documentName.toLowerCase()} number`}
@@ -191,31 +213,29 @@ export function PhotoStep({
             <div className="flex-1 overflow-y-auto">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                    className="flex items-center gap-2 text-text-primary mb-4 hover:text-gray-900"
                 >
                     <ArrowLeft size={20} />
-                    
+
                 </button>
 
-                <h2 className="text-xl font-semibold mb-2">
-                    {isPassport ? `Photo of ${documentName}` : `Photos of ${documentName}`}
+                <h2 className="heading-small text-primary  mb-2">
+                    Photos of {documentName}
                 </h2>
-                <p className="text-gray-600 mb-6">
-                    {isPassport
-                        ? `Take a photo of the photo page of your valid ${documentName}`
-                        : `Take photos of the front and back of the valid ${documentName}`
-                    }
+                <p className="text-text-primary mb-6">
+
+                    Take photos of the front and back of the valid ${documentName}
                 </p>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">
-                        {isPassport ? `${documentName} photo page` : `Front of ${documentName}`}
+                    <label className="block label-medium text-primary  mb-2">
+                        Front of {documentName}
                     </label>
-                    <label className="border-dashed border-2 p-10 text-center rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 min-h-[120px] ">
+                    <label className="border-dashed border-2 p-10 text-center rounded-xl flex flex-col items-center justify-center cursor-pointer text-brand border-brand bg-surface-brand-subtle min-h-[120px] ">
                         {frontImage ? (
                             <img src={frontImage} alt="Front" className="max-h-24 object-contain" />
                         ) : (
-                            <span className="text-gray-500">Tap to take photo</span>
+                            <span className="caption-large">Take photo of the front of the ID</span>
                         )}
                         <input
                             type="file"
@@ -228,12 +248,12 @@ export function PhotoStep({
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">Back of {documentName}</label>
-                    <label className="border-dashed border-2 p-10 text-center rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 min-h-[120px] ">
+                    <label className="block label-medium text-primary mb-2">Back of {documentName}</label>
+                    <label className="border-dashed border-2 p-10 text-center rounded-xl flex flex-col items-center justify-center cursor-pointer text-brand border-brand bg-surface-brand-subtle  min-h-[120px] ">
                         {backImage ? (
                             <img src={backImage} alt="Back" className="max-h-24 object-contain" />
                         ) : (
-                            <span className="text-gray-500">Tap to take photo</span>
+                            <span className="caption-large">Take photo of the back of the ID</span>
                         )}
                         <input
                             type="file"
@@ -289,27 +309,27 @@ export function SelfieStep({
             <div className="flex-1 overflow-y-auto">
                 <button
                     onClick={onBack}
-                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                    className="flex items-center gap-2 text-text-primary mb-4 hover:text-gray-900"
                 >
                     <ArrowLeft size={20} />
-                    
+
                 </button>
 
-                <h2 className="text-xl font-semibold mb-2">Photo of you holding {documentName}</h2>
-                <ul className="text-gray-600 mb-6 space-y-1 list-disc list-inside">
+                <h2 className="heading-small text-primary  mb-2">Photo of you holding {documentName}</h2>
+                <ul className=" mb-6 space-y-1 list-disc list-inside body-small">
                     <li>Make sure photo is taken in good light</li>
                     <li>Make sure {documentName.toLowerCase()} details are clearly visible</li>
                 </ul>
 
-                <label className="border-dashed border-2 p-10 text-center rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 min-h-[250px] ">
+                <label className="border-dashed border-2 p-10 text-center rounded-xl flex flex-col items-center justify-center cursor-pointer text-brand border-brand bg-surface-brand-subtle min-h-[250px] ">
                     {selfieImage ? (
                         <img src={selfieImage} alt="Selfie" className="max-h-48 object-contain" />
                     ) : (
                         <>
-                            <span className="text-gray-500 font-medium">
-                                Take photo of you holding {documentName.toLowerCase()}
+                            <span className="caption-large">
+                                Take photo of you holding the ID
                             </span>
-                            <span className="text-gray-400 text-sm mt-1">Tap to capture or upload</span>
+                           
                         </>
                     )}
                     <input
@@ -359,7 +379,7 @@ export function DoneStep() {
         <div className="flex flex-col items-center justify-center h-screen p-6 text-center">
             <div className="text-green-600 text-6xl mb-6">✓</div>
             <h2 className="text-2xl font-bold mb-2">Done</h2>
-            <p className="text-gray-600">You can now login</p>
+            <p className="text-text-primary">You can now login</p>
         </div>
     );
 }
