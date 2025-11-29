@@ -38,7 +38,7 @@ export default function VerifyPage() {
       docType,
       idNumber,
       frontImage,
-      backImage: docType === 'passport' ? null : backImage, // Only include back image for National ID
+      backImage: docType === 'passport' ? null : backImage,
       selfieImage,
       submittedAt: new Date().toISOString(),
     };
@@ -58,6 +58,11 @@ export default function VerifyPage() {
     // }
   };
 
+  // Back navigation handlers
+  const goBack = (previousStep: Step) => {
+    setStep(previousStep);
+  };
+
   return (
     <main className="min-h-screen bg-white text-black">
       {/* === MOBILE ONLY VIEW === */}
@@ -73,6 +78,7 @@ export default function VerifyPage() {
             onSelect={setCountry}
             onDocTypeChange={setDocType}
             onNext={() => setStep('enter-id')}
+            onBack={() => goBack('start')}
           />
         )}
 
@@ -81,6 +87,7 @@ export default function VerifyPage() {
             value={idNumber}
             onChange={setIdNumber}
             onNext={() => setStep('photos')}
+            onBack={() => goBack('pick-country')}
             docType={docType}
           />
         )}
@@ -92,6 +99,7 @@ export default function VerifyPage() {
             onFrontImageChange={setFrontImage}
             onBackImageChange={setBackImage}
             onNext={() => setStep('selfie')}
+            onBack={() => goBack('enter-id')}
             docType={docType}
           />
         )}
@@ -104,6 +112,7 @@ export default function VerifyPage() {
               handleSubmitVerification();
               setStep('verifying');
             }}
+            onBack={() => goBack('photos')}
             docType={docType}
           />
         )}

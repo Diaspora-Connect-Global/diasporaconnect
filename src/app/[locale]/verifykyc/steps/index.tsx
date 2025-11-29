@@ -5,6 +5,7 @@ import {
     RadioGroup,
     RadioGroupItem,
 } from "@/components/ui/radio-group";
+import { ArrowLeft } from "lucide-react";
 
 export function StartStep({ onNext }: { onNext: () => void }) {
     return (
@@ -36,20 +37,29 @@ export function CountryStep({
     onSelect,
     onDocTypeChange,
     onNext,
+    onBack,
 }: {
     value: string;
     docType: string;
     onSelect: (v: string) => void;
     onDocTypeChange: (v: string) => void;
     onNext: () => void;
+    onBack: () => void;
 }) {
     return (
         <div className="flex flex-col justify-between h-screen p-6">
             <div className="flex-1 overflow-y-auto">
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                >
+                    <ArrowLeft size={20} />
+                </button>
+
                 <p className="font-semibold text-lg mb-2">Pick a document for verification</p>
                 <p className="text-gray-600 mb-4">We need a valid document and the country that issued the document.</p>
 
-                <label className="block text-sm font-medium mb-2">Country</label>
+                <label className="block text-sm font-medium mb-2">ID issuing country</label>
                 <select
                     value={value}
                     onChange={(e) => onSelect(e.target.value)}
@@ -90,11 +100,13 @@ export function IdStep({
     value,
     onChange,
     onNext,
+    onBack,
     docType,
 }: {
     value: string;
     onChange: (v: string) => void;
     onNext: () => void;
+    onBack: () => void;
     docType: string;
 }) {
     const isPassport = docType === 'passport';
@@ -103,6 +115,14 @@ export function IdStep({
     return (
         <div className="flex flex-col justify-between h-screen p-6">
             <div className="flex-1 overflow-y-auto">
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                >
+                    <ArrowLeft size={20} />
+                    
+                </button>
+
                 <h2 className="text-xl font-semibold mb-2">{documentName} number</h2>
                 <p className="text-gray-600 mb-6">
                     Provide the {documentName.toLowerCase()} number on the valid {documentName}
@@ -133,6 +153,7 @@ export function PhotoStep({
     onFrontImageChange,
     onBackImageChange,
     onNext,
+    onBack,
     docType,
 }: {
     frontImage: string | null;
@@ -140,6 +161,7 @@ export function PhotoStep({
     onFrontImageChange: (image: string) => void;
     onBackImageChange: (image: string) => void;
     onNext: () => void;
+    onBack: () => void;
     docType: string;
 }) {
     const isPassport = docType === 'passport';
@@ -167,6 +189,14 @@ export function PhotoStep({
     return (
         <div className="flex flex-col justify-between h-screen p-6">
             <div className="flex-1 overflow-y-auto">
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                >
+                    <ArrowLeft size={20} />
+                    
+                </button>
+
                 <h2 className="text-xl font-semibold mb-2">
                     {isPassport ? `Photo of ${documentName}` : `Photos of ${documentName}`}
                 </h2>
@@ -231,11 +261,13 @@ export function SelfieStep({
     selfieImage,
     onSelfieImageChange,
     onNext,
+    onBack,
     docType,
 }: {
     selfieImage: string | null;
     onSelfieImageChange: (image: string) => void;
     onNext: () => void;
+    onBack: () => void;
     docType: string;
 }) {
     const isPassport = docType === 'passport';
@@ -255,6 +287,14 @@ export function SelfieStep({
     return (
         <div className="flex flex-col justify-between h-screen p-6">
             <div className="flex-1 overflow-y-auto">
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-900"
+                >
+                    <ArrowLeft size={20} />
+                    
+                </button>
+
                 <h2 className="text-xl font-semibold mb-2">Photo of you holding {documentName}</h2>
                 <ul className="text-gray-600 mb-6 space-y-1 list-disc list-inside">
                     <li>Make sure photo is taken in good light</li>
@@ -294,25 +334,19 @@ export function SelfieStep({
 }
 
 export function VerifyingStep({ onNext }: { onNext: () => void }) {
-
     return (
         <div className="flex flex-col justify-between h-screen p-6">
             <div className="flex-1 overflow-y-auto items-center justify-center">
-
                 <div className="mt-[40vh]">
-                <div className="text-green-600 text-6xl text-center mb-6  ">✓</div>
-                <h2 className="text-xl font-semibold mb-3 text-center">We  verifying you</h2>
-                <p className="text-secondary text-center">Our team is reviewing your documents. You will receive an email notification once you have been verified.</p>
-
+                    <div className="text-green-600 text-6xl text-center mb-6">✓</div>
+                    <h2 className="text-xl font-semibold mb-3 text-center">We are verifying you</h2>
+                    <p className="text-secondary text-center">Our team is reviewing your documents. You will receive an email notification once you have been verified.</p>
                 </div>
-
             </div>
-
-
 
             <ButtonType2
                 onClick={onNext}
-                className="py-3 rounded-xl w-full "
+                className="py-3 rounded-xl w-full"
             >
                 Continue
             </ButtonType2>
