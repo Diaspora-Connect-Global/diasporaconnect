@@ -1,8 +1,6 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-
+import { useState } from 'react';
 import {
   CountryStep,
   DoneStep,
@@ -23,70 +21,91 @@ type Step =
   | 'done';
 
 export default function VerifyPage() {
-  const params = useSearchParams();
-  const router = useRouter();
-
   const [step, setStep] = useState<Step>('start');
+  
+  // Form data state
   const [country, setCountry] = useState('');
   const [docType, setDocType] = useState('');
   const [idNumber, setIdNumber] = useState('');
+  const [frontImage, setFrontImage] = useState<string | null>(null);
+  const [backImage, setBackImage] = useState<string | null>(null);
+  const [selfieImage, setSelfieImage] = useState<string | null>(null);
 
-  // Read query params on load
-  useEffect(() => {
-    const stepParam = params.get('step') as Step;
-    const countryParam = params.get('country');
-    const docParam = params.get('docType');
-    const idParam = params.get('id');
+  // Handler to submit verification data
+  const handleSubmitVerification = async () => {
+    const verificationData = {
+      country,
+      docType,
+      idNumber,
+      frontImage,
+      backImage: docType === 'passport' ? null : backImage, // Only include back image for National ID
+      selfieImage,
+      submittedAt: new Date().toISOString(),
+    };
 
-    if (stepParam) setStep(stepParam);
-    if (countryParam) setCountry(countryParam);
-    if (docParam) setDocType(docParam);
-    if (idParam) setIdNumber(idParam);
-  }, [params]);
-
-  // Sync query params when state changes
-  useEffect(() => {
-    const query = new URLSearchParams();
-
-    query.set('step', step);
-    if (country) query.set('country', country);
-    if (docType) query.set('docType', docType);
-    if (idNumber) query.set('id', idNumber);
-
-    router.replace(`?${query.toString()}`);
-  }, [step, country, docType, idNumber, router]);
+    console.log('Verification Data:', verificationData);
+    
+    // TODO: Send to your API endpoint
+    // try {
+    //   const response = await fetch('/api/verify', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(verificationData),
+    //   });
+    //   const result = await response.json();
+    // } catch (error) {
+    //   console.error('Verification failed:', error);
+    // }
+  };
 
   return (
     <main className="min-h-screen bg-white text-black">
       {/* === MOBILE ONLY VIEW === */}
-      <div className="block md:hidden p-4">
-        {step === 'start' && <StartStep onNext={() => setStep('pick-country')} />}
+      <div className="block md:hidden">
+        {step === 'start' && (
+          <StartStep onNext={() => setStep('pick-country')} />
+        )}
 
         {step === 'pick-country' && (
           <CountryStep
             value={country}
-            onSelect={(val) => {
-              setCountry(val);
-              setStep('enter-id');
-            }}
+            docType={docType}
+            onSelect={setCountry}
+            onDocTypeChange={setDocType}
+            onNext={() => setStep('enter-id')}
           />
         )}
-
 
         {step === 'enter-id' && (
           <IdStep
             value={idNumber}
             onChange={setIdNumber}
             onNext={() => setStep('photos')}
+            docType={docType}
           />
         )}
 
         {step === 'photos' && (
-          <PhotoStep onNext={() => setStep('selfie')} />
+          <PhotoStep
+            frontImage={frontImage}
+            backImage={backImage}
+            onFrontImageChange={setFrontImage}
+            onBackImageChange={setBackImage}
+            onNext={() => setStep('selfie')}
+            docType={docType}
+          />
         )}
 
         {step === 'selfie' && (
-          <SelfieStep onNext={() => setStep('verifying')} />
+          <SelfieStep
+            selfieImage={selfieImage}
+            onSelfieImageChange={setSelfieImage}
+            onNext={() => {
+              handleSubmitVerification();
+              setStep('verifying');
+            }}
+            docType={docType}
+          />
         )}
 
         {step === 'verifying' && (
