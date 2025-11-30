@@ -51,8 +51,6 @@ export default function OnboardingView() {
                 );
             case 3:
                 return (
-
-                    
                         <Step2
                             data={formData}
                             updateData={updateFormData}
