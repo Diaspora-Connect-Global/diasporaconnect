@@ -50,14 +50,14 @@ const services: Product[] = [
 
 // Header Component
 const Header: React.FC<{ cartCount: number; onCartClick: () => void }> = ({ cartCount, onCartClick }) => (
-  <header className="border-b bg-white sticky top-0 z-50">
+  <header className="h-[64px] bg-surface-default sticky top-0 z-50">
     <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
       <h1 className="text-2xl font-bold">Marketplace</h1>
-      <button onClick={onCartClick} className="flex items-center gap-2 text-blue-600 hover:text-blue-700">
+      <button onClick={onCartClick} className="flex items-center gap-2 ">
         <ShoppingCart className="w-5 h-5" />
         <span>Cart</span>
         {cartCount > 0 && (
-          <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <span className=" text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {cartCount}
           </span>
         )}
@@ -994,7 +994,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-[calc(100vh-64px)] overflow-y-auto bg-amber-400">
       <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} />
       
       {currentView === 'home' && (
