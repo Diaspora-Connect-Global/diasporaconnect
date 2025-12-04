@@ -994,7 +994,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] overflow-y-auto bg-amber-400">
+    <div className="h-[calc(100vh-64px)] overflow-y-auto">
       <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} />
       
       {currentView === 'home' && (
