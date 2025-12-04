@@ -50,7 +50,7 @@ const services: Product[] = [
 
 // Header Component
 const Header: React.FC<{ cartCount: number; onCartClick: () => void }> = ({ cartCount, onCartClick }) => (
-  <header className="h-[64px] bg-surface-default sticky top-0 z-50">
+  <header className="h-[64px]  sticky top-0 z-50">
     <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
       <h1 className="text-2xl font-bold">Marketplace</h1>
       <button onClick={onCartClick} className="flex items-center gap-2 ">
@@ -994,21 +994,21 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] overflow-y-auto">
+    <div className="h-[calc(100vh-64px)] overflow-y-auto px-[10%]">
       <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} />
       
       {currentView === 'home' && (
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex gap-8 mb-6 border-b">
+        <div className="max-w-7xl mx-auto px-4 py-6 ">
+          <div className="flex gap-8 mb-6 border-b w-fit">
             <button 
               onClick={() => setActiveTab('products')}
-              className={`pb-2 font-medium ${activeTab === 'products' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
+              className={`pb-2 font-medium ${activeTab === 'products' ? ' border-b-2 border-border-brand' : 'text-gray-600'}`}
             >
               Products
             </button>
             <button 
               onClick={() => setActiveTab('services')}
-              className={`pb-2 font-medium ${activeTab === 'services' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'}`}
+              className={`pb-2 font-medium ${activeTab === 'services' ? 'border-b-2 border-border-brand' : 'text-gray-600'}`}
             >
               Services
             </button>
