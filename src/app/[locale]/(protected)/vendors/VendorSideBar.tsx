@@ -11,11 +11,11 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
     // Extract the language and active tab from the URL
     const getActiveTab = () => {
         const segments = pathname.split('/').filter(Boolean);
-        // segments example: ['en', 'myvendoraccount', 'orders']
+        // segments example: ['en', 'vendors', 'orders']
         const lastSegment = segments[segments.length - 1];
         
-        // If the last segment is 'myvendoraccount', it means we're on the overview page
-        if (lastSegment === 'myvendoraccount' || segments.length === 2) {
+        // If the last segment is 'vendors', it means we're on the overview page
+        if (lastSegment === 'vendors' || segments.length === 2) {
             return 'overview';
         }
         
@@ -35,7 +35,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
         {
             id: 'overview',
             label: 'Overview',
-            href: `/${currentLang}/myvendoraccount`,
+            href: `/${currentLang}/vendors`,
             icon: (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             )
@@ -43,7 +43,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
         {
             id: 'orders',
             label: 'Orders',
-            href: `/${currentLang}/myvendoraccount/orders`,
+            href: `/${currentLang}/vendors/orders`,
             icon: (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             )
@@ -51,7 +51,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
         {
             id: 'services',
             label: 'Services',
-            href: `/${currentLang}/myvendoraccount/services`,
+            href: `/${currentLang}/vendors/services`,
             icon: (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             )
@@ -59,7 +59,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
         {
             id: 'products',
             label: 'Products',
-            href: `/${currentLang}/myvendoraccount/products`,
+            href: `/${currentLang}/vendors/products`,
             icon: (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             )
@@ -67,7 +67,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
         {
             id: 'sales',
             label: 'Sales',
-            href: `/${currentLang}/myvendoraccount/sales`,
+            href: `/${currentLang}/vendors/sales`,
             icon: (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             )
@@ -75,7 +75,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
         {
             id: 'payouts',
             label: 'Payouts',
-            href: `/${currentLang}/myvendoraccount/payouts`,
+            href: `/${currentLang}/vendors/payouts`,
             icon: (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             )
@@ -109,7 +109,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     {/* Header */}
                     <div className="mt-5">
                         <button 
-                            onClick={() => router.push(`/${currentLang}/myvendoraccount/services/new`)}
+                            onClick={() => router.push(`/${currentLang}/vendors/services/new`)}
                             className="w-full px-4 py-2.5 rounded-lg transition-colors flex gap-2 text-text-brand"
                         >
                             <span className="">+</span>
