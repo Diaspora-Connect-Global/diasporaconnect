@@ -138,7 +138,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     </nav>
                 </aside>
 
-                <div className="h-full flex-1 overflow-y-auto  p-6 scrollbar-hide">
+                <div className="h-full flex-1 overflow-y-auto  py-6 px-10 scrollbar-hide">
                     {children}
                 </div>
             </div>
