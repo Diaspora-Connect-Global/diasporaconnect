@@ -109,7 +109,7 @@ const submitFormA = async () => {
 
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // nextStep(); 
+    nextStep(); 
   } catch (error) {
     console.error('OTP verification failed:', error);
     // Show error in UI
