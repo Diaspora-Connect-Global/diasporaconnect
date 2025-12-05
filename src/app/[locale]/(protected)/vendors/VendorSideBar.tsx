@@ -104,8 +104,8 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     </AvatarFallback>
                 </Avatar>
             </div>
-            <div className="flex h-[90vh]  overflow-y-auto  ">
-                <aside className="w-[22vw] px-6 bg-surface-default   flex flex-col">
+            <div className="flex h-[90vh]    ">
+                <aside className="w-[22vw] overflow-y-auto px-6 bg-surface-default   flex flex-col">
                     {/* Header */}
                     <div className="mt-5">
                         <button 
@@ -138,7 +138,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     </nav>
                 </aside>
 
-                <div className="flex-1  p-6">
+                <div className="h-full overflow-y-auto  p-6 scrollbar-hide">
                     {children}
                 </div>
             </div>
