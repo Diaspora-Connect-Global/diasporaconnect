@@ -113,47 +113,88 @@ interface SearchInputProps {
     bg?: string;
 }
 
+// export const SearchInput: React.FC<SearchInputProps> = ({
+//     value,
+//     onChange,
+//     onSearch,
+//     placeholder = "Search...",
+//     id = "search",
+//     bg = "bg-surface-subtle"
+// }) => {
+//     const handleKeyPress = (e: React.KeyboardEvent) => {
+//         if (e.key === 'Enter') {
+//             onSearch();
+//         }
+//     };
+
+//     return (
+//         <div className="">
+//             <div className={`${bg} rounded-full`}>
+//                 <div className="relative ${bg} border-border-subtle border-2 rounded-full flex text-text-secondary">
+//                     <input
+//                         id={id}
+//                         type="text"
+//                         placeholder={placeholder}
+//                         value={value}
+//                         onChange={(e) => onChange(e.target.value)}
+//                         onKeyDown={handleKeyPress}
+//                         className="w-48 pl-10 pr-4 py-2 border text-text-primary rounded-lg outline-none  border-transparent"
+//                     />
+//                     <button
+//                         type="button"
+//                         onClick={onSearch}
+//                         className=" absolute z-50 left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 "
+//                     >
+//                         <Search size={20} />
+//                     </button>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+
+
+
 export const SearchInput: React.FC<SearchInputProps> = ({
-    value,
-    onChange,
-    onSearch,
-    placeholder = "Search...",
-    id = "search",
-    bg = "bg-surface-subtle"
+  value,
+  onChange,
+  onSearch,
+  placeholder = "Search...",
+  id = "search",
+  bg = "bg-surface-subtle",
 }) => {
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            onSearch();
-        }
-    };
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      onSearch();
+    }
+  };
 
-    return (
-        <div className="space-y-2">
-
-            <div className={`${bg} rounded-full`}>
-                <div className="relative ${bg} border-border-subtle border-2 rounded-full flex text-text-secondary">
-                    <input
-                        id={id}
-                        type="text"
-                        placeholder={placeholder}
-                        value={value}
-                        onChange={(e) => onChange(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        className="w-48 pl-10 pr-4 py-2 border text-text-primary rounded-lg outline-none  border-transparent"
-                    />
-                    <button
-                        type="button"
-                        onClick={onSearch}
-                        className=" absolute z-50 left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 "
-                    >
-                        <Search size={20} />
-                    </button>
-                </div>
-            </div>
+  return (
+    <div className="space-y-2">
+      <div className={`${bg} rounded-full`}>
+        <div className={`relative ${bg} border-border-subtle border-2 rounded-full flex items-center`}>
+          <input
+            id={id}
+            type="text"
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyPress}
+            className="flex-1 pl-10 pr-4 py-2 border text-text-primary rounded-full outline-none border-transparent"
+          />
+          <button
+            type="button"
+            onClick={onSearch}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2"
+          >
+            <Search size={20} />
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
-
 
 
 interface SelectProps {

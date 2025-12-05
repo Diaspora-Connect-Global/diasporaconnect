@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { ShoppingCart, Star, Heart, Search, ChevronLeft, ChevronRight, Plus, Minus, Trash2, CheckCircle } from 'lucide-react';
+import { SearchInput } from '@/components/custom/input';
 
 // Types
 interface Product {
@@ -49,9 +50,9 @@ const services: Product[] = [
 
 
 // Header Component
-const Header: React.FC<{ cartCount: number; onCartClick: () => void }> = ({ cartCount, onCartClick }) => (
-  <header className="h-[64px]  sticky top-0 z-50">
-    <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTab: (item: 'products' | 'services') => void; activeTab: string }> = ({ cartCount, onCartClick, setActiveTab, activeTab }) => (
+  <div className="pt-8 flex flex-col justify-between space-y-6 bg-surface-subtle  sticky top-0 z-50">
+    <div className="max-w-7xl  flex  justify-between ">
       <h1 className="text-2xl font-bold">Marketplace</h1>
       <button onClick={onCartClick} className="flex items-center gap-2 ">
         <ShoppingCart className="w-5 h-5" />
@@ -63,12 +64,39 @@ const Header: React.FC<{ cartCount: number; onCartClick: () => void }> = ({ cart
         )}
       </button>
     </div>
-  </header>
+
+
+    <div className="flex  mt-auto  justify-between border-b ">
+      <div>
+        <button
+          onClick={() => setActiveTab('products')}
+          className={`p-2 font-medium ${activeTab === 'products' ? ' border-b-2 border-border-brand' : 'text-gray-600'}`}
+        >
+          Products
+        </button>
+        <button
+          onClick={() => setActiveTab('services')}
+          className={`p-2 font-medium ${activeTab === 'services' ? 'border-b-2 border-border-brand' : 'text-gray-600'}`}
+        >
+          Services
+        </button>
+      </div>
+      <div className="h-[5vh]">
+      <SearchInput
+        placeholder={'searchPeople'}
+        value={"searchTerm"}
+        onChange={() => { }}
+        onSearch={() => { }}
+        bg="bg-surface-default"
+      />
+      </div>
+    </div>
+  </div>
 );
 
 // Product Card Component
-const ProductCard: React.FC<{ 
-  product: Product; 
+const ProductCard: React.FC<{
+  product: Product;
   onAddToCart: (product: Product | CartItem) => void;
 }> = ({ product, onAddToCart }) => {
   const handleAddClick = (e: React.MouseEvent) => {
@@ -107,9 +135,9 @@ const ProductCard: React.FC<{
 };
 
 // Service Detail Component
-const ServiceDetail: React.FC<{ 
-  service: Product; 
-  onBack: () => void; 
+const ServiceDetail: React.FC<{
+  service: Product;
+  onBack: () => void;
   onContinue: (item: CartItem) => void;
 }> = ({ service, onBack, onContinue }) => {
   const [projectDuration, setProjectDuration] = useState<number>(0);
@@ -130,7 +158,7 @@ const ServiceDetail: React.FC<{
   ];
 
   const toggleExtra = (extraId: string) => {
-    setSelectedExtras(prev => 
+    setSelectedExtras(prev =>
       prev.includes(extraId) ? prev.filter(id => id !== extraId) : [...prev, extraId]
     );
   };
@@ -317,9 +345,9 @@ const ServiceDetail: React.FC<{
 };
 
 // Product Detail Component
-const ProductDetail: React.FC<{ 
-  product: Product; 
-  onBack: () => void; 
+const ProductDetail: React.FC<{
+  product: Product;
+  onBack: () => void;
   onAddToCart: (item: Product | CartItem) => void;
 }> = ({ product, onBack, onAddToCart }) => {
   const [selectedSize, setSelectedSize] = useState('M');
@@ -377,7 +405,7 @@ const ProductDetail: React.FC<{
           </div>
           <p className="text-sm text-gray-600 mb-4">By {product.seller}</p>
           <p className="text-3xl font-bold mb-6">GH₵{product.price.toFixed(2)}</p>
-          
+
           <div className="mb-6">
             <h3 className="font-semibold mb-2">Size</h3>
             <div className="flex gap-2">
@@ -873,7 +901,7 @@ const OrderSuccess: React.FC<{
         </div>
         <h2 className="text-2xl font-bold mb-2">Your order payment successfully</h2>
         <p className="text-gray-600 mb-8">Order details</p>
-        
+
         <div className="text-left mb-8">
           {cart.map(item => (
             <div key={item.id} className="flex gap-3 mb-4">
@@ -955,7 +983,7 @@ const App: React.FC = () => {
   const handleAddToCart = (item: Product | CartItem) => {
     // Convert Product to CartItem if needed
     const cartItem: CartItem = 'quantity' in item ? item : { ...item, quantity: 1 };
-    
+
     const existingItem = cart.find(i => i.id === cartItem.id);
     if (existingItem) {
       setCart(cart.map(i => i.id === cartItem.id ? { ...i, quantity: i.quantity + cartItem.quantity } : i));
@@ -995,24 +1023,10 @@ const App: React.FC = () => {
 
   return (
     <div className="h-[calc(100vh-64px)] overflow-y-auto px-[10%]">
-      <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} />
-      
+      <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} setActiveTab={setActiveTab} activeTab={activeTab} />
+
       {currentView === 'home' && (
         <div className="max-w-7xl mx-auto px-4 py-6 ">
-          <div className="flex gap-8 mb-6 border-b w-fit">
-            <button 
-              onClick={() => setActiveTab('products')}
-              className={`pb-2 font-medium ${activeTab === 'products' ? ' border-b-2 border-border-brand' : 'text-gray-600'}`}
-            >
-              Products
-            </button>
-            <button 
-              onClick={() => setActiveTab('services')}
-              className={`pb-2 font-medium ${activeTab === 'services' ? 'border-b-2 border-border-brand' : 'text-gray-600'}`}
-            >
-              Services
-            </button>
-          </div>
 
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
