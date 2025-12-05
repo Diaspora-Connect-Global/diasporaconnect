@@ -339,8 +339,8 @@ export default function Home() {
                 onClick={scrollLeft}
                 className="absolute left-0 top-1/2 -translate-y-1/2 z-10
                            flex h-10 w-10 items-center justify-center
-                           rounded-full bg-white/80 shadow-md
-                           hover:bg-white transition-colors"
+                           rounded-full bg-surface-default/80 shadow-md
+                           cursor-pointer transition-colors"
                 aria-label={tCommon('scrollLeft')}
               >
                 <ChevronLeftIcon className="h-6 w-6 text-gray-800" />
@@ -353,11 +353,11 @@ export default function Home() {
                 onClick={scrollRight}
                 className="absolute right-0 top-1/2 -translate-y-1/2 z-10
                            flex h-10 w-10 items-center justify-center
-                           rounded-full bg-white/80 shadow-md
-                           hover:bg-white transition-colors"
+                           rounded-full bg-surface-default/80 shadow-md
+                           cursor-pointer transition-colors"
                 aria-label={tCommon('scrollRight')}
               >
-                <ChevronRightIcon className="h-6 w-6 text-gray-800" />
+                <ChevronRightIcon className="h-6 w-6 text-primary" />
               </button>
             )}
 

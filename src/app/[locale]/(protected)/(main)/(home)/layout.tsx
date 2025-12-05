@@ -7,10 +7,10 @@ export default function HomeLayout({
 }) {
   return (
     <div className="mx-auto lg:flex items-center  justify-center min-h-[calc(100vh-4rem)]">
-      <div className="lg:sticky w-[20vw] top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
+      <div className="hidden lg:block lg:sticky w-[20vw] top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
         <HomeSidebar />
       </div>
-      <div className="h-[calc(100vh-4rem)] min-w-0 overflow-y-auto scrollbar-hide">
+      <div className="lg:h-[calc(100vh-4rem)] h-[calc(100vh-4rem)] min-w-0 overflow-y-auto scrollbar-hide">
         {children}
       </div>
     </div>

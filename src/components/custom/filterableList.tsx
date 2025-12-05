@@ -93,7 +93,7 @@ export function FilterableList({
                             onClick={() => handleFilterChange(tab.value)}
                             className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-300 ${
                                 tab.value === filter
-                                    ? 'bg-surface-brand text-white'
+                                    ? 'bg-surface-brand text-text-white'
                                     : 'bg-surface-default text-text-secondary hover:bg-surface-tertiary'
                             }`}
                         >
@@ -109,7 +109,7 @@ export function FilterableList({
                 </div>
             ) : (
                 <div className=" rounded-md overflow-y-auto scrollbar-hide lg:max-h-[calc(100vh-12rem)]">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
 
                     {filteredItems.map((item) => (
                         <CustomComponent

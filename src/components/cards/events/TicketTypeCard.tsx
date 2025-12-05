@@ -33,10 +33,10 @@ export default function TicketTypeCard({
       <div className="flex items-start justify-between gap-6">
         {/* Left: Title, Price, Description */}
         <div className="flex-1">
-          <h3 className="font-heading-xsmall ">{title}</h3>
-          <p className="font-label-large text-text-primary mt-1">{price}</p>
+          <h3 className="heading-xsmall ">{title}</h3>
+          <p className="label-large text-text-primary mt-1">{price}</p>
           {description && (
-            <p className="font-label-large text-text-secondary mt-3">{description}</p>
+            <p className="label-large text-text-secondary mt-3">{description}</p>
           )}
         </div>
 

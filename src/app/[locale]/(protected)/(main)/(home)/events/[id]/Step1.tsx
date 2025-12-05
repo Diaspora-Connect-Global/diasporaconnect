@@ -15,8 +15,8 @@ export default function Step1({ quantity, onQuantityChange }: Step1Props) {
   return (
     <div className="bg-surface-default overflow-y-auto scrollbar-hide">
       <section className="pb-4 mb-4">
-        <p className="font-heading-small text-primary">Accra Arts Events</p>
-        <div className="flex gap-2 items-center text-text-secondary">
+        <p className="heading-small text-primary">Accra Arts Events</p>
+        <div className="flex gap-2 label-large items-center text-text-secondary">
           <Image src="/CALENDAR.svg" alt="Calendar" width={16} height={16} />
           <span>Oct 21, 2025, 3:00PM</span>
         </div>

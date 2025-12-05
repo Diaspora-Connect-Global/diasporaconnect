@@ -17,7 +17,7 @@ interface ExploreOpportunitiesProps {
 
 const ExploreOpportunities = ({ name, imageUrl, icon: Icon, id }: ExploreOpportunitiesProps) => {
     return (
-        <Link href={`/opportunities/${id}`} className="flex  text-center justify-center items-center gap-4 bg-surface-default rounded-lg p-4 border border-border-subtle hover:border-border-brand hover:shadow-sm transition-all duration-200 cursor-pointer w-[17.75rem] h-[4rem] ">
+        <Link href={`/opportunities/${id}`} className="flex  text-center justify-center items-center gap-4 bg-surface-default rounded-lg p-4 border border-border-subtle hover:border-border-brand hover:shadow-sm transition-all duration-200 cursor-pointer max-w-[17.75rem] h-[4rem] ">
             <div className="flex-shrink-0 ">
                 {imageUrl ? (
                     <Image
@@ -33,7 +33,7 @@ const ExploreOpportunities = ({ name, imageUrl, icon: Icon, id }: ExploreOpportu
                     <div className="w-5 h-5 bg-text-primary rounded-md" />
                 )}
             </div>
-            <p className="text-text-primary font-medium text-sm line-clamp-2 break-words leading-tight">
+            <p className="text-text-primary font-medium text-sm line-clamp-4 break-words leading-tight">
                 {name}
             </p>
         </Link>
@@ -119,7 +119,7 @@ export default function Opportunities() {
     ];
 
     return (
-        <div className="lg:w-[55.3125rem] lg:max-h-[calc(100vh-64px)]  p-4 overflow-auto scrollbar-hide">
+        <div className="lg:w-[50rem] lg:h-[calc(100vh-64px)] h-[calc(100vh-64px)] p-4 overflow-auto scrollbar-hide">
             {/* 885px equivalent, 64px header height */}
             <div className="mx-auto">
                 <p className="text-2xl font-heading-large my-[1.25rem]">{t("youropp")}</p> {/* 20px equivalent */}
@@ -156,7 +156,7 @@ export default function Opportunities() {
 
                 <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreopp")}</h2> {/* 20px equivalent */}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.75rem] "> {/* 12px, 24px equivalent */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem] "> {/* 12px, 24px equivalent */}
                     {opportunities.map((opp, index) => (
                         <ExploreOpportunities
                         id={opp.id}

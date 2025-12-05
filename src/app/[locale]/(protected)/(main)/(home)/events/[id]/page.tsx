@@ -10,14 +10,14 @@ export default function EventsId() {
         title: "Accra Arts Festival",
         date: "Oct 21, 2025, 3:00PM",
         location: "Ghana Embassy, Belgium",
-        attendees: 32,
+        attendees: 38,
         imageUrl: "/EVENT.png",
     };
 
     return (
         <>
-            <div className="h-[calc(100vh-4rem)] w-[60vw] overflow-y-auto scrollbar-hide p-4">
-                <div className="min-w-[40rem] mx-auto">
+            <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
+                <div className="lg:min-w-[40rem] mx-auto">
                     <EventCard2
                         title={event.title}
                         date={event.date}

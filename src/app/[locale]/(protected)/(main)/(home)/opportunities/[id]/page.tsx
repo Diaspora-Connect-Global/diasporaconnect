@@ -23,6 +23,40 @@ const employmentCareerItems = [
         type: "Remote",
         date: "2 hours ago"
     },
+    {
+        id: "3",
+        title: "Project Manager",
+        company: "Global Tech Solutions",
+        location: "Kigali, Rwanda",
+        type: "On-site",
+        date: "Just now",
+        imageUrl: "/images/global-tech.jpg"
+    },
+    {
+        id: "4",
+        title: "Senior Developer",
+        company: "Tech Startup Inc",
+        location: "Ghana",
+        type: "Remote",
+        date: "2 hours ago"
+    },
+    {
+        id: "4",
+        title: "Project Manager",
+        company: "Global Tech Solutions",
+        location: "Kigali, Rwanda",
+        type: "On-site",
+        date: "Just now",
+        imageUrl: "/images/global-tech.jpg"
+    },
+    {
+        id: "6",
+        title: "Senior Developer",
+        company: "Tech Startup Inc",
+        location: "Ghana",
+        type: "Remote",
+        date: "2 hours ago"
+    },
 ];
 
 const educationTrainingItems = [
