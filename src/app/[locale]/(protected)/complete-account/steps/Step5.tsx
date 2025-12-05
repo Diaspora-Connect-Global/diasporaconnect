@@ -60,6 +60,7 @@ export const Step5: React.FC<Step5Props> = ({ data, loading, nextStep, prevStep,
                         <InputOTPSlot index={5} className="flex-1 h-12 text-lg rounded-md" />
                     </InputOTPGroup>
                 </InputOTP>
+                <p className='text-primary caption-medium mt-3'>Resend code in 0:50</p>
             </div>
         </MultiStep>
     );

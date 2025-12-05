@@ -115,25 +115,39 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
             onNext={handleSubmit}
             onBack={prevStep}
         >
-            <div className="w-full">
-                <div className="flex gap-[2rem] overflow-x-auto  scrollbar-hide snap-x snap-mandatory">
-                    {/* 32px gap, 16px padding */}
+
+
+            <div className="w-full max-w-full  scrollbar-hide
+ lg:mx-0 lg:px-0">
+                <div
+                    className="
+      flex flex-col gap-2
+      overflow-y-auto overflow-x-hidden
+      snap-y snap-mandatory 
+
+      lg:flex-row lg:gap-2
+      lg:overflow-y-hidden lg:overflow-x-auto
+      lg:snap-x
+      scrollbar-hide
+    "
+                >
                     {availableCommunities.map((communityItem, index) => (
                         <div
                             key={index}
-                            className=" sm:w-[17.5rem] snap-start mx-[0.75rem]" 
+                            className="snap-start w-full lg:w-auto lg:flex-shrink-0"
                         >
                             <CommunityCardVariant1
                                 title={communityItem.title}
                                 members={communityItem.members}
                                 onButtonClick={() => handleCommunityToggle(communityItem)}
                                 description={communityItem.description}
-                                buttonText={getButtonText(communityItem.title)} 
+                                buttonText={getButtonText(communityItem.title)}
                             />
                         </div>
                     ))}
                 </div>
             </div>
+
         </MultiStep>
     );
 };

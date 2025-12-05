@@ -53,7 +53,7 @@ export const Step6: React.FC<Step6Props> = ({ data, updateData, nextStep, prevSt
             onBack={prevStep}
             onSkip={() => nextStep()}
         >
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 w-full"> {/* Adjusted grid for better fit */}
+            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full"> 
                 {topics.map((topic) => (
                     <button
                         key={topic.key}

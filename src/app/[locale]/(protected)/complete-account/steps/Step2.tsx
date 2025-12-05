@@ -41,7 +41,7 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
             key={option.value}
             type="button"
             onClick={() => updateData({ communityType: option.value })}
-            className={`px-6 py-3 rounded-md border  transition-all cursor-pointer
+            className={`px-6 py-3 rounded-md border  transition-all cursor-pointer w-full lg:w-auto
               ${data.communityType === option.value
                 ? ' border-border-brand text-text-primary'
                 : 'bg-surface-brand-subtle  text-text-primary '
