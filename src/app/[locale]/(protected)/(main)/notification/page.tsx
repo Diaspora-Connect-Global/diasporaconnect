@@ -211,7 +211,7 @@ export default function Notification() {
     const emptyStateMessage = getEmptyStateMessage();
 
     return (
-        <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-[calc(100vh-4rem)] py-4">
+        <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4">
             <div className="lg:flex justify-between items-center mb-4">
                 <p className="text-2xl font-heading-large">
                     {t('notifications')}
@@ -259,7 +259,7 @@ export default function Notification() {
                     </div>
                 </div>
             ) : (
-                <div className="bg-surface-default rounded-md p-6 overflow-y-auto scrollbar-hide lg:max-h-[calc(100vh-12rem)]">
+                <div className="bg-surface-default rounded-md lg:p-6 overflow-y-auto scrollbar-hide pb-16">
                     {filteredNotifications.map((not) => (
                         <NotificationCard
                             key={not.id}

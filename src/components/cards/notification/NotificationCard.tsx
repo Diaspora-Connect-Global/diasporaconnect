@@ -51,7 +51,7 @@ export function NotificationCard({
 
     return (
         <header className="w-full border-b">
-            <div className="max-w-7xl mx-auto px-2 py-3 sm:px-4">
+            <div className="lg:max-w-7xl mx-auto px-2 py-3 sm:px-4">
                 <div className="flex items-center justify-between gap-2">
                     {/* Left section - Logo and branding */}
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
