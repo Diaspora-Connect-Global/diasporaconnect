@@ -320,7 +320,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex overflow-hidden">
+    <div className="h-[84vh] lg:h-[92vh] flex overflow-hidden">
         {/* Main Feed - Orange - Independent Scroll */}
         <div className=" lg:max-w-[40vw] overflow-y-auto scrollbar-hide m-4 flex flex-col">
           {/* Discover Section */}

@@ -7,13 +7,10 @@ export default function MainLayout({
 }) {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-        <Header>
-
-
+      <Header>
         {children}
+      </Header>
+    </div>
 
-        </Header>
-      </div>
-     
   );
 } 

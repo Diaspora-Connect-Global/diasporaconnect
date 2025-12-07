@@ -109,10 +109,10 @@ export default function Header({
 
   return (
     <div>
-      <div className="lg:h-[4rem] w-full bg-surface-default sticky top-0 z-50">
+      <div className="h-[8vh] w-full bg-surface-default sticky top-0 z-50">
       <header className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
         <div className="mx-auto px-4  lg:px-8"> {/* Responsive padding */}
-          <div className="flex  justify-between  h-16 "> {/* Standard header height */}
+          <div className="flex  justify-between h-[8vh]"> {/* Standard header height */}
             <div className='flex'>
               {/* Mobile menu button */}
               <button
@@ -238,11 +238,11 @@ export default function Header({
       </header>
 
       </div>
-      <div className=" scrollbar-hide pb-20 h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] bg-amber-300">
+      <div className=" scrollbar-hide pb-20 h-[84vh] lg:h-[92vh] bg-amber-300">
         {children}
       </div>
        <div
-          className="
+          className=" h-[8vh]
             fixed bottom-0 left-0 w-full
             flex  justify-between
             z-50
