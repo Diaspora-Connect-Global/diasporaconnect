@@ -1,6 +1,13 @@
-import React from "react";
+"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Pagination from "@/components/custom/pagination";
+import React, { useState } from "react";
 
 export default function OverviewPage() {
+
+  const [newList, setNewList] = useState<any[]>([]);
+  const [perPage, setPerPage] = useState<number>(4);
+
   const statsCards = [
     {
       id: 'sales',
@@ -32,6 +39,16 @@ export default function OverviewPage() {
     { id: '0003', date: '10 Dec 2025', customer: 'Linda Brown', amount: 'GH₵550.00', payment: 'Paid' },
   ];
 
+
+  const data = [
+  { id: 1, name: "Apple" },
+  { id: 2, name: "Banana" },
+  { id: 3, name: "Cherry" },
+  { id: 4, name: "Date" },
+  { id: 5, name: "Elderberry" },
+  { id: 6, name: "Fig" },
+  { id: 7, name: "Grape" },
+];
   return (
     <div className="">
       <h1 className="text-primary heading-xsmall mb-6">Overview</h1>
@@ -88,7 +105,7 @@ export default function OverviewPage() {
                 <th className="px-6 py-3 text-left uppercase tracking-wider">
                   Amount
                 </th>
-                
+
                 <th className="px-6 py-3 text-left  uppercase tracking-wider">
                   Actions
                 </th>
@@ -111,6 +128,14 @@ export default function OverviewPage() {
             </tbody>
           </table>
         </div>
+
+           <Pagination
+        LIST={data}
+        newList={newList}
+        setNewList={setNewList}
+        perPage={perPage}
+        setPerPage={setPerPage}
+      />
       </div>
     </div>
   );

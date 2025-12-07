@@ -129,28 +129,28 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   return (
-    <div className="space-y-2">
-      <div className={`${bg} rounded-full`}>
-        <div className={`relative ${bg} border-border-subtle border-2 rounded-full flex items-center`}>
-          <input
-            id={id}
-            type="text"
-            placeholder={placeholder}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="flex-1 pl-10 pr-4 py-2 border text-text-primary rounded-full outline-none border-transparent"
-          />
-          <button
-            type="button"
-            onClick={onSearch}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2"
-          >
-            <Search size={20} />
-          </button>
-        </div>
-      </div>
-    </div>
+    
+     <div className={`relative ${bg} border-border-subtle border-2 rounded-full flex items-center w-full overflow-hidden`}>
+  <button
+    type="button"
+    onClick={onSearch}
+    className="pl-2 flex-shrink-0"
+  >
+    <Search size={20} />
+  </button>
+
+  <input
+    id={id}
+    type="text"
+    placeholder={placeholder}
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    onKeyDown={handleKeyPress}
+    className="flex-1 px-3 py-1 text-text-primary rounded-full outline-none border-transparent bg-transparent w-full"
+  />
+</div>
+
+      
   );
 };
 

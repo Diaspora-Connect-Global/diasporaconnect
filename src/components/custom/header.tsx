@@ -27,7 +27,11 @@ import React from 'react';
 
 
 
-export default function Header() {
+export default function Header({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,162 +64,198 @@ export default function Header() {
     return normalizedPathname.startsWith(normalizedHref);
   };
 
-  return (
-    <header className="max-w-[80vw] mx-auto border-b border-border-subtle bg-surface-default"> {/* Full width header */}
-      <div className="mx-auto px-4 sm:px-6 lg:px-8"> {/* Responsive padding */}
-        <div className="flex justify-between  h-16 "> {/* Standard header height */}
-          {/* Logo */}
-          <div className=" flex text-center justify-center items-center">
-            <Link href={`/${currentLocale}`}>
-              <p className='text-text-brand font-heading-small'>diaspoplug</p>
-            </Link>
-          </div>
 
-          {/* Desktop Navigation - Centered */}
-<nav className="hidden lg:flex space-x-8">
-  {navigation.map((item) => {
-    const active = isActive(item.href);
+  const QuickLinks = () => {
     return (
-      <Link
-        key={item.name}
-        href={item.href}
-        className={`
-          group relative flex flex-col items-center justify-center
-          px-3 py-2 transition-all duration-200
-          ${active ? 'text-text-brand' : 'text-text-secondary hover:text-text-primary'}
-        `}
-      >
-        {/* Icon - Slightly raised above text */}
-        <div className="-mt-1">
-          <Image
-            width={60}
-            height={60}
-            src={`${item.icon}${active?"active":""}.svg`}
-            alt={`${item.name} Icon`}
-            className="w-6 h-6 object-contain"
-          />
-        </div>
+      <nav className="flex w-full justify-center lg:space-x-8 bg-surface-default">
+        {navigation.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`
+                group relative flex flex-col items-center justify-center
+                px-3 py-2 transition-all duration-200
+                ${active ? 'text-text-brand' : 'text-text-secondary hover:text-text-primary'}
+              `}
+            >
+              {/* Icon - Slightly raised above text */}
+              <div className="-mt-1">
+                <Image
+                  width={60}
+                  height={60}
+                  src={`${item.icon}${active ? "active" : ""}.svg`}
+                  alt={`${item.name} Icon`}
+                  className="w-6 h-6 object-contain"
+                />
+              </div>
 
-        {/* Label */}
-        <p className="text-xs font-medium whitespace-nowrap">
-          {item.name}
-        </p>
+              {/* Label */}
+              <p className="text-xs font-medium whitespace-nowrap">
+                {item.name}
+              </p>
 
-        {/* Active Indicator - Bottom border under text */}
-        {active && (
-          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-brand" />
-        )}
-      </Link>
+              {/* Active Indicator - Bottom border under text */}
+              {active && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-brand" />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
     );
-  })}
-</nav>
+  }
 
-          {/* Right Section - Search, Language, Profile */}
-          <div className="flex items-center space-x-4"> {/* Standard spacing */}
-            {/* Search Box - Hidden on mobile */}
-            <div className="hidden lg:flex items-center min-w-0 flex-1 max-w-xs">
-              <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                onSearch={handleSearch}
-                placeholder={t('searchLabel')}
-                id="main-search"
-              />
+  return (
+    <div>
+      <div className="lg:h-[4rem] w-full bg-surface-default sticky top-0 z-50">
+      <header className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
+        <div className="mx-auto px-4  lg:px-8"> {/* Responsive padding */}
+          <div className="flex  justify-between  h-16 "> {/* Standard header height */}
+            <div className='flex'>
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 rounded-md text-text-primary hover:bg-surface-hover transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                  />
+                </svg>
+              </button>
+
+              {/* Logo */}
+              <div className=" flex text-center justify-center items-center">
+                <Link href={`/${currentLocale}`}>
+                  <p className='text-text-brand font-heading-small'>diaspoplug</p>
+                </Link>
+              </div>
+
             </div>
 
-            {/* Language Selector and Theme Toggle */}
-            <div className="hidden lg:flex items-center space-x-2">
-              {/* <LocaleSwitcher
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden lg:flex ">
+            <QuickLinks/>
+            </div>
+
+            {/* Right Section - Search, Language, Profile */}
+            <div className="flex items-center space-x-1"> {/* Standard spacing */}
+              {/* Search Box - Hidden on mobile */}
+              <div className="lg:w-50 w-30 ">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  onSearch={handleSearch}
+                  placeholder={t('searchLabel')}
+                  id="main-search"
+                />
+              </div>
+
+              {/* Language Selector and Theme Toggle */}
+              <div className="hidden  items-center space-x-2">
+                {/* <LocaleSwitcher
                 selectClassName="appearance-none text-text-primary pr-8"
                 optionClassName="bg-surface-default"
               /> */}
-              <ThemeToggle />
-            </div>
-
-            {/* User Profile */}
-            <DropdownMenuAvatar />
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md text-text-primary hover:bg-surface-hover transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border-subtle">
-            {/* Mobile Search */}
-            <div className="mb-4 px-2">
-              <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                onSearch={handleSearch}
-                placeholder={t('searchLabel')}
-                id="mobile-search"
-              />
-            </div>
-
-            {/* Mobile Navigation Links */}
-            <nav className="grid grid-cols-2 gap-2 mb-4">
-              {navigation.map((item) => {
-                const active = isActive(item.href);
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-2 px-3 py-3 rounded-lg transition-all duration-200 ${active
-                      ? 'bg-surface-brand-light text-text-brand font-medium border border-border-brand-light'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                      }`}
-                  >
-                    <div className="w-5 h-5">
-                      <Image
-                        width={20}
-                        height={20}
-                        src={item.icon}
-                        alt={`${item.name} Icon`}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <span className="text-sm font-medium">{item.name}</span>
-                    {active && (
-                      <div className="ml-auto w-2 h-2 bg-text-brand rounded-full" />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Mobile user info and language selector */}
-            <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
-              <div className="flex items-center space-x-3">
-                <DropdownMenuAvatar />
-                <span className="text-sm text-text-primary">{t('profile')}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <LocaleSwitcher
-                  selectClassName="appearance-none text-text-primary text-sm"
-                  optionClassName="bg-surface-default"
-                />
                 <ThemeToggle />
               </div>
+
+              {/* User Profile */}
+              <DropdownMenuAvatar />
+
+
             </div>
           </div>
-        )}
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden py-4 border-t border-border-subtle">
+              {/* Mobile Search */}
+              <div className="mb-4 px-2">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  onSearch={handleSearch}
+                  placeholder={t('searchLabel')}
+                  id="mobile-search"
+                />
+              </div>
+
+              {/* Mobile Navigation Links */}
+              <nav className="grid grid-cols-2 gap-2 mb-4">
+                {navigation.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center space-x-2 px-3 py-3 rounded-lg transition-all duration-200 ${active
+                        ? 'bg-surface-brand-light text-text-brand font-medium border border-border-brand-light'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                        }`}
+                    >
+                      <div className="w-5 h-5">
+                        <Image
+                          width={20}
+                          height={20}
+                          src={item.icon}
+                          alt={`${item.name} Icon`}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <span className="text-sm font-medium">{item.name}</span>
+                      {active && (
+                        <div className="ml-auto w-2 h-2 bg-text-brand rounded-full" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Mobile user info and language selector */}
+              <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
+                <div className="flex items-center space-x-3">
+                  <DropdownMenuAvatar />
+                  <span className="text-sm text-text-primary">{t('profile')}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <LocaleSwitcher
+                    selectClassName="appearance-none text-text-primary text-sm"
+                    optionClassName="bg-surface-default"
+                  />
+                  <ThemeToggle />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+
       </div>
-    </header>
+      <div className=" scrollbar-hide pb-20 h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] bg-amber-300">
+        {children}
+      </div>
+       <div
+          className="
+            fixed bottom-0 left-0 w-full
+            flex  justify-between
+            z-50
+
+            lg:hidden lg:border-0 lg:bg-transparent
+          "
+        >
+            <QuickLinks/>
+
+
+        </div>
+
+    </div>
   );
 }
 
@@ -281,9 +321,9 @@ export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
 export function DropdownMenuAvatar() {
   const t = useTranslations('home.header');
   const [open, setOpen] = useState(false);
-  
+
   return (
-    <DropdownMenu  open={open} onOpenChange={setOpen}>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none cursor-pointer">
           <MyAvatar />
@@ -291,7 +331,7 @@ export function DropdownMenuAvatar() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-100 mx-20 mt-4" align="start">
         <DropdownMenuLabel>
-          <Link  onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
+          <Link onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
             <div className='flex space-x-4 items-center my-2'>
               <MyAvatar />
               <p className='text-xl'>John Doe</p>
