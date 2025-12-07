@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ChevronRight as CR, SettingsIcon } from 'lucide-react';
 import { LogoutCurve, Wallet3 } from 'iconsax-reactjs';
-import { QuestionIcon, StorefrontIcon } from "@phosphor-icons/react";
+import { QuestionIcon, StorefrontIcon, X } from "@phosphor-icons/react";
 import { IconFileDollar } from '@tabler/icons-react';
 import React from 'react';
 import HomeSidebar from '../home/HomeSidebar';
@@ -109,8 +109,8 @@ export default function Header({
   }
 
   return (
-    <div>
-      <div className=" h-app-top-down w-full bg-surface-default  top-0 z-50">
+    <div >
+      <div className="h-app-top-down w-full bg-surface-default  top-0 z-50">
         <header className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
           <div className="mx-auto px-4  lg:px-8"> {/* Responsive padding */}
             <div className="flex  justify-between h-app-top-down"> {/* Standard header height */}
@@ -173,13 +173,41 @@ export default function Header({
               </div>
             </div>
 
-            {/* Mobile Navigation */}
-            {isMobileMenuOpen && (
+          
 
-              <div className='lg:hidden w-[80%] bg-transparent '>
-                <HomeSidebar />
-              </div>
-            )}
+
+               {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Sidebar */}
+          <div className="fixed top-0 left-0 h-full w-[85%] max-w-sm bg-surface-default z-50 lg:hidden overflow-y-auto shadow-2xl">
+            {/* Sidebar Header */}
+            <div className="flex justify-between items-center p-4 border-b border-border-subtle sticky top-0 bg-surface-default z-10">
+              <Link href={`/${currentLocale}`} onClick={() => setIsMobileMenuOpen(false)}>
+                <p className='text-text-brand font-heading-small'>diaspoplug</p>
+              </Link>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
+                aria-label="Close menu"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Sidebar Content */}
+            <div className="p-4">
+              <HomeSidebar />
+            </div>
+          </div>
+        </>
+      )}
           </div>
         </header>
       </div>

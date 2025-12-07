@@ -677,21 +677,32 @@
   }
 }
 
-.h-app-inner {
-  height: 84vh;
-}
+/* Header height */
 .h-app-top-down {
-  height: 8vh;
-}
-.h-app-down {
-  height: 8vh;
+  height: 8vh; /* or fixed px if you prefer exact height */
 }
 
+/* Main content area */
+.h-app-inner {
+  /* Full viewport minus header and footer */
+  height: calc(100dvh - 8vh - 8vh); 
+  overflow-y: auto;
+}
+
+/* Footer / bottom QuickLinks */
+.h-app-down {
+  height: 8vh;
+  padding-bottom: env(safe-area-inset-bottom); /* For iPhones with notch & home indicator */
+}
+
+/* Responsive adjustments for larger screens */
 @media (min-width: 1024px) {
-  .h-app-inner  {
-    height: 92vh;
+  .h-app-inner {
+    height: calc(100dvh - 8vh); /* Hide bottom nav on desktop */
   }
   .h-app-down {
-  height: 0vh;
+    height: 0; /* Footer not needed on desktop */
+    padding-bottom: 0;
+  }
 }
-}
+

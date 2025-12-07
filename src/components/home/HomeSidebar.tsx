@@ -259,7 +259,7 @@ export default function HomeSidebar() {
     const isCommunity = true;
 
     return (
-        <div className='lg:max-w-[20vw] h-app-inner  lg:sticky top-[4rem] overflow-y-auto scrollbar-hide'>
+        <div className='lg:max-w-[20vw] h-app-inner  lg:sticky top-[4rem] overflow-y-auto scrollbar-hide z-50'>
             {!isCommunity ? <NoCommunity /> : <Community />}
 
             <div className="text-center text-xs space-x-2 py-4 mt-6 flex flex-wrap">

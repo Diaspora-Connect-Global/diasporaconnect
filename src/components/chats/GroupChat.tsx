@@ -1,5 +1,10 @@
+// ============================================
+// GROUP CHAT - MOBILE RESPONSIVE
+// ============================================
+// File: components/chats/GroupChat.tsx
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ChevronRight, InfoIcon, MessageCircle, X } from "lucide-react";
+import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { formatChatTimestamp } from "@/macros/time";
@@ -22,15 +27,14 @@ interface Reply {
 
 export default function GroupChat({ chat }: { chat: ChatInfo }) {
     const t = useTranslations('chat.group');
-    const tActions = useTranslations('actions');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [repliesSidebarOpen, setRepliesSidebarOpen] = useState(false);
     const [selectedMessage, setSelectedMessage] = useState<any>(null);
     const [replies, setReplies] = useState<Reply[]>([]);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
 
-    // Use Zustand store
     const {
         groupMembers,
         sendMessage,
@@ -39,20 +43,23 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         getUserById
     } = useChatStore();
 
-    // Get messages for current conversation
     const conversationMessages = getMessagesByConversation(chat.id);
 
-    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [conversationMessages]);
 
-    // Mark as read when opening the chat
     useEffect(() => {
         markAsRead(chat.id);
     }, [chat.id, markAsRead]);
 
-    // Mock replies data
     const mockReplies: Reply[] = [
         {
             id: '1',
@@ -70,22 +77,12 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
             timestamp: new Date(Date.now() - 1000 * 60).toISOString(),
             type: 'text'
         },
-        {
-            id: '3',
-            messageId: '16',
-            senderId: '4',
-            text: "Can't wait!",
-            timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            type: 'text'
-        }
     ];
 
-    // Get reply count for a message
     const getReplyCount = (messageId: string): number => {
         return mockReplies.filter(reply => reply.messageId === messageId).length;
     };
 
-    // Get replies for a specific message
     const getRepliesForMessage = (messageId: string): Reply[] => {
         return mockReplies.filter(reply => reply.messageId === messageId);
     };
@@ -93,7 +90,6 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
     const handleSendMessage = (messageText: string, image?: string) => {
         if (messageText.trim() || image) {
             if (replyingTo) {
-                // Send a reply
                 const newReply: Reply = {
                     id: Date.now().toString(),
                     messageId: replyingTo,
@@ -106,7 +102,6 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                 setReplies(prev => [...prev, newReply]);
                 setReplyingTo(null);
             } else {
-                // Send a regular message
                 sendMessage(chat.id, messageText, 'current-user', image ? 'image' : 'text');
             }
         }
@@ -117,8 +112,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         setReplies(getRepliesForMessage(message.id));
         setRepliesSidebarOpen(true);
         setReplyingTo(message.id);
-        setSidebarOpen(false)
-
+        setSidebarOpen(false);
     };
 
     const handleCloseReplies = () => {
@@ -127,7 +121,6 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         setReplyingTo(null);
     };
 
-    // Get group members with user details
     const membersWithDetails = groupMembers
         .filter(member => member.groupId === chat.id)
         .map(member => ({
@@ -136,37 +129,34 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         }))
         .filter(member => member.user);
 
-    // Helper function to get sender names for groups
     const getSenderName = (senderId: string): string => {
         const user = getUserById(senderId);
         return user?.name || 'Unknown User';
     };
 
-
-    const handleSideBarToggle = () =>{
-        setSidebarOpen(!sidebarOpen)
-        setRepliesSidebarOpen(false)
-    }
-
+    const handleSideBarToggle = () => {
+        setSidebarOpen(!sidebarOpen);
+        setRepliesSidebarOpen(false);
+    };
 
     return (
-        <div className="flex flex-row h-full min-h-0 space-x-2"> {/* Changed to h-full min-h-0 */}
+        <div className="flex flex-row  h-app-inner space-x-0 md:space-x-2">
             {/* Main Chat Area */}
-            <div className="flex-1 bg-surface-default rounded-lg border border-border-subtle flex flex-col h-full min-h-0"> {/* Removed fixed width, added min-h-0 */}
-                {/* Group Header */}
-                <div className="flex-shrink-0 border-b border-border-subtle p-4 flex justify-between"> {/* Added flex-shrink-0 */}
+            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${
+                isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'
+            }`}>
+                {/* Group Header - Hidden on mobile */}
+                <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                     <div className="flex items-center space-x-3">
                         <div className="relative">
                             <Avatar className="w-12 h-12">
                                 <AvatarImage src={chat.avatar} alt="avatar" />
-                                <AvatarFallback>U</AvatarFallback>
+                                <AvatarFallback>G</AvatarFallback>
                             </Avatar>
-                            {chat.online && (
-                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-text-success border-2 border-white rounded-full" />
-                            )}
                         </div>
                         <div>
                             <h2 className="font-semibold text-text-primary">{chat.name}</h2>
+                            <p className="text-sm text-text-secondary">{chat.memberCount} members</p>
                         </div>
                     </div>
                     <button onClick={handleSideBarToggle}>
@@ -174,20 +164,28 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     </button>
                 </div>
 
+                {/* Mobile Info Button - Floating */}
+                <button 
+                    onClick={handleSideBarToggle}
+                    className="md:hidden fixed top-20 right-4 z-10 p-2 bg-surface-brand rounded-full shadow-lg"
+                >
+                    <Menu className="w-5 h-5 text-text-white" />
+                </button>
+
                 {/* Messages Area */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4"> {/* Added min-h-0 */}
-                    {conversationMessages.map((message) => {
+                <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
+                    {conversationMessages.map((message,index) => {
                         const replyCount = getReplyCount(message.id);
                         return (
                             <div
-                                key={message.id}
+                                key={index}
                                 className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
                             >
-                                <div className={`max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
+                                <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
                                     {message.type === 'image' && (message as any).imageUrl ? (
                                         <div className="mb-2">
                                             {message.senderId !== 'current-user' && (
-                                                <p className="text-xs text-text-primary mb-1 ml-1">
+                                                <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
                                                     {getSenderName(message.senderId)}
                                                 </p>
                                             )}
@@ -199,18 +197,19 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                                 className="rounded-2xl max-w-full h-auto"
                                             />
                                             {message.text && (
-                                                <p className="text-sm text-text-primary mt-2">{message.text}</p>
+                                                <p className="text-xs sm:text-sm text-text-primary mt-2">{message.text}</p>
                                             )}
                                         </div>
                                     ) : (
                                         <div
-                                            className={`px-4 py-2 rounded-4xl ${message.senderId === 'current-user'
-                                                ? 'bg-text-brand text-white'
-                                                : 'bg-surface-brand-light text-text-primary'
-                                                }`}
+                                            className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
+                                                message.senderId === 'current-user'
+                                                    ? 'bg-text-brand text-white'
+                                                    : 'bg-surface-brand-light text-text-primary'
+                                            }`}
                                         >
                                             {message.senderId !== 'current-user' && (
-                                                <p className="text-xs text-text-primary mb-1 ml-1">
+                                                <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
                                                     {getSenderName(message.senderId)}
                                                 </p>
                                             )}
@@ -219,19 +218,19 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                     )}
 
                                     <div className="space-x-2 flex items-center justify-start mt-1">
-                                        <Avatar className="w-6 h-6">
+                                        <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
                                             <AvatarImage src={chat.avatar} alt="avatar" />
-                                            <AvatarFallback>U</AvatarFallback>
+                                            <AvatarFallback>G</AvatarFallback>
                                         </Avatar>
-                                        <p className="text-xs text-text-tertiary">
+                                        <p className="text-[10px] sm:text-xs text-text-tertiary">
                                             {formatChatTimestamp(message.timestamp)}
                                         </p>
                                         <button
                                             onClick={() => handleViewReplies(message)}
-                                            className="flex items-center space-x-1 text-xs text-text-brand hover:text-text-brand-dark transition-colors ml-2"
+                                            className="flex items-center space-x-1 text-[10px] sm:text-xs text-text-brand hover:text-text-brand-dark transition-colors"
                                         >
                                             <span>
-                                                {replyCount > 0 ? t('repliesCount', { count: replyCount }) + ' | ' + t('reply') : t('reply')}
+                                                {replyCount > 0 ? `${replyCount} ${t('replies')} | ` : ''}{t('reply')}
                                             </span>
                                         </button>
                                     </div>
@@ -242,9 +241,9 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* Main Message Input - Hidden when replies sidebar is open */}
+                {/* Main Message Input */}
                 {!repliesSidebarOpen && (
-                    <div className="flex-shrink-0"> {/* Added flex-shrink-0 wrapper */}
+                    <div className="flex-shrink-0">
                         <MessageInput
                             onSendMessage={handleSendMessage}
                             placeholder={t('message', { name: chat.name })}
@@ -257,170 +256,169 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
             {/* Group Info Sidebar */}
             {sidebarOpen && (
-                <div className="w-80 bg-surface-default border rounded-lg border-border-subtle flex flex-col min-h-0"> {/* Fixed width, added min-h-0 */}
-                    <div className="p-4 flex-1 min-h-0 flex flex-col"> {/* Added min-h-0 */}
-                        {/* Group Info */}
-                        <div className="flex-shrink-0 flex flex-col items-center mb-6"> {/* Added flex-shrink-0 */}
-                            <Avatar className="w-20 h-20">
-                                <AvatarImage src={chat.avatar} alt="avatar" />
-                                <AvatarFallback>U</AvatarFallback>
-                            </Avatar>
-                            <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
-                        </div>
-
-                        <div className="flex-shrink-0 flex items-center justify-center mb-6"> {/* Added flex-shrink-0 */}
-                            <ButtonType3>
-                                {t('edit')}
-                            </ButtonType3>
-                        </div>
-
-                        {/* Group Members */}
-                        <div className="flex-1 min-h-0 mb-6"> {/* Added flex-1 min-h-0 */}
-                            <div className="flex-shrink-0 flex justify-between items-center mb-3"> {/* Added flex-shrink-0 */}
-                                <h5 className="text-sm font-medium text-text-primary">
-                                    {t('members')}
-                                </h5>
-                                <ButtonType3 className="text-xs py-1 px-2">
-                                    {t('addPeople')}
-                                </ButtonType3>
+                <>
+                    {isMobile && (
+                        <div 
+                            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                            onClick={() => setSidebarOpen(false)}
+                        />
+                    )}
+                    
+                    <div className={`
+                        ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm' : 'w-80'} 
+                        bg-surface-default border-l border-border-subtle flex flex-col min-h-0
+                        ${isMobile ? 'rounded-l-2xl' : 'rounded-lg'}
+                    `}>
+                        {isMobile && (
+                            <div className="flex justify-between items-center p-4 border-b border-border-subtle">
+                                <h3 className="font-semibold text-text-primary">Group Info</h3>
+                                <button
+                                    onClick={() => setSidebarOpen(false)}
+                                    className="p-2 hover:bg-surface-hover rounded-lg"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
-                            <div className="h-full min-h-0 overflow-y-auto scrollbar-hide"> {/* Changed to h-full min-h-0 */}
-                                {membersWithDetails.map((member) => (
-                                    <div key={member.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-surface-hover">
-                                        <Avatar className="w-12 h-12">
-                                            <AvatarImage src={member.user?.avatar || chat.avatar} alt="avatar" />
-                                            <AvatarFallback>{member.user?.name?.charAt(0) || 'U'}</AvatarFallback>
-                                        </Avatar>
+                        )}
 
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-text-primary truncate">
-                                                {member.user?.name}
-                                                {member.userId === 'current-user' && t('you')}
-                                            </p>
-                                            <p className="text-xs text-text-secondary capitalize">
-                                                {member.role} • {member.user?.status || 'offline'}
-                                            </p>
+                        <div className="p-4 flex-1 min-h-0 flex flex-col overflow-y-auto">
+                            <div className="flex-shrink-0 flex flex-col items-center mb-6">
+                                <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
+                                    <AvatarImage src={chat.avatar} alt="avatar" />
+                                    <AvatarFallback>G</AvatarFallback>
+                                </Avatar>
+                                <h4 className="font-semibold text-text-primary text-base sm:text-lg mt-3">{chat.name}</h4>
+                            </div>
+
+                            <div className="flex-shrink-0 flex items-center justify-center mb-6">
+                                <ButtonType3 className="text-sm">{t('edit')}</ButtonType3>
+                            </div>
+
+                            <div className="flex-1 min-h-0 mb-6">
+                                <div className="flex-shrink-0 flex justify-between items-center mb-3">
+                                    <h5 className="text-sm font-medium text-text-primary">{t('members')}</h5>
+                                    <ButtonType3 className="text-xs py-1 px-2">{t('addPeople')}</ButtonType3>
+                                </div>
+                                <div className="space-y-2">
+                                    {membersWithDetails.map((member) => (
+                                        <div key={member.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-surface-hover">
+                                            <Avatar className="w-10 h-10">
+                                                <AvatarImage src={member.user?.avatar || chat.avatar} alt="avatar" />
+                                                <AvatarFallback>{member.user?.name?.charAt(0) || 'U'}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-text-primary truncate">
+                                                    {member.user?.name}
+                                                    {member.userId === 'current-user' && ' (You)'}
+                                                </p>
+                                                <p className="text-xs text-text-secondary capitalize">
+                                                    {member.role}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-shrink-0 border-t border-border-subtle p-4">
+                            <div className="space-y-2">
+                                <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer">
+                                    <p className="text-sm">{t('leaveGroup')}</p>
+                                    <ChevronRight className="w-4 h-4" />
+                                </div>
+                                <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer">
+                                    <p className="text-sm">{t('deleteGroup')}</p>
+                                    <ChevronRight className="w-4 h-4" />
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    {/* Quick Actions - At the bottom */}
-                    <div className="flex-shrink-0 border-t border-border-subtle p-4"> {/* Added flex-shrink-0 */}
-                        <div className="space-y-3">
-                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">{t('leaveGroup')}</p>
-                                <ChevronRight className="w-4 h-4" />
-                            </div>
-
-                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">{t('deleteGroup')}</p>
-                                <ChevronRight className="w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </>
             )}
 
             {/* Replies Sidebar */}
             {repliesSidebarOpen && (
-                <div className="w-80 bg-surface-default border rounded-lg border-border-subtle flex flex-col min-h-0"> {/* Fixed width, added min-h-0 */}
-                    {/* Replies Header */}
-                    <div className="flex-shrink-0 p-4 flex justify-between items-center"> {/* Added flex-shrink-0 */}
-                        <div>
-                            <h3 className="font-semibold text-text-primary">{t('replies')}</h3>
-                        </div>
-                        <button
+                <>
+                    {isMobile && (
+                        <div 
+                            className="fixed inset-0 bg-black/50 z-40 md:hidden"
                             onClick={handleCloseReplies}
-                            className="p-1 hover:bg-surface-hover rounded-full transition-colors"
-                        >
-                            <X className="w-4 h-4 text-text-secondary" />
-                        </button>
-                    </div>
-
-                    {/* Original Message */}
-                    {selectedMessage && (
-                        <div className="flex-shrink-0 p-4 border-b border-border-subtle bg-surface-hover"> {/* Added flex-shrink-0 */}
-                            <div className="bg-surface-brand-light px-4 py-4 rounded-4xl items-center min-w-0 mb-2">
-                                <span className="text-sm font-medium text-text-primary">
-                                    {getSenderName(selectedMessage.senderId)}
-                                </span>
-                                <p className="text-sm text-text-primary">{selectedMessage.text}</p>
-                            </div>
-                            <p className="text-xs text-text-tertiary flex items-center space-x-4 mt-1">
-                                <Avatar className="w-6 h-6">
-                                    <AvatarImage src={getUserById(selectedMessage.senderId)?.avatar} alt="avatar" />
-                                    <AvatarFallback>{getSenderName(selectedMessage.senderId).charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                {formatChatTimestamp(selectedMessage.timestamp)}
-                                <p className="text-text-brand"> 4 replies </p>
-                            </p>
-                        </div>
+                        />
                     )}
+                    
+                    <div className={`
+                        ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm' : 'w-80'} 
+                        bg-surface-default border-l border-border-subtle flex flex-col min-h-0
+                        ${isMobile ? 'rounded-l-2xl' : 'rounded-lg'}
+                    `}>
+                        <div className="flex-shrink-0 p-4 flex justify-between items-center border-b border-border-subtle">
+                            <h3 className="font-semibold text-text-primary text-sm sm:text-base">{t('replies')}</h3>
+                            <button
+                                onClick={handleCloseReplies}
+                                className="p-1 hover:bg-surface-hover rounded-full transition-colors"
+                            >
+                                <X className="w-4 h-4 text-text-secondary" />
+                            </button>
+                        </div>
 
-                    {/* Replies List */}
-                    <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4"> {/* Added min-h-0 */}
-                        {replies.length > 0 ? (
-                            replies.map((reply) => (
-                                <div key={reply.id} className="">
-                                    <div className="flex-1 min-w-0 bg-surface-brand-light rounded-4xl px-4 py-4">
-                                        <div className="mb-1">
-                                            <span className="text-sm font-medium text-text-primary">
-                                                {getSenderName(reply.senderId)}
-                                            </span>
-                                            {reply.type === 'image' && reply.imageUrl ? (
-                                                <div className="mb-2">
-                                                    <Image
-                                                        src={reply.imageUrl}
-                                                        alt="Reply image"
-                                                        width={200}
-                                                        height={150}
-                                                        className="rounded-xl max-w-full h-auto"
-                                                    />
-                                                    {reply.text && (
-                                                        <p className="text-sm text-text-primary mt-2">{reply.text}</p>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <p className="text-sm text-text-primary bg-surface-hover rounded-lg">
-                                                    {reply.text}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex space-x-3 items-center">
-                                        <Avatar className="w-3 h-3 flex-shrink-0">
-                                            <AvatarImage src={getUserById(reply.senderId)?.avatar} alt="avatar" />
-                                            <AvatarFallback>{getSenderName(reply.senderId).charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <span className="text-xs text-text-tertiary">
-                                            {formatChatTimestamp(reply.timestamp)}
-                                        </span>
-                                    </div>
+                        {selectedMessage && (
+                            <div className="flex-shrink-0 p-3 sm:p-4 border-b border-border-subtle bg-surface-hover">
+                                <div className="bg-surface-brand-light px-3 py-3 sm:px-4 sm:py-4 rounded-2xl sm:rounded-4xl mb-2">
+                                    <span className="text-xs sm:text-sm font-medium text-text-primary">
+                                        {getSenderName(selectedMessage.senderId)}
+                                    </span>
+                                    <p className="text-xs sm:text-sm text-text-primary">{selectedMessage.text}</p>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="text-center text-text-secondary py-8">
-                                <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p className="text-sm">{t('noReplies')}</p>
-                                <p className="text-xs">{t('beFirstToReply')}</p>
+                                <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center space-x-2">
+                                    <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
+                                        <AvatarImage src={getUserById(selectedMessage.senderId)?.avatar} alt="avatar" />
+                                        <AvatarFallback>{getSenderName(selectedMessage.senderId).charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <span>{formatChatTimestamp(selectedMessage.timestamp)}</span>
+                                </p>
                             </div>
                         )}
-                    </div>
 
-                    {/* Reply Input in Replies Sidebar */}
-                    <div className="flex-shrink-0"> {/* Added flex-shrink-0 */}
-                        <MessageInput
-                            onSendMessage={handleSendMessage}
-                            placeholder={t('writeReply')}
-                            conversationId={chat.id}
-                            senderId="current-user"
-                        />
+                        <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
+                            {replies.length > 0 ? (
+                                replies.map((reply) => (
+                                    <div key={reply.id}>
+                                        <div className="bg-surface-brand-light rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
+                                            <span className="text-xs sm:text-sm font-medium text-text-primary">
+                                                {getSenderName(reply.senderId)}
+                                            </span>
+                                            <p className="text-xs sm:text-sm text-text-primary">{reply.text}</p>
+                                        </div>
+                                        <div className="flex space-x-2 items-center mt-1">
+                                            <Avatar className="w-3 h-3 sm:w-4 sm:h-4">
+                                                <AvatarImage src={getUserById(reply.senderId)?.avatar} alt="avatar" />
+                                                <AvatarFallback>{getSenderName(reply.senderId).charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-[10px] sm:text-xs text-text-tertiary">
+                                                {formatChatTimestamp(reply.timestamp)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center text-text-secondary py-8">
+                                    <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-xs sm:text-sm">{t('noReplies')}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex-shrink-0">
+                            <MessageInput
+                                onSendMessage={handleSendMessage}
+                                placeholder={t('writeReply')}
+                                conversationId={chat.id}
+                                senderId="current-user"
+                            />
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );

@@ -1,5 +1,10 @@
+// ============================================
+// DIRECT MESSAGE CHAT - MOBILE RESPONSIVE (FIXED)
+// ============================================
+// File: components/chats/DirectMessageChat.tsx
+
 import { formatChatTimestamp } from "@/macros/time";
-import { ChevronRight, InfoIcon } from "lucide-react";
+import { ChevronRight, InfoIcon, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import Image from "next/image";
@@ -14,8 +19,8 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const t = useTranslations('chat.direct');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
-    // Use Zustand store
     const {
         addMessage,
         updateConversation,
@@ -24,22 +29,25 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
         initializeFromMockData
     } = useChatStore();
 
-    // Get messages for current conversation
     const conversationMessages = getMessagesByConversation(chat.id);
 
-    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [conversationMessages]);
 
-    // Initialize store with mock data on component mount
     useEffect(() => {
         initializeFromMockData();
     }, [initializeFromMockData]);
 
     const handleSendMessage = (messageText: string, image?: string) => {
         if (messageText.trim() || image) {
-            // Create new message object
             const newMsg: Message = {
                 id: Date.now().toString(),
                 conversationId: chat.id,
@@ -52,19 +60,14 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             };
 
             addMessage(newMsg);
-
-            // Update conversation's updatedAt timestamp
             updateConversation(chat.id, {
                 updatedAt: new Date().toISOString()
             });
-
-            // Update user conversation preferences (reset unread count for current user)
             updatePreference(chat.id, 'current-user', {
                 unreadCount: 0,
                 lastReadMessageId: newMsg.id
             });
 
-            // For direct messages, increment unread count for the other user
             const otherUserPreference = useChatStore.getState().preferences.find(pref =>
                 pref.conversationId === chat.id && pref.userId !== 'current-user'
             );
@@ -73,12 +76,9 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     unreadCount: otherUserPreference.unreadCount + 1
                 });
             }
-
-            console.log('New message added:', newMsg);
         }
     };
 
-    // Get user info for the chat
     const getUserInfo = () => {
         if (chat.type === 'direct') {
             return mockUsers.find(user => user.id === chat.id);
@@ -89,15 +89,17 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const userInfo = getUserInfo();
 
     return (
-        <div className="flex flex-row h-full min-h-0 space-x-2"> {/* Changed to h-full min-h-0 */}
+        <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
             {/* Main Chat Area */}
-            <div className="flex-1 bg-surface-default rounded-lg border border-border-subtle flex flex-col h-full min-h-0"> {/* Removed fixed width, added min-h-0 */}
-                {/* Chat Header */}
-                <div className="flex-shrink-0 border-b border-border-subtle p-4 flex justify-between"> {/* Added flex-shrink-0, removed fixed height */}
+            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full ${
+                isMobile && sidebarOpen ? 'hidden' : 'flex'
+            }`}>
+                {/* Chat Header - Hidden on mobile (shown in page.tsx) */}
+                <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between items-center">
                     <div className="flex items-center space-x-3">
                         <div className="relative">
                             <Avatar className="w-12 h-12">
-                                <AvatarImage src={chat.avatar} alt="avator" />
+                                <AvatarImage src={chat.avatar} alt="avatar" />
                                 <AvatarFallback>U</AvatarFallback>
                             </Avatar>
                             {chat.online && (
@@ -113,18 +115,28 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     </div>
 
                     <button onClick={() => setSidebarOpen(!sidebarOpen)}>
-                        <InfoIcon className={`w-6 h-6 cursor-pointer  ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full" : "text-text-brand "}`} />
+                        <InfoIcon className={`w-6 h-6 cursor-pointer transition-colors ${
+                            sidebarOpen ? "text-text-white bg-surface-brand rounded-full p-1" : "text-text-brand"
+                        }`} />
                     </button>
                 </div>
 
+                {/* Mobile Info Button - Floating */}
+                <button 
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="md:hidden fixed top-20 right-4 z-10 p-2.5 bg-surface-brand rounded-full shadow-lg hover:bg-surface-brand-dark transition-colors"
+                >
+                    <InfoIcon className="w-5 h-5 text-text-white" />
+                </button>
+
                 {/* Messages Area */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4"> {/* Added min-h-0, removed fixed height */}
-                    {conversationMessages.map((message) => (
+                <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-4">
+                    {conversationMessages.map((message, index) => (
                         <div
-                            key={message.id}
+                            key={index}
                             className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
+                            <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
                                 {message.type === 'image' && message.imageUrl ? (
                                     <div className="mb-2">
                                         <Image
@@ -140,15 +152,16 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                     </div>
                                 ) : (
                                     <div
-                                        className={`px-4 py-4 rounded-full ${message.senderId === 'current-user'
-                                            ? 'bg-text-brand text-white '
-                                            : 'bg-surface-brand-light text-text-primary '
-                                            }`}
+                                        className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${
+                                            message.senderId === 'current-user'
+                                                ? 'bg-text-brand text-white'
+                                                : 'bg-surface-brand-light text-text-primary'
+                                        }`}
                                     >
                                         {message.text}
                                     </div>
                                 )}
-                                <p className="text-xs text-text-tertiary mt-1 text-right">
+                                <p className="text-xs text-text-tertiary mt-1.5 px-1 text-right">
                                     {formatChatTimestamp(message.timestamp)}
                                 </p>
                             </div>
@@ -158,7 +171,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 </div>
 
                 {/* Message Input */}
-                <div className="flex-shrink-0"> {/* Added flex-shrink-0 wrapper, removed fixed height */}
+                <div className="flex-shrink-0">
                     <MessageInput
                         onSendMessage={handleSendMessage}
                         placeholder={t('typeMessage')}
@@ -168,46 +181,84 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 </div>
             </div>
 
-            {/* Sidebar */}
+            {/* Sidebar - Mobile Overlay */}
             {sidebarOpen && (
-                <div className="w-80 bg-surface-default border rounded-lg border-border-subtle flex flex-col min-h-0"> {/* Fixed width, added min-h-0 */}
-                    <div className="p-4 flex-1 min-h-0 flex flex-col"> {/* Added min-h-0 */}
-                        {/* User/Group Info */}
-                        <div className="flex-shrink-0 flex flex-col items-center mb-6"> {/* Added flex-shrink-0 */}
-                            <Avatar className="w-20 h-20">
-                                <AvatarImage src={chat.avatar} alt="avator" />
-                                <AvatarFallback>U</AvatarFallback>
-                            </Avatar>
-                            <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
+                <>
+                    {/* Mobile Backdrop */}
+                    {isMobile && (
+                        <div 
+                            className="fixed inset-0 bg-black/50 z-40 md:hidden animate-in fade-in duration-200"
+                            onClick={() => setSidebarOpen(false)}
+                        />
+                    )}
+                    
+                    {/* Sidebar Content */}
+                    <div className={`
+                        ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm animate-in slide-in-from-right duration-300' : 'w-80'} 
+                        bg-surface-default border-l border-border-subtle flex flex-col h-full
+                        ${isMobile ? 'rounded-l-2xl shadow-2xl' : 'rounded-lg'}
+                    `}>
+                        {/* Mobile Close Button */}
+                        {isMobile && (
+                            <div className="flex justify-between items-center p-4 border-b border-border-subtle md:hidden">
+                                <h3 className="font-semibold text-text-primary text-base">Profile</h3>
+                                <button
+                                    onClick={() => setSidebarOpen(false)}
+                                    className="p-2 hover:bg-surface-hover rounded-lg transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="p-4">
+                                {/* User Info */}
+                                <div className="flex flex-col items-center mb-6">
+                                    <Avatar className="w-20 h-20 mb-3">
+                                        <AvatarImage src={chat.avatar} alt="avatar" />
+                                        <AvatarFallback className="text-2xl">U</AvatarFallback>
+                                    </Avatar>
+                                    <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
+                                    {chat.online ? (
+                                        <p className="text-sm text-text-success font-medium">Online</p>
+                                    ) : (
+                                        <p className="text-sm text-text-secondary">
+                                            Last seen {formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime)}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* View Profile Button */}
+                                <div className="flex items-center justify-center mb-6">
+                                    <ButtonType3 className="px-6">
+                                        {t('viewProfile')}
+                                    </ButtonType3>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="flex-shrink-0 flex items-center justify-center"> {/* Added flex-shrink-0 */}
-                            <ButtonType3>
-                                {t('viewProfile')}
-                            </ButtonType3>
+                        {/* Quick Actions */}
+                        <div className="flex-shrink-0 border-t border-border-subtle p-4 bg-surface-default">
+                            <div className="space-y-1">
+                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                    <p className="text-sm font-medium">{t('report')}</p>
+                                    <ChevronRight className="w-4 h-4" />
+                                </div>
+
+                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                    <p className="text-sm font-medium">{t('block')}</p>
+                                    <ChevronRight className="w-4 h-4" />
+                                </div>
+
+                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                    <p className="text-sm font-medium">{t('deleteConversation')}</p>
+                                    <ChevronRight className="w-4 h-4" />
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Quick Actions - Now at the bottom */}
-                    <div className="flex-shrink-0 mt-auto border-t border-border-subtle p-4"> {/* Added flex-shrink-0 */}
-                        <div className="space-y-3">
-                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">{t('report')}</p>
-                                <ChevronRight className="w-4 h-4" />
-                            </div>
-
-                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">{t('block')}</p>
-                                <ChevronRight className="w-4 h-4" />
-                            </div>
-
-                            <div className="text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                <p className="text-sm">{t('deleteConversation')}</p>
-                                <ChevronRight className="w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </>
             )}
         </div>
     );
