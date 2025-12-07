@@ -238,7 +238,7 @@ export default function Header({
       </header>
 
       </div>
-      <div className=" scrollbar-hide pb-20 h-[84vh] lg:h-[92vh] bg-amber-300">
+      <div className=" scrollbar-hide pb-20 h-[84vh] lg:h-[92vh] ">
         {children}
       </div>
        <div
