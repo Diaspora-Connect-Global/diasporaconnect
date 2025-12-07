@@ -24,6 +24,7 @@ import { LogoutCurve, Wallet3 } from 'iconsax-reactjs';
 import { QuestionIcon, StorefrontIcon } from "@phosphor-icons/react";
 import { IconFileDollar } from '@tabler/icons-react';
 import React from 'react';
+import HomeSidebar from '../home/HomeSidebar';
 
 
 
@@ -109,151 +110,93 @@ export default function Header({
 
   return (
     <div>
-      <div className="h-[8vh] w-full bg-surface-default sticky top-0 z-50">
-      <header className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
-        <div className="mx-auto px-4  lg:px-8"> {/* Responsive padding */}
-          <div className="flex  justify-between h-[8vh]"> {/* Standard header height */}
-            <div className='flex'>
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-md text-text-primary hover:bg-surface-hover transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+      <div className=" h-app-top-down w-full bg-surface-default  top-0 z-50">
+        <header className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
+          <div className="mx-auto px-4  lg:px-8"> {/* Responsive padding */}
+            <div className="flex  justify-between h-app-top-down"> {/* Standard header height */}
+              <div className='flex'>
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="lg:hidden p-2 rounded-md text-text-primary hover:bg-surface-hover transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                    />
+                  </svg>
+                </button>
+
+                {/* Logo */}
+                <div className=" flex text-center justify-center items-center">
+                  <Link href={`/${currentLocale}`}>
+                    <p className='text-text-brand font-heading-small'>diaspoplug</p>
+                  </Link>
+                </div>
+
+              </div>
+
+              {/* Desktop Navigation - Centered */}
+              <div className="hidden lg:flex ">
+                <QuickLinks />
+              </div>
+
+              {/* Right Section - Search, Language, Profile */}
+              <div className="flex items-center space-x-1"> {/* Standard spacing */}
+                {/* Search Box - Hidden on mobile */}
+                <div className="lg:w-50 w-30 ">
+                  <SearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    onSearch={handleSearch}
+                    placeholder={t('searchLabel')}
+                    id="main-search"
                   />
-                </svg>
-              </button>
+                </div>
 
-              {/* Logo */}
-              <div className=" flex text-center justify-center items-center">
-                <Link href={`/${currentLocale}`}>
-                  <p className='text-text-brand font-heading-small'>diaspoplug</p>
-                </Link>
-              </div>
-
-            </div>
-
-            {/* Desktop Navigation - Centered */}
-            <div className="hidden lg:flex ">
-            <QuickLinks/>
-            </div>
-
-            {/* Right Section - Search, Language, Profile */}
-            <div className="flex items-center space-x-1"> {/* Standard spacing */}
-              {/* Search Box - Hidden on mobile */}
-              <div className="lg:w-50 w-30 ">
-                <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  onSearch={handleSearch}
-                  placeholder={t('searchLabel')}
-                  id="main-search"
-                />
-              </div>
-
-              {/* Language Selector and Theme Toggle */}
-              <div className="hidden  items-center space-x-2">
-                {/* <LocaleSwitcher
+                {/* Language Selector and Theme Toggle */}
+                <div className="hidden  items-center space-x-2">
+                  {/* <LocaleSwitcher
                 selectClassName="appearance-none text-text-primary pr-8"
                 optionClassName="bg-surface-default"
               /> */}
-                <ThemeToggle />
-              </div>
-
-              {/* User Profile */}
-              <DropdownMenuAvatar />
-
-
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMobileMenuOpen && (
-            <div className="lg:hidden py-4 border-t border-border-subtle">
-              {/* Mobile Search */}
-              <div className="mb-4 px-2">
-                <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  onSearch={handleSearch}
-                  placeholder={t('searchLabel')}
-                  id="mobile-search"
-                />
-              </div>
-
-              {/* Mobile Navigation Links */}
-              <nav className="grid grid-cols-2 gap-2 mb-4">
-                {navigation.map((item) => {
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center space-x-2 px-3 py-3 rounded-lg transition-all duration-200 ${active
-                        ? 'bg-surface-brand-light text-text-brand font-medium border border-border-brand-light'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                        }`}
-                    >
-                      <div className="w-5 h-5">
-                        <Image
-                          width={20}
-                          height={20}
-                          src={item.icon}
-                          alt={`${item.name} Icon`}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      <span className="text-sm font-medium">{item.name}</span>
-                      {active && (
-                        <div className="ml-auto w-2 h-2 bg-text-brand rounded-full" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
-
-              {/* Mobile user info and language selector */}
-              <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
-                <div className="flex items-center space-x-3">
-                  <DropdownMenuAvatar />
-                  <span className="text-sm text-text-primary">{t('profile')}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <LocaleSwitcher
-                    selectClassName="appearance-none text-text-primary text-sm"
-                    optionClassName="bg-surface-default"
-                  />
                   <ThemeToggle />
                 </div>
+
+                {/* User Profile */}
+                <DropdownMenuAvatar />
+
+
               </div>
             </div>
-          )}
-        </div>
-      </header>
 
+            {/* Mobile Navigation */}
+            {isMobileMenuOpen && (
+
+              <div className='lg:hidden w-[80%] bg-transparent '>
+                <HomeSidebar />
+              </div>
+            )}
+          </div>
+        </header>
       </div>
-      <div className=" scrollbar-hide pb-20 h-[84vh] lg:h-[92vh] ">
+      <div className=" scrollbar-hide h-app-inner ">
         {children}
       </div>
-       <div
-          className=" h-[8vh]
+      <div
+        className=" h-app-down 
             fixed bottom-0 left-0 w-full
-            flex  justify-between
+            flex  justify-between 
             z-50
 
-            lg:hidden lg:border-0 lg:bg-transparent
+            lg:hidden lg:border-0
           "
-        >
-            <QuickLinks/>
-
-
-        </div>
+      >
+        <QuickLinks />
+      </div>
 
     </div>
   );

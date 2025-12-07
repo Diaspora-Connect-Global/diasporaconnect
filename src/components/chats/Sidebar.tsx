@@ -144,7 +144,7 @@ export default function ChatSideBar() {
 
     return (
         <>
-            <div className="w-full h-full flex flex-col">
+            <div className="w-full h-app-inner flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center p-4">
                     <p className="text-2xl font-heading-large">{t('chats')}</p>

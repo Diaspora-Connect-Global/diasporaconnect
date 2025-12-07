@@ -320,9 +320,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="h-[84vh] lg:h-[92vh] flex overflow-hidden">
+    <div className="h-app-inner flex overflow-hidden ">
         {/* Main Feed - Orange - Independent Scroll */}
-        <div className=" lg:max-w-[40vw] overflow-y-auto scrollbar-hide m-4 flex flex-col">
+        <div className=" lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col">
           {/* Discover Section */}
           <div className="flex justify-between mb-4 shrink-0">
             <h2 className="label-medium">{t('discover')}</h2>
@@ -343,7 +343,7 @@ export default function Home() {
                            cursor-pointer transition-colors"
                 aria-label={tCommon('scrollLeft')}
               >
-                <ChevronLeftIcon className="h-6 w-6 text-gray-800" />
+                <ChevronLeftIcon className="h-6 w-6 text-primary" />
               </button>
             )}
 
@@ -382,7 +382,7 @@ export default function Home() {
           </div>
 
           {/* Feed Posts - Takes remaining space */}
-          <div className="space-y-2 flex-1 min-h-0">
+          <div className="space-y-2 ">
             {posts.map((post) => (
               <div key={post.id} className="mb-2">
                 <FeedCardWithReply

@@ -676,3 +676,22 @@
     border-color: var(--border-info);
   }
 }
+
+.h-app-inner {
+  height: 84vh;
+}
+.h-app-top-down {
+  height: 8vh;
+}
+.h-app-down {
+  height: 8vh;
+}
+
+@media (min-width: 1024px) {
+  .h-app-inner  {
+    height: 92vh;
+  }
+  .h-app-down {
+  height: 0vh;
+}
+}

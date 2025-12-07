@@ -41,7 +41,7 @@ export default function Community() {
     ];
 
     return (
-        <div className="mx-2 md:mx-[15%] overflow-auto scrollbar-hide h-[calc(100vh-64px)]">
+        <div className="mx-2 md:mx-[15%] overflow-auto scrollbar-hide h-app-inner pb-1">
             <p className="text-2xl font-heading-large my-5">{t('myCommunity')}</p>
 
             <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
