@@ -68,7 +68,7 @@ export default function Header({
 
   const QuickLinks = () => {
     return (
-      <nav className="flex w-full justify-center lg:space-x-8 bg-surface-default">
+      <nav className="flex w-full  justify-around lg:space-x-8 bg-surface-default">
         {navigation.map((item) => {
           const active = isActive(item.href);
           return (
@@ -77,7 +77,7 @@ export default function Header({
               href={item.href}
               className={`
                 group relative flex flex-col items-center justify-center
-                px-3 py-2 transition-all duration-200
+                lg:px-3 py-2 transition-all duration-200
                 ${active ? 'text-text-brand' : 'text-text-secondary hover:text-text-primary'}
               `}
             >
@@ -211,15 +211,14 @@ export default function Header({
           </div>
         </header>
       </div>
-      <div className=" scrollbar-hide h-app-inner ">
+      <div className=" scrollbar-hide h-app-inner  ">
         {children}
       </div>
       <div
         className=" h-app-down 
             fixed bottom-0 left-0 w-full
             flex  justify-between 
-            z-50
-
+            z-40
             lg:hidden lg:border-0
           "
       >
