@@ -112,7 +112,7 @@ export default function Header({
     <div >
       <div className="h-app-top-down w-full bg-surface-default  top-0 z-50">
         <header className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
-          <div className="mx-auto px-4  lg:px-8"> {/* Responsive padding */}
+          <div className="mx-auto "> {/* Responsive padding */}
             <div className="flex  justify-between h-app-top-down"> {/* Standard header height */}
               <div className='flex'>
                 {/* Mobile menu button */}
@@ -131,9 +131,15 @@ export default function Header({
                 </button>
 
                 {/* Logo */}
-                <div className=" flex text-center justify-center items-center">
+                <div className=" flex justify-start items-center">
                   <Link href={`/${currentLocale}`}>
-                    <p className='text-text-brand font-heading-small'>diaspoplug</p>
+                    <Image
+                        src="/LOGO.svg"
+                        alt="Logo"
+                       width={100}
+                       height={100}
+                        className="object-fill bg-amber-900-"
+                    />
                   </Link>
                 </div>
 
