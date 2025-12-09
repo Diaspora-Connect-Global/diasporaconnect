@@ -57,7 +57,7 @@ export default function TicketTypeCard({
 
           <button
             onClick={handleIncrement}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-text-brand hover:bg-blue-50 transition-colors"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-text-brand  transition-colors"
             aria-label="Increase quantity"
           >
             <Plus className="w-4 h-4" />
