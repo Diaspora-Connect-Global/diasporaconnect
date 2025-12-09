@@ -170,7 +170,7 @@ const t =  useTranslations("home.events")
     ];
 
     return (
-        <div className="lg:w-[60vw] h-[calc(100vh-4rem)] p-4 overflow-auto scrollbar-hide">
+        <div className="lg:w-[60vw] h-app-inner p-4 overflow-auto scrollbar-hide">
             <div className="mx-auto">
                 <p className="heading-small ">{t("yourevents")}</p> {/* 20px equivalent */}
 
