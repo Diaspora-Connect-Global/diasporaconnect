@@ -10,7 +10,7 @@ interface Notification {
     description: string;
     type: 'associations' | 'opportunities' | 'events';
     read: boolean;
-    date: string; 
+    date: string;
 }
 
 const notificationsFromApi: Notification[] = [
@@ -212,45 +212,50 @@ export default function Notification() {
 
     return (
         <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4">
-            <div className="lg:flex justify-between items-center mb-4">
-                <p className="text-2xl font-heading-large">
-                    {t('notifications')}
-                </p>
+            <div className="h-[30%] lg:h-[20%]">
 
-                <div className="flex items-center gap-4">
-                    <button
-                        className="flex items-center gap-2 text-text-brand hover:text-text-brand-dark transition-colors cursor-pointer"
-                        onClick={markAllAsRead}
-                    >
-                        <Check size={16} />
-                        <span className="text-sm">{t('markall')}</span>
-                    </button>
+                <div className="lg:flex justify-between items-center mb-4">
+                    <p className="text-2xl font-heading-large">
+                        {t('notifications')}
+                    </p>
 
-                    <div className="w-px h-4 bg-border-subtle"></div>
-
-                    <button className="flex items-center gap-2 text-text-brand hover:text-text-brand-dark transition-colors cursor-pointer">
-                        <Settings size={16} />
-                        <span className="text-sm">{t('preference')}</span>
-                    </button>
-                </div>
-            </div>
-
-            <div>
-                <div className="flex gap-2 mb-4 flex-wrap">
-                    {TABS.map((tab) => (
+                    <div className="flex items-center gap-4">
                         <button
-                            key={tab.value}
-                            onClick={() => handleFilterChange(tab.value)}
-                            className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-300 ${tab.value === filter
+                            className="flex items-center gap-2 text-text-brand hover:text-text-brand-dark transition-colors cursor-pointer"
+                            onClick={markAllAsRead}
+                        >
+                            <Check size={16} />
+                            <span className="text-sm">{t('markall')}</span>
+                        </button>
+
+                        <div className="w-px h-4 bg-border-subtle"></div>
+
+                        <button className="flex items-center gap-2 text-text-brand hover:text-text-brand-dark transition-colors cursor-pointer">
+                            <Settings size={16} />
+                            <span className="text-sm">{t('preference')}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div className="flex gap-2 mb-4 flex-wrap">
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.value}
+                                onClick={() => handleFilterChange(tab.value)}
+                                className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-300 ${tab.value === filter
                                     ? 'bg-surface-brand text-white'
                                     : 'bg-surface-default text-text-secondary hover:bg-surface-tertiary'
-                                }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
+
             </div>
+        
 
             {emptyStateMessage ? (
                 <div className="">
@@ -259,7 +264,7 @@ export default function Notification() {
                     </div>
                 </div>
             ) : (
-                <div className="bg-surface-default rounded-md lg:p-6 overflow-y-auto scrollbar-hide pb-16">
+                <div className="bg-surface-default rounded-md lg:p-6 h-[70%] lg:h-[80%]  overflow-y-auto scrollbar-hide ">
                     {filteredNotifications.map((not) => (
                         <NotificationCard
                             key={not.id}
