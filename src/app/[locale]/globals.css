@@ -678,20 +678,20 @@
 }
 
 .h-app-inner {
-  height: 84vh;
+  height: 84dvh;
 }
 .h-app-top-down {
-  height: 8vh;
+  height: 8dvh;
 }
 .h-app-down {
-  height: 8vh;
+  height: 8dvh;
 }
 
 @media (min-width: 1024px) {
   .h-app-inner  {
-    height: 92vh;
+    height: 92dvh;
   }
   .h-app-down {
-  height: 0vh;
+  height: 0dvh;
 }
 }
