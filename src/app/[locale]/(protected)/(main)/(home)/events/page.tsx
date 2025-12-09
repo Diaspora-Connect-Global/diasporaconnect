@@ -30,15 +30,16 @@ const AttendingComponent = ({ attendingEvents }: { attendingEvents: Event[] }) =
             ) : (
                 <>
                     {attendingEvents.map((event, index) => (
-                        <EventCardSmall
-                            key={index}
-                            title={event.title}
-                            date={event.date}
-                            location={event.location}
-                            attendees={event.attendees}
-                            imageUrl={event.imageUrl}
-                        />
-                    ))}
+    <div key={index} className="snap-start shrink-0">
+        <EventCardSmall
+            title={event.title}
+            date={event.date}
+            location={event.location}
+            attendees={event.attendees}
+            imageUrl={event.imageUrl}
+        />
+    </div>
+))}
                 </>
             )}
         </>
@@ -58,15 +59,16 @@ const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
             ) : (
                 <>
                     {savedEvents.map((event, index) => (
-                        <EventCardSmall
-                            key={index}
-                            title={event.title}
-                            date={event.date}
-                            location={event.location}
-                            attendees={event.attendees}
-                            imageUrl={event.imageUrl}
-                        />
-                    ))}
+    <div key={index} className="snap-start shrink-0">
+        <EventCardSmall
+            title={event.title}
+            date={event.date}
+            location={event.location}
+            attendees={event.attendees}
+            imageUrl={event.imageUrl}
+        />
+    </div>
+))}
                 </>
             )}
         </>
@@ -196,13 +198,13 @@ const t =  useTranslations("home.events")
                 </div>
 
                 {/* Events Content */}
-                <div className="overflow-auto scrollbar-hide flex gap-[0.5rem] "> {/* 8px equivalent */}
-                    {activeTab === "events" ? (
-                        <AttendingComponent attendingEvents={attendingEvents} />
-                    ) : (
-                        <SavedComponent savedEvents={savedEvents} />
-                    )}
-                </div>
+             <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory">
+    {activeTab === "events" ? (
+        <AttendingComponent attendingEvents={attendingEvents} />
+    ) : (
+        <SavedComponent savedEvents={savedEvents} />
+    )}
+</div>
 
                 <p className="heading-small my-4">Paid Events</p> {/* 20px equivalent */}
 
