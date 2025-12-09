@@ -104,13 +104,13 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
         <>
             {/* Main Payment Dialog */}
             <CustomDialog
-                contentClassName="lg:min-w-[70rem] h-[90vh] overflow-y-auto scrollbar-hidden"
+                contentClassName="lg:min-w-[70rem] h-[80vh] overflow-y-auto scrollbar-hidden"
                 showFooter={false}
                 title={t('title')}
                 open={isDialogOpen}
                 onOpenChange={closeDialog}
             >
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh] overflow-y-auto p-6 scrollbar-hide bg-surface-default">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[70vh] overflow-y-auto p-6 scrollbar-hide bg-surface-default">
                     <div className="lg:col-span-2 space-y-6">
                         {currentStep === 1 && <Step1 quantity={ticketQty} onQuantityChange={setTicketQty} />}
                         {currentStep === 2 && (
@@ -195,7 +195,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
 
             {/* Success Dialog */}
             <CustomDialog
-                contentClassName="lg:min-w-[70rem] h-[90vh] overflow-y-auto"
+                contentClassName="lg:min-w-[70rem] h-[80vh] overflow-y-auto"
                 showFooter={false}
                 title={t('title')}
                 open={isDialogSuccessOpen}
