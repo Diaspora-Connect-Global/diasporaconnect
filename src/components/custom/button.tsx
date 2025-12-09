@@ -67,7 +67,8 @@ export function ButtonType2({
         hover:bg-border-brand 
         hover:text-text-white 
         transition-colors
-        disabled:text-text-secondary 
+        disabled:text-text-primary
+        disabled:opacity-50 
         disabled:cursor-not-allowed
         disabled:bg-surface-disabled
         h-fit
