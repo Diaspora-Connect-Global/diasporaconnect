@@ -134,11 +134,11 @@ export default function Header({
                 <div className=" flex justify-start items-center">
                   <Link href={`/${currentLocale}`}>
                     <Image
-                        src="/LOGO.svg"
-                        alt="Logo"
-                       width={100}
-                       height={100}
-                        className="object-fill bg-amber-900-"
+                      src="/LOGO.svg"
+                      alt="Logo"
+                      width={100}
+                      height={100}
+                      className="object-fill bg-amber-900-"
                     />
                   </Link>
                 </div>
@@ -179,41 +179,49 @@ export default function Header({
               </div>
             </div>
 
-          
 
 
-               {/* Mobile Sidebar Overlay */}
-      {isMobileMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          
-          {/* Sidebar */}
-          <div className="fixed top-0 left-0 h-full w-[85%] max-w-sm bg-surface-default z-50 lg:hidden overflow-y-auto shadow-2xl">
-            {/* Sidebar Header */}
-            <div className="flex justify-between items-center p-4 border-b border-border-subtle sticky top-0 bg-surface-default z-10">
-              <Link href={`/${currentLocale}`} onClick={() => setIsMobileMenuOpen(false)}>
-                <p className='text-text-brand font-heading-small'>diaspoplug</p>
-              </Link>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
-                aria-label="Close menu"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
 
-            {/* Sidebar Content */}
-            <div className="p-4">
-              <HomeSidebar />
-            </div>
-          </div>
-        </>
-      )}
+            {/* Mobile Sidebar Overlay */}
+            {isMobileMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
+
+                {/* Sidebar */}
+                <div className="fixed top-0 left-0 h-full w-[85%] max-w-sm bg-surface-default z-50 lg:hidden overflow-y-auto shadow-2xl">
+                  {/* Sidebar Header */}
+                  <div className="flex justify-between items-center p-4 border-b border-border-subtle sticky top-0 bg-surface-default z-10">
+                    <Link href={`/${currentLocale}`} onClick={() => setIsMobileMenuOpen(false)}>
+                      <Image
+                        src="/LOGO.svg"
+                        alt="Logo"
+                        width={100}
+                        height={100}
+                        className="object-fill bg-amber-900-"
+                      />
+                    </Link>
+                    <button
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
+                      aria-label="Close menu"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Sidebar Content */}
+                  <div className="p-4 " onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {/** TODO: prop drill the modal closing to the links */}
+                    <HomeSidebar />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </header>
       </div>
