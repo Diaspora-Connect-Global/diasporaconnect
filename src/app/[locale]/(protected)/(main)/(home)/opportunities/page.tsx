@@ -119,7 +119,7 @@ export default function Opportunities() {
     ];
 
     return (
-        <div className="lg:w-[50rem] lg:h-[calc(100vh-64px)] h-[calc(100vh-64px)] p-4 overflow-auto scrollbar-hide">
+        <div className="lg:w-[50rem] h-app-inner p-4 overflow-auto scrollbar-hide">
             {/* 885px equivalent, 64px header height */}
             <div className="mx-auto">
                 <p className="text-2xl font-heading-large my-[1.25rem]">{t("youropp")}</p> {/* 20px equivalent */}
@@ -156,7 +156,7 @@ export default function Opportunities() {
 
                 <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreopp")}</h2> {/* 20px equivalent */}
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem] "> {/* 12px, 24px equivalent */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem]  lg:mb-1 "> {/* 12px, 24px equivalent */}
                     {opportunities.map((opp, index) => (
                         <ExploreOpportunities
                         id={opp.id}
