@@ -58,7 +58,7 @@ export default function Associations() {
     ];
     return (
         <>
-            <div className="lg:w-[60vw] px-4 py-2 overflow-y-auto scrollbar-hide">
+            <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
                 <p className="heading-small mb-2">{tAssociations("myassociations", { association: "GhanaConnectGlobal" })}</p>
 
                 <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[18rem]  ">

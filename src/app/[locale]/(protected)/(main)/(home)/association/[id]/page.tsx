@@ -101,11 +101,11 @@ export default function AssociationPage() {
     }
 
     return (
-        <div className="lg:flex  ">
+        <div className="lg:flex  overflow-y-auto h-app-inner  ">
             {/* Main Content Section (2/3 width) */}
-            <div className="overflow-auto lg:max-h-[calc(100vh-64px)] scrollbar-hide w-[40vw] px-3">
+            <div className="overflow-y-auto  scrollbar-hide lg:w-[40vw] px-3">
                 {/* Association Header */}
-                <div className="min-h-[6rem] flex space-x-4 my-4 p-1 border-b">
+                <div className="min-h-[6rem] flex space-x-4 my-4 py-3 border-b">
                     <div className="h-[6rem] w-[6rem] flex-shrink-0">
                         <Image
                             width={90}
@@ -117,13 +117,25 @@ export default function AssociationPage() {
                     </div>
                     <div className="flex flex-col justify-between w-full">
                         <div></div>
-                        <div className="flex justify-between items-center w-full">
-                            <p className="heading-medium">{currentAssociation.name}</p>
+                        <div className="justify-between items-center w-full ">
+                            <p className="heading-xsmall"> {currentAssociation.name}</p>
+                            <div className="flex justify-end">
                             <ButtonType1 className="py-1 px-3 ml-4 label-medium">
                                 {currentAssociation.joined ? tActions("joined") : tActions("join")}
                             </ButtonType1>
+
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <div className="lg:hidden">
+                     <AboutAssociation
+                        members={currentAssociation.members}
+                        createdDate={currentAssociation.createdDate}
+                        visibility={currentAssociation.visibility}
+                        description={currentAssociation.description}
+                    />
                 </div>
 
                 {/* Scrollable Feed */}
@@ -151,14 +163,17 @@ export default function AssociationPage() {
             </div>
 
             {/* Sidebar - Sticky Section */}
-            <div className="lg:self-start lg:max-h-[calc(100vh-64px)] lg:overflow-y-auto scrollbar-hide">
-                <div className="space-y-6 flex-1 ">
+            <div className="lg:self-start h-app-inner lg:overflow-y-auto scrollbar-hide">
+                <div className="space-y-6 flex-1 mb-6 mx-3">
+                    <div className="hidden lg:block">
                     <AboutAssociation
                         members={currentAssociation.members}
                         createdDate={currentAssociation.createdDate}
                         visibility={currentAssociation.visibility}
                         description={currentAssociation.description}
                     />
+
+                    </div>
                     {/* Remove any overflow containers */}
                     <PeopleYouMayKnow />
                 </div>
