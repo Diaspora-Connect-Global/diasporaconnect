@@ -155,7 +155,8 @@ export default function MessageInputGlobal({
         const textarea = textareaRef.current;
         if (textarea) {
             textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+            const newHeight = Math.min(textarea.scrollHeight, 72); // 72px = 3 lines (24px per line)
+            textarea.style.height = newHeight + 'px';
         }
     }, [newMessage]);
 
@@ -175,109 +176,106 @@ export default function MessageInputGlobal({
     }, [showEmojiPicker]);
 
     return (
-        <>
-            {/* Message Input */}
-            <div className=" border-border-subtle  ">
-                <div className={`flex ${reversed? "flex-row-reverse":""} space-x-2 items-center justify-center`}>
-                    <div className={`flex ${reversed? "flex-row-reverse":""} space-x-1`}>
-                        {/* Image Upload Button */}
-                        <div>
-                            <button
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={disabled}
-                                className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                title="Attach image"
-                            >
-                                <ImageIcon className="w-5 h-5 text-text-brand" />
-                            </button>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageSelect}
-                                accept="image/*"
-                                className="hidden"
-                                disabled={disabled}
-                            />
-                        </div>
-
-                        {/* Emoji Button */}
-                        <div className="relative">
-                            <button
-                                ref={emojiButtonRef}
-                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                disabled={disabled}
-                                className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                title="Add emoji"
-                            >
-                                <Smile className="w-5 h-5 text-text-brand" />
-                            </button>
-                            {showEmojiPicker && (
-                                <div className="absolute bottom-full mb-2 z-50 shadow-xl rounded-lg overflow-hidden">
-                                    {/* Emoji picker content */}
-                                </div>
-                            )}
-                        </div>
+        <div className="w-full">
+            <div className={`flex ${reversed ? "flex-row-reverse" : ""} gap-2 items-end`}>
+                <div className={`flex ${reversed ? "flex-row-reverse" : ""} gap-1 shrink-0 pb-1`}>
+                    {/* Image Upload Button */}
+                    <div>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={disabled}
+                            className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-full hover:bg-surface-subtle"
+                            title="Attach image"
+                        >
+                            <ImageIcon className="w-5 h-5 text-text-brand" />
+                        </button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageSelect}
+                            accept="image/*"
+                            className="hidden"
+                            disabled={disabled}
+                        />
                     </div>
 
-                    <div className={`border border-border-subtle ${imagePreview ? "rounded-md" : "rounded-full"} p-2 flex-1 flex-col`}>
-                        {/* Image Preview */}
-                        {imagePreview && (
-                            <div className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center relative">
-                                
-                                        <img
-                                            src={imagePreview}
-                                            alt="Preview"
-                                            className="w-16 h-16 rounded-lg object-cover"
-                                        />
-                                        <button
-                                            onClick={removeImagePreview}
-                                            className="cursor-pointer p-1 bg-surface-brand rounded-full text-text-white transition-colors absolute -top-2 -right-2"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
+                    {/* Emoji Button */}
+                    <div className="relative">
+                        <button
+                            ref={emojiButtonRef}
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            disabled={disabled}
+                            className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-full hover:bg-surface-subtle"
+                            title="Add emoji"
+                        >
+                            <Smile className="w-5 h-5 text-text-brand" />
+                        </button>
+                        {showEmojiPicker && (
+                            <div className="absolute bottom-full mb-2 z-50 shadow-xl rounded-lg overflow-hidden">
+                                {/* Emoji picker content */}
                             </div>
                         )}
+                    </div>
+                </div>
 
-                        <div className="flex justify-between relative">
-                            <textarea
-                                ref={textareaRef}
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                placeholder={disabled ? "Cannot send messages..." : placeholder}
-                                disabled={disabled}
-                                className="lg:max-w-[40rem] flex-1 rounded-full px-4 py-2 focus:outline-none focus:border-text-brand resize-none bg-surface-default disabled:opacity-50 disabled:cursor-not-allowed"
-                                rows={1}
-                            />
-                            <style jsx>{`
-                                textarea::-webkit-scrollbar {
-                                    display: none;
-                                }
-                            `}</style>
-                            {/* Send Button */}
-                            <ButtonType2
-                                onClick={handleSendMessage}
-                                disabled={(!newMessage.trim() && !imagePreview) || disabled}
-                                className="px-2 py-2 bg-text-brand text-white rounded-full hover:bg-text-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
-                            >
-                                {
-                                    reversed? (
-                                        <p>{reversedText}</p>
-                                    ):
-                                    (
-                                        <Send className="w-5 h-5" />
+                <div className={`border border-border-subtle bg-surface-default ${imagePreview ? "rounded-xl" : "rounded-xl"} px-3 py-2 flex-1 min-w-0 overflow-hidden`}>
+                    {/* Image Preview */}
+                    {imagePreview && (
+                        <div className="mb-2">
+                            <div className="relative inline-block">
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="w-16 h-16 rounded-lg object-cover"
+                                />
+                                <button
+                                    onClick={removeImagePreview}
+                                    className="cursor-pointer p-1 bg-surface-brand rounded-full text-text-white transition-colors absolute -top-2 -right-2 hover:bg-opacity-90"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
-                                    )
-                                }
-                            </ButtonType2>
+                    <div className=" gap-2 items-center">
+                        <textarea
+                            ref={textareaRef}
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder={disabled ? "Cannot send messages..." : placeholder}
+                            disabled={disabled}
+                            className="flex-1 min-w-0 bg-transparent focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed text-text-primary placeholder:text-text-secondary max-h-[4.5rem]"
+                            rows={1}
+                            style={{ lineHeight: '1.5rem' }}
+                        />
+                        <style jsx>{`
+                            textarea::-webkit-scrollbar {
+                                display: none;
+                            }
+                        `}</style>
+                        {/* Send Button */}
+                        <div className="flex justify-end">
+                        <ButtonType2
+                            onClick={handleSendMessage}
+                            disabled={(!newMessage.trim() && !imagePreview) || disabled}
+                            className="shrink-0 px-3 py-2 bg-text-brand text-white rounded-lg hover:bg-text-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
+                        >
+                            {reversed ? (
+                                <>
+                                    <span className="hidden lg:inline text-sm font-medium">{reversedText}</span>
+                                    <Send className="lg:hidden w-3 h-3" />
+                                </>
+                            ) : (
+                                <Send className="w-5 h-5" />
+                            )}
+                        </ButtonType2>
+
                         </div>
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

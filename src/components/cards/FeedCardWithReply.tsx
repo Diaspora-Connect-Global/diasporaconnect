@@ -197,7 +197,7 @@ export default function FeedCardWithReply({
         if (!showCommentInput) return null;
 
         return (
-            <div className="my-[1rem] flex items-center space-x-2">
+            <div className="my-[1rem] flex items-start gap-2">
                 <Image
                     src={"https://github.com/shadcn.png"}
                     alt={"image"}
@@ -205,14 +205,13 @@ export default function FeedCardWithReply({
                     height={40}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
-                <div className='flex-1'>
+                <div className="flex-1 min-w-0">
                     <MessageInputGlobal
                         onSendMessage={(txt: string) => handleSend(txt)}
                         placeholder={t('addComment')}
                         reversed={true}
                         reversedText={t('comment')}
                     />
-
                 </div>
             </div>
         );
@@ -222,7 +221,7 @@ export default function FeedCardWithReply({
         if (replyToCommentId !== commentId) return null;
 
         return (
-            <div className="mt-[1rem] ml-[3rem] flex items-center justify-end space-x-2">
+            <div className="mt-[1rem] ml-[3rem] flex items-start gap-2">
                 <Image
                     src={"https://github.com/shadcn.png"}
                     alt={"image"}
@@ -230,12 +229,14 @@ export default function FeedCardWithReply({
                     height={40}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
-                <MessageInputGlobal
-                    onSendMessage={(txt: string) => handleSend(txt, commentId)}
-                    placeholder={t('replyPlaceholder')}
-                    reversed={true}
-                    reversedText={t('reply')}
-                />
+                <div className="flex-1 min-w-0">
+                    <MessageInputGlobal
+                        onSendMessage={(txt: string) => handleSend(txt, commentId)}
+                        placeholder={t('replyPlaceholder')}
+                        reversed={true}
+                        reversedText={t('reply')}
+                    />
+                </div>
             </div>
         );
     };
