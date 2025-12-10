@@ -117,7 +117,7 @@ export default function OpportunityId() {
 
     if (!listConfig) {
         return (
-            <div className="lg:max-w-[60vw] mx-2  h-[calc(100vh-4rem)] py-4 flex items-center justify-center">
+            <div className="lg:max-w-[60vw] mx-2 py-4 flex items-center justify-center">
                 <div className="text-text-secondary font-medium text-center">
                     <p className="text-2xl mb-2">{t('title')}</p>
                     <p>{t('description', { id: opportunityId })}</p>
@@ -127,7 +127,7 @@ export default function OpportunityId() {
     }
 
     return (
-        <>
+        <div className=' h-app-inner  overflow-y-auto scrollbar-hide '>
             <FilterableList
                 items={employmentCareerItems}
                 filteredItems={filteredItems}
@@ -136,6 +136,6 @@ export default function OpportunityId() {
                 title={listConfig.title}
             />
 
-        </>
+        </div>
     );
 }

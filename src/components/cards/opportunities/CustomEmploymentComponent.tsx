@@ -90,7 +90,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             {/* Dialog */}
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="min-w-[70rem] max-h-[90vh] overflow-y-auto">
+                <DialogContent className="lg:min-w-[70rem] max-h-[90vh] overflow-y-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column - Main Content */}
                         <div className="lg:col-span-2 space-y-6">

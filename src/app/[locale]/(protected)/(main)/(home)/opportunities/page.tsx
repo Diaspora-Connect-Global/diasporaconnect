@@ -119,7 +119,7 @@ export default function Opportunities() {
     ];
 
     return (
-        <div className="lg:w-[50rem] h-app-inner  p-4 overflow-auto scrollbar-hide ">
+        <div className="lg:w-[50rem] h-app-inner  p-4 overflow-y-auto scrollbar-hide ">
             {/* 885px equivalent, 64px header height */}
             <div className="mx-auto mb-h-app-down">
                 <p className="text-2xl font-heading-large my-[1.25rem]">{t("youropp")}</p> {/* 20px equivalent */}

@@ -78,7 +78,7 @@ export function FilterableList({
     const emptyStateMessage = getEmptyStateMessage();
 
     return (
-        <div className="lg:w-[60vw] h-[calc(100vh-4rem)] p-4">
+        <div className="lg:w-[60vw] h-[calc(100vh-4rem)] p-4 mb-6">
                 <div className="flex justify-between items-center mb-4">
                     <p className="heading-small">
                         {listConfig.title}
@@ -108,8 +108,8 @@ export function FilterableList({
                     {emptyStateMessage}
                 </div>
             ) : (
-                <div className=" rounded-md overflow-y-auto scrollbar-hide lg:max-h-[calc(100vh-12rem)]">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <div className=" rounded-md mb-6 overflow-y-auto scrollbar-hide lg:max-h-[calc(100vh-12rem)]">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-6">
 
                     {filteredItems.map((item) => (
                         <CustomComponent
