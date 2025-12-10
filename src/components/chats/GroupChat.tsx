@@ -204,8 +204,8 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                                         <div
                                             className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
                                                 message.senderId === 'current-user'
-                                                    ? 'bg-text-brand text-white'
-                                                    : 'bg-surface-brand-light text-text-primary'
+                                                    ? 'bg-text-brand text-text-white'
+                                                : 'bg-surface-success/50 text-text-primary dark:text-text-white'
                                             }`}
                                         >
                                             {message.senderId !== 'current-user' && (
@@ -364,11 +364,11 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
                         {selectedMessage && (
                             <div className="flex-shrink-0 p-3 sm:p-4 border-b border-border-subtle bg-surface-hover">
-                                <div className="bg-surface-brand-light px-3 py-3 sm:px-4 sm:py-4 rounded-2xl sm:rounded-4xl mb-2">
-                                    <span className="text-xs sm:text-sm font-medium text-text-primary">
+                                <div className="bg-surface-brand text-text-white px-3 py-3 sm:px-4 sm:py-4 rounded-2xl sm:rounded-4xl mb-2">
+                                    <span className="text-xs sm:text-sm font-medium text-text-white">
                                         {getSenderName(selectedMessage.senderId)}
                                     </span>
-                                    <p className="text-xs sm:text-sm text-text-primary">{selectedMessage.text}</p>
+                                    <p className="text-xs sm:text-sm text-text-white">{selectedMessage.text}</p>
                                 </div>
                                 <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center space-x-2">
                                     <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
@@ -384,11 +384,11 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                             {replies.length > 0 ? (
                                 replies.map((reply) => (
                                     <div key={reply.id}>
-                                        <div className="bg-surface-brand-light rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
-                                            <span className="text-xs sm:text-sm font-medium text-text-primary">
+                                        <div className="bg-surface-success/50  rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
+                                            <span className="text-xs sm:text-sm font-medium text-text-primary dark:text-text-white">
                                                 {getSenderName(reply.senderId)}
                                             </span>
-                                            <p className="text-xs sm:text-sm text-text-primary">{reply.text}</p>
+                                            <p className="text-xs sm:text-sm text-text-primary dark:text-text-white">{reply.text}</p>
                                         </div>
                                         <div className="flex space-x-2 items-center mt-1">
                                             <Avatar className="w-3 h-3 sm:w-4 sm:h-4">

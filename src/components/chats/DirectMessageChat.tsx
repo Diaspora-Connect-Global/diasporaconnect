@@ -154,8 +154,8 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                     <div
                                         className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${
                                             message.senderId === 'current-user'
-                                                ? 'bg-text-brand text-white'
-                                                : 'bg-surface-brand-light text-text-primary'
+                                                ? 'bg-text-brand text-text-white'
+                                                : 'bg-surface-success/50 text-text-primary dark:text-text-white'
                                         }`}
                                     >
                                         {message.text}
