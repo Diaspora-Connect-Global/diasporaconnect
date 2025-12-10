@@ -153,7 +153,7 @@ export default function Header({
               {/* Right Section - Search, Language, Profile */}
               <div className="flex items-center space-x-1"> {/* Standard spacing */}
                 {/* Search Box - Hidden on mobile */}
-                <div className="lg:w-50 w-30 ">
+                <div className="lg:w-50 w-[80%] ">
                   <SearchInput
                     value={searchQuery}
                     onChange={setSearchQuery}
