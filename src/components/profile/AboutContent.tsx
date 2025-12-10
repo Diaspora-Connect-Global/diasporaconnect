@@ -24,14 +24,14 @@ export default function AboutContent({ userId, isOwnProfile =false }: AboutConte
 
   return (
     <>
-      <div className="flex">
+      <div className="lg:flex ">
         {/* Left Column - Vertical Tabs */}
-        <div className="w-[12vw] h-full">
+        <div className="lg:w-[12vw] h-full flex lg:flex-col ">
           {aboutSubTabs.map((tab) => (
             <div
               key={tab.id}
-              className={`w-full border-t text-left p-3 transition-colors cursor-pointer ${
-                activeSubTab === tab.id ? 'text-brand' : ''
+              className={`w-full border-t text-left lg:p-3 p-1 transition-colors cursor-pointer ${
+                activeSubTab === tab.id ? 'text-brand border-b-2 border-b-border-brand ' : ''
               }`}
               onClick={() => setActiveSubTab(tab.id)}
             >

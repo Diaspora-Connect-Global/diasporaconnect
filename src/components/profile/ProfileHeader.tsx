@@ -24,7 +24,7 @@ export function ProfileHeader({
   onEditAvatar
 }: ProfileHeaderProps) {
   const t = useTranslations('friends');
-  
+
   // Get user data based on userId
   const getUserData = (id: string) => {
     return DUMMY_USERS[id as keyof typeof DUMMY_USERS] || {
@@ -38,7 +38,7 @@ export function ProfileHeader({
   };
 
   const userData = getUserData(userId);
-  
+
   const initials = userData.name
     .split(' ')
     .map(word => word[0])
@@ -82,16 +82,18 @@ export function ProfileHeader({
 
           {/* User Info */}
           <div className="mt-auto">
-            <div className="flex items-center  space-x-2">
-              <h1 className=" text-text-primary heading-large">{userData.name}</h1>
-              <UserBadge tier={userData.tier as Tier} size="sm" />
+            <div className="flex lg:items-center  space-x-2">
+              <h1 className="text-text-primary heading-small line-clamp-2 break-words max-w-full">
+                {userData.name}
+              </h1>
+              <UserBadge tier={userData.tier as Tier} size="md" />
             </div>
             <div
               onClick={() => setFriendListOpen(!showFriendActions)}
               className="flex items-center space-x-1 text-text-brand cursor-pointer"
             >
               <UsersThreeIcon size={20} />
-              <p className="label-large">{userData.friendCount} {t('friends')}</p>
+              <p className="label-medium">{userData.friendCount} {t('friends')}</p>
             </div>
           </div>
         </div>

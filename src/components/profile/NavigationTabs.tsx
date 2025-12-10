@@ -99,7 +99,7 @@ isOwnProfile =false
   };
 
   return (
-    <Card className=" p-0 ">
+    <Card className=" p-0 mb-6">
       <CardContent className="p-0">
         {/* Main Horizontal Tabs */}
         <div className="flex border-b bg-surface-subtle rounded-t-lg">

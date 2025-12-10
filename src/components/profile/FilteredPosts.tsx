@@ -115,15 +115,15 @@ export default function FilteredPosts() {
   };
 
   return (
-    <div className=" overflow-hidden flex">
+    <div className=" overflow-hidden lg:flex">
       {/* Left: Tabs */}
-      <div className="w-[12vw] border-r border-border-subtle bg-surface-default">
+      <div className="lg:w-[12vw] flex lg:flex-col border-r border-border-subtle bg-surface-default">
         {postsSubTabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`w-full text-left p-3 transition-colors border-t first:border-t-0
-              ${activeTab === tab.id ? 'text-brand bg-brand/5 font-medium' : 'text-text-primary hover:bg-muted'}`}
+            className={`w-full text-left flex justify-center lg:p-3 p-1 transition-colors border-t first:border-t-0
+              ${activeTab === tab.id ? 'text-brand bg-brand/5 font-medium text-brand border-b-2 border-b-border-brand ' : 'text-text-primary hover:bg-muted'}`}
           >
             <span className="text-sm">{tab.label}</span>
           </button>

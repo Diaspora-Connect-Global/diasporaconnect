@@ -3,7 +3,7 @@ import { FriendType } from "@/components/friends/TypeOfFriend";
 export const DUMMY_USERS = {
     'me': {
         userId: 'me',
-        name: 'John Doe',
+        name: 'Stephany S. Bedjrah',
         friendCount: 245,
         bio: 'I am known to be a software developer who enjoys hiking and coding.',
         avatarUrl: 'https://i.pravatar.cc/150?img=8',
