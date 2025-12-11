@@ -517,4 +517,25 @@
         "cancel": "Cancel",
         "saving": "Saving..."
     }
+
+    "wallet": {
+        "title": "My Wallet",
+        "subtitle": "Manage your funds and transactions",
+        "totalBalance": "Total Balance",
+        "inEscrow": "In Escrow",
+        "available": "Available",
+        "quickActions": "Quick Actions",
+        "deposit": "Deposit",
+        "withdraw": "Withdraw",
+        "send": "Send",
+        "cards": "Cards",
+        "transactionHistory": "Transaction History",
+        "allTransactions": "All Transactions",
+        "completed": "Completed",
+        "pending": "Pending",
+        "failed": "Failed",
+        "loadMore": "Load More",
+        "noTransactions": "No transactions found",
+        "fromLastMonth": "from last month"
+  }
 }
