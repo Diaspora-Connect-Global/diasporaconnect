@@ -21,12 +21,6 @@ export default function WalletPage() {
             </Suspense>
           </div>
 
-          {/* Right Column - Quick Actions */}
-          <div className="w-full">
-            <QuickActions />
-          </div>
-        </div>
-
         {/* Full Width - Transaction History */}
         <Suspense fallback={<LoadingScreen text="Loading transactions..." />}>
           <TransactionHistory />
