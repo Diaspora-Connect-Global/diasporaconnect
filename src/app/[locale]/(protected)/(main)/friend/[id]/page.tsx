@@ -45,7 +45,7 @@ export default function FriendProfile() {
 
 
     return (
-        <div className="lg:flex space-x-5 my-2 mx-2 h-app-inner mb-5">
+        <div className="lg:flex space-x-5 my-2 mx-2 h-app-inner overflow-y-auto mb-5">
             {/* Left Column */}
             <div className="lg:w-[50vw] space-y-2">
                 <ProfileHeader
@@ -67,7 +67,7 @@ export default function FriendProfile() {
                         joinDate: userData.joinDate,
                     }} />                </div>
 
-                <div className='min-h-0 mb-5'>
+                <div className='mb-5 '>
                     <TrustScore
                         trustScore={userData.trustScore}
                     />
