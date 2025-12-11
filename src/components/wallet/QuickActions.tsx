@@ -1,36 +1,26 @@
-'use client';
+import { Suspense } from 'react';
+import WalletHeader from '@/components/wallet/WalletHeader';
+import BalanceCard from '@/components/wallet/BalanceCard';
+import TransactionHistory from '@/components/wallet/TransactionHistory';
+import LoadingScreen from '@/components/custom/LoadingScreen';
 
-import { ArrowUpIcon, RefreshCwIcon } from 'lucide-react';
-import { ButtonType2 } from '@/components/custom/button';
-
-export default function QuickActions() {
-  const handleWithdraw = () => {
-    console.log('Withdraw clicked');
-  };
-
-  const handleRefresh = () => {
-    console.log('Refresh clicked');
-  };
-
+export default function WalletPage() {
   return (
-    <div className="h-full flex flex-col gap-3">
-      {/* Withdraw Button */}
-      <ButtonType2
-        onClick={handleWithdraw}
-        className="flex items-center justify-center py-6 px-6 gap-3 w-full rounded-lg"
-      >
-        <ArrowUpIcon className="w-5 h-5" />
-        <span className="label-large">Withdraw</span>
-      </ButtonType2>
+    <div className="h-app-inner overflow-y-auto" style={{ backgroundColor: '#F5F7FA' }}>
+      <div className="max-w-7xl mx-auto p-4 space-y-6">
+        {/* Header */}
+        <WalletHeader />
 
-      {/* Refresh Button */}
-      <ButtonType2
-        onClick={handleRefresh}
-        className="flex items-center justify-center py-6 px-6 gap-3 w-full rounded-lg"
-      >
-        <RefreshCwIcon className="w-5 h-5" />
-        <span className="label-large">Refresh</span>
-      </ButtonType2>
+        {/* Balance Card - Full Width */}
+        <Suspense fallback={<LoadingScreen text="Loading balance..." />}>
+          <BalanceCard />
+        </Suspense>
+
+        {/* Transaction History - Full Width */}
+        <Suspense fallback={<LoadingScreen text="Loading transactions..." />}>
+          <TransactionHistory />
+        </Suspense>
+      </div>
     </div>
   );
 }
