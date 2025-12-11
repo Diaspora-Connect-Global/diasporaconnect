@@ -51,7 +51,7 @@ const services: Product[] = [
 
 // Header Component
 const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTab: (item: 'products' | 'services') => void; activeTab: string }> = ({ cartCount, onCartClick, setActiveTab, activeTab }) => (
-  <div className="pt-8 flex flex-col justify-between space-y-6 bg-surface-subtle  sticky top-0 z-50">
+  <div className="h-full flex flex-col justify-between space-y-6  sticky top-0 z-50">
     <div className="max-w-7xl  flex  justify-between ">
       <h1 className="text-2xl font-bold">Marketplace</h1>
       <button onClick={onCartClick} className="flex items-center gap-2 ">
@@ -105,31 +105,36 @@ const ProductCard: React.FC<{
   };
 
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4">
+    <div className=" p-4">
       <div className="relative mb-3">
-        <div className="bg-gray-100 rounded-lg h-48 flex items-center justify-center text-6xl">
+        <div className="rounded-lg h-48 flex items-center justify-center text-6xl border-2">
           {product.image}
         </div>
-        <button className="absolute top-2 right-2 bg-white rounded-full p-2 hover:bg-gray-100">
+        <button className="absolute top-2 right-2  rounded-full p-2 ">
           <Heart className="w-5 h-5 text-gray-400" />
         </button>
       </div>
+      <div className='flex'>
       <h3 className="font-semibold mb-1">{product.name}</h3>
-      <div className="flex items-center gap-1 mb-2">
+      <div className="flex items-center gap-1 ">
         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-        <span className="text-sm font-medium">{product.rating}</span>
-        <span className="text-sm text-gray-500">({product.reviews})</span>
+        <span className="text-sm font-medium text-primary">{product.rating}</span>
+        <span className="text-sm text-secondary">({product.reviews})</span>
       </div>
-      <p className="text-sm text-gray-600 mb-2">{product.seller}</p>
+
+      </div>
+      <p className="text-sm text-gray-600 mb-2">Accra,ghana</p>
       <div className="flex items-center justify-between">
         <span className="text-lg font-bold">GH₵{product.price.toFixed(2)}</span>
         <button
           onClick={handleAddClick}
-          className="bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700"
+          className="bg-surface-brand text-text-white rounded-full p-2 "
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
+            <p className="text-sm text-gray-600 mb-2">{product.seller}</p>
+
     </div>
   );
 };
@@ -1022,9 +1027,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] overflow-y-auto px-[10%]">
+    <div className="h-app-inner px-[10%]">
+      <div className='h-[20%]'>
       <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} setActiveTab={setActiveTab} activeTab={activeTab} />
+      </div>
 
+      <div className='h-[80%] overflow-y-auto scrollbar-hide'>
       {currentView === 'home' && (
         <div className="max-w-7xl mx-auto px-4 py-6 ">
 
@@ -1098,6 +1106,9 @@ const App: React.FC = () => {
           onCheckout={handleCheckout}
         />
       )}
+      
+      </div>
+
     </div>
   );
 };
