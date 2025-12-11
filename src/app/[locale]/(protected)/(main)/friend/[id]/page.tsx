@@ -45,7 +45,7 @@ export default function FriendProfile() {
 
 
     return (
-        <div className="lg:flex space-x-5 my-2 mx-2 h-app-inner overflow-y-auto mb-5">
+        <div className="lg:flex space-x-5 my-2 mx-2  ">
             {/* Left Column */}
             <div className="lg:w-[50vw] space-y-2">
                 <ProfileHeader
