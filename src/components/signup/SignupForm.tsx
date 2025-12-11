@@ -1,7 +1,7 @@
 "use client";
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { redirect } from 'next/navigation';
+import { useRouter  } from 'next/navigation';
 import React, { useState } from 'react';
 import { PasswordInput, TextInput } from '../custom/input';
 import SignInProvider from '../home/SignInProvider';
@@ -25,7 +25,7 @@ export default function SignUpForm() {
   const t = useTranslations('authentication');
   const a = useTranslations('actions');
   const client = useApolloClient();
-
+const router = useRouter(); 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (isChecking) return;
@@ -43,24 +43,24 @@ export default function SignUpForm() {
     setIsChecking(true);
 
     try {
-      const { data } = await client.query<CheckEmailAvailabilityResponse>({
-        query: CHECK_EMAIL_AVAILABILITY,
-        variables: { email: trimmedEmail },
-      });
+      // const { data } = await client.query<CheckEmailAvailabilityResponse>({
+      //   query: CHECK_EMAIL_AVAILABILITY,
+      //   variables: { email: trimmedEmail },
+      // });
 
-      if (data?.checkEmailAvailability === false) {
-        toast.error(t('form.email.exists'));
-        return;
-      }
+      // if (data?.checkEmailAvailability === false) {
+      //   toast.error(t('form.email.exists'));
+      //   return;
+      // }
 
-      if (password !== confirmPassword) {
-        toast.error(t('form.confirmPassword.mismatch'));
-        return;
-      }
+      // if (password !== confirmPassword) {
+      //   toast.error(t('form.confirmPassword.mismatch'));
+      //   return;
+      // }
 
       toast.success(t('form.signup.success'));
-      redirect('/complete-account');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+router.push('/complete-account');  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || t('form.email.checkFailed'));
     } finally {
