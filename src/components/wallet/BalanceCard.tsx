@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { EyeIcon, EyeOffIcon, LockIcon, WalletIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { ButtonType2 } from '@/components/custom/button';
 
 export default function BalanceCard() {
   const [showBalance, setShowBalance] = useState(true);
@@ -18,44 +19,69 @@ export default function BalanceCard() {
       : '••••••';
   };
 
+  const handleWithdraw = () => {
+    console.log('Withdraw clicked');
+    // Add withdraw logic
+  };
+
   return (
-    <Card className="bg-surface-brand border-none shadow-lg h-full">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <p className="body-small text-text-white/80 mb-1">Total Balance</p>
-            <h2 className="display-small text-text-white">
+    <Card className="bg-[#0D1B2A] border-none shadow-lg h-[200px]">
+      <CardContent className="p-6 h-full flex flex-col justify-between relative">
+        {/* Top Section with Balance and Withdraw Button */}
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="body-small text-white/70">Total Balance</p>
+              <button
+                onClick={() => setShowBalance(!showBalance)}
+                className="p-1 hover:bg-white/10 rounded transition-colors"
+                aria-label={showBalance ? 'Hide balance' : 'Show balance'}
+              >
+                {showBalance ? (
+                  <EyeOffIcon className="w-4 h-4 text-white/70" />
+                ) : (
+                  <EyeIcon className="w-4 h-4 text-white/70" />
+                )}
+              </button>
+            </div>
+            <h2 className="text-[36px] font-bold text-white leading-tight">
               {formatCurrency(totalBalance)}
             </h2>
           </div>
 
-          <button
-            onClick={() => setShowBalance(!showBalance)}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            aria-label={showBalance ? 'Hide balance' : 'Show balance'}
+          {/* Withdraw Button - Top Right */}
+          <ButtonType2
+            onClick={handleWithdraw}
+            className="bg-[#3CCF4E] hover:bg-[#35b944] text-white px-6 py-2 rounded-full text-sm font-semibold"
           >
-            {showBalance ? (
-              <EyeOffIcon className="w-5 h-5 text-text-white" />
-            ) : (
-              <EyeIcon className="w-5 h-5 text-text-white" />
-            )}
-          </button>
+            Withdraw
+          </ButtonType2>
         </div>
 
-        {/* Balance Breakdown */}
+        {/* Bottom Section with Sub-balances */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-            <p className="caption-medium text-text-white/70 mb-1">In Escrow</p>
-            <p className="heading-small text-text-white">
-              {formatCurrency(inEscrow)}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/10 rounded-lg">
+              <LockIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="caption-small text-white/60">In Escrow</p>
+              <p className="body-medium font-semibold text-white">
+                {formatCurrency(inEscrow)}
+              </p>
+            </div>
           </div>
 
-          <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-            <p className="caption-medium text-text-white/70 mb-1">Available</p>
-            <p className="heading-small text-text-white">
-              {formatCurrency(available)}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/10 rounded-lg">
+              <WalletIcon className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="caption-small text-white/60">Available</p>
+              <p className="body-medium font-semibold text-white">
+                {formatCurrency(available)}
+              </p>
+            </div>
           </div>
         </div>
       </CardContent>
