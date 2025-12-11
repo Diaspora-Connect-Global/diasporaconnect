@@ -20,6 +20,7 @@ export default function WalletPage() {
               <BalanceCard />
             </Suspense>
           </div>
+        </div>
 
         {/* Full Width - Transaction History */}
         <Suspense fallback={<LoadingScreen text="Loading transactions..." />}>
