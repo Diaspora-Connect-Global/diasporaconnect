@@ -27,7 +27,7 @@ export default function WalletHeader() {
       <div className="flex gap-2">
        <ButtonType2
           onClick={handleWithdraw}
-          className="flex items-center justify-center py-6 px-6 gap-3 w-full max-w-xs rounded-md"
+          className="flex items-center justify-center py-6 px-6 gap-3 w-full max-w-xs rounded-sm"
         >
           <ArrowUpIcon className="w-5 h-5" />
           <span className="label-large">Withdraw</span>
