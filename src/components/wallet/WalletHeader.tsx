@@ -21,6 +21,14 @@ export default function WalletHeader() {
       </div>
 
       <div className="flex gap-2">
+       <ButtonType2
+          onClick={handleWithdraw}
+          className="flex items-center justify-center py-6 px-6 gap-3 w-full max-w-xs rounded-md"
+        >
+          <ArrowUpIcon className="w-5 h-5" />
+          <span className="label-large">Withdraw</span>
+        </ButtonType2>
+        
         <ButtonType3
           onClick={handleRefresh}
           className="p-2 hover:bg-surface-subtle rounded-full transition-colors"
@@ -29,13 +37,6 @@ export default function WalletHeader() {
           <RefreshCwIcon className="w-5 h-5" />
         </ButtonType3>
         
-        <ButtonType3
-          onClick={handleSettings}
-          className="p-2 hover:bg-surface-subtle rounded-full transition-colors"
-          aria-label="Wallet settings"
-        >
-          <SettingsIcon className="w-5 h-5" />
-        </ButtonType3>
       </div>
     </div>
   );
