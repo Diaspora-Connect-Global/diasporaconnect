@@ -1,11 +1,5 @@
 'use client';
 
-import { 
-  ArrowDownIcon, 
-  ArrowUpIcon, 
-  RefreshCwIcon,
-  ChevronRightIcon 
-} from 'lucide-react';
 import type { Transaction } from './TransactionHistory';
 
 interface TransactionItemProps {
@@ -13,42 +7,16 @@ interface TransactionItemProps {
 }
 
 export default function TransactionItem({ transaction }: TransactionItemProps) {
-  const getIcon = () => {
-    switch (transaction.type) {
-      case 'deposit':
-        return <ArrowDownIcon className="w-5 h-5" />;
-      case 'withdrawal':
-        return <ArrowUpIcon className="w-5 h-5" />;
-      case 'refund':
-        return <RefreshCwIcon className="w-5 h-5" />;
-      default:
-        return null;
-    }
-  };
-
-  const getIconColor = () => {
-    switch (transaction.type) {
-      case 'deposit':
-        return 'bg-surface-success/20 text-text-success';
-      case 'withdrawal':
-        return 'bg-surface-warning/20 text-text-warning';
-      case 'refund':
-        return 'bg-surface-info/20 text-text-info';
-      default:
-        return 'bg-surface-subtle text-text-secondary';
-    }
-  };
-
   const getStatusColor = () => {
     switch (transaction.status) {
       case 'completed':
-        return 'text-text-success';
+        return 'bg-surface-success text-text-success';
       case 'pending':
-        return 'text-text-warning';
+        return 'bg-surface-warning text-text-warning';
       case 'failed':
-        return 'text-text-danger';
+        return 'bg-surface-danger text-text-danger';
       default:
-        return 'text-text-secondary';
+        return 'bg-surface-subtle text-text-secondary';
     }
   };
 
@@ -56,39 +24,49 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
     return transaction.type === 'deposit' ? '+' : '-';
   };
 
+  const getTypeIcon = () => {
+    switch (transaction.type) {
+      case 'deposit':
+        return '↓';
+      case 'withdrawal':
+        return '↑';
+      case 'refund':
+        return '↻';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <button
-      className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-surface-subtle transition-colors group"
-      onClick={() => console.log('Transaction details:', transaction.id)}
-    >
-      {/* Icon */}
-      <div className={`p-3 rounded-full ${getIconColor()}`}>
-        {getIcon()}
+    <div className="grid grid-cols-4 gap-4 px-6 py-4 hover:bg-surface-subtle/50 transition-colors">
+      {/* Date */}
+      <div className="flex items-center">
+        <p className="body-small text-text-primary">
+          {transaction.date}
+        </p>
       </div>
 
-      {/* Details */}
-      <div className="flex-1 text-left">
-        <div className="flex items-center justify-between mb-1">
-          <p className="label-large text-text-primary capitalize">
-            {transaction.type}
-          </p>
-          <p className="heading-xsmall text-text-primary">
-            {getAmountPrefix()}${transaction.amount.toFixed(2)}
-          </p>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <p className="caption-medium text-text-secondary">
-            {transaction.date}
-          </p>
-          <p className={`caption-medium capitalize ${getStatusColor()}`}>
-            {transaction.status}
-          </p>
-        </div>
+      {/* Type */}
+      <div className="flex items-center gap-2">
+        <span className="body-small text-text-secondary">{getTypeIcon()}</span>
+        <p className="body-small text-text-primary capitalize">
+          {transaction.type}
+        </p>
       </div>
 
-      {/* Arrow */}
-      <ChevronRightIcon className="w-5 h-5 text-text-tertiary opacity-0 group-hover:opacity-100 transition-opacity" />
-    </button>
+      {/* Amount */}
+      <div className="flex items-center">
+        <p className="body-medium text-text-primary font-semibold">
+          {getAmountPrefix()}${transaction.amount.toFixed(2)}
+        </p>
+      </div>
+
+      {/* Status */}
+      <div className="flex items-center justify-end">
+        <span className={`inline-flex items-center px-3 py-1 rounded-full caption-medium capitalize ${getStatusColor()}`}>
+          {transaction.status}
+        </span>
+      </div>
+    </div>
   );
 }
