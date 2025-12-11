@@ -52,7 +52,6 @@ export default function Header({
     { name: t('marketplace'), href: `/${currentLocale}/marketplace`, icon: "/MARKETPLACE", disabled: true },
     { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT", disabled: true },
     { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION" },
-    { name: t('wallet'), href: `/${currentLocale}/wallet`, icon: "/WALLET" },
   ];
 
   const isActive = (href: string) => {
@@ -337,12 +336,10 @@ export function DropdownMenuAvatar() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-
-            <DMItem icon={<Wallet3
-              size="80"
-            />} text={t('wallet')} />
-
+          <DropdownMenuItem asChild>
+            <Link href="/wallet">
+              <DMItem icon={<Wallet3 size="80" />} text={t('wallet')} />
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <DMItem icon={<SettingsIcon className='w-full h-full'
