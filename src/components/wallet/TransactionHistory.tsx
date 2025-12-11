@@ -1,9 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { FilterIcon } from 'lucide-react';
-import { ButtonType3 } from '@/components/custom/button';
+import { ChevronDownIcon } from 'lucide-react';
 import TransactionItem from './TransactionItem';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export interface Transaction {
   id: string;
@@ -59,67 +65,48 @@ export default function TransactionHistory() {
     ? transactions 
     : transactions.filter(t => t.status === filter);
 
-  const tabs = [
-    { value: 'all', label: 'All Transactions' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'failed', label: 'Failed' },
-  ] as const;
-
   return (
-    <div className="bg-surface-default rounded-lg p-6 border border-border-subtle">
+    <div className="bg-surface-default rounded-lg border border-border-subtle">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center p-6 border-b border-border-subtle">
         <h3 className="heading-small text-text-primary">Transaction History</h3>
         
-        <ButtonType3 className="flex items-center gap-2">
-          <FilterIcon className="w-4 h-4" />
-          <span className="label-medium">Filter</span>
-        </ButtonType3>
+        {/* Filter Dropdown */}
+        <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Transactions" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Transactions</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setFilter(tab.value)}
-            className={`
-              px-4 py-2 rounded-full whitespace-nowrap label-medium transition-colors
-              ${filter === tab.value 
-                ? 'bg-surface-brand text-text-white' 
-                : 'bg-surface-subtle text-text-secondary hover:bg-surface-tertiary'
-              }
-            `}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Table Header */}
+      <div className="grid grid-cols-4 gap-4 px-6 py-3 bg-surface-subtle border-b border-border-subtle">
+        <p className="label-small text-text-secondary">Date</p>
+        <p className="label-small text-text-secondary">Type</p>
+        <p className="label-small text-text-secondary">Amount</p>
+        <p className="label-small text-text-secondary text-right">Status</p>
       </div>
 
       {/* Transactions List */}
-      <div className="space-y-2">
+      <div className="divide-y divide-border-subtle">
         {filteredTransactions.length > 0 ? (
           filteredTransactions.map((transaction) => (
             <TransactionItem key={transaction.id} transaction={transaction} />
           ))
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-12 px-6">
             <p className="body-large text-text-secondary">
               No {filter !== 'all' ? filter : ''} transactions found
             </p>
           </div>
         )}
       </div>
-
-      {/* Load More */}
-      {filteredTransactions.length > 0 && (
-        <div className="mt-6 text-center">
-          <ButtonType3 className="px-6 py-2">
-            Load More
-          </ButtonType3>
-        </div>
-      )}
     </div>
   );
 }
