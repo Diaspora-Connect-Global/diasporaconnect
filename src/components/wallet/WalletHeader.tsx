@@ -14,6 +14,10 @@ export default function WalletHeader() {
     // Navigate to settings
   };
 
+    const handleWithdraw = () => {
+    console.log('Withdraw clicked');
+  };
+
   return (
     <div className="flex justify-between items-center">
       <div>
