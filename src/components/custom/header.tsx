@@ -52,6 +52,7 @@ export default function Header({
     { name: t('marketplace'), href: `/${currentLocale}/marketplace`, icon: "/MARKETPLACE", disabled: true },
     { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT", disabled: true },
     { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION" },
+    { name: t('wallet'), href: `/${currentLocale}/wallet`, icon: "/WALLET" },
   ];
 
   const isActive = (href: string) => {
