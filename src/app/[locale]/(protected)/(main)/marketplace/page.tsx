@@ -82,13 +82,13 @@ const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTa
         </button>
       </div>
       <div className="h-[5vh]">
-      <SearchInput
-        placeholder={'searchPeople'}
-        value={"searchTerm"}
-        onChange={() => { }}
-        onSearch={() => { }}
-        bg="bg-surface-default"
-      />
+        <SearchInput
+          placeholder={'searchPeople'}
+          value={"searchTerm"}
+          onChange={() => { }}
+          onSearch={() => { }}
+          bg="bg-surface-default"
+        />
       </div>
     </div>
   </div>
@@ -105,9 +105,9 @@ const ProductCard: React.FC<{
   };
 
   return (
-    <div className=" p-4">
+    <div className="">
       <div className="relative mb-3">
-        <div className="rounded-lg h-48 flex items-center justify-center text-6xl border-2">
+        <div className="rounded-4xl h-48 flex items-center justify-center text-6xl border-1">
           {product.image}
         </div>
         <button className="absolute top-2 right-2  rounded-full p-2 ">
@@ -115,12 +115,12 @@ const ProductCard: React.FC<{
         </button>
       </div>
       <div className='flex'>
-      <h3 className="font-semibold mb-1">{product.name}</h3>
-      <div className="flex items-center gap-1 ">
-        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-        <span className="text-sm font-medium text-primary">{product.rating}</span>
-        <span className="text-sm text-secondary">({product.reviews})</span>
-      </div>
+        <h3 className="font-semibold mb-1">{product.name}</h3>
+        <div className="flex items-center gap-1 ">
+          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <span className="text-sm font-medium text-primary">{product.rating}</span>
+          <span className="text-sm text-secondary">({product.reviews})</span>
+        </div>
 
       </div>
       <p className="text-sm text-gray-600 mb-2">Accra,ghana</p>
@@ -133,7 +133,7 @@ const ProductCard: React.FC<{
           <Plus className="w-4 h-4" />
         </button>
       </div>
-            <p className="text-sm text-gray-600 mb-2">{product.seller}</p>
+      <p className="text-sm text-text-secondary mb-2">{product.seller}</p>
 
     </div>
   );
@@ -371,98 +371,115 @@ const ProductDetail: React.FC<{
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      <button onClick={onBack} className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-800">
-        <ChevronLeft className="w-5 h-5" />
-        <span>Back</span>
-      </button>
-      <div className="grid md:grid-cols-2 gap-8">
-        <div>
-          <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center text-9xl mb-4">
-            {product.image}
-          </div>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-gray-100 rounded-lg w-20 h-20 flex items-center justify-center text-3xl cursor-pointer hover:ring-2 ring-blue-500">
-                {product.image}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
-              <div className="flex items-center gap-2 mb-4">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{product.rating}</span>
-                <span className="text-gray-500">({product.reviews})</span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button className="p-2 rounded-full hover:bg-gray-100">
-                <Heart className="w-5 h-5" />
-              </button>
-              <button className="p-2 rounded-full hover:bg-gray-100">
-                <Search className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          <p className="text-sm text-gray-600 mb-4">By {product.seller}</p>
-          <p className="text-3xl font-bold mb-6">GH₵{product.price.toFixed(2)}</p>
 
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2">Size</h3>
-            <div className="flex gap-2">
-              {sizes.map(size => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 border rounded ${selectedSize === size ? 'border-blue-600 text-blue-600' : 'border-gray-300'}`}
-                >
-                  {size}
-                </button>
+    <>
+      <div className='h-[10%] flex items-center text-center'>
+        <button onClick={onBack} className="flex items-center gap-2 text-primary  cursor-pointer">
+          <ChevronLeft className="w-5 h-5" />
+          <span>{product.name}</span>
+        </button>
+      </div>
+
+      <div className="h-[90%] overflow-y-auto max-w-7xl mx-auto px-4 py-6 scrollbar-hide">
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/** left side */}
+          <div >
+          <div className="flex space-x-2">
+            <div className="flex flex-col gap-2">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="border-1 rounded-lg w-20 h-20 flex items-center justify-center text-3xl cursor-pointer hover:ring-2 ring-text-brand">
+                  {product.image}
+                </div>
               ))}
             </div>
-          </div>
-
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2">Quantity</h3>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="p-2 border rounded hover:bg-gray-100"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="text-lg font-medium">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="p-2 border rounded hover:bg-gray-100"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+            <div className="border-1 w-full rounded-lg h-96 flex items-center justify-center text-9xl mb-4">
+              {product.image}
             </div>
           </div>
 
-          <div className="flex gap-4 mb-6">
-            <button onClick={handleAddToCart} className="flex-1 bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800">
-              Add to cart
-            </button>
-            <button className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
-              Buy now
-            </button>
+          
+            <div className=" p-2 rounded-lg">
+              <h3 className="font-semibold mb-2">About product</h3>
+              <p className="text-sm text-gray-600">
+                A classic men&apos;s leather shoe, crafted from high-quality materials for durability and style. With a sleek design and comfortable fit, these shoes are perfect for both formal and casual occasions. Elevate your wardrobe with this essential footwear that combines elegance and practicality.
+              </p>
+            </div>
+
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2">About product</h3>
-            <p className="text-sm text-gray-600">
-              A classic men&apos;s leather shoe, crafted from high-quality materials for durability and style. With a sleek design and comfortable fit, these shoes are perfect for both formal and casual occasions. Elevate your wardrobe with this essential footwear that combines elegance and practicality.
-            </p>
+                    {/** right side */}
+
+          <div>
+                        <p className="text-sm text-gray-600 mb-4">By {product.seller}</p>
+
+            <div className="flex items-start justify-between ">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
+                <div className="flex items-center gap-2 mb-4">
+                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <span className="font-medium">{product.rating}</span>
+                  <span className="text-gray-500">({product.reviews})</span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button className="p-2 rounded-full ">
+                  <Heart className="w-5 h-5" />
+                </button>
+                <button className="p-2 rounded-full ">
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <p className="text-3xl font-bold mb-6">GH₵{product.price.toFixed(2)}</p>
+
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2">Size</h3>
+              <div className="flex gap-2">
+                {sizes.map(size => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-2 py-1 border rounded-xl ${selectedSize === size ? 'border-brand text-brand' : 'border-gray-300'}`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2">Quantity</h3>
+              <div className="flex items-center gap-4 border-1 w-fit px-8 py-5 rounded-full text-text-brand border-brand">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="p-2  rounded "
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="text-lg font-medium text-primary">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="p-2  rounded "
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mb-6">
+              <button onClick={handleAddToCart} className="flex-1 bg-text-primary text-text-white py-3 rounded-full ">
+                Add to cart
+              </button>
+              <button className="flex-1 bg-surface-brand text-text-white py-3 rounded-full ">
+                Buy now
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -1028,46 +1045,56 @@ const App: React.FC = () => {
 
   return (
     <div className="h-app-inner px-[10%]">
-      <div className='h-[20%]'>
-      <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} setActiveTab={setActiveTab} activeTab={activeTab} />
-      </div>
 
-      <div className='h-[80%] overflow-y-auto scrollbar-hide'>
+
       {currentView === 'home' && (
-        <div className="max-w-7xl mx-auto px-4 py-6 ">
 
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">
-                {activeTab === 'products' ? 'Trending' : 'Services you may like'}
-              </h2>
-              <div className="flex gap-2">
-                <button className="p-2 border rounded-full hover:bg-gray-100">
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button className="p-2 border rounded-full hover:bg-gray-100">
-                  <ChevronRight className="w-5 h-5" />
-                </button>
+        <div className='h-full'>
+          <div className='h-[20%]'>
+            <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} setActiveTab={setActiveTab} activeTab={activeTab} />
+          </div>
+          <div className="max-w-7xl mx-auto px-4 py-6 h-[80%] overflow-y-auto scrollbar-hide">
+
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">
+                  {activeTab === 'products' ? 'Trending' : 'Services you may like'}
+                </h2>
+                <div className="flex gap-2">
+                  <button className="p-2 border rounded-full hover:bg-gray-100">
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button className="p-2 border rounded-full hover:bg-gray-100">
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                {(activeTab === 'products' ? products : services).map(item => (
+                  <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
+                    <ProductCard product={item} onAddToCart={handleAddToCart} />
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(activeTab === 'products' ? products : services).map(item => (
-                <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
-                  <ProductCard product={item} onAddToCart={handleAddToCart} />
-                </div>
-              ))}
-            </div>
           </div>
+
         </div>
+
       )}
 
-      {currentView === 'product' && selectedProduct && (
-        <ProductDetail
-          product={selectedProduct}
-          onBack={() => setCurrentView('home')}
-          onAddToCart={handleAddToCart}
-        />
-      )}
+      <div className='h-full '>
+
+        {currentView === 'product' && selectedProduct && (
+          <ProductDetail
+            product={selectedProduct}
+            onBack={() => setCurrentView('home')}
+            onAddToCart={handleAddToCart}
+          />
+        )}
+
+
+      </div>
 
       {currentView === 'service' && selectedProduct && (
         <ServiceDetail
@@ -1106,8 +1133,7 @@ const App: React.FC = () => {
           onCheckout={handleCheckout}
         />
       )}
-      
-      </div>
+
 
     </div>
   );
