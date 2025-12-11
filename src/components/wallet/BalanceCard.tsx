@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { EyeIcon, EyeOffIcon, LockIcon, WalletIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ButtonType2 } from '@/components/custom/button';
 
 export default function BalanceCard() {
   const [showBalance, setShowBalance] = useState(true);
@@ -17,11 +16,6 @@ export default function BalanceCard() {
     return showBalance 
       ? `$${amount.toFixed(2)}` 
       : '••••••';
-  };
-
-  const handleWithdraw = () => {
-    console.log('Withdraw clicked');
-    // Add withdraw logic
   };
 
   return (
@@ -48,14 +42,6 @@ export default function BalanceCard() {
               {formatCurrency(totalBalance)}
             </h2>
           </div>
-
-          {/* Withdraw Button - Top Right */}
-          <ButtonType2
-            onClick={handleWithdraw}
-            className="bg-[#3CCF4E] hover:bg-[#35b944] text-white px-6 py-2 rounded-full text-sm font-semibold"
-          >
-            Withdraw
-          </ButtonType2>
         </div>
 
         {/* Bottom Section with Sub-balances */}
