@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ArrowLeft, Bell, Shield, Eye, Globe, Palette } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -53,27 +52,6 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Sticky Header */}
-      <div className="sticky top-0 bg-card/80 backdrop-blur-sm border-b border-border z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">
-                Settings & Preferences
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Manage your account settings
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
