@@ -17,16 +17,13 @@ export default function WalletHeader() {
   return (
     <div className="flex justify-between items-center">
       <div>
-        <h1 className="heading-large text-text-primary">My Wallet</h1>
-        <p className="body-small text-text-secondary">
-          Manage your funds and transactions
-        </p>
+        <h1 className="heading-large text-text-primary">Overview</h1>
       </div>
 
       <div className="flex gap-2">
         <ButtonType3
           onClick={handleRefresh}
-          className="p-2"
+          className="p-2 hover:bg-surface-subtle rounded-full transition-colors"
           aria-label="Refresh wallet"
         >
           <RefreshCwIcon className="w-5 h-5" />
@@ -34,7 +31,7 @@ export default function WalletHeader() {
         
         <ButtonType3
           onClick={handleSettings}
-          className="p-2"
+          className="p-2 hover:bg-surface-subtle rounded-full transition-colors"
           aria-label="Wallet settings"
         >
           <SettingsIcon className="w-5 h-5" />
