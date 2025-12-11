@@ -28,9 +28,9 @@ export default function WalletHeader() {
               {/* Withdraw Button - Top Right */}
         <ButtonType2
           onClick={handleWithdraw}
-          className="bg-[#3CCF4E] hover:bg-[#35b944] text-white px-6 py-2 rounded-full text-sm font-semibold"
+          className="bg-[#3CCF4E] hover:bg-[#35b944] text-white px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
         >
-          <ArrowUpIcon className="w-5 h-5" />
+          <ArrowUpIcon className="w-4 h-4" />
           Withdraw
         </ButtonType2>
         
