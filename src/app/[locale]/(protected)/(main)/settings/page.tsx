@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Footer from "@/components/Footer";
 
 export default function SettingsPage() {
   // State for notifications
@@ -307,9 +306,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }
