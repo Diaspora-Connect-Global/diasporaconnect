@@ -11,10 +11,16 @@ export default function WalletPage() {
         {/* Header */}
         <WalletHeader />
 
-        {/* Balance Card - Full Width */}
-        <Suspense fallback={<LoadingScreen text="Loading balance..." />}>
-          <BalanceCard />
-        </Suspense>
+        {/* Balance Card - Half width on desktop, full on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="w-full">
+            <Suspense fallback={<LoadingScreen text="Loading balance..." />}>
+              <BalanceCard />
+            </Suspense>
+          </div>
+          {/* Empty div for spacing on desktop */}
+          <div className="hidden lg:block"></div>
+        </div>
 
         {/* Transaction History - Full Width */}
         <Suspense fallback={<LoadingScreen text="Loading transactions..." />}>
