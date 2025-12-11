@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ArrowLeft, Bell, Shield, Eye, Globe, Palette } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
