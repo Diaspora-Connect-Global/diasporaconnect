@@ -12,15 +12,22 @@ export default function WalletPage() {
         {/* Header */}
         <WalletHeader />
 
-        {/* Balance Overview */}
-        <Suspense fallback={<LoadingScreen text="Loading balance..." />}>
-          <BalanceCard />
-        </Suspense>
+        {/* Two column grid for Balance and Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Balance Card (half width on desktop) */}
+          <div className="w-full">
+            <Suspense fallback={<LoadingScreen text="Loading balance..." />}>
+              <BalanceCard />
+            </Suspense>
+          </div>
 
-        {/* Quick Actions */}
-        <QuickActions />
+          {/* Right Column - Quick Actions */}
+          <div className="w-full">
+            <QuickActions />
+          </div>
+        </div>
 
-        {/* Transaction History */}
+        {/* Full Width - Transaction History */}
         <Suspense fallback={<LoadingScreen text="Loading transactions..." />}>
           <TransactionHistory />
         </Suspense>
