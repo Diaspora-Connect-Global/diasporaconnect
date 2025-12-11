@@ -1,7 +1,7 @@
 'use client';
 
 import { SettingsIcon, RefreshCwIcon } from 'lucide-react';
-import { ButtonType3 } from '@/components/custom/button';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 
 export default function WalletHeader() {
   const handleRefresh = () => {
