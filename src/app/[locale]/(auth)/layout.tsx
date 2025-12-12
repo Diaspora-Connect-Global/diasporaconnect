@@ -22,7 +22,7 @@ export default function AuthLayout({
                                 src="/DiaspoLogo.svg" 
                                 alt="Logo" 
                                 width={230} 
-                                height={113} 
+                                height={93} 
                                 className="object-contain" 
                             />
                         </div>
@@ -39,8 +39,8 @@ export default function AuthLayout({
                         <Image 
                             src="/DiaspoLogo.svg" 
                             alt="Logo" 
-                            width={180} 
-                            height={88} 
+                            width={140} 
+                            height={68} 
                             className="object-contain" 
                         />
                     </div>
