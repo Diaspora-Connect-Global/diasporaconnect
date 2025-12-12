@@ -582,7 +582,7 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* Secondary actions - hidden on mobile */}
-                <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
+                <div className="md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
                   <button 
                     onClick={handleAddEmoji}
                     className="p-2 hover:bg-[#FFD700]/10 rounded-lg transition-colors group" 
