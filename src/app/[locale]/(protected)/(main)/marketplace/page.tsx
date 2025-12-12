@@ -51,7 +51,7 @@ const services: Product[] = [
 
 // Header Component
 const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTab: (item: 'products' | 'services') => void; activeTab: string }> = ({ cartCount, onCartClick, setActiveTab, activeTab }) => (
-  <div className="sticky top-0 bg-background z-10 pb-4">
+  <div className="bg-background z-10 pb-4 shrink-0">
     <div className="flex justify-between items-center py-4">
       <h1 className="text-2xl font-bold">Marketplace</h1>
       <button onClick={onCartClick} className="flex items-center gap-2">
@@ -1043,11 +1043,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-app-inner px-[10%]">
-
-
+    <div className="h-app-inner flex flex-col px-[10%]">
       {currentView === 'home' && (
-        <div className='h-full flex flex-col'>
+        <>
           <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} setActiveTab={setActiveTab} activeTab={activeTab} />
           
           <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-6">
@@ -1076,11 +1074,10 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
-      <div className='h-full'>
-
+      <div className='h-full flex flex-col'>
         {currentView === 'product' && selectedProduct && (
           <ProductDetail
             product={selectedProduct}
@@ -1088,8 +1085,6 @@ const App: React.FC = () => {
             onAddToCart={handleAddToCart}
           />
         )}
-
-
       </div>
 
       {currentView === 'service' && selectedProduct && (
