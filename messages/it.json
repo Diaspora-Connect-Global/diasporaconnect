@@ -430,5 +430,68 @@
     "metadata": {
         "title": "Diaspora Connect Global",
         "description": "Collegare le comunità della diaspora in tutto il mondo"
+    },
+    "settings": {
+    "title": "Impostazioni",
+    "notifications": {
+      "title": "Notifiche",
+      "email": {
+        "title": "Notifiche via email",
+        "description": "Ricevi notifiche via email"
+      },
+      "sms": {
+        "title": "Notifiche SMS",
+        "description": "Ricevi notifiche via SMS"
+      },
+      "push": {
+        "title": "Notifiche push",
+        "description": "Ricevi notifiche push sul tuo dispositivo"
+      }
+    },
+    "security": {
+      "title": "Sicurezza",
+      "twoFactor": {
+        "title": "Autenticazione a due fattori",
+        "description": "Aggiungi un ulteriore livello di sicurezza"
+      },
+      "changePassword": {
+        "title": "Cambia password",
+        "description": "Aggiorna la password del tuo account",
+        "button": "Cambia"
+      }
+    },
+    "privacy": {
+      "title": "Privacy",
+      "dataSharing": {
+        "title": "Condivisione dati",
+        "description": "Condividi i dati di utilizzo per migliorare i servizi"
+      },
+      "adPersonalization": {
+        "title": "Personalizzazione annunci",
+        "description": "Personalizza gli annunci in base alla tua attività"
+      }
+    },
+    "language": {
+      "title": "Lingua",
+      "appLanguage": {
+        "title": "Lingua dell'app",
+        "description": "Scegli la tua lingua preferita"
+      }
+    },
+    "theme": {
+      "title": "Tema",
+      "dark": {
+        "title": "Modalità scura",
+        "description": "Usa il tema scuro in tutta l'app"
+      },
+      "light": {
+        "title": "Modalità chiara",
+        "description": "Usa il tema chiaro in tutta l'app"
+      },
+      "system": {
+        "title": "Predefinito del sistema",
+        "description": "Segui le impostazioni del tema di sistema"
+      }
     }
+  }
 }
