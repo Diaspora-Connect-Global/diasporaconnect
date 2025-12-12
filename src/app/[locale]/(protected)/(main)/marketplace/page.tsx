@@ -51,8 +51,8 @@ const services: Product[] = [
 
 // Header Component
 const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTab: (item: 'products' | 'services') => void; activeTab: string }> = ({ cartCount, onCartClick, setActiveTab, activeTab }) => (
-  <div className="h-full flex flex-col justify-between space-y-6 sticky top-0 bg-background z-10">
-    <div className="max-w-7xl flex justify-between">
+  <div className="sticky top-0 bg-background z-10 pb-4">
+    <div className="flex justify-between items-center py-4">
       <h1 className="text-2xl font-bold">Marketplace</h1>
       <button onClick={onCartClick} className="flex items-center gap-2">
         <ShoppingCart className="w-5 h-5" />
@@ -65,8 +65,7 @@ const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTa
       </button>
     </div>
 
-
-    <div className="flex mt-auto justify-between border-b">
+    <div className="flex justify-between items-center border-b">
       <div>
         <button
           onClick={() => setActiveTab('products')}
@@ -1048,39 +1047,36 @@ const App: React.FC = () => {
 
 
       {currentView === 'home' && (
-
-        <div className='h-full'>
-          <div className='h-[20%]'>
-            <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} setActiveTab={setActiveTab} activeTab={activeTab} />
-          </div>
-          <div className="max-w-7xl mx-auto px-4 py-6 h-[80%] overflow-y-auto scrollbar-hide">
-
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">
-                  {activeTab === 'products' ? 'Trending' : 'Services you may like'}
-                </h2>
-                <div className="flex gap-2">
-                  <button className="p-2 border rounded-full hover:bg-gray-100">
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 border rounded-full hover:bg-gray-100">
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                {(activeTab === 'products' ? products : services).map(item => (
-                  <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
-                    <ProductCard product={item} onAddToCart={handleAddToCart} />
+        <div className='h-full flex flex-col'>
+          <Header cartCount={cart.length} onCartClick={() => setShowCart(true)} setActiveTab={setActiveTab} activeTab={activeTab} />
+          
+          <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">
+                    {activeTab === 'products' ? 'Trending' : 'Services you may like'}
+                  </h2>
+                  <div className="flex gap-2">
+                    <button className="p-2 border rounded-full hover:bg-gray-100">
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button className="p-2 border rounded-full hover:bg-gray-100">
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
                   </div>
-                ))}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                  {(activeTab === 'products' ? products : services).map(item => (
+                    <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
+                      <ProductCard product={item} onAddToCart={handleAddToCart} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-
         </div>
-
       )}
 
       <div className='h-full'>
