@@ -211,8 +211,8 @@ export default function CreatePostPage() {
   };
 
   return (
-  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4 flex items-center justify-center">
-    <div className="w-full max-w-3xl">
+  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4">
+    <div className="max-w-3xl mx-auto">
         {/* Main Composer Card */}
         <div className="bg-surface-default/80 backdrop-blur-md rounded-2xl border border-border-subtle shadow-xl">
           {/* User Header */}
