@@ -428,7 +428,70 @@
         "almostThere": "Fast geschafft..."
     },
     "metadata": {
-        "title": "Diaspora Connect Global",
+        "title": "Diaspo Plug",
         "description": "Diaspora-Gemeinschaften weltweit verbinden"
+    },
+    "settings": {
+    "title": "Einstellungen",
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "email": {
+        "title": "E-Mail-Benachrichtigungen",
+        "description": "Benachrichtigungen per E-Mail erhalten"
+      },
+      "sms": {
+        "title": "SMS-Benachrichtigungen",
+        "description": "Benachrichtigungen per SMS erhalten"
+      },
+      "push": {
+        "title": "Push-Benachrichtigungen",
+        "description": "Push-Benachrichtigungen auf Ihrem Gerät erhalten"
+      }
+    },
+    "security": {
+      "title": "Sicherheit",
+      "twoFactor": {
+        "title": "Zwei-Faktor-Authentifizierung",
+        "description": "Eine zusätzliche Sicherheitsebene hinzufügen"
+      },
+      "changePassword": {
+        "title": "Passwort ändern",
+        "description": "Ihr Kontopasswort aktualisieren",
+        "button": "Ändern"
+      }
+    },
+    "privacy": {
+      "title": "Datenschutz",
+      "dataSharing": {
+        "title": "Datenweitergabe",
+        "description": "Nutzungsdaten teilen, um Dienste zu verbessern"
+      },
+      "adPersonalization": {
+        "title": "Anzeigenpersonalisierung",
+        "description": "Anzeigen basierend auf Ihrer Aktivität personalisieren"
+      }
+    },
+    "language": {
+      "title": "Sprache",
+      "appLanguage": {
+        "title": "App-Sprache",
+        "description": "Wählen Sie Ihre bevorzugte Sprache"
+      }
+    },
+    "theme": {
+      "title": "Thema",
+      "dark": {
+        "title": "Dunkler Modus",
+        "description": "Dunkles Thema in der gesamten App verwenden"
+      },
+      "light": {
+        "title": "Heller Modus",
+        "description": "Helles Thema in der gesamten App verwenden"
+      },
+      "system": {
+        "title": "Systemstandard",
+        "description": "Systemthema-Einstellungen folgen"
+      }
     }
+  }
 }
