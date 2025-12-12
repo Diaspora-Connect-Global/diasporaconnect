@@ -615,7 +615,7 @@ export default function CreatePostPage() {
               </div>
 
               {/* Character Count */}
-              <div className={`hidden md:flex items-center gap-2 caption-medium ${getCharCountColor()}`}>
+              <div className={`md:flex items-center gap-2 caption-medium ${getCharCountColor()}`}>
                 <div className={`w-2 h-2 rounded-full ${getCharIndicatorColor()}`}></div>
                 <span>{charCount} / {charLimit}</span>
               </div>
