@@ -56,7 +56,7 @@ export default function SettingsPage() {
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Notifications Section */}
-          <div className="glass-card rounded-lg p-6 space-y-4">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -119,7 +119,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Security Section */}
-          <div className="glass-card rounded-lg p-6 space-y-4">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -162,7 +162,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Privacy Section */}
-          <div className="glass-card rounded-lg p-6 space-y-4">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">Privacy</h2>
@@ -204,7 +204,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Language Section */}
-          <div className="glass-card rounded-lg p-6 space-y-4">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -235,7 +235,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Theme Section */}
-          <div className="glass-card rounded-lg p-6 space-y-4">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Palette className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">Theme</h2>
