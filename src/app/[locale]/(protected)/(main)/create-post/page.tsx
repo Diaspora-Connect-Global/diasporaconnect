@@ -33,6 +33,7 @@ interface Attachment {
   type: AttachmentType;
   name?: string;
   file?: File;
+  preview?: string;
 }
 
 // Avatar Component
@@ -159,8 +160,20 @@ export default function CreatePostPage() {
 
   const t = useTranslations('actions');
   const userName = 'John Doe';
+  const userTitle = 'Product Designer';
   const charLimit = 3000;
   const charCount = postContent.length;
+
+  // Cleanup object URLs on unmount
+  React.useEffect(() => {
+    return () => {
+      attachments.forEach(attachment => {
+        if (attachment.preview) {
+          URL.revokeObjectURL(attachment.preview);
+        }
+      });
+    };
+  }, [attachments]);
 
   // Function to insert text at cursor position
   const insertAtCursor = (textToInsert: string) => {
@@ -245,11 +258,16 @@ export default function CreatePostPage() {
       if (!files || files.length === 0) return;
       
       Array.from(files).forEach(file => {
+        const preview = (file.type.startsWith('image/') || file.type.startsWith('video/')) 
+          ? URL.createObjectURL(file) 
+          : undefined;
+          
         const newAttachment: Attachment = {
           id: `${type}-${Date.now()}-${Math.random()}`,
           type,
           name: file.name,
-          file
+          file,
+          preview
         };
         setAttachments(prev => [...prev, newAttachment]);
       });
@@ -275,11 +293,14 @@ export default function CreatePostPage() {
       
       Array.from(files).forEach(file => {
         const isVideo = file.type.startsWith('video/');
+        const preview = URL.createObjectURL(file);
+        
         const newAttachment: Attachment = {
           id: `${isVideo ? 'Video' : 'Photo'}-${Date.now()}-${Math.random()}`,
           type: isVideo ? 'Video' : 'Photo',
           name: file.name,
-          file
+          file,
+          preview
         };
         setAttachments(prev => [...prev, newAttachment]);
       });
@@ -303,11 +324,14 @@ export default function CreatePostPage() {
       
       const file = files[0];
       const isVideo = file.type.startsWith('video/');
+      const preview = URL.createObjectURL(file);
+      
       const newAttachment: Attachment = {
         id: `${isVideo ? 'Video' : 'Photo'}-${Date.now()}-${Math.random()}`,
         type: isVideo ? 'Video' : 'Photo',
         name: file.name,
-        file
+        file,
+        preview
       };
       setAttachments(prev => [...prev, newAttachment]);
       
@@ -337,11 +361,16 @@ export default function CreatePostPage() {
           type = 'Video';
         }
         
+        const preview = (file.type.startsWith('image/') || file.type.startsWith('video/')) 
+          ? URL.createObjectURL(file) 
+          : undefined;
+        
         const newAttachment: Attachment = {
           id: `${type}-${Date.now()}-${Math.random()}`,
           type,
           name: file.name,
-          file
+          file,
+          preview
         };
         setAttachments(prev => [...prev, newAttachment]);
       });
@@ -354,6 +383,10 @@ export default function CreatePostPage() {
   };
 
   const handleRemoveAttachment = (id: string) => {
+    const attachment = attachments.find(a => a.id === id);
+    if (attachment?.preview) {
+      URL.revokeObjectURL(attachment.preview);
+    }
     setAttachments(attachments.filter(a => a.id !== id));
   };
 
@@ -415,6 +448,7 @@ export default function CreatePostPage() {
                 />
                 <div className="flex flex-col gap-1">
                   <h2 className="heading-small text-text-primary">{userName}</h2>
+                  <p className="body-small text-text-secondary">{userTitle}</p>
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
@@ -455,24 +489,65 @@ export default function CreatePostPage() {
           {/* Attachments Preview */}
           {attachments.length > 0 && (
             <div className="px-6 pb-6 pt-0 border-t border-border-subtle">
-              <div className="flex flex-wrap gap-2 mt-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
                 {attachments.map((attachment) => {
                   const { Icon, color, bg } = getAttachmentIcon(attachment.type);
+                  
                   return (
                     <div
                       key={attachment.id}
-                      className="group relative flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-surface-subtle to-surface-subtle/50 rounded-xl border border-border-subtle"
+                      className="group relative aspect-square rounded-xl overflow-hidden bg-surface-subtle border border-border-subtle"
                     >
-                      <div className={`p-1.5 rounded-lg ${bg}`}>
-                        <Icon className={`w-4 h-4 ${color}`} />
+                      {/* Preview Content */}
+                      {attachment.type === 'Photo' && attachment.preview ? (
+                        <Image
+                          src={attachment.preview}
+                          alt={attachment.name || 'Photo'}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : attachment.type === 'Video' && attachment.preview ? (
+                        <video
+                          src={attachment.preview}
+                          className="w-full h-full object-cover"
+                          controls={false}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                          <div className={`p-3 rounded-xl ${bg} mb-2`}>
+                            <Icon className={`w-8 h-8 ${color}`} />
+                          </div>
+                          <p className="caption-small text-center text-text-secondary line-clamp-2">
+                            {attachment.name}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Overlay on hover */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => handleRemoveAttachment(attachment.id)}
+                          className="w-10 h-10 rounded-full bg-text-danger hover:bg-text-danger/80 text-text-white flex items-center justify-center transition-colors"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
                       </div>
-                      <span className="body-small">{attachment.name || attachment.type}</span>
-                      <button
-                        onClick={() => handleRemoveAttachment(attachment.id)}
-                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-surface-default/80 hover:bg-text-danger hover:text-text-white border border-border-subtle flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
+
+                      {/* Type Badge */}
+                      <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm">
+                        <span className="caption-small text-text-white font-medium">
+                          {attachment.type}
+                        </span>
+                      </div>
+
+                      {/* Video Play Icon */}
+                      {attachment.type === 'Video' && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1"></div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -582,7 +657,7 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* Secondary actions - hidden on mobile */}
-                <div className="md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
+                <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
                   <button 
                     onClick={handleAddEmoji}
                     className="p-2 hover:bg-[#FFD700]/10 rounded-lg transition-colors group" 
@@ -615,14 +690,57 @@ export default function CreatePostPage() {
               </div>
 
               {/* Character Count */}
-              <div className={`md:flex items-center gap-2 caption-medium ${getCharCountColor()}`}>
+              <div className={`hidden md:flex items-center gap-2 caption-medium ${getCharCountColor()}`}>
                 <div className={`w-2 h-2 rounded-full ${getCharIndicatorColor()}`}></div>
                 <span>{charCount} / {charLimit}</span>
               </div>
             </div>
           </div>
         </div>
-        
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+          <button
+            onClick={() => handleAddAttachment('Photo')}
+            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-surface-brand/30 rounded-xl transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-surface-brand/10 flex items-center justify-center group-hover:bg-surface-brand/20 transition-colors">
+              <ImageIcon className="w-5 h-5 text-surface-brand" />
+            </div>
+            <span className="caption-large font-medium">Photo Gallery</span>
+          </button>
+
+          <button
+            onClick={() => handleAddAttachment('Video')}
+            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-text-danger/30 rounded-xl transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-text-danger/10 flex items-center justify-center group-hover:bg-text-danger/20 transition-colors">
+              <Video className="w-5 h-5 text-text-danger" />
+            </div>
+            <span className="caption-large font-medium">Go Live</span>
+          </button>
+
+          <button 
+            onClick={handleAddEmoji}
+            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#FFD700]/30 rounded-xl transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FFD700]/10 flex items-center justify-center group-hover:bg-[#FFD700]/20 transition-colors">
+              <Smile className="w-5 h-5 text-[#FFD700]" />
+            </div>
+            <span className="caption-large font-medium">Feeling</span>
+          </button>
+
+          <button 
+            onClick={handleAddLocation}
+            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#00a73e]/30 rounded-xl transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#00a73e]/10 flex items-center justify-center group-hover:bg-[#00a73e]/20 transition-colors">
+              <MapPin className="w-5 h-5 text-[#00a73e]" />
+            </div>
+            <span className="caption-large font-medium">Check In</span>
+          </button>
+        </div>
+
         {/* Pro Tips Section */}
         <div 
           className="mt-6 p-5 bg-gradient-to-r from-surface-brand/5 to-surface-brand/10 border border-surface-brand/20 rounded-xl"
