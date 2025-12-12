@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Bell, Shield, Eye, Globe, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,8 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import LocaleSwitcher from "@/components/LocalSwitcher";
+import { useTheme } from "next-themes";
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering theme-dependent UI
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // State for notifications
   const [notifications, setNotifications] = useState({
     email: true,
@@ -30,25 +40,6 @@ export default function SettingsPage() {
     dataSharing: false,
     adPersonalization: true,
   });
-
-  // State for language
-  const [language, setLanguage] = useState("English");
-
-  // State for theme
-  const [theme, setTheme] = useState({
-    dark: false,
-    light: true,
-    system: false,
-  });
-
-  // Handle theme changes (ensure only one is active)
-  const handleThemeChange = (selectedTheme: "dark" | "light" | "system") => {
-    setTheme({
-      dark: selectedTheme === "dark",
-      light: selectedTheme === "light",
-      system: selectedTheme === "system",
-    });
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -219,18 +210,9 @@ export default function SettingsPage() {
                   Choose your preferred language
                 </p>
               </div>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="French">French</SelectItem>
-                  <SelectItem value="Spanish">Spanish</SelectItem>
-                  <SelectItem value="German">German</SelectItem>
-                  <SelectItem value="Arabic">Arabic</SelectItem>
-                </SelectContent>
-              </Select>
+              <LocaleSwitcher 
+                selectClassName="w-[180px]"
+              />
             </div>
           </div>
 
@@ -241,46 +223,48 @@ export default function SettingsPage() {
               <h2 className="text-lg font-semibold text-foreground">Theme</h2>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">Dark Mode</p>
-                  <p className="text-sm text-muted-foreground">
-                    Use dark theme across the app
-                  </p>
+            {mounted && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">Dark Mode</p>
+                    <p className="text-sm text-muted-foreground">
+                      Use dark theme across the app
+                    </p>
+                  </div>
+                  <Switch
+                    checked={theme === "dark"}
+                    onCheckedChange={() => setTheme("dark")}
+                  />
                 </div>
-                <Switch
-                  checked={theme.dark}
-                  onCheckedChange={() => handleThemeChange("dark")}
-                />
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">Light Mode</p>
-                  <p className="text-sm text-muted-foreground">
-                    Use light theme across the app
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">Light Mode</p>
+                    <p className="text-sm text-muted-foreground">
+                      Use light theme across the app
+                    </p>
+                  </div>
+                  <Switch
+                    checked={theme === "light"}
+                    onCheckedChange={() => setTheme("light")}
+                  />
                 </div>
-                <Switch
-                  checked={theme.light}
-                  onCheckedChange={() => handleThemeChange("light")}
-                />
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">System Default</p>
-                  <p className="text-sm text-muted-foreground">
-                    Follow system theme settings
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">System Default</p>
+                    <p className="text-sm text-muted-foreground">
+                      Follow system theme settings
+                    </p>
+                  </div>
+                  <Switch
+                    checked={theme === "system"}
+                    onCheckedChange={() => setTheme("system")}
+                  />
                 </div>
-                <Switch
-                  checked={theme.system}
-                  onCheckedChange={() => handleThemeChange("system")}
-                />
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
