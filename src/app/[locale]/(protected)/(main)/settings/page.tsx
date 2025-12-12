@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/select";
 import LocaleSwitcher from "@/components/LocalSwitcher";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 
 export default function SettingsPage() {
+  const t = useTranslations("settings");
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -51,7 +53,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">
-                Notifications
+                {t("notifications.title")}
               </h2>
             </div>
 
@@ -59,10 +61,10 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">
-                    Email Notifications
+                    {t("notifications.email.title")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Receive notifications via email
+                    {t("notifications.email.description")}
                   </p>
                 </div>
                 <Switch
@@ -76,10 +78,10 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">
-                    SMS Notifications
+                    {t("notifications.sms.title")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Receive notifications via SMS
+                    {t("notifications.sms.description")}
                   </p>
                 </div>
                 <Switch
@@ -93,10 +95,10 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">
-                    Push Notifications
+                    {t("notifications.push.title")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Receive push notifications on your device
+                    {t("notifications.push.description")}
                   </p>
                 </div>
                 <Switch
@@ -114,7 +116,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">
-                Security
+                {t("security.title")}
               </h2>
             </div>
 
@@ -122,10 +124,10 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">
-                    Two-Factor Authentication
+                    {t("security.twoFactor.title")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Add an extra layer of security
+                    {t("security.twoFactor.description")}
                   </p>
                 </div>
                 <Switch
@@ -139,14 +141,14 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">
-                    Change Password
+                    {t("security.changePassword.title")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Update your account password
+                    {t("security.changePassword.description")}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Change
+                  {t("security.changePassword.button")}
                 </Button>
               </div>
             </div>
@@ -156,15 +158,19 @@ export default function SettingsPage() {
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-accent" />
-              <h2 className="text-lg font-semibold text-foreground">Privacy</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                {t("privacy.title")}
+              </h2>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-foreground">Data Sharing</p>
+                  <p className="font-medium text-foreground">
+                    {t("privacy.dataSharing.title")}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    Share usage data to improve services
+                    {t("privacy.dataSharing.description")}
                   </p>
                 </div>
                 <Switch
@@ -178,10 +184,10 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">
-                    Ad Personalization
+                    {t("privacy.adPersonalization.title")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Personalize ads based on your activity
+                    {t("privacy.adPersonalization.description")}
                   </p>
                 </div>
                 <Switch
@@ -199,15 +205,17 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-accent" />
               <h2 className="text-lg font-semibold text-foreground">
-                Language
+                {t("language.title")}
               </h2>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-foreground">App Language</p>
+                <p className="font-medium text-foreground">
+                  {t("language.appLanguage.title")}
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Choose your preferred language
+                  {t("language.appLanguage.description")}
                 </p>
               </div>
               <LocaleSwitcher 
@@ -220,16 +228,20 @@ export default function SettingsPage() {
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Palette className="h-5 w-5 text-accent" />
-              <h2 className="text-lg font-semibold text-foreground">Theme</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                {t("theme.title")}
+              </h2>
             </div>
 
             {mounted && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground">Dark Mode</p>
+                    <p className="font-medium text-foreground">
+                      {t("theme.dark.title")}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      Use dark theme across the app
+                      {t("theme.dark.description")}
                     </p>
                   </div>
                   <Switch
@@ -240,9 +252,11 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground">Light Mode</p>
+                    <p className="font-medium text-foreground">
+                      {t("theme.light.title")}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      Use light theme across the app
+                      {t("theme.light.description")}
                     </p>
                   </div>
                   <Switch
@@ -253,9 +267,11 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground">System Default</p>
+                    <p className="font-medium text-foreground">
+                      {t("theme.system.title")}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      Follow system theme settings
+                      {t("theme.system.description")}
                     </p>
                   </div>
                   <Switch
