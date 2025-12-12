@@ -17,7 +17,7 @@ export default function AuthLayout({
                 {/* Left side - Hidden on mobile, shown on desktop */}
                 <div className="hidden lg:block lg:w-[60%] h-full flex-shrink-0">
                     <div className="h-full mt-[30%] mx-[10%]">
-                        <div className="mb-6">
+                        <div className="mb-3">
                             <Image 
                                 src="/DiaspoLogo.svg" 
                                 alt="Logo" 
@@ -35,7 +35,7 @@ export default function AuthLayout({
                 {/* Right side - Full width on mobile */}
                 <div className="w-full lg:w-[40%] flex-1 flex flex-col bg-surface-default">
                     {/* Logo on top - Only visible on mobile */}
-                    <div className="lg:hidden flex justify-center pt-8 pb-4 px-6">
+                    <div className="lg:hidden flex justify-center pt-8 pb-2 px-6">
                         <Image 
                             src="/DiaspoLogo.svg" 
                             alt="Logo" 
