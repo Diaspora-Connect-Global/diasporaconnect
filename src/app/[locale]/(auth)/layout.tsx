@@ -12,17 +12,17 @@ export default function AuthLayout({
     const t = useTranslations('authentication');
 
     return (
-        <div className="min-h-screen"> {/* ✅ ADDED: Full viewport height */}
-            <div className="lg:flex min-h-screen"> {/* ✅ ADDED: Full height container */}
+        <div className="min-h-screen"> {/* Full viewport height */}
+            <div className="lg:flex min-h-screen"> {/* Full height container */}
                 {/* Left side*/}
-                <div className="lg:w-[60%] h-full  flex-shrink-0"> {/* ✅ ADDED: flex-shrink-0 */}
+                <div className="lg:w-[60%] h-full  flex-shrink-0"> {/* flex-shrink-0 */}
                     <div className="h-full mt-[30%] mx-[10%]">
                         <div className="mb-6">
                             <Image 
                                 src="/DiaspoLogo.svg" 
                                 alt="Logo" 
-                                width={196} 
-                                height={93} 
+                                width={230} 
+                                height={113} 
                                 className="object-contain" 
                             />
                         </div>
