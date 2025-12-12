@@ -19,7 +19,7 @@ export default function AuthLayout({
                     <div className="h-full mt-[30%] mx-[10%]">
                         <div className="mb-6">
                             <Image 
-                                src="/LOGO.png" 
+                                src="/DiaspoLogo.svg" 
                                 alt="Logo" 
                                 width={196} 
                                 height={93} 
