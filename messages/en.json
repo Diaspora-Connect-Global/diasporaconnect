@@ -537,5 +537,68 @@
         "loadMore": "Load More",
         "noTransactions": "No transactions found",
         "fromLastMonth": "from last month"
+  },
+    "settings": {
+    "title": "Settings",
+    "notifications": {
+      "title": "Notifications",
+      "email": {
+        "title": "Email Notifications",
+        "description": "Receive notifications via email"
+      },
+      "sms": {
+        "title": "SMS Notifications",
+        "description": "Receive notifications via SMS"
+      },
+      "push": {
+        "title": "Push Notifications",
+        "description": "Receive push notifications on your device"
+      }
+    },
+    "security": {
+      "title": "Security",
+      "twoFactor": {
+        "title": "Two-Factor Authentication",
+        "description": "Add an extra layer of security"
+      },
+      "changePassword": {
+        "title": "Change Password",
+        "description": "Update your account password",
+        "button": "Change"
+      }
+    },
+    "privacy": {
+      "title": "Privacy",
+      "dataSharing": {
+        "title": "Data Sharing",
+        "description": "Share usage data to improve services"
+      },
+      "adPersonalization": {
+        "title": "Ad Personalization",
+        "description": "Personalize ads based on your activity"
+      }
+    },
+    "language": {
+      "title": "Language",
+      "appLanguage": {
+        "title": "App Language",
+        "description": "Choose your preferred language"
+      }
+    },
+    "theme": {
+      "title": "Theme",
+      "dark": {
+        "title": "Dark Mode",
+        "description": "Use dark theme across the app"
+      },
+      "light": {
+        "title": "Light Mode",
+        "description": "Use light theme across the app"
+      },
+      "system": {
+        "title": "System Default",
+        "description": "Follow system theme settings"
+      }
+    }
   }
 }
