@@ -41,7 +41,7 @@ export default function InfoLinks() {
             <span>
                 <BodySmall>
                     <TextPrimary>
-                        © DCG 2025
+                        © Diaspo Plug {new Date().getFullYear()}
                     </TextPrimary>
                 </BodySmall>
             </span>
