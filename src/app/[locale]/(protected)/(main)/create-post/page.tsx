@@ -28,6 +28,8 @@ type AttachmentType = 'Photo' | 'Video' | 'Document';
 interface Attachment {
   id: string;
   type: AttachmentType;
+  name?: string;
+  file?: File;
 }
 
 // Avatar Component
@@ -149,19 +151,111 @@ export default function CreatePostPage() {
   const [visibility, setVisibility] = useState<Visibility>('public');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isPosting, setIsPosting] = useState(false);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const t = useTranslations('actions');
   const userName = 'John Doe';
+  const userTitle = 'Product Designer';
   const charLimit = 3000;
   const charCount = postContent.length;
 
+  // Function to insert text at cursor position
+  const insertAtCursor = (textToInsert: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newContent = 
+      postContent.substring(0, start) + 
+      textToInsert + 
+      postContent.substring(end);
+    
+    setPostContent(newContent);
+    
+    // Set cursor position after inserted text
+    setTimeout(() => {
+      textarea.focus();
+      const newPosition = start + textToInsert.length;
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
+  };
+
+  const handleAddEmoji = () => {
+    // You can integrate an emoji picker library here
+    const emojis = ['😊', '❤️', '👍', '🎉', '🔥', '✨', '💯', '🚀'];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    insertAtCursor(randomEmoji);
+    toast.success('Emoji added');
+  };
+
+  const handleAddHashtag = () => {
+    insertAtCursor('#');
+    toast.success('Add your hashtag', {
+      description: 'Type your hashtag after the # symbol'
+    });
+  };
+
+  const handleAddMention = () => {
+    insertAtCursor('@');
+    toast.success('Mention someone', {
+      description: 'Type the name after the @ symbol'
+    });
+  };
+
+  const handleAddLocation = () => {
+    // You can integrate a location picker here
+    const sampleLocations = [
+      'New York, NY',
+      'Los Angeles, CA',
+      'San Francisco, CA',
+      'London, UK',
+      'Tokyo, Japan'
+    ];
+    const location = sampleLocations[Math.floor(Math.random() * sampleLocations.length)];
+    insertAtCursor(`📍 ${location}`);
+    toast.success('Location added');
+  };
+
   const handleAddAttachment = (type: AttachmentType) => {
-    const newAttachment: Attachment = {
-      id: `${type}-${Date.now()}`,
-      type
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    
+    // Set accept attribute based on type
+    switch (type) {
+      case 'Photo':
+        input.accept = 'image/*';
+        break;
+      case 'Video':
+        input.accept = 'video/*';
+        break;
+      case 'Document':
+        input.accept = '.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx';
+        break;
+    }
+    
+    // Handle file selection
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || files.length === 0) return;
+      
+      Array.from(files).forEach(file => {
+        const newAttachment: Attachment = {
+          id: `${type}-${Date.now()}-${Math.random()}`,
+          type,
+          name: file.name,
+          file
+        };
+        setAttachments(prev => [...prev, newAttachment]);
+      });
+      
+      toast.success(`${files.length} ${type}(s) added`);
     };
-    setAttachments([...attachments, newAttachment]);
-    toast.success(`${type} added`);
+    
+    // Trigger file dialog
+    input.click();
   };
 
   const handleRemoveAttachment = (id: string) => {
@@ -211,8 +305,8 @@ export default function CreatePostPage() {
   };
 
   return (
-  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4">
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4">
+      <div className="w-full max-w-3xl mx-auto">
         {/* Main Composer Card */}
         <div className="bg-surface-default/80 backdrop-blur-md rounded-2xl border border-border-subtle shadow-xl">
           {/* User Header */}
@@ -226,6 +320,7 @@ export default function CreatePostPage() {
                 />
                 <div className="flex flex-col gap-1">
                   <h2 className="heading-small text-text-primary">{userName}</h2>
+                  <p className="body-small text-text-secondary">{userTitle}</p>
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
@@ -254,6 +349,7 @@ export default function CreatePostPage() {
           {/* Text Area */}
           <div className="px-6 py-6">
             <textarea
+              ref={textareaRef}
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
               placeholder={`What's on your mind, ${userName.split(' ')[0]}?`}
@@ -276,7 +372,7 @@ export default function CreatePostPage() {
                       <div className={`p-1.5 rounded-lg ${bg}`}>
                         <Icon className={`w-4 h-4 ${color}`} />
                       </div>
-                      <span className="body-small">{attachment.type}</span>
+                      <span className="body-small">{attachment.name || attachment.type}</span>
                       <button
                         onClick={() => handleRemoveAttachment(attachment.id)}
                         className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-surface-default/80 hover:bg-text-danger hover:text-text-white border border-border-subtle flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -326,17 +422,33 @@ export default function CreatePostPage() {
 
                 {/* Secondary actions - hidden on mobile */}
                 <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
-                  <button className="p-2 hover:bg-surface-subtle rounded-lg transition-colors" title="Add Emoji">
-                    <Smile className="w-5 h-5 text-text-secondary" />
+                  <button 
+                    onClick={handleAddEmoji}
+                    className="p-2 hover:bg-[#FFD700]/10 rounded-lg transition-colors group" 
+                    title="Add Emoji"
+                  >
+                    <Smile className="w-5 h-5 text-[#FFD700] group-hover:scale-110 transition-transform" />
                   </button>
-                  <button className="p-2 hover:bg-surface-subtle rounded-lg transition-colors" title="Add Hashtag">
-                    <Hash className="w-5 h-5 text-text-secondary" />
+                  <button 
+                    onClick={handleAddHashtag}
+                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group" 
+                    title="Add Hashtag"
+                  >
+                    <Hash className="w-5 h-5 text-surface-brand group-hover:scale-110 transition-transform" />
                   </button>
-                  <button className="p-2 hover:bg-surface-subtle rounded-lg transition-colors" title="Mention Someone">
-                    <AtSign className="w-5 h-5 text-text-secondary" />
+                  <button 
+                    onClick={handleAddMention}
+                    className="p-2 hover:bg-[#9333EA]/10 rounded-lg transition-colors group" 
+                    title="Mention Someone"
+                  >
+                    <AtSign className="w-5 h-5 text-[#9333EA] group-hover:scale-110 transition-transform" />
                   </button>
-                  <button className="p-2 hover:bg-surface-subtle rounded-lg transition-colors" title="Add Location">
-                    <MapPin className="w-5 h-5 text-text-secondary" />
+                  <button 
+                    onClick={handleAddLocation}
+                    className="p-2 hover:bg-[#00a73e]/10 rounded-lg transition-colors group" 
+                    title="Add Location"
+                  >
+                    <MapPin className="w-5 h-5 text-[#00a73e] group-hover:scale-110 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -372,14 +484,20 @@ export default function CreatePostPage() {
             <span className="caption-large font-medium">Go Live</span>
           </button>
 
-          <button className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#cb3500]/30 rounded-xl transition-all group">
-            <div className="w-10 h-10 rounded-xl bg-[#cb3500]/10 flex items-center justify-center group-hover:bg-[#cb3500]/20 transition-colors">
-              <Smile className="w-5 h-5 text-[#cb3500]" />
+          <button 
+            onClick={handleAddEmoji}
+            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#FFD700]/30 rounded-xl transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FFD700]/10 flex items-center justify-center group-hover:bg-[#FFD700]/20 transition-colors">
+              <Smile className="w-5 h-5 text-[#FFD700]" />
             </div>
             <span className="caption-large font-medium">Feeling</span>
           </button>
 
-          <button className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#00a73e]/30 rounded-xl transition-all group">
+          <button 
+            onClick={handleAddLocation}
+            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#00a73e]/30 rounded-xl transition-all group"
+          >
             <div className="w-10 h-10 rounded-xl bg-[#00a73e]/10 flex items-center justify-center group-hover:bg-[#00a73e]/20 transition-colors">
               <MapPin className="w-5 h-5 text-[#00a73e]" />
             </div>
