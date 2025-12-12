@@ -341,10 +341,11 @@ export function DropdownMenuAvatar() {
               <DMItem icon={<Wallet3 size="80" />} text={t('wallet')} />
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/settings">
             <DMItem icon={<SettingsIcon className='w-full h-full'
             />} text={t('settingsPrivacy')} />
-
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
