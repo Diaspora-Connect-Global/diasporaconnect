@@ -430,5 +430,68 @@
     "metadata": {
         "title": "Diaspora Connect Global",
         "description": "Connecter les communautés de la diaspora dans le monde entier"
+    },
+     "settings": {
+    "title": "Paramètres",
+    "notifications": {
+      "title": "Notifications",
+      "email": {
+        "title": "Notifications par e-mail",
+        "description": "Recevoir des notifications par e-mail"
+      },
+      "sms": {
+        "title": "Notifications SMS",
+        "description": "Recevoir des notifications par SMS"
+      },
+      "push": {
+        "title": "Notifications push",
+        "description": "Recevoir des notifications push sur votre appareil"
+      }
+    },
+    "security": {
+      "title": "Sécurité",
+      "twoFactor": {
+        "title": "Authentification à deux facteurs",
+        "description": "Ajouter une couche de sécurité supplémentaire"
+      },
+      "changePassword": {
+        "title": "Changer le mot de passe",
+        "description": "Mettre à jour le mot de passe de votre compte",
+        "button": "Changer"
+      }
+    },
+    "privacy": {
+      "title": "Confidentialité",
+      "dataSharing": {
+        "title": "Partage de données",
+        "description": "Partager les données d'utilisation pour améliorer les services"
+      },
+      "adPersonalization": {
+        "title": "Personnalisation des publicités",
+        "description": "Personnaliser les publicités en fonction de votre activité"
+      }
+    },
+    "language": {
+      "title": "Langue",
+      "appLanguage": {
+        "title": "Langue de l'application",
+        "description": "Choisissez votre langue préférée"
+      }
+    },
+    "theme": {
+      "title": "Thème",
+      "dark": {
+        "title": "Mode sombre",
+        "description": "Utiliser le thème sombre dans toute l'application"
+      },
+      "light": {
+        "title": "Mode clair",
+        "description": "Utiliser le thème clair dans toute l'application"
+      },
+      "system": {
+        "title": "Par défaut du système",
+        "description": "Suivre les paramètres du thème système"
+      }
     }
+  }
 }
