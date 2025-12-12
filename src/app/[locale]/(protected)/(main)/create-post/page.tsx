@@ -15,6 +15,9 @@ import {
   Sparkles,
   X,
   ChevronDown,
+  Paperclip,
+  Camera,
+  FolderOpen,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -151,11 +154,11 @@ export default function CreatePostPage() {
   const [visibility, setVisibility] = useState<Visibility>('public');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isPosting, setIsPosting] = useState(false);
+  const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const t = useTranslations('actions');
   const userName = 'John Doe';
-  const userTitle = 'Product Designer';
   const charLimit = 3000;
   const charCount = postContent.length;
 
@@ -258,6 +261,89 @@ export default function CreatePostPage() {
     input.click();
   };
 
+  // Mobile-specific handlers
+  const handleMobileGallery = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,video/*';
+    input.multiple = true;
+    
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || files.length === 0) return;
+      
+      Array.from(files).forEach(file => {
+        const isVideo = file.type.startsWith('video/');
+        const newAttachment: Attachment = {
+          id: `${isVideo ? 'Video' : 'Photo'}-${Date.now()}-${Math.random()}`,
+          type: isVideo ? 'Video' : 'Photo',
+          name: file.name,
+          file
+        };
+        setAttachments(prev => [...prev, newAttachment]);
+      });
+      
+      toast.success(`${files.length} file(s) added from gallery`);
+      setShowMobileAttachMenu(false);
+    };
+    
+    input.click();
+  };
+
+  const handleMobileCamera = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,video/*';
+    input.capture = 'environment'; // Use back camera by default
+    
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || files.length === 0) return;
+      
+      const file = files[0];
+      const isVideo = file.type.startsWith('video/');
+      const newAttachment: Attachment = {
+        id: `${isVideo ? 'Video' : 'Photo'}-${Date.now()}-${Math.random()}`,
+        type: isVideo ? 'Video' : 'Photo',
+        name: file.name,
+        file
+      };
+      setAttachments(prev => [...prev, newAttachment]);
+      
+      toast.success(`${isVideo ? 'Video' : 'Photo'} captured`);
+      setShowMobileAttachMenu(false);
+    };
+    
+    input.click();
+  };
+
+  const handleMobileDocument = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '*/*';
+    input.multiple = true;
+    
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || files.length === 0) return;
+      
+      Array.from(files).forEach(file => {
+        const newAttachment: Attachment = {
+          id: `Document-${Date.now()}-${Math.random()}`,
+          type: 'Document',
+          name: file.name,
+          file
+        };
+        setAttachments(prev => [...prev, newAttachment]);
+      });
+      
+      toast.success(`${files.length} file(s) added`);
+      setShowMobileAttachMenu(false);
+    };
+    
+    input.click();
+  };
+
   const handleRemoveAttachment = (id: string) => {
     setAttachments(attachments.filter(a => a.id !== id));
   };
@@ -320,7 +406,6 @@ export default function CreatePostPage() {
                 />
                 <div className="flex flex-col gap-1">
                   <h2 className="heading-small text-text-primary">{userName}</h2>
-                  <p className="body-small text-text-secondary">{userTitle}</p>
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
@@ -391,34 +476,101 @@ export default function CreatePostPage() {
             <div className="flex items-center justify-between">
               {/* Left Actions */}
               <div className="flex items-center gap-2">
-                {/* Primary attachment buttons */}
-                <button
-                  onClick={() => handleAddAttachment('Photo')}
-                  className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
-                  title="Add Photo"
-                >
-                  <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
-                    <ImageIcon className="w-5 h-5 text-surface-brand" />
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleAddAttachment('Video')}
-                  className="p-2 hover:bg-text-danger/10 rounded-lg transition-colors group"
-                  title="Add Video"
-                >
-                  <div className="p-1.5 rounded-lg bg-text-danger/10 group-hover:bg-text-danger/20 transition-colors">
-                    <Video className="w-5 h-5 text-text-danger" />
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleAddAttachment('Document')}
-                  className="p-2 hover:bg-[#cb3500]/10 rounded-lg transition-colors group"
-                  title="Add File"
-                >
-                  <div className="p-1.5 rounded-lg bg-[#cb3500]/10 group-hover:bg-[#cb3500]/20 transition-colors">
-                    <FileText className="w-5 h-5 text-[#cb3500]" />
-                  </div>
-                </button>
+                {/* Mobile - Single Attachment Button */}
+                <div className="md:hidden relative">
+                  <button
+                    onClick={() => setShowMobileAttachMenu(!showMobileAttachMenu)}
+                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
+                    title="Add Attachment"
+                  >
+                    <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
+                      <Paperclip className="w-5 h-5 text-surface-brand" />
+                    </div>
+                  </button>
+
+                  {/* Mobile Attachment Menu */}
+                  {showMobileAttachMenu && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setShowMobileAttachMenu(false)}
+                      ></div>
+                      <div className="absolute left-0 bottom-full mb-2 w-64 bg-surface-default border border-border-subtle rounded-xl shadow-xl overflow-hidden z-50 animate-slide-up">
+                        <div className="p-2">
+                          <button
+                            onClick={handleMobileCamera}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg transition-colors"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-surface-brand/10 flex items-center justify-center">
+                              <Camera className="w-5 h-5 text-surface-brand" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="font-medium text-sm">Camera</p>
+                              <p className="text-xs text-text-secondary">Take photo or video</p>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={handleMobileGallery}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg transition-colors"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-text-danger/10 flex items-center justify-center">
+                              <ImageIcon className="w-5 h-5 text-text-danger" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="font-medium text-sm">Gallery</p>
+                              <p className="text-xs text-text-secondary">Choose from gallery</p>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={handleMobileDocument}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg transition-colors"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-[#cb3500]/10 flex items-center justify-center">
+                              <FolderOpen className="w-5 h-5 text-[#cb3500]" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="font-medium text-sm">Files</p>
+                              <p className="text-xs text-text-secondary">Choose document</p>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Desktop - Separate Buttons */}
+                <div className="hidden md:flex items-center gap-2">
+                  <button
+                    onClick={() => handleAddAttachment('Photo')}
+                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
+                    title="Add Photo"
+                  >
+                    <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
+                      <ImageIcon className="w-5 h-5 text-surface-brand" />
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleAddAttachment('Video')}
+                    className="p-2 hover:bg-text-danger/10 rounded-lg transition-colors group"
+                    title="Add Video"
+                  >
+                    <div className="p-1.5 rounded-lg bg-text-danger/10 group-hover:bg-text-danger/20 transition-colors">
+                      <Video className="w-5 h-5 text-text-danger" />
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleAddAttachment('Document')}
+                    className="p-2 hover:bg-[#cb3500]/10 rounded-lg transition-colors group"
+                    title="Add File"
+                  >
+                    <div className="p-1.5 rounded-lg bg-[#cb3500]/10 group-hover:bg-[#cb3500]/20 transition-colors">
+                      <FileText className="w-5 h-5 text-[#cb3500]" />
+                    </div>
+                  </button>
+                </div>
 
                 {/* Secondary actions - hidden on mobile */}
                 <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
@@ -522,6 +674,23 @@ export default function CreatePostPage() {
           </div>
         </div>
       </div>
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.2s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
