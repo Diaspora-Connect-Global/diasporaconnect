@@ -1077,15 +1077,15 @@ const App: React.FC = () => {
         </>
       )}
 
-      <div className='h-full flex flex-col'>
         {currentView === 'product' && selectedProduct && (
+          <div className='h-full flex flex-col'>
           <ProductDetail
             product={selectedProduct}
             onBack={() => setCurrentView('home')}
             onAddToCart={handleAddToCart}
           />
-        )}
       </div>
+        )}
 
       {currentView === 'service' && selectedProduct && (
         <ServiceDetail
