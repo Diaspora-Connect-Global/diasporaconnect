@@ -1,7 +1,7 @@
 {
     "authentication": {
         "greetings": {
-            "signup": "Willkommen bei DCG",
+            "signup": "Willkommen bei Diaspo Plug",
             "login": "Willkommen zurück!"
         },
         "description": "Schaffung strukturierter, transparenter und wirkungsvoller Wege für die Diaspora-Beteiligung.",
@@ -87,7 +87,7 @@
             "resend": "Code erneut senden"
         },
         "topics": {
-            "title": "Welche Themen möchten Sie auf DCG sehen",
+            "title": "Welche Themen möchten Sie auf Diaspo Plug sehen",
             "description": "Wählen Sie Ihre Interessen, damit wir Ihren Feed mit Updates, Diskussionen und Möglichkeiten, die Sie interessieren, personalisieren können.",
             "technology": "Technologie",
             "science": "Wissenschaft",
