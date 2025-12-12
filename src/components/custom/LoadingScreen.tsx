@@ -22,7 +22,7 @@ export default function LoadingScreen({
         {showLogo && (
           <div className="relative w-32 h-32">
             <Image
-              src="/LOGO.png"
+              src="/LOGO.svg"
               alt="Logo"
               fill
               className="object-contain"
