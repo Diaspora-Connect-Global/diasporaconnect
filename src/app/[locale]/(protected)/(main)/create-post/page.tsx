@@ -159,6 +159,7 @@ export default function CreatePostPage() {
 
   const t = useTranslations('actions');
   const userName = 'John Doe';
+  const userTitle = 'Product Designer';
   const charLimit = 3000;
   const charCount = postContent.length;
 
@@ -267,6 +268,7 @@ export default function CreatePostPage() {
     input.type = 'file';
     input.accept = 'image/*,video/*';
     input.multiple = true;
+    // Remove capture attribute to go directly to gallery
     
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
@@ -320,7 +322,7 @@ export default function CreatePostPage() {
   const handleMobileDocument = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '*/*';
+    // No accept attribute - opens file manager with all files
     input.multiple = true;
     
     input.onchange = (e) => {
@@ -328,9 +330,17 @@ export default function CreatePostPage() {
       if (!files || files.length === 0) return;
       
       Array.from(files).forEach(file => {
+        // Determine type based on file MIME type
+        let type: AttachmentType = 'Document';
+        if (file.type.startsWith('image/')) {
+          type = 'Photo';
+        } else if (file.type.startsWith('video/')) {
+          type = 'Video';
+        }
+        
         const newAttachment: Attachment = {
-          id: `Document-${Date.now()}-${Math.random()}`,
-          type: 'Document',
+          id: `${type}-${Date.now()}-${Math.random()}`,
+          type,
           name: file.name,
           file
         };
@@ -406,6 +416,7 @@ export default function CreatePostPage() {
                 />
                 <div className="flex flex-col gap-1">
                   <h2 className="heading-small text-text-primary">{userName}</h2>
+                  <p className="body-small text-text-secondary">{userTitle}</p>
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
