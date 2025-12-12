@@ -51,14 +51,14 @@ const services: Product[] = [
 
 // Header Component
 const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTab: (item: 'products' | 'services') => void; activeTab: string }> = ({ cartCount, onCartClick, setActiveTab, activeTab }) => (
-  <div className="h-full flex flex-col justify-between space-y-6  sticky top-0 z-50">
-    <div className="max-w-7xl  flex  justify-between ">
+  <div className="h-full flex flex-col justify-between space-y-6 sticky top-0 bg-background z-10">
+    <div className="max-w-7xl flex justify-between">
       <h1 className="text-2xl font-bold">Marketplace</h1>
-      <button onClick={onCartClick} className="flex items-center gap-2 ">
+      <button onClick={onCartClick} className="flex items-center gap-2">
         <ShoppingCart className="w-5 h-5" />
         <span>Cart</span>
         {cartCount > 0 && (
-          <span className=" text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {cartCount}
           </span>
         )}
@@ -66,11 +66,11 @@ const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTa
     </div>
 
 
-    <div className="flex  mt-auto  justify-between border-b ">
+    <div className="flex mt-auto justify-between border-b">
       <div>
         <button
           onClick={() => setActiveTab('products')}
-          className={`p-2 font-medium ${activeTab === 'products' ? ' border-b-2 border-border-brand' : 'text-gray-600'}`}
+          className={`p-2 font-medium ${activeTab === 'products' ? 'border-b-2 border-border-brand' : 'text-gray-600'}`}
         >
           Products
         </button>
@@ -110,13 +110,13 @@ const ProductCard: React.FC<{
         <div className="rounded-4xl h-48 flex items-center justify-center text-6xl border-1">
           {product.image}
         </div>
-        <button className="absolute top-2 right-2  rounded-full p-2 ">
+        <button className="absolute top-2 right-2 rounded-full p-2">
           <Heart className="w-5 h-5 text-gray-400" />
         </button>
       </div>
       <div className='flex'>
         <h3 className="font-semibold mb-1">{product.name}</h3>
-        <div className="flex items-center gap-1 ">
+        <div className="flex items-center gap-1">
           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
           <span className="text-sm font-medium text-primary">{product.rating}</span>
           <span className="text-sm text-secondary">({product.reviews})</span>
@@ -128,7 +128,7 @@ const ProductCard: React.FC<{
         <span className="text-lg font-bold">GH₵{product.price.toFixed(2)}</span>
         <button
           onClick={handleAddClick}
-          className="bg-surface-brand text-text-white rounded-full p-2 "
+          className="bg-surface-brand text-text-white rounded-full p-2"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -374,7 +374,7 @@ const ProductDetail: React.FC<{
 
     <>
       <div className='h-[10%] flex items-center text-center'>
-        <button onClick={onBack} className="flex items-center gap-2 text-primary  cursor-pointer">
+        <button onClick={onBack} className="flex items-center gap-2 text-primary cursor-pointer">
           <ChevronLeft className="w-5 h-5" />
           <span>{product.name}</span>
         </button>
@@ -399,7 +399,7 @@ const ProductDetail: React.FC<{
           </div>
 
           
-            <div className=" p-2 rounded-lg">
+            <div className="p-2 rounded-lg">
               <h3 className="font-semibold mb-2">About product</h3>
               <p className="text-sm text-gray-600">
                 A classic men&apos;s leather shoe, crafted from high-quality materials for durability and style. With a sleek design and comfortable fit, these shoes are perfect for both formal and casual occasions. Elevate your wardrobe with this essential footwear that combines elegance and practicality.
@@ -413,7 +413,7 @@ const ProductDetail: React.FC<{
           <div>
                         <p className="text-sm text-gray-600 mb-4">By {product.seller}</p>
 
-            <div className="flex items-start justify-between ">
+            <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
                 <div className="flex items-center gap-2 mb-4">
@@ -423,10 +423,10 @@ const ProductDetail: React.FC<{
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="p-2 rounded-full ">
+                <button className="p-2 rounded-full">
                   <Heart className="w-5 h-5" />
                 </button>
-                <button className="p-2 rounded-full ">
+                <button className="p-2 rounded-full">
                   <Search className="w-5 h-5" />
                 </button>
               </div>
@@ -453,14 +453,14 @@ const ProductDetail: React.FC<{
               <div className="flex items-center gap-4 border-1 w-fit px-8 py-5 rounded-full text-text-brand border-brand">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2  rounded "
+                  className="p-2 rounded"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
                 <span className="text-lg font-medium text-primary">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="p-2  rounded "
+                  className="p-2 rounded"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -468,10 +468,10 @@ const ProductDetail: React.FC<{
             </div>
 
             <div className="flex gap-4 mb-6">
-              <button onClick={handleAddToCart} className="flex-1 bg-text-primary text-text-white py-3 rounded-full ">
+              <button onClick={handleAddToCart} className="flex-1 bg-text-primary text-text-white py-3 rounded-full">
                 Add to cart
               </button>
-              <button className="flex-1 bg-surface-brand text-text-white py-3 rounded-full ">
+              <button className="flex-1 bg-surface-brand text-text-white py-3 rounded-full">
                 Buy now
               </button>
             </div>
@@ -494,7 +494,7 @@ const ShoppingCartModal: React.FC<{
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="fixed inset-0  bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-surface-default rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
         <div className="p-6 border-b flex items-center justify-between">
           <h2 className="text-xl font-bold">Shopping cart</h2>
@@ -1083,7 +1083,7 @@ const App: React.FC = () => {
 
       )}
 
-      <div className='h-full '>
+      <div className='h-full'>
 
         {currentView === 'product' && selectedProduct && (
           <ProductDetail
