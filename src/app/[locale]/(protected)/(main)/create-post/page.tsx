@@ -160,7 +160,6 @@ export default function CreatePostPage() {
 
   const t = useTranslations('actions');
   const userName = 'John Doe';
-  const userTitle = 'Product Designer';
   const charLimit = 3000;
   const charCount = postContent.length;
 
@@ -448,7 +447,6 @@ export default function CreatePostPage() {
                 />
                 <div className="flex flex-col gap-1">
                   <h2 className="heading-small text-text-primary">{userName}</h2>
-                  <p className="body-small text-text-secondary">{userTitle}</p>
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
@@ -696,49 +694,6 @@ export default function CreatePostPage() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-          <button
-            onClick={() => handleAddAttachment('Photo')}
-            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-surface-brand/30 rounded-xl transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-surface-brand/10 flex items-center justify-center group-hover:bg-surface-brand/20 transition-colors">
-              <ImageIcon className="w-5 h-5 text-surface-brand" />
-            </div>
-            <span className="caption-large font-medium">Photo Gallery</span>
-          </button>
-
-          <button
-            onClick={() => handleAddAttachment('Video')}
-            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-text-danger/30 rounded-xl transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-text-danger/10 flex items-center justify-center group-hover:bg-text-danger/20 transition-colors">
-              <Video className="w-5 h-5 text-text-danger" />
-            </div>
-            <span className="caption-large font-medium">Go Live</span>
-          </button>
-
-          <button 
-            onClick={handleAddEmoji}
-            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#FFD700]/30 rounded-xl transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#FFD700]/10 flex items-center justify-center group-hover:bg-[#FFD700]/20 transition-colors">
-              <Smile className="w-5 h-5 text-[#FFD700]" />
-            </div>
-            <span className="caption-large font-medium">Feeling</span>
-          </button>
-
-          <button 
-            onClick={handleAddLocation}
-            className="flex items-center gap-3 p-4 bg-surface-default/60 backdrop-blur-md border border-border-subtle hover:border-[#00a73e]/30 rounded-xl transition-all group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#00a73e]/10 flex items-center justify-center group-hover:bg-[#00a73e]/20 transition-colors">
-              <MapPin className="w-5 h-5 text-[#00a73e]" />
-            </div>
-            <span className="caption-large font-medium">Check In</span>
-          </button>
         </div>
 
         {/* Pro Tips Section */}
