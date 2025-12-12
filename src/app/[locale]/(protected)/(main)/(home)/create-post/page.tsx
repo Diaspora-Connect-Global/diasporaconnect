@@ -152,7 +152,6 @@ export default function CreatePostPage() {
 
   const t = useTranslations('actions');
   const userName = 'John Doe';
-  const userTitle = 'Product Designer';
   const charLimit = 3000;
   const charCount = postContent.length;
 
@@ -227,7 +226,6 @@ export default function CreatePostPage() {
                 />
                 <div className="flex flex-col gap-1">
                   <h2 className="heading-small text-text-primary">{userName}</h2>
-                  <p className="body-small text-text-secondary">{userTitle}</p>
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
