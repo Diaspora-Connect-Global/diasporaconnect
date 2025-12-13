@@ -1,5 +1,6 @@
 "use client";
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/custom/header";
 import { authStorage } from "@/store/CentralPersist";
@@ -11,33 +12,28 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  const isAuthenticated = authStorage.getAccessToken();
+  useEffect(() => {
+    const token = authStorage.getAccessToken();
 
-  if (!isAuthenticated) {
-    // Redirect to login if not authenticated
-    router.push('/signin');
-    return;
+    if (!token) {
+      router.replace("/signin");
+      return;
+    }
+      console.log(" protected  routes visit ");
+
+
+    setCheckingAuth(false);
+  }, [router]);
+
+  // ✅ Render loading while auth is unresolved
+  if (checkingAuth) {
+    return <LoadingScreen />;
   }
 
-  // useEffect(() => {
-  //   // Check if user is authenticated
+  console.log("layout runs for protected  routes");
 
-  //   // Check if token is expired or needs refresh
-  //   // if (authStorage.isTokenExpired()) {
-  //   //   // Clear expired tokens
-  //   //   authStorage.clearAuth();
-  //   //   router.push('/login');
-  //   //   return;
-  //   // }
-
-  //   // Optional: Set up token refresh if needed
-  //   //   if (authStorage.needsRefresh()) {
-  //   //     // You can implement token refresh logic here
-  //   //     console.log('Token needs refresh');
-  //   //     // refreshToken();
-  //   //   }
-  // }, [router]);
 
   return (
     <div className="">
