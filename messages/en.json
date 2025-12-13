@@ -600,5 +600,11 @@
         "description": "Follow system theme settings"
       }
     }
+  },
+      "actions": {
+    "post": "Post",
+    "anyone": "Anyone",
+    "connections": "Connections",
+    "onlyMe": "Only me"
   }
 }
