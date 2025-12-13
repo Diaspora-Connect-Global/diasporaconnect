@@ -2,7 +2,7 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client"
 const cache = new InMemoryCache();
 const httpLink = new HttpLink({
-  uri: "https://flyby-router-demo.herokuapp.com/", 
+  uri: "https://api.diasporaconnectglobal.com/graphql", 
 });
 const gqlClient = new ApolloClient({
     cache: cache,

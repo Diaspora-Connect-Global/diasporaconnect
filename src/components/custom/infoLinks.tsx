@@ -1,11 +1,18 @@
 import { BodySmall, TextPrimary } from "../utils";
 import { useTranslations } from 'next-intl';
+import LocaleSwitcher from "@/components/LocalSwitcher"
+
 
 export default function InfoLinks() {
     const t = useTranslations('legal');
-    
+
     return (
         <>
+            <LocaleSwitcher
+                selectClassName="appearance-none text-text-primary"
+                optionClassName="bg-surface-default"
+            />
+            <span >·</span>
             <a href="#" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
@@ -14,7 +21,7 @@ export default function InfoLinks() {
                 </BodySmall>
             </a>
             <span>·</span>
-            <a href="#" className="hover:underline text-foreground">
+            <a href="#" className="hover:underline text-foreground flex-wrap">
                 <BodySmall>
                     <TextPrimary>
                         {t('terms')}
@@ -38,7 +45,7 @@ export default function InfoLinks() {
                 </BodySmall>
             </a>
             <span>·</span>
-            <span>
+            <span className="flex">
                 <BodySmall>
                     <TextPrimary>
                         © Diaspo Plug {new Date().getFullYear()}
