@@ -46,7 +46,7 @@ export default function CustomDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={`p-0 gap-0 flex flex-col ${contentClassName}`}>
-        <DialogHeader className="rounded-t-md px-6 py-3 h-[10vh]  border-b  sticky top-0 bg-surface-default z-10 flex">
+        <DialogHeader className="rounded-t-md px-6 py-3 h-[10vh] border-b sticky top-0 bg-surface-default z-10 flex">
           <DialogTitle className="text-xl font-semibold flex justify-between w-full">
             {defaultTitle}
             <XIcon
@@ -55,24 +55,24 @@ export default function CustomDialog({
             />
           </DialogTitle>
         </DialogHeader>
-        <div className={``}>
+        
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto px-3">
           {children}
         </div>
 
-        {
-          showFooter ? (
-            <DialogFooter className="h-[10vh] border-t">
-              <div className="flex items-end gap-3 px-6 py-4  sticky bottom-0">
-                <ButtonType3 className="px-6 py-3" onClick={handleCancel} disabled={isLoading}>
-                  {defaultCancelText}
-                </ButtonType3>
-                <ButtonType2 className="px-6 py-3" onClick={onSave} disabled={disabled || isLoading}>
-                  {isLoading ? t('saving') : defaultSaveText}
-                </ButtonType2>
-              </div>
-            </DialogFooter>
-          ) : ""
-        }
+        {showFooter && (
+          <DialogFooter className="h-[10vh] border-t">
+            <div className="flex items-end gap-3 px-6 py-4 sticky bottom-0">
+              <ButtonType3 className="px-6 py-3" onClick={handleCancel} disabled={isLoading}>
+                {defaultCancelText}
+              </ButtonType3>
+              <ButtonType2 className="px-6 py-3" onClick={onSave} disabled={disabled || isLoading}>
+                {isLoading ? t('saving') : defaultSaveText}
+              </ButtonType2>
+            </div>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
