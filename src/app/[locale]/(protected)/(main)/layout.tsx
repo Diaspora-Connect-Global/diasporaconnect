@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/custom/header";
-import { authStorage } from "@/store/CentralPersist";
 import LoadingScreen from "@/components/custom/LoadingScreen";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function MainLayout({
   children,
@@ -12,27 +12,31 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [checkingAuth, setCheckingAuth] = useState(true);
 
+  // 🔥 Subscribe to Zustand
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  const hasHydrated = useAuthStore.persist.hasHydrated();
+
+  // 🔐 Redirect when NOT authenticated (after hydration)
   useEffect(() => {
-    const token = authStorage.getAccessToken();
+    if (!hasHydrated) return;
 
-    if (!token) {
+    if (!isAuthenticated) {
       router.replace("/signin");
-      return;
     }
-      console.log(" protected  routes visit ");
+  }, [hasHydrated, isAuthenticated, router]);
 
-
-    setCheckingAuth(false);
-  }, [router]);
-
-  // ✅ Render loading while auth is unresolved
-  if (checkingAuth) {
+  // ⏳ Wait for persisted state to hydrate
+  if (!hasHydrated) {
     return <LoadingScreen />;
   }
 
-  console.log("layout runs for protected  routes");
+  // ⛔ Block render while redirecting
+  if (!isAuthenticated) {
+    return <LoadingScreen />;
+  }
+
+  console.log("layout runs for protected routes");
 
 
   return (

@@ -2,18 +2,19 @@
 "use client";
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { Button } from '@/components/ui/button';
-import { useTranslations } from 'next-intl';
-import { Link, useRouter } from '@/i18n/navigation';
-import { BodyMedium, HeadingMedium, LabelLarge } from '../utils';
-import { PasswordInput, TextInput } from '../custom/input';
-import SignInProvider from '../home/SignInProvider';
-import { LOGIN_USER, LoginInput, LoginResponse } from '@/services/gql/signin';
+import { useRouter } from '@/i18n/navigation';
 import { toast } from 'sonner';
-import { generateDeviceFingerprint } from '@/lib/deviceFingerprint';
-import { authStorage } from '@/store/CentralPersist';
-import { ButtonType2 } from '../custom/button';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { LOGIN_USER, LoginInput, LoginResponse } from '@/services/gql/signin';
+import { generateDeviceFingerprint } from '@/lib/deviceFingerprint';
+import { useAuthStore } from '@/store/useAuthStore';
+
+import { TextInput, PasswordInput } from '../custom/input';
+import SignInProvider from '../home/SignInProvider';
+import { ButtonType2 } from '../custom/button';
+import { Link } from '@/i18n/navigation';
+import { HeadingMedium, BodyMedium, LabelLarge } from '../utils';
 
 interface ValidationErrors {
     email?: string;
@@ -35,148 +36,93 @@ export default function SignInForm() {
 
     const [loginUser, { loading }] = useMutation<LoginResponse>(LOGIN_USER);
 
-    // Validation functions
+    // Zustand auth store actions
+    const setTokens = useAuthStore((s) => s.setTokens);
+    const setUser = useAuthStore((s) => s.setUser);
+    const setDeviceMetadata = useAuthStore((s) => s.setDeviceMetadata);
+    const setRememberMeStore = useAuthStore((s) => s.setRememberMe);
+
+    /* ============ Validation ============ */
     const validateEmail = (email: string): string | undefined => {
-        if (!email.trim()) {
-            return t('validation.email.required');
-        }
-
+        if (!email.trim()) return t('validation.email.required');
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return t('validation.email.invalid');
-        }
-
+        if (!emailRegex.test(email)) return t('validation.email.invalid');
         return undefined;
     };
 
     const validatePassword = (password: string): string | undefined => {
-        if (!password) {
-            return t('validation.password.required');
-        }
-
-        if (password.length < 8) {
-            return t('validation.password.minLength');
-        }
-
+        if (!password) return t('validation.password.required');
+        if (password.length < 8) return t('validation.password.minLength');
         return undefined;
     };
 
     const validateTwoFactorCode = (code: string): string | undefined => {
-        if (!code.trim()) {
-            return t('validation.twoFactor.required');
-        }
-
-        if (!/^\d{6}$/.test(code)) {
-            return t('validation.twoFactor.invalid');
-        }
-
+        if (!code.trim()) return t('validation.twoFactor.required');
+        if (!/^\d{6}$/.test(code)) return t('validation.twoFactor.invalid');
         return undefined;
     };
 
     const validateForm = (): { isValid: boolean; errors: ValidationErrors } => {
         const errors: ValidationErrors = {};
-
         const emailError = validateEmail(email);
-        if (emailError) {
-            errors.email = emailError;
-        }
-
+        if (emailError) errors.email = emailError;
         const passwordError = validatePassword(password);
-        if (passwordError) {
-            errors.password = passwordError;
-        }
-
+        if (passwordError) errors.password = passwordError;
         if (showTwoFactor) {
             const twoFactorError = validateTwoFactorCode(twoFactorCode);
-            if (twoFactorError) {
-                errors.twoFactorCode = twoFactorError;
-            }
+            if (twoFactorError) errors.twoFactorCode = twoFactorError;
         }
-
-        return {
-            isValid: Object.keys(errors).length === 0,
-            errors
-        };
+        return { isValid: Object.keys(errors).length === 0, errors };
     };
 
+    /* ============ Submit ============ */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validate form
         const { isValid, errors } = validateForm();
-
         if (!isValid) {
-            // Show validation errors
-            if (errors.email) {
-                toast.error(errors.email);
-                return;
-            }
-            if (errors.password) {
-                toast.error(errors.password);
-                return;
-            }
-            if (errors.twoFactorCode) {
-                toast.error(errors.twoFactorCode);
-                return;
-            }
-            toast.error(t('validation.formError'));
-            return;
+            if (errors.email) return toast.error(errors.email);
+            if (errors.password) return toast.error(errors.password);
+            if (errors.twoFactorCode) return toast.error(errors.twoFactorCode);
+            return toast.error(t('validation.formError'));
         }
 
         try {
-            // Generate device fingerprint
             const deviceId = await generateDeviceFingerprint();
 
-            // Prepare login input
             const input: LoginInput = {
                 email: email.trim().toLowerCase(),
                 password,
                 deviceId,
                 rememberMe,
-                ...(twoFactorCode && { twoFactorCode: twoFactorCode.trim() })
+                ...(twoFactorCode && { twoFactorCode: twoFactorCode.trim() }),
             };
 
-            // Execute login mutation
-            const { data } = await loginUser({
-                variables: { input }
-            });
+            const { data } = await loginUser({ variables: { input } });
 
             if (data?.login.requiresTwoFactor && !showTwoFactor) {
-                // Show 2FA input
                 setShowTwoFactor(true);
                 toast.success(t('twoFactor.enterCode'));
                 return;
             }
 
             if (data?.login.success) {
-                // Store authentication data using centralized storage
-                authStorage.setTokens({
+                // 🔥 Zustand storage instead of authStorage
+                setTokens({
                     accessToken: data.login.accessToken,
                     refreshToken: data.login.refreshToken,
                     sessionToken: data.login.sessionToken,
                     sessionId: data.login.sessionId,
                     expiresIn: data.login.expiresIn,
                 });
+                setUser(data.login.user);
+                setDeviceMetadata(data.login.deviceMetadata);
+                setRememberMeStore(rememberMe);
 
-                // Store user data
-                authStorage.setUser(data.login.user);
-
-                // Store device metadata
-                authStorage.setDeviceMetadata(data.login.deviceMetadata);
-
-                // Set remember me preference
-                authStorage.setRememberMe(rememberMe);
-
-                // Show success message
                 toast.success(t('login.welcomeBack', { name: data.login.user.firstName }));
-
-                // Navigate to dashboard
                 router.push('/');
             } else {
-                // Handle login failure - check both error and message fields
                 const errorMessage = data?.login.error || data?.login.message || t('login.failed');
-
-                // Parse the error message for specific scenarios
                 const errorText = errorMessage.toLowerCase();
 
                 if (errorText.includes('invalid email') || errorText.includes('invalid password') || errorText.includes('invalid credentials')) {
@@ -186,14 +132,11 @@ export default function SignInForm() {
                 } else if (errorText.includes('too many') || errorText.includes('rate limit')) {
                     toast.error(t('login.tooManyAttempts'));
                 } else {
-                    // Show the actual error message from the server
                     toast.error(errorMessage);
                 }
             }
         } catch (error: any) {
             console.error('Login error:', error);
-
-            // Handle network and GraphQL errors
             const errorMessage = error.message?.toLowerCase() || '';
 
             if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('failed to fetch')) {
