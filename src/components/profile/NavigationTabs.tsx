@@ -7,6 +7,7 @@ import { useState } from 'react';
 import FilteredPosts from "./FilteredPosts";
 import { useTranslations } from 'next-intl';
 import AboutContent from "./AboutContent";
+import { Profile } from "@/services/gql/profile";
 
 interface PersonalDetailsData {
   bio: string;
@@ -48,12 +49,14 @@ interface CommunitiesData {
 interface NavigationTabsProps {
   userId: string;
     isOwnProfile:boolean
+    userData: Profile | undefined
 
 }
 
 export function NavigationTabs({
 userId,
-isOwnProfile =false
+isOwnProfile =false,
+userData
 }: NavigationTabsProps) {
   const t = useTranslations('profile.navigation');
   const tActions = useTranslations('actions');
@@ -74,7 +77,7 @@ isOwnProfile =false
     switch (activeTab) {
       case 'about':
         return (
-         <AboutContent isOwnProfile={isOwnProfile} userId= {userId}/>
+         <AboutContent isOwnProfile={isOwnProfile} userId= {userId} userData={userData}/>
         );
 
       case 'posts':

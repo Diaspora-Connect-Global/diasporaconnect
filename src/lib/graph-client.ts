@@ -11,7 +11,8 @@ const httpLink = new HttpLink({
 
 
 const authLink = new SetContextLink((prevContext, operation) => {
-  const token = useAuthStore((s) => s.tokens?.accessToken);
+ const token = useAuthStore.getState().tokens?.accessToken;
+   console.log("token passed", token)
 
   return {
     headers: {

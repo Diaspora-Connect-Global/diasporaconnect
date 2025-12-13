@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 interface EditableFieldProps {
     title: string;
-    data: string;
+    data: string | undefined;
     onEdit: () => void;
     showEditButton?: boolean; 
 }

@@ -7,8 +7,19 @@ import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { KYCVerification } from '@/components/profile/KYCVerification';
 import { TrustScore } from '@/components/profile/TrustScore';
 import { DUMMY_USERS } from '@/data/users';
+import { useQuery } from "@apollo/client/react";
+import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
+import { toast } from "sonner";
 
-export default function Profile() {
+export default function ProfilePage() {
+
+
+    const { data, loading, error } = useQuery<GetProfileResponse>(GET_MY_PROFILE, {
+        fetchPolicy: 'network-only', // Force fresh data
+    });      const profile: Profile |undefined = data?.getProfile.profile;
+
+      console.log("profile info", profile)
+
     // Get current user data (user with ID 'me')
     const currentUser = DUMMY_USERS['me'];
 
@@ -25,16 +36,19 @@ export default function Profile() {
             {/* Profile Header - First on mobile, part of left column on desktop */}
             <div className="lg:w-[50vw] order-1 lg:order-none space-y-2 flex flex-col">
                 <ProfileHeader 
-                    userId='me'  
+                    userId='me'
                     friendType={currentUser.friendType}
                     showFriendActions={false} 
-                />
+                    userData={profile}               
+                     />
                 
                 {/* Navigation Tabs - Last on mobile, after header on desktop */}
                 <div className="hidden lg:block  lg:order-none">
                     <NavigationTabs
                         userId='me'
                         isOwnProfile={true}
+                        userData={profile}               
+
                     />
                 </div>
             </div>
@@ -44,6 +58,7 @@ export default function Profile() {
                     <NavigationTabs
                         userId='me'
                         isOwnProfile={true}
+                        userData={profile}
                     />
                 </div>
 
@@ -51,22 +66,21 @@ export default function Profile() {
             <div className="lg:w-[25vw] space-y-2 mb-4 order-2 lg:order-none">
                 <div className='min-h-0'>
                     <ProfileCompletion
-                        percentage={currentUser.percentageCompletion}
+                        percentage={profile?.profileCompletion?.percentage}
                         onCompleteProfile={handleCompleteProfile}
                     />
                 </div>
 
                 <div className='min-h-0'>
                     <KYCVerification
-                        verified={currentUser.kycVerified}
+                        verified={profile?.verificationStatus}
                         onVerify={handleVerifyKYC}
                     />
                 </div>
 
                 <div className='min-h-0'>
-                    <PersonalDetails data={{ 
-                        joinDate: currentUser.joinDate,
-                    }} />
+                    <PersonalDetails data={ profile?.createdAt
+                    } />
                 </div>
 
                 <div className='min-h-0'>

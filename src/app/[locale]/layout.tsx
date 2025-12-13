@@ -50,10 +50,7 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <GraphQLProvider>
-              <main>
-
               {children}
-              </main>
               <Toaster 
           position="top-center"
           richColors

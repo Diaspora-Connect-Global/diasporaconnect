@@ -8,10 +8,19 @@ import CustomDialog from "../custom/customDialog";
 import FriendListModal from "./FriendListModal";
 import { useTranslations } from "next-intl";
 import { FriendType, TypeOfFriend } from "../friends/TypeOfFriend";
-import { DUMMY_USERS } from "@/data/users";
+import { Profile } from "@/services/gql/profile";
+
+interface UserData {
+  name: string;
+  avatarUrl?: string;
+  tier?: Tier;
+  friendCount?: number;
+  bio?: string;
+}
 
 interface ProfileHeaderProps {
   userId: string;
+  userData: Profile | undefined;
   friendType?: FriendType;
   showFriendActions?: boolean;
   onEditAvatar?: () => void;
@@ -20,26 +29,13 @@ interface ProfileHeaderProps {
 export function ProfileHeader({
   userId,
   friendType,
+  userData,
   showFriendActions = false,
   onEditAvatar
 }: ProfileHeaderProps) {
   const t = useTranslations('friends');
 
-  // Get user data based on userId
-  const getUserData = (id: string) => {
-    return DUMMY_USERS[id as keyof typeof DUMMY_USERS] || {
-      userId: id,
-      name: 'Unknown User',
-      friendCount: 0,
-      bio: 'This user profile could not be found.',
-      avatarUrl: 'https://i.pravatar.cc/150?img=50',
-      friendType: 'stranger' as FriendType,
-    };
-  };
-
-  const userData = getUserData(userId);
-
-  const initials = userData.name
+  const initials = userData?.firstName
     .split(' ')
     .map(word => word[0])
     .join('')
@@ -55,7 +51,7 @@ export function ProfileHeader({
           {/* Avatar with Edit Icon */}
           <div className="relative group">
             <Avatar className="h-25 w-25 ring-4 ring-background">
-              <AvatarImage src={userData.avatarUrl} alt={userData.name} />
+              <AvatarImage src={userData?.avatarUrl} alt={userData?.avatarUrl} />
               <AvatarFallback className="text-4xl">{initials}</AvatarFallback>
             </Avatar>
 
@@ -84,21 +80,22 @@ export function ProfileHeader({
           <div className="mt-auto">
             <div className="flex lg:items-center  space-x-2">
               <h1 className="text-text-primary heading-small line-clamp-2 break-words max-w-full">
-                {userData.name}
+                {userData?.firstName}    {userData?.lastName}
+
               </h1>
-              <UserBadge tier={userData.tier as Tier} size="md" />
+              {/* <UserBadge tier={userData.tier as Tier} size="md" /> */}
             </div>
             <div
               onClick={() => setFriendListOpen(!showFriendActions)}
               className="flex items-center space-x-1 text-text-brand cursor-pointer"
             >
               <UsersThreeIcon size={20} />
-              <p className="label-medium">{userData.friendCount} {t('friends')}</p>
+              <p className="label-medium">{userData?.connectionCount} {t('friends')}</p>
             </div>
           </div>
         </div>
 
-        <p className="mt-2 text-sm">{userData.bio}</p>
+        <p className="mt-2 text-sm">{userData?.bio}</p>
 
         <div className="flex items-end justify-end">
           {/* Show TypeOfFriend component if friendType is provided and showFriendActions is true */}

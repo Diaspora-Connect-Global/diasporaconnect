@@ -5,14 +5,17 @@ import { useTranslations } from 'next-intl';
 import { PersonalDetailsContent } from './PersonalDetailsContent';
 import WorkExperience from './WorkExperience';
 import EducationContent from './EducationContent';
+import { Profile } from '@/services/gql/profile';
 
 interface AboutContentProps {
   userId: string;
-    isOwnProfile:boolean
+    isOwnProfile:boolean;
+    userData: Profile | undefined
+    
 
 }
 
-export default function AboutContent({ userId, isOwnProfile =false }: AboutContentProps) {
+export default function AboutContent({ userId, isOwnProfile =false,userData }: AboutContentProps) {
   const t = useTranslations('profile.navigation');
   const [activeSubTab, setActiveSubTab] = useState("personal-details");
 
@@ -43,7 +46,7 @@ export default function AboutContent({ userId, isOwnProfile =false }: AboutConte
         {/* Right Column - Content */}
         <div className="flex-1 border-l p-4">
           {activeSubTab === 'personal-details' && (
-            <PersonalDetailsContent isOwnProfile={isOwnProfile} userId= {userId} />
+            <PersonalDetailsContent isOwnProfile={isOwnProfile} userId= {userId} userData={userData} />
           )}
           {activeSubTab === 'work-experience' && (
             <WorkExperience  />

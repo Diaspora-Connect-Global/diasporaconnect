@@ -7,7 +7,7 @@ import { useRef } from "react";
 
 interface KYCVerificationProps {
  
-    verified: boolean;
+    verified: string | undefined;
     
   onVerify?: () => void;
 }
@@ -33,8 +33,8 @@ export function KYCVerification({ verified, onVerify }: KYCVerificationProps) {
             <ChevronRight className="w-4 h-4"/>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <span className={`text-sm ${verified ? "text-text-success" : "text-text-warning"}`}>
-              {verified ? t('verified') : t('notVerified')}
+            <span className={`text-sm ${verified ==="verified" ? "text-text-success" : "text-text-warning"}`}>
+              {verified ==="verified" ? t('verified') : t('notVerified')}
             </span>
           </div>
         </div>

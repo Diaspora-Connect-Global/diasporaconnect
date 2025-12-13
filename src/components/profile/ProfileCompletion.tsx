@@ -6,7 +6,7 @@ import { ChevronRight } from "lucide-react";
 import { useTranslations } from 'next-intl';
 
 interface ProfileCompletionProps {
-    percentage: number;
+    percentage: number | undefined;
     
     onCompleteProfile?: () => void;
 }
@@ -16,7 +16,7 @@ export function ProfileCompletion({ percentage, onCompleteProfile }: ProfileComp
     const [progress, setProgress] = useState(0)
 
     useEffect(() => {
-        const timer = setTimeout(() => setProgress(percentage), 500)
+        const timer = setTimeout(() => setProgress(percentage || 0), 500)
         return () => clearTimeout(timer)
     }, [percentage])
 
