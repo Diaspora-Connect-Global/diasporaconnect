@@ -15,8 +15,12 @@ export default function ProfilePage() {
 
 
     const { data, loading, error } = useQuery<GetProfileResponse>(GET_MY_PROFILE, {
-        fetchPolicy: 'network-only', // Force fresh data
-    });      const profile: Profile |undefined = data?.getProfile.profile;
+        fetchPolicy: 'cache-first', // Load from cache first, then fetch in background
+        nextFetchPolicy: 'cache-and-network', // After first fetch, always check network but show cache first
+        notifyOnNetworkStatusChange: false, // Don't trigger loading state on background refetch
+    });      
+    
+    const profile: Profile |undefined = data?.getProfile.profile;
 
       console.log("profile info", profile)
 
