@@ -160,6 +160,8 @@ export default function CompleteAccount() {
         // OTP sent → move to next step
         sessionStorage.setItem('registrationToken', token);
         nextStep();
+      }else{
+        toast.error(data?.registerUser.message)
       }
 
 
