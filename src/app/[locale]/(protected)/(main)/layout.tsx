@@ -18,7 +18,7 @@ export default function MainLayout({
     
     if (!isAuthenticated) {
       // Redirect to login if not authenticated
-      router.push('/login');
+      router.push('/signin');
       return;
     }
 
