@@ -77,7 +77,7 @@ export default function FriendProfile() {
             <div className="lg:w-[25vw] space-y-2 mb-4">
                 <div className='min-h-0'>
                     <PersonalDetails
-                        data={profile.createdAt}
+                        data={profile.updatedAt}
                     />
                 </div>
 

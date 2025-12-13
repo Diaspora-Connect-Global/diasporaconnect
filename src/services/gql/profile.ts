@@ -153,7 +153,7 @@ export const GET_MY_PROFILE = gql`
  * ```
  */
 export const GET_USER_PROFILE = gql`
-  query GetUserProfile($userId: ID!) {
+  query GetUserProfile($userId: String!) {
     getProfile(userId: $userId) {
       success
       message
