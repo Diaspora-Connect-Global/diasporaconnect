@@ -9,7 +9,7 @@ import { Step5 } from './steps/Step5';
 import { Step6 } from './steps/Step6';
 import { Step7 } from './steps/Step7';
 import { useMutation } from '@apollo/client/react';
-import { REGISTER_USER, RegisterUserResponse } from '@/services/gql/authentication';
+import { REGISTER_USER, RegisterUserResponse ,VERIFY_OTP,VerifyOtpResponse  } from '@/services/gql/authentication';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -57,11 +57,11 @@ export default function CompleteAccount() {
   });
   const [sendCodeLoading ,setSendCodeLoading] = useState(false)
   const [verifyOTPLoading ,setVerifyOTPLoading] = useState(false)
-    const router = useRouter();
+  const router = useRouter();
   
 
-
-    const [registerUser, { loading, error }] = useMutation<RegisterUserResponse>(REGISTER_USER);
+const [verifyOtp, { loading:verifyOtpLoading, error }] = useMutation<VerifyOtpResponse>(VERIFY_OTP);
+    const [registerUser, { loading:registerUserLoading, error:registerUserError }] = useMutation<RegisterUserResponse>(REGISTER_USER);
 
   // Load from session storage on component mount
   useEffect(() => {
@@ -175,10 +175,23 @@ const submitFormA = async () => {
   try {
     console.log("Verifying OTP...",formData);
     setVerifyOTPLoading(true)
+    const registrationToken = sessionStorage.getItem('registrationToken');
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+   const { data } = await verifyOtp({
+        variables: {
+          registrationToken: registrationToken,
+          otp: formData.verificationCode
+        }
+      });
 
-    nextStep(); 
+      console.log("OTP Verification response:", data);
+
+       if (data?.verifyRegistrationOtp.success) {
+        toast.success('Phone number verified successfully!');
+        nextStep(); 
+       } else {
+        toast.error('OTP verification failed. Please try again.');
+       }
   } catch (error) {
     console.error('OTP verification failed:', error);
     // Show error in UI
