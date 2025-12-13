@@ -132,12 +132,12 @@ if(!emailpresent || !passwordpresent){
 
         // 10 digits starting with 0 (e.g., 0551810814)
         if (digitsOnly.length === 10 && digitsOnly.startsWith('0')) {
-          return '`${formData.countryCode}`' + digitsOnly.substring(1);
+          return `${formData.countryCode}` + digitsOnly.substring(1);
         }
 
         // 9 digits (e.g., 551810814)
         if (digitsOnly.length === 9) {
-          return '`${formData.countryCode}`' + digitsOnly;
+          return `${formData.countryCode}` + digitsOnly;
         }
 
         // Return as is if doesn't match Ghana format
