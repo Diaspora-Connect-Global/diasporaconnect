@@ -101,6 +101,42 @@ const submitFormA = async () => {
     
     console.log("Sending OTP..." ,formData , email, password);
 
+    /**
+   * Formats phone number to E.164 format for Ghana (+233)
+   * - If 10 digits starting with 0: Remove 0 and add +233
+   * - If 9 digits: Add +233
+   * - If already has +233: Keep as is
+   * - Other formats: Keep as entered
+   */
+  const formatPhoneToE164 = (phone: string): string => {
+    // Remove all non-digit characters except +
+    const cleaned = phone.replace(/[^\d+]/g, '');
+    
+    // Already in E.164 format
+    if (cleaned.startsWith('+233')) {
+      return cleaned;
+    }
+    
+    // Remove + if present (for other formats)
+    const digitsOnly = cleaned.replace(/\+/g, '');
+    
+    // 10 digits starting with 0 (e.g., 0551810814)
+    if (digitsOnly.length === 10 && digitsOnly.startsWith('0')) {
+      return '+233' + digitsOnly.substring(1);
+    }
+    
+    // 9 digits (e.g., 551810814)
+    if (digitsOnly.length === 9) {
+      return '+233' + digitsOnly;
+    }
+    
+    // Return as is if doesn't match Ghana format
+    return cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+  };
+
+      const formatted = formatPhoneToE164(formData.phoneNumber);
+
+
     const { data } = await registerUser({
         variables: {
           input: {
@@ -108,7 +144,7 @@ const submitFormA = async () => {
             password: password ,
             firstName: formData.firstName,
             lastName: formData.lastName,
-            phone: formData.phoneNumber,
+            phone: formatted,
             country: "GH",
             role: formData.communityType
           }
