@@ -28,7 +28,7 @@ export function PersonalDetails({ data }: PersonalDetailsProps) {
                 <div className="flex-1 min-h-0 flex flex-col justify-center">
                     <h2 className="text-lg font-semibold mb-2">{t('whenJoined')}</h2>
                     <p className="text-sm text-text-secondary">
-                        {formattedDate || t('unknown')}
+                        {formattedDate || 'unknown'}
                     </p>
                 </div>
             </CardContent>

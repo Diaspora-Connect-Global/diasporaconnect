@@ -11,6 +11,10 @@ import {
 } from '@/components/ui/accordionA';
 import { AddWorkExperienceModal } from './modals/AddWorkExperienceModal';
 import { useTranslations } from 'next-intl';
+import { useQuery, useMutation } from '@apollo/client/react';
+import { ADD_SKILLS, AddSkillsResponse, GET_MY_SKILLS, GetUserSkillsResponse, REMOVE_SKILL, RemoveSkillResponse } from '@/services/gql/skills';
+import { GET_MY_WORK_EXPERIENCE, GetUserWorkExperienceResponse, WorkExperience } from '@/services/gql/work_experience';
+
 
 interface Skill {
     id: string;
@@ -25,64 +29,127 @@ interface Experience {
     endDate: string;
     contract: boolean;
     skills: string[];
-    description:string;
+    description: string;
 }
 
-export default function WorkExperience() {
+export default function WorkExperiencePage() {
     const t = useTranslations('profile.workExperience');
     const tActions = useTranslations('actions');
     
-    const [skills, setSkills] = useState<Skill[]>([
-        { id: '1', name: 'React' },
-        { id: '2', name: 'Angular' },
-        { id: '3', name: 'Vue.js' },
-        { id: '4', name: 'Svelte' },
-        { id: '5', name: 'Ember' },
-        { id: '6', name: 'Backbone.js' },
-        { id: '7', name: 'jQuery' },
-        { id: '8', name: 'Django' },
-        { id: '9', name: 'Flask' },
-        { id: '10', name: 'Ruby on Rails' },
-        { id: '11', name: 'ASP.NET' },
-        { id: '12', name: 'Spring' },
-        { id: '13', name: 'Laravel' },
-        { id: '14', name: 'Express' },
-        { id: '15', name: 'NativeScript' },
-    ]);
-
-    const [experiences, ] = useState<Experience[]>([
-        {
-            id: '1',
-            company: 'Grete Solutions',
-            role: 'Frontend Developer',
-            startDate: 'Jan 2012',
-            endDate: 'Nov 2024',
-            contract: true,
-            skills: ['React', 'Angular', 'NativeScript'],
-            description:'A Frontend Developer is responsible for creating the visual elements of a website or application that users interact with. They use languages like HTML, CSS, and JavaScript to build responsive and engaging user interfaces, ensuring a seamless experience across different devices. Their role involves collaborating with designers and backend developers to implement design concepts and optimize performance.'
-        },
-    ]);
-
     const [showSkillModal, setShowSkillModal] = useState(false);
     const [showExperienceModal, setShowExperienceModal] = useState(false);
     const [newSkill, setNewSkill] = useState('');
-    const [newExperience, ] = useState({
-        company: '',
-        role: '',
-        startDate: '',
-        endDate: '',
-        contract: false,
-        description: ''
-    });
 
-    const addSkill = () => {
-        if (newSkill.trim()) {
-            setSkills([...skills, { id: Date.now().toString(), name: newSkill.trim() }]);
+    // GraphQL Queries
+    const { data: workExpData, loading: workExpLoading, refetch: refetchWorkExp } = useQuery<GetUserWorkExperienceResponse>(
+        GET_MY_WORK_EXPERIENCE
+    );
+    
+    const { data: skillsData, loading: skillsLoading, refetch: refetchSkills } = useQuery<GetUserSkillsResponse>(
+        GET_MY_SKILLS
+    );
+
+    // GraphQL Mutations
+    const [addSkillsMutation] = useMutation<AddSkillsResponse>(ADD_SKILLS, {
+        onCompleted: () => {
+            refetchSkills();
             setNewSkill('');
             setShowSkillModal(false);
+        },
+        onError: (error) => {
+            console.error('Error adding skill:', error);
+            alert('Failed to add skill. Please try again.');
+        }
+    });
+
+    const [removeSkillMutation] = useMutation<RemoveSkillResponse>(REMOVE_SKILL, {
+        onCompleted: () => {
+            refetchSkills();
+        },
+        onError: (error) => {
+            console.error('Error removing skill:', error);
+            alert('Failed to remove skill. Please try again.');
+        }
+    });
+
+    // Transform GraphQL data to component format
+    const skills: Skill[] = skillsData?.getUserSkills.skills.map(skill => ({
+        id: skill.id,
+        name: skill.skillName
+    })) || [];
+
+    const experiences: Experience[] = workExpData?.getUserWorkExperience.workExperience.map((exp: WorkExperience) => {
+        const startDate = formatDate(exp.startDate);
+        const endDate = exp.currentlyWorking ? 'Present' : formatDate(exp.endDate || '');
+        
+        return {
+            id: exp.id,
+            company: exp.companyName,
+            role: exp.role,
+            startDate,
+            endDate,
+            contract: exp.employmentType === 'CONTRACT',
+            skills: exp.skills ? exp.skills.split(',').map(s => s.trim()) : [],
+            description: exp.jobDescription || ''
+        };
+    }) || [];
+
+    // Helper function to format dates
+    function formatDate(dateString: string): string {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    }
+
+    // Add skill handler
+    const addSkill = async () => {
+        if (!newSkill.trim()) return;
+
+        try {
+            await addSkillsMutation({
+                variables: {
+                    input: {
+                        skills: [{
+                            skillName: newSkill.trim(),
+                            proficiencyLevel: 'intermediate' // Default level
+                        }]
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error in addSkill:', error);
         }
     };
 
+    // Remove skill handler
+    const handleRemoveSkill = async (skillId: string) => {
+        if (!confirm('Are you sure you want to remove this skill?')) return;
+
+        try {
+            await removeSkillMutation({
+                variables: {
+                    input: { skillId }
+                }
+            });
+        } catch (error) {
+            console.error('Error in handleRemoveSkill:', error);
+        }
+    };
+
+    // Handle modal close and refetch
+    const handleExperienceModalClose = () => {
+        setShowExperienceModal(false);
+        refetchWorkExp();
+    };
+
+    // Loading state
+    if (workExpLoading || skillsLoading) {
+        return (
+            <div className="mx-auto font-sans">
+                <p className="text-center text-text-secondary">Loading...</p>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -94,7 +161,9 @@ export default function WorkExperience() {
                         {skills.map((skill) => (
                             <span
                                 key={skill.id}
-                                className="px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium"
+                                className="px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium cursor-pointer hover:bg-gray-50"
+                                onClick={() => handleRemoveSkill(skill.id)}
+                                title="Click to remove"
                             >
                                 {skill.name}
                             </span>
@@ -120,61 +189,65 @@ export default function WorkExperience() {
                         {t('addExperience')}
                     </ButtonType3>
 
-                    <Accordion type="single" collapsible className="w-full">
-                        {experiences.map((exp,idx) => (
-                            <Fragment key={idx}>
-                                <AccordionItem className='border-b-0' key={exp.id} value={exp.id}>
-                                     <h3 className="text-lg font-semibold text-text-primary">{exp.company}</h3>
-                                    <AccordionTrigger className="hover:no-underline">
-                                        <div className="flex justify-between items-start text-left">
-                                            <div>
-                                               
-                                                <p className='space-x-2'>
-                                                   <span className="text-text-primary">
-                                                    {exp.role} 
-                                                    </span> 
-                                                    <span className="text-text-secondary">
-                                                    ({exp.startDate} - {exp.endDate})
-                                                    </span>
-                                                </p>
+                    {experiences.length === 0 ? (
+                        <p className="text-text-secondary text-sm">No work experience added yet.</p>
+                    ) : (
+                        <Accordion type="single" collapsible className="w-full">
+                            {experiences.map((exp, idx) => (
+                                <Fragment key={idx}>
+                                    <AccordionItem className='border-b-0' key={exp.id} value={exp.id}>
+                                        <h3 className="text-lg font-semibold text-text-primary">{exp.company}</h3>
+                                        <AccordionTrigger className="hover:no-underline">
+                                            <div className="flex justify-between items-start text-left">
+                                                <div>
+                                                    <p className='space-x-2'>
+                                                        <span className="text-text-primary">
+                                                            {exp.role} 
+                                                        </span> 
+                                                        <span className="text-text-secondary">
+                                                            ({exp.startDate} - {exp.endDate})
+                                                        </span>
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <p>{exp.description}</p>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                {exp.contract && (
-                                    <span className="px-2 py-1 text-text-secondary text-center  text-sm font-medium">
-                                        {t('contract')}
-                                    </span>
-                                )}
-
-                                <div className="flex flex-wrap gap-2 mt-3">
-                                    {exp.skills.map((skill, i) => (
-                                        <span
-                                            key={i}
-                                            className="px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium"
-                                        >
-                                            {skill}
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <p>{exp.description}</p>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    {exp.contract && (
+                                        <span className="px-2 py-1 text-text-secondary text-center text-sm font-medium">
+                                            {t('contract')}
                                         </span>
-                                    ))}
-                                </div>
-                            </Fragment>
-                        ))}
-                    </Accordion>
+                                    )}
+
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {exp.skills.map((skill, i) => (
+                                            <span
+                                                key={i}
+                                                className="px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </Fragment>
+                            ))}
+                        </Accordion>
+                    )}
                 </section>
             </div>
 
             {/* Skill Modal */}
             {showSkillModal && (
-                <div className="fixed inset-0  bg-transparent flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md">
                         <h3 className="text-lg font-semibold mb-4">{t('addNewSkill')}</h3>
                         <input
                             type="text"
                             value={newSkill}
                             onChange={(e) => setNewSkill(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && addSkill()}
                             placeholder={t('skillPlaceholder')}
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             autoFocus
@@ -188,7 +261,8 @@ export default function WorkExperience() {
                             </button>
                             <button
                                 onClick={addSkill}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                disabled={!newSkill.trim()}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {t('addSkill')}
                             </button>
@@ -197,12 +271,10 @@ export default function WorkExperience() {
                 </div>
             )}
 
-             <AddWorkExperienceModal
-                    isOpen={showExperienceModal}
-                    onClose={() => setShowExperienceModal(false)}
-                    initialData={newExperience}
-                  />
-            
+            <AddWorkExperienceModal
+                isOpen={showExperienceModal}
+                onClose={handleExperienceModalClose}
+            />
         </>
     );
 }

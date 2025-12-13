@@ -15,16 +15,16 @@ export default function MainLayout({
 
   // 🔥 Subscribe to Zustand
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
-  const hasHydrated = useAuthStore.persist.hasHydrated();
+  // const hasHydrated = useAuthStore.persist.hasHydrated();
 
   // 🔐 Redirect when NOT authenticated (after hydration)
   useEffect(() => {
-    if (!hasHydrated) return;
+    // if (!hasHydrated) return;
 
     if (!isAuthenticated) {
       router.replace("/signin");
     }
-  }, [hasHydrated, isAuthenticated, router]);
+  }, [ isAuthenticated, router]);
 
   // // ⏳ Wait for persisted state to hydrate
   // if (!hasHydrated) {

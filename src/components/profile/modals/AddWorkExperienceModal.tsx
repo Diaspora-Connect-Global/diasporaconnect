@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,8 +13,17 @@ import { MonthSelect, TextArea, TextInput } from '@/components/custom/input';
 import { LabelLarge } from '@/components/utils';
 import { AutocompleteAsync } from '@/components/custom/autoCompleteAsync';
 import { useTranslations } from 'next-intl';
+import { useMutation } from '@apollo/client/react';
+import { 
+  ADD_WORK_EXPERIENCE,
+  UPDATE_WORK_EXPERIENCE,
+  type AddWorkExperienceResponse,
+  type UpdateWorkExperienceResponse,
+  type EmploymentType 
+} from '@/services/gql/work_experience';
 
 interface WorkExperience {
+  id?: string;
   company: string;
   role: string;
   employmentType: string;
@@ -32,15 +41,12 @@ interface AddWorkExperienceModalProps {
   initialData?: Partial<WorkExperience>;
 }
 
-
 interface Option {
   id: string;
   label: string;
 }
 
-/* -------------------------------------------------
-   Mock data – replace these with real API later
-   ------------------------------------------------- */
+/* Mock data for skills autocomplete */
 const ALL_SKILLS: Option[] = [
   { id: '1', label: 'React' },
   { id: '2', label: 'Angular' },
@@ -67,7 +73,6 @@ const ALL_SKILLS: Option[] = [
   { id: '23', label: 'Apache Cordova' },
 ];
 
-/* Simulated async search */
 const fetchSkills = (query: string): Promise<Option[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -76,11 +81,10 @@ const fetchSkills = (query: string): Promise<Option[]> => {
         s.label.toLowerCase().includes(lower)
       );
       resolve(matches);
-    }, 200); // fake network delay
+    }, 200);
   });
 };
 
-/* Simulated create */
 const createSkill = (label: string): Promise<Option> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -90,17 +94,17 @@ const createSkill = (label: string): Promise<Option> => {
   });
 };
 
-
 export function AddWorkExperienceModal({
   isOpen,
   onClose,
   initialData = {},
 }: AddWorkExperienceModalProps) {
   const t = useTranslations('profile.workExperience');
+  
   const [form, setForm] = useState<WorkExperience>({
     company: '',
     role: '',
-    employmentType: '',
+    employmentType: 'FULL_TIME',
     startMonth: '',
     startYear: '',
     endMonth: '',
@@ -110,42 +114,52 @@ export function AddWorkExperienceModal({
     ...initialData,
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [skills, setSkills] = useState<string[]>(
-[
-  'React',
-  'Angular',
-  'Vue.js',
-  'Svelte',
-  'Ember',
-  'Backbone.js',
-  'jQuery',
-  'Django',
-  'Flask',
-  'Ruby on Rails',
-  'ASP.NET',
-  'Spring',
-  'Laravel',
-  'Express',
-  'NativeScript',
-  'React Native',
-  'Flutter',
-  'Xamarin',
-  'Ionic',
-  'Cordova',
-  'SwiftUI',
-  'Jetpack Compose',
-  'Apache Cordova'
-]
+  const [skills, setSkills] = useState<string[]>([]);
+  const isEditMode = !!initialData?.id;
 
+  // GraphQL Mutations
+  const [addWorkExperience, { loading: addLoading }] = useMutation<AddWorkExperienceResponse>(
+    ADD_WORK_EXPERIENCE,
+    {
+      onCompleted: (data) => {
+        if (data.addWorkExperience.success) {
+          onClose();
+        } else {
+          alert(data.addWorkExperience.message || 'Failed to add work experience');
+        }
+      },
+      onError: (error) => {
+        console.error('Error adding work experience:', error);
+        alert('Failed to add work experience. Please try again.');
+      }
+    }
   );
+
+  const [updateWorkExperience, { loading: updateLoading }] = useMutation<UpdateWorkExperienceResponse>(
+    UPDATE_WORK_EXPERIENCE,
+    {
+      onCompleted: (data) => {
+        if (data.updateWorkExperience.success) {
+          onClose();
+        } else {
+          alert(data.updateWorkExperience.message || 'Failed to update work experience');
+        }
+      },
+      onError: (error) => {
+        console.error('Error updating work experience:', error);
+        alert('Failed to update work experience. Please try again.');
+      }
+    }
+  );
+
+  const isLoading = addLoading || updateLoading;
 
   useEffect(() => {
     if (isOpen) {
       setForm({
         company: '',
         role: '',
-        employmentType: '',
+        employmentType: 'FULL_TIME',
         startMonth: '',
         startYear: '',
         endMonth: '',
@@ -154,19 +168,81 @@ export function AddWorkExperienceModal({
         isCurrent: false,
         ...initialData,
       });
+      
+      // Parse skills if editing
+      if (initialData?.id && typeof initialData === 'object' && 'skills' in initialData) {
+        const skillsString = (initialData as any).skills;
+        setSkills(skillsString ? skillsString.split(',').map((s: string) => s.trim()) : []);
+      } else {
+        setSkills([]);
+      }
     }
-  }, [isOpen, initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleSave = async () => {
-    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      onClose();
+      // Validate required fields
+      if (!form.company.trim() || !form.role.trim() || !form.startMonth || !form.startYear) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // Format dates to ISO string
+      const startDate = `${form.startYear}-${form.startMonth.padStart(2, '0')}-01`;
+      const endDate = form.isCurrent 
+        ? null 
+        : form.endYear && form.endMonth 
+          ? `${form.endYear}-${form.endMonth.padStart(2, '0')}-01`
+          : null;
+
+      // Map employment type string to enum
+      const employmentTypeMap: Record<string, EmploymentType> = {
+        'FULL_TIME': 'FULL_TIME' as EmploymentType,
+        'PART_TIME': 'PART_TIME' as EmploymentType,
+        'CONTRACT': 'CONTRACT' as EmploymentType,
+        'INTERNSHIP': 'INTERNSHIP' as EmploymentType,
+        'FREELANCE': 'FREELANCE' as EmploymentType,
+      };
+
+      const employmentType = employmentTypeMap[form.employmentType.toUpperCase()] || 'FULL_TIME' as EmploymentType;
+
+      if (isEditMode && form.id) {
+        // Update existing work experience
+        await updateWorkExperience({
+          variables: {
+            input: {
+              workExperienceId: form.id,
+              companyName: form.company.trim(),
+              role: form.role.trim(),
+              employmentType,
+              startDate,
+              endDate,
+              currentlyWorking: form.isCurrent,
+              jobDescription: form.description.trim() || undefined,
+              skills: skills.length > 0 ? skills.join(', ') : undefined,
+            }
+          }
+        });
+      } else {
+        // Add new work experience
+        await addWorkExperience({
+          variables: {
+            input: {
+              companyName: form.company.trim(),
+              role: form.role.trim(),
+              employmentType,
+              startDate,
+              endDate,
+              currentlyWorking: form.isCurrent,
+              jobDescription: form.description.trim() || undefined,
+              skills: skills.length > 0 ? skills.join(', ') : undefined,
+            }
+          }
+        });
+      }
     } catch (error) {
-      console.error('Failed to save experience:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error in handleSave:', error);
     }
   };
 
@@ -177,32 +253,31 @@ export function AddWorkExperienceModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className=" min-w-[60vw] max-h-[90vh] flex flex-col p-0 overflow-hidden"
+        className="min-w-[60vw] max-h-[90vh] flex flex-col p-0 overflow-hidden"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         {/* Sticky Header */}
         <DialogHeader className="p-6 pb-4 border-b border-border-subtle sticky top-0 bg-background z-10">
           <DialogTitle className="text-xl font-semibold">
-            {t('addWorkExperience')}
+            {isEditMode ? t('editWorkExperience') : t('addWorkExperience')}
           </DialogTitle>
         </DialogHeader>
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="space-y-5">
-              <TextInput
-                label={t('company')}
-                placeholder={t('companyPlaceholder')}
-                value={form.company}
-                onChange={(v) => updateForm('company', v)}
-              />
-              <TextInput
-                label={t('role')}
-                placeholder={t('rolePlaceholder')}
-                value={form.role}
-                onChange={(v) => updateForm('role', v)}
-              />
-            
+            <TextInput
+              label={t('company')}
+              placeholder={t('companyPlaceholder')}
+              value={form.company}
+              onChange={(v) => updateForm('company', v)}
+            />
+            <TextInput
+              label={t('role')}
+              placeholder={t('rolePlaceholder')}
+              value={form.role}
+              onChange={(v) => updateForm('role', v)}
+            />
 
             {/* Employment Type */}
             <TextInput
@@ -212,58 +287,55 @@ export function AddWorkExperienceModal({
               onChange={(v) => updateForm('employmentType', v)}
             />
 
-              <div className={`${form.isCurrent ? "" : "grid lg:grid-cols-2 gap-6"} `}>
-                {/* Start Date */}
-                <div>
-                  <LabelLarge>{t('startDate')}</LabelLarge>
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    <MonthSelect
-                      value={form.startMonth}
-                      onChange={(v) => updateForm('startMonth', v)}
-                      label={t('month')}
-                    />
-                    <TextInput
-                      label={t('year')}
-                      placeholder={t('yearPlaceholder')}
-                      value={form.startYear}
-                      onChange={(v) => updateForm('startYear', v)}
-                    />
-                  </div>
+            <div className={`${form.isCurrent ? "" : "grid lg:grid-cols-2 gap-6"}`}>
+              {/* Start Date */}
+              <div>
+                <LabelLarge>{t('startDate')}</LabelLarge>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <MonthSelect
+                    value={form.startMonth}
+                    onChange={(v) => updateForm('startMonth', v)}
+                    label={t('month')}
+                  />
+                  <TextInput
+                    label={t('year')}
+                    placeholder={t('yearPlaceholder')}
+                    value={form.startYear}
+                    onChange={(v) => updateForm('startYear', v)}
+                  />
                 </div>
+              </div>
 
-
-
-                {/* End Date */}
-                <div className={`${form.isCurrent ? "hidden" : ""}`}>
-                  <LabelLarge>{t('endDate')}</LabelLarge>
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    <MonthSelect
-                      value={form.endMonth}
-                      onChange={(v) => updateForm('endMonth', v)}
-                      label={t('month')}
-                    />
-                    <TextInput
-                      label={t('year')}
-                      placeholder={t('present')}
-                      value={form.isCurrent ? t('present') : form.endYear}
-                      onChange={(v) => updateForm('endYear', v)}
-                    />
-                  </div>
+              {/* End Date */}
+              <div className={`${form.isCurrent ? "hidden" : ""}`}>
+                <LabelLarge>{t('endDate')}</LabelLarge>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <MonthSelect
+                    value={form.endMonth}
+                    onChange={(v) => updateForm('endMonth', v)}
+                    label={t('month')}
+                  />
+                  <TextInput
+                    label={t('year')}
+                    placeholder={t('present')}
+                    value={form.isCurrent ? t('present') : form.endYear}
+                    onChange={(v) => updateForm('endYear', v)}
+                  />
                 </div>
               </div>
             </div>
 
-              <div className="flex items-center gap-3 my-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.isCurrent}
-                    onChange={(e) => updateForm('isCurrent', e.target.checked)}
-                    className="w-4 h-4 text-text-brand rounded"
-                  />
-                  <span className="text-sm">{t('currentlyWorkHere')}</span>
-                </label>
-              </div>
+            <div className="flex items-center gap-3 my-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.isCurrent}
+                  onChange={(e) => updateForm('isCurrent', e.target.checked)}
+                  className="w-4 h-4 text-text-brand rounded"
+                />
+                <span className="text-sm">{t('currentlyWorkHere')}</span>
+              </label>
+            </div>
 
             {/* Description */}
             <TextArea
@@ -275,14 +347,15 @@ export function AddWorkExperienceModal({
               rows={5}
             />
 
-<AutocompleteAsync
-      label={t('skills')}
-      value={skills}
-      onChange={setSkills}
-      fetchOptions={fetchSkills}
-      onCreate={createSkill}
-      placeholder={t('skillsPlaceholder')}
-    />
+            <AutocompleteAsync
+              label={t('skills')}
+              value={skills}
+              onChange={setSkills}
+              fetchOptions={fetchSkills}
+              onCreate={createSkill}
+              placeholder={t('skillsPlaceholder')}
+            />
+          </div>
         </div>
 
         {/* Sticky Footer */}
