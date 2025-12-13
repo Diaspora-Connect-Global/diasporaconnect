@@ -2,6 +2,8 @@
 import React from 'react';
 import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
 import { LabelMedium } from '../utils';
+import { COUNTRIES } from '@/data/CountryCodesWithFlags';
+
 
 interface PasswordInputProps {
     password: string;
@@ -270,56 +272,18 @@ export const CountrySelect: React.FC<CountrySelectProps> = ({
     id = "country",
     required = false
 }) => {
-    const countries = [
-        { value: "US", label: "United States" },
-        { value: "GB", label: "United Kingdom" },
-        { value: "CA", label: "Canada" },
-        { value: "AU", label: "Australia" },
-        { value: "DE", label: "Germany" },
-        { value: "FR", label: "France" },
-        { value: "ES", label: "Spain" },
-        { value: "IT", label: "Italy" },
-        { value: "NL", label: "Netherlands" },
-        { value: "BE", label: "Belgium" },
-        { value: "CH", label: "Switzerland" },
-        { value: "AT", label: "Austria" },
-        { value: "SE", label: "Sweden" },
-        { value: "NO", label: "Norway" },
-        { value: "DK", label: "Denmark" },
-        { value: "FI", label: "Finland" },
-        { value: "PL", label: "Poland" },
-        { value: "CZ", label: "Czech Republic" },
-        { value: "GR", label: "Greece" },
-        { value: "PT", label: "Portugal" },
-        { value: "IE", label: "Ireland" },
-        { value: "NZ", label: "New Zealand" },
-        { value: "SG", label: "Singapore" },
-        { value: "HK", label: "Hong Kong" },
-        { value: "JP", label: "Japan" },
-        { value: "KR", label: "South Korea" },
-        { value: "CN", label: "China" },
-        { value: "IN", label: "India" },
-        { value: "BR", label: "Brazil" },
-        { value: "MX", label: "Mexico" },
-        { value: "AR", label: "Argentina" },
-        { value: "ZA", label: "South Africa" },
-        { value: "NG", label: "Nigeria" },
-        { value: "KE", label: "Kenya" },
-        { value: "EG", label: "Egypt" },
-        { value: "GH", label: "Ghana" },
-        { value: "AE", label: "United Arab Emirates" },
-        { value: "SA", label: "Saudi Arabia" },
-        { value: "IL", label: "Israel" },
-        { value: "TR", label: "Turkey" },
-        { value: "RU", label: "Russia" },
-        { value: "UA", label: "Ukraine" }
-    ].sort((a, b) => a.label.localeCompare(b.label));
+    // Transform COUNTRIES array to match Select component's expected format
+    const countryOptions = COUNTRIES.map(country => ({
+        value: country.code, // or country.name, depending on what you need
+        label: ` ${country.name}`, // Display with emoji
+        // Optionally include dial code: `${country.emoji} ${country.name} (${country.dial_code})`
+    }));
 
     return (
         <Select
             value={value}
             onChange={onChange}
-            options={countries}
+            options={countryOptions}
             placeholder="Select country"
             label={label}
             id={id}

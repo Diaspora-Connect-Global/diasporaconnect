@@ -47,7 +47,7 @@ export const Step6: React.FC<Step6Props> = ({ data, updateData, nextStep, prevSt
             subtitle={t('description')}
             isNextDisabled={false}
             nextButtonText={tActions('continue')}
-            showBackButton={true}
+            showBackButton={false}
             showSkipButton={true}
             onNext={() => nextStep()}
             onBack={prevStep}

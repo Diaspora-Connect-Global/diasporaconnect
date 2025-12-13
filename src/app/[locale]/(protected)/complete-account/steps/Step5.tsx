@@ -1,9 +1,10 @@
 // steps/Step5.tsx - OTP Verification
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useTranslations } from 'next-intl';
+import { ButtonType3 } from '@/components/custom/button';
 
 interface Step5Props {
     data: FormData;
@@ -27,6 +28,76 @@ export const Step5: React.FC<Step5Props> = ({ data, loading, nextStep, prevStep,
     };
 
     const isNextDisabled = value.length !== 6;
+
+  
+
+
+
+
+const COUNTDOWN_KEY = 'countdown_start_time';
+const COUNTDOWN_DURATION = 60; // 60 seconds
+const [timeLeft, setTimeLeft] = useState<number | null>(null);
+const [isComplete, setIsComplete] = useState(false);
+
+    useEffect(() => {
+        // Get or set the start time
+        let startTime = localStorage.getItem(COUNTDOWN_KEY);
+        
+        if (!startTime) {
+            startTime = Date.now().toString();
+            localStorage.setItem(COUNTDOWN_KEY, startTime);
+        }
+
+        const updateCountdown = () => {
+            const now = Date.now();
+            const elapsed = Math.floor((now - parseInt(startTime!)) / 1000);
+            const remaining = COUNTDOWN_DURATION - elapsed;
+
+            if (remaining <= 0) {
+                setTimeLeft(0);
+                setIsComplete(true);
+                localStorage.removeItem(COUNTDOWN_KEY);
+            } else {
+                setTimeLeft(remaining);
+            }
+        };
+
+        // Update immediately
+        updateCountdown();
+
+        // Then update every second
+        const timer = setInterval(updateCountdown, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const resetCountdown = () => {
+        localStorage.removeItem(COUNTDOWN_KEY);
+        setIsComplete(false);
+        setTimeLeft(COUNTDOWN_DURATION);
+        localStorage.setItem(COUNTDOWN_KEY, Date.now().toString());
+    };
+
+    if (timeLeft === null) {
+        return <div>Loading...</div>;
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     return (
         <MultiStep
@@ -60,7 +131,16 @@ export const Step5: React.FC<Step5Props> = ({ data, loading, nextStep, prevStep,
                         <InputOTPSlot index={5} className="flex-1 h-12 text-lg rounded-md" />
                     </InputOTPGroup>
                 </InputOTP>
-                <p className='text-primary caption-medium mt-3'>Resend code in 0:50</p>
+
+                <div>
+            {!isComplete ? (
+                <p>Resend code in {formatTime(timeLeft)}</p>
+            ) : (
+                <div>
+                    <ButtonType3 onClick={resetCountdown}>Resend code</ButtonType3>
+                </div>
+            )}
+        </div>
             </div>
         </MultiStep>
     );

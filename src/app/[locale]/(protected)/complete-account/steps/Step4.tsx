@@ -27,8 +27,7 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
             stepNumber={4}
             totalSteps={7}
             title={t('phoneVerification.title')}
-                        subtitle={t('phoneVerification.description')}
-
+            subtitle={t('phoneVerification.description')}
             isNextDisabled={isNextDisabled}
             nextButtonText={tActions('sendCode')}
             showBackButton={true}
@@ -49,14 +48,13 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
                 <InputGroup className='px-3 py-6 border-1 border-border-default rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition'>
                     <InputGroupAddon>
                         <InputGroupText>
-                                                <Image src="/FLAG.png" alt="Logo" width={15} height={15} className="" />
-                        
+                         <Image src={`https://flagcdn.com/w20/${data.country.toLowerCase()}.png`} alt="Logo" width={25} height={15} className="" />
                         </InputGroupText>
                     </InputGroupAddon>
                     <InputGroupAddon>
                         <InputGroupText className='text-text-primary'>
                             <TextPrimary>
-                                +233
+                                {data.countryCode}
                             </TextPrimary>
                         </InputGroupText>
                     </InputGroupAddon>
