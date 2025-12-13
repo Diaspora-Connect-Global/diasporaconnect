@@ -12,41 +12,32 @@ export default function MainLayout({
 }) {
   const router = useRouter();
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const isAuthenticated = authStorage.getAccessToken();
-    
-    if (!isAuthenticated) {
-      // Redirect to login if not authenticated
-      router.push('/signin');
-      return;
-    }
+  const isAuthenticated = authStorage.getAccessToken();
 
-    // Check if token is expired or needs refresh
-    // if (authStorage.isTokenExpired()) {
-    //   // Clear expired tokens
-    //   authStorage.clearAuth();
-    //   router.push('/login');
-    //   return;
-    // }
-
-    // Optional: Set up token refresh if needed
-  //   if (authStorage.needsRefresh()) {
-  //     // You can implement token refresh logic here
-  //     console.log('Token needs refresh');
-  //     // refreshToken();
-  //   }
-  }, [router]);
-
-  // Don't render content until authentication is verified
-  if (!authStorage.isAuthenticated()) {
-    return (
-<LoadingScreen 
-  showSpinner={true} 
-  text="Almost there..." 
-/>
-    );
+  if (!isAuthenticated) {
+    // Redirect to login if not authenticated
+    router.push('/signin');
+    return;
   }
+
+  // useEffect(() => {
+  //   // Check if user is authenticated
+
+  //   // Check if token is expired or needs refresh
+  //   // if (authStorage.isTokenExpired()) {
+  //   //   // Clear expired tokens
+  //   //   authStorage.clearAuth();
+  //   //   router.push('/login');
+  //   //   return;
+  //   // }
+
+  //   // Optional: Set up token refresh if needed
+  //   //   if (authStorage.needsRefresh()) {
+  //   //     // You can implement token refresh logic here
+  //   //     console.log('Token needs refresh');
+  //   //     // refreshToken();
+  //   //   }
+  // }, [router]);
 
   return (
     <div className="">
