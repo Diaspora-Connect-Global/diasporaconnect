@@ -64,11 +64,11 @@ export default function CompleteAccount() {
   const [verifyOtp, { loading: verifyOtpLoading, error }] = useMutation<VerifyOtpResponse>(VERIFY_OTP);
   const [registerUser, { loading: registerUserLoading, error: registerUserError }] = useMutation<RegisterUserResponse>(REGISTER_USER);
 
-  // Load from session storage on component mount
+   // Load from session storage on component mount
   useEffect(() => {
-    sessionStorage.removeItem('accountFormData');
-    sessionStorage.removeItem('accountFormStep');
-    const emailpresent = sessionStorage.getItem('signupEmail');
+    const savedData = sessionStorage.getItem('accountFormData');
+    const savedStep = sessionStorage.getItem('accountFormStep');
+     const emailpresent = sessionStorage.getItem('signupEmail');
     const passwordpresent = sessionStorage.getItem('signupPassword');
 
     
@@ -76,8 +76,19 @@ if(!emailpresent || !passwordpresent){
   redirect("/signup")
 
 }
-    
+
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+    if (savedStep) {
+      setCurrentStep(parseInt(savedStep));
+    }
   }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem('accountFormData', JSON.stringify(formData));
+    sessionStorage.setItem('accountFormStep', currentStep.toString());
+  }, [formData, currentStep]);
 
 
   const updateFormData = (newData: Partial<FormData>) => {
