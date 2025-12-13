@@ -43,7 +43,7 @@ export default function SignUpForm() {
           sessionStorage.setItem('accountFormStep', '1');
           
           toast.success(t('form.signup.success'));
-          router.push('/complete-account');
+          router.push('/onboarding');
         }
       },
       onError: (error) => {
@@ -128,7 +128,7 @@ export default function SignUpForm() {
       sessionStorage.setItem('signupPassword', password);
       
       toast.success('Email verified! Complete your profile to continue.');
-      router.push('/complete-account');
+      router.push('/onboarding');
 
     } catch (err: any) {
       toast.error(err.message || t('form.email.checkFailed'));
@@ -150,7 +150,7 @@ export default function SignUpForm() {
     };
     
     // Store current path for redirect after OAuth
-    sessionStorage.setItem('oauthRedirectPath', '/complete-account');
+    sessionStorage.setItem('oauthRedirectPath', '/onboarding');
     
     // Redirect to OAuth provider
     window.location.href = endpoints[provider];
