@@ -1,55 +1,90 @@
 {
     "authentication": {
-        "greetings": {
-            "signup": "Welcome to Diaspo Plug",
-            "login": "Welcome Back!"
-        },
-        "description": "Creating structured, transparent, and impactful pathways for diaspora engagement.",
-        "form": {
-            "email": {
-                "label": "Email",
-                "placeholder": "Your email",
-                "exists": "Email already exists",
-                "checkFailed": "Failed to check email"
-            },
-            "password": {
-                "label": "Password",
-                "placeholder": "Your password"
-            },
-            "createPassword": {
-                "label": "Create password",
-                "placeholder": "Create your new password"
-            },
-            "confirmPassword": {
-                "label": "Confirm password",
-                "placeholder": "Confirm your new password",
-                "mismatch": "Passwords do not match"
-            },
-            "signup": {
-                "success": "Account created successfully!"
-            }
-        },
-        "policies": {
-            "agreement": "By continuing with signup, you agree to our",
-            "privacyPolicy": "Privacy Policy",
-            "and": "and",
-            "termsOfService": "Terms of Service"
-        },
-        "socialAuth": {
-            "divider": "or continue with"
-        },
-        "accountSwitch": {
-            "existingAccount": {
-                "prompt": "Already having an account?",
-                "action": "Log in"
-            },
-            "newAccount": {
-                "prompt": "New to Diaspora Connect Global?",
-                "action": "Create an account"
-            }
-        },
-        "forgotPassword": "Forgot Password ?"
+    "greetings": {
+        "signup": "Welcome to Diaspo Plug",
+        "login": "Welcome Back!"
     },
+    "description": "Creating structured, transparent, and impactful pathways for diaspora engagement.",
+    "form": {
+        "email": {
+            "label": "Email",
+            "placeholder": "Your email",
+            "exists": "Email already exists",
+            "checkFailed": "Failed to check email"
+        },
+        "password": {
+            "label": "Password",
+            "placeholder": "Your password"
+        },
+        "createPassword": {
+            "label": "Create password",
+            "placeholder": "Create your new password"
+        },
+        "confirmPassword": {
+            "label": "Confirm password",
+            "placeholder": "Confirm your new password",
+            "mismatch": "Passwords do not match"
+        },
+        "signup": {
+            "success": "Account created successfully!"
+        },
+        "twoFactor": {
+            "label": "Two-Factor Code",
+            "placeholder": "Enter 6-digit code"
+        }
+    },
+    "validation": {
+        "email": {
+            "required": "Email is required",
+            "invalid": "Please enter a valid email address"
+        },
+        "password": {
+            "required": "Password is required",
+            "minLength": "Password must be at least 8 characters"
+        },
+        "twoFactor": {
+            "required": "Two-factor code is required",
+            "invalid": "Please enter a valid 6-digit code"
+        },
+        "formError": "Please fix the errors before submitting"
+    },
+    "policies": {
+        "agreement": "By continuing with signup, you agree to our",
+        "privacyPolicy": "Privacy Policy",
+        "and": "and",
+        "termsOfService": "Terms of Service"
+    },
+    "socialAuth": {
+        "divider": "or continue with"
+    },
+    "accountSwitch": {
+        "existingAccount": {
+            "prompt": "Already having an account?",
+            "action": "Log in"
+        },
+        "newAccount": {
+            "prompt": "New to Diaspora Connect Global?",
+            "action": "Create an account"
+        }
+    },
+    "forgotPassword": "Forgot Password ?",
+    "rememberMe": "Remember me",
+    "login": {
+        "loading": "Logging in...",
+        "success": "Login Successful",
+        "failed": "Login Failed",
+        "welcomeBack": "Welcome back, {name}!",
+        "invalidCredentials": "Invalid email or password",
+        "accountLocked": "Your account has been locked. Please contact support.",
+        "networkError": "Network error. Please check your connection.",
+        "tooManyAttempts": "Too many login attempts. Please try again later.",
+        "genericError": "An error occurred. Please try again."
+    },
+    "twoFactor": {
+        "required": "Two-Factor Authentication Required",
+        "enterCode": "Please enter your 6-digit verification code"
+    }
+},
     "onboarding": {
         "personalInfo": {
             "title": "What's your name",
@@ -146,9 +181,9 @@
         "replyPlaceholder": "Type a reply...",
         "cancel": "Cancel",
         "post": "Post",
-    "anyone": "Anyone",
-    "connections": "Connections",
-    "onlyMe": "Only me"
+        "anyone": "Anyone",
+        "connections": "Connections",
+        "onlyMe": "Only me"
     },
     "legal": {
         "about": "About",
@@ -521,7 +556,6 @@
         "cancel": "Cancel",
         "saving": "Saving..."
     },
-
     "wallet": {
         "title": "My Wallet",
         "subtitle": "Manage your funds and transactions",
@@ -541,69 +575,68 @@
         "loadMore": "Load More",
         "noTransactions": "No transactions found",
         "fromLastMonth": "from last month"
-  },
+    },
     "settings": {
-    "title": "Settings",
-    "notifications": {
-      "title": "Notifications",
-      "email": {
-        "title": "Email Notifications",
-        "description": "Receive notifications via email"
-      },
-      "sms": {
-        "title": "SMS Notifications",
-        "description": "Receive notifications via SMS"
-      },
-      "push": {
-        "title": "Push Notifications",
-        "description": "Receive push notifications on your device"
-      }
-    },
-    "security": {
-      "title": "Security",
-      "twoFactor": {
-        "title": "Two-Factor Authentication",
-        "description": "Add an extra layer of security"
-      },
-      "changePassword": {
-        "title": "Change Password",
-        "description": "Update your account password",
-        "button": "Change"
-      }
-    },
-    "privacy": {
-      "title": "Privacy",
-      "dataSharing": {
-        "title": "Data Sharing",
-        "description": "Share usage data to improve services"
-      },
-      "adPersonalization": {
-        "title": "Ad Personalization",
-        "description": "Personalize ads based on your activity"
-      }
-    },
-    "language": {
-      "title": "Language",
-      "appLanguage": {
-        "title": "App Language",
-        "description": "Choose your preferred language"
-      }
-    },
-    "theme": {
-      "title": "Theme",
-      "dark": {
-        "title": "Dark Mode",
-        "description": "Use dark theme across the app"
-      },
-      "light": {
-        "title": "Light Mode",
-        "description": "Use light theme across the app"
-      },
-      "system": {
-        "title": "System Default",
-        "description": "Follow system theme settings"
-      }
+        "title": "Settings",
+        "notifications": {
+            "title": "Notifications",
+            "email": {
+                "title": "Email Notifications",
+                "description": "Receive notifications via email"
+            },
+            "sms": {
+                "title": "SMS Notifications",
+                "description": "Receive notifications via SMS"
+            },
+            "push": {
+                "title": "Push Notifications",
+                "description": "Receive push notifications on your device"
+            }
+        },
+        "security": {
+            "title": "Security",
+            "twoFactor": {
+                "title": "Two-Factor Authentication",
+                "description": "Add an extra layer of security"
+            },
+            "changePassword": {
+                "title": "Change Password",
+                "description": "Update your account password",
+                "button": "Change"
+            }
+        },
+        "privacy": {
+            "title": "Privacy",
+            "dataSharing": {
+                "title": "Data Sharing",
+                "description": "Share usage data to improve services"
+            },
+            "adPersonalization": {
+                "title": "Ad Personalization",
+                "description": "Personalize ads based on your activity"
+            }
+        },
+        "language": {
+            "title": "Language",
+            "appLanguage": {
+                "title": "App Language",
+                "description": "Choose your preferred language"
+            }
+        },
+        "theme": {
+            "title": "Theme",
+            "dark": {
+                "title": "Dark Mode",
+                "description": "Use dark theme across the app"
+            },
+            "light": {
+                "title": "Light Mode",
+                "description": "Use light theme across the app"
+            },
+            "system": {
+                "title": "System Default",
+                "description": "Follow system theme settings"
+            }
+        }
     }
-  }
-      
 }
