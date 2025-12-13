@@ -153,12 +153,13 @@ const submitFormA = async () => {
 
       console.log("Registration response:", data);
 
-      //  if (data?.registerUser.success) {
-      //   // Store registration token for OTP verification
-      //   const token = data.registerUser.registrationToken;
-      //   // OTP sent → move to next step
-      //   nextStep();
-      // }
+       if (data?.registerUser.success) {
+        // Store registration token for OTP verification
+        const token = data.registerUser.registrationToken;
+        // OTP sent → move to next step
+        sessionStorage.setItem('registrationToken', token);
+        nextStep();
+      }
 
 
   } catch (error) {
