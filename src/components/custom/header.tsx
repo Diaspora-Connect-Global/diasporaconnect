@@ -25,6 +25,7 @@ import { QuestionIcon, StorefrontIcon, X } from "@phosphor-icons/react";
 import { IconFileDollar } from '@tabler/icons-react';
 import React from 'react';
 import HomeSidebar from '../home/HomeSidebar';
+  import { useAuthStore } from "@/store/useAuthStore";
 
 
 
@@ -305,6 +306,9 @@ export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
 export function DropdownMenuAvatar() {
   const t = useTranslations('home.header');
   const [open, setOpen] = useState(false);
+  const firstName = useAuthStore((s) => s.user?.firstName);
+  const lastName = useAuthStore((s) => s.user?.lastName);
+
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -313,12 +317,12 @@ export function DropdownMenuAvatar() {
           <MyAvatar />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-100 mx-20 mt-4" align="start">
+      <DropdownMenuContent className="lg:w-100 mx-20 mt-4" align="start">
         <DropdownMenuLabel>
           <Link onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
             <div className='flex space-x-4 items-center my-2'>
               <MyAvatar />
-              <p className='text-xl'>John Doe</p>
+              <p className='text-xl'>{firstName } {lastName}</p>
             </div>
             <CR />
           </Link>
