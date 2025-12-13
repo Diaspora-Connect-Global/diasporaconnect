@@ -1,6 +1,6 @@
+import { useAuthStore } from "@/store/useAuthStore";
 import { ApolloClient, HttpLink, InMemoryCache, ApolloLink } from "@apollo/client";
 import { SetContextLink } from '@apollo/client/link/context';
-import { authStorage } from '@/store/CentralPersist'; // Adjust path as needed
 
 const cache = new InMemoryCache();
 
@@ -11,7 +11,7 @@ const httpLink = new HttpLink({
 
 
 const authLink = new SetContextLink((prevContext, operation) => {
-  const token = authStorage.getAccessToken();
+  const token = useAuthStore((s) => s.tokens?.accessToken);
 
   return {
     headers: {
