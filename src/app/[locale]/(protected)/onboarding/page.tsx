@@ -155,7 +155,7 @@ if(!emailpresent || !passwordpresent){
             firstName: formData.firstName,
             lastName: formData.lastName,
             phone: formatted,
-            country: "GH",
+            country: formData.country,
             role: formData.communityType
           }
         }

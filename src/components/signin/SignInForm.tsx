@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { generateDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { authStorage } from '@/store/CentralPersist';
 import { ButtonType2 } from '../custom/button';
+import { Loader2 } from 'lucide-react';
 
 interface ValidationErrors {
     email?: string;
@@ -27,7 +28,7 @@ export default function SignInForm() {
     const [rememberMe, setRememberMe] = useState(false);
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [showTwoFactor, setShowTwoFactor] = useState(false);
-    
+
     const t = useTranslations('authentication');
     const a = useTranslations('actions');
     const router = useRouter();
@@ -39,12 +40,12 @@ export default function SignInForm() {
         if (!email.trim()) {
             return t('validation.email.required');
         }
-        
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return t('validation.email.invalid');
         }
-        
+
         return undefined;
     };
 
@@ -52,11 +53,11 @@ export default function SignInForm() {
         if (!password) {
             return t('validation.password.required');
         }
-        
+
         if (password.length < 8) {
             return t('validation.password.minLength');
         }
-        
+
         return undefined;
     };
 
@@ -64,34 +65,34 @@ export default function SignInForm() {
         if (!code.trim()) {
             return t('validation.twoFactor.required');
         }
-        
+
         if (!/^\d{6}$/.test(code)) {
             return t('validation.twoFactor.invalid');
         }
-        
+
         return undefined;
     };
 
     const validateForm = (): { isValid: boolean; errors: ValidationErrors } => {
         const errors: ValidationErrors = {};
-        
+
         const emailError = validateEmail(email);
         if (emailError) {
             errors.email = emailError;
         }
-        
+
         const passwordError = validatePassword(password);
         if (passwordError) {
             errors.password = passwordError;
         }
-        
+
         if (showTwoFactor) {
             const twoFactorError = validateTwoFactorCode(twoFactorCode);
             if (twoFactorError) {
                 errors.twoFactorCode = twoFactorError;
             }
         }
-        
+
         return {
             isValid: Object.keys(errors).length === 0,
             errors
@@ -103,7 +104,7 @@ export default function SignInForm() {
 
         // Validate form
         const { isValid, errors } = validateForm();
-        
+
         if (!isValid) {
             // Show validation errors
             if (errors.email) {
@@ -174,10 +175,10 @@ export default function SignInForm() {
             } else {
                 // Handle login failure - check both error and message fields
                 const errorMessage = data?.login.error || data?.login.message || t('login.failed');
-                
+
                 // Parse the error message for specific scenarios
                 const errorText = errorMessage.toLowerCase();
-                
+
                 if (errorText.includes('invalid email') || errorText.includes('invalid password') || errorText.includes('invalid credentials')) {
                     toast.error(t('login.invalidCredentials'));
                 } else if (errorText.includes('account locked') || errorText.includes('locked')) {
@@ -191,10 +192,10 @@ export default function SignInForm() {
             }
         } catch (error: any) {
             console.error('Login error:', error);
-            
+
             // Handle network and GraphQL errors
             const errorMessage = error.message?.toLowerCase() || '';
-            
+
             if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('failed to fetch')) {
                 toast.error(t('login.networkError'));
             } else if (errorMessage.includes('graphql')) {
@@ -245,12 +246,20 @@ export default function SignInForm() {
                                 {t("forgotPassword")}
                             </p>
                         </Link>
-                        <ButtonType2 onClick={handleSubmit}  className="px-8 py-3 h-full bg-surface-brand rounded-full w-full cursor-pointer">
-                            {a("login")}
+
+                        <ButtonType2 onClick={handleSubmit} disabled={loading} className="px-8 py-3 h-full bg-surface-brand rounded-full w-full cursor-pointer">
+
+                            <span className="flex items-center justify-center gap-2">
+                                {loading ? (
+                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                ) : (
+                                    a("login")
+                                )}
+                            </span>
                         </ButtonType2>
                     </div>
                 </div>
-                
+
                 <div className='lg:max-h-[1.5rem] my-4'> {/* 24px equivalent */}
                     <div className="flex items-center gap-[1rem]"> {/* 16px equivalent */}
                         <div className="flex-1 border-t border-gray-300"></div>
