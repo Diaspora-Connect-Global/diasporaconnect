@@ -171,29 +171,40 @@ export default function SignInForm() {
 
                 // Navigate to dashboard
                 router.push('/');
-            } else if (data?.login.error) {
-                // Show error message
-                toast.error(data.login.error || t('login.failed'));
+            } else {
+                // Handle login failure - check both error and message fields
+                const errorMessage = data?.login.error || data?.login.message || t('login.failed');
+                
+                // Parse the error message for specific scenarios
+                const errorText = errorMessage.toLowerCase();
+                
+                if (errorText.includes('invalid email') || errorText.includes('invalid password') || errorText.includes('invalid credentials')) {
+                    toast.error(t('login.invalidCredentials'));
+                } else if (errorText.includes('account locked') || errorText.includes('locked')) {
+                    toast.error(t('login.accountLocked'));
+                } else if (errorText.includes('too many') || errorText.includes('rate limit')) {
+                    toast.error(t('login.tooManyAttempts'));
+                } else {
+                    // Show the actual error message from the server
+                    toast.error(errorMessage);
+                }
             }
         } catch (error: any) {
             console.error('Login error:', error);
             
-            // Handle specific error types
+            // Handle network and GraphQL errors
             const errorMessage = error.message?.toLowerCase() || '';
             
-            if (errorMessage.includes('invalid credentials') || errorMessage.includes('unauthorized')) {
-                toast.error(t('login.invalidCredentials'));
-            } else if (errorMessage.includes('account locked') || errorMessage.includes('locked')) {
-                toast.error(t('login.accountLocked'));
-            } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+            if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('failed to fetch')) {
                 toast.error(t('login.networkError'));
-            } else if (errorMessage.includes('too many requests') || errorMessage.includes('rate limit')) {
-                toast.error(t('login.tooManyAttempts'));
-            } else {
+            } else if (errorMessage.includes('graphql')) {
                 toast.error(t('login.genericError'));
+            } else {
+                toast.error(error.message || t('login.genericError'));
             }
         }
     };
+
 
     return (
         <div className=''> {/* 80px equivalent */}
