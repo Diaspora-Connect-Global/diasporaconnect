@@ -432,8 +432,8 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4">
-      <div className="w-full max-w-3xl mx-auto">
+  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4 flex justify-center">
+    <div className="w-full max-w-3xl">
         {/* Main Composer Card */}
         <div className="bg-surface-default/80 backdrop-blur-md rounded-2xl border border-border-subtle shadow-xl">
           {/* User Header */}
@@ -521,15 +521,13 @@ export default function CreatePostPage() {
                         </div>
                       )}
 
-                      {/* Overlay on hover */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button
-                          onClick={() => handleRemoveAttachment(attachment.id)}
-                          className="w-10 h-10 rounded-full bg-text-danger hover:bg-text-danger/80 text-text-white flex items-center justify-center transition-colors"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
+                      {/* Remove Button - Always Visible */}
+                      <button
+                        onClick={() => handleRemoveAttachment(attachment.id)}
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-text-danger hover:bg-text-danger/80 text-text-white flex items-center justify-center transition-all shadow-lg hover:scale-110 z-10"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
 
                       {/* Type Badge */}
                       <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm">
