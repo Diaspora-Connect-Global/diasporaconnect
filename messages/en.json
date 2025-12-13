@@ -144,7 +144,11 @@
         "replies": "Replies",
         "reply": "Reply",
         "replyPlaceholder": "Type a reply...",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "post": "Post",
+    "anyone": "Anyone",
+    "connections": "Connections",
+    "onlyMe": "Only me"
     },
     "legal": {
         "about": "About",
@@ -600,11 +604,6 @@
         "description": "Follow system theme settings"
       }
     }
-  },
-      "actions": {
-    "post": "Post",
-    "anyone": "Anyone",
-    "connections": "Connections",
-    "onlyMe": "Only me"
   }
+      
 }
