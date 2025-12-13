@@ -14,7 +14,7 @@ export default function MainLayout({
 
   useEffect(() => {
     // Check if user is authenticated
-    const isAuthenticated = authStorage.isAuthenticated();
+    const isAuthenticated = authStorage.getAccessToken();
     
     if (!isAuthenticated) {
       // Redirect to login if not authenticated
