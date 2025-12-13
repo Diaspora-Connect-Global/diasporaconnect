@@ -26,15 +26,15 @@ export default function MainLayout({
     }
   }, [hasHydrated, isAuthenticated, router]);
 
-  // ⏳ Wait for persisted state to hydrate
-  if (!hasHydrated) {
-    return <LoadingScreen />;
-  }
+  // // ⏳ Wait for persisted state to hydrate
+  // if (!hasHydrated) {
+  //   return <LoadingScreen />;
+  // }
 
-  // ⛔ Block render while redirecting
-  if (!isAuthenticated) {
-    return <LoadingScreen />;
-  }
+  // // ⛔ Block render while redirecting
+  // if (!isAuthenticated) {
+  //   return <LoadingScreen />;
+  // }
 
   console.log("layout runs for protected routes");
 

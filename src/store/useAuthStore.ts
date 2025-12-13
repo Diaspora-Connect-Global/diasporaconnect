@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: () => {
         const tokens = get().tokens;
         if (!tokens) return false;
-        return !get().isTokenExpired();
+        return true
       },
 
       isTokenExpired: () => {
