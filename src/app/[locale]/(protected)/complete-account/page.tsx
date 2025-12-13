@@ -10,7 +10,7 @@ import { Step6 } from './steps/Step6';
 import { Step7 } from './steps/Step7';
 import { useMutation } from '@apollo/client/react';
 import { REGISTER_USER, RegisterUserResponse, VERIFY_OTP, VerifyOtpResponse } from '@/services/gql/authentication';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 
@@ -66,21 +66,19 @@ export default function CompleteAccount() {
 
   // Load from session storage on component mount
   useEffect(() => {
-    const savedData = sessionStorage.getItem('accountFormData');
-    const savedStep = sessionStorage.getItem('accountFormStep');
+    sessionStorage.removeItem('accountFormData');
+    sessionStorage.removeItem('accountFormStep');
+    const emailpresent = sessionStorage.getItem('signupEmail');
+    const passwordpresent = sessionStorage.getItem('signupPassword');
 
-    if (savedData) {
-      setFormData(JSON.parse(savedData));
-    }
-    if (savedStep) {
-      setCurrentStep(parseInt(savedStep));
-    }
+    
+if(!emailpresent || !passwordpresent){
+  redirect("/signup")
+
+}
+    
   }, []);
 
-  useEffect(() => {
-    sessionStorage.setItem('accountFormData', JSON.stringify(formData));
-    sessionStorage.setItem('accountFormStep', currentStep.toString());
-  }, [formData, currentStep]);
 
   const updateFormData = (newData: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...newData }));
