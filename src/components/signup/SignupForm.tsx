@@ -122,7 +122,6 @@ export default function SignUpForm() {
         setIsChecking(false);
         return;
       }
-
       // Email is available, proceed to store credentials and navigate
       // The actual registration will happen after completing all profile steps
       sessionStorage.setItem('signupEmail', trimmedEmail);
@@ -133,6 +132,7 @@ export default function SignUpForm() {
 
     } catch (err: any) {
       toast.error(err.message || t('form.email.checkFailed'));
+
     } finally {
       setIsChecking(false);
     }

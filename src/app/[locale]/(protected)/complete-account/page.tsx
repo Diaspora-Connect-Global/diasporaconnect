@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { Step1 } from './steps/Step1';
 import { Step2 } from './steps/Step2';
 import { Step3 } from './steps/Step3';
@@ -8,6 +8,11 @@ import { Step4 } from './steps/Step4';
 import { Step5 } from './steps/Step5';
 import { Step6 } from './steps/Step6';
 import { Step7 } from './steps/Step7';
+import { useMutation } from '@apollo/client/react';
+import { REGISTER_USER, RegisterUserResponse } from '@/services/gql/authentication';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
 
 export interface FormData {
   // Step 1
@@ -52,6 +57,11 @@ export default function CompleteAccount() {
   });
   const [sendCodeLoading ,setSendCodeLoading] = useState(false)
   const [verifyOTPLoading ,setVerifyOTPLoading] = useState(false)
+    const router = useRouter();
+  
+
+
+    const [registerUser, { loading, error }] = useMutation<RegisterUserResponse>(REGISTER_USER);
 
   // Load from session storage on component mount
   useEffect(() => {
@@ -86,13 +96,35 @@ export default function CompleteAccount() {
 const submitFormA = async () => {
   try {
     setSendCodeLoading(true);
-    console.log("Sending OTP..." ,formData);
+    const email = sessionStorage.getItem('signupEmail');
+    const password= sessionStorage.getItem('signupPassword');
+    
+    console.log("Sending OTP..." ,formData , email, password);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const { data } = await registerUser({
+        variables: {
+          input: {
+            email: email ,
+            password: password ,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phoneNumber,
+            country: "GH",
+            role: formData.communityType
+          }
+        }
+      });
 
-    // OTP sent → move to next step
-    nextStep();
+      console.log("Registration response:", data);
+
+      //  if (data?.registerUser.success) {
+      //   // Store registration token for OTP verification
+      //   const token = data.registerUser.registrationToken;
+      //   // OTP sent → move to next step
+      //   nextStep();
+      // }
+
+
   } catch (error) {
     console.error('Error sending OTP:', error);
     // Optionally show error toast
