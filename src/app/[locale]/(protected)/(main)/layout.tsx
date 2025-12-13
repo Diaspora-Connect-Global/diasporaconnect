@@ -31,10 +31,10 @@ export default function MainLayout({
   //   return <LoadingScreen />;
   // }
 
-  // // ⛔ Block render while redirecting
-  // if (!isAuthenticated) {
-  //   return <LoadingScreen />;
-  // }
+  // ⛔ Block render while redirecting
+  if (!isAuthenticated) {
+    return <LoadingScreen />;
+  }
 
   console.log("layout runs for protected routes");
 
