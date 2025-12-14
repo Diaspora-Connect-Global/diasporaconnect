@@ -104,7 +104,7 @@ export interface GetMutualFriendsResponse {
  * ```
  */
 export const GET_MY_CONNECTIONS = gql`
-  query GetMyConnections($limit: Int, $offset: Int) {
+  query GetMyConnections($limit: Float, $offset: Float) {
     getConnections(limit: $limit, offset: $offset) {
       success
       message
@@ -152,7 +152,7 @@ export const GET_MY_CONNECTIONS = gql`
  * ```
  */
 export const GET_USER_CONNECTIONS = gql`
-  query GetUserConnections($userId: ID!, $limit: Int, $offset: Int) {
+  query GetUserConnections($userId: ID!, $limit: Float, $offset: Float) {
     getConnections(userId: $userId, limit: $limit, offset: $offset) {
       success
       message
@@ -196,7 +196,7 @@ export const GET_USER_CONNECTIONS = gql`
  * ```
  */
 export const GET_PENDING_CONNECTIONS = gql`
-  query GetPendingConnections($limit: Int) {
+  query GetPendingConnections($limit: Float) {
     getPendingConnections(limit: $limit) {
       success
       message
