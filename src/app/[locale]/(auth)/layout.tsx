@@ -38,7 +38,7 @@ export default function AuthLayout({
 
                 {children}
                 {/* Footer that sticks to bottom */}
-                    <div className="flex items-center  space-x-2 flex-wrap">
+                    <div className="flex items-center justify-center space-x-2 flex-wrap">
                         <InfoLinks />
                     </div>
             </div>

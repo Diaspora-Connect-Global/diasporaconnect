@@ -154,13 +154,13 @@ export default function SignInForm() {
         <div className=''> {/* 80px equivalent */}
             <div className="lg:space-y-[2rem]"> {/* 32px equivalent */}
 
-                <div className='lg:h-[2.5rem]'> {/* 40px equivalent */}
+                <div className=''> {/* 40px equivalent */}
                     <HeadingMedium>
                         {t("greetings.login")}
                     </HeadingMedium>
                 </div>
 
-                <div className='lg:h-[17.25rem] space-y-[1.5rem]'> {/* 276px, 24px equivalent */}
+                <div className='space-y-[1.5rem]'> {/* 276px, 24px equivalent */}
 
                     <div className='lg:space-y-[1rem]'> {/* 16px equivalent */}
                         <TextInput
@@ -183,14 +183,14 @@ export default function SignInForm() {
                         />
                     </div>
 
-                    <div className="lg:h-[3.75rem] lg:flex flex-col lg:justify-between  space-y-4"> {/* 60px equivalent */}
-                        <Link href="/reset" className="text-text-brand font-medium hover:underline">
+                    <div className="lg:flex-row flex-col lg:justify-between "> {/* 60px equivalent */}
+                        <Link href="/reset" className="text-text-brand font-medium hover:underline mb-4">
                             <p className='flex label-large'>
                                 {t("forgotPassword")}
                             </p>
                         </Link>
 
-                        <ButtonType2 onClick={handleSubmit} disabled={loading} className="px-8 py-3 h-full bg-surface-brand rounded-full w-full cursor-pointer">
+                        <ButtonType2 onClick={handleSubmit} disabled={loading} className="px-8 py-3 h-full bg-surface-brand rounded-full w-full cursor-pointer my-2">
 
                             <span className="flex items-center justify-center gap-2">
                                 {loading ? (
@@ -203,19 +203,19 @@ export default function SignInForm() {
                     </div>
                 </div>
 
-                <div className='lg:max-h-[1.5rem] my-4'> {/* 24px equivalent */}
-                    <div className="flex items-center gap-[1rem]"> {/* 16px equivalent */}
-                        <div className="flex-1 border-t border-gray-300"></div>
+                <div className='mb-6'> {/* 24px equivalent */}
+                    <div className="flex items-center gap-[1rem] "> {/* 16px equivalent */}
+                        <div className="flex-1 border-t border-border-subtle"></div>
                         <span className="text-sm">{t("socialAuth.divider")}</span>
-                        <div className="flex-1 border-t border-gray-300"></div>
+                        <div className="flex-1 border-t border-border-subtle"></div>
                     </div>
                 </div>
 
-                <div className='lg:max-h-[3rem]'> {/* 48px equivalent */}
+                <div className=' mb-4'> {/* 48px equivalent */}
                     <SignInProvider />
                 </div>
 
-                <div className='lg:max-h-[3.75rem] mx-auto flex items-center justify-center gap-[0.5rem]'> {/* 60px, 8px equivalent */}
+                <div className=' mx-auto flex items-center justify-center text-center flex-wrap  gap-[0.5rem] mb-4'> {/* 60px, 8px equivalent */}
                     <BodyMedium className="">
                         {t("accountSwitch.newAccount.prompt")}
                     </BodyMedium>
