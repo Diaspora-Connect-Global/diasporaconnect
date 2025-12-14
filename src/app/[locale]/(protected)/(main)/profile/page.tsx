@@ -20,7 +20,7 @@ export default function ProfilePage() {
         notifyOnNetworkStatusChange: false, // Don't trigger loading state on background refetch
     });      
     
-    const profile: Profile |undefined = data?.getProfile.profile;
+    const profile: Profile | undefined = data?.getProfile.profile;
 
       console.log("profile info", profile)
 

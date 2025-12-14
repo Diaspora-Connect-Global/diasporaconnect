@@ -322,7 +322,7 @@ export function DropdownMenuAvatar() {
           <Link onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
             <div className='flex space-x-4 items-center my-2'>
               <MyAvatar />
-              <p className='text-xl'>{firstName } {lastName}</p>
+              <p className='text-xl'>{firstName} {lastName}</p>
             </div>
             <CR />
           </Link>
