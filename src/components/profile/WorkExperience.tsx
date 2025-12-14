@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { ButtonType2 } from '@/components/custom/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ADD_SKILLS, AddSkillsResponse, GET_MY_SKILLS, GetUserSkillsResponse, REMOVE_SKILL, RemoveSkillResponse } from '@/services/gql/skills';
@@ -105,6 +106,37 @@ const createSkill = (label: string): Promise<Option> => {
     });
 };
 
+// Skills Section Skeleton
+function SkillsSkeleton() {
+    return (
+        <div className="flex flex-wrap gap-2 mb-2">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Skeleton key={i} className="h-8 w-20 rounded-xl" />
+            ))}
+        </div>
+    );
+}
+
+// Work Experience Skeleton
+function WorkExperienceSkeleton() {
+    return (
+        <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-3">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-5 w-64" />
+                    <Skeleton className="h-4 w-32" />
+                    <div className="flex flex-wrap gap-2 mt-3">
+                        {[1, 2, 3].map((j) => (
+                            <Skeleton key={j} className="h-7 w-16 rounded-xl" />
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function WorkExperiencePage() {
     const t = useTranslations('profile.workExperience');
     const tActions = useTranslations('actions');
@@ -113,7 +145,7 @@ export default function WorkExperiencePage() {
     const [showExperienceModal, setShowExperienceModal] = useState(false);
     const [selectedSkills, setSelectedSkills] = useState<Option[]>([]);
 
-    // GraphQL Queries
+    // GraphQL Queries - Load separately
     const { data: workExpData, loading: workExpLoading, refetch: refetchWorkExp } = useQuery<GetUserWorkExperienceResponse>(
         GET_MY_WORK_EXPERIENCE
     );
@@ -220,40 +252,36 @@ export default function WorkExperiencePage() {
         setSelectedSkills([]);
     };
 
-    // Loading state
-    if (workExpLoading || skillsLoading) {
-        return (
-            <div className="mx-auto font-sans">
-                <p className="text-center text-text-secondary">Loading...</p>
-            </div>
-        );
-    }
-
     return (
         <>
             <div className="mx-auto font-sans">
                 {/* Skills Section */}
                 <section className="mb-10">
                     <h2 className="font-bold mb-4">{t('skill')}</h2>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                        {skills.map((skill) => (
-                            <span
-                                key={skill.id}
-                                className="px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium cursor-pointer hover:bg-gray-50"
-                                onClick={() => handleRemoveSkill(skill.id)}
-                                title="Click to remove"
+                    
+                    {skillsLoading ? (
+                        <SkillsSkeleton />
+                    ) : (
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {skills.map((skill) => (
+                                <span
+                                    key={skill.id}
+                                    className="px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium cursor-pointer hover:bg-gray-50"
+                                    onClick={() => handleRemoveSkill(skill.id)}
+                                    title="Click to remove"
+                                >
+                                    {skill.name}
+                                </span>
+                            ))}
+                            <ButtonType3
+                                onClick={() => setShowSkillModal(true)}
+                                className="flex items-center gap-1 px-2 py-1 text-text-brand font-medium text-sm rounded-full transition"
                             >
-                                {skill.name}
-                            </span>
-                        ))}
-                        <ButtonType3
-                            onClick={() => setShowSkillModal(true)}
-                            className="flex items-center gap-1 px-2 py-1 text-text-brand font-medium text-sm rounded-full transition"
-                        >
-                            <Plus className="w-4 h-4" />
-                            {t('addSkill')}
-                        </ButtonType3>
-                    </div>
+                                <Plus className="w-4 h-4" />
+                                {t('addSkill')}
+                            </ButtonType3>
+                        </div>
+                    )}
                 </section>
 
                 {/* Work Experience Section */}
@@ -267,7 +295,9 @@ export default function WorkExperiencePage() {
                         {t('addExperience')}
                     </ButtonType3>
 
-                    {experiences.length === 0 ? (
+                    {workExpLoading ? (
+                        <WorkExperienceSkeleton />
+                    ) : experiences.length === 0 ? (
                         <p className="text-text-secondary text-sm">No work experience added yet.</p>
                     ) : (
                         <Accordion type="single" collapsible className="w-full">
