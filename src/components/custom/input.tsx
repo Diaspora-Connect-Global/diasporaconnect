@@ -65,7 +65,7 @@ interface TextInputProps {
     value: string;
     onChange: (value: string) => void;
     type?: string;
-    placeholder?: string;
+    placeholder: string;
     label?: string;
     id?: string;
     required?: boolean;

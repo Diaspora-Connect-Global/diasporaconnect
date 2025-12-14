@@ -59,9 +59,9 @@ export function NameEditModal({ isOpen, onClose, onSave, initialData }: NameEdit
         </DialogHeader>
 
         <div className="flex-1 min-h-0 flex flex-col space-y-4">
-          <TextInput label={t('firstName')} value={firstName} onChange={setFirstName} />
-          <TextInput label={t('middleName')} value={middleName} onChange={setMiddleName} />
-          <TextInput label={t('lastName')} value={lastName} onChange={setLastName} />
+          <TextInput placeholder='Enter your first name' label={t('firstName')} value={firstName} onChange={setFirstName} />
+          <TextInput label={t('middleName')} value={middleName} onChange={setMiddleName} placeholder={'Enter your middle name'} />
+          <TextInput label={t('lastName')} value={lastName} onChange={setLastName} placeholder={'Enter your last name'} />
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
 
