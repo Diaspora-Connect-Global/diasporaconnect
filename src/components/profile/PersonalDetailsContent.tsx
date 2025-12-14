@@ -8,7 +8,7 @@ import { NameEditModal } from './modals/NameEditModal';
 import { ResidenceEditModal } from './modals/ResidenceEdit.tsx';
 import { HomeCountryEditModal } from './modals/HomeCountryEditModal';
 import { useTranslations } from 'next-intl';
-import { Profile, UpdateProfileInput } from '@/services/gql/profile';
+import { GET_MY_PROFILE, Profile, UpdateProfileInput } from '@/services/gql/profile';
 import { useMutation } from '@apollo/client/react';
 import { UPDATE_PROFILE } from '@/services/gql/profile';
 
@@ -26,9 +26,18 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
     setLocalUserData(userData);
   }, [userData]);
 
-  const [updateProfile] = useMutation<{ updateProfile: { success: boolean; message?: string; profile: Profile } }>(
-    UPDATE_PROFILE
-  );
+  // const [updateProfile] = useMutation<{ updateProfile: { success: boolean; message?: string; profile: Profile } }>(
+  //   UPDATE_PROFILE
+  // );
+
+
+  const [updateProfile] = useMutation<{ 
+  updateProfile: { success: boolean; message?: string; profile: Profile } 
+}>(UPDATE_PROFILE, {
+  refetchQueries: [{ query: GET_MY_PROFILE }],
+  // or refetchQueries: ['GetMyProfile'], // if your query has operationName
+  awaitRefetchQueries: true, // Wait for refetch to complete
+});
 
   // Loading states for each modal
   const [isBioLoading, setIsBioLoading] = useState(false);
