@@ -236,6 +236,7 @@
             "home": "Home",
             "community": "Community",
             "marketplace": "Marketplace",
+            "post":"Post",
             "chat": "Chat",
             "notification": "Notification",
             "searchLabel": "Search Diasplug ...",
