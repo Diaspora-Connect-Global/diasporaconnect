@@ -7,6 +7,7 @@ import { ButtonType3 } from '../custom/button';
 import { BodySmall, CaptionLarge } from '../utils';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   GET_MY_EDUCATION,
   DELETE_EDUCATION,
@@ -26,6 +27,28 @@ interface Education {
   endYear: string;
   activities: string;
   isCurrent?: boolean;
+}
+
+// Loading skeleton component for education items
+function EducationSkeleton() {
+  return (
+    <div className="pb-6 border-b border-border-subtle">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <Skeleton className="h-5 w-64 mb-2" />
+          <div className="flex flex-wrap gap-x-2 mt-1">
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <Skeleton className="h-16 w-full mt-2" />
+        </div>
+        <div className="flex gap-2 ml-4">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function EducationContent() {
@@ -111,14 +134,6 @@ export default function EducationContent() {
     return `${start} - ${end}`;
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto p-6">
-        <p className="text-center text-text-secondary">Loading...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       <section>
@@ -135,9 +150,16 @@ export default function EducationContent() {
         </ButtonType3>
       </section>
 
-      {/* Education List */}
+      {/* Education List with Loading State */}
       <div className="space-y-6">
-        {educationList.length === 0 ? (
+        {loading ? (
+          // Show 3 skeleton items while loading
+          <>
+            <EducationSkeleton />
+            <EducationSkeleton />
+            <EducationSkeleton />
+          </>
+        ) : educationList.length === 0 ? (
           <p className="text-text-secondary text-sm">No education added yet.</p>
         ) : (
           educationList.map((edu) => (
