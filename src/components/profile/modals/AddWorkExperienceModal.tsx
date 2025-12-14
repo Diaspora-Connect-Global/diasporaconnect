@@ -114,7 +114,8 @@ export function AddWorkExperienceModal({
     ...initialData,
   });
 
-  const [skills, setSkills] = useState<string[]>([]);
+  // Change to store Option objects instead of strings
+  const [skills, setSkills] = useState<Option[]>([]);
   const isEditMode = !!initialData?.id;
 
   // GraphQL Mutations
@@ -169,10 +170,19 @@ export function AddWorkExperienceModal({
         ...initialData,
       });
       
-      // Parse skills if editing
+      // Parse skills if editing - convert string labels to Option objects
       if (initialData?.id && typeof initialData === 'object' && 'skills' in initialData) {
         const skillsString = (initialData as any).skills;
-        setSkills(skillsString ? skillsString.split(',').map((s: string) => s.trim()) : []);
+        if (skillsString) {
+          const skillLabels = skillsString.split(',').map((s: string) => s.trim());
+          const skillOptions = skillLabels.map((label: string, index: number) => ({
+            id: `existing-${index}`,
+            label: label
+          }));
+          setSkills(skillOptions);
+        } else {
+          setSkills([]);
+        }
       } else {
         setSkills([]);
       }
@@ -207,6 +217,9 @@ export function AddWorkExperienceModal({
 
       const employmentType = employmentTypeMap[form.employmentType.toUpperCase()] || 'FULL_TIME' as EmploymentType;
 
+      // Extract skill labels from Option objects
+      const skillLabels = skills.map(skill => skill.label);
+
       if (isEditMode && form.id) {
         // Update existing work experience
         await updateWorkExperience({
@@ -220,7 +233,7 @@ export function AddWorkExperienceModal({
               endDate,
               currentlyWorking: form.isCurrent,
               jobDescription: form.description.trim() || undefined,
-              skills: skills.length > 0 ? skills.join(', ') : undefined,
+              skills: skillLabels.length > 0 ? skillLabels.join(', ') : undefined,
             }
           }
         });
@@ -236,7 +249,7 @@ export function AddWorkExperienceModal({
               endDate,
               currentlyWorking: form.isCurrent,
               jobDescription: form.description.trim() || undefined,
-              skills: skills.length > 0 ? skills.join(', ') : undefined,
+              skills: skillLabels.length > 0 ? skillLabels.join(', ') : undefined,
             }
           }
         });
