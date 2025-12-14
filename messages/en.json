@@ -379,7 +379,8 @@
         "friendList": "Friend List",
         "friends": "friends",
         "changeProfilePicture": "Change profile picture",
-        "editProfilePicture": "Edit profile picture"
+        "editProfilePicture": "Edit profile picture",
+        "loading": "Loading...."
     },
     "profile": {
         "workExperience": {
