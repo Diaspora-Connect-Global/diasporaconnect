@@ -51,11 +51,11 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <GraphQLProvider>
               {children}
-              <Toaster 
-          position="top-center"
-          richColors
-          
-        />
+              <Toaster
+                position="top-center"
+                richColors
+
+              />
             </GraphQLProvider>
 
           </ThemeProvider>

@@ -44,7 +44,7 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
             className={`px-6 py-3 rounded-md border  transition-all cursor-pointer w-full lg:w-auto
               ${data.communityType === option.value
                 ? ' border-border-brand text-text-primary'
-                : 'bg-surface-brand-subtle  text-text-primary '
+                : 'bg-surface-subtle  text-text-primary '
               }`}
           >
             {option.label}

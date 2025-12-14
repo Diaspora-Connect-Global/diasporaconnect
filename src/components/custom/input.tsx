@@ -1,8 +1,19 @@
 "use client"
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Eye, EyeOff, Search } from 'lucide-react';
 import { LabelMedium } from '../utils';
 import { COUNTRIES } from '@/data/CountryCodesWithFlags';
+import Image from 'next/image';
+import {
+  Select as SelectA,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 
 interface PasswordInputProps {
@@ -213,6 +224,134 @@ export const Select: React.FC<SelectProps> = ({
         </div>
     );
 };
+
+
+
+
+
+
+interface SelectOption {
+  value: string;
+  label: string;
+  dialCode?: string;
+}
+
+interface SelectCountryCodeProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  id?: string;
+  required?: boolean;
+}
+
+export const SelectCountryCode: React.FC<SelectCountryCodeProps> = ({
+  value,
+  onChange,
+  options,
+  placeholder = "Select a country",
+  id = "country-select",
+  required = false
+}) => {
+  const selectedOption = options.find(opt => opt.dialCode === value);
+
+  return (
+    <SelectA value={value} onValueChange={onChange} required={required}>
+      <SelectTrigger 
+        id={id}
+        className="h-12 w-full bg-transparent border-0 text-text-primary"
+      >
+        <SelectValue className='' placeholder={placeholder}>
+          {selectedOption && (
+            <div className="flex items-center gap-2">
+              <Image 
+                src={`https://flagcdn.com/w20/${selectedOption.value.toLowerCase()}.png`} 
+                alt={selectedOption.label}
+                width={25} 
+                height={15} 
+                className="shrink-0"
+              />
+              {/* Show only dial code in trigger */}
+              <span>{selectedOption.dialCode}</span>
+            </div>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent className="max-h-60">
+        <SelectGroup>
+          {options.map((option) => (
+            <SelectItem 
+              key={option.value} 
+              value={option.value}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Image 
+                  src={`https://flagcdn.com/w20/${option.value.toLowerCase()}.png`} 
+                  alt={option.label}
+                  width={25} 
+                  height={15} 
+                  className="shrink-0"
+                />
+                {/* Show full name in dropdown */}
+                <span>{option.label}</span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </SelectA>
+  );
+};
+
+
+interface CountrySelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  id?: string;
+  required?: boolean;
+}
+
+export const CountryCodeSelect: React.FC<CountrySelectProps> = ({
+  value,
+  onChange,
+  id = "country",
+  required = false
+}) => {
+  // Transform COUNTRIES array to include dialCode
+  const countryOptions = COUNTRIES.map(country => ({
+    value: country.code,
+    label: country.name,
+    dialCode: country.dial_code // Include dial code here
+  }));
+
+  return (
+    <SelectCountryCode
+      value={value}
+      onChange={onChange}
+      options={countryOptions}
+      placeholder="Select country"
+      id={id}
+      required={required}
+    />
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 interface MonthSelectProps {
     value: string;

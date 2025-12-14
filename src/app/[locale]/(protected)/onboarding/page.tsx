@@ -12,6 +12,7 @@ import { useMutation } from '@apollo/client/react';
 import { REGISTER_USER, RegisterUserResponse, VERIFY_OTP, VerifyOtpResponse } from '@/services/gql/authentication';
 import { redirect, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
 
 
 export interface FormData {
@@ -27,7 +28,7 @@ export interface FormData {
   }>;
   // Step 3
   country: string;
-  countryCode?: string;
+  countryCode: string;
   communityType: string
 
   // Step 4
@@ -54,28 +55,29 @@ export default function CompleteAccount() {
     phoneNumber: '',
     verificationCode: '',
     topics: [],
-    recommendations: []
+    recommendations: [],
+    countryCode: ""
   });
-  const [sendCodeLoading, setSendCodeLoading] = useState(false)
-  const [verifyOTPLoading, setVerifyOTPLoading] = useState(false)
+  const [sendCodeLoading, setSendCodeLoading] = useState(false);
+  const [verifyOTPLoading, setVerifyOTPLoading] = useState(false);
   const router = useRouter();
 
+  // Auth store
+  const { setTokens, setUser, setDeviceMetadata } = useAuthStore();
 
-  const [verifyOtp, { loading: verifyOtpLoading, error }] = useMutation<VerifyOtpResponse>(VERIFY_OTP);
-  const [registerUser, { loading: registerUserLoading, error: registerUserError }] = useMutation<RegisterUserResponse>(REGISTER_USER);
+  const [verifyOtp] = useMutation<VerifyOtpResponse>(VERIFY_OTP);
+  const [registerUser] = useMutation<RegisterUserResponse>(REGISTER_USER);
 
    // Load from session storage on component mount
   useEffect(() => {
     const savedData = sessionStorage.getItem('accountFormData');
     const savedStep = sessionStorage.getItem('accountFormStep');
-     const emailpresent = sessionStorage.getItem('signupEmail');
+    const emailpresent = sessionStorage.getItem('signupEmail');
     const passwordpresent = sessionStorage.getItem('signupPassword');
 
-    
-if(!emailpresent || !passwordpresent){
-  redirect("/signup")
-
-}
+    if(!emailpresent || !passwordpresent){
+      redirect("/signup")
+    }
 
     if (savedData) {
       setFormData(JSON.parse(savedData));
@@ -169,14 +171,14 @@ if(!emailpresent || !passwordpresent){
         // OTP sent → move to next step
         sessionStorage.setItem('registrationToken', token);
         nextStep();
-      }else{
+      } else {
         toast.error(data?.registerUser.message)
       }
 
 
     } catch (error) {
       console.error('Error sending OTP:', error);
-      // Optionally show error toast
+      toast.error('Failed to send verification code. Please try again.');
     } finally {
       setSendCodeLoading(false);
     }
@@ -199,19 +201,46 @@ if(!emailpresent || !passwordpresent){
       console.log("OTP Verification response:", data);
 
       if (data?.verifyRegistrationOtp.success) {
+        const { sessionToken, user, deviceMetadata, requires2fa } = data.verifyRegistrationOtp;
+
+        // Store tokens in auth store
+        setTokens({
+          accessToken: sessionToken,
+          refreshToken: '', // Add if your API returns it
+          sessionId: deviceMetadata.deviceId,
+          expiresIn: 3600, // Adjust based on your token expiry
+        });
+
+        // Store user data in auth store
+        setUser(user);
+
+        // Store device metadata in auth store
+        setDeviceMetadata(deviceMetadata);
+
+        // Clear session storage after successful verification
+        sessionStorage.removeItem('signupEmail');
+        sessionStorage.removeItem('signupPassword');
+        sessionStorage.removeItem('registrationToken');
+        sessionStorage.removeItem('accountFormData');
+        sessionStorage.removeItem('accountFormStep');
+
         toast.success('Phone number verified successfully!');
-        sessionStorage.setItem("sessionToken", data?.verifyRegistrationOtp.sessionToken)
-        sessionStorage.setItem("userInfo", JSON.stringify(data?.verifyRegistrationOtp.user))
-        nextStep();
+
+        // Check if 2FA is required
+        if (requires2fa) {
+          router.push('/auth/setup-2fa');
+        } else {
+          // Continue to next step (step 6 - topics)
+          nextStep();
+        }
       } else {
-        toast.error('OTP verification failed. Please try again.');
+        toast.error(data?.verifyRegistrationOtp.message || 'OTP verification failed. Please try again.');
       }
     } catch (error) {
       console.error('OTP verification failed:', error);
-      // Show error in UI
+      toast.error('Verification failed. Please try again.');
     } finally {
       setVerifyOTPLoading(false)
-
     }
   };
 
@@ -279,7 +308,6 @@ if(!emailpresent || !passwordpresent){
             updateData={updateFormData}
             prevStep={prevStep}
             nextStep={nextStep}
-
           />
         );
       default:
@@ -293,4 +321,3 @@ if(!emailpresent || !passwordpresent){
     </>
   );
 };
-

@@ -2,10 +2,11 @@
 import React from 'react';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
-import { LabelMedium, TextPrimary } from '@/components/utils';
+import { LabelMedium } from '@/components/utils';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
+import { CountryCodeSelect } from '@/components/custom/input';
+import { COUNTRIES } from '@/data/CountryCodesWithFlags';
 
 interface Step4Props {
     data: FormData;
@@ -18,12 +19,24 @@ interface Step4Props {
 export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextStep, prevStep }) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
-    
+
     const isNextDisabled = !data.phoneNumber.trim();
+
+
+    const handleCodeChange = (value: string) => {
+
+
+        // Find the full country object to get the dial code
+        const selectedCountry = COUNTRIES.find(country => country.code === value);
+
+        if (selectedCountry) {
+            updateData({ countryCode: selectedCountry.dial_code });
+        }
+    };
 
     return (
         <MultiStep
-        isLoading={loading}
+            isLoading={loading}
             stepNumber={4}
             totalSteps={7}
             title={t('phoneVerification.title')}
@@ -45,24 +58,27 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
                     </LabelMedium>
                 </label>
 
+
+
+
+
                 <InputGroup className='px-3 py-6 border-1 border-border-default rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition'>
                     <InputGroupAddon>
                         <InputGroupText>
-                         <Image src={`https://flagcdn.com/w20/${data.country.toLowerCase()}.png`} alt="Logo" width={25} height={15} className="" />
+                            <CountryCodeSelect
+                                value={data.countryCode}
+                                onChange={handleCodeChange}
+                                label={t('location.country.label')}
+
+                            />
                         </InputGroupText>
                     </InputGroupAddon>
-                    <InputGroupAddon>
-                        <InputGroupText className='text-text-primary'>
-                            <TextPrimary>
-                                {data.countryCode}
-                            </TextPrimary>
-                        </InputGroupText>
-                    </InputGroupAddon>
-                    <InputGroupInput 
+
+                    <InputGroupInput
                         onChange={(e) => updateData({ phoneNumber: e.target.value })}
                         value={data.phoneNumber || ''}
                         placeholder={t('phoneVerification.phoneNumber.placeholder')}
-                        className='text-text-primary font-body-large  px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0' 
+                        className='text-text-primary font-body-large  px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0'
                     />
                 </InputGroup>
             </div>

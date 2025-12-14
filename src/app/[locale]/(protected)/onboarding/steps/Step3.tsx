@@ -34,7 +34,8 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, nextStep, prevSt
     
     if (selectedCountry) {
         updateData({ countryCode: selectedCountry.dial_code });
-    }    };
+    }    
+};
 
     return (
         <MultiStep

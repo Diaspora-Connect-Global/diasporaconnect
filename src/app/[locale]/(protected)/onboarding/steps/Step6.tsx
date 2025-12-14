@@ -63,7 +63,7 @@ export const Step6: React.FC<Step6Props> = ({ data, updateData, nextStep, prevSt
                             ${
                                 data.topics?.includes(topic.key)
                                     ? 'border-border-brand text-text-primary'
-                                    : 'bg-surface-brand-subtle  text-text-primary'
+                                    : 'bg-surface-subtle  text-text-primary'
                             }`}
                     >
                         {topic.value}
