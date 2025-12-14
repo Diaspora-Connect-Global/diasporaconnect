@@ -80,6 +80,8 @@ interface TextInputProps {
     label?: string;
     id?: string;
     required?: boolean;
+    disabled?: boolean;
+
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
@@ -89,32 +91,47 @@ export const TextInput: React.FC<TextInputProps> = ({
     placeholder = "Your email",
     label = "Email",
     id = "email",
-    required = false
+    required = false,
+    disabled = false
 }) => {
     return (
-        <div className="space-y-2 ">
-            <label htmlFor={id} className="">
+        <div className="space-y-2">
+            <label htmlFor={id}>
                 <LabelMedium>
                     {label}
-                    {required && <span className="text-text-danger ml-1">*</span>}
+                    {required && (
+                        <span className="text-text-danger ml-1">*</span>
+                    )}
                 </LabelMedium>
             </label>
-            <div className="bg-surface-subtle rounded-md">
+
+            <div
+                className={`bg-surface-subtle rounded-md ${
+                    disabled ? 'opacity-60' : ''
+                }`}
+            >
                 <div className="border-border-subtle border-2 rounded-md">
                     <input
                         id={id}
                         type={type}
                         placeholder={placeholder}
                         value={value}
-                        onChange={(e) => onChange(e.target.value)}
-                        className="h-12  placeholder:text-text-secondary w-full  px-3 focus:outline-none"
+                        disabled={disabled}
+                        onChange={(e) =>
+                            !disabled && onChange(e.target.value)
+                        }
+                        className={`h-12 w-full px-3 focus:outline-none placeholder:text-text-secondary
+                          ${disabled ? 'cursor-not-allowed bg-transparent' : ''}
+                        `}
                         required={required}
+                        aria-disabled={disabled}
                     />
                 </div>
             </div>
         </div>
     );
 };
+
 
 interface SearchInputProps {
     value: string;

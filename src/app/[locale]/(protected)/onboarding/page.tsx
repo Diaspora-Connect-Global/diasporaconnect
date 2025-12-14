@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useMutation } from '@apollo/client/react';
+import { redirect, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
 import { Step1 } from './steps/Step1';
 import { Step2 } from './steps/Step2';
 import { Step3 } from './steps/Step3';
@@ -8,316 +13,319 @@ import { Step4 } from './steps/Step4';
 import { Step5 } from './steps/Step5';
 import { Step6 } from './steps/Step6';
 import { Step7 } from './steps/Step7';
-import { useMutation } from '@apollo/client/react';
-import { REGISTER_USER, RegisterUserResponse, VERIFY_OTP, VerifyOtpResponse } from '@/services/gql/authentication';
-import { redirect, useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+
+import {
+  REGISTER_USER,
+  COMPLETE_OAUTH_REGISTRATION,
+  VERIFY_OTP,
+  RegisterUserResponse,
+  CompleteOAuthRegistrationResponse,
+  VerifyOtpResponse
+} from '@/services/gql/authentication';
+
 import { useAuthStore } from '@/store/useAuthStore';
 
-
 export interface FormData {
-  // Step 1
   firstName: string;
   lastName: string;
-
-  // Step 2
-  community: Array<{
-    title: string;
-    members: number;
-    description: string;
-  }>;
-  // Step 3
+  community: any[];
+  communityType: string;
   country: string;
   countryCode: string;
-  communityType: string
-
-  // Step 4
   phoneNumber: string;
-
-  // Step 5
   verificationCode: string;
-
-  // Step 6
   topics: string[];
-
-  // Step 7
   recommendations: string[];
 }
 
 export default function CompleteAccount() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const router = useRouter();
+  const { setTokens, setUser, setDeviceMetadata } =
+    useAuthStore();
+
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
     community: [],
-    communityType: "",
+    communityType: '',
     country: '',
+    countryCode: '',
     phoneNumber: '',
     verificationCode: '',
     topics: [],
-    recommendations: [],
-    countryCode: ""
+    recommendations: []
   });
-  const [sendCodeLoading, setSendCodeLoading] = useState(false);
-  const [verifyOTPLoading, setVerifyOTPLoading] = useState(false);
-  const router = useRouter();
 
-  // Auth store
-  const { setTokens, setUser, setDeviceMetadata } = useAuthStore();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [sendCodeLoading, setSendCodeLoading] =
+    useState(false);
+  const [verifyOTPLoading, setVerifyOTPLoading] =
+    useState(false);
 
-  const [verifyOtp] = useMutation<VerifyOtpResponse>(VERIFY_OTP);
-  const [registerUser] = useMutation<RegisterUserResponse>(REGISTER_USER);
+  const [isOAuth, setIsOAuth] =
+    useState<boolean | null>(null);
 
-   // Load from session storage on component mount
+  const [registerUser] =
+    useMutation<RegisterUserResponse>(REGISTER_USER);
+
+  const [completeOAuthRegistration] =
+    useMutation<CompleteOAuthRegistrationResponse>(
+      COMPLETE_OAUTH_REGISTRATION
+    );
+
+  const [verifyOtp] =
+    useMutation<VerifyOtpResponse>(VERIFY_OTP);
+
+  /* ------------------------------------------------------------------ */
+  /* Detect OAuth FIRST */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
-    const savedData = sessionStorage.getItem('accountFormData');
-    const savedStep = sessionStorage.getItem('accountFormStep');
-    const emailpresent = sessionStorage.getItem('signupEmail');
-    const passwordpresent = sessionStorage.getItem('signupPassword');
-
-    if(!emailpresent || !passwordpresent){
-      redirect("/signup")
-    }
-
-    if (savedData) {
-      setFormData(JSON.parse(savedData));
-    }
-    if (savedStep) {
-      setCurrentStep(parseInt(savedStep));
-    }
+    const oauth = sessionStorage.getItem('oauthRegistration');
+    setIsOAuth(!!oauth);
   }, []);
 
+  /* ------------------------------------------------------------------ */
+  /* Load saved onboarding state */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
-    sessionStorage.setItem('accountFormData', JSON.stringify(formData));
-    sessionStorage.setItem('accountFormStep', currentStep.toString());
-  }, [formData, currentStep]);
+    if (isOAuth === null) return;
 
+    if (!isOAuth) {
+      const email = sessionStorage.getItem('signupEmail');
+      const password =
+        sessionStorage.getItem('signupPassword');
 
-  const updateFormData = (newData: Partial<FormData>) => {
-    setFormData(prev => ({ ...prev, ...newData }));
+      if (!email || !password) {
+        redirect('/signup');
+        return;
+      }
+    }
+
+    const savedData =
+      sessionStorage.getItem('accountFormData');
+    const savedStep =
+      sessionStorage.getItem('accountFormStep');
+
+    if (savedData) setFormData(JSON.parse(savedData));
+    if (savedStep) setCurrentStep(Number(savedStep));
+  }, [isOAuth]);
+
+  /* ------------------------------------------------------------------ */
+  /* Persist state safely */
+  /* ------------------------------------------------------------------ */
+  useEffect(() => {
+    if (isOAuth === null) return;
+
+    sessionStorage.setItem(
+      'accountFormData',
+      JSON.stringify(formData)
+    );
+    sessionStorage.setItem(
+      'accountFormStep',
+      currentStep.toString()
+    );
+  }, [formData, currentStep, isOAuth]);
+
+  /* ------------------------------------------------------------------ */
+  /* Helpers */
+  /* ------------------------------------------------------------------ */
+  const updateData = (data: Partial<FormData>) =>
+    setFormData(prev => ({ ...prev, ...data }));
+
+  const nextStep = () =>
+    setCurrentStep(s => Math.min(s + 1, 7));
+  const prevStep = () =>
+    setCurrentStep(s => Math.max(s - 1, 1));
+
+  const formatPhone = (phone: string) => {
+    const clean = phone.replace(/[^\d]/g, '');
+    if (clean.length === 10 && clean.startsWith('0'))
+      return `${formData.countryCode}${clean.slice(1)}`;
+    if (clean.length === 9)
+      return `${formData.countryCode}${clean}`;
+    return phone.startsWith('+') ? phone : `+${phone}`;
   };
 
-  const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 7));
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
+  /* ------------------------------------------------------------------ */
+  /* Step 4 – Send OTP */
+  /* ------------------------------------------------------------------ */
   const submitFormA = async () => {
     try {
       setSendCodeLoading(true);
-      const email = sessionStorage.getItem('signupEmail');
-      const password = sessionStorage.getItem('signupPassword');
+      const phone = formatPhone(formData.phoneNumber);
+      let token = '';
 
-      console.log("Sending OTP...", formData, email, password);
+      if (isOAuth) {
+        const { data } =
+          await completeOAuthRegistration({
+            variables: {
+              input: {
+                oauthRegistrationToken: JSON.parse(
+                  sessionStorage.getItem(
+                    'oauthRegistration'
+                  )!
+                ).oauthRegistrationToken,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phone,
+                country: formData.country,
+                role: formData.communityType
+              }
+            }
+          });
 
-      /**
-     * Formats phone number to E.164 format for Ghana (`${formData.countryCode}`)
-     * - If 10 digits starting with 0: Remove 0 and add `${formData.countryCode}`
-     * - If 9 digits: Add `${formData.countryCode}`
-     * - If already has `${formData.countryCode}`: Keep as is
-     * - Other formats: Keep as entered
-     */
-      const formatPhoneToE164 = (phone: string): string => {
-        // Remove all non-digit characters except +
-        const cleaned = phone.replace(/[^\d+]/g, '');
+        if (!data?.completeOAuthRegistration.success)
+          throw new Error(
+            data?.completeOAuthRegistration.message
+          );
 
-        // Already in E.164 format
-        if (cleaned.startsWith(`${formData.countryCode}`)) {
-          return cleaned;
-        }
-
-        // Remove + if present (for other formats)
-        const digitsOnly = cleaned.replace(/\+/g, '');
-
-        // 10 digits starting with 0 (e.g., 0551810814)
-        if (digitsOnly.length === 10 && digitsOnly.startsWith('0')) {
-          return `${formData.countryCode}` + digitsOnly.substring(1);
-        }
-
-        // 9 digits (e.g., 551810814)
-        if (digitsOnly.length === 9) {
-          return `${formData.countryCode}` + digitsOnly;
-        }
-
-        // Return as is if doesn't match Ghana format
-        return cleaned.startsWith('+') ? cleaned : '+' + cleaned;
-      };
-
-      const formatted = formatPhoneToE164(formData.phoneNumber);
-
-
-      const { data } = await registerUser({
-        variables: {
-          input: {
-            email: email,
-            password: password,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formatted,
-            country: formData.country,
-            role: formData.communityType
-          }
-        }
-      });
-
-      console.log("Registration response:", data);
-
-      if (data?.registerUser.success) {
-        // Store registration token for OTP verification
-        const token = data.registerUser.registrationToken;
-        // OTP sent → move to next step
-        sessionStorage.setItem('registrationToken', token);
-        nextStep();
+        token =
+          data.completeOAuthRegistration.registrationToken;
       } else {
-        toast.error(data?.registerUser.message)
+        const { data } = await registerUser({
+          variables: {
+            input: {
+              email: sessionStorage.getItem('signupEmail'),
+              password:
+                sessionStorage.getItem('signupPassword'),
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              phone,
+              country: formData.country,
+              role: formData.communityType
+            }
+          }
+        });
+
+        if (!data?.registerUser.success)
+          throw new Error(data?.registerUser.message);
+
+        token = data.registerUser.registrationToken;
       }
 
-
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      toast.error('Failed to send verification code. Please try again.');
+      sessionStorage.setItem('registrationToken', token);
+      nextStep();
+    } catch (e: any) {
+      toast.error(e.message);
     } finally {
       setSendCodeLoading(false);
     }
   };
 
-
+  /* ------------------------------------------------------------------ */
+  /* Step 5 – Verify OTP */
+  /* ------------------------------------------------------------------ */
   const submitFormB = async () => {
     try {
-      console.log("Verifying OTP...", formData);
-      setVerifyOTPLoading(true)
-      const registrationToken = sessionStorage.getItem('registrationToken');
+      setVerifyOTPLoading(true);
+      const token =
+        sessionStorage.getItem('registrationToken');
 
       const { data } = await verifyOtp({
         variables: {
-          registrationToken: registrationToken,
+          registrationToken: token,
           otp: formData.verificationCode
         }
       });
 
-      console.log("OTP Verification response:", data);
+      if (!data?.verifyRegistrationOtp.success)
+        throw new Error(
+          data?.verifyRegistrationOtp.message
+        );
 
-      if (data?.verifyRegistrationOtp.success) {
-        const { sessionToken, user, deviceMetadata, requires2fa } = data.verifyRegistrationOtp;
+      const {
+        sessionToken,
+        user,
+        deviceMetadata,
+        // requires2fa
+      } = data.verifyRegistrationOtp;
 
-        // Store tokens in auth store
-        setTokens({
-          accessToken: sessionToken,
-          refreshToken: '', // Add if your API returns it
-          sessionId: deviceMetadata.deviceId,
-          expiresIn: 3600, // Adjust based on your token expiry
-        });
+      setTokens({
+        accessToken: sessionToken,
+        refreshToken: '',
+        sessionId: deviceMetadata.deviceId,
+        expiresIn: 3600
+      });
 
-        // Store user data in auth store
-        setUser(user);
+      setUser(user);
+      setDeviceMetadata(deviceMetadata);
 
-        // Store device metadata in auth store
-        setDeviceMetadata(deviceMetadata);
+      sessionStorage.clear();
 
-        // Clear session storage after successful verification
-        sessionStorage.removeItem('signupEmail');
-        sessionStorage.removeItem('signupPassword');
-        sessionStorage.removeItem('registrationToken');
-        sessionStorage.removeItem('accountFormData');
-        sessionStorage.removeItem('accountFormStep');
-
-        toast.success('Phone number verified successfully!');
-
-        // Check if 2FA is required
-        if (requires2fa) {
-          router.push('/auth/setup-2fa');
-        } else {
-          // Continue to next step (step 6 - topics)
-          nextStep();
-        }
-      } else {
-        toast.error(data?.verifyRegistrationOtp.message || 'OTP verification failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('OTP verification failed:', error);
-      toast.error('Verification failed. Please try again.');
+      // requires2fa
+      //   ? router.push('/auth/setup-2fa')
+      //   : 
+        
+        nextStep();
+    } catch (e: any) {
+      toast.error(e.message);
     } finally {
-      setVerifyOTPLoading(false)
+      setVerifyOTPLoading(false);
     }
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <Step1
-            data={formData}
-            updateData={updateFormData}
-            nextStep={nextStep}
-          />
-        );
-      case 2:
-        return (
-          <Step2
-            data={formData}
-            updateData={updateFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        );
-      case 3:
-        return (
-          <Step3
-            data={formData}
-            updateData={updateFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        );
-      case 4:
-        return (
-          <Step4
-            data={formData}
-            updateData={updateFormData}
-            nextStep={submitFormA}
-            loading={sendCodeLoading}
-            prevStep={prevStep}
-          />
-        );
-      case 5:
-        return (
-          <Step5
-            data={formData}
-            updateData={updateFormData}
-            nextStep={submitFormB}
-            loading={verifyOTPLoading}
-            prevStep={prevStep}
-          />
-        );
-      case 6:
-        return (
-          <Step6
-            data={formData}
-            updateData={updateFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        );
-      case 7:
-        return (
-          <Step7
-            data={formData}
-            updateData={updateFormData}
-            prevStep={prevStep}
-            nextStep={nextStep}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  if (isOAuth === null) return null;
 
   return (
     <>
-      {renderStep()}
+      {currentStep === 1 && (
+        <Step1
+          data={formData}
+          updateData={updateData}
+          nextStep={nextStep}
+          isOAuth={isOAuth}
+        />
+      )}
+      {currentStep === 2 && (
+        <Step2
+          data={formData}
+          updateData={updateData}
+          nextStep={nextStep}
+          prevStep={prevStep}
+        />
+      )}
+      {currentStep === 3 && (
+        <Step3
+          data={formData}
+          updateData={updateData}
+          nextStep={nextStep}
+          prevStep={prevStep}
+        />
+      )}
+      {currentStep === 4 && (
+        <Step4
+          data={formData}
+          updateData={updateData}
+          nextStep={submitFormA}
+          loading={sendCodeLoading}
+          prevStep={prevStep}
+        />
+      )}
+      {currentStep === 5 && (
+        <Step5
+          data={formData}
+          updateData={updateData}
+          nextStep={submitFormB}
+          loading={verifyOTPLoading}
+          prevStep={prevStep}
+        />
+      )}
+      {currentStep === 6 && (
+        <Step6
+          data={formData}
+          updateData={updateData}
+          nextStep={nextStep}
+          prevStep={prevStep}
+        />
+      )}
+      {currentStep === 7 && (
+        <Step7
+          data={formData}
+          updateData={updateData}
+          nextStep={() => router.push('/dashboard')}
+          prevStep={prevStep}
+        />
+      )}
     </>
   );
-};
+}
