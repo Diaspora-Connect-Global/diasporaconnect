@@ -10,11 +10,19 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordionA';
 import { AddWorkExperienceModal } from './modals/AddWorkExperienceModal';
+import { AutocompleteAsync } from '@/components/custom/autoCompleteAsync';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { ButtonType2 } from '@/components/custom/button';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ADD_SKILLS, AddSkillsResponse, GET_MY_SKILLS, GetUserSkillsResponse, REMOVE_SKILL, RemoveSkillResponse } from '@/services/gql/skills';
 import { GET_MY_WORK_EXPERIENCE, GetUserWorkExperienceResponse, WorkExperience } from '@/services/gql/work_experience';
-
 
 interface Skill {
     id: string;
@@ -32,13 +40,78 @@ interface Experience {
     description: string;
 }
 
+interface Option {
+    id: string;
+    label: string;
+}
+
+// Mock data for skills autocomplete
+const ALL_SKILLS: Option[] = [
+    { id: '1', label: 'React' },
+    { id: '2', label: 'Angular' },
+    { id: '3', label: 'Vue.js' },
+    { id: '4', label: 'Svelte' },
+    { id: '5', label: 'Node.js' },
+    { id: '6', label: 'Python' },
+    { id: '7', label: 'Django' },
+    { id: '8', label: 'Flask' },
+    { id: '9', label: 'Ruby on Rails' },
+    { id: '10', label: 'ASP.NET' },
+    { id: '11', label: 'Spring Boot' },
+    { id: '12', label: 'Laravel' },
+    { id: '13', label: 'Express.js' },
+    { id: '14', label: 'NestJS' },
+    { id: '15', label: 'GraphQL' },
+    { id: '16', label: 'REST API' },
+    { id: '17', label: 'MongoDB' },
+    { id: '18', label: 'PostgreSQL' },
+    { id: '19', label: 'MySQL' },
+    { id: '20', label: 'Redis' },
+    { id: '21', label: 'Docker' },
+    { id: '22', label: 'Kubernetes' },
+    { id: '23', label: 'AWS' },
+    { id: '24', label: 'Azure' },
+    { id: '25', label: 'Google Cloud' },
+    { id: '26', label: 'TypeScript' },
+    { id: '27', label: 'JavaScript' },
+    { id: '28', label: 'Java' },
+    { id: '29', label: 'C#' },
+    { id: '30', label: 'Go' },
+    { id: '31', label: 'Rust' },
+    { id: '32', label: 'Swift' },
+    { id: '33', label: 'Kotlin' },
+    { id: '34', label: 'React Native' },
+    { id: '35', label: 'Flutter' },
+];
+
+const fetchSkills = (query: string): Promise<Option[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const lower = query.toLowerCase();
+            const matches = ALL_SKILLS.filter((s) =>
+                s.label.toLowerCase().includes(lower)
+            );
+            resolve(matches);
+        }, 200);
+    });
+};
+
+const createSkill = (label: string): Promise<Option> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const newId = `custom-${Date.now()}`;
+            resolve({ id: newId, label });
+        }, 300);
+    });
+};
+
 export default function WorkExperiencePage() {
     const t = useTranslations('profile.workExperience');
     const tActions = useTranslations('actions');
     
     const [showSkillModal, setShowSkillModal] = useState(false);
     const [showExperienceModal, setShowExperienceModal] = useState(false);
-    const [newSkill, setNewSkill] = useState('');
+    const [selectedSkills, setSelectedSkills] = useState<Option[]>([]);
 
     // GraphQL Queries
     const { data: workExpData, loading: workExpLoading, refetch: refetchWorkExp } = useQuery<GetUserWorkExperienceResponse>(
@@ -50,10 +123,10 @@ export default function WorkExperiencePage() {
     );
 
     // GraphQL Mutations
-    const [addSkillsMutation] = useMutation<AddSkillsResponse>(ADD_SKILLS, {
+    const [addSkillsMutation, { loading: addingSkills }] = useMutation<AddSkillsResponse>(ADD_SKILLS, {
         onCompleted: () => {
             refetchSkills();
-            setNewSkill('');
+            setSelectedSkills([]);
             setShowSkillModal(false);
         },
         onError: (error) => {
@@ -101,23 +174,23 @@ export default function WorkExperiencePage() {
         return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     }
 
-    // Add skill handler
-    const addSkill = async () => {
-        if (!newSkill.trim()) return;
+    // Add skills handler
+    const addSkills = async () => {
+        if (selectedSkills.length === 0) return;
 
         try {
             await addSkillsMutation({
                 variables: {
                     input: {
-                        skills: [{
-                            skillName: newSkill.trim(),
+                        skills: selectedSkills.map(skill => ({
+                            skillName: skill.label,
                             proficiencyLevel: 'intermediate' // Default level
-                        }]
+                        }))
                     }
                 }
             });
         } catch (error) {
-            console.error('Error in addSkill:', error);
+            console.error('Error in addSkills:', error);
         }
     };
 
@@ -140,6 +213,11 @@ export default function WorkExperiencePage() {
     const handleExperienceModalClose = () => {
         setShowExperienceModal(false);
         refetchWorkExp();
+    };
+
+    const handleSkillModalClose = () => {
+        setShowSkillModal(false);
+        setSelectedSkills([]);
     };
 
     // Loading state
@@ -238,38 +316,40 @@ export default function WorkExperiencePage() {
                 </section>
             </div>
 
-            {/* Skill Modal */}
-            {showSkillModal && (
-                <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                        <h3 className="text-lg font-semibold mb-4">{t('addNewSkill')}</h3>
-                        <input
-                            type="text"
-                            value={newSkill}
-                            onChange={(e) => setNewSkill(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && addSkill()}
-                            placeholder={t('skillPlaceholder')}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            autoFocus
+            {/* Skill Modal with AutocompleteAsync */}
+            <Dialog open={showSkillModal} onOpenChange={handleSkillModalClose}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>{t('addNewSkill')}</DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="py-4">
+                        <AutocompleteAsync
+                            value={selectedSkills}
+                            onChange={setSelectedSkills}
+                            fetchOptions={fetchSkills}
+                            onCreate={createSkill}
+                            placeholder={t('skillPlaceholder') || 'Search or add skills...'}
+                            label={t('skills') || 'Skills'}
                         />
-                        <div className="flex justify-end gap-2 mt-4">
-                            <button
-                                onClick={() => setShowSkillModal(false)}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
-                            >
-                                {t('cancel')}
-                            </button>
-                            <button
-                                onClick={addSkill}
-                                disabled={!newSkill.trim()}
-                                className="px-4 py-2 bg-surface-brand text-white rounded-md  disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {t('addSkill')}
-                            </button>
-                        </div>
                     </div>
-                </div>
-            )}
+
+                    <DialogFooter>
+                        <ButtonType3 
+                            onClick={handleSkillModalClose}
+                            disabled={addingSkills}
+                        >
+                            {t('cancel')}
+                        </ButtonType3>
+                        <ButtonType2
+                            onClick={addSkills}
+                            disabled={selectedSkills.length === 0 || addingSkills}
+                        >
+                            {addingSkills ? 'Adding...' : t('addSkill')}
+                        </ButtonType2>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <AddWorkExperienceModal
                 isOpen={showExperienceModal}
