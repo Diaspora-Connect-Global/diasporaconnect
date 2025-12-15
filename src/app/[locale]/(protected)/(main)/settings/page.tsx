@@ -51,7 +51,7 @@ export default function SettingsPage() {
           {/* Notifications Section */}
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-accent" />
+              <Bell className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
                 {t("notifications.title")}
               </h2>
@@ -114,7 +114,7 @@ export default function SettingsPage() {
           {/* Security Section */}
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-accent" />
+              <Shield className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
                 {t("security.title")}
               </h2>
@@ -157,7 +157,7 @@ export default function SettingsPage() {
           {/* Privacy Section */}
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-accent" />
+              <Eye className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
                 {t("privacy.title")}
               </h2>
@@ -203,7 +203,7 @@ export default function SettingsPage() {
           {/* Language Section */}
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-accent" />
+              <Globe className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
                 {t("language.title")}
               </h2>
@@ -227,7 +227,7 @@ export default function SettingsPage() {
           {/* Theme Section */}
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Palette className="h-5 w-5 text-accent" />
+              <Palette className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
                 {t("theme.title")}
               </h2>
