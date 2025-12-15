@@ -352,7 +352,11 @@ export function DropdownMenuAvatar() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
+                      <Link onClick={() => setOpen(false)} href={"/help"} className='flex items-center justify-between'>
             <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
+                      
+                      </Link>
+
 
           </DropdownMenuItem>
         </DropdownMenuGroup>
