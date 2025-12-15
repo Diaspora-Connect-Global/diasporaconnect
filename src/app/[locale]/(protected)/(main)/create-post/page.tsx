@@ -45,7 +45,7 @@ const Avatar: React.FC<{ src?: string; alt: string; size?: number }> = ({
   const initials = alt.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   
   return (
-    <div className="relative">
+    <div className="relative ">
       <div 
         className="rounded-full ring-4 ring-primary/20 shadow-lg overflow-hidden bg-surface-brand flex items-center justify-center text-text-white font-semibold"
         style={{ width: size, height: size, fontSize: size * 0.4 }}
@@ -432,8 +432,8 @@ export default function CreatePostPage() {
   };
 
   return (
-  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4 flex justify-center">
-    <div className="w-full max-w-3xl">
+  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4 flex justify-center mx-auto ">
+    <div className="w-full max-w-3xl mb-2">
         {/* Main Composer Card */}
         <div className="bg-surface-default/80 backdrop-blur-md rounded-2xl border border-border-subtle shadow-xl">
           {/* User Header */}
@@ -696,7 +696,7 @@ export default function CreatePostPage() {
 
         {/* Pro Tips Section */}
         <div 
-          className="mt-6 p-5 bg-gradient-to-r from-surface-brand/5 to-surface-brand/10 border border-surface-brand/20 rounded-xl"
+          className="my-6 p-5 bg-gradient-to-r from-surface-brand/5 to-surface-brand/10 border border-surface-brand/20 rounded-xl"
         >
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-surface-brand to-surface-brand/80 flex items-center justify-center flex-shrink-0">

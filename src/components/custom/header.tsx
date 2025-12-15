@@ -50,7 +50,7 @@ export default function Header({
   const navigation = [
     { name: t('home'), href: `/${currentLocale}`, icon: "/HOME" },
     { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY" },
-    { name: t('post'), href: `/${currentLocale}/create-post`, icon: "/MARKETPLACE", disabled: true },
+    { name: t('post'), href: `/${currentLocale}/create-post`, icon: "/POST", disabled: true },
     { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT", disabled: true },
     { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION" },
   ];

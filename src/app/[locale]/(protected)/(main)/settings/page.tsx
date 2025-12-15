@@ -44,7 +44,7 @@ export default function SettingsPage() {
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col overflow-auto scrollbar-hide h-app-inner bg-background">
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
