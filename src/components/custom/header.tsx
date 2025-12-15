@@ -327,8 +327,8 @@ export function DropdownMenuAvatar() {
             <CR />
           </Link>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
+        {/* <DropdownMenuSeparator /> */}
+        {/* <DropdownMenuGroup>
           <DropdownMenuItem>
 
             <DMItem icon={<StorefrontIcon />} text={t('becomeVendor')} />
@@ -337,7 +337,7 @@ export function DropdownMenuAvatar() {
 
             <DMItem icon={<IconFileDollar />} text={'Become a vendor'} />
           </DropdownMenuItem>
-        </DropdownMenuGroup>
+        </DropdownMenuGroup> */}
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
