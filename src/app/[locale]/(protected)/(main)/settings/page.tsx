@@ -218,9 +218,12 @@ export default function SettingsPage() {
                   {t("language.appLanguage.description")}
                 </p>
               </div>
+              <div className="w-[180px] border-1 border-border-subtle rounded-md">
               <LocaleSwitcher 
-                selectClassName="w-[180px]"
+                selectClassName="w-full"
               />
+
+              </div>
             </div>
           </div>
 
