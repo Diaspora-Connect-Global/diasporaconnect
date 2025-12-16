@@ -17,7 +17,7 @@ export interface UserData {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  role?: string;
 }
 
 export interface DeviceMetadata {

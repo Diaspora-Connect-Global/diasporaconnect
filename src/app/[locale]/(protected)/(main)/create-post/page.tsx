@@ -23,6 +23,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { ButtonType2 } from '@/components/custom/button';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
 
 // Types
 type Visibility = 'public' | 'connections' | 'private';
@@ -159,6 +160,7 @@ export default function CreatePostPage() {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const t = useTranslations('actions');
+  const currentUser = useAuthStore(state => state.user);
   const userName = 'John Doe';
   const charLimit = 3000;
   const charCount = postContent.length;
@@ -446,7 +448,7 @@ export default function CreatePostPage() {
                   size={56}
                 />
                 <div className="flex flex-col gap-1">
-                  <h2 className="heading-small text-text-primary">{userName}</h2>
+                  <h2 className="heading-small text-text-primary">{currentUser?.firstName} {currentUser?.lastName}</h2>
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>

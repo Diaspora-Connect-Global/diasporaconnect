@@ -10,8 +10,14 @@ import { DUMMY_USERS } from '@/data/users';
 import { useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function ProfilePage() {
+        const setUser = useAuthStore(state => state.setUser);
+    // const currentUser = useAuthStore(state => state.user);
+
+
 
 
     const { data, loading, error } = useQuery<GetProfileResponse>(GET_MY_PROFILE, {
@@ -23,6 +29,19 @@ export default function ProfilePage() {
     const profile: Profile | undefined = data?.getProfile.profile;
 
       console.log("profile info", profile)
+
+          useEffect(() => {
+        if (profile) {
+            setUser({
+                ...profile,
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                email: profile.email,
+                id: profile.userId,
+                
+            });
+        }
+    }, [profile?.firstName, profile?.lastName, profile?.email, profile, setUser]); // Only run when these specific fields change
 
     // Get current user data (user with ID 'me')
     const currentUser = DUMMY_USERS['me'];

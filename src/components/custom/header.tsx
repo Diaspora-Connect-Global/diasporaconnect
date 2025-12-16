@@ -25,7 +25,9 @@ import { QuestionIcon, StorefrontIcon, X } from "@phosphor-icons/react";
 import { IconFileDollar } from '@tabler/icons-react';
 import React from 'react';
 import HomeSidebar from '../home/HomeSidebar';
-  import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
+
 
 
 
@@ -38,6 +40,8 @@ export default function Header({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const t = useTranslations('home.header');
+  const router = useRouter();
+
 
   const handleSearch = () => {
     console.log('Searching for:', searchQuery);
@@ -308,27 +312,34 @@ export function DropdownMenuAvatar() {
   const [open, setOpen] = useState(false);
   const firstName = useAuthStore((s) => s.user?.firstName);
   const lastName = useAuthStore((s) => s.user?.lastName);
+  const router = useRouter(); // Add this
 
+  // Move logout function here
+  const logout = () => {
+    sessionStorage.clear();
+    localStorage.clear();
+    router.replace("/signin");
+  }
 
-  return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <button className="focus:outline-none cursor-pointer">
-          <MyAvatar />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="lg:w-100 mx-20 mt-4" align="start">
-        <DropdownMenuLabel>
-          <Link onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
-            <div className='flex space-x-4 items-center my-2'>
-              <MyAvatar />
-              <p className='text-xl'>{firstName} {lastName}</p>
-            </div>
-            <CR />
-          </Link>
-        </DropdownMenuLabel>
-        {/* <DropdownMenuSeparator /> */}
-        {/* <DropdownMenuGroup>
+    return (
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <button className="focus:outline-none cursor-pointer">
+            <MyAvatar />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="lg:w-100 mx-20 mt-4" align="start">
+          <DropdownMenuLabel>
+            <Link onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
+              <div className='flex space-x-4 items-center my-2'>
+                <MyAvatar />
+                <p className='text-xl'>{firstName} {lastName}</p>
+              </div>
+              <CR />
+            </Link>
+          </DropdownMenuLabel>
+          {/* <DropdownMenuSeparator /> */}
+          {/* <DropdownMenuGroup>
           <DropdownMenuItem>
 
             <DMItem icon={<StorefrontIcon />} text={t('becomeVendor')} />
@@ -338,35 +349,35 @@ export function DropdownMenuAvatar() {
             <DMItem icon={<IconFileDollar />} text={'Become a vendor'} />
           </DropdownMenuItem>
         </DropdownMenuGroup> */}
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/wallet">
-              <DMItem icon={<Wallet3 size="80" />} text={t('wallet')} />
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/settings">
-            <DMItem icon={<SettingsIcon className='w-full h-full'
-            />} text={t('settingsPrivacy')} />
-            </Link>
-          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem asChild>
+              <Link href="/wallet">
+                <DMItem icon={<Wallet3 size="80" />} text={t('wallet')} />
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <DMItem icon={<SettingsIcon className='w-full h-full'
+                />} text={t('settingsPrivacy')} />
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link onClick={() => setOpen(false)} href={"/help"} className='flex items-center justify-between'>
+                <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
+
+              </Link>
+
+
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
           <DropdownMenuItem>
-                      <Link onClick={() => setOpen(false)} href={"/help"} className='flex items-center justify-between'>
-            <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
-                      
-                      </Link>
-
-
+            <DMItem icon={<LogoutCurve
+              size={40}
+            />} text={t('logout')} onClick={logout} />
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <DMItem icon={<LogoutCurve
-            size={40}
-          />} text={t('logout')} />
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }
