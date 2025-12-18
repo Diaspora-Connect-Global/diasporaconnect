@@ -369,3 +369,66 @@ export const REJECT_CONNECTION = gql`
     }
   }
 `;
+
+export interface FriendSuggestionProfile {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  sector?: string;
+  countryOfOrigin?: string;
+  residenceCountry?: string;
+  bio?: string;
+  connectionCount: number;
+}
+
+export interface FriendSuggestion {
+  profile: FriendSuggestionProfile;
+  score: number;
+  matchReasons: string[];
+  mutualConnectionsCount: number;
+}
+
+export interface GetFriendSuggestionsResponse {
+  getFriendSuggestions: {
+    success: boolean;
+    message?: string;
+    total: number;
+    suggestions: FriendSuggestion[];
+  };
+}
+
+/**
+ * Get suggested friends for the current user.
+ *
+ * @example
+ * ```ts
+ * const { data } = useQuery<GetFriendSuggestionsResponse>(
+ *   GET_FRIEND_SUGGESTIONS,
+ *   { variables: { limit: 10 } }
+ * );
+ * ```
+ */
+export const GET_FRIEND_SUGGESTIONS = gql`
+  query GetFriendSuggestions($limit: Int) {
+    getFriendSuggestions(limit: $limit) {
+      success
+      message
+      total
+      suggestions {
+        profile {
+          userId
+          firstName
+          lastName
+          sector
+          countryOfOrigin
+          residenceCountry
+          bio
+          connectionCount
+        }
+        score
+        matchReasons
+        mutualConnectionsCount
+      }
+    }
+  }
+`;

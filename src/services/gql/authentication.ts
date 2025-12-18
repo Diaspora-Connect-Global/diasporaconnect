@@ -573,3 +573,193 @@ export interface CheckEmailAvailabilityResponse {
 export interface CheckPhoneAvailabilityResponse {
   isPhoneAvailable: boolean;
 }
+
+
+// ============================================================================
+// TOKEN REFRESH MUTATION
+// ============================================================================
+
+/**
+ * Refreshes an expired or soon-to-expire session token using a refresh token.
+ *
+ * @description
+ * Exchanges a valid refresh token for a new session token and (optionally)
+ * a new refresh token. This keeps the user authenticated without requiring
+ * them to log in again.
+ *
+ * This mutation should typically be called:
+ * - When an API request returns an authentication error
+ * - On app startup to restore a session
+ * - Shortly before the session token expires
+ *
+ * @example
+ * ```typescript
+ * import { useMutation } from '@apollo/client';
+ * import {
+ *   REFRESH_TOKEN,
+ *   RefreshTokenResponse
+ * } from './auth.mutations';
+ *
+ * function useRefreshSession() {
+ *   const [refreshTokenMutation] = useMutation<RefreshTokenResponse>(
+ *     REFRESH_TOKEN
+ *   );
+ *
+ *   const refreshSession = async () => {
+ *     const refreshToken = localStorage.getItem('refreshToken');
+ *     if (!refreshToken) return null;
+ *
+ *     try {
+ *       const { data } = await refreshTokenMutation({
+ *         variables: { refreshToken }
+ *       });
+ *
+ *       if (data?.refreshToken.success) {
+ *         // Update stored tokens
+ *         localStorage.setItem(
+ *           'sessionToken',
+ *           data.refreshToken.sessionToken
+ *         );
+ *         localStorage.setItem(
+ *           'refreshToken',
+ *           data.refreshToken.refreshToken
+ *         );
+ *
+ *         return data.refreshToken.user;
+ *       }
+ *     } catch (err) {
+ *       console.error('Token refresh failed:', err);
+ *       // Optional: force logout here
+ *     }
+ *
+ *     return null;
+ *   };
+ *
+ *   return refreshSession;
+ * }
+ * ```
+ *
+ * @param {string} refreshToken - Long-lived refresh token
+ * @returns {RefreshTokenResponse} New session token, refresh token, and user data
+ */
+export const REFRESH_TOKEN = gql`
+  mutation RefreshToken($refreshToken: String!) {
+    refreshToken(refreshToken: $refreshToken) {
+      success
+      message
+      user {
+        id
+        email
+        firstName
+        lastName
+        role
+      }
+      refreshToken
+      sessionToken
+      refreshTokenExpiry
+      sessionTokenExpiry
+    }
+  }
+`;
+
+// ============================================================================
+// TYPESCRIPT INTERFACES
+// ============================================================================
+
+/**
+ * Response from refresh token mutation.
+ *
+ * @property {boolean} success - Whether the token refresh was successful
+ * @property {string} message - Success or error message
+ * @property {Object} user - Authenticated user profile
+ * @property {string} refreshToken - New refresh token (may be rotated)
+ * @property {string} sessionToken - New JWT session token
+ * @property {string} refreshTokenExpiry - ISO timestamp when refresh token expires
+ * @property {string} sessionTokenExpiry - ISO timestamp when session token expires
+ */
+export interface RefreshTokenResponse {
+  refreshToken: {
+    success: boolean;
+    message: string;
+    user: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    };
+    refreshToken: string;
+    sessionToken: string;
+    refreshTokenExpiry: string;
+    sessionTokenExpiry: string;
+  };
+}
+
+
+
+
+
+// ============================================================================
+// RESEND OTP MUTATION
+// ============================================================================
+
+/**
+ * Resends the OTP code for an in-progress registration.
+ *
+ * @description
+ * Sends a new OTP to the phone number associated with the provided
+ * registration token. This is typically used when:
+ * - The user did not receive the OTP
+ * - The OTP expired
+ * - The user requests a new code
+ *
+ * Rate-limiting is usually enforced on the backend to prevent abuse.
+ *
+ * @example
+ * ```typescript
+ * import { useMutation } from '@apollo/client';
+ * import {
+ *   RESEND_REGISTRATION_OTP,
+ *   ResendRegistrationOtpResponse
+ * } from './auth.mutations';
+ *
+ * function ResendOtpButton({ registrationToken }: { registrationToken: string }) {
+ *   const [resendOtp, { loading }] =
+ *     useMutation<ResendRegistrationOtpResponse>(
+ *       RESEND_REGISTRATION_OTP
+ *     );
+ *
+ *   const handleResend = async () => {
+ *     const { data } = await resendOtp({
+ *       variables: { registrationToken }
+ *     });
+ *
+ *     if (data?.resendRegistrationOtp.success) {
+ *       toast.success('OTP resent successfully');
+ *     } else {
+ *       toast.error(data?.resendRegistrationOtp.message);
+ *     }
+ *   };
+ *
+ *   return (
+ *     <button onClick={handleResend} disabled={loading}>
+ *       Resend code
+ *     </button>
+ *   );
+ * }
+ * ```
+ *
+ * @param {string} registrationToken - Token issued during registration
+ * @returns {ResendRegistrationOtpResponse} Success status and message
+ */
+export const RESEND_REGISTRATION_OTP = gql`
+  mutation ResendRegistrationOtp($registrationToken: String!) {
+    resendRegistrationOtp(registrationToken: $registrationToken) {
+      success
+      message
+      verificationExpiresAt
+      verificationTtlSeconds
+      smsSent
+    }
+  }
+`;
