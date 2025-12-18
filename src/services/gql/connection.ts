@@ -435,3 +435,76 @@ export const GET_FRIEND_SUGGESTIONS = gql`
     }
   }
 `;
+
+
+// Get pending requests SENT (where current user is requester)
+export const GET_PENDING_REQUESTS_SENT = gql`
+  query GetPendingRequestsSent($limit: Float, $offset: Float) {
+    getPendingConnections(limit: $limit, offset: $offset) {
+      success
+      message
+      total
+      connections {
+        id
+        status
+        requesterId
+        receiverId
+        message
+        createdAt
+        receiver {
+          userId
+          firstName
+          lastName
+          email
+          avatarUrl
+          bio
+          occupation
+          sector
+          location
+          country
+        }
+      }
+    }
+  }
+`;
+
+// Get pending requests RECEIVED (where current user is receiver)
+export const GET_PENDING_REQUESTS_RECEIVED = gql`
+  query GetPendingRequestsReceived($limit: Float, $offset: Float) {
+    getPendingConnections(limit: $limit, offset: $offset) {
+      success
+      message
+      total
+      connections {
+        id
+        status
+        requesterId
+        receiverId
+        message
+        createdAt
+        requester {
+          userId
+          firstName
+          lastName
+          email
+          avatarUrl
+          bio
+          occupation
+          sector
+          location
+          country
+        }
+      }
+    }
+  }
+`;
+
+// Type for both pending request responses
+export interface GetPendingRequestsResponse {
+  getPendingConnections: {
+    success: boolean;
+    message?: string;
+    total: number;
+    connections: Connection[];
+  };
+}

@@ -9,12 +9,14 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
 import {
   GET_MY_CONNECTIONS,
-  GET_PENDING_CONNECTIONS,
   GetConnectionsResponse,
-  GetPendingConnectionsResponse,
-  Connection,
   GetFriendSuggestionsResponse,
   GET_FRIEND_SUGGESTIONS,
+} from "@/services/gql/connection";
+import { 
+  GET_PENDING_REQUESTS_SENT,
+  GET_PENDING_REQUESTS_RECEIVED,
+  GetPendingRequestsResponse 
 } from "@/services/gql/connection";
 
 interface Friend {
@@ -40,29 +42,47 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   /* --------------------- GraphQL Queries --------------------- */
-  const {
-    data: connectionsData,
-    loading: connectionsLoading,
-    refetch: refetchConnections
+  // Get accepted connections (friends)
+  const { 
+    data: connectionsData, 
+    loading: connectionsLoading, 
+    refetch: refetchConnections 
   } = useQuery<GetConnectionsResponse>(GET_MY_CONNECTIONS, {
     variables: { limit: 100.0, offset: 0.0 },
+    skip: activeTab !== "friends", // Only fetch when on friends tab
   });
 
-  const {
-    data: pendingData,
-    loading: pendingLoading,
-    refetch: refetchPending
-  } = useQuery<GetPendingConnectionsResponse>(GET_PENDING_CONNECTIONS, {
-    variables: { limit: 100.0 },
+  // Get pending requests SENT (where current user is requester)
+  const { 
+    data: requestsSentData, 
+    loading: requestsSentLoading, 
+    refetch: refetchRequestsSent 
+  } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_SENT, {
+    variables: { limit: 100.0, offset: 0.0 },
+    skip: activeTab !== "request-sent", // Only fetch when on request-sent tab
   });
 
-  const {
-    data: suggestions,
+  // Get pending requests RECEIVED (where current user is receiver)
+  const { 
+    data: requestsReceivedData, 
+    loading: requestsReceivedLoading, 
+    refetch: refetchRequestsReceived 
+  } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_RECEIVED, {
+    variables: { limit: 100.0, offset: 0.0 },
+    skip: activeTab !== "request-received", // Only fetch when on request-received tab
+  });
+
+  // Get friend suggestions
+  const { 
+    data: suggestions, 
     loading: suggestionsLoading,
-    refetch: refetchSuggestions
+    refetch: refetchSuggestions 
   } = useQuery<GetFriendSuggestionsResponse>(
     GET_FRIEND_SUGGESTIONS,
-    { variables: { limit: 10 } }
+    { 
+      variables: { limit: 10 },
+      skip: activeTab !== "suggested", // Only fetch when on suggested tab
+    }
   );
 
   /* --------------------- Helper: Determine tier from user data --------------------- */
@@ -73,58 +93,38 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     return "starter";
   };
 
-  /* --------------------- Helper: Get connection status --------------------- */
-  const getConnectionStatus = (connection: Connection, currentUserId: string): FriendType => {
-    if (connection.status === "ACCEPTED") {
-      return "friends";
-    }
-
-    if (connection.status === "PENDING") {
-      // If current user is the receiver, it's a request received
-      if (connection.receiverId === currentUserId) {
-        return "request-received";
-      }
-      // If current user is the requester, it's a request sent
-      if (connection.requesterId === currentUserId) {
-        return "request-sent";
-      }
-    }
-
-    return "suggested"; // Default fallback
-  };
-
   /* --------------------- Transform API data to Friend[] --------------------- */
   const allFriends: Friend[] = useMemo(() => {
     const friends: Friend[] = [];
-
+    
     // TODO: Get current user ID from auth context or session
     const currentUserId = "me"; // Replace with actual current user ID
 
     // Process accepted connections (friends)
+    // GET_MY_CONNECTIONS only returns ACCEPTED connections
     if (connectionsData?.getConnections.connections) {
       connectionsData.getConnections.connections.forEach((connection) => {
-          // Determine which user is the friend (not current user)
-          const friend = connection.requesterId === currentUserId
-            ? connection.receiver
-            : connection.requester;
+        // Determine which user is the friend (not current user)
+        const friend = connection.requesterId === currentUserId 
+          ? connection.receiver 
+          : connection.requester;
 
-          friends.push({
-            userId: friend.userId,
-            connectionId: connection.id,
-            name: `${friend.firstName} ${friend.lastName}`,
-            imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
-            mutualConnections: undefined, // TODO: Fetch from GET_MUTUAL_FRIENDS if needed
-            tier: getTierFromUser(friend),
-            status: "friends",
-          });
+        friends.push({
+          userId: friend.userId,
+          connectionId: connection.id,
+          name: `${friend.firstName} ${friend.lastName}`,
+          imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
+          mutualConnections: undefined, // TODO: Fetch from GET_MUTUAL_FRIENDS if needed
+          tier: getTierFromUser(friend),
+          status: "friends",
+        });
       });
     }
 
-    // Process pending connections (sent and received requests)
-    if (pendingData?.getPendingConnections.connections) {
-      pendingData.getPendingConnections.connections.forEach((connection) => {
-        const isReceived = connection.receiverId === currentUserId;
-        const friend = isReceived ? connection.requester : connection.receiver;
+    // Process pending requests SENT (current user is requester)
+    if (requestsSentData?.getPendingConnections.connections) {
+      requestsSentData.getPendingConnections.connections.forEach((connection) => {
+        const friend = connection.receiver; // The person who received the request
 
         friends.push({
           userId: friend.userId,
@@ -133,7 +133,24 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
           imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
           mutualConnections: undefined,
           tier: getTierFromUser(friend),
-          status: isReceived ? "request-received" : "request-sent",
+          status: "request-sent",
+        });
+      });
+    }
+
+    // Process pending requests RECEIVED (current user is receiver)
+    if (requestsReceivedData?.getPendingConnections.connections) {
+      requestsReceivedData.getPendingConnections.connections.forEach((connection) => {
+        const friend = connection.requester; // The person who sent the request
+
+        friends.push({
+          userId: friend.userId,
+          connectionId: connection.id,
+          name: `${friend.firstName} ${friend.lastName}`,
+          imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
+          mutualConnections: undefined,
+          tier: getTierFromUser(friend),
+          status: "request-received",
         });
       });
     }
@@ -145,7 +162,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
           userId: suggestion.profile.userId,
           connectionId: undefined, // No connection exists yet for suggestions
           name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
-          imageSrc: `${suggestion.profile.avatarUrl}` || "https://github.com/shadcn.png",
+          imageSrc: suggestion.profile.avatarUrl || "https://github.com/shadcn.png",
           mutualConnections: suggestion.mutualConnectionsCount,
           tier: getTierFromUser(suggestion.profile),
           status: "suggested",
@@ -154,23 +171,25 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     }
 
     return friends;
-  }, [connectionsData, pendingData, suggestions]);
+  }, [connectionsData, requestsSentData, requestsReceivedData, suggestions]);
 
   /* --------------------- Refetch on tab change --------------------- */
   useEffect(() => {
-    switch (activeTab) {
+    switch(activeTab) {
       case "friends":
         refetchConnections();
         break;
       case "request-sent":
+        refetchRequestsSent();
+        break;
       case "request-received":
-        refetchPending();
+        refetchRequestsReceived();
         break;
       case "suggested":
         refetchSuggestions();
         break;
     }
-  }, [activeTab, refetchConnections, refetchPending, refetchSuggestions]);
+  }, [activeTab, refetchConnections, refetchRequestsSent, refetchRequestsReceived, refetchSuggestions]);
 
   /* --------------------- Handle name click --------------------- */
   const handleNameClick = (userId: string) => {
@@ -178,7 +197,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     if (onClose) {
       onClose();
     }
-
+    
     // Then navigate to the friend's profile
     router.push(`/friend/${userId}`);
   };
@@ -201,18 +220,14 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   /* --------------------- Dynamic counts --------------------- */
   const counts = useMemo(() => {
     const byStatus: Record<FriendType, number> = {
-      "friends": 0,
-      "suggested": 0,
-      "request-received": 0,
-      "request-sent": 0,
+      "friends": connectionsData?.getConnections.total || 0,
+      "suggested": suggestions?.getFriendSuggestions.total || 0,
+      "request-received": requestsReceivedData?.getPendingConnections.total || 0,
+      "request-sent": requestsSentData?.getPendingConnections.total || 0,
     };
 
-    allFriends.forEach((f) => {
-      byStatus[f.status]++;
-    });
-
     return byStatus;
-  }, [allFriends]);
+  }, [connectionsData, requestsSentData, requestsReceivedData, suggestions]);
 
   const tabTitle = {
     "friends": t("titles.all", { count: counts["friends"] }),
@@ -222,12 +237,12 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   }[activeTab];
 
   /* --------------------- Loading state --------------------- */
-  const isLoading = connectionsLoading || pendingLoading || suggestionsLoading;
+  const isLoading = connectionsLoading || requestsSentLoading || requestsReceivedLoading || suggestionsLoading;
 
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
     const key = `${friend.status}-${friend.userId}`;
-
+    
     return (
       <FriendsCard
         key={key}
@@ -264,10 +279,11 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") setActiveTab(key);
               }}
-              className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${activeTab === key
+              className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${
+                activeTab === key
                   ? "bg-surface-brand-subtle text-text-brand"
                   : "text-text-secondary"
-                }`}
+              }`}
             >
               <p>{label}</p>
             </div>
