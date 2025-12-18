@@ -13,11 +13,13 @@ import {
   GetConnectionsResponse,
   GetPendingConnectionsResponse,
   Connection,
+  GetFriendSuggestionsResponse,
+  GET_FRIEND_SUGGESTIONS,
 } from "@/services/gql/connection";
 
 interface Friend {
   userId: string;
-  connectionId?: string; // Add connectionId for mutations
+  connectionId?: string;
   name: string;
   imageSrc: string;
   mutualConnections?: number;
@@ -38,15 +40,30 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   /* --------------------- GraphQL Queries --------------------- */
-  const { data: connectionsData, loading: connectionsLoading, refetch: refetchConnections } = 
-    useQuery<GetConnectionsResponse>(GET_MY_CONNECTIONS, {
-      variables: { limit: 100.0, offset: 0.0 },
-    });
+  const {
+    data: connectionsData,
+    loading: connectionsLoading,
+    refetch: refetchConnections
+  } = useQuery<GetConnectionsResponse>(GET_MY_CONNECTIONS, {
+    variables: { limit: 100.0, offset: 0.0 },
+  });
 
-  const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = 
-    useQuery<GetPendingConnectionsResponse>(GET_PENDING_CONNECTIONS, {
-      variables: { limit: 100.0 },
-    });
+  const {
+    data: pendingData,
+    loading: pendingLoading,
+    refetch: refetchPending
+  } = useQuery<GetPendingConnectionsResponse>(GET_PENDING_CONNECTIONS, {
+    variables: { limit: 100.0 },
+  });
+
+  const {
+    data: suggestions,
+    loading: suggestionsLoading,
+    refetch: refetchSuggestions
+  } = useQuery<GetFriendSuggestionsResponse>(
+    GET_FRIEND_SUGGESTIONS,
+    { variables: { limit: 10 } }
+  );
 
   /* --------------------- Helper: Determine tier from user data --------------------- */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,7 +78,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     if (connection.status === "ACCEPTED") {
       return "friends";
     }
-    
+
     if (connection.status === "PENDING") {
       // If current user is the receiver, it's a request received
       if (connection.receiverId === currentUserId) {
@@ -72,24 +89,23 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         return "request-sent";
       }
     }
-    
+
     return "suggested"; // Default fallback
   };
 
   /* --------------------- Transform API data to Friend[] --------------------- */
   const allFriends: Friend[] = useMemo(() => {
     const friends: Friend[] = [];
-    
+
     // TODO: Get current user ID from auth context or session
     const currentUserId = "me"; // Replace with actual current user ID
 
     // Process accepted connections (friends)
     if (connectionsData?.getConnections.connections) {
       connectionsData.getConnections.connections.forEach((connection) => {
-        if (connection.status === "ACCEPTED") {
           // Determine which user is the friend (not current user)
-          const friend = connection.requesterId === currentUserId 
-            ? connection.receiver 
+          const friend = connection.requesterId === currentUserId
+            ? connection.receiver
             : connection.requester;
 
           friends.push({
@@ -101,7 +117,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             tier: getTierFromUser(friend),
             status: "friends",
           });
-        }
       });
     }
 
@@ -123,19 +138,39 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       });
     }
 
-    // TODO: Add suggested friends logic
-    // This would typically come from a separate query or recommendation system
+    // Process friend suggestions
+    if (suggestions?.getFriendSuggestions.suggestions) {
+      suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
+        friends.push({
+          userId: suggestion.profile.userId,
+          connectionId: undefined, // No connection exists yet for suggestions
+          name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
+          imageSrc: `${suggestion.profile.avatarUrl}` || "https://github.com/shadcn.png",
+          mutualConnections: suggestion.mutualConnectionsCount,
+          tier: getTierFromUser(suggestion.profile),
+          status: "suggested",
+        });
+      });
+    }
 
     return friends;
-  }, [connectionsData, pendingData]);
+  }, [connectionsData, pendingData, suggestions]);
 
   /* --------------------- Refetch on tab change --------------------- */
   useEffect(() => {
-    if (activeTab === "friends" || activeTab === "request-sent" || activeTab === "request-received") {
-      refetchConnections();
-      refetchPending();
+    switch (activeTab) {
+      case "friends":
+        refetchConnections();
+        break;
+      case "request-sent":
+      case "request-received":
+        refetchPending();
+        break;
+      case "suggested":
+        refetchSuggestions();
+        break;
     }
-  }, [activeTab, refetchConnections, refetchPending]);
+  }, [activeTab, refetchConnections, refetchPending, refetchSuggestions]);
 
   /* --------------------- Handle name click --------------------- */
   const handleNameClick = (userId: string) => {
@@ -143,7 +178,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     if (onClose) {
       onClose();
     }
-    
+
     // Then navigate to the friend's profile
     router.push(`/friend/${userId}`);
   };
@@ -187,12 +222,12 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   }[activeTab];
 
   /* --------------------- Loading state --------------------- */
-  const isLoading = connectionsLoading || pendingLoading;
+  const isLoading = connectionsLoading || pendingLoading || suggestionsLoading;
 
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
     const key = `${friend.status}-${friend.userId}`;
-    
+
     return (
       <FriendsCard
         key={key}
@@ -243,20 +278,19 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       {/* ---------- RIGHT CONTENT ---------- */}
       <div className="lg:w-[80vw] overflow-y-auto">
         <div className="w-[75vw] m-auto">
-          <div className="lg:flex  justify-between items-center my-4">
+          <div className="lg:flex justify-between items-center my-4">
             {/* DYNAMIC heading */}
             <p className="font-heading-xsmall">{tabTitle}</p>
 
-<div>
-            <SearchInput
-              value={searchTerm}
-              onChange={setSearchTerm}
-              onSearch={() => {
-                /* optional API search */
-              }}
-            />
-
-</div>
+            <div>
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSearch={() => {
+                  /* optional API search */
+                }}
+              />
+            </div>
           </div>
 
           {/* Loading state */}

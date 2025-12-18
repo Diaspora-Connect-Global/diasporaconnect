@@ -379,6 +379,8 @@ export interface FriendSuggestionProfile {
   residenceCountry?: string;
   bio?: string;
   connectionCount: number;
+  profilePicture:string
+  avatarUrl:string
 }
 
 export interface FriendSuggestion {
@@ -424,6 +426,7 @@ export const GET_FRIEND_SUGGESTIONS = gql`
           residenceCountry
           bio
           connectionCount
+          avatarUrl
         }
         score
         matchReasons

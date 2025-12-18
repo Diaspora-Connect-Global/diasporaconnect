@@ -26,7 +26,7 @@ export interface Profile {
   coverPhoto?: string;
   gender?: string;
   dateOfBirth?: string;
-  connectionCount?: number;
+  connectionCount: number;
   version: number;
   verificationStatus?: string;
   createdAt: string;
