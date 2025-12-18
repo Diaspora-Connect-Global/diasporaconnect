@@ -55,6 +55,8 @@ export interface GetProfileResponse {
     success: boolean;
     message?: string;
     profile: Profile;
+    connectionStatus:string
+    connectionId:string
   };
 }
 
@@ -169,6 +171,8 @@ export const GET_USER_PROFILE = gql`
         avatarUrl
         updatedAt
       }
+    connectionStatus
+    connectionId
     }
   }
 `;

@@ -20,11 +20,9 @@ export default function ProfilePage() {
 
 
 
-    const { data, loading, error } = useQuery<GetProfileResponse>(GET_MY_PROFILE, {
-        fetchPolicy: 'cache-first', // Load from cache first, then fetch in background
-        nextFetchPolicy: 'cache-and-network', // After first fetch, always check network but show cache first
-        notifyOnNetworkStatusChange: false, // Don't trigger loading state on background refetch
-    });      
+    const { data, loading, error } = useQuery<GetProfileResponse>(GET_MY_PROFILE);      
+
+    console.log(" Data response" , data)
     
     const profile: Profile | undefined = data?.getProfile.profile;
 
@@ -61,9 +59,9 @@ export default function ProfilePage() {
                 <ProfileHeader 
                     userId='me'
                     friendType={currentUser.friendType}
-                    showFriendActions={false} 
-                    userData={profile}               
-                     />
+                    showFriendActions={false}
+                    userData={profile} 
+                    connectionId={""}                     />
                 
                 {/* Navigation Tabs - Last on mobile, after header on desktop */}
                 <div className="hidden lg:block  lg:order-none">

@@ -24,11 +24,13 @@ interface ProfileHeaderProps {
   friendType?: FriendType;
   showFriendActions?: boolean;
   onEditAvatar?: () => void;
+  connectionId:string
 }
 
 export function ProfileHeader({
   userId,
   friendType,
+  connectionId,
   userData,
   showFriendActions = false,
   onEditAvatar
@@ -103,6 +105,7 @@ export function ProfileHeader({
             <TypeOfFriend
               userId={userId}
               type={friendType}
+              connectionId = {connectionId}
             />
           )}
         </div>

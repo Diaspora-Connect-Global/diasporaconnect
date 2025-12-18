@@ -26,7 +26,7 @@ export default function FriendProfile() {
 
     });
 
-    console.log("from friends page",data)
+    console.log("from friends page", data)
 
     // Show loading screen while fetching data
     if (loading) {
@@ -39,7 +39,7 @@ export default function FriendProfile() {
             <div className="flex items-center justify-center h-app-inner">
                 <div className="text-center space-y-4">
                     <p className="text-destructive">
-                       userNotFound
+                        userNotFound
                     </p>
                     <button
                         onClick={() => router.back()}
@@ -53,7 +53,7 @@ export default function FriendProfile() {
     }
 
     const profile = data.getProfile.profile;
-
+const connectionId = data.getProfile.connectionId
 
     return (
         <div className="lg:flex space-x-5 my-2 mx-2">
@@ -62,7 +62,14 @@ export default function FriendProfile() {
                 <ProfileHeader
                     userId={userId}
                     userData={profile}
+                    connectionId={connectionId}
 
+                    friendType={
+                        data.getProfile.connectionStatus === "pending_sent" ? "request-sent"
+                            : data.getProfile.connectionStatus === "pending_request" ? "request-received"
+                                : data.getProfile.connectionStatus === "none" ? "suggested" : "friends"
+
+                    }
                     showFriendActions={true}
                 />
                 <NavigationTabs

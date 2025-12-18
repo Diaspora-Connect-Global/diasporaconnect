@@ -128,8 +128,9 @@ const FriendsCard: FC<FriendsCardProps> = ({
             <FriendActionButtons 
                 userId={userId}
                 buttonsToShow={buttons}
-                dropdownOptions={dropdownOptions}
-            />
+                dropdownOptions={dropdownOptions} 
+                connectionId={""}            
+                />
         </div>
     );
 };

@@ -32,11 +32,13 @@ interface FriendActionButtonsProps {
     buttonsToShow: FriendButtonType[];
     dropdownOptions?: DropdownOption[]; // Only needed if "dropdown" is in buttonsToShow
     className?: string;
+    connectionId:string
 }
 
 export const FriendActionButtons = ({ 
     userId, 
     buttonsToShow,
+    connectionId,
     dropdownOptions = [],
     className = "flex space-x-2"
 }: FriendActionButtonsProps) => {
@@ -63,17 +65,17 @@ export const FriendActionButtons = ({
             </ButtonType2>
         ),
         accept: (
-            <ButtonType2 key="accept" onClick={() => acceptRequest(userId)}>
+            <ButtonType2 key="accept" onClick={() => acceptRequest(connectionId)}>
                 {t('accept')}
             </ButtonType2>
         ),
         ignore: (
-            <ButtonType1 key="ignore" onClick={() => ignoreRequest(userId)}>
+            <ButtonType1 key="ignore" onClick={() => ignoreRequest(connectionId)}>
                 {t('ignore')}
             </ButtonType1>
         ),
         cancelRequest: (
-            <ButtonType1 key="cancelRequest" onClick={() => cancelRequest(userId)}>
+            <ButtonType1 key="cancelRequest" onClick={() => cancelRequest(connectionId)}>
                 {t('cancelRequest')}
             </ButtonType1>
         ),

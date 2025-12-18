@@ -16,6 +16,7 @@ interface TypeOfFriendProps {
     userId: string;
     type: FriendType;
     className?: string;
+    connectionId:string
 }
 
 /**
@@ -70,6 +71,7 @@ const getButtonsForType = (type: FriendType): {
 export const TypeOfFriend: FC<TypeOfFriendProps> = ({
     userId,
     type,
+    connectionId,
     className = "mt-4"
 }) => {
     const { buttons, dropdownOptions } = getButtonsForType(type);
@@ -83,6 +85,7 @@ export const TypeOfFriend: FC<TypeOfFriendProps> = ({
         <div className={className}>
             <FriendActionButtons
                 userId={userId}
+                connectionId= {connectionId}
                 buttonsToShow={buttons}
                 dropdownOptions={dropdownOptions}
                 className="flex space-x-2 justify-start"

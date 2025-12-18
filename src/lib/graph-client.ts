@@ -12,12 +12,14 @@ const httpLink = new HttpLink({
 
 const authLink = new SetContextLink((prevContext, operation) => {
  const token = useAuthStore.getState().tokens?.accessToken;
-   console.log("token passed", token)
+ const fingerprint = useAuthStore.getState().deviceMetadata?.fingerprint;
+   console.log("token passed with fingerprint", token , fingerprint)
 
   return {
     headers: {
       ...prevContext.headers,
       authorization: token ? `Bearer ${token}` : "",
+      "x-device-fingerprint": fingerprint ,
     },
   };
 });
