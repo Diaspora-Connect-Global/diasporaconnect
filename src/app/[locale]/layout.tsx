@@ -8,13 +8,10 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import GraphQLProvider from "@/components/provider/apollo-provider";
 import { Toaster } from 'sonner';
-import DeviceFingerprintInitializer from '@/components/auth/DeviceFingerprintInitializer';
-
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
-
 export async function generateMetadata({
   params
 }: {
@@ -27,11 +24,9 @@ export async function generateMetadata({
     description: t('description'),
   };
 }
-
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
-
 export default async function RootLayout({
   children,
   params
@@ -40,22 +35,18 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
+    <html lang={locale} >
+      <body
+        className= ${inter.variable} antialiased }
+      >
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <GraphQLProvider>
-              {/* ✅ Device Fingerprint Initializer - runs on app mount */}
-              <DeviceFingerprintInitializer />
-              
               {children}
-              
               <Toaster
                 position="top-center"
                 richColors
