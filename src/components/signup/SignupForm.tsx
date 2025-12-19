@@ -14,9 +14,11 @@ import {
   REGISTER_USER,
   RegisterUserResponse 
 } from '@/services/gql/authentication';
-import { useApolloClient ,useMutation} from '@apollo/client/react';
+import { useApolloClient, useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { ButtonType2 } from '../custom/button';
+import { generateDeviceFingerprint } from '@/lib/deviceFingerprint';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function SignUpForm() {
   const [email, setEmail] = useState('');
@@ -122,17 +124,39 @@ export default function SignUpForm() {
         setIsChecking(false);
         return;
       }
+
+      // ✅ Generate and store device fingerprint
+      const { deviceMetadata, setDeviceMetadata } = useAuthStore.getState();
+      let deviceId = deviceMetadata?.fingerprint;
+      
+      if (!deviceId) {
+        console.log('[SignUp] Generating new device fingerprint');
+        deviceId = await generateDeviceFingerprint();
+        
+        // Store in both localStorage and Zustand
+        localStorage.setItem('deviceFingerprint', deviceId);
+        setDeviceMetadata({
+          fingerprint: deviceId,
+          deviceId: deviceId,
+          ipAddress: '',
+          userAgent: navigator.userAgent
+        });
+      } else {
+        console.log('[SignUp] Using existing device fingerprint');
+      }
+
       // Email is available, proceed to store credentials and navigate
       // The actual registration will happen after completing all profile steps
       sessionStorage.setItem('signupEmail', trimmedEmail);
       sessionStorage.setItem('signupPassword', password);
+      sessionStorage.setItem('signupDeviceId', deviceId); // ✅ Store for later use
       
       toast.success('Email verified! Complete your profile to continue.');
       router.push('/onboarding');
 
     } catch (err: any) {
+      console.error('[SignUp] Error:', err);
       toast.error(err.message || t('form.email.checkFailed'));
-
     } finally {
       setIsChecking(false);
     }
@@ -170,7 +194,6 @@ export default function SignUpForm() {
             type="email"
             placeholder={t("form.email.placeholder")}
             id="email"
-            // disabled={isChecking || registerLoading}
           />
 
           <PasswordInput
@@ -181,7 +204,6 @@ export default function SignUpForm() {
             setShowPassword={setShowPassword}
             placeholder={t("form.createPassword.placeholder")}
             label={t("form.createPassword.label")}
-            // disabled={isChecking || registerLoading}
           />
 
           <PasswordInput
@@ -192,7 +214,6 @@ export default function SignUpForm() {
             setShowPassword={setShowConfirmPassword}
             placeholder={t("form.confirmPassword.placeholder")}
             label={t("form.confirmPassword.label")}
-            // disabled={isChecking || registerLoading}
           />
         </div>
 
