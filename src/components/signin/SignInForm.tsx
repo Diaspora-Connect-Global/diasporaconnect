@@ -88,7 +88,11 @@ export default function SignInForm() {
         }
 
         try {
-            const deviceId = await generateDeviceFingerprint();
+            // const deviceId = await generateDeviceFingerprint();
+            
+            // Get existing fingerprint from store (already initialized by DeviceFingerprintInitializer)
+            const { deviceMetadata } = useAuthStore.getState();
+            const deviceId = deviceMetadata?.fingerprint || await generateDeviceFingerprint(); // Fallback only
 
             const input: LoginInput = {
                 email: email.trim().toLowerCase(),
