@@ -39,9 +39,9 @@ export default async function RootLayout({
     notFound();
   }
   return (
-    <html lang={locale} >
+    <html lang={locale} suppressHydrationWarning >
       <body
-        className= ${inter.variable} antialiased }
+        className= {`${inter.variable} antialiased`}
       >
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
