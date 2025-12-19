@@ -151,15 +151,54 @@ export default function ProfilePage() {
                 onOpenChange={setEditAvatarOpen}
                 showFooter={false}
             >
-                <div className="space-y-4 ">
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) setSelectedFile(file);
-                        }}
-                    />
+                <div className="space-y-4 h-full justify-center flex flex-col items-center">
+                    {/* Circular Image Preview/Upload Area */}
+                    <div className="flex justify-center mb-20">
+                        <label
+                            htmlFor="avatar-upload"
+                            className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex items-center justify-center overflow-hidden relative group transition-all"
+                        >
+                            {selectedFile ? (
+                                <>
+                                    <img
+                                        src={URL.createObjectURL(selectedFile)}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <span className="text-white text-sm">Change</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center p-4">
+                                    <svg
+                                        className="w-8 h-8 mx-auto mb-2 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                    <span className="text-xs text-gray-500">Click to upload</span>
+                                </div>
+                            )}
+                        </label>
+                        <input
+                            id="avatar-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) setSelectedFile(file);
+                            }}
+                        />
+                    </div>
 
                     <ButtonType2
                         onClick={handleAvatarUpload}
