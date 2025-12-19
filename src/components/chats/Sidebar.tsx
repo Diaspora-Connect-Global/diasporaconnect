@@ -7,6 +7,8 @@ import { useChatStore } from "@/store/ChatStore";
 import { ButtonType3 } from "../custom/button";
 import { StartConversationModal } from "./modals/StartConversationModal";
 import { useTranslations } from 'next-intl';
+import { useQuery } from "@apollo/client/react";
+import { GET_MY_GROUPS } from "@/services/gql/groups";
 
 type TabType = 'direct' | 'groups';
 
@@ -210,7 +212,6 @@ export default function ChatSideBar() {
                         />
                     ) : (
                         <GroupsList
-                            groups={filteredGroups}
                             activeChat={activeChat}
                             onChatClick={handleChatClick}
                         />
@@ -348,16 +349,59 @@ function DirectMessagesList({ chats, activeChat, onChatClick }: DirectMessagesLi
     );
 }
 
-// Groups List Component
-interface GroupsListProps {
-    groups: ChatItem[];
-    activeChat: { id: string; type: 'direct' | 'group' } | null;
-    onChatClick: (chat: { id: string; type: 'direct' | 'group' }) => void;
+// Types
+interface Group {
+    id: string;
+    name: string;
+    description: string;
+    privacy: string;
+    memberCount: number;
+    ownerId: string;
+    createdAt: string;
 }
 
-function GroupsList({ groups, activeChat, onChatClick }: GroupsListProps) {
+interface GetMyGroupsResponse {
+    getMyGroups: {
+        success: boolean;
+        message: string;
+        total: number;
+        groups: Group[];
+    };
+}
+
+interface GroupsListProps {
+    activeChat: { id: string; type: 'direct' | 'group' } | null;
+    onChatClick: (chat: { id: string; type: 'direct' | 'group' }) => void;
+    limit?: number;
+    offset?: number;
+}
+
+function GroupsList({ activeChat, onChatClick, limit = 50, offset = 0 }: GroupsListProps) {
     const t = useTranslations('chat');
     
+    const { data, loading, error } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
+        variables: { limit, offset },
+    });
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-full p-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
+                <p className="text-center text-red-500">{t('errorLoadingGroups')}</p>
+                <p className="text-sm text-text-tertiary mt-2">{error.message}</p>
+            </div>
+        );
+    }
+
+    const groups = data?.getMyGroups.groups || [];
+
     if (groups.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
@@ -372,7 +416,17 @@ function GroupsList({ groups, activeChat, onChatClick }: GroupsListProps) {
             {groups.map((group) => (
                 <ChatItem
                     key={group.id}
-                    chat={group}
+                    chat={{
+                        id: group.id,
+                        name: group.name,
+                        avatar: '', // Add avatar URL if available
+                        lastMessage: group.description,
+                        lastMessageTime: new Date(group.createdAt).toISOString(),
+                        // unreadCount: 0, // You might want to add this to your query
+                        unread: 0,
+                        // isOnline: false,
+                        type: 'group' as const,
+                    }}
                     isActive={activeChat?.id === group.id && activeChat?.type === 'group'}
                     onClick={() => onChatClick({ id: group.id, type: 'group' })}
                 />
