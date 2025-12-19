@@ -11,7 +11,7 @@ const httpLink = new HttpLink({
 
 
 const authLink = new SetContextLink((prevContext, operation) => {
- const token = useAuthStore.getState().tokens?.accessToken;
+ const token = useAuthStore.getState().tokens?.sessionToken;
  const fingerprint = useAuthStore.getState().deviceMetadata?.fingerprint;
    console.log("token passed with fingerprint", token , fingerprint)
 
