@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -7,28 +8,59 @@ import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { KYCVerification } from '@/components/profile/KYCVerification';
 import { TrustScore } from '@/components/profile/TrustScore';
 import { DUMMY_USERS } from '@/data/users';
-import { useQuery } from "@apollo/client/react";
-import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { GET_MY_PROFILE, GetProfileResponse, Profile, UPLOAD_PROFILE_PICTURE } from "@/services/gql/profile";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { Button } from "@/components/ui/button";
+import CustomDialog from "@/components/custom/customDialog";
+import { ButtonType2 } from "@/components/custom/button";
 
 export default function ProfilePage() {
-        const setUser = useAuthStore(state => state.setUser);
+    const setUser = useAuthStore(state => state.setUser);
     // const currentUser = useAuthStore(state => state.user);
 
+    const [editAvatarOpen, setEditAvatarOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const [uploadProfilePicture, { loading: uploading }] =
+        useMutation(UPLOAD_PROFILE_PICTURE, {
+            onCompleted: (res: any) => {
+                if (res.uploadProfilePicture.success) {
+                    toast.success(res.uploadProfilePicture.message || "Profile picture updated");
+                    setEditAvatarOpen(false);
+                    setSelectedFile(null);
+                } else {
+                    toast.error(res.uploadProfilePicture.message || "Upload failed");
+                }
+            },
+            onError: (err) => {
+                toast.error(err.message);
+            },
+        });
+
+    const handleAvatarUpload = async () => {
+        if (!selectedFile) return;
+
+        await uploadProfilePicture({
+            variables: {
+                file: selectedFile,
+            },
+        });
+    };
 
 
 
-    const { data, loading, error } = useQuery<GetProfileResponse>(GET_MY_PROFILE);      
+    const { data, loading, error } = useQuery<GetProfileResponse>(GET_MY_PROFILE);
 
-    console.log(" Data response" , data)
-    
+    console.log(" Data response", data)
+
     const profile: Profile | undefined = data?.getProfile.profile;
 
-      console.log("profile info", profile)
+    console.log("profile info", profile)
 
-          useEffect(() => {
+    useEffect(() => {
         if (profile) {
             setUser({
                 ...profile,
@@ -36,7 +68,7 @@ export default function ProfilePage() {
                 lastName: profile.lastName,
                 email: profile.email,
                 id: profile.userId,
-                
+
             });
         }
     }, [profile?.firstName, profile?.lastName, profile?.email, profile, setUser]); // Only run when these specific fields change
@@ -56,32 +88,35 @@ export default function ProfilePage() {
         <div className="flex flex-col lg:flex-row lg:space-x-5 my-2 space-y-2 lg:space-y-0 h-app-inner mx-2">
             {/* Profile Header - First on mobile, part of left column on desktop */}
             <div className="lg:w-[50vw] order-1 lg:order-none space-y-2 flex flex-col">
-                <ProfileHeader 
+                <ProfileHeader
                     userId='me'
                     friendType={currentUser.friendType}
                     showFriendActions={false}
-                    userData={profile} 
-                    connectionId={""}                     />
-                
+                    userData={profile}
+                    connectionId={""}
+                    onEditAvatar={() => setEditAvatarOpen(true)}
+
+                />
+
                 {/* Navigation Tabs - Last on mobile, after header on desktop */}
                 <div className="hidden lg:block  lg:order-none">
                     <NavigationTabs
                         userId='me'
                         isOwnProfile={true}
-                        userData={profile}               
+                        userData={profile}
 
                     />
                 </div>
             </div>
 
             {/* Navigation Tabs - Last on mobile, after header on desktop */}
-                <div className="order-3 lg:hidden">
-                    <NavigationTabs
-                        userId='me'
-                        isOwnProfile={true}
-                        userData={profile}
-                    />
-                </div>
+            <div className="order-3 lg:hidden">
+                <NavigationTabs
+                    userId='me'
+                    isOwnProfile={true}
+                    userData={profile}
+                />
+            </div>
 
             {/* Right Column - Second on mobile */}
             <div className="lg:w-[25vw] space-y-2 mb-4 order-2 lg:order-none">
@@ -100,7 +135,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className='min-h-0'>
-                    <PersonalDetails data={ profile?.createdAt
+                    <PersonalDetails data={profile?.createdAt
                     } />
                 </div>
 
@@ -110,6 +145,32 @@ export default function ProfilePage() {
                     />
                 </div>
             </div>
+            <CustomDialog
+                title="Change profile picture"
+                open={editAvatarOpen}
+                onOpenChange={setEditAvatarOpen}
+                showFooter={false}
+            >
+                <div className="space-y-4 ">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setSelectedFile(file);
+                        }}
+                    />
+
+                    <ButtonType2
+                        onClick={handleAvatarUpload}
+                        disabled={!selectedFile || uploading}
+                        className="w-full"
+                    >
+                        {uploading ? "Uploading..." : "Upload"}
+                    </ButtonType2>
+                </div>
+            </CustomDialog>
+
         </div>
     );
 }
