@@ -55,12 +55,12 @@ export const FriendActionButtons = ({
 
     const buttonMap: Record<FriendButtonType, ReactNode> = {
         message: (
-            <ButtonType1 key="message" onClick={() => sendMessage(userId)}>
+            <ButtonType1 key="message" onClick={() => sendMessage(connectionId)}>
                 {t('message')}
             </ButtonType1>
         ),
         addFriend: (
-            <ButtonType2 key="addFriend" onClick={() => addFriend(userId)}>
+            <ButtonType2 key="addFriend" onClick={() => addFriend(connectionId)}>
                 {t('addFriend')}
             </ButtonType2>
         ),
@@ -80,12 +80,12 @@ export const FriendActionButtons = ({
             </ButtonType1>
         ),
         removeFriend: (
-            <ButtonType1 key="removeFriend" onClick={() => removeFriend(userId)}>
+            <ButtonType1 key="removeFriend" onClick={() => removeFriend(connectionId)}>
                 {t('removeFriend')}
             </ButtonType1>
         ),
         blockFriend: (
-            <ButtonType1 key="blockFriend" onClick={() => blockFriend(userId)}>
+            <ButtonType1 key="blockFriend" onClick={() => blockFriend(connectionId)}>
                 {t('blockFriend')}
             </ButtonType1>
         ),
