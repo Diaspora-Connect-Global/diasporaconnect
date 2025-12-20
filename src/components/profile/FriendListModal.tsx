@@ -105,10 +105,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     if (connectionsData?.getConnections.connections) {
       connectionsData.getConnections.connections.forEach((connection) => {
         // Determine which user is the friend (not current user)
-        const friend = connection.requesterId === currentUserId 
-          ? connection.receiver 
-          : connection.requester;
-
+        const friend = connection.receiver 
         friends.push({
           userId: friend.userId,
           connectionId: connection.id,
