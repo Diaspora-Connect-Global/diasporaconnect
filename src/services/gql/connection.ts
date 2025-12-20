@@ -63,6 +63,13 @@ export interface AcceptConnectionResponse {
     connection: Connection;
   };
 }
+export interface CancelConnectionResponse {
+  cancelConnection: {
+    success: boolean;
+    message?: string;
+    connection: Connection;
+  };
+}
 
 export interface RejectConnectionResponse {
   rejectConnection: {
@@ -364,6 +371,14 @@ export const ACCEPT_CONNECTION = gql`
 export const REJECT_CONNECTION = gql`
   mutation RejectConnection($input: RejectConnectionInput!) {
     rejectConnection(input: $input) {
+      success
+      message
+    }
+  }
+`;
+export const CANCEL_CONNECTION = gql`
+  mutation CancelConnection($input: CancelConnectionInput!) {
+    cancelConnection(input: $input) {
       success
       message
     }

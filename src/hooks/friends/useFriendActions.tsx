@@ -11,6 +11,8 @@ import {
     SendConnectionRequestResponse,
     AcceptConnectionResponse,
     RejectConnectionResponse,
+    CANCEL_CONNECTION,
+    CancelConnectionResponse,
 } from '@/services/gql/connection';
 import {
     BLOCK_USER,
@@ -41,6 +43,12 @@ export const useFriendActions = () => {
 
     const [rejectConnection] = useMutation<RejectConnectionResponse>(
         REJECT_CONNECTION,
+        {
+            refetchQueries: [{ query: GET_PENDING_CONNECTIONS }],
+        }
+    );
+    const [cancelConnection] = useMutation<CancelConnectionResponse>(
+        CANCEL_CONNECTION,
         {
             refetchQueries: [{ query: GET_PENDING_CONNECTIONS }],
         }
@@ -129,7 +137,7 @@ export const useFriendActions = () => {
 
     const cancelRequest = useCallback(async (connectionId: string) => {
         try {
-            const { data } = await rejectConnection({
+            const { data } = await cancelConnection({
                 variables: {
                     input: {
                         connectionId,
@@ -137,16 +145,16 @@ export const useFriendActions = () => {
                 },
             });
 
-            if (data?.rejectConnection.success) {
+            if (data?.cancelConnection.success) {
                 toast.success(t('toasts.requestCancelled'));
             } else {
-                toast.error(data?.rejectConnection.message || 'Failed to cancel request');
+                toast.error(data?.cancelConnection.message || 'Failed to cancel request');
             }
         } catch (error) {
             console.error('Error canceling friend request:', error);
             toast.error('Failed to cancel friend request');
         }
-    }, [t, rejectConnection]);
+    }, [t, cancelConnection]);
 
     const removeFriend = useCallback(async (connectionId: string) => {
         try {

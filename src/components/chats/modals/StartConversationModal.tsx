@@ -17,15 +17,16 @@ import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { mockUsers, User } from '@/data/chats';
 import { StartGroupConfirmationModal } from './StartGroupConfirmationModal';
 import { useTranslations } from 'next-intl';
-import { 
-    CREATE_GROUP, 
-    CreateGroupResponse, 
+import {
+    CREATE_GROUP,
+    CreateGroupResponse,
     CreateGroupInput,
     GroupPrivacy,
 } from '@/services/gql/groups';
 import { GET_MY_CONNECTIONS } from '@/services/gql/connection';
 import { toast } from 'sonner';
 import { useMutation, useQuery } from '@apollo/client/react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface StartConversationModalProps {
     isOpen: boolean;
@@ -41,6 +42,8 @@ export function StartConversationModal({
     const t = useTranslations('chat.conversation');
     const tActions = useTranslations('actions');
     
+
+
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -65,10 +68,10 @@ export function StartConversationModal({
                     const connectionUsers = connectionsData.getConnections.connections
                         .map((conn: any) => {
                             // Map connection to User type
-                            const user = conn.requester.userId === conn.requesterId 
-                                ? conn.receiver 
+                            const user = conn.requester.userId === conn.requesterId
+                                ? conn.receiver
                                 : conn.requester;
-                            
+
                             return {
                                 id: user.userId,
                                 name: `${user.firstName} ${user.lastName}`,
@@ -109,7 +112,7 @@ export function StartConversationModal({
                 // Keep existing direct message logic
                 console.log('Starting direct chat with user:', data.userIds[0]);
                 // window.location.href = `/chat/${conversation.id}`;
-                
+
                 // Simulate API call delay
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 return { id: 'temp-id', ...data };
@@ -120,17 +123,28 @@ export function StartConversationModal({
         }
     };
 
+    const user = useAuthStore((state) => state.user);
+
     const handleGroupCreate = async (groupName: string, groupPhoto?: string) => {
+        const currentUserId = user?.id;
+
+
+        // Create array of member IDs including current user
+        const memberIds = [
+            currentUserId, // Add current user first
+            ...selectedUsers.map(user => user.id) // Add selected users
+        ].filter((id): id is string => id !== undefined && id !== null);
+
         try {
             console.log('Creating group:', { groupName, groupPhoto, selectedUsers });
-            
+
             // Create the group using GraphQL mutation
             const createGroupInput: CreateGroupInput = {
                 name: groupName,
                 privacy: GroupPrivacy.PRIVATE, // You can make this configurable
                 avatarUrl: groupPhoto,
                 description: '', // Optional: add description field to modal
-                memberIds: selectedUsers.map(user => user.id), // Extract user IDs from selected users
+                memberIds: memberIds, // Extract user IDs from selected users
             };
 
             const { data } = await createGroup({
@@ -146,7 +160,7 @@ export function StartConversationModal({
 
                 // Navigate to the new group chat
                 // window.location.href = `/chat/group/${newGroup.id}`;
-                
+
                 handleClose();
             } else {
                 throw new Error(data?.createGroup?.message || 'Failed to create group');
@@ -263,17 +277,15 @@ export function StartConversationModal({
                                         return (
                                             <div
                                                 key={user.id}
-                                                className={`flex items-center p-3 cursor-pointer hover:bg-muted/50 ${
-                                                    isSelected ? 'bg-muted' : ''
-                                                }`}
+                                                className={`flex items-center p-3 cursor-pointer hover:bg-muted/50 ${isSelected ? 'bg-muted' : ''
+                                                    }`}
                                                 onClick={() => handleUserSelect(user)}
                                             >
                                                 <div
-                                                    className={`w-4 h-4 border rounded mr-3 flex items-center justify-center ${
-                                                        isSelected
+                                                    className={`w-4 h-4 border rounded mr-3 flex items-center justify-center ${isSelected
                                                             ? 'bg-surface-brand border-border-brand text-primary-foreground'
                                                             : 'border-muted-foreground'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {isSelected && <Check />}
                                                 </div>
@@ -309,10 +321,10 @@ export function StartConversationModal({
                                 onClick={handleStartClick}
                                 disabled={!isFormValid || isLoadingUsers || isProcessing}
                             >
-                                {isProcessing 
-                                    ? t('processing') 
-                                    : type === "group" 
-                                        ? t('createGroup') 
+                                {isProcessing
+                                    ? t('processing')
+                                    : type === "group"
+                                        ? t('createGroup')
                                         : t('startConversation')
                                 }
                             </ButtonType2>
