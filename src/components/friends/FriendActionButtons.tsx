@@ -60,7 +60,7 @@ export const FriendActionButtons = ({
             </ButtonType1>
         ),
         addFriend: (
-            <ButtonType2 key="addFriend" onClick={() => addFriend(connectionId)}>
+            <ButtonType2 key="addFriend" onClick={() => addFriend(userId)}>
                 {t('addFriend')}
             </ButtonType2>
         ),
