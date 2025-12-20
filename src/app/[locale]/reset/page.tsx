@@ -12,7 +12,6 @@ export interface ResetFormData {
 }
 
 export default function ResetAccount() {
-    
     const [mounted, setMounted] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<ResetFormData>({
@@ -21,22 +20,15 @@ export default function ResetAccount() {
         verificationCode: '',
     });
 
-    // Handle mounting and load saved data
     useEffect(() => {
         setMounted(true);
-        
         const savedData = sessionStorage.getItem('accountResetFormData');
         const savedStep = sessionStorage.getItem('accountResetFormStep');
 
-        if (savedData) {
-            setFormData(JSON.parse(savedData));
-        }
-        if (savedStep) {
-            setCurrentStep(parseInt(savedStep));
-        }
+        if (savedData) setFormData(JSON.parse(savedData));
+        if (savedStep) setCurrentStep(parseInt(savedStep));
     }, []);
 
-    // Save to session storage whenever formData or currentStep changes
     useEffect(() => {
         if (mounted) {
             sessionStorage.setItem('accountResetFormData', JSON.stringify(formData));
@@ -48,59 +40,23 @@ export default function ResetAccount() {
         setFormData(prev => ({ ...prev, ...newData }));
     };
 
-    const nextStep = () => {
-        setCurrentStep(prev => Math.min(prev + 1, 3));
-    };
-
-    const prevStep = () => {
-        setCurrentStep(prev => Math.max(prev - 1, 1));
-    };
-
-    
- 
+    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3));
+    const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
     const renderStep = () => {
         switch (currentStep) {
             case 1:
-                return (
-                    <Step1
-                        data={formData}
-                        updateData={updateFormData}
-                        nextStep={nextStep}
-                        prevStep={prevStep}
-                    />
-                );
+                return <Step1 data={formData} updateData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
             case 2:
-                return (
-                    <Step2
-                        data={formData}
-                        updateData={updateFormData}
-                        nextStep={nextStep}
-                        prevStep={prevStep}
-                    />
-                );
+                return <Step2 data={formData} updateData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
             case 3:
-                return (
-                    <Step3
-                        data={formData}
-                        updateData={updateFormData}
-                        nextStep={nextStep}
-                        prevStep={prevStep}
-                    />
-                );
+                return <Step3 data={formData} updateData={updateFormData} prevStep={prevStep} />;
             default:
                 return null;
         }
     };
 
-    // Don't render until mounted to avoid hydration mismatch
-    if (!mounted) {
-        return null;
-    }
+    if (!mounted) return null;
 
-    return (
-        <>
-            {renderStep()}
-        </>
-    );
+    return <>{renderStep()}</>;
 }

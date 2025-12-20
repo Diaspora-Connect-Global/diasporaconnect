@@ -324,7 +324,11 @@ export const FORGOT_PASSWORD = gql`
  */
 export const RESET_PASSWORD = gql`
   mutation ResetPassword($email: String!, $resetCode: String!, $newPassword: String!) {
-    resetPassword(email: $email, resetCode: $resetCode, newPassword: $newPassword)
+    resetPassword(email: $email, resetCode: $resetCode, newPassword: $newPassword){
+      data{
+        resetPassword
+      }
+    }
   }
 `;
 

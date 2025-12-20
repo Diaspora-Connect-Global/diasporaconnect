@@ -1,31 +1,44 @@
-// steps/Step5.tsx - OTP Verification
 import React from 'react';
 import { ResetFormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
-import { useTranslations } from 'next-intl';
 import { TextInput } from '@/components/custom/input';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@apollo/client/react';
+import { FORGOT_PASSWORD } from '@/services/gql/authentication';
+import { toast } from 'sonner';
 
 
-interface Step2Props {
+interface Step1Props {
     data: ResetFormData;
     updateData: (data: Partial<ResetFormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
 }
 
-export const Step1: React.FC<Step2Props> = ({ data, updateData, nextStep }) => {
+export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep }) => {
     const t = useTranslations('passwordReset');
     const tActions = useTranslations('actions');
-        const router = useRouter();
-    
+    const router = useRouter();
 
-  const handleBack = async () => {
-            router.push('/signin');
-       
+    const [forgotPassword, { loading }] = useMutation(FORGOT_PASSWORD);
+
+    const handleBack = () => router.push('/signin');
+
+    const handleNext = async () => {
+        try {
+            await forgotPassword({
+                variables: { email: data.email },
+            });
+            toast.success('Reset code sent to your email');
+            nextStep();
+        } catch (err) {
+            console.error('Failed to send reset code:', err);
+            toast.error('Email not found or error occurred');
+        }
     };
 
-    const isNextDisabled = !data.email.trim();
+    const isNextDisabled = !data.email.trim() || loading;
 
     return (
         <MultiStep
@@ -35,11 +48,12 @@ export const Step1: React.FC<Step2Props> = ({ data, updateData, nextStep }) => {
             subtitle={t('request.description')}
             isNextDisabled={isNextDisabled}
             nextButtonText={tActions('submit')}
-            showBackButton={true}
+            showBackButton
             showSkipButton={false}
-            onNext={() => nextStep()}
+            onNext={handleNext}
             onBack={handleBack}
             showStepLabel={false}
+            isLoading={loading}
         >
             <div className="w-full">
                 <TextInput
@@ -47,7 +61,7 @@ export const Step1: React.FC<Step2Props> = ({ data, updateData, nextStep }) => {
                     placeholder={t('request.email.placeholder')}
                     value={data.email}
                     onChange={(value) => updateData({ email: value })}
-                    id="firstName"
+                    id="email"
                 />
             </div>
         </MultiStep>

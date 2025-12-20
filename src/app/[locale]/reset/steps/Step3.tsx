@@ -1,15 +1,18 @@
-"use client"
+'use client';
+
 import React, { useState } from 'react';
 import { ResetFormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
 import { useTranslations } from 'next-intl';
 import { PasswordInput } from '@/components/custom/input';
 import { useRouter } from 'next/navigation';
+import { RESET_PASSWORD } from '@/services/gql/authentication';
+import { useMutation } from '@apollo/client/react';
+import { toast } from 'sonner';
 
 interface Step3Props {
     data: ResetFormData;
     updateData: (data: Partial<ResetFormData>) => void;
-    nextStep: () => void;
     prevStep: () => void;
 }
 
@@ -18,10 +21,12 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
     const tActions = useTranslations('actions');
     const router = useRouter();
 
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [password, setPassword] = useState(data.password || '');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const [resetPasswordMutation, { loading }] = useMutation(RESET_PASSWORD);
 
     const handlePasswordChange = (value: string) => {
         setPassword(value);
@@ -30,17 +35,18 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
 
     const handleSubmit = async () => {
         try {
-            // Your API call here
-            console.log('Submitting password reset:', { 
-                email: data.email, 
-                verificationCode: data.verificationCode,
-                password: data.password 
+            await resetPasswordMutation({
+                variables: {
+                    email: data.email,
+                    resetCode: data.verificationCode,
+                    newPassword: password
+                }
             });
+
             
-            // If successful, redirect
             router.push('/signin');
-        } catch (error) {
-            console.error('Submission error:', error);
+        } catch (err) {
+            console.error('Password reset failed:', err);
         }
     };
 
@@ -51,13 +57,14 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
             stepNumber={3}
             totalSteps={3}
             title={t('newPassword.title')}
-            isNextDisabled={isNextDisabled}
+            isNextDisabled={isNextDisabled || loading}
             nextButtonText={tActions('submit')}
-            showBackButton={true}
+            showBackButton
             showSkipButton={false}
             onNext={handleSubmit}
             onBack={prevStep}
             showStepLabel={false}
+            isLoading={loading}
         >
             <div className="w-full space-y-3">
                 <PasswordInput
@@ -69,7 +76,6 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
                     placeholder={t("newPassword.createPassword.placeholder")}
                     label={t("newPassword.createPassword.label")}
                 />
-
                 <PasswordInput
                     id='confirmPassword'
                     password={confirmPassword}
