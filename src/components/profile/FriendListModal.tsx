@@ -6,12 +6,14 @@ import { useMemo, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { FriendType } from "../friends/TypeOfFriend";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useLazyQuery } from "@apollo/client/react";
 import {
   GET_MY_CONNECTIONS,
   GetConnectionsResponse,
   GetFriendSuggestionsResponse,
   GET_FRIEND_SUGGESTIONS,
+  SEARCH_USERS,
+  SearchUsersResponse,
 } from "@/services/gql/connection";
 import { 
   GET_PENDING_REQUESTS_SENT,
@@ -49,30 +51,30 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     refetch: refetchConnections 
   } = useQuery<GetConnectionsResponse>(GET_MY_CONNECTIONS, {
     variables: { limit: 100.0, offset: 0.0 },
-    skip: activeTab !== "friends", // Only fetch when on friends tab
+    skip: activeTab !== "friends",
   });
 
-  // Get pending requests SENT (where current user is requester)
+  // Get pending requests SENT
   const { 
     data: requestsSentData, 
     loading: requestsSentLoading, 
     refetch: refetchRequestsSent 
   } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_SENT, {
     variables: { limit: 100.0, offset: 0.0 },
-    skip: activeTab !== "request-sent", // Only fetch when on request-sent tab
+    skip: activeTab !== "request-sent",
   });
 
-  // Get pending requests RECEIVED (where current user is receiver)
+  // Get pending requests RECEIVED
   const { 
     data: requestsReceivedData, 
     loading: requestsReceivedLoading, 
     refetch: refetchRequestsReceived 
   } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_RECEIVED, {
     variables: { limit: 100.0, offset: 0.0 },
-    skip: activeTab !== "request-received", // Only fetch when on request-received tab
+    skip: activeTab !== "request-received",
   });
 
-  // Get friend suggestions
+  // Get friend suggestions (when no search term)
   const { 
     data: suggestions, 
     loading: suggestionsLoading,
@@ -81,48 +83,67 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     GET_FRIEND_SUGGESTIONS,
     { 
       variables: { limit: 10 },
-      skip: activeTab !== "suggested", // Only fetch when on suggested tab
+      skip: activeTab !== "suggested" || searchTerm.length > 0, // Skip if searching
     }
   );
 
-  /* --------------------- Helper: Determine tier from user data --------------------- */
+  // Search users (when search term exists on suggested tab)
+  const [
+    searchUsers, 
+    { data: searchResults, loading: searchLoading }
+  ] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS);
+
+  /* --------------------- Handle search for suggested tab --------------------- */
+  useEffect(() => {
+    // Only search when on suggested tab and search term exists
+    if (activeTab === "suggested" && searchTerm.length > 0) {
+      const timeoutId = setTimeout(() => {
+        searchUsers({
+          variables: {
+            searchUsersInput: {
+              query: searchTerm,
+              limit: 20,
+              offset: 0,
+            }
+          }
+        });
+      }, 300); // Debounce search by 300ms
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchTerm, activeTab, searchUsers]);
+
+  /* --------------------- Helper: Determine tier --------------------- */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getTierFromUser = (user: any): "starter" | "trusted" | "reliable" | "elite" => {
-    // TODO: Implement actual tier logic based on your business rules
-    // For now, returning a default
+    // TODO: Implement actual tier logic
     return "starter";
   };
 
   /* --------------------- Transform API data to Friend[] --------------------- */
   const allFriends: Friend[] = useMemo(() => {
     const friends: Friend[] = [];
-    
-    // TODO: Get current user ID from auth context or session
-    const currentUserId = "me"; // Replace with actual current user ID
 
     // Process accepted connections (friends)
-    // GET_MY_CONNECTIONS only returns ACCEPTED connections
     if (connectionsData?.getConnections.connections) {
       connectionsData.getConnections.connections.forEach((connection) => {
-        // Determine which user is the friend (not current user)
-        const friend = connection.receiver 
+        const friend = connection.receiver;
         friends.push({
           userId: friend.userId,
           connectionId: connection.id,
           name: `${friend.firstName} ${friend.lastName}`,
           imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
-          mutualConnections: undefined, // TODO: Fetch from GET_MUTUAL_FRIENDS if needed
+          mutualConnections: undefined,
           tier: getTierFromUser(friend),
           status: "friends",
         });
       });
     }
 
-    // Process pending requests SENT (current user is requester)
+    // Process pending requests SENT
     if (requestsSentData?.getPendingConnections.connections) {
       requestsSentData.getPendingConnections.connections.forEach((connection) => {
-        const friend = connection.receiver; // The person who received the request
-
+        const friend = connection.receiver;
         friends.push({
           userId: friend.userId,
           connectionId: connection.id,
@@ -135,11 +156,10 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       });
     }
 
-    // Process pending requests RECEIVED (current user is receiver)
+    // Process pending requests RECEIVED
     if (requestsReceivedData?.getPendingConnections.connections) {
       requestsReceivedData.getPendingConnections.connections.forEach((connection) => {
-        const friend = connection.requester; // The person who sent the request
-
+        const friend = connection.requester;
         friends.push({
           userId: friend.userId,
           connectionId: connection.id,
@@ -152,26 +172,53 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       });
     }
 
-    // Process friend suggestions
-    if (suggestions?.getFriendSuggestions.suggestions) {
-      suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
-        friends.push({
-          userId: suggestion.profile.userId,
-          connectionId: undefined, // No connection exists yet for suggestions
-          name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
-          imageSrc: suggestion.profile.avatarUrl || "https://github.com/shadcn.png",
-          mutualConnections: suggestion.mutualConnectionsCount,
-          tier: getTierFromUser(suggestion.profile),
-          status: "suggested",
+    // Process friend suggestions OR search results (for suggested tab)
+    if (activeTab === "suggested") {
+      if (searchTerm.length > 0 && searchResults?.searchUsers.profiles) {
+        // Use search results when searching
+        searchResults.searchUsers.profiles.forEach((profile) => {
+          friends.push({
+            userId: profile.userId,
+            connectionId: undefined,
+            name: `${profile.firstName} ${profile.lastName}`,
+            imageSrc: "https://github.com/shadcn.png", // Search API doesn't return avatarUrl
+            mutualConnections: undefined,
+            tier: getTierFromUser(profile),
+            status: "suggested",
+          });
         });
-      });
+      } else if (suggestions?.getFriendSuggestions.suggestions) {
+        // Use suggestions when not searching
+        suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
+          friends.push({
+            userId: suggestion.profile.userId,
+            connectionId: undefined,
+            name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
+            imageSrc: suggestion.profile.avatarUrl || "https://github.com/shadcn.png",
+            mutualConnections: suggestion.mutualConnectionsCount,
+            tier: getTierFromUser(suggestion.profile),
+            status: "suggested",
+          });
+        });
+      }
     }
 
     return friends;
-  }, [connectionsData, requestsSentData, requestsReceivedData, suggestions]);
+  }, [
+    activeTab,
+    searchTerm,
+    connectionsData, 
+    requestsSentData, 
+    requestsReceivedData, 
+    suggestions,
+    searchResults
+  ]);
 
   /* --------------------- Refetch on tab change --------------------- */
   useEffect(() => {
+    // Clear search term when changing tabs
+    setSearchTerm("");
+    
     switch(activeTab) {
       case "friends":
         refetchConnections();
@@ -190,26 +237,29 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
   /* --------------------- Handle name click --------------------- */
   const handleNameClick = (userId: string) => {
-    // Close the modal first
     if (onClose) {
       onClose();
     }
-    
-    // Then navigate to the friend's profile
     router.push(`/friend/${userId}`);
   };
 
   /* --------------------- Filtering --------------------- */
   const filteredFriends = useMemo(() => {
+    // For suggested tab with search, results are already filtered by search query
+    if (activeTab === "suggested" && searchTerm.length > 0) {
+      return allFriends.filter((f) => f.status === activeTab);
+    }
+
+    // For other tabs, apply client-side filtering
     return allFriends.filter((f) => {
-      // Search filter first
+      // Search filter
       if (
         searchTerm &&
         !f.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
         return false;
 
-      // Tab filter: match the status
+      // Tab filter
       return f.status === activeTab;
     });
   }, [activeTab, searchTerm, allFriends]);
@@ -218,23 +268,39 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const counts = useMemo(() => {
     const byStatus: Record<FriendType, number> = {
       "friends": connectionsData?.getConnections.total || 0,
-      "suggested": suggestions?.getFriendSuggestions.total || 0,
+      "suggested": searchTerm.length > 0 
+        ? (searchResults?.searchUsers.total || 0)
+        : (suggestions?.getFriendSuggestions.total || 0),
       "request-received": requestsReceivedData?.getPendingConnections.total || 0,
       "request-sent": requestsSentData?.getPendingConnections.total || 0,
     };
 
     return byStatus;
-  }, [connectionsData, requestsSentData, requestsReceivedData, suggestions]);
+  }, [
+    searchTerm,
+    connectionsData, 
+    requestsSentData, 
+    requestsReceivedData, 
+    suggestions,
+    searchResults
+  ]);
 
   const tabTitle = {
     "friends": t("titles.all", { count: counts["friends"] }),
-    "suggested": t("titles.suggested"),
+    "suggested": searchTerm.length > 0 
+      ? `${t("titles.searchResults")} (${counts["suggested"]})`
+      : t("titles.suggested"),
     "request-received": t("titles.requestReceived", { count: counts["request-received"] }),
     "request-sent": t("titles.requestSent"),
   }[activeTab];
 
   /* --------------------- Loading state --------------------- */
-  const isLoading = connectionsLoading || requestsSentLoading || requestsReceivedLoading || suggestionsLoading;
+  const isLoading = 
+    connectionsLoading || 
+    requestsSentLoading || 
+    requestsReceivedLoading || 
+    suggestionsLoading ||
+    searchLoading;
 
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
@@ -254,7 +320,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     );
   };
 
-  /* --------------------- UI (styles untouched) --------------------- */
+  /* --------------------- UI --------------------- */
   return (
     <div className="lg:flex bg-surface-default h-[90vh] ">
       {/* ---------- LEFT SIDEBAR (tabs) ---------- */}
@@ -300,8 +366,13 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
                 value={searchTerm}
                 onChange={setSearchTerm}
                 onSearch={() => {
-                  /* optional API search */
+                  // Search is handled automatically by useEffect
                 }}
+                placeholder={
+                  activeTab === "suggested" 
+                    ? t("searchUsers") || "Search users..."
+                    : t("search") || "Search..."
+                }
               />
             </div>
           </div>
@@ -323,7 +394,9 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
           {/* Empty state */}
           {!isLoading && filteredFriends.length === 0 && (
             <p className="text-center text-muted-foreground col-span-2">
-              {t("empty")}
+              {searchTerm.length > 0 && activeTab === "suggested"
+                ? t("noSearchResults") || "No users found"
+                : t("empty")}
             </p>
           )}
         </div>

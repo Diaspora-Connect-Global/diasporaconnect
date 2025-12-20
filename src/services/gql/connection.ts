@@ -523,3 +523,81 @@ export interface GetPendingRequestsResponse {
     connections: Connection[];
   };
 }
+
+// ============================================================================
+// SEARCH TYPES
+// ============================================================================
+
+export interface SearchUsersInput {
+  query: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface UserProfile {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  sector?: string;
+  countryOfOrigin?: string;
+  residenceCountry?: string;
+  bio?: string;
+  headline?: string;
+  connectionCount: number;
+  avatarUrl?: string;
+}
+
+export interface SearchUsersResponse {
+  searchUsers: {
+    success: boolean;
+    message?: string;
+    total: number;
+    hasMore: boolean;
+    profiles: UserProfile[];
+  };
+}
+
+// ============================================================================
+// SEARCH QUERY
+// ============================================================================
+
+/**
+ * Search for users by name, sector, or other criteria
+ * 
+ * @example
+ * ```typescript
+ * const [searchUsers, { data, loading }] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS);
+ * 
+ * searchUsers({
+ *   variables: {
+ *     searchUsersInput: {
+ *       query: "john",
+ *       limit: 20,
+ *       offset: 0
+ *     }
+ *   }
+ * });
+ * ```
+ */
+export const SEARCH_USERS = gql`
+  query SearchUsers($searchUsersInput: SearchUsersInput!) {
+    searchUsers(input: $searchUsersInput) {
+      success
+      message
+      total
+      hasMore
+      profiles {
+        userId
+        firstName
+        lastName
+        sector
+        countryOfOrigin
+        residenceCountry
+        bio
+        headline
+        connectionCount
+        avatarUrl
+      }
+    }
+  }
+`;
