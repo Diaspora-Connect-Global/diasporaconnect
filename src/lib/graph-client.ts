@@ -1,38 +1,64 @@
-import { useAuthStore } from "@/store/useAuthStore";
-import { ApolloClient, HttpLink, InMemoryCache, ApolloLink } from "@apollo/client";
+'use client';
+
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloLink,
+} from '@apollo/client';
 import { SetContextLink } from '@apollo/client/link/context';
+import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 
-const cache = new InMemoryCache();
+import { useAuthStore } from '@/store/useAuthStore';
 
-const httpLink = new HttpLink({
-  uri: "https://api.diasporaconnectglobal.com/graphql", 
-});
-
-
-
-const authLink = new SetContextLink((prevContext, operation) => {
- const token = useAuthStore.getState().tokens?.sessionToken;
- const fingerprint = useAuthStore.getState().deviceMetadata?.fingerprint;
-   console.log("token passed with fingerprint", token , fingerprint)
+/* ------------------------------------------------------------------ */
+/* Auth + Device Fingerprint Link */
+/* ------------------------------------------------------------------ */
+const authLink = new SetContextLink((prevContext) => {
+  const { tokens, deviceMetadata } = useAuthStore.getState();
 
   return {
     headers: {
       ...prevContext.headers,
-      authorization: token ? `Bearer ${token}` : "",
-      "x-device-fingerprint": fingerprint ,
+      authorization: tokens?.sessionToken
+        ? `Bearer ${tokens.sessionToken}`
+        : '',
+      'x-device-fingerprint': deviceMetadata?.fingerprint ?? '',
     },
   };
 });
 
+/* ------------------------------------------------------------------ */
+/* Upload-capable terminating link */
+/* ------------------------------------------------------------------ */
+const uploadLink = new UploadHttpLink({
+  uri: 'https://api.diasporaconnectglobal.com/graphql',
+  credentials: 'include',
+});
 
-// Combine the auth link and http link
+/* ------------------------------------------------------------------ */
+/* Combine links (ORDER MATTERS) */
+/* ------------------------------------------------------------------ */
+const link = ApolloLink.from([
+  authLink,
+  uploadLink,
+]);
+
+/* ------------------------------------------------------------------ */
+/* Apollo Client */
+/* ------------------------------------------------------------------ */
 const gqlClient = new ApolloClient({
-  cache: cache,
-  link: authLink.concat(httpLink),
+  link,
+  cache: new InMemoryCache(),
   queryDeduplication: false,
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: "cache-and-network",
+      fetchPolicy: 'cache-and-network',
+    },
+    query: {
+      fetchPolicy: 'network-only',
+    },
+    mutate: {
+      fetchPolicy: 'no-cache',
     },
   },
 });
