@@ -22,8 +22,20 @@ export interface ChatInfo {
 
 export default function Chat() {
     const { activeChat, setActiveChat } = useChatStore();
-    const [chatInfo, setChatInfo] = useState<ChatInfo | null>(null);
+    const [chatInfo, setChatInfo] = useState<ChatInfo >({
+        name: "",
+        id: "",
+        type: 'direct',
+        lastMessage: "",
+        lastMessageTime: "",
+        unread: 0,
+        avatar: ""
+    });
     const [isMobile, setIsMobile] = useState(false);
+
+    const chatchosen = sessionStorage.getItem('activeChat');
+    const chatchosenParsed = chatchosen ? JSON.parse(chatchosen) : null;
+    console.log("Active Chat from sessionStorage:", chatchosen);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -41,7 +53,15 @@ export default function Chat() {
                 setChatInfo(chat);
             }
         } else {
-            setChatInfo(null);
+            setChatInfo({
+                name: "",
+                id: "",
+                type: 'direct',
+                lastMessage: "",
+                lastMessageTime: "",
+                unread: 0,
+                avatar: ""
+            });
         }
     }, [activeChat]);
 
@@ -49,7 +69,7 @@ export default function Chat() {
         setActiveChat(null);
     };
 
-    if (!activeChat || !chatInfo) {
+    if (!activeChat ) {
         return (
             <div className="bg-surface-default rounded-md h-full overflow-hidden">
                 <EmptyMessage />
@@ -71,14 +91,14 @@ export default function Chat() {
                     </button>
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium">{chatInfo.avatar}</span>
+                            <span className="text-sm font-medium">{chatInfo?.avatar}</span>
                         </div>
                         <div>
-                            <h2 className="font-semibold text-text-primary">{chatInfo.name}</h2>
-                            {chatInfo.type === 'direct' && chatInfo.online && (
+                            <h2 className="font-semibold text-text-primary">{chatInfo?.name}</h2>
+                            {chatInfo?.type === 'direct' && chatInfo.online && (
                                 <p className="text-xs text-text-success">Online</p>
                             )}
-                            {chatInfo.type === 'group' && chatInfo.memberCount && (
+                            {chatInfo?.type === 'group' && chatInfo.memberCount && (
                                 <p className="text-xs text-text-secondary">{chatInfo.memberCount} members</p>
                             )}
                         </div>
@@ -88,10 +108,10 @@ export default function Chat() {
             
             {/* Chat content */}
             <div className="flex-1 overflow-hidden">
-                {chatInfo.type === 'direct' ? (
+                {chatchosenParsed?.type === 'direct' ? (
                     <DirectMessageChat chat={chatInfo} />
                 ) : (
-                    <GroupChat chat={chatInfo} />
+                    <GroupChat  />
                 )}
             </div>
         </div>

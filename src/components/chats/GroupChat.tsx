@@ -1,8 +1,4 @@
-// ============================================
-// GROUP CHAT - MOBILE RESPONSIVE
-// ============================================
-// File: components/chats/GroupChat.tsx
-
+// components/chats/GroupChat.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +10,8 @@ import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ButtonType3 } from "../custom/button";
 import { useTranslations } from 'next-intl';
+import { useQuery } from "@apollo/client/react";
+import { GET_GROUP, GET_GROUP_MEMBERS, GetGroupResponse, GetGroupMembersResponse } from "@/services/gql/groups";
 
 interface Reply {
     id: string;
@@ -25,7 +23,11 @@ interface Reply {
     imageUrl?: string;
 }
 
-export default function GroupChat({ chat }: { chat: ChatInfo }) {
+interface GroupChatProps {
+    chat: ChatInfo;
+}
+
+export default function GroupChat() {
     const t = useTranslations('chat.group');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,15 +37,29 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
-    const {
-        groupMembers,
-        sendMessage,
-        markAsRead,
-        getMessagesByConversation,
-        getUserById
-    } = useChatStore();
+    const { messages, users } = useChatStore();
 
-    const conversationMessages = getMessagesByConversation(chat.id);
+    const chatData = sessionStorage.getItem('activeChat');
+    const chat: ChatInfo = chatData ? JSON.parse(chatData) : null;
+
+    // Fetch group details
+    const { data: groupData, loading: loadingGroup } = useQuery<GetGroupResponse>(GET_GROUP, {
+        variables: { groupId: chat.id },
+        skip: !chat.id,
+    });
+
+    // Fetch group members
+    const { data: membersData, loading: loadingMembers } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
+        variables: { groupId: chat.id, membersLimit: 100, membersOffset: 0 },
+        skip: !chat.id,
+    });
+
+    const group = groupData?.getGroup?.group;
+    const groupMembers = membersData?.getGroupMembers?.members || [];
+    const groupMembersCount = membersData?.getGroupMembers?.total || 0;
+
+    // Get messages for this conversation
+    const conversationMessages = messages.filter(m => m.conversationId === chat.id);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -55,10 +71,6 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [conversationMessages]);
-
-    useEffect(() => {
-        markAsRead(chat.id);
-    }, [chat.id, markAsRead]);
 
     const mockReplies: Reply[] = [
         {
@@ -87,6 +99,10 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         return mockReplies.filter(reply => reply.messageId === messageId);
     };
 
+    const getUserById = (userId: string) => {
+        return users?.find(u => u.id === userId);
+    };
+
     const handleSendMessage = (messageText: string, image?: string) => {
         if (messageText.trim() || image) {
             if (replyingTo) {
@@ -102,7 +118,8 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                 setReplies(prev => [...prev, newReply]);
                 setReplyingTo(null);
             } else {
-                sendMessage(chat.id, messageText, 'current-user', image ? 'image' : 'text');
+                // Handle sending new message to group chat
+                console.log("Sending message to group chat:", messageText, image);
             }
         }
     };
@@ -121,13 +138,10 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         setReplyingTo(null);
     };
 
-    const membersWithDetails = groupMembers
-        .filter(member => member.groupId === chat.id)
-        .map(member => ({
-            ...member,
-            user: getUserById(member.userId)
-        }))
-        .filter(member => member.user);
+    const membersWithDetails = groupMembers.map(member => ({
+        ...member,
+        user: getUserById(member.userId)
+    })).filter(member => member.user);
 
     const getSenderName = (senderId: string): string => {
         const user = getUserById(senderId);
@@ -139,8 +153,24 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
         setRepliesSidebarOpen(false);
     };
 
+    if (loadingGroup || loadingMembers) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (!group) {
+        return (
+            <div className="flex items-center justify-center h-full text-text-secondary">
+                <p>{t('groupNotFound')}</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex flex-row  h-app-inner space-x-0 md:space-x-2">
+        <div className="flex flex-row h-app-inner space-x-0 md:space-x-2">
             {/* Main Chat Area */}
             <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${
                 isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'
@@ -150,13 +180,13 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     <div className="flex items-center space-x-3">
                         <div className="relative">
                             <Avatar className="w-12 h-12">
-                                <AvatarImage src={chat.avatar} alt="avatar" />
-                                <AvatarFallback>G</AvatarFallback>
+                                <AvatarImage src={group.avatarUrl || chat.avatar} alt="avatar" />
+                                <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
                         </div>
                         <div>
-                            <h2 className="font-semibold text-text-primary">{chat.name}</h2>
-                            <p className="text-sm text-text-secondary">{chat.memberCount} members</p>
+                            <h2 className="font-semibold text-text-primary">{group.name}</h2>
+                            <p className="text-sm text-text-secondary">{group.memberCount} members</p>
                         </div>
                     </div>
                     <button onClick={handleSideBarToggle}>
@@ -174,70 +204,77 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
                 {/* Messages Area */}
                 <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
-                    {conversationMessages.map((message,index) => {
-                        const replyCount = getReplyCount(message.id);
-                        return (
-                            <div
-                                key={index}
-                                className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
-                                    {message.type === 'image' && (message as any).imageUrl ? (
-                                        <div className="mb-2">
-                                            {message.senderId !== 'current-user' && (
-                                                <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
-                                                    {getSenderName(message.senderId)}
-                                                </p>
-                                            )}
-                                            <Image
-                                                src={(message as any).imageUrl}
-                                                alt="Shared image"
-                                                width={300}
-                                                height={200}
-                                                className="rounded-2xl max-w-full h-auto"
-                                            />
-                                            {message.text && (
-                                                <p className="text-xs sm:text-sm text-text-primary mt-2">{message.text}</p>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div
-                                            className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
-                                                message.senderId === 'current-user'
-                                                    ? 'bg-text-brand text-text-white'
-                                                : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                            }`}
-                                        >
-                                            {message.senderId !== 'current-user' && (
-                                                <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
-                                                    {getSenderName(message.senderId)}
-                                                </p>
-                                            )}
-                                            {message.text}
-                                        </div>
-                                    )}
+                    {conversationMessages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-text-secondary">
+                            <MessageCircle className="w-12 h-12 mb-4 opacity-50" />
+                            <p>{t('noMessages')}</p>
+                        </div>
+                    ) : (
+                        conversationMessages.map((message, index) => {
+                            const replyCount = getReplyCount(message.id);
+                            return (
+                                <div
+                                    key={index}
+                                    className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
+                                        {message.type === 'image' && (message as any).imageUrl ? (
+                                            <div className="mb-2">
+                                                {message.senderId !== 'current-user' && (
+                                                    <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
+                                                        {getSenderName(message.senderId)}
+                                                    </p>
+                                                )}
+                                                <Image
+                                                    src={(message as any).imageUrl}
+                                                    alt="Shared image"
+                                                    width={300}
+                                                    height={200}
+                                                    className="rounded-2xl max-w-full h-auto"
+                                                />
+                                                {message.text && (
+                                                    <p className="text-xs sm:text-sm text-text-primary mt-2">{message.text}</p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
+                                                    message.senderId === 'current-user'
+                                                        ? 'bg-text-brand text-text-white'
+                                                    : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                }`}
+                                            >
+                                                {message.senderId !== 'current-user' && (
+                                                    <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
+                                                        {getSenderName(message.senderId)}
+                                                    </p>
+                                                )}
+                                                {message.text}
+                                            </div>
+                                        )}
 
-                                    <div className="space-x-2 flex items-center justify-start mt-1">
-                                        <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
-                                            <AvatarImage src={chat.avatar} alt="avatar" />
-                                            <AvatarFallback>G</AvatarFallback>
-                                        </Avatar>
-                                        <p className="text-[10px] sm:text-xs text-text-tertiary">
-                                            {formatChatTimestamp(message.timestamp)}
-                                        </p>
-                                        <button
-                                            onClick={() => handleViewReplies(message)}
-                                            className="flex items-center space-x-1 text-[10px] sm:text-xs text-text-brand hover:text-text-brand-dark transition-colors"
-                                        >
-                                            <span>
-                                                {replyCount > 0 ? `${replyCount} ${t('replies')} | ` : ''}{t('reply')}
-                                            </span>
-                                        </button>
+                                        <div className="space-x-2 flex items-center justify-start mt-1">
+                                            <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
+                                                <AvatarImage src={getUserById(message.senderId)?.avatar} alt="avatar" />
+                                                <AvatarFallback>{getSenderName(message.senderId).charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <p className="text-[10px] sm:text-xs text-text-tertiary">
+                                                {formatChatTimestamp(message.timestamp)}
+                                            </p>
+                                            <button
+                                                onClick={() => handleViewReplies(message)}
+                                                className="flex items-center space-x-1 text-[10px] sm:text-xs text-text-brand hover:text-text-brand-dark transition-colors"
+                                            >
+                                                <span>
+                                                    {replyCount > 0 ? `${replyCount} ${t('replies')} | ` : ''}{t('reply')}
+                                                </span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
 
@@ -246,7 +283,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                     <div className="flex-shrink-0">
                         <MessageInput
                             onSendMessage={handleSendMessage}
-                            placeholder={t('message', { name: chat.name })}
+                            placeholder={t('message', { name: group.name })}
                             conversationId={chat.id}
                             senderId="current-user"
                         />
@@ -284,10 +321,13 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                         <div className="p-4 flex-1 min-h-0 flex flex-col overflow-y-auto">
                             <div className="flex-shrink-0 flex flex-col items-center mb-6">
                                 <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
-                                    <AvatarImage src={chat.avatar} alt="avatar" />
-                                    <AvatarFallback>G</AvatarFallback>
+                                    <AvatarImage src={group.avatarUrl} alt="avatar" />
+                                    <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
-                                <h4 className="font-semibold text-text-primary text-base sm:text-lg mt-3">{chat.name}</h4>
+                                <h4 className="font-semibold text-text-primary text-base sm:text-lg mt-3">{group.name}</h4>
+                                {group.description && (
+                                    <p className="text-sm text-text-secondary mt-1 text-center">{group.description}</p>
+                                )}
                             </div>
 
                             <div className="flex-shrink-0 flex items-center justify-center mb-6">
@@ -296,23 +336,24 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
 
                             <div className="flex-1 min-h-0 mb-6">
                                 <div className="flex-shrink-0 flex justify-between items-center mb-3">
-                                    <h5 className="text-sm font-medium text-text-primary">{t('members')}</h5>
+                                    <h5 className="text-sm font-medium text-text-primary">
+                                        {t('members')} ({groupMembersCount})
+                                    </h5>
                                     <ButtonType3 className="text-xs py-1 px-2">{t('addPeople')}</ButtonType3>
                                 </div>
-                                <div className="space-y-2">
-                                    {membersWithDetails.map((member) => (
+                                <div className="space-y-2 overflow-y-auto">
+                                    {groupMembers.map((member) => (
                                         <div key={member.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-surface-hover">
                                             <Avatar className="w-10 h-10">
-                                                <AvatarImage src={member.user?.avatar || chat.avatar} alt="avatar" />
-                                                <AvatarFallback>{member.user?.name?.charAt(0) || 'U'}</AvatarFallback>
+                                                <AvatarImage src={member?.userId} alt="avatar" />
+                                                <AvatarFallback>{ 'U'}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-text-primary truncate">
-                                                    {member.user?.name}
-                                                    {member.userId === 'current-user' && ' (You)'}
+                                                    {`${member.profile.firstName} ${member.profile.lastName}`}
                                                 </p>
                                                 <p className="text-xs text-text-secondary capitalize">
-                                                    {member.role}
+                                                    {member.role.toLowerCase()}
                                                 </p>
                                             </div>
                                         </div>
@@ -384,7 +425,7 @@ export default function GroupChat({ chat }: { chat: ChatInfo }) {
                             {replies.length > 0 ? (
                                 replies.map((reply) => (
                                     <div key={reply.id}>
-                                        <div className="bg-surface-success/50  rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
+                                        <div className="bg-surface-success/50 rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
                                             <span className="text-xs sm:text-sm font-medium text-text-primary dark:text-text-white">
                                                 {getSenderName(reply.senderId)}
                                             </span>

@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { Profile } from './profile';
 
 // ============================================================================
 // GROUP TYPES
@@ -36,6 +37,7 @@ export interface Group {
 }
 
 export interface GroupMember {
+  profile: Profile;
   id: string;
   groupId: string;
   userId: string;
@@ -70,6 +72,7 @@ export interface CreateGroupInput {
   avatarUrl?: string;
   privacy: GroupPrivacy;
   maxMembers?: number;
+  memberIds?: string[];
 }
 
 export interface UpdateGroupInput {
@@ -344,6 +347,11 @@ export const GET_GROUP_MEMBERS = gql`
         status
         joinedAt
         createdAt
+        profile {
+          avatarUrl
+          firstName
+          lastName
+        }
       }
     }
   }

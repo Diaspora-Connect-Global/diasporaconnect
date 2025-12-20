@@ -31,9 +31,8 @@ export default function ChatSideBar() {
     const [activeTab, setActiveTab] = useState<TabType>('direct');
     const { activeChat, setActiveChat, conversations, preferences, messages, initializeFromMockData } = useChatStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalType, setModalType] = useState<'direct' | 'group'>('direct'); // Add state for modal type
+    const [modalType, setModalType] = useState<'direct' | 'group'>('direct');
     const [directChats, setDirectChats] = useState<ChatItem[]>([]);
-    const [groupChats, setGroupChats] = useState<ChatItem[]>([]);
 
     // Initialize store and compute chat lists
     useEffect(() => {
@@ -41,12 +40,9 @@ export default function ChatSideBar() {
     }, [initializeFromMockData]);
 
     useEffect(() => {
-        // Compute direct messages and groups from store data
+        // Compute direct messages from store data
         const computedDirectChats = computeDirectChats();
-        const computedGroupChats = computeGroupChats();
-        
         setDirectChats(computedDirectChats);
-        setGroupChats(computedGroupChats);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversations, preferences, messages]);
 
@@ -58,7 +54,6 @@ export default function ChatSideBar() {
                 const lastMessage = convMessages[convMessages.length - 1];
                 const preference = preferences.find(p => p.conversationId === conv.id && p.userId === 'current-user');
                 
-                // For direct messages, the conversation ID corresponds to the user ID
                 const user = useChatStore.getState().users?.find(u => u.id === conv.id) || {
                     id: conv.id,
                     name: 'Unknown User',
@@ -81,32 +76,8 @@ export default function ChatSideBar() {
             });
     };
 
-    const computeGroupChats = (): ChatItem[] => {
-        return conversations
-            .filter(conv => conv.type === 'group')
-            .map(conv => {
-                const convMessages = messages.filter(m => m.conversationId === conv.id);
-                const lastMessage = convMessages[convMessages.length - 1];
-                const preference = preferences.find(p => p.conversationId === conv.id && p.userId === 'current-user');
-                const group = useChatStore.getState().groups?.find(g => g.id === conv.groupId);
-                const memberCount = useChatStore.getState().groupMembers?.filter(m => m.groupId === conv.groupId).length || 0;
-
-                return {
-                    id: conv.id,
-                    name: group?.name || 'Unknown Group',
-                    type: 'group' as const,
-                    lastMessage: lastMessage?.text || t('empty.title'),
-                    lastMessageTime: lastMessage?.timestamp || conv.createdAt,
-                    unread: preference?.unreadCount || 0,
-                    memberCount,
-                    avatar: group?.avatar || 'UG'
-                };
-            });
-    };
-
     // Calculate total unread counts
     const directUnreadCount = directChats.reduce((sum, chat) => sum + chat.unread, 0);
-    const groupsUnreadCount = groupChats.reduce((sum, chat) => sum + chat.unread, 0);
 
     // Filter based on search query
     const filteredDirectMessages = directChats.filter(chat =>
@@ -114,13 +85,9 @@ export default function ChatSideBar() {
         chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const filteredGroups = groupChats.filter(chat =>
-        chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     const handleChatClick = (chat: { id: string; type: 'direct' | 'group' }) => {
         setActiveChat(chat);
+        sessionStorage.setItem('activeChat', JSON.stringify(chat));
         
         // Reset unread count when chat is clicked
         const preference = preferences.find(p => 
@@ -152,7 +119,7 @@ export default function ChatSideBar() {
                     <p className="text-2xl font-heading-large">{t('chats')}</p>
                     <ButtonType3
                         className="px-4 py-3 flex items-center"
-                        onClick={() => handleOpenModal('direct')} // Open with direct type
+                        onClick={() => handleOpenModal('direct')}
                     >
                         <SquarePen className="mr-2 h-4 w-4" />
                         {t('newMessage')}
@@ -184,7 +151,7 @@ export default function ChatSideBar() {
                             active={activeTab === 'groups'}
                             onClick={() => setActiveTab('groups')}
                             label={t('groups')}
-                            notificationCount={groupsUnreadCount}
+                            notificationCount={0}
                         />
                     </div>
                 </div>
@@ -194,7 +161,7 @@ export default function ChatSideBar() {
                     <div className="px-4 py-3">
                         <div 
                             className="text-text-brand flex items-center cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={handleCreateGroup} // Add click handler
+                            onClick={handleCreateGroup}
                         >
                             <Plus className="mr-2 h-4 w-4" />
                             <p>{t('createGroup')}</p>
@@ -212,6 +179,7 @@ export default function ChatSideBar() {
                         />
                     ) : (
                         <GroupsList
+                            searchQuery={searchQuery}
                             activeChat={activeChat}
                             onChatClick={handleChatClick}
                         />
@@ -222,11 +190,12 @@ export default function ChatSideBar() {
             <StartConversationModal
                 isOpen={isModalOpen}
                 onOpenChange={setIsModalOpen}
-                type={modalType} // Use dynamic modal type
+                type={modalType} 
             />
         </>
     );
 }
+
 // Tab Button Component
 interface TabButtonProps {
     active: boolean;
@@ -239,9 +208,10 @@ function TabButton({ active, onClick, label, notificationCount }: TabButtonProps
     return (
         <button
             onClick={onClick}
-            className={`flex-1 py-1 text-center font-medium transition-colors cursor-pointer ${active
-                ? 'text-text-primary border-b-2 border-text-brand'
-                : 'text-text-secondary hover:text-text-secondary'
+            className={`flex-1 py-1 text-center font-medium transition-colors cursor-pointer ${
+                active
+                    ? 'text-text-primary border-b-2 border-text-brand'
+                    : 'text-text-secondary hover:text-text-secondary'
                 }`}
         >
             <div className="flex items-center justify-center space-x-2">
@@ -279,7 +249,8 @@ function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
     return (
         <div
             onClick={onClick}
-            className={`flex items-center border-b space-x-3 p-3 hover:bg-surface-hover cursor-pointer transition-colors group ${isActive ? 'bg-surface-default border border-surface-brand-light rounded-lg' : ''
+            className={`flex items-center border-b space-x-3 p-3 hover:bg-surface-hover cursor-pointer transition-colors group ${
+                isActive ? 'bg-surface-default border border-surface-brand-light rounded-lg' : ''
                 }`}
         >
             {/* Avatar with online status */}
@@ -358,6 +329,7 @@ interface Group {
     memberCount: number;
     ownerId: string;
     createdAt: string;
+    avatarUrl?: string;
 }
 
 interface GetMyGroupsResponse {
@@ -370,17 +342,19 @@ interface GetMyGroupsResponse {
 }
 
 interface GroupsListProps {
+    searchQuery: string;
     activeChat: { id: string; type: 'direct' | 'group' } | null;
     onChatClick: (chat: { id: string; type: 'direct' | 'group' }) => void;
     limit?: number;
     offset?: number;
 }
 
-function GroupsList({ activeChat, onChatClick, limit = 50, offset = 0 }: GroupsListProps) {
+function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset = 0 }: GroupsListProps) {
     const t = useTranslations('chat');
     
     const { data, loading, error } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
         variables: { limit, offset },
+        fetchPolicy: 'cache-and-network', // Ensure fresh data
     });
 
     if (loading) {
@@ -402,35 +376,53 @@ function GroupsList({ activeChat, onChatClick, limit = 50, offset = 0 }: GroupsL
 
     const groups = data?.getMyGroups.groups || [];
 
-    if (groups.length === 0) {
+    // Filter groups based on search query
+    const filteredGroups = groups.filter(group =>
+        group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        group.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (filteredGroups.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
-                <p className="text-center">{t('noGroups')}</p>
-                <p className="text-sm text-text-tertiary mt-2">{t('tryAdjustingSearch')}</p>
+                <p className="text-center">{searchQuery ? t('noGroupsFound') : t('noGroups')}</p>
+                <p className="text-sm text-text-tertiary mt-2">
+                    {searchQuery ? t('tryAdjustingSearch') : t('createFirstGroup')}
+                </p>
             </div>
         );
     }
 
     return (
         <div className="space-y-1 p-2">
-            {groups.map((group) => (
-                <ChatItem
-                    key={group.id}
-                    chat={{
-                        id: group.id,
-                        name: group.name,
-                        avatar: '', // Add avatar URL if available
-                        lastMessage: group.description,
-                        lastMessageTime: new Date(group.createdAt).toISOString(),
-                        // unreadCount: 0, // You might want to add this to your query
-                        unread: 0,
-                        // isOnline: false,
-                        type: 'group' as const,
-                    }}
-                    isActive={activeChat?.id === group.id && activeChat?.type === 'group'}
-                    onClick={() => onChatClick({ id: group.id, type: 'group' })}
-                />
-            ))}
+            {filteredGroups.map((group) => {
+                // Generate avatar initials from group name
+                const getInitials = (name: string) => {
+                    const words = name.trim().split(' ');
+                    if (words.length >= 2) {
+                        return (words[0][0] + words[1][0]).toUpperCase();
+                    }
+                    return name.substring(0, 2).toUpperCase();
+                };
+
+                return (
+                    <ChatItem
+                        key={group.id}
+                        chat={{
+                            id: group.id,
+                            name: group.name,
+                            avatar: group.avatarUrl || getInitials(group.name),
+                            lastMessage: group.description || `${group.memberCount} members`,
+                            lastMessageTime: group.createdAt,
+                            unread: 0, // TODO: Add unread count from your backend
+                            type: 'group' as const,
+                            memberCount: group.memberCount,
+                        }}
+                        isActive={activeChat?.id === group.id && activeChat?.type === 'group'}
+                        onClick={() => onChatClick({ id: group.id, type: 'group' })}
+                    />
+                );
+            })}
         </div>
     );
 }
