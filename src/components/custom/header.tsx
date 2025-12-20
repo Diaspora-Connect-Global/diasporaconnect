@@ -357,9 +357,6 @@ export function DropdownMenuAvatar() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {/* <DropdownMenuItem asChild>
-      <Link href="/wallet">
-        <DMItem icon={<Wallet3 size="80" />} text={t('wallet')} />
-      </Link>
     </DropdownMenuItem> */}
           <DropdownMenuItem asChild>
             <Link href="/settings">
