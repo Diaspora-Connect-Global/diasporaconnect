@@ -19,6 +19,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   role?: string;
+  avatarUrl?: string;
 }
 
 export interface DeviceMetadata {

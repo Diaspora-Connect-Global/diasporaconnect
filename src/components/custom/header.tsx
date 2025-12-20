@@ -251,9 +251,11 @@ export default function Header({
 
 
 export function MyAvatar() {
+    const url = useAuthStore((s) => s.user?.avatarUrl);
+
   return (
     <Avatar>
-      <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+      <AvatarImage src={url || "https://github.com/shadcn.png"} alt="@shadcn" />
       <AvatarFallback>
         <Image
           width={32}
