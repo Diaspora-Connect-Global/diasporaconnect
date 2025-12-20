@@ -116,7 +116,7 @@ export default function Header({
   return (
     <div >
       <div className="h-app-top-down w-full bg-surface-default  top-0 z-50">
-        <header className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
+        <div className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
           <div className="mx-auto "> {/* Responsive padding */}
             <div className="flex  justify-between h-app-top-down"> {/* Standard header height */}
               <div className='flex'>
@@ -228,7 +228,7 @@ export default function Header({
               </>
             )}
           </div>
-        </header>
+        </div>
       </div>
       <div className=" scrollbar-hide h-app-inner  ">
         {children}
