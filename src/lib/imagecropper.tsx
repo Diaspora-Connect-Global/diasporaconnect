@@ -112,9 +112,9 @@ export function CircularImageCropper({
         {/* hidden canvas */}
         <canvas ref={canvasRef} className="hidden" />
 
-        <div className="flex justify-end gap-3 mt-4">
+        <div className="flex justify-end items-center gap-3 mt-4">
           <ButtonType3 onClick={onCancel}>Cancel</ButtonType3>
-          <ButtonType2  onClick={generateCroppedImage}>Done</ButtonType2>
+          <ButtonType2 className="px-3 py-2" onClick={generateCroppedImage}>Done</ButtonType2>
         </div>
       </DialogContent>
     </Dialog>

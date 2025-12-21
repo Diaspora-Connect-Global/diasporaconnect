@@ -16,6 +16,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import CustomDialog from "@/components/custom/customDialog";
 import { ButtonType2 } from "@/components/custom/button";
+import { CircularImageCropper } from "@/lib/imagecropper";
 
 export default function ProfilePage() {
     const setUser = useAuthStore(state => state.setUser);
@@ -23,6 +24,11 @@ export default function ProfilePage() {
 
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [croppedImage, setCroppedImage] = useState<string | null>(null);
+    
+    // Cropper state
+    const [rawImage, setRawImage] = useState<string | null>(null);
+    const [showCropper, setShowCropper] = useState(false);
 
     const [uploadProfilePicture, { loading: uploading }] =
         useMutation(UPLOAD_PROFILE_PICTURE, {
@@ -31,6 +37,7 @@ export default function ProfilePage() {
                     toast.success(res.uploadProfilePicture.message || "Profile picture updated");
                     setEditAvatarOpen(false);
                     setSelectedFile(null);
+                    setCroppedImage(null);
                 } else {
                     toast.error(res.uploadProfilePicture.message || "Upload failed");
                 }
@@ -41,11 +48,16 @@ export default function ProfilePage() {
         });
 
     const handleAvatarUpload = async () => {
-        if (!selectedFile) return;
+        if (!croppedImage) return;
+
+        // Convert base64 to File
+        const response = await fetch(croppedImage);
+        const blob = await response.blob();
+        const file = new File([blob], selectedFile?.name || "profile.png", { type: "image/png" });
 
         await uploadProfilePicture({
             variables: {
-                file: selectedFile,
+                file: file,
             },
         });
     };
@@ -83,6 +95,18 @@ export default function ProfilePage() {
     function handleCompleteProfile(): void {
         throw new Error('Function not implemented.');
     }
+
+    const handleFileSelect = (file: File) => {
+        if (file && file.type.startsWith('image/')) {
+            setSelectedFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setRawImage(e.target?.result as string);
+                setShowCropper(true);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     return (
         <div className="flex flex-col lg:flex-row lg:space-x-5 my-2 space-y-2 lg:space-y-0 h-app-inner mx-2">
@@ -159,10 +183,10 @@ export default function ProfilePage() {
                             htmlFor="avatar-upload"
                             className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex items-center justify-center overflow-hidden relative group transition-all"
                         >
-                            {selectedFile ? (
+                            {croppedImage ? (
                                 <>
                                     <img
-                                        src={URL.createObjectURL(selectedFile)}
+                                        src={croppedImage}
                                         alt="Preview"
                                         className="w-full h-full object-cover"
                                     />
@@ -196,20 +220,38 @@ export default function ProfilePage() {
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) setSelectedFile(file);
+                                if (file) handleFileSelect(file);
                             }}
                         />
                     </div>
 
                     <ButtonType2
                         onClick={handleAvatarUpload}
-                        disabled={!selectedFile || uploading}
+                        disabled={!croppedImage || uploading}
                         className="w-full py-3 "
                     >
                         {uploading ? "Uploading..." : "Upload"}
                     </ButtonType2>
                 </div>
             </CustomDialog>
+
+            {/* Circular Cropper */}
+            {rawImage && (
+                <CircularImageCropper
+                    open={showCropper}
+                    src={rawImage}
+                    onCancel={() => {
+                        setShowCropper(false);
+                        setRawImage(null);
+                        setSelectedFile(null);
+                    }}
+                    onConfirm={(cropped) => {
+                        setCroppedImage(cropped);
+                        setShowCropper(false);
+                        setRawImage(null);
+                    }}
+                />
+            )}
 
         </div>
     );
