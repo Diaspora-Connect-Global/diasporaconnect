@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react"
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop"
 import "react-image-crop/dist/ReactCrop.css"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button"
+import { ButtonType2, ButtonType3 } from "@/components/custom/button"
 
 interface ImageCropperProps {
   open: boolean
@@ -35,14 +35,26 @@ export function CircularImageCropper({
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     imgRef.current = e.currentTarget
     
-    // ✅ Set initial completed crop when image loads
+    // ✅ Set initial completed crop when image loads - centered circle
     const { width, height } = e.currentTarget
+    const size = Math.min(width, height) * 0.8
+    const x = (width - size) / 2
+    const y = (height - size) / 2
+    
     setCompletedCrop({
       unit: "px",
-      x: width * 0.2,
-      y: height * 0.2,
-      width: width * 0.6,
-      height: height * 0.6,
+      x,
+      y,
+      width: size,
+      height: size,
+    })
+    
+    setCrop({
+      unit: "%",
+      x: (x / width) * 100,
+      y: (y / height) * 100,
+      width: (size / width) * 100,
+      height: (size / height) * 100,
     })
   }
 
