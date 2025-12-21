@@ -36,7 +36,7 @@ export function ConfirmationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg w-full mx-4 flex flex-col"> {/* Responsive sizing */}
+      <DialogContent className="lg:max-w-full lg:mx-4 flex flex-col"> {/* Responsive sizing */}
         <DialogHeader>
           <DialogTitle>{t('chooseHowToMessage')}</DialogTitle>
         </DialogHeader>
@@ -52,14 +52,14 @@ export function ConfirmationModal({
         {/* Action Buttons footer - Now at the bottom */}
         <div className="flex justify-end items-center space-x-2 pt-4 border-t border-border-subtle mt-auto">
           <ButtonType1
-            className='px-6 py-2'
+            className='px-4'
             onClick={() => { }}
           >
             {t('createGroup')}
           </ButtonType1>
           <ButtonType2
             onClick={() => { }}
-            className='px-6 py-2'
+            className='px-4 py-2 w-fit'
           >
             {t('sendIndividually')}
           </ButtonType2>
