@@ -553,7 +553,9 @@
             "repliesCount": "{count} {count, plural, =1 {reply} other {replies}}",
             "writeReply": "Write a reply...",
             "noReplies": "No replies yet",
-            "beFirstToReply": "Be the first to reply"
+            "beFirstToReply": "Be the first to reply",
+            "groupNotFound": "Group not found",
+            "noMessages": "No messages yet"
         }
     },
     "dialog": {

@@ -172,9 +172,8 @@ export default function GroupChat() {
     return (
         <div className="flex flex-row h-app-inner space-x-0 md:space-x-2">
             {/* Main Chat Area */}
-            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${
-                isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'
-            }`}>
+            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'
+                }`}>
                 {/* Group Header - Hidden on mobile */}
                 <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                     <div className="flex items-center space-x-3">
@@ -195,7 +194,7 @@ export default function GroupChat() {
                 </div>
 
                 {/* Mobile Info Button - Floating */}
-                <button 
+                <button
                     onClick={handleSideBarToggle}
                     className="md:hidden fixed top-20 right-4 z-10 p-2 bg-surface-brand rounded-full shadow-lg"
                 >
@@ -238,11 +237,10 @@ export default function GroupChat() {
                                             </div>
                                         ) : (
                                             <div
-                                                className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
-                                                    message.senderId === 'current-user'
+                                                className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${message.senderId === 'current-user'
                                                         ? 'bg-text-brand text-text-white'
-                                                    : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                                }`}
+                                                        : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                    }`}
                                             >
                                                 {message.senderId !== 'current-user' && (
                                                     <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
@@ -295,12 +293,12 @@ export default function GroupChat() {
             {sidebarOpen && (
                 <>
                     {isMobile && (
-                        <div 
+                        <div
                             className="fixed inset-0 bg-black/50 z-40 md:hidden"
                             onClick={() => setSidebarOpen(false)}
                         />
                     )}
-                    
+
                     <div className={`
                         ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm' : 'w-80'} 
                         bg-surface-default border-l border-border-subtle flex flex-col min-h-0
@@ -345,12 +343,12 @@ export default function GroupChat() {
                                     {groupMembers.map((member) => (
                                         <div key={member.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-surface-hover">
                                             <Avatar className="w-10 h-10">
-                                                <AvatarImage src={member?.userId} alt="avatar" />
-                                                <AvatarFallback>{ 'U'}</AvatarFallback>
+                                                <AvatarImage src={member?.profile?.avatarUrl} alt="avatar" />
+                                                <AvatarFallback>{'U'}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-text-primary truncate">
-                                                    {`${member.profile.firstName} ${member.profile.lastName}`}
+                                                    {`${member.profile?.firstName} ${member.profile?.lastName}`}
                                                 </p>
                                                 <p className="text-xs text-text-secondary capitalize">
                                                     {member.role.toLowerCase()}
@@ -382,12 +380,12 @@ export default function GroupChat() {
             {repliesSidebarOpen && (
                 <>
                     {isMobile && (
-                        <div 
+                        <div
                             className="fixed inset-0 bg-black/50 z-40 md:hidden"
                             onClick={handleCloseReplies}
                         />
                     )}
-                    
+
                     <div className={`
                         ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm' : 'w-80'} 
                         bg-surface-default border-l border-border-subtle flex flex-col min-h-0
