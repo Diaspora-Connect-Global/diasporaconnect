@@ -150,10 +150,11 @@ export default function ProfilePage() {
                 open={editAvatarOpen}
                 onOpenChange={setEditAvatarOpen}
                 showFooter={false}
+                contentClassName="min-h-[50%] lg:min-h-[80%]"
             >
-                <div className="space-y-4 h-full justify-center flex flex-col items-center">
+                <div className="lg:space-y-4  justify-center flex flex-col items-center">
                     {/* Circular Image Preview/Upload Area */}
-                    <div className="flex justify-center mb-20">
+                    <div className="flex justify-center lg:mb-20 my-6">
                         <label
                             htmlFor="avatar-upload"
                             className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex items-center justify-center overflow-hidden relative group transition-all"
@@ -165,7 +166,7 @@ export default function ProfilePage() {
                                         alt="Preview"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-black/20 bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <span className="text-white text-sm">Change</span>
                                     </div>
                                 </>
@@ -203,7 +204,7 @@ export default function ProfilePage() {
                     <ButtonType2
                         onClick={handleAvatarUpload}
                         disabled={!selectedFile || uploading}
-                        className="w-full"
+                        className="w-full py-3 "
                     >
                         {uploading ? "Uploading..." : "Upload"}
                     </ButtonType2>
