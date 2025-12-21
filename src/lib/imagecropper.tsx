@@ -4,6 +4,7 @@ import React, { useRef, useState } from "react"
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop"
 import "react-image-crop/dist/ReactCrop.css"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button"
 
 interface ImageCropperProps {
   open: boolean
@@ -112,8 +113,8 @@ export function CircularImageCropper({
         <canvas ref={canvasRef} className="hidden" />
 
         <div className="flex justify-end gap-3 mt-4">
-          <button onClick={onCancel}>Cancel</button>
-          <button onClick={generateCroppedImage}>Done</button>
+          <ButtonType3 onClick={onCancel}>Cancel</ButtonType3>
+          <ButtonType2  onClick={generateCroppedImage}>Done</ButtonType2>
         </div>
       </DialogContent>
     </Dialog>
