@@ -434,7 +434,7 @@ export default function CreatePostPage() {
   };
 
   return (
-  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide p-4 flex justify-center mx-auto ">
+  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide py-4 flex justify-center mx-auto ">
     <div className="w-full max-w-3xl mb-2">
         {/* Main Composer Card */}
         <div className="bg-surface-default/80 backdrop-blur-md rounded-2xl border border-border-subtle shadow-xl">
@@ -443,12 +443,12 @@ export default function CreatePostPage() {
             <div className="flex items-start justify-between mb-6">
               <div className="flex gap-4">
                 <Avatar
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=John"
-                  alt={userName}
+                  src={currentUser?.avatarUrl}
+                  alt={currentUser?.firstName + ' ' + currentUser?.lastName}
                   size={56}
                 />
                 <div className="flex flex-col gap-1">
-                  <h2 className="heading-small text-text-primary">{currentUser?.firstName} {currentUser?.lastName}</h2>
+                  {/* <h2 className="heading-xsmall text-text-primary">{currentUser?.firstName} {currentUser?.lastName}</h2> */}
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
@@ -465,10 +465,10 @@ export default function CreatePostPage() {
                     <span>Posting...</span>
                   </>
                 ) : (
-                  <>
+                  <div className='px-2 py-1 flex'>
                     <Sparkles className="w-4 h-4" />
                     <span>{t('post')}</span>
-                  </>
+                  </div>
                 )}
               </ButtonType2>
             </div>
