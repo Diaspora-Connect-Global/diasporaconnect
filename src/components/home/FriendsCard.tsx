@@ -24,7 +24,7 @@ interface FriendsCardProps {
     /** Optional: Override default buttons for this status */
     customButtons?: FriendButtonType[];
     customDropdownOptions?: DropdownOption[];
-    
+
     /** New prop for handling name click */
     onNameClick?: (userId: string) => void;
 }
@@ -45,22 +45,22 @@ const getDefaultButtonConfig = (status: FriendType): {
                     { type: "blockFriend" }
                 ]
             };
-        
+
         case "suggested":
             return {
                 buttons: ["addFriend"]
             };
-        
+
         case "request-received":
             return {
                 buttons: ["accept", "ignore"]
             };
-        
+
         case "request-sent":
             return {
                 buttons: ["cancelRequest"]
             };
-        
+
         default:
             return { buttons: [] };
     }
@@ -78,20 +78,19 @@ const FriendsCard: FC<FriendsCardProps> = ({
     onNameClick,
 }) => {
     const t = useTranslations('friends');
-    
+
     // Use custom buttons if provided, otherwise use defaults based on status
     const defaultConfig = getDefaultButtonConfig(status);
     const buttons = customButtons ?? defaultConfig.buttons;
     const dropdownOptions = customDropdownOptions ?? defaultConfig.dropdownOptions;
-    
+
     const handleNameClick = () => {
         if (onNameClick) {
             onNameClick(userId);
         }
     };
-    
     return (
-        <div className="flex items-center justify-between border border-border-subtle px-3 py-6 rounded-2xl">
+        <div className="flex items-center justify-between lg:border border-t border-border-subtle px-3 py-6 lg:rounded-2xl">
             {/* ---- Avatar + Info ---- */}
             <div className="flex items-center space-x-3">
                 <Image
@@ -103,19 +102,24 @@ const FriendsCard: FC<FriendsCardProps> = ({
                 />
 
                 <div>
-                    <div className="flex items-center space-x-2">
-                        <span 
+                    <div className="flex items-center flex-wrap">
+                        <div
                             onClick={handleNameClick}
-                            className="font-body-large text-text-primary text-sm cursor-pointer hover:text-text-brand transition-colors"
+                            className="font-body-large text-text-primary text-sm cursor-pointer hover:text-text-brand transition-colors inline-flex items-center gap-1 mr-2"
                         >
-                            {name}
-                        </span>
-                        {tier && <UserBadge tier={tier} size="sm" />}
+                            <span className="flex items-center space-x-2 ">
+                                <p className="whitespace-nowrap">
+                                    {name?.trim()}
+                                </p>
+                                <UserBadge tier={tier} size="sm" />
+                            </span>
+
+                        </div>
                     </div>
 
                     {mutualConnections !== undefined && (
                         <span className="text-sm text-text-secondary">
-                            {mutualConnections === 1 
+                            {mutualConnections === 1
                                 ? t('mutualConnection', { count: mutualConnections })
                                 : t('mutualConnections', { count: mutualConnections })
                             }
@@ -125,12 +129,12 @@ const FriendsCard: FC<FriendsCardProps> = ({
             </div>
 
             {/* ---- Dynamic Action Buttons ---- */}
-            <FriendActionButtons 
+            <FriendActionButtons
                 userId={userId}
                 buttonsToShow={buttons}
-                dropdownOptions={dropdownOptions} 
-                connectionId={""}            
-                />
+                dropdownOptions={dropdownOptions}
+                connectionId={""}
+            />
         </div>
     );
 };

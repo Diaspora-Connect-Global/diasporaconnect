@@ -56,7 +56,9 @@ export function UserBadge({
 
     return (
         <div className="inline-flex items-center gap-2">
+            <span>
             {badge}
+            </span>
             <span className="text-sm font-medium text-muted-foreground capitalize">
                 {tier}
             </span>

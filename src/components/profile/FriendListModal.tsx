@@ -15,10 +15,10 @@ import {
   SEARCH_USERS,
   SearchUsersResponse,
 } from "@/services/gql/connection";
-import { 
+import {
   GET_PENDING_REQUESTS_SENT,
   GET_PENDING_REQUESTS_RECEIVED,
-  GetPendingRequestsResponse 
+  GetPendingRequestsResponse
 } from "@/services/gql/connection";
 
 interface Friend {
@@ -45,43 +45,43 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
   /* --------------------- GraphQL Queries --------------------- */
   // Get accepted connections (friends)
-  const { 
-    data: connectionsData, 
-    loading: connectionsLoading, 
-    refetch: refetchConnections 
+  const {
+    data: connectionsData,
+    loading: connectionsLoading,
+    refetch: refetchConnections
   } = useQuery<GetConnectionsResponse>(GET_MY_CONNECTIONS, {
     variables: { limit: 100.0, offset: 0.0 },
     skip: activeTab !== "friends",
   });
 
   // Get pending requests SENT
-  const { 
-    data: requestsSentData, 
-    loading: requestsSentLoading, 
-    refetch: refetchRequestsSent 
+  const {
+    data: requestsSentData,
+    loading: requestsSentLoading,
+    refetch: refetchRequestsSent
   } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_SENT, {
     variables: { limit: 100.0, offset: 0.0 },
     skip: activeTab !== "request-sent",
   });
 
   // Get pending requests RECEIVED
-  const { 
-    data: requestsReceivedData, 
-    loading: requestsReceivedLoading, 
-    refetch: refetchRequestsReceived 
+  const {
+    data: requestsReceivedData,
+    loading: requestsReceivedLoading,
+    refetch: refetchRequestsReceived
   } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_RECEIVED, {
     variables: { limit: 100.0, offset: 0.0 },
     skip: activeTab !== "request-received",
   });
 
   // Get friend suggestions (when no search term)
-  const { 
-    data: suggestions, 
+  const {
+    data: suggestions,
     loading: suggestionsLoading,
-    refetch: refetchSuggestions 
+    refetch: refetchSuggestions
   } = useQuery<GetFriendSuggestionsResponse>(
     GET_FRIEND_SUGGESTIONS,
-    { 
+    {
       variables: { limit: 10 },
       skip: activeTab !== "suggested" || searchTerm.length > 0, // Skip if searching
     }
@@ -89,7 +89,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
   // Search users (when search term exists on suggested tab)
   const [
-    searchUsers, 
+    searchUsers,
     { data: searchResults, loading: searchLoading }
   ] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS);
 
@@ -207,9 +207,9 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   }, [
     activeTab,
     searchTerm,
-    connectionsData, 
-    requestsSentData, 
-    requestsReceivedData, 
+    connectionsData,
+    requestsSentData,
+    requestsReceivedData,
     suggestions,
     searchResults
   ]);
@@ -218,8 +218,8 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   useEffect(() => {
     // Clear search term when changing tabs
     setSearchTerm("");
-    
-    switch(activeTab) {
+
+    switch (activeTab) {
       case "friends":
         refetchConnections();
         break;
@@ -268,7 +268,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const counts = useMemo(() => {
     const byStatus: Record<FriendType, number> = {
       "friends": connectionsData?.getConnections.total || 0,
-      "suggested": searchTerm.length > 0 
+      "suggested": searchTerm.length > 0
         ? (searchResults?.searchUsers.total || 0)
         : (suggestions?.getFriendSuggestions.total || 0),
       "request-received": requestsReceivedData?.getPendingConnections.total || 0,
@@ -278,16 +278,16 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     return byStatus;
   }, [
     searchTerm,
-    connectionsData, 
-    requestsSentData, 
-    requestsReceivedData, 
+    connectionsData,
+    requestsSentData,
+    requestsReceivedData,
     suggestions,
     searchResults
   ]);
 
   const tabTitle = {
     "friends": t("titles.all", { count: counts["friends"] }),
-    "suggested": searchTerm.length > 0 
+    "suggested": searchTerm.length > 0
       ? `${t("titles.searchResults")} (${counts["suggested"]})`
       : t("titles.suggested"),
     "request-received": t("titles.requestReceived", { count: counts["request-received"] }),
@@ -295,17 +295,17 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   }[activeTab];
 
   /* --------------------- Loading state --------------------- */
-  const isLoading = 
-    connectionsLoading || 
-    requestsSentLoading || 
-    requestsReceivedLoading || 
+  const isLoading =
+    connectionsLoading ||
+    requestsSentLoading ||
+    requestsReceivedLoading ||
     suggestionsLoading ||
     searchLoading;
 
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
     const key = `${friend.status}-${friend.userId}`;
-    
+
     return (
       <FriendsCard
         key={key}
@@ -342,11 +342,10 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") setActiveTab(key);
               }}
-              className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${
-                activeTab === key
+              className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${activeTab === key
                   ? "bg-surface-brand-subtle text-text-brand"
                   : "text-text-secondary"
-              }`}
+                }`}
             >
               <p>{label}</p>
             </div>
@@ -356,12 +355,12 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
       {/* ---------- RIGHT CONTENT ---------- */}
       <div className="lg:w-[80vw] overflow-y-auto">
-        <div className="w-[75vw] m-auto">
+        <div className="lg:w-[75vw] m-auto">
           <div className="lg:flex justify-between items-center my-4">
             {/* DYNAMIC heading */}
-            <p className="font-heading-xsmall">{tabTitle}</p>
+            <p className="font-heading-xsmall w-[75vw]  mx-auto lg:w-fit ">{tabTitle}</p>
 
-            <div>
+            <div className="w-[75vw] lg:w-fit  mx-auto">
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
@@ -369,7 +368,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
                   // Search is handled automatically by useEffect
                 }}
                 placeholder={
-                  activeTab === "suggested" 
+                  activeTab === "suggested"
                     ? t("searchUsers") || "Search users..."
                     : t("search") || "Search..."
                 }
@@ -386,7 +385,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
           {/* Cards grid */}
           {!isLoading && (
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 lg:gap-6">
               {filteredFriends.map((friend) => renderCard(friend))}
             </div>
           )}
