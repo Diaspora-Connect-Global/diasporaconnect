@@ -39,7 +39,7 @@ interface FriendListModalProps {
 export default function FriendListModal({ onClose }: FriendListModalProps) {
   const t = useTranslations("friends");
   const router = useRouter();
-  const { addFriend, acceptFriend, cancelFriendRequest } = useFriendActions();
+  const { addFriend, acceptRequest, cancelRequest } = useFriendActions();
 
   /* --------------------- State --------------------- */
   const [activeTab, setActiveTab] = useState<FriendType>("friends");
@@ -138,10 +138,10 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     }
   };
 
-  const handleAcceptFriend = async (userId: string) => {
-    setLoadingUserId(userId);
+  const handleAcceptFriend = async (connectionId: string) => {
+    setLoadingUserId(connectionId);
     try {
-      await acceptFriend(userId);
+      await acceptRequest(connectionId);
       setTimeout(() => {
         refetchRequestsReceived();
         refetchConnections();
@@ -153,10 +153,10 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     }
   };
 
-  const handleCancelRequest = async (userId: string) => {
-    setLoadingUserId(userId);
+  const handleCancelRequest = async (connectionId: string) => {
+    setLoadingUserId(connectionId);
     try {
-      await cancelFriendRequest(userId);
+      await cancelRequest(connectionId);
       setTimeout(() => {
         refetchRequestsSent();
       }, 500);
@@ -352,6 +352,12 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
     const key = `${friend.status}-${friend.userId}`;
+    
+    // Use connectionId for loading state on request-received and request-sent
+    // Use userId for loading state on suggested
+    const isLoadingThis = friend.status === 'suggested' 
+      ? loadingUserId === friend.userId
+      : loadingUserId === friend.connectionId;
 
     return (
       <FriendsCard
@@ -363,10 +369,10 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         tier={friend.tier}
         status={friend.status}
         onNameClick={handleNameClick}
-        isLoading={loadingUserId === friend.userId}
+        isLoading={isLoadingThis}
         onAddFriend={() => handleAddFriend(friend.userId)}
-        onAcceptFriend={() => handleAcceptFriend(friend.userId)}
-        onCancelRequest={() => handleCancelRequest(friend.userId)}
+        onAcceptFriend={friend.connectionId ? () => handleAcceptFriend(friend.connectionId!) : undefined}
+        onCancelRequest={friend.connectionId ? () => handleCancelRequest(friend.connectionId!) : undefined}
       />
     );
   };
