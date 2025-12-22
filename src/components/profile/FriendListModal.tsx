@@ -20,6 +20,7 @@ import {
   GET_PENDING_REQUESTS_RECEIVED,
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
+import { useFriendActions } from "@/hooks/friends/useFriendActions";
 
 interface Friend {
   userId: string;
@@ -38,10 +39,12 @@ interface FriendListModalProps {
 export default function FriendListModal({ onClose }: FriendListModalProps) {
   const t = useTranslations("friends");
   const router = useRouter();
+  const { addFriend, acceptFriend, cancelFriendRequest } = useFriendActions();
 
   /* --------------------- State --------------------- */
   const [activeTab, setActiveTab] = useState<FriendType>("friends");
   const [searchTerm, setSearchTerm] = useState("");
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
   /* --------------------- GraphQL Queries --------------------- */
   // Get accepted connections (friends)
@@ -118,6 +121,50 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const getTierFromUser = (user: any): "starter" | "trusted" | "reliable" | "elite" => {
     // TODO: Implement actual tier logic
     return "starter";
+  };
+
+  /* --------------------- Action Handlers with Loading State --------------------- */
+  const handleAddFriend = async (userId: string) => {
+    setLoadingUserId(userId);
+    try {
+      await addFriend(userId);
+      setTimeout(() => {
+        refetchSuggestions();
+      }, 500);
+    } catch (error) {
+      console.error('Error adding friend:', error);
+    } finally {
+      setLoadingUserId(null);
+    }
+  };
+
+  const handleAcceptFriend = async (userId: string) => {
+    setLoadingUserId(userId);
+    try {
+      await acceptFriend(userId);
+      setTimeout(() => {
+        refetchRequestsReceived();
+        refetchConnections();
+      }, 500);
+    } catch (error) {
+      console.error('Error accepting friend:', error);
+    } finally {
+      setLoadingUserId(null);
+    }
+  };
+
+  const handleCancelRequest = async (userId: string) => {
+    setLoadingUserId(userId);
+    try {
+      await cancelFriendRequest(userId);
+      setTimeout(() => {
+        refetchRequestsSent();
+      }, 500);
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+    } finally {
+      setLoadingUserId(null);
+    }
   };
 
   /* --------------------- Transform API data to Friend[] --------------------- */
@@ -316,6 +363,10 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         tier={friend.tier}
         status={friend.status}
         onNameClick={handleNameClick}
+        isLoading={loadingUserId === friend.userId}
+        onAddFriend={() => handleAddFriend(friend.userId)}
+        onAcceptFriend={() => handleAcceptFriend(friend.userId)}
+        onCancelRequest={() => handleCancelRequest(friend.userId)}
       />
     );
   };
