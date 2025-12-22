@@ -1,8 +1,8 @@
 "use client";
 
 import { SearchInput } from "@/components/custom/input";
-import FriendsCardWithLoading from "./FriendsCardWithLoading";
-import { useMemo, useState, useEffect, createContext, useContext } from "react";
+import FriendsCard from "@/components/home/FriendsCard";
+import { useMemo, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { FriendType } from "../friends/TypeOfFriend";
 import { useRouter } from "next/navigation";
@@ -21,22 +21,6 @@ import {
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Context for managing loading states across friend actions
-interface FriendActionContextType {
-  loadingUserId: string | null;
-  setLoadingUserId: (userId: string | null) => void;
-}
-
-const FriendActionContext = createContext<FriendActionContextType | null>(null);
-
-export const useFriendActionLoading = () => {
-  const context = useContext(FriendActionContext);
-  if (!context) {
-    throw new Error('useFriendActionLoading must be used within FriendActionProvider');
-  }
-  return context;
-};
 
 interface Friend {
   userId: string;
@@ -75,7 +59,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   /* --------------------- State --------------------- */
   const [activeTab, setActiveTab] = useState<FriendType>("friends");
   const [searchTerm, setSearchTerm] = useState("");
-  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
   /* --------------------- GraphQL Queries --------------------- */
   // Get accepted connections (friends)
@@ -252,8 +235,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   useEffect(() => {
     // Clear search term when changing tabs
     setSearchTerm("");
-    // Clear loading state when switching tabs
-    setLoadingUserId(null);
 
     switch (activeTab) {
       case "friends":
@@ -270,30 +251,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         break;
     }
   }, [activeTab, refetchConnections, refetchRequestsSent, refetchRequestsReceived, refetchSuggestions]);
-
-  /* --------------------- Handle friend action callbacks --------------------- */
-  const handleActionStart = (userId: string) => {
-    setLoadingUserId(userId);
-  };
-
-  const handleActionComplete = () => {
-    setLoadingUserId(null);
-    // Refetch the current tab's data
-    switch (activeTab) {
-      case "friends":
-        refetchConnections();
-        break;
-      case "request-sent":
-        refetchRequestsSent();
-        break;
-      case "request-received":
-        refetchRequestsReceived();
-        break;
-      case "suggested":
-        refetchSuggestions();
-        break;
-    }
-  };
 
   /* --------------------- Handle name click --------------------- */
   const handleNameClick = (userId: string) => {
@@ -383,7 +340,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     const key = `${friend.status}-${friend.userId}`;
 
     return (
-      <FriendsCardWithLoading
+      <FriendsCard
         key={key}
         userId={friend.userId}
         name={friend.name}
@@ -398,91 +355,89 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
   /* --------------------- UI --------------------- */
   return (
-    <FriendActionContext.Provider value={{ loadingUserId, setLoadingUserId }}>
-      <div className="lg:flex bg-surface-default h-[90vh] ">
-        {/* ---------- LEFT SIDEBAR (tabs) ---------- */}
-        <div className="lg:w-[20vw] p-4 border-r lg:min-h-[90vh] overflow-y-auto">
-          <div className="mt-4 space-y-2 flex lg:flex-col">
-            {(
-              [
-                { key: "friends" as FriendType, label: t("tabs.all") },
-                { key: "suggested" as FriendType, label: t("tabs.suggested") },
-                { key: "request-received" as FriendType, label: t("tabs.requestReceived") },
-                { key: "request-sent" as FriendType, label: t("tabs.requestSent") },
-              ] as const
-            ).map(({ key, label }) => (
-              <div
-                key={key}
-                role="button"
-                tabIndex={0}
-                onClick={() => setActiveTab(key)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") setActiveTab(key);
-                }}
-                className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${activeTab === key
-                    ? "bg-surface-brand-subtle text-text-brand"
-                    : "text-text-secondary"
-                  }`}
-              >
-                <p>{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ---------- RIGHT CONTENT ---------- */}
-        <div className="lg:w-[80vw] overflow-y-auto">
-          <div className="lg:w-[75vw] m-auto">
-            <div className="lg:flex justify-between items-center my-4">
-              {/* DYNAMIC heading */}
-              <p className="font-heading-xsmall w-[75vw]  mx-auto lg:w-fit ">{tabTitle}</p>
-
-              <div className="w-[75vw] lg:w-fit  mx-auto">
-                <SearchInput
-                  value={searchTerm}
-                  onChange={setSearchTerm}
-                  onSearch={() => {
-                    // Search is handled automatically by useEffect
-                  }}
-                  placeholder={
-                    activeTab === "suggested"
-                      ? t("searchUsers") || "Search users..."
-                      : t("search") || "Search..."
-                  }
-                />
-              </div>
+    <div className="lg:flex bg-surface-default h-[90vh] ">
+      {/* ---------- LEFT SIDEBAR (tabs) ---------- */}
+      <div className="lg:w-[20vw] p-4 border-r lg:min-h-[90vh] overflow-y-auto">
+        <div className="mt-4 space-y-2 flex lg:flex-col">
+          {(
+            [
+              { key: "friends" as FriendType, label: t("tabs.all") },
+              { key: "suggested" as FriendType, label: t("tabs.suggested") },
+              { key: "request-received" as FriendType, label: t("tabs.requestReceived") },
+              { key: "request-sent" as FriendType, label: t("tabs.requestSent") },
+            ] as const
+          ).map(({ key, label }) => (
+            <div
+              key={key}
+              role="button"
+              tabIndex={0}
+              onClick={() => setActiveTab(key)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") setActiveTab(key);
+              }}
+              className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${activeTab === key
+                  ? "bg-surface-brand-subtle text-text-brand"
+                  : "text-text-secondary"
+                }`}
+            >
+              <p>{label}</p>
             </div>
-
-            {/* Loading state with skeletons */}
-            {isLoading && (
-              <div className="grid lg:grid-cols-2 lg:gap-6">
-                <FriendCardSkeleton />
-                <FriendCardSkeleton />
-                <FriendCardSkeleton />
-                <FriendCardSkeleton />
-                <FriendCardSkeleton />
-                <FriendCardSkeleton />
-              </div>
-            )}
-
-            {/* Cards grid */}
-            {!isLoading && (
-              <div className="grid lg:grid-cols-2 lg:gap-6">
-                {filteredFriends.map((friend) => renderCard(friend))}
-              </div>
-            )}
-
-            {/* Empty state */}
-            {!isLoading && filteredFriends.length === 0 && (
-              <p className="text-center text-muted-foreground col-span-2">
-                {searchTerm.length > 0 && activeTab === "suggested"
-                  ? t("noSearchResults") || "No users found"
-                  : t("empty")}
-              </p>
-            )}
-          </div>
+          ))}
         </div>
       </div>
-    </FriendActionContext.Provider>
+
+      {/* ---------- RIGHT CONTENT ---------- */}
+      <div className="lg:w-[80vw] overflow-y-auto">
+        <div className="lg:w-[75vw] m-auto">
+          <div className="lg:flex justify-between items-center my-4">
+            {/* DYNAMIC heading */}
+            <p className="font-heading-xsmall w-[75vw]  mx-auto lg:w-fit ">{tabTitle}</p>
+
+            <div className="w-[75vw] lg:w-fit  mx-auto">
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSearch={() => {
+                  // Search is handled automatically by useEffect
+                }}
+                placeholder={
+                  activeTab === "suggested"
+                    ? t("searchUsers") || "Search users..."
+                    : t("search") || "Search..."
+                }
+              />
+            </div>
+          </div>
+
+          {/* Loading state with skeletons */}
+          {isLoading && (
+            <div className="grid lg:grid-cols-2 lg:gap-6">
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+            </div>
+          )}
+
+          {/* Cards grid */}
+          {!isLoading && (
+            <div className="grid lg:grid-cols-2 lg:gap-6">
+              {filteredFriends.map((friend) => renderCard(friend))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!isLoading && filteredFriends.length === 0 && (
+            <p className="text-center text-muted-foreground col-span-2">
+              {searchTerm.length > 0 && activeTab === "suggested"
+                ? t("noSearchResults") || "No users found"
+                : t("empty")}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
