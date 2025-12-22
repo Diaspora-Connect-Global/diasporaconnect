@@ -34,7 +34,7 @@ export function PeopleYouMayKnow() {
     const { data, loading, refetch } = useQuery<GetFriendSuggestionsResponse>(
         GET_FRIEND_SUGGESTIONS,
         {
-            variables: { limit: 3 },
+            variables: { limit: 5 },
             fetchPolicy: 'cache-and-network',
         }
     );
