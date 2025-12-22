@@ -20,6 +20,7 @@ import {
   GET_PENDING_REQUESTS_RECEIVED,
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
+import { useFriendActions } from "@/hooks/useFriendActions";
 
 interface Friend {
   userId: string;
@@ -38,10 +39,12 @@ interface FriendListModalProps {
 export default function FriendListModal({ onClose }: FriendListModalProps) {
   const t = useTranslations("friends");
   const router = useRouter();
+  const { addFriend, acceptRequest, cancelRequest } = useFriendActions();
 
   /* --------------------- State --------------------- */
   const [activeTab, setActiveTab] = useState<FriendType>("friends");
   const [searchTerm, setSearchTerm] = useState("");
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
   /* --------------------- GraphQL Queries --------------------- */
   // Get accepted connections (friends)
@@ -92,6 +95,40 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     searchUsers,
     { data: searchResults, loading: searchLoading }
   ] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS);
+
+  /* --------------------- Action Handlers --------------------- */
+  const handleAddFriend = async (userId: string) => {
+    setLoadingUserId(userId);
+    try {
+      await addFriend(userId);
+      setTimeout(() => refetchSuggestions(), 500);
+    } finally {
+      setLoadingUserId(null);
+    }
+  };
+
+  const handleAcceptFriend = async (connectionId: string) => {
+    setLoadingUserId(connectionId);
+    try {
+      await acceptRequest(connectionId);
+      setTimeout(() => {
+        refetchRequestsReceived();
+        refetchConnections();
+      }, 500);
+    } finally {
+      setLoadingUserId(null);
+    }
+  };
+
+  const handleCancelRequest = async (connectionId: string) => {
+    setLoadingUserId(connectionId);
+    try {
+      await cancelRequest(connectionId);
+      setTimeout(() => refetchRequestsSent(), 500);
+    } finally {
+      setLoadingUserId(null);
+    }
+  };
 
   /* --------------------- Handle search for suggested tab --------------------- */
   useEffect(() => {
@@ -305,6 +342,24 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
     const key = `${friend.status}-${friend.userId}`;
+    
+    // Determine which ID to use for loading state
+    const loadingId = friend.status === 'suggested' ? friend.userId : friend.connectionId;
+    const isLoadingThis = loadingUserId === loadingId;
+
+    // Get the appropriate action handler based on status
+    const getActionHandler = () => {
+      switch (friend.status) {
+        case "suggested":
+          return () => handleAddFriend(friend.userId);
+        case "request-received":
+          return () => handleAcceptFriend(friend.connectionId!);
+        case "request-sent":
+          return () => handleCancelRequest(friend.connectionId!);
+        default:
+          return undefined;
+      }
+    };
 
     return (
       <FriendsCard
@@ -316,6 +371,8 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         tier={friend.tier}
         status={friend.status}
         onNameClick={handleNameClick}
+        isLoading={isLoadingThis}
+        onAction={getActionHandler()}
       />
     );
   };
