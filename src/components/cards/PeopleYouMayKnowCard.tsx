@@ -37,7 +37,7 @@ export default function PeopleYouMayKnowCard({
   // Determine button label based on state
   const getButtonLabel = () => {
     if (isLoading) {
-      return tActions('adding') || 'Adding...';
+      return ''; // Show only spinner, no text
     }
     if (isAdded) {
       return tActions('added');
@@ -74,10 +74,13 @@ export default function PeopleYouMayKnowCard({
           className="inline-flex items-center gap-1 text-text-brand cursor-pointer whitespace-nowrap"
           onClick={handleClick}
           disabled={isAdded || isLoading}
-          aria-label={buttonLabel}
+          aria-label={buttonLabel || 'Loading'}
         >
-          {isLoading && <Spinner className="w-3 h-3" />}
-          <p className='label-medium'>{buttonLabel}</p>
+          {isLoading ? (
+            <Spinner className="w-4 h-4" />
+          ) : (
+            <p className='label-medium'>{buttonLabel}</p>
+          )}
         </button>
       </div>
     </div>
