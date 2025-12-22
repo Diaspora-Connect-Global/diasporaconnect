@@ -1,45 +1,94 @@
+'use client';
+
 import { ChevronRight } from "lucide-react";
 import PeopleYouMayKnowCard from "../cards/PeopleYouMayKnowCard";
 import { useTranslations } from 'next-intl';
 import { Link } from "@/i18n/navigation";
+import { useQuery } from "@apollo/client/react";
+import { GET_FRIEND_SUGGESTIONS, GetFriendSuggestionsResponse } from "@/services/gql/connection";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useFriendActions } from "@/hooks/friends/useFriendActions";
+
+// Loading skeleton for friend suggestions
+function FriendSuggestionSkeleton() {
+    return (
+        <div className="h-[2.5rem] flex space-x-6 items-center justify-between">
+            <div className="flex items-center gap-[0.5rem]">
+                <Skeleton className="h-[1.5rem] w-[1.5rem] rounded-full" />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                </div>
+            </div>
+            <Skeleton className="h-6 w-16" />
+        </div>
+    );
+}
 
 export function PeopleYouMayKnow() {
     const t = useTranslations('home');
     const tActions = useTranslations('actions');
+    const { addFriend } = useFriendActions();
+
+    // Query friend suggestions - limit to 3 for homepage
+    const { data, loading, refetch } = useQuery<GetFriendSuggestionsResponse>(
+        GET_FRIEND_SUGGESTIONS,
+        {
+            variables: { limit: 3 },
+            fetchPolicy: 'cache-and-network',
+        }
+    );
+
+    const suggestions = data?.getFriendSuggestions.suggestions || [];
+
+    const handleAddFriend = async (userId: string) => {
+        await addFriend(userId);
+        // Refetch suggestions after adding a friend to update the list
+        setTimeout(() => {
+            refetch();
+        }, 500); // Small delay to allow backend to update
+    };
 
     return (
-        <div className="space-y-[3.2rem] " > {/* 32px equivalent */}
+        <div className="space-y-[3.2rem]"> {/* 32px equivalent */}
             <div className="space-y-[1.2rem]"> {/* 12px equivalent */}
                 <p className="caption-large">{t('peopleYouMayKnow')}</p>
                 <div className="space-y-[1.6rem]"> {/* 16px equivalent */}
-                    <PeopleYouMayKnowCard
-                        profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
-                        name="Janet Doe"
-                        mutualConnections={4}
-                    />
-                    <PeopleYouMayKnowCard
-                        profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
-                        name="John Smith"
-                        mutualConnections={120}
-                    />
-                    <PeopleYouMayKnowCard
-                        profileImage="https://img.freepik.com/free-photo/close-up-upset-american-black-person_23-2148749582.jpg?semt=ais_hybrid&w=740&q=80"
-                        name="Sarah Johnson"
-                        mutualConnections={7}
-                    />
-
-                  
+                    {loading ? (
+                        // Show 3 skeleton loaders while loading
+                        <>
+                            <FriendSuggestionSkeleton />
+                            <FriendSuggestionSkeleton />
+                            <FriendSuggestionSkeleton />
+                        </>
+                    ) : suggestions.length === 0 ? (
+                        // Show empty state
+                        <p className="text-text-secondary text-sm text-center py-4">
+                            {t('noSuggestions') || 'No friend suggestions available'}
+                        </p>
+                    ) : (
+                        // Show actual suggestions
+                        suggestions.map((suggestion) => (
+                            <PeopleYouMayKnowCard
+                                key={suggestion.profile.userId}
+                                profileImage={suggestion.profile.avatarUrl || "https://github.com/shadcn.png"}
+                                name={`${suggestion.profile.firstName} ${suggestion.profile.lastName}`}
+                                mutualConnections={suggestion.mutualConnectionsCount}
+                                onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
+                            />
+                        ))
+                    )}
                 </div>
             </div>
-            <div className="flex justify-between ">
-                <p className="caption-large text-text-primary  whitespace-nowrap">{t('events.near')}</p>
+            <div className="flex justify-between">
+                <p className="caption-large text-text-primary whitespace-nowrap">{t('events.near')}</p>
                 <Link href="/events">
                     <div className="label-medium text-text-brand flex text-center justify-end items-end">
-                        <p className=" whitespace-nowrap">{tActions('seemore')}</p>
+                        <p className="whitespace-nowrap">{tActions('seemore')}</p>
                         <ChevronRight size={20} />
                     </div>
                 </Link>
             </div>
         </div>
-    )
+    );
 }
