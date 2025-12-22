@@ -84,16 +84,15 @@ export const FriendActionButtons = ({
   };
 
   const handleRemoveFriend = async () => {
-    await withLoading(() => friendActions.unfriend(connectionId));
+    await withLoading(() => friendActions.removeFriend(connectionId));
   };
 
   const handleBlockFriend = async () => {
-    await withLoading(() => friendActions.blockUser(userId));
+    await withLoading(() => friendActions.blockFriend(userId));
   };
 
-  const handleMessage = () => {
-    // Navigate to messages or open chat
-    friendActions.sendMessage(userId);
+  const handleMessage = async () => {
+    await friendActions.sendMessage(userId);
   };
 
   // Render button based on type
