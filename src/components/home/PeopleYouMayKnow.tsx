@@ -34,11 +34,11 @@ export function PeopleYouMayKnow() {
     // Track which user is currently being added
     const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
-    // Query friend suggestions - limit to 5 for homepage
+    // Query friend suggestions - limit to 3 for homepage
     const { data, loading, refetch } = useQuery<GetFriendSuggestionsResponse>(
         GET_FRIEND_SUGGESTIONS,
         {
-            variables: { limit: 5 },
+            variables: { limit: 3 },
             fetchPolicy: 'cache-and-network',
         }
     );
