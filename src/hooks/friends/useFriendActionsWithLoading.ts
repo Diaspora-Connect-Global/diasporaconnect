@@ -1,5 +1,5 @@
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
-import { useFriendActionLoading } from "../profile/FriendListModal";
+import { useFriendActionLoading } from "@/components/profile/FriendListModal";
 
 /**
  * Enhanced friend actions hook that integrates with the loading state context
