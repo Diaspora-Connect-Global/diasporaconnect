@@ -25,7 +25,7 @@ export const useFriendActionsWithLoading = () => {
     acceptFriend: async (connectionId: string, userId: string) => {
       setLoadingUserId(userId);
       try {
-        await friendActions.acceptFriend(connectionId);
+        await friendActions.acceptRequest(connectionId);
       } finally {
         setTimeout(() => {
           setLoadingUserId(null);
@@ -36,7 +36,7 @@ export const useFriendActionsWithLoading = () => {
     ignoreFriend: async (connectionId: string, userId: string) => {
       setLoadingUserId(userId);
       try {
-        await friendActions.ignoreFriend(connectionId);
+        await friendActions.ignoreRequest(connectionId);
       } finally {
         setTimeout(() => {
           setLoadingUserId(null);
