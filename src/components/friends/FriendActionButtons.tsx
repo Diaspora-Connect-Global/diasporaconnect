@@ -35,6 +35,7 @@ interface FriendActionButtonsProps {
   buttonsToShow: FriendButtonType[];
   dropdownOptions?: DropdownOption[];
   connectionId: string;
+  className?: string;
 }
 
 export const FriendActionButtons = ({
@@ -42,6 +43,7 @@ export const FriendActionButtons = ({
   buttonsToShow,
   dropdownOptions = [],
   connectionId,
+  className = "",
 }: FriendActionButtonsProps) => {
   const t = useTranslations('friends');
   const friendActions = useFriendActions();
@@ -191,7 +193,7 @@ export const FriendActionButtons = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={`flex items-center gap-2 ${className}`}>
       {buttonsToShow.map((buttonType) => renderButton(buttonType))}
     </div>
   );
