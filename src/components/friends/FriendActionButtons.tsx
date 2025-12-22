@@ -72,11 +72,11 @@ export const FriendActionButtons = ({
   };
 
   const handleAcceptFriend = async () => {
-    await withLoading(() => friendActions.acceptFriend(connectionId));
+    await withLoading(() => friendActions.acceptRequest(connectionId));
   };
 
   const handleIgnoreFriend = async () => {
-    await withLoading(() => friendActions.ignoreFriend(connectionId));
+    await withLoading(() => friendActions.ignoreRequest(connectionId));
   };
 
   const handleCancelRequest = async () => {
@@ -84,16 +84,16 @@ export const FriendActionButtons = ({
   };
 
   const handleRemoveFriend = async () => {
-    await withLoading(() => friendActions.removeFriend(connectionId));
+    await withLoading(() => friendActions.unfriend(connectionId));
   };
 
   const handleBlockFriend = async () => {
-    await withLoading(() => friendActions.blockFriend(userId));
+    await withLoading(() => friendActions.blockUser(userId));
   };
 
   const handleMessage = () => {
     // Navigate to messages or open chat
-    console.log('Message user:', userId);
+    friendActions.sendMessage(userId);
   };
 
   // Render button based on type
