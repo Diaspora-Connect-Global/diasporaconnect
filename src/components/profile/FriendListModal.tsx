@@ -20,6 +20,7 @@ import {
   GET_PENDING_REQUESTS_RECEIVED,
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Friend {
   userId: string;
@@ -33,6 +34,22 @@ interface Friend {
 
 interface FriendListModalProps {
   onClose?: () => void;
+}
+
+// Loading skeleton component for friend cards
+function FriendCardSkeleton() {
+  return (
+    <div className="flex items-center justify-between border-t border-border-subtle px-3 py-6 lg:border lg:rounded-2xl">
+      <div className="flex items-center space-x-3">
+        <Skeleton className="w-14 h-14 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-24" />
+        </div>
+      </div>
+      <Skeleton className="h-8 w-20 rounded-full" />
+    </div>
+  );
 }
 
 export default function FriendListModal({ onClose }: FriendListModalProps) {
@@ -294,13 +311,29 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     "request-sent": t("titles.requestSent"),
   }[activeTab];
 
-  /* --------------------- Loading state --------------------- */
-  const isLoading =
-    connectionsLoading ||
-    requestsSentLoading ||
-    requestsReceivedLoading ||
-    suggestionsLoading ||
-    searchLoading;
+  /* --------------------- Determine loading state per tab --------------------- */
+  const isLoading = useMemo(() => {
+    switch (activeTab) {
+      case "friends":
+        return connectionsLoading;
+      case "suggested":
+        return searchTerm.length > 0 ? searchLoading : suggestionsLoading;
+      case "request-received":
+        return requestsReceivedLoading;
+      case "request-sent":
+        return requestsSentLoading;
+      default:
+        return false;
+    }
+  }, [
+    activeTab,
+    searchTerm,
+    connectionsLoading,
+    suggestionsLoading,
+    searchLoading,
+    requestsReceivedLoading,
+    requestsSentLoading
+  ]);
 
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
@@ -376,11 +409,16 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             </div>
           </div>
 
-          {/* Loading state */}
+          {/* Loading state with skeletons */}
           {isLoading && (
-            <p className="text-center text-muted-foreground">
-              {t("loading") || "Loading..."}
-            </p>
+            <div className="grid lg:grid-cols-2 lg:gap-6">
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+              <FriendCardSkeleton />
+            </div>
           )}
 
           {/* Cards grid */}
