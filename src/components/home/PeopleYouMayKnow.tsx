@@ -8,6 +8,7 @@ import { useQuery } from "@apollo/client/react";
 import { GET_FRIEND_SUGGESTIONS, GetFriendSuggestionsResponse } from "@/services/gql/connection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
+import { useState } from "react";
 
 // Loading skeleton for friend suggestions
 function FriendSuggestionSkeleton() {
@@ -29,8 +30,11 @@ export function PeopleYouMayKnow() {
     const t = useTranslations('home');
     const tActions = useTranslations('actions');
     const { addFriend } = useFriendActions();
+    
+    // Track which user is currently being added
+    const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
-    // Query friend suggestions - limit to 3 for homepage
+    // Query friend suggestions - limit to 5 for homepage
     const { data, loading, refetch } = useQuery<GetFriendSuggestionsResponse>(
         GET_FRIEND_SUGGESTIONS,
         {
@@ -42,11 +46,22 @@ export function PeopleYouMayKnow() {
     const suggestions = data?.getFriendSuggestions.suggestions || [];
 
     const handleAddFriend = async (userId: string) => {
-        await addFriend(userId);
-        // Refetch suggestions after adding a friend to update the list
-        setTimeout(() => {
-            refetch();
-        }, 500); // Small delay to allow backend to update
+        setLoadingUserId(userId); // Set loading state for this specific user
+        
+        try {
+            await addFriend(userId);
+            // Success toast is handled in the hook
+            
+            // Refetch suggestions after adding a friend to update the list
+            setTimeout(() => {
+                refetch();
+            }, 500); // Small delay to allow backend to update
+        } catch (error) {
+            console.error('Error adding friend:', error);
+            // Error toast is handled in the hook
+        } finally {
+            setLoadingUserId(null); // Clear loading state
+        }
     };
 
     return (
@@ -55,12 +70,46 @@ export function PeopleYouMayKnow() {
                 <p className="caption-large">{t('peopleYouMayKnow')}</p>
                 <div className="space-y-[1.6rem]"> {/* 16px equivalent */}
                     {loading ? (
-                        // Show 3 skeleton loaders while loading
+                        // Show 5 skeleton loaders while loading
                         <>
                             <FriendSuggestionSkeleton />
                             <FriendSuggestionSkeleton />
                             <FriendSuggestionSkeleton />
+                            <FriendSuggestionSkeleton />
+                            <FriendSuggestionSkeleton />
                         </>
+                    ) : suggestions.length === 0 ? (
+                        // Show empty state
+                        <p className="text-text-secondary text-sm text-center py-4">
+                            {t('noSuggestions') || 'No friend suggestions available'}
+                        </p>
+                    ) : (
+                        // Show actual suggestions
+                        suggestions.map((suggestion) => (
+                            <PeopleYouMayKnowCard
+                                key={suggestion.profile.userId}
+                                profileImage={suggestion.profile.avatarUrl || "https://github.com/shadcn.png"}
+                                name={`${suggestion.profile.firstName} ${suggestion.profile.lastName}`}
+                                mutualConnections={suggestion.mutualConnectionsCount}
+                                onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
+                                isLoading={loadingUserId === suggestion.profile.userId}
+                            />
+                        ))
+                    )}
+                </div>
+            </div>
+            <div className="flex justify-between">
+                <p className="caption-large text-text-primary whitespace-nowrap">{t('events.near')}</p>
+                <Link href="/events">
+                    <div className="label-medium text-text-brand flex text-center justify-end items-end">
+                        <p className="whitespace-nowrap">{tActions('seemore')}</p>
+                        <ChevronRight size={20} />
+                    </div>
+                </Link>
+            </div>
+        </div>
+    );
+}
                     ) : suggestions.length === 0 ? (
                         // Show empty state
                         <p className="text-text-secondary text-sm text-center py-4">
