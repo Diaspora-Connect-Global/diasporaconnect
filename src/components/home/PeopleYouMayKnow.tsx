@@ -110,34 +110,3 @@ export function PeopleYouMayKnow() {
         </div>
     );
 }
-                    ) : suggestions.length === 0 ? (
-                        // Show empty state
-                        <p className="text-text-secondary text-sm text-center py-4">
-                            {t('noSuggestions') || 'No friend suggestions available'}
-                        </p>
-                    ) : (
-                        // Show actual suggestions
-                        suggestions.map((suggestion) => (
-                            <PeopleYouMayKnowCard
-                                key={suggestion.profile.userId}
-                                profileImage={suggestion.profile.avatarUrl || "https://github.com/shadcn.png"}
-                                name={`${suggestion.profile.firstName} ${suggestion.profile.lastName}`}
-                                mutualConnections={suggestion.mutualConnectionsCount}
-                                onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
-                            />
-                        ))
-                    )}
-                </div>
-            </div>
-            <div className="flex justify-between">
-                <p className="caption-large text-text-primary whitespace-nowrap">{t('events.near')}</p>
-                <Link href="/events">
-                    <div className="label-medium text-text-brand flex text-center justify-end items-end">
-                        <p className="whitespace-nowrap">{tActions('seemore')}</p>
-                        <ChevronRight size={20} />
-                    </div>
-                </Link>
-            </div>
-        </div>
-    );
-}
