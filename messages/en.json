@@ -170,6 +170,7 @@
         "login": "Login",
         "postedBy": "Posted by {user}",
         "added": "Added",
+        "adding": "Adding...",
         "applied": "Applied",
         "showMore": "Show more",
         "showLess": "Show less",
@@ -232,6 +233,7 @@
     "home": {
         "mutualConnections": "mutual connections",
         "peopleYouMayKnow": "People you may know",
+        "noSuggestions": "No friend suggestions available",
         "header": {
             "home": "Home",
             "community": "Community",
