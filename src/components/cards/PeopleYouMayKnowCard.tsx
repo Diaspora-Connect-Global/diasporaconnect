@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { LabelMedium } from '../utils';
+import { Spinner } from '@/components/ui/spinner';
 
 interface PeopleYouMayKnowCardProps {
   profileImage: string;
@@ -11,6 +12,7 @@ interface PeopleYouMayKnowCardProps {
   onAddFriend?: () => void;
   buttonText?: string;
   buttonVariant?: 'primary' | 'secondary' | 'success';
+  isLoading?: boolean; // New prop for loading state
 }
 
 export default function PeopleYouMayKnowCard({
@@ -19,19 +21,31 @@ export default function PeopleYouMayKnowCard({
   mutualConnections,
   onAddFriend,
   buttonText,
+  isLoading = false, // Default to false
 }: PeopleYouMayKnowCardProps) {
   const [isAdded, setIsAdded] = useState(false);
   const t = useTranslations('home');
   const tActions = useTranslations('actions');
 
   const handleClick = () => {
-    if (!isAdded && onAddFriend) {
+    if (!isAdded && onAddFriend && !isLoading) {
       onAddFriend();
+      setIsAdded(true);
     }
-    setIsAdded((prev) => !prev);
   };
 
-  const buttonLabel = isAdded ? tActions('added') : buttonText || tActions('addFriend');
+  // Determine button label based on state
+  const getButtonLabel = () => {
+    if (isLoading) {
+      return tActions('adding') || 'Adding...';
+    }
+    if (isAdded) {
+      return tActions('added');
+    }
+    return buttonText || tActions('addFriend');
+  };
+
+  const buttonLabel = getButtonLabel();
 
   return (
     <div className=" h-[2.5rem] flex space-x-6 items-center justify-between  transition-colors rounded-lg ">
@@ -57,11 +71,12 @@ export default function PeopleYouMayKnowCard({
       {/* Right side - Action button */}
       <div className="flex items-center ">
         <button
-          className="inline-flex text-text-brand cursor-pointer  whitespace-nowrap"
+          className="inline-flex items-center gap-1 text-text-brand cursor-pointer whitespace-nowrap"
           onClick={handleClick}
-          disabled={isAdded}
+          disabled={isAdded || isLoading}
           aria-label={buttonLabel}
         >
+          {isLoading && <Spinner className="w-3 h-3" />}
           <p className='label-medium'>{buttonLabel}</p>
         </button>
       </div>
