@@ -275,7 +275,7 @@ const formatPhone = (phone: string, countryCode: string) => {
           data={formData}
           updateData={updateData}
           nextStep={nextStep}
-          isOAuth={isOAuth}
+          isOAuth={false}
         />
       )}
       {currentStep === 2 && (
