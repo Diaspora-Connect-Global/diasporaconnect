@@ -5,7 +5,7 @@ import FriendsCardWithLoading from "./FriendsCardWithLoading";
 import { useMemo, useState, useEffect, createContext, useContext } from "react";
 import { useTranslations } from "next-intl";
 import { FriendType } from "../friends/TypeOfFriend";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useLazyQuery } from "@apollo/client/react";
 import {
   GET_MY_CONNECTIONS,
@@ -68,14 +68,41 @@ function FriendCardSkeleton() {
   );
 }
 
+// Map tab numbers to FriendType
+const TAB_MAP: Record<string, FriendType> = {
+  "1": "friends",
+  "2": "suggested",
+  "3": "request-received",
+  "4": "request-sent",
+};
+
+// Reverse map for setting URL params
+const FRIEND_TYPE_TO_TAB: Record<FriendType, string> = {
+  "friends": "1",
+  "suggested": "2",
+  "request-received": "3",
+  "request-sent": "4",
+};
+
 export default function FriendListModal({ onClose }: FriendListModalProps) {
   const t = useTranslations("friends");
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   /* --------------------- State --------------------- */
-  const [activeTab, setActiveTab] = useState<FriendType>("friends");
+  // Get active tab from URL param, default to "1" (friends)
+  const tabParam = searchParams.get('t') || '1';
+  const activeTab: FriendType = TAB_MAP[tabParam] || "friends";
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+
+  /* --------------------- Tab navigation --------------------- */
+  const setActiveTab = (friendType: FriendType) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('t', FRIEND_TYPE_TO_TAB[friendType]);
+    router.push(`?${params.toString()}`);
+  };
 
   /* --------------------- GraphQL Queries --------------------- */
   // Get accepted connections (friends)

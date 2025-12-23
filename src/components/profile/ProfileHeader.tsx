@@ -47,17 +47,17 @@ export function ProfileHeader({
     .slice(0, 2);
 
   // Check if friendList modal should be open based on query param
-  const friendListOpen = searchParams.get('modal') === 'friendlist';
+  const friendListOpen = searchParams.get('m') === 'friends';
 
   const openFriendList = () => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('modal', 'friendlist');
+    params.set('m', 'friends');
     router.push(`?${params.toString()}`);
   };
 
   const closeFriendList = () => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete('modal');
+    params.delete('m');
     router.push(`?${params.toString()}`);
   };
 

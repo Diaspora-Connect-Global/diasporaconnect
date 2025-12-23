@@ -50,7 +50,7 @@ export default function CustomDialog({
           <DialogTitle className="text-xl font-semibold flex justify-between w-full">
             {defaultTitle}
             <XIcon
-              className="cursor-pointer h-5 w-5"
+              className="cursor-pointer h-5 w-5 mt-5"
               onClick={() => onOpenChange(false)}
             />
           </DialogTitle>
