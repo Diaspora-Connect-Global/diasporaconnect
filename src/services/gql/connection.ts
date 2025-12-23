@@ -12,6 +12,7 @@ export interface UserBasic {
   avatarUrl?: string;
   sector?: string;
   occupation?: string;
+  connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
 }
 
 export interface Connection {
@@ -24,6 +25,7 @@ export interface Connection {
   acceptedAt?: string;
   requester: UserBasic;
   receiver: UserBasic;
+  
 }
 
 export interface SendConnectionRequestInput {
@@ -396,6 +398,7 @@ export interface FriendSuggestionProfile {
   connectionCount: number;
   profilePicture:string
   avatarUrl:string
+  connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
 }
 
 export interface FriendSuggestion {
@@ -545,6 +548,7 @@ export interface UserProfile {
   headline?: string;
   connectionCount: number;
   avatarUrl?: string;
+  connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
 }
 
 export interface SearchUsersResponse {
@@ -597,6 +601,7 @@ export const SEARCH_USERS = gql`
         headline
         connectionCount
         avatarUrl
+        connectionStatus
       }
     }
   }

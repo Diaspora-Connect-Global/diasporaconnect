@@ -19,7 +19,7 @@ interface FriendsCardProps {
     tier: Tier;
 
     /** Current relationship status */
-    status: FriendType;
+    status: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
 
     /** Optional: Override default buttons for this status */
     customButtons?: FriendButtonType[];
@@ -32,12 +32,12 @@ interface FriendsCardProps {
 /**
  * Returns default button configuration based on friend status
  */
-const getDefaultButtonConfig = (status: FriendType): {
+const getDefaultButtonConfig = (status: "connected" | "none" | "pending_received" | "pending_sent" | "blocked"): {
     buttons: FriendButtonType[];
     dropdownOptions?: DropdownOption[];
 } => {
     switch (status) {
-        case "friends":
+        case "connected":
             return {
                 buttons: ["message", "dropdown"],
                 dropdownOptions: [
@@ -46,17 +46,17 @@ const getDefaultButtonConfig = (status: FriendType): {
                 ]
             };
 
-        case "suggested":
+        case "none":
             return {
                 buttons: ["addFriend"]
             };
 
-        case "request-received":
+        case "pending_received":
             return {
                 buttons: ["accept", "ignore"]
             };
 
-        case "request-sent":
+        case "pending_sent":
             return {
                 buttons: ["cancelRequest"]
             };

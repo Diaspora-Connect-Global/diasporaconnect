@@ -1,200 +1,150 @@
-import { useContext, createContext } from 'react';
-import { useTranslations } from 'next-intl';
-import { useFriendActions } from '@/hooks/friends/useFriendActions';
-import { ButtonType1, ButtonType2, ButtonType3 } from '@/components/custom/button';
+import { ButtonType1, ButtonType2 } from "../custom/button";
+import { Button } from "../ui/button";
+import { BanIcon, MoreHorizontalIcon } from "lucide-react";
+import { Trash } from "iconsax-reactjs";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { DotsThree } from '@phosphor-icons/react';
-
-// Context for loading state (shared with FriendListModal)
-const FriendActionContext = createContext<{
-  loadingUserId: string | null;
-  setLoadingUserId: (userId: string | null) => void;
-} | null>(null);
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "../ui/dropdown-menu";
+import { useFriendActions } from "@/hooks/friends/useFriendActions";
+import { ReactNode } from "react";
 
 export type FriendButtonType = 
-  | 'addFriend' 
-  | 'message' 
-  | 'accept' 
-  | 'ignore' 
-  | 'cancelRequest' 
-  | 'dropdown';
+    | "message" 
+    | "addFriend" 
+    | "accept" 
+    | "ignore" 
+    | "cancelRequest"
+    | "removeFriend"
+    | "blockFriend"
+    | "dropdown"; // Special type for dropdown menu
 
 interface DropdownOption {
-  type: 'removeFriend' | 'blockFriend';
-  separator?: boolean;
+    type: "removeFriend" | "blockFriend";
+    separator?: boolean; // Add separator after this item
 }
 
 interface FriendActionButtonsProps {
-  userId: string;
-  buttonsToShow: FriendButtonType[];
-  dropdownOptions?: DropdownOption[];
-  connectionId: string;
-  className?: string;
+    userId: string;
+    buttonsToShow: FriendButtonType[];
+    dropdownOptions?: DropdownOption[]; // Only needed if "dropdown" is in buttonsToShow
+    className?: string;
+    connectionId:string
 }
 
-export const FriendActionButtons = ({
-  userId,
-  buttonsToShow,
-  dropdownOptions = [],
-  connectionId,
-  className = "",
+export const FriendActionButtons = ({ 
+    userId, 
+    buttonsToShow,
+    connectionId,
+    dropdownOptions = [],
+    className = "flex space-x-2"
 }: FriendActionButtonsProps) => {
-  const t = useTranslations('friends');
-  const friendActions = useFriendActions();
+    const {
+        sendMessage,
+        addFriend,
+        acceptRequest,
+        ignoreRequest,
+        cancelRequest,
+        removeFriend,
+        blockFriend,
+        t,
+    } = useFriendActions();
 
-  // Try to access loading context (will be null if not in FriendListModal)
-  let loadingContext = null;
-  try {
-    loadingContext = useContext(FriendActionContext);
-  } catch {
-    // Not in loading context, component works normally
-  }
+    const buttonMap: Record<FriendButtonType, ReactNode> = {
+        message: (
+            <ButtonType1 key="message" onClick={() => sendMessage(connectionId)}>
+                {t('message')}
+            </ButtonType1>
+        ),
+        addFriend: (
+            <ButtonType2 key="addFriend" onClick={() => addFriend(userId)}>
+                {t('addFriend')}
+            </ButtonType2>
+        ),
+        accept: (
+            <ButtonType2 key="accept" onClick={() => acceptRequest(connectionId)}>
+                {t('accept')}
+            </ButtonType2>
+        ),
+        ignore: (
+            <ButtonType1 key="ignore" onClick={() => ignoreRequest(connectionId)}>
+                {t('ignore')}
+            </ButtonType1>
+        ),
+        cancelRequest: (
+            <ButtonType1 key="cancelRequest" onClick={() => cancelRequest(connectionId)}>
+                {t('cancelRequest')}
+            </ButtonType1>
+        ),
+        removeFriend: (
+            <ButtonType1 key="removeFriend" onClick={() => removeFriend(connectionId)}>
+                {t('removeFriend')}
+            </ButtonType1>
+        ),
+        blockFriend: (
+            <ButtonType1 key="blockFriend" onClick={() => blockFriend(connectionId)}>
+                {t('blockFriend')}
+            </ButtonType1>
+        ),
+        dropdown: (
+            <DropdownMenu key="dropdown">
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        className="cursor-pointer bg-surface-default border-0 shadow-none text-text-primary p-1"
+                        variant="outline"
+                        aria-label="Open menu"
+                        size="icon-sm"
+                    >
+                        <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-surface-default min-w-[200px]">
+                    {dropdownOptions.map((option, index) => {
+                        const items = [];
+                        
+                        if (option.type === "removeFriend") {
+                            items.push(
+                                <DropdownMenuItem
+                                    key="removeFriend"
+                                    onSelect={() => removeFriend(userId)}
+                                    className="font-body-large text-text-primary flex items-center"
+                                >
+                                    <Trash size="32" />
+                                    <span>{t('removeFriend')}</span>
+                                </DropdownMenuItem>
+                            );
+                        }
+                        
+                        if (option.type === "blockFriend") {
+                            items.push(
+                                <DropdownMenuItem
+                                    key="blockFriend"
+                                    onSelect={() => blockFriend(userId)}
+                                    className="font-body-large flex items-center"
+                                >
+                                    <BanIcon />
+                                    <span>{t('blockFriend')}</span>
+                                </DropdownMenuItem>
+                            );
+                        }
+                        
+                        if (option.separator && index < dropdownOptions.length - 1) {
+                            items.push(<DropdownMenuSeparator key={`separator-${index}`} />);
+                        }
+                        
+                        return items;
+                    })}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+    };
 
-  // Helper to wrap actions with loading state
-  const withLoading = async (actionFn: () => Promise<void>) => {
-    if (loadingContext) loadingContext.setLoadingUserId(userId);
-    try {
-      await actionFn();
-    } finally {
-      if (loadingContext) {
-        setTimeout(() => loadingContext.setLoadingUserId(null), 500);
-      }
-    }
-  };
-
-  // Action handlers
-  const handleAddFriend = async () => {
-    await withLoading(() => friendActions.addFriend(userId));
-  };
-
-  const handleAcceptFriend = async () => {
-    await withLoading(() => friendActions.acceptRequest(connectionId));
-  };
-
-  const handleIgnoreFriend = async () => {
-    await withLoading(() => friendActions.ignoreRequest(connectionId));
-  };
-
-  const handleCancelRequest = async () => {
-    await withLoading(() => friendActions.cancelRequest(connectionId));
-  };
-
-  const handleRemoveFriend = async () => {
-    await withLoading(() => friendActions.removeFriend(connectionId));
-  };
-
-  const handleBlockFriend = async () => {
-    await withLoading(() => friendActions.blockFriend(userId));
-  };
-
-  const handleMessage = async () => {
-    await friendActions.sendMessage(userId);
-  };
-
-  // Render button based on type
-  const renderButton = (buttonType: FriendButtonType) => {
-    switch (buttonType) {
-      case 'addFriend':
-        return (
-          <ButtonType2
-            key="addFriend"
-            onClick={handleAddFriend}
-            className="px-4 py-2 text-sm"
-          >
-            {t('addFriend')}
-          </ButtonType2>
-        );
-
-      case 'message':
-        return (
-          <ButtonType1
-            key="message"
-            onClick={handleMessage}
-            className="px-4 py-2 text-sm"
-          >
-            {t('message')}
-          </ButtonType1>
-        );
-
-      case 'accept':
-        return (
-          <ButtonType2
-            key="accept"
-            onClick={handleAcceptFriend}
-            className="px-4 py-2 text-sm"
-          >
-            {t('accept')}
-          </ButtonType2>
-        );
-
-      case 'ignore':
-        return (
-          <ButtonType3
-            key="ignore"
-            onClick={handleIgnoreFriend}
-            className="px-4 py-2 text-sm"
-          >
-            {t('ignore')}
-          </ButtonType3>
-        );
-
-      case 'cancelRequest':
-        return (
-          <ButtonType3
-            key="cancelRequest"
-            onClick={handleCancelRequest}
-            className="px-4 py-2 text-sm"
-          >
-            {t('cancelRequest')}
-          </ButtonType3>
-        );
-
-      case 'dropdown':
-        return (
-          <DropdownMenu key="dropdown">
-            <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-surface-hover rounded-full transition-colors">
-                <DotsThree size={20} className="text-text-secondary" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {dropdownOptions.map((option, index) => (
-                <div key={index}>
-                  {option.separator && <DropdownMenuSeparator />}
-                  <DropdownMenuItem
-                    onClick={() => {
-                      if (option.type === 'removeFriend') {
-                        handleRemoveFriend();
-                      } else if (option.type === 'blockFriend') {
-                        handleBlockFriend();
-                      }
-                    }}
-                    className="cursor-pointer"
-                  >
-                    {option.type === 'removeFriend' 
-                      ? t('removeFriend') 
-                      : t('blockFriend')}
-                  </DropdownMenuItem>
-                </div>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      {buttonsToShow.map((buttonType) => renderButton(buttonType))}
-    </div>
-  );
+    return (
+        <div className={className}>
+            {buttonsToShow.map(buttonType => buttonMap[buttonType])}
+        </div>
+    );
 };
