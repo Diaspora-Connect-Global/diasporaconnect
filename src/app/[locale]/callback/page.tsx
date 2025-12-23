@@ -35,6 +35,7 @@ export default function OAuthCallbackPage() {
 
   useEffect(() => {
     log('OAuthCallbackPage mounted', Object.fromEntries(params.entries()));
+    log("Parameters ",params)
 
     const success = params.get('success') === 'true';
     log('Parsed success param', success);
