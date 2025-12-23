@@ -18,7 +18,7 @@ export interface UserData {
   email: string;
   firstName: string;
   lastName: string;
-  role?: string;
+  role: string;
   avatarUrl?: string;
 }
 
@@ -179,7 +179,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setUser: (user) => set({ user }),
-
+    
       setDeviceMetadata: (metadata) =>
         set({ deviceMetadata: metadata }),
 

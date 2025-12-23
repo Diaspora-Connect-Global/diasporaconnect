@@ -73,6 +73,8 @@ export const LOGIN_USER = gql`
         firstName
         lastName
         role
+        avatarUrl
+
       }
       deviceMetadata {
         fingerprint
@@ -199,12 +201,15 @@ export interface LoginResponse {
     sessionId: string;
     expiresIn: number;
     requiresTwoFactor: boolean;
+    avatarUrl?: string;
+
     user: {
       id: string;
       email: string;
       firstName: string;
       lastName: string;
       role: string;
+      avatarUrl?: string;
     };
     deviceMetadata: {
       fingerprint: string;
