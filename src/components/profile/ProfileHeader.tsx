@@ -127,7 +127,7 @@ export function ProfileHeader({
       </CardContent>
 
       <CustomDialog
-        contentClassName="min-w-[100vw] h-[100vh]"
+        contentClassName="min-w-[100dvw] h-[100dvh]"
         title={t('friendList')}
         open={friendListOpen}
         onOpenChange={closeFriendList}

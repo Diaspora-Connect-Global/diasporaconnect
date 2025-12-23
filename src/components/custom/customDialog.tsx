@@ -31,7 +31,7 @@ export default function CustomDialog({
   disabled = false,
   saveText,
   cancelText,
-  contentClassName = 'min-w-[70vw] h-[90vh]'
+  contentClassName = 'min-w-[70dvw] h-[90dvh]'
 }: CustomDialogProps) {
   const t = useTranslations('dialog');
   const defaultTitle = title || t('title');
