@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tier, UserBadge } from "../custom/userBadge";
 import { PencilSimpleIcon, UsersThreeIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import CustomDialog from "../custom/customDialog";
 import FriendListModal from "./FriendListModal";
 import { useTranslations } from "next-intl";
@@ -24,7 +24,7 @@ interface ProfileHeaderProps {
   friendType?: FriendType;
   showFriendActions?: boolean;
   onEditAvatar?: () => void;
-  connectionId:string
+  connectionId: string;
 }
 
 export function ProfileHeader({
@@ -36,6 +36,8 @@ export function ProfileHeader({
   onEditAvatar
 }: ProfileHeaderProps) {
   const t = useTranslations('friends');
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const initials = userData?.firstName
     .split(' ')
@@ -44,7 +46,20 @@ export function ProfileHeader({
     .toUpperCase()
     .slice(0, 2);
 
-  const [friendList, setFriendListOpen] = useState(false);
+  // Check if friendList modal should be open based on query param
+  const friendListOpen = searchParams.get('modal') === 'friendlist';
+
+  const openFriendList = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('modal', 'friendlist');
+    router.push(`?${params.toString()}`);
+  };
+
+  const closeFriendList = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('modal');
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <Card className="lg:min-h-[10rem] p-1">
@@ -80,15 +95,14 @@ export function ProfileHeader({
 
           {/* User Info */}
           <div className="mt-auto">
-            <div className="flex lg:items-center  space-x-2">
+            <div className="flex lg:items-center space-x-2">
               <h1 className="text-text-primary heading-small line-clamp-2 break-words max-w-full">
-                {userData?.firstName}    {userData?.lastName}
-
+                {userData?.firstName} {userData?.lastName}
               </h1>
               {/* <UserBadge tier={userData.tier as Tier} size="md" /> */}
             </div>
             <div
-              onClick={() => setFriendListOpen(!showFriendActions)}
+              onClick={() => !showFriendActions && openFriendList()}
               className="flex items-center space-x-1 text-text-brand cursor-pointer"
             >
               <UsersThreeIcon size={20} />
@@ -105,7 +119,7 @@ export function ProfileHeader({
             <TypeOfFriend
               userId={userId}
               type={friendType}
-              connectionId = {connectionId}
+              connectionId={connectionId}
             />
           )}
         </div>
@@ -114,11 +128,11 @@ export function ProfileHeader({
       <CustomDialog
         contentClassName="min-w-[100vw] h-[100vh]"
         title={t('friendList')}
-        open={friendList}
-        onOpenChange={() => setFriendListOpen(false)}
+        open={friendListOpen}
+        onOpenChange={closeFriendList}
         showFooter={false}
       >
-        <FriendListModal onClose={() => setFriendListOpen(false)} />
+        <FriendListModal onClose={closeFriendList} />
       </CustomDialog>
     </Card>
   );
