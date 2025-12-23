@@ -80,7 +80,7 @@ export default function ProfilePage() {
                 lastName: profile.lastName,
                 email: profile.email,
                 id: profile.userId,
-
+                role: profile.role
             });
         }
     }, [profile?.firstName, profile?.lastName, profile?.email, profile, setUser]); // Only run when these specific fields change

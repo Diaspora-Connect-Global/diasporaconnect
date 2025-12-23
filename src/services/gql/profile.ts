@@ -32,6 +32,7 @@ export interface Profile {
   createdAt: string;
   updatedAt: string;
   profileCompletion?: ProfileCompletion;
+  role:string;
 }
 
 export interface UpdateProfileInput {
