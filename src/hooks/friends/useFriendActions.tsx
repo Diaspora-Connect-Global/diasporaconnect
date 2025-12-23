@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation } from '@apollo/client/react';
 import {
@@ -7,7 +7,8 @@ import {
     ACCEPT_CONNECTION,
     REJECT_CONNECTION,
     GET_MY_CONNECTIONS,
-    GET_PENDING_CONNECTIONS,
+    GET_PENDING_REQUESTS_SENT,
+    GET_PENDING_REQUESTS_RECEIVED,
     SendConnectionRequestResponse,
     AcceptConnectionResponse,
     RejectConnectionResponse,
@@ -23,11 +24,22 @@ import {
 export const useFriendActions = () => {
     const t = useTranslations('friends');
 
+    // Loading states for each action type
+    const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+
+    // Helper to set loading state for a specific action
+    const setActionLoading = (actionKey: string, isLoading: boolean) => {
+        setLoadingStates(prev => ({ ...prev, [actionKey]: isLoading }));
+    };
+
     // GraphQL Mutations - Connections
     const [sendConnectionRequest] = useMutation<SendConnectionRequestResponse>(
         SEND_CONNECTION_REQUEST,
         {
-            refetchQueries: [{ query: GET_MY_CONNECTIONS }],
+            refetchQueries: [
+                { query: GET_MY_CONNECTIONS },
+                { query: GET_PENDING_REQUESTS_SENT },
+            ],
         }
     );
 
@@ -36,7 +48,7 @@ export const useFriendActions = () => {
         {
             refetchQueries: [
                 { query: GET_MY_CONNECTIONS },
-                { query: GET_PENDING_CONNECTIONS },
+                { query: GET_PENDING_REQUESTS_RECEIVED },
             ],
         }
     );
@@ -44,13 +56,19 @@ export const useFriendActions = () => {
     const [rejectConnection] = useMutation<RejectConnectionResponse>(
         REJECT_CONNECTION,
         {
-            refetchQueries: [{ query: GET_PENDING_CONNECTIONS }],
+            refetchQueries: [
+                { query: GET_MY_CONNECTIONS },
+                { query: GET_PENDING_REQUESTS_RECEIVED },
+            ],
         }
     );
+
     const [cancelConnection] = useMutation<CancelConnectionResponse>(
         CANCEL_CONNECTION,
         {
-            refetchQueries: [{ query: GET_PENDING_CONNECTIONS }],
+            refetchQueries: [
+                { query: GET_PENDING_REQUESTS_SENT },
+            ],
         }
     );
 
@@ -73,6 +91,9 @@ export const useFriendActions = () => {
     }, [t]);
 
     const addFriend = useCallback(async (userId: string) => {
+        const actionKey = `addFriend-${userId}`;
+        setActionLoading(actionKey, true);
+        
         try {
             const { data } = await sendConnectionRequest({
                 variables: {
@@ -90,10 +111,15 @@ export const useFriendActions = () => {
         } catch (error) {
             console.error('Error sending friend request:', error);
             toast.error('Failed to send friend request');
+        } finally {
+            setActionLoading(actionKey, false);
         }
     }, [t, sendConnectionRequest]);
 
     const acceptRequest = useCallback(async (connectionId: string) => {
+        const actionKey = `acceptRequest-${connectionId}`;
+        setActionLoading(actionKey, true);
+        
         try {
             const { data } = await acceptConnection({
                 variables: {
@@ -111,10 +137,15 @@ export const useFriendActions = () => {
         } catch (error) {
             console.error('Error accepting friend request:', error);
             toast.error('Failed to accept friend request');
+        } finally {
+            setActionLoading(actionKey, false);
         }
     }, [t, acceptConnection]);
 
     const ignoreRequest = useCallback(async (connectionId: string) => {
+        const actionKey = `ignoreRequest-${connectionId}`;
+        setActionLoading(actionKey, true);
+        
         try {
             const { data } = await rejectConnection({
                 variables: {
@@ -132,10 +163,15 @@ export const useFriendActions = () => {
         } catch (error) {
             console.error('Error ignoring friend request:', error);
             toast.error('Failed to ignore friend request');
+        } finally {
+            setActionLoading(actionKey, false);
         }
     }, [t, rejectConnection]);
 
     const cancelRequest = useCallback(async (connectionId: string) => {
+        const actionKey = `cancelRequest-${connectionId}`;
+        setActionLoading(actionKey, true);
+        
         console.log('Cancelling friend request with connectionId:', connectionId);
         try {
             const { data } = await cancelConnection({
@@ -154,10 +190,15 @@ export const useFriendActions = () => {
         } catch (error) {
             console.error('Error canceling friend request:', error);
             toast.error('Failed to cancel friend request');
+        } finally {
+            setActionLoading(actionKey, false);
         }
     }, [t, cancelConnection]);
 
     const removeFriend = useCallback(async (connectionId: string) => {
+        const actionKey = `removeFriend-${connectionId}`;
+        setActionLoading(actionKey, true);
+        
         try {
             // Using rejectConnection to remove/delete the connection
             const { data } = await rejectConnection({
@@ -176,10 +217,15 @@ export const useFriendActions = () => {
         } catch (error) {
             console.error('Error removing friend:', error);
             toast.error('Failed to remove friend');
+        } finally {
+            setActionLoading(actionKey, false);
         }
     }, [t, rejectConnection]);
 
     const blockFriend = useCallback(async (userId: string) => {
+        const actionKey = `blockFriend-${userId}`;
+        setActionLoading(actionKey, true);
+        
         try {
             const { data } = await blockUserMutation({
                 variables: {
@@ -197,8 +243,15 @@ export const useFriendActions = () => {
         } catch (error) {
             console.error('Error blocking user:', error);
             toast.error('Failed to block user');
+        } finally {
+            setActionLoading(actionKey, false);
         }
     }, [t, blockUserMutation]);
+
+    // Helper function to check if a specific action is loading
+    const isActionLoading = useCallback((actionType: string, id: string) => {
+        return loadingStates[`${actionType}-${id}`] || false;
+    }, [loadingStates]);
 
     return {
         sendMessage,
@@ -208,6 +261,7 @@ export const useFriendActions = () => {
         cancelRequest,
         removeFriend,
         blockFriend,
+        isActionLoading,
         t,
     };
 };

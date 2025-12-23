@@ -116,3 +116,36 @@ export function ButtonType3({
     </button>
   );
 }
+export function ButtonType4Pill({ 
+  children, 
+  onClick, 
+  type = "button", 
+  disabled = false,
+  className = ""
+}: ButtonProps) {
+  return (
+    <button 
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`
+        bg-surface-danger
+        text-text-danger 
+        rounded-full 
+        font-label-medium 
+        ring-text-danger
+        cursor-pointer
+        transition-colors
+        disabled:opacity-50 
+        disabled:cursor-not-allowed
+        h-fit
+        w-fit
+        py-1 px-2
+        whitespace-nowrap
+        ${className}
+      `}
+    >
+      {children}
+    </button>
+  );
+}

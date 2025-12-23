@@ -1,6 +1,6 @@
-import { ButtonType1, ButtonType2 } from "../custom/button";
+import { ButtonType1, ButtonType2, ButtonType4Pill } from "../custom/button";
 import { Button } from "../ui/button";
-import { BanIcon, MoreHorizontalIcon } from "lucide-react";
+import { BanIcon, MoreHorizontalIcon, Loader2 } from "lucide-react";
 import { Trash } from "iconsax-reactjs";
 import {
     DropdownMenu,
@@ -20,19 +20,19 @@ export type FriendButtonType =
     | "cancelRequest"
     | "removeFriend"
     | "blockFriend"
-    | "dropdown"; // Special type for dropdown menu
+    | "dropdown";
 
 interface DropdownOption {
     type: "removeFriend" | "blockFriend";
-    separator?: boolean; // Add separator after this item
+    separator?: boolean;
 }
 
 interface FriendActionButtonsProps {
     userId: string;
     buttonsToShow: FriendButtonType[];
-    dropdownOptions?: DropdownOption[]; // Only needed if "dropdown" is in buttonsToShow
+    dropdownOptions?: DropdownOption[];
     className?: string;
-    connectionId:string
+    connectionId: string;
 }
 
 export const FriendActionButtons = ({ 
@@ -50,8 +50,17 @@ export const FriendActionButtons = ({
         cancelRequest,
         removeFriend,
         blockFriend,
+        isActionLoading,
         t,
     } = useFriendActions();
+
+    // Check loading states for each action
+    const isAddFriendLoading = isActionLoading('addFriend', userId);
+    const isAcceptLoading = isActionLoading('acceptRequest', connectionId);
+    const isIgnoreLoading = isActionLoading('ignoreRequest', connectionId);
+    const isCancelLoading = isActionLoading('cancelRequest', connectionId);
+    const isRemoveLoading = isActionLoading('removeFriend', connectionId);
+    const isBlockLoading = isActionLoading('blockFriend', userId);
 
     const buttonMap: Record<FriendButtonType, ReactNode> = {
         message: (
@@ -60,34 +69,76 @@ export const FriendActionButtons = ({
             </ButtonType1>
         ),
         addFriend: (
-            <ButtonType2 key="addFriend" onClick={() => addFriend(userId)}>
-                {t('addFriend')}
+            <ButtonType2 
+                key="addFriend" 
+                onClick={() => addFriend(userId)}
+                disabled={isAddFriendLoading}
+            >
+                {isAddFriendLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('addFriend')
+                )}
             </ButtonType2>
         ),
         accept: (
-            <ButtonType2 key="accept" onClick={() => acceptRequest(connectionId)}>
-                {t('accept')}
+            <ButtonType2 
+                key="accept" 
+                onClick={() => acceptRequest(connectionId)}
+                disabled={isAcceptLoading}
+            >
+                {isAcceptLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('accept')
+                )}
             </ButtonType2>
         ),
         ignore: (
-            <ButtonType1 key="ignore" onClick={() => ignoreRequest(connectionId)}>
-                {t('ignore')}
+            <ButtonType1 
+                key="ignore" 
+                onClick={() => ignoreRequest(connectionId)}
+                disabled={isIgnoreLoading}
+            >
+                {isIgnoreLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('ignore')
+                )}
             </ButtonType1>
         ),
         cancelRequest: (
-            <ButtonType1 key="cancelRequest" onClick={() => cancelRequest(connectionId)}>
-                {t('cancelRequest')}
+            <ButtonType1 
+                key="cancelRequest" 
+                onClick={() => cancelRequest(connectionId)}
+                disabled={isCancelLoading}
+            >
+                {isCancelLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('cancelRequest')
+                )}
             </ButtonType1>
         ),
         removeFriend: (
-            <ButtonType1 key="removeFriend" onClick={() => removeFriend(connectionId)}>
-                {t('removeFriend')}
+            <ButtonType1 
+                key="removeFriend" 
+                onClick={() => removeFriend(connectionId)}
+                disabled={isRemoveLoading}
+            >
+                {isRemoveLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('removeFriend')
+                )}
             </ButtonType1>
         ),
         blockFriend: (
-            <ButtonType1 key="blockFriend" onClick={() => blockFriend(connectionId)}>
-                {t('blockFriend')}
-            </ButtonType1>
+            <ButtonType4Pill
+                key="blockFriend" 
+                >
+                  Blocked
+            </ButtonType4Pill>
         ),
         dropdown: (
             <DropdownMenu key="dropdown">
@@ -97,8 +148,13 @@ export const FriendActionButtons = ({
                         variant="outline"
                         aria-label="Open menu"
                         size="icon-sm"
+                        disabled={isRemoveLoading || isBlockLoading}
                     >
-                        <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        {(isRemoveLoading || isBlockLoading) ? (
+                            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                        ) : (
+                            <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        )}
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-surface-default min-w-[200px]">
@@ -109,10 +165,15 @@ export const FriendActionButtons = ({
                             items.push(
                                 <DropdownMenuItem
                                     key="removeFriend"
-                                    onSelect={() => removeFriend(userId)}
+                                    onSelect={() => removeFriend(connectionId)}
                                     className="font-body-large text-text-primary flex items-center"
+                                    disabled={isRemoveLoading}
                                 >
-                                    <Trash size="32" />
+                                    {isRemoveLoading ? (
+                                        <Loader2 className="w-8 h-8 animate-spin" />
+                                    ) : (
+                                        <Trash size="32" />
+                                    )}
                                     <span>{t('removeFriend')}</span>
                                 </DropdownMenuItem>
                             );
@@ -124,8 +185,13 @@ export const FriendActionButtons = ({
                                     key="blockFriend"
                                     onSelect={() => blockFriend(userId)}
                                     className="font-body-large flex items-center"
+                                    disabled={isBlockLoading}
                                 >
-                                    <BanIcon />
+                                    {isBlockLoading ? (
+                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                    ) : (
+                                        <BanIcon />
+                                    )}
                                     <span>{t('blockFriend')}</span>
                                 </DropdownMenuItem>
                             );

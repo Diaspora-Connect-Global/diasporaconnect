@@ -61,6 +61,10 @@ const getDefaultButtonConfig = (status: "connected" | "none" | "pending_received
             return {
                 buttons: ["cancelRequest"]
             };
+        case "blocked":
+            return {
+                buttons: ["blockFriend"]
+            };
 
         default:
             return { buttons: [] };
@@ -102,7 +106,6 @@ const FriendsCard: FC<FriendsCardProps> = ({
                     height={40}
                     className="w-14 h-14 rounded-full object-cover flex-shrink-0"
                 />
-
                 <div>
                     <div className="flex items-center flex-wrap">
                         <div
