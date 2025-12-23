@@ -137,14 +137,15 @@ export default function CompleteAccount() {
   const prevStep = () =>
     setCurrentStep(s => Math.max(s - 1, 1));
 
-  const formatPhone = (phone: string) => {
-    const clean = phone.replace(/[^\d]/g, '');
-    if (clean.length === 10 && clean.startsWith('0'))
-      return `${formData.countryCode}${clean.slice(1)}`;
-    if (clean.length === 9)
-      return `${formData.countryCode}${clean}`;
-    return phone.startsWith('+') ? phone : `+${phone}`;
-  };
+const formatPhone = (phone: string, countryCode: string) => {
+  const clean = phone.replace(/[^\d]/g, '');
+  
+  // Remove leading 0 if present
+  const phoneWithoutLeadingZero = clean.startsWith('0') ? clean.slice(1) : clean;
+  
+  // Append country code
+  return `${countryCode}${phoneWithoutLeadingZero}`;
+};
 
   /* ------------------------------------------------------------------ */
   /* Step 4 – Send OTP */
@@ -152,7 +153,8 @@ export default function CompleteAccount() {
   const submitFormA = async () => {
     try {
       setSendCodeLoading(true);
-      const phone = formatPhone(formData.phoneNumber);
+      const phone = formatPhone(formData.phoneNumber,formData.countryCode);
+      console.log('Formatted Phone:', phone);
       let token = '';
 
       if (isOAuth) {
