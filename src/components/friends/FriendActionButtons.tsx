@@ -1,7 +1,7 @@
 import { useContext, createContext } from 'react';
 import { useTranslations } from 'next-intl';
 import { useFriendActions } from '@/hooks/friends/useFriendActions';
-import { ButtonType2, ButtonType3 } from '@/components/custom/button';
+import { ButtonType1, ButtonType2, ButtonType3 } from '@/components/custom/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -113,13 +113,13 @@ export const FriendActionButtons = ({
 
       case 'message':
         return (
-          <ButtonType2
+          <ButtonType1
             key="message"
             onClick={handleMessage}
             className="px-4 py-2 text-sm"
           >
             {t('message')}
-          </ButtonType2>
+          </ButtonType1>
         );
 
       case 'accept':
