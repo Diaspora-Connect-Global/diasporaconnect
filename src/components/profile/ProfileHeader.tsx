@@ -58,6 +58,7 @@ export function ProfileHeader({
   const closeFriendList = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('m');
+    params.delete('t');
     router.push(`?${params.toString()}`);
   };
 
