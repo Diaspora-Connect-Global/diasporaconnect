@@ -136,6 +136,7 @@ export const useFriendActions = () => {
     }, [t, rejectConnection]);
 
     const cancelRequest = useCallback(async (connectionId: string) => {
+        console.log('Cancelling friend request with connectionId:', connectionId);
         try {
             const { data } = await cancelConnection({
                 variables: {

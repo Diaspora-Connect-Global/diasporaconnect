@@ -17,6 +17,7 @@ interface FriendsCardProps {
     imageSrc: string;
     mutualConnections?: number;
     tier: Tier;
+    connectionId:string
 
     /** Current relationship status */
     status: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
@@ -75,6 +76,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
     status,
     customButtons,
     customDropdownOptions,
+    connectionId,
     onNameClick,
 }) => {
     const t = useTranslations('friends');
@@ -133,7 +135,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
                 userId={userId}
                 buttonsToShow={buttons}
                 dropdownOptions={dropdownOptions}
-                connectionId={""}
+                connectionId={connectionId}
             />
         </div>
     );

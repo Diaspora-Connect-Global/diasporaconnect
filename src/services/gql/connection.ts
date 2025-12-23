@@ -25,7 +25,7 @@ export interface Connection {
   acceptedAt?: string;
   requester: UserBasic;
   receiver: UserBasic;
-  
+
 }
 
 export interface SendConnectionRequestInput {
@@ -391,6 +391,7 @@ export interface FriendSuggestionProfile {
   userId: string;
   firstName: string;
   lastName: string;
+  connectionId:string
   sector?: string;
   countryOfOrigin?: string;
   residenceCountry?: string;
@@ -548,6 +549,7 @@ export interface UserProfile {
   headline?: string;
   connectionCount: number;
   avatarUrl?: string;
+  connectionId: string;
   connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
 }
 
@@ -602,6 +604,7 @@ export const SEARCH_USERS = gql`
         connectionCount
         avatarUrl
         connectionStatus
+        connectionId
       }
     }
   }

@@ -23,7 +23,7 @@ import {
 
 interface Friend {
   userId: string;
-  connectionId?: string;
+  connectionId: string;
   name: string;
   imageSrc: string;
   mutualConnections?: number;
@@ -210,7 +210,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         searchResults.searchUsers.profiles.forEach((profile) => {
           friends.push({
             userId: profile.userId,
-            connectionId: undefined,
+            connectionId: profile.connectionId,
             name: `${profile.firstName} ${profile.lastName}`,
             imageSrc: "https://github.com/shadcn.png", // Search API doesn't return avatarUrl
             mutualConnections: undefined,
@@ -224,7 +224,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
           friends.push({
             userId: suggestion.profile.userId,
-            connectionId: undefined,
+            connectionId: suggestion.profile.connectionId,
             name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
             imageSrc: suggestion.profile.avatarUrl || "https://github.com/shadcn.png",
             mutualConnections: suggestion.mutualConnectionsCount,
@@ -344,6 +344,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         mutualConnections={friend.mutualConnections}
         tier={friend.tier}
         status={friend.connectionStatus} // Pass the actual connectionStatus from API
+        connectionId={friend.connectionId }
       />
     );
   };
