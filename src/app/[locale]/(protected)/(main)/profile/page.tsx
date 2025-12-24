@@ -118,7 +118,10 @@ export default function ProfilePage() {
                     showFriendActions={false}
                     userData={profile}
                     connectionId={""}
-                    onEditAvatar={() => setEditAvatarOpen(true)}
+                    onEditAvatar={() => {
+                        setSelectedFile(null);
+                        setCroppedImage(null);
+                        setEditAvatarOpen(true)}}
 
                 />
 
@@ -174,6 +177,7 @@ export default function ProfilePage() {
                 open={editAvatarOpen}
                 onOpenChange={setEditAvatarOpen}
                 showFooter={false}
+                
                 contentClassName="min-h-[50%] lg:min-h-[80%]"
             >
                 <div className="lg:space-y-4  justify-center flex flex-col items-center">
