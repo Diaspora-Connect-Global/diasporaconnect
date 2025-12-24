@@ -189,6 +189,8 @@ export default function ProfilePage() {
             toast.dismiss();
             toast.error(err.message || "Failed to upload profile picture");
             console.error("Upload error:", err);
+        }finally{
+            toast.dismiss();
         }
     };
 
