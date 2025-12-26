@@ -60,6 +60,12 @@ export default function GroupChat() {
 
     // Get messages for this conversation
     const conversationMessages = messages.filter(m => m.conversationId === chat.id);
+    const chatchosen = sessionStorage.getItem('activeChat');
+
+    useEffect(() => {
+       setRepliesSidebarOpen(false);
+       setSidebarOpen(false);
+    }, [chatchosen]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
