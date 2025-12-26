@@ -115,7 +115,7 @@ export default function ChatSideBar() {
         <>
             <div className="w-full h-app-inner flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center p-4">
+                <div className="flex justify-between items-center px-4">
                     <p className="text-2xl font-heading-large">{t('chats')}</p>
                     <ButtonType3
                         className="px-4 py-3 flex items-center"

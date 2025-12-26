@@ -71,14 +71,14 @@ export default function Chat() {
 
     if (!activeChat ) {
         return (
-            <div className="bg-surface-default rounded-md h-full overflow-hidden">
+            <div className="bg-surface-default rounded-md h-app-inner overflow-hidden">
                 <EmptyMessage />
             </div>
         );
     }
 
     return (
-        <div className="rounded-md h-full overflow-hidden flex flex-col">
+        <div className="rounded-md h-app-inner overflow-hidden flex flex-col">
             {/* Mobile back button header */}
             {isMobile && (
                 <div className="flex items-center gap-3 p-4 border-b border-border-subtle bg-surface-default md:hidden">
@@ -107,7 +107,7 @@ export default function Chat() {
             )}
             
             {/* Chat content */}
-            <div className="flex-1 overflow-hidden">
+            <div className="overflow-hidden h-[96%] my-auto ">
                 {chatchosenParsed?.type === 'direct' ? (
                     <DirectMessageChat chat={chatInfo} />
                 ) : (

@@ -176,7 +176,7 @@ export default function GroupChat() {
     }
 
     return (
-        <div className="flex flex-row h-app-inner space-x-0 md:space-x-2">
+        <div className="flex flex-row h-full space-x-0 md:space-x-2">
             {/* Main Chat Area */}
             <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'
                 }`}>
