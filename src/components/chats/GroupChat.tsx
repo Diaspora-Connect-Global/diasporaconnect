@@ -1,4 +1,3 @@
-// components/chats/GroupChat.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -14,16 +13,28 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { 
     GET_GROUP, 
     GET_GROUP_MEMBERS, 
+    GET_MY_GROUPS,
     GetGroupResponse, 
     GetGroupMembersResponse,
     LEAVE_GROUP,
     DELETE_GROUP,
+    UPDATE_GROUP,
+    REMOVE_MEMBER,
+    UPDATE_MEMBER_ROLE,
     LeaveGroupResponse,
     DeleteGroupResponse,
-    GET_MY_GROUPS
+    UpdateGroupResponse,
+    RemoveMemberResponse,
+    UpdateMemberRoleResponse,
+    MemberRole,
+    GroupPrivacy
 } from "@/services/gql/groups";
 import { useRouter } from "next/navigation";
+import { EditGroupModal } from "./modals/EditGroupModal";
+import { ManageMemberModal } from "./modals/ManageMemberModal";
 import { ConfirmationModal } from "../custom/confirmationModal";
+import { AddMembersModal } from "./modals/AddMembersModal";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Reply {
     id: string;
@@ -50,9 +61,15 @@ export default function GroupChat() {
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Confirmation modals state
+    // Modal states
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showAddMembersModal, setShowAddMembersModal] = useState(false);
+    const [showManageMemberModal, setShowManageMemberModal] = useState(false);
+    const [selectedMember, setSelectedMember] = useState<any>(null);
+
+    // Loading states
     const [isLeavingGroup, setIsLeavingGroup] = useState(false);
     const [isDeletingGroup, setIsDeletingGroup] = useState(false);
 
@@ -62,42 +79,55 @@ export default function GroupChat() {
     const chat: ChatInfo = chatData ? JSON.parse(chatData) : null;
 
     // Fetch group details
-    const { data: groupData, loading: loadingGroup } = useQuery<GetGroupResponse>(GET_GROUP, {
+    const { data: groupData, loading: loadingGroup, refetch: refetchGroup } = useQuery<GetGroupResponse>(GET_GROUP, {
         variables: { groupId: chat.id },
         skip: !chat.id,
     });
 
     // Fetch group members
-    const { data: membersData, loading: loadingMembers } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
+    const { data: membersData, loading: loadingMembers, refetch: refetchMembers } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
         variables: { groupId: chat.id, membersLimit: 100, membersOffset: 0 },
         skip: !chat.id,
     });
 
     // Mutations
-   // In GroupChat.tsx
+    const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
+        refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
+        awaitRefetchQueries: true,
+    });
 
-const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
-    refetchQueries: [
-        { 
-            query: GET_MY_GROUPS, 
-            variables: { limit: 50, offset: 0 } 
-        }
-    ],
-    awaitRefetchQueries: true, // Wait for refetch to complete
-});
+    const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
+        refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
+        awaitRefetchQueries: true,
+    });
 
-const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
-    refetchQueries: [
-        { 
-            query: GET_MY_GROUPS, 
-            variables: { limit: 50, offset: 0 } 
+    const [updateGroup] = useMutation<UpdateGroupResponse>(UPDATE_GROUP, {
+        onCompleted: () => {
+            refetchGroup();
         }
-    ],
-    awaitRefetchQueries: true,
-});
+    });
+
+    const [removeMember] = useMutation<RemoveMemberResponse>(REMOVE_MEMBER, {
+        onCompleted: () => {
+            refetchMembers();
+        }
+    });
+
+    const [updateMemberRole] = useMutation<UpdateMemberRoleResponse>(UPDATE_MEMBER_ROLE, {
+        onCompleted: () => {
+            refetchMembers();
+        }
+    });
+
     const group = groupData?.getGroup?.group;
     const groupMembers = membersData?.getGroupMembers?.members || [];
     const groupMembersCount = membersData?.getGroupMembers?.total || 0;
+    const user = useAuthStore((state) => state.user);
+
+    const currentUserId = user?.userId;
+    const currentUserMember = groupMembers.find(m => m.userId === currentUserId);
+    const isOwner = group?.ownerId === currentUserId;
+    const isAdmin = currentUserMember?.role === MemberRole.ADMIN || isOwner;
 
     // Get messages for this conversation
     const conversationMessages = messages.filter(m => m.conversationId === chat.id);
@@ -165,7 +195,6 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
                 setReplies(prev => [...prev, newReply]);
                 setReplyingTo(null);
             } else {
-                // Handle sending new message to group chat
                 console.log("Sending message to group chat:", messageText, image);
             }
         }
@@ -184,11 +213,6 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
         setSelectedMessage(null);
         setReplyingTo(null);
     };
-
-    const membersWithDetails = groupMembers.map(member => ({
-        ...member,
-        user: getUserById(member.userId)
-    })).filter(member => member.user);
 
     const getSenderName = (senderId: string): string => {
         const user = getUserById(senderId);
@@ -211,22 +235,15 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
             });
 
             if (data?.leaveGroup.success) {
-                // Clear active chat
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
-                
-                // Navigate back to chat list
                 router.push('/chat?t=groups');
-                
-                // Close modal
                 setShowLeaveModal(false);
             } else {
                 console.error('Failed to leave group:', data?.leaveGroup.message);
-                // You might want to show a toast/error message here
             }
         } catch (error) {
             console.error('Error leaving group:', error);
-            // You might want to show a toast/error message here
         } finally {
             setIsLeavingGroup(false);
         }
@@ -243,24 +260,107 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
             });
 
             if (data?.deleteGroup.success) {
-                // Clear active chat
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
-                
-                // Navigate back to chat list
                 router.push('/chat?t=groups');
-                
-                // Close modal
                 setShowDeleteModal(false);
             } else {
                 console.error('Failed to delete group:', data?.deleteGroup.message);
-                // You might want to show a toast/error message here
             }
         } catch (error) {
             console.error('Error deleting group:', error);
-            // You might want to show a toast/error message here
         } finally {
             setIsDeletingGroup(false);
+        }
+    };
+
+    /**
+     * Handle edit group action
+     */
+    const handleEditGroup = async (updates: { 
+        name?: string; 
+        description?: string; 
+        avatarUrl?: string; 
+        privacy?: GroupPrivacy 
+    }) => {
+        try {
+            const { data } = await updateGroup({
+                variables: {
+                    updateInput: {
+                        groupId: chat.id,
+                        ...updates
+                    }
+                }
+            });
+
+            if (data?.updateGroup.success) {
+                setShowEditModal(false);
+            } else {
+                console.error('Failed to update group:', data?.updateGroup.message);
+            }
+        } catch (error) {
+            console.error('Error updating group:', error);
+        }
+    };
+
+    /**
+     * Handle member click for management
+     */
+    const handleMemberClick = (member: any) => {
+        if (isAdmin && member.userId !== currentUserId) {
+            setSelectedMember(member);
+            setShowManageMemberModal(true);
+        }
+    };
+
+    /**
+     * Handle remove member
+     */
+    const handleRemoveMember = async (userId: string) => {
+        try {
+            const { data } = await removeMember({
+                variables: {
+                    removeInput: {
+                        groupId: chat.id,
+                        userId
+                    }
+                }
+            });
+
+            if (data?.removeMember.success) {
+                setShowManageMemberModal(false);
+                setSelectedMember(null);
+            } else {
+                console.error('Failed to remove member:', data?.removeMember.message);
+            }
+        } catch (error) {
+            console.error('Error removing member:', error);
+        }
+    };
+
+    /**
+     * Handle update member role
+     */
+    const handleUpdateMemberRole = async (userId: string, role: MemberRole) => {
+        try {
+            const { data } = await updateMemberRole({
+                variables: {
+                    roleInput: {
+                        groupId: chat.id,
+                        userId,
+                        role
+                    }
+                }
+            });
+
+            if (data?.updateMemberRole.success) {
+                setShowManageMemberModal(false);
+                setSelectedMember(null);
+            } else {
+                console.error('Failed to update member role:', data?.updateMemberRole.message);
+            }
+        } catch (error) {
+            console.error('Error updating member role:', error);
         }
     };
 
@@ -284,8 +384,7 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
         <>
             <div className="flex flex-row h-full space-x-0 md:space-x-2">
                 {/* Main Chat Area */}
-                <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'
-                    }`}>
+                <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'}`}>
                     {/* Group Header - Hidden on mobile */}
                     <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                         <div className="flex items-center space-x-3">
@@ -440,23 +539,45 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
                                     )}
                                 </div>
 
-                                <div className="flex-shrink-0 flex items-center justify-center mb-6">
-                                    <ButtonType3 className="text-sm">{t('edit')}</ButtonType3>
-                                </div>
+                                {isAdmin && (
+                                    <div className="flex-shrink-0 flex items-center justify-center mb-6">
+                                        <ButtonType3 
+                                            className="text-sm"
+                                            onClick={() => setShowEditModal(true)}
+                                        >
+                                            {t('edit')}
+                                        </ButtonType3>
+                                    </div>
+                                )}
 
                                 <div className="flex-1 min-h-0 mb-6">
                                     <div className="flex-shrink-0 flex justify-between items-center mb-3">
                                         <h5 className="text-sm font-medium text-text-primary">
                                             {t('members')} ({groupMembersCount})
                                         </h5>
-                                        <ButtonType3 className="text-xs py-1 px-2">{t('addPeople')}</ButtonType3>
+                                        {isAdmin && (
+                                            <ButtonType3 
+                                                className="text-xs py-1 px-2"
+                                                onClick={() => setShowAddMembersModal(true)}
+                                            >
+                                                {t('addPeople')}
+                                            </ButtonType3>
+                                        )}
                                     </div>
                                     <div className="space-y-2 overflow-y-auto">
                                         {groupMembers.map((member) => (
-                                            <div key={member.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-surface-hover">
+                                            <div 
+                                                key={member.id} 
+                                                className={`flex items-center space-x-3 p-2 rounded-lg ${
+                                                    isAdmin && member.userId !== currentUserId 
+                                                        ? 'hover:bg-surface-hover cursor-pointer' 
+                                                        : ''
+                                                }`}
+                                                onClick={() => handleMemberClick(member)}
+                                            >
                                                 <Avatar className="w-10 h-10">
                                                     <AvatarImage src={member?.profile?.avatarUrl} alt="avatar" />
-                                                    <AvatarFallback>{'U'}</AvatarFallback>
+                                                    <AvatarFallback>U</AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-text-primary truncate">
@@ -481,13 +602,15 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
                                         <p className="text-sm">{t('leaveGroup')}</p>
                                         <ChevronRight className="w-4 h-4" />
                                     </button>
-                                    <button
-                                        onClick={() => setShowDeleteModal(true)}
-                                        className="w-full text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer"
-                                    >
-                                        <p className="text-sm">{t('deleteGroup')}</p>
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
+                                    {isOwner && (
+                                        <button
+                                            onClick={() => setShowDeleteModal(true)}
+                                            className="w-full text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer"
+                                        >
+                                            <p className="text-sm">{t('deleteGroup')}</p>
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -579,31 +702,69 @@ const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
                 )}
             </div>
 
-            {/* Leave Group Confirmation Modal */}
-            <ConfirmationModal
-                open={showLeaveModal}
-                onCancel={() => setShowLeaveModal(false)}
-                onConfirm={handleLeaveGroup}
-                title={t('leaveGroup')}
-                description={t('leaveGroupConfirmation', { groupName: group.name })}
-                confirmText={t('leave')}
-                cancelText={t('cancel')}
-                confirmVariant="destructive"
-                isLoading={isLeavingGroup}
-            />
+            {/* Confirmation Modals */}
 
-            {/* Delete Group Confirmation Modal */}
             <ConfirmationModal
-                open={showDeleteModal}
-                onCancel={() => setShowDeleteModal(false)}
-                onConfirm={handleDeleteGroup}
-                title={t('deleteGroup')}
-                description={t('deleteGroupConfirmation', { groupName: group.name })}
-                confirmText={t('delete')}
-                cancelText={t('cancel')}
-                confirmVariant="destructive"
-                isLoading={isDeletingGroup}
+open={showLeaveModal}
+onCancel={() => setShowLeaveModal(false)}
+onConfirm={handleLeaveGroup}
+title={t('leaveGroup')}
+description={t('leaveGroupConfirmation', { groupName: group.name })}
+confirmText={t('leave')}
+cancelText={t('cancel')}
+confirmVariant="destructive"
+isLoading={isLeavingGroup}
+/>
+<ConfirmationModal
+            open={showDeleteModal}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteGroup}
+            title={t('deleteGroup')}
+            description={t('deleteGroupConfirmation', { groupName: group.name })}
+            confirmText={t('delete')}
+            cancelText={t('cancel')}
+            confirmVariant="destructive"
+            isLoading={isDeletingGroup}
+        />
+
+        {/* Edit Group Modal */}
+        {showEditModal && group && (
+            <EditGroupModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                onSave={handleEditGroup}
+                initialData={{
+                    name: group.name,
+                    description: group.description || '',
+                    avatarUrl: group.avatarUrl || '',
+                    privacy: group.privacy
+                }}
             />
-        </>
-    );
+        )}
+
+        {/* Add Members Modal */}
+        {showAddMembersModal && (
+            <AddMembersModal
+                    isOpen={showAddMembersModal}
+                    onClose={() => setShowAddMembersModal(false)}
+                    groupId={chat.id}
+                    onMembersAdded={refetchMembers}             />
+        )}
+
+        {/* Manage Member Modal */}
+        {showManageMemberModal && selectedMember && (
+            <ManageMemberModal
+                isOpen={showManageMemberModal}
+                onClose={() => {
+                    setShowManageMemberModal(false);
+                    setSelectedMember(null);
+                }}
+                member={selectedMember}
+                onRemove={() => handleRemoveMember(selectedMember.userId)}
+                onUpdateRole={(role) => handleUpdateMemberRole(selectedMember.userId, role)}
+                isOwner={isOwner}
+            />
+        )}
+    </>
+);
 }
