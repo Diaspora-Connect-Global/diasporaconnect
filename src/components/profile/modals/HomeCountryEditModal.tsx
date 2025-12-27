@@ -51,7 +51,7 @@ export function HomeCountryEditModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-2xl w-[90vw] max-h-[80vh] flex flex-col"  onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{t('homeCountry')}</DialogTitle>
         </DialogHeader>
