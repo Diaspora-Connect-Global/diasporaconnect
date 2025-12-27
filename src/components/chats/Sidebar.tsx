@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SearchInput } from "../custom/input";
 import { Plus, SquarePen } from "lucide-react";
 import { formatDateProximity } from "@/macros/time";
@@ -27,12 +28,26 @@ interface ChatItem {
 export default function ChatSideBar() {
     const t = useTranslations('chat');
     const tActions = useTranslations('actions');
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeTab, setActiveTab] = useState<TabType>('direct');
     const { activeChat, setActiveChat, conversations, preferences, messages, initializeFromMockData } = useChatStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'direct' | 'group'>('direct');
     const [directChats, setDirectChats] = useState<ChatItem[]>([]);
+
+    // Get active tab from URL query param 't', default to 'direct'
+    const tabFromUrl = (searchParams.get('t') as TabType) || 'direct';
+    const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl);
+
+    // Sync activeTab with URL
+    useEffect(() => {
+        const urlTab = searchParams.get('t') as TabType;
+        if (urlTab && (urlTab === 'direct' || urlTab === 'groups')) {
+            setActiveTab(urlTab);
+        }
+    }, [searchParams]);
 
     // Initialize store and compute chat lists
     useEffect(() => {
@@ -85,9 +100,32 @@ export default function ChatSideBar() {
         chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    // Update URL with query params
+    const updateUrlParams = (tab?: TabType, chatType?: 'direct' | 'group') => {
+        const params = new URLSearchParams(searchParams.toString());
+        
+        if (tab) {
+            params.set('t', tab);
+        }
+        
+        if (chatType) {
+            params.set('ct', chatType);
+        }
+        
+        router.push(`?${params.toString()}`, { scroll: false });
+    };
+
+    const handleTabChange = (tab: TabType) => {
+        setActiveTab(tab);
+        updateUrlParams(tab);
+    };
+
     const handleChatClick = (chat: { id: string; type: 'direct' | 'group' }) => {
         setActiveChat(chat);
         sessionStorage.setItem('activeChat', JSON.stringify(chat));
+        
+        // Update URL with chat type
+        updateUrlParams(undefined, chat.type);
         
         // Reset unread count when chat is clicked
         const preference = preferences.find(p => 
@@ -143,13 +181,13 @@ export default function ChatSideBar() {
                     <div className="flex">
                         <TabButton
                             active={activeTab === 'direct'}
-                            onClick={() => setActiveTab('direct')}
+                            onClick={() => handleTabChange('direct')}
                             label={t('directMessages')}
                             notificationCount={directUnreadCount}
                         />
                         <TabButton
                             active={activeTab === 'groups'}
-                            onClick={() => setActiveTab('groups')}
+                            onClick={() => handleTabChange('groups')}
                             label={t('groups')}
                             notificationCount={0}
                         />
