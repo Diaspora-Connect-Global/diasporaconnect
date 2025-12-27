@@ -16,6 +16,10 @@ export interface Profile {
   phone?: string;
   firstName: string;
   lastName: string;
+  middleName: string;
+  residenceSinceYear: number;
+  residenceSinceMonth: number;
+  city?: string;
   countryOfOrigin?: string;
   residenceCountry?: string;
   location?: string;
@@ -32,13 +36,18 @@ export interface Profile {
   createdAt: string;
   updatedAt: string;
   profileCompletion?: ProfileCompletion;
-  role:string;
+  role: string;
 }
 
 export interface UpdateProfileInput {
   version: number;
   firstName?: string;
   lastName?: string;
+  middleName?: string;
+  city?: string;
+  residenceSinceYear?: number;
+  residenceSinceMonth?: number;
+
   countryOfOrigin?: string;
   residenceCountry?: string;
   bio?: string;
@@ -56,8 +65,8 @@ export interface GetProfileResponse {
     success: boolean;
     message?: string;
     profile: Profile;
-    connectionStatus:string
-    connectionId:string
+    connectionStatus: string
+    connectionId: string
   };
 }
 
@@ -121,8 +130,12 @@ export const GET_MY_PROFILE = gql`
         phone
         firstName
         lastName
+        middleName
         countryOfOrigin
         residenceCountry
+        residenceSinceYear
+        residenceSinceMonth
+        city
         sector
         industry
         bio

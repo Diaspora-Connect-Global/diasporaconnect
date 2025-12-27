@@ -15,15 +15,25 @@ import { useTranslations } from 'next-intl';
 interface ResidenceEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (residence: string) => Promise<void>; // Save as single string
-  initialData?: string;
+  onSave: (residenceCountry: string, city: string, residenceSinceMonth: number, residenceSinceYear: number) => Promise<void>;
+  initialData: {
+    residenceCountry: string;
+    city: string;
+    residenceSinceMonth: number;
+    residenceSinceYear: number;
+  };
 }
 
 export function ResidenceEditModal({
   isOpen,
   onClose,
   onSave,
-  initialData = '',
+  initialData = {
+    residenceCountry: "",
+    city: "",
+    residenceSinceMonth: 0,
+    residenceSinceYear: 0
+  },
 }: ResidenceEditModalProps) {
   const t = useTranslations('profile.personalDetails');
   const tWork = useTranslations('profile.workExperience');
@@ -35,32 +45,13 @@ export function ResidenceEditModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Parse initialData into parts if saved as "City, Country – Month Year"
   useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        const regex = /^(.*), (.*) – (\w+) (\d{4})$/;
-        const match = initialData.match(regex);
-        if (match) {
-          setCity(match[1]);
-          setCountry(match[2]);
-          setMonth(match[3]);
-          setYear(match[4]);
-        } else {
-          setCity('');
-          setCountry(initialData);
-          setMonth('');
-          setYear('');
-        }
-      } else {
-        setCity('');
-        setCountry('');
-        setMonth('');
-        setYear('');
-      }
-      setError(null);
-    }
-  }, [isOpen, initialData]);
+    setCity(initialData.city);
+    setCountry(initialData.residenceCountry);
+    setMonth(initialData.residenceSinceMonth ? String(initialData.residenceSinceMonth) : '');
+    setYear(initialData.residenceSinceYear ? String(initialData.residenceSinceYear) : '');
+    setError(null);
+  }, [initialData.city, initialData.residenceCountry, initialData.residenceSinceMonth, initialData.residenceSinceYear]);
 
   const handleSave = async () => {
     if (!country || !city || !month || !year) {
@@ -68,15 +59,22 @@ export function ResidenceEditModal({
       return;
     }
 
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+
+    if (isNaN(monthNum) || isNaN(yearNum)) {
+      setError('Invalid month or year');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
-      const value = `${city}, ${country} – ${month} ${year}`;
-      await onSave(value);
+      await onSave(`${country}A`, city, monthNum, yearNum);
       onClose();
     } catch (err) {
       console.error('Failed to save residence:', err);
-      setError( 'Failed to save');
+      setError('Failed to save');
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +94,13 @@ export function ResidenceEditModal({
           <LabelLarge>{t('livingHereSince')}</LabelLarge>
           <div className="grid grid-cols-2 gap-2">
             <MonthSelect value={month} onChange={setMonth} label={tWork('month')} />
-            <TextInput label={tWork('year')} placeholder={tWork('yearPlaceholder')} value={year} onChange={setYear} />
+            <TextInput 
+              label={tWork('year')} 
+              placeholder={tWork('yearPlaceholder')} 
+              value={year} 
+              onChange={setYear}
+              type="number"
+            />
           </div>
 
           {error && <p className="text-xs text-red-500">{error}</p>}

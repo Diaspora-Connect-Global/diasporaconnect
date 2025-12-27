@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Profile } from "../services/gql/profile";
 
 /* ===================== TYPES ===================== */
 
@@ -13,14 +14,6 @@ export interface AuthTokens {
   refreshTokenExpiresAt?: number | string; // Support both timestamp formats
 }
 
-export interface UserData {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  avatarUrl?: string;
-}
 
 export interface DeviceMetadata {
   fingerprint: string;
@@ -34,7 +27,7 @@ export interface DeviceMetadata {
 interface AuthState {
   // persisted state
   tokens: AuthTokens | null;
-  user: UserData | null;
+  user: Profile | null;
   deviceMetadata: DeviceMetadata | null;
   rememberMe: boolean;
 
@@ -49,7 +42,7 @@ interface AuthState {
   updateAccessToken: (accessToken: string, expiresIn: number) => void;
   refreshTokens: (sessionToken: string, refreshToken: string, sessionTokenExpiry: number, refreshTokenExpiry: number) => void;
 
-  setUser: (user: UserData) => void;
+  setUser: (user: Profile) => void;
   setDeviceMetadata: (metadata: DeviceMetadata) => void;
   setRememberMe: (remember: boolean) => void;
 

@@ -110,8 +110,9 @@ export default function ProfilePage() {
                 firstName: profile.firstName,
                 lastName: profile.lastName,
                 email: profile.email,
-                id: profile.userId,
-                role: profile.role
+                userId: profile.userId,
+                role: profile.role,
+                countryOfOrigin: profile.countryOfOrigin?.slice(0, 2).toUpperCase(),
             });
         }
     }, [profile?.firstName, profile?.lastName, profile?.email, profile, setUser]);

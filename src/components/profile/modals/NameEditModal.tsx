@@ -9,9 +9,14 @@ import { useTranslations } from 'next-intl';
 interface NameEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (fullName: string) => Promise<void>; // must return Promise
-  initialData: string;
-}
+  onSave: (firstName:string ,middleName: string, lastName:string) => Promise<void>; // must return Promise
+  initialData: {
+    firstName: string;
+    middleName: string;
+    lastName: string;
+  } 
+  };
+
 
 export function NameEditModal({ isOpen, onClose, onSave, initialData }: NameEditModalProps) {
   const t = useTranslations('profile.personalDetails');
@@ -23,25 +28,20 @@ export function NameEditModal({ isOpen, onClose, onSave, initialData }: NameEdit
 
   useEffect(() => {
     if (isOpen) {
-      const parts = initialData.trim().split(' ');
-      setFirstName(parts[0] || '');
-      setLastName(parts.length > 1 ? parts[parts.length - 1] : '');
-      setMiddleName(parts.length > 2 ? parts.slice(1, -1).join(' ') : '');
+      setFirstName(initialData.firstName);
+      setLastName(initialData.lastName);
+      setMiddleName(initialData.middleName);
       setError(null);
     }
   }, [isOpen, initialData]);
 
   const handleSave = async () => {
-    const fullName = [firstName, middleName, lastName].filter(Boolean).join(' ').trim();
-    if (!fullName || fullName === initialData.trim()) {
-      onClose();
-      return;
-    }
+ 
 
     setIsLoading(true);
     setError(null);
     try {
-      await onSave(fullName); // waits for parent mutation
+      await onSave( firstName, middleName, lastName );
       onClose();
     } catch (err) {
       console.error('Failed to save name:', err);

@@ -31,13 +31,13 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
   // );
 
 
-  const [updateProfile] = useMutation<{ 
-  updateProfile: { success: boolean; message?: string; profile: Profile } 
-}>(UPDATE_PROFILE, {
-  refetchQueries: [{ query: GET_MY_PROFILE }],
-  // or refetchQueries: ['GetMyProfile'], // if your query has operationName
-  awaitRefetchQueries: true, // Wait for refetch to complete
-});
+  const [updateProfile] = useMutation<{
+    updateProfile: { success: boolean; message?: string; profile: Profile }
+  }>(UPDATE_PROFILE, {
+    refetchQueries: [{ query: GET_MY_PROFILE }],
+    // or refetchQueries: ['GetMyProfile'], // if your query has operationName
+    awaitRefetchQueries: true, // Wait for refetch to complete
+  });
 
   // Loading states for each modal
   const [isBioLoading, setIsBioLoading] = useState(false);
@@ -80,6 +80,8 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
   const [isResidenceModalOpen, setIsResidenceModalOpen] = useState(false);
   const [isHomeCountryModalOpen, setIsHomeCountryModalOpen] = useState(false);
 
+    const residenceStr = `${localUserData?.city}, ${localUserData?.residenceCountry}. Since ${localUserData?.residenceSinceMonth}, ${localUserData?.residenceSinceYear}`; 
+
   return (
     <div className="space-y-6">
       {isOwnProfile && (
@@ -94,7 +96,7 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
       {isOwnProfile && (
         <EditableField
           title={t('fullName')}
-          data={`${localUserData?.firstName || ''} ${localUserData?.lastName || ''}`}
+          data={`${localUserData?.firstName || ''} ${localUserData?.middleName || ''} ${localUserData?.lastName || ''}`}
           onEdit={() => setIsNameModalOpen(true)}
           showEditButton={isOwnProfile}
         />
@@ -111,14 +113,14 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
 
       <EditableField
         title={t('residenceAddress')}
-        data={localUserData?.residenceCountry || ''}
+        data={residenceStr}
         onEdit={() => setIsResidenceModalOpen(true)}
         showEditButton={isOwnProfile}
       />
 
       <EditableField
         title={t('homeCountry')}
-        data={localUserData?.countryOfOrigin || ''}
+        data={localUserData?.countryOfOrigin?.slice(0, 2).toUpperCase() || ''}
         onEdit={() => setIsHomeCountryModalOpen(true)}
         showEditButton={isOwnProfile}
       />
@@ -132,15 +134,17 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
             initialData={localUserData?.bio || ''}
           />
 
-      <NameEditModal
+          <NameEditModal
             isOpen={isNameModalOpen}
             onClose={() => setIsNameModalOpen(false)}
-            onSave={async fullName => {
-              const [firstName, ...lastParts] = fullName.trim().split(' ');
-              const lastName = lastParts.join(' ');
-              await handleSaveField({ firstName, lastName  },setIsNameLoading);
+            onSave={async (firstName, middleName, lastName) => {
+              await handleSaveField({ firstName, middleName, lastName }, setIsNameLoading)
             }}
-            initialData={`${localUserData?.firstName || ''} ${localUserData?.lastName || ''}`}
+            initialData={{
+              firstName: localUserData?.firstName || '',
+              middleName: localUserData?.middleName || '',
+              lastName: localUserData?.lastName || ''
+            }}
           />
 
           <DOBEditModal
@@ -150,18 +154,30 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
             initialData={localUserData?.dateOfBirth || ''}
           />
 
-          <ResidenceEditModal
-            isOpen={isResidenceModalOpen}
-            onClose={() => setIsResidenceModalOpen(false)}
-            onSave={(residence) => handleSaveField({ residenceCountry: residence }, setIsResidenceLoading)}
-            initialData={localUserData?.residenceCountry || ''}
-          />
+       <ResidenceEditModal
+  isOpen={isResidenceModalOpen}
+  onClose={() => setIsResidenceModalOpen(false)}
+  onSave={(residenceCountry, city, residenceSinceMonth, residenceSinceYear) =>
+    handleSaveField({
+      residenceCountry,
+      city,
+      residenceSinceMonth,
+      residenceSinceYear
+    }, setIsResidenceLoading)
+  }
+  initialData={{
+    residenceCountry: localUserData?.residenceCountry?.slice(0, 2).toUpperCase() || '',
+    city: localUserData?.city || '',
+    residenceSinceMonth: localUserData?.residenceSinceMonth || 0,
+    residenceSinceYear: localUserData?.residenceSinceYear || 0
+  }}
+/>
 
           <HomeCountryEditModal
             isOpen={isHomeCountryModalOpen}
             onClose={() => setIsHomeCountryModalOpen(false)}
             onSave={(countryOfOrigin) => handleSaveField({ countryOfOrigin }, setIsHomeCountryLoading)}
-            initialData={localUserData?.countryOfOrigin || ''}
+            initialData={localUserData?.countryOfOrigin?.slice(0, 2).toUpperCase() || ''}
           />
         </>
       )}

@@ -73,8 +73,10 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
 };
 
 interface TextInputProps {
-    value: string;
-    onChange: (value: string) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onChange: (value: any) => void;
     type?: string;
     placeholder: string;
     label?: string;
