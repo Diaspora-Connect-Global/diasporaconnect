@@ -19,7 +19,8 @@ import {
     LEAVE_GROUP,
     DELETE_GROUP,
     LeaveGroupResponse,
-    DeleteGroupResponse
+    DeleteGroupResponse,
+    GET_MY_GROUPS
 } from "@/services/gql/groups";
 import { useRouter } from "next/navigation";
 import { ConfirmationModal } from "../custom/confirmationModal";
@@ -73,9 +74,27 @@ export default function GroupChat() {
     });
 
     // Mutations
-    const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP);
-    const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP);
+   // In GroupChat.tsx
 
+const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
+    refetchQueries: [
+        { 
+            query: GET_MY_GROUPS, 
+            variables: { limit: 50, offset: 0 } 
+        }
+    ],
+    awaitRefetchQueries: true, // Wait for refetch to complete
+});
+
+const [deleteGroup] = useMutation<DeleteGroupResponse>(DELETE_GROUP, {
+    refetchQueries: [
+        { 
+            query: GET_MY_GROUPS, 
+            variables: { limit: 50, offset: 0 } 
+        }
+    ],
+    awaitRefetchQueries: true,
+});
     const group = groupData?.getGroup?.group;
     const groupMembers = membersData?.getGroupMembers?.members || [];
     const groupMembersCount = membersData?.getGroupMembers?.total || 0;
