@@ -1,6 +1,7 @@
 // Chat.tsx
 "use client"
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useChatStore } from "@/store/ChatStore";
 import DirectMessageChat from "@/components/chats/DirectMessageChat";
@@ -21,8 +22,11 @@ export interface ChatInfo {
 }
 
 export default function Chat() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { activeChat, setActiveChat } = useChatStore();
-    const [chatInfo, setChatInfo] = useState<ChatInfo >({
+    
+    const [chatInfo, setChatInfo] = useState<ChatInfo>({
         name: "",
         id: "",
         type: 'direct',
@@ -33,9 +37,8 @@ export default function Chat() {
     });
     const [isMobile, setIsMobile] = useState(false);
 
-    const chatchosen = sessionStorage.getItem('activeChat');
-    const chatchosenParsed = chatchosen ? JSON.parse(chatchosen) : null;
-    console.log("Active Chat from sessionStorage:", chatchosen);
+    // Get chat type from URL parameter
+    const chatTypeFromUrl = searchParams.get('ct') as 'direct' | 'group' | null;
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -43,6 +46,27 @@ export default function Chat() {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    // Sync activeChat with URL parameters and sessionStorage
+    useEffect(() => {
+        const chatchosen = sessionStorage.getItem('activeChat');
+        
+        if (chatTypeFromUrl && chatchosen) {
+            const chatchosenParsed = JSON.parse(chatchosen);
+            
+            // Only update if URL param matches sessionStorage type
+            if (chatchosenParsed.type === chatTypeFromUrl) {
+                if (!activeChat || activeChat.id !== chatchosenParsed.id) {
+                    setActiveChat(chatchosenParsed);
+                }
+            }
+        } else if (!chatTypeFromUrl && !chatchosen) {
+            // Clear active chat if no params and no session storage
+            if (activeChat) {
+                setActiveChat(null);
+            }
+        }
+    }, [chatTypeFromUrl, activeChat, setActiveChat]);
 
     useEffect(() => {
         if (activeChat) {
@@ -67,9 +91,17 @@ export default function Chat() {
 
     const handleBack = () => {
         setActiveChat(null);
+        sessionStorage.removeItem('activeChat');
+        
+        // Remove chat type param but keep tab param
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('ct');
+        
+        const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+        router.push(newUrl, { scroll: false });
     };
 
-    if (!activeChat ) {
+    if (!activeChat) {
         return (
             <div className="bg-surface-default rounded-md h-app-inner overflow-hidden">
                 <EmptyMessage />
@@ -107,11 +139,11 @@ export default function Chat() {
             )}
             
             {/* Chat content */}
-            <div className="overflow-hidden h-[96%] my-auto ">
-                {chatchosenParsed?.type === 'direct' ? (
+            <div className="overflow-hidden h-[96%] my-auto">
+                {activeChat.type === 'direct' ? (
                     <DirectMessageChat chat={chatInfo} />
                 ) : (
-                    <GroupChat  />
+                    <GroupChat />
                 )}
             </div>
         </div>
