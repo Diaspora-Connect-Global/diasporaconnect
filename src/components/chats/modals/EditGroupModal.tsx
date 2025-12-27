@@ -104,12 +104,6 @@ export function EditGroupModal({
             rows={3}
           />
 
-          <TextInput
-            label={t("avatarUrl")}
-            placeholder={t("avatarUrlPlaceholder")}
-            value={avatarUrl}
-            onChange={setAvatarUrl}
-          />
 
           <div>
             <label className="block text-sm font-medium text-text-primary mb-2">

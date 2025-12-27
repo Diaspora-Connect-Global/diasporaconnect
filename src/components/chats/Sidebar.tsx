@@ -430,7 +430,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
-                <p className="text-center text-red-500">{t('errorLoadingGroups')}</p>
+                <p className="text-center text-red-500">{t('group.groupsNotFound')}</p>
                 <p className="text-sm text-text-tertiary mt-2">{error.message}</p>
             </div>
         );
