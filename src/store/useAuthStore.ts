@@ -5,7 +5,7 @@ import { Profile } from "../services/gql/profile";
 /* ===================== TYPES ===================== */
 
 export interface AuthTokens {
-  accessToken: string;
+  accessToken?: string;
   refreshToken: string;
   sessionToken?: string;
   sessionId: string;

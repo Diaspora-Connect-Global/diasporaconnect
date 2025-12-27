@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
 import Header from "@/components/custom/header";
 import LoadingScreen from "@/components/custom/LoadingScreen";
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 const REFRESH_AFTER_MS = 2 * 60 * 1000; // 2 minutes
 const CHECK_INTERVAL_MS = 60 * 1000; // 1 minute
 const TOKEN_ISSUED_KEY = "accessTokenIssuedAt";
+const REDIRECT_URL_KEY = "redirectAfterSignin";
 
 /* ================================
    HELPERS
@@ -30,14 +31,42 @@ const shouldRefreshToken = () => {
   return Date.now() - issuedAt >= REFRESH_AFTER_MS;
 };
 
+/**
+ * Save the current URL to redirect back after signin
+ */
+const saveRedirectUrl = (url: string) => {
+  // Don't save auth-related pages or home page
+  const authPages = ["/signin", "/signup", "/forgot-password", "/reset-password", "/"];
+  const isAuthPage = authPages.some(page => url === page || url.startsWith(page + "?"));
+  
+  if (!isAuthPage) {
+    localStorage.setItem(REDIRECT_URL_KEY, url);
+  }
+};
+
+/**
+ * Get and clear the saved redirect URL
+ */
+const getAndClearRedirectUrl = (): string | null => {
+  const url = localStorage.getItem(REDIRECT_URL_KEY);
+  if (url) {
+    localStorage.removeItem(REDIRECT_URL_KEY);
+    return url;
+  }
+  return null;
+};
+
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isRefreshingRef = useRef(false);
+  const hasCheckedRedirectRef = useRef(false);
 
   /* ================================
      AUTH STORE
@@ -49,10 +78,15 @@ export default function MainLayout({
   /* ================================
      GRAPHQL
   ================================ */
-  const [refreshTokenMutation, { loading: refreshing }] =
+  const [refreshTokenMutation] =
     useMutation<RefreshTokenResponse>(REFRESH_TOKEN, {
       onError: (error) => {
         console.error("Token refresh failed:", error);
+        
+        // Save current URL before clearing auth
+        const currentUrl = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+        saveRedirectUrl(currentUrl);
+        
         clearAuth();
         toast.error("Session expired. Please sign in again.");
         router.replace("/signin");
@@ -68,6 +102,10 @@ export default function MainLayout({
 
     const refreshToken = tokens?.refreshToken;
     if (!refreshToken) {
+      // Save current URL before redirecting
+      const currentUrl = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+      saveRedirectUrl(currentUrl);
+      
       clearAuth();
       router.replace("/signin");
       return;
@@ -123,12 +161,46 @@ export default function MainLayout({
 
     } catch (err) {
       console.error("Refresh error:", err);
+      
+      // Save current URL before clearing auth
+      const currentUrl = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+      saveRedirectUrl(currentUrl);
+      
       clearAuth();
       router.replace("/signin");
     } finally {
       isRefreshingRef.current = false;
     }
   };
+
+  /* ================================
+     HANDLE REDIRECT AFTER SIGNIN
+     This runs once when user becomes authenticated
+  ================================ */
+  useEffect(() => {
+    // Only run once after successful authentication
+    if (isAuthenticated && tokens && !hasCheckedRedirectRef.current) {
+      hasCheckedRedirectRef.current = true;
+      
+      const redirectUrl = getAndClearRedirectUrl();
+      
+      if (redirectUrl) {
+        // User had a previous page they wanted to visit
+        console.log("Redirecting to saved URL:", redirectUrl);
+        router.replace(redirectUrl);
+      } else {
+        // No saved URL - check if we're on an auth page and redirect to home
+        const authPages = ["/signin", "/signup", "/forgot-password", "/reset-password"];
+        const isOnAuthPage = authPages.some(page => pathname === page);
+        
+        if (isOnAuthPage) {
+          console.log("No saved URL, redirecting to home");
+          router.replace("/");
+        }
+        // Otherwise, user is already on a valid page, stay there
+      }
+    }
+  }, [isAuthenticated, tokens, router, pathname]);
 
   /* ================================
      INITIAL + INTERVAL CHECK
@@ -172,14 +244,18 @@ export default function MainLayout({
   ================================ */
   useEffect(() => {
     if (!isAuthenticated) {
+      // Save current URL before redirecting to signin
+      const currentUrl = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+      saveRedirectUrl(currentUrl);
+      
       router.replace("/signin");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, pathname, searchParams]);
 
   /* ================================
      BLOCK RENDER
   ================================ */
-  if (!isAuthenticated ) {
+  if (!isAuthenticated) {
     return <LoadingScreen />;
   }
 

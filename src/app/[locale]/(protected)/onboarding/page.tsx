@@ -182,7 +182,7 @@ const formatPhone = (phone: string, countryCode: string) => {
           );
 
         token =
-          data.completeOAuthRegistration.registrationToken;
+data.completeOAuthRegistration.registrationToken;
       } else {
         const { data } = await registerUser({
           variables: {
@@ -239,11 +239,10 @@ const formatPhone = (phone: string, countryCode: string) => {
         sessionToken,
         user,
         deviceMetadata,
-        // requires2fa
       } = data.verifyRegistrationOtp;
 
       setTokens({
-        accessToken: sessionToken,
+        sessionToken: sessionToken,
         refreshToken: '',
         sessionId: deviceMetadata.deviceId,
         expiresIn: 3600
