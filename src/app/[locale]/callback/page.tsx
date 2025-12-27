@@ -57,7 +57,7 @@ export default function OAuthCallbackPage() {
       log('Existing user detected, preparing user and device metadata');
 
       const user = {
-        id: params.get('userId'),
+        userId: params.get('userId'),
         email: params.get('email'),
         firstName: decodeURIComponent(params.get('firstName') || ''),
         lastName: decodeURIComponent(params.get('lastName') || ''),

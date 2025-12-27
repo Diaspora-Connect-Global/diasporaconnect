@@ -119,8 +119,19 @@ export default function SignInForm() {
                     sessionId: data.login.sessionId,
                     expiresIn: data.login.expiresIn,
                 });
-                console.log("User data on login:", data.login.user);    
-                setUser(data.login.user);
+                console.log("User data on login:", data.login.user);   
+                const user = data.login.user 
+                setUser({
+                    ...user,
+                    userId: user.id,
+                    middleName: '',
+                    residenceSinceYear: 0,
+                    residenceSinceMonth: 0,
+                    connectionCount: 0,
+                    version: 0,
+                    createdAt: '',
+                    updatedAt: ''
+                });
                 setDeviceMetadata(data.login.deviceMetadata);
                 setRememberMeStore(rememberMe);
 

@@ -249,7 +249,18 @@ const formatPhone = (phone: string, countryCode: string) => {
         expiresIn: 3600
       });
 
-      setUser(user);
+      setUser({
+        ...user,
+        userId: user.id,
+        middleName: '',
+        residenceSinceYear: new Date().getFullYear(),
+        residenceSinceMonth: new Date().getMonth() + 1,
+        bio: '',
+        connectionCount: 0,
+        version: 0,
+        createdAt: '',
+        updatedAt: ''
+      });
       setDeviceMetadata(deviceMetadata);
 
       sessionStorage.clear();

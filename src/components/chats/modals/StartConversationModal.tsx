@@ -126,7 +126,7 @@ export function StartConversationModal({
     const user = useAuthStore((state) => state.user);
 
     const handleGroupCreate = async (groupName: string, groupPhoto?: string) => {
-        const currentUserId = user?.id;
+        const currentUserId = user?.userId;
 
 
         // Create array of member IDs including current user
