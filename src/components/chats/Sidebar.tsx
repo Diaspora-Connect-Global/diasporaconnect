@@ -228,6 +228,28 @@ function TabButton({ active, onClick, label, notificationCount }: TabButtonProps
     );
 }
 
+// Skeleton Loader Component
+function ChatItemSkeleton() {
+    return (
+        <div className="flex items-center border-b space-x-3 p-3 animate-pulse">
+            {/* Avatar skeleton */}
+            <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0" />
+            
+            {/* Content skeleton */}
+            <div className="flex-1 min-w-0 space-y-2">
+                <div className="h-4 bg-gray-300 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+            </div>
+            
+            {/* Time and badge skeleton */}
+            <div className="flex flex-col items-end space-y-2">
+                <div className="h-3 bg-gray-200 rounded w-12" />
+                <div className="w-5 h-5 bg-gray-200 rounded-full" />
+            </div>
+        </div>
+    );
+}
+
 // Reusable ChatItem component
 interface ChatItemProps {
     chat: {
@@ -354,13 +376,15 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
     
     const { data, loading, error } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
         variables: { limit, offset },
-        fetchPolicy: 'cache-and-network', // Ensure fresh data
+        fetchPolicy: 'cache-and-network',
     });
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full p-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="p-2 space-y-1">
+                {[...Array(5)].map((_, i) => (
+                    <ChatItemSkeleton key={i} />
+                ))}
             </div>
         );
     }
@@ -414,7 +438,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
                             avatar: group.avatarUrl || getInitials(group.name),
                             lastMessage: group.description || `${group.memberCount} members`,
                             lastMessageTime: group.createdAt,
-                            unread: 0, // TODO: Add unread count from your backend
+                            unread: 0,
                             type: 'group' as const,
                             memberCount: group.memberCount,
                         }}
