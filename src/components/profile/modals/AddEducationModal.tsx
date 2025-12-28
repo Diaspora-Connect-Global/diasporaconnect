@@ -241,6 +241,7 @@ export function AddEducationModal({
                                     placeholder={t('yearPlaceholder')}
                                     value={form.startYear}
                                     onChange={(v) => updateForm('startYear', v)}
+                                    type='number'
                                 />
                             </div>
                         </div>
@@ -258,6 +259,7 @@ export function AddEducationModal({
                                         placeholder={t('endYearPlaceholder')}
                                         value={form.endYear}
                                         onChange={(v) => updateForm('endYear', v)}
+                                        type='number'
                                     />
                                 </div>
                             </div>

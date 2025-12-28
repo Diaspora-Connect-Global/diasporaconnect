@@ -123,7 +123,7 @@ export const GET_MY_EDUCATION = gql`
  * ```
  */
 export const GET_USER_EDUCATION = gql`
-  query GetUserEducation($userId: ID!) {
+  query GetUserEducation($userId: String!) {
     getUserEducation(userId: $userId) {
       success
       message

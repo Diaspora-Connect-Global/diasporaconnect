@@ -10,6 +10,7 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   GET_MY_EDUCATION,
+  GET_USER_EDUCATION,
   DELETE_EDUCATION,
   type GetUserEducationResponse,
   type DeleteEducationResponse,
@@ -51,15 +52,29 @@ function EducationSkeleton() {
   );
 }
 
-export default function EducationContent() {
+interface EducationContentProps {
+  userId: string;
+  isOwnProfile: boolean;
+}
+
+export default function EducationContent({ userId, isOwnProfile }: EducationContentProps) {
   const t = useTranslations('profile.education');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEducation, setEditingEducation] = useState<Education | null>(null);
 
-  // GraphQL Query
-  const { data, loading, refetch } = useQuery<GetUserEducationResponse>(GET_MY_EDUCATION);
+  // Determine which query to use based on isOwnProfile
+  const isMyProfile = isOwnProfile && userId === "me";
 
-  // GraphQL Mutation
+  // GraphQL Query - Conditionally load based on profile ownership
+  const { data, loading, refetch } = useQuery<GetUserEducationResponse>(
+    isMyProfile ? GET_MY_EDUCATION : GET_USER_EDUCATION,
+    {
+      variables: isMyProfile ? undefined : { userId },
+      skip: !userId
+    }
+  );
+
+  // GraphQL Mutation - Only available for own profile
   const [deleteEducationMutation] = useMutation<DeleteEducationResponse>(DELETE_EDUCATION, {
     onCompleted: (data) => {
       if (data.deleteEducation.success) {
@@ -103,11 +118,15 @@ export default function EducationContent() {
   };
 
   const handleEdit = (education: Education) => {
+    if (!isMyProfile) return;
+    
     setEditingEducation(education);
     setIsModalOpen(true);
   };
 
   const handleDelete = async (educationId: string) => {
+    if (!isMyProfile) return;
+    
     if (!confirm(t('confirmDelete') || 'Are you sure you want to delete this education?')) {
       return;
     }
@@ -138,16 +157,20 @@ export default function EducationContent() {
     <div className="max-w-4xl mx-auto p-6">
       <section>
         <h2 className="text-2xl font-bold mb-4 text-text-primary">{t('title')}</h2>
-        <ButtonType3
-          onClick={() => {
-            setEditingEducation(null);
-            setIsModalOpen(true);
-          }}
-          className="flex items-center gap-1 mb-6 text-text-brand font-medium text-sm hover:text-text-brand"
-        >
-          <Plus className="w-4 h-4" />
-          {t('addEducation')}
-        </ButtonType3>
+        
+        {/* Only show Add Education button for own profile */}
+        {isMyProfile && (
+          <ButtonType3
+            onClick={() => {
+              setEditingEducation(null);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center gap-1 mb-6 text-text-brand font-medium text-sm hover:text-text-brand"
+          >
+            <Plus className="w-4 h-4" />
+            {t('addEducation')}
+          </ButtonType3>
+        )}
       </section>
 
       {/* Education List with Loading State */}
@@ -160,7 +183,11 @@ export default function EducationContent() {
             <EducationSkeleton />
           </>
         ) : educationList.length === 0 ? (
-          <p className="text-text-secondary text-sm">No education added yet.</p>
+          <p className="text-text-secondary text-sm">
+            {isMyProfile 
+              ? 'No education added yet.' 
+              : 'This user has not added any education yet.'}
+          </p>
         ) : (
           educationList.map((edu) => (
             <div key={edu.id} className="pb-6 border-b border-border-subtle last:border-0">
@@ -181,35 +208,41 @@ export default function EducationContent() {
                     </BodySmall>
                   )}
                 </div>
-                <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={() => handleEdit(edu)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    title="Edit"
-                  >
-                    <Edit className="w-4 h-4 text-text-secondary" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(edu.id)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4 text-text-secondary" />
-                  </button>
-                </div>
+                
+                {/* Only show Edit/Delete buttons for own profile */}
+                {isMyProfile && (
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => handleEdit(edu)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      title="Edit"
+                    >
+                      <Edit className="w-4 h-4 text-text-secondary" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(edu.id)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4 text-text-secondary" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))
         )}
       </div>
 
-      {/* Modal handles save itself */}
-      <AddEducationModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        initialData={editingEducation}
-        onSaveSuccess={handleSaveSuccess}
-      />
+      {/* Modal - Only render for own profile */}
+      {isMyProfile && (
+        <AddEducationModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          initialData={editingEducation}
+          onSaveSuccess={handleSaveSuccess}
+        />
+      )}
     </div>
   );
 }

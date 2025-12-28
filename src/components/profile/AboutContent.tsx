@@ -52,7 +52,7 @@ export default function AboutContent({ userId, isOwnProfile =false,userData }: A
             <WorkExperience  isOwnProfile={isOwnProfile} userId= {userId} />
           )}
           {activeSubTab === 'education' && (
-            <EducationContent  />
+            <EducationContent isOwnProfile={isOwnProfile} userId= {userId} />
           )}
         </div>
       </div>
