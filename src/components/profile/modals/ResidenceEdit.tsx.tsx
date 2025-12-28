@@ -70,7 +70,7 @@ export function ResidenceEditModal({
     setIsLoading(true);
     setError(null);
     try {
-      await onSave(`${country}A`, city, monthNum, yearNum);
+      await onSave(`${country}`, city, monthNum, yearNum);
       onClose();
     } catch (err) {
       console.error('Failed to save residence:', err);
