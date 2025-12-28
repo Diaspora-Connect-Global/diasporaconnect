@@ -38,9 +38,9 @@ import { gql } from '@apollo/client';
  *         router.push('/verify-2fa');
  *       } else if (data?.login.success) {
  *         // Store tokens in secure storage
- *         localStorage.setItem('accessToken', data.login.accessToken);
- *         localStorage.setItem('refreshToken', data.login.refreshToken);
- *         localStorage.setItem('sessionId', data.login.sessionId);
+ *         sessionStorage.setItem('accessToken', data.login.accessToken);
+ *         sessionStorage.setItem('refreshToken', data.login.refreshToken);
+ *         sessionStorage.setItem('sessionId', data.login.sessionId);
  *         
  *         // Navigate to dashboard
  *         router.push('/dashboard');
@@ -117,9 +117,9 @@ export const LOGIN_USER = gql`
  * 
  *       if (data?.logout.success) {
  *         // Clear local storage
- *         localStorage.removeItem('accessToken');
- *         localStorage.removeItem('refreshToken');
- *         localStorage.removeItem('sessionId');
+ *         sessionStorage.removeItem('accessToken');
+ *         sessionStorage.removeItem('refreshToken');
+ *         sessionStorage.removeItem('sessionId');
  *         
  *         // Redirect to login page
  *         router.push('/login');

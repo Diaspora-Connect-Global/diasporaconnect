@@ -176,7 +176,7 @@ export const COMPLETE_OAUTH_REGISTRATION = gql`
  * 
  *       if (data?.verifyRegistrationOtp.success) {
  *         // Store session token in secure storage
- *         localStorage.setItem('sessionToken', data.verifyRegistrationOtp.sessionToken);
+ *         sessionStorage.setItem('sessionToken', data.verifyRegistrationOtp.sessionToken);
  *         
  *         // Store user data
  *         const user = data.verifyRegistrationOtp.user;
@@ -610,7 +610,7 @@ export interface CheckPhoneAvailabilityResponse {
  *   );
  *
  *   const refreshSession = async () => {
- *     const refreshToken = localStorage.getItem('refreshToken');
+ *     const refreshToken = sessionStorage.getItem('refreshToken');
  *     if (!refreshToken) return null;
  *
  *     try {
@@ -620,11 +620,11 @@ export interface CheckPhoneAvailabilityResponse {
  *
  *       if (data?.refreshToken.success) {
  *         // Update stored tokens
- *         localStorage.setItem(
+ *         sessionStorage.setItem(
  *           'sessionToken',
  *           data.refreshToken.sessionToken
  *         );
- *         localStorage.setItem(
+ *         sessionStorage.setItem(
  *           'refreshToken',
  *           data.refreshToken.refreshToken
  *         );

@@ -51,7 +51,7 @@ export const generateDeviceFingerprint = async (): Promise<string> => {
 
 /**
  * Gets or creates a persistent device ID.
- * Stores in localStorage for consistency across sessions.
+ * Stores in sessionStorage for consistency across sessions.
  * 
  * @returns {Promise<string>} Persistent device ID
  */
@@ -59,12 +59,12 @@ export const getOrCreateDeviceId = async (): Promise<string> => {
   const DEVICE_ID_KEY = 'device_id';
   
   // Check if device ID already exists
-  let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+  let deviceId = sessionStorage.getItem(DEVICE_ID_KEY);
   
   if (!deviceId) {
     // Generate new device ID
     deviceId = await generateDeviceFingerprint();
-    localStorage.setItem(DEVICE_ID_KEY, deviceId);
+    sessionStorage.setItem(DEVICE_ID_KEY, deviceId);
   }
   
   return deviceId;

@@ -41,11 +41,11 @@ const [isComplete, setIsComplete] = useState(false);
 
     useEffect(() => {
         // Get or set the start time
-        let startTime = localStorage.getItem(COUNTDOWN_KEY);
+        let startTime = sessionStorage.getItem(COUNTDOWN_KEY);
         
         if (!startTime) {
             startTime = Date.now().toString();
-            localStorage.setItem(COUNTDOWN_KEY, startTime);
+            sessionStorage.setItem(COUNTDOWN_KEY, startTime);
         }
 
         const updateCountdown = () => {
@@ -56,7 +56,7 @@ const [isComplete, setIsComplete] = useState(false);
             if (remaining <= 0) {
                 setTimeLeft(0);
                 setIsComplete(true);
-                localStorage.removeItem(COUNTDOWN_KEY);
+                sessionStorage.removeItem(COUNTDOWN_KEY);
             } else {
                 setTimeLeft(remaining);
             }
@@ -78,10 +78,10 @@ const [isComplete, setIsComplete] = useState(false);
     };
 
     const resetCountdown = () => {
-        localStorage.removeItem(COUNTDOWN_KEY);
+        sessionStorage.removeItem(COUNTDOWN_KEY);
         setIsComplete(false);
         setTimeLeft(COUNTDOWN_DURATION);
-        localStorage.setItem(COUNTDOWN_KEY, Date.now().toString());
+        sessionStorage.setItem(COUNTDOWN_KEY, Date.now().toString());
     };
 
     if (timeLeft === null) {

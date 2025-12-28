@@ -133,8 +133,8 @@ export default function SignUpForm() {
         console.log('[SignUp] Generating new device fingerprint');
         deviceId = await generateDeviceFingerprint();
         
-        // Store in both localStorage and Zustand
-        localStorage.setItem('deviceFingerprint', deviceId);
+        // Store in both sessionStorage and Zustand
+        sessionStorage.setItem('deviceFingerprint', deviceId);
         setDeviceMetadata({
           fingerprint: deviceId,
           deviceId: deviceId,

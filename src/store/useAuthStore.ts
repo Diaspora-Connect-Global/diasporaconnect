@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { Profile } from "../services/gql/profile";
 
 /* ===================== TYPES ===================== */
@@ -65,36 +65,36 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: () => {
         const tokens = get().tokens;
         if (!tokens) return false;
-        
+
         // Check if refresh token is still valid
         if (get().isRefreshTokenExpired()) {
           return false;
         }
-        
+
         return true;
       },
 
       isTokenExpired: () => {
         const tokens = get().tokens;
         if (!tokens?.expiresAt) return true;
-        
+
         // Handle both string and number timestamps
-        const expiresAt = typeof tokens.expiresAt === 'string' 
-          ? new Date(tokens.expiresAt).getTime() 
+        const expiresAt = typeof tokens.expiresAt === 'string'
+          ? new Date(tokens.expiresAt).getTime()
           : tokens.expiresAt;
-        
+
         return Date.now() >= expiresAt;
       },
 
       needsRefresh: () => {
         const tokens = get().tokens;
         if (!tokens?.expiresAt) return true;
-        
+
         // Handle both string and number timestamps
-        const expiresAt = typeof tokens.expiresAt === 'string' 
-          ? new Date(tokens.expiresAt).getTime() 
+        const expiresAt = typeof tokens.expiresAt === 'string'
+          ? new Date(tokens.expiresAt).getTime()
           : tokens.expiresAt;
-        
+
         // Refresh 5 minutes before expiry
         const fiveMinutes = 5 * 60 * 1000;
         return Date.now() >= expiresAt - fiveMinutes;
@@ -103,12 +103,12 @@ export const useAuthStore = create<AuthState>()(
       isRefreshTokenExpired: () => {
         const tokens = get().tokens;
         if (!tokens?.refreshTokenExpiresAt) return false; // If no expiry set, assume valid
-        
+
         // Handle both string and number timestamps
         const refreshExpiresAt = typeof tokens.refreshTokenExpiresAt === 'string'
           ? new Date(tokens.refreshTokenExpiresAt).getTime()
           : tokens.refreshTokenExpiresAt;
-        
+
         return Date.now() >= refreshExpiresAt;
       },
 
@@ -155,7 +155,7 @@ export const useAuthStore = create<AuthState>()(
         // Convert timestamps to milliseconds if they're in seconds
         const sessionExpiryMs = sessionTokenExpiry > 1e12 ? sessionTokenExpiry : sessionTokenExpiry * 1000;
         const refreshExpiryMs = refreshTokenExpiry > 1e12 ? refreshTokenExpiry : refreshTokenExpiry * 1000;
-        
+
         const expiresIn = Math.floor((sessionExpiryMs - Date.now()) / 1000);
 
         set({
@@ -172,7 +172,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setUser: (user) => set({ user }),
-    
+
       setDeviceMetadata: (metadata) =>
         set({ deviceMetadata: metadata }),
 
@@ -191,8 +191,8 @@ export const useAuthStore = create<AuthState>()(
         }),
     }),
     {
-      name: "auth-store", // localStorage key
-
+      name: "auth-store", // sessionStorage key
+      storage: createJSONStorage(() => sessionStorage),
       // 🔥 Persist ONLY these fields
       partialize: (state) => ({
         tokens: state.tokens,

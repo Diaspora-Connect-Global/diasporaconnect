@@ -24,7 +24,7 @@ const REDIRECT_URL_KEY = "redirectAfterSignin";
    HELPERS
 ================================ */
 const shouldRefreshToken = () => {
-  const issuedAtRaw = localStorage.getItem(TOKEN_ISSUED_KEY);
+  const issuedAtRaw = sessionStorage.getItem(TOKEN_ISSUED_KEY);
   if (!issuedAtRaw) return true;
 
   const issuedAt = Number(issuedAtRaw);
@@ -40,7 +40,7 @@ const saveRedirectUrl = (url: string) => {
   const isAuthPage = authPages.some(page => url === page || url.startsWith(page + "?"));
   
   if (!isAuthPage) {
-    localStorage.setItem(REDIRECT_URL_KEY, url);
+    sessionStorage.setItem(REDIRECT_URL_KEY, url);
   }
 };
 
@@ -48,9 +48,9 @@ const saveRedirectUrl = (url: string) => {
  * Get and clear the saved redirect URL
  */
 const getAndClearRedirectUrl = (): string | null => {
-  const url = localStorage.getItem(REDIRECT_URL_KEY);
+  const url = sessionStorage.getItem(REDIRECT_URL_KEY);
   if (url) {
-    localStorage.removeItem(REDIRECT_URL_KEY);
+    sessionStorage.removeItem(REDIRECT_URL_KEY);
     return url;
   }
   return null;
@@ -154,7 +154,7 @@ export default function MainLayout({
       });
 
       // 🔑 Store issued timestamp
-      localStorage.setItem(
+      sessionStorage.setItem(
         TOKEN_ISSUED_KEY,
         Date.now().toString()
       );

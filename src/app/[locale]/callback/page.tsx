@@ -6,19 +6,19 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 
 /**
- * Helper to log messages into localStorage
+ * Helper to log messages into sessionStorage
  */
 const log = (message: string, data?: any) => {
-  const logs = JSON.parse(localStorage.getItem('debugLogs') || '[]');
+  const logs = JSON.parse(sessionStorage.getItem('debugLogs') || '[]');
   logs.push({ message, data, timestamp: new Date().toISOString() });
-  localStorage.setItem('debugLogs', JSON.stringify(logs));
+  sessionStorage.setItem('debugLogs', JSON.stringify(logs));
 };
 
 /**
  * Helper to download logs as JSON
  */
 export const downloadLogs = () => {
-  const logs = localStorage.getItem('debugLogs') || '[]';
+  const logs = sessionStorage.getItem('debugLogs') || '[]';
   const blob = new Blob([logs], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

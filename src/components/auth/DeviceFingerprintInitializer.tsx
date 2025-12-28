@@ -15,10 +15,10 @@ export default function DeviceFingerprintInitializer() {
         return;
       }
 
-      // Try to restore from localStorage
-      const storedFingerprint = localStorage.getItem('deviceFingerprint');
+      // Try to restore from sessionStorage
+      const storedFingerprint = sessionStorage.getItem('deviceFingerprint');
       if (storedFingerprint) {
-        console.log('[DeviceFingerprint] Restored from localStorage');
+        console.log('[DeviceFingerprint] Restored from sessionStorage');
         setDeviceMetadata({
           fingerprint: storedFingerprint,
           deviceId: storedFingerprint,
@@ -34,7 +34,7 @@ export default function DeviceFingerprintInitializer() {
         console.log('[DeviceFingerprint] Generated new fingerprint');
         
         // Store in both places
-        localStorage.setItem('deviceFingerprint', newFingerprint);
+        sessionStorage.setItem('deviceFingerprint', newFingerprint);
         setDeviceMetadata({
           fingerprint: newFingerprint,
           deviceId: newFingerprint,
@@ -44,8 +44,8 @@ export default function DeviceFingerprintInitializer() {
       } catch (error) {
         console.error('[DeviceFingerprint] Generation failed:', error);
         
-        // Fallback: try localStorage one more time
-        const fallbackFingerprint = localStorage.getItem('deviceFingerprint');
+        // Fallback: try sessionStorage one more time
+        const fallbackFingerprint = sessionStorage.getItem('deviceFingerprint');
         if (fallbackFingerprint) {
           setDeviceMetadata({
             fingerprint: fallbackFingerprint,

@@ -43,10 +43,10 @@ export default function SettingsPage() {
     adPersonalization: true,
   });
 
-  // Function to handle theme change with localStorage
+  // Function to handle theme change with sessionStorage
   const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+    sessionStorage.setItem("theme", newTheme);
   };
 
   return (
