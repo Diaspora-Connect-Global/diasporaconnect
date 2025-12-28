@@ -160,7 +160,7 @@ export function AddWorkExperienceModal({
       setForm({
         company: '',
         role: '',
-        employmentType: 'FULL_TIME',
+        employmentType: '',
         startMonth: '',
         startYear: '',
         endMonth: '',
