@@ -20,6 +20,7 @@ import {
   GET_PENDING_REQUESTS_RECEIVED,
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Friend {
   userId: string;
@@ -148,104 +149,115 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     return "starter";
   };
 
-  /* --------------------- Transform API data to Friend[] --------------------- */
-  const allFriends: Friend[] = useMemo(() => {
-    const friends: Friend[] = [];
-
-    // Process accepted connections (friends)
-    if (connectionsData?.getConnections.connections) {
-      connectionsData.getConnections.connections.forEach((connection) => {
-        const friend = connection.receiver;
-        friends.push({
-          userId: friend.userId,
-          connectionId: connection.id,
-          name: `${friend.firstName} ${friend.lastName}`,
-          imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
-          mutualConnections: undefined,
-          tier: getTierFromUser(friend),
-          connectionStatus: "connected",
-          tabType: "friends",
-        });
-      });
-    }
-
-    // Process pending requests SENT
-    if (requestsSentData?.getPendingConnections.connections) {
-      requestsSentData.getPendingConnections.connections.forEach((connection) => {
-        const friend = connection.receiver;
-        friends.push({
-          userId: friend.userId,
-          connectionId: connection.id,
-          name: `${friend.firstName} ${friend.lastName}`,
-          imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
-          mutualConnections: undefined,
-          tier: getTierFromUser(friend),
-          connectionStatus: friend.connectionStatus,
-          tabType: "request-sent",
-        });
-      });
-    }
-
-    // Process pending requests RECEIVED
-    if (requestsReceivedData?.getPendingConnections.connections) {
-      requestsReceivedData.getPendingConnections.connections.forEach((connection) => {
-        const friend = connection.requester;
-        friends.push({
-          userId: friend.userId,
-          connectionId: connection.id,
-          name: `${friend.firstName} ${friend.lastName}`,
-          imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
-          mutualConnections: undefined,
-          tier: getTierFromUser(friend),
-          connectionStatus: friend.connectionStatus,
-          tabType: "request-received",
-        });
-      });
-    }
-
-    // Process friend suggestions OR search results (for suggested tab)
-    if (activeTab === "suggested") {
-      if (searchTerm.length > 0 && searchResults?.searchUsers.profiles) {
-        // Use search results when searching
-        searchResults.searchUsers.profiles.forEach((profile) => {
-          friends.push({
-            userId: profile.userId,
-            connectionId: profile.connectionId,
-            name: `${profile.firstName} ${profile.lastName}`,
-            imageSrc: "https://github.com/shadcn.png", // Search API doesn't return avatarUrl
-            mutualConnections: undefined,
-            tier: getTierFromUser(profile),
-            connectionStatus: profile.connectionStatus,
-            tabType: "suggested",
-          });
-        });
-      } else if (suggestions?.getFriendSuggestions.suggestions) {
-        // Use suggestions when not searching
-        suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
-          friends.push({
-            userId: suggestion.profile.userId,
-            connectionId: suggestion.profile.connectionId,
-            name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
-            imageSrc: suggestion.profile.avatarUrl || "https://github.com/shadcn.png",
-            mutualConnections: suggestion.mutualConnectionsCount,
-            tier: getTierFromUser(suggestion.profile),
-            connectionStatus: suggestion.profile.connectionStatus,
-            tabType: "suggested",
-          });
-        });
-      }
-    }
-
+/* --------------------- Transform API data to Friend[] --------------------- */
+const allFriends: Friend[] = useMemo(() => {
+  const friends: Friend[] = [];
+  
+  // Get current user ID from Zustand auth store
+  const currentUserId = useAuthStore.getState().user?.userId;
+  
+  if (!currentUserId) {
+    console.warn("Current user ID not available");
     return friends;
-  }, [
-    activeTab,
-    searchTerm,
-    connectionsData,
-    requestsSentData,
-    requestsReceivedData,
-    suggestions,
-    searchResults
-  ]);
+  }
+
+  // Process accepted connections (friends)
+  if (connectionsData?.getConnections.connections) {
+    connectionsData.getConnections.connections.forEach((connection) => {
+      // Determine which user is the "other" person (not the current user)
+      const isRequester = connection.requesterId === currentUserId;
+      const friend = isRequester ? connection.receiver : connection.requester;
+      
+      friends.push({
+        userId: friend.userId,
+        connectionId: connection.id,
+        name: `${friend.firstName} ${friend.lastName}`,
+        imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
+        mutualConnections: undefined,
+        tier: getTierFromUser(friend),
+        connectionStatus: "connected",
+        tabType: "friends",
+      });
+    });
+  }
+
+  // Process pending requests SENT
+  if (requestsSentData?.getPendingConnections.connections) {
+    requestsSentData.getPendingConnections.connections.forEach((connection) => {
+      const friend = connection.receiver;
+      friends.push({
+        userId: friend.userId,
+        connectionId: connection.id,
+        name: `${friend.firstName} ${friend.lastName}`,
+        imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
+        mutualConnections: undefined,
+        tier: getTierFromUser(friend),
+        connectionStatus: friend.connectionStatus,
+        tabType: "request-sent",
+      });
+    });
+  }
+
+  // Process pending requests RECEIVED
+  if (requestsReceivedData?.getPendingConnections.connections) {
+    requestsReceivedData.getPendingConnections.connections.forEach((connection) => {
+      const friend = connection.requester;
+      friends.push({
+        userId: friend.userId,
+        connectionId: connection.id,
+        name: `${friend.firstName} ${friend.lastName}`,
+        imageSrc: friend.avatarUrl || "https://github.com/shadcn.png",
+        mutualConnections: undefined,
+        tier: getTierFromUser(friend),
+        connectionStatus: friend.connectionStatus,
+        tabType: "request-received",
+      });
+    });
+  }
+
+  // Process friend suggestions OR search results (for suggested tab)
+  if (activeTab === "suggested") {
+    if (searchTerm.length > 0 && searchResults?.searchUsers.profiles) {
+      // Use search results when searching
+      searchResults.searchUsers.profiles.forEach((profile) => {
+        friends.push({
+          userId: profile.userId,
+          connectionId: profile.connectionId,
+          name: `${profile.firstName} ${profile.lastName}`,
+          imageSrc: "https://github.com/shadcn.png",
+          mutualConnections: undefined,
+          tier: getTierFromUser(profile),
+          connectionStatus: profile.connectionStatus,
+          tabType: "suggested",
+        });
+      });
+    } else if (suggestions?.getFriendSuggestions.suggestions) {
+      // Use suggestions when not searching
+      suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
+        friends.push({
+          userId: suggestion.profile.userId,
+          connectionId: suggestion.profile.connectionId,
+          name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
+          imageSrc: suggestion.profile.avatarUrl || "https://github.com/shadcn.png",
+          mutualConnections: suggestion.mutualConnectionsCount,
+          tier: getTierFromUser(suggestion.profile),
+          connectionStatus: suggestion.profile.connectionStatus,
+          tabType: "suggested",
+        });
+      });
+    }
+  }
+
+  return friends;
+}, [
+  activeTab,
+  searchTerm,
+  connectionsData,
+  requestsSentData,
+  requestsReceivedData,
+  suggestions,
+  searchResults
+]);
 
   /* --------------------- Refetch on tab change --------------------- */
   useEffect(() => {
@@ -345,6 +357,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         tier={friend.tier}
         status={friend.connectionStatus} // Pass the actual connectionStatus from API
         connectionId={friend.connectionId }
+        onNameClick={handleNameClick}
       />
     );
   };
