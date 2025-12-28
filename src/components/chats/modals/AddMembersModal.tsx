@@ -67,7 +67,7 @@ export function AddMembersModal({
   const [inviteToGroup] = useMutation<InviteToGroupResponse>(INVITE_TO_GROUP);
   const user = useAuthStore((state) => state.user);
   
-      const currentUserId = user?.userId;
+  const currentUserId = user?.userId;
 
   // Query for connections
   const { data, loading } = useQuery<GetMyConnectionsResponse>(GET_MY_CONNECTIONS, {
@@ -83,8 +83,8 @@ export function AddMembersModal({
     
     const users: User[] = [];
     data.getConnections.connections.forEach((connection) => {
-      // Only include accepted connections
-      if (connection.status !== "ACCEPTED") return;
+      // Only include accepted connections (case-insensitive check)
+      if (connection.status.toLowerCase() !== "accepted") return;
       
       // Add the other user in the connection (not the current user)
       if (connection.requesterId === currentUserId) {
@@ -131,7 +131,7 @@ export function AddMembersModal({
             variables: {
               inviteInput: {
                 groupId,
-                invitedUserId: userId,
+                userId,
               },
             },
           })
