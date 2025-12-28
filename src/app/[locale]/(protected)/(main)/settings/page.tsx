@@ -43,6 +43,12 @@ export default function SettingsPage() {
     adPersonalization: true,
   });
 
+  // Function to handle theme change with localStorage
+  const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
+
   return (
     <div className="flex flex-col overflow-auto scrollbar-hide h-app-inner bg-background">
       {/* Main Content */}
@@ -249,7 +255,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={theme === "dark"}
-                    onCheckedChange={() => setTheme("dark")}
+                    onCheckedChange={() => handleThemeChange("dark")}
                   />
                 </div>
 
@@ -264,7 +270,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={theme === "light"}
-                    onCheckedChange={() => setTheme("light")}
+                    onCheckedChange={() => handleThemeChange("light")}
                   />
                 </div>
 
@@ -279,7 +285,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={theme === "system"}
-                    onCheckedChange={() => setTheme("system")}
+                    onCheckedChange={() => handleThemeChange("system")}
                   />
                 </div>
               </div>
