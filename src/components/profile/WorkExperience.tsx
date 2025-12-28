@@ -365,6 +365,8 @@ export default function WorkExperiencePage() {
                     </div>
 
                     <DialogFooter>
+                        <div className="flex items-center space-x-2 justify-end">
+
                         <ButtonType3 
                             onClick={handleSkillModalClose}
                             disabled={addingSkills}
@@ -377,6 +379,7 @@ export default function WorkExperiencePage() {
                         >
                             {addingSkills ? 'Adding...' : t('addSkill')}
                         </ButtonType2>
+                        </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
