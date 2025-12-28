@@ -135,7 +135,7 @@ export const GET_MY_WORK_EXPERIENCE = gql`
  * ```
  */
 export const GET_USER_WORK_EXPERIENCE = gql`
-  query GetUserWorkExperience($userId: ID!) {
+  query GetUserWorkExperience($userId: String!) {
     getUserWorkExperience(userId: $userId) {
       success
       message

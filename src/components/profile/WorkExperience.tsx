@@ -22,8 +22,21 @@ import { ButtonType2 } from '@/components/custom/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { ADD_SKILLS, AddSkillsResponse, GET_MY_SKILLS, GetUserSkillsResponse, REMOVE_SKILL, RemoveSkillResponse } from '@/services/gql/skills';
-import { GET_MY_WORK_EXPERIENCE, GetUserWorkExperienceResponse, WorkExperience } from '@/services/gql/work_experience';
+import { 
+    ADD_SKILLS, 
+    AddSkillsResponse, 
+    GET_MY_SKILLS, 
+    GET_USER_SKILLS, 
+    GetUserSkillsResponse, 
+    REMOVE_SKILL, 
+    RemoveSkillResponse 
+} from '@/services/gql/skills';
+import { 
+    GET_MY_WORK_EXPERIENCE, 
+    GET_USER_WORK_EXPERIENCE, 
+    GetUserWorkExperienceResponse, 
+    WorkExperience 
+} from '@/services/gql/work_experience';
 
 interface Skill {
     id: string;
@@ -137,7 +150,12 @@ function WorkExperienceSkeleton() {
     );
 }
 
-export default function WorkExperiencePage() {
+interface WorkExperienceContentProps {
+  userId: string;
+  isOwnProfile: boolean;
+}
+
+export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperienceContentProps) {
     const t = useTranslations('profile.workExperience');
     const tActions = useTranslations('actions');
     
@@ -145,16 +163,27 @@ export default function WorkExperiencePage() {
     const [showExperienceModal, setShowExperienceModal] = useState(false);
     const [selectedSkills, setSelectedSkills] = useState<Option[]>([]);
 
-    // GraphQL Queries - Load separately
+    // Determine which query to use based on isOwnProfile
+    const isMyProfile = isOwnProfile && userId === "me";
+
+    // GraphQL Queries - Conditionally load based on profile ownership
     const { data: workExpData, loading: workExpLoading, refetch: refetchWorkExp } = useQuery<GetUserWorkExperienceResponse>(
-        GET_MY_WORK_EXPERIENCE
+        isMyProfile ? GET_MY_WORK_EXPERIENCE : GET_USER_WORK_EXPERIENCE,
+        {
+            variables: isMyProfile ? undefined : { userId },
+            skip: !userId
+        }
     );
     
     const { data: skillsData, loading: skillsLoading, refetch: refetchSkills } = useQuery<GetUserSkillsResponse>(
-        GET_MY_SKILLS
+        isMyProfile ? GET_MY_SKILLS : GET_USER_SKILLS,
+        {
+            variables: isMyProfile ? undefined : { userId },
+            skip: !userId
+        }
     );
 
-    // GraphQL Mutations
+    // GraphQL Mutations - Only available for own profile
     const [addSkillsMutation, { loading: addingSkills }] = useMutation<AddSkillsResponse>(ADD_SKILLS, {
         onCompleted: () => {
             refetchSkills();
@@ -206,9 +235,9 @@ export default function WorkExperiencePage() {
         return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     }
 
-    // Add skills handler
+    // Add skills handler - only for own profile
     const addSkills = async () => {
-        if (selectedSkills.length === 0) return;
+        if (!isMyProfile || selectedSkills.length === 0) return;
 
         try {
             await addSkillsMutation({
@@ -226,8 +255,10 @@ export default function WorkExperiencePage() {
         }
     };
 
-    // Remove skill handler
+    // Remove skill handler - only for own profile
     const handleRemoveSkill = async (skillId: string) => {
+        if (!isMyProfile) return;
+        
         if (!confirm('Are you sure you want to remove this skill?')) return;
 
         try {
@@ -266,20 +297,26 @@ export default function WorkExperiencePage() {
                             {skills.map((skill) => (
                                 <span
                                     key={skill.id}
-                                    className="px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium cursor-pointer hover:bg-gray-50"
-                                    onClick={() => handleRemoveSkill(skill.id)}
-                                    title="Click to remove"
+                                    className={`px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium ${
+                                        isMyProfile ? 'cursor-pointer hover:bg-gray-50' : ''
+                                    }`}
+                                    onClick={isMyProfile ? () => handleRemoveSkill(skill.id) : undefined}
+                                    title={isMyProfile ? "Click to remove" : undefined}
                                 >
                                     {skill.name}
                                 </span>
                             ))}
-                            <ButtonType3
-                                onClick={() => setShowSkillModal(true)}
-                                className="flex items-center gap-1 px-2 py-1 text-text-brand font-medium text-sm rounded-full transition"
-                            >
-                                <Plus className="w-4 h-4" />
-                                {t('addSkill')}
-                            </ButtonType3>
+                            
+                            {/* Only show Add Skill button for own profile */}
+                            {isMyProfile && (
+                                <ButtonType3
+                                    onClick={() => setShowSkillModal(true)}
+                                    className="flex items-center gap-1 px-2 py-1 text-text-brand font-medium text-sm rounded-full transition"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    {t('addSkill')}
+                                </ButtonType3>
+                            )}
                         </div>
                     )}
                 </section>
@@ -287,18 +324,26 @@ export default function WorkExperiencePage() {
                 {/* Work Experience Section */}
                 <section>
                     <h2 className="font-bold mb-4">{t('title')}</h2>
-                    <ButtonType3
-                        onClick={() => setShowExperienceModal(true)}
-                        className="flex items-center gap-1 mb-6 text-text-brand font-medium text-sm"
-                    >
-                        <Plus className="w-4 h-4" />
-                        {t('addExperience')}
-                    </ButtonType3>
+                    
+                    {/* Only show Add Experience button for own profile */}
+                    {isMyProfile && (
+                        <ButtonType3
+                            onClick={() => setShowExperienceModal(true)}
+                            className="flex items-center gap-1 mb-6 text-text-brand font-medium text-sm"
+                        >
+                            <Plus className="w-4 h-4" />
+                            {t('addExperience')}
+                        </ButtonType3>
+                    )}
 
                     {workExpLoading ? (
                         <WorkExperienceSkeleton />
                     ) : experiences.length === 0 ? (
-                        <p className="text-text-secondary text-sm">No work experience added yet.</p>
+                        <p className="text-text-secondary text-sm">
+                            {isMyProfile 
+                                ? 'No work experience added yet.' 
+                                : 'This user has not added any work experience yet.'}
+                        </p>
                     ) : (
                         <Accordion type="single" collapsible className="w-full">
                             {experiences.map((exp, idx) => (
@@ -346,48 +391,52 @@ export default function WorkExperiencePage() {
                 </section>
             </div>
 
-            {/* Skill Modal with AutocompleteAsync */}
-            <Dialog open={showSkillModal} onOpenChange={handleSkillModalClose}>
-                <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                        <DialogTitle>{t('addNewSkill')}</DialogTitle>
-                    </DialogHeader>
-                    
-                    <div className="py-4">
-                        <AutocompleteAsync
-                            value={selectedSkills}
-                            onChange={setSelectedSkills}
-                            fetchOptions={fetchSkills}
-                            onCreate={createSkill}
-                            placeholder={t('skillPlaceholder') || 'Search or add skills...'}
-                            label={t('skills') || 'Skills'}
-                        />
-                    </div>
-
-                    <DialogFooter>
-                        <div className="flex items-center space-x-2 justify-end">
-
-                        <ButtonType3 
-                            onClick={handleSkillModalClose}
-                            disabled={addingSkills}
-                        >
-                            {t('cancel')}
-                        </ButtonType3>
-                        <ButtonType2
-                            onClick={addSkills}
-                            disabled={selectedSkills.length === 0 || addingSkills}
-                        >
-                            {addingSkills ? 'Adding...' : t('addSkill')}
-                        </ButtonType2>
+            {/* Skill Modal - Only render for own profile */}
+            {isMyProfile && (
+                <Dialog open={showSkillModal} onOpenChange={handleSkillModalClose}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>{t('addNewSkill')}</DialogTitle>
+                        </DialogHeader>
+                        
+                        <div className="py-4">
+                            <AutocompleteAsync
+                                value={selectedSkills}
+                                onChange={setSelectedSkills}
+                                fetchOptions={fetchSkills}
+                                onCreate={createSkill}
+                                placeholder={t('skillPlaceholder') || 'Search or add skills...'}
+                                label={t('skills') || 'Skills'}
+                            />
                         </div>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
 
-            <AddWorkExperienceModal
-                isOpen={showExperienceModal}
-                onClose={handleExperienceModalClose}
-            />
+                        <DialogFooter>
+                            <div className="flex items-center space-x-2 justify-end">
+                                <ButtonType3 
+                                    onClick={handleSkillModalClose}
+                                    disabled={addingSkills}
+                                >
+                                    {t('cancel')}
+                                </ButtonType3>
+                                <ButtonType2
+                                    onClick={addSkills}
+                                    disabled={selectedSkills.length === 0 || addingSkills}
+                                >
+                                    {addingSkills ? 'Adding...' : t('addSkill')}
+                                </ButtonType2>
+                            </div>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            {/* Work Experience Modal - Only render for own profile */}
+            {isMyProfile && (
+                <AddWorkExperienceModal
+                    isOpen={showExperienceModal}
+                    onClose={handleExperienceModalClose}
+                />
+            )}
         </>
     );
 }

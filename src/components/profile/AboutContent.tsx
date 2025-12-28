@@ -49,7 +49,7 @@ export default function AboutContent({ userId, isOwnProfile =false,userData }: A
             <PersonalDetailsContent isOwnProfile={isOwnProfile} userId= {userId} userData={userData} />
           )}
           {activeSubTab === 'work-experience' && (
-            <WorkExperience  />
+            <WorkExperience  isOwnProfile={isOwnProfile} userId= {userId} />
           )}
           {activeSubTab === 'education' && (
             <EducationContent  />

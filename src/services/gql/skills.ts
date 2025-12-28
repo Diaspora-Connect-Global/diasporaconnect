@@ -100,7 +100,7 @@ export const GET_MY_SKILLS = gql`
  * ```
  */
 export const GET_USER_SKILLS = gql`
-  query GetUserSkills($userId: ID!) {
+  query GetUserSkills($userId: String!) {
     getUserSkills(userId: $userId) {
       success
       message
