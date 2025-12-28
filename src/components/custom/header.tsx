@@ -28,6 +28,7 @@ import HomeSidebar from '../home/HomeSidebar';
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { LogoutConfirmModal } from '../auth/LogoutConfirmModal';
+import { clearStorage } from '@/lib/logout';
 
 
 
@@ -251,7 +252,7 @@ export default function Header({
 
 
 export function MyAvatar() {
-    const url = useAuthStore((s) => s.user?.avatarUrl);
+  const url = useAuthStore((s) => s.user?.avatarUrl);
 
   return (
     <Avatar>
@@ -310,6 +311,7 @@ export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
 
 
 
+
 export function DropdownMenuAvatar() {
   const t = useTranslations('home.header');
   const [open, setOpen] = useState(false);
@@ -317,12 +319,8 @@ export function DropdownMenuAvatar() {
   const lastName = useAuthStore((s) => s.user?.lastName);
   const router = useRouter(); // Add this
   const [lOpen, setLOpen] = useState(false);
-
-
-  // Move logout function here
   const logout = () => {
-    sessionStorage.clear();
-    localStorage.clear();
+    clearStorage();
     router.replace("/signin");
   }
 
@@ -375,7 +373,7 @@ export function DropdownMenuAvatar() {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <DMItem icon={<LogoutCurve
-            size={40} />} text={t('logout')} onClick={()=>setLOpen(true)} />
+            size={40} />} text={t('logout')} onClick={() => setLOpen(true)} />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu><LogoutConfirmModal
