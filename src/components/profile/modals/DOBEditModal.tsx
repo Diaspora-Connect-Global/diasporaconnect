@@ -87,6 +87,8 @@ export function DOBEditModal({ isOpen, onClose, onSave, initialData }: DOBEditMo
               placeholder={tWork('yearPlaceholder')}
               value={year}
               onChange={setYear}
+                            type="number"
+
             />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
