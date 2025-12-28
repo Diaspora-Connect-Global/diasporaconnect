@@ -104,7 +104,7 @@ export function AddWorkExperienceModal({
   const [form, setForm] = useState<WorkExperience>({
     company: '',
     role: '',
-    employmentType: 'FULL_TIME',
+    employmentType: '',
     startMonth: '',
     startYear: '',
     endMonth: '',
