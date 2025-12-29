@@ -12,7 +12,7 @@ interface PeopleYouMayKnowCardProps {
   onAddFriend?: () => void;
   buttonText?: string;
   buttonVariant?: 'primary' | 'secondary' | 'success';
-  isLoading?: boolean; // New prop for loading state
+  isLoading?: boolean;
 }
 
 export default function PeopleYouMayKnowCard({
@@ -21,9 +21,10 @@ export default function PeopleYouMayKnowCard({
   mutualConnections,
   onAddFriend,
   buttonText,
-  isLoading = false, // Default to false
+  isLoading = false,
 }: PeopleYouMayKnowCardProps) {
   const [isAdded, setIsAdded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const t = useTranslations('home');
   const tActions = useTranslations('actions');
 
@@ -34,10 +35,34 @@ export default function PeopleYouMayKnowCard({
     }
   };
 
-  // Determine button label based on state
+  // Get initials from name
+  const getInitials = (name: string) => {
+    const names = name.trim().split(' ');
+    if (names.length === 1) {
+      return names[0].substring(0, 2).toUpperCase();
+    }
+    return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+  };
+
+  // Generate a consistent color based on name
+  const getAvatarColor = (name: string) => {
+    const colors = [
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-purple-500',
+      'bg-pink-500',
+      'bg-indigo-500',
+      'bg-red-500',
+      'bg-yellow-500',
+      'bg-teal-500',
+    ];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
   const getButtonLabel = () => {
     if (isLoading) {
-      return ''; // Show only spinner, no text
+      return '';
     }
     if (isAdded) {
       return tActions('added');
@@ -46,21 +71,31 @@ export default function PeopleYouMayKnowCard({
   };
 
   const buttonLabel = getButtonLabel();
+  const shouldShowFallback = !profileImage || imageError;
 
   return (
-    <div className=" h-[2.5rem] flex space-x-6 items-center justify-between  transition-colors rounded-lg ">
+    <div className="h-[2.5rem] flex space-x-6 items-center justify-between transition-colors rounded-lg">
       {/* Left side - Profile info */}
       <div className="flex items-center mr-2 gap-[0.5rem]">
-        <div className="h-[1.5rem] w-[1.5rem]">
-          <Image
-            width={32}
-            height={32}
-            src={profileImage}
-            alt={`${name}'s profile`}
-            className="w-full h-full rounded-full object-cover"
-          />
+        <div className="h-[1.5rem] w-[1.5rem] flex-shrink-0">
+          {shouldShowFallback ? (
+            <div
+              className={`w-full h-full rounded-full flex items-center justify-center ${getAvatarColor(name)} text-white text-xs font-semibold`}
+            >
+              {getInitials(name)}
+            </div>
+          ) : (
+            <Image
+              width={32}
+              height={32}
+              src={profileImage}
+              alt={`${name}'s profile`}
+              className="w-full h-full rounded-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          )}
         </div>
-        <div className="flex-1 ">
+        <div className="flex-1">
           <h3 className="caption-medium text-text-primary truncate">{name}</h3>
           <p className="body-small text-text-secondary truncate">
             {mutualConnections} {t('mutualConnections', { count: mutualConnections })}
@@ -69,7 +104,7 @@ export default function PeopleYouMayKnowCard({
       </div>
 
       {/* Right side - Action button */}
-      <div className="flex items-center ">
+      <div className="flex items-center">
         <button
           className="inline-flex items-center gap-1 text-text-brand cursor-pointer whitespace-nowrap"
           onClick={handleClick}
@@ -79,7 +114,7 @@ export default function PeopleYouMayKnowCard({
           {isLoading ? (
             <Spinner className="w-4 h-4" />
           ) : (
-            <p className='label-medium'>{buttonLabel}</p>
+            <p className="label-medium">{buttonLabel}</p>
           )}
         </button>
       </div>

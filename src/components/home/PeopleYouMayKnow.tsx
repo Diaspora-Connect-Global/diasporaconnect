@@ -88,7 +88,7 @@ export function PeopleYouMayKnow() {
                         suggestions.map((suggestion) => (
                             <PeopleYouMayKnowCard
                                 key={suggestion.profile.userId}
-                                profileImage={suggestion.profile.avatarUrl || "https://github.com/shadcn.png"}
+                                profileImage={suggestion.profile.avatarUrl }
                                 name={`${suggestion.profile.firstName} ${suggestion.profile.lastName}`}
                                 mutualConnections={suggestion.mutualConnectionsCount}
                                 onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
