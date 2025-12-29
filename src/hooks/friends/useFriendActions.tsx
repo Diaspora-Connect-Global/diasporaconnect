@@ -9,6 +9,8 @@ import {
     GET_MY_CONNECTIONS,
     GET_PENDING_REQUESTS_SENT,
     GET_PENDING_REQUESTS_RECEIVED,
+    GET_FRIEND_SUGGESTIONS, // Add this import
+    SEARCH_USERS, // Add this import
     SendConnectionRequestResponse,
     AcceptConnectionResponse,
     RejectConnectionResponse,
@@ -39,7 +41,10 @@ export const useFriendActions = () => {
             refetchQueries: [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_PENDING_REQUESTS_SENT },
+                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
             ],
+            // Alternative: use awaitRefetchQueries for sequential execution
+            awaitRefetchQueries: true,
         }
     );
 
@@ -49,7 +54,10 @@ export const useFriendActions = () => {
             refetchQueries: [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_PENDING_REQUESTS_RECEIVED },
+                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
             ],
+            awaitRefetchQueries: true,
+
         }
     );
 
@@ -59,7 +67,10 @@ export const useFriendActions = () => {
             refetchQueries: [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_PENDING_REQUESTS_RECEIVED },
+                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
             ],
+            awaitRefetchQueries: true,
+
         }
     );
 
@@ -68,7 +79,10 @@ export const useFriendActions = () => {
         {
             refetchQueries: [
                 { query: GET_PENDING_REQUESTS_SENT },
+                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
             ],
+            awaitRefetchQueries: true,
+
         }
     );
 
@@ -79,7 +93,10 @@ export const useFriendActions = () => {
             refetchQueries: [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_BLOCKED_USERS },
+                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
             ],
+            awaitRefetchQueries: true,
+
         }
     );
 
@@ -93,7 +110,7 @@ export const useFriendActions = () => {
     const addFriend = useCallback(async (userId: string) => {
         const actionKey = `addFriend-${userId}`;
         setActionLoading(actionKey, true);
-        
+
         try {
             const { data } = await sendConnectionRequest({
                 variables: {
@@ -119,7 +136,7 @@ export const useFriendActions = () => {
     const acceptRequest = useCallback(async (connectionId: string) => {
         const actionKey = `acceptRequest-${connectionId}`;
         setActionLoading(actionKey, true);
-        
+
         try {
             const { data } = await acceptConnection({
                 variables: {
@@ -145,7 +162,7 @@ export const useFriendActions = () => {
     const ignoreRequest = useCallback(async (connectionId: string) => {
         const actionKey = `ignoreRequest-${connectionId}`;
         setActionLoading(actionKey, true);
-        
+
         try {
             const { data } = await rejectConnection({
                 variables: {
@@ -171,7 +188,7 @@ export const useFriendActions = () => {
     const cancelRequest = useCallback(async (connectionId: string) => {
         const actionKey = `cancelRequest-${connectionId}`;
         setActionLoading(actionKey, true);
-        
+
         console.log('Cancelling friend request with connectionId:', connectionId);
         try {
             const { data } = await cancelConnection({
@@ -198,7 +215,7 @@ export const useFriendActions = () => {
     const removeFriend = useCallback(async (connectionId: string) => {
         const actionKey = `removeFriend-${connectionId}`;
         setActionLoading(actionKey, true);
-        
+
         try {
             // Using rejectConnection to remove/delete the connection
             const { data } = await rejectConnection({
@@ -225,7 +242,7 @@ export const useFriendActions = () => {
     const blockFriend = useCallback(async (userId: string) => {
         const actionKey = `blockFriend-${userId}`;
         setActionLoading(actionKey, true);
-        
+
         try {
             const { data } = await blockUserMutation({
                 variables: {
