@@ -33,6 +33,8 @@ interface FriendActionButtonsProps {
     dropdownOptions?: DropdownOption[];
     className?: string;
     connectionId: string;
+    searchQuery?: string;
+    isSearching?: boolean;
 }
 
 export const FriendActionButtons = ({ 
@@ -40,7 +42,9 @@ export const FriendActionButtons = ({
     buttonsToShow,
     connectionId,
     dropdownOptions = [],
-    className = "flex space-x-2"
+    className = "flex space-x-2",
+    searchQuery = "",
+    isSearching = false,
 }: FriendActionButtonsProps) => {
     const {
         sendMessage,
@@ -52,7 +56,7 @@ export const FriendActionButtons = ({
         blockFriend,
         isActionLoading,
         t,
-    } = useFriendActions();
+    } = useFriendActions({ searchQuery, isSearching });
 
     // Check loading states for each action
     const isAddFriendLoading = isActionLoading('addFriend', userId);

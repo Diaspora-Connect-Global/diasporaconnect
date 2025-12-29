@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { useMutation } from '@apollo/client/react';
 import {
@@ -9,8 +9,8 @@ import {
     GET_MY_CONNECTIONS,
     GET_PENDING_REQUESTS_SENT,
     GET_PENDING_REQUESTS_RECEIVED,
-    GET_FRIEND_SUGGESTIONS, // Add this import
-    SEARCH_USERS, // Add this import
+    GET_FRIEND_SUGGESTIONS,
+    SEARCH_USERS,
     SendConnectionRequestResponse,
     AcceptConnectionResponse,
     RejectConnectionResponse,
@@ -23,8 +23,18 @@ import {
     BlockUserResponse,
 } from '@/services/gql/users';
 
-export const useFriendActions = () => {
+interface UseFriendActionsOptions {
+    searchQuery?: string;
+    isSearching?: boolean;
+}
+
+export const useFriendActions = (options?: UseFriendActionsOptions) => {
     const t = useTranslations('friends');
+    const { searchQuery = '', isSearching = false } = options || {};
+    
+    // Use ref to get latest values in refetchQueries closure
+    const searchStateRef = useRef({ searchQuery, isSearching });
+    searchStateRef.current = { searchQuery, isSearching };
 
     // Loading states for each action type
     const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
@@ -34,16 +44,43 @@ export const useFriendActions = () => {
         setLoadingStates(prev => ({ ...prev, [actionKey]: isLoading }));
     };
 
+    // Build refetch queries dynamically based on whether we're searching
+    const buildRefetchQueries = (includeConnections = false) => {
+        const { searchQuery: currentSearchQuery, isSearching: currentIsSearching } = searchStateRef.current;
+        const queries = [];
+        
+        if (includeConnections) {
+            queries.push({ query: GET_MY_CONNECTIONS });
+        }
+        
+        queries.push({ query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } });
+        
+        // If actively searching, also refetch search results
+        if (currentIsSearching && currentSearchQuery.length > 0) {
+            queries.push({
+                query: SEARCH_USERS,
+                variables: {
+                    searchUsersInput: {
+                        query: currentSearchQuery,
+                        limit: 20,
+                        offset: 0,
+                    }
+                }
+            });
+        }
+        
+        return queries;
+    };
+
     // GraphQL Mutations - Connections
     const [sendConnectionRequest] = useMutation<SendConnectionRequestResponse>(
         SEND_CONNECTION_REQUEST,
         {
-            refetchQueries: [
+            refetchQueries: () => [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_PENDING_REQUESTS_SENT },
-                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
+                ...buildRefetchQueries(),
             ],
-            // Alternative: use awaitRefetchQueries for sequential execution
             awaitRefetchQueries: true,
         }
     );
@@ -51,38 +88,35 @@ export const useFriendActions = () => {
     const [acceptConnection] = useMutation<AcceptConnectionResponse>(
         ACCEPT_CONNECTION,
         {
-            refetchQueries: [
+            refetchQueries: () => [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_PENDING_REQUESTS_RECEIVED },
-                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
+                ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,
-
         }
     );
 
     const [rejectConnection] = useMutation<RejectConnectionResponse>(
         REJECT_CONNECTION,
         {
-            refetchQueries: [
+            refetchQueries: () => [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_PENDING_REQUESTS_RECEIVED },
-                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
+                ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,
-
         }
     );
 
     const [cancelConnection] = useMutation<CancelConnectionResponse>(
         CANCEL_CONNECTION,
         {
-            refetchQueries: [
+            refetchQueries: () => [
                 { query: GET_PENDING_REQUESTS_SENT },
-                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
+                ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,
-
         }
     );
 
@@ -90,13 +124,12 @@ export const useFriendActions = () => {
     const [blockUserMutation] = useMutation<BlockUserResponse>(
         BLOCK_USER,
         {
-            refetchQueries: [
+            refetchQueries: () => [
                 { query: GET_MY_CONNECTIONS },
                 { query: GET_BLOCKED_USERS },
-                { query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } },
+                ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,
-
         }
     );
 

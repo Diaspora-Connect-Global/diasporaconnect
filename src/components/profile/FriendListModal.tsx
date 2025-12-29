@@ -30,7 +30,9 @@ interface Friend {
   mutualConnections?: number;
   tier: "starter" | "trusted" | "reliable" | "elite";
   connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
-  tabType: FriendType; // Added to track which tab this friend belongs to
+  tabType: FriendType;
+  searchQuery?: string;
+  isSearching?: boolean;
 }
 
 interface FriendListModalProps {
@@ -112,7 +114,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     GET_FRIEND_SUGGESTIONS,
     {
       variables: { limit: 10 },
-      skip: activeTab !== "suggested" || searchTerm.length > 0, // Skip if searching
+      skip: activeTab !== "suggested" || searchTerm.length > 0,
     }
   );
 
@@ -136,7 +138,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             }
           }
         });
-      }, 300); // Debounce search by 300ms
+      }, 300);
 
       return () => clearTimeout(timeoutId);
     }
@@ -161,10 +163,12 @@ const allFriends: Friend[] = useMemo(() => {
     return friends;
   }
 
+  // Determine if we're in search mode for the suggested tab
+  const isSearchingOnSuggestedTab = activeTab === "suggested" && searchTerm.length > 0;
+
   // Process accepted connections (friends)
   if (connectionsData?.getConnections.connections) {
     connectionsData.getConnections.connections.forEach((connection) => {
-      // Determine which user is the "other" person (not the current user)
       const isRequester = connection.requesterId === currentUserId;
       const friend = isRequester ? connection.receiver : connection.requester;
       
@@ -177,6 +181,8 @@ const allFriends: Friend[] = useMemo(() => {
         tier: getTierFromUser(friend),
         connectionStatus: "connected",
         tabType: "friends",
+        searchQuery: "",
+        isSearching: false,
       });
     });
   }
@@ -194,6 +200,8 @@ const allFriends: Friend[] = useMemo(() => {
         tier: getTierFromUser(friend),
         connectionStatus: friend.connectionStatus,
         tabType: "request-sent",
+        searchQuery: "",
+        isSearching: false,
       });
     });
   }
@@ -211,13 +219,15 @@ const allFriends: Friend[] = useMemo(() => {
         tier: getTierFromUser(friend),
         connectionStatus: friend.connectionStatus,
         tabType: "request-received",
+        searchQuery: "",
+        isSearching: false,
       });
     });
   }
 
   // Process friend suggestions OR search results (for suggested tab)
   if (activeTab === "suggested") {
-    if (searchTerm.length > 0 && searchResults?.searchUsers.profiles) {
+    if (isSearchingOnSuggestedTab && searchResults?.searchUsers.profiles) {
       // Use search results when searching
       searchResults.searchUsers.profiles.forEach((profile) => {
         friends.push({
@@ -229,6 +239,8 @@ const allFriends: Friend[] = useMemo(() => {
           tier: getTierFromUser(profile),
           connectionStatus: profile.connectionStatus,
           tabType: "suggested",
+          searchQuery: searchTerm,
+          isSearching: true,
         });
       });
     } else if (suggestions?.getFriendSuggestions.suggestions) {
@@ -243,6 +255,8 @@ const allFriends: Friend[] = useMemo(() => {
           tier: getTierFromUser(suggestion.profile),
           connectionStatus: suggestion.profile.connectionStatus,
           tabType: "suggested",
+          searchQuery: "",
+          isSearching: false,
         });
       });
     }
@@ -259,26 +273,11 @@ const allFriends: Friend[] = useMemo(() => {
   searchResults
 ]);
 
-  /* --------------------- Refetch on tab change --------------------- */
+  /* --------------------- Clear search on tab change --------------------- */
   useEffect(() => {
     // Clear search term when changing tabs
     setSearchTerm("");
-
-    switch (activeTab) {
-      case "friends":
-        refetchConnections();
-        break;
-      case "request-sent":
-        refetchRequestsSent();
-        break;
-      case "request-received":
-        refetchRequestsReceived();
-        break;
-      case "suggested":
-        refetchSuggestions();
-        break;
-    }
-  }, [activeTab, refetchConnections, refetchRequestsSent, refetchRequestsReceived, refetchSuggestions]);
+  }, [activeTab]);
 
   /* --------------------- Handle name click --------------------- */
   const handleNameClick = (userId: string) => {
@@ -356,8 +355,10 @@ const allFriends: Friend[] = useMemo(() => {
         mutualConnections={friend.mutualConnections}
         tier={friend.tier}
         status={friend.connectionStatus} 
-        connectionId={friend.connectionId }
+        connectionId={friend.connectionId}
         onNameClick={handleNameClick}
+        searchQuery={friend.searchQuery}
+        isSearching={friend.isSearching}
       />
     );
   };

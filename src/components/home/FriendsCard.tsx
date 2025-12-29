@@ -3,7 +3,6 @@ import Image from "next/image";
 import { FC } from "react";
 import { useTranslations } from 'next-intl';
 import { FriendActionButtons, FriendButtonType } from "@/components/friends/FriendActionButtons";
-import { FriendType } from "../friends/TypeOfFriend";
 
 interface DropdownOption {
     type: "removeFriend" | "blockFriend";
@@ -17,7 +16,7 @@ interface FriendsCardProps {
     imageSrc: string;
     mutualConnections?: number;
     tier: Tier;
-    connectionId:string
+    connectionId: string;
 
     /** Current relationship status */
     status: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
@@ -28,6 +27,10 @@ interface FriendsCardProps {
 
     /** New prop for handling name click */
     onNameClick?: (userId: string) => void;
+
+    /** Search context for refetching */
+    searchQuery?: string;
+    isSearching?: boolean;
 }
 
 /**
@@ -82,6 +85,8 @@ const FriendsCard: FC<FriendsCardProps> = ({
     customDropdownOptions,
     connectionId,
     onNameClick,
+    searchQuery = "",
+    isSearching = false,
 }) => {
     const t = useTranslations('friends');
 
@@ -95,6 +100,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
             onNameClick(userId);
         }
     };
+
     return (
         <div className="flex items-center justify-between lg:border border-t border-border-subtle px-3 py-6 lg:rounded-2xl">
             {/* ---- Avatar + Info ---- */}
@@ -118,7 +124,6 @@ const FriendsCard: FC<FriendsCardProps> = ({
                                 </p>
                                 <UserBadge tier={tier} size="sm" />
                             </span>
-
                         </div>
                     </div>
 
@@ -139,6 +144,8 @@ const FriendsCard: FC<FriendsCardProps> = ({
                 buttonsToShow={buttons}
                 dropdownOptions={dropdownOptions}
                 connectionId={connectionId}
+                searchQuery={searchQuery}
+                isSearching={isSearching}
             />
         </div>
     );
