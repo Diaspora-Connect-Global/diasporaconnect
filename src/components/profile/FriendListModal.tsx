@@ -285,7 +285,7 @@ const allFriends: Friend[] = useMemo(() => {
     if (onClose) {
       onClose();
     }
-    router.push(`/friend/${userId}`);
+    router.push(`/${userId}`);
   };
 
   /* --------------------- Filtering --------------------- */
@@ -355,7 +355,7 @@ const allFriends: Friend[] = useMemo(() => {
         imageSrc={friend.imageSrc}
         mutualConnections={friend.mutualConnections}
         tier={friend.tier}
-        status={friend.connectionStatus} // Pass the actual connectionStatus from API
+        status={friend.connectionStatus} 
         connectionId={friend.connectionId }
         onNameClick={handleNameClick}
       />
