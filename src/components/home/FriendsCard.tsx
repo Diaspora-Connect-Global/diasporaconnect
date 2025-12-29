@@ -1,6 +1,6 @@
 import { Tier, UserBadge } from "../custom/userBadge";
 import Image from "next/image";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useTranslations } from 'next-intl';
 import { FriendActionButtons, FriendButtonType } from "@/components/friends/FriendActionButtons";
 
@@ -77,7 +77,7 @@ const getDefaultButtonConfig = (status: "connected" | "none" | "pending_received
 const FriendsCard: FC<FriendsCardProps> = ({
     userId,
     name,
-    imageSrc = "https://github.com/shadcn.png",
+    imageSrc ,
     mutualConnections,
     tier = "starter",
     status,
@@ -89,6 +89,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
     isSearching = false,
 }) => {
     const t = useTranslations('friends');
+    const [imageError, setImageError] = useState(false);
 
     // Use custom buttons if provided, otherwise use defaults based on status
     const defaultConfig = getDefaultButtonConfig(status);
@@ -101,17 +102,49 @@ const FriendsCard: FC<FriendsCardProps> = ({
         }
     };
 
+    // Get initials from name
+    const getInitials = (fullName: string) => {
+        const names = fullName.trim().split(' ');
+        if (names.length === 1) {
+            return names[0].charAt(0).toUpperCase();
+        }
+        return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    };
+
+    // Generate consistent color based on name
+    const getAvatarColor = (fullName: string) => {
+        const colors = [
+            'bg-blue-500',
+            'bg-green-500',
+            'bg-purple-500',
+            'bg-pink-500',
+            'bg-indigo-500',
+            'bg-red-500',
+            'bg-yellow-500',
+            'bg-teal-500',
+        ];
+        const index = fullName.charCodeAt(0) % colors.length;
+        return colors[index];
+    };
+
     return (
         <div className="flex items-center justify-between lg:border border-t border-border-subtle px-3 py-6 lg:rounded-2xl">
             {/* ---- Avatar + Info ---- */}
             <div className="flex items-center space-x-3">
-                <Image
-                    src={imageSrc}
-                    alt={name}
-                    width={40}
-                    height={40}
-                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                />
+                {!imageError && imageSrc ? (
+                    <Image
+                        src={imageSrc}
+                        alt={name}
+                        width={40}
+                        height={40}
+                        className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                        onError={() => setImageError(true)}
+                    />
+                ) : (
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 ${getAvatarColor(name)} text-white font-semibold text-lg`}>
+                        {getInitials(name)}
+                    </div>
+                )}
                 <div>
                     <div className="flex items-center flex-wrap">
                         <div
