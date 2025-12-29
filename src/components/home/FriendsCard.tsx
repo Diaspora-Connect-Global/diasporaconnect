@@ -131,7 +131,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
         <div className="flex items-center justify-between lg:border border-t border-border-subtle px-3 py-6 lg:rounded-2xl">
             {/* ---- Avatar + Info ---- */}
             <div className="flex items-center space-x-3">
-                {!imageError && imageSrc ? (
+                {!imageError && imageSrc && imageSrc.trim() !== '' && imageSrc !== 'null' && imageSrc !== 'undefined' ? (
                     <Image
                         src={imageSrc}
                         alt={name}
