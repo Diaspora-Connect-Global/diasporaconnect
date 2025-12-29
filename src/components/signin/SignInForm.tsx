@@ -88,8 +88,6 @@ export default function SignInForm() {
         }
 
         try {
-            // const deviceId = await generateDeviceFingerprint();
-            
             // Get existing fingerprint from store (already initialized by DeviceFingerprintInitializer)
             const { deviceMetadata } = useAuthStore.getState();
             const deviceId = deviceMetadata?.fingerprint || await generateDeviceFingerprint(); // Fallback only
@@ -167,80 +165,79 @@ export default function SignInForm() {
 
 
     return (
-        <div className=''> {/* 80px equivalent */}
-            <div className="lg:space-y-[2rem]"> {/* 32px equivalent */}
+        <div className="space-y-4 lg:space-y-8">
+            <div>
+                <HeadingMedium>
+                    {t("greetings.login")}
+                </HeadingMedium>
+            </div>
 
-                <div className=''> {/* 40px equivalent */}
-                    <HeadingMedium>
-                        {t("greetings.login")}
-                    </HeadingMedium>
+            <div className="space-y-6 lg:space-y-8">
+                <div className="space-y-4">
+                    <TextInput
+                        value={email}
+                        onChange={setEmail}
+                        type="email"
+                        placeholder={t("form.email.placeholder")}
+                        label={t("form.email.label")}
+                        id="email"
+                    />
+
+                    <PasswordInput
+                        id='password'
+                        password={password}
+                        setPassword={setPassword}
+                        showPassword={showPassword}
+                        setShowPassword={setShowPassword}
+                        placeholder={t("form.password.placeholder")}
+                        label={t("form.password.label")}
+                    />
                 </div>
 
-                <div className='space-y-[1.5rem]'> {/* 276px, 24px equivalent */}
-
-                    <div className='lg:space-y-[1rem]'> {/* 16px equivalent */}
-                        <TextInput
-                            value={email}
-                            onChange={setEmail}
-                            type="email"
-                            placeholder={t("form.email.placeholder")}
-                            label={t("form.email.label")}
-                            id="email"
-                        />
-
-                        <PasswordInput
-                            id='password'
-                            password={password}
-                            setPassword={setPassword}
-                            showPassword={showPassword}
-                            setShowPassword={setShowPassword}
-                            placeholder={t("form.password.placeholder")}
-                            label={t("form.password.label")}
-                        />
-                    </div>
-
-                    <div className="lg:flex-row flex-col lg:justify-between "> {/* 60px equivalent */}
-                        <Link href="/reset" className="text-text-brand font-medium hover:underline mb-4">
-                            <p className='flex label-large'>
-                                {t("forgotPassword")}
-                            </p>
-                        </Link>
-
-                        <ButtonType2 onClick={handleSubmit} disabled={loading} className="px-8 py-3 h-full bg-surface-brand rounded-full w-full cursor-pointer my-2">
-
-                            <span className="flex items-center justify-center gap-2">
-                                {loading ? (
-                                    <Loader2 className="h-6 w-6 animate-spin" />
-                                ) : (
-                                    a("login")
-                                )}
-                            </span>
-                        </ButtonType2>
-                    </div>
-                </div>
-
-                <div className='mb-6'> {/* 24px equivalent */}
-                    <div className="flex items-center gap-[1rem] "> {/* 16px equivalent */}
-                        <div className="flex-1 border-t border-border-subtle"></div>
-                        <span className="text-sm">{t("socialAuth.divider")}</span>
-                        <div className="flex-1 border-t border-border-subtle"></div>
-                    </div>
-                </div>
-
-                <div className=' mb-4'> {/* 48px equivalent */}
-                    <SignInProvider />
-                </div>
-
-                <div className=' mx-auto flex items-center justify-center text-center flex-wrap  gap-[0.5rem] mb-4'> {/* 60px, 8px equivalent */}
-                    <BodyMedium className="">
-                        {t("accountSwitch.newAccount.prompt")}
-                    </BodyMedium>
-                    <Link href="/signup" className="text-text-brand font-medium hover:underline">
-                        <LabelLarge>
-                            {t("accountSwitch.newAccount.action")}
-                        </LabelLarge>
+                <div className="space-y-4">
+                    <Link href="/reset" className="text-text-brand font-medium hover:underline">
+                        <p className='flex label-large'>
+                            {t("forgotPassword")}
+                        </p>
                     </Link>
+
+                    <ButtonType2 
+                        onClick={handleSubmit} 
+                        disabled={loading} 
+                        className="px-8 py-3 bg-surface-brand rounded-full w-full cursor-pointer"
+                    >
+                        <span className="flex items-center justify-center gap-2">
+                            {loading ? (
+                                <Loader2 className="h-6 w-6 animate-spin" />
+                            ) : (
+                                a("login")
+                            )}
+                        </span>
+                    </ButtonType2>
                 </div>
+            </div>
+
+            <div className="lg:py-4">
+                <div className="flex items-center gap-4">
+                    <div className="flex-1 border-t border-border-subtle"></div>
+                    <span className="text-sm">{t("socialAuth.divider")}</span>
+                    <div className="flex-1 border-t border-border-subtle"></div>
+                </div>
+            </div>
+
+            <div>
+                <SignInProvider />
+            </div>
+
+            <div className="flex items-center justify-center text-center flex-wrap gap-2 lg:pt-4">
+                <BodyMedium>
+                    {t("accountSwitch.newAccount.prompt")}
+                </BodyMedium>
+                <Link href="/signup" className="text-text-brand font-medium hover:underline">
+                    <LabelLarge>
+                        {t("accountSwitch.newAccount.action")}
+                    </LabelLarge>
+                </Link>
             </div>
         </div>
     );

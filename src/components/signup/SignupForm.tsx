@@ -181,13 +181,13 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="lg:h-[100dvh]">
-      <div className="lg:h-[2.5rem]">
+    <div className="space-y-4 lg:space-y-8">
+      <div>
         <HeadingMedium>{t("greetings.signup")}</HeadingMedium>
       </div>
 
-      <div className="">
-        <div className="lg:space-y-[1rem]">
+      <div className="space-y-4 lg:space-y-6">
+        <div className="space-y-4">
           <TextInput
             value={email}
             onChange={setEmail}
@@ -217,7 +217,7 @@ export default function SignUpForm() {
           />
         </div>
 
-        <p className="lg:h-[3rem] text-text-primary text-sm">
+        <p className="text-text-primary text-sm lg:py-2">
           {t("policies.agreement")}{' '}
           <a href="#" className="text-text-brand hover:underline">
             {t("policies.privacyPolicy")}
@@ -228,7 +228,7 @@ export default function SignUpForm() {
           </a>
         </p>
 
-        <div className="lg:h-[3.75rem] lg:flex lg:justify-end mb-2">
+        <div className="flex justify-end">
           <ButtonType2
             onClick={handleSubmit}
             disabled={isChecking || registerLoading}
@@ -239,19 +239,19 @@ export default function SignUpForm() {
         </div>
       </div>
 
-      <div className="lg:h-[1.5rem] mb-2">
-        <div className="flex items-center gap-[1rem]">
+      <div className="lg:py-4">
+        <div className="flex items-center gap-4">
           <div className="flex-1 border-t border-border-disabled"></div>
           <span className="text-sm">{t("socialAuth.divider")}</span>
           <div className="flex-1 border-t border-border-disabled"></div>
         </div>
       </div>
 
-      <div className="lg:max-h-[3rem] mb-2">
+      <div>
         <SignInProvider onProviderClick={handleProviderClick} />
       </div>
 
-      <div className="lg:h-[3.75rem] mx-auto flex items-center justify-center gap-[0.5rem]">
+      <div className="flex items-center justify-center gap-2 lg:pt-4">
         <BodyMedium>{t("accountSwitch.existingAccount.prompt")}</BodyMedium>
         <Link href="/signin" className="text-text-brand font-medium hover:underline">
           <LabelLarge>{t("accountSwitch.existingAccount.action")}</LabelLarge>
