@@ -365,9 +365,9 @@ const allFriends: Friend[] = useMemo(() => {
 
   /* --------------------- UI --------------------- */
   return (
-    <div className="lg:flex bg-surface-default h-[90vh] ">
+    <div className="lg:flex bg-surface-default h-[90dvh] ">
       {/* ---------- LEFT SIDEBAR (tabs) ---------- */}
-      <div className="lg:w-[20vw] p-4 border-r lg:min-h-[90vh] overflow-y-auto">
+      <div className="lg:w-[20vw] lg:p-4 border-r lg:min-h-[90vh] overflow-y-auto">
         <div className="mt-4 space-y-2 flex lg:flex-col">
           {(
             [
@@ -397,7 +397,7 @@ const allFriends: Friend[] = useMemo(() => {
       </div>
 
       {/* ---------- RIGHT CONTENT ---------- */}
-      <div className="lg:w-[80vw] overflow-y-auto">
+      <div className="lg:w-[80vw] overflow-y-auto bg-surface-default lg:h-[90dvh]">
         <div className="lg:w-[75vw] m-auto">
           <div className="lg:flex justify-between items-center my-4">
             {/* DYNAMIC heading */}
@@ -428,7 +428,7 @@ const allFriends: Friend[] = useMemo(() => {
 
           {/* Cards grid */}
           {!isLoading && (
-            <div className="grid lg:grid-cols-2 lg:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 ">
               {filteredFriends.map((friend) => renderCard(friend))}
             </div>
           )}

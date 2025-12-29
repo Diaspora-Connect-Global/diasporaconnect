@@ -57,7 +57,7 @@ export default function CustomDialog({
         </DialogHeader>
         
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto px-3">
+        <div className="flex-1 overflow-y-auto scrollbar-hide ">
           {children}
         </div>
 
