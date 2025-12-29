@@ -351,6 +351,32 @@
     @apply bg-background text-foreground;
   }
 
+
+  /* Custom Scrollbar Styles */
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--surface-brand);
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--border-brand);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-brand) transparent;
+  }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
