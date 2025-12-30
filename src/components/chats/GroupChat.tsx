@@ -29,12 +29,13 @@ import {
     MemberRole,
     GroupPrivacy
 } from "@/services/gql/groups";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EditGroupModal } from "./modals/EditGroupModal";
 import { ManageMemberModal } from "./modals/ManageMemberModal";
 import { ConfirmationModal } from "../custom/confirmationModal";
 import { AddMembersModal } from "./modals/AddMembersModal";
 import { useAuthStore } from "@/store/useAuthStore";
+import { ArrowLeft } from "iconsax-reactjs";
 
 interface Reply {
     id: string;
@@ -128,6 +129,7 @@ export default function GroupChat() {
     const currentUserMember = groupMembers.find(m => m.userId === currentUserId);
     const isOwner = group?.ownerId === currentUserId;
     const isAdmin = currentUserMember?.role === MemberRole.ADMIN || isOwner;
+     const searchParams = useSearchParams();
 
     // Get messages for this conversation
     const conversationMessages = messages.filter(m => m.conversationId === chat.id);
@@ -148,6 +150,18 @@ export default function GroupChat() {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [conversationMessages]);
+
+      const handleMBack = () => {
+        setActiveChat(null);
+        sessionStorage.removeItem('activeChat');
+        
+        // Remove chat type param but keep tab param
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('ct');
+        
+        const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+        router.push(newUrl, { scroll: false });
+    };
 
     const mockReplies: Reply[] = [
         {
@@ -380,14 +394,26 @@ export default function GroupChat() {
         );
     }
 
+  
+
     return (
         <>
             <div className="flex flex-row h-full space-x-0 md:space-x-2">
+
+
+                
                 {/* Main Chat Area */}
                 <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'}`}>
                     {/* Group Header - Hidden on mobile */}
-                    <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
+                    <div className=" md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                         <div className="flex items-center space-x-3">
+                            <button 
+                        onClick={handleMBack}
+                        className="p-2 hover:bg-surface-hover rounded-lg transition-colors md:hidden"
+                        aria-label="Back to chats"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
                             <div className="relative">
                                 <Avatar className="w-12 h-12">
                                     <AvatarImage src={group.avatarUrl || chat.avatar} alt="avatar" />
@@ -400,7 +426,7 @@ export default function GroupChat() {
                             </div>
                         </div>
                         <button onClick={handleSideBarToggle}>
-                            <InfoIcon className={`w-6 h-6 cursor-pointer ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full" : "text-text-brand"}`} />
+                            <InfoIcon className={`hidden md:block w-6 h-6 cursor-pointer ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full" : "text-text-brand"}`} />
                         </button>
                     </div>
 

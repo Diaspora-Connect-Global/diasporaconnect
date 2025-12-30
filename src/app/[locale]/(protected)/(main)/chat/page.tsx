@@ -111,32 +111,7 @@ export default function Chat() {
 
     return (
         <div className="rounded-md h-app-inner overflow-hidden flex flex-col">
-            {/* Mobile back button header */}
-            {isMobile && (
-                <div className="flex items-center gap-3 p-4 border-b border-border-subtle bg-surface-default md:hidden">
-                    <button 
-                        onClick={handleBack}
-                        className="p-2 hover:bg-surface-hover rounded-lg transition-colors"
-                        aria-label="Back to chats"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium">{chatInfo?.avatar}</span>
-                        </div>
-                        <div>
-                            <h2 className="font-semibold text-text-primary">{chatInfo?.name}</h2>
-                            {chatInfo?.type === 'direct' && chatInfo.online && (
-                                <p className="text-xs text-text-success">Online</p>
-                            )}
-                            {chatInfo?.type === 'group' && chatInfo.memberCount && (
-                                <p className="text-xs text-text-secondary">{chatInfo.memberCount} members</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+
             
             {/* Chat content */}
             <div className="overflow-hidden h-[96%] my-auto">
