@@ -22,6 +22,7 @@ import {
     CreateGroupResponse,
     CreateGroupInput,
     GroupPrivacy,
+    GET_MY_GROUPS,
 } from '@/services/gql/groups';
 import { GET_MY_CONNECTIONS } from '@/services/gql/connection';
 import { toast } from 'sonner';
@@ -41,8 +42,9 @@ export function StartConversationModal({
 }: StartConversationModalProps) {
     const t = useTranslations('chat.conversation');
     const tActions = useTranslations('actions');
-    
 
+    const user = useAuthStore((state) => state.user);
+    const currentUserId = user?.userId;
 
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -51,35 +53,47 @@ export function StartConversationModal({
     const [isLoading, setIsLoading] = useState(false);
 
     // GraphQL mutations
-    const [createGroup, { loading: creatingGroup }] = useMutation<CreateGroupResponse>(CREATE_GROUP);
+    const [createGroup, { loading: creatingGroup }] = useMutation<CreateGroupResponse>(CREATE_GROUP, {
+        refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
+        awaitRefetchQueries: true,
+    });
 
     // Query connections for user list
     const { data: connectionsData, loading: loadingConnections } = useQuery<any>(GET_MY_CONNECTIONS, {
         variables: { limit: 100, offset: 0 },
         skip: !isOpen,
+        fetchPolicy: 'network-only',
     });
 
     // Fetch users when modal opens
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && currentUserId) {
             if (type === "group") {
                 // For groups, use connections data from GraphQL
                 if (connectionsData?.getConnections?.connections) {
                     const connectionUsers = connectionsData.getConnections.connections
                         .map((conn: any) => {
-                            // Map connection to User type
-                            const user = conn.requester.userId === conn.requesterId
+                            // Intelligently determine which user is NOT the current user
+                            // If current user is the requester, use receiver; otherwise use requester
+                            const otherUser = conn.requesterId === currentUserId
                                 ? conn.receiver
                                 : conn.requester;
 
                             return {
-                                id: user.userId,
-                                name: `${user.firstName} ${user.lastName}`,
-                                email: user.email,
-                                avatarUrl: user.avatarUrl,
-                                sector: user.sector,
+                                id: otherUser.userId,
+                                name: `${otherUser.firstName} ${otherUser.lastName}`,
+                                email: otherUser.email,
+                                avatarUrl: otherUser.avatarUrl,
+                                sector: otherUser.sector,
                             };
-                        });
+                        })
+                        // Filter out any potential duplicates or invalid entries
+                        .filter((user: User, index: number, self: User[]) =>
+                            user.id &&
+                            user.id !== currentUserId && // Ensure we never include ourselves
+                            self.findIndex(u => u.id === user.id) === index // Remove duplicates
+                        );
+
                     setUsers(connectionUsers);
                 }
             } else {
@@ -87,18 +101,20 @@ export function StartConversationModal({
                 fetchUsers();
             }
         }
-    }, [isOpen, connectionsData, type]);
+    }, [isOpen, connectionsData, type, currentUserId]);
 
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 500));
-            // Use mock data for direct messages
-            setUsers(mockUsers);
+            // Use mock data for direct messages, excluding current user
+            const filteredMockUsers = mockUsers.filter(u => u.id !== currentUserId);
+            setUsers(filteredMockUsers);
         } catch (error) {
             console.error('Failed to fetch users:', error);
-            setUsers(mockUsers);
+            const filteredMockUsers = mockUsers.filter(u => u.id !== currentUserId);
+            setUsers(filteredMockUsers);
         } finally {
             setIsLoading(false);
         }
@@ -123,12 +139,13 @@ export function StartConversationModal({
         }
     };
 
-    const user = useAuthStore((state) => state.user);
-
     const handleGroupCreate = async (groupName: string, groupPhoto?: string) => {
-        const currentUserId = user?.userId;
+        if (!currentUserId) {
+            toast.error('User not authenticated');
+            return;
+        }
 
-
+        console.log("selectedUsers", selectedUsers);
         // Create array of member IDs including current user
         const memberIds = [
             currentUserId, // Add current user first
@@ -136,7 +153,7 @@ export function StartConversationModal({
         ].filter((id): id is string => id !== undefined && id !== null);
 
         try {
-            console.log('Creating group:', { groupName, groupPhoto, selectedUsers });
+            console.log('Creating group:', { groupName, groupPhoto, memberIds });
 
             // Create the group using GraphQL mutation
             const createGroupInput: CreateGroupInput = {
@@ -156,7 +173,7 @@ export function StartConversationModal({
             if (data?.createGroup?.success && data.createGroup.group) {
                 const newGroup = data.createGroup.group;
 
-                toast('groupCreated');
+                toast.success('Group created successfully');
 
                 // Navigate to the new group chat
                 // window.location.href = `/chat/group/${newGroup.id}`;
@@ -167,7 +184,7 @@ export function StartConversationModal({
             }
         } catch (error) {
             console.error('Failed to create group:', error);
-            toast('group Creation Failed');
+            toast.error('Group creation failed');
         }
     };
 
@@ -213,7 +230,7 @@ export function StartConversationModal({
             handleClose();
         } catch (error) {
             console.error('Failed to start conversation:', error);
-            toast('conversationStartFailed');
+            toast.error('Failed to start conversation');
         }
     };
 
@@ -283,8 +300,8 @@ export function StartConversationModal({
                                             >
                                                 <div
                                                     className={`w-4 h-4 border rounded mr-3 flex items-center justify-center ${isSelected
-                                                            ? 'bg-surface-brand border-border-brand text-primary-foreground'
-                                                            : 'border-muted-foreground'
+                                                        ? 'bg-surface-brand border-border-brand text-primary-foreground'
+                                                        : 'border-muted-foreground'
                                                         }`}
                                                 >
                                                     {isSelected && <Check />}
