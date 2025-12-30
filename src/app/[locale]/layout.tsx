@@ -25,9 +25,9 @@ export async function generateMetadata({
     title: "Diaspoplug",
     description: t('description'),
     icons: {
-      icon: '/DiaspoLogo.svg',
-      shortcut: '/DiaspoLogo.svg',
-      apple: '/DiaspoLogo.svg',
+      icon: '/favicon.svg',
+      shortcut: '/favicon.svg',
+      apple: '/favicon.svg',
     },
   };
 }
