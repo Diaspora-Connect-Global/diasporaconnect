@@ -133,7 +133,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
             <div className="flex items-center space-x-3">
                 {!imageError && imageSrc && imageSrc.trim() !== '' && imageSrc !== 'null' && imageSrc !== 'undefined' ? (
                     <Image
-                        src={imageSrc}
+                        src={imageSrc.trim()}
                         alt={name}
                         width={40}
                         height={40}

@@ -52,13 +52,13 @@ const gqlClient = new ApolloClient({
   queryDeduplication: false,
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: 'cache-and-network',
+      fetchPolicy: 'network-only',
     },
     query: {
       fetchPolicy: 'network-only',
     },
     mutate: {
-      fetchPolicy: 'no-cache',
+      fetchPolicy: 'network-only',
     },
   },
 });

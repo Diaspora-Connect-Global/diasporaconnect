@@ -414,7 +414,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
     
     const { data, loading, error } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
         variables: { limit, offset },
-        fetchPolicy: 'cache-and-network',
+        fetchPolicy: 'network-only',
     });
 
     if (loading) {

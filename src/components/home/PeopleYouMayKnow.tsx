@@ -39,7 +39,7 @@ export function PeopleYouMayKnow() {
         GET_FRIEND_SUGGESTIONS,
         {
             variables: { limit: 3 },
-            fetchPolicy: 'cache-and-network',
+            fetchPolicy: 'network-only',
         }
     );
 
