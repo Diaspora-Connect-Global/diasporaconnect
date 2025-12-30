@@ -86,7 +86,7 @@ export default function FeedCardWithReply({
     const toggleExpand = () => setIsExpanded((v) => !v);
     const toggleComments = () => setShowComments((v) => !v);
     const toggleCommentInput = () => {
-        setShowCommentInput(true);
+        setShowCommentInput((v) => !v);
         onComment?.();
     };
 
