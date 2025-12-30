@@ -10,6 +10,7 @@ import { StartConversationModal } from "./modals/StartConversationModal";
 import { useTranslations } from 'next-intl';
 import { useQuery } from "@apollo/client/react";
 import { GET_MY_GROUPS } from "@/services/gql/groups";
+import Image from "next/image";
 
 type TabType = 'direct' | 'groups';
 
@@ -288,6 +289,74 @@ function ChatItemSkeleton() {
     );
 }
 
+// Helper function to generate initials from name
+function getInitials(name: string): string {
+    const words = name.trim().split(' ').filter(Boolean);
+    if (words.length >= 2) {
+        return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+}
+
+// Helper function to check if avatar is a URL
+function isValidUrl(string: string): boolean {
+    try {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
+// Avatar Component with URL support and fallback
+interface AvatarProps {
+    src: string;
+    name: string;
+    size?: 'sm' | 'md' | 'lg';
+    online?: boolean;
+}
+
+function Avatar({ src, name, size = 'md', online }: AvatarProps) {
+    const [imageError, setImageError] = useState(false);
+    const isUrl = isValidUrl(src);
+    
+    const sizeClasses = {
+        sm: 'w-8 h-8 text-xs',
+        md: 'w-12 h-12 text-sm',
+        lg: 'w-16 h-16 text-base'
+    };
+
+    const onlineIndicatorSize = {
+        sm: 'w-2 h-2',
+        md: 'w-3 h-3',
+        lg: 'w-4 h-4'
+    };
+
+    return (
+        <div className="relative flex-shrink-0">
+            <div className={`${sizeClasses[size]} bg-gray-300 rounded-full flex items-center justify-center overflow-hidden`}>
+                {isUrl && !imageError ? (
+                    <Image
+                        src={src}
+                        alt={name}
+                        width={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
+                        height={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
+                        className="w-full h-full object-cover"
+                        onError={() => setImageError(true)}
+                    />
+                ) : (
+                    <span className="font-medium text-text-primary">
+                        {getInitials(name)}
+                    </span>
+                )}
+            </div>
+            {online && (
+                <div className={`absolute bottom-0 right-0 ${onlineIndicatorSize[size]} bg-text-success border-2 border-white rounded-full`} />
+            )}
+        </div>
+    );
+}
+
 // Reusable ChatItem component
 interface ChatItemProps {
     chat: {
@@ -314,14 +383,11 @@ function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
                 }`}
         >
             {/* Avatar with online status */}
-            <div className="relative flex-shrink-0">
-                <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-text-primary">{chat.avatar}</span>
-                </div>
-                {chat.online && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-text-success border-2 border-text-white rounded-full" />
-                )}
-            </div>
+            <Avatar 
+                src={chat.avatar} 
+                name={chat.name}
+                online={chat.online}
+            />
 
             {/* Content */}
             <div className="flex-1 min-w-0">
@@ -458,15 +524,6 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
     return (
         <div className="space-y-1 p-2">
             {filteredGroups.map((group) => {
-                // Generate avatar initials from group name
-                const getInitials = (name: string) => {
-                    const words = name.trim().split(' ');
-                    if (words.length >= 2) {
-                        return (words[0][0] + words[1][0]).toUpperCase();
-                    }
-                    return name.substring(0, 2).toUpperCase();
-                };
-
                 return (
                     <ChatItem
                         key={group.id}

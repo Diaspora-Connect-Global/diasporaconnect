@@ -290,6 +290,7 @@ export const GET_MY_GROUPS = gql`
         memberCount
         ownerId
         createdAt
+        avatarUrl
       }
     }
   }

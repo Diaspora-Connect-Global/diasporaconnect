@@ -14,6 +14,7 @@ import { User } from '@/data/chats';
 import { TextInput } from '@/components/custom/input';
 import { useTranslations } from 'next-intl';
 import { CircularImageCropper } from '@/lib/imagecropper';
+import { useImageUpload } from '@/hooks/useImageUpload';
 
 interface AddGroupPhotoModalProps {
   isOpen: boolean;
@@ -33,32 +34,31 @@ export function StartGroupConfirmationModal({
   const t = useTranslations('chat.conversation');
 
   const [groupName, setGroupName] = useState(initialGroupName);
-  const [groupPhoto, setGroupPhoto] = useState<string | null>(null);
-
-  // 👇 cropper state
-  const [rawImage, setRawImage] = useState<string | null>(null);
-  const [showCropper, setShowCropper] = useState(false);
-
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  console.log('Selected users for group', selectedUsers);
+  // Use the image upload hook
+  const {
+    uploading,
+    rawImage,
+    croppedImage,
+    showCropper,
+    handleFileSelect,
+    handleCropConfirm,
+    handleCropCancel,
+    uploadImage,
+    reset: resetImageUpload,
+  } = useImageUpload({
+    category: 'group_avatar',
+    contentType: 'image/jpeg',
+  });
 
-  const handlePhotoSelect = (file: File) => {
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setRawImage(e.target?.result as string);
-        setShowCropper(true);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  console.log('Selected users for group', selectedUsers);
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      handlePhotoSelect(file);
+      handleFileSelect(file);
     }
   };
 
@@ -78,23 +78,30 @@ export function StartGroupConfirmationModal({
 
     const file = e.dataTransfer.files[0];
     if (file) {
-      handlePhotoSelect(file);
+      handleFileSelect(file);
     }
   };
 
   const removePhoto = () => {
-    setGroupPhoto(null);
+    resetImageUpload();
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (groupName.trim()) {
-      onGroupCreate(groupName.trim(), groupPhoto || undefined);
+      let photoUrl: string | undefined;
+
+      // Upload the image if one was selected
+      if (croppedImage) {
+        photoUrl = (await uploadImage()) || undefined;
+      }
+
+      onGroupCreate(groupName.trim(), photoUrl);
       onClose();
       setGroupName('');
-      setGroupPhoto(null);
+      resetImageUpload();
     }
   };
 
@@ -119,7 +126,7 @@ export function StartGroupConfirmationModal({
                   ${
                     isDragging
                       ? 'border-border-brand bg-surface-brand-light'
-                      : groupPhoto
+                      : croppedImage
                       ? ''
                       : 'border-border-brand border-2 border-dashed bg-surface-subtle'
                   }
@@ -129,10 +136,10 @@ export function StartGroupConfirmationModal({
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
               >
-                {groupPhoto ? (
+                {croppedImage ? (
                   <>
                     <Image
-                      src={groupPhoto}
+                      src={croppedImage}
                       alt="Group photo preview"
                       fill
                       className="rounded-full object-cover"
@@ -146,7 +153,7 @@ export function StartGroupConfirmationModal({
                     >
                       <X className="w-3 h-3" />
                     </button>
-                    <div className="absolute inset-0  bg-opacity-0 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all">
+                    <div className="absolute inset-0 bg-opacity-0 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all">
                       <Camera className="w-6 h-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                     </div>
                   </>
@@ -194,28 +201,21 @@ export function StartGroupConfirmationModal({
             <ButtonType2
               onClick={handleCreate}
               className="px-6 py-2"
-              disabled={!isFormValid}
+              disabled={!isFormValid || uploading}
             >
-              {t('createGroup')}
+              {uploading ? t('uploading') : t('createGroup')}
             </ButtonType2>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* 🔵 Circular Cropper */}
+      {/* Circular Cropper */}
       {rawImage && (
         <CircularImageCropper
           open={showCropper}
           src={rawImage}
-          onCancel={() => {
-            setShowCropper(false);
-            setRawImage(null);
-          }}
-          onConfirm={(croppedImage) => {
-            setGroupPhoto(croppedImage);
-            setShowCropper(false);
-            setRawImage(null);
-          }}
+          onCancel={handleCropCancel}
+          onConfirm={handleCropConfirm}
         />
       )}
     </>
