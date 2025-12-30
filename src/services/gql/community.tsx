@@ -10,6 +10,9 @@ export const LIST_AVAILABLE_COMMUNITIES = gql`
       communities {
         id
         name
+        description
+        visibility
+        avatarUrl
       }
       total
     }
