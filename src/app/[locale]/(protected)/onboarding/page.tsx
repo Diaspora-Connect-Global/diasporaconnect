@@ -320,6 +320,7 @@ data.completeOAuthRegistration.registrationToken;
           nextStep={submitFormB}
           loading={verifyOTPLoading}
           prevStep={prevStep}
+          resendCode={submitFormA}
         />
       )}
       {currentStep === 6 && (

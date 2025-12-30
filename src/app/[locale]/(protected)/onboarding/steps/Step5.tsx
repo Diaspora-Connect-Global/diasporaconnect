@@ -11,10 +11,11 @@ interface Step5Props {
     updateData: (data: Partial<FormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
+    resendCode: () => void;
     loading: boolean;
 }
 
-export const Step5: React.FC<Step5Props> = ({ data, loading, nextStep, prevStep,updateData }) => {
+export const Step5: React.FC<Step5Props> = ({ data, loading, nextStep, prevStep,updateData,resendCode }) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
@@ -82,6 +83,8 @@ const [isComplete, setIsComplete] = useState(false);
         setIsComplete(false);
         setTimeLeft(COUNTDOWN_DURATION);
         sessionStorage.setItem(COUNTDOWN_KEY, Date.now().toString());
+
+        resendCode();
     };
 
     if (timeLeft === null) {
