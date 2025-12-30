@@ -22,8 +22,13 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
   return {
-    title: t('title'),
+    title: "Diaspoplug",
     description: t('description'),
+    icons: {
+      icon: '/DiaspoLogo.svg',
+      shortcut: '/DiaspoLogo.svg',
+      apple: '/DiaspoLogo.svg',
+    },
   };
 }
 
