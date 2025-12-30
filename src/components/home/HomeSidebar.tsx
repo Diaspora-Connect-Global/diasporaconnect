@@ -143,44 +143,10 @@ function Community() {
 
 
 
-    const communities = [
-        {
-            id: '1',
-            title: 'GhanaConnect:Global',
-            description: 'Connect with professionals and businesses across Ghana and abroad.'
-        },
-        {
-            id: '2',
-            title: 'GhanaTechHub',
-            description: 'A platform for tech enthusiasts to collaborate and innovate.'
-        },
-        {
-            id: '3',
-            title: 'GhanaArtsNetwork',
-            description: 'Showcasing the rich cultural heritage of Ghana.'
-        }
-    ];
-
-    // Handle community change
-    const handleCommunityChange = (community: Community) => {
-        console.log('Switched to:', community.title);
-        // Add your logic here (e.g., fetch community data, update state, etc.)
-    };
-
-    // Handle leave community
-    const handleLeaveCommunity = (community: Community) => {
-        console.log('Leaving:', community.title);
-        // Add your logic here (e.g., show confirmation dialog, remove from list, etc.)
-    };
 
     return (
         <div className=" ">
-
-            <MyCommunityCard2
-                communities={communities}
-                defaultCommunityId='1'  // Optional: which community to show first
-                onCommunityChange={handleCommunityChange}
-                onLeaveCommunity={handleLeaveCommunity}
+            <MyCommunityCard2 
             />
 
             {/* Associations Section */}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React from 'react';
 import { ChevronRight, MoreHorizontalIcon } from 'lucide-react';
@@ -11,21 +12,35 @@ import {
 import { Button } from '../ui/button';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image'
+import { useCommunityStore } from '@/store/useCommunityStore';
+import { useRouter, usePathname } from "next/navigation";
+
 
 
 interface GhanaConnectHeaderProps {
     title?: string;
+    id: string;
     description?: string;
     logoIcon?: React.ReactNode;
     onMenuClick?: () => void;
 }
 
 export function MyCommunityCard({
-    title = "GhanaConnect:Global",
-     description = "Connect with professionals and businesses across Ghana and abroad.",
+    title = "",
+     description = "",
     logoIcon,
+    id
 }: GhanaConnectHeaderProps) {
+    
+    const router = useRouter();
     const t = useTranslations('community');
+
+        const setSelectedCommunity = useCommunityStore(state => state.setSelectedCommunity);
+    
+     const handleCommunitySelect = (id :string) => {
+        setSelectedCommunity(id);
+        router.push(`/`);
+    };
     
     return (
         <header className="w-full border-b">
@@ -46,7 +61,7 @@ export function MyCommunityCard({
                         </div>
 
                         <div className="flex flex-col min-w-0 flex-1"> {/* Allow text truncation */}
-                            <h1 className="text-text-primary font-label-large text-sm sm:text-base truncate"> {/* Responsive font and truncate long titles */}
+                            <h1 className="text-text-primary font-label-large text-sm sm:text-base truncate cursor-pointer hover:text-text-brand" onClick={() => handleCommunitySelect(id)}> {/* Responsive font and truncate long titles */}
                                 {title}
                             </h1>
                             <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-1"> {/* Smaller font, clamp description on small screens */}
@@ -61,7 +76,7 @@ export function MyCommunityCard({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default min-w-[200px]'> {/* Wider menu for touch targets */}
-                            <DropdownMenuItem onSelect={() => console.log(title)} className='font-body-large text-text-primary flex justify-between items-center'>
+                            <DropdownMenuItem onSelect={() => handleCommunitySelect(id)} className='font-body-large text-text-primary flex justify-between items-center'>
                                 <span>{t('openInHome')}</span>
                                 <ChevronRight className="w-4 h-4" />
                             </DropdownMenuItem>
