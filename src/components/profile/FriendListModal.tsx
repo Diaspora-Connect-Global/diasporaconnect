@@ -2,7 +2,7 @@
 
 import { SearchInput } from "@/components/custom/input";
 import FriendsCard from "@/components/home/FriendsCard";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { FriendType } from "../friends/TypeOfFriend";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -39,7 +39,6 @@ interface FriendListModalProps {
   onClose?: () => void;
 }
 
-// Map tab numbers to FriendType
 const TAB_MAP: Record<string, FriendType> = {
   "1": "friends",
   "2": "suggested",
@@ -47,7 +46,6 @@ const TAB_MAP: Record<string, FriendType> = {
   "4": "request-sent",
 };
 
-// Reverse map for setting URL params
 const FRIEND_TYPE_TO_TAB: Record<FriendType, string> = {
   "friends": "1",
   "suggested": "2",
@@ -61,11 +59,17 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const searchParams = useSearchParams();
 
   /* --------------------- State --------------------- */
-  // Get active tab from URL param, default to "1" (friends)
   const tabParam = searchParams.get('t') || '1';
   const activeTab: FriendType = TAB_MAP[tabParam] || "friends";
   
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [shouldShowStaleResults, setShouldShowStaleResults] = useState(false);
+  
+  // Ref to track the latest search term to prevent stale updates
+  const searchTermRef = useRef(searchTerm);
+  searchTermRef.current = searchTerm;
 
   /* --------------------- Tab navigation --------------------- */
   const setActiveTab = (friendType: FriendType) => {
@@ -75,7 +79,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   };
 
   /* --------------------- GraphQL Queries --------------------- */
-  // Get accepted connections (friends)
   const {
     data: connectionsData,
     loading: connectionsLoading,
@@ -85,7 +88,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     skip: activeTab !== "friends",
   });
 
-  // Get pending requests SENT
   const {
     data: requestsSentData,
     loading: requestsSentLoading,
@@ -95,7 +97,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     skip: activeTab !== "request-sent",
   });
 
-  // Get pending requests RECEIVED
   const {
     data: requestsReceivedData,
     loading: requestsReceivedLoading,
@@ -105,7 +106,6 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     skip: activeTab !== "request-received",
   });
 
-  // Get friend suggestions (when no search term)
   const {
     data: suggestions,
     loading: suggestionsLoading,
@@ -114,169 +114,196 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     GET_FRIEND_SUGGESTIONS,
     {
       variables: { limit: 10 },
-      skip: activeTab !== "suggested" || searchTerm.length > 0,
+      skip: activeTab !== "suggested" || debouncedSearchTerm.length > 0,
     }
   );
 
-  // Search users (when search term exists on suggested tab)
   const [
     searchUsers,
-    { data: searchResults, loading: searchLoading }
-  ] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS);
+    { data: searchResults, loading: searchLoading, called: searchCalled }
+  ] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, {
+    fetchPolicy: 'network-only', // Ensure fresh data
+  });
+
+  /* --------------------- Debounce search term --------------------- */
+  useEffect(() => {
+    // When user starts typing, immediately hide stale results
+    if (searchTerm.length > 0 && activeTab === "suggested") {
+      setShouldShowStaleResults(false);
+      setIsSearching(true);
+    }
+    
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // Increased to 500ms for better debouncing
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, activeTab]);
 
   /* --------------------- Handle search for suggested tab --------------------- */
   useEffect(() => {
-    // Only search when on suggested tab and search term exists
-    if (activeTab === "suggested" && searchTerm.length > 0) {
-      const timeoutId = setTimeout(() => {
-        searchUsers({
-          variables: {
-            searchUsersInput: {
-              query: searchTerm,
-              limit: 20,
-              offset: 0,
-            }
+    if (activeTab === "suggested" && debouncedSearchTerm.length > 0) {
+      setIsSearching(true);
+      setShouldShowStaleResults(false);
+      
+      searchUsers({
+        variables: {
+          searchUsersInput: {
+            query: debouncedSearchTerm,
+            limit: 20,
+            offset: 0,
           }
-        });
-      }, 300);
-
-      return () => clearTimeout(timeoutId);
+        }
+      }).then(() => {
+        // Only update state if this is still the current search term
+        if (searchTermRef.current === debouncedSearchTerm) {
+          setIsSearching(false);
+          setShouldShowStaleResults(true);
+        }
+      }).catch(() => {
+        if (searchTermRef.current === debouncedSearchTerm) {
+          setIsSearching(false);
+          setShouldShowStaleResults(true);
+        }
+      });
+    } else {
+      setIsSearching(false);
+      setShouldShowStaleResults(true);
     }
-  }, [searchTerm, activeTab, searchUsers]);
+  }, [debouncedSearchTerm, activeTab, searchUsers]);
 
   /* --------------------- Helper: Determine tier --------------------- */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getTierFromUser = (user: any): "starter" | "trusted" | "reliable" | "elite" => {
-    // TODO: Implement actual tier logic
     return "starter";
   };
 
-/* --------------------- Transform API data to Friend[] --------------------- */
-const allFriends: Friend[] = useMemo(() => {
-  const friends: Friend[] = [];
-  
-  // Get current user ID from Zustand auth store
-  const currentUserId = useAuthStore.getState().user?.userId;
-  
-  if (!currentUserId) {
-    console.warn("Current user ID not available");
-    return friends;
-  }
+  /* --------------------- Transform API data to Friend[] --------------------- */
+  const allFriends: Friend[] = useMemo(() => {
+    const friends: Friend[] = [];
+    
+    const currentUserId = useAuthStore.getState().user?.userId;
+    
+    if (!currentUserId) {
+      console.warn("Current user ID not available");
+      return friends;
+    }
 
-  // Determine if we're in search mode for the suggested tab
-  const isSearchingOnSuggestedTab = activeTab === "suggested" && searchTerm.length > 0;
+    const isSearchingOnSuggestedTab = activeTab === "suggested" && debouncedSearchTerm.length > 0;
 
-  // Process accepted connections (friends)
-  if (connectionsData?.getConnections.connections) {
-    connectionsData.getConnections.connections.forEach((connection) => {
-      const isRequester = connection.requesterId === currentUserId;
-      const friend = isRequester ? connection.receiver : connection.requester;
-      
-      friends.push({
-        userId: friend.userId,
-        connectionId: connection.id,
-        name: `${friend.firstName} ${friend.lastName}`,
-        imageSrc: `${friend.avatarUrl} `,
-        mutualConnections: undefined,
-        tier: getTierFromUser(friend),
-        connectionStatus: "connected",
-        tabType: "friends",
-        searchQuery: "",
-        isSearching: false,
-      });
-    });
-  }
-
-  // Process pending requests SENT
-  if (requestsSentData?.getPendingConnections.connections) {
-    requestsSentData.getPendingConnections.connections.forEach((connection) => {
-      const friend = connection.receiver;
-      friends.push({
-        userId: friend.userId,
-        connectionId: connection.id,
-        name: `${friend.firstName} ${friend.lastName}`,
-        imageSrc: `${friend.avatarUrl} ` ,
-        mutualConnections: undefined,
-        tier: getTierFromUser(friend),
-        connectionStatus: friend.connectionStatus,
-        tabType: "request-sent",
-        searchQuery: "",
-        isSearching: false,
-      });
-    });
-  }
-
-  // Process pending requests RECEIVED
-  if (requestsReceivedData?.getPendingConnections.connections) {
-    requestsReceivedData.getPendingConnections.connections.forEach((connection) => {
-      const friend = connection.requester;
-      friends.push({
-        userId: friend.userId,
-        connectionId: connection.id,
-        name: `${friend.firstName} ${friend.lastName}`,
-        imageSrc: `${friend.avatarUrl} `,
-        mutualConnections: undefined,
-        tier: getTierFromUser(friend),
-        connectionStatus: friend.connectionStatus,
-        tabType: "request-received",
-        searchQuery: "",
-        isSearching: false,
-      });
-    });
-  }
-
-  // Process friend suggestions OR search results (for suggested tab)
-  if (activeTab === "suggested") {
-    if (isSearchingOnSuggestedTab && searchResults?.searchUsers.profiles) {
-      // Use search results when searching
-      searchResults.searchUsers.profiles.forEach((profile) => {
+    // Process accepted connections (friends)
+    if (connectionsData?.getConnections.connections) {
+      connectionsData.getConnections.connections.forEach((connection) => {
+        const isRequester = connection.requesterId === currentUserId;
+        const friend = isRequester ? connection.receiver : connection.requester;
+        
         friends.push({
-          userId: profile.userId,
-          connectionId: profile.connectionId,
-          name: `${profile.firstName} ${profile.lastName}`,
-          imageSrc: `${profile.avatarUrl}` ,
+          userId: friend.userId,
+          connectionId: connection.id,
+          name: `${friend.firstName} ${friend.lastName}`,
+          imageSrc: `${friend.avatarUrl}`,
           mutualConnections: undefined,
-          tier: getTierFromUser(profile),
-          connectionStatus: profile.connectionStatus,
-          tabType: "suggested",
-          searchQuery: searchTerm,
-          isSearching: true,
-        });
-      });
-    } else if (suggestions?.getFriendSuggestions.suggestions) {
-      // Use suggestions when not searching
-      suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
-        friends.push({
-          userId: suggestion.profile.userId,
-          connectionId: suggestion.profile.connectionId,
-          name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
-          imageSrc: suggestion.profile.avatarUrl ,
-          mutualConnections: suggestion.mutualConnectionsCount,
-          tier: getTierFromUser(suggestion.profile),
-          connectionStatus: suggestion.profile.connectionStatus,
-          tabType: "suggested",
+          tier: getTierFromUser(friend),
+          connectionStatus: "connected",
+          tabType: "friends",
           searchQuery: "",
           isSearching: false,
         });
       });
     }
-  }
 
-  return friends;
-}, [
-  activeTab,
-  searchTerm,
-  connectionsData,
-  requestsSentData,
-  requestsReceivedData,
-  suggestions,
-  searchResults
-]);
+    // Process pending requests SENT
+    if (requestsSentData?.getPendingConnections.connections) {
+      requestsSentData.getPendingConnections.connections.forEach((connection) => {
+        const friend = connection.receiver;
+        friends.push({
+          userId: friend.userId,
+          connectionId: connection.id,
+          name: `${friend.firstName} ${friend.lastName}`,
+          imageSrc: `${friend.avatarUrl}`,
+          mutualConnections: undefined,
+          tier: getTierFromUser(friend),
+          connectionStatus: friend.connectionStatus,
+          tabType: "request-sent",
+          searchQuery: "",
+          isSearching: false,
+        });
+      });
+    }
+
+    // Process pending requests RECEIVED
+    if (requestsReceivedData?.getPendingConnections.connections) {
+      requestsReceivedData.getPendingConnections.connections.forEach((connection) => {
+        const friend = connection.requester;
+        friends.push({
+          userId: friend.userId,
+          connectionId: connection.id,
+          name: `${friend.firstName} ${friend.lastName}`,
+          imageSrc: `${friend.avatarUrl}`,
+          mutualConnections: undefined,
+          tier: getTierFromUser(friend),
+          connectionStatus: friend.connectionStatus,
+          tabType: "request-received",
+          searchQuery: "",
+          isSearching: false,
+        });
+      });
+    }
+
+    // Process friend suggestions OR search results (for suggested tab)
+    if (activeTab === "suggested") {
+      // Only show results if we're allowed to (not in the middle of typing/searching)
+      if (isSearchingOnSuggestedTab && searchResults?.searchUsers.profiles && shouldShowStaleResults) {
+        searchResults.searchUsers.profiles.forEach((profile) => {
+          friends.push({
+            userId: profile.userId,
+            connectionId: profile.connectionId,
+            name: `${profile.firstName} ${profile.lastName}`,
+            imageSrc: `${profile.avatarUrl}`,
+            mutualConnections: undefined,
+            tier: getTierFromUser(profile),
+            connectionStatus: profile.connectionStatus,
+            tabType: "suggested",
+            searchQuery: debouncedSearchTerm,
+            isSearching: true,
+          });
+        });
+      } else if (!isSearchingOnSuggestedTab && suggestions?.getFriendSuggestions.suggestions) {
+        suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
+          friends.push({
+            userId: suggestion.profile.userId,
+            connectionId: suggestion.profile.connectionId,
+            name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
+            imageSrc: suggestion.profile.avatarUrl,
+            mutualConnections: suggestion.mutualConnectionsCount,
+            tier: getTierFromUser(suggestion.profile),
+            connectionStatus: suggestion.profile.connectionStatus,
+            tabType: "suggested",
+            searchQuery: "",
+            isSearching: false,
+          });
+        });
+      }
+    }
+
+    return friends;
+  }, [
+    activeTab,
+    debouncedSearchTerm,
+    connectionsData,
+    requestsSentData,
+    requestsReceivedData,
+    suggestions,
+    searchResults,
+    shouldShowStaleResults
+  ]);
 
   /* --------------------- Clear search on tab change --------------------- */
   useEffect(() => {
-    // Clear search term when changing tabs
     setSearchTerm("");
+    setDebouncedSearchTerm("");
+    setIsSearching(false);
+    setShouldShowStaleResults(true);
   }, [activeTab]);
 
   /* --------------------- Handle name click --------------------- */
@@ -290,10 +317,8 @@ const allFriends: Friend[] = useMemo(() => {
   /* --------------------- Filtering --------------------- */
   const filteredFriends = useMemo(() => {
     return allFriends.filter((f) => {
-      // Tab filter - match by tabType instead of status
       if (f.tabType !== activeTab) return false;
 
-      // Search filter (only for non-suggested tabs, as suggested tab handles search via API)
       if (activeTab !== "suggested" && searchTerm) {
         if (!f.name.toLowerCase().includes(searchTerm.toLowerCase())) {
           return false;
@@ -308,7 +333,7 @@ const allFriends: Friend[] = useMemo(() => {
   const counts = useMemo(() => {
     const byStatus: Record<FriendType, number> = {
       "friends": connectionsData?.getConnections.total || 0,
-      "suggested": searchTerm.length > 0
+      "suggested": debouncedSearchTerm.length > 0
         ? (searchResults?.searchUsers.total || 0)
         : (suggestions?.getFriendSuggestions.total || 0),
       "request-received": requestsReceivedData?.getPendingConnections.total || 0,
@@ -317,7 +342,7 @@ const allFriends: Friend[] = useMemo(() => {
 
     return byStatus;
   }, [
-    searchTerm,
+    debouncedSearchTerm,
     connectionsData,
     requestsSentData,
     requestsReceivedData,
@@ -327,7 +352,7 @@ const allFriends: Friend[] = useMemo(() => {
 
   const tabTitle = {
     "friends": t("titles.all", { count: counts["friends"] }),
-    "suggested": searchTerm.length > 0
+    "suggested": debouncedSearchTerm.length > 0
       ? `${t("titles.searchResults")} (${counts["suggested"]})`
       : t("titles.suggested"),
     "request-received": t("titles.requestReceived", { count: counts["request-received"] }),
@@ -335,12 +360,27 @@ const allFriends: Friend[] = useMemo(() => {
   }[activeTab];
 
   /* --------------------- Loading state --------------------- */
-  const isLoading =
-    connectionsLoading ||
-    requestsSentLoading ||
-    requestsReceivedLoading ||
-    suggestionsLoading ||
-    searchLoading;
+  const isLoading = (() => {
+    // If we're typing but haven't debounced yet, show the user's typing feedback
+    const isTypingButNotDebounced = searchTerm !== debouncedSearchTerm && searchTerm.length > 0;
+    
+    // For suggested tab with search
+    if (activeTab === "suggested" && debouncedSearchTerm.length > 0) {
+      return isSearching || searchLoading || isTypingButNotDebounced;
+    }
+    
+    // For suggested tab without search
+    if (activeTab === "suggested") {
+      return suggestionsLoading;
+    }
+    
+    // For other tabs
+    return (
+      connectionsLoading ||
+      requestsSentLoading ||
+      requestsReceivedLoading
+    );
+  })();
 
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
@@ -365,7 +405,7 @@ const allFriends: Friend[] = useMemo(() => {
 
   /* --------------------- UI --------------------- */
   return (
-    <div className="lg:flex bg-surface-default h-[90dvh] ">
+    <div className="lg:flex bg-surface-default h-[90dvh]">
       {/* ---------- LEFT SIDEBAR (tabs) ---------- */}
       <div className="lg:w-[20vw] lg:p-4 border-r lg:min-h-[90vh] overflow-y-auto">
         <div className="mt-4 space-y-2 flex lg:flex-col">
@@ -385,10 +425,11 @@ const allFriends: Friend[] = useMemo(() => {
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") setActiveTab(key);
               }}
-              className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${activeTab === key
+              className={`cursor-pointer pl-3 py-1 px-2 rounded-lg ${
+                activeTab === key
                   ? "bg-surface-brand-subtle text-text-brand"
                   : "text-text-secondary"
-                }`}
+              }`}
             >
               <p>{label}</p>
             </div>
@@ -400,10 +441,9 @@ const allFriends: Friend[] = useMemo(() => {
       <div className="lg:w-[80vw] overflow-y-auto bg-surface-default lg:h-[90dvh]">
         <div className="lg:w-[75vw] m-auto">
           <div className="lg:flex justify-between items-center my-4">
-            {/* DYNAMIC heading */}
-            <p className="font-heading-xsmall w-[75vw]  mx-auto lg:w-fit ">{tabTitle}</p>
+            <p className="font-heading-xsmall w-[75vw] mx-auto lg:w-fit">{tabTitle}</p>
 
-            <div className="w-[75vw] lg:w-fit  mx-auto">
+            <div className="w-[75vw] lg:w-fit mx-auto">
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
@@ -428,7 +468,7 @@ const allFriends: Friend[] = useMemo(() => {
 
           {/* Cards grid */}
           {!isLoading && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 ">
+            <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6">
               {filteredFriends.map((friend) => renderCard(friend))}
             </div>
           )}
@@ -436,7 +476,7 @@ const allFriends: Friend[] = useMemo(() => {
           {/* Empty state */}
           {!isLoading && filteredFriends.length === 0 && (
             <p className="text-center text-muted-foreground col-span-2">
-              {searchTerm.length > 0 && activeTab === "suggested"
+              {debouncedSearchTerm.length > 0 && activeTab === "suggested"
                 ? t("noSearchResults") || "No users found"
                 : t("empty")}
             </p>
