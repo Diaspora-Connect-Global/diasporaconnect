@@ -324,7 +324,9 @@
         "myCommunity": "My Community",
         "discoverMore": "Discover more communities",
         "openInHome": "Open community in home",
-        "leaveCommunity": "Leave community"
+        "leaveCommunity": "Leave community",
+        "noCommunitiesJoined": "No communities joined yet.",
+        "noCommunitiesFound": "No communities found. Try refreshing the page or adjusting your search."
     },
     "notification": {
         "notifications": "Notifications",
