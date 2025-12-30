@@ -8,7 +8,7 @@ import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { KYCVerification } from '@/components/profile/KYCVerification';
 import { TrustScore } from '@/components/profile/TrustScore';
 import { DUMMY_USERS } from '@/data/users';
-import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
@@ -17,17 +17,7 @@ import CustomDialog from "@/components/custom/customDialog";
 import { ButtonType2 } from "@/components/custom/button";
 import { CircularImageCropper } from "@/lib/imagecropper";
 import { gql } from "@apollo/client";
-
-// New GraphQL queries
-const GET_AVATAR_UPLOAD_URL = gql`
-  query GetAvatarUploadUrl {
-    getUploadUrl(contentType: "image/jpeg", category: "avatar") {
-      url
-      publicUrl
-      path
-    }
-  }
-`;
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
@@ -46,14 +36,6 @@ const UPDATE_PROFILE = gql`
   }
 `;
 
-interface GetUploadUrlResponse {
-  getUploadUrl: {
-    url: string;
-    publicUrl: string;
-    path: string;
-  };
-}
-
 interface UpdateProfileResponse {
   updateProfile: {
     success: boolean;
@@ -64,17 +46,41 @@ interface UpdateProfileResponse {
 
 export default function ProfilePage() {
     const setUser = useAuthStore(state => state.setUser);
-
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [croppedImage, setCroppedImage] = useState<string | null>(null);
-    
-    // Cropper state
-    const [rawImage, setRawImage] = useState<string | null>(null);
-    const [showCropper, setShowCropper] = useState(false);
 
-    // Get upload URL query (using lazy query since we need to trigger it manually)
-    const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_AVATAR_UPLOAD_URL);
+    const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_MY_PROFILE);
+    const profile: Profile | undefined = data?.getProfile.profile;
+
+    // Use the image upload hook
+    const {
+        uploading,
+        rawImage,
+        croppedImage,
+        showCropper,
+        handleFileSelect,
+        handleCropConfirm,
+        handleCropCancel,
+        uploadImage,
+        reset,
+    } = useImageUpload({
+        category: 'avatar',
+        onSuccess: async (publicUrl) => {
+            // Update profile with the new avatar URL
+            if (profile) {
+                await updateProfile({
+                    variables: {
+                        input: {
+                            version: profile.version || 1,
+                            avatarUrl: publicUrl,
+                        },
+                    },
+                });
+            }
+        },
+        onError: (error) => {
+            console.error('Avatar upload error:', error);
+        },
+    });
 
     // Update profile mutation
     const [updateProfile, { loading: updating }] = useMutation<UpdateProfileResponse>(UPDATE_PROFILE, {
@@ -82,10 +88,8 @@ export default function ProfilePage() {
             if (res.updateProfile.success) {
                 toast.success(res.updateProfile.message || "Profile picture updated");
                 setEditAvatarOpen(false);
-                setSelectedFile(null);
-                setCroppedImage(null);
-                // Refetch profile to get updated data
-                refetch();
+                reset(); // Reset the image upload state
+                refetch(); // Refetch profile to get updated data
             } else {
                 toast.error(res.updateProfile.message || "Update failed");
             }
@@ -95,12 +99,7 @@ export default function ProfilePage() {
         },
     });
 
-    const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_MY_PROFILE);
-
     console.log("Data response", data);
-
-    const profile: Profile | undefined = data?.getProfile.profile;
-
     console.log("profile info", profile);
 
     useEffect(() => {
@@ -127,72 +126,15 @@ export default function ProfilePage() {
         throw new Error('Function not implemented.');
     }
 
-    const handleFileSelect = (file: File) => {
-        if (file && file.type.startsWith('image/')) {
-            setSelectedFile(file);
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setRawImage(e.target?.result as string);
-                setShowCropper(true);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleAvatarUpload = async () => {
-        if (!croppedImage || !profile) {
-            toast.error("No image selected or profile not loaded");
+        if (!profile) {
+            toast.error("Profile not loaded");
             return;
         }
 
-        try {
-            toast.loading("Uploading profile picture...");
-
-            // Step 1: Get upload URL
-            const { data: uploadData } = await getUploadUrl();
-            
-            if (!uploadData?.getUploadUrl) {
-                throw new Error("Failed to get upload URL");
-            }
-
-            const { url, publicUrl } = uploadData.getUploadUrl;
-
-            // Step 2: Convert base64 to blob
-            const response = await fetch(croppedImage);
-            const blob = await response.blob();
-
-            // Step 3: Upload to the signed URL
-            const uploadResponse = await fetch(url, {
-                method: 'PUT',
-                body: blob,
-                headers: {
-                    'Content-Type': 'image/jpeg',
-                },
-            });
-
-            if (!uploadResponse.ok) {
-                throw new Error("Failed to upload image");
-            }
-
-            toast.dismiss();
-
-            // Step 4: Update profile with the new avatar URL
-            await updateProfile({
-                variables: {
-                    input: {
-                        version: profile.version || 1,
-                        avatarUrl: publicUrl,
-                    },
-                },
-            });
-
-        } catch (err: any) {
-            toast.dismiss();
-            toast.error(err.message || "Failed to upload profile picture");
-            console.error("Upload error:", err);
-        }finally{
-            toast.dismiss();
-        }
+        // Upload the image and get the public URL
+        await uploadImage();
+        // The onSuccess callback will handle updating the profile
     };
 
     return (
@@ -206,8 +148,7 @@ export default function ProfilePage() {
                     userData={profile}
                     connectionId={""}
                     onEditAvatar={() => {
-                        setSelectedFile(null);
-                        setCroppedImage(null);
+                        reset();
                         setEditAvatarOpen(true);
                     }}
                 />
@@ -316,10 +257,10 @@ export default function ProfilePage() {
 
                     <ButtonType2
                         onClick={handleAvatarUpload}
-                        disabled={!croppedImage || updating}
+                        disabled={!croppedImage || uploading || updating}
                         className="w-full py-3"
                     >
-                        {updating ? "Uploading..." : "Upload"}
+                        {uploading || updating ? "Uploading..." : "Upload"}
                     </ButtonType2>
                 </div>
             </CustomDialog>
@@ -329,16 +270,8 @@ export default function ProfilePage() {
                 <CircularImageCropper
                     open={showCropper}
                     src={rawImage}
-                    onCancel={() => {
-                        setShowCropper(false);
-                        setRawImage(null);
-                        setSelectedFile(null);
-                    }}
-                    onConfirm={(cropped) => {
-                        setCroppedImage(cropped);
-                        setShowCropper(false);
-                        setRawImage(null);
-                    }}
+                    onCancel={handleCropCancel}
+                    onConfirm={handleCropConfirm}
                 />
             )}
         </div>

@@ -98,7 +98,7 @@ export function ProfileHeader({
           <div className="mt-auto">
             <div className="flex lg:items-center space-x-2">
               <h1 className="text-text-primary heading-small line-clamp-2 break-words max-w-full">
-                {userData?.firstName} {userData?.lastName}
+                {userData?.firstName} {userData?.middleName} {userData?.lastName}
               </h1>
               {/* <UserBadge tier={userData.tier as Tier} size="md" /> */}
             </div>
