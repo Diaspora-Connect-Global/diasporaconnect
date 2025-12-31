@@ -238,18 +238,18 @@ const renderImageModal = () => {
 
     return (
         <div 
-            className="fixed inset-0 z-50 bg-surface-default/10  flex items-center justify-center animate-in fade-in duration-200"
+            className="fixed inset-0 z-50  flex items-center bg-surface-default/80 justify-center animate-in fade-in duration-200"
             onClick={closeImageModal}
         >
             {/* Modal Container */}
             <div 
-                className="relative w-[80%] h-[80%] flex flex-col bg-surface-default rounded-2xl overflow-hidden"
+                className="relative w-[100%] h-[100%] flex flex-col  rounded-2xl overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header Bar */}
-                <div className="flex items-center justify-between p-4  border-border-subtle bg-surface-default">
+                <div className="flex items-center justify-between p-4  border-border-subtle ">
                     {/* Image counter */}
-                    <div className="bg-surface-default/10 backdrop-blur-md rounded-full px-4 py-2 border border-subtle/20">
+                    <div className=" backdrop-blur-md rounded-full px-4 py-2 border border-subtle/20">
                         <span className="text-brand font-medium text-sm">
                             {currentImageIndex + 1} / {images.length}
                         </span>
@@ -258,7 +258,7 @@ const renderImageModal = () => {
                     {/* Close button */}
                     <button
                         onClick={closeImageModal}
-                        className="bg-surface-default/10 backdrop-blur-md hover:bg-surface-default/20 rounded-full p-3 transition-all duration-200 border border-subtle/20 group"
+                        className="bg-surface-default/10 backdrop-blur-md hover:bg-surface-default/20 rounded-full p-3 transition-all duration-200 border border-subtle/20 group cursor-pointer"
                     >
                         <X className="w-6 h-6 text-brand group-hover:rotate-90 transition-transform duration-200" />
                     </button>
@@ -274,7 +274,7 @@ const renderImageModal = () => {
                                     e.stopPropagation();
                                     prevImage();
                                 }}
-                                className="absolute left-6 bg-surface-default/10 backdrop-blur-md hover:bg-white/20 rounded-full p-4 transition-all duration-200 border border-subtle/20 z-10 group"
+                                className="absolute left-6 bg-surface-default/10 backdrop-blur-md hover:bg-white/20 rounded-full p-4 transition-all duration-200 border border-subtle/20 z-10 group cursor-pointer"
                             >
                                 <ChevronLeft className="w-7 h-7 text-brand group-hover:-translate-x-1 transition-transform duration-200" />
                             </button>
@@ -284,7 +284,7 @@ const renderImageModal = () => {
                                     e.stopPropagation();
                                     nextImage();
                                 }}
-                                className="absolute right-6 bg-surface-default/10 backdrop-blur-md hover:bg-surface-default/20 rounded-full p-4 transition-all duration-200 border border-subtle/20 z-10 group"
+                                className="absolute right-6 bg-surface-default/10 backdrop-blur-md hover:bg-surface-default/20 rounded-full p-4 transition-all duration-200 border border-subtle/20 z-10 group cursor-pointer"
                             >
                                 <ChevronRight className="w-7 h-7 text-brand group-hover:translate-x-1 transition-transform duration-200" />
                             </button>
