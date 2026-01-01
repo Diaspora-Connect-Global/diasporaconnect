@@ -21,6 +21,7 @@ import {
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useUserStore } from "@/store/useUserStore";
 
 interface Friend {
   userId: string;
@@ -182,7 +183,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const allFriends: Friend[] = useMemo(() => {
     const friends: Friend[] = [];
     
-    const currentUserId = useAuthStore.getState().user?.userId;
+    const currentUserId = useUserStore.getState().user?.userId;
     
     if (!currentUserId) {
       console.warn("Current user ID not available");

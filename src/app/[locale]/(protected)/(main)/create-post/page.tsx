@@ -24,6 +24,7 @@ import { useTranslations } from 'next-intl';
 import { ButtonType2 } from '@/components/custom/button';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useUserStore } from '@/store/useUserStore';
 
 // Types
 type Visibility = 'public' | 'connections' | 'private';
@@ -160,7 +161,7 @@ export default function CreatePostPage() {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const t = useTranslations('actions');
-  const currentUser = useAuthStore(state => state.user);
+  const currentUser = useUserStore(state => state.user);
   const userName = 'John Doe';
   const charLimit = 3000;
   const charCount = postContent.length;

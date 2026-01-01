@@ -17,6 +17,7 @@ import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useUserStore } from "@/store/useUserStore";
 
 interface User {
   userId: string;
@@ -65,7 +66,7 @@ export function AddMembersModal({
   const [isInviting, setIsInviting] = useState(false);
 
   const [inviteToGroup] = useMutation<InviteToGroupResponse>(INVITE_TO_GROUP);
-  const user = useAuthStore((state) => state.user);
+  const user = useUserStore((state) => state.user);
   
   const currentUserId = user?.userId;
 

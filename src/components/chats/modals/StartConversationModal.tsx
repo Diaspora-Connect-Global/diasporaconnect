@@ -28,6 +28,7 @@ import { GET_MY_CONNECTIONS } from '@/services/gql/connection';
 import { toast } from 'sonner';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useUserStore } from '@/store/useUserStore';
 
 interface StartConversationModalProps {
     isOpen: boolean;
@@ -43,7 +44,7 @@ export function StartConversationModal({
     const t = useTranslations('chat.conversation');
     const tActions = useTranslations('actions');
 
-    const user = useAuthStore((state) => state.user);
+    const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
 
     const [selectedUsers, setSelectedUsers] = useState<User[]>([]);

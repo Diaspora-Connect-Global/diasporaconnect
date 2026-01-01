@@ -4,11 +4,13 @@ import { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import LoadingScreen from '@/components/custom/LoadingScreen';
+import { useUserStore } from '@/store/useUserStore';
 
 export default function OAuthCallbackPage() {
   const params = useSearchParams();
   const router = useRouter();
-  const { setTokens, setUser, setDeviceMetadata } = useAuthStore();
+  const { setTokens, setDeviceMetadata } = useAuthStore();
+  const { setUser } = useUserStore();
 
   useEffect(() => {
     const success = params.get('success') === 'true';

@@ -36,6 +36,7 @@ import { ConfirmationModal } from "../custom/confirmationModal";
 import { AddMembersModal } from "./modals/AddMembersModal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ArrowLeft } from "iconsax-reactjs";
+import { useUserStore } from "@/store/useUserStore";
 
 interface Reply {
     id: string;
@@ -123,7 +124,7 @@ export default function GroupChat() {
     const group = groupData?.getGroup?.group;
     const groupMembers = membersData?.getGroupMembers?.members || [];
     const groupMembersCount = membersData?.getGroupMembers?.total || 0;
-    const user = useAuthStore((state) => state.user);
+    const user = useUserStore((state) => state.user);
 
     const currentUserId = user?.userId;
     const currentUserMember = groupMembers.find(m => m.userId === currentUserId);

@@ -18,6 +18,7 @@ import { ButtonType2 } from "@/components/custom/button";
 import { CircularImageCropper } from "@/lib/imagecropper";
 import { gql } from "@apollo/client";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useUserStore } from "@/store/useUserStore";
 
 const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
@@ -45,7 +46,7 @@ interface UpdateProfileResponse {
 }
 
 export default function ProfilePage() {
-    const setUser = useAuthStore(state => state.setUser);
+    const setUser = useUserStore(state => state.setUser);
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
 
     const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_MY_PROFILE);

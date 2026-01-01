@@ -24,6 +24,7 @@ import {
 } from '@/services/gql/authentication';
 
 import { useAuthStore } from '@/store/useAuthStore';
+import { useUserStore } from '@/store/useUserStore';
 
 export interface FormData {
   firstName: string;
@@ -40,8 +41,9 @@ export interface FormData {
 
 export default function CompleteAccount() {
   const router = useRouter();
-  const { setTokens, setUser, setDeviceMetadata } =
+  const { setTokens, setDeviceMetadata } =
     useAuthStore();
+    const { setUser} = useUserStore();
 
   const [formData, setFormData] = useState<FormData>({
     firstName: '',

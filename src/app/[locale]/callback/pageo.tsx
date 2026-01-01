@@ -4,6 +4,7 @@
 import { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useUserStore } from '@/store/useUserStore';
 
 /**
  * Helper to log messages into sessionStorage
@@ -31,7 +32,8 @@ export const downloadLogs = () => {
 export default function OAuthCallbackPage() {
   const params = useSearchParams();
   const router = useRouter();
-  const { setTokens, setUser, setDeviceMetadata, } = useAuthStore();
+  const { setTokens, setDeviceMetadata } = useAuthStore();
+  const { setUser } = useUserStore();
 
   useEffect(() => {
     log('OAuthCallbackPage mounted', Object.fromEntries(params.entries()));

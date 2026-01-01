@@ -15,6 +15,7 @@ import SignInProvider from '../home/SignInProvider';
 import { ButtonType2 } from '../custom/button';
 import { Link } from '@/i18n/navigation';
 import { HeadingMedium, BodyMedium, LabelLarge } from '../utils';
+import { useUserStore } from '@/store/useUserStore';
 
 interface ValidationErrors {
     email?: string;
@@ -38,9 +39,9 @@ export default function SignInForm() {
 
     // Zustand auth store actions
     const setTokens = useAuthStore((s) => s.setTokens);
-    const setUser = useAuthStore((s) => s.setUser);
+    const setUser = useUserStore((s) => s.setUser);
     const setDeviceMetadata = useAuthStore((s) => s.setDeviceMetadata);
-    const setRememberMeStore = useAuthStore((s) => s.setRememberMe);
+    const setRememberMeStore = useUserStore((s) => s.setRememberMe);
 
     /* ============ Validation ============ */
     const validateEmail = (email: string): string | undefined => {

@@ -29,6 +29,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { LogoutConfirmModal } from '../auth/LogoutConfirmModal';
 import { clearStorage } from '@/lib/logout';
+import { useUserStore } from '@/store/useUserStore';
 
 
 
@@ -252,7 +253,7 @@ export default function Header({
 
 
 export function MyAvatar() {
-  const url = useAuthStore((s) => s.user?.avatarUrl);
+  const url = useUserStore((s) => s.user?.avatarUrl);
 
   return (
     <Avatar>
@@ -315,8 +316,8 @@ export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
 export function DropdownMenuAvatar() {
   const t = useTranslations('home.header');
   const [open, setOpen] = useState(false);
-  const firstName = useAuthStore((s) => s.user?.firstName);
-  const lastName = useAuthStore((s) => s.user?.lastName);
+  const firstName = useUserStore((s) => s.user?.firstName);
+  const lastName = useUserStore((s) => s.user?.lastName);
   const router = useRouter(); // Add this
   const [lOpen, setLOpen] = useState(false);
   const logout = () => {
