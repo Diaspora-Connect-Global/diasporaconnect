@@ -518,6 +518,7 @@
         "noDirectMessages": "No direct messages found",
         "noGroups": "No groups found",
         "tryAdjustingSearch": "Try adjusting your search",
+        "createFirstGroup": "Create your first group chat by adding members and starting a conversation.",
         "empty": {
             "title": "You have no messages here. Start a conversation to see their messages"
         },
@@ -535,6 +536,7 @@
             "chooseHowToMessage": "Choose how you want to message",
             "selectedContacts": "You selected {count} contacts. Would you like to start a group chat or send the message to each person individually?",
             "sendIndividually": "Send individually"
+            
         },
         "direct": {
             "online": "Online",

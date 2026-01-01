@@ -514,7 +514,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
                 <p className="text-center">{searchQuery ? t('noGroupsFound') : t('noGroups')}</p>
-                <p className="text-sm text-text-tertiary mt-2">
+                <p className="text-sm text-text-tertiary justify-center text-center mt-2">
                     {searchQuery ? t('tryAdjustingSearch') : t('createFirstGroup')}
                 </p>
             </div>
