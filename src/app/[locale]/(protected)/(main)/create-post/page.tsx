@@ -25,6 +25,7 @@ import { ButtonType2 } from '@/components/custom/button';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
+import { MyAvatar } from '@/components/custom/header';
 
 // Types
 type Visibility = 'public' | 'connections' | 'private';
@@ -443,10 +444,8 @@ export default function CreatePostPage() {
           <div className="p-6 pb-0">
             <div className="flex items-start justify-between mb-6">
               <div className="flex gap-4">
-                <Avatar
-                  src={currentUser?.avatarUrl}
-                  alt={currentUser?.firstName + ' ' + currentUser?.lastName}
-                  size={56}
+                <MyAvatar
+                 
                 />
                 <div className="flex flex-col gap-1">
                   {/* <h2 className="heading-xsmall text-text-primary">{currentUser?.firstName} {currentUser?.lastName}</h2> */}
