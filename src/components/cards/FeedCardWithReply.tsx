@@ -238,18 +238,19 @@ const renderImageModal = () => {
 
     return (
         <div 
-            className="fixed inset-0 z-50  flex items-center bg-surface-default/80 justify-center animate-in fade-in duration-200"
+            className="fixed inset-0 z-50 flex items-center bg-surface-default/80 justify-center animate-in fade-in duration-200"
             onClick={closeImageModal}
         >
             {/* Modal Container */}
             <div 
-                className="relative w-[100%] h-[100%] flex flex-col  rounded-2xl overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
+                className="relative w-[100%] h-[100%] flex flex-col rounded-2xl overflow-hidden"
             >
                 {/* Header Bar */}
-                <div className="flex items-center justify-between p-4  border-border-subtle ">
+                <div 
+                    className="flex items-center justify-between p-4 border-border-subtle"
+                >
                     {/* Image counter */}
-                    <div className=" backdrop-blur-md rounded-full px-4 py-2 border border-subtle/20">
+                    <div className="backdrop-blur-md rounded-full px-4 py-2 border border-subtle/20">
                         <span className="text-brand font-medium text-sm">
                             {currentImageIndex + 1} / {images.length}
                         </span>
@@ -257,7 +258,10 @@ const renderImageModal = () => {
 
                     {/* Close button */}
                     <button
-                        onClick={closeImageModal}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            closeImageModal();
+                        }}
                         className="bg-surface-default/10 backdrop-blur-md hover:bg-surface-default/20 rounded-full p-3 transition-all duration-200 border border-subtle/20 group cursor-pointer"
                     >
                         <X className="w-6 h-6 text-brand group-hover:rotate-90 transition-transform duration-200" />
@@ -265,7 +269,7 @@ const renderImageModal = () => {
                 </div>
 
                 {/* Image Display Area */}
-                <div className="relative flex-1 flex items-center justify-center  min-h-0">
+                <div className="relative flex-1 flex items-center justify-center min-h-0">
                     {/* Navigation Buttons */}
                     {images.length > 1 && (
                         <>
@@ -292,20 +296,24 @@ const renderImageModal = () => {
                     )}
 
                     {/* Current Image */}
-                    <div className="relative w-full h-full flex items-center justify-center">
+                    <div 
+                        className="relative w-full h-full flex items-center justify-center"
+                    >
                         <Image
                             src={images[currentImageIndex]}
                             alt={`Image ${currentImageIndex + 1}`}
                             width={1200}
                             height={800}
-                            className="object-contain w-full h-full "
+                            className="object-contain w-full h-full"
                         />
                     </div>
                 </div>
 
                 {/* Thumbnail Strip - Below Image */}
                 {images.length > 1 && (
-                    <div className=" border-border-subtle  p-4">
+                    <div 
+                        className="border-border-subtle p-4"
+                    >
                         <div className="flex justify-center">
                             <div className="bg-surface-default rounded-2xl p-3 border border-subtle/20 max-w-4xl overflow-x-auto">
                                 <div className="flex gap-3">
@@ -318,7 +326,7 @@ const renderImageModal = () => {
                                             }}
                                             className={`relative w-20 h-20 rounded-lg cursor-pointer flex-shrink-0 transition-all duration-200 ${
                                                 i === currentImageIndex 
-                                                    ? 'ring-3 ring-text-brand scale-110 ' 
+                                                    ? 'ring-3 ring-text-brand scale-110' 
                                                     : 'opacity-50 hover:opacity-100 hover:scale-105'
                                             }`}
                                         >
