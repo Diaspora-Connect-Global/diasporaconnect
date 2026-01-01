@@ -257,7 +257,7 @@ export function MyAvatar() {
 
   return (
     <Avatar>
-      <AvatarImage src={url || "https://github.com/shadcn.png"} alt="@shadcn" />
+      <AvatarImage src={url} alt="@shadcn" />
       <AvatarFallback>
         <Image
           width={32}
