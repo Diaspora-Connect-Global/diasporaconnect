@@ -43,7 +43,7 @@ export default function CompleteAccount() {
   const router = useRouter();
   const { setTokens, setDeviceMetadata } =
     useAuthStore();
-    const { setUser} = useUserStore();
+  const { setUser } = useUserStore();
 
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -139,59 +139,56 @@ export default function CompleteAccount() {
   const prevStep = () =>
     setCurrentStep(s => Math.max(s - 1, 1));
 
-const formatPhone = (phone: string, countryCode: string) => {
-  const clean = phone.replace(/[^\d]/g, '');
-  
-  // Remove leading 0 if present
-  const phoneWithoutLeadingZero = clean.startsWith('0') ? clean.slice(1) : clean;
-  
-  // Append country code
-  return `${countryCode}${phoneWithoutLeadingZero}`;
-};
+  const formatPhone = (phone: string, countryCode: string) => {
+    const clean = phone.replace(/[^\d]/g, '');
+
+    // Remove leading 0 if present
+    const phoneWithoutLeadingZero = clean.startsWith('0') ? clean.slice(1) : clean;
+
+    // Append country code
+    return `${countryCode}${phoneWithoutLeadingZero}`;
+  };
 
   /* ------------------------------------------------------------------ */
   /* Step 4 – Send OTP */
   /* ------------------------------------------------------------------ */
-  const submitFormA = async () => {
+  // page.tsx - Update submitFormA to store expiration time
+
+  const submitFormA = async (continueToNext: boolean = false) => {
     try {
       setSendCodeLoading(true);
-      const phone = formatPhone(formData.phoneNumber,formData.countryCode);
+      const phone = formatPhone(formData.phoneNumber, formData.countryCode);
       console.log('Formatted Phone:', phone);
       let token = '';
+      let verificationExpiresAt = '';
 
       if (isOAuth) {
-        const { data } =
-          await completeOAuthRegistration({
-            variables: {
-              input: {
-                oauthRegistrationToken: JSON.parse(
-                  sessionStorage.getItem(
-                    'oauthRegistration'
-                  )!
-                ).oauthRegistrationToken,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                phone,
-                country: formData.country,
-                role: formData.communityType
-              }
+        const { data } = await completeOAuthRegistration({
+          variables: {
+            input: {
+              oauthRegistrationToken: JSON.parse(
+                sessionStorage.getItem('oauthRegistration')!
+              ).oauthRegistrationToken,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              phone,
+              country: formData.country,
+              role: formData.communityType
             }
-          });
+          }
+        });
 
         if (!data?.completeOAuthRegistration.success)
-          throw new Error(
-            data?.completeOAuthRegistration.message
-          );
+          throw new Error(data?.completeOAuthRegistration.message);
 
-        token =
-data.completeOAuthRegistration.registrationToken;
+        token = data.completeOAuthRegistration.registrationToken;
+        verificationExpiresAt = data.completeOAuthRegistration.verificationExpiresAt;
       } else {
         const { data } = await registerUser({
           variables: {
             input: {
               email: sessionStorage.getItem('signupEmail'),
-              password:
-                sessionStorage.getItem('signupPassword'),
+              password: sessionStorage.getItem('signupPassword'),
               firstName: formData.firstName,
               lastName: formData.lastName,
               phone,
@@ -205,10 +202,21 @@ data.completeOAuthRegistration.registrationToken;
           throw new Error(data?.registerUser.message);
 
         token = data.registerUser.registrationToken;
+        verificationExpiresAt = data.registerUser.verificationExpiresAt;
       }
 
       sessionStorage.setItem('registrationToken', token);
-      nextStep();
+
+      if (verificationExpiresAt) {
+        const expirationTime = new Date(verificationExpiresAt).getTime();
+        sessionStorage.setItem('otp_expires_at', expirationTime.toString());
+      }
+
+      toast.success(continueToNext ? 'Verification code sent!' : 'Code resent successfully!');
+
+      if (continueToNext) {
+        nextStep();
+      }
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -266,11 +274,8 @@ data.completeOAuthRegistration.registrationToken;
 
       sessionStorage.clear();
 
-      // requires2fa
-      //   ? router.push('/auth/setup-2fa')
-      //   : 
-        
-        nextStep();
+      toast.success('Phone number verified successfully!');
+      nextStep();
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -310,7 +315,7 @@ data.completeOAuthRegistration.registrationToken;
         <Step4
           data={formData}
           updateData={updateData}
-          nextStep={submitFormA}
+          nextStep={() => submitFormA(true)}
           loading={sendCodeLoading}
           prevStep={prevStep}
         />
@@ -322,7 +327,9 @@ data.completeOAuthRegistration.registrationToken;
           nextStep={submitFormB}
           loading={verifyOTPLoading}
           prevStep={prevStep}
-          resendCode={submitFormA}
+          resendCode={async () => await submitFormA(false)}
+          resendLoading={sendCodeLoading}
+
         />
       )}
       {currentStep === 6 && (

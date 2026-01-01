@@ -11,55 +11,64 @@ interface Step5Props {
     updateData: (data: Partial<FormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
-    resendCode: () => void;
+    resendCode: () => Promise<void>;
     loading: boolean;
+    resendLoading: boolean;
 }
 
-export const Step5: React.FC<Step5Props> = ({ data, loading, nextStep, prevStep,updateData,resendCode }) => {
+export const Step5: React.FC<Step5Props> = ({ 
+    data, 
+    loading, 
+    nextStep, 
+    prevStep, 
+    updateData, 
+    resendCode,
+    resendLoading 
+}) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
     const [value, setValue] = React.useState("");
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [isComplete, setIsComplete] = useState(false);
+    const [showResend, setShowResend] = useState(false);
+
+    const COUNTDOWN_KEY = 'otp_resend_expires_at';
 
     const handleChange = (newValue: string) => {
-        // Only allow numbers
         const numericValue = newValue.replace(/\D/g, '');
         setValue(numericValue);
-        updateData({ verificationCode: numericValue })
+        updateData({ verificationCode: numericValue });
     };
 
     const isNextDisabled = value.length !== 6;
 
-  
-
-
-
-
-const COUNTDOWN_KEY = 'countdown_start_time';
-const COUNTDOWN_DURATION = 60; // 60 seconds
-const [timeLeft, setTimeLeft] = useState<number | null>(null);
-const [isComplete, setIsComplete] = useState(false);
-
     useEffect(() => {
-        // Get or set the start time
-        let startTime = sessionStorage.getItem(COUNTDOWN_KEY);
+        // Get resend expiration time from sessionStorage
+        const expiresAt = sessionStorage.getItem(COUNTDOWN_KEY);
         
-        if (!startTime) {
-            startTime = Date.now().toString();
-            sessionStorage.setItem(COUNTDOWN_KEY, startTime);
+        if (!expiresAt) {
+            // First time on this page - show resend button without countdown
+            setShowResend(true);
+            setIsComplete(true);
+            setTimeLeft(null);
+            return;
         }
 
         const updateCountdown = () => {
             const now = Date.now();
-            const elapsed = Math.floor((now - parseInt(startTime!)) / 1000);
-            const remaining = COUNTDOWN_DURATION - elapsed;
+            const expirationTime = parseInt(expiresAt);
+            const remaining = Math.floor((expirationTime - now) / 1000);
 
             if (remaining <= 0) {
                 setTimeLeft(0);
                 setIsComplete(true);
+                setShowResend(true);
                 sessionStorage.removeItem(COUNTDOWN_KEY);
             } else {
                 setTimeLeft(remaining);
+                setIsComplete(false);
+                setShowResend(true);
             }
         };
 
@@ -78,29 +87,24 @@ const [isComplete, setIsComplete] = useState(false);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const resetCountdown = () => {
-        sessionStorage.removeItem(COUNTDOWN_KEY);
-        setIsComplete(false);
-        setTimeLeft(COUNTDOWN_DURATION);
-        sessionStorage.setItem(COUNTDOWN_KEY, Date.now().toString());
-
-        resendCode();
+    const handleResendCode = async () => {
+        await resendCode();
+        
+        // After resend, get the new expiration from backend (stored by submitFormA)
+        const expiresAt = sessionStorage.getItem('otp_expires_at');
+        if (expiresAt) {
+            // Store it as resend expiration
+            sessionStorage.setItem(COUNTDOWN_KEY, expiresAt);
+            
+            const now = Date.now();
+            const expirationTime = parseInt(expiresAt);
+            const remaining = Math.floor((expirationTime - now) / 1000);
+            
+            setTimeLeft(remaining);
+            setIsComplete(false);
+            setShowResend(true);
+        }
     };
-
-    if (timeLeft === null) {
-        return <div>Loading...</div>;
-    }
-
-
-
-
-
-
-
-
-
-
-
 
     return (
         <MultiStep
@@ -108,7 +112,7 @@ const [isComplete, setIsComplete] = useState(false);
             stepNumber={5}
             totalSteps={7}
             title={t('confirmVerification.title')}
-            subtitle={t('confirmVerification.description', { phoneNumber: `+233 ${data.phoneNumber}` })}
+            subtitle={t('confirmVerification.description', { phoneNumber: `${data.countryCode} ${data.phoneNumber}` })}
             isNextDisabled={isNextDisabled}
             nextButtonText={tActions('submit')}
             showBackButton={true}
@@ -116,7 +120,7 @@ const [isComplete, setIsComplete] = useState(false);
             onNext={() => nextStep()}
             onBack={prevStep}
         >
-            <div className="w-full">
+            <div className="w-full space-y-6">
                 <InputOTP
                     maxLength={6}
                     value={value}
@@ -135,15 +139,22 @@ const [isComplete, setIsComplete] = useState(false);
                     </InputOTPGroup>
                 </InputOTP>
 
-                <div>
-            {!isComplete ? (
-                <p>Resend code in {formatTime(timeLeft)}</p>
-            ) : (
-                <div>
-                    <ButtonType3 onClick={resetCountdown}>Resend code</ButtonType3>
-                </div>
-            )}
-        </div>
+                {showResend && (
+                    <div className="flex ">
+                        {!isComplete && timeLeft !== null ? (
+                            <p className="text-text-secondary text-sm">
+                                Resend code in <span className="font-medium text-text-brand">{formatTime(timeLeft)}</span>
+                            </p>
+                        ) : (
+                            <ButtonType3 
+                                onClick={handleResendCode}
+                                disabled={resendLoading}
+                            >
+                                {resendLoading ? 'Sending...' : 'Resend code'}
+                            </ButtonType3>
+                        )}
+                    </div>
+                )}
             </div>
         </MultiStep>
     );
