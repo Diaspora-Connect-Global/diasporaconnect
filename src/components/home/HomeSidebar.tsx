@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
+import ViewFilter from './viewFilter';
 
 // Reusable Section Component
 interface SectionProps {
@@ -198,6 +199,10 @@ function Community() {
 
     return (
         <div className=" ">
+            <div className='mt-3'>
+
+            <ViewFilter />
+            </div>
             <MyCommunityCard2 />
 
             {/* Associations Section */}
