@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
-import { GET_MY_GROUPS } from '@/services/gql/groups'; // Adjust path as needed
+import { GET_MY_GROUPS } from '@/services/gql/groups';
 
 // Reusable Section Component
 interface SectionProps {
@@ -126,14 +126,21 @@ function NoCommunity() {
     )
 }
 
-function CommunityItem({ name, type, link }: { name: string, type: string, link: string }) {
+function CommunityItem({ name, type, link, onClick }: { name: string, type: string, link: string, onClick?: () => void }) {
     const t = useTranslations('privacy');
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (onClick) {
+            e.preventDefault();
+            onClick();
+        }
+    };
 
     return (
         <div className="text-center space-x-2 flex flex-wrap 
         justify-content-center items-center">
             <BodySmall>
-                <Link href={`${link}`}>
+                <Link href={link} onClick={handleClick}>
                     <span className="text-primary">{name}</span>
                 </Link>
             </BodySmall>
@@ -177,6 +184,17 @@ function Community() {
     };
 
     const myGroups = groupsData?.getMyGroups?.groups || [];
+
+    const handleGroupClick = (groupId: string) => {
+        // Set active chat in session storage
+        sessionStorage.setItem('activeChat', JSON.stringify({
+            id: groupId,
+            type: 'group'
+        }));
+        
+        // Navigate to chat page
+        window.location.href = '/chat?t=groups&ct=group';
+    };
 
     return (
         <div className=" ">
@@ -229,7 +247,8 @@ function Community() {
                                 <CommunityItem 
                                     link={`/chat?t=groups&ct=group`} 
                                     name={group.name} 
-                                    type={group.privacy === "PUBLIC" ? `${tPrivacy("public")}` : `${tPrivacy("private")}`} 
+                                    type={group.privacy === "PUBLIC" ? `${tPrivacy("public")}` : `${tPrivacy("private")}`}
+                                    onClick={() => handleGroupClick(group.id)}
                                 />
                             </div>
                         ))
