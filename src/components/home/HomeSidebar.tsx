@@ -7,6 +7,9 @@ import { MyCommunityCard2 } from '../cards/MyCommunityCard2';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
+import { useQuery } from '@apollo/client/react';
+import { GET_MY_GROUPS } from '@/services/gql/groups'; // Adjust path as needed
+
 // Reusable Section Component
 interface SectionProps {
     title: string;
@@ -17,10 +20,31 @@ interface SectionProps {
     image: string,
     link?: string;
 }
+
 interface Community {
     id: string;
     title: string;
     description?: string;
+}
+
+interface Group {
+    id: string;
+    name: string;
+    description?: string;
+    privacy: string;
+    memberCount: number;
+    ownerId: string;
+    createdAt: string;
+    avatarUrl?: string;
+}
+
+interface GetMyGroupsResponse {
+    getMyGroups: {
+        success: boolean;
+        message: string;
+        total: number;
+        groups: Group[];
+    };
 }
 
 function Section({ image, title, isOpen, onToggle, defaultAction, children, link }: SectionProps) {
@@ -102,7 +126,7 @@ function NoCommunity() {
     )
 }
 
-function CommunityItem({ name, type,link }: { name: string, type: string ,link :string}) {
+function CommunityItem({ name, type, link }: { name: string, type: string, link: string }) {
     const t = useTranslations('privacy');
 
     return (
@@ -110,7 +134,7 @@ function CommunityItem({ name, type,link }: { name: string, type: string ,link :
         justify-content-center items-center">
             <BodySmall>
                 <Link href={`${link}`}>
-                <span className="text-primary">{name}</span>
+                    <span className="text-primary">{name}</span>
                 </Link>
             </BodySmall>
             <span>·</span>
@@ -134,6 +158,17 @@ function Community() {
     const tPrivacy = useTranslations('privacy');
     const t = useTranslations('home');
 
+    // Fetch user's groups
+    const { data: groupsData, loading: groupsLoading } = useQuery<GetMyGroupsResponse>(
+        GET_MY_GROUPS,
+        {
+            variables: {
+                limit: 10,
+                offset: 0
+            }
+        }
+    );
+
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections(prev => ({
             ...prev,
@@ -141,13 +176,11 @@ function Community() {
         }));
     };
 
-
-
+    const myGroups = groupsData?.getMyGroups?.groups || [];
 
     return (
         <div className=" ">
-            <MyCommunityCard2 
-            />
+            <MyCommunityCard2 />
 
             {/* Associations Section */}
             <Section
@@ -157,17 +190,20 @@ function Community() {
                 defaultAction={t('associations.discover')}
                 image='/ASSOCIATION.png'
                 link="/association"
-
             >
                 <div className="space-y-1">
                     {[
                         { name: "The Adansi Times", type: "Public", link: "/association/adansi-times" },
-                        { name: "Tech Innovations Daily", type: "Private" , link: "/association/adansi-times"},
-                        { name: "Global Finance Report", type: "Public" , link: "/association/adansi-times"},
+                        { name: "Tech Innovations Daily", type: "Private", link: "/association/adansi-times" },
+                        { name: "Global Finance Report", type: "Public", link: "/association/adansi-times" },
                         { name: "Health & Wellness Journal", type: "Private", link: "/association/adansi-times" }
                     ].map((association, index) => (
                         <div key={index}>
-                            <CommunityItem link={association.link}  name={association.name} type={association.type == "Public" ? `${tPrivacy("public")}` : `${tPrivacy("public")}`} />
+                            <CommunityItem 
+                                link={association.link} 
+                                name={association.name} 
+                                type={association.type === "Public" ? `${tPrivacy("public")}` : `${tPrivacy("private")}`} 
+                            />
                         </div>
                     ))}
                 </div>
@@ -181,18 +217,27 @@ function Community() {
                 defaultAction={t('groupchats.discover')}
                 image='/GROUPCHAT.png'
                 link="/chat?t=groups"
-
-
             >
                 <div className="space-y-2">
-                    {[
-                        { name: "The Adansi Times", type: "Public", link: "/chat" },
-                        { name: "Tech Innovations Daily", type: "Private", link: "/chat" }
-                    ].map((item, index) => (
-                        <div key={index} >
-                            <CommunityItem link={item.link} name={item.name} type={item.type} />
-                        </div>
-                    ))}
+                    {groupsLoading ? (
+                        <BodySmall>
+                            <span className="text-secondary">Loading groups...</span>
+                        </BodySmall>
+                    ) : myGroups.length > 0 ? (
+                        myGroups.map((group) => (
+                            <div key={group.id}>
+                                <CommunityItem 
+                                    link={`/chat?t=groups&ct=group`} 
+                                    name={group.name} 
+                                    type={group.privacy === "PUBLIC" ? `${tPrivacy("public")}` : `${tPrivacy("private")}`} 
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <BodySmall>
+                            <span className="text-secondary">No groups yet</span>
+                        </BodySmall>
+                    )}
                 </div>
             </Section>
 
@@ -203,9 +248,7 @@ function Community() {
                 onToggle={() => toggleSection('events')}
                 image='/EVENTS.png'
                 link="/events"
-
             />
-
 
             {/* Opportunities Section */}
             <Section
@@ -214,9 +257,7 @@ function Community() {
                 onToggle={() => toggleSection('opportunities')}
                 image='/OPPORTUNITIES.png'
                 link='/opportunities'
-
             />
-
         </div>
     )
 }
@@ -233,4 +274,4 @@ export default function HomeSidebar() {
             </div>
         </div>
     );
-} 
+}
