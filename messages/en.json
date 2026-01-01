@@ -261,7 +261,8 @@
         },
         "groupchats": {
             "groupchats": "Group chats",
-            "create": "Create group chat"
+            "create": "Create group chat",
+            "discover": "Discover group chats"
         },
         "events": {
             "events": "Events",

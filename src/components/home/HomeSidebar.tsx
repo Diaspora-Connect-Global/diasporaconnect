@@ -178,9 +178,9 @@ function Community() {
                 title={t('groupchats.groupchats')}
                 isOpen={openSections.groupChats}
                 onToggle={() => toggleSection('groupChats')}
-                defaultAction={t('groupchats.create')}
+                defaultAction={t('groupchats.discover')}
                 image='/GROUPCHAT.png'
-                link="#"
+                link="/chat?t=groups"
 
 
             >
