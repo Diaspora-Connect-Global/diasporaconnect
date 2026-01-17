@@ -31,7 +31,7 @@ const authLink = new SetContextLink((prevContext) => {
 /* Upload-capable terminating link */
 /* ------------------------------------------------------------------ */
 const uploadLink = new UploadHttpLink({
-  uri: 'https://api.diasporaconnectglobal.com/graphql',
+  uri: 'https://api.diaspoplug.net/graphql',
   credentials: 'include',
 });
 
