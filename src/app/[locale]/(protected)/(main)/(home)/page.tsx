@@ -5,39 +5,28 @@ import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
 import { LIST_AVAILABLE_COMMUNITIES } from '@/services/gql/community';
-import { useQuery } from '@apollo/client/react';
+import { 
+  GET_FEED, 
+  ADD_ENGAGEMENT, 
+  CREATE_COMMENT,
+  GetFeedData,
+  AddEngagementData,
+  CreateCommentData 
+} from '@/services/gql/postsFeed';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { ListCommunitiesData } from '../community/page';
-
-interface Comment {
-  id: string;
-  author: string;
-  authorImage: string;
-  content: string;
-  createdAt: string;
-  likes: number;
-}
-
-interface Post {
-  id: string;
-  profileImage: string;
-  profileName: string;
-  category: string;
-  postDate: string;
-  content: string;
-  images?: string[];
-  likes: number;
-  comments: number;
-  commentsData?: Comment[];
-  joinButton: boolean;
-}
+import { toast } from 'sonner';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 
 export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
+  const tActions = useTranslations('actions');
 
+  // Fetch communities
   const { data: discoverData, loading: discoverLoading } = useQuery<ListCommunitiesData>(
     LIST_AVAILABLE_COMMUNITIES,
     {
@@ -48,225 +37,111 @@ export default function Home() {
     }
   );
 
-  // Initial posts with full data
-  const initialPosts: Post[] = [
-    {
-      id: '1',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Oct 1',
-      content:
-        'The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots, discover inspiring journeys, and engage in conversations that shape our global community. Follow us for updates on cultural events, business opportunities, and more.',
-      images: [
-        'https://img.freepik.com/free-vector/flat-design-travel-background_23-2149193475.jpg?semt=ais_hybrid&w=740&q=80',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmtm8g4xFqFS0gyk3bWfr0erUeVJrDy6DAMA&s',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0m6xP62VCldBhh7AmbWi6_DNH9SBGd0t-PA&s',
-        'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fHRyYXZlbHxlbnwwfHwwfHx8MA%3D%3D&fm=jpg&q=60&w=3000',
-        'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dHJhdmVsfGVufDB8fDB8fHww&fm=jpg&q=60&w=3000',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqxK9dBtEZiDmir9AosAMr1709tDGdBNG7ug&s',
-      ],
-      likes: 3,
-      comments: 5,
-      commentsData: [
-        {
-          id: 'c1',
-          author: 'Kwame',
-          authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT73Hx3joXluMeacnnC_5P92ZM4zbZq6-VYvWGrgPwLmEWlLRepRH1jYOGoQyHJYbviEnU&usqp=CAU',
-          content: 'This is inspiring!',
-          createdAt: '2h ago',
-          likes: 2,
-        },
-        {
-          id: 'c2',
-          author: 'Abena',
-          authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1zwhySGCEBxRRFYIcQgvOLOpRGqrT3d7Qng&s',
-          content: 'Love the updates!',
-          createdAt: '1h ago',
-          likes: 1,
-        },
-      ],
-      joinButton: true,
-    },
-    {
-      id: '2',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Oct 2',
-      content:
-        'Breaking: New cultural festival announced in Accra! Join us to celebrate heritage, music, and food from across the diaspora.',
-      images: [
-        'https://cdn.prod.website-files.com/652ed40a5b50682220b9eb86/6760d12ecaab156dcb8d0d7a_image_travel-insights.webp',
-      ],
-      likes: 8,
-      comments: 3,
-      commentsData: [],
-      joinButton: true,
-    },
-    {
-      id: '3',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Sep 30',
-      content:
-        'Business spotlight: A Ghanaian startup just raised $2M to expand solar solutions in rural communities. Read the full story.',
-      images: [
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7FzecHSou7npNbaFUiAmtx0Q60vFi2JcPOw&s',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRkkr7F8iZZpRWR0Ic-TzjaH_rpeTqMIUdTg&s',
-      ],
-      likes: 15,
-      comments: 7,
-      commentsData: [
-        {
-          id: 'c3',
-          author: 'Kofi',
-          authorImage: '/kofi.jpg',
-          content: 'This is game-changing!',
-          createdAt: '3h ago',
-          likes: 5,
-        },
-      ],
-      joinButton: true,
-    },
-    {
-      id: '4',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Sep 29',
-      content:
-        "Throwback Thursday: Remembering the legends who paved the way for Ghanaian music globally. Who's your favorite?",
-      likes: 22,
-      comments: 12,
-      commentsData: [],
-      joinButton: true,
-    },
-    {
-      id: '5',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'Travel & Tourism',
-      postDate: 'Oct 3',
-      content:
-        'Explore the hidden gems of Ghana! From pristine beaches to lush rainforests, discover destinations that will take your breath away.',
-      images: [
-        'https://res.cloudinary.com/worldpackers/image/upload/c_fill,f_auto,q_auto,w_1024/v1/guides/article_cover/pxutrrxynm6aegghgsoy?_a=BACADKGT',
-        'https://www.imagetours.com/__media/tours/PR/cover.jpg',
-        'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dHJhdmVsfGVufDB8fDB8fHww&fm=jpg&q=60&w=3000',
-      ],
-      likes: 45,
-      comments: 18,
-      commentsData: [
-        {
-          id: 'c4',
-          author: 'Ama',
-          authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1zwhySGCEBxRRFYIcQgvOLOpRGqrT3d7Qng&s',
-          content: 'Added to my bucket list!',
-          createdAt: '1h ago',
-          likes: 8,
-        },
-        {
-          id: 'c5',
-          author: 'Yaw',
-          authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT73Hx3joXluMeacnnC_5P92ZM4zbZq6-VYvWGrgPwLmEWlLRepRH1jYOGoQyHJYbviEnU&usqp=CAU',
-          content: 'Ghana is beautiful!',
-          createdAt: '45m ago',
-          likes: 12,
-        },
-      ],
-      joinButton: true,
-    },
-    {
-      id: '6',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'Community Events',
-      postDate: 'Oct 4',
-      content:
-        'Join us this weekend for the annual Diaspora Connect meetup! Network with fellow Ghanaians, enjoy traditional cuisine, and celebrate our culture together.',
-      images: [
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqxK9dBtEZiDmir9AosAMr1709tDGdBNG7ug&s',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0m6xP62VCldBhh7AmbWi6_DNH9SBGd0t-PA&s',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmtm8g4xFqFS0gyk3bWfr0erUeVJrDy6DAMA&s',
-        'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fHRyYXZlbHxlbnwwfHwwfHx8MA%3D%3D&fm=jpg&q=60&w=3000',
-      ],
-      likes: 67,
-      comments: 100,
-      commentsData: [
-        {
-          id: 'c6',
-          author: 'Efua',
-          authorImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1zwhySGCEBxRRFYIcQgvOLOpRGqrT3d7Qng&s',
-          content: "Can't wait! See you there!",
-          createdAt: '30m ago',
-          likes: 15,
-        },
-      ],
-      joinButton: true,
-    },
-    {
-      id: '7',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'Arts & Culture',
-      postDate: 'Oct 5',
-      content:
-        'Celebrating Ghanaian artisans who are keeping traditional crafts alive while innovating for the modern world. Swipe to see their incredible work!',
-      likes: 34,
-      comments: 9,
-      commentsData: [],
-      joinButton: true,
-    },
-  ];
+  // Fetch feed
+  const { 
+    data: feedData, 
+    loading: feedLoading, 
+    error: feedError,
+    refetch: refetchFeed 
+  } = useQuery<GetFeedData>(GET_FEED, {
+    variables: {
+      input: {
+        limit: 20,
+        offset: 0
+      }
+    }
+  });
 
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  // Mutations
+  const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
+  const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
   // Handle like
-  const handleLike = (postId: string) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId ? { ...p, likes: p.likes + (p.likes > 0 ? -1 : 1) } : p
-      )
-    );
+  const handleLike = async (postId: string) => {
+    try {
+      const { data } = await addEngagement({
+        variables: {
+          input: {
+            postId,
+            engagementType: 'LIKE'
+          }
+        }
+      });
+
+      if (data?.addEngagement.success) {
+        toast.success(data.addEngagement.message);
+        refetchFeed(); // Refresh feed to get updated counts
+      }
+    } catch (err) {
+      console.error('Failed to like post:', err);
+      toast.error('Failed to like post');
+    }
   };
 
   // Handle save
-  const handleSave = (postId: string) => {
-    console.log('Saved post:', postId);
+  const handleSave = async (postId: string) => {
+    try {
+      const { data } = await addEngagement({
+        variables: {
+          input: {
+            postId,
+            engagementType: 'SAVE'
+          }
+        }
+      });
+
+      if (data?.addEngagement.success) {
+        toast.success(data.addEngagement.message);
+        refetchFeed();
+      }
+    } catch (err) {
+      console.error('Failed to save post:', err);
+      toast.error('Failed to save post');
+    }
   };
 
   // Handle share
-  const handleShare = (postId: string) => {
-    console.log('Shared post:', postId);
+  const handleShare = async (postId: string) => {
+    try {
+      const { data } = await addEngagement({
+        variables: {
+          input: {
+            postId,
+            engagementType: 'SHARE'
+          }
+        }
+      });
+
+      if (data?.addEngagement.success) {
+        toast.success(data.addEngagement.message);
+        refetchFeed();
+      }
+    } catch (err) {
+      console.error('Failed to share post:', err);
+      toast.error('Failed to share post');
+    }
   };
 
   // Handle new comment
-  const handleSendComment = (postId: string, content: string) => {
-    const now = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const handleSendComment = async (postId: string, content: string) => {
+    if (!content.trim()) return;
 
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              comments: p.comments + 1,
-              commentsData: [
-                ...(p.commentsData || []),
-                {
-                  id: `${postId}-${Date.now()}`,
-                  author: 'You',
-                  authorImage: '/ADANSI.png',
-                  content,
-                  createdAt: now,
-                  likes: 0,
-                },
-              ],
-            }
-          : p
-      )
-    );
+    try {
+      await createComment({
+        variables: {
+          input: {
+            postId,
+            text: content
+          }
+        }
+      });
+
+      toast.success('Comment posted!');
+      refetchFeed(); // Refresh feed to show new comment
+    } catch (err) {
+      console.error('Failed to post comment:', err);
+      toast.error('Failed to post comment');
+    }
   };
 
   // --- Horizontal Scroll with Smart Buttons ---
@@ -307,9 +182,12 @@ export default function Home() {
   const communities = discoverData?.listCommunities?.communities || [];
   const hasCommunities = communities.length > 0;
 
+  const posts = feedData?.feed?.posts || [];
+  const hasPosts = posts.length > 0;
+
   return (
     <div className="h-app-inner flex overflow-hidden">
-      {/* Main Feed - Orange - Independent Scroll */}
+      {/* Main Feed - Independent Scroll */}
       <div className="lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col">
         {/* Discover Section */}
         <div className="flex justify-between mb-4 shrink-0">
@@ -397,31 +275,82 @@ export default function Home() {
 
         {/* Feed Posts - Takes remaining space */}
         <div className="space-y-2">
-          {posts.map((post) => (
+          {/* Feed Loading State */}
+          {feedLoading && (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-surface-subtle rounded-lg p-4 animate-pulse">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-surface-default rounded-full" />
+                    <div className="flex-1">
+                      <div className="h-4 bg-surface-default rounded w-1/3 mb-2" />
+                      <div className="h-3 bg-surface-default rounded w-1/4" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-surface-default rounded w-full" />
+                    <div className="h-4 bg-surface-default rounded w-5/6" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Feed Error State */}
+          {feedError && (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <p className="body-medium text-text-secondary mb-4">
+                Failed to load feed. Please try again.
+              </p>
+              <ButtonType3
+                onClick={() => refetchFeed()}
+                className="px-4 py-2 bg-primary rounded-lg "
+              >
+                Retry
+              </ButtonType3>
+            </div>
+          )}
+
+          {/* Feed Empty State */}
+          {!feedLoading && !feedError && !hasPosts && (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <p className="body-medium text-text-secondary mb-2">
+                {t('join')}
+              </p>
+            </div>
+          )}
+
+          {/* Feed Posts */}
+          {!feedLoading && hasPosts && posts.map((post) => (
             <div key={post.id} className="mb-2">
               <FeedCardWithReply
-                profileImage={post.profileImage}
-                profileName={post.profileName}
-                category={post.category}
-                postDate={post.postDate}
-                content={post.content}
-                images={post.images}
-                likes={post.likes}
-                comments={post.comments}
-                commentsData={post.commentsData}
+                profileImage="/ADANSI.png" // You'll need to map this from author data
+                profileName={post.authorId} // You'll need to fetch author name separately
+                category="Community" // You'll need to map this from post data
+                postDate={new Date(post.createdAt).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+                content={post.text}
+                images={[]} // Add images if available in your schema
+                likes={post.engagementCounts.likes}
+                comments={post.engagementCounts.comments}
+                commentsData={[]} // You'll need to fetch comments separately
                 onLike={() => handleLike(post.id)}
                 onComment={() => console.log('Open comment input for', post.id)}
                 onShare={() => handleShare(post.id)}
                 onSave={() => handleSave(post.id)}
                 onSendComment={(content) => handleSendComment(post.id, content)}
-                joinButton={post.joinButton}
+                joinButton={false}
+                isLiked={post.userEngagement.hasLiked}
+                isSaved={post.userEngagement.hasSaved}
               />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Sidebar - Purple - Independent Scroll */}
+      {/* Sidebar - Independent Scroll */}
       <div className="hidden lg:block min-w-0 overflow-y-auto py-4">
         <PeopleYouMayKnow />
       </div>

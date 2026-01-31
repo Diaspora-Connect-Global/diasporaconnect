@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState } from 'react';
@@ -23,12 +24,14 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { ButtonType2 } from '@/components/custom/button';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { MyAvatar } from '@/components/custom/header';
+import { useMutation } from '@apollo/client/react';
+import { CREATE_POST, CreatePostData, GET_FEED } from '@/services/gql/postsFeed';
+import { useRouter } from 'next/navigation';
 
 // Types
-type Visibility = 'public' | 'connections' | 'private';
+type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
 type AttachmentType = 'Photo' | 'Video' | 'Document';
 
 interface Attachment {
@@ -38,32 +41,6 @@ interface Attachment {
   file?: File;
   preview?: string;
 }
-
-// Avatar Component
-const Avatar: React.FC<{ src?: string; alt: string; size?: number }> = ({ 
-  src, 
-  alt, 
-  size = 56 
-}) => {
-  const initials = alt.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  
-  return (
-    <div className="relative ">
-      <div 
-        className="rounded-full ring-4 ring-primary/20 shadow-lg overflow-hidden bg-surface-brand flex items-center justify-center text-text-white font-semibold"
-        style={{ width: size, height: size, fontSize: size * 0.4 }}
-      >
-        {src ? (
-          <Image src={src} alt={alt} width={size} height={size} className="w-full h-full object-cover" />
-        ) : (
-          initials
-        )}
-      </div>
-      {/* Online indicator */}
-      <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-[#00a73e] border-2 border-surface-default"></div>
-    </div>
-  );
-};
 
 // Dropdown Menu Component
 const VisibilityDropdown: React.FC<{
@@ -75,19 +52,19 @@ const VisibilityDropdown: React.FC<{
 
   const options = [
     {
-      key: 'public' as Visibility,
+      key: 'PUBLIC' as Visibility,
       label: t('anyone'),
       description: 'Visible to everyone',
       icon: Globe
     },
     {
-      key: 'connections' as Visibility,
+      key: 'CONNECTIONS' as Visibility,
       label: t('connections'),
       description: 'Only your connections',
       icon: Users
     },
     {
-      key: 'private' as Visibility,
+      key: 'PRIVATE' as Visibility,
       label: t('onlyMe'),
       description: 'Only visible to you',
       icon: Lock
@@ -155,17 +132,33 @@ const VisibilityDropdown: React.FC<{
 // Main Component
 export default function CreatePostPage() {
   const [postContent, setPostContent] = useState('');
-  const [visibility, setVisibility] = useState<Visibility>('public');
+  const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [isPosting, setIsPosting] = useState(false);
   const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const t = useTranslations('actions');
+  const router = useRouter();
   const currentUser = useUserStore(state => state.user);
-  const userName = 'John Doe';
+  const userName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'User';
+  
   const charLimit = 3000;
   const charCount = postContent.length;
+
+  // Create Post Mutation
+  const [createPost, { loading: isPosting }] = useMutation<CreatePostData>(CREATE_POST, {
+    refetchQueries: [
+      {
+        query: GET_FEED,
+        variables: {
+          input: {
+            limit: 20,
+            offset: 0
+          }
+        }
+      }
+    ]
+  });
 
   // Cleanup object URLs on unmount
   React.useEffect(() => {
@@ -201,7 +194,6 @@ export default function CreatePostPage() {
   };
 
   const handleAddEmoji = () => {
-    // You can integrate an emoji picker library here
     const emojis = ['😊', '❤️', '👍', '🎉', '🔥', '✨', '💯', '🚀'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     insertAtCursor(randomEmoji);
@@ -223,7 +215,6 @@ export default function CreatePostPage() {
   };
 
   const handleAddLocation = () => {
-    // You can integrate a location picker here
     const sampleLocations = [
       'New York, NY',
       'Los Angeles, CA',
@@ -237,12 +228,10 @@ export default function CreatePostPage() {
   };
 
   const handleAddAttachment = (type: AttachmentType) => {
-    // Create file input element
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
     
-    // Set accept attribute based on type
     switch (type) {
       case 'Photo':
         input.accept = 'image/*';
@@ -255,7 +244,6 @@ export default function CreatePostPage() {
         break;
     }
     
-    // Handle file selection
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
@@ -278,17 +266,14 @@ export default function CreatePostPage() {
       toast.success(`${files.length} ${type}(s) added`);
     };
     
-    // Trigger file dialog
     input.click();
   };
 
-  // Mobile-specific handlers
   const handleMobileGallery = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*,video/*';
     input.multiple = true;
-    // Remove capture attribute to go directly to gallery
     
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
@@ -319,7 +304,7 @@ export default function CreatePostPage() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*,video/*';
-    input.capture = 'environment'; // Use back camera by default
+    input.capture = 'environment';
     
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
@@ -348,7 +333,6 @@ export default function CreatePostPage() {
   const handleMobileDocument = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    // No accept attribute - opens file manager with all files
     input.multiple = true;
     
     input.onchange = (e) => {
@@ -356,7 +340,6 @@ export default function CreatePostPage() {
       if (!files || files.length === 0) return;
       
       Array.from(files).forEach(file => {
-        // Determine type based on file MIME type
         let type: AttachmentType = 'Document';
         if (file.type.startsWith('image/')) {
           type = 'Photo';
@@ -399,17 +382,36 @@ export default function CreatePostPage() {
       return;
     }
 
-    setIsPosting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsPosting(false);
-    toast.success('Post published successfully!');
-    
-    // Reset form
-    setTimeout(() => {
-      setPostContent('');
-      setAttachments([]);
-    }, 1000);
+    try {
+      // Note: File upload functionality would need to be implemented separately
+      // This example only sends the text content
+      const { data } = await createPost({
+        variables: {
+          input: {
+            text: postContent,
+            visibility: visibility,
+            // communityId can be added if posting to a specific community
+          }
+        }
+      });
+
+      if (data?.createPost) {
+        toast.success('Post published successfully!');
+        
+        // Reset form
+        setPostContent('');
+        setAttachments([]);
+        setVisibility('PUBLIC');
+
+        // Redirect to home after short delay
+        setTimeout(() => {
+          router.push('/');
+        }, 1000);
+      }
+    } catch (error: any) {
+      console.error('Failed to create post:', error);
+      toast.error(error?.message || 'Failed to create post. Please try again.');
+    }
   };
 
   const getAttachmentIcon = (type: AttachmentType) => {
@@ -444,11 +446,8 @@ export default function CreatePostPage() {
           <div className="p-6 pb-0">
             <div className="flex items-start justify-between mb-6">
               <div className="flex gap-4">
-                <MyAvatar
-                 
-                />
+                <MyAvatar />
                 <div className="flex flex-col gap-1">
-                  {/* <h2 className="heading-xsmall text-text-primary">{currentUser?.firstName} {currentUser?.lastName}</h2> */}
                   <VisibilityDropdown value={visibility} onChange={setVisibility} />
                 </div>
               </div>
@@ -523,7 +522,7 @@ export default function CreatePostPage() {
                         </div>
                       )}
 
-                      {/* Remove Button - Always Visible */}
+                      {/* Remove Button */}
                       <button
                         onClick={() => handleRemoveAttachment(attachment.id)}
                         className="absolute top-2 right-2 w-8 h-8 rounded-full bg-text-danger hover:bg-text-danger/80 text-text-white flex items-center justify-center transition-all shadow-lg hover:scale-110 z-10"

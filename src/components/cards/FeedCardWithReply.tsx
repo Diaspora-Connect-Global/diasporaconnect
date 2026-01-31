@@ -1,15 +1,14 @@
 'use client';
 import { Bookmark, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal'
 import { UserBadge } from "@/components/custom/userBadge";
 
-
 /* --------------------------------------------------------------- */
-/*  Types (unchanged – kept for reference)                        */
+/*  Types                                                          */
 /* --------------------------------------------------------------- */
 interface Comment {
     id: string;
@@ -36,6 +35,8 @@ interface FeedCardProps {
     onSave?: () => void;
     onSendComment?: (content: string, parentId?: string) => void;
     joinButton?: boolean;
+    isLiked?: boolean;  // New prop from API
+    isSaved?: boolean;  // New prop from API
 }
 
 /* --------------------------------------------------------------- */
@@ -57,9 +58,11 @@ export default function FeedCardWithReply({
     onSave,
     onSendComment,
     joinButton = true,
+    isLiked: initialIsLiked = false,  // Use prop with default
+    isSaved: initialIsSaved = false,  // Use prop with default
 }: FeedCardProps) {
-    const [isLiked, setIsLiked] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
+    const [isLiked, setIsLiked] = useState(initialIsLiked);
+    const [isSaved, setIsSaved] = useState(initialIsSaved);
     const [likeCount, setLikeCount] = useState(likes);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showComments, setShowComments] = useState(false);
@@ -71,15 +74,39 @@ export default function FeedCardWithReply({
 
     const t = useTranslations('actions');
 
+    // Sync state with props when they change (important for refetch scenarios)
+    useEffect(() => {
+        setIsLiked(initialIsLiked);
+    }, [initialIsLiked]);
+
+    useEffect(() => {
+        setIsSaved(initialIsSaved);
+    }, [initialIsSaved]);
+
+    useEffect(() => {
+        setLikeCount(likes);
+    }, [likes]);
+
+    useEffect(() => {
+        setCommentCount(comments);
+    }, [comments]);
+
     /* ------------------- Interaction Handlers ------------------- */
     const handleLike = () => {
-        setIsLiked((v) => !v);
-        setLikeCount((c) => (isLiked ? c - 1 : c + 1));
+        // Optimistic update
+        const newLikedState = !isLiked;
+        setIsLiked(newLikedState);
+        setLikeCount((c) => newLikedState ? c + 1 : c - 1);
+        
+        // Call parent handler (which will trigger API call)
         onLike?.();
     };
 
     const handleSave = () => {
+        // Optimistic update
         setIsSaved((v) => !v);
+        
+        // Call parent handler (which will trigger API call)
         onSave?.();
     };
 
