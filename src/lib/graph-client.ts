@@ -4,11 +4,85 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloLink,
+  CombinedGraphQLErrors,
+  CombinedProtocolErrors,
 } from '@apollo/client';
 import { SetContextLink } from '@apollo/client/link/context';
+import { ErrorLink } from '@apollo/client/link/error';
 import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
+import { toast } from 'sonner';
 
 import { useAuthStore } from '@/store/useAuthStore';
+
+/* ------------------------------------------------------------------ */
+/* Track shown toasts to prevent duplicates */
+/* ------------------------------------------------------------------ */
+const shownToasts = new Set<string>();
+
+const showToastOnce = (message: string, duration = 4000) => {
+  if (!shownToasts.has(message)) {
+    shownToasts.add(message);
+    toast.error(message, { duration });
+    
+    // Clear from set after toast disappears
+    setTimeout(() => {
+      shownToasts.delete(message);
+    }, duration);
+  }
+};
+
+/* ------------------------------------------------------------------ */
+/* Error Handling Link with Toast Notifications */
+/* ------------------------------------------------------------------ */
+const errorLink = new ErrorLink(({ error, operation }) => {
+  if (CombinedGraphQLErrors.is(error)) {
+    // GraphQL errors (validation, business logic errors)
+    error.errors.forEach(({ message, locations, path }) => {
+      console.error(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+      );
+      
+      // Show toast only if not already shown
+      showToastOnce(message || 'Something went wrong. Please try again.');
+    });
+  } else if (CombinedProtocolErrors.is(error)) {
+    // Protocol errors (malformed requests, etc.)
+    error.errors.forEach(({ message, extensions }) => {
+      console.error(
+        `[Protocol error]: Message: ${message}, Extensions: ${JSON.stringify(
+          extensions
+        )}`
+      );
+    });
+    
+    showToastOnce('Something went wrong. Please try again.');
+  } else {
+    // Network errors (server down, connection refused, etc.)
+    console.error(`[Network error]: ${error}`);
+    
+    const errorMessage = error?.message || '';
+    
+    // Check for specific network error types
+    if (errorMessage.includes('Failed to fetch') || 
+        errorMessage.includes('ERR_CONNECTION_REFUSED')) {
+      showToastOnce('Unable to connect. Please try again later.', 5000);
+    } else if (errorMessage.includes('timeout')) {
+      showToastOnce('This is taking longer than expected. Please try again.');
+    } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+      showToastOnce('Please log in to continue.', 5000);
+      // Optionally redirect to login
+      // window.location.href = '/login';
+    } else if (errorMessage.includes('403') || errorMessage.includes('Forbidden')) {
+      showToastOnce('You don\'t have permission to do this.');
+    } else if (errorMessage.includes('404')) {
+      showToastOnce('We couldn\'t find what you\'re looking for.');
+    } else if (errorMessage.includes('500') || errorMessage.includes('Internal Server Error')) {
+      showToastOnce('Something went wrong on our end. Please try again later.', 5000);
+    } else {
+      showToastOnce('Something went wrong. Please try again.');
+    }
+  }
+});
 
 /* ------------------------------------------------------------------ */
 /* Auth + Device Fingerprint Link */
@@ -36,11 +110,12 @@ const uploadLink = new UploadHttpLink({
 });
 
 /* ------------------------------------------------------------------ */
-/* Combine links (ORDER MATTERS) */
+/* Combine links (ORDER MATTERS: error → auth → upload) */
 /* ------------------------------------------------------------------ */
 const link = ApolloLink.from([
-  authLink,
-  uploadLink,
+  errorLink,  // First: catch and log errors
+  authLink,   // Second: add auth headers
+  uploadLink, // Last: make the request
 ]);
 
 /* ------------------------------------------------------------------ */
@@ -53,12 +128,15 @@ const gqlClient = new ApolloClient({
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'network-only',
+      errorPolicy: 'all', // Return both data and errors
     },
     query: {
       fetchPolicy: 'network-only',
+      errorPolicy: 'all',
     },
     mutate: {
       fetchPolicy: 'network-only',
+      errorPolicy: 'all',
     },
   },
 });
