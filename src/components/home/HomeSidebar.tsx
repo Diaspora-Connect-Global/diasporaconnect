@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
+import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import ViewFilter from './viewFilter';
 
 // Reusable Section Component
@@ -24,8 +25,8 @@ interface SectionProps {
 
 interface Community {
     id: string;
-    title: string;
-    description?: string;
+    name: string;
+    avatarUrl?: string;
 }
 
 interface Group {
@@ -37,6 +38,10 @@ interface Group {
     ownerId: string;
     createdAt: string;
     avatarUrl?: string;
+}
+
+interface ListMyJoinedCommunitiesResponse {
+    listUserCommunities: Community[];
 }
 
 interface GetMyGroupsResponse {
@@ -127,7 +132,7 @@ function NoCommunity() {
     )
 }
 
-function CommunityItem({ name, type, link, onClick }: { name: string, type: string, link: string, onClick?: () => void }) {
+function CommunityItem({ name, type, link, onClick }: { name: string, type?: string, link: string, onClick?: () => void }) {
     const t = useTranslations('privacy');
 
     const handleClick = (e: React.MouseEvent) => {
@@ -145,12 +150,16 @@ function CommunityItem({ name, type, link, onClick }: { name: string, type: stri
                     <span className="text-primary">{name}</span>
                 </Link>
             </BodySmall>
-            <span>·</span>
-            <BodySmall>
-                <span className="text-secondary">
-                    {type === 'Public' ? t('public') : t('private')}
-                </span>
-            </BodySmall>
+            {type && (
+                <>
+                    <span>·</span>
+                    <BodySmall>
+                        <span className="text-secondary">
+                            {type === 'Public' ? t('public') : t('private')}
+                        </span>
+                    </BodySmall>
+                </>
+            )}
         </div>
     )
 }
@@ -165,6 +174,11 @@ function Community() {
 
     const tPrivacy = useTranslations('privacy');
     const t = useTranslations('home');
+
+    // Fetch user's joined communities
+    const { data: communitiesData, loading: communitiesLoading } = useQuery<ListMyJoinedCommunitiesResponse>(
+        LIST_MY_JOINED_COMMUNITIES
+    );
 
     // Fetch user's groups
     const { data: groupsData, loading: groupsLoading } = useQuery<GetMyGroupsResponse>(
@@ -185,6 +199,7 @@ function Community() {
     };
 
     const myGroups = groupsData?.getMyGroups?.groups || [];
+    const myCommunities = communitiesData?.listUserCommunities || [];
 
     const handleGroupClick = (groupId: string) => {
         // Set active chat in session storage
@@ -197,11 +212,15 @@ function Community() {
         window.location.href = '/chat?t=groups&ct=group';
     };
 
+    const handleCommunityClick = (communityId: string) => {
+        // Navigate to community page
+        window.location.href = `/association/${communityId}`;
+    };
+
     return (
         <div className=" ">
             <div className='mt-3'>
-
-            <ViewFilter />
+                <ViewFilter />
             </div>
             <MyCommunityCard2 />
 
@@ -215,20 +234,25 @@ function Community() {
                 link="/association"
             >
                 <div className="space-y-1">
-                    {[
-                        { name: "The Adansi Times", type: "Public", link: "/association/adansi-times" },
-                        { name: "Tech Innovations Daily", type: "Private", link: "/association/adansi-times" },
-                        { name: "Global Finance Report", type: "Public", link: "/association/adansi-times" },
-                        { name: "Health & Wellness Journal", type: "Private", link: "/association/adansi-times" }
-                    ].map((association, index) => (
-                        <div key={index}>
-                            <CommunityItem 
-                                link={association.link} 
-                                name={association.name} 
-                                type={association.type === "Public" ? `${tPrivacy("public")}` : `${tPrivacy("private")}`} 
-                            />
-                        </div>
-                    ))}
+                    {communitiesLoading ? (
+                        <BodySmall>
+                            <span className="text-secondary">Loading communities...</span>
+                        </BodySmall>
+                    ) : myCommunities.length > 0 ? (
+                        myCommunities.map((community) => (
+                            <div key={community.id}>
+                                <CommunityItem 
+                                    link={`/association/${community.id}`} 
+                                    name={community.name}
+                                    onClick={() => handleCommunityClick(community.id)}
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <BodySmall>
+                            <span className="text-secondary">No communities yet</span>
+                        </BodySmall>
+                    )}
                 </div>
             </Section>
 

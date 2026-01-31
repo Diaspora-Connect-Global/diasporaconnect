@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { MoreHorizontalIcon, Check } from 'lucide-react';
 import {
     DropdownMenu,
@@ -13,11 +13,17 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image'
 import { useCommunityStore } from '@/store/useCommunityStore';
 import { Link } from '@/i18n/navigation';
+import { useQuery } from '@apollo/client/react';
+import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 
 interface Community {
     id: string;
-    title: string;
-    description?: string;
+    name: string;
+    avatarUrl?: string;
+}
+
+interface ListMyJoinedCommunitiesResponse {
+    listUserCommunities: Community[];
 }
 
 export function MyCommunityCard2() {
@@ -28,50 +34,40 @@ export function MyCommunityCard2() {
     const selectedCommunity = useCommunityStore(state => state.getSelectedCommunity());
     const setSelectedCommunity = useCommunityStore(state => state.setSelectedCommunity);
     const setCommunities = useCommunityStore(state => state.setCommunities);
-    const storeCommunities = useCommunityStore(state => state.communities);
 
-    const communities: Community[] = [
-         {
-            id: '1',
-            title: 'GhanaConnect:Global',
-            description: 'Connect with professionals and businesses across Ghana and abroad.'
-        },
-        {
-            id: '2',
-            title: 'GhanaTechHub',
-            description: 'A platform for tech enthusiasts to collaborate and innovate.'
-        },
-        {
-            id: '3',
-            title: 'GhanaArtsNetwork',
-            description: 'Showcasing the rich cultural heritage of Ghana.'
-        }
-    ];
+    // Fetch user's joined communities
+    const { data: communitiesData, loading: communitiesLoading } = useQuery<ListMyJoinedCommunitiesResponse>(
+        LIST_MY_JOINED_COMMUNITIES
+    );
+
+    // Memoize communities to prevent recreation on every render
+    const communities = useMemo(() => {
+        return communitiesData?.listUserCommunities || [];
+    }, [communitiesData]);
 
     // Handle community change
     const handleCommunityChange = (community: Community) => {
-        console.log('Switched to:', community.title);
-        // Add your logic here (e.g., fetch community data, update state, etc.)
+        console.log('Switched to:', community.name);
     };
 
-    // Initialize store with communities on mount
+    // Initialize store with communities on mount and when data changes
     useEffect(() => {
-        // Only update if communities have changed
-        const storeCommunities = communities.map(c => ({
-            id: c.id,
-            name: c.title
-        }));
-        
-        setCommunities(storeCommunities);
+        if (communities.length > 0) {
+            // Update store with fetched communities
+            const storeCommunities = communities.map(c => ({
+                id: c.id,
+                name: c.name
+            }));
+            
+            setCommunities(storeCommunities);
 
-        // Set default selected community if none is selected
-        if (!selectedCommunity && communities.length > 0) {
-            const defaultCommunity = communities[0];
-            setSelectedCommunity(defaultCommunity.id);
+            // Set default selected community if none is selected
+            if (!selectedCommunity) {
+                const defaultCommunity = communities[0];
+                setSelectedCommunity(defaultCommunity.id);
+            }
         }
-        // Only run when communities array changes
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [communities.length]);
+    }, [communities, selectedCommunity, setCommunities, setSelectedCommunity]);
 
     const handleCommunitySelect = (community: Community) => {
         setSelectedCommunity(community.id);
@@ -82,6 +78,32 @@ export function MyCommunityCard2() {
     const displayCommunity = selectedCommunity 
         ? communities.find(c => c.id === selectedCommunity.id) 
         : communities[0];
+
+    // Show loading state
+    if (communitiesLoading) {
+        return (
+            <div className="w-full">
+                <div className="py-3">
+                    <div className="border p-2 rounded-2xl border-border-disabled flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                            <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Image
+                                    width={24}
+                                    height={24}
+                                    src="/GLOBE.png"
+                                    alt="Loading"
+                                    className="w-6 h-6 rounded-full object-cover"
+                                />
+                            </div>
+                            <h1 className="font-body-large text-text-secondary truncate">
+                                Loading communities...
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     // Show "No community" with dropdown to discover communities
     if (communities.length === 0) {
@@ -130,16 +152,26 @@ export function MyCommunityCard2() {
                             {/* Left section - Logo and selected community title */}
                             <div className="flex items-center gap-1 min-w-0 flex-1">
                                 <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <Image
-                                        width={24}
-                                        height={24}
-                                        src="/GLOBE.png"
-                                        alt="Profile"
-                                        className="w-6 h-6 rounded-full object-cover"
-                                    />
+                                    {displayCommunity?.avatarUrl ? (
+                                        <Image
+                                            width={24}
+                                            height={24}
+                                            src={displayCommunity.avatarUrl}
+                                            alt={displayCommunity.name}
+                                            className="w-6 h-6 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <Image
+                                            width={24}
+                                            height={24}
+                                            src="/GLOBE.png"
+                                            alt="Community"
+                                            className="w-6 h-6 rounded-full object-cover"
+                                        />
+                                    )}
                                 </div>
                                 <h1 className="font-body-large text-text-primary truncate">
-                                    {displayCommunity?.title}
+                                    {displayCommunity?.name}
                                 </h1>
                             </div>
                             {/* Right section - Trigger icon */}
@@ -160,7 +192,18 @@ export function MyCommunityCard2() {
                                 onSelect={() => handleCommunitySelect(community)}
                                 className='font-body-large text-text-primary flex items-center justify-between'
                             >
-                                <span className="truncate flex-1">{community.title}</span>
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    {community.avatarUrl && (
+                                        <Image
+                                            width={20}
+                                            height={20}
+                                            src={community.avatarUrl}
+                                            alt={community.name}
+                                            className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                                        />
+                                    )}
+                                    <span className="truncate flex-1">{community.name}</span>
+                                </div>
                                 {selectedCommunity?.id === community.id && (
                                     <Check className='w-4 h-4 text-text-brand flex-shrink-0 ml-2' />
                                 )}
