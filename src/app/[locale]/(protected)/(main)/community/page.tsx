@@ -33,24 +33,6 @@ export default function Community() {
     const t = useTranslations('community');
     const tActions = useTranslations('actions');
     
-
-    const communities = [
-         {
-            id: '1',
-            title: 'GhanaConnect:Global',
-            description: 'Connect with professionals and businesses across Ghana and abroad.'
-        },
-        {
-            id: '2',
-            title: 'GhanaTechHub',
-            description: 'A platform for tech enthusiasts to collaborate and innovate.'
-        },
-        {
-            id: '3',
-            title: 'GhanaArtsNetwork',
-            description: 'Showcasing the rich cultural heritage of Ghana.'
-        }
-    ];
     // Fetch user's joined communities
     const { data: myCommunitiesData, loading: myCommunitiesLoading } = useQuery<ListUserCommunitiesData>(
         LIST_MY_JOINED_COMMUNITIES
@@ -61,7 +43,7 @@ export default function Community() {
         LIST_AVAILABLE_COMMUNITIES,
         {
             variables: {
-                limit: 12,
+                limit: 20,
                 offset: 0
             }
         }
@@ -81,12 +63,12 @@ export default function Community() {
                     <div className="text-center py-8 text-gray-500">
                         Loading your communities...
                     </div>
-                ) : communities.length ? (
-                    communities.map((community) => (
+                ) : myCommunitiesData?.listUserCommunities?.length ? (
+                    myCommunitiesData?.listUserCommunities?.map((community) => (
                         <MyCommunityCard
                         id={community.id}
                             key={community.id}
-                            title={community.title}
+                            title={community.name}
                             description={community.description || ''}
                         />
                     ))
