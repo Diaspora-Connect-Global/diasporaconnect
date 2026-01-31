@@ -16,13 +16,19 @@ interface Community {
 
 interface DiscoverCommunity extends Community {
     visibility: string;
+    membershipStatus: string;
+    communityType: {
+        name: string;
+        isEmbassy: boolean;
+    };
+    memberCount: number;
 }
 
 interface ListUserCommunitiesData {
     listUserCommunities: Community[];
 }
 
-interface ListCommunitiesData {
+export interface ListCommunitiesData {
     listCommunities: {
         communities: DiscoverCommunity[];
         total: number;

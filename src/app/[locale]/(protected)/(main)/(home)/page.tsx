@@ -4,9 +4,12 @@ import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVar
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
+import { LIST_AVAILABLE_COMMUNITIES } from '@/services/gql/community';
+import { useQuery } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { ListCommunitiesData } from '../community/page';
 
 interface Comment {
   id: string;
@@ -35,33 +38,17 @@ export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
 
-  // Community data
-  const communities = [
-    {
-      title: 'Ghana Innovation',
-      members: 1200,
-      onButtonClick: () => console.log('Join button clicked!'),
-      buttonText: t('joincommunity'),
-    },
-    {
-      title: 'Ghana Innovation',
-      members: 1200,
-      onButtonClick: () => console.log('Join button clicked!'),
-      buttonText: t('joincommunity'),
-    },
-    {
-      title: 'Ghana Innovation',
-      members: 1200,
-      onButtonClick: () => console.log('Join button clicked!'),
-      buttonText: t('joincommunity'),
-    },
-    {
-      title: 'Ghana Innovation',
-      members: 1200,
-      onButtonClick: () => console.log('Join button clicked!'),
-      buttonText: t('joincommunity'),
-    },
-  ];
+  const { data: discoverData, loading: discoverLoading } = useQuery<ListCommunitiesData>(
+          LIST_AVAILABLE_COMMUNITIES,
+          {
+              variables: {
+                  limit: 20,
+                  offset: 0
+              }
+          }
+      );
+
+
 
   // Initial posts with full data
   const initialPosts: Post[] = [
@@ -368,13 +355,14 @@ export default function Home() {
                          snap-x snap-mandatory"
               style={{ scrollBehavior: 'smooth' }}
             >
-              {communities.map((community, index) => (
+              {discoverData?.listCommunities.communities.map((community, index) => (
                 <div key={index} className="flex-none snap-start">
                   <CommunityCardVariant2
-                    title={community.title}
-                    members={community.members}
-                    onButtonClick={community.onButtonClick}
-                    buttonText={community.buttonText}
+                  icon={community.avatarUrl }
+                    title={community.name}
+                    members={community.memberCount}
+                    onButtonClick={ () => console.log('Join button clicked!')}
+                    buttonText={t('joincommunity')}
                   />
                 </div>
               ))}

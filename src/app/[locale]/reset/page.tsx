@@ -25,8 +25,8 @@ export default function ResetAccount() {
         const savedData = sessionStorage.getItem('accountResetFormData');
         const savedStep = sessionStorage.getItem('accountResetFormStep');
 
-        if (savedData) setFormData(JSON.parse(savedData));
-        if (savedStep) setCurrentStep(parseInt(savedStep));
+        // if (savedData) setFormData(JSON.parse(savedData));
+        // if (savedStep) setCurrentStep(parseInt(savedStep));
     }, []);
 
     useEffect(() => {

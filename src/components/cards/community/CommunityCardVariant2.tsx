@@ -14,8 +14,8 @@ interface CommunityCardVariant2Props {
     description?: string;
     onButtonClick?: () => void;
     onCardClick?: () => void;
-    icon?: React.ReactNode;
-    members?: number;
+    icon: React.ReactNode;
+    members: number;
     buttonText: string;
 }
 
@@ -38,15 +38,14 @@ export default function CommunityCardVariant2({
             >
                 {/* Icon */}
                 <div className="flex items-center justify-center h-[4rem] w-[4rem]">
-                    {icon || (
+                   
                         <Image
                             width={64}
                             height={64}
-                            src="/GLOBE.png"
+                            src={`${icon ?? "/GLOBE.png" }`}
                             alt="Profile"
                             className="rounded-full object-contain w-full h-full"
                         />
-                    )}
                 </div>
 
                 {/* Title - max 2 lines with conditional tooltip */}
@@ -71,7 +70,7 @@ export default function CommunityCardVariant2({
                 <div className="w-full text-center h-[1rem]">
                     {members !== undefined && (
                         <p className="font-caption-medium text-text-primary">
-                            {members.toLocaleString()} {t('members')}
+                            {members ?? 0} {t('members')}
                         </p>
                     )}
                 </div>

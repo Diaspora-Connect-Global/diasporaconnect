@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState } from 'react';
@@ -16,6 +17,11 @@ interface Step3Props {
     prevStep: () => void;
 }
 
+// Add this type definition
+interface ResetPasswordResponse {
+    resetPassword: string;
+}
+
 export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
     const t = useTranslations('passwordReset');
     const tActions = useTranslations('actions');
@@ -26,7 +32,8 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const [resetPasswordMutation, { loading }] = useMutation(RESET_PASSWORD);
+    // Add the type to useMutation
+    const [resetPasswordMutation, { loading }] = useMutation<ResetPasswordResponse>(RESET_PASSWORD);
 
     const handlePasswordChange = (value: string) => {
         setPassword(value);
@@ -35,7 +42,7 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
 
     const handleSubmit = async () => {
         try {
-            await resetPasswordMutation({
+            const { data: responseData } = await resetPasswordMutation({
                 variables: {
                     email: data.email,
                     resetCode: data.verificationCode,
@@ -43,10 +50,24 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
                 }
             });
 
-            
-            router.push('/signin');
-        } catch (err) {
+            const result = responseData?.resetPassword;
+
+            // Check if the result contains an error message
+            if (result?.toLowerCase().includes('failed') || 
+                result?.toLowerCase().includes('invalid') || 
+                result?.toLowerCase().includes('expired') ||
+                result?.toLowerCase().includes('error')) {
+                toast.error(result);
+            } else {
+                // Success case
+                toast.success(result || t('success') || 'Password reset successfully!');
+                setTimeout(() => {
+                    router.push('/signin');
+                }, 1000);
+            }
+        } catch (err: any) {
             console.error('Password reset failed:', err);
+            toast.error(err?.message || t('error') || 'An error occurred');
         }
     };
 

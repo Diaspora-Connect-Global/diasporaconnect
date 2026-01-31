@@ -13,6 +13,13 @@ export const LIST_AVAILABLE_COMMUNITIES = gql`
         description
         visibility
         avatarUrl
+        memberCount
+      membershipStatus
+      communityType {
+        name
+        isEmbassy
+      }
+
       }
       total
     }
