@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { ListCommunitiesData } from '../community/page';
 import { toast } from 'sonner';
-import { ButtonType2, ButtonType3 } from '@/components/custom/button';
+import {  ButtonType3 } from '@/components/custom/button';
 
 export default function Home() {
   const t = useTranslations('community');
