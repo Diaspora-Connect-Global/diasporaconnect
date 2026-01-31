@@ -39,16 +39,14 @@ export default function Home() {
   const tCommon = useTranslations('common');
 
   const { data: discoverData, loading: discoverLoading } = useQuery<ListCommunitiesData>(
-          LIST_AVAILABLE_COMMUNITIES,
-          {
-              variables: {
-                  limit: 20,
-                  offset: 0
-              }
-          }
-      );
-
-
+    LIST_AVAILABLE_COMMUNITIES,
+    {
+      variables: {
+        limit: 20,
+        offset: 0
+      }
+    }
+  );
 
   // Initial posts with full data
   const initialPosts: Post[] = [
@@ -304,101 +302,129 @@ export default function Home() {
       el.removeEventListener('scroll', checkScroll);
       window.removeEventListener('resize', checkScroll);
     };
-  }, []);
+  }, [discoverData]);
+
+  const communities = discoverData?.listCommunities?.communities || [];
+  const hasCommunities = communities.length > 0;
 
   return (
-    <div className="h-app-inner flex overflow-hidden ">
-        {/* Main Feed - Orange - Independent Scroll */}
-        <div className=" lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col">
-          {/* Discover Section */}
-          <div className="flex justify-between mb-4 shrink-0">
-            <h2 className="label-medium">{t('discover')}</h2>
-            <Link href="/community">
-              <p className="label-medium text-text-brand">{t('seeall')}</p>
-            </Link>
-          </div>
+    <div className="h-app-inner flex overflow-hidden">
+      {/* Main Feed - Orange - Independent Scroll */}
+      <div className="lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col">
+        {/* Discover Section */}
+        <div className="flex justify-between mb-4 shrink-0">
+          <h2 className="label-medium">{t('discover')}</h2>
+          <Link href="/community">
+            <p className="label-medium text-text-brand">{t('seeall')}</p>
+          </Link>
+        </div>
 
-          {/* Communities Carousel with Smart Arrows */}
-          <div className="relative mb-6">
-            {/* Left Arrow */}
-            {canScrollLeft && (
-              <button
-                onClick={scrollLeft}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10
-                           flex h-10 w-10 items-center justify-center
-                           rounded-full bg-surface-default/80 shadow-md
-                           cursor-pointer transition-colors"
-                aria-label={tCommon('scrollLeft')}
-              >
-                <ChevronLeftIcon className="h-6 w-6 text-primary" />
-              </button>
-            )}
-
-            {/* Right Arrow */}
-            {canScrollRight && (
-              <button
-                onClick={scrollRight}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10
-                           flex h-10 w-10 items-center justify-center
-                           rounded-full bg-surface-default/80 shadow-md
-                           cursor-pointer transition-colors"
-                aria-label={tCommon('scrollRight')}
-              >
-                <ChevronRightIcon className="h-6 w-6 text-primary" />
-              </button>
-            )}
-
-            {/* Scrollable Container */}
-            <div
-              ref={scrollRef}
-              className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 shrink-0
-                         snap-x snap-mandatory"
-              style={{ scrollBehavior: 'smooth' }}
-            >
-              {discoverData?.listCommunities.communities.map((community, index) => (
-                <div key={index} className="flex-none snap-start">
-                  <CommunityCardVariant2
-                  icon={community.avatarUrl }
-                    title={community.name}
-                    members={community.memberCount}
-                    onButtonClick={ () => console.log('Join button clicked!')}
-                    buttonText={t('joincommunity')}
-                  />
+        {/* Communities Carousel with Smart Arrows */}
+        <div className="relative mb-6">
+          {/* Loading State */}
+          {discoverLoading && (
+            <div className="flex gap-2 overflow-hidden pb-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex-none w-[280px]">
+                  <div className="h-32 bg-surface-subtle rounded-lg animate-pulse" />
                 </div>
               ))}
             </div>
-          </div>
+          )}
 
-          {/* Feed Posts - Takes remaining space */}
-          <div className="space-y-2 ">
-            {posts.map((post) => (
-              <div key={post.id} className="mb-2">
-                <FeedCardWithReply
-                  profileImage={post.profileImage}
-                  profileName={post.profileName}
-                  category={post.category}
-                  postDate={post.postDate}
-                  content={post.content}
-                  images={post.images}
-                  likes={post.likes}
-                  comments={post.comments}
-                  commentsData={post.commentsData}
-                  onLike={() => handleLike(post.id)}
-                  onComment={() => console.log('Open comment input for', post.id)}
-                  onShare={() => handleShare(post.id)}
-                  onSave={() => handleSave(post.id)}
-                  onSendComment={(content) => handleSendComment(post.id, content)}
-                  joinButton={post.joinButton}
-                />
+          {/* Empty State */}
+          {!discoverLoading && !hasCommunities && (
+            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+              <p className="body-medium text-text-secondary mb-2">
+                {t('noCommunitiesFound')}
+              </p>
+            </div>
+          )}
+
+          {/* Communities List */}
+          {!discoverLoading && hasCommunities && (
+            <>
+              {/* Left Arrow */}
+              {canScrollLeft && (
+                <button
+                  onClick={scrollLeft}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+                             flex h-10 w-10 items-center justify-center
+                             rounded-full bg-surface-default/80 shadow-md
+                             cursor-pointer transition-colors hover:bg-surface-subtle"
+                  aria-label={tCommon('scrollLeft')}
+                >
+                  <ChevronLeftIcon className="h-6 w-6 text-primary" />
+                </button>
+              )}
+
+              {/* Right Arrow */}
+              {canScrollRight && (
+                <button
+                  onClick={scrollRight}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+                             flex h-10 w-10 items-center justify-center
+                             rounded-full bg-surface-default/80 shadow-md
+                             cursor-pointer transition-colors hover:bg-surface-subtle"
+                  aria-label={tCommon('scrollRight')}
+                >
+                  <ChevronRightIcon className="h-6 w-6 text-primary" />
+                </button>
+              )}
+
+              {/* Scrollable Container */}
+              <div
+                ref={scrollRef}
+                className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 shrink-0
+                           snap-x snap-mandatory"
+                style={{ scrollBehavior: 'smooth' }}
+              >
+                {communities.map((community) => (
+                  <div key={community.id} className="flex-none snap-start">
+                    <CommunityCardVariant2
+                      icon={community.avatarUrl}
+                      title={community.name}
+                      members={community.memberCount}
+                      onButtonClick={() => console.log('Join button clicked!')}
+                      buttonText={t('joincommunity')}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
 
-        {/* Sidebar - Purple - Independent Scroll */}
-        <div className="hidden lg:block  min-w-0 overflow-y-auto py-4">
-          <PeopleYouMayKnow />
+        {/* Feed Posts - Takes remaining space */}
+        <div className="space-y-2">
+          {posts.map((post) => (
+            <div key={post.id} className="mb-2">
+              <FeedCardWithReply
+                profileImage={post.profileImage}
+                profileName={post.profileName}
+                category={post.category}
+                postDate={post.postDate}
+                content={post.content}
+                images={post.images}
+                likes={post.likes}
+                comments={post.comments}
+                commentsData={post.commentsData}
+                onLike={() => handleLike(post.id)}
+                onComment={() => console.log('Open comment input for', post.id)}
+                onShare={() => handleShare(post.id)}
+                onSave={() => handleSave(post.id)}
+                onSendComment={(content) => handleSendComment(post.id, content)}
+                joinButton={post.joinButton}
+              />
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* Sidebar - Purple - Independent Scroll */}
+      <div className="hidden lg:block min-w-0 overflow-y-auto py-4">
+        <PeopleYouMayKnow />
+      </div>
     </div>
   );
 }
