@@ -317,6 +317,7 @@ export function DropdownMenuAvatar() {
   const t = useTranslations('home.header');
   const [open, setOpen] = useState(false);
   const firstName = useUserStore((s) => s.user?.firstName);
+  const middleName = useUserStore((s) => s.user?.middleName);
   const lastName = useUserStore((s) => s.user?.lastName);
   const router = useRouter(); // Add this
   const [lOpen, setLOpen] = useState(false);
@@ -337,7 +338,7 @@ export function DropdownMenuAvatar() {
           <Link onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
             <div className='flex space-x-4 items-center my-2'>
               <MyAvatar />
-              <p className='text-xl'>{firstName} {lastName}</p>
+              <p className='text-xl'>{firstName} {middleName} {lastName}</p>
             </div>
             <CR />
           </Link>
