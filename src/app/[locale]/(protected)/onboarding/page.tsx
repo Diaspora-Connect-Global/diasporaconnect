@@ -121,6 +121,9 @@ export default function CompleteAccount() {
   useEffect(() => {
     if (isOAuth === null) return;
 
+    // Don't persist if onboarding is completed
+    if (onboardingCompletedRef.current) return;
+
     sessionStorage.setItem(
       'accountFormData',
       JSON.stringify(formData)
