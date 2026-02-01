@@ -363,7 +363,7 @@ export function DropdownMenuAvatar() {
               <DMItem icon={<SettingsIcon className='w-full h-full' />} text={t('settingsPrivacy')} />
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link onClick={() => setOpen(false)} href={"/help"} className='flex items-center justify-between'>
               <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
 
@@ -373,14 +373,16 @@ export function DropdownMenuAvatar() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <DMItem icon={<LogoutCurve
             size={40} />} text={t('logout')} onClick={() => setLOpen(true)} />
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu><LogoutConfirmModal
+    </DropdownMenu>
+    <LogoutConfirmModal
         open={lOpen}
         onCancel={() => setLOpen(false)}
-        onConfirm={logout} /></>
+        onConfirm={logout} />
+        </>
   )
 }
