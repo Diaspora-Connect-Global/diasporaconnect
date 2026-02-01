@@ -55,3 +55,12 @@ export function formatChatTimestamp(dateString: string | Date): string {
         hour12: true
     });
 }
+export function formatDateOnly(dateString: string | Date): string {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+
+    return date.toLocaleString('en', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    });
+}

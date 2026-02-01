@@ -10,6 +10,14 @@ export const LIST_AVAILABLE_ASSOCIATIONS = gql`
       associations {
         id
         name
+      description
+      avatarUrl
+      memberCount
+      membershipStatus
+      associationType {
+        name
+      }
+
       }
       total
     }
@@ -21,6 +29,15 @@ export const GET_ASSOCIATION_DETAILS = gql`
     getAssociation(id: $associationId) {
       id
       name
+      description
+      avatarUrl
+      memberCount
+      membershipStatus
+      associationType {
+        name
+      }
+      createdAt
+
     }
   }
 `;
@@ -34,7 +51,7 @@ export const REQUEST_JOIN_ASSOCIATION = gql`
     requestMembership(
       input: {
         entityId: $associationId
-        entityType: ASSOCIATION
+        entityType: "ASSOCIATION"
       }
     ) {
       status

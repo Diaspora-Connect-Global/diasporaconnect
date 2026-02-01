@@ -39,6 +39,7 @@ export interface GetFeedInput {
   offset?: number;
   communityId?: string;
   authorId?: string;
+  type :  'all' 
 }
 
 export interface CreatePostInput {

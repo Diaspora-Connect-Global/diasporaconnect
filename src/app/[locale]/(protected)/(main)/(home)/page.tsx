@@ -47,7 +47,8 @@ export default function Home() {
     variables: {
       input: {
         limit: 20,
-        offset: 0
+        offset: 0,
+        type: 'all'
       }
     }
   });

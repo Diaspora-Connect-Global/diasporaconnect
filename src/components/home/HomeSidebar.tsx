@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
-import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
+import { LIST_AVAILABLE_ASSOCIATIONS } from '@/services/gql/associations';
 import ViewFilter from './viewFilter';
 
 // Reusable Section Component
@@ -23,10 +23,14 @@ interface SectionProps {
     link?: string;
 }
 
-interface Community {
+interface Association {
     id: string;
     name: string;
+    description?: string;
     avatarUrl?: string;
+    memberCount?: number;
+    membershipStatus?: string;
+    associationType?: { name: string };
 }
 
 interface Group {
@@ -40,8 +44,11 @@ interface Group {
     avatarUrl?: string;
 }
 
-interface ListMyJoinedCommunitiesResponse {
-    listUserCommunities: Community[];
+interface ListAvailableAssociationsResponse {
+    listAssociations: {
+        associations: Association[];
+        total: number;
+    };
 }
 
 interface GetMyGroupsResponse {
@@ -164,7 +171,7 @@ function CommunityItem({ name, type, link, onClick }: { name: string, type?: str
     )
 }
 
-function Community() {
+function SidebarLists() {
     const [openSections, setOpenSections] = useState({
         associations: true,
         groupChats: true,
@@ -175,9 +182,15 @@ function Community() {
     const tPrivacy = useTranslations('privacy');
     const t = useTranslations('home');
 
-    // Fetch user's joined communities
-    const { data: communitiesData, loading: communitiesLoading } = useQuery<ListMyJoinedCommunitiesResponse>(
-        LIST_MY_JOINED_COMMUNITIES
+    // Fetch available associations
+    const { data: associationsData, loading: associationsLoading } = useQuery<ListAvailableAssociationsResponse>(
+        LIST_AVAILABLE_ASSOCIATIONS,
+        {
+            variables: {
+                limit: 10,
+                offset: 0,
+            },
+        }
     );
 
     // Fetch user's groups
@@ -199,7 +212,7 @@ function Community() {
     };
 
     const myGroups = groupsData?.getMyGroups?.groups || [];
-    const myCommunities = communitiesData?.listUserCommunities || [];
+    const myAssociations = associationsData?.listAssociations?.associations || [];
 
     const handleGroupClick = (groupId: string) => {
         // Set active chat in session storage
@@ -212,9 +225,9 @@ function Community() {
         window.location.href = '/chat?t=groups&ct=group';
     };
 
-    const handleCommunityClick = (communityId: string) => {
-        // Navigate to community page
-        window.location.href = `/association/${communityId}`;
+    const handleAssociationClick = (associationId: string) => {
+        // Navigate to association page
+        window.location.href = `/association/${associationId}`;
     };
 
     return (
@@ -234,24 +247,22 @@ function Community() {
                 link="/association"
             >
                 <div className="space-y-1">
-                    {communitiesLoading ? (
+                    {associationsLoading ? (
                         <BodySmall>
-                            <span className="text-secondary">Loading communities...</span>
+                            <span className="text-secondary">Loading associations...</span>
                         </BodySmall>
-                    ) : myCommunities.length > 0 ? (
-                        myCommunities.map((community) => (
-                            <div key={community.id}>
+                    ) : myAssociations.length > 0 ? (
+                        myAssociations.map((association) => (
+                            <div key={association.id}>
                                 <CommunityItem 
-                                    link={`/association/${community.id}`} 
-                                    name={community.name}
-                                    onClick={() => handleCommunityClick(community.id)}
+                                    link={`/association/${association.id}`} 
+                                    name={association.name}
+                                    onClick={() => handleAssociationClick(association.id)}
                                 />
                             </div>
                         ))
                     ) : (
-                        <BodySmall>
-                            <span className="text-secondary">No communities yet</span>
-                        </BodySmall>
+                        <NoCommunity />
                     )}
                 </div>
             </Section>
@@ -311,11 +322,10 @@ function Community() {
 }
 
 export default function HomeSidebar() {
-    const isCommunity = true;
 
     return (
         <div className='lg:max-w-[20vw] h-app-inner  lg:sticky top-[4rem] overflow-y-auto scrollbar-hide z-50'>
-            {!isCommunity ? <NoCommunity /> : <Community />}
+             <SidebarLists />
 
             <div className="text-center text-xs space-x-2 py-4 mt-6 flex flex-wrap">
                 <InfoLinks />

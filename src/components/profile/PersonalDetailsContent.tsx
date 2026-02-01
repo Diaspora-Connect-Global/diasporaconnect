@@ -89,8 +89,18 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
 
   const homeCountryName = countryLookup[localUserData?.countryOfOrigin?.slice(0, 2).toUpperCase() ?? '']?.name || localUserData?.countryOfOrigin  || 'Unknown';
 
-    const residenceStr = `${localUserData?.city}, ${countryName}. Since ${localUserData?.residenceSinceMonth}, ${localUserData?.residenceSinceYear}`; 
+const residenceParts = [
+    localUserData?.city,
+    countryName,
+].filter(Boolean);
 
+const location = residenceParts.length > 0 ? residenceParts.join(', ') : null;
+
+const since = localUserData?.residenceSinceMonth && localUserData?.residenceSinceYear
+    ? `Since ${localUserData.residenceSinceMonth}, ${localUserData.residenceSinceYear}`
+    : null;
+
+const residenceStr = [location, since].filter(Boolean).join('. ') || 'Residence unknown';
 
 
   return (

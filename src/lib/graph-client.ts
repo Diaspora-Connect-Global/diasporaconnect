@@ -39,11 +39,16 @@ const errorLink = new ErrorLink(({ error, operation }) => {
     // GraphQL errors (validation, business logic errors)
     error.errors.forEach(({ message, locations, path }) => {
       console.error(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        `[GraphQL error]\n` +
+        `  Message:    ${message}\n` +
+        `  Operation:  ${operation.operationName ?? 'unknown'}\n` +
+        `  Location:   ${JSON.stringify(locations)}\n` +
+        `  Path:       ${JSON.stringify(path)}\n` +
+        `  Variables:  ${JSON.stringify(operation.variables, null, 2)}`
       );
       
       // Show toast only if not already shown
-      showToastOnce(message || 'Something went wrong. Please try again.');
+      showToastOnce('Something went wrong. Please try again.');
     });
   } else if (CombinedProtocolErrors.is(error)) {
     // Protocol errors (malformed requests, etc.)
