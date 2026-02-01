@@ -252,8 +252,9 @@ export default function CompleteAccount() {
       } = data.verifyRegistrationOtp;
 
       setTokens({
+        accessToken: sessionToken,
         sessionToken: sessionToken,
-        refreshToken: '',
+        refreshToken: undefined,
         sessionId: deviceMetadata.deviceId,
         expiresIn: 3600
       });
@@ -272,7 +273,15 @@ export default function CompleteAccount() {
       });
       setDeviceMetadata(deviceMetadata);
 
-      sessionStorage.clear();
+      // Clear only onboarding-related items, NOT auth tokens
+      sessionStorage.removeItem('signupEmail');
+      sessionStorage.removeItem('signupPassword');
+      sessionStorage.removeItem('signupDeviceId');
+      sessionStorage.removeItem('registrationToken');
+      sessionStorage.removeItem('accountFormData');
+      sessionStorage.removeItem('accountFormStep');
+      sessionStorage.removeItem('oauthRegistration');
+      sessionStorage.removeItem('otp_expires_at');
 
       toast.success('Phone number verified successfully!');
       nextStep();
