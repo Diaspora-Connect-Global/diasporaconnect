@@ -67,6 +67,9 @@ export default function CompleteAccount() {
   const [isOAuth, setIsOAuth] =
     useState<boolean | null>(null);
 
+  // Track if onboarding was completed to prevent cleanup on successful completion
+  const onboardingCompletedRef = React.useRef(false);
+
   const [registerUser] =
     useMutation<RegisterUserResponse>(REGISTER_USER);
 
@@ -129,6 +132,41 @@ export default function CompleteAccount() {
   }, [formData, currentStep, isOAuth]);
 
   /* ------------------------------------------------------------------ */
+  /* Cleanup if user abandons onboarding (browser close/refresh) */
+  /* ------------------------------------------------------------------ */
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Only cleanup if onboarding wasn't completed
+      if (!onboardingCompletedRef.current) {
+        console.log('[Onboarding] User closing browser - cleaning up all data including auth');
+
+        // Clear sessionStorage items
+        sessionStorage.removeItem('signupEmail');
+        sessionStorage.removeItem('signupPassword');
+        sessionStorage.removeItem('signupDeviceId');
+        sessionStorage.removeItem('registrationToken');
+        sessionStorage.removeItem('accountFormData');
+        sessionStorage.removeItem('accountFormStep');
+        sessionStorage.removeItem('oauthRegistration');
+        sessionStorage.removeItem('otp_expires_at');
+
+        // Clear auth state (log them out)
+        const { clearAuth } = useAuthStore.getState();
+        const { clearUser } = useUserStore.getState();
+        clearAuth();
+        clearUser();
+      }
+    };
+
+    // Listen for browser close/tab close/refresh
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  /* ------------------------------------------------------------------ */
   /* Helpers */
   /* ------------------------------------------------------------------ */
   const updateData = (data: Partial<FormData>) =>
@@ -147,6 +185,27 @@ export default function CompleteAccount() {
 
     // Append country code
     return `${countryCode}${phoneWithoutLeadingZero}`;
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Complete Onboarding */
+  /* ------------------------------------------------------------------ */
+  const completeOnboarding = () => {
+    // Mark onboarding as completed to prevent cleanup on unmount
+    onboardingCompletedRef.current = true;
+
+    // Clear all onboarding-related sessionStorage items
+    sessionStorage.removeItem('signupEmail');
+    sessionStorage.removeItem('signupPassword');
+    sessionStorage.removeItem('signupDeviceId');
+    sessionStorage.removeItem('registrationToken');
+    sessionStorage.removeItem('accountFormData');
+    sessionStorage.removeItem('accountFormStep');
+    sessionStorage.removeItem('oauthRegistration');
+    sessionStorage.removeItem('otp_expires_at');
+
+    // Navigate to home
+    router.push('/');
   };
 
   /* ------------------------------------------------------------------ */
@@ -273,14 +332,12 @@ export default function CompleteAccount() {
       });
       setDeviceMetadata(deviceMetadata);
 
-      // Clear only onboarding-related items, NOT auth tokens
+      // Clear only signup credentials and registration tokens, NOT onboarding progress
+      // (user still needs to complete Steps 6 & 7)
       sessionStorage.removeItem('signupEmail');
       sessionStorage.removeItem('signupPassword');
       sessionStorage.removeItem('signupDeviceId');
       sessionStorage.removeItem('registrationToken');
-      sessionStorage.removeItem('accountFormData');
-      sessionStorage.removeItem('accountFormStep');
-      sessionStorage.removeItem('oauthRegistration');
       sessionStorage.removeItem('otp_expires_at');
 
       toast.success('Phone number verified successfully!');
@@ -353,7 +410,7 @@ export default function CompleteAccount() {
         <Step7
           data={formData}
           updateData={updateData}
-          nextStep={() => router.push('/')}
+          nextStep={completeOnboarding}
           prevStep={prevStep}
         />
       )}

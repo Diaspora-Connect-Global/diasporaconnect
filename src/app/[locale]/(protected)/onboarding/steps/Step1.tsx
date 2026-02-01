@@ -6,6 +6,8 @@ import { TextInput } from '@/components/custom/input';
 import { MultiStep } from '@/components/custom/multistep';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useUserStore } from '@/store/useUserStore';
 
 interface Step1Props {
     data: FormData;
@@ -25,6 +27,22 @@ export const Step1: React.FC<Step1Props> = ({
     const router = useRouter();
 
     const handleBack = () => {
+        // Clear all onboarding data when user goes back to signup
+        sessionStorage.removeItem('signupEmail');
+        sessionStorage.removeItem('signupPassword');
+        sessionStorage.removeItem('signupDeviceId');
+        sessionStorage.removeItem('registrationToken');
+        sessionStorage.removeItem('accountFormData');
+        sessionStorage.removeItem('accountFormStep');
+        sessionStorage.removeItem('oauthRegistration');
+        sessionStorage.removeItem('otp_expires_at');
+
+        // Clear auth state (log them out)
+        const { clearAuth } = useAuthStore.getState();
+        const { clearUser } = useUserStore.getState();
+        clearAuth();
+        clearUser();
+
         router.push('/signup');
     };
 
