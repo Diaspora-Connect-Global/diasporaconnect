@@ -129,7 +129,7 @@ export function CircularImageCropper({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-auto">
         <div className="flex flex-col gap-4 p-4">
           <h2 className="text-lg font-semibold">Crop Your Image</h2>
           
