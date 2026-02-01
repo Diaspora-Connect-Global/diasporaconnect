@@ -108,8 +108,8 @@ export default function CompleteAccount() {
     const savedStep =
       sessionStorage.getItem('accountFormStep');
 
-    if (savedData) setFormData(JSON.parse(savedData));
-    if (savedStep) setCurrentStep(Number(savedStep));
+    // if (savedData) setFormData(JSON.parse(savedData));
+    // if (savedStep) setCurrentStep(Number(savedStep));
   }, [isOAuth]);
 
   /* ------------------------------------------------------------------ */
@@ -344,7 +344,7 @@ export default function CompleteAccount() {
         <Step7
           data={formData}
           updateData={updateData}
-          nextStep={() => router.push('/dashboard')}
+          nextStep={() => router.push('/')}
           prevStep={prevStep}
         />
       )}

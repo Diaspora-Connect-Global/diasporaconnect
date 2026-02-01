@@ -25,7 +25,7 @@ export const Step1: React.FC<Step1Props> = ({
     const router = useRouter();
 
     const handleBack = () => {
-        router.push('/signin');
+        router.push('/signup');
     };
 
     const isNextDisabled =
