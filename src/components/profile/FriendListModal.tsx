@@ -216,7 +216,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     // Process pending requests SENT
     if (requestsSentData?.getPendingConnections.connections) {
       requestsSentData.getPendingConnections.connections.forEach((connection) => {
-        const friend = connection.receiver;
+        const friend = connection.requester;
         friends.push({
           userId: friend.userId,
           connectionId: connection.id,
