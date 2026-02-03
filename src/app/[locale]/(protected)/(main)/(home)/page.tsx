@@ -21,6 +21,45 @@ import { ListCommunitiesData } from '../community/page';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 
+// Type definitions for better type safety
+interface UserProfile {
+  name: string;
+  avatar: string | null;
+  isVip: boolean;
+  verificationTier: string;
+}
+
+interface OrganizationProfile {
+  name: string;
+  logo: string | null;
+  isVerified: boolean;
+}
+
+interface AuthorProfile {
+  userProfile: UserProfile | null;
+  organizationProfile: OrganizationProfile | null;
+}
+
+interface Post {
+  id: string;
+  text: string;
+  authorId: string;
+  authorType: 'USER' | 'ORG';
+  authorProfile: AuthorProfile;
+  createdAt: string;
+  engagementCounts: {
+    likes: number;
+    comments: number;
+    shares: number;
+    saves: number;
+  };
+  userEngagement: {
+    hasLiked: boolean;
+    hasSaved: boolean;
+    hasShared: boolean;
+  };
+}
+
 export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
@@ -69,7 +108,7 @@ export default function Home() {
       });
 
       if (data?.addEngagement.success) {
-        toast.success(data.addEngagement.message);
+        toast.success("Post liked ");
         refetchFeed(); // Refresh feed to get updated counts
       }
     } catch (err) {
@@ -91,7 +130,7 @@ export default function Home() {
       });
 
       if (data?.addEngagement.success) {
-        toast.success(data.addEngagement.message);
+        toast.success("Post saved ");
         refetchFeed();
       }
     } catch (err) {
@@ -113,7 +152,7 @@ export default function Home() {
       });
 
       if (data?.addEngagement.success) {
-        toast.success(data.addEngagement.message);
+        toast.success("Post shared ");
         refetchFeed();
       }
     } catch (err) {
@@ -186,30 +225,52 @@ export default function Home() {
   const hasPosts = posts.length > 0;
 
   // Helper function to get profile data based on author type
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getProfileData = (post: any) => {
-    if (post.authorType === 'org' && post.authorProfile?.organizationProfile) {
+  // Updated to handle uppercase author types from API
+  const getProfileData = (post: Post) => {
+    // Handle organization posts (authorType === 'ORG')
+    if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
       return {
         name: post.authorProfile.organizationProfile.name,
         avatar: post.authorProfile.organizationProfile.logo || '/default-avatar.png',
         isVerified: post.authorProfile.organizationProfile.isVerified,
-        isVip: false
+        isVip: false,
+        type: 'Organization' as const
       };
-    } else if (post.authorType === 'user' && post.authorProfile?.userProfile) {
+    } 
+    // Handle user posts (authorType === 'USER')
+    else if (post.authorType === 'USER' && post.authorProfile?.userProfile) {
       return {
         name: post.authorProfile.userProfile.name,
-        avatar: post.authorProfile.userProfile.avatar || '/default-avatar.png',
-        isVerified: post.authorProfile.userProfile.verificationTier !== 'NONE',
-        isVip: post.authorProfile.userProfile.isVip
+        avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+        isVerified: post.authorProfile.userProfile.verificationTier !== 'unverified' && 
+                    post.authorProfile.userProfile.verificationTier !== 'NONE',
+        isVip: post.authorProfile.userProfile.isVip,
+        type: 'User' as const
       };
     }
-    // Fallback
+    
+    // Fallback for unknown or missing data
     return {
       name: 'Unknown User',
-      avatar: '/default-avatar.png',
+      avatar: '/PROFILE.png',
       isVerified: false,
-      isVip: false
+      isVip: false,
+      type: 'User' as const
     };
+  };
+
+  // Helper function to format post date
+  const formatPostDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: new Date(dateString).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Unknown date';
+    }
   };
 
   return (
@@ -349,17 +410,14 @@ export default function Home() {
 
           {/* Feed Posts */}
           {!feedLoading && hasPosts && posts.map((post) => {
-            const profileData = getProfileData(post);
+            const profileData = getProfileData(post as Post);
             return (
               <div key={post.id} className="mb-2">
                 <FeedCardWithReply
                   profileImage={profileData.avatar}
                   profileName={profileData.name}
-                  category={post.authorType === 'org' ? 'Organization' : 'Community'}
-                  postDate={new Date(post.createdAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                  })}
+                  category={profileData.type}
+                  postDate={formatPostDate(post.createdAt)}
                   content={post.text}
                   images={[]}
                   likes={post.engagementCounts.likes}

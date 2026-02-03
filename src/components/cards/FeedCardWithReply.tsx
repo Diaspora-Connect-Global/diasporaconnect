@@ -187,14 +187,14 @@ export default function FeedCardWithReply({
             <>
                 <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem]">
                     {truncated ? `${content.slice(0, max)}...` : content}
-                {truncated && (
-                    <span
-                        onClick={toggleExpand}
-                        className="text-text-brand text-xs cursor-pointer"
-                    >
-                        {isExpanded ? t('showLess') : t('showMore')}
-                    </span>
-                )}
+                    {truncated && (
+                        <span
+                            onClick={toggleExpand}
+                            className="text-text-brand text-xs cursor-pointer ml-1"
+                        >
+                            {isExpanded ? t('showLess') : t('showMore')}
+                        </span>
+                    )}
                 </p>
             </>
         );
@@ -541,7 +541,7 @@ export default function FeedCardWithReply({
                 {/* Images */}
                 {renderImages()}
 
-                {/* Reaction Bar - ✅ Using formatCount for all counts */}
+                {/* Reaction Bar - Using formatCount for all counts */}
                 <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
                     <button
                         className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem]"

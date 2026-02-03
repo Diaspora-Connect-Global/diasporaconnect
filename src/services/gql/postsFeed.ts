@@ -119,7 +119,6 @@ export interface EditPostData {
 export interface AddEngagementData {
   addEngagement: {
     success: boolean;
-    message: string;
   };
 }
 
@@ -377,7 +376,7 @@ export const ADD_ENGAGEMENT = gql`
   mutation AddEngagement($input: AddEngagementInput!) {
     addEngagement(input: $input) {
       success
-      message
+      
     }
   }
 `;
