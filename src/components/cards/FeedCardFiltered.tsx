@@ -38,7 +38,7 @@ export interface FeedCardFilteredProps {
     onSave?: () => void;
     onSendComment?: (content: string, parentId?: string) => void;
     joinButton?: boolean;
-    forceShowComments?: boolean; // Auto-expand in Commented tab
+    forceShowComments?: boolean; 
 }
 
 /* --------------------------------------------------------------- */

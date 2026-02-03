@@ -19,12 +19,11 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { ListCommunitiesData } from '../community/page';
 import { toast } from 'sonner';
-import {  ButtonType3 } from '@/components/custom/button';
+import { ButtonType3 } from '@/components/custom/button';
 
 export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
-  const tActions = useTranslations('actions');
 
   // Fetch communities
   const { data: discoverData, loading: discoverLoading } = useQuery<ListCommunitiesData>(
@@ -186,6 +185,33 @@ export default function Home() {
   const posts = feedData?.feed?.posts || [];
   const hasPosts = posts.length > 0;
 
+  // Helper function to get profile data based on author type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getProfileData = (post: any) => {
+    if (post.authorType === 'org' && post.authorProfile?.organizationProfile) {
+      return {
+        name: post.authorProfile.organizationProfile.name,
+        avatar: post.authorProfile.organizationProfile.logo || '/default-avatar.png',
+        isVerified: post.authorProfile.organizationProfile.isVerified,
+        isVip: false
+      };
+    } else if (post.authorType === 'user' && post.authorProfile?.userProfile) {
+      return {
+        name: post.authorProfile.userProfile.name,
+        avatar: post.authorProfile.userProfile.avatar || '/default-avatar.png',
+        isVerified: post.authorProfile.userProfile.verificationTier !== 'NONE',
+        isVip: post.authorProfile.userProfile.isVip
+      };
+    }
+    // Fallback
+    return {
+      name: 'Unknown User',
+      avatar: '/default-avatar.png',
+      isVerified: false,
+      isVip: false
+    };
+  };
+
   return (
     <div className="h-app-inner flex overflow-hidden">
       {/* Main Feed - Independent Scroll */}
@@ -305,7 +331,7 @@ export default function Home() {
               </p>
               <ButtonType3
                 onClick={() => refetchFeed()}
-                className="px-4 py-2 bg-primary rounded-lg "
+                className="px-4 py-2 bg-primary rounded-lg"
               >
                 Retry
               </ButtonType3>
@@ -322,32 +348,37 @@ export default function Home() {
           )}
 
           {/* Feed Posts */}
-          {!feedLoading && hasPosts && posts.map((post) => (
-            <div key={post.id} className="mb-2">
-              <FeedCardWithReply
-                profileImage="/ADANSI.png" // You'll need to map this from author data
-                profileName={post.authorId} // You'll need to fetch author name separately
-                category="Community" // You'll need to map this from post data
-                postDate={new Date(post.createdAt).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
-                content={post.text}
-                images={[]} // Add images if available in your schema
-                likes={post.engagementCounts.likes}
-                comments={post.engagementCounts.comments}
-                commentsData={[]} // You'll need to fetch comments separately
-                onLike={() => handleLike(post.id)}
-                onComment={() => console.log('Open comment input for', post.id)}
-                onShare={() => handleShare(post.id)}
-                onSave={() => handleSave(post.id)}
-                onSendComment={(content) => handleSendComment(post.id, content)}
-                joinButton={false}
-                isLiked={post.userEngagement.hasLiked}
-                isSaved={post.userEngagement.hasSaved}
-              />
-            </div>
-          ))}
+          {!feedLoading && hasPosts && posts.map((post) => {
+            const profileData = getProfileData(post);
+            return (
+              <div key={post.id} className="mb-2">
+                <FeedCardWithReply
+                  profileImage={profileData.avatar}
+                  profileName={profileData.name}
+                  category={post.authorType === 'org' ? 'Organization' : 'Community'}
+                  postDate={new Date(post.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                  content={post.text}
+                  images={[]}
+                  likes={post.engagementCounts.likes}
+                  comments={post.engagementCounts.comments}
+                  shares={post.engagementCounts.shares}
+                  commentsData={[]}
+                  onLike={() => handleLike(post.id)}
+                  onComment={() => console.log('Open comment input for', post.id)}
+                  onShare={() => handleShare(post.id)}
+                  onSave={() => handleSave(post.id)}
+                  onSendComment={(content) => handleSendComment(post.id, content)}
+                  joinButton={false}
+                  isLiked={post.userEngagement.hasLiked}
+                  isSaved={post.userEngagement.hasSaved}
+                  isShared={post.userEngagement.hasShared}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 

@@ -15,6 +15,25 @@ export interface EngagementCounts {
 export interface UserEngagement {
   hasLiked: boolean;
   hasSaved: boolean;
+  hasShared: boolean;  // ✅ Added missing field
+}
+
+export interface UserProfile {
+  name: string;
+  avatar: string;
+  isVip: boolean;
+  verificationTier: string;
+}
+
+export interface OrganizationProfile {
+  name: string;
+  logo: string;
+  isVerified: boolean;
+}
+
+export interface AuthorProfile {
+  organizationProfile?: OrganizationProfile;
+  userProfile?: UserProfile;
 }
 
 export interface Post {
@@ -22,6 +41,7 @@ export interface Post {
   text: string;
   authorId: string;
   authorType: string;
+  authorProfile?: AuthorProfile;
   createdAt: string;
   engagementCounts: EngagementCounts;
   userEngagement: UserEngagement;
@@ -39,7 +59,7 @@ export interface GetFeedInput {
   offset?: number;
   communityId?: string;
   authorId?: string;
-  type :  'all' 
+  type: 'all';
 }
 
 export interface CreatePostInput {
@@ -143,6 +163,18 @@ export const GET_FEED = gql`
         text
         authorId
         authorType
+        authorProfile {
+          organizationProfile {
+            name
+            isVip
+          }
+          userProfile {
+            name
+            avatar
+            isVip
+            verificationTier
+          }
+        }
         createdAt
         engagementCounts {
           likes
@@ -153,6 +185,7 @@ export const GET_FEED = gql`
         userEngagement {
           hasLiked
           hasSaved
+          hasShared
         }
       }
     }
@@ -191,6 +224,7 @@ export const GET_POST = gql`
       userEngagement {
         hasLiked
         hasSaved
+        hasShared
       }
     }
   }

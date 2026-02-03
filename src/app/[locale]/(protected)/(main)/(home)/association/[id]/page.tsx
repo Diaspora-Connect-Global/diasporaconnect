@@ -216,6 +216,7 @@ export default function AssociationPage() {
                                 category={association.name}
                                 postDate={post.createdAt}
                                 content={post.text}
+                                shares={post.engagementCounts.shares}
                                 likes={post.engagementCounts.likes}
                                 comments={post.engagementCounts.comments}
                                 onLike={() => console.log('Like', post.id)}
