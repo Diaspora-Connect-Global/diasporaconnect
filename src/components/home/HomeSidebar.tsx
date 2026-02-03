@@ -9,8 +9,9 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
-import { LIST_AVAILABLE_ASSOCIATIONS } from '@/services/gql/associations';
+import { GET_USER_ASSOCIATIONS } from '@/services/gql/associations';
 import ViewFilter from './viewFilter';
+import { useUserStore } from '@/store/useUserStore';
 
 // Reusable Section Component
 interface SectionProps {
@@ -32,6 +33,16 @@ interface Association {
     membershipStatus?: string;
     associationType?: { name: string };
 }
+
+interface UserAssociation {
+  id: string;
+  name: string;
+}
+
+interface GetUserAssociationsResponse {
+  getUserAssociations: UserAssociation[];
+}
+
 
 interface Group {
     id: string;
@@ -181,17 +192,19 @@ function SidebarLists() {
 
     const tPrivacy = useTranslations('privacy');
     const t = useTranslations('home');
+    const userId = useUserStore(state => state.user?.userId);
 
     // Fetch available associations
-    const { data: associationsData, loading: associationsLoading } = useQuery<ListAvailableAssociationsResponse>(
-        LIST_AVAILABLE_ASSOCIATIONS,
-        {
-            variables: {
-                limit: 10,
-                offset: 0,
-            },
-        }
-    );
+ 
+    const {
+  data: userAssociationsData,
+  loading: userAssociationsLoading
+} = useQuery<GetUserAssociationsResponse>(
+  GET_USER_ASSOCIATIONS,
+  {
+    variables: { userId }
+  }
+);
 
     // Fetch user's groups
     const { data: groupsData, loading: groupsLoading } = useQuery<GetMyGroupsResponse>(
@@ -212,7 +225,8 @@ function SidebarLists() {
     };
 
     const myGroups = groupsData?.getMyGroups?.groups || [];
-    const myAssociations = associationsData?.listAssociations?.associations || [];
+const myAssociations =
+  userAssociationsData?.getUserAssociations || [];
 
     const handleGroupClick = (groupId: string) => {
         // Set active chat in session storage
@@ -247,23 +261,26 @@ function SidebarLists() {
                 link="/association"
             >
                 <div className="space-y-1">
-                    {associationsLoading ? (
-                        <BodySmall>
-                            <span className="text-secondary">Loading associations...</span>
+                  {userAssociationsLoading ? (
+  <BodySmall>
+    <span className="text-secondary">Loading associations...</span>
+  </BodySmall>
+) : myAssociations.length > 0 ? (
+  myAssociations.map((association) => (
+    <div key={association.id}>
+      <CommunityItem
+        link={`/association/${association.id}`}
+        name={association.name}
+        onClick={() => handleAssociationClick(association.id)}
+      />
+    </div>
+  ))
+) : (
+  <BodySmall>
+                            <span className="text-secondary">No associations joined yet</span>
                         </BodySmall>
-                    ) : myAssociations.length > 0 ? (
-                        myAssociations.map((association) => (
-                            <div key={association.id}>
-                                <CommunityItem 
-                                    link={`/association/${association.id}`} 
-                                    name={association.name}
-                                    onClick={() => handleAssociationClick(association.id)}
-                                />
-                            </div>
-                        ))
-                    ) : (
-                        <NoCommunity />
-                    )}
+)}
+
                 </div>
             </Section>
 

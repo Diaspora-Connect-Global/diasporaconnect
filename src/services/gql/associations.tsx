@@ -59,3 +59,16 @@ export const REQUEST_JOIN_ASSOCIATION = gql`
     }
   }
 `;
+
+
+
+
+
+export const GET_USER_ASSOCIATIONS = gql`
+  query GetUserAssociations($userId: ID!) {
+    getUserAssociations(userId: $userId) {
+      id
+      name
+    }
+  }
+`;
