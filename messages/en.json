@@ -665,12 +665,15 @@
             "report": "Report",
             "block": "Block",
             "deleteConversation": "Delete Conversation",
-            "typeMessage": "Type a message..."
+            "typeMessage": "Type a message...",
+            "cannotSend": "Cannot send messages..."
         },
         "group": {
             "message": "Message {name}",
             "edit": "Edit",
             "members": "Members",
+            "memberCount": "{count} members",
+            "groupInfo": "Group Info",
             "addPeople": "Add people",
             "you": " (You)",
             "leaveGroup": "Leave Group",

@@ -531,7 +531,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
                             id: group.id,
                             name: group.name,
                             avatar: group.avatarUrl || getInitials(group.name),
-                            lastMessage: group.description || `${group.memberCount} members`,
+                            lastMessage: group.description || t('group.memberCount', { count: group.memberCount }),
                             lastMessageTime: group.createdAt,
                             unread: 0,
                             type: 'group' as const,

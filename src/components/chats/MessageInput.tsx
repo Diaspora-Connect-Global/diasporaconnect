@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
+import { useTranslations } from "next-intl";
 
 
 interface MessageInputProps {
@@ -16,17 +17,20 @@ interface MessageInputProps {
 
 export function MessageInput({
     onSendMessage,
-    placeholder = "Type a message...",
+    placeholder,
     disabled = false,
     conversationId,
     senderId = 'current-user'
 }: MessageInputProps) {
+    const t = useTranslations('chat.direct');
     const [newMessage, setNewMessage] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    
+    const inputPlaceholder = placeholder || t('typeMessage');
 
     const updateMockData = (messageText: string, image?: string) => {
         if (!conversationId) return;
@@ -251,7 +255,7 @@ export function MessageInput({
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     onKeyPress={handleKeyPress}
-                                    placeholder={disabled ? "Cannot send messages..." : placeholder}
+                                    placeholder={disabled ? t('cannotSend') : inputPlaceholder}
                                     disabled={disabled}
                                     className="w-full rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base leading-6 sm:leading-7 focus:outline-none focus:border-text-brand resize-none bg-surface-default disabled:opacity-50 disabled:cursor-not-allowed overflow-y-auto"
                                     rows={1}

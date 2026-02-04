@@ -423,7 +423,7 @@ export default function GroupChat() {
                             </div>
                             <div>
                                 <h2 className="font-semibold text-text-primary">{group.name}</h2>
-                                <p className="text-sm text-text-secondary">{group.memberCount} members</p>
+                                <p className="text-sm text-text-secondary">{t('memberCount', { count: group.memberCount })}</p>
                             </div>
                         </div>
                         <button onClick={handleSideBarToggle}>
@@ -544,7 +544,7 @@ export default function GroupChat() {
                         `}>
                             {isMobile && (
                                 <div className="flex justify-between items-center p-4 border-b border-border-subtle">
-                                    <h3 className="font-semibold text-text-primary">Group Info</h3>
+                                    <h3 className="font-semibold text-text-primary">{t('groupInfo')}</h3>
                                     <button
                                         onClick={() => setSidebarOpen(false)}
                                         className="p-2 hover:bg-surface-hover rounded-lg"

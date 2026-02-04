@@ -201,7 +201,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                         {/* Mobile Close Button */}
                         {isMobile && (
                             <div className="flex justify-between items-center p-4 border-b border-border-subtle md:hidden">
-                                <h3 className="font-semibold text-text-primary text-base">Profile</h3>
+                                <h3 className="font-semibold text-text-primary text-base">{t('viewProfile')}</h3>
                                 <button
                                     onClick={() => setSidebarOpen(false)}
                                     className="p-2 hover:bg-surface-hover rounded-lg transition-colors"
@@ -221,10 +221,10 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                     </Avatar>
                                     <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
                                     {chat.online ? (
-                                        <p className="text-sm text-text-success font-medium">Online</p>
+                                        <p className="text-sm text-text-success font-medium">{t('online')}</p>
                                     ) : (
                                         <p className="text-sm text-text-secondary">
-                                            Last seen {formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime)}
+                                            {t('lastSeen', { time: formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime) })}
                                         </p>
                                     )}
                                 </div>
