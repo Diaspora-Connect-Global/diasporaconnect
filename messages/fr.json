@@ -122,6 +122,7 @@
         "addFriend": "Ajouter un ami",
         "join": "Rejoindre",
         "joined": "Rejoint",
+        "joining": "Adhésion en cours...",
         "pending": "En attente",
         "attending": "Participe",
         "saved": "Sauvegardé",
@@ -289,7 +290,20 @@
         "associations": {
             "discover": "Découvrir des associations",
             "myassociations": "Mes associations à {association}",
-            "discovermore": "Découvrir plus d'associations à {association}"
+            "discovermore": "Découvrir plus d'associations dans {association}",
+            "noAssociations": "Aucune association trouvée pour cette communauté",
+            "noDiscoverAssociations": "Aucune association à découvrir pour cette communauté",
+            "noCommunitySelected": "Aucune communauté sélectionnée",
+            "selectCommunityMessage": "Veuillez sélectionner une communauté pour voir les associations",
+            "loading": "Chargement...",
+            "loadingPosts": "Chargement des publications...",
+            "noPosts": "Aucune publication pour le moment.",
+            "joining": "Adhésion en cours...",
+            "notfound": {
+                "title": "Association introuvable",
+                "description": "Nous n'avons pas pu trouver l'association que vous recherchez. Elle a peut-être été supprimée ou le lien est incorrect.",
+                "browse": "Parcourir les associations"
+            }
         },
         "groupchats": {
             "groupchats": "Chats de groupe",

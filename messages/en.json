@@ -163,6 +163,7 @@
         "addFriend": "Add Friend",
         "join": "Join",
         "joined": "Joined",
+        "joining": "Joining...",
         "pending": "Pending",
         "attending": "Attending",
         "saved": "Saved",
@@ -364,9 +365,17 @@
             "discover": "Discover associations",
             "myassociations": "My associations in {association}",
             "discovermore": "Discover more associations in {association}",
+            "noAssociations": "No associations found for this community",
+            "noDiscoverAssociations": "No associations to discover for this community",
+            "noCommunitySelected": "No community selected",
+            "selectCommunityMessage": "Please select a community to view associations",
+            "loading": "Loading...",
+            "loadingPosts": "Loading posts...",
+            "noPosts": "No posts yet.",
+            "joining": "Joining...",
             "notfound": {
                 "title": "Association not found",
-                "description": " We couldn't find the association you're looking for. It may have been removed or the link is incorrect.",
+                "description": "We couldn't find the association you're looking for. It may have been removed or the link is incorrect.",
                 "browse": "Browse associations"
             }
         },

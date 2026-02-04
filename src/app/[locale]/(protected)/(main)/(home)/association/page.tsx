@@ -168,8 +168,8 @@ export default function Associations() {
         return (
             <div className="lg:w-[60vw] h-app-inner px-4 py-2 flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-xl text-gray-600 mb-2">No community selected</p>
-                    <p className="text-sm text-gray-500">Please select a community to view associations</p>
+                    <p className="text-xl text-gray-600 mb-2">{tAssociations("noCommunitySelected")}</p>
+                    <p className="text-sm text-gray-500">{tAssociations("selectCommunityMessage")}</p>
                 </div>
             </div>
         );
@@ -199,7 +199,7 @@ export default function Associations() {
                         ))
                     ) : (
                         <div className="text-center py-8 text-gray-500">
-                            No associations found for this community
+                            {tAssociations("noAssociations")}
                         </div>
                     )}
                 </div>
@@ -224,7 +224,7 @@ export default function Associations() {
                         ))
                     ) : (
                         <div className="col-span-full text-center py-8 text-gray-500">
-                            No associations to discover for this community
+                            {tAssociations("noDiscoverAssociations")}
                         </div>
                     )}
                 </div>

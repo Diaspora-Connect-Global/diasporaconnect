@@ -122,6 +122,7 @@
         "addFriend": "Freund hinzufügen",
         "join": "Beitreten",
         "joined": "Beigetreten",
+        "joining": "Beitritt läuft...",
         "pending": "Ausstehend",
         "attending": "Nehme teil",
         "saved": "Gespeichert",
@@ -289,7 +290,20 @@
         "associations": {
             "discover": "Vereine entdecken",
             "myassociations": "Meine Vereine in {association}",
-            "discovermore": "Weitere Vereine in {association} entdecken"
+            "discovermore": "Weitere Vereine in {association} entdecken",
+            "noAssociations": "Keine Vereine für diese Gemeinschaft gefunden",
+            "noDiscoverAssociations": "Keine Vereine zum Entdecken für diese Gemeinschaft",
+            "noCommunitySelected": "Keine Gemeinschaft ausgewählt",
+            "selectCommunityMessage": "Bitte wählen Sie eine Gemeinschaft aus, um Vereine anzuzeigen",
+            "loading": "Wird geladen...",
+            "loadingPosts": "Beiträge werden geladen...",
+            "noPosts": "Noch keine Beiträge.",
+            "joining": "Beitritt läuft...",
+            "notfound": {
+                "title": "Verein nicht gefunden",
+                "description": "Wir konnten den gesuchten Verein nicht finden. Er wurde möglicherweise entfernt oder der Link ist falsch.",
+                "browse": "Vereine durchsuchen"
+            }
         },
         "groupchats": {
             "groupchats": "Gruppenchats",

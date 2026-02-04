@@ -115,7 +115,7 @@ export default function AssociationPage() {
     if (detailsLoading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center p-4">
-                <p className="text-text-secondary">Loading...</p>
+                <p className="text-text-secondary">{t("loading")}</p>
             </div>
         );
     }
@@ -183,7 +183,7 @@ export default function AssociationPage() {
                                     disabled={joinLoading || isJoined}
                                 >
                                     {joinLoading
-                                        ? tActions("joining") || 'Joining...'
+                                        ? tActions("joining")
                                         : isJoined
                                             ? tActions("joined")
                                             : tActions("join")}
@@ -206,7 +206,7 @@ export default function AssociationPage() {
                 {/* Feed */}
                 <div className="overflow-auto lg:max-h-[calc(100vh-64px)] scrollbar-hide">
                     {feedLoading ? (
-                        <p className="text-text-secondary text-sm py-4 px-2">Loading posts...</p>
+                        <p className="text-text-secondary text-sm py-4 px-2">{t("loadingPosts")}</p>
                     ) : posts.length > 0 ? (
                         posts.map((post) => (
                             <FeedCardWithReply
@@ -227,7 +227,7 @@ export default function AssociationPage() {
                             />
                         ))
                     ) : (
-                        <p className="text-text-secondary text-sm py-4 px-2">No posts yet.</p>
+                        <p className="text-text-secondary text-sm py-4 px-2">{t("noPosts")}</p>
                     )}
                 </div>
             </div>
