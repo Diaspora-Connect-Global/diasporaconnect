@@ -8,6 +8,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { useTranslations } from "next-intl";
 
 /**
  * Props for the ConfirmationModal component
@@ -81,12 +82,13 @@ export function ConfirmationModal({
   onConfirm,
   title,
   description,
-  cancelText = "Cancel",
-  confirmText = "Confirm",
+  cancelText,
+  confirmText,
   confirmVariant = "default",
   isLoading = false,
   maxWidth = "sm",
 }: ConfirmationModalProps) {
+  const tCommon = useTranslations("common");
   const maxWidthClasses = {
     sm: "max-w-sm",
     md: "max-w-md",
@@ -110,7 +112,7 @@ export function ConfirmationModal({
             onClick={onCancel}
             disabled={isLoading}
           >
-            {cancelText}
+            {cancelText || tCommon("cancel")}
           </ButtonType3>
           <ButtonType2
             className={`py-2 px-3 ${
@@ -121,7 +123,7 @@ export function ConfirmationModal({
             onClick={onConfirm}
             disabled={isLoading}
           >
-            {isLoading ? "Processing..." : confirmText}
+            {isLoading ? tCommon("processing") : (confirmText || tCommon("confirm"))}
           </ButtonType2>
         </div>
       </DialogContent>

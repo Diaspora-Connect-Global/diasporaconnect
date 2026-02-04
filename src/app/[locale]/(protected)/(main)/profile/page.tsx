@@ -19,6 +19,7 @@ import { CircularImageCropper } from "@/lib/imagecropper";
 import { gql } from "@apollo/client";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useUserStore } from "@/store/useUserStore";
+import { useTranslations } from "next-intl";
 
 const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
@@ -46,6 +47,7 @@ interface UpdateProfileResponse {
 }
 
 export default function ProfilePage() {
+    const tCommon = useTranslations("common");
     const setUser = useUserStore(state => state.setUser);
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
 
@@ -261,7 +263,7 @@ export default function ProfilePage() {
                         disabled={!croppedImage || uploading || updating}
                         className="w-full py-3"
                     >
-                        {uploading || updating ? "Uploading..." : "Upload"}
+                        {uploading || updating ? tCommon("uploading") : tCommon("upload")}
                     </ButtonType2>
                 </div>
             </CustomDialog>

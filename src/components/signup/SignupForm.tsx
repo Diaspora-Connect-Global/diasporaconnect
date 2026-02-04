@@ -21,6 +21,7 @@ import { generateDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function SignUpForm() {
+  const tCommon = useTranslations("common");
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -234,7 +235,7 @@ export default function SignUpForm() {
             disabled={isChecking || registerLoading}
             className="px-8 py-4 w-full lg:w-fit"
           >
-            {isChecking || registerLoading ? 'Processing...' : a("continue")}
+            {isChecking || registerLoading ? tCommon("processing") : a("continue")}
           </ButtonType2>
         </div>
       </div>
