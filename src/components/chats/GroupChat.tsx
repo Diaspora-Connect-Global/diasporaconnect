@@ -54,6 +54,7 @@ interface GroupChatProps {
 
 export default function GroupChat() {
     const t = useTranslations('chat.group');
+    const tCommon = useTranslations('common');
     const router = useRouter();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -411,7 +412,7 @@ export default function GroupChat() {
                             <button 
                         onClick={handleMBack}
                         className="p-2 hover:bg-surface-hover rounded-lg transition-colors md:hidden"
-                        aria-label="Back to chats"
+                        aria-label={tCommon('backToChats')}
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>

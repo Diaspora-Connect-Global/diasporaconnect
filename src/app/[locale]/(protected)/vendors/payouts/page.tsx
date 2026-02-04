@@ -13,6 +13,7 @@ interface Transaction {
 
 const PayoutsDashboard = () => {
   const t = useTranslations('vendors.payouts');
+  const tCommon = useTranslations('common');
   const [searchTerm, setSearchTerm] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -138,7 +139,7 @@ const PayoutsDashboard = () => {
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    aria-label="Previous page"
+                    aria-label={tCommon('previousPage')}
                   >
                     <ChevronLeft className="w-5 h-5 text-gray-600" />
                   </button>
@@ -146,7 +147,7 @@ const PayoutsDashboard = () => {
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
                     className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    aria-label="Next page"
+                    aria-label={tCommon('nextPage')}
                   >
                     <ChevronRight className="w-5 h-5 text-gray-600" />
                   </button>

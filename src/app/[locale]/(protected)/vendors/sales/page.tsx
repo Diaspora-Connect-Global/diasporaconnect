@@ -14,6 +14,7 @@ interface SalesOrder {
 
 const SalesDashboard = () => {
   const t = useTranslations('vendors.sales');
+  const tCommon = useTranslations('common');
   const [searchTerm, setSearchTerm] = useState('');
   const [timeFilter, setTimeFilter] = useState('all-time');
   const [statusFilter, setStatusFilter] = useState('all-status');
@@ -147,7 +148,7 @@ const SalesDashboard = () => {
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label="Previous page"
+                aria-label={tCommon('previousPage')}
               >
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
@@ -155,7 +156,7 @@ const SalesDashboard = () => {
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label="Next page"
+                aria-label={tCommon('nextPage')}
               >
                 <ChevronRight className="w-5 h-5 text-gray-600" />
               </button>

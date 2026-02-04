@@ -10,6 +10,7 @@ type PricingMode = 'single' | 'multiple';
 const AddServiceFlow = () => {
   const t = useTranslations('vendors.services');
   const tForm = useTranslations('vendors.services.form');
+  const tCommon = useTranslations('common');
   
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [pricingMode, setPricingMode] = useState<PricingMode>('single');
@@ -315,7 +316,7 @@ const AddServiceFlow = () => {
                             <button
                               onClick={() => updatePackage(pkg.id, 'revisions', Math.max(0, pkg.revisions - 1))}
                               className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50"
-                              aria-label="Decrease revisions"
+                              aria-label={tCommon('decreaseRevisions')}
                             >
                               <Minus className="w-4 h-4 text-gray-600" />
                             </button>
@@ -323,7 +324,7 @@ const AddServiceFlow = () => {
                             <button
                               onClick={() => updatePackage(pkg.id, 'revisions', pkg.revisions + 1)}
                               className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50"
-                              aria-label="Increase revisions"
+                              aria-label={tCommon('increaseRevisions')}
                             >
                               <Plus className="w-4 h-4 text-gray-600" />
                             </button>

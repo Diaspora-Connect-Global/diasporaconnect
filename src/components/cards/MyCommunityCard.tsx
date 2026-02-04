@@ -34,6 +34,7 @@ export function MyCommunityCard({
     
     const router = useRouter();
     const t = useTranslations('community');
+    const tCommon = useTranslations('common');
 
         const setSelectedCommunity = useCommunityStore(state => state.setSelectedCommunity);
     
@@ -71,7 +72,7 @@ export function MyCommunityCard({
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button className='bg-surface-default border-0 shadow-none text-text-primary p-1' variant="outline" aria-label="Open menu" size="icon-sm">
+                            <Button className='bg-surface-default border-0 shadow-none text-text-primary p-1' variant="outline" aria-label={tCommon('openMenu')} size="icon-sm">
                                 <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" /> {/* Smaller icon on mobile */}
                             </Button>
                         </DropdownMenuTrigger>

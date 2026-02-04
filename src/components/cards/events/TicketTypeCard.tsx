@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Minus, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface TicketTypeCardProps {
   title: string;
@@ -18,6 +19,8 @@ export default function TicketTypeCard({
   quantity,
   onQuantityChange,
 }: TicketTypeCardProps) {
+  const tCommon = useTranslations('common');
+  
   const handleDecrement = () => {
     if (quantity > 0) {
       onQuantityChange(quantity - 1);
@@ -46,7 +49,7 @@ export default function TicketTypeCard({
             onClick={handleDecrement}
             disabled={quantity === 0}
             className="w-9 h-9 rounded-full flex items-center justify-center text-text-brand  disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            aria-label="Decrease quantity"
+            aria-label={tCommon('decreaseQuantity')}
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -58,7 +61,7 @@ export default function TicketTypeCard({
           <button
             onClick={handleIncrement}
             className="w-9 h-9 rounded-full flex items-center justify-center text-text-brand  transition-colors"
-            aria-label="Increase quantity"
+            aria-label={tCommon('increaseQuantity')}
           >
             <Plus className="w-4 h-4" />
           </button>

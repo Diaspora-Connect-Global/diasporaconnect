@@ -34,6 +34,7 @@ export function NotificationCard({
     onRemove,
 }: NotificationCardProps) {
     const t = useTranslations('notification');
+    const tCommon = useTranslations('common');
 
     const handleMarkAsRead = (event: Event) => {
         event.preventDefault();
@@ -89,7 +90,7 @@ export function NotificationCard({
                                     <Button 
                                         className='bg-surface-default border-0 shadow-none text-text-primary p-1' 
                                         variant="outline" 
-                                        aria-label="Open menu" 
+                                        aria-label={tCommon('openMenu')} 
                                         size="icon-sm"
                                     >
                                         <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -122,8 +123,8 @@ export function NotificationCard({
                             {!read && (
                                 <div
                                     className="w-2 h-2 bg-surface-brand rounded-full flex-shrink-0"
-                                    aria-label="Unread"
-                                    title="Unread"
+                                    aria-label={tCommon('unread')}
+                                    title={tCommon('unread')}
                                 />
                             )}
                         </div>

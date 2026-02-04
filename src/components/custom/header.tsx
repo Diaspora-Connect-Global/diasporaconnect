@@ -43,6 +43,7 @@ export default function Header({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const t = useTranslations('home.header');
+  const tCommon = useTranslations('common');
   const router = useRouter();
 
 
@@ -215,7 +216,7 @@ export default function Header({
                     <button
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
-                      aria-label="Close menu"
+                      aria-label={tCommon('closeMenu')}
                     >
                       <X className="w-6 h-6" />
                     </button>

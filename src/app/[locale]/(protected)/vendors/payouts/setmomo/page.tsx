@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 const AddMobileAccount = () => {
   const t = useTranslations('vendors.payouts.momo');
+  const tCommon = useTranslations('common');
   const [selectedProvider, setSelectedProvider] = useState('mtn');
   const [phoneNumber, setPhoneNumber] = useState('24 123 4567');
   const [accountName, setAccountName] = useState('John Doe');
@@ -74,7 +75,7 @@ const AddMobileAccount = () => {
             </label>
             <div className="flex gap-3">
               <div className="relative w-28">
-                <select className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-none cursor-pointer text-sm" aria-label="Country code">
+                <select className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-none cursor-pointer text-sm" aria-label={tCommon('countryCode')}>
                   <option>🇬🇭 +233</option>
                   <option>🇳🇬 +234</option>
                   <option>🇰🇪 +254</option>

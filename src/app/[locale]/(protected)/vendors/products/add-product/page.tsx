@@ -20,6 +20,7 @@ type ImageType = {
 export default function AddProductForm() {
   const t = useTranslations('vendors.products');
   const tForm = useTranslations('vendors.products.form');
+  const tCommon = useTranslations('common');
   
   const [formData, setFormData] = React.useState<FormDataType>({
     name: "",
@@ -200,7 +201,7 @@ export default function AddProductForm() {
                 <button
                   onClick={() => removeImage(index)}
                   className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full"
-                  aria-label="Remove image"
+                  aria-label={tCommon('removeImage')}
                 >
                   ×
                 </button>

@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 
 export default function ServicesPage() {
   const t = useTranslations('vendors.services');
+  const tCommon = useTranslations('common');
   const [statusFilter, setStatusFilter] = React.useState('all');
   const [categoryFilter, setCategoryFilter] = React.useState('all');
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -180,12 +181,12 @@ export default function ServicesPage() {
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">{t('page', { current: 1, total: 10 })}</span>
             <div className="flex items-center gap-1">
-              <button className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50" disabled aria-label="Previous page">
+              <button className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50" disabled aria-label={tCommon('previousPage')}>
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="p-1 hover:bg-gray-100 rounded transition-colors" aria-label="Next page">
+              <button className="p-1 hover:bg-gray-100 rounded transition-colors" aria-label={tCommon('nextPage')}>
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

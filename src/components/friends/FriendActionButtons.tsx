@@ -11,6 +11,7 @@ import {
 } from "../ui/dropdown-menu";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 export type FriendButtonType = 
     | "message" 
@@ -46,6 +47,7 @@ export const FriendActionButtons = ({
     searchQuery = "",
     isSearching = false,
 }: FriendActionButtonsProps) => {
+    const tCommon = useTranslations('common');
     const {
         sendMessage,
         addFriend,
@@ -150,7 +152,7 @@ export const FriendActionButtons = ({
                     <Button
                         className="cursor-pointer bg-surface-default border-0 shadow-none text-text-primary p-1"
                         variant="outline"
-                        aria-label="Open menu"
+                        aria-label={tCommon('openMenu')}
                         size="icon-sm"
                         disabled={isRemoveLoading || isBlockLoading}
                     >

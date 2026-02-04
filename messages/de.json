@@ -882,7 +882,21 @@
   "common": {
     "scrollLeft": "Nach links scrollen",
     "scrollRight": "Nach rechts scrollen",
-    "almostThere": "Fast geschafft..."
+    "almostThere": "Fast geschafft...",
+    "loading": "Wird geladen",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "close": "Schließen",
+    "previousPage": "Vorherige Seite",
+    "nextPage": "Nächste Seite",
+    "backToChats": "Zurück zu Chats",
+    "unread": "Ungelesen",
+    "removeImage": "Bild entfernen",
+    "countryCode": "Ländervorwahl",
+    "decreaseRevisions": "Überarbeitungen verringern",
+    "increaseRevisions": "Überarbeitungen erhöhen",
+    "decreaseQuantity": "Menge verringern",
+    "increaseQuantity": "Menge erhöhen"
   },
   "metadata": {
     "title": "Diaspora Connect Global",
