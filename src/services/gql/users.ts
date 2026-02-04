@@ -1,65 +1,16 @@
 import { gql } from '@apollo/client';
 
-// ============================================================================
-// BLOCKING TYPES
-// ============================================================================
-
-export interface UserBasic {
-  userId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string;
-}
-
-export interface Block {
-  id: string;
-  blockerId: string;
-  blockedId: string;
-  reason?: string;
-  blockedAt: string;
-  blocker: UserBasic;
-  blocked: UserBasic;
-}
-
-export interface BlockUserInput {
-  blockedId: string;
-  reason?: string;
-}
-
-export interface UnblockUserInput {
-  blockedId: string;
-}
-
-export interface BlockUserResponse {
-  blockUser: {
-    success: boolean;
-    message?: string;
-    block: Block;
-  };
-}
-
-export interface UnblockUserResponse {
-  unblockUser: {
-    success: boolean;
-    message?: string;
-  };
-}
-
-export interface GetBlockedUsersResponse {
-  getBlockedUsers: {
-    users: Block[];
-    total: number;
-    hasMore: boolean;
-    nextCursor?: string;
-  };
-}
-
-export interface IsUserBlockedResponse {
-  isUserBlocked: {
-    isBlocked: boolean;
-  };
-}
+// Re-export types from the types folder for backward compatibility
+export type {
+  BlockUserBasic,
+  Block,
+  BlockUserInput,
+  UnblockUserInput,
+  BlockUserResponse,
+  UnblockUserResponse,
+  GetBlockedUsersResponse,
+  IsUserBlockedResponse,
+} from './types';
 
 // ============================================================================
 // BLOCKING QUERIES

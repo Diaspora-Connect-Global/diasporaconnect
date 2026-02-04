@@ -1,5 +1,13 @@
 import { gql } from '@apollo/client';
 
+// Re-export types from the types folder for backward compatibility
+export type {
+  LoginInput,
+  LoginUser,
+  LoginResponse,
+  LogoutResponse,
+} from './types';
+
 // ============================================================================
 // LOGIN MUTATIONS
 // ============================================================================
@@ -154,84 +162,3 @@ export const LOGOUT_USER = gql`
     }
   }
 `;
-
-// ============================================================================
-// TYPESCRIPT INTERFACES
-// ============================================================================
-
-/**
- * Input type for user login.
- * 
- * @property {string} email - User's registered email address
- * @property {string} password - User's password
- * @property {string} deviceId - Unique device identifier/fingerprint
- * @property {boolean} [rememberMe] - Optional: Keep user logged in for extended period
- * @property {string} [twoFactorCode] - Optional: 6-digit 2FA code (required if 2FA is enabled)
- */
-export interface LoginInput {
-  email: string;
-  password: string;
-  deviceId: string;
-  rememberMe?: boolean;
-  twoFactorCode?: string;
-}
-
-/**
- * Response from login mutation.
- * 
- * @property {boolean} success - Whether login was successful
- * @property {string} message - Success or error message
- * @property {string} sessionToken - Session token for authentication
- * @property {string} accessToken - JWT access token for API requests
- * @property {string} refreshToken - Token for refreshing expired access tokens
- * @property {string} sessionId - Unique session identifier
- * @property {number} expiresIn - Token expiry time in seconds
- * @property {boolean} requiresTwoFactor - Whether 2FA verification is required
- * @property {Object} user - Authenticated user's profile data
- * @property {Object} deviceMetadata - Information about the login device
- * @property {string} [error] - Error message if login failed
- */
-export interface LoginResponse {
-  login: {
-    success: boolean;
-    message: string;
-    sessionToken: string;
-    accessToken: string;
-    refreshToken: string;
-    sessionId: string;
-    expiresIn: number;
-    requiresTwoFactor: boolean;
-    avatarUrl?: string;
-
-    user: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-      avatarUrl?: string;
-    };
-    deviceMetadata: {
-      fingerprint: string;
-      ipAddress: string;
-      userAgent: string;
-      deviceId: string;
-    };
-    error?: string;
-  };
-}
-
-/**
- * Response from logout mutation.
- * 
- * @property {boolean} success - Whether logout was successful
- * @property {string} message - Success or error message
- * @property {string} [error] - Error message if logout failed
- */
-export interface LogoutResponse {
-  logout: {
-    success: boolean;
-    message: string;
-    error?: string;
-  };
-}

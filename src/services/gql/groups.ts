@@ -1,235 +1,36 @@
 import { gql } from '@apollo/client';
-import { Profile } from './profile';
+import type { Profile } from './types';
 
-// ============================================================================
-// GROUP TYPES
-// ============================================================================
-
-export enum GroupPrivacy {
-  PUBLIC = 'PUBLIC',
-  PRIVATE = 'PRIVATE',
-}
-
-export enum MemberRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  MODERATOR = 'MODERATOR',
-  MEMBER = 'MEMBER',
-}
-
-export enum MemberStatus {
-  ACTIVE = 'ACTIVE',
-  PENDING = 'PENDING',
-  BANNED = 'BANNED',
-}
-
-export interface Group {
-  id: string;
-  name: string;
-  description?: string;
-  avatarUrl?: string;
-  privacy: GroupPrivacy;
-  maxMembers?: number;
-  memberCount: number;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface GroupMember {
-  profile: Profile;
-  id: string;
-  groupId: string;
-  userId: string;
-  role: MemberRole;
-  status: MemberStatus;
-  joinedAt?: string;
-  createdAt: string;
-}
-
-export interface GroupInvitation {
-  id: string;
-  groupId: string;
-  invitedBy: string;
-  invitedUserId: string;
-  status: string;
-  expiresAt?: string;
-  createdAt: string;
-}
-
-export interface JoinRequest {
-  id: string;
-  groupId: string;
-  userId: string;
-  status: string;
-  message?: string;
-  createdAt: string;
-}
-
-export interface CreateGroupInput {
-  name: string;
-  description?: string;
-  avatarUrl?: string;
-  privacy: GroupPrivacy;
-  maxMembers?: number;
-  memberIds?: string[];
-}
-
-export interface UpdateGroupInput {
-  groupId: string;
-  name?: string;
-  description?: string;
-  avatarUrl?: string;
-  privacy?: GroupPrivacy;
-}
-
-export interface RequestToJoinInput {
-  groupId: string;
-  message?: string;
-}
-
-export interface UpdateMemberRoleInput {
-  groupId: string;
-  userId: string;
-  role: MemberRole;
-}
-
-export interface RemoveMemberInput {
-  groupId: string;
-  userId: string;
-}
-
-export interface InviteToGroupInput {
-  groupId: string;
-  invitedUserId: string;
-}
-
-export interface GetGroupResponse {
-  getGroup: {
-    success: boolean;
-    message?: string;
-    group: Group;
-  };
-}
-
-export interface GetMyGroupsResponse {
-  getMyGroups: {
-    success: boolean;
-    message?: string;
-    total: number;
-    groups: Group[];
-  };
-}
-
-export interface SearchGroupsResponse {
-  searchGroups: {
-    success: boolean;
-    message?: string;
-    total: number;
-    groups: Group[];
-  };
-}
-
-export interface GetGroupMembersResponse {
-  getGroupMembers: {
-    success: boolean;
-    message?: string;
-    total: number;
-    members: GroupMember[];
-  };
-}
-
-export interface CheckGroupMembershipResponse {
-  checkGroupMembership: {
-    isMember: boolean;
-    role?: MemberRole;
-    status?: MemberStatus;
-  };
-}
-
-export interface CreateGroupResponse {
-  createGroup: {
-    success: boolean;
-    message?: string;
-    group: Group;
-  };
-}
-
-export interface UpdateGroupResponse {
-  updateGroup: {
-    success: boolean;
-    message?: string;
-    group: Group;
-  };
-}
-
-export interface DeleteGroupResponse {
-  deleteGroup: {
-    success: boolean;
-    message?: string;
-  };
-}
-
-export interface JoinGroupResponse {
-  joinGroup: {
-    success: boolean;
-    message?: string;
-    member: GroupMember;
-  };
-}
-
-export interface LeaveGroupResponse {
-  leaveGroup: {
-    success: boolean;
-    message?: string;
-  };
-}
-
-export interface RequestToJoinGroupResponse {
-  requestToJoinGroup: {
-    success: boolean;
-    message?: string;
-    request: JoinRequest;
-  };
-}
-
-export interface UpdateMemberRoleResponse {
-  updateMemberRole: {
-    success: boolean;
-    message?: string;
-    member: GroupMember;
-  };
-}
-
-export interface RemoveMemberResponse {
-  removeMember: {
-    success: boolean;
-    message?: string;
-  };
-}
-
-export interface InviteToGroupResponse {
-  inviteToGroup: {
-    success: boolean;
-    message?: string;
-    invitation: GroupInvitation;
-  };
-}
-
-export interface AcceptGroupInvitationResponse {
-  acceptGroupInvitation: {
-    success: boolean;
-    message?: string;
-    member: GroupMember;
-  };
-}
-
-export interface DeclineGroupInvitationResponse {
-  declineGroupInvitation: {
-    success: boolean;
-    message?: string;
-  };
-}
+// Re-export enums (runtime values) and types separately
+export { GroupPrivacy, MemberRole, MemberStatus } from './types';
+export type {
+  Group,
+  GroupMember,
+  GroupInvitation,
+  JoinRequest,
+  CreateGroupInput,
+  UpdateGroupInput,
+  RequestToJoinInput,
+  UpdateMemberRoleInput,
+  RemoveMemberInput,
+  InviteToGroupInput,
+  GetGroupResponse,
+  GetMyGroupsResponse,
+  SearchGroupsResponse,
+  GetGroupMembersResponse,
+  CheckGroupMembershipResponse,
+  CreateGroupResponse,
+  UpdateGroupResponse,
+  DeleteGroupResponse,
+  JoinGroupResponse,
+  LeaveGroupResponse,
+  RequestToJoinGroupResponse,
+  UpdateMemberRoleResponse,
+  RemoveMemberResponse,
+  InviteToGroupResponse,
+  AcceptGroupInvitationResponse,
+  DeclineGroupInvitationResponse,
+} from './types';
 
 // ============================================================================
 // GROUP QUERIES

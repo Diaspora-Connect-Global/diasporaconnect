@@ -1,78 +1,16 @@
 import { gql } from '@apollo/client';
 
-// ============================================================================
-// EDUCATION TYPES
-// ============================================================================
-
-export interface Education {
-  id: string;
-  userId: string;
-  institution: string;
-  degree: string;
-  fieldOfStudy: string;
-  startDate: string;
-  endDate?: string | null;
-  current: boolean;
-  activities?: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AddEducationInput {
-  institution: string;
-  degree: string;
-  fieldOfStudy: string;
-  startDate: string;
-  endDate?: string | null;
-  current: boolean;
-  activities?: string[];
-}
-
-export interface UpdateEducationInput {
-  educationId: string;
-  institution?: string;
-  degree?: string;
-  fieldOfStudy?: string;
-  startDate?: string;
-  endDate?: string | null;
-  current?: boolean;
-  activities?: string[];
-}
-
-export interface DeleteEducationInput {
-  educationId: string;
-}
-
-export interface GetUserEducationResponse {
-  getUserEducation: {
-    success: boolean;
-    message?: string;
-    education: Education[];
-  };
-}
-
-export interface AddEducationResponse {
-  addEducation: {
-    success: boolean;
-    message?: string;
-    education: Education;
-  };
-}
-
-export interface UpdateEducationResponse {
-  updateEducation: {
-    success: boolean;
-    message?: string;
-    education: Education;
-  };
-}
-
-export interface DeleteEducationResponse {
-  deleteEducation: {
-    success: boolean;
-    message?: string;
-  };
-}
+// Re-export types from the types folder for backward compatibility
+export type {
+  Education,
+  AddEducationInput,
+  UpdateEducationInput,
+  DeleteEducationInput,
+  GetUserEducationResponse,
+  AddEducationResponse,
+  UpdateEducationResponse,
+  DeleteEducationResponse,
+} from './types';
 
 // ============================================================================
 // EDUCATION QUERIES

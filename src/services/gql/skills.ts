@@ -1,58 +1,16 @@
 import { gql } from '@apollo/client';
 
-// ============================================================================
-// SKILLS TYPES
-// ============================================================================
-
-export interface Skill {
-  id: string;
-  userId: string;
-  skillName: string;
-  proficiencyLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  yearsOfExperience?: number;
-  isPrimary?: boolean;
-  endorsements?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface SkillInput {
-  skillName: string;
-  proficiencyLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  yearsOfExperience?: number;
-  isPrimary?: boolean;
-}
-
-export interface AddSkillsInput {
-  skills: SkillInput[];
-}
-
-export interface RemoveSkillInput {
-  skillId: string;
-}
-
-export interface GetUserSkillsResponse {
-  getUserSkills: {
-    success: boolean;
-    message?: string;
-    skills: Skill[];
-  };
-}
-
-export interface AddSkillsResponse {
-  addSkills: {
-    success: boolean;
-    message?: string;
-    skills: Skill[];
-  };
-}
-
-export interface RemoveSkillResponse {
-  removeSkill: {
-    success: boolean;
-    message?: string;
-  };
-}
+// Re-export types from the types folder for backward compatibility
+export type {
+  Skill,
+  SkillInput,
+  AddSkillsInput,
+  RemoveSkillInput,
+  ProficiencyLevel,
+  GetUserSkillsResponse,
+  AddSkillsResponse,
+  RemoveSkillResponse,
+} from './types';
 
 // ============================================================================
 // SKILLS QUERIES

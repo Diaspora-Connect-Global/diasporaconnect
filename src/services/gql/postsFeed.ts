@@ -1,143 +1,28 @@
 // services/gql/postsFeed.ts
 import { gql } from '@apollo/client';
 
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
-
-export interface EngagementCounts {
-  likes: number;
-  comments: number;
-  shares: number;
-  saves: number;
-}
-
-export interface UserEngagement {
-  hasLiked: boolean;
-  hasSaved: boolean;
-  hasShared: boolean;
-}
-
-export interface UserProfile {
-  name: string;
-  avatar: string;
-  isVip: boolean;
-  verificationTier: string;
-}
-
-export interface OrganizationProfile {
-  name: string;
-  logo: string;
-  isVerified: boolean;
-}
-
-export interface AuthorProfile {
-  organizationProfile?: OrganizationProfile;
-  userProfile?: UserProfile;
-}
-
-export interface Post {
-  id: string;
-  text: string;
-  authorId: string;
-  authorType: string;
-  authorProfile?: AuthorProfile;
-  createdAt: string;
-  engagementCounts: EngagementCounts;
-  userEngagement: UserEngagement;
-}
-
-export interface Comment {
-  id: string;
-  text: string;
-  authorId: string;
-  authorType: 'USER' | 'ORG';
-  authorProfile?: AuthorProfile;
-  createdAt: string;
-  postId: string;
-  parentId?: string | null;
-}
-
-export interface GetFeedInput {
-  limit?: number;
-  offset?: number;
-  communityId?: string;
-  authorId?: string;
-  type: 'all' | 'following' | 'community';
-}
-
-export interface CreatePostInput {
-  text: string;
-  communityId?: string;
-  visibility?: 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
-}
-
-export interface EditPostInput {
-  id: string;
-  text: string;
-}
-
-export interface AddEngagementInput {
-  postId: string;
-  engagementType: 'LIKE' | 'SAVE' | 'SHARE';
-}
-
-export interface CreateCommentInput {
-  postId: string;
-  text: string;
-  parentId?: string;
-}
-
-// ============================================================================
-// RESPONSE TYPES
-// ============================================================================
-
-export interface GetFeedData {
-  feed: {
-    total: number;
-    posts: Post[];
-  };
-}
-
-export interface GetPostData {
-  post: Post;
-}
-
-export interface GetPostCommentsData {
-  postComments: Comment[];
-}
-
-export interface CreatePostData {
-  createPost: {
-    id: string;
-    text: string;
-  };
-}
-
-export interface EditPostData {
-  editPost: {
-    id: string;
-    text: string;
-  };
-}
-
-export interface AddEngagementData {
-  addEngagement: {
-    success: boolean;
-  };
-}
-
-export interface CreateCommentData {
-  createComment: {
-    id: string;
-    text: string;
-    postId: string;
-    parentId?: string | null;
-    authorId: string;
-    authorType: 'USER' | 'ORG';
-    createdAt: string;
-  };
-}
+// Re-export types from the types folder for backward compatibility
+export type {
+  EngagementCounts,
+  UserEngagement,
+  PostUserProfile,
+  OrganizationProfile,
+  AuthorProfile,
+  Post,
+  Comment,
+  GetFeedInput,
+  CreatePostInput,
+  EditPostInput,
+  AddEngagementInput,
+  CreateCommentInput,
+  GetFeedData,
+  GetPostData,
+  GetPostCommentsData,
+  CreatePostData,
+  EditPostData,
+  AddEngagementData,
+  CreateCommentData,
+} from './types';
 
 // ============================================================================
 // QUERIES

@@ -1,108 +1,15 @@
 import { gql } from '@apollo/client';
 
-// ============================================================================
-// PROFILE TYPES
-// ============================================================================
-
-export interface ProfileCompletion {
-  percentage: number;
-  completedSections: string[];
-  missingSections: string[];
-}
-
-export interface Profile {
-  userId: string;
-  email: string;
-  phone?: string;
-  firstName: string;
-  lastName: string;
-  middleName: string;
-  residenceSinceYear: number;
-  residenceSinceMonth: number;
-  city?: string;
-  countryOfOrigin?: string;
-  residenceCountry?: string;
-  location?: string;
-  sector?: string;
-  industry?: string;
-  bio?: string;
-  avatarUrl?: string;
-  coverPhoto?: string;
-  gender?: string;
-  dateOfBirth?: string;
-  connectionCount: number;
-  version: number;
-  verificationStatus?: string;
-  createdAt: string;
-  updatedAt: string;
-  profileCompletion?: ProfileCompletion;
-  role: string;
-}
-
-export interface UpdateProfileInput {
-  version: number;
-  firstName?: string;
-  lastName?: string;
-  middleName?: string;
-  city?: string;
-  residenceSinceYear?: number;
-  residenceSinceMonth?: number;
-
-  countryOfOrigin?: string;
-  residenceCountry?: string;
-  bio?: string;
-  sector?: string;
-  location?: string;
-  avatarUrl?: string;
-  coverPhoto?: string;
-  industry?: string;
-  gender?: string;
-  dateOfBirth?: string;
-}
-
-export interface GetProfileResponse {
-  getProfile: {
-    success: boolean;
-    message?: string;
-    profile: Profile;
-    connectionStatus: string
-    connectionId: string
-  };
-}
-
-export interface UpdateProfileResponse {
-  updateProfile: {
-    success: boolean;
-    message?: string;
-    profile: Profile;
-  };
-}
-
-export interface UploadProfilePictureResponse {
-  uploadProfilePicture: {
-    success: boolean;
-    message?: string;
-    profile: {
-      userId: string;
-      avatarUrl: string;
-      profileCompletion: {
-        percentage: number;
-      };
-    };
-  };
-}
-
-export interface UploadCoverPhotoResponse {
-  uploadCoverPhoto: {
-    success: boolean;
-    message?: string;
-    profile: {
-      coverPhoto: string;
-      updatedAt: string;
-    };
-    error?: string;
-  };
-}
+// Re-export types from the types folder for backward compatibility
+export type {
+  ProfileCompletion,
+  Profile,
+  UpdateProfileInput,
+  GetProfileResponse,
+  UpdateProfileResponse,
+  UploadProfilePictureResponse,
+  UploadCoverPhotoResponse,
+} from './types';
 
 // ============================================================================
 // PROFILE QUERIES

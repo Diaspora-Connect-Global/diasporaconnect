@@ -1,89 +1,17 @@
 import { gql } from '@apollo/client';
 
-// ============================================================================
-// WORK EXPERIENCE TYPES
-// ============================================================================
-
-export enum EmploymentType {
-  FULL_TIME = 'FULL_TIME',
-  PART_TIME = 'PART_TIME',
-  CONTRACT = 'CONTRACT',
-  INTERNSHIP = 'INTERNSHIP',
-  FREELANCE = 'FREELANCE',
-}
-
-export interface WorkExperience {
-  id: string;
-  userId: string;
-  companyName: string;
-  role: string;
-  employmentType: EmploymentType;
-  startDate: string;
-  endDate?: string | null;
-  currentlyWorking: boolean;
-  jobDescription?: string;
-  skills?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AddWorkExperienceInput {
-  companyName: string;
-  role: string;
-  employmentType: EmploymentType;
-  startDate: string;
-  endDate?: string | null;
-  currentlyWorking: boolean;
-  jobDescription?: string;
-  skills?: string;
-}
-
-export interface UpdateWorkExperienceInput {
-  workExperienceId: string;
-  companyName?: string;
-  role?: string;
-  employmentType?: EmploymentType;
-  startDate?: string;
-  endDate?: string | null;
-  currentlyWorking?: boolean;
-  jobDescription?: string;
-  skills?: string;
-}
-
-export interface DeleteWorkExperienceInput {
-  workExperienceId: string;
-}
-
-export interface GetUserWorkExperienceResponse {
-  getUserWorkExperience: {
-    success: boolean;
-    message?: string;
-    workExperience: WorkExperience[];
-  };
-}
-
-export interface AddWorkExperienceResponse {
-  addWorkExperience: {
-    success: boolean;
-    message?: string;
-    workExperience: WorkExperience;
-  };
-}
-
-export interface UpdateWorkExperienceResponse {
-  updateWorkExperience: {
-    success: boolean;
-    message?: string;
-    workExperience: WorkExperience;
-  };
-}
-
-export interface DeleteWorkExperienceResponse {
-  deleteWorkExperience: {
-    success: boolean;
-    message?: string;
-  };
-}
+// Re-export types from the types folder for backward compatibility
+export { EmploymentType } from './types';
+export type {
+  WorkExperience,
+  AddWorkExperienceInput,
+  UpdateWorkExperienceInput,
+  DeleteWorkExperienceInput,
+  GetUserWorkExperienceResponse,
+  AddWorkExperienceResponse,
+  UpdateWorkExperienceResponse,
+  DeleteWorkExperienceResponse,
+} from './types';
 
 // ============================================================================
 // WORK EXPERIENCE QUERIES

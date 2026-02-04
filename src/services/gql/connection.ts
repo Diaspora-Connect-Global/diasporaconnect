@@ -1,102 +1,29 @@
 import { gql } from '@apollo/client';
 
-// ============================================================================
-// CONNECTION TYPES
-// ============================================================================
-
-export interface UserBasic {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatarUrl?: string;
-  sector?: string;
-  occupation?: string;
-  connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
-}
-
-export interface Connection {
-  id: string;
-  requesterId: string;
-  receiverId: string;
-  status: string;
-  message?: string;
-  createdAt: string;
-  acceptedAt?: string;
-  requester: UserBasic;
-  receiver: UserBasic;
-
-}
-
-export interface SendConnectionRequestInput {
-  receiverId: string;
-  message?: string;
-}
-
-export interface AcceptConnectionInput {
-  connectionId: string;
-}
-
-export interface RejectConnectionInput {
-  connectionId: string;
-}
-
-export interface GetConnectionsResponse {
-  getConnections: {
-    success: boolean;
-    message?: string;
-    connections: Connection[];
-    total: number;
-  };
-}
-
-export interface SendConnectionRequestResponse {
-  sendConnectionRequest: {
-    success: boolean;
-    message?: string;
-    connection: Connection;
-  };
-}
-
-export interface AcceptConnectionResponse {
-  acceptConnection: {
-    success: boolean;
-    message?: string;
-    connection: Connection;
-  };
-}
-export interface CancelConnectionResponse {
-  cancelConnection: {
-    success: boolean;
-    message?: string;
-    connection: Connection;
-  };
-}
-
-export interface RejectConnectionResponse {
-  rejectConnection: {
-    success: boolean;
-    message?: string;
-  };
-}
-
-export interface GetPendingConnectionsResponse {
-  getPendingConnections: {
-    success: boolean;
-    message?: string;
-    connections: Connection[];
-    total: number;
-  };
-}
-
-export interface GetMutualFriendsResponse {
-  getMutualFriends: {
-    success: boolean;
-    message?: string;
-    mutualFriends: UserBasic[];
-    total: number;
-  };
-}
+// Re-export types from the types folder for backward compatibility
+export type {
+  UserBasic,
+  Connection,
+  ConnectionStatus,
+  SendConnectionRequestInput,
+  AcceptConnectionInput,
+  RejectConnectionInput,
+  CancelConnectionInput,
+  GetConnectionsResponse,
+  SendConnectionRequestResponse,
+  AcceptConnectionResponse,
+  CancelConnectionResponse,
+  RejectConnectionResponse,
+  GetPendingConnectionsResponse,
+  GetMutualFriendsResponse,
+  FriendSuggestionProfile,
+  FriendSuggestion,
+  GetFriendSuggestionsResponse,
+  GetPendingRequestsResponse,
+  SearchUsersInput,
+  UserProfile,
+  SearchUsersResponse,
+} from './types';
 
 // ============================================================================
 // CONNECTION QUERIES
@@ -387,37 +314,6 @@ export const CANCEL_CONNECTION = gql`
   }
 `;
 
-export interface FriendSuggestionProfile {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  connectionId:string
-  sector?: string;
-  countryOfOrigin?: string;
-  residenceCountry?: string;
-  bio?: string;
-  connectionCount: number;
-  profilePicture:string
-  avatarUrl:string
-  connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
-}
-
-export interface FriendSuggestion {
-  profile: FriendSuggestionProfile;
-  score: number;
-  matchReasons: string[];
-  mutualConnectionsCount: number;
-}
-
-export interface GetFriendSuggestionsResponse {
-  getFriendSuggestions: {
-    success: boolean;
-    message?: string;
-    total: number;
-    suggestions: FriendSuggestion[];
-  };
-}
-
 /**
  * Get suggested friends for the current user.
  *
@@ -517,51 +413,6 @@ export const GET_PENDING_REQUESTS_RECEIVED = gql`
     }
   }
 `;
-
-// Type for both pending request responses
-export interface GetPendingRequestsResponse {
-  getPendingConnections: {
-    success: boolean;
-    message?: string;
-    total: number;
-    connections: Connection[];
-  };
-}
-
-// ============================================================================
-// SEARCH TYPES
-// ============================================================================
-
-export interface SearchUsersInput {
-  query: string;
-  limit?: number;
-  offset?: number;
-}
-
-export interface UserProfile {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  sector?: string;
-  countryOfOrigin?: string;
-  residenceCountry?: string;
-  bio?: string;
-  headline?: string;
-  connectionCount: number;
-  avatarUrl?: string;
-  connectionId: string;
-  connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
-}
-
-export interface SearchUsersResponse {
-  searchUsers: {
-    success: boolean;
-    message?: string;
-    total: number;
-    hasMore: boolean;
-    profiles: UserProfile[];
-  };
-}
 
 // ============================================================================
 // SEARCH QUERY

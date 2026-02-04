@@ -1,5 +1,18 @@
 import { gql } from '@apollo/client';
 
+// Re-export types from the types folder for backward compatibility
+export type {
+  RegisterUserInput,
+  RegisterUserResponse,
+  CompleteOAuthRegistrationInput,
+  CompleteOAuthRegistrationResponse,
+  VerifyOtpResponse,
+  CheckEmailAvailabilityResponse,
+  CheckPhoneAvailabilityResponse,
+  RefreshTokenResponse,
+  ResendRegistrationOtpResponse,
+} from './types';
+
 // ============================================================================
 // REGISTRATION MUTATIONS
 // ============================================================================
@@ -429,153 +442,6 @@ export const CHECK_PHONE_AVAILABILITY = gql`
 `;
 
 // ============================================================================
-// TYPESCRIPT INTERFACES
-// ============================================================================
-
-/**
- * Input type for user registration with email/password.
- * 
- * @property {string} email - Valid email address
- * @property {string} password - Strong password (min 8 chars, uppercase, lowercase, number, special char)
- * @property {string} firstName - User's first name
- * @property {string} lastName - User's last name
- * @property {string} phone - Phone number with country code (e.g., +233551810814)
- * @property {string} country - ISO 3166-1 alpha-2 country code (e.g., GH, US, UK)
- * @property {'diaspora' | 'local'} role - User role type
- */
-export interface RegisterUserInput {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  country: string;
-  role: 'diaspora' | 'local';
-}
-
-/**
- * Input type for completing OAuth registration.
- * 
- * @property {string} oauthRegistrationToken - Token received from OAuth callback
- * @property {string} firstName - User's first name (may be pre-filled from OAuth)
- * @property {string} lastName - User's last name (may be pre-filled from OAuth)
- * @property {string} phone - Phone number with country code
- * @property {string} country - ISO 3166-1 alpha-2 country code
- * @property {'diaspora' | 'local'} role - User role type
- */
-export interface CompleteOAuthRegistrationInput {
-  oauthRegistrationToken: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  country: string;
-  role: 'diaspora' | 'local';
-}
-
-/**
- * Response from user registration mutation.
- * 
- * @property {boolean} success - Whether registration was successful
- * @property {string} registrationToken - Token for OTP verification (expires in 10 minutes)
- * @property {number} expiresIn - Token expiry time in seconds
- * @property {string} message - Success or error message
- * @property {string} verificationMethod - Method used for verification (typically 'sms')
- * @property {boolean} smsSent - Whether SMS was successfully sent
- * @property {string} verificationExpiresAt - ISO timestamp when OTP expires
- * @property {number} verificationTtlSeconds - OTP validity duration in seconds
- */
-export interface RegisterUserResponse {
-  registerUser: {
-    success: boolean;
-    registrationToken: string;
-    expiresIn: number;
-    message: string;
-    verificationMethod: string;
-    smsSent: boolean;
-    verificationExpiresAt: string;
-    verificationTtlSeconds: number;
-    meta: {
-      registrationFlow: string;
-      userEmail: string;
-      phoneNumber: string;
-    };
-  };
-}
-
-/**
- * Response from OAuth registration completion mutation.
- * Identical structure to RegisterUserResponse.
- */
-export interface CompleteOAuthRegistrationResponse {
-  completeOAuthRegistration: {
-    success: boolean;
-    message: string;
-    registrationToken: string;
-    expiresIn: number;
-    verificationMethod: string;
-    smsSent: boolean;
-    verificationExpiresAt: string;
-    verificationTtlSeconds: number;
-    meta: {
-      registrationFlow: string;
-      userEmail: string;
-      phoneNumber: string;
-    };
-  };
-}
-
-/**
- * Response from OTP verification mutation.
- * 
- * @property {boolean} success - Whether verification was successful
- * @property {string} message - Success or error message
- * @property {string} sessionToken - JWT token for authenticated API requests
- * @property {boolean} requires2fa - Whether 2FA setup is required
- * @property {Object} user - Verified user's profile data
- * @property {Object} deviceMetadata - Information about the device used for registration
- */
-export interface VerifyOtpResponse {
-  verifyRegistrationOtp: {
-    success: boolean;
-    message: string;
-    sessionToken: string;
-    requires2fa: boolean;
-    user: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-    };
-    deviceMetadata: {
-      fingerprint: string;
-      ipAddress: string;
-      userAgent: string;
-      deviceId: string;
-    };
-  };
-}
-
-/**
- * Response from email availability check query.
- * 
- * @property {boolean} isEmailAvailable - True if email is available for registration
- */
-export interface CheckEmailAvailabilityResponse {
-  isEmailAvailable: boolean;
-}
-
-/**
- * Response from phone availability check query.
- * 
- * @property {boolean} isPhoneAvailable - True if phone number is available for registration
- */
-export interface CheckPhoneAvailabilityResponse {
-  isPhoneAvailable: boolean;
-}
-
-
-// ============================================================================
 // TOKEN REFRESH MUTATION
 // ============================================================================
 
@@ -661,43 +527,6 @@ export const REFRESH_TOKEN = gql`
     }
   }
 `;
-
-// ============================================================================
-// TYPESCRIPT INTERFACES
-// ============================================================================
-
-/**
- * Response from refresh token mutation.
- *
- * @property {boolean} success - Whether the token refresh was successful
- * @property {string} message - Success or error message
- * @property {Object} user - Authenticated user profile
- * @property {string} refreshToken - New refresh token (may be rotated)
- * @property {string} sessionToken - New JWT session token
- * @property {string} refreshTokenExpiry - ISO timestamp when refresh token expires
- * @property {string} sessionTokenExpiry - ISO timestamp when session token expires
- */
-export interface RefreshTokenResponse {
-  refreshToken: {
-    success: boolean;
-    message: string;
-    user: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-    };
-    refreshToken: string;
-    sessionToken: string;
-    refreshTokenExpiry: string;
-    sessionTokenExpiry: string;
-  };
-}
-
-
-
-
 
 // ============================================================================
 // RESEND OTP MUTATION
