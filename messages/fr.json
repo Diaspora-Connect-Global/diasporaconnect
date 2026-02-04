@@ -139,6 +139,61 @@
         "reply": "Répondre",
         "replyPlaceholder": "Tapez une réponse..."
     },
+    "createPost": {
+        "placeholder": "Qu'avez-vous en tête, {name} ?",
+        "posting": "Publication en cours...",
+        "emptyError": "Impossible de publier un contenu vide",
+        "successMessage": "Publication réussie !",
+        "errorMessage": "Échec de la création du post. Veuillez réessayer.",
+        "visibility": {
+            "public": "Tout le monde",
+            "publicDescription": "Visible par tous",
+            "connections": "Connexions",
+            "connectionsDescription": "Uniquement vos connexions",
+            "private": "Moi uniquement",
+            "privateDescription": "Visible uniquement par vous"
+        },
+        "attachments": {
+            "photo": "Photo",
+            "video": "Vidéo",
+            "document": "Document",
+            "addPhoto": "Ajouter une photo",
+            "addVideo": "Ajouter une vidéo",
+            "addFile": "Ajouter un fichier",
+            "addAttachment": "Ajouter une pièce jointe",
+            "filesAdded": "{count} fichier(s) ajouté(s)",
+            "photosAdded": "{count} photo(s) ajoutée(s)",
+            "videosAdded": "{count} vidéo(s) ajoutée(s)",
+            "documentsAdded": "{count} document(s) ajouté(s)",
+            "filesAddedFromGallery": "{count} fichier(s) ajouté(s) depuis la galerie",
+            "photoCaptured": "Photo capturée",
+            "videoCaptured": "Vidéo capturée"
+        },
+        "mobile": {
+            "camera": "Appareil photo",
+            "cameraDescription": "Prendre une photo ou vidéo",
+            "gallery": "Galerie",
+            "galleryDescription": "Choisir depuis la galerie",
+            "files": "Fichiers",
+            "filesDescription": "Choisir un document"
+        },
+        "actions": {
+            "addEmoji": "Ajouter un emoji",
+            "addHashtag": "Ajouter un hashtag",
+            "addMention": "Mentionner quelqu'un",
+            "addLocation": "Ajouter un lieu",
+            "emojiAdded": "Emoji ajouté",
+            "hashtagPrompt": "Ajoutez votre hashtag",
+            "hashtagDescription": "Tapez votre hashtag après le symbole #",
+            "mentionPrompt": "Mentionner quelqu'un",
+            "mentionDescription": "Tapez le nom après le symbole @",
+            "locationAdded": "Lieu ajouté"
+        },
+        "proTips": {
+            "title": "Conseils Pro",
+            "description": "Ajoutez des images ou des vidéos pour plus d'engagement. Utilisez des hashtags pour toucher un public plus large. Identifiez des personnes pour les notifier."
+        }
+    },
     "legal": {
         "about": "À propos",
         "terms": "Conditions",

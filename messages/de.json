@@ -139,6 +139,61 @@
         "reply": "Antworten",
         "replyPlaceholder": "Antwort eingeben..."
     },
+    "createPost": {
+        "placeholder": "Was bewegt Sie, {name}?",
+        "posting": "Wird gepostet...",
+        "emptyError": "Leere Inhalte können nicht gepostet werden",
+        "successMessage": "Beitrag erfolgreich veröffentlicht!",
+        "errorMessage": "Beitrag konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "visibility": {
+            "public": "Jeder",
+            "publicDescription": "Für alle sichtbar",
+            "connections": "Verbindungen",
+            "connectionsDescription": "Nur Ihre Verbindungen",
+            "private": "Nur ich",
+            "privateDescription": "Nur für Sie sichtbar"
+        },
+        "attachments": {
+            "photo": "Foto",
+            "video": "Video",
+            "document": "Dokument",
+            "addPhoto": "Foto hinzufügen",
+            "addVideo": "Video hinzufügen",
+            "addFile": "Datei hinzufügen",
+            "addAttachment": "Anhang hinzufügen",
+            "filesAdded": "{count} Datei(en) hinzugefügt",
+            "photosAdded": "{count} Foto(s) hinzugefügt",
+            "videosAdded": "{count} Video(s) hinzugefügt",
+            "documentsAdded": "{count} Dokument(e) hinzugefügt",
+            "filesAddedFromGallery": "{count} Datei(en) aus Galerie hinzugefügt",
+            "photoCaptured": "Foto aufgenommen",
+            "videoCaptured": "Video aufgenommen"
+        },
+        "mobile": {
+            "camera": "Kamera",
+            "cameraDescription": "Foto oder Video aufnehmen",
+            "gallery": "Galerie",
+            "galleryDescription": "Aus Galerie auswählen",
+            "files": "Dateien",
+            "filesDescription": "Dokument auswählen"
+        },
+        "actions": {
+            "addEmoji": "Emoji hinzufügen",
+            "addHashtag": "Hashtag hinzufügen",
+            "addMention": "Jemanden erwähnen",
+            "addLocation": "Standort hinzufügen",
+            "emojiAdded": "Emoji hinzugefügt",
+            "hashtagPrompt": "Hashtag hinzufügen",
+            "hashtagDescription": "Geben Sie Ihren Hashtag nach dem # ein",
+            "mentionPrompt": "Jemanden erwähnen",
+            "mentionDescription": "Geben Sie den Namen nach dem @ ein",
+            "locationAdded": "Standort hinzugefügt"
+        },
+        "proTips": {
+            "title": "Profi-Tipps",
+            "description": "Fügen Sie Bilder oder Videos hinzu, um mehr Engagement zu erzielen. Verwenden Sie Hashtags, um ein breiteres Publikum zu erreichen. Markieren Sie Personen, um sie zu benachrichtigen."
+        }
+    },
     "legal": {
         "about": "Über uns",
         "terms": "Bedingungen",

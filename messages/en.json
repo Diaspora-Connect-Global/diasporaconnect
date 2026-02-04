@@ -186,6 +186,61 @@
         "connections": "Connections",
         "onlyMe": "Only me"
     },
+    "createPost": {
+        "placeholder": "What's on your mind, {name}?",
+        "posting": "Posting...",
+        "emptyError": "Cannot post empty content",
+        "successMessage": "Post published successfully!",
+        "errorMessage": "Failed to create post. Please try again.",
+        "visibility": {
+            "public": "Anyone",
+            "publicDescription": "Visible to everyone",
+            "connections": "Connections",
+            "connectionsDescription": "Only your connections",
+            "private": "Only me",
+            "privateDescription": "Only visible to you"
+        },
+        "attachments": {
+            "photo": "Photo",
+            "video": "Video",
+            "document": "Document",
+            "addPhoto": "Add Photo",
+            "addVideo": "Add Video",
+            "addFile": "Add File",
+            "addAttachment": "Add Attachment",
+            "filesAdded": "{count} file(s) added",
+            "photosAdded": "{count} Photo(s) added",
+            "videosAdded": "{count} Video(s) added",
+            "documentsAdded": "{count} Document(s) added",
+            "filesAddedFromGallery": "{count} file(s) added from gallery",
+            "photoCaptured": "Photo captured",
+            "videoCaptured": "Video captured"
+        },
+        "mobile": {
+            "camera": "Camera",
+            "cameraDescription": "Take photo or video",
+            "gallery": "Gallery",
+            "galleryDescription": "Choose from gallery",
+            "files": "Files",
+            "filesDescription": "Choose document"
+        },
+        "actions": {
+            "addEmoji": "Add Emoji",
+            "addHashtag": "Add Hashtag",
+            "addMention": "Mention Someone",
+            "addLocation": "Add Location",
+            "emojiAdded": "Emoji added",
+            "hashtagPrompt": "Add your hashtag",
+            "hashtagDescription": "Type your hashtag after the # symbol",
+            "mentionPrompt": "Mention someone",
+            "mentionDescription": "Type the name after the @ symbol",
+            "locationAdded": "Location added"
+        },
+        "proTips": {
+            "title": "Pro Tips",
+            "description": "Add images or videos to get more engagement. Use hashtags to reach a wider audience. Tag people to notify them."
+        }
+    },
     "legal": {
         "about": "About",
         "terms": "Terms",

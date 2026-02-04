@@ -48,25 +48,25 @@ const VisibilityDropdown: React.FC<{
   onChange: (value: Visibility) => void;
 }> = ({ value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const t = useTranslations('actions');
+  const t = useTranslations('createPost.visibility');
 
   const options = [
     {
       key: 'PUBLIC' as Visibility,
-      label: t('anyone'),
-      description: 'Visible to everyone',
+      label: t('public'),
+      description: t('publicDescription'),
       icon: Globe
     },
     {
       key: 'CONNECTIONS' as Visibility,
       label: t('connections'),
-      description: 'Only your connections',
+      description: t('connectionsDescription'),
       icon: Users
     },
     {
       key: 'PRIVATE' as Visibility,
-      label: t('onlyMe'),
-      description: 'Only visible to you',
+      label: t('private'),
+      description: t('privateDescription'),
       icon: Lock
     }
   ];
@@ -136,7 +136,8 @@ export default function CreatePostPage() {
   const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
-  const t = useTranslations('actions');
+  const t = useTranslations('createPost');
+  const tActions = useTranslations('actions');
   const router = useRouter();
   const currentUser = useUserStore(state => state.user);
   const userName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'User';
@@ -197,20 +198,20 @@ export default function CreatePostPage() {
     const emojis = ['😊', '❤️', '👍', '🎉', '🔥', '✨', '💯', '🚀'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
     insertAtCursor(randomEmoji);
-    toast.success('Emoji added');
+    toast.success(t('actions.emojiAdded'));
   };
 
   const handleAddHashtag = () => {
     insertAtCursor('#');
-    toast.success('Add your hashtag', {
-      description: 'Type your hashtag after the # symbol'
+    toast.success(t('actions.hashtagPrompt'), {
+      description: t('actions.hashtagDescription')
     });
   };
 
   const handleAddMention = () => {
     insertAtCursor('@');
-    toast.success('Mention someone', {
-      description: 'Type the name after the @ symbol'
+    toast.success(t('actions.mentionPrompt'), {
+      description: t('actions.mentionDescription')
     });
   };
 
@@ -224,7 +225,7 @@ export default function CreatePostPage() {
     ];
     const location = sampleLocations[Math.floor(Math.random() * sampleLocations.length)];
     insertAtCursor(`📍 ${location}`);
-    toast.success('Location added');
+    toast.success(t('actions.locationAdded'));
   };
 
   const handleAddAttachment = (type: AttachmentType) => {
@@ -263,7 +264,7 @@ export default function CreatePostPage() {
         setAttachments(prev => [...prev, newAttachment]);
       });
 
-      toast.success(`${files.length} ${type}(s) added`);
+      toast.success(t('attachments.filesAdded', { count: files.length }));
     };
 
     input.click();
@@ -293,7 +294,7 @@ export default function CreatePostPage() {
         setAttachments(prev => [...prev, newAttachment]);
       });
 
-      toast.success(`${files.length} file(s) added from gallery`);
+      toast.success(t('attachments.filesAddedFromGallery', { count: files.length }));
       setShowMobileAttachMenu(false);
     };
 
@@ -323,7 +324,7 @@ export default function CreatePostPage() {
       };
       setAttachments(prev => [...prev, newAttachment]);
 
-      toast.success(`${isVideo ? 'Video' : 'Photo'} captured`);
+      toast.success(isVideo ? t('attachments.videoCaptured') : t('attachments.photoCaptured'));
       setShowMobileAttachMenu(false);
     };
 
@@ -361,7 +362,7 @@ export default function CreatePostPage() {
         setAttachments(prev => [...prev, newAttachment]);
       });
 
-      toast.success(`${files.length} file(s) added`);
+      toast.success(t('attachments.filesAdded', { count: files.length }));
       setShowMobileAttachMenu(false);
     };
 
@@ -378,7 +379,7 @@ export default function CreatePostPage() {
 
   const handlePost = async () => {
     if (!postContent.trim() && attachments.length === 0) {
-      toast.error('Cannot post empty content');
+      toast.error(t('emptyError'));
       return;
     }
 
@@ -399,7 +400,7 @@ export default function CreatePostPage() {
       });
 
       if (data?.createPost) {
-        toast.success('Post published successfully!');
+        toast.success(t('successMessage'));
 
         // Reset form
         setPostContent('');
@@ -413,7 +414,7 @@ export default function CreatePostPage() {
       }
     } catch (error: any) {
       console.error('Failed to create post:', error);
-      toast.error(error?.message || 'Failed to create post. Please try again.');
+      toast.error(error?.message || t('errorMessage'));
     }
   };
 
@@ -464,12 +465,12 @@ export default function CreatePostPage() {
                 {isPosting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-text-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Posting...</span>
+                    <span>{t('posting')}</span>
                   </>
                 ) : (
                   <div className='px-2 py-1 flex'>
                     <Sparkles className="w-4 h-4" />
-                    <span>{t('post')}</span>
+                    <span>{tActions('post')}</span>
                   </div>
                 )}
               </ButtonType2>
@@ -482,7 +483,7 @@ export default function CreatePostPage() {
               ref={textareaRef}
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              placeholder={`What's on your mind, ${userName.split(' ')[0]}?`}
+              placeholder={t('placeholder', { name: userName.split(' ')[0] })}
               className="w-full min-h-[200px] body-large leading-relaxed bg-transparent border-none outline-none resize-none placeholder:text-text-secondary text-text-primary"
               maxLength={charLimit}
             />
@@ -565,7 +566,7 @@ export default function CreatePostPage() {
                   <button
                     onClick={() => setShowMobileAttachMenu(!showMobileAttachMenu)}
                     className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
-                    title="Add Attachment"
+                    title={t('attachments.addAttachment')}
                   >
                     <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
                       <Paperclip className="w-5 h-5 text-surface-brand" />
@@ -589,8 +590,8 @@ export default function CreatePostPage() {
                               <Camera className="w-5 h-5 text-surface-brand" />
                             </div>
                             <div className="flex-1 text-left">
-                              <p className="font-medium text-sm">Camera</p>
-                              <p className="text-xs text-text-secondary">Take photo or video</p>
+                              <p className="font-medium text-sm">{t('mobile.camera')}</p>
+                              <p className="text-xs text-text-secondary">{t('mobile.cameraDescription')}</p>
                             </div>
                           </button>
 
@@ -602,8 +603,8 @@ export default function CreatePostPage() {
                               <ImageIcon className="w-5 h-5 text-text-danger" />
                             </div>
                             <div className="flex-1 text-left">
-                              <p className="font-medium text-sm">Gallery</p>
-                              <p className="text-xs text-text-secondary">Choose from gallery</p>
+                              <p className="font-medium text-sm">{t('mobile.gallery')}</p>
+                              <p className="text-xs text-text-secondary">{t('mobile.galleryDescription')}</p>
                             </div>
                           </button>
 
@@ -615,8 +616,8 @@ export default function CreatePostPage() {
                               <FolderOpen className="w-5 h-5 text-[#cb3500]" />
                             </div>
                             <div className="flex-1 text-left">
-                              <p className="font-medium text-sm">Files</p>
-                              <p className="text-xs text-text-secondary">Choose document</p>
+                              <p className="font-medium text-sm">{t('mobile.files')}</p>
+                              <p className="text-xs text-text-secondary">{t('mobile.filesDescription')}</p>
                             </div>
                           </button>
                         </div>
@@ -630,7 +631,7 @@ export default function CreatePostPage() {
                   <button
                     onClick={() => handleAddAttachment('Photo')}
                     className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
-                    title="Add Photo"
+                    title={t('attachments.addPhoto')}
                   >
                     <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
                       <ImageIcon className="w-5 h-5 text-surface-brand" />
@@ -639,7 +640,7 @@ export default function CreatePostPage() {
                   <button
                     onClick={() => handleAddAttachment('Video')}
                     className="p-2 hover:bg-text-danger/10 rounded-lg transition-colors group"
-                    title="Add Video"
+                    title={t('attachments.addVideo')}
                   >
                     <div className="p-1.5 rounded-lg bg-text-danger/10 group-hover:bg-text-danger/20 transition-colors">
                       <Video className="w-5 h-5 text-text-danger" />
@@ -648,7 +649,7 @@ export default function CreatePostPage() {
                   <button
                     onClick={() => handleAddAttachment('Document')}
                     className="p-2 hover:bg-[#cb3500]/10 rounded-lg transition-colors group"
-                    title="Add File"
+                    title={t('attachments.addFile')}
                   >
                     <div className="p-1.5 rounded-lg bg-[#cb3500]/10 group-hover:bg-[#cb3500]/20 transition-colors">
                       <FileText className="w-5 h-5 text-[#cb3500]" />
@@ -661,28 +662,28 @@ export default function CreatePostPage() {
                   <button
                     onClick={handleAddEmoji}
                     className="p-2 hover:bg-[#FFD700]/10 rounded-lg transition-colors group"
-                    title="Add Emoji"
+                    title={t('actions.addEmoji')}
                   >
                     <Smile className="w-5 h-5 text-[#FFD700] group-hover:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={handleAddHashtag}
                     className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
-                    title="Add Hashtag"
+                    title={t('actions.addHashtag')}
                   >
                     <Hash className="w-5 h-5 text-surface-brand group-hover:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={handleAddMention}
                     className="p-2 hover:bg-[#9333EA]/10 rounded-lg transition-colors group"
-                    title="Mention Someone"
+                    title={t('actions.addMention')}
                   >
                     <AtSign className="w-5 h-5 text-[#9333EA] group-hover:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={handleAddLocation}
                     className="p-2 hover:bg-[#00a73e]/10 rounded-lg transition-colors group"
-                    title="Add Location"
+                    title={t('actions.addLocation')}
                   >
                     <MapPin className="w-5 h-5 text-[#00a73e] group-hover:scale-110 transition-transform" />
                   </button>
@@ -707,9 +708,9 @@ export default function CreatePostPage() {
               <Sparkles className="w-5 h-5 text-text-white" />
             </div>
             <div>
-              <h3 className="label-large mb-1">Pro Tips</h3>
+              <h3 className="label-large mb-1">{t('proTips.title')}</h3>
               <p className="body-small text-text-secondary">
-                Add images or videos to get more engagement. Use hashtags to reach a wider audience. Tag people to notify them.
+                {t('proTips.description')}
               </p>
             </div>
           </div>

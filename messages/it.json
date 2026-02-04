@@ -139,6 +139,61 @@
         "reply": "Rispondi",
         "replyPlaceholder": "Digita una risposta..."
     },
+    "createPost": {
+        "placeholder": "A cosa sta pensando, {name}?",
+        "posting": "Pubblicazione in corso...",
+        "emptyError": "Impossibile pubblicare contenuto vuoto",
+        "successMessage": "Post pubblicato con successo!",
+        "errorMessage": "Impossibile creare il post. Riprovi per favore.",
+        "visibility": {
+            "public": "Chiunque",
+            "publicDescription": "Visibile a tutti",
+            "connections": "Connessioni",
+            "connectionsDescription": "Solo le Sue connessioni",
+            "private": "Solo io",
+            "privateDescription": "Visibile solo a Lei"
+        },
+        "attachments": {
+            "photo": "Foto",
+            "video": "Video",
+            "document": "Documento",
+            "addPhoto": "Aggiungi foto",
+            "addVideo": "Aggiungi video",
+            "addFile": "Aggiungi file",
+            "addAttachment": "Aggiungi allegato",
+            "filesAdded": "{count} file aggiunto/i",
+            "photosAdded": "{count} foto aggiunta/e",
+            "videosAdded": "{count} video aggiunto/i",
+            "documentsAdded": "{count} documento/i aggiunto/i",
+            "filesAddedFromGallery": "{count} file aggiunto/i dalla galleria",
+            "photoCaptured": "Foto catturata",
+            "videoCaptured": "Video catturato"
+        },
+        "mobile": {
+            "camera": "Fotocamera",
+            "cameraDescription": "Scatta foto o video",
+            "gallery": "Galleria",
+            "galleryDescription": "Scegli dalla galleria",
+            "files": "File",
+            "filesDescription": "Scegli documento"
+        },
+        "actions": {
+            "addEmoji": "Aggiungi emoji",
+            "addHashtag": "Aggiungi hashtag",
+            "addMention": "Menziona qualcuno",
+            "addLocation": "Aggiungi posizione",
+            "emojiAdded": "Emoji aggiunto",
+            "hashtagPrompt": "Aggiungi il tuo hashtag",
+            "hashtagDescription": "Digita l'hashtag dopo il simbolo #",
+            "mentionPrompt": "Menziona qualcuno",
+            "mentionDescription": "Digita il nome dopo il simbolo @",
+            "locationAdded": "Posizione aggiunta"
+        },
+        "proTips": {
+            "title": "Suggerimenti Pro",
+            "description": "Aggiunga immagini o video per ottenere più coinvolgimento. Usi gli hashtag per raggiungere un pubblico più ampio. Tagghi le persone per notificarle."
+        }
+    },
     "legal": {
         "about": "Informazioni",
         "terms": "Termini",
