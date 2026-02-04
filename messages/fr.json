@@ -283,9 +283,16 @@
             "home": "Accueil",
             "community": "Communauté",
             "marketplace": "Marketplace",
+            "post": "Publier",
             "chat": "Chat",
             "notification": "Notifications",
-            "searchLabel": "Rechercher sur Diasplug ..."
+            "searchLabel": "Rechercher sur Diasplug ...",
+            "profile": "Profil",
+            "becomeVendor": "Devenir vendeur",
+            "wallet": "Portefeuille",
+            "settingsPrivacy": "Paramètres et confidentialité",
+            "helpSupport": "Aide et assistance",
+            "logout": "Déconnexion"
         },
         "associations": {
             "discover": "Découvrir des associations",
