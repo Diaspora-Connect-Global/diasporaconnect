@@ -194,6 +194,43 @@
             "description": "Fügen Sie Bilder oder Videos hinzu, um mehr Engagement zu erzielen. Verwenden Sie Hashtags, um ein breiteres Publikum zu erreichen. Markieren Sie Personen, um sie zu benachrichtigen."
         }
     },
+    "wallet": {
+        "title": "Übersicht",
+        "subtitle": "Verwalten Sie Ihre Gelder und Transaktionen",
+        "withdraw": "Abheben",
+        "refreshWallet": "Wallet aktualisieren",
+        "balance": {
+            "totalBalance": "Gesamtguthaben",
+            "inEscrow": "Im Treuhandkonto",
+            "available": "Verfügbar",
+            "hideBalance": "Guthaben ausblenden",
+            "showBalance": "Guthaben anzeigen"
+        },
+        "transactions": {
+            "title": "Transaktionsverlauf",
+            "allTransactions": "Alle Transaktionen",
+            "completed": "Abgeschlossen",
+            "pending": "Ausstehend",
+            "failed": "Fehlgeschlagen",
+            "noTransactions": "Keine Transaktionen gefunden",
+            "noFilteredTransactions": "Keine {filter} Transaktionen gefunden",
+            "columns": {
+                "date": "Datum",
+                "type": "Typ",
+                "amount": "Betrag",
+                "status": "Status"
+            },
+            "types": {
+                "deposit": "Einzahlung",
+                "withdrawal": "Abhebung",
+                "refund": "Rückerstattung"
+            }
+        },
+        "loading": {
+            "balance": "Guthaben wird geladen...",
+            "transactions": "Transaktionen werden geladen..."
+        }
+    },
     "legal": {
         "about": "Über uns",
         "terms": "Bedingungen",

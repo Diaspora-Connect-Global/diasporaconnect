@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { EyeIcon, EyeOffIcon, LockIcon, WalletIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
 
 export default function BalanceCard() {
   const [showBalance, setShowBalance] = useState(true);
+  const t = useTranslations('wallet.balance');
   
   // Mock data - replace with real data from your API
   const totalBalance = 1200.00;
@@ -25,11 +27,11 @@ export default function BalanceCard() {
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <p className="body-small text-white/70">Total Balance</p>
+              <p className="body-small text-white/70">{t('totalBalance')}</p>
               <button
                 onClick={() => setShowBalance(!showBalance)}
                 className="p-1 hover:bg-white/10 rounded transition-colors"
-                aria-label={showBalance ? 'Hide balance' : 'Show balance'}
+                aria-label={showBalance ? t('hideBalance') : t('showBalance')}
               >
                 {showBalance ? (
                   <EyeOffIcon className="w-4 h-4 text-white/70" />
@@ -51,7 +53,7 @@ export default function BalanceCard() {
               <LockIcon className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="caption-small text-white/60">In Escrow</p>
+              <p className="caption-small text-white/60">{t('inEscrow')}</p>
               <p className="body-medium font-semibold text-white">
                 {formatCurrency(inEscrow)}
               </p>
@@ -63,7 +65,7 @@ export default function BalanceCard() {
               <WalletIcon className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="caption-small text-white/60">Available</p>
+              <p className="caption-small text-white/60">{t('available')}</p>
               <p className="body-medium font-semibold text-white">
                 {formatCurrency(available)}
               </p>

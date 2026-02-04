@@ -2,8 +2,11 @@
 
 import { ArrowUpIcon, RefreshCwIcon } from 'lucide-react';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
+import { useTranslations } from 'next-intl';
 
 export default function WalletHeader() {
+  const t = useTranslations('wallet');
+  
   const handleRefresh = () => {
     console.log('Refreshing wallet data...');
     // Add refresh logic
@@ -21,7 +24,7 @@ export default function WalletHeader() {
   return (
     <div className="flex justify-between items-center">
       <div>
-        <h1 className="heading-large text-text-primary">Overview</h1>
+        <h1 className="heading-large text-text-primary">{t('title')}</h1>
       </div>
 
       <div className="flex gap-2">
@@ -31,13 +34,13 @@ export default function WalletHeader() {
           className="bg-[#3CCF4E] hover:bg-[#35b944] text-white px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
         >
           <ArrowUpIcon className="w-4 h-4" />
-          Withdraw
+          {t('withdraw')}
         </ButtonType2>
         
         <ButtonType3
           onClick={handleRefresh}
           className="p-2 hover:bg-surface-subtle rounded-full transition-colors"
-          aria-label="Refresh wallet"
+          aria-label={t('refreshWallet')}
         >
           <RefreshCwIcon className="w-5 h-5" />
         </ButtonType3>

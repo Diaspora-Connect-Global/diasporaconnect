@@ -194,6 +194,43 @@
             "description": "Aggiunga immagini o video per ottenere più coinvolgimento. Usi gli hashtag per raggiungere un pubblico più ampio. Tagghi le persone per notificarle."
         }
     },
+    "wallet": {
+        "title": "Panoramica",
+        "subtitle": "Gestisca i Suoi fondi e transazioni",
+        "withdraw": "Preleva",
+        "refreshWallet": "Aggiorna portafoglio",
+        "balance": {
+            "totalBalance": "Saldo totale",
+            "inEscrow": "In deposito fiduciario",
+            "available": "Disponibile",
+            "hideBalance": "Nascondi saldo",
+            "showBalance": "Mostra saldo"
+        },
+        "transactions": {
+            "title": "Storico transazioni",
+            "allTransactions": "Tutte le transazioni",
+            "completed": "Completata",
+            "pending": "In attesa",
+            "failed": "Fallita",
+            "noTransactions": "Nessuna transazione trovata",
+            "noFilteredTransactions": "Nessuna transazione {filter} trovata",
+            "columns": {
+                "date": "Data",
+                "type": "Tipo",
+                "amount": "Importo",
+                "status": "Stato"
+            },
+            "types": {
+                "deposit": "Deposito",
+                "withdrawal": "Prelievo",
+                "refund": "Rimborso"
+            }
+        },
+        "loading": {
+            "balance": "Caricamento saldo...",
+            "transactions": "Caricamento transazioni..."
+        }
+    },
     "legal": {
         "about": "Informazioni",
         "terms": "Termini",

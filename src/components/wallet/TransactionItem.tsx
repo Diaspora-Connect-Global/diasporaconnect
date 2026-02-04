@@ -1,12 +1,15 @@
 'use client';
 
 import type { Transaction } from './TransactionHistory';
+import { useTranslations } from 'next-intl';
 
 interface TransactionItemProps {
   transaction: Transaction;
 }
 
 export default function TransactionItem({ transaction }: TransactionItemProps) {
+  const t = useTranslations('wallet.transactions');
+
   const getStatusColor = () => {
     switch (transaction.status) {
       case 'completed':
@@ -17,6 +20,32 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
         return 'bg-surface-danger text-text-danger';
       default:
         return 'bg-surface-subtle text-text-secondary';
+    }
+  };
+
+  const getStatusLabel = () => {
+    switch (transaction.status) {
+      case 'completed':
+        return t('completed');
+      case 'pending':
+        return t('pending');
+      case 'failed':
+        return t('failed');
+      default:
+        return transaction.status;
+    }
+  };
+
+  const getTypeLabel = () => {
+    switch (transaction.type) {
+      case 'deposit':
+        return t('types.deposit');
+      case 'withdrawal':
+        return t('types.withdrawal');
+      case 'refund':
+        return t('types.refund');
+      default:
+        return transaction.type;
     }
   };
 
@@ -49,8 +78,8 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
       {/* Type */}
       <div className="flex items-center gap-2">
         <span className="body-small text-text-secondary">{getTypeIcon()}</span>
-        <p className="body-small text-text-primary capitalize">
-          {transaction.type}
+        <p className="body-small text-text-primary">
+          {getTypeLabel()}
         </p>
       </div>
 
@@ -63,8 +92,8 @@ export default function TransactionItem({ transaction }: TransactionItemProps) {
 
       {/* Status */}
       <div className="flex items-center justify-end">
-        <span className={`inline-flex items-center px-3 py-1 rounded-full caption-medium capitalize ${getStatusColor()}`}>
-          {transaction.status}
+        <span className={`inline-flex items-center px-3 py-1 rounded-full caption-medium ${getStatusColor()}`}>
+          {getStatusLabel()}
         </span>
       </div>
     </div>

@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useTranslations } from 'next-intl';
 
 export interface Transaction {
   id: string;
@@ -20,6 +21,7 @@ export interface Transaction {
 
 export default function TransactionHistory() {
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
+  const t = useTranslations('wallet.transactions');
 
   // Mock data matching the JSON spec
   const transactions: Transaction[] = [
@@ -77,6 +79,32 @@ export default function TransactionHistory() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return t('completed');
+      case 'pending':
+        return t('pending');
+      case 'failed':
+        return t('failed');
+      default:
+        return status;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'deposit':
+        return t('types.deposit');
+      case 'withdrawal':
+        return t('types.withdrawal');
+      case 'refund':
+        return t('types.refund');
+      default:
+        return type;
+    }
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'deposit':
@@ -94,22 +122,22 @@ export default function TransactionHistory() {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Header */}
       <div className="flex justify-between items-center p-6 border-b border-gray-200">
-        <h3 className="text-xl font-semibold text-[#1A1A1A]">Transaction History</h3>
+        <h3 className="text-xl font-semibold text-[#1A1A1A]">{t('title')}</h3>
         
         <div className="flex items-center gap-3">
           {/* Filter Dropdown */}
           <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
             <SelectTrigger className="w-[180px] border-gray-300">
               <div className="flex items-center gap-2">
-                <SelectValue placeholder="All Transactions" />
+                <SelectValue placeholder={t('allTransactions')} />
                 <ChevronDownIcon className="w-4 h-4" />
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Transactions</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="failed">Failed</SelectItem>
+              <SelectItem value="all">{t('allTransactions')}</SelectItem>
+              <SelectItem value="completed">{t('completed')}</SelectItem>
+              <SelectItem value="pending">{t('pending')}</SelectItem>
+              <SelectItem value="failed">{t('failed')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -122,10 +150,10 @@ export default function TransactionHistory() {
 
       {/* Table Header */}
       <div className="grid grid-cols-4 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200">
-        <p className="text-sm font-medium text-gray-600">Date</p>
-        <p className="text-sm font-medium text-gray-600">Type</p>
-        <p className="text-sm font-medium text-gray-600">Amount</p>
-        <p className="text-sm font-medium text-gray-600 text-right">Status</p>
+        <p className="text-sm font-medium text-gray-600">{t('columns.date')}</p>
+        <p className="text-sm font-medium text-gray-600">{t('columns.type')}</p>
+        <p className="text-sm font-medium text-gray-600">{t('columns.amount')}</p>
+        <p className="text-sm font-medium text-gray-600 text-right">{t('columns.status')}</p>
       </div>
 
       {/* Transactions List */}
@@ -143,8 +171,8 @@ export default function TransactionHistory() {
               {/* Type */}
               <div className="flex items-center gap-2">
                 {getTypeIcon(transaction.type)}
-                <p className="text-sm text-[#1A1A1A] capitalize">
-                  {transaction.type}
+                <p className="text-sm text-[#1A1A1A]">
+                  {getTypeLabel(transaction.type)}
                 </p>
               </div>
 
@@ -157,8 +185,8 @@ export default function TransactionHistory() {
 
               {/* Status */}
               <div className="flex items-center justify-end">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(transaction.status)}`}>
-                  {transaction.status}
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
+                  {getStatusLabel(transaction.status)}
                 </span>
               </div>
             </div>
@@ -166,7 +194,7 @@ export default function TransactionHistory() {
         ) : (
           <div className="text-center py-12 px-6">
             <p className="text-base text-gray-500">
-              No {filter !== 'all' ? filter : ''} transactions found
+              {filter !== 'all' ? t('noFilteredTransactions', { filter: getStatusLabel(filter) }) : t('noTransactions')}
             </p>
           </div>
         )}

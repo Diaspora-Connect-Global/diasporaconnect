@@ -241,6 +241,43 @@
             "description": "Add images or videos to get more engagement. Use hashtags to reach a wider audience. Tag people to notify them."
         }
     },
+    "wallet": {
+        "title": "Overview",
+        "subtitle": "Manage your funds and transactions",
+        "withdraw": "Withdraw",
+        "refreshWallet": "Refresh wallet",
+        "balance": {
+            "totalBalance": "Total Balance",
+            "inEscrow": "In Escrow",
+            "available": "Available",
+            "hideBalance": "Hide balance",
+            "showBalance": "Show balance"
+        },
+        "transactions": {
+            "title": "Transaction History",
+            "allTransactions": "All Transactions",
+            "completed": "Completed",
+            "pending": "Pending",
+            "failed": "Failed",
+            "noTransactions": "No transactions found",
+            "noFilteredTransactions": "No {filter} transactions found",
+            "columns": {
+                "date": "Date",
+                "type": "Type",
+                "amount": "Amount",
+                "status": "Status"
+            },
+            "types": {
+                "deposit": "Deposit",
+                "withdrawal": "Withdrawal",
+                "refund": "Refund"
+            }
+        },
+        "loading": {
+            "balance": "Loading balance...",
+            "transactions": "Loading transactions..."
+        }
+    },
     "legal": {
         "about": "About",
         "terms": "Terms",

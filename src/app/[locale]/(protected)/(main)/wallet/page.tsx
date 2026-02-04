@@ -1,10 +1,15 @@
+'use client';
+
 import { Suspense } from 'react';
 import WalletHeader from '@/components/wallet/WalletHeader';
 import BalanceCard from '@/components/wallet/BalanceCard';
 import TransactionHistory from '@/components/wallet/TransactionHistory';
 import LoadingScreen from '@/components/custom/LoadingScreen';
+import { useTranslations } from 'next-intl';
 
 export default function WalletPage() {
+  const t = useTranslations('wallet.loading');
+  
   return (
     <div className="h-app-inner overflow-y-auto" style={{ backgroundColor: '#F5F7FA' }}>
       <div className="max-w-7xl mx-auto p-4 space-y-6">
@@ -14,7 +19,7 @@ export default function WalletPage() {
         {/* Balance Card - Half width on desktop, full on mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="w-full">
-            <Suspense fallback={<LoadingScreen text="Loading balance..." />}>
+            <Suspense fallback={<LoadingScreen text={t('balance')} />}>
               <BalanceCard />
             </Suspense>
           </div>
@@ -23,7 +28,7 @@ export default function WalletPage() {
         </div>
 
         {/* Transaction History - Full Width */}
-        <Suspense fallback={<LoadingScreen text="Loading transactions..." />}>
+        <Suspense fallback={<LoadingScreen text={t('transactions')} />}>
           <TransactionHistory />
         </Suspense>
       </div>
