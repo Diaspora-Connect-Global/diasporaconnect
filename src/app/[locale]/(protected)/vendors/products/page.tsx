@@ -1,7 +1,9 @@
 "use client";
 import React from "react";
+import { useTranslations } from 'next-intl';
 
 export default function ProductsPage() {
+  const t = useTranslations('vendors.products');
   const [statusFilter, setStatusFilter] = React.useState('all');
   const [categoryFilter, setCategoryFilter] = React.useState('all');
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -27,14 +29,22 @@ export default function ProductsPage() {
     }
   ];
 
+  const getLocalizedStatus = (status: string): string => {
+    return status === 'Live' ? t('live') : t('draft');
+  };
+
+  const getLocalizedCategory = (category: string): string => {
+    return category === 'Men fashion' ? t('menFashion') : t('womenFashion');
+  };
+
   return (
     <div className="p-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Products</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
         <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
           <span className="text-lg">+</span>
-          Add a product
+          {t('addProduct')}
         </button>
       </div>
 
@@ -46,12 +56,13 @@ export default function ProductsPage() {
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             type="text"
-            placeholder="Search product by name"
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -62,7 +73,7 @@ export default function ProductsPage() {
             statusFilter === 'live' ? 'bg-gray-200 text-gray-900' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
-          Live
+          {t('live')}
         </button>
 
         <button
@@ -71,17 +82,18 @@ export default function ProductsPage() {
             statusFilter === 'draft' ? 'bg-gray-200 text-gray-900' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
-          Draft
+          {t('draft')}
         </button>
 
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label={t('allCategories')}
         >
-          <option value="all">All categories</option>
-          <option value="men-fashion">Men fashion</option>
-          <option value="women-fashion">Women fashion</option>
+          <option value="all">{t('allCategories')}</option>
+          <option value="men-fashion">{t('menFashion')}</option>
+          <option value="women-fashion">{t('womenFashion')}</option>
         </select>
       </div>
 
@@ -92,22 +104,22 @@ export default function ProductsPage() {
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product name
+                  {t('productName')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Inventory
+                  {t('inventory')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
+                  {t('category')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                  {t('price')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t('status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
+                  {t('action')}
                 </th>
               </tr>
             </thead>
@@ -123,7 +135,7 @@ export default function ProductsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{product.inventory}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{product.category}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{getLocalizedCategory(product.category)}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{product.price}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -131,16 +143,16 @@ export default function ProductsPage() {
                         ? 'bg-green-100 text-green-700' 
                         : 'bg-gray-100 text-gray-600'
                     }`}>
-                      {product.status}
+                      {getLocalizedStatus(product.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <button className="text-sm text-blue-600 font-medium hover:text-blue-700 hover:underline">
-                        Preview
+                        {t('preview')}
                       </button>
                       <button className="text-sm text-blue-600 font-medium hover:text-blue-700 hover:underline">
-                        Edit
+                        {t('edit')}
                       </button>
                     </div>
                   </td>
@@ -153,7 +165,7 @@ export default function ProductsPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Rows per page:</span>
+            <span className="text-sm text-gray-600">{t('rowsPerPage')}</span>
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
@@ -166,15 +178,15 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Page 1 of 10</span>
+            <span className="text-sm text-gray-600">{t('page', { current: 1, total: 10 })}</span>
             <div className="flex items-center gap-1">
-              <button className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50" disabled>
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50" disabled aria-label="Previous page">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button className="p-1 hover:bg-gray-100 rounded transition-colors" aria-label="Next page">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>

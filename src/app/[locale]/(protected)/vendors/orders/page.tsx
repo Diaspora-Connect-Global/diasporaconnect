@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { useTranslations } from 'next-intl';
 
 type DeliveryStatus = "Delivered" | "Pending" | "Processing" | "In transit";
 
@@ -13,11 +14,40 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const t = useTranslations('vendors.orders');
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [timeFilter] = useState<string>("all");
   const [deliveryFilter, setDeliveryFilter] = useState<string>("all");
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const getLocalizedStatus = (status: DeliveryStatus): string => {
+    switch (status) {
+      case "Delivered":
+        return t('delivered');
+      case "Pending":
+        return t('pending');
+      case "Processing":
+        return t('processing');
+      case "In transit":
+        return t('inTransit');
+      default:
+        return status;
+    }
+  };
+
+  const getLocalizedAction = (action: string): string => {
+    switch (action) {
+      case "View order":
+        return t('viewOrder');
+      case "Process order":
+        return t('processOrder');
+      case "Track order":
+        return t('trackOrder');
+      default:
+        return action;
+    }
+  };
 
   const allOrders: Order[] = [
     {
@@ -101,7 +131,7 @@ export default function OrdersPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Orders</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-6">{t('title')}</h1>
 
       {/* Search and Filters */}
       <div className="flex items-center gap-4 mb-6">
@@ -111,6 +141,7 @@ export default function OrdersPage() {
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -126,7 +157,7 @@ export default function OrdersPage() {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setSearchQuery(e.target.value)
             }
-            placeholder="Search order by order number"
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -138,12 +169,13 @@ export default function OrdersPage() {
             setCurrentPage(1);
           }}
           className="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label={t('deliveryStatus')}
         >
-          <option value="all">Delivery status</option>
-          <option value="delivered">Delivered</option>
-          <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
-          <option value="in transit">In transit</option>
+          <option value="all">{t('deliveryStatus')}</option>
+          <option value="delivered">{t('delivered')}</option>
+          <option value="pending">{t('pending')}</option>
+          <option value="processing">{t('processing')}</option>
+          <option value="in transit">{t('inTransit')}</option>
         </select>
       </div>
 
@@ -153,22 +185,22 @@ export default function OrdersPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Order number
+                {t('orderNumber')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Date
+                {t('date')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Customer
+                {t('customer')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Amount
+                {t('amount')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Delivery
+                {t('delivery')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Actions
+                {t('actions')}
               </th>
             </tr>
           </thead>
@@ -187,12 +219,12 @@ export default function OrdersPage() {
                         order.delivery
                       )}`}
                     >
-                      {order.delivery}
+                      {getLocalizedStatus(order.delivery)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <button className="text-blue-600 hover:underline">
-                      {order.action}
+                      {getLocalizedAction(order.action)}
                     </button>
                   </td>
                 </tr>
@@ -200,7 +232,7 @@ export default function OrdersPage() {
             ) : (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                  No orders found
+                  {t('noOrdersFound')}
                 </td>
               </tr>
             )}
@@ -210,7 +242,7 @@ export default function OrdersPage() {
         {/* Pagination */}
         <div className="flex justify-between items-center px-6 py-4 border-t">
           <div className="flex gap-2 items-center">
-            <span>Rows per page:</span>
+            <span>{t('rowsPerPage')}</span>
             <select
               value={rowsPerPage}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -233,11 +265,11 @@ export default function OrdersPage() {
               }
               className="px-2 py-1 border rounded disabled:opacity-50"
             >
-              Prev
+              {t('prev')}
             </button>
 
             <span>
-              Page {currentPage} of {totalPages}
+              {t('page', { current: currentPage, total: totalPages })}
             </span>
 
             <button
@@ -247,7 +279,7 @@ export default function OrdersPage() {
               }
               className="px-2 py-1 border rounded disabled:opacity-50"
             >
-              Next
+              {t('next')}
             </button>
           </div>
         </div>

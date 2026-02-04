@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SalesOrder {
   id: string;
@@ -12,6 +13,7 @@ interface SalesOrder {
 }
 
 const SalesDashboard = () => {
+  const t = useTranslations('vendors.sales');
   const [searchTerm, setSearchTerm] = useState('');
   const [timeFilter, setTimeFilter] = useState('all-time');
   const [statusFilter, setStatusFilter] = useState('all-status');
@@ -32,9 +34,9 @@ const SalesDashboard = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Sales</h1>
+          <h1 className="text-3xl font-bold text-gray-800">{t('title')}</h1>
           <button className="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2.5 rounded-full font-medium transition-colors">
-            Export sales
+            {t('exportSales')}
           </button>
         </div>
 
@@ -42,10 +44,10 @@ const SalesDashboard = () => {
         <div className="flex gap-4 mb-6">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" aria-hidden="true" />
             <input
               type="text"
-              placeholder="Search sales by order number"
+              placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
@@ -57,11 +59,12 @@ const SalesDashboard = () => {
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
             className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+            aria-label={t('allTime')}
           >
-            <option value="all-time">All time</option>
-            <option value="today">Today</option>
-            <option value="this-week">This week</option>
-            <option value="this-month">This month</option>
+            <option value="all-time">{t('allTime')}</option>
+            <option value="today">{t('today')}</option>
+            <option value="this-week">{t('thisWeek')}</option>
+            <option value="this-month">{t('thisMonth')}</option>
           </select>
 
           {/* Status Filter */}
@@ -69,10 +72,11 @@ const SalesDashboard = () => {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+            aria-label={t('payoutStatus')}
           >
-            <option value="all-status">Payout status</option>
-            <option value="paid">Paid</option>
-            <option value="in-escrow">In escrow</option>
+            <option value="all-status">{t('payoutStatus')}</option>
+            <option value="paid">{t('paid')}</option>
+            <option value="in-escrow">{t('inEscrow')}</option>
           </select>
         </div>
 
@@ -81,12 +85,12 @@ const SalesDashboard = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Order number</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Date</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Customer</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Amount</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Payout status</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">Actions</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('orderNumber')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('date')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('customer')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('amount')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('payoutStatus')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -104,12 +108,12 @@ const SalesDashboard = () => {
                           : 'bg-orange-100 text-orange-700'
                       }`}
                     >
-                      {order.payoutStatus === 'paid' ? 'Paid' : 'In escrow'}
+                      {order.payoutStatus === 'paid' ? t('paid') : t('inEscrow')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
-                      View order
+                      {t('viewOrder')}
                     </button>
                   </td>
                 </tr>
@@ -121,7 +125,7 @@ const SalesDashboard = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Rows per page:</span>
+            <span className="text-sm text-gray-600">{t('rowsPerPage')}</span>
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
@@ -136,13 +140,14 @@ const SalesDashboard = () => {
 
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
-              Page {currentPage} of {totalPages}
+              {t('page', { current: currentPage, total: totalPages })}
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Previous page"
               >
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
@@ -150,6 +155,7 @@ const SalesDashboard = () => {
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Next page"
               >
                 <ChevronRight className="w-5 h-5 text-gray-600" />
               </button>

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from 'next-intl';
 
 type FormDataType = {
   name: string;
@@ -17,6 +18,9 @@ type ImageType = {
 };
 
 export default function AddProductForm() {
+  const t = useTranslations('vendors.products');
+  const tForm = useTranslations('vendors.products.form');
+  
   const [formData, setFormData] = React.useState<FormDataType>({
     name: "",
     description: "",
@@ -32,7 +36,12 @@ export default function AddProductForm() {
   const [newFeature, setNewFeature] = React.useState<string>("");
   const [sizes, setSizes] = React.useState<string[]>([]);
 
-  const availableSizes = ["Small", "Medium", "Large", "X-Large"];
+  const availableSizes = [
+    { key: "Small", label: tForm('small') },
+    { key: "Medium", label: tForm('medium') },
+    { key: "Large", label: tForm('large') },
+    { key: "X-Large", label: tForm('xLarge') }
+  ];
 
   const handleInputChange = <K extends keyof FormDataType>(
     field: K,
@@ -82,7 +91,7 @@ export default function AddProductForm() {
 
   const handleSaveDraft = () => {
     console.log("Saving as draft:", { ...formData, images, features, sizes });
-    alert("Product saved as draft!");
+    alert(tForm('savedAsDraft'));
   };
 
   const handleSaveAndAddAnother = () => {
@@ -93,7 +102,7 @@ export default function AddProductForm() {
       sizes,
     });
 
-    alert("Product saved! Ready to add another.");
+    alert(tForm('savedReadyAnother'));
 
     setFormData({
       name: "",
@@ -112,7 +121,7 @@ export default function AddProductForm() {
 
   const handleSaveAndPreview = () => {
     console.log("Saving and previewing:", { ...formData, images, features, sizes });
-    alert("Product saved! Opening preview...");
+    alert(tForm('savedAsDraft'));
   };
 
   return (
@@ -120,24 +129,24 @@ export default function AddProductForm() {
       {/* Header */}
       <div className="mb-6">
         <button className="text-sm text-gray-600 hover:text-gray-800 mb-2 flex items-center gap-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Add a new product
+          {t('addNewProduct')}
         </button>
 
-        <h1 className="text-2xl font-semibold text-gray-900">Add a new product</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{t('addNewProduct')}</h1>
       </div>
 
       <div className="space-y-6">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{tForm('name')}</label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange("name", e.target.value)}
-            placeholder="Men's leather shoe"
+            placeholder={tForm('namePlaceholder')}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
@@ -145,12 +154,12 @@ export default function AddProductForm() {
         {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description
+            {tForm('description')}
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => handleInputChange("description", e.target.value)}
-            placeholder="Introducing our premium men's leather shoe..."
+            placeholder={tForm('descriptionPlaceholder')}
             rows={4}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none"
           />
@@ -159,13 +168,13 @@ export default function AddProductForm() {
         {/* Quantity */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Quantity
+            {tForm('quantity')}
           </label>
           <input
             type="number"
             value={formData.quantity}
             onChange={(e) => handleInputChange("quantity", e.target.value)}
-            placeholder="300"
+            placeholder={tForm('quantityPlaceholder')}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
@@ -173,7 +182,7 @@ export default function AddProductForm() {
         {/* Images */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Add image of product
+            {tForm('addImageOfProduct')}
           </label>
 
           <div className="grid grid-cols-4 gap-4">
@@ -184,13 +193,14 @@ export default function AddProductForm() {
               >
                 <img
                   src={img.preview}
-                  alt={`Product ${index + 1}`}
+                  alt={tForm('productImage', { number: index + 1 })}
                   className="w-full h-full object-cover"
                 />
 
                 <button
                   onClick={() => removeImage(index)}
                   className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full"
+                  aria-label="Remove image"
                 >
                   ×
                 </button>
@@ -215,24 +225,24 @@ export default function AddProductForm() {
         {/* Category */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Product category
+            {tForm('productCategory')}
           </label>
           <select
             value={formData.category}
             onChange={(e) => handleInputChange("category", e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
           >
-            <option value="Men fashion">Men fashion</option>
-            <option value="Women fashion">Women fashion</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Home & Garden">Home & Garden</option>
+            <option value="Men fashion">{t('menFashion')}</option>
+            <option value="Women fashion">{t('womenFashion')}</option>
+            <option value="Electronics">{tForm('electronics')}</option>
+            <option value="Home & Garden">{tForm('homeGarden')}</option>
           </select>
         </div>
 
         {/* Price / Discount */}
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Price</label>
+            <label className="block text-sm font-medium mb-2">{t('price')}</label>
             <input
               type="number"
               value={formData.price}
@@ -242,7 +252,7 @@ export default function AddProductForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Discount</label>
+            <label className="block text-sm font-medium mb-2">{tForm('discount')}</label>
             <input
               type="number"
               value={formData.discount}
@@ -262,13 +272,13 @@ export default function AddProductForm() {
               handleInputChange("applyDiscount", e.target.checked)
             }
           />
-          <label htmlFor="applyDiscount">Apply discount</label>
+          <label htmlFor="applyDiscount">{tForm('applyDiscount')}</label>
         </div>
 
         {/* Features */}
         <div>
           <label className="block text-sm font-medium mb-2">
-            Product features
+            {tForm('productFeatures')}
           </label>
 
           <div className="flex gap-2 mb-3">
@@ -284,7 +294,7 @@ export default function AddProductForm() {
               onClick={addFeature}
               className="px-4 py-2 text-blue-600"
             >
-              + Add feature
+              {tForm('addFeature')}
             </button>
           </div>
 
@@ -308,21 +318,21 @@ export default function AddProductForm() {
 
         {/* Sizes */}
         <div>
-          <label className="block text-sm font-medium mb-2">Size</label>
+          <label className="block text-sm font-medium mb-2">{tForm('size')}</label>
 
           <div className="flex gap-2">
             {availableSizes.map((size) => (
               <button
-                key={size}
-                onClick={() => toggleSize(size)}
+                key={size.key}
+                onClick={() => toggleSize(size.key)}
                 type="button"
                 className={`px-4 py-2 border rounded-lg ${
-                  sizes.includes(size)
+                  sizes.includes(size.key)
                     ? "border-blue-500 bg-blue-50 text-blue-700"
                     : "border-gray-300"
                 }`}
               >
-                {size}
+                {size.label}
               </button>
             ))}
           </div>
@@ -331,7 +341,7 @@ export default function AddProductForm() {
         {/* Buttons */}
         <div className="flex justify-between pt-6 border-t">
           <button onClick={handleSaveDraft} className="border px-6 py-2 rounded-lg">
-            Save to draft
+            {tForm('saveToDraft')}
           </button>
 
           <div className="flex gap-3">
@@ -339,14 +349,14 @@ export default function AddProductForm() {
               onClick={handleSaveAndAddAnother}
               className="border px-6 py-2 rounded-lg"
             >
-              Save and another
+              {tForm('saveAndAnother')}
             </button>
 
             <button
               onClick={handleSaveAndPreview}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg"
             >
-              Save and preview
+              {tForm('saveAndPreview')}
             </button>
           </div>
         </div>

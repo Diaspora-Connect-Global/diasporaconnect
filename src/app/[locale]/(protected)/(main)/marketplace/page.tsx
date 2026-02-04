@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Star, Heart, Search, ChevronLeft, ChevronRight, Plus, Minus, Trash2, CheckCircle } from 'lucide-react';
 import { SearchInput } from '@/components/custom/input';
+import { useTranslations } from 'next-intl';
 
 // Types
 interface Product {
@@ -50,13 +51,16 @@ const services: Product[] = [
 
 
 // Header Component
-const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTab: (item: 'products' | 'services') => void; activeTab: string }> = ({ cartCount, onCartClick, setActiveTab, activeTab }) => (
+const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTab: (item: 'products' | 'services') => void; activeTab: string }> = ({ cartCount, onCartClick, setActiveTab, activeTab }) => {
+  const t = useTranslations('marketplace');
+  
+  return (
   <div className="bg-background z-10 pb-4 shrink-0">
     <div className="flex justify-between items-center py-4">
-      <h1 className="text-2xl font-bold">Marketplace</h1>
+      <h1 className="text-2xl font-bold">{t('title')}</h1>
       <button onClick={onCartClick} className="flex items-center gap-2">
         <ShoppingCart className="w-5 h-5" />
-        <span>Cart</span>
+        <span>{t('cart')}</span>
         {cartCount > 0 && (
           <span className="text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {cartCount}
@@ -71,13 +75,13 @@ const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTa
           onClick={() => setActiveTab('products')}
           className={`p-2 font-medium ${activeTab === 'products' ? 'border-b-2 border-border-brand' : 'text-gray-600'}`}
         >
-          Products
+          {t('products')}
         </button>
         <button
           onClick={() => setActiveTab('services')}
           className={`p-2 font-medium ${activeTab === 'services' ? 'border-b-2 border-border-brand' : 'text-gray-600'}`}
         >
-          Services
+          {t('services')}
         </button>
       </div>
       <div className="h-[5vh]">
@@ -92,12 +96,14 @@ const Header: React.FC<{ cartCount: number; onCartClick: () => void, setActiveTa
     </div>
   </div>
 );
+}
 
 // Product Card Component
 const ProductCard: React.FC<{
   product: Product;
   onAddToCart: (product: Product | CartItem) => void;
 }> = ({ product, onAddToCart }) => {
+  const t = useTranslations('marketplace');
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAddToCart(product);
@@ -109,7 +115,7 @@ const ProductCard: React.FC<{
         <div className="rounded-4xl h-48 flex items-center justify-center text-6xl border-1">
           {product.image}
         </div>
-        <button className="absolute top-2 right-2 rounded-full p-2">
+        <button className="absolute top-2 right-2 rounded-full p-2" aria-label={t('addToWishlist')}>
           <Heart className="w-5 h-5 text-gray-400" />
         </button>
       </div>
@@ -122,12 +128,13 @@ const ProductCard: React.FC<{
         </div>
 
       </div>
-      <p className="text-sm text-gray-600 mb-2">Accra,ghana</p>
+      <p className="text-sm text-gray-600 mb-2">{t('location')}</p>
       <div className="flex items-center justify-between">
         <span className="text-lg font-bold">GH₵{product.price.toFixed(2)}</span>
         <button
           onClick={handleAddClick}
           className="bg-surface-brand text-text-white rounded-full p-2"
+          aria-label={t('addToCart')}
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -144,6 +151,7 @@ const ServiceDetail: React.FC<{
   onBack: () => void;
   onContinue: (item: CartItem) => void;
 }> = ({ service, onBack, onContinue }) => {
+  const t = useTranslations('marketplace');
   const [projectDuration, setProjectDuration] = useState<number>(0);
   const [selectedPackage, setSelectedPackage] = useState<'basic' | 'standard' | 'premium'>('basic');
   const [quantity, setQuantity] = useState(1);
@@ -197,9 +205,9 @@ const ServiceDetail: React.FC<{
             ))}
           </div>
           <div className="mt-6">
-            <h3 className="font-semibold mb-2">About service</h3>
+            <h3 className="font-semibold mb-2">{t('aboutService')}</h3>
             <p className="text-sm text-gray-600">
-              Introducing our premium men&apos;s leather shoe, crafted from high-quality materials for durability and style. With a sleek design and comfortable fit, these shoes are perfect for both formal and casual occasions. Elevate your wardrobe with this essential footwear that combines elegance and practicality.
+              {t('serviceDescription')}
             </p>
           </div>
         </div>
@@ -228,18 +236,18 @@ const ServiceDetail: React.FC<{
           </div>
 
           <div className="mb-6">
-            <label className="block font-semibold mb-2">Project duration (in hours)</label>
+            <label className="block font-semibold mb-2">{t('projectDuration')}</label>
             <input
               type="number"
               value={projectDuration}
               onChange={(e) => setProjectDuration(Number(e.target.value))}
-              placeholder="Enter how long the project will last in hours"
+              placeholder={t('projectDurationPlaceholder')}
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
 
           <div className="mb-6">
-            <label className="block font-semibold mb-2">Packages</label>
+            <label className="block font-semibold mb-2">{t('packages')}</label>
             <div className="space-y-3">
               {Object.entries(packages).map(([key, pkg]) => (
                 <div
@@ -262,11 +270,12 @@ const ServiceDetail: React.FC<{
           </div>
 
           <div className="mb-6">
-            <h3 className="font-semibold mb-2">Quantity</h3>
+            <h3 className="font-semibold mb-2">{t('quantity')}</h3>
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 className="p-2 border rounded hover:bg-gray-100"
+                aria-label={t('decreaseQuantity')}
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -274,6 +283,7 @@ const ServiceDetail: React.FC<{
               <button
                 onClick={() => setQuantity(quantity + 1)}
                 className="p-2 border rounded hover:bg-gray-100"
+                aria-label={t('increaseQuantity')}
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -284,14 +294,14 @@ const ServiceDetail: React.FC<{
             onClick={handleContinue}
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 mb-4"
           >
-            Continue
+            {t('continue')}
           </button>
 
           <button
             onClick={() => setShowExtras(true)}
             className="w-full border border-blue-600 text-blue-600 py-3 rounded-lg hover:bg-blue-50"
           >
-            Add extras
+            {t('addExtras')}
           </button>
         </div>
       </div>
@@ -300,8 +310,8 @@ const ServiceDetail: React.FC<{
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold">Add extras</h3>
-              <button onClick={() => setShowExtras(false)} className="text-gray-500 hover:text-gray-700 text-2xl">
+              <h3 className="text-xl font-bold">{t('addExtras')}</h3>
+              <button onClick={() => setShowExtras(false)} className="text-gray-500 hover:text-gray-700 text-2xl" aria-label={t('close')}>
                 &times;
               </button>
             </div>
@@ -329,7 +339,7 @@ const ServiceDetail: React.FC<{
                 onClick={() => setShowExtras(false)}
                 className="flex-1 border border-gray-300 py-2 rounded-lg hover:bg-gray-50"
               >
-                I don&apos;t want extra services
+                {t('noExtraServices')}
               </button>
               <button
                 onClick={() => {
@@ -338,7 +348,7 @@ const ServiceDetail: React.FC<{
                 }}
                 className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
               >
-                Add extras (GH₵ {selectedExtras.length * 125}.00)
+                {t('addExtrasAmount', { amount: selectedExtras.length * 125 })}
               </button>
             </div>
           </div>
@@ -354,6 +364,7 @@ const ProductDetail: React.FC<{
   onBack: () => void;
   onAddToCart: (item: Product | CartItem) => void;
 }> = ({ product, onBack, onAddToCart }) => {
+  const t = useTranslations('marketplace');
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
@@ -399,9 +410,9 @@ const ProductDetail: React.FC<{
 
           
             <div className="p-2 rounded-lg">
-              <h3 className="font-semibold mb-2">About product</h3>
+              <h3 className="font-semibold mb-2">{t('aboutProduct')}</h3>
               <p className="text-sm text-gray-600">
-                A classic men&apos;s leather shoe, crafted from high-quality materials for durability and style. With a sleek design and comfortable fit, these shoes are perfect for both formal and casual occasions. Elevate your wardrobe with this essential footwear that combines elegance and practicality.
+                {t('productDescription')}
               </p>
             </div>
 
@@ -410,7 +421,7 @@ const ProductDetail: React.FC<{
                     {/** right side */}
 
           <div>
-                        <p className="text-sm text-gray-600 mb-4">By {product.seller}</p>
+                        <p className="text-sm text-gray-600 mb-4">{t('bySeller', { seller: product.seller })}</p>
 
             <div className="flex items-start justify-between">
               <div>
@@ -433,7 +444,7 @@ const ProductDetail: React.FC<{
             <p className="text-3xl font-bold mb-6">GH₵{product.price.toFixed(2)}</p>
 
             <div className="mb-6">
-              <h3 className="font-semibold mb-2">Size</h3>
+              <h3 className="font-semibold mb-2">{t('size')}</h3>
               <div className="flex gap-2">
                 {sizes.map(size => (
                   <button
@@ -448,11 +459,12 @@ const ProductDetail: React.FC<{
             </div>
 
             <div className="mb-6">
-              <h3 className="font-semibold mb-2">Quantity</h3>
+              <h3 className="font-semibold mb-2">{t('quantity')}</h3>
               <div className="flex items-center gap-4 border-1 w-fit px-8 py-5 rounded-full text-text-brand border-brand">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="p-2 rounded"
+                  aria-label={t('decreaseQuantity')}
                 >
                   <Minus className="w-4 h-4" />
                 </button>
@@ -460,6 +472,7 @@ const ProductDetail: React.FC<{
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   className="p-2 rounded"
+                  aria-label={t('increaseQuantity')}
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -468,10 +481,10 @@ const ProductDetail: React.FC<{
 
             <div className="flex gap-4 mb-6">
               <button onClick={handleAddToCart} className="flex-1 bg-text-primary text-text-white py-3 rounded-full">
-                Add to cart
+                {t('addToCart')}
               </button>
               <button className="flex-1 bg-surface-brand text-text-white py-3 rounded-full">
-                Buy now
+                {t('buyNow')}
               </button>
             </div>
 
@@ -490,19 +503,20 @@ const ShoppingCartModal: React.FC<{
   onRemoveItem: (id: string) => void;
   onCheckout: () => void;
 }> = ({ cart, onClose, onUpdateQuantity, onRemoveItem, onCheckout }) => {
+  const t = useTranslations('marketplace');
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-surface-default rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
         <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-bold">Shopping cart</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+          <h2 className="text-xl font-bold">{t('shoppingCart')}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl" aria-label={t('close')}>&times;</button>
         </div>
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Items in cart</h3>
-            <span className="text-sm text-gray-600">Number of items: {cart.length}</span>
+            <h3 className="font-semibold">{t('itemsInCart')}</h3>
+            <span className="text-sm text-gray-600">{t('numberOfItems', { count: cart.length })}</span>
           </div>
           {cart.map(item => (
             <div key={item.id} className="flex gap-4 mb-4 pb-4 border-b">
@@ -540,13 +554,13 @@ const ShoppingCartModal: React.FC<{
             </div>
           ))}
           <div className="mt-6 text-right">
-            <p className="text-sm text-gray-600 mb-1">ONE TIME FEE: GH₵20.00</p>
-            <p className="text-2xl font-bold mb-4">Total: GH₵{(total + 20).toFixed(2)}</p>
+            <p className="text-sm text-gray-600 mb-1">{t('oneTimeFee')}: GH₵20.00</p>
+            <p className="text-2xl font-bold mb-4">{t('total')}: GH₵{(total + 20).toFixed(2)}</p>
             <button
               onClick={onCheckout}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
             >
-              Proceed to checkout
+              {t('proceedToCheckout')}
             </button>
           </div>
         </div>
@@ -561,6 +575,7 @@ const ServiceCheckout: React.FC<{
   onBack: () => void;
   onComplete: () => void;
 }> = ({ serviceItem, onBack, onComplete }) => {
+  const t = useTranslations('marketplace');
   const [paymentMethod, setPaymentMethod] = useState('credit');
   const [billingAddress, setBillingAddress] = useState({
     name: '',
@@ -583,18 +598,18 @@ const ServiceCheckout: React.FC<{
     <div className="max-w-7xl mx-auto px-4 py-6">
       <button onClick={onBack} className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-800">
         <ChevronLeft className="w-5 h-5" />
-        <span>Checkout</span>
+        <span>{t('checkout')}</span>
       </button>
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="font-semibold mb-4">Order details</h3>
+            <h3 className="font-semibold mb-4">{t('orderDetails')}</h3>
             <div className="flex gap-4 mb-4">
               <div className="bg-gray-100 rounded w-16 h-16 flex items-center justify-center text-2xl flex-shrink-0">
                 {serviceItem.image}
               </div>
               <div className="flex-1">
-                <p className="font-medium mb-1">I will develop a revenue strategy for your business</p>
+                <p className="font-medium mb-1">{t('revenueStrategyService')}</p>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                   <span>{serviceItem.seller}</span>
@@ -602,24 +617,24 @@ const ServiceCheckout: React.FC<{
               </div>
             </div>
             <div className="text-sm text-gray-600">
-              <p>Premium package (GH₵{packagePrice.toFixed(2)})</p>
+              <p>{t('premiumPackage')} (GH₵{packagePrice.toFixed(2)})</p>
             </div>
             {serviceItem.extras && serviceItem.extras.length > 0 && (
               <div className="mt-3 pt-3 border-t">
-                <p className="text-sm font-medium mb-1">Extras</p>
-                <p className="text-sm text-gray-600">Include source file</p>
+                <p className="text-sm font-medium mb-1">{t('extras')}</p>
+                <p className="text-sm text-gray-600">{t('includeSourceFile')}</p>
               </div>
             )}
           </div>
 
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="font-semibold mb-4">Payment details</h3>
+            <h3 className="font-semibold mb-4">{t('paymentDetails')}</h3>
             <button className="flex items-center justify-between w-full p-4 border rounded-lg mb-3 hover:bg-gray-50">
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 border rounded flex items-center justify-center">
                   💳
                 </div>
-                <span>Credit card</span>
+                <span>{t('creditCard')}</span>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </button>
@@ -628,30 +643,30 @@ const ServiceCheckout: React.FC<{
                 <div className="w-6 h-6 border rounded flex items-center justify-center">
                   📱
                 </div>
-                <span>Mobile payment</span>
+                <span>{t('mobilePayment')}</span>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </button>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-semibold mb-4">Billing address</h3>
+            <h3 className="font-semibold mb-4">{t('billingAddress')}</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
+                <label className="block text-sm font-medium mb-1">{t('name')}</label>
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder={t('namePlaceholder')}
                   value={billingAddress.name}
                   onChange={(e) => setBillingAddress({ ...billingAddress, name: e.target.value })}
                   className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Address</label>
+                <label className="block text-sm font-medium mb-1">{t('address')}</label>
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder={t('addressPlaceholder')}
                   value={billingAddress.address}
                   onChange={(e) => setBillingAddress({ ...billingAddress, address: e.target.value })}
                   className="w-full px-4 py-2 border rounded-lg"
@@ -659,38 +674,38 @@ const ServiceCheckout: React.FC<{
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">City</label>
+                  <label className="block text-sm font-medium mb-1">{t('city')}</label>
                   <input
                     type="text"
-                    placeholder="Name"
+                    placeholder={t('cityPlaceholder')}
                     value={billingAddress.city}
                     onChange={(e) => setBillingAddress({ ...billingAddress, city: e.target.value })}
                     className="w-full px-4 py-2 border rounded-lg"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Country</label>
+                  <label className="block text-sm font-medium mb-1">{t('country')}</label>
                   <select
                     value={billingAddress.country}
                     onChange={(e) => setBillingAddress({ ...billingAddress, country: e.target.value })}
                     className="w-full px-4 py-2 border rounded-lg"
                   >
-                    <option value="">Select country</option>
-                    <option value="GH">Ghana</option>
-                    <option value="NG">Nigeria</option>
-                    <option value="KE">Kenya</option>
+                    <option value="">{t('selectCountry')}</option>
+                    <option value="GH">{t('countries.ghana')}</option>
+                    <option value="NG">{t('countries.nigeria')}</option>
+                    <option value="KE">{t('countries.kenya')}</option>
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Phone number</label>
+                <label className="block text-sm font-medium mb-1">{t('phoneNumber')}</label>
                 <div className="flex gap-2">
                   <select className="px-3 py-2 border rounded-lg">
                     <option>🇬🇭 +233</option>
                   </select>
                   <input
                     type="tel"
-                    placeholder="50 000 0000"
+                    placeholder={t('phonePlaceholder')}
                     value={billingAddress.phoneNumber}
                     onChange={(e) => setBillingAddress({ ...billingAddress, phoneNumber: e.target.value })}
                     className="flex-1 px-4 py-2 border rounded-lg"
@@ -703,7 +718,7 @@ const ServiceCheckout: React.FC<{
 
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow p-6 sticky top-24">
-            <h3 className="font-semibold mb-4">Price summary</h3>
+            <h3 className="font-semibold mb-4">{t('priceSummary')}</h3>
             <div className="space-y-3 mb-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">{serviceItem.name}</span>
@@ -711,18 +726,18 @@ const ServiceCheckout: React.FC<{
               </div>
               {serviceItem.extras && serviceItem.extras.length > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Include source file</span>
+                  <span className="text-gray-600">{t('includeSourceFile')}</span>
                   <span className="font-medium">GH₵{extrasPrice.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-gray-600">Service fee</span>
+                <span className="text-gray-600">{t('serviceFee')}</span>
                 <span className="font-medium">GH₵{serviceFee.toFixed(2)}</span>
               </div>
             </div>
             <div className="border-t pt-4 mb-6">
               <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
+                <span>{t('total')}</span>
                 <span>GH₵{total.toFixed(2)}</span>
               </div>
             </div>
@@ -730,7 +745,7 @@ const ServiceCheckout: React.FC<{
               onClick={handlePay}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
             >
-              Pay GH₵ {total.toFixed(2)}
+              {t('payAmount', { amount: total.toFixed(2) })}
             </button>
           </div>
         </div>
@@ -745,6 +760,7 @@ const Checkout: React.FC<{
   onBack: () => void;
   onComplete: () => void;
 }> = ({ cart, onBack, onComplete }) => {
+  const t = useTranslations('marketplace');
   const [paymentMethod, setPaymentMethod] = useState('credit');
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     name: '',
@@ -766,13 +782,13 @@ const Checkout: React.FC<{
     <div className="max-w-7xl mx-auto px-4 py-6">
       <button onClick={onBack} className="flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-800">
         <ChevronLeft className="w-5 h-5" />
-        <span>Checkout</span>
+        <span>{t('checkout')}</span>
       </button>
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
           <div>
             <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="font-semibold mb-4">Order details</h3>
+              <h3 className="font-semibold mb-4">{t('orderDetails')}</h3>
               {cart.map(item => (
                 <div key={item.id} className="flex gap-3 mb-3">
                   <div className="bg-gray-100 rounded w-16 h-16 flex items-center justify-center text-2xl">
@@ -787,7 +803,7 @@ const Checkout: React.FC<{
             </div>
 
             <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="font-semibold mb-4">Payment method</h3>
+              <h3 className="font-semibold mb-4">{t('paymentMethod')}</h3>
               <label className="flex items-center gap-3 mb-3 cursor-pointer">
                 <input
                   type="radio"
@@ -796,7 +812,7 @@ const Checkout: React.FC<{
                   checked={paymentMethod === 'credit'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
-                <span>Credit card</span>
+                <span>{t('creditCard')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -806,16 +822,16 @@ const Checkout: React.FC<{
                   checked={paymentMethod === 'debit'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
-                <span>Debit/payment</span>
+                <span>{t('debitPayment')}</span>
               </label>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="font-semibold mb-4">Shipping address</h3>
+              <h3 className="font-semibold mb-4">{t('shippingAddress')}</h3>
               <div className="space-y-4">
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder={t('namePlaceholder')}
                   value={shippingAddress.name}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, name: e.target.value })}
                   className="w-full px-4 py-2 border rounded-lg"
@@ -823,7 +839,7 @@ const Checkout: React.FC<{
                 />
                 <input
                   type="text"
-                  placeholder="Address"
+                  placeholder={t('addressPlaceholder')}
                   value={shippingAddress.address}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, address: e.target.value })}
                   className="w-full px-4 py-2 border rounded-lg"
@@ -832,7 +848,7 @@ const Checkout: React.FC<{
                 <div className="grid grid-cols-2 gap-4">
                   <input
                     type="text"
-                    placeholder="City"
+                    placeholder={t('cityPlaceholder')}
                     value={shippingAddress.city}
                     onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                     className="px-4 py-2 border rounded-lg"
@@ -844,15 +860,15 @@ const Checkout: React.FC<{
                     className="px-4 py-2 border rounded-lg"
                     required
                   >
-                    <option value="">Country</option>
-                    <option value="GH">Ghana</option>
-                    <option value="NG">Nigeria</option>
-                    <option value="KE">Kenya</option>
+                    <option value="">{t('country')}</option>
+                    <option value="GH">{t('countries.ghana')}</option>
+                    <option value="NG">{t('countries.nigeria')}</option>
+                    <option value="KE">{t('countries.kenya')}</option>
                   </select>
                 </div>
                 <input
                   type="tel"
-                  placeholder="Phone number"
+                  placeholder={t('phoneNumberPlaceholder')}
                   value={shippingAddress.phoneNumber}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, phoneNumber: e.target.value })}
                   className="w-full px-4 py-2 border rounded-lg"
@@ -862,10 +878,10 @@ const Checkout: React.FC<{
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold mb-4">Billing address</h3>
+              <h3 className="font-semibold mb-4">{t('billingAddress')}</h3>
               <label className="flex items-center gap-2">
                 <input type="checkbox" defaultChecked />
-                <span className="text-sm">Same as shipping address</span>
+                <span className="text-sm">{t('sameAsShipping')}</span>
               </label>
             </div>
           </div>
@@ -873,24 +889,24 @@ const Checkout: React.FC<{
 
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow p-6 sticky top-24">
-            <h3 className="font-semibold mb-4">Price summary</h3>
+            <h3 className="font-semibold mb-4">{t('priceSummary')}</h3>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Subtotal amount</span>
+                <span className="text-gray-600">{t('subtotalAmount')}</span>
                 <span>GH₵{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Shipping fee</span>
+                <span className="text-gray-600">{t('shippingFee')}</span>
                 <span>GH₵{shippingFee.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Discount</span>
+                <span className="text-gray-600">{t('discount')}</span>
                 <span>GH₵0.00</span>
               </div>
             </div>
             <div className="border-t pt-4 mb-6">
               <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
+                <span>{t('total')}</span>
                 <span>GH₵{total.toFixed(2)}</span>
               </div>
             </div>
@@ -898,7 +914,7 @@ const Checkout: React.FC<{
               onClick={handleSubmit}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
             >
-              Pay GH₵{total.toFixed(2)}
+              {t('payAmount', { amount: total.toFixed(2) })}
             </button>
           </div>
         </div>
@@ -912,6 +928,7 @@ const OrderSuccess: React.FC<{
   cart: CartItem[];
   onBackToHome: () => void;
 }> = ({ cart, onBackToHome }) => {
+  const t = useTranslations('marketplace');
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0) + 20;
 
   return (
@@ -920,8 +937,8 @@ const OrderSuccess: React.FC<{
         <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
           <CheckCircle className="w-12 h-12 text-green-600" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">Your order payment successfully</h2>
-        <p className="text-gray-600 mb-8">Order details</p>
+        <h2 className="text-2xl font-bold mb-2">{t('orderSuccess')}</h2>
+        <p className="text-gray-600 mb-8">{t('orderDetails')}</p>
 
         <div className="text-left mb-8">
           {cart.map(item => (
@@ -941,13 +958,13 @@ const OrderSuccess: React.FC<{
         <div className="border-t pt-6 mb-8">
           <div className="grid grid-cols-2 gap-4 text-sm mb-2">
             <div className="text-left">
-              <p className="text-gray-600 mb-4">Shipping address</p>
+              <p className="text-gray-600 mb-4">{t('shippingAddress')}</p>
               <p>Jane Doe</p>
               <p>Kumasi, Ghana - Danyame-Nhyianso</p>
               <p>PO 233-543-8392</p>
             </div>
             <div className="text-left">
-              <p className="text-gray-600 mb-4">Billing address</p>
+              <p className="text-gray-600 mb-4">{t('billingAddress')}</p>
               <p>Jane Doe</p>
               <p>Kumasi, Ghana - Danyame-Nhyianso</p>
               <p>PO 233-543-8392</p>
@@ -955,13 +972,13 @@ const OrderSuccess: React.FC<{
           </div>
           <div className="grid grid-cols-2 gap-4 text-sm mt-6">
             <div className="text-left">
-              <p className="text-gray-600">Payment method</p>
-              <p>Visa ending in 1234</p>
+              <p className="text-gray-600">{t('paymentMethod')}</p>
+              <p>{t('visaEnding', { digits: '1234' })}</p>
             </div>
             <div className="text-right">
-              <p className="text-gray-600">Subtotal:</p>
-              <p className="text-gray-600">Shipping fee:</p>
-              <p className="font-bold text-lg">Total:</p>
+              <p className="text-gray-600">{t('subtotal')}:</p>
+              <p className="text-gray-600">{t('shippingFee')}:</p>
+              <p className="font-bold text-lg">{t('total')}:</p>
             </div>
             <div></div>
             <div className="text-right">
@@ -976,7 +993,7 @@ const OrderSuccess: React.FC<{
           onClick={onBackToHome}
           className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700"
         >
-          Done order
+          {t('doneOrder')}
         </button>
       </div>
     </div>
@@ -985,6 +1002,7 @@ const OrderSuccess: React.FC<{
 
 // Main App Component
 const App: React.FC = () => {
+  const t = useTranslations('marketplace');
   const [currentView, setCurrentView] = useState<'home' | 'product' | 'service' | 'cart' | 'checkout' | 'service-checkout' | 'success'>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -1053,13 +1071,13 @@ const App: React.FC = () => {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold">
-                    {activeTab === 'products' ? 'Trending' : 'Services you may like'}
+                    {activeTab === 'products' ? t('trending') : t('servicesYouMayLike')}
                   </h2>
                   <div className="flex gap-2">
-                    <button className="p-2 border rounded-full hover:bg-gray-100">
+                    <button className="p-2 border rounded-full hover:bg-gray-100" aria-label={t('scrollLeft')}>
                       <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <button className="p-2 border rounded-full hover:bg-gray-100">
+                    <button className="p-2 border rounded-full hover:bg-gray-100" aria-label={t('scrollRight')}>
                       <ChevronRight className="w-5 h-5" />
                     </button>
                   </div>
