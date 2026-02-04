@@ -403,14 +403,3 @@ mutation Logout {
 ```
 
 ---
-
-# RULES
-
-| Rule | Format |
-|------|--------|
-| Response structure | `{ success, message?, data }` |
-| Pagination | Include `total` field |
-| Field names | camelCase |
-| IDs | UUID string |
-| Dates | ISO 8601 format |
-| Optional fields | Mark with `?` |
