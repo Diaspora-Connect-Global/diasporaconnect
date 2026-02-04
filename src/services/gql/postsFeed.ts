@@ -1,4 +1,4 @@
-// services/gql/feed.ts
+// services/gql/postsFeed.ts
 import { gql } from '@apollo/client';
 
 // ============================================================================
@@ -15,7 +15,7 @@ export interface EngagementCounts {
 export interface UserEngagement {
   hasLiked: boolean;
   hasSaved: boolean;
-  hasShared: boolean;  // ✅ Added missing field
+  hasShared: boolean;
 }
 
 export interface UserProfile {
@@ -51,7 +51,11 @@ export interface Comment {
   id: string;
   text: string;
   authorId: string;
+  authorType: 'USER' | 'ORG';
+  authorProfile?: AuthorProfile;
   createdAt: string;
+  postId: string;
+  parentId?: string | null;
 }
 
 export interface GetFeedInput {
@@ -59,7 +63,7 @@ export interface GetFeedInput {
   offset?: number;
   communityId?: string;
   authorId?: string;
-  type: 'all';
+  type: 'all' | 'following' | 'community';
 }
 
 export interface CreatePostInput {
@@ -81,6 +85,7 @@ export interface AddEngagementInput {
 export interface CreateCommentInput {
   postId: string;
   text: string;
+  parentId?: string;
 }
 
 // ============================================================================
@@ -126,6 +131,11 @@ export interface CreateCommentData {
   createComment: {
     id: string;
     text: string;
+    postId: string;
+    parentId?: string | null;
+    authorId: string;
+    authorType: 'USER' | 'ORG';
+    createdAt: string;
   };
 }
 
@@ -133,26 +143,6 @@ export interface CreateCommentData {
 // QUERIES
 // ============================================================================
 
-/**
- * Get Feed
- * 
- * @description
- * Retrieves a paginated feed of posts based on the provided filters.
- * Can be filtered by community, author, or retrieved as a general feed.
- * 
- * @example
- * ```typescript
- * const { data, loading, error } = useQuery<GetFeedData>(GET_FEED, {
- *   variables: {
- *     input: {
- *       limit: 10,
- *       offset: 0,
- *       communityId: 'community-123'
- *     }
- *   }
- * });
- * ```
- */
 export const GET_FEED = gql`
   query GetFeed($input: GetFeedInput!) {
     feed(input: $input) {
@@ -165,7 +155,7 @@ export const GET_FEED = gql`
         authorProfile {
           organizationProfile {
             name
-            isVip
+          
           }
           userProfile {
             name
@@ -191,21 +181,6 @@ export const GET_FEED = gql`
   }
 `;
 
-/**
- * Get Post
- * 
- * @description
- * Retrieves detailed information about a specific post by ID.
- * 
- * @example
- * ```typescript
- * const { data, loading, error } = useQuery<GetPostData>(GET_POST, {
- *   variables: {
- *     id: 'post-123'
- *   }
- * });
- * ```
- */
 export const GET_POST = gql`
   query GetPost($id: String!) {
     post(id: $id) {
@@ -213,6 +188,18 @@ export const GET_POST = gql`
       text
       authorId
       authorType
+      authorProfile {
+        organizationProfile {
+          name
+         
+        }
+        userProfile {
+          name
+          avatar
+          isVip
+          verificationTier
+        }
+      }
       createdAt
       engagementCounts {
         likes
@@ -229,30 +216,28 @@ export const GET_POST = gql`
   }
 `;
 
-/**
- * Get Post Comments
- * 
- * @description
- * Retrieves paginated comments for a specific post.
- * 
- * @example
- * ```typescript
- * const { data, loading, error } = useQuery<GetPostCommentsData>(GET_POST_COMMENTS, {
- *   variables: {
- *     postId: 'post-123',
- *     limit: 20,
- *     offset: 0
- *   }
- * });
- * ```
- */
 export const GET_POST_COMMENTS = gql`
   query GetPostComments($postId: String!, $limit: Int, $offset: Int) {
     postComments(postId: $postId, limit: $limit, offset: $offset) {
       id
       text
       authorId
+      authorType
+      authorProfile {
+        organizationProfile {
+          name
+          
+        }
+        userProfile {
+          name
+          avatar
+          isVip
+          verificationTier
+        }
+      }
       createdAt
+      postId
+      parentId
     }
   }
 `;
@@ -261,70 +246,16 @@ export const GET_POST_COMMENTS = gql`
 // MUTATIONS
 // ============================================================================
 
-/**
- * Create Post
- * 
- * @description
- * Creates a new post with the provided content and optional community assignment.
- * 
- * @example
- * ```typescript
- * const [createPost, { loading }] = useMutation<CreatePostData>(CREATE_POST);
- * 
- * const handleCreatePost = async () => {
- *   try {
- *     const { data } = await createPost({
- *       variables: {
- *         input: {
- *           text: 'Hello world!',
- *           communityId: 'community-123',
- *           visibility: 'PUBLIC'
- *         }
- *       }
- *     });
- *     toast.success('Post created successfully!');
- *   } catch (error) {
- *     toast.error('Failed to create post');
- *   }
- * };
- * ```
- */
 export const CREATE_POST = gql`
   mutation CreatePost($input: CreatePostInput!) {
     createPost(input: $input) {
       id
       text
+      authorType
     }
   }
 `;
 
-/**
- * Edit Post
- * 
- * @description
- * Updates the text content of an existing post.
- * 
- * @example
- * ```typescript
- * const [editPost, { loading }] = useMutation<EditPostData>(EDIT_POST);
- * 
- * const handleEditPost = async (postId: string, newText: string) => {
- *   try {
- *     const { data } = await editPost({
- *       variables: {
- *         input: {
- *           id: postId,
- *           text: newText
- *         }
- *       }
- *     });
- *     toast.success('Post updated successfully!');
- *   } catch (error) {
- *     toast.error('Failed to update post');
- *   }
- * };
- * ```
- */
 export const EDIT_POST = gql`
   mutation EditPost($input: EditPostInput!) {
     editPost(input: $input) {
@@ -334,93 +265,24 @@ export const EDIT_POST = gql`
   }
 `;
 
-/**
- * Add Engagement
- * 
- * @description
- * Adds or removes an engagement (like, save, or share) on a post.
- * If the engagement already exists, it will be removed (toggle behavior).
- * 
- * @example
- * ```typescript
- * const [addEngagement, { loading }] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
- * 
- * const handleLike = async (postId: string) => {
- *   try {
- *     const { data } = await addEngagement({
- *       variables: {
- *         input: {
- *           postId,
- *           engagementType: 'LIKE'
- *         }
- *       },
- *       // Optimistically update the UI
- *       optimisticResponse: {
- *         addEngagement: {
- *           success: true,
- *           message: 'Post liked'
- *         }
- *       }
- *     });
- *     
- *     if (data?.addEngagement.success) {
- *       toast.success(data.addEngagement.message);
- *     }
- *   } catch (error) {
- *     toast.error('Failed to like post');
- *   }
- * };
- * ```
- */
 export const ADD_ENGAGEMENT = gql`
   mutation AddEngagement($input: AddEngagementInput!) {
     addEngagement(input: $input) {
       success
-      
     }
   }
 `;
 
-/**
- * Create Comment
- * 
- * @description
- * Creates a new comment on a post.
- * 
- * @example
- * ```typescript
- * const [createComment, { loading }] = useMutation<CreateCommentData>(CREATE_COMMENT);
- * 
- * const handleComment = async (postId: string, text: string) => {
- *   try {
- *     const { data } = await createComment({
- *       variables: {
- *         input: {
- *           postId,
- *           text
- *         }
- *       },
- *       // Refetch comments after creating
- *       refetchQueries: [
- *         {
- *           query: GET_POST_COMMENTS,
- *           variables: { postId, limit: 20, offset: 0 }
- *         }
- *       ]
- *     });
- *     
- *     toast.success('Comment posted!');
- *   } catch (error) {
- *     toast.error('Failed to post comment');
- *   }
- * };
- * ```
- */
 export const CREATE_COMMENT = gql`
   mutation CreateComment($input: CreateCommentInput!) {
     createComment(input: $input) {
       id
       text
+      postId
+      parentId
+      authorId
+      authorType
+      createdAt
     }
   }
 `;

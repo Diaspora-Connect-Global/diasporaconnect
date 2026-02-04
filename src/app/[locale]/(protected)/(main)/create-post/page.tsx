@@ -87,15 +87,15 @@ const VisibilityDropdown: React.FC<{
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           ></div>
           <div className="absolute left-0 top-full mt-2 w-64 bg-surface-default border border-border-subtle rounded-lg shadow-lg overflow-hidden z-50">
             {options.map((option) => {
               const Icon = option.icon;
               const isActive = option.key === value;
-              
+
               return (
                 <button
                   key={option.key}
@@ -103,9 +103,8 @@ const VisibilityDropdown: React.FC<{
                     onChange(option.key);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-start gap-3 p-3 hover:bg-surface-hover transition-colors ${
-                    isActive ? 'bg-surface-hover' : ''
-                  }`}
+                  className={`w-full flex items-start gap-3 p-3 hover:bg-surface-hover transition-colors ${isActive ? 'bg-surface-hover' : ''
+                    }`}
                 >
                   <Icon className="w-5 h-5 mt-0.5 text-text-secondary" />
                   <div className="flex-1 text-left">
@@ -141,7 +140,7 @@ export default function CreatePostPage() {
   const router = useRouter();
   const currentUser = useUserStore(state => state.user);
   const userName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'User';
-  
+
   const charLimit = 3000;
   const charCount = postContent.length;
 
@@ -153,7 +152,8 @@ export default function CreatePostPage() {
         variables: {
           input: {
             limit: 20,
-            offset: 0
+            offset: 0,
+            type: 'all'
           }
         }
       }
@@ -178,13 +178,13 @@ export default function CreatePostPage() {
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const newContent = 
-      postContent.substring(0, start) + 
-      textToInsert + 
+    const newContent =
+      postContent.substring(0, start) +
+      textToInsert +
       postContent.substring(end);
-    
+
     setPostContent(newContent);
-    
+
     // Set cursor position after inserted text
     setTimeout(() => {
       textarea.focus();
@@ -231,7 +231,7 @@ export default function CreatePostPage() {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
-    
+
     switch (type) {
       case 'Photo':
         input.accept = 'image/*';
@@ -243,16 +243,16 @@ export default function CreatePostPage() {
         input.accept = '.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx';
         break;
     }
-    
+
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
-      
+
       Array.from(files).forEach(file => {
-        const preview = (file.type.startsWith('image/') || file.type.startsWith('video/')) 
-          ? URL.createObjectURL(file) 
+        const preview = (file.type.startsWith('image/') || file.type.startsWith('video/'))
+          ? URL.createObjectURL(file)
           : undefined;
-          
+
         const newAttachment: Attachment = {
           id: `${type}-${Date.now()}-${Math.random()}`,
           type,
@@ -262,10 +262,10 @@ export default function CreatePostPage() {
         };
         setAttachments(prev => [...prev, newAttachment]);
       });
-      
+
       toast.success(`${files.length} ${type}(s) added`);
     };
-    
+
     input.click();
   };
 
@@ -274,15 +274,15 @@ export default function CreatePostPage() {
     input.type = 'file';
     input.accept = 'image/*,video/*';
     input.multiple = true;
-    
+
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
-      
+
       Array.from(files).forEach(file => {
         const isVideo = file.type.startsWith('video/');
         const preview = URL.createObjectURL(file);
-        
+
         const newAttachment: Attachment = {
           id: `${isVideo ? 'Video' : 'Photo'}-${Date.now()}-${Math.random()}`,
           type: isVideo ? 'Video' : 'Photo',
@@ -292,11 +292,11 @@ export default function CreatePostPage() {
         };
         setAttachments(prev => [...prev, newAttachment]);
       });
-      
+
       toast.success(`${files.length} file(s) added from gallery`);
       setShowMobileAttachMenu(false);
     };
-    
+
     input.click();
   };
 
@@ -305,15 +305,15 @@ export default function CreatePostPage() {
     input.type = 'file';
     input.accept = 'image/*,video/*';
     input.capture = 'environment';
-    
+
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
-      
+
       const file = files[0];
       const isVideo = file.type.startsWith('video/');
       const preview = URL.createObjectURL(file);
-      
+
       const newAttachment: Attachment = {
         id: `${isVideo ? 'Video' : 'Photo'}-${Date.now()}-${Math.random()}`,
         type: isVideo ? 'Video' : 'Photo',
@@ -322,11 +322,11 @@ export default function CreatePostPage() {
         preview
       };
       setAttachments(prev => [...prev, newAttachment]);
-      
+
       toast.success(`${isVideo ? 'Video' : 'Photo'} captured`);
       setShowMobileAttachMenu(false);
     };
-    
+
     input.click();
   };
 
@@ -334,11 +334,11 @@ export default function CreatePostPage() {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
-    
+
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
-      
+
       Array.from(files).forEach(file => {
         let type: AttachmentType = 'Document';
         if (file.type.startsWith('image/')) {
@@ -346,11 +346,11 @@ export default function CreatePostPage() {
         } else if (file.type.startsWith('video/')) {
           type = 'Video';
         }
-        
-        const preview = (file.type.startsWith('image/') || file.type.startsWith('video/')) 
-          ? URL.createObjectURL(file) 
+
+        const preview = (file.type.startsWith('image/') || file.type.startsWith('video/'))
+          ? URL.createObjectURL(file)
           : undefined;
-        
+
         const newAttachment: Attachment = {
           id: `${type}-${Date.now()}-${Math.random()}`,
           type,
@@ -360,11 +360,11 @@ export default function CreatePostPage() {
         };
         setAttachments(prev => [...prev, newAttachment]);
       });
-      
+
       toast.success(`${files.length} file(s) added`);
       setShowMobileAttachMenu(false);
     };
-    
+
     input.click();
   };
 
@@ -390,6 +390,9 @@ export default function CreatePostPage() {
           input: {
             text: postContent,
             visibility: visibility,
+            authorType: "USER",
+            authorId: currentUser?.userId,
+
             // communityId can be added if posting to a specific community
           }
         }
@@ -397,7 +400,7 @@ export default function CreatePostPage() {
 
       if (data?.createPost) {
         toast.success('Post published successfully!');
-        
+
         // Reset form
         setPostContent('');
         setAttachments([]);
@@ -438,8 +441,8 @@ export default function CreatePostPage() {
   };
 
   return (
-  <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide py-4 flex justify-center mx-auto ">
-    <div className="w-full max-w-3xl mb-2">
+    <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide py-4 flex justify-center mx-auto ">
+      <div className="w-full max-w-3xl mb-2">
         {/* Main Composer Card */}
         <div className="bg-surface-default/80 backdrop-blur-md rounded-2xl border border-border-subtle shadow-xl">
           {/* User Header */}
@@ -491,7 +494,7 @@ export default function CreatePostPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
                 {attachments.map((attachment) => {
                   const { Icon, color, bg } = getAttachmentIcon(attachment.type);
-                  
+
                   return (
                     <div
                       key={attachment.id}
@@ -572,8 +575,8 @@ export default function CreatePostPage() {
                   {/* Mobile Attachment Menu */}
                   {showMobileAttachMenu && (
                     <>
-                      <div 
-                        className="fixed inset-0 z-40" 
+                      <div
+                        className="fixed inset-0 z-40"
                         onClick={() => setShowMobileAttachMenu(false)}
                       ></div>
                       <div className="absolute left-0 bottom-full mb-2 w-64 bg-surface-default border border-border-subtle rounded-xl shadow-xl overflow-hidden z-50 animate-slide-up">
@@ -655,30 +658,30 @@ export default function CreatePostPage() {
 
                 {/* Secondary actions - hidden on mobile */}
                 <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
-                  <button 
+                  <button
                     onClick={handleAddEmoji}
-                    className="p-2 hover:bg-[#FFD700]/10 rounded-lg transition-colors group" 
+                    className="p-2 hover:bg-[#FFD700]/10 rounded-lg transition-colors group"
                     title="Add Emoji"
                   >
                     <Smile className="w-5 h-5 text-[#FFD700] group-hover:scale-110 transition-transform" />
                   </button>
-                  <button 
+                  <button
                     onClick={handleAddHashtag}
-                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group" 
+                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
                     title="Add Hashtag"
                   >
                     <Hash className="w-5 h-5 text-surface-brand group-hover:scale-110 transition-transform" />
                   </button>
-                  <button 
+                  <button
                     onClick={handleAddMention}
-                    className="p-2 hover:bg-[#9333EA]/10 rounded-lg transition-colors group" 
+                    className="p-2 hover:bg-[#9333EA]/10 rounded-lg transition-colors group"
                     title="Mention Someone"
                   >
                     <AtSign className="w-5 h-5 text-[#9333EA] group-hover:scale-110 transition-transform" />
                   </button>
-                  <button 
+                  <button
                     onClick={handleAddLocation}
-                    className="p-2 hover:bg-[#00a73e]/10 rounded-lg transition-colors group" 
+                    className="p-2 hover:bg-[#00a73e]/10 rounded-lg transition-colors group"
                     title="Add Location"
                   >
                     <MapPin className="w-5 h-5 text-[#00a73e] group-hover:scale-110 transition-transform" />
@@ -696,7 +699,7 @@ export default function CreatePostPage() {
         </div>
 
         {/* Pro Tips Section */}
-        <div 
+        <div
           className="my-6 p-5 bg-gradient-to-r from-surface-brand/5 to-surface-brand/10 border border-surface-brand/20 rounded-xl"
         >
           <div className="flex items-start gap-4">
