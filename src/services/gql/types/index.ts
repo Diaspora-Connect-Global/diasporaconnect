@@ -42,3 +42,5 @@ export * from './users';
 
 // Work Experience types
 export * from './work_experience';
+
+export * from './opportunities';

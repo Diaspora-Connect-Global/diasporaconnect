@@ -366,6 +366,7 @@ export const GET_PENDING_REQUESTS_SENT = gql`
         receiverId
         message
         createdAt
+        connectionStatus
         receiver {
           userId
           firstName
@@ -397,6 +398,7 @@ export const GET_PENDING_REQUESTS_RECEIVED = gql`
         receiverId
         message
         createdAt
+        connectionStatus
         requester {
           userId
           firstName
