@@ -20,6 +20,7 @@ interface JoinCommunityCardProps {
   iconBgColor?: string;
   iconColor?: string;
   members?: number;
+  isDisabled?: boolean;
 }
 
 export default function JoinCommunityCard({
@@ -30,7 +31,7 @@ export default function JoinCommunityCard({
   onButtonClick,
   onCardClick,
   icon,
-
+  isDisabled = false,
 }: JoinCommunityCardProps) {
   const t = useTranslations('community');
 
@@ -104,7 +105,7 @@ export default function JoinCommunityCard({
           )}
 
           {/* Button */}
-          <ButtonType1 onClick={onButtonClick} className='py-3 px-6'>
+          <ButtonType1 onClick={onButtonClick} className='py-3 px-6' disabled={isDisabled}>
             {buttonText}
           </ButtonType1>
         </div>

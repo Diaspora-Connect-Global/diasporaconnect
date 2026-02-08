@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { useQuery } from '@apollo/client/react';
+import { useQuery, useMutation } from '@apollo/client/react';
 import JoinCommunityCard from "@/components/cards/JoinCommunityCard";
 import { MyCommunityCard } from "@/components/cards/MyCommunityCard";
 import { useTranslations } from 'next-intl';
-import { LIST_AVAILABLE_COMMUNITIES, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
+import { LIST_AVAILABLE_COMMUNITIES, LIST_MY_JOINED_COMMUNITIES, REQUEST_JOIN_COMMUNITY } from '@/services/gql/community';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 // Type definitions for GraphQL responses
 interface Community {
@@ -39,13 +41,15 @@ export default function Community() {
     const t = useTranslations('community');
     const tActions = useTranslations('actions');
     
+    const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
+    
     // Fetch user's joined communities
-    const { data: myCommunitiesData, loading: myCommunitiesLoading } = useQuery<ListUserCommunitiesData>(
+    const { data: myCommunitiesData, loading: myCommunitiesLoading, refetch: refetchMyCommunities } = useQuery<ListUserCommunitiesData>(
         LIST_MY_JOINED_COMMUNITIES
     );
 
     // Fetch available communities to discover
-    const { data: discoverData, loading: discoverLoading } = useQuery<ListCommunitiesData>(
+    const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<ListCommunitiesData>(
         LIST_AVAILABLE_COMMUNITIES,
         {
             variables: {
@@ -55,9 +59,32 @@ export default function Community() {
         }
     );
 
-    const handleJoinCommunity = (communityId: string, communityName: string) => {
-        console.log(`Join ${communityName} clicked! ID: ${communityId}`);
-        // TODO: Implement REQUEST_JOIN_COMMUNITY mutation
+    const [requestJoinCommunity] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
+        refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
+        awaitRefetchQueries: false,
+    });
+
+    const handleJoinCommunity = async (communityId: string, communityName: string) => {
+        try {
+            const { data } = await requestJoinCommunity({
+                variables: { communityId }
+            });
+
+            if (data?.requestMembership?.status === 'ACTIVE') {
+                toast.success(data.requestMembership.message);
+                setJoinedCommunities(prev => new Set(prev).add(communityId));
+                // Refetch in background
+                setTimeout(() => {
+                    refetchCommunities();
+                    refetchMyCommunities();
+                }, 100);
+            } else {
+                toast.error('Failed to join community');
+            }
+        } catch (err) {
+            console.error('Failed to join community:', err);
+            toast.error('Failed to join community');
+        }
     };
 
     return (
@@ -99,8 +126,13 @@ export default function Community() {
                             title={community.name}
                             members={0}
                             onButtonClick={() => handleJoinCommunity(community.id, community.name)}
-                            buttonText={tActions('join')}
+                            buttonText={
+                                community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
+                                    ? 'Joined'
+                                    : tActions('join')
+                            }
                             description={community.description || ''}
+                            isDisabled={community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)}
                         />
                     ))
                 ) : (

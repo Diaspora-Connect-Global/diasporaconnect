@@ -77,6 +77,15 @@ export const LIST_MY_JOINED_COMMUNITIES = gql`
   }
 `;
 
+export const LEAVE_COMMUNITY = gql`
+  mutation LeaveCommunity($communityId: ID!) {
+    leaveCommunity(communityId: $communityId) {
+      success
+      message
+    }
+  }
+`;
+
 /* =========================
    STATS (READ ONLY)
 ========================= */

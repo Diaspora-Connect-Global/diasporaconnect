@@ -14,6 +14,9 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image'
 import { useCommunityStore } from '@/store/useCommunityStore';
 import { useRouter, usePathname } from "next/navigation";
+import { useMutation } from '@apollo/client/react';
+import { LEAVE_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, LIST_AVAILABLE_COMMUNITIES } from '@/services/gql/community';
+import { toast } from 'sonner';
 
 
 
@@ -36,7 +39,32 @@ export function MyCommunityCard({
     const t = useTranslations('community');
     const tCommon = useTranslations('common');
 
-        const setSelectedCommunity = useCommunityStore(state => state.setSelectedCommunity);
+    const setSelectedCommunity = useCommunityStore(state => state.setSelectedCommunity);
+    
+    const [leaveCommunity] = useMutation<{leaveCommunity: {success: boolean, message: string}}>(LEAVE_COMMUNITY, {
+        refetchQueries: [
+            { query: LIST_MY_JOINED_COMMUNITIES },
+            { query: LIST_AVAILABLE_COMMUNITIES, variables: { limit: 20, offset: 0 } }
+        ],
+        awaitRefetchQueries: false,
+    });
+    
+    const handleLeaveCommunity = async () => {
+        try {
+            const { data } = await leaveCommunity({
+                variables: { communityId: id }
+            });
+
+            if (data?.leaveCommunity?.success) {
+                toast.success(data.leaveCommunity.message || 'Left community successfully');
+            } else {
+                toast.error('Failed to leave community');
+            }
+        } catch (err) {
+            console.error('Failed to leave community:', err);
+            toast.error('Failed to leave community');
+        }
+    };
     
      const handleCommunitySelect = (id :string) => {
         setSelectedCommunity(id);
@@ -82,7 +110,7 @@ export function MyCommunityCard({
                                 <ChevronRight className="w-4 h-4" />
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className='text-text-danger font-body-large'>
+                            <DropdownMenuItem onSelect={handleLeaveCommunity} className='text-text-danger font-body-large'>
                                 {t('leaveCommunity')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
