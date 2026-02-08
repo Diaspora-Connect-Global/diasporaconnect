@@ -4,7 +4,7 @@ import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVar
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
-import { LIST_AVAILABLE_COMMUNITIES, REQUEST_JOIN_COMMUNITY } from '@/services/gql/community';
+import { LIST_AVAILABLE_COMMUNITIES, REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import { 
   GET_FEED, 
   ADD_ENGAGEMENT, 
@@ -65,7 +65,7 @@ export default function Home() {
   const tCommon = useTranslations('common');
 
   // Fetch communities
-  const { data: discoverData, loading: discoverLoading } = useQuery<ListCommunitiesData>(
+  const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<ListCommunitiesData>(
     LIST_AVAILABLE_COMMUNITIES,
     {
       variables: {
@@ -94,13 +94,15 @@ export default function Home() {
   // Mutations
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
-  const [requestJoinCommunity] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY);
+  const [requestJoinCommunity] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
+    refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
+    awaitRefetchQueries: false,
+  });
   const [joiningCommunities, setJoiningCommunities] = useState<Set<string>>(new Set());
+  const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
 
   // Handle join community
   const handleJoinCommunity = async (communityId: string) => {
-    setJoiningCommunities(prev => new Set(prev).add(communityId));
-    
     try {
       const { data } = await requestJoinCommunity({
         variables: { communityId }
@@ -108,18 +110,15 @@ export default function Home() {
 
       if (data?.requestMembership?.status === 'ACTIVE') {
         toast.success(data.requestMembership.message);
+        setJoinedCommunities(prev => new Set(prev).add(communityId));
+        // Refetch in background
+        setTimeout(() => refetchCommunities(), 100);
       } else {
         toast.error('Failed to join community');
       }
     } catch (err) {
       console.error('Failed to join community:', err);
       toast.error('Failed to join community');
-    } finally {
-      setJoiningCommunities(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(communityId);
-        return newSet;
-      });
     }
   };
 
@@ -381,13 +380,11 @@ export default function Home() {
                       members={community.memberCount}
                       onButtonClick={() => handleJoinCommunity(community.id)}
                       buttonText={
-                        community.membershipStatus === 'MEMBER' 
-                          ? t('joined')
-                          : joiningCommunities.has(community.id)
-                            ? 'Joining...'
-                            : t('joincommunity')
+                        community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
+                          ? 'Joined'
+                          : t('joincommunity')
                       }
-                      isDisabled={community.membershipStatus === 'MEMBER' || joiningCommunities.has(community.id)}
+                      isDisabled={community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)}
                     />
                   </div>
                 ))}

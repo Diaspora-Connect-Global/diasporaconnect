@@ -35,12 +35,12 @@ interface Association {
 }
 
 interface UserAssociation {
-  id: string;
-  name: string;
+    id: string;
+    name: string;
 }
 
 interface GetUserAssociationsResponse {
-  getUserAssociations: UserAssociation[];
+    getUserAssociations: UserAssociation[];
 }
 
 
@@ -195,16 +195,16 @@ function SidebarLists() {
     const userId = useUserStore(state => state.user?.userId);
 
     // Fetch available associations
- 
+
     const {
-  data: userAssociationsData,
-  loading: userAssociationsLoading
-} = useQuery<GetUserAssociationsResponse>(
-  GET_USER_ASSOCIATIONS,
-  {
-    variables: { userId }
-  }
-);
+        data: userAssociationsData,
+        loading: userAssociationsLoading
+    } = useQuery<GetUserAssociationsResponse>(
+        GET_USER_ASSOCIATIONS,
+        {
+            variables: { userId }
+        }
+    );
 
     // Fetch user's groups
     const { data: groupsData, loading: groupsLoading } = useQuery<GetMyGroupsResponse>(
@@ -225,8 +225,8 @@ function SidebarLists() {
     };
 
     const myGroups = groupsData?.getMyGroups?.groups || [];
-const myAssociations =
-  userAssociationsData?.getUserAssociations || [];
+    const myAssociations =
+        userAssociationsData?.getUserAssociations || [];
 
     const handleGroupClick = (groupId: string) => {
         // Set active chat in session storage
@@ -234,7 +234,7 @@ const myAssociations =
             id: groupId,
             type: 'group'
         }));
-        
+
         // Navigate to chat page
         window.location.href = '/chat?t=groups&ct=group';
     };
@@ -261,25 +261,25 @@ const myAssociations =
                 link="/association"
             >
                 <div className="space-y-1">
-                  {userAssociationsLoading ? (
-  <BodySmall>
-    <span className="text-secondary">Loading associations...</span>
-  </BodySmall>
-) : myAssociations.length > 0 ? (
-  myAssociations.map((association) => (
-    <div key={association.id}>
-      <CommunityItem
-        link={`/association/${association.id}`}
-        name={association.name}
-        onClick={() => handleAssociationClick(association.id)}
-      />
-    </div>
-  ))
-) : (
-  <BodySmall>
+                    {userAssociationsLoading ? (
+                        <BodySmall>
+                            <span className="text-secondary">Loading associations...</span>
+                        </BodySmall>
+                    ) : myAssociations.length > 0 ? (
+                        myAssociations.map((association) => (
+                            <div key={association.id}>
+                                <CommunityItem
+                                    link={`/association/${association.id}`}
+                                    name={association.name}
+                                    onClick={() => handleAssociationClick(association.id)}
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <BodySmall>
                             <span className="text-secondary">No associations joined yet</span>
                         </BodySmall>
-)}
+                    )}
 
                 </div>
             </Section>
@@ -301,9 +301,9 @@ const myAssociations =
                     ) : myGroups.length > 0 ? (
                         myGroups.map((group) => (
                             <div key={group.id}>
-                                <CommunityItem 
-                                    link={`/chat?t=groups&ct=group`} 
-                                    name={group.name} 
+                                <CommunityItem
+                                    link={`/chat?t=groups&ct=group`}
+                                    name={group.name}
                                     type={group.privacy === "PUBLIC" ? `${tPrivacy("public")}` : `${tPrivacy("private")}`}
                                     onClick={() => handleGroupClick(group.id)}
                                 />
@@ -342,7 +342,7 @@ export default function HomeSidebar() {
 
     return (
         <div className='lg:max-w-[20vw] h-app-inner  lg:sticky top-[4rem] overflow-y-auto scrollbar-hide z-50'>
-             <SidebarLists />
+            <SidebarLists />
 
             <div className="text-center text-xs space-x-2 py-4 mt-6 flex flex-wrap">
                 <InfoLinks />
