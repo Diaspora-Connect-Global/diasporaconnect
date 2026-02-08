@@ -1,10 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { NotificationCard } from "@/components/cards/notification/NotificationCard";
 import { Check, Settings } from "lucide-react";
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+    deleteNotification,
+    getNotifications,
+    markAllAsRead as markAllAsReadApi,
+    markAsRead as markAsReadApi,
+    Notification as ApiNotification,
+} from "@/services/rest/notification";
+import { useAuthStore } from '@/store/useAuthStore';
 
-interface Notification {
+interface UiNotification {
     id: string;
     title: string;
     description: string;
@@ -12,114 +21,6 @@ interface Notification {
     read: boolean;
     date: string;
 }
-
-const notificationsFromApi: Notification[] = [
-    {
-        id: "1",
-        title: "GhanaConnect:Global Monthly Meetup",
-        description: "Join our virtual networking session with diaspora professionals this Friday at 6 PM GMT.",
-        type: 'associations',
-        read: true,
-        date: new Date(Date.now() - 30 * 1000).toISOString(), // 30 seconds ago - "Just now"
-    },
-    {
-        id: "2",
-        title: "Senior Frontend Developer at FinTech Startup",
-        description: "Remote position available for React/TypeScript developer with 5+ years experience.",
-        type: 'opportunities',
-        read: false,
-        date: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 minutes ago - "2m ago"
-    },
-    {
-        id: "3",
-        title: "African Tech Innovation Summit 2024",
-        description: "Register for our annual conference featuring top innovators and investors across Africa.",
-        type: 'events',
-        read: true,
-        date: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago - "45m ago"
-    },
-    {
-        id: "4",
-        title: "Diaspora Business Association Election",
-        description: "Voting opens tomorrow for the new executive board members. Make your voice heard!",
-        type: 'associations',
-        read: false,
-        date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago - "3h ago"
-    },
-    {
-        id: "5",
-        title: "Marketing Manager - Remote Position",
-        description: "Global company seeking marketing professional with African market experience.",
-        type: 'opportunities',
-        read: false,
-        date: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago - "12h ago"
-    },
-    {
-        id: "6",
-        title: "Cultural Exchange Festival",
-        description: "Celebrate African heritage with food, music, and networking in London next month.",
-        type: 'events',
-        read: true,
-        date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago - "Yesterday"
-    },
-    {
-        id: "7",
-        title: "Ghanaian Professionals Network Update",
-        description: "New membership benefits announced including mentorship programs and career resources.",
-        type: 'associations',
-        read: false,
-        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago - "3d ago"
-    },
-    {
-        id: "8",
-        title: "Data Scientist Opportunity",
-        description: "Join our AI research team working on solutions for African agricultural challenges.",
-        type: 'opportunities',
-        read: true,
-        date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago - "1w ago"
-    },
-    {
-        id: "9",
-        title: "Startup Pitch Competition",
-        description: "Submit your business idea for a chance to win $50,000 in funding and mentorship.",
-        type: 'events',
-        read: false,
-        date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), // 21 days ago - "3w ago"
-    },
-    {
-        id: "10",
-        title: "Diaspora Investment Group Meeting",
-        description: "Quarterly meeting to discuss new investment opportunities in West Africa.",
-        type: 'associations',
-        read: true,
-        date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days ago - "1mo ago"
-    },
-    {
-        id: "11",
-        title: "Product Manager - E-commerce Platform",
-        description: "Lead product development for fast-growing African online marketplace.",
-        type: 'opportunities',
-        read: false,
-        date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days ago - "3mo ago"
-    },
-    {
-        id: "12",
-        title: "Annual Diaspora Homecoming Gala",
-        description: "Formal event celebrating diaspora achievements and fostering connections.",
-        type: 'events',
-        read: true,
-        date: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000).toISOString(), // 400 days ago - "1y ago"
-    },
-    {
-        id: "13",
-        title: "Tech Conference 2025",
-        description: "Save the date for our biggest tech conference next year.",
-        type: 'events',
-        read: false,
-        date: new Date(Date.now() - 800 * 24 * 60 * 60 * 1000).toISOString(), // 800 days ago - "2y ago"
-    }
-];
-
 
 interface Tab {
     label: string;
@@ -130,64 +31,148 @@ export default function Notification() {
     const t = useTranslations('notification');
 
     const [filter, setFilter] = useState<'all' | 'associations' | 'opportunities' | 'events'>('all');
-    const [notifications, setNotifications] = useState<Notification[]>(notificationsFromApi);
-    const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>(notificationsFromApi);
+    const [notifications, setNotifications] = useState<UiNotification[]>([]);
+    const [filteredNotifications, setFilteredNotifications] = useState<UiNotification[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const TABS: Tab[] = [
+    const TABS: Tab[] = useMemo(() => ([
         { label: t('allnotifications'), value: 'all' },
         { label: t('opportunities'), value: 'opportunities' },
         { label: t('events'), value: 'events' },
         { label: t('associations'), value: 'associations' },
-    ];
+    ]), [t]);
+
+    const mapApiNotification = (notification: ApiNotification): UiNotification => {
+        const type = notification.type === 'opportunities' || notification.type === 'events'
+            ? notification.type
+            : 'associations';
+
+        return {
+            id: notification.id,
+            title: notification.title,
+            description: notification.message,
+            type,
+            read: notification.isRead,
+            date: notification.createdAt,
+        };
+    };
+
+    // Check auth token on mount
+    useEffect(() => {
+        const token = useAuthStore.getState().tokens?.sessionToken;
+        console.log('🔑 Auth Token Status:', token ? 'EXISTS' : 'MISSING');
+        if (token) {
+            console.log('🔑 Token Preview:', token.substring(0, 20) + '...');
+        }
+    }, []);
+
+    useEffect(() => {
+        const loadNotifications = async () => {
+            console.log('🔵 Starting to load notifications...');
+            console.log('🔵 Current URL:', window.location.href);
+            
+            try {
+                setIsLoading(true);
+                setErrorMessage(null);
+                
+                console.log('🔵 Calling getNotifications API with page=1, limit=50...');
+                const response = await getNotifications(1, 50);
+                
+                console.log('✅ API Response received:', response);
+                console.log('✅ Notifications count:', response.notifications?.length || 0);
+                console.log('✅ Total:', response.total);
+                
+                setNotifications(response.notifications.map(mapApiNotification));
+            } catch (error) {
+                console.error('❌ Error loading notifications:', error);
+                if (error instanceof Error) {
+                    console.error('❌ Error message:', error.message);
+                    console.error('❌ Error stack:', error.stack);
+                }
+                // Check if it's an axios error
+                if ((error as any).response) {
+                    console.error('❌ Response status:', (error as any).response.status);
+                    console.error('❌ Response data:', (error as any).response.data);
+                }
+                setErrorMessage('Unable to load notifications.');
+            } finally {
+                setIsLoading(false);
+                console.log('🔵 Finished loading notifications (isLoading set to false)');
+            }
+        };
+
+        loadNotifications();
+    }, []);
 
     // Use useEffect to handle filtering based on the current filter and notifications state
     useEffect(() => {
+        console.log('🔍 Filter changed to:', filter);
+        console.log('🔍 Total notifications:', notifications.length);
+        
         if (filter === 'all') {
             setFilteredNotifications(notifications);
+            console.log('🔍 Showing all notifications:', notifications.length);
         } else {
             const filtered = notifications.filter(notification => notification.type === filter);
             setFilteredNotifications(filtered);
+            console.log(`🔍 Filtered ${filter} notifications:`, filtered.length);
         }
     }, [filter, notifications]);
 
     const handleFilterChange = (value: 'all' | 'associations' | 'opportunities' | 'events') => {
+        console.log('🎯 Filter button clicked:', value);
         setFilter(value);
     };
 
     // Mark notification as read based on id
-    const markAsRead = (id: string) => {
-        const updatedNotifications = notifications.map(notification =>
-            notification.id === id
-                ? { ...notification, read: true }
-                : notification
-        );
-        setNotifications(updatedNotifications);
+    const markAsRead = async (id: string) => {
+        console.log('📖 Marking notification as read:', id);
+        try {
+            await markAsReadApi(id);
+            const updatedNotifications = notifications.map(notification =>
+                notification.id === id
+                    ? { ...notification, read: true }
+                    : notification
+            );
+            setNotifications(updatedNotifications);
+            console.log('✅ Notification marked as read');
+        } catch (error) {
+            console.error('❌ Error marking as read:', error);
+            setErrorMessage('Unable to update notifications.');
+        }
     };
 
     // Remove notification based on id
-    const removeNotification = (id: string) => {
-        const updatedNotifications = notifications.filter(notification => notification.id !== id);
-        setNotifications(updatedNotifications);
+    const removeNotification = async (id: string) => {
+        console.log('🗑️ Removing notification:', id);
+        try {
+            await deleteNotification(id);
+            const updatedNotifications = notifications.filter(notification => notification.id !== id);
+            setNotifications(updatedNotifications);
+            console.log('✅ Notification removed');
+        } catch (error) {
+            console.error('❌ Error removing notification:', error);
+            setErrorMessage('Unable to update notifications.');
+        }
     };
 
-    // Mark all as read based on current filter
-    const markAllAsRead = () => {
-        const updatedNotifications = notifications.map(notification => {
-            // If filter is 'all', mark all notifications as read
-            if (filter === 'all') {
-                return { ...notification, read: true };
-            }
-            // If filter is specific, only mark notifications of that type as read
-            if (notification.type === filter) {
-                return { ...notification, read: true };
-            }
-            // Keep other notifications unchanged
-            return notification;
-        });
-        setNotifications(updatedNotifications);
+    // Mark all as read
+    const markAllAsRead = async () => {
+        console.log('📖 Marking all notifications as read');
+        try {
+            await markAllAsReadApi();
+            const updatedNotifications = notifications.map(notification => ({
+                ...notification,
+                read: true,
+            }));
+            setNotifications(updatedNotifications);
+            console.log('✅ All notifications marked as read');
+        } catch (error) {
+            console.error('❌ Error marking all as read:', error);
+            setErrorMessage('Unable to update notifications.');
+        }
     };
-
-
 
     // Get empty state message based on current filter
     const getEmptyStateMessage = () => {
@@ -209,6 +194,15 @@ export default function Notification() {
     };
 
     const emptyStateMessage = getEmptyStateMessage();
+
+    console.log('🎨 Render state:', {
+        isLoading,
+        errorMessage,
+        emptyStateMessage,
+        notificationsCount: notifications.length,
+        filteredCount: filteredNotifications.length,
+        currentFilter: filter
+    });
 
     return (
         <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4">
@@ -257,7 +251,15 @@ export default function Notification() {
             </div>
         
 
-            {emptyStateMessage ? (
+            {isLoading ? (
+                <div className="text-text-secondary font-medium">
+                    Loading...
+                </div>
+            ) : errorMessage ? (
+                <div className="text-text-danger font-medium">
+                    {errorMessage}
+                </div>
+            ) : emptyStateMessage ? (
                 <div className="">
                     <div className="text-text-secondary font-medium">
                         {emptyStateMessage}
