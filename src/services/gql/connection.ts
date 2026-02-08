@@ -367,6 +367,18 @@ export const GET_PENDING_REQUESTS_SENT = gql`
         message
         createdAt
         connectionStatus
+        requester {
+          userId
+          firstName
+          lastName
+          email
+          avatarUrl
+          bio
+          occupation
+          sector
+          location
+          country
+        }
         receiver {
           userId
           firstName
@@ -400,6 +412,18 @@ export const GET_PENDING_REQUESTS_RECEIVED = gql`
         createdAt
         connectionStatus
         requester {
+          userId
+          firstName
+          lastName
+          email
+          avatarUrl
+          bio
+          occupation
+          sector
+          location
+          country
+        }
+        receiver {
           userId
           firstName
           lastName

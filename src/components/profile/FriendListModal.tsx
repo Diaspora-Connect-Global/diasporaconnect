@@ -213,43 +213,45 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       });
     }
 
-    // Process pending requests SENT
-    if (requestsSentData?.getPendingConnections.connections) {
-      requestsSentData.getPendingConnections.connections.forEach((connection) => {
-        const friend = connection.requester;
-        friends.push({
-          userId: friend.userId,
-          connectionId: connection.id,
-          name: `${friend.firstName} ${friend.lastName}`,
-          imageSrc: `${friend.avatarUrl}`,
-          mutualConnections: undefined,
-          tier: getTierFromUser(friend),
-          connectionStatus: friend.connectionStatus,
-          tabType: "request-sent",
-          searchQuery: "",
-          isSearching: false,
-        });
+ // Process pending requests SENT (where I am the requester)
+if (requestsSentData?.getPendingConnections.connections) {
+  requestsSentData.getPendingConnections.connections
+    .filter(connection => connection.requesterId === currentUserId) // Only show requests I sent
+    .forEach((connection) => {
+      friends.push({
+        userId: connection.receiver.userId,
+        connectionId: connection.id,
+        name: `${connection.receiver.firstName} ${connection.receiver.lastName}`,
+        imageSrc: connection.receiver.avatarUrl || '',
+        mutualConnections: undefined,
+        tier: getTierFromUser(connection.receiver),
+        connectionStatus: "pending_sent",
+        tabType: "request-sent",
+        searchQuery: "",
+        isSearching: false,
       });
-    }
+    });
+}
 
-    // Process pending requests RECEIVED
-    if (requestsReceivedData?.getPendingConnections.connections) {
-      requestsReceivedData.getPendingConnections.connections.forEach((connection) => {
-        const friend = connection.requester;
-        friends.push({
-          userId: friend.userId,
-          connectionId: connection.id,
-          name: `${friend.firstName} ${friend.lastName}`,
-          imageSrc: `${friend.avatarUrl}`,
-          mutualConnections: undefined,
-          tier: getTierFromUser(friend),
-          connectionStatus: friend.connectionStatus,
-          tabType: "request-received",
-          searchQuery: "",
-          isSearching: false,
-        });
+// Process pending requests RECEIVED (where I am the receiver)
+if (requestsReceivedData?.getPendingConnections.connections) {
+  requestsReceivedData.getPendingConnections.connections
+    .filter(connection => connection.receiverId === currentUserId) // Only show requests I received
+    .forEach((connection) => {
+      friends.push({
+        userId: connection.requester.userId,
+        connectionId: connection.id,
+        name: `${connection.requester.firstName} ${connection.requester.lastName}`,
+        imageSrc: connection.requester.avatarUrl || '',
+        mutualConnections: undefined,
+        tier: getTierFromUser(connection.requester),
+        connectionStatus: "pending_received",
+        tabType: "request-received",
+        searchQuery: "",
+        isSearching: false,
       });
-    }
+    });
+}
 
     // Process friend suggestions OR search results (for suggested tab)
     if (activeTab === "suggested") {
