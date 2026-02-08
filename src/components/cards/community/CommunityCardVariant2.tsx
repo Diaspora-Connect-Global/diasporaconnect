@@ -17,6 +17,7 @@ interface CommunityCardVariant2Props {
     icon: React.ReactNode;
     members: number;
     buttonText: string;
+    isDisabled?: boolean;
 }
 
 export default function CommunityCardVariant2({
@@ -25,6 +26,8 @@ export default function CommunityCardVariant2({
     onButtonClick,
     onCardClick,
     icon,
+    buttonText,
+    isDisabled = false,
 }: CommunityCardVariant2Props) {
     const t = useTranslations('community');
 
@@ -79,9 +82,10 @@ export default function CommunityCardVariant2({
                 <div className="w-full flex justify-center h-[2.25rem] ">
                     <ButtonType1
                         onClick={onButtonClick}
-                        className="w-[8.75rem]  shrink"
+                        className="w-[8.75rem] shrink"
+                        disabled={isDisabled}
                     >
-                        {t('joincommunity')}
+                        {buttonText}
                     </ButtonType1>
                 </div>
             </div>

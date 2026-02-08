@@ -48,7 +48,7 @@ export const REQUEST_JOIN_COMMUNITY = gql`
     requestMembership(
       input: {
         entityId: $communityId
-        entityType: COMMUNITY
+        entityType: "COMMUNITY"
       }
     ) {
       status
