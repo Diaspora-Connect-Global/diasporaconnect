@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge } from '@/components/custom/userBadge';
 import { renderRichText } from '@/components/custom/richTextRenderer';
+import { useUserStore } from '@/store/useUserStore';
 
 /* --------------------------------------------------------------- */
 interface Comment {
@@ -55,7 +56,7 @@ export default function FeedCardFiltered({
     commentsData = [],
     isLiked: externalIsLiked = false,
     isSaved: externalIsSaved = false,
-    currentUser = { name: 'You', avatar: 'https://github.com/shadcn.png' },
+    currentUser = { name: 'You', avatar: '' },
     onLike,
     onComment,
     onShare,
@@ -64,6 +65,8 @@ export default function FeedCardFiltered({
     joinButton = true,
     forceShowComments = false,
 }: FeedCardFilteredProps) {
+    const storeAvatar = useUserStore((s) => s.user?.avatarUrl);
+    const resolvedAvatar = currentUser.avatar || storeAvatar || '/PROFILE.png';
     const [isLiked, setIsLiked] = useState(externalIsLiked);
     const [isSaved, setIsSaved] = useState(externalIsSaved);
     const [likeCount, setLikeCount] = useState(initialLikes);
@@ -200,7 +203,7 @@ export default function FeedCardFiltered({
         return (
             <div className="my-[1rem] flex items-center space-x-2">
                 <Image
-                    src={currentUser.avatar}
+                    src={resolvedAvatar}
                     alt={currentUser.name}
                     width={40}
                     height={40}
@@ -223,7 +226,7 @@ export default function FeedCardFiltered({
         return (
             <div className="mt-[1rem] ml-[3rem] flex items-center space-x-2">
                 <Image
-                    src={currentUser.avatar}
+                    src={resolvedAvatar}
                     alt={currentUser.name}
                     width={40}
                     height={40}

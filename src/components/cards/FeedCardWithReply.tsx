@@ -8,6 +8,7 @@ import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge } from "@/components/custom/userBadge";
 import { formatCount } from '@/macros/formatCount';
 import { renderRichText } from '@/components/custom/richTextRenderer';
+import { useUserStore } from '@/store/useUserStore';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -138,6 +139,8 @@ export default function FeedCardWithReply({
 
     const toggleExpand = () => setIsExpanded((v) => !v);
     const toggleComments = () => setShowComments((v) => !v);
+    const currentUserAvatar = useUserStore((s) => s.user?.avatarUrl) || '/PROFILE.png';
+
     const toggleCommentInput = () => {
         setShowCommentInput((v) => !v);
         onComment?.();
@@ -399,8 +402,8 @@ export default function FeedCardWithReply({
         return (
             <div className="my-[1rem] flex items-start gap-2">
                 <Image
-                    src={"https://github.com/shadcn.png"}
-                    alt={"image"}
+                    src={currentUserAvatar}
+                    alt="You"
                     width={40}
                     height={40}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
@@ -423,8 +426,8 @@ export default function FeedCardWithReply({
         return (
             <div className="mt-[1rem] ml-[3rem] flex items-start gap-2">
                 <Image
-                    src={"https://github.com/shadcn.png"}
-                    alt={"image"}
+                    src={currentUserAvatar}
+                    alt="You"
                     width={40}
                     height={40}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
