@@ -177,27 +177,55 @@ export interface Post {
 }
 
 /**
+ * Info about a mentioned entity in a post or comment.
+ */
+export interface MentionInfo {
+  entityId: string;
+  entityType: string;
+  handle: string;
+  displayName: string;
+  avatarUrl?: string;
+  startPosition: number;
+  endPosition: number;
+}
+
+/**
+ * Info about a hashtag used in a post or comment.
+ */
+export interface HashtagInfo {
+  id: string;
+  tag: string;
+  usageCount: number;
+}
+
+/**
+ * Attachment metadata on a post or comment.
+ */
+export interface CommentAttachmentInfo {
+  id: string;
+  objectKey: string;
+  url: string;
+  type: string;
+  mimeType: string;
+}
+
+/**
  * Represents a comment on a post.
  *
  * @interface Comment
- * @property {string} id - Unique comment identifier
- * @property {string} text - Comment content
- * @property {string} authorId - ID of the comment author
- * @property {AuthorType} authorType - Type of author
- * @property {AuthorProfile} [authorProfile] - Author's profile information
- * @property {string} createdAt - ISO timestamp when comment was created
- * @property {string} postId - ID of the post this comment belongs to
- * @property {string | null} [parentId] - ID of parent comment for replies
  */
 export interface Comment {
   id: string;
   text: string;
   authorId: string;
-  authorType: AuthorType;
-  authorProfile?: AuthorProfile;
+  authorType: string;
   createdAt: string;
+  updatedAt?: string;
   postId: string;
   parentId?: string | null;
+  mentions?: MentionInfo[];
+  hashtags?: HashtagInfo[];
+  attachments?: CommentAttachmentInfo[];
 }
 
 // ============================================================================

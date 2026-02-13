@@ -438,6 +438,7 @@ export default function Home() {
             return (
               <div key={post.id} className="mb-2">
                 <FeedCardWithReply
+                  postId={post.id}
                   profileImage={profileData.avatar}
                   profileName={profileData.name}
                   category={profileData.type}
@@ -450,7 +451,6 @@ export default function Home() {
                   likes={post.engagementCounts.likes}
                   comments={post.engagementCounts.comments}
                   shares={post.engagementCounts.shares}
-                  commentsData={[]}
                   onLike={() => handleLike(post.id)}
                   onComment={() => console.log('Open comment input for', post.id)}
                   onShare={() => handleShare(post.id)}

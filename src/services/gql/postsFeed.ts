@@ -122,27 +122,37 @@ export const GET_POST = gql`
 `;
 
 export const GET_POST_COMMENTS = gql`
-  query GetPostComments($postId: String!, $limit: Int, $offset: Int) {
-    postComments(postId: $postId, limit: $limit, offset: $offset) {
+  query GetPostComments($postId: String!, $limit: Int, $offset: Int, $parentId: String) {
+    postComments(postId: $postId, limit: $limit, offset: $offset, parentId: $parentId) {
       id
       text
       authorId
       authorType
-      authorProfile {
-        organizationProfile {
-          name
-          
-        }
-        userProfile {
-          name
-          avatar
-          isVip
-          verificationTier
-        }
-      }
       createdAt
+      updatedAt
       postId
       parentId
+      mentions {
+        entityId
+        entityType
+        handle
+        displayName
+        avatarUrl
+        startPosition
+        endPosition
+      }
+      hashtags {
+        id
+        tag
+        usageCount
+      }
+      attachments {
+        id
+        objectKey
+        url
+        type
+        mimeType
+      }
     }
   }
 `;

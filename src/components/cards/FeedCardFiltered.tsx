@@ -1,14 +1,17 @@
 'use client';
 
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge } from '@/components/custom/userBadge';
 import { renderRichText } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
+import { useLazyQuery } from '@apollo/client/react';
+import { GET_POST_COMMENTS, GetPostCommentsData } from '@/services/gql/postsFeed';
+import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 
 /* --------------------------------------------------------------- */
 interface Comment {
@@ -22,6 +25,7 @@ interface Comment {
 
 export interface FeedCardFilteredProps {
     id: string;
+    postId?: string;
     profileImage: string;
     profileName: string;
     category: string;
@@ -43,8 +47,23 @@ export interface FeedCardFilteredProps {
     forceShowComments?: boolean; 
 }
 
+/** Map an API Comment to the local Comment shape. */
+function mapApiComment(c: ApiComment): Comment {
+    const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
+    return {
+        id: c.id,
+        author: selfMention?.displayName ?? c.authorId,
+        authorImage: selfMention?.avatarUrl ?? '/PROFILE.png',
+        content: c.text,
+        createdAt: c.createdAt,
+        likes: 0,
+    };
+}
+
 /* --------------------------------------------------------------- */
 export default function FeedCardFiltered({
+    id,
+    postId,
     profileImage,
     profileName,
     category,
@@ -53,7 +72,7 @@ export default function FeedCardFiltered({
     images,
     likes: initialLikes,
     comments: initialComments,
-    commentsData = [],
+    commentsData: commentsDataProp = [],
     isLiked: externalIsLiked = false,
     isSaved: externalIsSaved = false,
     currentUser = { name: 'You', avatar: '' },
@@ -65,6 +84,7 @@ export default function FeedCardFiltered({
     joinButton = true,
     forceShowComments = false,
 }: FeedCardFilteredProps) {
+    const resolvedPostId = postId ?? id;
     const storeAvatar = useUserStore((s) => s.user?.avatarUrl);
     const resolvedAvatar = currentUser.avatar || storeAvatar || '/PROFILE.png';
     const [isLiked, setIsLiked] = useState(externalIsLiked);
@@ -76,6 +96,29 @@ export default function FeedCardFiltered({
     const [showComments, setShowComments] = useState(forceShowComments);
     const [showCommentInput, setShowCommentInput] = useState(false);
     const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
+    const [loadedComments, setLoadedComments] = useState<Comment[]>(commentsDataProp);
+    const [commentsLoaded, setCommentsLoaded] = useState(false);
+
+    /* ---- lazy-load comments from API ---- */
+    const [fetchComments, { loading: commentsLoading, data: commentsQueryData }] = useLazyQuery<GetPostCommentsData>(
+        GET_POST_COMMENTS,
+        { fetchPolicy: 'cache-and-network' }
+    );
+
+    useEffect(() => {
+        if (commentsQueryData?.postComments) {
+            setLoadedComments(commentsQueryData.postComments.map(mapApiComment));
+            setCommentsLoaded(true);
+        }
+    }, [commentsQueryData]);
+
+    const loadComments = useCallback(() => {
+        if (!commentsLoaded && resolvedPostId) {
+            fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0 } });
+        }
+    }, [commentsLoaded, resolvedPostId, fetchComments]);
+
+    const commentsData = commentsLoaded ? loadedComments : commentsDataProp;
 
     const t = useTranslations('actions');
 
@@ -97,7 +140,11 @@ export default function FeedCardFiltered({
     };
 
     const toggleExpand = () => setIsExpanded((v) => !v);
-    const toggleComments = () => setShowComments((v) => !v);
+    const toggleComments = () => {
+        const willShow = !showComments;
+        setShowComments(willShow);
+        if (willShow) loadComments();
+    };
     const toggleCommentInput = () => {
         setShowCommentInput(true);
         onComment?.();
@@ -114,6 +161,12 @@ export default function FeedCardFiltered({
         setShowComments(true);
         setShowCommentInput(false);
         setReplyToCommentId(null);
+
+        // Refresh comments from API
+        setTimeout(() => {
+            setCommentsLoaded(false);
+            fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0 } });
+        }, 500);
     };
 
     /* ------------------- Render Helpers ------------------- */
@@ -251,7 +304,11 @@ export default function FeedCardFiltered({
         return (
             <div className={`pt-[1rem] ${showCommentInput ? '' : 'mt-[1rem]'} border-t border-border-subtle`}>
                 <div className="max-h-[12rem] overflow-y-auto mb-[1rem] space-y-[1.5rem]">
-                    {userComments.length === 0 ? (
+                    {commentsLoading ? (
+                        <div className="flex items-center justify-center py-[2rem]">
+                            <Loader2 className="w-5 h-5 animate-spin text-text-brand" />
+                        </div>
+                    ) : userComments.length === 0 ? (
                         <p className="text-text-secondary text-sm text-center py-[2rem]">
                             {t('noComments')}
                         </p>

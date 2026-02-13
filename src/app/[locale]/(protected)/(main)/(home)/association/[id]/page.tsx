@@ -211,6 +211,7 @@ export default function AssociationPage() {
                         posts.map((post) => (
                             <FeedCardWithReply
                                 key={post.id}
+                                postId={post.id}
                                 profileImage={association.avatarUrl || '/ADANSI.PNG'}
                                 profileName={association.name}
                                 category={association.name}

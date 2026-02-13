@@ -240,6 +240,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
           return (
             <div key={post.id} className="mb-2">
               <FeedCardWithReply
+                postId={post.id}
                 profileImage={profileData.avatar}
                 profileName={profileData.name}
                 category={profileData.type}
@@ -254,7 +255,6 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
                 shares={post.engagementCounts.shares}
-                commentsData={[]}
                 onLike={() => handleLike(post.id)}
                 onComment={() => {}}
                 onShare={() => handleShare(post.id)}
