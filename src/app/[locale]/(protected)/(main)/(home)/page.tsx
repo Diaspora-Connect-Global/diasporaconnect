@@ -133,7 +133,7 @@ export default function Home() {
   // Handle like
   const handleLike = async (postId: string) => {
     try {
-      const { data } = await addEngagement({
+      await addEngagement({
         variables: {
           input: {
             postId,
@@ -141,11 +141,6 @@ export default function Home() {
           }
         }
       });
-
-      if (data?.addEngagement.success) {
-        toast.success("Post liked ");
-        refetchFeed(); // Refresh feed to get updated counts
-      }
     } catch (err) {
       console.error('Failed to like post:', err);
       toast.error('Failed to like post');
@@ -155,7 +150,7 @@ export default function Home() {
   // Handle save
   const handleSave = async (postId: string) => {
     try {
-      const { data } = await addEngagement({
+      await addEngagement({
         variables: {
           input: {
             postId,
@@ -163,11 +158,6 @@ export default function Home() {
           }
         }
       });
-
-      if (data?.addEngagement.success) {
-        toast.success("Post saved ");
-        refetchFeed();
-      }
     } catch (err) {
       console.error('Failed to save post:', err);
       toast.error('Failed to save post');
@@ -177,7 +167,7 @@ export default function Home() {
   // Handle share
   const handleShare = async (postId: string) => {
     try {
-      const { data } = await addEngagement({
+      await addEngagement({
         variables: {
           input: {
             postId,
@@ -185,11 +175,6 @@ export default function Home() {
           }
         }
       });
-
-      if (data?.addEngagement.success) {
-        toast.success("Post shared ");
-        refetchFeed();
-      }
     } catch (err) {
       console.error('Failed to share post:', err);
       toast.error('Failed to share post');
@@ -211,7 +196,6 @@ export default function Home() {
       });
 
       toast.success('Comment posted!');
-      refetchFeed(); // Refresh feed to show new comment
     } catch (err) {
       console.error('Failed to post comment:', err);
       toast.error('Failed to post comment');
@@ -403,8 +387,8 @@ export default function Home() {
 
         {/* Feed Posts - Takes remaining space */}
         <div className="space-y-2">
-          {/* Feed Loading State */}
-          {feedLoading && (
+          {/* Feed Loading State — only on initial load */}
+          {feedLoading && !feedData && (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="bg-surface-subtle rounded-lg p-4 animate-pulse">
@@ -449,7 +433,7 @@ export default function Home() {
           )}
 
           {/* Feed Posts */}
-          {!feedLoading && hasPosts && posts.map((post) => {
+          {hasPosts && posts.map((post) => {
             const profileData = getProfileData(post as Post);
             return (
               <div key={post.id} className="mb-2">
