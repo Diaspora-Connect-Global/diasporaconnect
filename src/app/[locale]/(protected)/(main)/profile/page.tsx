@@ -159,7 +159,7 @@ export default function ProfilePage() {
                 {/* Navigation Tabs - Last on mobile, after header on desktop */}
                 <div className="hidden lg:block lg:order-none">
                     <NavigationTabs
-                        userId='me'
+                        userId={profile?.userId || ''}
                         isOwnProfile={true}
                         userData={profile}
                     />
@@ -169,7 +169,7 @@ export default function ProfilePage() {
             {/* Navigation Tabs - Last on mobile, after header on desktop */}
             <div className="order-3 lg:hidden">
                 <NavigationTabs
-                    userId='me'
+                    userId={profile?.userId || ''}
                     isOwnProfile={true}
                     userData={profile}
                 />

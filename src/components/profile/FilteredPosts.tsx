@@ -1,157 +1,273 @@
 'use client';
 
 import { useState } from 'react';
-import FeedCardFiltered, { FeedCardFilteredProps } from '../cards/FeedCardFiltered';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
+import {
+  GET_FEED,
+  GET_USER_ENGAGED_POSTS,
+  ADD_ENGAGEMENT,
+  CREATE_COMMENT,
+  GetFeedData,
+  AddEngagementData,
+  CreateCommentData,
+  GetEngagedPostsData,
+  Post,
+} from '@/services/gql/postsFeed';
+import FeedCardWithReply from '../cards/FeedCardWithReply';
+import { toast } from 'sonner';
+import { Bookmark, Heart, MessageCircle, FileText } from 'lucide-react';
 
-export default function FilteredPosts() {
+type TabId = 'myPosts' | 'saved' | 'liked' | 'commented';
+
+interface FilteredPostsProps {
+  /** The userId whose posts to show */
+  userId: string;
+  /** Whether this is the logged-in user's own profile */
+  isOwnProfile: boolean;
+}
+
+export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsProps) {
   const t = useTranslations('profile.navigation');
-  
-  const postsSubTabs: { id: 'saved' | 'liked' | 'commented'; label: string }[] = [
-    { id: 'saved', label: t('saved') },
-    { id: 'liked', label: t('liked') },
-    { id: 'commented', label: t('commented') },
-  ];
-  const [activeTab, setActiveTab] = useState<'saved' | 'liked' | 'commented'>('saved');
 
-  // Current user (you)
-  const currentUser = { name: 'You', avatar: 'https://github.com/shadcn.png' };
+  const [activeTab, setActiveTab] = useState<TabId>('myPosts');
 
-  // Posts with your comments
-  const allPosts: FeedCardFilteredProps[] = [
-    {
-      id: 'post-1',
-      profileImage: '/ADANSI.png',
-      profileName: 'The Adansi Times',
-      category: 'GhanaConnectGlobal',
-      postDate: 'Oct 1',
-      content:
-        'The Adansi Times is your go-to source for news and stories from the Ghanaian diaspora. Stay connected with your roots...',
-      images: ['/image1.jpg', '/image2.jpg'],
-      likes: 3,
-      comments: 5,
-      commentsData: [
-        {
-          id: 'c1',
-          author: 'You',
-          authorImage: currentUser.avatar,
-          content: 'Love this! Keep it coming.',
-          createdAt: '2h ago',
-          likes: 2,
-        },
-        {
-          id: 'c2',
-          author: 'Kwame',
-          authorImage: '/avatar1.png',
-          content: 'This is inspiring!',
-          createdAt: '3h ago',
-          likes: 1,
-        },
-      ],
-      joinButton: true,
+  // ---- Tabs config ----
+  const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = isOwnProfile
+    ? [
+        { id: 'myPosts', label: t('posts'), icon: <FileText className="w-4 h-4" /> },
+        { id: 'saved', label: t('saved'), icon: <Bookmark className="w-4 h-4" /> },
+        { id: 'liked', label: t('liked'), icon: <Heart className="w-4 h-4" /> },
+        { id: 'commented', label: t('commented'), icon: <MessageCircle className="w-4 h-4" /> },
+      ]
+    : [
+        // Other users only see their posts
+        { id: 'myPosts', label: t('posts'), icon: <FileText className="w-4 h-4" /> },
+      ];
+
+  // ---- "My Posts" / user posts via feed with authorId ----
+  const {
+    data: postsData,
+    loading: postsLoading,
+  } = useQuery<GetFeedData>(GET_FEED, {
+    variables: {
+      input: {
+        limit: 30,
+        offset: 0,
+        type: 'all',
+        authorId: userId,
+      },
     },
-    {
-      id: 'post-2',
-      profileImage: '/ADANSI.png',
-      profileName: 'Another User',
-      category: 'Tech',
-      postDate: 'Sep 30',
-      content: 'A very long post that will be truncated...',
-      likes: 12,
-      comments: 2,
-      commentsData: [
-        {
-          id: 'c3',
-          author: 'You',
-          authorImage: currentUser.avatar,
-          content: 'Great insight!',
-          createdAt: '1d ago',
-          likes: 0,
-        },
-      ],
-    },
-    {
-      id: 'post-3',
-      profileImage: '/ADANSI.png',
-      profileName: 'Tech Guru',
-      category: 'Innovation',
-      postDate: 'Sep 28',
-      content: 'Breaking: AI in Africa is booming!',
-      likes: 25,
-      comments: 8,
-      commentsData: [],
-    },
-  ];
-
-  // Global interaction tracking
-  const [savedPostIds, setSavedPostIds] = useState<string[]>(['post-1']);
-  const [likedPostIds, setLikedPostIds] = useState<string[]>(['post-1', 'post-3']);
-  const [commentedPostIds, setCommentedPostIds] = useState<string[]>(['post-1', 'post-2']);
-
-  // Filter posts by active tab
-  const filteredPosts = allPosts.filter((post) => {
-    if (activeTab === 'saved') return savedPostIds.includes(post.id);
-    if (activeTab === 'liked') return likedPostIds.includes(post.id);
-    if (activeTab === 'commented') return commentedPostIds.includes(post.id);
-    return false;
+    skip: activeTab !== 'myPosts',
+    fetchPolicy: 'cache-and-network',
   });
 
-  // Handlers
-  const toggleLike = (postId: string) => {
-    setLikedPostIds((prev) =>
-      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
-    );
+  // ---- Engaged posts (saved / liked / commented) ----
+  const {
+    data: engagedData,
+    loading: engagedLoading,
+  } = useQuery<GetEngagedPostsData>(GET_USER_ENGAGED_POSTS, {
+    variables: {
+      input: {
+        type: activeTab, // 'saved' | 'liked' | 'commented'
+        userId: isOwnProfile ? undefined : userId,
+        limit: 30,
+        offset: 0,
+      },
+    },
+    skip: activeTab === 'myPosts',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // ---- Mutations ----
+  const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
+  const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
+
+  // ---- Derived data ----
+  const posts: Post[] =
+    activeTab === 'myPosts'
+      ? (postsData?.feed?.posts as Post[]) ?? []
+      : (engagedData?.engagedPosts?.posts as Post[]) ?? [];
+
+  const loading = activeTab === 'myPosts' ? postsLoading : engagedLoading;
+
+  // ---- Handlers ----
+  const handleLike = async (postId: string) => {
+    try {
+      await addEngagement({
+        variables: { input: { postId, engagementType: 'LIKE' } },
+      });
+    } catch {
+      toast.error('Failed to like post');
+    }
   };
 
-  const toggleSave = (postId: string) => {
-    setSavedPostIds((prev) =>
-      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
-    );
+  const handleSave = async (postId: string) => {
+    try {
+      await addEngagement({
+        variables: { input: { postId, engagementType: 'SAVE' } },
+      });
+    } catch {
+      toast.error('Failed to save post');
+    }
   };
 
-  const addComment = (postId: string, text: string, parentId?: string) => {
-    setCommentedPostIds((prev) => (prev.includes(postId) ? prev : [...prev, postId]));
-    console.log('Comment added:', { postId, text, parentId });
+  const handleShare = async (postId: string) => {
+    try {
+      await addEngagement({
+        variables: { input: { postId, engagementType: 'SHARE' } },
+      });
+    } catch {
+      toast.error('Failed to share post');
+    }
   };
 
+  const handleSendComment = async (postId: string, content: string, parentId?: string) => {
+    try {
+      await createComment({
+        variables: {
+          input: {
+            postId,
+            text: content,
+            ...(parentId ? { parentId } : {}),
+          },
+        },
+      });
+    } catch {
+      toast.error('Failed to add comment');
+    }
+  };
+
+  // ---- Helpers ----
+  const getProfileData = (post: Post) => {
+    if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
+      return {
+        name: post.authorProfile.organizationProfile.name,
+        avatar: '/default-avatar.png',
+        type: 'Organization' as const,
+      };
+    }
+    if (post.authorProfile?.userProfile) {
+      return {
+        name: post.authorProfile.userProfile.name,
+        avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+        type: 'User' as const,
+      };
+    }
+    return { name: 'Unknown', avatar: '/PROFILE.png', type: 'User' as const };
+  };
+
+  const formatPostDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year:
+          new Date(dateString).getFullYear() !== new Date().getFullYear()
+            ? 'numeric'
+            : undefined,
+      });
+    } catch {
+      return '';
+    }
+  };
+
+  // ---- Render ----
   return (
-    <div className=" overflow-hidden lg:flex">
-      {/* Left: Tabs */}
+    <div className="overflow-hidden lg:flex">
+      {/* Left: Sub-tabs */}
       <div className="lg:w-[12vw] flex lg:flex-col border-r border-border-subtle bg-surface-default">
-        {postsSubTabs.map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`w-full text-left flex justify-center lg:p-3 p-1 transition-colors border-t first:border-t-0
-              ${activeTab === tab.id ? 'text-brand bg-brand/5 font-medium text-brand border-b-2 border-b-border-brand ' : 'text-text-primary hover:bg-muted'}`}
+            className={`w-full text-left flex items-center justify-center lg:justify-start gap-2 lg:p-3 p-2 transition-colors border-t first:border-t-0 cursor-pointer
+              ${
+                activeTab === tab.id
+                  ? 'text-brand bg-brand/5 font-medium border-b-2 border-b-border-brand'
+                  : 'text-text-primary hover:bg-muted'
+              }`}
           >
-            <span className="text-sm">{tab.label}</span>
+            {tab.icon}
+            <span className="text-sm hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Right: Feed */}
-      <div className="flex-1 overflow-y-auto bg-surface-default p-4 space-y-4">
-        {filteredPosts.length === 0 ? (
-          <p className="text-center text-text-secondary py-8">
-            {t('noPosts', { type: t(activeTab) })}
-          </p>
-        ) : (
-          filteredPosts.map((post) => (
-            <FeedCardFiltered
-              key={post.id}
-              {...post}
-              currentUser={currentUser}
-              isLiked={likedPostIds.includes(post.id)}
-              isSaved={savedPostIds.includes(post.id)}
-              onLike={() => toggleLike(post.id)}
-              onSave={() => toggleSave(post.id)}
-              onShare={() => console.log('share', post.id)}
-              onSendComment={(txt, parentId) => addComment(post.id, txt, parentId)}
-              forceShowComments={activeTab === 'commented'}
-            />
-          ))
+      <div className="flex-1 overflow-y-auto bg-surface-default p-4 space-y-4 max-h-[70vh]">
+        {/* Loading skeletons */}
+        {loading && posts.length === 0 && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-surface-subtle rounded-lg p-4 animate-pulse">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-surface-default rounded-full" />
+                  <div className="flex-1">
+                    <div className="h-4 bg-surface-default rounded w-1/3 mb-2" />
+                    <div className="h-3 bg-surface-default rounded w-1/4" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-surface-default rounded w-full" />
+                  <div className="h-4 bg-surface-default rounded w-5/6" />
+                </div>
+              </div>
+            ))}
+          </div>
         )}
+
+        {/* Empty state */}
+        {!loading && posts.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-subtle flex items-center justify-center">
+              {activeTab === 'saved' && <Bookmark className="w-8 h-8 text-text-secondary" />}
+              {activeTab === 'liked' && <Heart className="w-8 h-8 text-text-secondary" />}
+              {activeTab === 'commented' && <MessageCircle className="w-8 h-8 text-text-secondary" />}
+              {activeTab === 'myPosts' && <FileText className="w-8 h-8 text-text-secondary" />}
+            </div>
+            <p className="text-text-secondary text-sm">
+              {t('noPosts', {
+                type: activeTab === 'myPosts' ? '' : t(activeTab as 'saved' | 'liked' | 'commented'),
+              })}
+            </p>
+          </div>
+        )}
+
+        {/* Posts */}
+        {posts.map((post) => {
+          const profileData = getProfileData(post);
+          return (
+            <div key={post.id} className="mb-2">
+              <FeedCardWithReply
+                profileImage={profileData.avatar}
+                profileName={profileData.name}
+                category={profileData.type}
+                postDate={formatPostDate(post.createdAt)}
+                content={post.text}
+                images={
+                  post.attachments
+                    ?.filter((a) => a.mimeType?.startsWith('image/'))
+                    .map((a) => a.url || '')
+                    .filter(Boolean) || []
+                }
+                likes={post.engagementCounts.likes}
+                comments={post.engagementCounts.comments}
+                shares={post.engagementCounts.shares}
+                commentsData={[]}
+                onLike={() => handleLike(post.id)}
+                onComment={() => {}}
+                onShare={() => handleShare(post.id)}
+                onSave={() => handleSave(post.id)}
+                onSendComment={(content) => handleSendComment(post.id, content)}
+                joinButton={false}
+                isLiked={post.userEngagement.hasLiked}
+                isSaved={post.userEngagement.hasSaved}
+                isShared={post.userEngagement.hasShared}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

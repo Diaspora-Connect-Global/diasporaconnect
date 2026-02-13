@@ -419,3 +419,32 @@ export interface CreateCommentData {
     createdAt: string;
   };
 }
+
+// ============================================================================
+// ENGAGED POSTS TYPES
+// ============================================================================
+
+/**
+ * Engagement filter type for fetching posts the user interacted with.
+ */
+export type EngagedPostsType = 'liked' | 'saved' | 'commented';
+
+/**
+ * Input for fetching posts a user has engaged with (liked, saved, or commented).
+ */
+export interface GetEngagedPostsInput {
+  type: EngagedPostsType;
+  userId?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Response from fetching engaged posts.
+ */
+export interface GetEngagedPostsData {
+  engagedPosts: {
+    total: number;
+    posts: Post[];
+  };
+}

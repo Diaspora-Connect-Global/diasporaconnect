@@ -25,6 +25,9 @@ export type {
   AddEngagementData,
   CreateCommentData,
   RequestUploadUrlData,
+  EngagedPostsType,
+  GetEngagedPostsInput,
+  GetEngagedPostsData,
 } from './types';
 
 // ============================================================================
@@ -195,6 +198,58 @@ export const CREATE_COMMENT = gql`
       authorId
       authorType
       createdAt
+    }
+  }
+`;
+
+// ============================================================================
+// PROFILE POST QUERIES
+// ============================================================================
+
+/**
+ * Get posts filtered by engagement type for the current user's profile.
+ * type: 'liked' | 'saved' | 'commented'
+ */
+export const GET_USER_ENGAGED_POSTS = gql`
+  query GetUserEngagedPosts($input: GetEngagedPostsInput!) {
+    engagedPosts(input: $input) {
+      total
+      posts {
+        id
+        text
+        authorId
+        authorType
+        authorProfile {
+          organizationProfile {
+            name
+          }
+          userProfile {
+            name
+            avatar
+            isVip
+            verificationTier
+          }
+        }
+        createdAt
+        attachments {
+          id
+          objectKey
+          url
+          type
+          mimeType
+        }
+        engagementCounts {
+          likes
+          comments
+          shares
+          saves
+        }
+        userEngagement {
+          hasLiked
+          hasSaved
+          hasShared
+        }
+      }
     }
   }
 `;

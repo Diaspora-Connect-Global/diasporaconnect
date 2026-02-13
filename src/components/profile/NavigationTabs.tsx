@@ -83,7 +83,7 @@ userData
 
       case 'posts':
         return (
-          <FilteredPosts />
+          <FilteredPosts userId={userId} isOwnProfile={isOwnProfile} />
         );
 
       case 'communities':
