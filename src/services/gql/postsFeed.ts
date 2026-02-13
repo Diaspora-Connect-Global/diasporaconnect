@@ -9,6 +9,8 @@ export type {
   OrganizationProfile,
   AuthorProfile,
   Post,
+  Attachment,
+  AttachmentInput,
   Comment,
   GetFeedInput,
   CreatePostInput,
@@ -22,6 +24,7 @@ export type {
   EditPostData,
   AddEngagementData,
   CreateCommentData,
+  RequestUploadUrlData,
 } from './types';
 
 // ============================================================================
@@ -50,6 +53,13 @@ export const GET_FEED = gql`
           }
         }
         createdAt
+        attachments {
+          id
+          objectKey
+          url
+          type
+          mimeType
+        }
         engagementCounts {
           likes
           comments
@@ -86,6 +96,13 @@ export const GET_POST = gql`
         }
       }
       createdAt
+      attachments {
+        id
+        objectKey
+        url
+        type
+        mimeType
+      }
       engagementCounts {
         likes
         comments
@@ -137,6 +154,16 @@ export const CREATE_POST = gql`
       id
       text
       authorType
+    }
+  }
+`;
+
+export const REQUEST_UPLOAD_URL = gql`
+  mutation RequestUploadUrl($fileName: String!, $contentType: String!, $fileSize: Int!) {
+    requestUploadUrl(fileName: $fileName, contentType: $contentType, fileSize: $fileSize) {
+      uploadUrl
+      readUrl
+      objectKey
     }
   }
 `;

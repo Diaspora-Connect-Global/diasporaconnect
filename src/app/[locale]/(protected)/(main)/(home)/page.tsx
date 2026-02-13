@@ -47,6 +47,14 @@ interface Post {
   authorType: 'USER' | 'ORG';
   authorProfile: AuthorProfile;
   createdAt: string;
+  attachments?: {
+    id: string;
+    objectKey: string;
+    url?: string;
+    type: string;
+    mimeType: string;
+    size: number;
+  }[];
   engagementCounts: {
     likes: number;
     comments: number;
@@ -451,7 +459,10 @@ export default function Home() {
                   category={profileData.type}
                   postDate={formatPostDate(post.createdAt)}
                   content={post.text}
-                  images={[]}
+                  images={(post as Post).attachments
+                    ?.filter((a) => a.mimeType?.startsWith('image/'))
+                    .map((a) => a.url || '') 
+                    .filter(Boolean) || []}
                   likes={post.engagementCounts.likes}
                   comments={post.engagementCounts.comments}
                   shares={post.engagementCounts.shares}

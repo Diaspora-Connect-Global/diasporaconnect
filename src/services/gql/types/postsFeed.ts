@@ -136,6 +136,34 @@ export type AuthorType = 'USER' | 'ORG';
  * };
  * ```
  */
+/**
+ * Attachment on a post (image, video, file, etc.).
+ *
+ * @interface Attachment
+ */
+export interface Attachment {
+  id: string;
+  objectKey: string;
+  url?: string;
+  type: string;
+  mimeType: string;
+  size: number;
+  duration?: number;
+}
+
+/**
+ * Input for creating a post attachment.
+ *
+ * @interface AttachmentInput
+ */
+export interface AttachmentInput {
+  objectKey: string;
+  type: string;
+  mimeType: string;
+  size: number;
+  duration?: number;
+}
+
 export interface Post {
   id: string;
   text: string;
@@ -143,6 +171,7 @@ export interface Post {
   authorType: string;
   authorProfile?: AuthorProfile;
   createdAt: string;
+  attachments?: Attachment[];
   engagementCounts: EngagementCounts;
   userEngagement: UserEngagement;
 }
@@ -221,6 +250,8 @@ export interface CreatePostInput {
   text: string;
   communityId?: string;
   visibility?: PostVisibility;
+  publishImmediately?: boolean;
+  attachments?: AttachmentInput[];
 }
 
 /**
@@ -315,10 +346,24 @@ export interface GetPostCommentsData {
  * @property {string} createPost.id - New post's ID
  * @property {string} createPost.text - Post content
  */
+/**
+ * Response from requesting a pre-signed upload URL.
+ *
+ * @interface RequestUploadUrlData
+ */
+export interface RequestUploadUrlData {
+  requestUploadUrl: {
+    uploadUrl: string;
+    readUrl: string;
+    objectKey: string;
+  };
+}
+
 export interface CreatePostData {
   createPost: {
     id: string;
     text: string;
+    authorType: string;
   };
 }
 

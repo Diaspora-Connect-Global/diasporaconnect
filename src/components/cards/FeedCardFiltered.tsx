@@ -7,6 +7,7 @@ import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge } from '@/components/custom/userBadge';
+import { renderRichText } from '@/components/custom/richTextRenderer';
 
 /* --------------------------------------------------------------- */
 interface Comment {
@@ -116,10 +117,11 @@ export default function FeedCardFiltered({
     const renderContent = () => {
         const max = 200;
         const truncated = content.length > max && !isExpanded;
+        const displayText = truncated ? `${content.slice(0, max)}...` : content;
 
         return (
             <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem]">
-                {truncated ? `${content.slice(0, max)}...` : content}
+                {renderRichText(displayText)}
                 {truncated && (
                     <span
                         onClick={toggleExpand}
