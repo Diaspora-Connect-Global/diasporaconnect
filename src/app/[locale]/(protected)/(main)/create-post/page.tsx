@@ -29,6 +29,7 @@ import { MyAvatar } from '@/components/custom/header';
 import { useMutation } from '@apollo/client/react';
 import { CREATE_POST, CreatePostData, GET_FEED } from '@/services/gql/postsFeed';
 import { useRouter } from 'next/navigation';
+import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
 
 // Types
 type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
@@ -134,7 +135,8 @@ export default function CreatePostPage() {
   const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
+  const textareaRef = React.useRef<RichTextareaHandle>(null);
 
   const t = useTranslations('createPost');
   const tActions = useTranslations('actions');
@@ -174,24 +176,11 @@ export default function CreatePostPage() {
 
   // Function to insert text at cursor position
   const insertAtCursor = (textToInsert: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const newContent =
-      postContent.substring(0, start) +
-      textToInsert +
-      postContent.substring(end);
-
-    setPostContent(newContent);
-
-    // Set cursor position after inserted text
-    setTimeout(() => {
-      textarea.focus();
-      const newPosition = start + textToInsert.length;
-      textarea.setSelectionRange(newPosition, newPosition);
-    }, 0);
+    if (textareaRef.current) {
+      textareaRef.current.insertAtCursor(textToInsert);
+    } else {
+      setPostContent(prev => prev + textToInsert);
+    }
   };
 
   const handleAddEmoji = () => {
@@ -202,17 +191,15 @@ export default function CreatePostPage() {
   };
 
   const handleAddHashtag = () => {
-    insertAtCursor('#');
-    toast.success(t('actions.hashtagPrompt'), {
-      description: t('actions.hashtagDescription')
-    });
+    const needsSpace = postContent.length > 0 && !postContent.endsWith(' ') && !postContent.endsWith('\n');
+    insertAtCursor((needsSpace ? ' ' : '') + '#');
+    textareaRef.current?.focus();
   };
 
   const handleAddMention = () => {
-    insertAtCursor('@');
-    toast.success(t('actions.mentionPrompt'), {
-      description: t('actions.mentionDescription')
-    });
+    const needsSpace = postContent.length > 0 && !postContent.endsWith(' ') && !postContent.endsWith('\n');
+    insertAtCursor((needsSpace ? ' ' : '') + '@');
+    textareaRef.current?.focus();
   };
 
   const handleAddLocation = () => {
@@ -393,7 +380,9 @@ export default function CreatePostPage() {
             visibility: visibility,
             authorType: "USER",
             authorId: currentUser?.userId,
-
+            ...(mentionedUsers.length > 0 && {
+              mentionedUserIds: mentionedUsers.map((m) => m.userId),
+            }),
             // communityId can be added if posting to a specific community
           }
         }
@@ -406,6 +395,7 @@ export default function CreatePostPage() {
         setPostContent('');
         setAttachments([]);
         setVisibility('PUBLIC');
+        setMentionedUsers([]);
 
         // Redirect to home after short delay
         setTimeout(() => {
@@ -479,13 +469,16 @@ export default function CreatePostPage() {
 
           {/* Text Area */}
           <div className="px-6 py-6">
-            <textarea
+            <RichTextarea
               ref={textareaRef}
               value={postContent}
-              onChange={(e) => setPostContent(e.target.value)}
+              onChange={setPostContent}
+              onMentionsChange={setMentionedUsers}
               placeholder={t('placeholder', { name: userName.split(' ')[0] })}
-              className="w-full min-h-[200px] body-large leading-relaxed bg-transparent border-none outline-none resize-none placeholder:text-text-secondary text-text-primary"
               maxLength={charLimit}
+              disabled={isPosting}
+              className="body-large leading-relaxed placeholder:text-text-secondary text-text-primary"
+              minHeight="200px"
             />
           </div>
 

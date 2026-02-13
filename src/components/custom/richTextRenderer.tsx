@@ -4,15 +4,14 @@ import React from 'react';
 
 /**
  * Parses post text and renders:
- * - @mentions in blue
- * - #hashtags in bold
+ * - @mentions as LinkedIn-style blue links with subtle background
+ * - #hashtags in bold with brand color
  * - Emoji/plain text as-is
  */
 export function renderRichText(text: string): React.ReactNode[] {
-  // Regex to match @mentions and #hashtags
-  // @mention: starts with @ followed by word characters (letters, digits, underscore)
-  // #hashtag: starts with # followed by word characters (letters, digits, underscore)
-  const pattern = /([@#][\w]+)/g;
+  // Match @MentionName (one or more word chars — handles names like @StephenBedzrah)
+  // Match #HashtagWord (one or more word chars)
+  const pattern = /((?:@[\w]+(?:\s[\w]+)?)|(?:#[\w]+))/g;
 
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -26,16 +25,22 @@ export function renderRichText(text: string): React.ReactNode[] {
 
     const token = match[1];
     if (token.startsWith('@')) {
-      // Mention — render in blue
+      // Mention — LinkedIn-style: blue text with subtle blue background pill
       parts.push(
-        <span key={match.index} className="text-blue-500 cursor-pointer hover:underline">
+        <span
+          key={match.index}
+          className="text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+        >
           {token}
         </span>
       );
     } else if (token.startsWith('#')) {
-      // Hashtag — render in bold
+      // Hashtag — bold with brand-ish color
       parts.push(
-        <span key={match.index} className="font-bold cursor-pointer hover:underline">
+        <span
+          key={match.index}
+          className="font-bold text-text-brand cursor-pointer hover:underline"
+        >
           {token}
         </span>
       );
@@ -59,7 +64,7 @@ interface RichTextProps {
 
 /**
  * Component wrapper for renderRichText.
- * Renders post content with styled @mentions (blue) and #hashtags (bold).
+ * Renders post content with styled @mentions (blue pill) and #hashtags (bold).
  */
 export default function RichText({ text, className = '' }: RichTextProps) {
   return <span className={className}>{renderRichText(text)}</span>;
