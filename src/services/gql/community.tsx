@@ -77,6 +77,21 @@ export const LIST_MY_JOINED_COMMUNITIES = gql`
   }
 `;
 
+/**
+ * List communities for a specific user by their userId.
+ * Used on another user's profile page to show their communities.
+ */
+export const LIST_USER_COMMUNITIES_BY_ID = gql`
+  query ListUserCommunitiesById($userId: ID!) {
+    listUserCommunities(userId: $userId) {
+      id
+      name
+      avatarUrl
+      description
+    }
+  }
+`;
+
 export const LEAVE_COMMUNITY = gql`
   mutation LeaveCommunity($communityId: ID!) {
     leaveCommunity(communityId: $communityId) {

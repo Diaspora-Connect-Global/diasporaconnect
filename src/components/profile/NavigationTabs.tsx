@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState } from 'react';
 
 import FilteredPosts from "./FilteredPosts";
+import ProfileCommunities from "./ProfileCommunities";
 import { useTranslations } from 'next-intl';
 import AboutContent from "./AboutContent";
 import { Profile } from "@/services/gql/profile";
@@ -87,13 +88,7 @@ userData
 
       case 'communities':
         return (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold mb-4">{t('communities')}</h3>
-          
-              <p className="text-muted-foreground">{t('noCommunities')}</p>
-           
-            
-          </div>
+          <ProfileCommunities userId={userId} isOwnProfile={isOwnProfile} />
         );
 
       default:
