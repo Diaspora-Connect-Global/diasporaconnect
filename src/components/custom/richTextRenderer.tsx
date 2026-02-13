@@ -1,14 +1,30 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+
+/**
+ * Map from mention tag (without @) → userId.
+ * e.g. { "StephenBedzrah": "user-uuid-123" }
+ *
+ * When provided, @mentions become clickable links to /{userId}.
+ * When omitted, @mentions render as styled (non-linked) pills.
+ */
+export type MentionMap = Record<string, string>;
 
 /**
  * Parses post text and renders:
- * - @mentions as LinkedIn-style blue links with subtle background
+ * - @mentions as LinkedIn-style blue links (with profile navigation when mentionMap is provided)
  * - #hashtags in bold with brand color
  * - Emoji/plain text as-is
+ *
+ * @param text - The raw post text
+ * @param mentionMap - Optional map of mention tag → userId for making mentions clickable links
  */
-export function renderRichText(text: string): React.ReactNode[] {
+export function renderRichText(
+  text: string,
+  mentionMap?: MentionMap,
+): React.ReactNode[] {
   // Match @MentionName (one or more word chars — handles names like @StephenBedzrah)
   // Match #HashtagWord (one or more word chars)
   const pattern = /((?:@[\w]+(?:\s[\w]+)?)|(?:#[\w]+))/g;
@@ -25,15 +41,31 @@ export function renderRichText(text: string): React.ReactNode[] {
 
     const token = match[1];
     if (token.startsWith('@')) {
-      // Mention — LinkedIn-style: blue text with subtle blue background pill
-      parts.push(
-        <span
-          key={match.index}
-          className="text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
-        >
-          {token}
-        </span>
-      );
+      const tag = token.slice(1); // strip @
+      const userId = mentionMap?.[tag];
+
+      if (userId) {
+        // Linked mention — navigates to the user's profile
+        parts.push(
+          <Link
+            key={match.index}
+            href={`/${userId}`}
+            className="inline text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors no-underline"
+          >
+            {token}
+          </Link>,
+        );
+      } else {
+        // Unlinked mention — styled pill without navigation
+        parts.push(
+          <span
+            key={match.index}
+            className="text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded cursor-default"
+          >
+            {token}
+          </span>,
+        );
+      }
     } else if (token.startsWith('#')) {
       // Hashtag — bold with brand-ish color
       parts.push(
@@ -42,7 +74,7 @@ export function renderRichText(text: string): React.ReactNode[] {
           className="font-bold text-text-brand cursor-pointer hover:underline"
         >
           {token}
-        </span>
+        </span>,
       );
     }
 
@@ -59,13 +91,14 @@ export function renderRichText(text: string): React.ReactNode[] {
 
 interface RichTextProps {
   text: string;
+  mentionMap?: MentionMap;
   className?: string;
 }
 
 /**
  * Component wrapper for renderRichText.
- * Renders post content with styled @mentions (blue pill) and #hashtags (bold).
+ * Renders post content with styled @mentions (blue pill, optionally linked) and #hashtags (bold).
  */
-export default function RichText({ text, className = '' }: RichTextProps) {
-  return <span className={className}>{renderRichText(text)}</span>;
+export default function RichText({ text, mentionMap, className = '' }: RichTextProps) {
+  return <span className={className}>{renderRichText(text, mentionMap)}</span>;
 }
