@@ -7,11 +7,12 @@ import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge } from "@/components/custom/userBadge";
 import { formatCount } from '@/macros/formatCount';
-import { renderRichText } from '@/components/custom/richTextRenderer';
+import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery } from '@apollo/client/react';
 import { GET_POST_COMMENTS, GetPostCommentsData } from '@/services/gql/postsFeed';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
+import { formatDateProximity } from '@/macros/time';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -23,6 +24,8 @@ interface Comment {
     content: string;
     createdAt: string;
     likes: number;
+    replies?: number;
+    mentionMap?: MentionMap;
 }
 
 interface FeedCardProps {
@@ -53,16 +56,25 @@ interface FeedCardProps {
 /* --------------------------------------------------------------- */
 /** Map an API Comment to the local Comment shape used for rendering. */
 function mapApiComment(c: ApiComment): Comment {
-    // Use the first mention's displayName/avatar if the commenter mentioned themselves,
-    // otherwise fall back to authorId
+    // Build a mentionMap so renderRichText can link @mentions in comment text
+    const mentionMap: MentionMap = {};
+    c.mentions?.forEach((m) => {
+        mentionMap[m.handle] = m.entityId;
+    });
+
+    // Try to resolve the author's display name from the mentions list
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
+    const authorName = selfMention?.displayName || selfMention?.handle || c.authorId;
+    const authorAvatar = selfMention?.avatarUrl || '/PROFILE.png';
+
     return {
         id: c.id,
-        author: selfMention?.displayName ?? c.authorId,
-        authorImage: selfMention?.avatarUrl ?? '/PROFILE.png',
+        author: authorName,
+        authorImage: authorAvatar,
         content: c.text,
         createdAt: c.createdAt,
         likes: 0,
+        mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
     };
 }
 
@@ -516,43 +528,41 @@ export default function FeedCardWithReply({
                         commentsData.map((c) => (
                             <div key={c.id}>
                                 <div className="flex gap-[0.75rem]">
+                                    <Image
+                                        src={c.authorImage || '/PROFILE.png'}
+                                        alt={c.author}
+                                        width={32}
+                                        height={32}
+                                        className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
+                                    />
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between gap-[0.5rem] mb-[0.25rem]">
-                                            <div className='flex text-center items-center justify-center space-x-2'>
-                                                <Image
-                                                    src={c.authorImage}
-                                                    alt={c.author}
-                                                    width={40}
-                                                    height={40}
-                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                                                />
-                                                <span className="font-semibold text-text-primary text-sm">{c.author}</span>
-                                                <span>
-                                                    <UserBadge tier="starter" size="xs" />
-                                                </span>
-                                            </div>
-                                            <span className="text-text-secondary text-xs">{c.createdAt}</span>
+                                        <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
+                                            <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
+                                            <UserBadge tier="starter" size="xs" />
+                                            <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
+                                            <span className="text-text-tertiary text-xs flex-shrink-0">
+                                                {formatDateProximity(c.createdAt)}
+                                            </span>
                                         </div>
-                                        <div className='ml-10'>
-                                            <p className="font-body-small text-text-primary break-words mb-[0.5rem]">
-                                                {c.content}
-                                            </p>
-                                            <div className="flex items-center gap-[1rem]">
-                                                <button className="text-sm font-semibold text-text-brand">
-                                                    {t('like')}
-                                                </button>
-                                                <button
-                                                    onClick={() => handleReplyClick(c.id)}
-                                                    className="text-sm font-semibold text-text-brand"
-                                                >
-                                                    {t('reply')}
-                                                </button>
-                                                <span className="text-text-secondary text-xs">|</span>
-                                                <span className="text-text-secondary text-xs">
-                                                    {formatCount(c.likes)} {t('likes')}
-                                                </span>
-                                                <span className="text-text-secondary text-xs">5 {t('replies')}</span>
-                                            </div>
+                                        <p className="font-body-small text-text-primary break-words mb-[0.5rem]">
+                                            {renderRichText(c.content, c.mentionMap)}
+                                        </p>
+                                        <div className="flex items-center gap-[0.75rem]">
+                                            <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
+                                                {t('like')}
+                                            </button>
+                                            <button
+                                                onClick={() => handleReplyClick(c.id)}
+                                                className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors"
+                                            >
+                                                {t('reply')}
+                                            </button>
+                                            <span className="text-text-tertiary text-xs">
+                                                {formatCount(c.likes)} {t('likes')}
+                                            </span>
+                                            <span className="text-text-tertiary text-xs">
+                                                {formatCount(c.replies ?? 0)} {t('replies')}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

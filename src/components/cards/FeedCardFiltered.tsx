@@ -7,11 +7,13 @@ import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge } from '@/components/custom/userBadge';
-import { renderRichText } from '@/components/custom/richTextRenderer';
+import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery } from '@apollo/client/react';
 import { GET_POST_COMMENTS, GetPostCommentsData } from '@/services/gql/postsFeed';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
+import { formatDateProximity } from '@/macros/time';
+import { formatCount } from '@/macros/formatCount';
 
 /* --------------------------------------------------------------- */
 interface Comment {
@@ -21,6 +23,8 @@ interface Comment {
     content: string;
     createdAt: string;
     likes: number;
+    replies?: number;
+    mentionMap?: MentionMap;
 }
 
 export interface FeedCardFilteredProps {
@@ -49,14 +53,23 @@ export interface FeedCardFilteredProps {
 
 /** Map an API Comment to the local Comment shape. */
 function mapApiComment(c: ApiComment): Comment {
+    const mentionMap: MentionMap = {};
+    c.mentions?.forEach((m) => {
+        mentionMap[m.handle] = m.entityId;
+    });
+
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
+    const authorName = selfMention?.displayName || selfMention?.handle || c.authorId;
+    const authorAvatar = selfMention?.avatarUrl || '/PROFILE.png';
+
     return {
         id: c.id,
-        author: selfMention?.displayName ?? c.authorId,
-        authorImage: selfMention?.avatarUrl ?? '/PROFILE.png',
+        author: authorName,
+        authorImage: authorAvatar,
         content: c.text,
         createdAt: c.createdAt,
         likes: 0,
+        mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
     };
 }
 
@@ -339,38 +352,42 @@ export default function FeedCardFiltered({
 
                                     {/* Comment Content */}
                                     <div className="ml-14 pt-4">
-                                        <div className="flex items-center justify-between gap-[0.5rem] mb-[0.25rem]">
-                                            <div className="flex items-center space-x-2">
-                                                <Image
-                                                    src={c.authorImage}
-                                                    alt={c.author}
-                                                    width={32}
-                                                    height={32}
-                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                                                />
-                                                <span className="font-semibold text-text-primary text-sm">{c.author}</span>
-                                                <UserBadge tier="starter" size="xs" />
-                                            </div>
-                                            <span className="text-text-secondary text-xs">{c.createdAt}</span>
+                                        <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
+                                            <Image
+                                                src={c.authorImage || '/PROFILE.png'}
+                                                alt={c.author}
+                                                width={32}
+                                                height={32}
+                                                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                            />
+                                            <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
+                                            <UserBadge tier="starter" size="xs" />
+                                            <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
+                                            <span className="text-text-tertiary text-xs flex-shrink-0">
+                                                {formatDateProximity(c.createdAt)}
+                                            </span>
                                         </div>
 
                                         <div className="ml-10">
                                             <p className="font-body-small text-text-primary break-words mb-[0.5rem]">
-                                                {c.content}
+                                                {renderRichText(c.content, c.mentionMap)}
                                             </p>
-                                            <div className="flex items-center gap-[1rem]">
-                                                <button className="text-sm font-semibold text-text-brand">{t('like')}</button>
+                                            <div className="flex items-center gap-[0.75rem]">
+                                                <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
+                                                    {t('like')}
+                                                </button>
                                                 <button
                                                     onClick={() => handleReplyClick(c.id)}
-                                                    className="text-sm font-semibold text-text-brand"
+                                                    className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors"
                                                 >
                                                     {t('reply')}
                                                 </button>
-                                                <span className="text-text-secondary text-xs">|</span>
-                                                <span className="text-text-secondary text-xs">
-                                                    {c.likes} {t('likes')}
+                                                <span className="text-text-tertiary text-xs">
+                                                    {formatCount(c.likes)} {t('likes')}
                                                 </span>
-                                                <span className="text-text-secondary text-xs">5 {t('replies')}</span>
+                                                <span className="text-text-tertiary text-xs">
+                                                    {formatCount(c.replies ?? 0)} {t('replies')}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
