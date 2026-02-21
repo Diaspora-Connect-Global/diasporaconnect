@@ -72,6 +72,7 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
 
     /* — mentioned users tracking — */
     const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
+    const skipDetectionRef = useRef(false);
 
     /* — mention state — */
     const [mentionQuery, setMentionQuery] = useState<string | null>(null);
@@ -127,6 +128,18 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
     /* — detect @mention trigger — */
     const detectMention = useCallback(
       (text: string, cursorPos: number) => {
+        // Don't detect mentions if we're typing after a completed mention
+        if (cursorPos > 0) {
+          const beforeCursor = text.slice(0, cursorPos);
+          // Check if we just typed after a completed mention (ends with @Name )
+          const completedMentionMatch = beforeCursor.match(/@[\w\s-]+\s+\w*$/);
+          if (completedMentionMatch) {
+            setMentionQuery(null);
+            setMentionStartIdx(-1);
+            return;
+          }
+        }
+
         // Walk backwards from cursor to find the @ that triggered this
         let i = cursorPos - 1;
         while (i >= 0) {
@@ -261,9 +274,10 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
         const after = value.slice(
           mentionStartIdx + 1 + (mentionQuery?.length ?? 0),
         );
-        const newValue = before + `@${tag} ` + after;
-        onChange(newValue);
-
+        // Use a special marker to denote end of mention
+        const newValue = before + `@${tag}` + String.fromCharCode(8203) + ' ' + after; // Zero-width space + space
+        const cursorPos = before.length + tag.length + 2; // @+tag+zero-width+space
+        
         // Track the mentioned user
         const newMention: MentionedUser = { userId: user.userId, name: tag, displayName };
         setMentionedUsers((prev) => {
@@ -274,18 +288,25 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
           return updated;
         });
 
+        // Clear mention state BEFORE onChange to prevent detectMention from running
         setMentionQuery(null);
         setMentionStartIdx(-1);
         setMentionResults([]);
+        
+        // Set flag to skip next detection
+        skipDetectionRef.current = true;
+        
+        // Update value
+        onChange(newValue);
 
-        requestAnimationFrame(() => {
+        // Set cursor position after a short delay to ensure state updates complete
+        setTimeout(() => {
           const el = textareaRef.current;
           if (el) {
-            const pos = before.length + tag.length + 2; // @+tag+space
             el.focus();
-            el.selectionStart = el.selectionEnd = pos;
+            el.setSelectionRange(cursorPos, cursorPos);
           }
-        });
+        }, 0);
       },
       [value, mentionStartIdx, mentionQuery, onChange, onMentionsChange],
     );
@@ -318,6 +339,34 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
           return;
         }
       }
+
+      // Handle backspace to delete entire mentions
+      if (e.key === 'Backspace') {
+        const el = e.target as HTMLTextAreaElement;
+        const cursorPos = el.selectionStart;
+        const selectionEnd = el.selectionEnd;
+        
+        // Only handle if no text is selected (single cursor position)
+        if (cursorPos === selectionEnd && cursorPos > 0) {
+          // Look for mention pattern before cursor
+          const beforeCursor = value.slice(0, cursorPos);
+          const mentionMatch = beforeCursor.match(/@[\w\s-]+$/); // Match mention at end
+          
+          if (mentionMatch) {
+            e.preventDefault();
+            const mentionStart = cursorPos - mentionMatch[0].length;
+            const newValue = value.slice(0, mentionStart) + value.slice(cursorPos);
+            onChange(newValue);
+            
+            // Update cursor position
+            requestAnimationFrame(() => {
+              el.focus();
+              el.selectionStart = el.selectionEnd = mentionStart;
+            });
+            return;
+          }
+        }
+      }
     };
 
     /* — handle input change — */
@@ -333,6 +382,12 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
         }
         return pruned;
       });
+
+      // Skip detection if we just selected a mention
+      if (skipDetectionRef.current) {
+        skipDetectionRef.current = false;
+        return;
+      }
 
       // Detect mention right after the change
       requestAnimationFrame(() => {

@@ -261,11 +261,15 @@ export default function CreatePostForm({
     const before = text.slice(0, start);
     const after = text.slice(end);
     const newText = before + insertion + after;
+    const newCursorPos = start + insertion.length;
+    
     setText(newText);
-    requestAnimationFrame(() => {
+    
+    // Use setTimeout to ensure state update completes first
+    setTimeout(() => {
       el.focus();
-      el.selectionStart = el.selectionEnd = start + insertion.length;
-    });
+      el.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
   };
 
   const handleEmojiClick = (emojiData: { emoji: string }) => {

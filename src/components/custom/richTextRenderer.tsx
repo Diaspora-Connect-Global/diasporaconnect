@@ -25,9 +25,9 @@ export function renderRichText(
   text: string,
   mentionMap?: MentionMap,
 ): React.ReactNode[] {
-  // Match @MentionName (one or more word chars — handles names like @StephenBedzrah)
-  // Match #HashtagWord (one or more word chars)
-  const pattern = /((?:@[\w]+(?:\s[\w]+)?)|(?:#[\w]+))/g;
+  // Match @MentionName followed by zero-width space or space/end
+  // The zero-width space (\u200B) marks the end of a completed mention
+  const pattern = /((?:@[\w\s-]+(?=\u200B|\s|$))|(?:#[\w]+))/g;
 
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -41,7 +41,7 @@ export function renderRichText(
 
     const token = match[1];
     if (token.startsWith('@')) {
-      const tag = token.slice(1); // strip @
+      const tag = token.slice(1).trim(); // strip @ and trim
       const userId = mentionMap?.[tag];
 
       if (userId) {
@@ -81,9 +81,9 @@ export function renderRichText(
     lastIndex = match.index + match[0].length;
   }
 
-  // Add remaining text
+  // Add remaining text (filter out zero-width spaces for display)
   if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
+    parts.push(text.slice(lastIndex).replace(/\u200B/g, ''));
   }
 
   return parts;
