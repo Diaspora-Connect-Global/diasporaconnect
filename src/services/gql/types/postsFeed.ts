@@ -474,3 +474,46 @@ export interface GetEngagedPostsData {
     posts: Post[];
   };
 }
+
+/**
+ * Response from fetching user posts.
+ */
+export interface GetUserPostsData {
+  userPosts: Post[];
+}
+
+/**
+ * Response from fetching saved posts.
+ */
+export interface GetSavedPostsData {
+  savedPosts: {
+    limit: number;
+    offset: number;
+    total: number;
+    posts: Post[];
+  };
+}
+
+/**
+ * Response from fetching liked posts.
+ */
+export interface GetLikedPostsData {
+  likedPosts: {
+    limit: number;
+    offset: number;
+    total: number;
+    posts: Post[];
+  };
+}
+
+/**
+ * Response from fetching commented posts.
+ */
+export interface GetCommentedPostsData {
+  commentedPosts: {
+    limit: number;
+    offset: number;
+    total: number;
+    posts: Post[];
+  };
+}

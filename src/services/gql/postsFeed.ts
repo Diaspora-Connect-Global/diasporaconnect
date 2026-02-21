@@ -28,6 +28,10 @@ export type {
   EngagedPostsType,
   GetEngagedPostsInput,
   GetEngagedPostsData,
+  GetUserPostsData,
+  GetSavedPostsData,
+  GetLikedPostsData,
+  GetCommentedPostsData,
 } from './types';
 
 // ============================================================================
@@ -221,6 +225,185 @@ export const CREATE_COMMENT = gql`
 export const GET_USER_ENGAGED_POSTS = gql`
   query GetUserEngagedPosts($input: GetEngagedPostsInput!) {
     engagedPosts(input: $input) {
+      total
+      posts {
+        id
+        text
+        authorId
+        authorType
+        authorProfile {
+          organizationProfile {
+            name
+          }
+          userProfile {
+            name
+            avatar
+            isVip
+            verificationTier
+          }
+        }
+        createdAt
+        attachments {
+          id
+          objectKey
+          url
+          type
+          mimeType
+        }
+        engagementCounts {
+          likes
+          comments
+          shares
+          saves
+        }
+        userEngagement {
+          hasLiked
+          hasSaved
+          hasShared
+        }
+      }
+    }
+  }
+`;
+
+export const GET_USER_POSTS = gql`
+  query GetUserPosts($authorId: String, $authorType: String = "USER", $limit: Int = 20, $offset: Int = 0) {
+    userPosts(authorId: $authorId, authorType: $authorType, limit: $limit, offset: $offset) {
+      id
+      text
+      authorId
+      authorType
+      authorProfile {
+        organizationProfile {
+          name
+        }
+        userProfile {
+          name
+          avatar
+          isVip
+          verificationTier
+        }
+      }
+      createdAt
+      attachments {
+        id
+        objectKey
+        url
+        type
+        mimeType
+      }
+      engagementCounts {
+        likes
+        comments
+        shares
+        saves
+      }
+      userEngagement {
+        hasLiked
+        hasSaved
+        hasShared
+      }
+    }
+  }
+`;
+
+export const GET_SAVED_POSTS = gql`
+  query GetSavedPosts($limit: Int = 20, $offset: Int = 0, $userId: String) {
+    savedPosts(limit: $limit, offset: $offset, userId: $userId) {
+      limit
+      offset
+      total
+      posts {
+        id
+        text
+        authorId
+        authorType
+        authorProfile {
+          organizationProfile {
+            name
+          }
+          userProfile {
+            name
+            avatar
+            isVip
+            verificationTier
+          }
+        }
+        createdAt
+        attachments {
+          id
+          objectKey
+          url
+          type
+          mimeType
+        }
+        engagementCounts {
+          likes
+          comments
+          shares
+          saves
+        }
+        userEngagement {
+          hasLiked
+          hasSaved
+          hasShared
+        }
+      }
+    }
+  }
+`;
+
+export const GET_LIKED_POSTS = gql`
+  query GetLikedPosts($limit: Int = 20, $offset: Int = 0, $userId: String) {
+    likedPosts(limit: $limit, offset: $offset, userId: $userId) {
+      limit
+      offset
+      total
+      posts {
+        id
+        text
+        authorId
+        authorType
+        authorProfile {
+          organizationProfile {
+            name
+          }
+          userProfile {
+            name
+            avatar
+            isVip
+            verificationTier
+          }
+        }
+        createdAt
+        attachments {
+          id
+          objectKey
+          url
+          type
+          mimeType
+        }
+        engagementCounts {
+          likes
+          comments
+          shares
+          saves
+        }
+        userEngagement {
+          hasLiked
+          hasSaved
+          hasShared
+        }
+      }
+    }
+  }
+`;
+
+export const GET_COMMENTED_POSTS = gql`
+  query GetCommentedPosts($limit: Int = 20, $offset: Int = 0, $userId: String) {
+    commentedPosts(limit: $limit, offset: $offset, userId: $userId) {
+      limit
+      offset
       total
       posts {
         id

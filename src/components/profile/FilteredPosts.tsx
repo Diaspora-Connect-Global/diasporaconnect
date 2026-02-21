@@ -4,14 +4,18 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import {
-  GET_FEED,
-  GET_USER_ENGAGED_POSTS,
+  GET_USER_POSTS,
+  GET_SAVED_POSTS,
+  GET_LIKED_POSTS,
+  GET_COMMENTED_POSTS,
   ADD_ENGAGEMENT,
   CREATE_COMMENT,
-  GetFeedData,
+  GetUserPostsData,
+  GetSavedPostsData,
+  GetLikedPostsData,
+  GetCommentedPostsData,
   AddEngagementData,
   CreateCommentData,
-  GetEngagedPostsData,
   Post,
 } from '@/services/gql/postsFeed';
 import FeedCardWithReply from '../cards/FeedCardWithReply';
@@ -49,33 +53,53 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
   const {
     data: postsData,
     loading: postsLoading,
-  } = useQuery<GetFeedData>(GET_FEED, {
+  } = useQuery<GetUserPostsData>(GET_USER_POSTS, {
     variables: {
-      input: {
-        limit: 30,
-        offset: 0,
-        type: 'all',
-        authorId: userId,
-      },
+      authorId: userId,
+      authorType: 'USER',
+      limit: 30,
+      offset: 0,
     },
     skip: activeTab !== 'myPosts',
     fetchPolicy: 'cache-and-network',
   });
 
-  // ---- Engaged posts (saved / liked / commented) ----
   const {
-    data: engagedData,
-    loading: engagedLoading,
-  } = useQuery<GetEngagedPostsData>(GET_USER_ENGAGED_POSTS, {
+    data: savedData,
+    loading: savedLoading,
+  } = useQuery<GetSavedPostsData>(GET_SAVED_POSTS, {
     variables: {
-      input: {
-        type: activeTab, // 'saved' | 'liked' | 'commented'
-        userId: isOwnProfile ? undefined : userId,
-        limit: 30,
-        offset: 0,
-      },
+      limit: 30,
+      offset: 0,
+      userId: isOwnProfile ? undefined : userId,
     },
-    skip: activeTab === 'myPosts',
+    skip: activeTab !== 'saved',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const {
+    data: likedData,
+    loading: likedLoading,
+  } = useQuery<GetLikedPostsData>(GET_LIKED_POSTS, {
+    variables: {
+      limit: 30,
+      offset: 0,
+      userId: isOwnProfile ? undefined : userId,
+    },
+    skip: activeTab !== 'liked',
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const {
+    data: commentedData,
+    loading: commentedLoading,
+  } = useQuery<GetCommentedPostsData>(GET_COMMENTED_POSTS, {
+    variables: {
+      limit: 30,
+      offset: 0,
+      userId: isOwnProfile ? undefined : userId,
+    },
+    skip: activeTab !== 'commented',
     fetchPolicy: 'cache-and-network',
   });
 
@@ -86,10 +110,17 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
   // ---- Derived data ----
   const posts: Post[] =
     activeTab === 'myPosts'
-      ? (postsData?.feed?.posts as Post[]) ?? []
-      : (engagedData?.engagedPosts?.posts as Post[]) ?? [];
+      ? (postsData?.userPosts as Post[]) ?? []
+      : activeTab === 'saved'
+      ? (savedData?.savedPosts?.posts as Post[]) ?? []
+      : activeTab === 'liked'
+      ? (likedData?.likedPosts?.posts as Post[]) ?? []
+      : (commentedData?.commentedPosts?.posts as Post[]) ?? [];
 
-  const loading = activeTab === 'myPosts' ? postsLoading : engagedLoading;
+  const loading = 
+    activeTab === 'myPosts' ? postsLoading : 
+    activeTab === 'saved' ? savedLoading :
+    activeTab === 'liked' ? likedLoading : commentedLoading;
 
   // ---- Handlers ----
   const handleLike = async (postId: string) => {
