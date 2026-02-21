@@ -382,8 +382,6 @@ export interface GetPostCommentsData {
 export interface RequestUploadUrlData {
   requestUploadUrl: {
     uploadUrl: string;
-    readUrl: string;
-    objectKey: string;
   };
 }
 

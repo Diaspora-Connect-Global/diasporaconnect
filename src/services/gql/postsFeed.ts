@@ -172,11 +172,9 @@ export const CREATE_POST = gql`
 `;
 
 export const REQUEST_UPLOAD_URL = gql`
-  mutation RequestUploadUrl($fileName: String!, $contentType: String!, $fileSize: Int!) {
-    requestUploadUrl(fileName: $fileName, contentType: $contentType, fileSize: $fileSize) {
+  mutation RequestUploadUrl($fileName: String!, $fileType: String!, $contentType: String!, $vendorId: String!) {
+    requestUploadUrl(fileName: $fileName, fileType: $fileType, contentType: $contentType, vendorId: $vendorId) {
       uploadUrl
-      readUrl
-      objectKey
     }
   }
 `;

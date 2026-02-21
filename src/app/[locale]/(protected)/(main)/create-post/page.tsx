@@ -27,9 +27,10 @@ import { toast } from 'sonner';
 import { useUserStore } from '@/store/useUserStore';
 import { MyAvatar } from '@/components/custom/header';
 import { useMutation } from '@apollo/client/react';
-import { CREATE_POST, CreatePostData, GET_FEED } from '@/services/gql/postsFeed';
+import { CREATE_POST, CreatePostData, GET_FEED, REQUEST_UPLOAD_URL, RequestUploadUrlData } from '@/services/gql/postsFeed';
 import { useRouter } from 'next/navigation';
 import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
+import { AttachmentInput } from '@/services/gql/types/postsFeed';
 
 // Types
 type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
@@ -162,6 +163,9 @@ export default function CreatePostPage() {
       }
     ]
   });
+
+  // Request Upload URL Mutation
+  const [requestUploadUrl] = useMutation<RequestUploadUrlData>(REQUEST_UPLOAD_URL);
 
   // Cleanup object URLs on unmount
   React.useEffect(() => {
@@ -371,19 +375,65 @@ export default function CreatePostPage() {
     }
 
     try {
-      // Note: File upload functionality would need to be implemented separately
-      // This example only sends the text content
+      let attachmentInputs: AttachmentInput[] = [];
+
+      // Upload attachments if any
+      if (attachments.length > 0) {
+        const uploadPromises = attachments.map(async (attachment) => {
+          if (!attachment.file) return null;
+
+          // Request upload URL
+          const { data: uploadData } = await requestUploadUrl({
+            variables: {
+              fileName: attachment.file.name,
+              fileType: attachment.file.type,
+              contentType: attachment.file.type,
+              vendorId: 'default'
+            }
+          });
+
+          if (!uploadData?.requestUploadUrl) {
+            throw new Error('Failed to get upload URL');
+          }
+
+          // Upload file to S3
+          const uploadResponse = await fetch(uploadData.requestUploadUrl.uploadUrl, {
+            method: 'PUT',
+            body: attachment.file,
+            headers: {
+              'Content-Type': attachment.file.type
+            }
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload file');
+          }
+
+          // Generate object key from file name
+          const objectKey = `uploads/${Date.now()}-${attachment.file.name}`;
+
+          return {
+            objectKey,
+            type: attachment.file.type.startsWith('image/') ? 'IMAGE' : 
+                  attachment.file.type.startsWith('video/') ? 'VIDEO' : 'DOCUMENT',
+            mimeType: attachment.file.type,
+            size: attachment.file.size
+          };
+        });
+
+        const uploadResults = await Promise.all(uploadPromises);
+        attachmentInputs = uploadResults.filter(Boolean) as AttachmentInput[];
+      }
+
       const { data } = await createPost({
         variables: {
           input: {
             text: postContent,
             visibility: visibility,
-            authorType: "USER",
-            authorId: currentUser?.userId,
+            ...(attachmentInputs.length > 0 && { attachments: attachmentInputs }),
             ...(mentionedUsers.length > 0 && {
               mentionedUserIds: mentionedUsers.map((m) => m.userId),
             }),
-            // communityId can be added if posting to a specific community
           }
         }
       });
