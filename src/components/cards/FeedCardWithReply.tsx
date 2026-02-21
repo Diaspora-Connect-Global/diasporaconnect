@@ -601,8 +601,9 @@ export default function FeedCardWithReply({
                                     </button>
                                 )}
                             </div>
+
                             <p className="font-body-small text-text-secondary text-wrap">
-                                {t('postedBy', { user: 'Admin' })} · {category} · {postDate}
+                                {postDate}
                             </p>
                         </div>
                     </div>
