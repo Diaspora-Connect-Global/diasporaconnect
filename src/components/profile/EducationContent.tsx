@@ -63,13 +63,13 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
   const [editingEducation, setEditingEducation] = useState<Education | null>(null);
 
   // Determine which query to use based on isOwnProfile
-  const isMyProfile = isOwnProfile && userId === "me";
+  const isMyProfile = isOwnProfile;
 
   // GraphQL Query - Conditionally load based on profile ownership
   const { data, loading, refetch } = useQuery<GetUserEducationResponse>(
-    isMyProfile ? GET_MY_EDUCATION : GET_USER_EDUCATION,
+    isOwnProfile ? GET_MY_EDUCATION : GET_USER_EDUCATION,
     {
-      variables: isMyProfile ? undefined : { userId },
+      variables: isOwnProfile ? undefined : { userId },
       skip: !userId
     }
   );
@@ -118,14 +118,14 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
   };
 
   const handleEdit = (education: Education) => {
-    if (!isMyProfile) return;
+    if (!isOwnProfile) return;
     
     setEditingEducation(education);
     setIsModalOpen(true);
   };
 
   const handleDelete = async (educationId: string) => {
-    if (!isMyProfile) return;
+    if (!isOwnProfile) return;
     
     if (!confirm(t('confirmDelete') || 'Are you sure you want to delete this education?')) {
       return;
@@ -159,7 +159,7 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
         <h2 className="text-2xl font-bold mb-4 text-text-primary">{t('title')}</h2>
         
         {/* Only show Add Education button for own profile */}
-        {isMyProfile && (
+        {isOwnProfile && (
           <ButtonType3
             onClick={() => {
               setEditingEducation(null);
@@ -184,7 +184,7 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
           </>
         ) : educationList.length === 0 ? (
           <p className="text-text-secondary text-sm">
-            {isMyProfile 
+            {isOwnProfile 
               ? 'No education added yet.' 
               : 'This user has not added any education yet.'}
           </p>
@@ -210,7 +210,7 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
                 </div>
                 
                 {/* Only show Edit/Delete buttons for own profile */}
-                {isMyProfile && (
+                {isOwnProfile && (
                   <div className="flex gap-2 ml-4">
                     <button
                       onClick={() => handleEdit(edu)}
@@ -235,7 +235,7 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
       </div>
 
       {/* Modal - Only render for own profile */}
-      {isMyProfile && (
+      {isOwnProfile && (
         <AddEducationModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
