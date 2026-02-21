@@ -4,14 +4,16 @@ import { NotificationCard } from "@/components/cards/notification/NotificationCa
 import { Check, Settings } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, useMutation } from '@apollo/client/react';
 import {
-    deleteNotification,
-    getNotifications,
-    markAllAsRead as markAllAsReadApi,
-    markAsRead as markAsReadApi,
+    GET_NOTIFICATIONS,
+    MARK_AS_READ,
+    DELETE_NOTIFICATION,
     Notification as ApiNotification,
-} from "@/services/rest/notification";
-import { useAuthStore } from '@/store/useAuthStore';
+    GetNotificationsResponse,
+    MarkAsReadResponse,
+    DeleteNotificationResponse,
+} from "@/services/gql/notification";
 
 interface UiNotification {
     id: string;
@@ -33,7 +35,6 @@ export default function Notification() {
     const [filter, setFilter] = useState<'all' | 'associations' | 'opportunities' | 'events'>('all');
     const [notifications, setNotifications] = useState<UiNotification[]>([]);
     const [filteredNotifications, setFilteredNotifications] = useState<UiNotification[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const TABS: Tab[] = useMemo(() => ([
@@ -43,6 +44,13 @@ export default function Notification() {
         { label: t('associations'), value: 'associations' },
     ]), [t]);
 
+    const { data, loading, error, refetch } = useQuery<GetNotificationsResponse>(GET_NOTIFICATIONS, {
+        variables: { limit: 50, offset: 0 },
+    });
+
+    const [markAsReadMutation] = useMutation<MarkAsReadResponse>(MARK_AS_READ);
+    const [deleteNotificationMutation] = useMutation<DeleteNotificationResponse>(DELETE_NOTIFICATION);
+
     const mapApiNotification = (notification: ApiNotification): UiNotification => {
         const type = notification.type === 'opportunities' || notification.type === 'events'
             ? notification.type
@@ -51,125 +59,83 @@ export default function Notification() {
         return {
             id: notification.id,
             title: notification.title,
-            description: notification.message,
+            description: notification.body,
             type,
             read: notification.isRead,
             date: notification.createdAt,
         };
     };
 
-    // Check auth token on mount
     useEffect(() => {
-        const token = useAuthStore.getState().tokens?.sessionToken;
-        console.log('🔑 Auth Token Status:', token ? 'EXISTS' : 'MISSING');
-        if (token) {
-            console.log('🔑 Token Preview:', token.substring(0, 20) + '...');
+        if (data?.getNotifications) {
+            setNotifications(data.getNotifications.map(mapApiNotification));
         }
-    }, []);
+    }, [data]);
 
     useEffect(() => {
-        const loadNotifications = async () => {
-            console.log('🔵 Starting to load notifications...');
-            console.log('🔵 Current URL:', window.location.href);
-            
-            try {
-                setIsLoading(true);
-                setErrorMessage(null);
-                
-                console.log('🔵 Calling getNotifications API with page=1, limit=50...');
-                const response = await getNotifications(1, 50);
-                
-                console.log('✅ API Response received:', response);
-                console.log('✅ Notifications count:', response.notifications?.length || 0);
-                console.log('✅ Total:', response.total);
-                
-                setNotifications(response.notifications.map(mapApiNotification));
-            } catch (error) {
-                console.error('❌ Error loading notifications:', error);
-                if (error instanceof Error) {
-                    console.error('❌ Error message:', error.message);
-                    console.error('❌ Error stack:', error.stack);
-                }
-                // Check if it's an axios error
-                if ((error as any).response) {
-                    console.error('❌ Response status:', (error as any).response.status);
-                    console.error('❌ Response data:', (error as any).response.data);
-                }
-                setErrorMessage('Unable to load notifications.');
-            } finally {
-                setIsLoading(false);
-                console.log('🔵 Finished loading notifications (isLoading set to false)');
-            }
-        };
-
-        loadNotifications();
-    }, []);
+        if (error) {
+            setErrorMessage('Unable to load notifications.');
+        }
+    }, [error]);
 
     // Use useEffect to handle filtering based on the current filter and notifications state
     useEffect(() => {
-        console.log('🔍 Filter changed to:', filter);
-        console.log('🔍 Total notifications:', notifications.length);
-        
         if (filter === 'all') {
             setFilteredNotifications(notifications);
-            console.log('🔍 Showing all notifications:', notifications.length);
         } else {
             const filtered = notifications.filter(notification => notification.type === filter);
             setFilteredNotifications(filtered);
-            console.log(`🔍 Filtered ${filter} notifications:`, filtered.length);
         }
     }, [filter, notifications]);
 
     const handleFilterChange = (value: 'all' | 'associations' | 'opportunities' | 'events') => {
-        console.log('🎯 Filter button clicked:', value);
         setFilter(value);
     };
 
-    // Mark notification as read based on id
     const markAsRead = async (id: string) => {
-        console.log('📖 Marking notification as read:', id);
         try {
-            await markAsReadApi(id);
+            await markAsReadMutation({
+                variables: { notificationId: id },
+            });
             const updatedNotifications = notifications.map(notification =>
                 notification.id === id
                     ? { ...notification, read: true }
                     : notification
             );
             setNotifications(updatedNotifications);
-            console.log('✅ Notification marked as read');
         } catch (error) {
-            console.error('❌ Error marking as read:', error);
+            console.error('Error marking as read:', error);
             setErrorMessage('Unable to update notifications.');
         }
     };
 
-    // Remove notification based on id
     const removeNotification = async (id: string) => {
-        console.log('🗑️ Removing notification:', id);
         try {
-            await deleteNotification(id);
+            await deleteNotificationMutation({
+                variables: { notificationId: id },
+            });
             const updatedNotifications = notifications.filter(notification => notification.id !== id);
             setNotifications(updatedNotifications);
-            console.log('✅ Notification removed');
         } catch (error) {
-            console.error('❌ Error removing notification:', error);
+            console.error('Error removing notification:', error);
             setErrorMessage('Unable to update notifications.');
         }
     };
 
-    // Mark all as read
     const markAllAsRead = async () => {
-        console.log('📖 Marking all notifications as read');
         try {
-            await markAllAsReadApi();
+            await Promise.all(
+                notifications
+                    .filter(n => !n.read)
+                    .map(n => markAsReadMutation({ variables: { notificationId: n.id } }))
+            );
             const updatedNotifications = notifications.map(notification => ({
                 ...notification,
                 read: true,
             }));
             setNotifications(updatedNotifications);
-            console.log('✅ All notifications marked as read');
         } catch (error) {
-            console.error('❌ Error marking all as read:', error);
+            console.error('Error marking all as read:', error);
             setErrorMessage('Unable to update notifications.');
         }
     };
@@ -194,15 +160,6 @@ export default function Notification() {
     };
 
     const emptyStateMessage = getEmptyStateMessage();
-
-    console.log('🎨 Render state:', {
-        isLoading,
-        errorMessage,
-        emptyStateMessage,
-        notificationsCount: notifications.length,
-        filteredCount: filteredNotifications.length,
-        currentFilter: filter
-    });
 
     return (
         <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4">
@@ -251,7 +208,7 @@ export default function Notification() {
             </div>
         
 
-            {isLoading ? (
+            {loading ? (
                 <div className="text-text-secondary font-medium">
                     Loading...
                 </div>
