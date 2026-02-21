@@ -4,7 +4,7 @@ import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVar
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
-import { LIST_AVAILABLE_COMMUNITIES, REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
+import { DISCOVER_COMMUNITIES, REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import { 
   GET_FEED, 
   ADD_ENGAGEMENT, 
@@ -17,11 +17,29 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { ListCommunitiesData } from '../community/page';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 
 // Type definitions for better type safety
+interface DiscoverCommunitiesData {
+  discoverCommunities: {
+    communities: Array<{
+      id: string;
+      name: string;
+      description?: string;
+      visibility: string;
+      avatarUrl?: string;
+      memberCount?: number;
+      membershipStatus?: string;
+      communityType?: {
+        name: string;
+        isEmbassy: boolean;
+      };
+    }>;
+    total: number;
+  };
+}
+
 interface UserProfile {
   name: string;
   avatar: string | null;
@@ -73,10 +91,11 @@ export default function Home() {
   const tCommon = useTranslations('common');
 
   // Fetch communities
-  const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<ListCommunitiesData>(
-    LIST_AVAILABLE_COMMUNITIES,
+  const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<DiscoverCommunitiesData>(
+    DISCOVER_COMMUNITIES,
     {
       variables: {
+        includeRecommended: true,
         limit: 20,
         offset: 0
       }
@@ -237,7 +256,7 @@ export default function Home() {
     };
   }, [discoverData]);
 
-  const communities = discoverData?.listCommunities?.communities || [];
+  const communities = discoverData?.discoverCommunities?.communities || [];
   const hasCommunities = communities.length > 0;
 
   const posts = feedData?.feed?.posts || [];
@@ -369,7 +388,7 @@ export default function Home() {
                     <CommunityCardVariant2
                       icon={community.avatarUrl}
                       title={community.name}
-                      members={community.memberCount}
+                      members={community?.memberCount || 0}
                       onButtonClick={() => handleJoinCommunity(community.id)}
                       buttonText={
                         community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)

@@ -4,6 +4,45 @@ import { gql } from '@apollo/client';
    DISCOVERY & DETAILS
 ========================= */
 
+export const DISCOVER_COMMUNITIES = gql`
+  query DiscoverCommunities(
+    $communityTypeId: String
+    $country: String
+    $includeNearby: Boolean! = false
+    $includeRecommended: Boolean! = true
+    $includeTrending: Boolean! = false
+    $limit: Int = 20
+    $offset: Int = 0
+    $searchTerm: String
+  ) {
+    discoverCommunities(
+      communityTypeId: $communityTypeId
+      country: $country
+      includeNearby: $includeNearby
+      includeRecommended: $includeRecommended
+      includeTrending: $includeTrending
+      limit: $limit
+      offset: $offset
+      searchTerm: $searchTerm
+    ) {
+      communities {
+        id
+        name
+        description
+        visibility
+        avatarUrl
+        memberCount
+        membershipStatus
+        communityType {
+          name
+          isEmbassy
+        }
+      }
+      total
+    }
+  }
+`;
+
 export const LIST_AVAILABLE_COMMUNITIES = gql`
   query ListAvailableCommunities($limit: Int!, $offset: Int!) {
     listCommunities(limit: $limit, offset: $offset) {
