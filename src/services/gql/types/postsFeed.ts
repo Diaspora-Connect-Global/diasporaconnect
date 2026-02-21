@@ -517,3 +517,13 @@ export interface GetCommentedPostsData {
     posts: Post[];
   };
 }
+
+/**
+ * Response from sharing a post.
+ */
+export interface SharePostData {
+  sharePost: {
+    success: boolean;
+    shareLink: string;
+  };
+}

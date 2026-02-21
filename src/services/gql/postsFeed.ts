@@ -32,6 +32,7 @@ export type {
   GetSavedPostsData,
   GetLikedPostsData,
   GetCommentedPostsData,
+  SharePostData,
 } from './types';
 
 // ============================================================================
@@ -196,6 +197,15 @@ export const ADD_ENGAGEMENT = gql`
   mutation AddEngagement($input: AddEngagementInput!) {
     addEngagement(input: $input) {
       success
+    }
+  }
+`;
+
+export const SHARE_POST = gql`
+  mutation SharePost($postId: String!) {
+    sharePost(postId: $postId) {
+      success
+      shareLink
     }
   }
 `;

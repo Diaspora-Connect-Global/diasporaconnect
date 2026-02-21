@@ -1,5 +1,5 @@
 'use client';
-import { Bookmark, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Copy, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { GoHeartFill } from 'react-icons/go';
@@ -9,8 +9,8 @@ import { UserBadge } from "@/components/custom/userBadge";
 import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
-import { useLazyQuery } from '@apollo/client/react';
-import { GET_POST_COMMENTS, GetPostCommentsData } from '@/services/gql/postsFeed';
+import { useLazyQuery, useMutation } from '@apollo/client/react';
+import { GET_POST_COMMENTS, SHARE_POST, GetPostCommentsData, SharePostData } from '@/services/gql/postsFeed';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
 
@@ -119,6 +119,8 @@ export default function FeedCardWithReply({
         { fetchPolicy: 'cache-and-network' }
     );
 
+    const [sharePostMutation] = useMutation<SharePostData>(SHARE_POST);
+
     useEffect(() => {
         if (commentsQueryData?.postComments) {
             setLoadedComments(commentsQueryData.postComments.map(mapApiComment));
@@ -136,6 +138,9 @@ export default function FeedCardWithReply({
     const commentsData = commentsLoaded ? loadedComments : commentsDataProp;
     const [showImageModal, setShowImageModal] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [showShareDialog, setShowShareDialog] = useState(false);
+    const [shareLink, setShareLink] = useState('');
+    const [copied, setCopied] = useState(false);
 
     const t = useTranslations('actions');
 
@@ -183,14 +188,30 @@ export default function FeedCardWithReply({
         onSave?.();
     };
 
-    const handleShare = () => {
-        // Optimistic update
-        const newSharedState = !isShared;
-        setIsShared(newSharedState);
-        setShareCount((c) => newSharedState ? c + 1 : c - 1);
-        
-        // Call parent handler (which will trigger API call)
+    const handleShare = async () => {
+        try {
+            const { data } = await sharePostMutation({ variables: { postId } });
+            if (data?.sharePost.shareLink) {
+                setShareLink(data.sharePost.shareLink);
+                setShowShareDialog(true);
+                const newSharedState = !isShared;
+                setIsShared(newSharedState);
+                setShareCount((c) => newSharedState ? c + 1 : c - 1);
+            }
+        } catch (error) {
+            console.error('Share failed:', error);
+        }
         onShare?.();
+    };
+
+    const copyToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText(shareLink);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (error) {
+            console.error('Copy failed:', error);
+        }
     };
 
     const toggleExpand = () => setIsExpanded((v) => !v);
@@ -690,6 +711,36 @@ export default function FeedCardWithReply({
 
             {/* Image Modal */}
             {renderImageModal()}
+
+            {/* Share Dialog */}
+            {showShareDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowShareDialog(false)}>
+                    <div className="bg-surface-default rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-semibold text-text-primary mb-4">{t('sharePost')}</h3>
+                        <div className="flex items-center gap-2 mb-4">
+                            <input
+                                type="text"
+                                value={shareLink}
+                                readOnly
+                                className="flex-1 px-3 py-2 bg-surface-subtle border border-border-subtle rounded-md text-text-primary text-sm"
+                            />
+                            <button
+                                onClick={copyToClipboard}
+                                className="px-4 py-2 bg-surface-brand text-white rounded-md hover:bg-surface-brand-dark transition-colors flex items-center gap-2"
+                            >
+                                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                                {copied ? t('copied') : t('copy')}
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => setShowShareDialog(false)}
+                            className="w-full px-4 py-2 bg-surface-subtle text-text-primary rounded-md hover:bg-surface-tertiary transition-colors"
+                        >
+                            {t('close')}
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

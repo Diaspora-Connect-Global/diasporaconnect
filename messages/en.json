@@ -185,7 +185,11 @@
         "post": "Post",
         "anyone": "Anyone",
         "connections": "Connections",
-        "onlyMe": "Only me"
+        "onlyMe": "Only me",
+        "sharePost": "Share Post",
+        "copy": "Copy",
+        "copied": "Copied!",
+        "close": "Close"
     },
     "createPost": {
         "placeholder": "What's on your mind, {name}?",
