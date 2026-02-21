@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import JoinCommunityCard from "@/components/cards/JoinCommunityCard";
 import { MyCommunityCard } from "@/components/cards/MyCommunityCard";
 import { useTranslations } from 'next-intl';
-import { LIST_AVAILABLE_COMMUNITIES, LIST_MY_JOINED_COMMUNITIES, REQUEST_JOIN_COMMUNITY } from '@/services/gql/community';
+import { DISCOVER_COMMUNITIES, LIST_MY_JOINED_COMMUNITIES, REQUEST_JOIN_COMMUNITY } from '@/services/gql/community';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
@@ -30,8 +30,8 @@ interface ListUserCommunitiesData {
     listUserCommunities: Community[];
 }
 
-export interface ListCommunitiesData {
-    listCommunities: {
+export interface DiscoverCommunitiesData {
+    discoverCommunities: {
         communities: DiscoverCommunity[];
         total: number;
     };
@@ -49,10 +49,11 @@ export default function Community() {
     );
 
     // Fetch available communities to discover
-    const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<ListCommunitiesData>(
-        LIST_AVAILABLE_COMMUNITIES,
+    const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<DiscoverCommunitiesData>(
+        DISCOVER_COMMUNITIES,
         {
             variables: {
+                includeRecommended: true,
                 limit: 20,
                 offset: 0
             }
@@ -119,8 +120,8 @@ export default function Community() {
                     <div className="col-span-full text-center py-8 text-gray-500">
                         Loading communities...
                     </div>
-                ) : discoverData?.listCommunities?.communities?.length ? (
-                    discoverData.listCommunities.communities.map((community) => (
+                ) : discoverData?.discoverCommunities?.communities?.length ? (
+                    discoverData.discoverCommunities.communities.map((community) => (
                         <JoinCommunityCard
                             key={community.id}
                             title={community.name}
