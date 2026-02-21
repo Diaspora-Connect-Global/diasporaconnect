@@ -164,21 +164,21 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
     const [selectedSkills, setSelectedSkills] = useState<Option[]>([]);
 
     // Determine which query to use based on isOwnProfile
-    const isMyProfile = isOwnProfile && userId === "me";
+    const isMyProfile = isOwnProfile;
 
     // GraphQL Queries - Conditionally load based on profile ownership
     const { data: workExpData, loading: workExpLoading, refetch: refetchWorkExp } = useQuery<GetUserWorkExperienceResponse>(
-        isMyProfile ? GET_MY_WORK_EXPERIENCE : GET_USER_WORK_EXPERIENCE,
+        isOwnProfile ? GET_MY_WORK_EXPERIENCE : GET_USER_WORK_EXPERIENCE,
         {
-            variables: isMyProfile ? undefined : { userId },
+            variables: isOwnProfile ? undefined : { userId },
             skip: !userId
         }
     );
     
     const { data: skillsData, loading: skillsLoading, refetch: refetchSkills } = useQuery<GetUserSkillsResponse>(
-        isMyProfile ? GET_MY_SKILLS : GET_USER_SKILLS,
+        isOwnProfile ? GET_MY_SKILLS : GET_USER_SKILLS,
         {
-            variables: isMyProfile ? undefined : { userId },
+            variables: isOwnProfile ? undefined : { userId },
             skip: !userId
         }
     );
@@ -237,7 +237,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
 
     // Add skills handler - only for own profile
     const addSkills = async () => {
-        if (!isMyProfile || selectedSkills.length === 0) return;
+        if (!isOwnProfile || selectedSkills.length === 0) return;
 
         try {
             await addSkillsMutation({
@@ -257,7 +257,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
 
     // Remove skill handler - only for own profile
     const handleRemoveSkill = async (skillId: string) => {
-        if (!isMyProfile) return;
+        if (!isOwnProfile) return;
         
         if (!confirm('Are you sure you want to remove this skill?')) return;
 
@@ -298,17 +298,17 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                                 <span
                                     key={skill.id}
                                     className={`px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium ${
-                                        isMyProfile ? 'cursor-pointer hover:bg-gray-50' : ''
+                                        isOwnProfile ? 'cursor-pointer hover:bg-gray-50' : ''
                                     }`}
-                                    onClick={isMyProfile ? () => handleRemoveSkill(skill.id) : undefined}
-                                    title={isMyProfile ? "Click to remove" : undefined}
+                                    onClick={isOwnProfile ? () => handleRemoveSkill(skill.id) : undefined}
+                                    title={isOwnProfile ? "Click to remove" : undefined}
                                 >
                                     {skill.name}
                                 </span>
                             ))}
                             
                             {/* Only show Add Skill button for own profile */}
-                            {isMyProfile && (
+                            {isOwnProfile && (
                                 <ButtonType3
                                     onClick={() => setShowSkillModal(true)}
                                     className="flex items-center gap-1 px-2 py-1 text-text-brand font-medium text-sm rounded-full transition"
@@ -326,7 +326,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                     <h2 className="font-bold mb-4">{t('title')}</h2>
                     
                     {/* Only show Add Experience button for own profile */}
-                    {isMyProfile && (
+                    {isOwnProfile && (
                         <ButtonType3
                             onClick={() => setShowExperienceModal(true)}
                             className="flex items-center gap-1 mb-6 text-text-brand font-medium text-sm"
@@ -340,7 +340,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                         <WorkExperienceSkeleton />
                     ) : experiences.length === 0 ? (
                         <p className="text-text-secondary text-sm">
-                            {isMyProfile 
+                            {isOwnProfile 
                                 ? 'No work experience added yet.' 
                                 : 'This user has not added any work experience yet.'}
                         </p>
@@ -392,7 +392,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
             </div>
 
             {/* Skill Modal - Only render for own profile */}
-            {isMyProfile && (
+            {isOwnProfile && (
                 <Dialog open={showSkillModal} onOpenChange={handleSkillModalClose}>
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
@@ -431,7 +431,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
             )}
 
             {/* Work Experience Modal - Only render for own profile */}
-            {isMyProfile && (
+            {isOwnProfile && (
                 <AddWorkExperienceModal
                     isOpen={showExperienceModal}
                     onClose={handleExperienceModalClose}
