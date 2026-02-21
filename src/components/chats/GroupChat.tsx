@@ -10,11 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ButtonType3 } from "../custom/button";
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from "@apollo/client/react";
-import { 
-    GET_GROUP, 
-    GET_GROUP_MEMBERS, 
+import {
+    GET_GROUP,
+    GET_GROUP_MEMBERS,
     GET_MY_GROUPS,
-    GetGroupResponse, 
+    GetGroupResponse,
     GetGroupMembersResponse,
     LEAVE_GROUP,
     DELETE_GROUP,
@@ -34,9 +34,10 @@ import { EditGroupModal } from "./modals/EditGroupModal";
 import { ManageMemberModal } from "./modals/ManageMemberModal";
 import { ConfirmationModal } from "../custom/confirmationModal";
 import { AddMembersModal } from "./modals/AddMembersModal";
-import { useAuthStore } from "@/store/useAuthStore";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
+import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
+import { encryptMessage, decryptMessage } from "@/utils/encryption";
 
 interface Reply {
     id: string;
@@ -46,10 +47,6 @@ interface Reply {
     timestamp: string;
     type: 'text' | 'image';
     imageUrl?: string;
-}
-
-interface GroupChatProps {
-    chat: ChatInfo;
 }
 
 export default function GroupChat() {
@@ -75,25 +72,24 @@ export default function GroupChat() {
     // Loading states
     const [isLeavingGroup, setIsLeavingGroup] = useState(false);
     const [isDeletingGroup, setIsDeletingGroup] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
+    const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
-    const { messages, users, setActiveChat } = useChatStore();
+    const { messages, users, setActiveChat, addMessage } = useChatStore();
 
     const chatData = sessionStorage.getItem('activeChat');
     const chat: ChatInfo = chatData ? JSON.parse(chatData) : null;
 
-    // Fetch group details
     const { data: groupData, loading: loadingGroup, refetch: refetchGroup } = useQuery<GetGroupResponse>(GET_GROUP, {
         variables: { groupId: chat.id },
         skip: !chat.id,
     });
 
-    // Fetch group members
     const { data: membersData, loading: loadingMembers, refetch: refetchMembers } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
         variables: { groupId: chat.id, membersLimit: 100, membersOffset: 0 },
         skip: !chat.id,
     });
 
-    // Mutations
     const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
         refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
         awaitRefetchQueries: true,
@@ -105,21 +101,15 @@ export default function GroupChat() {
     });
 
     const [updateGroup] = useMutation<UpdateGroupResponse>(UPDATE_GROUP, {
-        onCompleted: () => {
-            refetchGroup();
-        }
+        onCompleted: () => refetchGroup(),
     });
 
     const [removeMember] = useMutation<RemoveMemberResponse>(REMOVE_MEMBER, {
-        onCompleted: () => {
-            refetchMembers();
-        }
+        onCompleted: () => refetchMembers(),
     });
 
     const [updateMemberRole] = useMutation<UpdateMemberRoleResponse>(UPDATE_MEMBER_ROLE, {
-        onCompleted: () => {
-            refetchMembers();
-        }
+        onCompleted: () => refetchMembers(),
     });
 
     const group = groupData?.getGroup?.group;
@@ -131,9 +121,8 @@ export default function GroupChat() {
     const currentUserMember = groupMembers.find(m => m.userId === currentUserId);
     const isOwner = group?.ownerId === currentUserId;
     const isAdmin = currentUserMember?.role === MemberRole.ADMIN || isOwner;
-     const searchParams = useSearchParams();
+    const searchParams = useSearchParams();
 
-    // Get messages for this conversation
     const conversationMessages = messages.filter(m => m.conversationId === chat.id);
     const chatchosen = sessionStorage.getItem('activeChat');
 
@@ -153,14 +142,65 @@ export default function GroupChat() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [conversationMessages]);
 
-      const handleMBack = () => {
+    // WebSocket connection and message handling
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (!token || !chat?.id) return;
+
+        messageService.connect(token);
+
+        const unsubConnect = messageService.onConnect(() => {
+            console.log('WebSocket connected for chat:', chat.id);
+            setIsConnected(true);
+        });
+
+        const unsubDisconnect = messageService.onDisconnect(() => {
+            console.log('WebSocket disconnected');
+            setIsConnected(false);
+        });
+
+        const unsubMessage = messageService.onMessage((wsMessage: WSMessage) => {
+            console.log('Received WebSocket message:', wsMessage);
+            if (wsMessage.conversationId === chat.id) {
+                const decryptedContent = decryptMessage(wsMessage.encryptedData);
+                addMessage({
+                    id: wsMessage.id,
+                    conversationId: wsMessage.conversationId,
+                    senderId: wsMessage.senderId,
+                    text: decryptedContent,
+                    timestamp: wsMessage.createdAt,
+                    type: wsMessage.type,
+                    metadata: wsMessage.metadata,
+                    mentions: wsMessage.mentions,
+                    replyToId: wsMessage.replyToId
+                });
+            }
+        });
+
+        const unsubPresence = messageService.onPresenceUpdate((data) => {
+            console.log('Presence update:', data);
+            setOnlineUsers(prev => {
+                const newSet = new Set(prev);
+                data.isOnline ? newSet.add(data.userId) : newSet.delete(data.userId);
+                return newSet;
+            });
+        });
+
+        return () => {
+            unsubConnect();
+            unsubDisconnect();
+            unsubMessage();
+            unsubPresence();
+            messageService.disconnect();
+            setIsConnected(false);
+        };
+    }, [chat?.id, addMessage]);
+
+    const handleMBack = () => {
         setActiveChat(null);
         sessionStorage.removeItem('activeChat');
-        
-        // Remove chat type param but keep tab param
         const params = new URLSearchParams(searchParams.toString());
         params.delete('ct');
-        
         const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
         router.push(newUrl, { scroll: false });
     };
@@ -197,22 +237,45 @@ export default function GroupChat() {
     };
 
     const handleSendMessage = (messageText: string, image?: string) => {
-        if (messageText.trim() || image) {
-            if (replyingTo) {
-                const newReply: Reply = {
-                    id: Date.now().toString(),
-                    messageId: replyingTo,
-                    senderId: 'current-user',
-                    text: messageText,
-                    timestamp: new Date().toISOString(),
-                    type: image ? 'image' : 'text',
-                    imageUrl: image
-                };
-                setReplies(prev => [...prev, newReply]);
-                setReplyingTo(null);
-            } else {
-                console.log("Sending message to group chat:", messageText, image);
-            }
+        if (!messageText.trim() && !image) return;
+        if ( !currentUserId) {
+            console.warn(`Cannot send: No userId ${currentUserId}`);
+            return;
+        }
+        if (!isConnected ) {
+            console.warn(`Cannot send: connection status  ${isConnected}`);
+            return;
+        }
+
+        if (replyingTo) {
+            const newReply: Reply = {
+                id: Date.now().toString(),
+                messageId: replyingTo,
+                senderId: currentUserId,
+                text: messageText,
+                timestamp: new Date().toISOString(),
+                type: image ? 'image' : 'text',
+                imageUrl: image
+            };
+            setReplies(prev => [...prev, newReply]);
+            setReplyingTo(null);
+        } else {
+            const encryptedData = encryptMessage(messageText);
+            const payload: SendMessagePayload = {
+                conversationId: chat.id,
+                type: image ? 'image' : 'text',
+                encryptedData,
+                ...(image && {
+                    metadata: {
+                        fileName: 'image.jpg',
+                        fileSize: 0,
+                        mimeType: 'image/jpeg',
+                        gcsPath: image
+                    }
+                }),
+                ...(replyingTo && { replyToId: replyingTo })
+            };
+            messageService.sendMessage(payload);
         }
     };
 
@@ -240,16 +303,10 @@ export default function GroupChat() {
         setRepliesSidebarOpen(false);
     };
 
-    /**
-     * Handle leave group action
-     */
     const handleLeaveGroup = async () => {
         setIsLeavingGroup(true);
         try {
-            const { data } = await leaveGroup({
-                variables: { leaveGroupId: chat.id }
-            });
-
+            const { data } = await leaveGroup({ variables: { leaveGroupId: chat.id } });
             if (data?.leaveGroup.success) {
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
@@ -265,16 +322,10 @@ export default function GroupChat() {
         }
     };
 
-    /**
-     * Handle delete group action
-     */
     const handleDeleteGroup = async () => {
         setIsDeletingGroup(true);
         try {
-            const { data } = await deleteGroup({
-                variables: { deleteGroupId: chat.id }
-            });
-
+            const { data } = await deleteGroup({ variables: { deleteGroupId: chat.id } });
             if (data?.deleteGroup.success) {
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
@@ -290,25 +341,16 @@ export default function GroupChat() {
         }
     };
 
-    /**
-     * Handle edit group action
-     */
-    const handleEditGroup = async (updates: { 
-        name?: string; 
-        description?: string; 
-        avatarUrl?: string; 
-        privacy?: GroupPrivacy 
+    const handleEditGroup = async (updates: {
+        name?: string;
+        description?: string;
+        avatarUrl?: string;
+        privacy?: GroupPrivacy
     }) => {
         try {
             const { data } = await updateGroup({
-                variables: {
-                    updateInput: {
-                        groupId: chat.id,
-                        ...updates
-                    }
-                }
+                variables: { updateInput: { groupId: chat.id, ...updates } }
             });
-
             if (data?.updateGroup.success) {
                 setShowEditModal(false);
             } else {
@@ -319,9 +361,6 @@ export default function GroupChat() {
         }
     };
 
-    /**
-     * Handle member click for management
-     */
     const handleMemberClick = (member: any) => {
         if (isAdmin && member.userId !== currentUserId) {
             setSelectedMember(member);
@@ -329,20 +368,11 @@ export default function GroupChat() {
         }
     };
 
-    /**
-     * Handle remove member
-     */
     const handleRemoveMember = async (userId: string) => {
         try {
             const { data } = await removeMember({
-                variables: {
-                    removeInput: {
-                        groupId: chat.id,
-                        userId
-                    }
-                }
+                variables: { removeInput: { groupId: chat.id, userId } }
             });
-
             if (data?.removeMember.success) {
                 setShowManageMemberModal(false);
                 setSelectedMember(null);
@@ -354,21 +384,11 @@ export default function GroupChat() {
         }
     };
 
-    /**
-     * Handle update member role
-     */
     const handleUpdateMemberRole = async (userId: string, role: MemberRole) => {
         try {
             const { data } = await updateMemberRole({
-                variables: {
-                    roleInput: {
-                        groupId: chat.id,
-                        userId,
-                        role
-                    }
-                }
+                variables: { roleInput: { groupId: chat.id, userId, role } }
             });
-
             if (data?.updateMemberRole.success) {
                 setShowManageMemberModal(false);
                 setSelectedMember(null);
@@ -396,26 +416,22 @@ export default function GroupChat() {
         );
     }
 
-  
-
     return (
         <>
             <div className="flex flex-row h-full space-x-0 md:space-x-2">
 
-
-                
                 {/* Main Chat Area */}
                 <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'}`}>
-                    {/* Group Header - Hidden on mobile */}
-                    <div className=" md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
+                    {/* Group Header */}
+                    <div className="md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                         <div className="flex items-center space-x-3">
-                            <button 
-                        onClick={handleMBack}
-                        className="p-2 hover:bg-surface-hover rounded-lg transition-colors md:hidden"
-                        aria-label={tCommon('backToChats')}
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
+                            <button
+                                onClick={handleMBack}
+                                className="p-2 hover:bg-surface-hover rounded-lg transition-colors md:hidden"
+                                aria-label={tCommon('backToChats')}
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
                             <div className="relative">
                                 <Avatar className="w-12 h-12">
                                     <AvatarImage src={group.avatarUrl || chat.avatar} alt="avatar" />
@@ -424,7 +440,15 @@ export default function GroupChat() {
                             </div>
                             <div>
                                 <h2 className="font-semibold text-text-primary">{group.name}</h2>
-                                <p className="text-sm text-text-secondary">{t('memberCount', { count: group.memberCount })}</p>
+                                <div className="flex items-center space-x-2">
+                                    <p className="text-sm text-text-secondary">{t('memberCount', { count: group.memberCount })}</p>
+                                    {isConnected && (
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            <span className="text-xs text-green-600">Online</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <button onClick={handleSideBarToggle}>
@@ -432,7 +456,7 @@ export default function GroupChat() {
                         </button>
                     </div>
 
-                    {/* Mobile Info Button - Floating */}
+                    {/* Mobile Info Button */}
                     <button
                         onClick={handleSideBarToggle}
                         className="md:hidden fixed top-20 right-4 z-10 p-2 bg-surface-brand rounded-full shadow-lg"
@@ -453,12 +477,12 @@ export default function GroupChat() {
                                 return (
                                     <div
                                         key={index}
-                                        className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
+                                        className={`flex ${message.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
+                                        <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === currentUserId ? 'ml-auto' : ''}`}>
                                             {message.type === 'image' && (message as any).imageUrl ? (
                                                 <div className="mb-2">
-                                                    {message.senderId !== 'current-user' && (
+                                                    {message.senderId !== currentUserId && (
                                                         <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
                                                             {getSenderName(message.senderId)}
                                                         </p>
@@ -476,12 +500,13 @@ export default function GroupChat() {
                                                 </div>
                                             ) : (
                                                 <div
-                                                    className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${message.senderId === 'current-user'
+                                                    className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
+                                                        message.senderId === currentUserId
                                                             ? 'bg-text-brand text-text-white'
                                                             : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                                        }`}
+                                                    }`}
                                                 >
-                                                    {message.senderId !== 'current-user' && (
+                                                    {message.senderId !== currentUserId && (
                                                         <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
                                                             {getSenderName(message.senderId)}
                                                         </p>
@@ -522,7 +547,7 @@ export default function GroupChat() {
                                 onSendMessage={handleSendMessage}
                                 placeholder={t('message', { name: group.name })}
                                 conversationId={chat.id}
-                                senderId="current-user"
+                                senderId={currentUserId ?? 'current-user'}
                             />
                         </div>
                     )}
@@ -569,7 +594,7 @@ export default function GroupChat() {
 
                                 {isAdmin && (
                                     <div className="flex-shrink-0 flex items-center justify-center mb-6">
-                                        <ButtonType3 
+                                        <ButtonType3
                                             className="text-sm"
                                             onClick={() => setShowEditModal(true)}
                                         >
@@ -584,7 +609,7 @@ export default function GroupChat() {
                                             {t('members')} ({groupMembersCount})
                                         </h5>
                                         {isAdmin && (
-                                            <ButtonType3 
+                                            <ButtonType3
                                                 className="text-xs py-1 px-2"
                                                 onClick={() => setShowAddMembersModal(true)}
                                             >
@@ -594,11 +619,11 @@ export default function GroupChat() {
                                     </div>
                                     <div className="space-y-2 overflow-y-auto">
                                         {groupMembers.map((member) => (
-                                            <div 
-                                                key={member.id} 
+                                            <div
+                                                key={member.id}
                                                 className={`flex items-center space-x-3 p-2 rounded-lg ${
-                                                    isAdmin && member.userId !== currentUserId 
-                                                        ? 'hover:bg-surface-hover cursor-pointer' 
+                                                    isAdmin && member.userId !== currentUserId
+                                                        ? 'hover:bg-surface-hover cursor-pointer'
                                                         : ''
                                                 }`}
                                                 onClick={() => handleMemberClick(member)}
@@ -722,7 +747,7 @@ export default function GroupChat() {
                                     onSendMessage={handleSendMessage}
                                     placeholder={t('writeReply')}
                                     conversationId={chat.id}
-                                    senderId="current-user"
+                                    senderId={currentUserId ?? 'current-user'}
                                 />
                             </div>
                         </div>
@@ -731,68 +756,65 @@ export default function GroupChat() {
             </div>
 
             {/* Confirmation Modals */}
-
             <ConfirmationModal
-open={showLeaveModal}
-onCancel={() => setShowLeaveModal(false)}
-onConfirm={handleLeaveGroup}
-title={t('leaveGroup')}
-description={t('leaveGroupConfirmation', { groupName: group.name })}
-confirmText={t('leave')}
-cancelText={t('cancel')}
-confirmVariant="destructive"
-isLoading={isLeavingGroup}
-/>
-<ConfirmationModal
-            open={showDeleteModal}
-            onCancel={() => setShowDeleteModal(false)}
-            onConfirm={handleDeleteGroup}
-            title={t('deleteGroup')}
-            description={t('deleteGroupConfirmation', { groupName: group.name })}
-            confirmText={t('delete')}
-            cancelText={t('cancel')}
-            confirmVariant="destructive"
-            isLoading={isDeletingGroup}
-        />
-
-        {/* Edit Group Modal */}
-        {showEditModal && group && (
-            <EditGroupModal
-                isOpen={showEditModal}
-                onClose={() => setShowEditModal(false)}
-                onSave={handleEditGroup}
-                initialData={{
-                    name: group.name,
-                    description: group.description || '',
-                    avatarUrl: group.avatarUrl || '',
-                    privacy: group.privacy
-                }}
+                open={showLeaveModal}
+                onCancel={() => setShowLeaveModal(false)}
+                onConfirm={handleLeaveGroup}
+                title={t('leaveGroup')}
+                description={t('leaveGroupConfirmation', { groupName: group.name })}
+                confirmText={t('leave')}
+                cancelText={t('cancel')}
+                confirmVariant="destructive"
+                isLoading={isLeavingGroup}
             />
-        )}
+            <ConfirmationModal
+                open={showDeleteModal}
+                onCancel={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteGroup}
+                title={t('deleteGroup')}
+                description={t('deleteGroupConfirmation', { groupName: group.name })}
+                confirmText={t('delete')}
+                cancelText={t('cancel')}
+                confirmVariant="destructive"
+                isLoading={isDeletingGroup}
+            />
 
-        {/* Add Members Modal */}
-        {showAddMembersModal && (
-            <AddMembersModal
+            {showEditModal && group && (
+                <EditGroupModal
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    onSave={handleEditGroup}
+                    initialData={{
+                        name: group.name,
+                        description: group.description || '',
+                        avatarUrl: group.avatarUrl || '',
+                        privacy: group.privacy
+                    }}
+                />
+            )}
+
+            {showAddMembersModal && (
+                <AddMembersModal
                     isOpen={showAddMembersModal}
                     onClose={() => setShowAddMembersModal(false)}
                     groupId={chat.id}
-                    onMembersAdded={refetchMembers}             />
-        )}
+                    onMembersAdded={refetchMembers}
+                />
+            )}
 
-        {/* Manage Member Modal */}
-        {showManageMemberModal && selectedMember && (
-            <ManageMemberModal
-                isOpen={showManageMemberModal}
-                onClose={() => {
-                    setShowManageMemberModal(false);
-                    setSelectedMember(null);
-                }}
-                member={selectedMember}
-                onRemove={() => handleRemoveMember(selectedMember.userId)}
-                onUpdateRole={(role) => handleUpdateMemberRole(selectedMember.userId, role)}
-                isOwner={isOwner}
-            />
-        )}
-    </>
-);
+            {showManageMemberModal && selectedMember && (
+                <ManageMemberModal
+                    isOpen={showManageMemberModal}
+                    onClose={() => {
+                        setShowManageMemberModal(false);
+                        setSelectedMember(null);
+                    }}
+                    member={selectedMember}
+                    onRemove={() => handleRemoveMember(selectedMember.userId)}
+                    onUpdateRole={(role) => handleUpdateMemberRole(selectedMember.userId, role)}
+                    isOwner={isOwner}
+                />
+            )}
+        </>
+    );
 }

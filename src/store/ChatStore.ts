@@ -23,7 +23,7 @@ interface ChatStore {
   setGroups: (groups: Group[]) => void;
   
   // New actions for enhanced functionality
-  sendMessage: (conversationId: string, text: string, senderId?: string, type?: 'text' | 'image' | 'file') => void;
+  sendMessage: (conversationId: string, text: string, senderId?: string, type?: 'text' | 'image' | 'file' | 'video' | 'audio') => void;
   markAsRead: (conversationId: string, userId?: string) => void;
   createConversation: (type: 'direct' | 'group', participants: string[], groupInfo?: Partial<Group>) => string;
   deleteMessage: (messageId: string) => void;
@@ -115,7 +115,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   // Enhanced actions
 
   // Send a new message with automatic handling
-  sendMessage: (conversationId: string, text: string, senderId: string = 'current-user', type: 'text' | 'image' | 'file' = 'text') => {
+  sendMessage: (conversationId: string, text: string, senderId: string = 'current-user', type: 'text' | 'image' | 'file' | 'video' | 'audio' = 'text') => {
     const { addMessage, updateConversation, updatePreference, conversations, preferences } = get();
     
     // Create new message

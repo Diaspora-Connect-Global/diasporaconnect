@@ -15,10 +15,21 @@ export interface Message {
   conversationId: string;
   senderId: string;
   text: string;
-  type: 'text' | 'image' | 'file';
+  type: 'text' | 'image' | 'file' | 'video' | 'audio';
   timestamp: string;
   status?: 'sent' | 'delivered' | 'read';
-  imageUrl?:string
+  imageUrl?: string;
+  metadata?: {
+    fileId?: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    gcsPath: string;
+    width?: number;
+    height?: number;
+  };
+  mentions?: string[];
+  replyToId?: string;
 }
 
 export interface MessageWithSender extends Message {

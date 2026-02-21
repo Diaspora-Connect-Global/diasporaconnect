@@ -160,18 +160,22 @@ export default function CreatePostForm({
           return c;
         });
 
+        // Generate object key
+        const objectKey = `posts/${Date.now()}-${fp.file.name}`;
+
         // 1. Get pre-signed URL
         const { data } = await requestUploadUrl({
           variables: {
             fileName: fp.file.name,
+            fileType: fp.file.type.startsWith('image/') ? 'IMAGE' : 'FILE',
             contentType: fp.file.type,
-            fileSize: fp.file.size,
+            vendorId: user?.userId || 'anonymous',
           },
         });
 
         if (!data?.requestUploadUrl) throw new Error('Failed to get upload URL');
 
-        const { uploadUrl, objectKey } = data.requestUploadUrl;
+        const { uploadUrl } = data.requestUploadUrl;
 
         // 2. PUT file to pre-signed URL
         await fetch(uploadUrl, {
@@ -202,7 +206,7 @@ export default function CreatePostForm({
         return null;
       }
     },
-    [requestUploadUrl],
+    [requestUploadUrl, user?.userId],
   );
 
   /* — submit post — */

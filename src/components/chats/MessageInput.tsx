@@ -100,11 +100,8 @@ export function MessageInput({
 
     const handleSendMessage = () => {
         if ((newMessage.trim() || imagePreview) && !disabled) {
-            // Call the original onSendMessage prop
+            // Only call the original onSendMessage prop - let the parent handle the logic
             onSendMessage(newMessage, imagePreview || undefined);
-            
-            // Update mock data
-            updateMockData(newMessage, imagePreview || undefined);
             
             // Reset state
             setNewMessage('');
