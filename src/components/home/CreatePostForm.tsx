@@ -160,8 +160,6 @@ export default function CreatePostForm({
           return c;
         });
 
-        // Generate object key
-        const objectKey = `posts/${Date.now()}-${fp.file.name}`;
 
         // 1. Get pre-signed URL
         const { data } = await requestUploadUrl({
