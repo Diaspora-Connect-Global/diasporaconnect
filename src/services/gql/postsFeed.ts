@@ -180,6 +180,7 @@ export const REQUEST_UPLOAD_URL = gql`
   mutation RequestUploadUrl($fileName: String!, $fileType: String!, $contentType: String!, $vendorId: String!) {
     requestUploadUrl(fileName: $fileName, fileType: $fileType, contentType: $contentType, vendorId: $vendorId) {
       uploadUrl
+      objectKey
     }
   }
 `;
