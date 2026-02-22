@@ -160,10 +160,7 @@ export default function CreatePostForm({
           return c;
         });
 
-        // Generate object key
-        const objectKey = `posts/${Date.now()}-${fp.file.name}`;
-
-        // 1. Get pre-signed URL
+         // 1. Get pre-signed URL and object key from backend
         const { data } = await requestUploadUrl({
           variables: {
             fileName: fp.file.name,
@@ -175,7 +172,8 @@ export default function CreatePostForm({
 
         if (!data?.requestUploadUrl) throw new Error('Failed to get upload URL');
 
-        const { uploadUrl } = data.requestUploadUrl;
+        const { uploadUrl, objectKey } = data.requestUploadUrl;
+
 
         // 2. PUT file to pre-signed URL
         await fetch(uploadUrl, {
