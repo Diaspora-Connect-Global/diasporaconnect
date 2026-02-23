@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Header from "@/components/custom/header";
 import LoadingScreen from "@/components/custom/LoadingScreen";
@@ -14,20 +14,25 @@ export default function MainLayout({
   const router = useRouter();
   const pathname = usePathname();
   const hasRedirectedRef = useRef(false);
+  const [mounted, setMounted] = useState(false);
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
 
+  // Wait for client-side hydration before rendering auth-dependent UI
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Redirect to signin if not authenticated
   useEffect(() => {
-    if (!isAuthenticated  && !hasRedirectedRef.current) {
+    if (mounted && !isAuthenticated && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
       router.replace("/signin");
     }
-  }, [isAuthenticated, router]);
+  }, [mounted, isAuthenticated, router]);
 
-  // Show loading while checking auth
-  if (!isAuthenticated) {
+  // Show loading until hydrated and authenticated
+  if (!mounted || !isAuthenticated) {
     return <LoadingScreen />;
   }
 

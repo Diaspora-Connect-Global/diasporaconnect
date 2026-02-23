@@ -2,12 +2,10 @@
 "use client"
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { useChatStore } from "@/store/ChatStore";
 import DirectMessageChat from "@/components/chats/DirectMessageChat";
 import GroupChat from "@/components/chats/GroupChat";
 import { EmptyMessage } from "@/components/chats/EmptyMessage";
-import { mockDirectMessages, mockGroups } from "@/data/chats";
 
 export interface ChatInfo {
     id: string;
@@ -50,15 +48,21 @@ export default function Chat() {
     // Sync activeChat with URL parameters and sessionStorage
     useEffect(() => {
         const chatchosen = sessionStorage.getItem('activeChat');
-        
+
         if (chatTypeFromUrl && chatchosen) {
-            const chatchosenParsed = JSON.parse(chatchosen);
-            
-            // Only update if URL param matches sessionStorage type
-            if (chatchosenParsed.type === chatTypeFromUrl) {
-                if (!activeChat || activeChat.id !== chatchosenParsed.id) {
-                    setActiveChat(chatchosenParsed);
+            try {
+                const chatchosenParsed = JSON.parse(chatchosen);
+
+                // Only update if URL param matches sessionStorage type
+                if (chatchosenParsed.type === chatTypeFromUrl) {
+                    if (!activeChat || activeChat.id !== chatchosenParsed.id) {
+                        setActiveChat(chatchosenParsed);
+                    }
                 }
+            } catch (error) {
+                console.error('Failed to parse activeChat from sessionStorage:', error);
+                // Clear corrupted data
+                sessionStorage.removeItem('activeChat');
             }
         } else if (!chatTypeFromUrl && !chatchosen) {
             // Clear active chat if no params and no session storage
@@ -70,12 +74,17 @@ export default function Chat() {
 
     useEffect(() => {
         if (activeChat) {
-            const allChats = [...mockDirectMessages, ...mockGroups];
-            const chat = allChats.find(c => c.id === activeChat.id && c.type === activeChat.type);
-
-            if (chat) {
-                setChatInfo(chat);
-            }
+            // Build chat info from the activeChat data
+            // For real API conversations, the id is the user/group ID
+            setChatInfo({
+                id: activeChat.id,
+                name: activeChat.id, // Will be resolved by child components
+                type: activeChat.type,
+                lastMessage: '',
+                lastMessageTime: '',
+                unread: 0,
+                avatar: '',
+            });
         } else {
             setChatInfo({
                 name: "",

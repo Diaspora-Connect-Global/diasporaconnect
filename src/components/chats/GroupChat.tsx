@@ -36,8 +36,12 @@ import { ConfirmationModal } from "../custom/confirmationModal";
 import { AddMembersModal } from "./modals/AddMembersModal";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
-import { encryptMessage, decryptMessage } from "@/utils/encryption";
+import { useMutation as useGqlMutation } from "@apollo/client/react";
+import { CREATE_CONVERSATION, SEND_MESSAGE } from "@/services/gql/messaging";
+import type { CreateConversationData, SendMessageData } from "@/services/gql/types/messaging";
+import { ApiMessage } from "@/store/ChatStore";
 
 interface Reply {
     id: string;
@@ -75,19 +79,34 @@ export default function GroupChat() {
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
-    const { messages, users, setActiveChat, addMessage } = useChatStore();
+    const { messages, users, setActiveChat, addMessage, addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation } = useChatStore();
+
+    const tokens = useAuthStore((state) => state.tokens);
+    const sessionToken = tokens?.accessToken; // Use accessToken for WebSocket (JWT)
+
+    const [conversationId, setConversationId] = useState<string | null>(null);
+
+    const [createConversationMutation] = useGqlMutation<CreateConversationData>(CREATE_CONVERSATION);
+    const [sendMessageMutation] = useGqlMutation<SendMessageData>(SEND_MESSAGE);
 
     const chatData = sessionStorage.getItem('activeChat');
-    const chat: ChatInfo = chatData ? JSON.parse(chatData) : null;
+    let chat: ChatInfo | null = null;
+
+    try {
+        chat = chatData ? JSON.parse(chatData) : null;
+    } catch (error) {
+        console.error('Failed to parse activeChat in GroupChat:', error);
+        sessionStorage.removeItem('activeChat');
+    }
 
     const { data: groupData, loading: loadingGroup, refetch: refetchGroup } = useQuery<GetGroupResponse>(GET_GROUP, {
-        variables: { groupId: chat.id },
-        skip: !chat.id,
+        variables: { groupId: chat?.id || '' },
+        skip: !chat?.id,
     });
 
     const { data: membersData, loading: loadingMembers, refetch: refetchMembers } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
-        variables: { groupId: chat.id, membersLimit: 100, membersOffset: 0 },
-        skip: !chat.id,
+        variables: { groupId: chat?.id || '', membersLimit: 100, membersOffset: 0 },
+        skip: !chat?.id,
     });
 
     const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
@@ -123,7 +142,7 @@ export default function GroupChat() {
     const isAdmin = currentUserMember?.role === MemberRole.ADMIN || isOwner;
     const searchParams = useSearchParams();
 
-    const conversationMessages = messages.filter(m => m.conversationId === chat.id);
+    const apiMessages = getApiMessagesByConversation(conversationId || '');
     const chatchosen = sessionStorage.getItem('activeChat');
 
     useEffect(() => {
@@ -140,45 +159,88 @@ export default function GroupChat() {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [conversationMessages]);
+    }, [apiMessages]);
+
+    // Create or retrieve group conversation
+    useEffect(() => {
+        if (!chat?.id || !currentUserId || !groupMembers.length) return;
+
+        const existing = getRealConversation(chat.id);
+        if (existing) {
+            setConversationId(existing.conversationId);
+            return;
+        }
+
+        const initGroupConversation = async () => {
+            try {
+                const memberIds = groupMembers.map(m => m.userId).filter(id => id !== currentUserId);
+                const { data } = await createConversationMutation({
+                    variables: {
+                        type: 'GROUP',
+                        participantIds: memberIds,
+                        groupId: chat.id,
+                    },
+                });
+
+                if (data?.createConversation) {
+                    const convId = data.createConversation;
+                    setConversationId(convId);
+                    setRealConversation(chat.id, {
+                        conversationId: convId,
+                        type: 'GROUP',
+                        participantIds: [currentUserId, ...memberIds],
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to create group conversation:', error);
+            }
+        };
+
+        initGroupConversation();
+    }, [chat?.id, currentUserId, groupMembers, getRealConversation, setRealConversation, createConversationMutation]);
 
     // WebSocket connection and message handling
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (!token || !chat?.id) return;
+        if (!sessionToken || !conversationId) return;
 
-        messageService.connect(token);
+        messageService.connect(sessionToken);
 
         const unsubConnect = messageService.onConnect(() => {
-            console.log('WebSocket connected for chat:', chat.id);
             setIsConnected(true);
         });
 
         const unsubDisconnect = messageService.onDisconnect(() => {
-            console.log('WebSocket disconnected');
             setIsConnected(false);
         });
 
         const unsubMessage = messageService.onMessage((wsMessage: WSMessage) => {
-            console.log('Received WebSocket message:', wsMessage);
-            if (wsMessage.conversationId === chat.id) {
-                const decryptedContent = decryptMessage(wsMessage.encryptedData);
-                addMessage({
-                    id: wsMessage.id,
+            if (wsMessage.conversationId === conversationId) {
+                // Backend sends encryptedData via WebSocket (notification only)
+                // Actual decrypted content should be fetched via GraphQL
+                // For now, we'll add a placeholder and refetch messages
+                console.log('📨 New message notification received:', wsMessage.messageId);
+
+                // TODO: Fetch message content via GraphQL query
+                // For now, trigger a refetch of conversation messages
+                // or add placeholder message until content is fetched
+
+                // Placeholder implementation - shows notification received
+                const apiMsg: ApiMessage = {
+                    id: wsMessage.messageId,
                     conversationId: wsMessage.conversationId,
                     senderId: wsMessage.senderId,
-                    text: decryptedContent,
-                    timestamp: wsMessage.createdAt,
-                    type: wsMessage.type,
-                    metadata: wsMessage.metadata,
+                    type: (wsMessage.type?.toUpperCase() as ApiMessage['type']) || 'TEXT',
+                    content: '[Loading message...]', // Placeholder until GraphQL fetch
+                    createdAt: wsMessage.timestamp,
                     mentions: wsMessage.mentions,
-                    replyToId: wsMessage.replyToId
-                });
+                    replyToId: wsMessage.replyToId,
+                    status: 'sent',
+                };
+                addApiMessage(apiMsg);
             }
         });
 
         const unsubPresence = messageService.onPresenceUpdate((data) => {
-            console.log('Presence update:', data);
             setOnlineUsers(prev => {
                 const newSet = new Set(prev);
                 data.isOnline ? newSet.add(data.userId) : newSet.delete(data.userId);
@@ -191,10 +253,8 @@ export default function GroupChat() {
             unsubDisconnect();
             unsubMessage();
             unsubPresence();
-            messageService.disconnect();
-            setIsConnected(false);
         };
-    }, [chat?.id, addMessage]);
+    }, [sessionToken, conversationId, addApiMessage]);
 
     const handleMBack = () => {
         setActiveChat(null);
@@ -236,46 +296,101 @@ export default function GroupChat() {
         return users?.find(u => u.id === userId);
     };
 
-    const handleSendMessage = (messageText: string, image?: string) => {
+    const handleSendMessage = async (messageText: string, image?: string) => {
         if (!messageText.trim() && !image) return;
-        if ( !currentUserId) {
-            console.warn(`Cannot send: No userId ${currentUserId}`);
-            return;
-        }
-        if (!isConnected ) {
-            console.warn(`Cannot send: connection status  ${isConnected}`);
+        if (!currentUserId || !conversationId) {
+            console.warn('Cannot send: missing userId or conversationId');
             return;
         }
 
         if (replyingTo) {
-            const newReply: Reply = {
-                id: Date.now().toString(),
-                messageId: replyingTo,
-                senderId: currentUserId,
-                text: messageText,
-                timestamp: new Date().toISOString(),
-                type: image ? 'image' : 'text',
-                imageUrl: image
-            };
-            setReplies(prev => [...prev, newReply]);
+            // Handle reply via GraphQL
+            try {
+                const messageType = image ? 'IMAGE' : 'TEXT';
+                const { data } = await sendMessageMutation({
+                    variables: {
+                        conversationId,
+                        messageType,
+                        content: messageText || 'Image',
+                        replyToId: replyingTo,
+                    },
+                });
+
+                if (data?.sendMessage) {
+                    const sentMsg: ApiMessage = {
+                        id: data.sendMessage,
+                        conversationId,
+                        senderId: currentUserId,
+                        type: messageType,
+                        content: messageText,
+                        createdAt: new Date().toISOString(),
+                        status: 'sent',
+                        replyToId: replyingTo,
+                    };
+                    addApiMessage(sentMsg);
+
+                    // Also add to replies sidebar
+                    const newReply: Reply = {
+                        id: data.sendMessage,
+                        messageId: replyingTo,
+                        senderId: currentUserId,
+                        text: messageText,
+                        timestamp: new Date().toISOString(),
+                        type: image ? 'image' : 'text',
+                        imageUrl: image
+                    };
+                    setReplies(prev => [...prev, newReply]);
+                }
+            } catch (error) {
+                console.error('Failed to send reply:', error);
+            }
             setReplyingTo(null);
         } else {
-            const encryptedData = encryptMessage(messageText);
-            const payload: SendMessagePayload = {
-                conversationId: chat.id,
-                type: image ? 'image' : 'text',
-                encryptedData,
-                ...(image && {
-                    metadata: {
-                        fileName: 'image.jpg',
-                        fileSize: 0,
-                        mimeType: 'image/jpeg',
-                        gcsPath: image
-                    }
-                }),
-                ...(replyingTo && { replyToId: replyingTo })
-            };
-            messageService.sendMessage(payload);
+            // Send via GraphQL mutation
+            try {
+                const messageType = image ? 'IMAGE' : 'TEXT';
+                const { data } = await sendMessageMutation({
+                    variables: {
+                        conversationId,
+                        messageType,
+                        content: messageText || 'Image',
+                    },
+                });
+
+                if (data?.sendMessage) {
+                    const sentMsg: ApiMessage = {
+                        id: data.sendMessage,
+                        conversationId,
+                        senderId: currentUserId,
+                        type: messageType,
+                        content: messageText,
+                        createdAt: new Date().toISOString(),
+                        status: 'sent',
+                    };
+                    addApiMessage(sentMsg);
+                }
+
+                // Also send via WebSocket for real-time delivery
+                if (isConnected) {
+                    const encryptedData = encryptMessage(messageText);
+                    const payload: SendMessagePayload = {
+                        conversationId,
+                        type: image ? 'image' : 'text',
+                        encryptedData,
+                        ...(image && {
+                            metadata: {
+                                fileName: 'image.jpg',
+                                fileSize: 0,
+                                mimeType: 'image/jpeg',
+                                gcsPath: image
+                            }
+                        }),
+                    };
+                    messageService.sendMessage(payload);
+                }
+            } catch (error) {
+                console.error('Failed to send message:', error);
+            }
         }
     };
 
@@ -400,6 +515,14 @@ export default function GroupChat() {
         }
     };
 
+    if (!chat) {
+        return (
+            <div className="flex items-center justify-center h-full text-text-secondary">
+                <p>{t('selectChat')}</p>
+            </div>
+        );
+    }
+
     if (loadingGroup || loadingMembers) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -466,52 +589,52 @@ export default function GroupChat() {
 
                     {/* Messages Area */}
                     <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
-                        {conversationMessages.length === 0 ? (
+                        {apiMessages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-text-secondary">
                                 <MessageCircle className="w-12 h-12 mb-4 opacity-50" />
                                 <p>{t('noMessages')}</p>
                             </div>
                         ) : (
-                            conversationMessages.map((message, index) => {
-                                const replyCount = getReplyCount(message.id);
+                            apiMessages.map((message) => {
+                                const isMe = message.senderId === currentUserId;
                                 return (
                                     <div
-                                        key={index}
-                                        className={`flex ${message.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}
+                                        key={message.id}
+                                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === currentUserId ? 'ml-auto' : ''}`}>
-                                            {message.type === 'image' && (message as any).imageUrl ? (
+                                        <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
+                                            {message.type === 'IMAGE' && message.mediaMetadata?.gcsPath ? (
                                                 <div className="mb-2">
-                                                    {message.senderId !== currentUserId && (
+                                                    {!isMe && (
                                                         <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
                                                             {getSenderName(message.senderId)}
                                                         </p>
                                                     )}
                                                     <Image
-                                                        src={(message as any).imageUrl}
+                                                        src={message.mediaMetadata.gcsPath}
                                                         alt="Shared image"
                                                         width={300}
                                                         height={200}
                                                         className="rounded-2xl max-w-full h-auto"
                                                     />
-                                                    {message.text && (
-                                                        <p className="text-xs sm:text-sm text-text-primary mt-2">{message.text}</p>
+                                                    {message.content && (
+                                                        <p className="text-xs sm:text-sm text-text-primary mt-2">{message.content}</p>
                                                     )}
                                                 </div>
                                             ) : (
                                                 <div
                                                     className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
-                                                        message.senderId === currentUserId
+                                                        isMe
                                                             ? 'bg-text-brand text-text-white'
                                                             : 'bg-surface-success/50 text-text-primary dark:text-text-white'
                                                     }`}
                                                 >
-                                                    {message.senderId !== currentUserId && (
+                                                    {!isMe && (
                                                         <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
                                                             {getSenderName(message.senderId)}
                                                         </p>
                                                     )}
-                                                    {message.text}
+                                                    {message.content}
                                                 </div>
                                             )}
 
@@ -521,15 +644,13 @@ export default function GroupChat() {
                                                     <AvatarFallback>{getSenderName(message.senderId).charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <p className="text-[10px] sm:text-xs text-text-tertiary">
-                                                    {formatChatTimestamp(message.timestamp)}
+                                                    {formatChatTimestamp(message.createdAt)}
                                                 </p>
                                                 <button
-                                                    onClick={() => handleViewReplies(message)}
+                                                    onClick={() => handleViewReplies({ ...message, text: message.content, timestamp: message.createdAt })}
                                                     className="flex items-center space-x-1 text-[10px] sm:text-xs text-text-brand hover:text-text-brand-dark transition-colors"
                                                 >
-                                                    <span>
-                                                        {replyCount > 0 ? `${replyCount} ${t('replies')} | ` : ''}{t('reply')}
-                                                    </span>
+                                                    <span>{t('reply')}</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -546,8 +667,9 @@ export default function GroupChat() {
                             <MessageInput
                                 onSendMessage={handleSendMessage}
                                 placeholder={t('message', { name: group.name })}
-                                conversationId={chat.id}
+                                conversationId={conversationId || chat.id}
                                 senderId={currentUserId ?? 'current-user'}
+                                disabled={!conversationId}
                             />
                         </div>
                     )}

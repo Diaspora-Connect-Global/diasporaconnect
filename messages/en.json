@@ -683,8 +683,8 @@
             "dropPhotoHere": "Drop photo here",
             "chooseHowToMessage": "Choose how you want to message",
             "selectedContacts": "You selected {count} contacts. Would you like to start a group chat or send the message to each person individually?",
-            "sendIndividually": "Send individually"
-            
+            "sendIndividually": "Send individually",
+            "processing": "Processing..."
         },
         "direct": {
             "online": "Online",

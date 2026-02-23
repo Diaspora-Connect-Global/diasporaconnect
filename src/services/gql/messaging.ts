@@ -91,53 +91,46 @@ export const GET_CONVERSATION_DETAILS = gql`
 `;
 
 // ============================================================================
-// MUTATIONS
+// MUTATIONS — Flat arguments matching the actual API
 // ============================================================================
 
+// Returns: String (conversation ID)
 export const CREATE_CONVERSATION = gql`
-  mutation CreateConversation($input: CreateConversationInput!) {
-    createConversation(input: $input) {
-      id
-      type
-      groupId
-      participantIds
-      participantCount
-      isActive
-    }
+  mutation CreateConversation(
+    $type: String!
+    $participantIds: [String!]!
+    $groupId: String
+  ) {
+    createConversation(
+      type: $type
+      participantIds: $participantIds
+      groupId: $groupId
+    )
   }
 `;
 
+// Returns: String (message ID)
 export const SEND_MESSAGE = gql`
-  mutation SendMessage($input: SendMessageInput!) {
-    sendMessage(input: $input) {
-      id
-      conversationId
-      senderId
-      type
-      content
-      mentions
-      replyToId
-      mediaMetadata {
-        fileId
-        fileName
-        fileSize
-        mimeType
-        gcsPath
-        width
-        height
-        duration
-      }
-      isEdited
-      createdAt
-      status
-    }
+  mutation SendMessage(
+    $conversationId: String!
+    $messageType: String!
+    $content: String!
+    $mentions: [String]
+    $replyToId: String
+  ) {
+    sendMessage(
+      conversationId: $conversationId
+      messageType: $messageType
+      content: $content
+      mentions: $mentions
+      replyToId: $replyToId
+    )
   }
 `;
 
+// Returns: Boolean
 export const MARK_MESSAGE_AS_READ = gql`
-  mutation MarkMessageAsRead($messageId: ID!) {
-    markMessageAsRead(messageId: $messageId) {
-      success
-    }
+  mutation MarkMessageAsRead($messageId: String!) {
+    markMessageAsRead(messageId: $messageId)
   }
 `;

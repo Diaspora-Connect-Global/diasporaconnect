@@ -10,6 +10,9 @@ import { StartConversationModal } from "./modals/StartConversationModal";
 import { useTranslations } from 'next-intl';
 import { useQuery } from "@apollo/client/react";
 import { GET_MY_GROUPS } from "@/services/gql/groups";
+import { GET_CONVERSATIONS } from "@/services/gql/messaging";
+import type { GetConversationsData } from "@/services/gql/types/messaging";
+import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
 
 type TabType = 'direct' | 'groups';
@@ -31,12 +34,20 @@ export default function ChatSideBar() {
     const tActions = useTranslations('actions');
     const router = useRouter();
     const searchParams = useSearchParams();
-    
+
     const [searchQuery, setSearchQuery] = useState('');
-    const { activeChat, setActiveChat, conversations, preferences, messages, initializeFromMockData } = useChatStore();
+    const { activeChat, setActiveChat, setRealConversation } = useChatStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'direct' | 'group'>('direct');
     const [directChats, setDirectChats] = useState<ChatItem[]>([]);
+
+    const user = useUserStore((state) => state.user);
+    const currentUserId = user?.userId;
+
+    // Fetch real conversations from API
+    const { data: conversationsData, loading: loadingConversations } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
+        fetchPolicy: 'network-only',
+    });
 
     // Get active tab from URL query param 't', default to 'direct'
     const tabFromUrl = (searchParams.get('t') as TabType) || 'direct';
@@ -50,49 +61,41 @@ export default function ChatSideBar() {
         }
     }, [searchParams]);
 
-    // Initialize store and compute chat lists
+    // Compute direct chats from API data
     useEffect(() => {
-        initializeFromMockData();
-    }, [initializeFromMockData]);
+        if (!conversationsData?.getConversations || !currentUserId) return;
 
-    useEffect(() => {
-        // Compute direct messages from store data
-        const computedDirectChats = computeDirectChats();
-        setDirectChats(computedDirectChats);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [conversations, preferences, messages]);
+        const apiConversations = conversationsData.getConversations;
+        const dmConversations = apiConversations
+            .filter((conv: any) => conv.type === 'DIRECT' && conv.isActive)
+            .map((conv: any) => {
+                // Find the other participant (not the current user)
+                const otherParticipantId = conv.participantIds?.find((id: string) => id !== currentUserId) || '';
 
-    const computeDirectChats = (): ChatItem[] => {
-        return conversations
-            .filter(conv => conv.type === 'direct')
-            .map(conv => {
-                const convMessages = messages.filter(m => m.conversationId === conv.id);
-                const lastMessage = convMessages[convMessages.length - 1];
-                const preference = preferences.find(p => p.conversationId === conv.id && p.userId === 'current-user');
-                
-                const user = useChatStore.getState().users?.find(u => u.id === conv.id) || {
-                    id: conv.id,
-                    name: 'Unknown User',
-                    avatar: 'UU',
-                    status: 'offline' as const,
-                    email: '',
-                    lastSeen: new Date().toISOString()
-                };
+                // Store the real conversation mapping
+                if (otherParticipantId) {
+                    setRealConversation(otherParticipantId, {
+                        conversationId: conv.id,
+                        type: 'DIRECT',
+                        participantIds: conv.participantIds || [],
+                    });
+                }
 
                 return {
-                    id: conv.id,
-                    name: user.name,
+                    id: otherParticipantId || conv.id,
+                    name: otherParticipantId ? `User ${otherParticipantId.substring(0, 8)}` : 'Unknown',
                     type: 'direct' as const,
-                    lastMessage: lastMessage?.text || t('empty.title'),
-                    lastMessageTime: lastMessage?.timestamp || conv.createdAt,
-                    unread: preference?.unreadCount || 0,
-                    online: user.status === 'online',
-                    avatar: user.avatar
+                    lastMessage: conv.lastMessage?.content || t('empty.title'),
+                    lastMessageTime: conv.lastMessage?.createdAt || conv.lastMessageAt || '',
+                    unread: 0,
+                    online: false,
+                    avatar: '',
                 };
             });
-    };
 
-    // Calculate total unread counts
+        setDirectChats(dmConversations);
+    }, [conversationsData, currentUserId, setRealConversation, t]);
+
     const directUnreadCount = directChats.reduce((sum, chat) => sum + chat.unread, 0);
 
     // Filter based on search query
@@ -124,19 +127,9 @@ export default function ChatSideBar() {
     const handleChatClick = (chat: { id: string; type: 'direct' | 'group' }) => {
         setActiveChat(chat);
         sessionStorage.setItem('activeChat', JSON.stringify(chat));
-        
+
         // Update URL with chat type
         updateUrlParams(undefined, chat.type);
-        
-        // Reset unread count when chat is clicked
-        const preference = preferences.find(p => 
-            p.conversationId === chat.id && p.userId === 'current-user'
-        );
-        if (preference && preference.unreadCount > 0) {
-            useChatStore.getState().updatePreference(chat.id, 'current-user', {
-                unreadCount: 0
-            });
-        }
     };
 
     // Handle opening modal with specific type
@@ -211,11 +204,19 @@ export default function ChatSideBar() {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto scrollbar-hide">
                     {activeTab === 'direct' ? (
-                        <DirectMessagesList
-                            chats={filteredDirectMessages}
-                            activeChat={activeChat}
-                            onChatClick={handleChatClick}
-                        />
+                        loadingConversations ? (
+                            <div className="p-2 space-y-1">
+                                {[...Array(5)].map((_, i) => (
+                                    <ChatItemSkeleton key={i} />
+                                ))}
+                            </div>
+                        ) : (
+                            <DirectMessagesList
+                                chats={filteredDirectMessages}
+                                activeChat={activeChat}
+                                onChatClick={handleChatClick}
+                            />
+                        )
                     ) : (
                         <GroupsList
                             searchQuery={searchQuery}

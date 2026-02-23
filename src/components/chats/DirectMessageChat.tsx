@@ -1,35 +1,122 @@
 // ============================================
-// DIRECT MESSAGE CHAT - MOBILE RESPONSIVE (FIXED)
+// DIRECT MESSAGE CHAT - REAL API INTEGRATION
 // ============================================
 // File: components/chats/DirectMessageChat.tsx
 
 import { formatChatTimestamp } from "@/macros/time";
 import { ChevronRight, InfoIcon, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
 import Image from "next/image";
-import { Message, mockUsers } from "@/data/chats";
-import { useChatStore } from "@/store/ChatStore";
+import { useChatStore, ApiMessage } from "@/store/ChatStore";
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useTranslations } from 'next-intl';
+import { useMutation } from "@apollo/client/react";
+import { CREATE_CONVERSATION, SEND_MESSAGE } from "@/services/gql/messaging";
+import type { CreateConversationData, SendMessageData } from "@/services/gql/types/messaging";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useUserStore } from "@/store/useUserStore";
+import { messageService } from "@/services/websocket/messageService";
 
 export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const t = useTranslations('chat.direct');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
+    const [conversationId, setConversationId] = useState<string | null>(null);
+    const [isSending, setIsSending] = useState(false);
 
-    const {
-        addMessage,
-        updateConversation,
-        updatePreference,
-        getMessagesByConversation,
-        initializeFromMockData
-    } = useChatStore();
+    const { addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation } = useChatStore();
 
-    const conversationMessages = getMessagesByConversation(chat.id);
+    const user = useUserStore((state) => state.user);
+    const currentUserId = user?.userId;
+    const tokens = useAuthStore((state) => state.tokens);
+    const sessionToken = tokens?.accessToken; // Use accessToken for WebSocket (JWT)
+
+    const apiMessages = getApiMessagesByConversation(conversationId || '');
+
+    const [createConversation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
+    const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE);
+
+    // Initialize or retrieve conversation
+    useEffect(() => {
+        if (!chat.id || !currentUserId) return;
+
+        const existing = getRealConversation(chat.id);
+        if (existing) {
+            setConversationId(existing.conversationId);
+            return;
+        }
+
+        // Create a new conversation via GraphQL
+        const initConversation = async () => {
+            try {
+                // chat.id is the other user's ID for direct messages
+                const { data } = await createConversation({
+                    variables: {
+                        type: 'DIRECT',
+                        participantIds: [chat.id],
+                    },
+                });
+
+                if (data?.createConversation) {
+                    const convId = data.createConversation;
+                    setConversationId(convId);
+                    setRealConversation(chat.id, {
+                        conversationId: convId,
+                        type: 'DIRECT',
+                        participantIds: [currentUserId, chat.id],
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to create conversation:', error);
+            }
+        };
+
+        initConversation();
+    }, [chat.id, currentUserId, getRealConversation, setRealConversation, createConversation]);
+
+    // WebSocket connection
+    useEffect(() => {
+        if (!sessionToken || !conversationId) return;
+
+        messageService.connect(sessionToken);
+
+        const unsubConnect = messageService.onConnect(() => {
+            setIsConnected(true);
+        });
+
+        const unsubDisconnect = messageService.onDisconnect(() => {
+            setIsConnected(false);
+        });
+
+        const unsubMessage = messageService.onMessage((wsMessage) => {
+            if (wsMessage.conversationId === conversationId) {
+                const decryptedContent = decryptMessage(wsMessage.encryptedData);
+                const apiMsg: ApiMessage = {
+                    id: wsMessage.id,
+                    conversationId: wsMessage.conversationId,
+                    senderId: wsMessage.senderId,
+                    type: (wsMessage.type?.toUpperCase() as ApiMessage['type']) || 'TEXT',
+                    content: decryptedContent,
+                    createdAt: wsMessage.createdAt,
+                    mentions: wsMessage.mentions,
+                    replyToId: wsMessage.replyToId,
+                    status: 'sent',
+                };
+                addApiMessage(apiMsg);
+            }
+        });
+
+        return () => {
+            unsubConnect();
+            unsubDisconnect();
+            unsubMessage();
+        };
+    }, [sessionToken, conversationId, addApiMessage]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -40,53 +127,54 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [conversationMessages]);
+    }, [apiMessages]);
 
-    useEffect(() => {
-        initializeFromMockData();
-    }, [initializeFromMockData]);
+    const handleSendMessage = useCallback(async (messageText: string, image?: string) => {
+        if ((!messageText.trim() && !image) || !conversationId || !currentUserId) return;
 
-    const handleSendMessage = (messageText: string, image?: string) => {
-        if (messageText.trim() || image) {
-            const newMsg: Message = {
-                id: Date.now().toString(),
-                conversationId: chat.id,
-                senderId: 'current-user',
-                text: messageText,
-                type: image ? 'image' as const : 'text' as const,
-                timestamp: new Date().toISOString(),
-                status: 'sent' as const,
-                imageUrl: image,
-            };
+        setIsSending(true);
+        try {
+            // Determine message type
+            const messageType = image ? 'IMAGE' : 'TEXT';
 
-            addMessage(newMsg);
-            updateConversation(chat.id, {
-                updatedAt: new Date().toISOString()
-            });
-            updatePreference(chat.id, 'current-user', {
-                unreadCount: 0,
-                lastReadMessageId: newMsg.id
+            // Send via GraphQL mutation
+            const { data } = await sendMessageMutation({
+                variables: {
+                    conversationId,
+                    messageType,
+                    content: messageText || 'Image',
+                },
             });
 
-            const otherUserPreference = useChatStore.getState().preferences.find(pref =>
-                pref.conversationId === chat.id && pref.userId !== 'current-user'
-            );
-            if (otherUserPreference) {
-                updatePreference(chat.id, otherUserPreference.userId, {
-                    unreadCount: otherUserPreference.unreadCount + 1
+            if (data?.sendMessage) {
+                // Add the sent message to local state immediately
+                const sentMsg: ApiMessage = {
+                    id: data.sendMessage,
+                    conversationId,
+                    senderId: currentUserId,
+                    type: messageType,
+                    content: messageText,
+                    createdAt: new Date().toISOString(),
+                    status: 'sent',
+                };
+                addApiMessage(sentMsg);
+            }
+
+            // Also send via WebSocket for real-time delivery to other participants
+            if (isConnected) {
+                const encrypted = await encryptMessage(messageText, chat.id);
+                messageService.sendMessage({
+                    conversationId,
+                    type: image ? 'image' : 'text',
+                    encryptedData: encrypted,
                 });
             }
+        } catch (error) {
+            console.error('Failed to send message:', error);
+        } finally {
+            setIsSending(false);
         }
-    };
-
-    const getUserInfo = () => {
-        if (chat.type === 'direct') {
-            return mockUsers.find(user => user.id === chat.id);
-        }
-        return null;
-    };
-
-    const userInfo = getUserInfo();
+    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, isConnected]);
 
     return (
         <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
@@ -109,7 +197,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                         <div>
                             <h2 className="font-semibold text-text-primary">{chat.name}</h2>
                             <p className="text-sm text-text-secondary">
-                                {chat.online ? t('online') : t('lastSeen', { time: formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime) })}
+                                {chat.online ? t('online') : t('lastSeen', { time: formatChatTimestamp(chat.lastMessageTime) })}
                             </p>
                         </div>
                     </div>
@@ -131,42 +219,50 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-4">
-                    {conversationMessages.map((message, index) => (
-                        <div
-                            key={index}
-                            className={`flex ${message.senderId === 'current-user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${message.senderId === 'current-user' ? 'ml-auto' : ''}`}>
-                                {message.type === 'image' && message.imageUrl ? (
-                                    <div className="mb-2">
-                                        <Image
-                                            src={message.imageUrl}
-                                            alt="Shared image"
-                                            width={300}
-                                            height={200}
-                                            className="rounded-2xl max-w-full h-auto"
-                                        />
-                                        {message.text && (
-                                            <p className="text-sm text-text-primary mt-2">{message.text}</p>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div
-                                        className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${
-                                            message.senderId === 'current-user'
-                                                ? 'bg-text-brand text-text-white'
-                                                : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                        }`}
-                                    >
-                                        {message.text}
-                                    </div>
-                                )}
-                                <p className="text-xs text-text-tertiary mt-1.5 px-1 text-right">
-                                    {formatChatTimestamp(message.timestamp)}
-                                </p>
-                            </div>
+                    {apiMessages.length === 0 && !conversationId && (
+                        <div className="flex items-center justify-center h-full text-text-secondary">
+                            <p className="text-sm">{t('typeMessage')}</p>
                         </div>
-                    ))}
+                    )}
+                    {apiMessages.map((message) => {
+                        const isMe = message.senderId === currentUserId;
+                        return (
+                            <div
+                                key={message.id}
+                                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                            >
+                                <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
+                                    {message.type === 'IMAGE' && message.mediaMetadata?.gcsPath ? (
+                                        <div className="mb-2">
+                                            <Image
+                                                src={message.mediaMetadata.gcsPath}
+                                                alt="Shared image"
+                                                width={300}
+                                                height={200}
+                                                className="rounded-2xl max-w-full h-auto"
+                                            />
+                                            {message.content && (
+                                                <p className="text-sm text-text-primary mt-2">{message.content}</p>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${
+                                                isMe
+                                                    ? 'bg-text-brand text-text-white'
+                                                    : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                            }`}
+                                        >
+                                            {message.content}
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-text-tertiary mt-1.5 px-1 text-right">
+                                        {formatChatTimestamp(message.createdAt)}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })}
                     <div ref={messagesEndRef} />
                 </div>
 
@@ -175,8 +271,9 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     <MessageInput
                         onSendMessage={handleSendMessage}
                         placeholder={t('typeMessage')}
-                        conversationId={chat.id}
-                        senderId="current-user"
+                        conversationId={conversationId || chat.id}
+                        senderId={currentUserId || 'current-user'}
+                        disabled={isSending || !conversationId}
                     />
                 </div>
             </div>
@@ -224,7 +321,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                         <p className="text-sm text-text-success font-medium">{t('online')}</p>
                                     ) : (
                                         <p className="text-sm text-text-secondary">
-                                            {t('lastSeen', { time: formatChatTimestamp(userInfo?.lastSeen || chat.lastMessageTime) })}
+                                            {t('lastSeen', { time: formatChatTimestamp(chat.lastMessageTime) })}
                                         </p>
                                     )}
                                 </div>

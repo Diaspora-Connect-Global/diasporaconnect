@@ -2,9 +2,33 @@ import { create } from 'zustand';
 import { Message, Conversation, UserConversationPreference, User, Group, GroupMember, mockGroupsData, mockGroupMembers, mockUsers } from '@/data/chats';
 import { mockMessages, mockConversations, mockUserConversationPreferences } from '@/data/chats';
 
+// Real API message type (from GraphQL/WebSocket)
+export interface ApiMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  type: 'TEXT' | 'IMAGE' | 'FILE' | 'VIDEO' | 'AUDIO';
+  content: string;
+  mentions?: string[];
+  replyToId?: string;
+  mediaMetadata?: {
+    fileId: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    gcsPath: string;
+    width?: number;
+    height?: number;
+    duration?: number;
+  };
+  status?: 'sent' | 'delivered' | 'read';
+  createdAt: string;
+}
+
 interface ChatStore {
   // State
   messages: Message[];
+  apiMessages: ApiMessage[];
   conversations: Conversation[];
   preferences: UserConversationPreference[];
   users: User[];
@@ -12,17 +36,28 @@ interface ChatStore {
   groupMembers: GroupMember[];
   activeChat: { id: string; type: 'direct' | 'group' } | null;
 
+  // Real conversation IDs (from API) - maps chatId -> conversation data
+  realConversations: Map<string, { conversationId: string; type: 'DIRECT' | 'GROUP'; participantIds: string[] }>;
+
   // Actions
   setActiveChat: (chat: { id: string; type: 'direct' | 'group' } | null) => void;
   addMessage: (message: Message) => void;
+  addApiMessage: (message: ApiMessage) => void;
+  getApiMessagesByConversation: (conversationId: string) => ApiMessage[];
+  clearApiMessages: (conversationId: string) => void;
+  setApiMessages: (conversationId: string, messages: ApiMessage[]) => void;
   updateConversation: (conversationId: string, updates: Partial<Conversation>) => void;
   updatePreference: (conversationId: string, userId: string, updates: Partial<UserConversationPreference>) => void;
   getMessagesByConversation: (conversationId: string) => Message[];
   initializeFromMockData: () => void;
   setUsers: (users: User[]) => void;
   setGroups: (groups: Group[]) => void;
-  
-  // New actions for enhanced functionality
+
+  // Real conversation management
+  setRealConversation: (chatId: string, data: { conversationId: string; type: 'DIRECT' | 'GROUP'; participantIds: string[] }) => void;
+  getRealConversation: (chatId: string) => { conversationId: string; type: 'DIRECT' | 'GROUP'; participantIds: string[] } | undefined;
+
+  // Enhanced actions
   sendMessage: (conversationId: string, text: string, senderId?: string, type?: 'text' | 'image' | 'file' | 'video' | 'audio') => void;
   markAsRead: (conversationId: string, userId?: string) => void;
   createConversation: (type: 'direct' | 'group', participants: string[], groupInfo?: Partial<Group>) => string;
@@ -36,12 +71,14 @@ interface ChatStore {
 export const useChatStore = create<ChatStore>((set, get) => ({
   // Initial state
   messages: [],
+  apiMessages: [],
   conversations: [],
   preferences: [],
   users: [],
   groups: [],
   groupMembers: [],
   activeChat: null,
+  realConversations: new Map(),
 
   // Basic setters
   setUsers: (users: User[]) => set({ users }),
@@ -60,14 +97,56 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     });
   },
 
-  // Add a new message
+  // Add a new message (mock format)
   addMessage: (message: Message) => {
     set((state) => ({
       messages: [...state.messages, message],
     }));
-
-    // Also add to mockMessages for compatibility
     mockMessages.push(message);
+  },
+
+  // Add a real API message
+  addApiMessage: (message: ApiMessage) => {
+    set((state) => {
+      const exists = state.apiMessages.some(m => m.id === message.id);
+      if (exists) return state;
+      return { apiMessages: [...state.apiMessages, message] };
+    });
+  },
+
+  getApiMessagesByConversation: (conversationId: string) => {
+    const { apiMessages } = get();
+    return apiMessages
+      .filter(m => m.conversationId === conversationId)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  },
+
+  clearApiMessages: (conversationId: string) => {
+    set((state) => ({
+      apiMessages: state.apiMessages.filter(m => m.conversationId !== conversationId),
+    }));
+  },
+
+  setApiMessages: (conversationId: string, messages: ApiMessage[]) => {
+    set((state) => ({
+      apiMessages: [
+        ...state.apiMessages.filter(m => m.conversationId !== conversationId),
+        ...messages,
+      ],
+    }));
+  },
+
+  // Real conversation management
+  setRealConversation: (chatId, data) => {
+    set((state) => {
+      const newMap = new Map(state.realConversations);
+      newMap.set(chatId, data);
+      return { realConversations: newMap };
+    });
+  },
+
+  getRealConversation: (chatId) => {
+    return get().realConversations.get(chatId);
   },
 
   // Update conversation

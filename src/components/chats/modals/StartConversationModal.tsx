@@ -24,11 +24,14 @@ import {
     GroupPrivacy,
     GET_MY_GROUPS,
 } from '@/services/gql/groups';
+import { CREATE_CONVERSATION } from '@/services/gql/messaging';
+import type { CreateConversationData } from '@/services/gql/types/messaging';
 import { GET_MY_CONNECTIONS } from '@/services/gql/connection';
 import { toast } from 'sonner';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
+import { useChatStore } from '@/store/ChatStore';
 
 interface StartConversationModalProps {
     isOpen: boolean;
@@ -53,11 +56,15 @@ export function StartConversationModal({
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const { setRealConversation, setActiveChat } = useChatStore();
+
     // GraphQL mutations
     const [createGroup, { loading: creatingGroup }] = useMutation<CreateGroupResponse>(CREATE_GROUP, {
         refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
         awaitRefetchQueries: true,
     });
+
+    const [createConversationMutation, { loading: creatingConversation }] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
 
     // Query connections for user list
     const { data: connectionsData, loading: loadingConnections } = useQuery<any>(GET_MY_CONNECTIONS, {
@@ -66,73 +73,65 @@ export function StartConversationModal({
         fetchPolicy: 'network-only',
     });
 
-    // Fetch users when modal opens
+    // Fetch users (connections/friends) when modal opens - for both DMs and groups
     useEffect(() => {
-        if (isOpen && currentUserId) {
-            if (type === "group") {
-                // For groups, use connections data from GraphQL
-                if (connectionsData?.getConnections?.connections) {
-                    const connectionUsers = connectionsData.getConnections.connections
-                        .map((conn: any) => {
-                            // Intelligently determine which user is NOT the current user
-                            // If current user is the requester, use receiver; otherwise use requester
-                            const otherUser = conn.requesterId === currentUserId
-                                ? conn.receiver
-                                : conn.requester;
+        if (isOpen && currentUserId && connectionsData?.getConnections?.connections) {
+            const connectionUsers = connectionsData.getConnections.connections
+                .map((conn: any) => {
+                    // Determine which user is NOT the current user
+                    const otherUser = conn.requesterId === currentUserId
+                        ? conn.receiver
+                        : conn.requester;
 
-                            return {
-                                id: otherUser.userId,
-                                name: `${otherUser.firstName} ${otherUser.lastName}`,
-                                email: otherUser.email,
-                                avatarUrl: otherUser.avatarUrl,
-                                sector: otherUser.sector,
-                            };
-                        })
-                        // Filter out any potential duplicates or invalid entries
-                        .filter((user: User, index: number, self: User[]) =>
-                            user.id &&
-                            user.id !== currentUserId && // Ensure we never include ourselves
-                            self.findIndex(u => u.id === user.id) === index // Remove duplicates
-                        );
+                    return {
+                        id: otherUser.userId,
+                        name: `${otherUser.firstName} ${otherUser.lastName}`,
+                        email: otherUser.email,
+                        avatarUrl: otherUser.avatarUrl,
+                        sector: otherUser.sector,
+                    };
+                })
+                .filter((user: User, index: number, self: User[]) =>
+                    user.id &&
+                    user.id !== currentUserId &&
+                    self.findIndex(u => u.id === user.id) === index
+                );
 
-                    setUsers(connectionUsers);
-                }
-            } else {
-                // For direct messages, use mock data or your existing logic
-                fetchUsers();
-            }
+            setUsers(connectionUsers);
         }
     }, [isOpen, connectionsData, type, currentUserId]);
 
-    const fetchUsers = async () => {
-        setIsLoading(true);
-        try {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            // Use mock data for direct messages, excluding current user
-            const filteredMockUsers = mockUsers.filter(u => u.id !== currentUserId);
-            setUsers(filteredMockUsers);
-        } catch (error) {
-            console.error('Failed to fetch users:', error);
-            const filteredMockUsers = mockUsers.filter(u => u.id !== currentUserId);
-            setUsers(filteredMockUsers);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     const startConversation = async (data: ConversationStartData) => {
         try {
-            console.log('Starting conversation with:', data);
-
             if (data.type === 'direct') {
-                // Keep existing direct message logic
-                console.log('Starting direct chat with user:', data.userIds[0]);
-                // window.location.href = `/chat/${conversation.id}`;
+                // Create a real conversation via GraphQL
+                const participantIds = data.userIds;
 
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return { id: 'temp-id', ...data };
+                const { data: result } = await createConversationMutation({
+                    variables: {
+                        type: 'DIRECT',
+                        participantIds,
+                    },
+                });
+
+                if (result?.createConversation) {
+                    const conversationId = result.createConversation;
+
+                    // Store the real conversation mapping
+                    const targetUserId = participantIds[0];
+                    setRealConversation(targetUserId, {
+                        conversationId,
+                        type: 'DIRECT',
+                        participantIds: [currentUserId!, ...participantIds],
+                    });
+
+                    // Set active chat to navigate to it
+                    setActiveChat({ id: targetUserId, type: 'direct' });
+                    sessionStorage.setItem('activeChat', JSON.stringify({ id: targetUserId, type: 'direct' }));
+
+                    toast.success('Conversation started');
+                    return { id: conversationId, ...data };
+                }
             }
         } catch (error) {
             console.error('Error starting conversation:', error);
@@ -258,8 +257,8 @@ export function StartConversationModal({
     };
 
     const isFormValid = selectedUsers.length > 0;
-    const isLoadingUsers = type === "group" ? loadingConnections : isLoading;
-    const isProcessing = creatingGroup;
+    const isLoadingUsers = loadingConnections;
+    const isProcessing = creatingGroup || creatingConversation;
 
     return (
         <>

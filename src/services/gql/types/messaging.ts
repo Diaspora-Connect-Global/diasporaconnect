@@ -93,12 +93,19 @@ export interface GetMessagesInput {
 // RESPONSE TYPES
 // ============================================================================
 
+// API returns a plain string (conversation ID)
 export interface CreateConversationData {
-  createConversation: Conversation;
+  createConversation: string;
 }
 
+// API returns a plain string (message ID)
 export interface SendMessageData {
-  sendMessage: Message;
+  sendMessage: string;
+}
+
+// API returns a boolean
+export interface MarkMessageAsReadData {
+  markMessageAsRead: boolean;
 }
 
 export interface GetMessagesData {
