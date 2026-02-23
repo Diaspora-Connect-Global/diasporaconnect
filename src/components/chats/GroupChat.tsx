@@ -39,8 +39,8 @@ import { useUserStore } from "@/store/useUserStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData } from "@/services/gql/types/messaging";
+import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES } from "@/services/gql/messaging";
+import type { CreateConversationData, SendMessageData, GetMessagesData } from "@/services/gql/types/messaging";
 import { ApiMessage } from "@/store/ChatStore";
 
 interface Reply {
@@ -79,7 +79,7 @@ export default function GroupChat() {
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
-    const { messages, users, setActiveChat, addMessage, addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation } = useChatStore();
+    const { messages, users, setActiveChat, addMessage, addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
 
     const tokens = useAuthStore((state) => state.tokens);
     const sessionToken = tokens?.accessToken; // Use accessToken for WebSocket (JWT)
@@ -198,6 +198,34 @@ export default function GroupChat() {
 
         initGroupConversation();
     }, [chat?.id, currentUserId, groupMembers, getRealConversation, setRealConversation, createConversationMutation]);
+
+    // Fetch message history for this group conversation
+    const { data: messagesData } = useQuery<GetMessagesData>(GET_MESSAGES, {
+        variables: { conversationId: conversationId || '', limit: 50, offset: 0 },
+        skip: !conversationId,
+        fetchPolicy: 'network-only',
+    });
+
+    useEffect(() => {
+        if (messagesData?.getMessages?.messages && conversationId) {
+            // Map the raw GraphQL messages to our internal ApiMessage format
+            const history = messagesData.getMessages.messages.map((m: any): ApiMessage => ({
+                id: m.id,
+                conversationId: m.conversationId,
+                senderId: m.senderId,
+                type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
+                content: m.content || '',
+                createdAt: m.createdAt,
+                mentions: m.mentions?.map((mn: any) => mn.userId) || [],
+                replyToId: m.replyToId,
+                status: 'read', // History is loaded as read
+                mediaMetadata: m.mediaMetadata,
+            }));
+
+            // Prepend or bulk-replace into global store
+            setApiMessages(conversationId, history);
+        }
+    }, [messagesData, conversationId, setApiMessages]);
 
     // WebSocket connection and message handling
     useEffect(() => {
@@ -623,11 +651,10 @@ export default function GroupChat() {
                                                 </div>
                                             ) : (
                                                 <div
-                                                    className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${
-                                                        isMe
-                                                            ? 'bg-text-brand text-text-white'
-                                                            : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                                    }`}
+                                                    className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe
+                                                        ? 'bg-text-brand text-text-white'
+                                                        : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                        }`}
                                                 >
                                                     {!isMe && (
                                                         <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
@@ -743,11 +770,10 @@ export default function GroupChat() {
                                         {groupMembers.map((member) => (
                                             <div
                                                 key={member.id}
-                                                className={`flex items-center space-x-3 p-2 rounded-lg ${
-                                                    isAdmin && member.userId !== currentUserId
-                                                        ? 'hover:bg-surface-hover cursor-pointer'
-                                                        : ''
-                                                }`}
+                                                className={`flex items-center space-x-3 p-2 rounded-lg ${isAdmin && member.userId !== currentUserId
+                                                    ? 'hover:bg-surface-hover cursor-pointer'
+                                                    : ''
+                                                    }`}
                                                 onClick={() => handleMemberClick(member)}
                                             >
                                                 <Avatar className="w-10 h-10">

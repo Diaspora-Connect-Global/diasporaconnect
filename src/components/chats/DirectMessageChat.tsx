@@ -14,8 +14,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData, GetConversationsData } from "@/services/gql/types/messaging";
+import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES } from "@/services/gql/messaging";
+import type { CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData } from "@/services/gql/types/messaging";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
@@ -29,7 +29,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
 
-    const { addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation } = useChatStore();
+    const { addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
@@ -107,6 +107,34 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
         initConversation();
     }, [chat.id, currentUserId, conversationsData, getRealConversation, setRealConversation, createConversation]);
+
+    // Fetch message history for this conversation
+    const { data: messagesData } = useQuery<GetMessagesData>(GET_MESSAGES, {
+        variables: { conversationId: conversationId || '', limit: 50, offset: 0 },
+        skip: !conversationId,
+        fetchPolicy: 'network-only',
+    });
+
+    useEffect(() => {
+        if (messagesData?.getMessages?.messages && conversationId) {
+            // Map the raw GraphQL messages to our internal ApiMessage format
+            const history = messagesData.getMessages.messages.map((m: any): ApiMessage => ({
+                id: m.id,
+                conversationId: m.conversationId,
+                senderId: m.senderId,
+                type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
+                content: m.content || '',
+                createdAt: m.createdAt,
+                mentions: m.mentions?.map((mn: any) => mn.userId) || [],
+                replyToId: m.replyToId,
+                status: 'read', // History is loaded as read
+                mediaMetadata: m.mediaMetadata,
+            }));
+
+            // Prepend or bulk-replace into global store
+            setApiMessages(conversationId, history);
+        }
+    }, [messagesData, conversationId, setApiMessages]);
 
     // WebSocket connection
     useEffect(() => {
@@ -223,9 +251,8 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     return (
         <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
             {/* Main Chat Area */}
-            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full ${
-                isMobile && sidebarOpen ? 'hidden' : 'flex'
-            }`}>
+            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full ${isMobile && sidebarOpen ? 'hidden' : 'flex'
+                }`}>
                 {/* Chat Header - Hidden on mobile (shown in page.tsx) */}
                 <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between items-center">
                     <div className="flex items-center space-x-3">
@@ -247,14 +274,13 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     </div>
 
                     <button onClick={() => setSidebarOpen(!sidebarOpen)}>
-                        <InfoIcon className={`w-6 h-6 cursor-pointer transition-colors ${
-                            sidebarOpen ? "text-text-white bg-surface-brand rounded-full p-1" : "text-text-brand"
-                        }`} />
+                        <InfoIcon className={`w-6 h-6 cursor-pointer transition-colors ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full p-1" : "text-text-brand"
+                            }`} />
                     </button>
                 </div>
 
                 {/* Mobile Info Button - Floating */}
-                <button 
+                <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="md:hidden fixed top-20 right-4 z-10 p-2.5 bg-surface-brand rounded-full shadow-lg hover:bg-surface-brand-dark transition-colors"
                 >
@@ -291,11 +317,10 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                         </div>
                                     ) : (
                                         <div
-                                            className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${
-                                                isMe
-                                                    ? 'bg-text-brand text-text-white'
-                                                    : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                            }`}
+                                            className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${isMe
+                                                ? 'bg-text-brand text-text-white'
+                                                : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                }`}
                                         >
                                             {message.content}
                                         </div>
@@ -327,12 +352,12 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 <>
                     {/* Mobile Backdrop */}
                     {isMobile && (
-                        <div 
+                        <div
                             className="fixed inset-0 bg-black/50 z-40 md:hidden animate-in fade-in duration-200"
                             onClick={() => setSidebarOpen(false)}
                         />
                     )}
-                    
+
                     {/* Sidebar Content */}
                     <div className={`
                         ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm animate-in slide-in-from-right duration-300' : 'w-80'} 
