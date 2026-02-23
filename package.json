@@ -27,6 +27,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@swc/helpers": "^0.5.19",
     "@tabler/icons-react": "^3.35.0",
     "@xstate/react": "^6.0.0",
     "apollo-upload-client": "^19.0.0",
