@@ -165,7 +165,7 @@ export default function GroupChat() {
     useEffect(() => {
         if (!chat?.id || !currentUserId || !groupMembers.length) return;
 
-        const existing = getRealConversation(chat.id);
+        const existing = getRealConversation(chat?.id);
         if (existing) {
             setConversationId(existing.conversationId);
             return;
@@ -178,14 +178,14 @@ export default function GroupChat() {
                     variables: {
                         type: 'GROUP',
                         participantIds: memberIds,
-                        groupId: chat.id,
+                        groupId: chat?.id,
                     },
                 });
 
                 if (data?.createConversation) {
                     const convId = data.createConversation;
                     setConversationId(convId);
-                    setRealConversation(chat.id, {
+                    setRealConversation(chat?.id, {
                         conversationId: convId,
                         type: 'GROUP',
                         participantIds: [currentUserId, ...memberIds],
@@ -371,12 +371,12 @@ export default function GroupChat() {
                 }
 
                 // Also send via WebSocket for real-time delivery
+                // Backend handles encryption — we send plaintext
                 if (isConnected) {
-                    const encryptedData = encryptMessage(messageText);
                     const payload: SendMessagePayload = {
                         conversationId,
                         type: image ? 'image' : 'text',
-                        encryptedData,
+                        content: messageText,
                         ...(image && {
                             metadata: {
                                 fileName: 'image.jpg',
@@ -421,7 +421,7 @@ export default function GroupChat() {
     const handleLeaveGroup = async () => {
         setIsLeavingGroup(true);
         try {
-            const { data } = await leaveGroup({ variables: { leaveGroupId: chat.id } });
+            const { data } = await leaveGroup({ variables: { leaveGroupId: chat?.id } });
             if (data?.leaveGroup.success) {
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
@@ -440,7 +440,7 @@ export default function GroupChat() {
     const handleDeleteGroup = async () => {
         setIsDeletingGroup(true);
         try {
-            const { data } = await deleteGroup({ variables: { deleteGroupId: chat.id } });
+            const { data } = await deleteGroup({ variables: { deleteGroupId: chat?.id } });
             if (data?.deleteGroup.success) {
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
@@ -464,7 +464,7 @@ export default function GroupChat() {
     }) => {
         try {
             const { data } = await updateGroup({
-                variables: { updateInput: { groupId: chat.id, ...updates } }
+                variables: { updateInput: { groupId: chat?.id, ...updates } }
             });
             if (data?.updateGroup.success) {
                 setShowEditModal(false);
@@ -486,7 +486,7 @@ export default function GroupChat() {
     const handleRemoveMember = async (userId: string) => {
         try {
             const { data } = await removeMember({
-                variables: { removeInput: { groupId: chat.id, userId } }
+                variables: { removeInput: { groupId: chat?.id, userId } }
             });
             if (data?.removeMember.success) {
                 setShowManageMemberModal(false);
@@ -502,7 +502,7 @@ export default function GroupChat() {
     const handleUpdateMemberRole = async (userId: string, role: MemberRole) => {
         try {
             const { data } = await updateMemberRole({
-                variables: { roleInput: { groupId: chat.id, userId, role } }
+                variables: { roleInput: { groupId: chat?.id, userId, role } }
             });
             if (data?.updateMemberRole.success) {
                 setShowManageMemberModal(false);
@@ -667,7 +667,7 @@ export default function GroupChat() {
                             <MessageInput
                                 onSendMessage={handleSendMessage}
                                 placeholder={t('message', { name: group.name })}
-                                conversationId={conversationId || chat.id}
+                                conversationId={conversationId || chat?.id}
                                 senderId={currentUserId ?? 'current-user'}
                                 disabled={!conversationId}
                             />
@@ -868,7 +868,7 @@ export default function GroupChat() {
                                 <MessageInput
                                     onSendMessage={handleSendMessage}
                                     placeholder={t('writeReply')}
-                                    conversationId={chat.id}
+                                    conversationId={chat?.id}
                                     senderId={currentUserId ?? 'current-user'}
                                 />
                             </div>
@@ -919,7 +919,7 @@ export default function GroupChat() {
                 <AddMembersModal
                     isOpen={showAddMembersModal}
                     onClose={() => setShowAddMembersModal(false)}
-                    groupId={chat.id}
+                    groupId={chat?.id}
                     onMembersAdded={refetchMembers}
                 />
             )}

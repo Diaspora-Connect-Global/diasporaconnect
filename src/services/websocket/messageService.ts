@@ -172,12 +172,10 @@ class MessageService {
     console.log('📤 Sending message via WebSocket:', {
       conversationId: payload.conversationId,
       type: payload.type,
-      hasEncryptedData: !!payload.encryptedData,
-      encryptedDataKeys: payload.encryptedData ? Object.keys(payload.encryptedData) : [],
+      contentLength: payload.content?.length ?? 0,
       hasMentions: !!payload.mentions,
       hasReplyTo: !!payload.replyToId,
     });
-    console.log('📦 Full payload:', JSON.stringify(payload, null, 2));
     this.socket!.emit('message:send', payload);
   }
 

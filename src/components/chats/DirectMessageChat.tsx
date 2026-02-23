@@ -95,14 +95,16 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
         const unsubMessage = messageService.onMessage((wsMessage) => {
             if (wsMessage.conversationId === conversationId) {
-                const decryptedContent = decryptMessage(wsMessage.encryptedData);
+                // Backend sends encryptedData via WebSocket (notification only)
+                // Actual decrypted content is fetched via GraphQL
+                console.log('📨 New message notification received:', wsMessage.messageId);
                 const apiMsg: ApiMessage = {
-                    id: wsMessage.id,
+                    id: wsMessage.messageId,
                     conversationId: wsMessage.conversationId,
                     senderId: wsMessage.senderId,
                     type: (wsMessage.type?.toUpperCase() as ApiMessage['type']) || 'TEXT',
-                    content: decryptedContent,
-                    createdAt: wsMessage.createdAt,
+                    content: '[Loading message...]',
+                    createdAt: wsMessage.timestamp,
                     mentions: wsMessage.mentions,
                     replyToId: wsMessage.replyToId,
                     status: 'sent',
@@ -161,12 +163,12 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             }
 
             // Also send via WebSocket for real-time delivery to other participants
+            // Backend handles encryption — we send plaintext
             if (isConnected) {
-                const encrypted = await encryptMessage(messageText, chat.id);
                 messageService.sendMessage({
                     conversationId,
                     type: image ? 'image' : 'text',
-                    encryptedData: encrypted,
+                    content: messageText,
                 });
             }
         } catch (error) {
