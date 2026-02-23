@@ -61,6 +61,17 @@ export interface GetEventData {
   event: Event;
 }
 
+export interface GetEventsData {
+  events: Event[];
+}
+
+export interface GetUserEventsData {
+  userEvents: {
+    attending: Event[];
+    saved: Event[];
+  };
+}
+
 export interface CreateEventData {
   createEvent: string;
 }
@@ -103,6 +114,78 @@ export const GET_EVENT = gql`
         id
         name
         priceInCents
+      }
+    }
+  }
+`;
+
+export const GET_EVENTS = gql`
+  query GetEvents($limit: Int, $offset: Int) {
+    events(limit: $limit, offset: $offset) {
+      id
+      title
+      description
+      eventCategory
+      startAt
+      endAt
+      locationType
+      locationDetails {
+        physical {
+          venue
+          city
+          country
+        }
+        virtual {
+          platform
+        }
+      }
+      isPaid
+      registrationCount
+      availableSpots
+      isRegistered
+      canRegister
+    }
+  }
+`;
+
+export const GET_USER_EVENTS = gql`
+  query GetUserEvents {
+    userEvents {
+      attending {
+        id
+        title
+        startAt
+        endAt
+        locationType
+        locationDetails {
+          physical {
+            venue
+            city
+            country
+          }
+          virtual {
+            platform
+          }
+        }
+        registrationCount
+      }
+      saved {
+        id
+        title
+        startAt
+        endAt
+        locationType
+        locationDetails {
+          physical {
+            venue
+            city
+            country
+          }
+          virtual {
+            platform
+          }
+        }
+        registrationCount
       }
     }
   }

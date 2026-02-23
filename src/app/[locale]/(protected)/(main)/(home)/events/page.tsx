@@ -5,21 +5,21 @@ import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
+import { useQuery, useMutation } from '@apollo/client/react';
+import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, GetEventsData, GetUserEventsData, RegisterEventData, SaveEventData, Event } from '@/services/gql/events';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
+const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Event[], loading: boolean }) => {
+    const t = useTranslations("home.events");
 
-
-
-interface Event {
-    title: string;
-    date: string;
-    location: string;
-    attendees: number;
-    imageUrl: string;
-}
-
-const AttendingComponent = ({ attendingEvents }: { attendingEvents: Event[] }) => {
-    const t =  useTranslations("home.events")
-
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center p-4">
+                <Loader2 className="w-6 h-6 animate-spin text-text-brand" />
+            </div>
+        );
+    }
 
     return (
         <>
@@ -29,26 +29,42 @@ const AttendingComponent = ({ attendingEvents }: { attendingEvents: Event[] }) =
                 </p>
             ) : (
                 <>
-                    {attendingEvents.map((event, index) => (
-    <div key={index} className="snap-start shrink-0">
-        <EventCardSmall
-            title={event.title}
-            date={event.date}
-            location={event.location}
-            attendees={event.attendees}
-            imageUrl={event.imageUrl}
-        />
-    </div>
-))}
+                    {attendingEvents.map((event) => (
+                        <div key={event.id} className="snap-start shrink-0">
+                            <EventCardSmall
+                                title={event.title}
+                                date={new Date(event.startAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                })}
+                                location={event.locationType === 'physical' 
+                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
+                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                }
+                                attendees={event.registrationCount}
+                                imageUrl="/EVENT.png"
+                            />
+                        </div>
+                    ))}
                 </>
             )}
         </>
     );
 };
 
-const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
-    const t =  useTranslations("home.events")
+const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loading: boolean }) => {
+    const t = useTranslations("home.events");
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center p-4">
+                <Loader2 className="w-6 h-6 animate-spin text-text-brand" />
+            </div>
+        );
+    }
 
     return (
         <>
@@ -58,17 +74,26 @@ const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
                 </p>
             ) : (
                 <>
-                    {savedEvents.map((event, index) => (
-    <div key={index} className="snap-start shrink-0">
-        <EventCardSmall
-            title={event.title}
-            date={event.date}
-            location={event.location}
-            attendees={event.attendees}
-            imageUrl={event.imageUrl}
-        />
-    </div>
-))}
+                    {savedEvents.map((event) => (
+                        <div key={event.id} className="snap-start shrink-0">
+                            <EventCardSmall
+                                title={event.title}
+                                date={new Date(event.startAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                })}
+                                location={event.locationType === 'physical' 
+                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
+                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                }
+                                attendees={event.registrationCount}
+                                imageUrl="/EVENT.png"
+                            />
+                        </div>
+                    ))}
                 </>
             )}
         </>
@@ -77,111 +102,68 @@ const SavedComponent = ({ savedEvents }: { savedEvents: Event[] }) => {
 
 export default function Events() {
     const [activeTab, setActiveTab] = useState<string>("events");
-        const tActions =  useTranslations("actions")
-            const modalRef = useRef<PaidEventsModalRef>(null);
-        
+    const tActions = useTranslations("actions");
+    const modalRef = useRef<PaidEventsModalRef>(null);
+    
+    const { data: userEventsData, loading: userEventsLoading } = useQuery<GetUserEventsData>(GET_USER_EVENTS);
+    const { data: eventsData, loading: eventsLoading } = useQuery<GetEventsData>(GET_EVENTS, {
+        variables: { limit: 20, offset: 0 }
+    });
+    
+    const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT);
+    const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT);
 
-const TABS = [
-    {
-        name: `${tActions("attending")}`,
-        status: "events"
-    },
-    {
-        name:  `${tActions("saved")}`,
-        status: "saved"
-    },
-]
+    const handleAttendEvent = async (eventId: string) => {
+        try {
+            await registerForEvent({
+                variables: { input: { eventId } }
+            });
+            toast.success('Successfully registered for event');
+        } catch {
+            toast.error('Failed to register for event');
+        }
+    };
 
-const t =  useTranslations("home.events")
+    const handleSaveEvent = async (eventId: string) => {
+        try {
+            await saveEvent({
+                variables: { eventId }
+            });
+            toast.success('Event saved successfully');
+        } catch {
+            toast.error('Failed to save event');
+        }
+    };
 
-    const attendingEvents: Event[] = [
+    const TABS = [
         {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
+            name: `${tActions("attending")}`,
+            status: "events"
+        },
+        {
+            name: `${tActions("saved")}`,
+            status: "saved"
         },
     ];
-    const savedEvents: Event[] = [
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-    ];
-    const moreEvents: Event[] = [
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-        {
-            title: "Accra Arts Festival",
-            date: "Oct 21, 2025, 3:00PM",
-            location: "Ghana Embassy, Belgium",
-            attendees: 32,
-            imageUrl: "/EVENT.png",
-        },
-    ];
+
+    const t = useTranslations("home.events");
+
+    const attendingEvents = userEventsData?.userEvents.attending || [];
+    const savedEvents = userEventsData?.userEvents.saved || [];
+    const allEvents = eventsData?.events || [];
+    const paidEvents = allEvents.filter(event => event.isPaid);
+    const freeEvents = allEvents.filter(event => !event.isPaid);
 
     return (
         <div className="lg:w-[60vw] h-app-inner p-4 overflow-auto scrollbar-hide">
             <div className="mx-auto">
-                <p className="heading-small ">{t("yourevents")}</p> {/* 20px equivalent */}
+                <p className="heading-small ">{t("yourevents")}</p>
 
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
-                    {/* 52px height, 8px margin */}
                     {
                         TABS.map((tab, idx) => (
-                            <div key={idx} className="lg:w-[6.375rem] lg:h-[3.25rem]"> {/* 102px, 52px equivalent */}
+                            <div key={idx} className="lg:w-[6.375rem] lg:h-[3.25rem]">
                                 <button
                                     onClick={() => setActiveTab(`${tab.status}`)}
                                     className={`h-full px-[0.5rem] text-center transition-all duration-200 relative cursor-pointer font-label-large ${activeTab === `${tab.status}`
@@ -192,54 +174,82 @@ const t =  useTranslations("home.events")
                                     {tab.name}
                                 </button>
                             </div>
-
                         ))
                     }
                 </div>
 
                 {/* Events Content */}
-             <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory">
-    {activeTab === "events" ? (
-        <AttendingComponent attendingEvents={attendingEvents} />
-    ) : (
-        <SavedComponent savedEvents={savedEvents} />
-    )}
-</div>
-
-                <p className="heading-small my-4">Paid Events</p> {/* 20px equivalent */}
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 w-full "> {/* 12px, 24px equivalent */}
-                    {moreEvents.map((event, index) => (
-                        <PaidEventCard
-                            key={index}
-                            title={event.title}
-                            date={event.date}
-                            location={event.location}
-                            attendees={event.attendees}
-                            imageUrl={event.imageUrl}
-                            onAttendClick={() => modalRef.current?.open()}
-
-                        />
-                    ))}
+                <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory">
+                    {activeTab === "events" ? (
+                        <AttendingComponent attendingEvents={attendingEvents} loading={userEventsLoading} />
+                    ) : (
+                        <SavedComponent savedEvents={savedEvents} loading={userEventsLoading} />
+                    )}
                 </div>
-                <p className="heading-small my-2">{t("moreevents")}</p> {/* 20px equivalent */}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full "> {/* 12px, 24px equivalent */}
-                    {moreEvents.map((event, index) => (
-                        <EventCard1
-                            key={index}
-                            title={event.title}
-                            date={event.date}
-                            location={event.location}
-                            attendees={event.attendees}
-                            imageUrl={event.imageUrl}
-                            onAttendClick={()=>{}}
+                <p className="heading-small my-4">Paid Events</p>
 
-                        />
-                    ))}
-                </div>
+                {eventsLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                        <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 w-full">
+                        {paidEvents.map((event) => (
+                            <PaidEventCard
+                                key={event.id}
+                                title={event.title}
+                                date={new Date(event.startAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                })}
+                                location={event.locationType === 'physical' 
+                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
+                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                }
+                                attendees={event.registrationCount}
+                                imageUrl="/EVENT.png"
+                                onAttendClick={() => handleAttendEvent(event.id)}
+                            />
+                        ))}
+                    </div>
+                )}
+                
+                <p className="heading-small my-2">{t("moreevents")}</p>
+
+                {eventsLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                        <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full">
+                        {freeEvents.map((event) => (
+                            <EventCard1
+                                key={event.id}
+                                title={event.title}
+                                date={new Date(event.startAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                })}
+                                location={event.locationType === 'physical' 
+                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
+                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                }
+                                attendees={event.registrationCount}
+                                imageUrl="/EVENT.png"
+                                onAttendClick={() => handleAttendEvent(event.id)}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
-             <PaidEventsModal ref={modalRef} />
+            <PaidEventsModal ref={modalRef} />
         </div>
     );
 }
