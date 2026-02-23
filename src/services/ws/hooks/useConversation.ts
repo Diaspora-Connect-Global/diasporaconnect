@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useMessageClient } from './useMessageClient';
-import { IncomingMessage, MessageSentResponse } from '../types';
+import type { IncomingMessage, MessageSentResponse } from '../types';
 
 interface UseConversationOptions {
   conversationId: string;
@@ -45,21 +45,23 @@ export const useConversation = ({
     },
   });
 
+  /**
+   * Send a plain-text message via WebSocket.
+   * Per spec, we send plaintext content — the server handles encryption.
+   */
   const sendTextMessage = useCallback(
     async (
       text: string,
-      encryptedData: { ciphertext: string; ephemeralKey: string },
       replyToId?: string
     ): Promise<MessageSentResponse> => {
       setIsSending(true);
       try {
-        const response = await sendMessage({
+        return await sendMessage({
           conversationId,
-          encryptedData,
           type: 'text',
+          content: text,
           replyToId,
         });
-        return response;
       } finally {
         setIsSending(false);
       }
@@ -67,21 +69,17 @@ export const useConversation = ({
     [conversationId, sendMessage]
   );
 
+  /**
+   * Upload a media file and send the associated WebSocket notification.
+   */
   const sendFile = useCallback(
     async (
       file: File,
-      encryptedData: { ciphertext: string; ephemeralKey: string },
       type: 'image' | 'video' | 'audio' | 'file'
     ): Promise<MessageSentResponse> => {
       setIsSending(true);
       try {
-        const response = await sendMediaMessage(
-          file,
-          conversationId,
-          encryptedData,
-          type
-        );
-        return response;
+        return await sendMediaMessage(file, conversationId, type);
       } finally {
         setIsSending(false);
       }

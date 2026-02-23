@@ -1,76 +1,38 @@
+/**
+ * @fileoverview WebSocket message types for the message service.
+ * These mirror the exact event payloads defined in the API spec.
+ *
+ * MessageType casing:
+ *  - WebSocket (emit/listen):  lowercase ('text', 'image', etc.)
+ *  - GraphQL (mutations/queries): uppercase ('TEXT', 'IMAGE', etc.)
+ */
+
+// ─── Emit Payloads (client → server) ────────────────────────────────────────
+
+/** Emitted via 'message:send' */
 export interface MessageData {
   conversationId: string;
-  encryptedData: {
-    ciphertext: string;
-    ephemeralKey: string;
-  };
   type: 'text' | 'image' | 'video' | 'audio' | 'file';
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    mimeType?: string;
-    fileId?: string;
-    key?: string;
-  };
+  content: string;
+  mentions?: string[];
   replyToId?: string;
 }
 
-export interface IncomingMessage {
+/** Emitted via 'message:delivered' */
+export interface DeliveryEmit {
   messageId: string;
-  conversationId: string;
-  senderId: string;
-  encryptedData: {
-    ciphertext: string;
-    ephemeralKey: string;
-  };
-  type: 'text' | 'image' | 'video' | 'audio' | 'file';
-  timestamp: string;
-  isOffline?: boolean;
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    mimeType?: string;
-    fileId?: string;
-    key?: string;
-  };
-  replyToId?: string;
-}
-
-export interface MessageSentResponse {
-  messageId: string;
+  userId: string;
   conversationId: string;
 }
 
-export interface DeliveryStatus {
+/** Emitted via 'message:read' */
+export interface ReadEmit {
   messageId: string;
   userId: string;
-  status: 'delivered';
+  conversationId: string;
 }
 
-export interface ReadStatus {
-  messageId: string;
-  userId: string;
-  status: 'read';
-}
-
-export interface PresenceResponse {
-  userId: string;
-  isOnline: boolean;
-  lastSeen?: string;
-}
-
-export interface PresenceUpdate {
-  userId: string;
-  isOnline: boolean;
-  timestamp?: string;
-  lastSeen?: string;
-}
-
-export interface OnlineUsersResponse {
-  onlineUsers: string[];
-  count: number;
-}
-
+/** Emitted via 'media:request-upload-url' */
 export interface MediaUploadRequest {
   conversationId: string;
   fileName: string;
@@ -78,6 +40,43 @@ export interface MediaUploadRequest {
   fileSize: number;
 }
 
+// ─── Listen Payloads (server → client) ──────────────────────────────────────
+
+/** Received via 'message:sent' */
+export interface MessageSentResponse {
+  messageId: string;
+  conversationId: string;
+}
+
+/**
+ * Received via 'message:new'.
+ * The server encrypts content at rest; `encryptedData` is opaque here.
+ * Fetch plaintext via GraphQL `getMessages`.
+ */
+export interface IncomingMessage {
+  messageId: string;
+  conversationId: string;
+  senderId: string;
+  encryptedData: unknown;
+  type: 'text' | 'image' | 'video' | 'audio' | 'file';
+  timestamp: string;
+}
+
+/** Received via 'message:delivery' */
+export interface DeliveryStatus {
+  messageId: string;
+  userId: string;
+  status: 'delivered';
+}
+
+/** Received via 'message:read' */
+export interface ReadStatus {
+  messageId: string;
+  userId: string;
+  status: 'read';
+}
+
+/** Received via 'media:upload-url' */
 export interface MediaUploadResponse {
   uploadUrl: string;
   fileId: string;
@@ -85,6 +84,34 @@ export interface MediaUploadResponse {
   expiresIn: number;
 }
 
+/** Received via 'presence:update' */
+export interface PresenceUpdate {
+  userId: string;
+  isOnline: boolean;
+  lastSeen?: string;
+}
+
+/** Response when querying a single user's presence */
+export interface PresenceResponse {
+  userId: string;
+  isOnline: boolean;
+  lastSeen?: string;
+}
+
+/** Response from querying online users list */
+export interface OnlineUsersResponse {
+  onlineUsers: string[];
+  count: number;
+}
+
+/** Received via 'pong' */
+export interface PongResponse {
+  timestamp: number;
+}
+
+// ─── Misc ───────────────────────────────────────────────────────────────────
+
+/** Lowercase WS message type alias */
 export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'file';
 
 export type SupportedMimeType =

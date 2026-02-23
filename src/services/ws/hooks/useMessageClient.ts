@@ -96,18 +96,12 @@ export const useMessageClient = ({
     async (
       file: File,
       conversationId: string,
-      encryptedData: { ciphertext: string; ephemeralKey: string },
       type: 'image' | 'video' | 'audio' | 'file'
     ): Promise<MessageSentResponse> => {
       if (!clientRef.current) {
         throw new Error('Message client not initialized');
       }
-      return clientRef.current.sendMediaMessage(
-        file,
-        conversationId,
-        encryptedData,
-        type
-      );
+      return clientRef.current.sendMediaMessage(file, conversationId, type);
     },
     []
   );

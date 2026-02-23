@@ -1,23 +1,18 @@
 import { io, Socket } from 'socket.io-client';
 
-// Message received from backend (backend sends encrypted data)
+/**
+ * Payload received from backend via 'message:new' WebSocket event.
+ * Backend encrypts content; use GraphQL getMessages for plaintext.
+ */
 export interface Message {
   messageId: string;
   conversationId: string;
   senderId: string;
+  /** Server-side encrypted payload; treat as opaque notification trigger */
+  encryptedData: unknown;
   type: 'text' | 'image' | 'file' | 'video' | 'audio';
-  encryptedData: any; // Backend sends encrypted data (handled by backend)
   timestamp: string;
-  isOffline?: boolean; // true if sent while user was offline
-  metadata?: {
-    fileId?: string;
-    fileName: string;
-    fileSize: number;
-    mimeType: string;
-    gcsPath: string;
-    width?: number;
-    height?: number;
-  };
+  isOffline?: boolean;
   mentions?: string[];
   replyToId?: string;
 }
@@ -53,7 +48,8 @@ class MessageService {
   private messageSentCallbacks: ((data: { messageId: string; conversationId: string }) => void)[] = [];
   private messageDeliveredCallbacks: ((data: { messageId: string; userId: string }) => void)[] = [];
   private messageReadCallbacks: ((data: { messageId: string; userId: string }) => void)[] = [];
-  private presenceCallbacks: ((data: { userId: string; isOnline: boolean; timestamp: string }) => void)[] = [];
+  private presenceCallbacks: ((data: { userId: string; isOnline: boolean; lastSeen?: string }) => void)[] = [];
+  private pongCallbacks: ((data: { timestamp: number }) => void)[] = [];
   private connectCallbacks: (() => void)[] = [];
   private disconnectCallbacks: (() => void)[] = [];
   private uploadUrlCallbacks: ((data: MediaUploadResponse) => void)[] = [];
@@ -136,23 +132,32 @@ class MessageService {
     });
 
     this.socket.on('message:sent', (data: { messageId: string; conversationId: string }) => {
+      console.log('✅ Message sent confirmed:', data.messageId);
       this.messageSentCallbacks.forEach(cb => cb(data));
     });
 
-    this.socket.on('message:delivered:confirm', (data: { messageId: string; userId: string }) => {
+    // Spec event: 'message:delivery' (not 'message:delivered:confirm')
+    this.socket.on('message:delivery', (data: { messageId: string; userId: string; status: 'delivered' }) => {
+      console.log('📬 Message delivered:', data.messageId, '→', data.userId);
       this.messageDeliveredCallbacks.forEach(cb => cb(data));
     });
 
-    this.socket.on('message:read:confirm', (data: { messageId: string; userId: string }) => {
+    // Spec event: 'message:read' (not 'message:read:confirm')
+    this.socket.on('message:read', (data: { messageId: string; userId: string; status: 'read' }) => {
+      console.log('👀 Message read:', data.messageId, '→', data.userId);
       this.messageReadCallbacks.forEach(cb => cb(data));
     });
 
-    this.socket.on('presence:update', (data: { userId: string; isOnline: boolean; timestamp: string }) => {
+    this.socket.on('presence:update', (data: { userId: string; isOnline: boolean; lastSeen?: string }) => {
       this.presenceCallbacks.forEach(cb => cb(data));
     });
 
     this.socket.on('media:upload-url', (data: MediaUploadResponse) => {
       this.uploadUrlCallbacks.forEach(cb => cb(data));
+    });
+
+    this.socket.on('pong', (data: { timestamp: number }) => {
+      this.pongCallbacks.forEach(cb => cb(data));
     });
   }
 
@@ -259,10 +264,17 @@ class MessageService {
     };
   }
 
-  onPresenceUpdate(callback: (data: { userId: string; isOnline: boolean; timestamp: string }) => void) {
+  onPresenceUpdate(callback: (data: { userId: string; isOnline: boolean; lastSeen?: string }) => void) {
     this.presenceCallbacks.push(callback);
     return () => {
       this.presenceCallbacks = this.presenceCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  onPong(callback: (data: { timestamp: number }) => void) {
+    this.pongCallbacks.push(callback);
+    return () => {
+      this.pongCallbacks = this.pongCallbacks.filter(cb => cb !== callback);
     };
   }
 

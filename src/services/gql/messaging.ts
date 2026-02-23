@@ -25,20 +25,24 @@ export type {
 // ============================================================================
 
 export const GET_CONVERSATIONS = gql`
-  query GetConversations {
-    getConversations {
+  query GetConversations($limit: Int, $offset: Int) {
+    getConversations(limit: $limit, offset: $offset) {
       id
       type
       groupId
       participantIds
       participantCount
-      lastMessageAt
       isActive
+      createdAt
+      updatedAt
+      lastMessageAt
       lastMessage {
         id
-        content
         senderId
         type
+        content
+        isEdited
+        isDeleted
         createdAt
       }
     }
@@ -46,29 +50,28 @@ export const GET_CONVERSATIONS = gql`
 `;
 
 export const GET_MESSAGES = gql`
-  query GetMessages($input: GetMessagesInput!) {
-    getMessages(input: $input) {
+  query GetMessages($conversationId: String!, $limit: Int, $offset: Int) {
+    getMessages(conversationId: $conversationId, limit: $limit, offset: $offset) {
       messages {
         id
         conversationId
         senderId
         type
         content
-        mentions
+        mentions {
+          userId
+          username
+        }
         replyToId
         mediaMetadata {
-          fileId
           fileName
           fileSize
           mimeType
           gcsPath
-          width
-          height
-          duration
         }
         isEdited
+        isDeleted
         createdAt
-        status
       }
       total
       hasMore
@@ -115,7 +118,7 @@ export const SEND_MESSAGE = gql`
     $conversationId: String!
     $messageType: String!
     $content: String!
-    $mentions: [String]
+    $mentions: [String!]
     $replyToId: String
   ) {
     sendMessage(

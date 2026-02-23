@@ -1,95 +1,17 @@
 import { io, Socket } from 'socket.io-client';
-
-interface AuthToken {
-  token: string;
-}
-
-interface MessageData {
-  conversationId: string;
-  encryptedData: {
-    ciphertext: string;
-    ephemeralKey: string;
-  };
-  type: 'text' | 'image' | 'video' | 'audio' | 'file';
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    mimeType?: string;
-    fileId?: string;
-    key?: string;
-  };
-  replyToId?: string;
-}
-
-interface IncomingMessage {
-  messageId: string;
-  conversationId: string;
-  senderId: string;
-  encryptedData: {
-    ciphertext: string;
-    ephemeralKey: string;
-  };
-  type: 'text' | 'image' | 'video' | 'audio' | 'file';
-  timestamp: string;
-  isOffline?: boolean;
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    mimeType?: string;
-    fileId?: string;
-    key?: string;
-  };
-  replyToId?: string;
-}
-
-interface MessageSentResponse {
-  messageId: string;
-  conversationId: string;
-}
-
-interface DeliveryStatus {
-  messageId: string;
-  userId: string;
-  status: 'delivered';
-}
-
-interface ReadStatus {
-  messageId: string;
-  userId: string;
-  status: 'read';
-}
-
-interface PresenceResponse {
-  userId: string;
-  isOnline: boolean;
-  lastSeen?: string;
-}
-
-interface PresenceUpdate {
-  userId: string;
-  isOnline: boolean;
-  timestamp?: string;
-  lastSeen?: string;
-}
-
-interface OnlineUsersResponse {
-  onlineUsers: string[];
-  count: number;
-}
-
-interface MediaUploadRequest {
-  conversationId: string;
-  fileName: string;
-  mimeType: string;
-  fileSize: number;
-}
-
-interface MediaUploadResponse {
-  uploadUrl: string;
-  fileId: string;
-  key: string;
-  expiresIn: number;
-}
+import type {
+  MessageData,
+  IncomingMessage,
+  MessageSentResponse,
+  DeliveryStatus,
+  ReadStatus,
+  PresenceUpdate,
+  PresenceResponse,
+  OnlineUsersResponse,
+  MediaUploadRequest,
+  MediaUploadResponse,
+  PongResponse,
+} from './types';
 
 interface MessageClientConfig {
   url?: string;
@@ -112,7 +34,8 @@ export class MessageClient {
 
     this.socket = io(finalConfig.url!, {
       path: finalConfig.path,
-      auth: { token: jwtToken } as AuthToken,
+      // Spec: auth token without 'Bearer ' prefix
+      auth: { token: jwtToken.startsWith('Bearer ') ? jwtToken.slice(7) : jwtToken },
       transports: finalConfig.transports,
     });
 
@@ -242,10 +165,10 @@ export class MessageClient {
   }
 
   // ==================== HEARTBEAT ====================
-  sendHeartbeat(): Promise<void> {
+  sendHeartbeat(): Promise<PongResponse> {
     return new Promise((resolve) => {
       this.socket.emit('ping');
-      this.socket.once('pong', () => resolve());
+      this.socket.once('pong', (data: PongResponse) => resolve(data));
     });
   }
 
@@ -313,25 +236,19 @@ export class MessageClient {
   async sendMediaMessage(
     file: File,
     conversationId: string,
-    encryptedData: { ciphertext: string; ephemeralKey: string },
     type: 'image' | 'video' | 'audio' | 'file'
   ): Promise<MessageSentResponse> {
     // Upload file first
     const { fileId, key } = await this.uploadFile(file, conversationId);
 
-    // Send message with metadata
+    // Send message notification via WebSocket (plaintext filename as content)
     return this.sendMessage({
       conversationId,
-      encryptedData,
       type,
-      metadata: {
-        fileName: file.name,
-        fileSize: file.size,
-        mimeType: file.type,
-        fileId,
-        key,
-      },
+      content: file.name,
+      // Note: actual media content is saved via GraphQL sendMessage mutation
     });
+    void fileId; void key; // metadata tracked by backend
   }
 
   // ==================== CONNECTION MANAGEMENT ====================

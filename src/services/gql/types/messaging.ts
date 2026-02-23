@@ -16,26 +16,34 @@ export type MessageStatus = 'SENT' | 'DELIVERED' | 'READ';
 // MESSAGE TYPES
 // ============================================================================
 
+export interface MessageMention {
+  userId: string;
+  username: string;
+}
+
 export interface Message {
   id: string;
   conversationId: string;
   senderId: string;
   type: MessageType;
   content: string;
-  mentions?: string[];
+  mentions?: MessageMention[];
   replyToId?: string;
   mediaMetadata?: MediaMetadata;
   isEdited: boolean;
+  editedAt?: string;
+  isDeleted: boolean;
   createdAt: string;
-  status: MessageStatus;
+  status?: MessageStatus;
 }
 
 export interface MediaMetadata {
-  fileId: string;
   fileName: string;
   fileSize: number;
   mimeType: string;
   gcsPath: string;
+  // Extended fields (may be present)
+  fileId?: string;
   thumbnailGcsPath?: string;
   width?: number;
   height?: number;
@@ -48,9 +56,11 @@ export interface Conversation {
   groupId?: string;
   participantIds: string[];
   participantCount: number;
-  lastMessageAt?: string;
   isActive: boolean;
-  lastMessage?: Message;
+  createdAt: string;
+  updatedAt: string;
+  lastMessageAt?: string;
+  lastMessage?: Pick<Message, 'id' | 'senderId' | 'type' | 'content' | 'isEdited' | 'isDeleted' | 'createdAt'>;
 }
 
 // ============================================================================
@@ -69,7 +79,6 @@ export interface SendMessageInput {
   content: string;
   mentions?: string[];
   replyToId?: string;
-  mediaMetadata?: MediaMetadataInput;
 }
 
 export interface MediaMetadataInput {
@@ -124,25 +133,27 @@ export interface GetConversationsData {
 // WEBSOCKET TYPES
 // ============================================================================
 
-export interface WebSocketMessage {
+/** Payload emitted via 'message:send' WebSocket event */
+export interface WebSocketSendPayload {
   conversationId: string;
-  type: MessageType;
+  type: 'text' | 'image' | 'file' | 'video' | 'audio'; // lowercase for WS
   content: string;
   mentions?: string[];
   replyToId?: string;
-  metadata?: {
-    fileId?: string;
-    fileName?: string;
-    fileSize?: number;
-    mimeType?: string;
-    gcsPath?: string;
-    width?: number;
-    height?: number;
-  };
+}
+
+/** Payload received via 'message:new' WebSocket event */
+export interface WebSocketMessage {
+  messageId: string;
+  conversationId: string;
+  senderId: string;
+  encryptedData: unknown; // Server encrypts; use GraphQL for plaintext content
+  type: 'text' | 'image' | 'file' | 'video' | 'audio';
+  timestamp: string;
 }
 
 export interface PresenceUpdate {
   userId: string;
   isOnline: boolean;
-  timestamp: string;
+  lastSeen?: string;
 }

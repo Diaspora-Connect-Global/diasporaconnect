@@ -168,7 +168,13 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             // Determine message type
             const messageType = image ? 'IMAGE' : 'TEXT';
 
-            // Send via GraphQL mutation
+            // Step 1: Save to database via GraphQL mutation
+            console.log('📝 [Step 1] Saving message to database via GraphQL...', {
+                conversationId,
+                messageType,
+                content: messageText || 'Image',
+            });
+
             const { data } = await sendMessageMutation({
                 variables: {
                     conversationId,
@@ -178,7 +184,8 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             });
 
             if (data?.sendMessage) {
-                // Add the sent message to local state immediately
+                console.log('✅ [Step 1] Message SAVED to database! messageId:', data.sendMessage);
+
                 const sentMsg: ApiMessage = {
                     id: data.sendMessage,
                     conversationId,
@@ -189,19 +196,25 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     status: 'sent',
                 };
                 addApiMessage(sentMsg);
+            } else {
+                console.error('❌ [Step 1] GraphQL returned no messageId — message may NOT be saved');
             }
 
-            // Also send via WebSocket for real-time delivery to other participants
+            // Step 2: Send via WebSocket for real-time delivery to recipient
             // Backend handles encryption — we send plaintext
             if (isConnected) {
+                console.log('📤 [Step 2] Sending via WebSocket for real-time delivery...');
                 messageService.sendMessage({
                     conversationId,
                     type: image ? 'image' : 'text',
                     content: messageText,
                 });
+                console.log('✅ [Step 2] WebSocket message emitted');
+            } else {
+                console.warn('⚠️ [Step 2] WebSocket NOT connected — recipient will NOT get real-time notification');
             }
         } catch (error) {
-            console.error('Failed to send message:', error);
+            console.error('❌ Failed to send message:', error);
         } finally {
             setIsSending(false);
         }
