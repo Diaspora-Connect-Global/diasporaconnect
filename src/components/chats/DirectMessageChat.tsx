@@ -13,9 +13,9 @@ import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useTranslations } from 'next-intl';
-import { useMutation } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData } from "@/services/gql/types/messaging";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS } from "@/services/gql/messaging";
+import type { CreateConversationData, SendMessageData, GetConversationsData } from "@/services/gql/types/messaging";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
@@ -41,20 +41,39 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const [createConversation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
     const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE);
 
+    // Fetch existing conversations to find one with this participant
+    const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS);
+
     // Initialize or retrieve conversation
     useEffect(() => {
         if (!chat.id || !currentUserId) return;
 
+        // Check in-memory store first
         const existing = getRealConversation(chat.id);
         if (existing) {
             setConversationId(existing.conversationId);
             return;
         }
 
-        // Create a new conversation via GraphQL
+        // Check if conversation already exists from GraphQL query
+        if (conversationsData?.getConversations) {
+            const existingConv = conversationsData.getConversations.find(
+                (conv) => conv.type === 'DIRECT' && conv.participantIds?.includes(chat.id)
+            );
+            if (existingConv) {
+                setConversationId(existingConv.id);
+                setRealConversation(chat.id, {
+                    conversationId: existingConv.id,
+                    type: 'DIRECT',
+                    participantIds: existingConv.participantIds || [currentUserId, chat.id],
+                });
+                return;
+            }
+        }
+
+        // Only create if no existing conversation found
         const initConversation = async () => {
             try {
-                // chat.id is the other user's ID for direct messages
                 const { data } = await createConversation({
                     variables: {
                         type: 'DIRECT',
@@ -71,13 +90,23 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                         participantIds: [currentUserId, chat.id],
                     });
                 }
-            } catch (error) {
-                console.error('Failed to create conversation:', error);
+            } catch (error: any) {
+                // Handle duplicate key - conversation already exists
+                const isDuplicate = error?.graphQLErrors?.some(
+                    (e: any) => e.message?.includes('duplicate key')
+                );
+                if (isDuplicate) {
+                    console.log('Conversation already exists, fetching...');
+                    // Conversation exists but we don't have the ID - refetch conversations
+                    // The useQuery above will re-run and find it
+                } else {
+                    console.error('Failed to create conversation:', error);
+                }
             }
         };
 
         initConversation();
-    }, [chat.id, currentUserId, getRealConversation, setRealConversation, createConversation]);
+    }, [chat.id, currentUserId, conversationsData, getRealConversation, setRealConversation, createConversation]);
 
     // WebSocket connection
     useEffect(() => {
