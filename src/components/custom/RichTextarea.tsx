@@ -69,6 +69,7 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const backdropRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const pendingSelectionRef = useRef<{ start: number; end: number } | null>(null);
 
     /* — mentioned users tracking — */
     const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
@@ -115,6 +116,23 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
         backdropRef.current.scrollLeft = textareaRef.current.scrollLeft;
       }
     }, []);
+
+    /* — restore cursor position after React applies controlled value (prevents cursor jumping) — */
+    useEffect(() => {
+      const pending = pendingSelectionRef.current;
+      if (pending === null) return;
+      pendingSelectionRef.current = null;
+      const el = textareaRef.current;
+      if (!el || document.activeElement !== el) return;
+      const start = Math.min(pending.start, value.length);
+      const end = Math.min(pending.end, value.length);
+      requestAnimationFrame(() => {
+        if (textareaRef.current && document.activeElement === textareaRef.current) {
+          textareaRef.current.selectionStart = start;
+          textareaRef.current.selectionEnd = end;
+        }
+      });
+    }, [value]);
 
     /* — auto-resize textarea — */
     useEffect(() => {
@@ -372,6 +390,9 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
     /* — handle input change — */
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newVal = e.target.value;
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      pendingSelectionRef.current = { start, end };
       onChange(newVal);
 
       // Prune mentioned users whose @Name no longer exists in the text
