@@ -32,10 +32,36 @@ const showToastOnce = (message: string, duration = 4000) => {
 };
 
 /* ------------------------------------------------------------------ */
+/* Clear session and redirect to sign-in when session is invalid/revoked */
+/* ------------------------------------------------------------------ */
+const LOCALES = ['en', 'fr', 'it', 'de'] as const;
+
+function clearSessionAndRedirectToSignIn() {
+  const { clearAuth } = useAuthStore.getState();
+  clearAuth();
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const segment = pathname.split('/')[1];
+  const locale = segment && LOCALES.includes(segment as (typeof LOCALES)[number]) ? segment : 'en';
+  if (typeof window !== 'undefined') {
+    window.location.href = `/${locale}/signin`;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Error Handling Link with Toast Notifications */
 /* ------------------------------------------------------------------ */
 const errorLink = new ErrorLink(({ error, operation }) => {
   if (CombinedGraphQLErrors.is(error)) {
+    const isForbidden = error.errors.some(
+      (e) =>
+        e.message === 'Forbidden resource' ||
+        (e.extensions as { code?: string } | undefined)?.code === 'FORBIDDEN'
+    );
+    if (isForbidden) {
+      clearSessionAndRedirectToSignIn();
+      return;
+    }
+
     // GraphQL errors (validation, business logic errors)
     error.errors.forEach(({ message, locations, path }) => {
       console.error(
@@ -74,11 +100,11 @@ const errorLink = new ErrorLink(({ error, operation }) => {
     } else if (errorMessage.includes('timeout')) {
       showToastOnce('This is taking longer than expected. Please try again.');
     } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
-      showToastOnce('Please log in to continue.', 5000);
-      // Optionally redirect to login
-      // window.location.href = '/login';
+      clearSessionAndRedirectToSignIn();
+      return;
     } else if (errorMessage.includes('403') || errorMessage.includes('Forbidden')) {
-      showToastOnce('You don\'t have permission to do this.');
+      clearSessionAndRedirectToSignIn();
+      return;
     } else if (errorMessage.includes('404')) {
       showToastOnce('We couldn\'t find what you\'re looking for.');
     } else if (errorMessage.includes('500') || errorMessage.includes('Internal Server Error')) {

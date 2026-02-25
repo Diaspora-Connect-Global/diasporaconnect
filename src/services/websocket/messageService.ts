@@ -113,17 +113,16 @@ class MessageService {
       }
     });
 
-    this.socket.on('error', (error: any) => {
-      console.error('🔴 WebSocket error:', error);
-      console.error('Error type:', typeof error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+    this.socket.on('error', (error: unknown) => {
+      const msg = typeof error === 'string' ? error : (error as Error)?.message ?? String(error);
+      console.error('🔴 WebSocket error:', msg);
 
-      if (typeof error === 'string' && error.includes('token')) {
-        console.error('💡 Token issue detected. Please sign in again to get a fresh token.');
-      }
-
-      if (typeof error === 'string' && error.includes('message')) {
-        console.error('💡 Message sending issue. Check message format and required fields.');
+      if (msg.toLowerCase().includes('connection failed')) {
+        console.warn('💡 Message server rejected the connection. Check: (1) Auth token is valid and not expired, (2) Message service backend is running and accepts this token.');
+      } else if (typeof error === 'string' && error.includes('token')) {
+        console.warn('💡 Token issue. Sign in again to get a fresh token.');
+      } else if (typeof error === 'string' && error.includes('message')) {
+        console.warn('💡 Check message format and required fields.');
       }
     });
 

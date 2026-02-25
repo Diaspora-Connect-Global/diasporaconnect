@@ -4,6 +4,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   useCallback,
   forwardRef,
   useImperativeHandle,
@@ -117,30 +118,21 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
       }
     }, []);
 
-    /* — restore cursor position after React applies controlled value (prevents cursor jumping) — */
-    useEffect(() => {
-      const pending = pendingSelectionRef.current;
-      if (pending === null) return;
-      pendingSelectionRef.current = null;
-      const el = textareaRef.current;
-      if (!el || document.activeElement !== el) return;
-      const start = Math.min(pending.start, value.length);
-      const end = Math.min(pending.end, value.length);
-      requestAnimationFrame(() => {
-        if (textareaRef.current && document.activeElement === textareaRef.current) {
-          textareaRef.current.selectionStart = start;
-          textareaRef.current.selectionEnd = end;
-        }
-      });
-    }, [value]);
-
-    /* — auto-resize textarea — */
-    useEffect(() => {
+    /* — resize then restore cursor in one layout effect (order matters: resize can move caret, so restore after) — */
+    useLayoutEffect(() => {
       const el = textareaRef.current;
       if (el) {
         el.style.height = 'auto';
         el.style.height = Math.max(el.scrollHeight, parseInt(minHeight)) + 'px';
       }
+      const pending = pendingSelectionRef.current;
+      if (pending === null) return;
+      pendingSelectionRef.current = null;
+      if (!el || document.activeElement !== el) return;
+      const start = Math.min(pending.start, value.length);
+      const end = Math.min(pending.end, value.length);
+      el.selectionStart = start;
+      el.selectionEnd = end;
     }, [value, minHeight]);
 
     /* — detect @mention trigger — */
@@ -444,11 +436,11 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
     /* ---------------------------------------------------------------- */
     return (
       <div ref={containerRef} className="relative">
-        {/* Highlight backdrop (renders styled text behind the textarea) */}
+        {/* Backdrop hidden so cursor aligns with visible textarea text (no overlay layout drift) */}
         <div
           ref={backdropRef}
           aria-hidden
-          className={`absolute inset-0 pointer-events-none overflow-hidden whitespace-pre-wrap break-words ${className}`}
+          className={`absolute inset-0 pointer-events-none overflow-hidden whitespace-pre-wrap break-words invisible ${className}`}
           style={{
             minHeight,
             lineHeight: 'inherit',
@@ -457,10 +449,10 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
             color: 'inherit',
           }}
         >
-          {renderRichText(value)}
+          {renderRichText(value, undefined, true)}
         </div>
 
-        {/* Actual textarea (transparent text so backdrop shows through) */}
+        {/* Visible textarea — caret and text match; no transparent overlay */}
         <textarea
           ref={textareaRef}
           value={value}
@@ -471,8 +463,8 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
           placeholder={placeholder}
           maxLength={maxLength}
           disabled={disabled}
-          className={`relative w-full bg-transparent border-none outline-none resize-none caret-text-primary ${className}`}
-          style={{ minHeight, color: 'transparent', caretColor: 'var(--color-text-primary, #000)' }}
+          className={`relative w-full bg-transparent border-none outline-none resize-none text-text-primary caret-text-primary ${className}`}
+          style={{ minHeight, caretColor: 'var(--color-text-primary, #000)' }}
         />
 
         {/* Mention dropdown */}

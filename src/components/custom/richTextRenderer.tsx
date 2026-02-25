@@ -20,10 +20,12 @@ export type MentionMap = Record<string, string>;
  *
  * @param text - The raw post text
  * @param mentionMap - Optional map of mention tag → userId for making mentions clickable links
+ * @param compactLayout - If true, no padding on mentions/hashtags so layout matches plain text (for textarea overlay alignment)
  */
 export function renderRichText(
   text: string,
   mentionMap?: MentionMap,
+  compactLayout?: boolean,
 ): React.ReactNode[] {
   // Match @MentionName followed by zero-width space or space/end
   // The zero-width space (\u200B) marks the end of a completed mention
@@ -32,6 +34,14 @@ export function renderRichText(
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
+
+  // When compactLayout, use no padding so character positions match textarea (cursor alignment)
+  const mentionClass = compactLayout
+    ? 'text-blue-600 dark:text-blue-400 font-semibold cursor-default'
+    : 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded cursor-default';
+  const linkClass = compactLayout
+    ? 'inline text-blue-600 dark:text-blue-400 font-semibold no-underline'
+    : 'inline text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors no-underline';
 
   while ((match = pattern.exec(text)) !== null) {
     // Add text before the match
@@ -50,7 +60,7 @@ export function renderRichText(
           <Link
             key={match.index}
             href={`/${userId}`}
-            className="inline text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors no-underline"
+            className={linkClass}
           >
             {token}
           </Link>,
@@ -60,14 +70,14 @@ export function renderRichText(
         parts.push(
           <span
             key={match.index}
-            className="text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded cursor-default"
+            className={mentionClass}
           >
             {token}
           </span>,
         );
       }
     } else if (token.startsWith('#')) {
-      // Hashtag — bold with brand-ish color
+      // Hashtag — bold with brand-ish color (no extra padding in compact)
       parts.push(
         <span
           key={match.index}

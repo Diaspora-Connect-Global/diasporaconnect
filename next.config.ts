@@ -7,14 +7,19 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        pathname: '/diaspoplug-media/**',
+      },
+      {
+        protocol: 'https',
         hostname: '**',
       },
       {
         protocol: 'http',
         hostname: '**',
-      }
+      },
     ],
-      dangerouslyAllowSVG: true
+    dangerouslyAllowSVG: true,
   },
 };
 
