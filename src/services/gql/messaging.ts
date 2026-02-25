@@ -34,15 +34,6 @@ export const GET_CONVERSATIONS = gql`
       groupId
       participantIds
       participantCount
-      participantHash
-      participants {
-        id
-        userId
-        lastReadAt
-        isActive
-        joinedAt
-        leftAt
-      }
       lastMessage {
         id
         senderId
@@ -96,19 +87,12 @@ export const GET_CONVERSATION_DETAILS = gql`
       id
       type
       groupId
-      participantHash
+      participantIds
+      participantCount
       createdAt
       updatedAt
       lastMessageAt
       isActive
-      participants {
-        id
-        userId
-        lastReadAt
-        isActive
-        joinedAt
-        leftAt
-      }
     }
   }
 `;

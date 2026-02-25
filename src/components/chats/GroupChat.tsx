@@ -335,14 +335,15 @@ export default function GroupChat() {
         }
 
         if (replyingTo) {
-            // Handle reply via GraphQL
+            // Handle reply via GraphQL — use same content for backend and local store
+            const content = messageText?.trim() || (image ? 'Image' : '');
             try {
                 const messageType = image ? 'IMAGE' : 'TEXT';
                 const { data } = await sendMessageMutation({
                     variables: {
                         conversationId,
                         messageType,
-                        content: messageText || 'Image',
+                        content,
                         replyToId: replyingTo,
                     },
                 });
@@ -353,7 +354,7 @@ export default function GroupChat() {
                         conversationId,
                         senderId: currentUserId,
                         type: messageType,
-                        content: messageText,
+                        content,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
                         replyToId: replyingTo,
@@ -365,7 +366,7 @@ export default function GroupChat() {
                         id: data.sendMessage,
                         messageId: replyingTo,
                         senderId: currentUserId,
-                        text: messageText,
+                        text: content,
                         timestamp: new Date().toISOString(),
                         type: image ? 'image' : 'text',
                         imageUrl: image
@@ -377,14 +378,15 @@ export default function GroupChat() {
             }
             setReplyingTo(null);
         } else {
-            // Send via GraphQL mutation
+            // Send via GraphQL mutation — use same content for backend, local store, and WebSocket
+            const content = messageText?.trim() || (image ? 'Image' : '');
             try {
                 const messageType = image ? 'IMAGE' : 'TEXT';
                 const { data } = await sendMessageMutation({
                     variables: {
                         conversationId,
                         messageType,
-                        content: messageText || 'Image',
+                        content,
                     },
                 });
 
@@ -394,7 +396,7 @@ export default function GroupChat() {
                         conversationId,
                         senderId: currentUserId,
                         type: messageType,
-                        content: messageText,
+                        content,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
                     };
@@ -407,7 +409,7 @@ export default function GroupChat() {
                     const payload: SendMessagePayload = {
                         conversationId,
                         type: image ? 'image' : 'text',
-                        content: messageText,
+                        content,
                         ...(image && {
                             metadata: {
                                 fileName: 'image.jpg',

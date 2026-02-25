@@ -15,7 +15,7 @@ import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData } from "@/services/gql/types/messaging";
+import type { Conversation, Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData } from "@/services/gql/types/messaging";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
@@ -58,14 +58,14 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
         // Check if conversation already exists from GraphQL query
         if (conversationsData?.getConversations) {
             const existingConv = conversationsData.getConversations.find(
-                (conv) => conv.type === 'DIRECT' && conv.participants?.some((p: any) => p.userId === chat.id)
+                (conv) => conv.type === 'DIRECT' && conv.participantIds?.includes(chat.id)
             );
             if (existingConv) {
                 setConversationId(existingConv.id);
                 setRealConversation(chat.id, {
                     conversationId: existingConv.id,
                     type: 'DIRECT',
-                    participantIds: existingConv.participants?.map((p: any) => p.userId) || [currentUserId, chat.id],
+                    participantIds: existingConv.participantIds || [currentUserId, chat.id],
                 });
                 return;
             }
@@ -90,10 +90,11 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                         participantIds: [currentUserId, chat.id],
                     });
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 // Handle duplicate key - conversation already exists
-                const isDuplicate = error?.graphQLErrors?.some(
-                    (e: any) => e.message?.includes('duplicate key')
+                const err = error as { graphQLErrors?: Array<{ message?: string }> };
+                const isDuplicate = err?.graphQLErrors?.some(
+                    (e: { message?: string }) => e.message?.includes('duplicate key')
                 );
                 if (isDuplicate) {
                     console.log('Conversation already exists, fetching...');
@@ -120,17 +121,17 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     useEffect(() => {
         if (messagesData?.getMessages?.messages && conversationId && hasLoadedHistoryRef.current !== conversationId) {
             // Map the raw GraphQL messages to our internal ApiMessage format
-            const history = messagesData.getMessages.messages.map((m: any): ApiMessage => ({
+            const history = messagesData.getMessages.messages.map((m: Message): ApiMessage => ({
                 id: m.id,
                 conversationId: m.conversationId,
                 senderId: m.senderId,
                 type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
                 content: m.content || '',
                 createdAt: m.createdAt,
-                mentions: m.mentions?.map((mn: any) => mn.userId) || [],
+                mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
                 replyToId: m.replyToId,
                 status: 'read', // History is loaded as read
-                mediaMetadata: m.mediaMetadata,
+                mediaMetadata: m.mediaMetadata as ApiMessage['mediaMetadata'],
             }));
 
             // Prepend or bulk-replace into global store

@@ -95,8 +95,7 @@ export default function ChatSideBar() {
             })
             .map((conv: any) => {
                 // Find the other participant (not the current user)
-                const otherParticipant = conv.participants?.find((p: any) => p.userId !== currentUserId);
-                const otherParticipantId = otherParticipant?.userId || '';
+                const otherParticipantId = conv.participantIds?.find((id: string) => id !== currentUserId) || '';
 
                 // Try to find full profile info from connections
                 const otherUserObj = connectionMap.get(otherParticipantId);
@@ -111,15 +110,13 @@ export default function ChatSideBar() {
                     setRealConversation(otherParticipantId, {
                         conversationId: conv.id,
                         type: 'DIRECT',
-                        participantIds: conv.participants?.map((p: any) => p.userId) || [],
+                        participantIds: conv.participantIds || [],
                     });
                 } else {
-                    // When we have no other participant (e.g. malformed data), chat.id falls back to conv.id —
-                    // register under conv.id so getRealConversation(chat.id) finds it
                     setRealConversation(conv.id, {
                         conversationId: conv.id,
                         type: 'DIRECT',
-                        participantIds: conv.participants?.map((p: any) => p.userId) || [],
+                        participantIds: conv.participantIds || [],
                     });
                 }
 
