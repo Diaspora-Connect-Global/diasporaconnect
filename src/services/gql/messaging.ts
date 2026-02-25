@@ -14,6 +14,8 @@ export type {
   SendMessageData,
   GetMessagesData,
   GetConversationsData,
+  GQLConversationResponse,
+  GQLConversationVariables,
   WebSocketMessage,
   PresenceUpdate,
   MediaMetadata,
@@ -32,19 +34,27 @@ export const GET_CONVERSATIONS = gql`
       groupId
       participantIds
       participantCount
-      isActive
-      createdAt
-      updatedAt
-      lastMessageAt
+      participantHash
+      participants {
+        id
+        userId
+        lastReadAt
+        isActive
+        joinedAt
+        leftAt
+      }
       lastMessage {
         id
         senderId
         type
         content
-        isEdited
-        isDeleted
         createdAt
       }
+      unreadCount
+      isActive
+      lastMessageAt
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -70,6 +80,7 @@ export const GET_MESSAGES = gql`
           gcsPath
         }
         isEdited
+        editedAt
         isDeleted
         createdAt
       }
@@ -81,14 +92,23 @@ export const GET_MESSAGES = gql`
 
 export const GET_CONVERSATION_DETAILS = gql`
   query GetConversationDetails($conversationId: ID!) {
-    getConversation(id: $conversationId) {
+    getConversation(conversationId: $conversationId) {
       id
       type
       groupId
-      participantIds
-      participantCount
+      participantHash
+      createdAt
+      updatedAt
       lastMessageAt
       isActive
+      participants {
+        id
+        userId
+        lastReadAt
+        isActive
+        joinedAt
+        leftAt
+      }
     }
   }
 `;

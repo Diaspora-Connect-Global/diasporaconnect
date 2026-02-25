@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 import { useQuery } from "@apollo/client/react";
 import { GET_MY_GROUPS } from "@/services/gql/groups";
 import { GET_CONVERSATIONS } from "@/services/gql/messaging";
+import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import type { GetConversationsData } from "@/services/gql/types/messaging";
 import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
@@ -19,6 +20,7 @@ type TabType = 'direct' | 'groups';
 
 interface ChatItem {
     id: string;
+    conversationId?: string;
     name: string;
     type: 'direct' | 'group';
     lastMessage: string;
@@ -45,8 +47,14 @@ export default function ChatSideBar() {
     const currentUserId = user?.userId;
 
     // Fetch real conversations from API
-    const { data: conversationsData, loading: loadingConversations } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
+    const { data: conversationsData, loading: loadingConversations, error: conversationsError } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
         fetchPolicy: 'network-only',
+    });
+
+    // Fetch user connections to map participant IDs to real names
+    const { data: connectionsData, loading: loadingConnections } = useQuery<any>(GET_MY_CONNECTIONS, {
+        variables: { limit: 100, offset: 0 },
+        fetchPolicy: 'cache-first',
     });
 
     // Get active tab from URL query param 't', default to 'direct'
@@ -65,36 +73,74 @@ export default function ChatSideBar() {
     useEffect(() => {
         if (!conversationsData?.getConversations || !currentUserId) return;
 
+        // Build a Map of connected user IDs to their details
+        const connectionMap = new Map<string, any>();
+        if (connectionsData?.getConnections?.connections) {
+            connectionsData.getConnections.connections.forEach((conn: any) => {
+                const otherUser = conn.requesterId === currentUserId ? conn.receiver : conn.requester;
+                if (otherUser?.userId) {
+                    connectionMap.set(otherUser.userId, otherUser);
+                }
+            });
+        }
+
         const apiConversations = conversationsData.getConversations;
+        console.log("Raw API Conversations:", apiConversations);
+
         const dmConversations = apiConversations
-            .filter((conv: any) => conv.type === 'DIRECT' && conv.isActive)
+            .filter((conv: any) => {
+                const isDirect = conv.type === 'DIRECT' || conv.type === 'direct';
+                console.log(`Checking conversation ${conv.id}: type=${conv.type}, isActive=${conv.isActive}, isDirect=${isDirect}`);
+                return isDirect && conv.isActive;
+            })
             .map((conv: any) => {
                 // Find the other participant (not the current user)
-                const otherParticipantId = conv.participantIds?.find((id: string) => id !== currentUserId) || '';
+                const otherParticipant = conv.participants?.find((p: any) => p.userId !== currentUserId);
+                const otherParticipantId = otherParticipant?.userId || '';
 
-                // Store the real conversation mapping
+                // Try to find full profile info from connections
+                const otherUserObj = connectionMap.get(otherParticipantId);
+                const displayName = otherUserObj
+                    ? [otherUserObj.firstName, otherUserObj.lastName].filter(Boolean).join(' ').trim() || `User ${otherParticipantId.substring(0, 8)}`
+                    : `User ${otherParticipantId.substring(0, 8)}`;
+                const avatar = otherUserObj?.avatarUrl || '';
+
+                // Store the real conversation mapping so DirectMessageChat can look it up by chat.id
+                const chatId = otherParticipantId || conv.id;
                 if (otherParticipantId) {
                     setRealConversation(otherParticipantId, {
                         conversationId: conv.id,
                         type: 'DIRECT',
-                        participantIds: conv.participantIds || [],
+                        participantIds: conv.participants?.map((p: any) => p.userId) || [],
+                    });
+                } else {
+                    // When we have no other participant (e.g. malformed data), chat.id falls back to conv.id —
+                    // register under conv.id so getRealConversation(chat.id) finds it
+                    setRealConversation(conv.id, {
+                        conversationId: conv.id,
+                        type: 'DIRECT',
+                        participantIds: conv.participants?.map((p: any) => p.userId) || [],
                     });
                 }
 
                 return {
-                    id: otherParticipantId || conv.id,
-                    name: otherParticipantId ? `User ${otherParticipantId.substring(0, 8)}` : 'Unknown',
+                    id: chatId,
+                    conversationId: conv.id,
+                    name: displayName || 'Unknown',
                     type: 'direct' as const,
                     lastMessage: conv.lastMessage?.content || t('empty.title'),
                     lastMessageTime: conv.lastMessage?.createdAt || conv.lastMessageAt || '',
-                    unread: 0,
+                    unread: conv.unreadCount ?? 0,
                     online: false,
-                    avatar: '',
+                    avatar: avatar,
                 };
             });
 
         setDirectChats(dmConversations);
-    }, [conversationsData, currentUserId, setRealConversation, t]);
+    }, [conversationsData, connectionsData, currentUserId, setRealConversation, t]);
+
+    console.log("=== ALL DIRECT MESSAGE CONVERSATION IDS ===", directChats.map(chat => chat.conversationId).filter(Boolean));
+    console.log("Raw API Conversations on Render:", conversationsData?.getConversations);
 
     const directUnreadCount = directChats.reduce((sum, chat) => sum + chat.unread, 0);
 
@@ -107,15 +153,15 @@ export default function ChatSideBar() {
     // Update URL with query params
     const updateUrlParams = (tab?: TabType, chatType?: 'direct' | 'group') => {
         const params = new URLSearchParams(searchParams.toString());
-        
+
         if (tab) {
             params.set('t', tab);
         }
-        
+
         if (chatType) {
             params.set('ct', chatType);
         }
-        
+
         router.push(`?${params.toString()}`, { scroll: false });
     };
 
@@ -191,7 +237,7 @@ export default function ChatSideBar() {
                 {/* Create Group Button - Only show when Groups tab is active */}
                 {activeTab === 'groups' && (
                     <div className="px-4 py-3">
-                        <div 
+                        <div
                             className="text-text-brand flex items-center cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={handleCreateGroup}
                         >
@@ -203,8 +249,13 @@ export default function ChatSideBar() {
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto scrollbar-hide">
+                    {conversationsError && (
+                        <div className="p-4 text-red-500 text-sm">
+                            Error loading conversations: {conversationsError.message}
+                        </div>
+                    )}
                     {activeTab === 'direct' ? (
-                        loadingConversations ? (
+                        (loadingConversations || loadingConnections) ? (
                             <div className="p-2 space-y-1">
                                 {[...Array(5)].map((_, i) => (
                                     <ChatItemSkeleton key={i} />
@@ -222,6 +273,7 @@ export default function ChatSideBar() {
                             searchQuery={searchQuery}
                             activeChat={activeChat}
                             onChatClick={handleChatClick}
+                            conversations={conversationsData?.getConversations || []}
                         />
                     )}
                 </div>
@@ -230,7 +282,7 @@ export default function ChatSideBar() {
             <StartConversationModal
                 isOpen={isModalOpen}
                 onOpenChange={setIsModalOpen}
-                type={modalType} 
+                type={modalType}
             />
         </>
     );
@@ -248,10 +300,9 @@ function TabButton({ active, onClick, label, notificationCount }: TabButtonProps
     return (
         <button
             onClick={onClick}
-            className={`flex-1 py-1 text-center font-medium transition-colors cursor-pointer ${
-                active
-                    ? 'text-text-primary border-b-2 border-text-brand'
-                    : 'text-text-secondary hover:text-text-secondary'
+            className={`flex-1 py-1 text-center font-medium transition-colors cursor-pointer ${active
+                ? 'text-text-primary border-b-2 border-text-brand'
+                : 'text-text-secondary hover:text-text-secondary'
                 }`}
         >
             <div className="flex items-center justify-center space-x-2">
@@ -274,13 +325,13 @@ function ChatItemSkeleton() {
         <div className="flex items-center border-b space-x-3 p-3 animate-pulse">
             {/* Avatar skeleton */}
             <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0" />
-            
+
             {/* Content skeleton */}
             <div className="flex-1 min-w-0 space-y-2">
                 <div className="h-4 bg-gray-300 rounded w-3/4" />
                 <div className="h-3 bg-gray-200 rounded w-1/2" />
             </div>
-            
+
             {/* Time and badge skeleton */}
             <div className="flex flex-col items-end space-y-2">
                 <div className="h-3 bg-gray-200 rounded w-12" />
@@ -320,7 +371,7 @@ interface AvatarProps {
 function Avatar({ src, name, size = 'md', online }: AvatarProps) {
     const [imageError, setImageError] = useState(false);
     const isUrl = isValidUrl(src);
-    
+
     const sizeClasses = {
         sm: 'w-8 h-8 text-xs',
         md: 'w-12 h-12 text-sm',
@@ -362,6 +413,7 @@ function Avatar({ src, name, size = 'md', online }: AvatarProps) {
 interface ChatItemProps {
     chat: {
         id: string;
+        conversationId?: string;
         name: string;
         lastMessage: string;
         lastMessageTime: string;
@@ -379,13 +431,12 @@ function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
     return (
         <div
             onClick={onClick}
-            className={`flex items-center border-b space-x-3 p-3 hover:bg-surface-hover cursor-pointer transition-colors group ${
-                isActive ? 'bg-surface-default border border-surface-brand-light rounded-lg' : ''
+            className={`flex items-center border-b space-x-3 p-3 hover:bg-surface-hover cursor-pointer transition-colors group ${isActive ? 'bg-surface-default border border-surface-brand-light rounded-lg' : ''
                 }`}
         >
             {/* Avatar with online status */}
-            <Avatar 
-                src={chat.avatar} 
+            <Avatar
+                src={chat.avatar}
                 name={chat.name}
                 online={chat.online}
             />
@@ -394,8 +445,10 @@ function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
             <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-text-primary truncate">{chat.name}</h3>
                 <p className="text-sm text-text-secondary truncate">{chat.lastMessage}</p>
+                {chat.conversationId && (
+                    <p className="text-[10px] text-text-tertiary truncate font-mono mt-0.5">ID: {chat.conversationId}</p>
+                )}
             </div>
-
             <div className="flex flex-col items-end space-y-1">
                 <span className={`text-xs ${chat.unread > 0 ? "text-text-brand" : "text-text-secondary"} whitespace-nowrap`}>
                     {formatDateProximity(chat.lastMessageTime)}
@@ -423,7 +476,7 @@ interface DirectMessagesListProps {
 
 function DirectMessagesList({ chats, activeChat, onChatClick }: DirectMessagesListProps) {
     const t = useTranslations('chat');
-    
+
     if (chats.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
@@ -472,13 +525,14 @@ interface GroupsListProps {
     searchQuery: string;
     activeChat: { id: string; type: 'direct' | 'group' } | null;
     onChatClick: (chat: { id: string; type: 'direct' | 'group' }) => void;
+    conversations?: any[];
     limit?: number;
     offset?: number;
 }
 
-function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset = 0 }: GroupsListProps) {
+function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], limit = 50, offset = 0 }: GroupsListProps) {
     const t = useTranslations('chat');
-    
+
     const { data, loading, error } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
         variables: { limit, offset },
         fetchPolicy: 'network-only',
@@ -525,16 +579,21 @@ function GroupsList({ searchQuery, activeChat, onChatClick, limit = 50, offset =
     return (
         <div className="space-y-1 p-2">
             {filteredGroups.map((group) => {
+                const correspondingConversation = conversations.find(
+                    (conv) => conv.type === 'GROUP' && conv.groupId === group.id
+                );
+
                 return (
                     <ChatItem
                         key={group.id}
                         chat={{
                             id: group.id,
+                            conversationId: correspondingConversation?.id,
                             name: group.name,
                             avatar: group.avatarUrl || getInitials(group.name),
                             lastMessage: group.description || t('group.memberCount', { count: group.memberCount }),
                             lastMessageTime: group.createdAt,
-                            unread: 0,
+                            unread: correspondingConversation?.unreadCount ?? 0,
                             type: 'group' as const,
                             memberCount: group.memberCount,
                         }}

@@ -54,13 +54,25 @@ export interface Conversation {
   id: string;
   type: ConversationType;
   groupId?: string;
-  participantIds: string[];
-  participantCount: number;
+  /** User IDs in the conversation (spec); may be present alongside participants */
+  participantIds?: string[];
+  participantCount?: number;
+  participantHash?: string;
+  participants: {
+    id: string;
+    userId: string;
+    lastReadAt?: string;
+    isActive: boolean;
+    joinedAt: string;
+    leftAt?: string;
+  }[];
+  lastMessage?: Pick<Message, 'id' | 'senderId' | 'type' | 'content' | 'createdAt'>;
+  /** Unread message count for the current user */
+  unreadCount?: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   lastMessageAt?: string;
-  lastMessage?: Pick<Message, 'id' | 'senderId' | 'type' | 'content' | 'isEdited' | 'isDeleted' | 'createdAt'>;
 }
 
 // ============================================================================
@@ -98,6 +110,10 @@ export interface GetMessagesInput {
   offset?: number;
 }
 
+export type GQLConversationVariables = {
+  conversationId: string;
+};
+
 // ============================================================================
 // RESPONSE TYPES
 // ============================================================================
@@ -129,6 +145,27 @@ export interface GetConversationsData {
   getConversations: Conversation[];
 }
 
+export type GQLConversationResponse = {
+  getConversation: {
+    id: string;
+    type: string;             // 'direct' | 'group'
+    groupId?: string | null;
+    participantHash: string;
+    createdAt: string;        // ISO Date String
+    updatedAt: string;        // ISO Date String
+    lastMessageAt?: string | null; // ISO Date String
+    isActive: boolean;
+    participants: {
+      id: string;
+      userId: string;
+      lastReadAt?: string | null;  // ISO Date String
+      isActive: boolean;
+      joinedAt: string;            // ISO Date String
+      leftAt?: string | null;      // ISO Date String
+    }[];
+  } | null; // Returns null if conversation is not found
+};
+
 // ============================================================================
 // WEBSOCKET TYPES
 // ============================================================================
@@ -140,6 +177,7 @@ export interface WebSocketSendPayload {
   content: string;
   mentions?: string[];
   replyToId?: string;
+  metadata?: { fileId: string; fileName: string; fileSize: number; mimeType: string; gcsPath: string };
 }
 
 /** Payload received via 'message:new' WebSocket event */
@@ -149,7 +187,10 @@ export interface WebSocketMessage {
   senderId: string;
   encryptedData: unknown; // Server encrypts; use GraphQL for plaintext content
   type: 'text' | 'image' | 'file' | 'video' | 'audio';
+  metadata?: { fileId?: string; fileName?: string; fileSize?: number; mimeType?: string; gcsPath?: string };
+  replyToId?: string;
   timestamp: string;
+  isOffline?: boolean;
 }
 
 export interface PresenceUpdate {

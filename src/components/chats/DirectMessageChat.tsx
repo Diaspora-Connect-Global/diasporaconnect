@@ -58,14 +58,14 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
         // Check if conversation already exists from GraphQL query
         if (conversationsData?.getConversations) {
             const existingConv = conversationsData.getConversations.find(
-                (conv) => conv.type === 'DIRECT' && conv.participantIds?.includes(chat.id)
+                (conv) => conv.type === 'DIRECT' && conv.participants?.some((p: any) => p.userId === chat.id)
             );
             if (existingConv) {
                 setConversationId(existingConv.id);
                 setRealConversation(chat.id, {
                     conversationId: existingConv.id,
                     type: 'DIRECT',
-                    participantIds: existingConv.participantIds || [currentUserId, chat.id],
+                    participantIds: existingConv.participants?.map((p: any) => p.userId) || [currentUserId, chat.id],
                 });
                 return;
             }
@@ -115,8 +115,10 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
         fetchPolicy: 'network-only',
     });
 
+    const hasLoadedHistoryRef = useRef<string | null>(null);
+
     useEffect(() => {
-        if (messagesData?.getMessages?.messages && conversationId) {
+        if (messagesData?.getMessages?.messages && conversationId && hasLoadedHistoryRef.current !== conversationId) {
             // Map the raw GraphQL messages to our internal ApiMessage format
             const history = messagesData.getMessages.messages.map((m: any): ApiMessage => ({
                 id: m.id,
@@ -133,6 +135,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
             // Prepend or bulk-replace into global store
             setApiMessages(conversationId, history);
+            hasLoadedHistoryRef.current = conversationId;
         }
     }, [messagesData, conversationId, setApiMessages]);
 
@@ -202,7 +205,6 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                 messageType,
                 content: messageText || 'Image',
             });
-
             const { data } = await sendMessageMutation({
                 variables: {
                     conversationId,
@@ -213,7 +215,6 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
             if (data?.sendMessage) {
                 console.log('✅ [Step 1] Message SAVED to database! messageId:', data.sendMessage);
-
                 const sentMsg: ApiMessage = {
                     id: data.sendMessage,
                     conversationId,

@@ -206,8 +206,10 @@ export default function GroupChat() {
         fetchPolicy: 'network-only',
     });
 
+    const hasLoadedHistoryRef = useRef<string | null>(null);
+
     useEffect(() => {
-        if (messagesData?.getMessages?.messages && conversationId) {
+        if (messagesData?.getMessages?.messages && conversationId && hasLoadedHistoryRef.current !== conversationId) {
             // Map the raw GraphQL messages to our internal ApiMessage format
             const history = messagesData.getMessages.messages.map((m: any): ApiMessage => ({
                 id: m.id,
@@ -224,6 +226,7 @@ export default function GroupChat() {
 
             // Prepend or bulk-replace into global store
             setApiMessages(conversationId, history);
+            hasLoadedHistoryRef.current = conversationId;
         }
     }, [messagesData, conversationId, setApiMessages]);
 

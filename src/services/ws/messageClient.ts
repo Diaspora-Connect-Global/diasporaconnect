@@ -238,17 +238,20 @@ export class MessageClient {
     conversationId: string,
     type: 'image' | 'video' | 'audio' | 'file'
   ): Promise<MessageSentResponse> {
-    // Upload file first
     const { fileId, key } = await this.uploadFile(file, conversationId);
 
-    // Send message notification via WebSocket (plaintext filename as content)
     return this.sendMessage({
       conversationId,
       type,
       content: file.name,
-      // Note: actual media content is saved via GraphQL sendMessage mutation
+      metadata: {
+        fileId,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        gcsPath: key,
+      },
     });
-    void fileId; void key; // metadata tracked by backend
   }
 
   // ==================== CONNECTION MANAGEMENT ====================

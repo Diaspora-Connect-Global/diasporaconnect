@@ -9,13 +9,23 @@
 
 // ─── Emit Payloads (client → server) ────────────────────────────────────────
 
-/** Emitted via 'message:send' */
+/** Optional metadata for media messages (IMAGE, VIDEO, FILE, AUDIO) */
+export interface MessageSendMetadata {
+  fileId: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  gcsPath: string;
+}
+
+/** Emitted via 'message:send'. For media: upload first via media:request-upload-url, then send with metadata. */
 export interface MessageData {
   conversationId: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'file';
   content: string;
   mentions?: string[];
   replyToId?: string;
+  metadata?: MessageSendMetadata;
 }
 
 /** Emitted via 'message:delivered' */
@@ -59,7 +69,11 @@ export interface IncomingMessage {
   senderId: string;
   encryptedData: unknown;
   type: 'text' | 'image' | 'video' | 'audio' | 'file';
+  metadata?: MessageSendMetadata;
+  replyToId?: string;
   timestamp: string;
+  /** true when delivered on reconnect (offline queue) */
+  isOffline?: boolean;
 }
 
 /** Received via 'message:delivery' */
