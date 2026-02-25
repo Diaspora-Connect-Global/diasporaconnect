@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Header from "@/components/custom/header";
 import LoadingScreen from "@/components/custom/LoadingScreen";
 import { useAuthStore } from "@/store/useAuthStore";
+import MessageWebSocketProvider from "@/components/provider/MessageWebSocketProvider";
 
 export default function MainLayout({
   children,
@@ -37,8 +38,10 @@ export default function MainLayout({
   }
 
   return (
-    <div>
-      <Header>{children}</Header>
-    </div>
+    <MessageWebSocketProvider>
+      <div>
+        <Header>{children}</Header>
+      </div>
+    </MessageWebSocketProvider>
   );
 }

@@ -5,6 +5,8 @@ import { Smile, ImageIcon, Send, X } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 import { useTranslations } from "next-intl";
+import EmojiPicker, { Theme } from "emoji-picker-react";
+import { useTheme } from "next-themes";
 
 
 interface MessageInputProps {
@@ -29,8 +31,27 @@ export function MessageInput({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    
+    const cursorAfterEmojiRef = useRef<number | null>(null);
+    const { resolvedTheme } = useTheme();
+
     const inputPlaceholder = placeholder || t('typeMessage');
+
+    const handleEmojiClick = (emojiData: { emoji: string }) => {
+        const textarea = textareaRef.current;
+        const emoji = emojiData.emoji;
+        if (textarea) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const before = newMessage.slice(0, start);
+            const after = newMessage.slice(end);
+            const next = before + emoji + after;
+            setNewMessage(next);
+            cursorAfterEmojiRef.current = before.length + emoji.length;
+        } else {
+            setNewMessage((prev) => prev + emoji);
+        }
+        setShowEmojiPicker(false);
+    };
 
     const updateMockData = (messageText: string, image?: string) => {
         if (!conversationId) return;
@@ -160,6 +181,16 @@ export function MessageInput({
         }
     }, [newMessage]);
 
+    // Restore cursor position after inserting emoji
+    useEffect(() => {
+        const pos = cursorAfterEmojiRef.current;
+        if (pos !== null && textareaRef.current) {
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(pos, pos);
+            cursorAfterEmojiRef.current = null;
+        }
+    }, [newMessage]);
+
     // Close emoji picker when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -214,8 +245,13 @@ export function MessageInput({
                                 <Smile className="w-4 h-4 sm:w-5 sm:h-5 text-text-brand" />
                             </button>
                             {showEmojiPicker && (
-                                <div className="absolute bottom-full mb-2 left-0 sm:left-auto z-50 shadow-xl rounded-lg overflow-hidden">
-                                    {/* Emoji picker content */}
+                                <div className="absolute bottom-full mb-2 left-0 sm:left-auto sm:right-0 z-50 shadow-xl rounded-lg overflow-hidden">
+                                    <EmojiPicker
+                                        onEmojiClick={handleEmojiClick}
+                                        theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
+                                        width={320}
+                                        height={400}
+                                    />
                                 </div>
                             )}
                         </div>

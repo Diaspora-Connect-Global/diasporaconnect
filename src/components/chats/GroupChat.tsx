@@ -36,7 +36,6 @@ import { ConfirmationModal } from "../custom/confirmationModal";
 import { AddMembersModal } from "./modals/AddMembersModal";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
-import { useAuthStore } from "@/store/useAuthStore";
 import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES } from "@/services/gql/messaging";
@@ -80,9 +79,6 @@ export default function GroupChat() {
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
     const { messages, users, setActiveChat, addMessage, addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
-
-    const tokens = useAuthStore((state) => state.tokens);
-    const sessionToken = tokens?.accessToken; // Use accessToken for WebSocket (JWT)
 
     const [conversationId, setConversationId] = useState<string | null>(null);
 
@@ -230,11 +226,11 @@ export default function GroupChat() {
         }
     }, [messagesData, conversationId, setApiMessages]);
 
-    // WebSocket connection and message handling
+    // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
     useEffect(() => {
-        if (!sessionToken || !conversationId) return;
+        if (!conversationId) return;
 
-        messageService.connect(sessionToken);
+        setIsConnected(messageService.isConnected);
 
         const unsubConnect = messageService.onConnect(() => {
             setIsConnected(true);
@@ -248,20 +244,14 @@ export default function GroupChat() {
             if (wsMessage.conversationId === conversationId) {
                 // Backend sends encryptedData via WebSocket (notification only)
                 // Actual decrypted content should be fetched via GraphQL
-                // For now, we'll add a placeholder and refetch messages
                 console.log('📨 New message notification received:', wsMessage.messageId);
 
-                // TODO: Fetch message content via GraphQL query
-                // For now, trigger a refetch of conversation messages
-                // or add placeholder message until content is fetched
-
-                // Placeholder implementation - shows notification received
                 const apiMsg: ApiMessage = {
                     id: wsMessage.messageId,
                     conversationId: wsMessage.conversationId,
                     senderId: wsMessage.senderId,
                     type: (wsMessage.type?.toUpperCase() as ApiMessage['type']) || 'TEXT',
-                    content: '[Loading message...]', // Placeholder until GraphQL fetch
+                    content: '[Loading message...]',
                     createdAt: wsMessage.timestamp,
                     mentions: wsMessage.mentions,
                     replyToId: wsMessage.replyToId,
@@ -285,7 +275,7 @@ export default function GroupChat() {
             unsubMessage();
             unsubPresence();
         };
-    }, [sessionToken, conversationId, addApiMessage]);
+    }, [conversationId, addApiMessage]);
 
     const handleMBack = () => {
         setActiveChat(null);

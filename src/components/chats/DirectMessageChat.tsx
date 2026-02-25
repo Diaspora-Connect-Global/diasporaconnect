@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES } from "@/services/gql/messaging";
 import type { Conversation, Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData } from "@/services/gql/types/messaging";
-import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 
@@ -33,8 +32,6 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
-    const tokens = useAuthStore((state) => state.tokens);
-    const sessionToken = tokens?.accessToken; // Use accessToken for WebSocket (JWT)
 
     const apiMessages = getApiMessagesByConversation(conversationId || '');
 
@@ -143,11 +140,11 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
         }
     }, [messagesData, conversationId, setApiMessages]);
 
-    // WebSocket connection
+    // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
     useEffect(() => {
-        if (!sessionToken || !conversationId) return;
+        if (!conversationId) return;
 
-        messageService.connect(sessionToken);
+        setIsConnected(messageService.isConnected);
 
         const unsubConnect = messageService.onConnect(() => {
             setIsConnected(true);
@@ -182,7 +179,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             unsubDisconnect();
             unsubMessage();
         };
-    }, [sessionToken, conversationId, addApiMessage]);
+    }, [conversationId, addApiMessage]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
