@@ -89,7 +89,12 @@ export default function ChatSideBar() {
 
         const dmConversations = apiConversations
             .filter((conv: any) => {
-                const isDirect = conv.type === 'DIRECT' || conv.type === 'direct';
+                const typeDirect = conv.type === 'DIRECT' || conv.type === 'direct';
+                const misclassifiedAsGroup =
+                    (conv.type === 'GROUP' || conv.type === 'group') &&
+                    (conv.groupId == null || conv.groupId === '') &&
+                    (conv.participantIds?.length === 2 || conv.participantCount === 2);
+                const isDirect = typeDirect || misclassifiedAsGroup;
                 console.log(`Checking conversation ${conv.id}: type=${conv.type}, isActive=${conv.isActive}, isDirect=${isDirect}`);
                 return isDirect && conv.isActive;
             })

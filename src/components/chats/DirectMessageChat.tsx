@@ -57,8 +57,11 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
         // Check if conversation already exists from GraphQL query
         if (conversationsData?.getConversations) {
+            const isDirectConv = (conv: { type?: string; groupId?: string | null; participantIds?: string[] }) =>
+                (conv.type === 'DIRECT' || conv.type === 'direct') ||
+                ((conv.type === 'GROUP' || conv.type === 'group') && (conv.groupId == null || conv.groupId === '') && (conv.participantIds?.length === 2));
             const existingConv = conversationsData.getConversations.find(
-                (conv) => conv.type === 'DIRECT' && conv.participantIds?.includes(chat.id)
+                (conv) => isDirectConv(conv) && conv.participantIds?.includes(chat.id)
             );
             if (existingConv) {
                 setConversationId(existingConv.id);
