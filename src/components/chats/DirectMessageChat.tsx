@@ -278,15 +278,15 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     <div className="flex items-center space-x-3">
                         <div className="relative">
                             <Avatar className="w-12 h-12">
-                                <AvatarImage src={chat.avatar} alt="avatar" />
-                                <AvatarFallback>U</AvatarFallback>
+                                <AvatarImage src={otherAvatar} alt="" />
+                                <AvatarFallback>{displayName.slice(0, 1).toUpperCase() || 'U'}</AvatarFallback>
                             </Avatar>
                             {chat.online && (
                                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-text-success border-2 border-white rounded-full" />
                             )}
                         </div>
                         <div>
-                            <h2 className="font-semibold text-text-primary">{chat.name}</h2>
+                            <h2 className="font-semibold text-text-primary">{displayName}</h2>
                             <p className="text-sm text-text-secondary">
                                 {chat.online ? t('online') : t('lastSeen', { time: formatChatTimestamp(chat.lastMessageTime) })}
                             </p>
@@ -299,13 +299,23 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     </button>
                 </div>
 
-                {/* Mobile Info Button - Floating */}
-                <button
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="md:hidden fixed top-20 right-4 z-10 p-2.5 bg-surface-brand rounded-full shadow-lg hover:bg-surface-brand-dark transition-colors"
-                >
-                    <InfoIcon className="w-5 h-5 text-text-white" />
-                </button>
+                {/* Mobile: top bar with avatar, display name, and info button */}
+                <div className="md:hidden flex flex-shrink-0 border-b border-border-subtle p-3 justify-between items-center bg-surface-default">
+                    <div className="flex items-center space-x-3 min-w-0">
+                        <Avatar className="w-10 h-10 flex-shrink-0">
+                            <AvatarImage src={otherAvatar} alt="" />
+                            <AvatarFallback>{displayName.slice(0, 1).toUpperCase() || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <h2 className="font-semibold text-text-primary truncate">{displayName}</h2>
+                    </div>
+                    <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="flex-shrink-0 p-2 rounded-full hover:bg-surface-subtle transition-colors"
+                        aria-label={t('viewProfile')}
+                    >
+                        <InfoIcon className="w-6 h-6 text-text-brand" />
+                    </button>
+                </div>
 
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-4">
