@@ -50,6 +50,7 @@ class MessageService {
   private messageDeliveredCallbacks: ((data: { messageId: string; conversationId?: string; userId: string; status: 'delivered' }) => void)[] = [];
   private messageReadCallbacks: ((data: { messageId: string; conversationId?: string; userId: string; status: 'read' }) => void)[] = [];
   private conversationReadCallbacks: ((data: { conversationId: string; userId: string }) => void)[] = [];
+  private conversationReadAckCallbacks: ((data: { conversationId: string; updatedCount: number }) => void)[] = [];
   private presenceCallbacks: ((data: { userId: string; isOnline: boolean; lastSeen?: string }) => void)[] = [];
   private pongCallbacks: ((data: { timestamp: number }) => void)[] = [];
   private connectCallbacks: (() => void)[] = [];
@@ -150,6 +151,11 @@ class MessageService {
     // Another participant read the conversation (e.g. for "read by" in group chats)
     this.socket.on('conversation:read', (data: { conversationId: string; userId: string }) => {
       this.conversationReadCallbacks.forEach(cb => cb(data));
+    });
+
+    // Ack when we emit conversation:read — use updatedCount to set unreadCount = 0 locally if desired
+    this.socket.on('conversation:read:ack', (data: { conversationId: string; updatedCount: number }) => {
+      this.conversationReadAckCallbacks.forEach(cb => cb(data));
     });
 
     this.socket.on('presence:update', (data: { userId: string; isOnline: boolean; lastSeen?: string }) => {
@@ -273,6 +279,19 @@ class MessageService {
     return () => {
       this.conversationReadCallbacks = this.conversationReadCallbacks.filter(cb => cb !== callback);
     };
+  }
+
+  onConversationReadAck(callback: (data: { conversationId: string; updatedCount: number }) => void) {
+    this.conversationReadAckCallbacks.push(callback);
+    return () => {
+      this.conversationReadAckCallbacks = this.conversationReadAckCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  /** Emit when user opens a conversation (Option B for marking as read; we also use GraphQL mutation). */
+  markConversationAsRead(conversationId: string, userId: string) {
+    if (!this.isConnected) return;
+    this.socket!.emit('conversation:read', { conversationId, userId });
   }
 
   onPresenceUpdate(callback: (data: { userId: string; isOnline: boolean; lastSeen?: string }) => void) {
