@@ -20,6 +20,8 @@ interface Comment {
     id: string;
     author: string;
     authorImage: string;
+    /** Handle for @mentions (e.g. jsmith); use when building reply text so backend can link mentions. */
+    authorHandle?: string;
     content: string;
     createdAt: string;
     likes: number;
@@ -69,6 +71,7 @@ function mapApiComment(c: ApiComment): Comment {
         id: c.id,
         author: authorName,
         authorImage: authorAvatar,
+        authorHandle: selfMention?.handle,
         content: c.text,
         createdAt: c.createdAt,
         likes: 0,
@@ -259,7 +262,10 @@ export default function FeedCardWithReply({
         let preparedText = text.trim();
         if (parentId) {
             const parent = commentsData.find((c) => c.id === parentId);
-            if (parent) preparedText = `@${parent.author} ${preparedText}`;
+            if (parent) {
+                const mention = parent.authorHandle ?? parent.author;
+                preparedText = `@${mention} ${preparedText}`;
+            }
         }
         try {
             const result = onSendComment(preparedText, parentId);
