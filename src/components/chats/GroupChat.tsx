@@ -202,6 +202,16 @@ export default function GroupChat() {
                 });
                 return;
             }
+            // ID was resolved earlier but not in current list (e.g. refetched list is stale/incomplete).
+            // Use the known id and set store to avoid creating a duplicate conversation.
+            const fallbackParticipantIds = groupMembers.map(m => m.userId);
+            setConversationId(resolvedGroupConvId);
+            setRealConversation(chat.id, {
+                conversationId: resolvedGroupConvId,
+                type: 'GROUP',
+                participantIds: fallbackParticipantIds,
+            });
+            return;
         }
 
         const memberIds = groupMembers.map(m => m.userId).filter(id => id !== currentUserId);
