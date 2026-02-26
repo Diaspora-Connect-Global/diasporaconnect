@@ -64,8 +64,9 @@ export default function PostPage() {
           },
         },
       });
-    } catch {
+    } catch (err) {
       toast.error('Failed to add comment');
+      throw err;
     }
   };
 

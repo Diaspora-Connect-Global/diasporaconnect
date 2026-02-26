@@ -1,6 +1,9 @@
 import { io, Socket } from 'socket.io-client';
 
 /**
+ * Message WebSocket client. Per backend spec, connect via the API Gateway (e.g. port 3000).
+ * Auth: pass session ID or JWT in auth: { token } (no "Bearer " prefix).
+ *
  * Payload received from backend via 'message:new' WebSocket event.
  * Backend encrypts content; use GraphQL getMessages for plaintext.
  */
@@ -51,7 +54,7 @@ class MessageService {
   private messageReadCallbacks: ((data: { messageId: string; conversationId?: string; userId: string; status: 'read' }) => void)[] = [];
   private conversationReadCallbacks: ((data: { conversationId: string; userId: string }) => void)[] = [];
   private conversationReadAckCallbacks: ((data: { conversationId: string; updatedCount: number }) => void)[] = [];
-  private presenceCallbacks: ((data: { userId: string; isOnline: boolean; lastSeen?: string }) => void)[] = [];
+  private presenceCallbacks: ((data: { userId: string; isOnline: boolean; lastSeen?: string; timestamp?: number }) => void)[] = [];
   private pongCallbacks: ((data: { timestamp: number }) => void)[] = [];
   private connectCallbacks: (() => void)[] = [];
   private disconnectCallbacks: (() => void)[] = [];
@@ -84,7 +87,7 @@ class MessageService {
     // Pass raw JWT token - server handles auth directly
     const authToken = token.startsWith('Bearer ') ? token.slice(7) : token;
 
-    // Use environment variable for WebSocket URL, with fallback
+    // Connect via API Gateway (spec: port 3000). Set NEXT_PUBLIC_MESSAGE_WS_URL to your gateway (e.g. https://your-domain:3000).
     const SOCKET_URL = process.env.NEXT_PUBLIC_MESSAGE_WS_URL || 'https://api.diaspoplug.net';
 
     console.log(`🔌 Connecting to WebSocket: ${SOCKET_URL}`);
@@ -158,7 +161,7 @@ class MessageService {
       this.conversationReadAckCallbacks.forEach(cb => cb(data));
     });
 
-    this.socket.on('presence:update', (data: { userId: string; isOnline: boolean; lastSeen?: string }) => {
+    this.socket.on('presence:update', (data: { userId: string; isOnline: boolean; lastSeen?: string; timestamp?: number }) => {
       this.presenceCallbacks.forEach(cb => cb(data));
     });
 
@@ -294,7 +297,7 @@ class MessageService {
     this.socket!.emit('conversation:read', { conversationId, userId });
   }
 
-  onPresenceUpdate(callback: (data: { userId: string; isOnline: boolean; lastSeen?: string }) => void) {
+  onPresenceUpdate(callback: (data: { userId: string; isOnline: boolean; lastSeen?: string; timestamp?: number }) => void) {
     this.presenceCallbacks.push(callback);
     return () => {
       this.presenceCallbacks = this.presenceCallbacks.filter(cb => cb !== callback);

@@ -219,6 +219,9 @@ export interface Comment {
   text: string;
   authorId: string;
   authorType: string;
+  authorDisplayName?: string;
+  authorAvatarUrl?: string;
+  replyCount?: number;
   createdAt: string;
   updatedAt?: string;
   postId: string;
@@ -382,6 +385,7 @@ export interface GetPostCommentsData {
 export interface RequestUploadUrlData {
   requestUploadUrl: {
     uploadUrl: string;
+    objectKey: string;
   };
 }
 

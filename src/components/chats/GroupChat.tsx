@@ -3,7 +3,6 @@ import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { formatChatTimestamp } from "@/macros/time";
-import Image from "next/image";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -705,11 +704,9 @@ export default function GroupChat() {
                                                             {getSenderName(message.senderId)}
                                                         </p>
                                                     )}
-                                                    <Image
+                                                    <img
                                                         src={message.mediaMetadata.gcsPath}
                                                         alt="Shared image"
-                                                        width={300}
-                                                        height={200}
                                                         className="rounded-2xl max-w-full h-auto"
                                                     />
                                                     {message.content && (

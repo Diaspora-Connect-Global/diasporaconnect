@@ -48,6 +48,7 @@ export default function ChatSideBar() {
 
     // Fetch real conversations from API
     const { data: conversationsData, loading: loadingConversations, error: conversationsError } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
+        variables: { limit: 100, offset: 0 },
         fetchPolicy: 'network-only',
     });
 

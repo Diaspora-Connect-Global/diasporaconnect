@@ -7,7 +7,6 @@ import { formatChatTimestamp } from "@/macros/time";
 import { Check, ChevronRight, InfoIcon, X } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
-import Image from "next/image";
 import { useChatStore, ApiMessage } from "@/store/ChatStore";
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -38,9 +37,14 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
     const [createConversation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
     const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE);
+    const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
+        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
+    });
 
-    // Fetch existing conversations to find one with this participant
-    const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS);
+    // Fetch existing conversations to find one with this participant (variables must match refetchQueries in markConversationAsRead)
+    const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
+        variables: { limit: 100, offset: 0 },
+    });
 
     // Resolve other user's display name and avatar from connections (so header/info show name, not userId)
     const { data: connectionsData } = useQuery<{ getConnections?: { connections?: Array<{
@@ -331,11 +335,9 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                 <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
                                     {message.type === 'IMAGE' && message.mediaMetadata?.gcsPath ? (
                                         <div className="mb-2">
-                                            <Image
+                                            <img
                                                 src={message.mediaMetadata.gcsPath}
                                                 alt="Shared image"
-                                                width={300}
-                                                height={200}
                                                 className="rounded-2xl max-w-full h-auto"
                                             />
                                             {message.content && (

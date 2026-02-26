@@ -133,6 +133,9 @@ export const GET_POST_COMMENTS = gql`
       text
       authorId
       authorType
+      authorDisplayName
+      authorAvatarUrl
+      replyCount
       createdAt
       updatedAt
       postId

@@ -56,7 +56,7 @@ export interface Conversation {
   groupId?: string;
   participantIds: string[];
   participantCount: number;
-  lastMessage?: Pick<Message, 'id' | 'senderId' | 'type' | 'content' | 'createdAt'>;
+  lastMessage?: Pick<Message, 'id' | 'conversationId' | 'senderId' | 'type' | 'content' | 'isEdited' | 'isDeleted' | 'createdAt'>;
   unreadCount?: number;
   isActive: boolean;
   createdAt: string;

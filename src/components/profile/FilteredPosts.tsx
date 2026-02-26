@@ -164,8 +164,9 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
           },
         },
       });
-    } catch {
+    } catch (err) {
       toast.error('Failed to add comment');
+      throw err;
     }
   };
 

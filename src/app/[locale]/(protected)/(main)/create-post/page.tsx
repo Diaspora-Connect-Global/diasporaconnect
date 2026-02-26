@@ -145,7 +145,7 @@ export default function CreatePostPage() {
   const currentUser = useUserStore(state => state.user);
   const userName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'User';
 
-  const charLimit = 3000;
+  const charLimit = 5000; // Backend max; send raw text with \n preserved
   const charCount = postContent.length;
 
   // Create Post Mutation
@@ -382,7 +382,7 @@ export default function CreatePostPage() {
         const uploadPromises = attachments.map(async (attachment) => {
           if (!attachment.file) return null;
 
-          // Request upload URL
+          // Request upload URL (backend returns uploadUrl + objectKey for the GCS path)
           const { data: uploadData } = await requestUploadUrl({
             variables: {
               fileName: attachment.file.name,
@@ -392,12 +392,13 @@ export default function CreatePostPage() {
             }
           });
 
-          if (!uploadData?.requestUploadUrl) {
+          const uploadResult = uploadData?.requestUploadUrl;
+          if (!uploadResult?.uploadUrl) {
             throw new Error('Failed to get upload URL');
           }
 
-          // Upload file to S3
-          const uploadResponse = await fetch(uploadData.requestUploadUrl.uploadUrl, {
+          // Upload file to GCS via signed URL
+          const uploadResponse = await fetch(uploadResult.uploadUrl, {
             method: 'PUT',
             body: attachment.file,
             headers: {
@@ -409,8 +410,8 @@ export default function CreatePostPage() {
             throw new Error('Failed to upload file');
           }
 
-          // Generate object key from file name
-          const objectKey = `uploads/${Date.now()}-${attachment.file.name}`;
+          // Use backend's objectKey so it can store and return the correct GCS URL in the feed
+          const objectKey = uploadResult.objectKey ?? `uploads/${Date.now()}-${attachment.file.name}`;
 
           return {
             objectKey,
@@ -470,14 +471,14 @@ export default function CreatePostPage() {
   };
 
   const getCharCountColor = () => {
-    if (charCount > 2500) return 'text-text-danger';
-    if (charCount > 2000) return 'text-[#cb3500]';
+    if (charCount > 4500) return 'text-text-danger';
+    if (charCount > 4000) return 'text-[#cb3500]';
     return 'text-surface-brand';
   };
 
   const getCharIndicatorColor = () => {
-    if (charCount > 2500) return 'bg-text-danger';
-    if (charCount > 2000) return 'bg-[#cb3500]';
+    if (charCount > 4500) return 'bg-text-danger';
+    if (charCount > 4000) return 'bg-[#cb3500]';
     return 'bg-surface-brand';
   };
 

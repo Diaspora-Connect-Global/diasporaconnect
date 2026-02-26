@@ -1,6 +1,5 @@
 'use client';
 import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Copy, Check } from 'lucide-react';
-import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
@@ -25,6 +24,7 @@ interface Comment {
     createdAt: string;
     likes: number;
     replies?: number;
+    parentId?: string | null;
     mentionMap?: MentionMap;
 }
 
@@ -54,18 +54,16 @@ interface FeedCardProps {
 /* --------------------------------------------------------------- */
 /*  Component                                                       */
 /* --------------------------------------------------------------- */
-/** Map an API Comment to the local Comment shape used for rendering. */
+/** Map an API Comment to the local Comment shape. Use authorDisplayName/authorAvatarUrl from API when present. */
 function mapApiComment(c: ApiComment): Comment {
-    // Build a mentionMap so renderRichText can link @mentions in comment text
     const mentionMap: MentionMap = {};
     c.mentions?.forEach((m) => {
         mentionMap[m.handle] = m.entityId;
     });
 
-    // Try to resolve the author's display name from the mentions list
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
-    const authorName = selfMention?.displayName || selfMention?.handle || c.authorId;
-    const authorAvatar = selfMention?.avatarUrl || '/PROFILE.png';
+    const authorName = c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId;
+    const authorAvatar = c.authorAvatarUrl ?? selfMention?.avatarUrl ?? '/PROFILE.png';
 
     return {
         id: c.id,
@@ -74,6 +72,8 @@ function mapApiComment(c: ApiComment): Comment {
         content: c.text,
         createdAt: c.createdAt,
         likes: 0,
+        replies: c.replyCount,
+        parentId: c.parentId ?? undefined,
         mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
     };
 }
@@ -252,21 +252,31 @@ export default function FeedCardWithReply({
         }
     };
 
-    /** Called by MessageInputGlobal – adds a comment or a reply */
-    const handleSend = (text: string, parentId?: string) => {
+    /** Called by MessageInputGlobal – adds a comment or a reply. Updates local state only after mutation succeeds. */
+    const handleSend = async (text: string, parentId?: string) => {
         if (!text.trim() || !onSendComment) return;
 
-        onSendComment(text, parentId);
-        setCommentCount((c) => c + 1);
-        setShowComments(true);
-        setShowCommentInput(false);
-        setReplyToCommentId(null);
-
-        // Refresh comments from API after a short delay so the backend has time to persist
-        setTimeout(() => {
-            setCommentsLoaded(false);
-            fetchComments({ variables: { postId, limit: 20, offset: 0 } });
-        }, 500);
+        let preparedText = text.trim();
+        if (parentId) {
+            const parent = commentsData.find((c) => c.id === parentId);
+            if (parent) preparedText = `@${parent.author} ${preparedText}`;
+        }
+        try {
+            const result = onSendComment(preparedText, parentId);
+            if (result != null && typeof (result as Promise<unknown>).then === 'function') {
+                await result;
+            }
+            setCommentCount((c) => c + 1);
+            setShowComments(true);
+            setShowCommentInput(false);
+            setReplyToCommentId(null);
+            setTimeout(() => {
+                setCommentsLoaded(false);
+                fetchComments({ variables: { postId, limit: 20, offset: 0 } });
+            }, 500);
+        } catch {
+            // Mutation failed; parent shows toast; don't update local count or refresh
+        }
     };
 
     /* ------------------- Render Helpers ------------------- */
@@ -277,7 +287,7 @@ export default function FeedCardWithReply({
 
         return (
             <>
-                <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem]">
+                <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
                     {renderRichText(displayText)}
                     {truncated && (
                         <span
@@ -306,7 +316,7 @@ export default function FeedCardWithReply({
                         className="relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                         onClick={() => openImageModal(0)}
                     >
-                        <Image src={images[0]} alt="post" fill className="object-cover" />
+                        <img src={images[0]} alt="post" className="w-full h-full object-cover" />
                     </div>
                 ) : imageCount === 2 ? (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
@@ -316,7 +326,7 @@ export default function FeedCardWithReply({
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openImageModal(i)}
                             >
-                                <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
+                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
                             </div>
                         ))}
                     </div>
@@ -326,20 +336,20 @@ export default function FeedCardWithReply({
                             className="relative h-[30.5rem] rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => openImageModal(0)}
                         >
-                            <Image src={images[0]} alt="post 1" fill className="object-cover" />
+                            <img src={images[0]} alt="post 1" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col gap-[0.5rem]">
                             <div 
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openImageModal(1)}
                             >
-                                <Image src={images[1]} alt="post 2" fill className="object-cover" />
+                                <img src={images[1]} alt="post 2" className="w-full h-full object-cover" />
                             </div>
                             <div 
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openImageModal(2)}
                             >
-                                <Image src={images[2]} alt="post 3" fill className="object-cover" />
+                                <img src={images[2]} alt="post 3" className="w-full h-full object-cover" />
                             </div>
                         </div>
                     </div>
@@ -357,7 +367,7 @@ export default function FeedCardWithReply({
                                     }
                                 }}
                             >
-                                <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
+                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
                                 {i === maxDisplay - 1 && excessCount > 0 && (
                                     <div className="absolute inset-0 bg-black/40 bg-opacity-60 flex items-center justify-center">
                                         <span className="text-white text-3xl font-semibold">
@@ -432,11 +442,9 @@ export default function FeedCardWithReply({
                         <div 
                             className="relative w-full h-full flex items-center justify-center"
                         >
-                            <Image
+                            <img
                                 src={images[currentImageIndex]}
                                 alt={`Image ${currentImageIndex + 1}`}
-                                width={1200}
-                                height={800}
                                 className="object-contain w-full h-full"
                             />
                         </div>
@@ -456,17 +464,16 @@ export default function FeedCardWithReply({
                                                     e.stopPropagation();
                                                     setCurrentImageIndex(i);
                                                 }}
-                                                className={`relative w-20 h-20 rounded-lg cursor-pointer flex-shrink-0 transition-all duration-200 ${
+                                                className={`relative w-20 h-20 rounded-lg cursor-pointer flex-shrink-0 transition-all duration-200 overflow-hidden ${
                                                     i === currentImageIndex 
                                                         ? 'ring-3 ring-text-brand scale-110' 
                                                         : 'opacity-50 hover:opacity-100 hover:scale-105'
                                                 }`}
                                             >
-                                                <Image
+                                                <img
                                                     src={src}
                                                     alt={`Thumbnail ${i + 1}`}
-                                                    fill
-                                                    className="object-cover rounded-lg"
+                                                    className="w-full h-full object-cover rounded-lg"
                                                 />
                                                 {i === currentImageIndex && (
                                                     <div className="absolute inset-0 bg-surface-default/10 rounded-lg" />
@@ -488,11 +495,13 @@ export default function FeedCardWithReply({
 
         return (
             <div className="my-[1rem] flex items-start gap-2">
-                <Image
+                <img
                     src={currentUserAvatar}
                     alt="You"
                     width={40}
                     height={40}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
@@ -512,11 +521,13 @@ export default function FeedCardWithReply({
 
         return (
             <div className="mt-[1rem] ml-[3rem] flex items-start gap-2">
-                <Image
+                <img
                     src={currentUserAvatar}
                     alt="You"
                     width={40}
                     height={40}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
@@ -534,6 +545,16 @@ export default function FeedCardWithReply({
     const renderComments = () => {
         if (!showComments) return null;
 
+        const topLevel = commentsData.filter((c) => !c.parentId);
+        const repliesByParentId = new Map<string, Comment[]>();
+        commentsData.forEach((c) => {
+            if (c.parentId) {
+                const list = repliesByParentId.get(c.parentId) ?? [];
+                list.push(c);
+                repliesByParentId.set(c.parentId, list);
+            }
+        });
+
         return (
             <div className={`pt-[1rem] ${showCommentInput ? '' : 'mt-[1rem]'} border-t border-border-subtle`}>
                 <div className="max-h-[12rem] overflow-y-auto mb-[1rem] space-y-[1.5rem]">
@@ -541,19 +562,21 @@ export default function FeedCardWithReply({
                         <div className="flex items-center justify-center py-[2rem]">
                             <Loader2 className="w-5 h-5 animate-spin text-text-brand" />
                         </div>
-                    ) : commentsData.length === 0 ? (
+                    ) : topLevel.length === 0 ? (
                         <p className="text-text-secondary text-sm text-center py-[2rem]">
                             {t('noComments')}
                         </p>
                     ) : (
-                        commentsData.map((c) => (
+                        topLevel.map((c) => (
                             <div key={c.id}>
                                 <div className="flex gap-[0.75rem]">
-                                    <Image
+                                    <img
                                         src={c.authorImage || '/PROFILE.png'}
                                         alt={c.author}
                                         width={32}
                                         height={32}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
                                     />
                                     <div className="flex-1 min-w-0">
@@ -565,7 +588,7 @@ export default function FeedCardWithReply({
                                                 {formatDateProximity(c.createdAt)}
                                             </span>
                                         </div>
-                                        <p className="font-body-small text-text-primary break-words mb-[0.5rem]">
+                                        <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                                             {renderRichText(c.content, c.mentionMap)}
                                         </p>
                                         <div className="flex items-center gap-[0.75rem]">
@@ -588,6 +611,44 @@ export default function FeedCardWithReply({
                                     </div>
                                 </div>
                                 {renderReplyInput(c.id)}
+                                {(repliesByParentId.get(c.id)?.length ?? 0) > 0 && (
+                                    <div className="ml-8 mt-3 space-y-3">
+                                        {repliesByParentId.get(c.id)!.map((reply) => (
+                                            <div key={reply.id} className="flex gap-[0.75rem]">
+                                                <img
+                                                    src={reply.authorImage || '/PROFILE.png'}
+                                                    alt={reply.author}
+                                                    width={32}
+                                                    height={32}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
+                                                        <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
+                                                        <UserBadge tier="starter" size="xs" />
+                                                        <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
+                                                        <span className="text-text-tertiary text-xs flex-shrink-0">
+                                                            {formatDateProximity(reply.createdAt)}
+                                                        </span>
+                                                    </div>
+                                                    <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                        {renderRichText(reply.content, reply.mentionMap)}
+                                                    </p>
+                                                    <div className="flex items-center gap-[0.75rem]">
+                                                        <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
+                                                            {t('like')}
+                                                        </button>
+                                                        <span className="text-text-tertiary text-xs">
+                                                            {formatCount(reply.likes)} {t('likes')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))
                     )}
@@ -605,11 +666,13 @@ export default function FeedCardWithReply({
                 {/* Header */}
                 <div className="flex items-center justify-between mb-[1rem]">
                     <div className="lg:flex items-center gap-[0.75rem]">
-                        <Image
-                            width={40}
-                            height={40}
+                        <img
                             src={profileImage}
                             alt={profileName}
+                            width={40}
+                            height={40}
+                            loading="lazy"
+                            decoding="async"
                             className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle"
                         />
                         <div className="lg:flex-1">
@@ -653,7 +716,7 @@ export default function FeedCardWithReply({
                         onClick={toggleComments}
                         title={`${commentCount.toLocaleString()} comments`}
                     >
-                        <Image width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                        <img width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[1.25rem] h-[1.25rem] object-contain" />
                         <span>{formatCount(commentCount)}</span>
                     </button>
                     <button
@@ -661,7 +724,7 @@ export default function FeedCardWithReply({
                         onClick={handleShare}
                         title={`${shareCount.toLocaleString()} shares`}
                     >
-                        <Image width={20} height={20} src="/SHARE.svg" alt="shares" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                        <img width={20} height={20} src="/SHARE.svg" alt="shares" className="w-[1.25rem] h-[1.25rem] object-contain" />
                         <span>{formatCount(shareCount)}</span>
                     </button>
                 </div>
@@ -673,21 +736,21 @@ export default function FeedCardWithReply({
                             className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
                             onClick={handleLike}
                         >
-                            <Image width={20} height={20} src="/LIKE.svg" alt="like" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                            <img width={20} height={20} src="/LIKE.svg" alt="like" className="w-[1.25rem] h-[1.25rem] object-contain" />
                             <span>{t('like')}</span>
                         </button>
                         <button
                             className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
                             onClick={toggleCommentInput}
                         >
-                            <Image width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                            <img width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-[1.25rem] h-[1.25rem] object-contain" />
                             <span>{t('comment')}</span>
                         </button>
                         <button
                             className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
                             onClick={handleShare}
                         >
-                            <Image width={20} height={20} src="/SHARE.svg" alt="share" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                            <img width={20} height={20} src="/SHARE.svg" alt="share" className="w-[1.25rem] h-[1.25rem] object-contain" />
                             <span>{t('share')}</span>
                         </button>
                     </div>

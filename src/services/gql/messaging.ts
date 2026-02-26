@@ -35,18 +35,21 @@ export const GET_CONVERSATIONS = gql`
       groupId
       participantIds
       participantCount
+      createdAt
+      updatedAt
+      lastMessageAt
       lastMessage {
         id
+        conversationId
         senderId
         type
         content
+        isEdited
+        isDeleted
         createdAt
       }
       unreadCount
       isActive
-      lastMessageAt
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -138,9 +141,9 @@ export const SEND_MESSAGE = gql`
   }
 `;
 
-// Returns: Boolean — call when user opens a conversation to reset badge count
+// Returns: Boolean — call when user opens a conversation to reset badge count (spec: conversationId is String!)
 export const MARK_CONVERSATION_AS_READ = gql`
-  mutation MarkConversationAsRead($conversationId: ID!) {
+  mutation MarkConversationAsRead($conversationId: String!) {
     markConversationAsRead(conversationId: $conversationId)
   }
 `;

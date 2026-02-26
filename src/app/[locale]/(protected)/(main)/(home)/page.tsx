@@ -200,8 +200,8 @@ export default function Home() {
     }
   };
 
-  // Handle new comment
-  const handleSendComment = async (postId: string, content: string) => {
+  // Handle new comment (or reply when parentId is set)
+  const handleSendComment = async (postId: string, content: string, parentId?: string) => {
     if (!content.trim()) return;
 
     try {
@@ -209,7 +209,8 @@ export default function Home() {
         variables: {
           input: {
             postId,
-            text: content
+            text: content,
+            ...(parentId ? { parentId } : {}),
           }
         }
       });
@@ -218,6 +219,7 @@ export default function Home() {
     } catch (err) {
       console.error('Failed to post comment:', err);
       toast.error('Failed to post comment');
+      throw err;
     }
   };
 
@@ -474,7 +476,7 @@ export default function Home() {
                   onComment={() => console.log('Open comment input for', post.id)}
                   onShare={() => handleShare(post.id)}
                   onSave={() => handleSave(post.id)}
-                  onSendComment={(content) => handleSendComment(post.id, content)}
+                  onSendComment={(content, parentId) => handleSendComment(post.id, content, parentId)}
                   joinButton={false}
                   isLiked={post.userEngagement.hasLiked}
                   isSaved={post.userEngagement.hasSaved}

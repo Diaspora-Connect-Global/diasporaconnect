@@ -24,6 +24,7 @@ interface Comment {
     createdAt: string;
     likes: number;
     replies?: number;
+    parentId?: string | null;
     mentionMap?: MentionMap;
 }
 
@@ -51,7 +52,7 @@ export interface FeedCardFilteredProps {
     forceShowComments?: boolean; 
 }
 
-/** Map an API Comment to the local Comment shape. */
+/** Map an API Comment to the local Comment shape. Use authorDisplayName/authorAvatarUrl from API when present. */
 function mapApiComment(c: ApiComment): Comment {
     const mentionMap: MentionMap = {};
     c.mentions?.forEach((m) => {
@@ -59,8 +60,8 @@ function mapApiComment(c: ApiComment): Comment {
     });
 
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
-    const authorName = selfMention?.displayName || selfMention?.handle || c.authorId;
-    const authorAvatar = selfMention?.avatarUrl || '/PROFILE.png';
+    const authorName = c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId;
+    const authorAvatar = c.authorAvatarUrl ?? selfMention?.avatarUrl ?? '/PROFILE.png';
 
     return {
         id: c.id,
@@ -69,6 +70,8 @@ function mapApiComment(c: ApiComment): Comment {
         content: c.text,
         createdAt: c.createdAt,
         likes: 0,
+        replies: c.replyCount,
+        parentId: c.parentId ?? undefined,
         mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
     };
 }
@@ -167,19 +170,29 @@ export default function FeedCardFiltered({
         setReplyToCommentId((cur) => (cur === commentId ? null : commentId));
     };
 
-    const handleSend = (text: string, parentId?: string) => {
+    const handleSend = async (text: string, parentId?: string) => {
         if (!text.trim() || !onSendComment) return;
-        onSendComment(text, parentId);
-        setCommentCount((c) => c + 1);
-        setShowComments(true);
-        setShowCommentInput(false);
-        setReplyToCommentId(null);
-
-        // Refresh comments from API
-        setTimeout(() => {
-            setCommentsLoaded(false);
-            fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0 } });
-        }, 500);
+        let preparedText = text.trim();
+        if (parentId) {
+            const parent = commentsData.find((c) => c.id === parentId);
+            if (parent) preparedText = `@${parent.author} ${preparedText}`;
+        }
+        try {
+            const result = onSendComment(preparedText, parentId);
+            if (result != null && typeof (result as Promise<unknown>).then === 'function') {
+                await result;
+            }
+            setCommentCount((c) => c + 1);
+            setShowComments(true);
+            setShowCommentInput(false);
+            setReplyToCommentId(null);
+            setTimeout(() => {
+                setCommentsLoaded(false);
+                fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0 } });
+            }, 500);
+        } catch {
+            // Mutation failed; parent shows toast; don't update local count or refresh
+        }
     };
 
     /* ------------------- Render Helpers ------------------- */
@@ -189,7 +202,7 @@ export default function FeedCardFiltered({
         const displayText = truncated ? `${content.slice(0, max)}...` : content;
 
         return (
-            <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem]">
+            <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
                 {renderRichText(displayText)}
                 {truncated && (
                     <span
@@ -214,27 +227,27 @@ export default function FeedCardFiltered({
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {imageCount === 1 ? (
                     <div className="relative w-full h-[15rem] rounded-lg overflow-hidden">
-                        <Image src={images[0]} alt="post" fill className="object-cover" />
+                        <img src={images[0]} alt="post" className="w-full h-full object-cover" />
                     </div>
                 ) : imageCount === 2 ? (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
                         {images.map((src, i) => (
                             <div key={i} className="relative h-[15rem] rounded-lg overflow-hidden">
-                                <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
+                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
                             </div>
                         ))}
                     </div>
                 ) : imageCount === 3 ? (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
                         <div className="relative h-[30.5rem] rounded-lg overflow-hidden">
-                            <Image src={images[0]} alt="post 1" fill className="object-cover" />
+                            <img src={images[0]} alt="post 1" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col gap-[0.5rem]">
                             <div className="relative h-[15rem] rounded-lg overflow-hidden">
-                                <Image src={images[1]} alt="post 2" fill className="object-cover" />
+                                <img src={images[1]} alt="post 2" className="w-full h-full object-cover" />
                             </div>
                             <div className="relative h-[15rem] rounded-lg overflow-hidden">
-                                <Image src={images[2]} alt="post 3" fill className="object-cover" />
+                                <img src={images[2]} alt="post 3" className="w-full h-full object-cover" />
                             </div>
                         </div>
                     </div>
@@ -250,7 +263,7 @@ export default function FeedCardFiltered({
                                     }
                                 }}
                             >
-                                <Image src={src} alt={`post ${i + 1}`} fill className="object-cover" />
+                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
                                 {i === maxDisplay - 1 && excessCount > 0 && (
                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                         <span className="text-white text-3xl font-semibold">+{excessCount}</span>
@@ -268,11 +281,13 @@ export default function FeedCardFiltered({
         if (!showCommentInput) return null;
         return (
             <div className="my-[1rem] flex items-center space-x-2">
-                <Image
+                <img
                     src={resolvedAvatar}
                     alt={currentUser.name}
                     width={40}
                     height={40}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <div className="flex-1">
@@ -291,11 +306,13 @@ export default function FeedCardFiltered({
         if (replyToCommentId !== commentId) return null;
         return (
             <div className="mt-[1rem] ml-[3rem] flex items-center space-x-2">
-                <Image
+                <img
                     src={resolvedAvatar}
                     alt={currentUser.name}
                     width={40}
                     height={40}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <MessageInputGlobal
@@ -308,8 +325,45 @@ export default function FeedCardFiltered({
         );
     };
 
-    // Only show YOUR comments
+    // Only show YOUR comments; build tree (top-level + replies). Include parents of
+    // your replies so replies to other users' comments are not orphaned. If the
+    // parent comment is not in commentsData (e.g. pagination), add a stub so the reply still renders.
     const userComments = commentsData.filter((c) => c.author === currentUser.name);
+    const repliesByParentId = new Map<string, Comment[]>();
+    userComments.forEach((c) => {
+        if (c.parentId) {
+            const list = repliesByParentId.get(c.parentId) ?? [];
+            list.push(c);
+            repliesByParentId.set(c.parentId, list);
+        }
+    });
+    const parentIdsOfUserReplies = new Set(userComments.filter((c) => c.parentId).map((c) => c.parentId!));
+    const myTopLevel = userComments.filter((c) => !c.parentId);
+    const myTopIds = new Set(myTopLevel.map((c) => c.id));
+    const parentCommentsWeRepliedTo = commentsData.filter(
+        (c) => parentIdsOfUserReplies.has(c.id) && !myTopIds.has(c.id)
+    );
+    const topLevelIds = new Set([...myTopLevel, ...parentCommentsWeRepliedTo].map((c) => c.id));
+    const orphanedParentIds = [...repliesByParentId.keys()].filter((pid) => !topLevelIds.has(pid));
+    const stubParents: Comment[] = orphanedParentIds.map((parentId) => {
+        const replies = repliesByParentId.get(parentId) ?? [];
+        const earliestReply = replies.reduce((a, b) =>
+            new Date(a.createdAt).getTime() < new Date(b.createdAt).getTime() ? a : b
+        );
+        return {
+            id: parentId,
+            author: 'Another user',
+            authorImage: '/PROFILE.png',
+            content: '',
+            createdAt: earliestReply.createdAt,
+            likes: 0,
+            parentId: undefined,
+        };
+    });
+    const topLevel = [...myTopLevel, ...parentCommentsWeRepliedTo, ...stubParents].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+    const stubParentIds = new Set(orphanedParentIds);
 
     const renderComments = () => {
         if (!showComments) return null;
@@ -321,43 +375,40 @@ export default function FeedCardFiltered({
                         <div className="flex items-center justify-center py-[2rem]">
                             <Loader2 className="w-5 h-5 animate-spin text-text-brand" />
                         </div>
-                    ) : userComments.length === 0 ? (
+                    ) : topLevel.length === 0 ? (
                         <p className="text-text-secondary text-sm text-center py-[2rem]">
                             {t('noComments')}
                         </p>
                     ) : (
-                        userComments.map((c, index) => {
-                            const isLastComment = index === userComments.length - 1;
+                        topLevel.map((c, parentIndex) => {
+                            const isLastTopLevel = parentIndex === topLevel.length - 1;
 
                             return (
                                 <div key={c.id} className="relative">
                                     {/* L-Shape Thread Line – CURVED VERSION */}
-                                    {/* Full vertical line between comments (except last) */}
-                                    {!isLastComment && (
+                                    {!isLastTopLevel && (
                                         <div className="absolute left-4 top-0 bottom-0 w-[2px] bg-surface-subtle" />
                                     )}
 
-                                    {/* Short vertical stub leading into the curve */}
                                     <div className="absolute left-4 top-0 h-4 w-[2px] bg-surface-subtle" />
 
-                                    {/* Curved corner + horizontal line */}
                                     <div className="absolute left-4 top-4 w-8 h-8">
-                                        {/* Quarter-circle curve */}
                                         <div
                                             className="absolute left-0 top-0 w-8 h-4 border-l-2 border-b-2 border-surface-subtle rounded-bl-full"
                                             style={{ boxSizing: 'border-box' }}
                                         />
-
                                     </div>
 
                                     {/* Comment Content */}
                                     <div className="ml-14 pt-4">
                                         <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
-                                            <Image
+                                            <img
                                                 src={c.authorImage || '/PROFILE.png'}
                                                 alt={c.author}
                                                 width={32}
                                                 height={32}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                                             />
                                             <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
@@ -369,9 +420,15 @@ export default function FeedCardFiltered({
                                         </div>
 
                                         <div className="ml-10">
-                                            <p className="font-body-small text-text-primary break-words mb-[0.5rem]">
-                                                {renderRichText(c.content, c.mentionMap)}
-                                            </p>
+                                            {stubParentIds.has(c.id) ? (
+                                                <p className="font-body-small text-text-tertiary italic mb-[0.5rem]">
+                                                    Reply to this comment
+                                                </p>
+                                            ) : (
+                                                <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                    {renderRichText(c.content, c.mentionMap)}
+                                                </p>
+                                            )}
                                             <div className="flex items-center gap-[0.75rem]">
                                                 <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
                                                     {t('like')}
@@ -392,8 +449,46 @@ export default function FeedCardFiltered({
                                         </div>
                                     </div>
 
-                                    {/* Reply Input (inside the same container) */}
                                     {renderReplyInput(c.id)}
+
+                                    {(repliesByParentId.get(c.id)?.length ?? 0) > 0 && (
+                                        <div className="ml-8 mt-3 space-y-3 pl-6">
+                                            {repliesByParentId.get(c.id)!.map((reply) => (
+                                                <div key={reply.id} className="flex gap-[0.75rem]">
+                                                    <img
+                                                        src={reply.authorImage || '/PROFILE.png'}
+                                                        alt={reply.author}
+                                                        width={32}
+                                                        height={32}
+                                                        loading="lazy"
+                                                        decoding="async"
+                                                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
+                                                            <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
+                                                            <UserBadge tier="starter" size="xs" />
+                                                            <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
+                                                            <span className="text-text-tertiary text-xs flex-shrink-0">
+                                                                {formatDateProximity(reply.createdAt)}
+                                                            </span>
+                                                        </div>
+                                                        <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                            {renderRichText(reply.content, reply.mentionMap)}
+                                                        </p>
+                                                        <div className="flex items-center gap-[0.75rem]">
+                                                            <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
+                                                                {t('like')}
+                                                            </button>
+                                                            <span className="text-text-tertiary text-xs">
+                                                                {formatCount(reply.likes)} {t('likes')}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })
@@ -408,11 +503,13 @@ export default function FeedCardFiltered({
             {/* Header */}
             <div className="flex items-center justify-between mb-[1rem]">
                 <div className="flex items-center gap-[0.75rem] flex-1 min-w-0">
-                    <Image
-                        width={40}
-                        height={40}
+                    <img
                         src={profileImage}
                         alt={profileName}
+                        width={40}
+                        height={40}
+                        loading="lazy"
+                        decoding="async"
                         className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
