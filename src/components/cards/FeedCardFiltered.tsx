@@ -236,7 +236,6 @@ export default function FeedCardFiltered({
             setTimeout(() => {
                 fetchComments({
                     variables: { postId: resolvedPostId, limit: 20, offset: 0 },
-                    fetchPolicy: 'network-only',
                 });
             }, 500);
         } catch {
