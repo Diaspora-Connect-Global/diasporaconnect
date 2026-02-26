@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { formatChatTimestamp } from "@/macros/time";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
@@ -256,18 +256,16 @@ export default function GroupChat() {
     }, [chat?.id, currentUserId, groupMembers, resolvedGroupConvId, conversationsData?.getConversations, getRealConversation, setRealConversation, createConversationMutation]);
 
     // Fetch message history for this group conversation
-    const { data: messagesData } = useQuery<GetMessagesData>(GET_MESSAGES, {
+    const { data: messagesData, refetch: refetchMessages } = useQuery<GetMessagesData>(GET_MESSAGES, {
         variables: { conversationId: conversationId || '', limit: 50, offset: 0 },
         skip: !conversationId,
         fetchPolicy: 'network-only',
     });
 
-    const hasLoadedHistoryRef = useRef<string | null>(null);
-
+    // Sync GraphQL messages to store whenever we have data for the current conversation (initial load + refetch after new message)
     useEffect(() => {
         const messages = messagesData?.getMessages?.messages;
-        if (!messages?.length || !conversationId || hasLoadedHistoryRef.current === conversationId) return;
-        // Only apply when response is for the current conversation (avoids stale response after navigation/refresh)
+        if (!messages?.length || !conversationId) return;
         const firstConvId = messages[0]?.conversationId;
         if (firstConvId && firstConvId !== conversationId) return;
 
@@ -285,7 +283,6 @@ export default function GroupChat() {
         }));
 
         setApiMessages(conversationId, history);
-        hasLoadedHistoryRef.current = conversationId;
     }, [messagesData, conversationId, setApiMessages]);
 
     // Mark conversation as read when user opens it (resets badge count)
@@ -329,6 +326,7 @@ export default function GroupChat() {
                     status: 'sent',
                 };
                 addApiMessage(apiMsg);
+                refetchMessages();
             }
         });
 
@@ -346,7 +344,57 @@ export default function GroupChat() {
             unsubMessage();
             unsubPresence();
         };
-    }, [conversationId, addApiMessage]);
+    }, [conversationId, addApiMessage, refetchMessages]);
+
+    // Typing indicator: subscribe to typing:start / typing:stop (exclude current user)
+    useEffect(() => {
+        if (!conversationId || !currentUserId) return;
+        const timeoutsByUser = new Map<string, ReturnType<typeof setTimeout>>();
+
+        const unsubStart = messageService.onTypingStart((data) => {
+            if (data.conversationId !== conversationId || data.userId === currentUserId) return;
+            const uid = data.userId;
+            if (timeoutsByUser.has(uid)) {
+                clearTimeout(timeoutsByUser.get(uid)!);
+                timeoutsByUser.delete(uid);
+            }
+            setTypingUserIds((prev) => new Set(prev).add(uid));
+            const t = setTimeout(() => {
+                timeoutsByUser.delete(uid);
+                setTypingUserIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(uid);
+                    return next;
+                });
+            }, 5000);
+            timeoutsByUser.set(uid, t);
+        });
+        const unsubStop = messageService.onTypingStop((data) => {
+            if (data.conversationId !== conversationId || data.userId === currentUserId) return;
+            const uid = data.userId;
+            if (timeoutsByUser.has(uid)) {
+                clearTimeout(timeoutsByUser.get(uid)!);
+                timeoutsByUser.delete(uid);
+            }
+            setTypingUserIds((prev) => {
+                const next = new Set(prev);
+                next.delete(uid);
+                return next;
+            });
+        });
+
+        return () => {
+            timeoutsByUser.forEach((t) => clearTimeout(t));
+            unsubStart();
+            unsubStop();
+        };
+    }, [conversationId, currentUserId]);
+
+    const handleTyping = useCallback((isTyping: boolean) => {
+        if (!conversationId) return;
+        if (isTyping) messageService.emitTypingStart(conversationId);
+        else messageService.emitTypingStop(conversationId);
+    }, [conversationId]);
 
     const handleMBack = () => {
         setActiveChat(null);
@@ -969,8 +1017,9 @@ export default function GroupChat() {
                                 <MessageInput
                                     onSendMessage={handleSendMessage}
                                     placeholder={t('writeReply')}
-                                    conversationId={chat?.id}
+                                    conversationId={conversationId ?? chat?.id}
                                     senderId={currentUserId ?? 'current-user'}
+                                    onTyping={handleTyping}
                                 />
                             </div>
                         </div>

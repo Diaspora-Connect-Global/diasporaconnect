@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 
+const TYPING_STOP_DEBOUNCE_MS = 2500;
 
 interface MessageInputProps {
     onSendMessage: (message: string, image?: string) => void;
@@ -16,6 +17,8 @@ interface MessageInputProps {
     disabled?: boolean;
     conversationId?: string;
     senderId?: string;
+    /** Called when user starts or stops typing (debounced). Use to emit typing:start / typing:stop. */
+    onTyping?: (isTyping: boolean) => void;
 }
 
 export function MessageInput({
@@ -23,7 +26,8 @@ export function MessageInput({
     placeholder,
     disabled = false,
     conversationId,
-    senderId = 'current-user'
+    senderId = 'current-user',
+    onTyping,
 }: MessageInputProps) {
     const t = useTranslations('chat.direct');
     const [newMessage, setNewMessage] = useState('');
@@ -34,7 +38,15 @@ export function MessageInput({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const cursorAfterEmojiRef = useRef<number | null>(null);
     const hasAutoFocusedRef = useRef<string | null>(null);
+    const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isTypingRef = useRef(false);
     const { resolvedTheme } = useTheme();
+
+    const notifyTyping = useCallback((isTyping: boolean) => {
+        if (!onTyping || isTypingRef.current === isTyping) return;
+        isTypingRef.current = isTyping;
+        onTyping(isTyping);
+    }, [onTyping]);
 
     const inputPlaceholder = placeholder || t('typeMessage');
 
@@ -137,9 +149,14 @@ export function MessageInput({
 
     const handleSendMessage = () => {
         if ((newMessage.trim() || imagePreview) && !disabled) {
+            notifyTyping(false);
+            if (typingStopTimerRef.current) {
+                clearTimeout(typingStopTimerRef.current);
+                typingStopTimerRef.current = null;
+            }
             // Only call the original onSendMessage prop - let the parent handle the logic
             onSendMessage(newMessage, imagePreview || undefined);
-            
+
             // Reset state
             setNewMessage('');
             setImagePreview(null);
@@ -217,6 +234,24 @@ export function MessageInput({
             hasAutoFocusedRef.current = conversationId;
         }
     }, [conversationId, disabled]);
+
+    // Typing indicator: notify parent on first keystroke, debounced stop after inactivity
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setNewMessage(e.target.value);
+        if (!onTyping) return;
+        notifyTyping(true);
+        if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+        typingStopTimerRef.current = setTimeout(() => {
+            typingStopTimerRef.current = null;
+            notifyTyping(false);
+        }, TYPING_STOP_DEBOUNCE_MS);
+    }, [onTyping, notifyTyping]);
+
+    useEffect(() => {
+        return () => {
+            if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+        };
+    }, []);
 
     // Close emoji picker when clicking outside (button or floating picker)
     useEffect(() => {
@@ -327,7 +362,7 @@ export function MessageInput({
                                 <textarea
                                     ref={textareaRef}
                                     value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onChange={handleInputChange}
                                     onKeyPress={handleKeyPress}
                                     placeholder={disabled ? t('cannotSend') : inputPlaceholder}
                                     disabled={disabled}

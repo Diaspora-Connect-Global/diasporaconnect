@@ -46,6 +46,11 @@ export interface MediaUploadResponse {
   expiresIn: number;
 }
 
+export interface TypingPayload {
+  conversationId: string;
+  userId: string;
+}
+
 class MessageService {
   private socket: Socket | null = null;
   private messageCallbacks: ((message: Message) => void)[] = [];
@@ -55,6 +60,8 @@ class MessageService {
   private conversationReadCallbacks: ((data: { conversationId: string; userId: string }) => void)[] = [];
   private conversationReadAckCallbacks: ((data: { conversationId: string; updatedCount: number }) => void)[] = [];
   private presenceCallbacks: ((data: { userId: string; isOnline: boolean; lastSeen?: string; timestamp?: number }) => void)[] = [];
+  private typingStartCallbacks: ((data: TypingPayload) => void)[] = [];
+  private typingStopCallbacks: ((data: TypingPayload) => void)[] = [];
   private pongCallbacks: ((data: { timestamp: number }) => void)[] = [];
   private connectCallbacks: (() => void)[] = [];
   private disconnectCallbacks: (() => void)[] = [];
@@ -165,6 +172,14 @@ class MessageService {
       this.presenceCallbacks.forEach(cb => cb(data));
     });
 
+    this.socket.on('typing:start', (data: TypingPayload) => {
+      this.typingStartCallbacks.forEach(cb => cb(data));
+    });
+
+    this.socket.on('typing:stop', (data: TypingPayload) => {
+      this.typingStopCallbacks.forEach(cb => cb(data));
+    });
+
     this.socket.on('media:upload-url', (data: MediaUploadResponse) => {
       this.uploadUrlCallbacks.forEach(cb => cb(data));
     });
@@ -233,6 +248,30 @@ class MessageService {
   sendHeartbeat() {
     if (!this.isConnected) return;
     this.socket!.emit('ping');
+  }
+
+  emitTypingStart(conversationId: string) {
+    if (!this.isConnected) return;
+    this.socket!.emit('typing:start', { conversationId });
+  }
+
+  emitTypingStop(conversationId: string) {
+    if (!this.isConnected) return;
+    this.socket!.emit('typing:stop', { conversationId });
+  }
+
+  onTypingStart(callback: (data: TypingPayload) => void) {
+    this.typingStartCallbacks.push(callback);
+    return () => {
+      this.typingStartCallbacks = this.typingStartCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  onTypingStop(callback: (data: TypingPayload) => void) {
+    this.typingStopCallbacks.push(callback);
+    return () => {
+      this.typingStopCallbacks = this.typingStopCallbacks.filter(cb => cb !== callback);
+    };
   }
 
   onConnect(callback: () => void) {

@@ -12,6 +12,7 @@ import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { GET_POST_COMMENTS, SHARE_POST, GetPostCommentsData, SharePostData } from '@/services/gql/postsFeed';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
+import { toast } from 'sonner';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -277,8 +278,10 @@ export default function FeedCardWithReply({
             setShowCommentInput(false);
             setReplyToCommentId(null);
             setTimeout(() => {
-                setCommentsLoaded(false);
-                fetchComments({ variables: { postId, limit: 20, offset: 0 } });
+                fetchComments({
+                    variables: { postId, limit: 20, offset: 0 },
+                    fetchPolicy: 'network-only',
+                });
             }, 500);
         } catch {
             // Mutation failed; parent shows toast; don't update local count or refresh
@@ -643,7 +646,11 @@ export default function FeedCardWithReply({
                                                         {renderRichText(reply.content, reply.mentionMap)}
                                                     </p>
                                                     <div className="flex items-center gap-[0.75rem]">
-                                                        <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => (onLikeComment ? onLikeComment(reply.id) : toast.info('Comment likes aren\'t available yet.'))}
+                                                            className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors"
+                                                        >
                                                             {t('like')}
                                                         </button>
                                                         <span className="text-text-tertiary text-xs">

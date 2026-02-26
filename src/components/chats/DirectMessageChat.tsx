@@ -27,6 +27,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const [isConnected, setIsConnected] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
+    const [otherUserTyping, setOtherUserTyping] = useState(false);
 
     const { addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
 
@@ -132,34 +133,32 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     }, [chat.id, currentUserId, conversationsData, getRealConversation, setRealConversation, createConversation]);
 
     // Fetch message history for this conversation
-    const { data: messagesData } = useQuery<GetMessagesData>(GET_MESSAGES, {
+    const { data: messagesData, refetch: refetchMessages } = useQuery<GetMessagesData>(GET_MESSAGES, {
         variables: { conversationId: conversationId || '', limit: 50, offset: 0 },
         skip: !conversationId,
         fetchPolicy: 'network-only',
     });
 
-    const hasLoadedHistoryRef = useRef<string | null>(null);
-
+    // Sync GraphQL messages to store whenever we have data for the current conversation (initial load + refetch after new message)
     useEffect(() => {
-        if (messagesData?.getMessages?.messages && conversationId && hasLoadedHistoryRef.current !== conversationId) {
-            // Map the raw GraphQL messages to our internal ApiMessage format
-            const history = messagesData.getMessages.messages.map((m: Message): ApiMessage => ({
-                id: m.id,
-                conversationId: m.conversationId,
-                senderId: m.senderId,
-                type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
-                content: m.content || '',
-                createdAt: m.createdAt,
-                mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
-                replyToId: m.replyToId,
-                status: 'read', // History is loaded as read
-                mediaMetadata: m.mediaMetadata as ApiMessage['mediaMetadata'],
-            }));
+        const messages = messagesData?.getMessages?.messages;
+        if (!messages?.length || !conversationId) return;
+        const firstConvId = messages[0]?.conversationId;
+        if (firstConvId && firstConvId !== conversationId) return;
 
-            // Prepend or bulk-replace into global store
-            setApiMessages(conversationId, history);
-            hasLoadedHistoryRef.current = conversationId;
-        }
+        const history = messages.map((m: Message): ApiMessage => ({
+            id: m.id,
+            conversationId: m.conversationId,
+            senderId: m.senderId,
+            type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
+            content: m.content || '',
+            createdAt: m.createdAt,
+            mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
+            replyToId: m.replyToId,
+            status: 'read',
+            mediaMetadata: m.mediaMetadata as ApiMessage['mediaMetadata'],
+        }));
+        setApiMessages(conversationId, history);
     }, [messagesData, conversationId, setApiMessages]);
 
     // Mark conversation as read when user opens it (resets badge count)
@@ -202,6 +201,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     status: 'sent',
                 };
                 addApiMessage(apiMsg);
+                refetchMessages();
             }
         });
 
@@ -210,7 +210,39 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             unsubDisconnect();
             unsubMessage();
         };
-    }, [conversationId, addApiMessage]);
+    }, [conversationId, addApiMessage, refetchMessages]);
+
+    // Typing indicator: subscribe to typing:start / typing:stop for the other participant
+    useEffect(() => {
+        if (!conversationId || !chat.id) return;
+        const otherUserId = chat.id;
+        let typingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+        const unsubStart = messageService.onTypingStart((data) => {
+            if (data.conversationId !== conversationId || data.userId !== otherUserId) return;
+            if (typingTimeout) clearTimeout(typingTimeout);
+            setOtherUserTyping(true);
+            typingTimeout = setTimeout(() => setOtherUserTyping(false), 5000);
+        });
+        const unsubStop = messageService.onTypingStop((data) => {
+            if (data.conversationId !== conversationId || data.userId !== otherUserId) return;
+            if (typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = null;
+            setOtherUserTyping(false);
+        });
+
+        return () => {
+            if (typingTimeout) clearTimeout(typingTimeout);
+            unsubStart();
+            unsubStop();
+        };
+    }, [conversationId, chat.id]);
+
+    const handleTyping = useCallback((isTyping: boolean) => {
+        if (!conversationId) return;
+        if (isTyping) messageService.emitTypingStart(conversationId);
+        else messageService.emitTypingStop(conversationId);
+    }, [conversationId]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -373,6 +405,13 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     <div ref={messagesEndRef} />
                 </div>
 
+                {/* Typing indicator */}
+                {otherUserTyping && (
+                    <div className="flex-shrink-0 px-3 md:px-4 py-1 text-sm text-text-secondary italic">
+                        {displayName} {t('typing', { defaultValue: 'typing...' })}
+                    </div>
+                )}
+
                 {/* Message Input */}
                 <div className="flex-shrink-0">
                     <MessageInput
@@ -381,6 +420,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                         conversationId={conversationId || chat.id}
                         senderId={currentUserId || 'current-user'}
                         disabled={isSending || !conversationId}
+                        onTyping={handleTyping}
                     />
                 </div>
             </div>
