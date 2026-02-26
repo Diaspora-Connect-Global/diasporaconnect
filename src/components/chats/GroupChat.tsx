@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { formatChatTimestamp } from "@/macros/time";
 import Image from "next/image";
@@ -110,6 +110,19 @@ export default function GroupChat() {
         skip: !chat?.id,
     });
 
+    // Stable id for this group's conversation from API (avoids effect re-running on every GET_CONVERSATIONS refetch)
+    const resolvedGroupConvId = useMemo(() => {
+        const list = conversationsData?.getConversations;
+        if (!list?.length || !chat?.id) return null;
+        const c = list.find((x: { type?: string; groupId?: string | null }) =>
+            (x.type === 'GROUP' || x.type === 'group') && x.groupId === chat.id
+        );
+        return c?.id ?? null;
+    }, [conversationsData?.getConversations, chat?.id]);
+
+    const creationInFlightRef = useRef<string | null>(null);
+    const creationMemberIdsKeyRef = useRef<string | null>(null);
+
     const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
         refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
         awaitRefetchQueries: true,
@@ -173,11 +186,11 @@ export default function GroupChat() {
         }
 
         // Resolve from existing conversations (same as DM) so we get messages on first load / after refresh
-        const apiConversations = conversationsData?.getConversations;
-        if (apiConversations?.length) {
-            const groupConv = apiConversations.find(
-                (c: { type?: string; groupId?: string | null }) =>
-                    (c.type === 'GROUP' || c.type === 'group') && c.groupId === chat.id
+        if (resolvedGroupConvId) {
+            const list = conversationsData?.getConversations;
+            const groupConv = list?.find(
+                (c: { type?: string; groupId?: string | null; id?: string }) =>
+                    (c.type === 'GROUP' || c.type === 'group') && c.groupId === chat.id && c.id === resolvedGroupConvId
             );
             if (groupConv) {
                 setConversationId(groupConv.id);
@@ -191,9 +204,16 @@ export default function GroupChat() {
             }
         }
 
+        const memberIds = groupMembers.map(m => m.userId).filter(id => id !== currentUserId);
+        const memberIdsKey = memberIds.slice().sort().join(',');
+
+        // Prevent duplicate create for the same chat+members; if members changed during in-flight create, allow new create
+        if (creationInFlightRef.current === chat.id && creationMemberIdsKeyRef.current === memberIdsKey) return;
+        creationInFlightRef.current = chat.id;
+        creationMemberIdsKeyRef.current = memberIdsKey;
+
         const initGroupConversation = async () => {
             try {
-                const memberIds = groupMembers.map(m => m.userId).filter(id => id !== currentUserId);
                 const { data } = await createConversationMutation({
                     variables: {
                         type: 'GROUP',
@@ -213,11 +233,14 @@ export default function GroupChat() {
                 }
             } catch (error) {
                 console.error('Failed to create group conversation:', error);
+            } finally {
+                creationInFlightRef.current = null;
+                creationMemberIdsKeyRef.current = null;
             }
         };
 
         initGroupConversation();
-    }, [chat?.id, currentUserId, groupMembers, conversationsData?.getConversations, getRealConversation, setRealConversation, createConversationMutation]);
+    }, [chat?.id, currentUserId, groupMembers, resolvedGroupConvId, conversationsData?.getConversations, getRealConversation, setRealConversation, createConversationMutation]);
 
     // Fetch message history for this group conversation
     const { data: messagesData } = useQuery<GetMessagesData>(GET_MESSAGES, {
