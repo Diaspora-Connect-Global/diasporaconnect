@@ -100,7 +100,6 @@ export default function FeedCardWithReply({
     onShare,
     onSave,
     onSendComment,
-    onLikeComment,
     joinButton = true,
     isLiked: initialIsLiked = false,
     isSaved: initialIsSaved = false,
@@ -320,7 +319,6 @@ export default function FeedCardWithReply({
             setTimeout(() => {
                 fetchComments({
                     variables: { postId, limit: 20, offset: 0 },
-                    fetchPolicy: 'network-only',
                 });
             }, 500);
         } catch {
@@ -688,7 +686,7 @@ export default function FeedCardWithReply({
                                                     <div className="flex items-center gap-[0.75rem]">
                                                         <button
                                                             type="button"
-                                                            onClick={() => (onLikeComment ? onLikeComment(reply.id) : handleLikeComment(reply.id))}
+                                                            onClick={() => handleLikeComment(reply.id)}
                                                             className={`text-xs font-semibold transition-colors ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
                                                         >
                                                             {t('like')}

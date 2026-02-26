@@ -236,7 +236,6 @@ export default function FeedCardFiltered({
             setTimeout(() => {
                 fetchComments({
                     variables: { postId: resolvedPostId, limit: 20, offset: 0 },
-                    fetchPolicy: 'network-only',
                 });
             }, 500);
         } catch {
@@ -481,7 +480,7 @@ export default function FeedCardFiltered({
                                             <div className="flex items-center gap-[0.75rem]">
                                                 <button
                                                     type="button"
-                                                    onClick={() => (onLikeComment ? onLikeComment(c.id) : handleLikeComment(c.id))}
+                                                    onClick={() => handleLikeComment(c.id)}
                                                     className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
                                                 >
                                                     {t('like')}
@@ -532,7 +531,7 @@ export default function FeedCardFiltered({
                                                         <div className="flex items-center gap-[0.75rem]">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => (onLikeComment ? onLikeComment(reply.id) : handleLikeComment(reply.id))}
+                                                                onClick={() => handleLikeComment(reply.id)}
                                                                 className={`text-xs font-semibold transition-colors ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
                                                             >
                                                                 {t('like')}

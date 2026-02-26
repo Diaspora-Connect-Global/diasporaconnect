@@ -77,6 +77,7 @@ export default function GroupChat() {
     const [isDeletingGroup, setIsDeletingGroup] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+    const [, setTypingUserIds] = useState<Set<string>>(new Set());
 
     const { messages, users, setActiveChat, addMessage, addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
 
