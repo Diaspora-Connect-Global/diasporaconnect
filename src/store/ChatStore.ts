@@ -43,6 +43,7 @@ interface ChatStore {
   setActiveChat: (chat: { id: string; type: 'direct' | 'group' } | null) => void;
   addMessage: (message: Message) => void;
   addApiMessage: (message: ApiMessage) => void;
+  updateApiMessageStatus: (messageId: string, status: 'delivered' | 'read') => void;
   getApiMessagesByConversation: (conversationId: string) => ApiMessage[];
   clearApiMessages: (conversationId: string) => void;
   setApiMessages: (conversationId: string, messages: ApiMessage[]) => void;
@@ -112,6 +113,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       if (exists) return state;
       return { apiMessages: [...state.apiMessages, message] };
     });
+  },
+
+  updateApiMessageStatus: (messageId: string, status: 'delivered' | 'read') => {
+    set((state) => ({
+      apiMessages: state.apiMessages.map(m =>
+        m.id === messageId ? { ...m, status } : m
+      ),
+    }));
   },
 
   getApiMessagesByConversation: (conversationId: string) => {

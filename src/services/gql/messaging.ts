@@ -14,6 +14,7 @@ export type {
   SendMessageData,
   GetMessagesData,
   GetConversationsData,
+  MarkConversationAsReadData,
   GQLConversationResponse,
   GQLConversationVariables,
   WebSocketMessage,
@@ -116,7 +117,7 @@ export const CREATE_CONVERSATION = gql`
   }
 `;
 
-// Returns: String (message ID)
+// Returns: String (message ID). idempotencyKey optional — same key on retry/double-send avoids duplicates.
 export const SEND_MESSAGE = gql`
   mutation SendMessage(
     $conversationId: String!
@@ -124,6 +125,7 @@ export const SEND_MESSAGE = gql`
     $content: String!
     $mentions: [String!]
     $replyToId: String
+    $idempotencyKey: String
   ) {
     sendMessage(
       conversationId: $conversationId
@@ -131,11 +133,19 @@ export const SEND_MESSAGE = gql`
       content: $content
       mentions: $mentions
       replyToId: $replyToId
+      idempotencyKey: $idempotencyKey
     )
   }
 `;
 
-// Returns: Boolean
+// Returns: Boolean — call when user opens a conversation to reset badge count
+export const MARK_CONVERSATION_AS_READ = gql`
+  mutation MarkConversationAsRead($conversationId: ID!) {
+    markConversationAsRead(conversationId: $conversationId)
+  }
+`;
+
+// Returns: Boolean (per-message granularity)
 export const MARK_MESSAGE_AS_READ = gql`
   mutation MarkMessageAsRead($messageId: String!) {
     markMessageAsRead(messageId: $messageId)

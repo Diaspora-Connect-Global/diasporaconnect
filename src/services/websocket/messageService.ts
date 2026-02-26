@@ -24,6 +24,7 @@ export interface SendMessagePayload {
   content: string; // Required: Plaintext message content
   mentions?: string[]; // Optional: Array of mentioned user IDs
   replyToId?: string; // Optional: Message ID being replied to
+  idempotencyKey?: string; // Optional: same key on retry/double-send avoids duplicate messages
   metadata?: {
     fileId?: string;
     fileName?: string;
@@ -46,8 +47,9 @@ class MessageService {
   private socket: Socket | null = null;
   private messageCallbacks: ((message: Message) => void)[] = [];
   private messageSentCallbacks: ((data: { messageId: string; conversationId: string }) => void)[] = [];
-  private messageDeliveredCallbacks: ((data: { messageId: string; userId: string }) => void)[] = [];
-  private messageReadCallbacks: ((data: { messageId: string; userId: string }) => void)[] = [];
+  private messageDeliveredCallbacks: ((data: { messageId: string; conversationId?: string; userId: string; status: 'delivered' }) => void)[] = [];
+  private messageReadCallbacks: ((data: { messageId: string; conversationId?: string; userId: string; status: 'read' }) => void)[] = [];
+  private conversationReadCallbacks: ((data: { conversationId: string; userId: string }) => void)[] = [];
   private presenceCallbacks: ((data: { userId: string; isOnline: boolean; lastSeen?: string }) => void)[] = [];
   private pongCallbacks: ((data: { timestamp: number }) => void)[] = [];
   private connectCallbacks: (() => void)[] = [];
@@ -135,16 +137,19 @@ class MessageService {
       this.messageSentCallbacks.forEach(cb => cb(data));
     });
 
-    // Spec event: 'message:delivery' (not 'message:delivered:confirm')
-    this.socket.on('message:delivery', (data: { messageId: string; userId: string; status: 'delivered' }) => {
-      console.log('📬 Message delivered:', data.messageId, '→', data.userId);
+    // Delivery receipts — only sender receives these
+    this.socket.on('message:delivery', (data: { messageId: string; conversationId?: string; userId: string; status: 'delivered' }) => {
       this.messageDeliveredCallbacks.forEach(cb => cb(data));
     });
 
-    // Spec event: 'message:read' (not 'message:read:confirm')
-    this.socket.on('message:read', (data: { messageId: string; userId: string; status: 'read' }) => {
-      console.log('👀 Message read:', data.messageId, '→', data.userId);
+    // Read receipts — only sender receives these
+    this.socket.on('message:read', (data: { messageId: string; conversationId?: string; userId: string; status: 'read' }) => {
       this.messageReadCallbacks.forEach(cb => cb(data));
+    });
+
+    // Another participant read the conversation (e.g. for "read by" in group chats)
+    this.socket.on('conversation:read', (data: { conversationId: string; userId: string }) => {
+      this.conversationReadCallbacks.forEach(cb => cb(data));
     });
 
     this.socket.on('presence:update', (data: { userId: string; isOnline: boolean; lastSeen?: string }) => {
@@ -249,17 +254,24 @@ class MessageService {
     };
   }
 
-  onMessageDelivered(callback: (data: { messageId: string; userId: string }) => void) {
+  onMessageDelivered(callback: (data: { messageId: string; conversationId?: string; userId: string; status: 'delivered' }) => void) {
     this.messageDeliveredCallbacks.push(callback);
     return () => {
       this.messageDeliveredCallbacks = this.messageDeliveredCallbacks.filter(cb => cb !== callback);
     };
   }
 
-  onMessageRead(callback: (data: { messageId: string; userId: string }) => void) {
+  onMessageRead(callback: (data: { messageId: string; conversationId?: string; userId: string; status: 'read' }) => void) {
     this.messageReadCallbacks.push(callback);
     return () => {
       this.messageReadCallbacks = this.messageReadCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  onConversationRead(callback: (data: { conversationId: string; userId: string }) => void) {
+    this.conversationReadCallbacks.push(callback);
+    return () => {
+      this.conversationReadCallbacks = this.conversationReadCallbacks.filter(cb => cb !== callback);
     };
   }
 

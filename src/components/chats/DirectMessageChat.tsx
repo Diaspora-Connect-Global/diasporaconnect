@@ -4,7 +4,7 @@
 // File: components/chats/DirectMessageChat.tsx
 
 import { formatChatTimestamp } from "@/macros/time";
-import { ChevronRight, InfoIcon, X } from "lucide-react";
+import { Check, ChevronRight, InfoIcon, X } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
 import Image from "next/image";
@@ -14,8 +14,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES } from "@/services/gql/messaging";
-import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData } from "@/services/gql/types/messaging";
+import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
+import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
@@ -158,6 +158,15 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
         }
     }, [messagesData, conversationId, setApiMessages]);
 
+    // Mark conversation as read when user opens it (resets badge count)
+    useEffect(() => {
+        if (conversationId) {
+            markConversationAsRead({ variables: { conversationId } }).catch((err) => {
+                console.warn('markConversationAsRead failed:', err);
+            });
+        }
+    }, [conversationId, markConversationAsRead]);
+
     // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
     useEffect(() => {
         if (!conversationId) return;
@@ -213,53 +222,41 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
     const handleSendMessage = useCallback(async (messageText: string, image?: string) => {
         if ((!messageText.trim() && !image) || !conversationId || !currentUserId) return;
 
+        const idempotencyKey = crypto.randomUUID();
         setIsSending(true);
         try {
-            // Determine message type
             const messageType = image ? 'IMAGE' : 'TEXT';
+            const content = messageText?.trim() || (image ? 'Image' : '');
 
-            // Step 1: Save to database via GraphQL mutation
-            console.log('📝 [Step 1] Saving message to database via GraphQL...', {
-                conversationId,
-                messageType,
-                content: messageText || 'Image',
-            });
             const { data } = await sendMessageMutation({
                 variables: {
                     conversationId,
                     messageType,
-                    content: messageText || 'Image',
+                    content,
+                    idempotencyKey,
                 },
             });
 
             if (data?.sendMessage) {
-                console.log('✅ [Step 1] Message SAVED to database! messageId:', data.sendMessage);
                 const sentMsg: ApiMessage = {
                     id: data.sendMessage,
                     conversationId,
                     senderId: currentUserId,
                     type: messageType,
-                    content: messageText,
+                    content,
                     createdAt: new Date().toISOString(),
                     status: 'sent',
                 };
                 addApiMessage(sentMsg);
-            } else {
-                console.error('❌ [Step 1] GraphQL returned no messageId — message may NOT be saved');
-            }
 
-            // Step 2: Send via WebSocket for real-time delivery to recipient
-            // Backend handles encryption — we send plaintext
-            if (isConnected) {
-                console.log('📤 [Step 2] Sending via WebSocket for real-time delivery...');
-                messageService.sendMessage({
-                    conversationId,
-                    type: image ? 'image' : 'text',
-                    content: messageText,
-                });
-                console.log('✅ [Step 2] WebSocket message emitted');
-            } else {
-                console.warn('⚠️ [Step 2] WebSocket NOT connected — recipient will NOT get real-time notification');
+                if (isConnected) {
+                    messageService.sendMessage({
+                        conversationId,
+                        type: image ? 'image' : 'text',
+                        content,
+                        idempotencyKey,
+                    });
+                }
             }
         } catch (error) {
             console.error('❌ Failed to send message:', error);
@@ -355,8 +352,17 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                             {message.content}
                                         </div>
                                     )}
-                                    <p className="text-xs text-text-tertiary mt-1.5 px-1 text-right">
+                                    <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 justify-end ${isMe ? "text-text-tertiary" : ""}`}>
                                         {formatChatTimestamp(message.createdAt)}
+                                        {isMe && (
+                                            <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
+                                                {message.status === "read" || message.status === "delivered" ? (
+                                                    <span className="inline-flex"><Check className="w-3 h-3 -ml-0.5" /><Check className="w-3 h-3 -ml-1" /></span>
+                                                ) : (
+                                                    <Check className="w-3 h-3" />
+                                                )}
+                                            </span>
+                                        )}
                                     </p>
                                 </div>
                             </div>

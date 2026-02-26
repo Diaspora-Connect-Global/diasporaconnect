@@ -117,7 +117,12 @@ export interface SendMessageData {
   sendMessage: string;
 }
 
-// API returns a boolean
+// API returns a boolean — resets unread badge for the conversation
+export interface MarkConversationAsReadData {
+  markConversationAsRead: boolean;
+}
+
+// API returns a boolean (per-message)
 export interface MarkMessageAsReadData {
   markMessageAsRead: boolean;
 }

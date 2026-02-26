@@ -34,12 +34,13 @@ import { EditGroupModal } from "./modals/EditGroupModal";
 import { ManageMemberModal } from "./modals/ManageMemberModal";
 import { ConfirmationModal } from "../custom/confirmationModal";
 import { AddMembersModal } from "./modals/AddMembersModal";
+import { Check } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData } from "@/services/gql/types/messaging";
+import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
+import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
 import { ApiMessage } from "@/store/ChatStore";
 
 interface Reply {
@@ -84,6 +85,9 @@ export default function GroupChat() {
 
     const [createConversationMutation] = useGqlMutation<CreateConversationData>(CREATE_CONVERSATION);
     const [sendMessageMutation] = useGqlMutation<SendMessageData>(SEND_MESSAGE);
+    const [markConversationAsRead] = useGqlMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
+        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
+    });
 
     const chatData = sessionStorage.getItem('activeChat');
     let chat: ChatInfo | null = null;
@@ -285,6 +289,15 @@ export default function GroupChat() {
         hasLoadedHistoryRef.current = conversationId;
     }, [messagesData, conversationId, setApiMessages]);
 
+    // Mark conversation as read when user opens it (resets badge count)
+    useEffect(() => {
+        if (conversationId) {
+            markConversationAsRead({ variables: { conversationId } }).catch((err) => {
+                console.warn('markConversationAsRead failed:', err);
+            });
+        }
+    }, [conversationId, markConversationAsRead]);
+
     // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
     useEffect(() => {
         if (!conversationId) return;
@@ -383,8 +396,8 @@ export default function GroupChat() {
             return;
         }
 
+        const idempotencyKey = crypto.randomUUID();
         if (replyingTo) {
-            // Handle reply via GraphQL — use same content for backend and local store
             const content = messageText?.trim() || (image ? 'Image' : '');
             try {
                 const messageType = image ? 'IMAGE' : 'TEXT';
@@ -394,6 +407,7 @@ export default function GroupChat() {
                         messageType,
                         content,
                         replyToId: replyingTo,
+                        idempotencyKey,
                     },
                 });
 
@@ -427,7 +441,6 @@ export default function GroupChat() {
             }
             setReplyingTo(null);
         } else {
-            // Send via GraphQL mutation — use same content for backend, local store, and WebSocket
             const content = messageText?.trim() || (image ? 'Image' : '');
             try {
                 const messageType = image ? 'IMAGE' : 'TEXT';
@@ -436,6 +449,7 @@ export default function GroupChat() {
                         conversationId,
                         messageType,
                         content,
+                        idempotencyKey,
                     },
                 });
 
@@ -450,25 +464,24 @@ export default function GroupChat() {
                         status: 'sent',
                     };
                     addApiMessage(sentMsg);
-                }
 
-                // Also send via WebSocket for real-time delivery
-                // Backend handles encryption — we send plaintext
-                if (isConnected) {
-                    const payload: SendMessagePayload = {
-                        conversationId,
-                        type: image ? 'image' : 'text',
-                        content,
-                        ...(image && {
-                            metadata: {
-                                fileName: 'image.jpg',
-                                fileSize: 0,
-                                mimeType: 'image/jpeg',
-                                gcsPath: image
-                            }
-                        }),
-                    };
-                    messageService.sendMessage(payload);
+                    if (isConnected) {
+                        const payload: SendMessagePayload = {
+                            conversationId,
+                            type: image ? 'image' : 'text',
+                            content,
+                            idempotencyKey,
+                            ...(image && {
+                                metadata: {
+                                    fileName: 'image.jpg',
+                                    fileSize: 0,
+                                    mimeType: 'image/jpeg',
+                                    gcsPath: image
+                                }
+                            }),
+                        };
+                        messageService.sendMessage(payload);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to send message:', error);
@@ -719,13 +732,24 @@ export default function GroupChat() {
                                                 </div>
                                             )}
 
-                                            <div className="space-x-2 flex items-center justify-start mt-1">
-                                                <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
-                                                    <AvatarImage src={getUserById(message.senderId)?.avatar} alt="avatar" />
-                                                    <AvatarFallback>{getSenderName(message.senderId).charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <p className="text-[10px] sm:text-xs text-text-tertiary">
+                                            <div className={`space-x-2 flex items-center mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
+                                                {!isMe && (
+                                                    <Avatar className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0">
+                                                        <AvatarImage src={getUserById(message.senderId)?.avatar} alt="avatar" />
+                                                        <AvatarFallback>{getSenderName(message.senderId).charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                )}
+                                                <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center gap-1">
                                                     {formatChatTimestamp(message.createdAt)}
+                                                    {isMe && (
+                                                        <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
+                                                            {message.status === "read" || message.status === "delivered" ? (
+                                                                <span className="inline-flex"><Check className="w-3 h-3 -ml-0.5" /><Check className="w-3 h-3 -ml-1" /></span>
+                                                            ) : (
+                                                                <Check className="w-3 h-3" />
+                                                            )}
+                                                        </span>
+                                                    )}
                                                 </p>
                                                 <button
                                                     onClick={() => handleViewReplies({ ...message, text: message.content, timestamp: message.createdAt })}
