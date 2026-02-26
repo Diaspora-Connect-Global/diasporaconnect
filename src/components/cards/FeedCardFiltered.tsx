@@ -9,8 +9,8 @@ import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge } from '@/components/custom/userBadge';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
-import { useLazyQuery } from '@apollo/client/react';
-import { GET_POST_COMMENTS, GetPostCommentsData } from '@/services/gql/postsFeed';
+import { useLazyQuery, useMutation } from '@apollo/client/react';
+import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
 import { formatCount } from '@/macros/formatCount';
@@ -25,6 +25,7 @@ interface Comment {
     content: string;
     createdAt: string;
     likes: number;
+    hasLiked?: boolean;
     replies?: number;
     parentId?: string | null;
     mentionMap?: MentionMap;
@@ -69,10 +70,11 @@ function mapApiComment(c: ApiComment): Comment {
         id: c.id,
         author: authorName,
         authorImage: authorAvatar,
-        authorHandle: selfMention?.handle,
+        authorHandle: c.authorHandle ?? selfMention?.handle,
         content: c.text,
         createdAt: c.createdAt,
-        likes: 0,
+        likes: c.likeCount ?? 0,
+        hasLiked: c.hasLiked ?? false,
         replies: c.replyCount,
         parentId: c.parentId ?? undefined,
         mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
@@ -122,6 +124,45 @@ export default function FeedCardFiltered({
     const [fetchComments, { loading: commentsLoading, data: commentsQueryData }] = useLazyQuery<GetPostCommentsData>(
         GET_POST_COMMENTS,
         { fetchPolicy: 'cache-and-network' }
+    );
+
+    const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
+    const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
+
+    const handleLikeComment = useCallback(
+        async (commentId: string) => {
+            const comment = loadedComments.find((c) => c.id === commentId);
+            if (!comment) return;
+            const isLiked = comment.hasLiked ?? false;
+            try {
+                if (isLiked) {
+                    const { data } = await removeCommentLikeMutation({ variables: { input: { commentId } } });
+                    if (data?.removeCommentLike != null) {
+                        setLoadedComments((prev) =>
+                            prev.map((c) =>
+                                c.id === commentId
+                                    ? { ...c, hasLiked: false, likes: data.removeCommentLike.likeCount }
+                                    : c
+                            )
+                        );
+                    }
+                } else {
+                    const { data } = await likeCommentMutation({ variables: { input: { commentId } } });
+                    if (data?.likeComment != null) {
+                        setLoadedComments((prev) =>
+                            prev.map((c) =>
+                                c.id === commentId
+                                    ? { ...c, hasLiked: true, likes: data.likeComment.likeCount }
+                                    : c
+                            )
+                        );
+                    }
+                }
+            } catch {
+                // Mutation failed; leave UI unchanged
+            }
+        },
+        [loadedComments, likeCommentMutation, removeCommentLikeMutation]
     );
 
     useEffect(() => {
@@ -438,7 +479,11 @@ export default function FeedCardFiltered({
                                                 </p>
                                             )}
                                             <div className="flex items-center gap-[0.75rem]">
-                                                <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => (onLikeComment ? onLikeComment(c.id) : handleLikeComment(c.id))}
+                                                    className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
+                                                >
                                                     {t('like')}
                                                 </button>
                                                 <button
@@ -487,8 +532,8 @@ export default function FeedCardFiltered({
                                                         <div className="flex items-center gap-[0.75rem]">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => (onLikeComment ? onLikeComment(reply.id) : toast.info('Comment likes aren\'t available yet.'))}
-                                                                className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors"
+                                                                onClick={() => (onLikeComment ? onLikeComment(reply.id) : handleLikeComment(reply.id))}
+                                                                className={`text-xs font-semibold transition-colors ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
                                                             >
                                                                 {t('like')}
                                                             </button>

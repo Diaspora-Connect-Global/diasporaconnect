@@ -17,6 +17,8 @@ export type {
   EditPostInput,
   AddEngagementInput,
   CreateCommentInput,
+  LikeCommentInput,
+  DeleteCommentInput,
   GetFeedData,
   GetPostData,
   GetPostCommentsData,
@@ -24,6 +26,9 @@ export type {
   EditPostData,
   AddEngagementData,
   CreateCommentData,
+  LikeCommentData,
+  RemoveCommentLikeData,
+  DeleteCommentData,
   RequestUploadUrlData,
   EngagedPostsType,
   GetEngagedPostsInput,
@@ -126,6 +131,7 @@ export const GET_POST = gql`
   }
 `;
 
+/** When parentId is not sent, backend returns a flat list of all comments + replies; build tree client-side. */
 export const GET_POST_COMMENTS = gql`
   query GetPostComments($postId: String!, $limit: Int, $offset: Int, $parentId: String) {
     postComments(postId: $postId, limit: $limit, offset: $offset, parentId: $parentId) {
@@ -135,7 +141,10 @@ export const GET_POST_COMMENTS = gql`
       authorType
       authorDisplayName
       authorAvatarUrl
+      authorHandle
       replyCount
+      likeCount
+      hasLiked
       createdAt
       updatedAt
       postId
@@ -218,12 +227,52 @@ export const CREATE_COMMENT = gql`
   mutation CreateComment($input: CreateCommentInput!) {
     createComment(input: $input) {
       id
-      text
       postId
-      parentId
       authorId
-      authorType
+      text
+      parentId
       createdAt
+      authorDisplayName
+      authorAvatarUrl
+      authorHandle
+      replyCount
+      likeCount
+      hasLiked
+      mentions {
+        entityId
+        entityType
+        handle
+        displayName
+        avatarUrl
+        startPosition
+        endPosition
+      }
+    }
+  }
+`;
+
+export const LIKE_COMMENT = gql`
+  mutation LikeComment($input: LikeCommentInput!) {
+    likeComment(input: $input) {
+      success
+      likeCount
+    }
+  }
+`;
+
+export const REMOVE_COMMENT_LIKE = gql`
+  mutation RemoveCommentLike($input: LikeCommentInput!) {
+    removeCommentLike(input: $input) {
+      success
+      likeCount
+    }
+  }
+`;
+
+export const DELETE_COMMENT = gql`
+  mutation DeleteComment($input: DeleteCommentInput!) {
+    deleteComment(input: $input) {
+      success
     }
   }
 `;

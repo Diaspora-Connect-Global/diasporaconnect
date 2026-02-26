@@ -221,7 +221,10 @@ export interface Comment {
   authorType: string;
   authorDisplayName?: string;
   authorAvatarUrl?: string;
+  authorHandle?: string;
   replyCount?: number;
+  likeCount?: number;
+  hasLiked?: boolean;
   createdAt: string;
   updatedAt?: string;
   postId: string;
@@ -323,11 +326,23 @@ export interface AddEngagementInput {
  * @property {string} postId - ID of the post to comment on
  * @property {string} text - Comment content
  * @property {string} [parentId] - Optional parent comment ID for replies
+ * @property {AttachmentInput[]} [attachments] - Optional attachments
  */
 export interface CreateCommentInput {
   postId: string;
   text: string;
   parentId?: string;
+  attachments?: AttachmentInput[];
+}
+
+/** Input for likeComment and removeCommentLike. */
+export interface LikeCommentInput {
+  commentId: string;
+}
+
+/** Input for deleteComment. */
+export interface DeleteCommentInput {
+  commentId: string;
 }
 
 // ============================================================================
@@ -426,17 +441,7 @@ export interface AddEngagementData {
 }
 
 /**
- * Response from creating a comment.
- *
- * @interface CreateCommentData
- * @property {Object} createComment - Created comment data
- * @property {string} createComment.id - Comment ID
- * @property {string} createComment.text - Comment content
- * @property {string} createComment.postId - Parent post ID
- * @property {string | null} [createComment.parentId] - Parent comment ID
- * @property {string} createComment.authorId - Author ID
- * @property {AuthorType} createComment.authorType - Author type
- * @property {string} createComment.createdAt - Creation timestamp
+ * Response from creating a comment (enriched so it can be inserted into the list without refetch).
  */
 export interface CreateCommentData {
   createComment: {
@@ -445,9 +450,31 @@ export interface CreateCommentData {
     postId: string;
     parentId?: string | null;
     authorId: string;
-    authorType: AuthorType;
+    authorType?: AuthorType;
     createdAt: string;
+    authorDisplayName?: string;
+    authorAvatarUrl?: string;
+    authorHandle?: string;
+    replyCount?: number;
+    likeCount?: number;
+    hasLiked?: boolean;
+    mentions?: MentionInfo[];
   };
+}
+
+/** Response from likeComment. */
+export interface LikeCommentData {
+  likeComment: { success: boolean; likeCount: number };
+}
+
+/** Response from removeCommentLike. */
+export interface RemoveCommentLikeData {
+  removeCommentLike: { success: boolean; likeCount: number };
+}
+
+/** Response from deleteComment. */
+export interface DeleteCommentData {
+  deleteComment: { success: boolean };
 }
 
 // ============================================================================

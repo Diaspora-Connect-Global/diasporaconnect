@@ -9,10 +9,9 @@ import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { GET_POST_COMMENTS, SHARE_POST, GetPostCommentsData, SharePostData } from '@/services/gql/postsFeed';
+import { GET_POST_COMMENTS, SHARE_POST, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, SharePostData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
-import { toast } from 'sonner';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -26,6 +25,7 @@ interface Comment {
     content: string;
     createdAt: string;
     likes: number;
+    hasLiked?: boolean;
     replies?: number;
     parentId?: string | null;
     mentionMap?: MentionMap;
@@ -72,10 +72,11 @@ function mapApiComment(c: ApiComment): Comment {
         id: c.id,
         author: authorName,
         authorImage: authorAvatar,
-        authorHandle: selfMention?.handle,
+        authorHandle: c.authorHandle ?? selfMention?.handle,
         content: c.text,
         createdAt: c.createdAt,
-        likes: 0,
+        likes: c.likeCount ?? 0,
+        hasLiked: c.hasLiked ?? false,
         replies: c.replyCount,
         parentId: c.parentId ?? undefined,
         mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
@@ -99,6 +100,7 @@ export default function FeedCardWithReply({
     onShare,
     onSave,
     onSendComment,
+    onLikeComment,
     joinButton = true,
     isLiked: initialIsLiked = false,
     isSaved: initialIsSaved = false,
@@ -124,6 +126,44 @@ export default function FeedCardWithReply({
     );
 
     const [sharePostMutation] = useMutation<SharePostData>(SHARE_POST);
+    const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
+    const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
+
+    const handleLikeComment = useCallback(
+        async (commentId: string) => {
+            const comment = loadedComments.find((c) => c.id === commentId);
+            if (!comment) return;
+            const isLiked = comment.hasLiked ?? false;
+            try {
+                if (isLiked) {
+                    const { data } = await removeCommentLikeMutation({ variables: { input: { commentId } } });
+                    if (data?.removeCommentLike != null) {
+                        setLoadedComments((prev) =>
+                            prev.map((c) =>
+                                c.id === commentId
+                                    ? { ...c, hasLiked: false, likes: data.removeCommentLike.likeCount }
+                                    : c
+                            )
+                        );
+                    }
+                } else {
+                    const { data } = await likeCommentMutation({ variables: { input: { commentId } } });
+                    if (data?.likeComment != null) {
+                        setLoadedComments((prev) =>
+                            prev.map((c) =>
+                                c.id === commentId
+                                    ? { ...c, hasLiked: true, likes: data.likeComment.likeCount }
+                                    : c
+                            )
+                        );
+                    }
+                }
+            } catch {
+                // Mutation failed; leave UI unchanged
+            }
+        },
+        [loadedComments, likeCommentMutation, removeCommentLikeMutation]
+    );
 
     useEffect(() => {
         if (commentsQueryData?.postComments) {
@@ -648,8 +688,8 @@ export default function FeedCardWithReply({
                                                     <div className="flex items-center gap-[0.75rem]">
                                                         <button
                                                             type="button"
-                                                            onClick={() => (onLikeComment ? onLikeComment(reply.id) : toast.info('Comment likes aren\'t available yet.'))}
-                                                            className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors"
+                                                            onClick={() => (onLikeComment ? onLikeComment(reply.id) : handleLikeComment(reply.id))}
+                                                            className={`text-xs font-semibold transition-colors ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
                                                         >
                                                             {t('like')}
                                                         </button>
