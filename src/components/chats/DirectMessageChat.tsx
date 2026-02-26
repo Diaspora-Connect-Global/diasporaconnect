@@ -15,7 +15,8 @@ import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES } from "@/services/gql/messaging";
-import type { Conversation, Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData } from "@/services/gql/types/messaging";
+import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData } from "@/services/gql/types/messaging";
+import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 
@@ -40,6 +41,23 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
 
     // Fetch existing conversations to find one with this participant
     const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS);
+
+    // Resolve other user's display name and avatar from connections (so header/info show name, not userId)
+    const { data: connectionsData } = useQuery<{ getConnections?: { connections?: Array<{
+        requester: { userId: string; firstName?: string; lastName?: string; avatarUrl?: string };
+        receiver: { userId: string; firstName?: string; lastName?: string; avatarUrl?: string };
+    }> } }>(GET_MY_CONNECTIONS, { variables: { limit: 200, offset: 0 }, skip: !chat.id });
+    const otherUser = connectionsData?.getConnections?.connections?.find(
+        (c: { requester: { userId: string }; receiver: { userId: string } }) =>
+            c.requester.userId === chat.id || c.receiver.userId === chat.id
+    );
+    const otherProfile = otherUser
+        ? (otherUser.requester.userId === chat.id ? otherUser.requester : otherUser.receiver)
+        : null;
+    const displayName = otherProfile
+        ? [otherProfile.firstName, otherProfile.lastName].filter(Boolean).join(' ').trim() || chat.name || `User ${chat.id.substring(0, 8)}`
+        : (chat.name && chat.name !== chat.id ? chat.name : `User ${chat.id.substring(0, 8)}`);
+    const otherAvatar = otherProfile?.avatarUrl ?? chat.avatar ?? '';
 
     // Initialize or retrieve conversation
     useEffect(() => {
@@ -384,10 +402,10 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                                 {/* User Info */}
                                 <div className="flex flex-col items-center mb-6">
                                     <Avatar className="w-20 h-20 mb-3">
-                                        <AvatarImage src={chat.avatar} alt="avatar" />
+                                        <AvatarImage src={otherAvatar} alt="avatar" />
                                         <AvatarFallback className="text-2xl">U</AvatarFallback>
                                     </Avatar>
-                                    <h4 className="font-semibold text-text-primary text-lg">{chat.name}</h4>
+                                    <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>
                                     {chat.online ? (
                                         <p className="text-sm text-text-success font-medium">{t('online')}</p>
                                     ) : (

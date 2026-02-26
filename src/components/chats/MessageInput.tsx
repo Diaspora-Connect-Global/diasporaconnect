@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
@@ -32,9 +33,12 @@ export function MessageInput({
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const cursorAfterEmojiRef = useRef<number | null>(null);
+    const hasAutoFocusedRef = useRef<string | null>(null);
     const { resolvedTheme } = useTheme();
 
     const inputPlaceholder = placeholder || t('typeMessage');
+
+    const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
     const handleEmojiClick = (emojiData: { emoji: string }) => {
         const textarea = textareaRef.current;
@@ -52,6 +56,18 @@ export function MessageInput({
         }
         setShowEmojiPicker(false);
     };
+
+    useLayoutEffect(() => {
+        if (!showEmojiPicker || !emojiButtonRef.current) return;
+        const rect = emojiButtonRef.current.getBoundingClientRect();
+        const pickerHeight = 400;
+        const gap = 8;
+        const top = rect.top - pickerHeight - gap;
+        setPickerPosition({
+            top: Math.max(8, top),
+            left: Math.max(8, Math.min(rect.right - 320, window.innerWidth - 320 - 8)),
+        });
+    }, [showEmojiPicker]);
 
     const updateMockData = (messageText: string, image?: string) => {
         if (!conversationId) return;
@@ -191,13 +207,27 @@ export function MessageInput({
         }
     }, [newMessage]);
 
-    // Close emoji picker when clicking outside
+    // When chat is ready (conversationId set, not disabled), focus textarea so user can type immediately
+    useEffect(() => {
+        if (!conversationId || disabled) return;
+        if (hasAutoFocusedRef.current === conversationId) return;
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.focus();
+            hasAutoFocusedRef.current = conversationId;
+        }
+    }, [conversationId, disabled]);
+
+    // Close emoji picker when clicking outside (button or floating picker)
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (showEmojiPicker &&
+            if (
+                showEmojiPicker &&
                 emojiButtonRef.current &&
                 !emojiButtonRef.current.contains(event.target as Node) &&
-                !(event.target as Element).closest('.epr-emoji-picker')) {
+                !(event.target as Element).closest('.emoji-picker-float') &&
+                !(event.target as Element).closest('.epr-emoji-picker')
+            ) {
                 setShowEmojiPicker(false);
             }
         };
@@ -233,8 +263,8 @@ export function MessageInput({
                             />
                         </div>
 
-                        {/* Emoji Button */}
-                        <div className="relative">
+                        {/* Emoji Button - hidden on mobile, visible from sm and up */}
+                        <div className="relative hidden sm:block">
                             <button
                                 ref={emojiButtonRef}
                                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -244,16 +274,27 @@ export function MessageInput({
                             >
                                 <Smile className="w-4 h-4 sm:w-5 sm:h-5 text-text-brand" />
                             </button>
-                            {showEmojiPicker && (
-                                <div className="absolute bottom-full mb-2 left-0 sm:left-auto sm:right-0 z-50 shadow-xl rounded-lg overflow-hidden">
-                                    <EmojiPicker
-                                        onEmojiClick={handleEmojiClick}
-                                        theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
-                                        width={320}
-                                        height={400}
-                                    />
-                                </div>
-                            )}
+                            {showEmojiPicker &&
+                                typeof document !== "undefined" &&
+                                createPortal(
+                                    <div
+                                        className="emoji-picker-float fixed z-[9999] shadow-xl rounded-lg overflow-hidden border border-border-subtle bg-surface-default"
+                                        style={{
+                                            top: pickerPosition.top,
+                                            left: pickerPosition.left,
+                                            width: 320,
+                                            height: 400,
+                                        }}
+                                    >
+                                        <EmojiPicker
+                                            onEmojiClick={handleEmojiClick}
+                                            theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
+                                            width={320}
+                                            height={400}
+                                        />
+                                    </div>,
+                                    document.body
+                                )}
                         </div>
                     </div>
 

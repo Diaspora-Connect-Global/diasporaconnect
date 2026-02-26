@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
@@ -36,6 +37,8 @@ export default function MessageInputGlobal({
     const cursorAfterEmojiRef = useRef<number | null>(null);
     const { resolvedTheme } = useTheme();
 
+    const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+
     const handleEmojiClick = (emojiData: { emoji: string }) => {
         const textarea = textareaRef.current;
         const emoji = emojiData.emoji;
@@ -52,6 +55,18 @@ export default function MessageInputGlobal({
         }
         setShowEmojiPicker(false);
     };
+
+    useLayoutEffect(() => {
+        if (!showEmojiPicker || !emojiButtonRef.current) return;
+        const rect = emojiButtonRef.current.getBoundingClientRect();
+        const pickerHeight = 400;
+        const gap = 8;
+        const top = rect.top - pickerHeight - gap;
+        setPickerPosition({
+            top: Math.max(8, top),
+            left: Math.max(8, Math.min(rect.right - 320, window.innerWidth - 320 - 8)),
+        });
+    }, [showEmojiPicker]);
 
     const updateMockData = (messageText: string, image?: string) => {
         if (!conversationId) return;
@@ -220,8 +235,8 @@ export default function MessageInputGlobal({
                         />
                     </div>
 
-                    {/* Emoji Button */}
-                    <div className="relative">
+                    {/* Emoji Button - hidden on mobile, visible from sm and up */}
+                    <div className="relative hidden sm:block">
                         <button
                             ref={emojiButtonRef}
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -231,16 +246,27 @@ export default function MessageInputGlobal({
                         >
                             <Smile className="w-5 h-5 text-text-brand" />
                         </button>
-                        {showEmojiPicker && (
-                            <div className="absolute bottom-full mb-2 left-0 right-0 sm:left-auto sm:right-0 z-50 shadow-xl rounded-lg overflow-hidden">
-                                <EmojiPicker
-                                    onEmojiClick={handleEmojiClick}
-                                    theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
-                                    width={320}
-                                    height={400}
-                                />
-                            </div>
-                        )}
+                        {showEmojiPicker &&
+                            typeof document !== "undefined" &&
+                            createPortal(
+                                <div
+                                    className="emoji-picker-float fixed z-[9999] shadow-xl rounded-lg overflow-hidden border border-border-subtle bg-surface-default"
+                                    style={{
+                                        top: pickerPosition.top,
+                                        left: pickerPosition.left,
+                                        width: 320,
+                                        height: 400,
+                                    }}
+                                >
+                                    <EmojiPicker
+                                        onEmojiClick={handleEmojiClick}
+                                        theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
+                                        width={320}
+                                        height={400}
+                                    />
+                                </div>,
+                                document.body
+                            )}
                     </div>
                 </div>
 

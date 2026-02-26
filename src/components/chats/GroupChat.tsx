@@ -38,8 +38,8 @@ import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData, GetMessagesData } from "@/services/gql/types/messaging";
+import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS } from "@/services/gql/messaging";
+import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData } from "@/services/gql/types/messaging";
 import { ApiMessage } from "@/store/ChatStore";
 
 interface Reply {
@@ -105,6 +105,11 @@ export default function GroupChat() {
         skip: !chat?.id,
     });
 
+    const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
+        variables: { limit: 100, offset: 0 },
+        skip: !chat?.id,
+    });
+
     const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
         refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
         awaitRefetchQueries: true,
@@ -157,14 +162,33 @@ export default function GroupChat() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [apiMessages]);
 
-    // Create or retrieve group conversation
+    // Create or retrieve group conversation (resolve from store, then GET_CONVERSATIONS, then create)
     useEffect(() => {
         if (!chat?.id || !currentUserId || !groupMembers.length) return;
 
-        const existing = getRealConversation(chat?.id);
+        const existing = getRealConversation(chat.id);
         if (existing) {
             setConversationId(existing.conversationId);
             return;
+        }
+
+        // Resolve from existing conversations (same as DM) so we get messages on first load / after refresh
+        const apiConversations = conversationsData?.getConversations;
+        if (apiConversations?.length) {
+            const groupConv = apiConversations.find(
+                (c: { type?: string; groupId?: string | null }) =>
+                    (c.type === 'GROUP' || c.type === 'group') && c.groupId === chat.id
+            );
+            if (groupConv) {
+                setConversationId(groupConv.id);
+                const participantIds = (groupConv as { participantIds?: string[] }).participantIds ?? [];
+                setRealConversation(chat.id, {
+                    conversationId: groupConv.id,
+                    type: 'GROUP',
+                    participantIds,
+                });
+                return;
+            }
         }
 
         const initGroupConversation = async () => {
@@ -193,7 +217,7 @@ export default function GroupChat() {
         };
 
         initGroupConversation();
-    }, [chat?.id, currentUserId, groupMembers, getRealConversation, setRealConversation, createConversationMutation]);
+    }, [chat?.id, currentUserId, groupMembers, conversationsData?.getConversations, getRealConversation, setRealConversation, createConversationMutation]);
 
     // Fetch message history for this group conversation
     const { data: messagesData } = useQuery<GetMessagesData>(GET_MESSAGES, {
@@ -205,25 +229,27 @@ export default function GroupChat() {
     const hasLoadedHistoryRef = useRef<string | null>(null);
 
     useEffect(() => {
-        if (messagesData?.getMessages?.messages && conversationId && hasLoadedHistoryRef.current !== conversationId) {
-            // Map the raw GraphQL messages to our internal ApiMessage format
-            const history = messagesData.getMessages.messages.map((m: any): ApiMessage => ({
-                id: m.id,
-                conversationId: m.conversationId,
-                senderId: m.senderId,
-                type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
-                content: m.content || '',
-                createdAt: m.createdAt,
-                mentions: m.mentions?.map((mn: any) => mn.userId) || [],
-                replyToId: m.replyToId,
-                status: 'read', // History is loaded as read
-                mediaMetadata: m.mediaMetadata,
-            }));
+        const messages = messagesData?.getMessages?.messages;
+        if (!messages?.length || !conversationId || hasLoadedHistoryRef.current === conversationId) return;
+        // Only apply when response is for the current conversation (avoids stale response after navigation/refresh)
+        const firstConvId = messages[0]?.conversationId;
+        if (firstConvId && firstConvId !== conversationId) return;
 
-            // Prepend or bulk-replace into global store
-            setApiMessages(conversationId, history);
-            hasLoadedHistoryRef.current = conversationId;
-        }
+        const history = messages.map((m: any): ApiMessage => ({
+            id: m.id,
+            conversationId: m.conversationId,
+            senderId: m.senderId,
+            type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
+            content: m.content || '',
+            createdAt: m.createdAt,
+            mentions: m.mentions?.map((mn: any) => mn.userId) || [],
+            replyToId: m.replyToId,
+            status: 'read',
+            mediaMetadata: m.mediaMetadata,
+        }));
+
+        setApiMessages(conversationId, history);
+        hasLoadedHistoryRef.current = conversationId;
     }, [messagesData, conversationId, setApiMessages]);
 
     // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
