@@ -1,3 +1,20 @@
+// Enums (align with API documentation)
+export enum OpportunityType {
+  EMPLOYMENT = 'EMPLOYMENT',
+  SCHOLARSHIP = 'SCHOLARSHIP',
+  INVESTMENT = 'INVESTMENT',
+  FELLOWSHIP = 'FELLOWSHIP',
+  GRANT = 'GRANT',
+  VOLUNTEER = 'VOLUNTEER',
+}
+
+export enum ApplicationStatus {
+  PENDING = 'PENDING',
+  REVIEWING = 'REVIEWING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+}
+
 // Opportunity Types
 export interface Opportunity {
   id: string;
@@ -162,4 +179,21 @@ export interface ApplicationsResponse {
 export interface SavedOpportunitiesResponse {
   savedOpportunities: SavedOpportunity[];
   total: number;
+}
+
+// GraphQL response types for use with useQuery/useMutation
+export interface GetOpportunityData {
+  opportunity: Opportunity | null;
+}
+
+export interface CreateOpportunityData {
+  createOpportunity: { id: string; title?: string; status?: string; createdAt?: string };
+}
+
+export interface SubmitApplicationData {
+  submitApplication: string | boolean;
+}
+
+export interface SaveOpportunityData {
+  saveOpportunity: string | boolean;
 }

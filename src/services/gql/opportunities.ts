@@ -1,6 +1,20 @@
 import { gql } from '@apollo/client';
 
 // ============================================
+// Opportunity Service GraphQL API
+// ============================================
+// Matches backend: opportunity, createOpportunity, submitApplication, saveOpportunity.
+// Types: @/services/gql/types/opportunities (Opportunity, CreateOpportunityInput,
+// SubmitApplicationInput, OpportunityType, ApplicationStatus).
+//
+// Usage:
+//   const { data } = useQuery<GetOpportunityData>(GET_OPPORTUNITY, { variables: { id } });
+//   const [createOpportunity] = useMutation<CreateOpportunityData>(CREATE_OPPORTUNITY);
+//   const [submitApplication] = useMutation<SubmitApplicationData>(SUBMIT_APPLICATION);
+//   const [saveOpportunity] = useMutation<SaveOpportunityData>(SAVE_OPPORTUNITY);
+// ============================================
+
+// ============================================
 // OPPORTUNITY QUERIES
 // ============================================
 
