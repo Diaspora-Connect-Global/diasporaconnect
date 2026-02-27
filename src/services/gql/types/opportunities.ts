@@ -181,6 +181,27 @@ export interface SavedOpportunitiesResponse {
   total: number;
 }
 
+export interface UserApplicationsResponse {
+  userApplications: {
+    applications: Application[];
+    total: number;
+  };
+}
+
+export interface GetSavedOpportunitiesData {
+  getSavedOpportunities: {
+    savedOpportunities: SavedOpportunity[];
+    total: number;
+  };
+}
+
+export interface ListOpportunitiesResponse {
+  opportunities: {
+    opportunities: Opportunity[];
+    total: number;
+  };
+}
+
 // GraphQL response types for use with useQuery/useMutation
 export interface GetOpportunityData {
   opportunity: Opportunity | null;

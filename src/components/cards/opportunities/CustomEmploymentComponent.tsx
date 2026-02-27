@@ -15,22 +15,40 @@ import { LabelMedium } from "@/components/utils";
 import { Bookmark, Clock, ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useMutation } from "@apollo/client/react";
+import { SAVE_OPPORTUNITY, SUBMIT_APPLICATION, GET_SAVED_OPPORTUNITIES, GET_USER_APPLICATIONS } from "@/services/gql/opportunities";
+import type { SaveOpportunityData, SubmitApplicationData } from "@/services/gql/types/opportunities";
+import type { Opportunity } from "@/services/gql/types/opportunities";
+import { formatChatTimestamp } from "@/macros/time";
 
 interface OpportunityItemProps {
-    item: {
-        title: string;
-        company?: string;
-        location?: string;
-        type?: string;
-        date?: string;
-        imageUrl?: string;
-    };
+    item: Opportunity;
+}
+
+function formatOpportunityDate(iso?: string) {
+    if (!iso) return "";
+    try {
+        return formatChatTimestamp(iso);
+    } catch {
+        return new Date(iso).toLocaleDateString();
+    }
 }
 
 export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [formData, setFormData] = useState({ fullName: "", email: "", phoneNumber: "", coverLetter: "" });
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
     const t = useTranslations('authentication');
     const tO = useTranslations('onboarding');
+
+    const [saveOpportunity, { loading: saving }] = useMutation<SaveOpportunityData>(SAVE_OPPORTUNITY, {
+        onCompleted: () => setSaved(true),
+        refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
+    });
+    const [submitApplication, { loading: submitting }] = useMutation<SubmitApplicationData>(SUBMIT_APPLICATION, {
+        refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } }],
+    });
 
 
     const RequiredAsterisk = () => <span className="text-red-500">*</span>;
@@ -58,27 +76,20 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                             {item.title}
                         </p>
                         <p className=" body-small inline-flex items-center gap-1">
-                            {item.date}
+                            {formatOpportunityDate(item.createdAt)}
                         </p>
-
                     </div>
 
                     <div className=" body-medium flex items-center gap-2 text-text-primary text-sm mb-2">
-                        {item.company && (
-                            <span className="">{item.company}</span>
-                        )}
-                        {item.company && item.location && (
-                            <span className="">,</span>
-                        )}
                         {item.location && (
                             <p className="">{item.location}</p>
                         )}
                     </div>
 
                     <div className="flex items-center gap-3 text-text-primary text-sm">
-                        {item.type && (
+                        {(item.workMode || item.engagementType) && (
                             <span className=" body-small inline-flex items-center gap-1">
-                                {item.type}
+                                {[item.workMode, item.engagementType].filter(Boolean).join(" · ")}
                             </span>
                         )}
                     </div>
@@ -96,20 +107,22 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                         <div className="lg:col-span-2 space-y-6">
                             <DialogHeader className="text-left">
                                 <div className="space-y-2">
-                                    {/* Company and Location */}
-                                    <div className="text-text-secondary text-sm">
-                                        {item.company}, {item.location}
-                                    </div>
+                                    {item.location && (
+                                        <div className="text-text-secondary text-sm">
+                                            {item.location}
+                                        </div>
+                                    )}
 
-                                    {/* Job Title */}
                                     <DialogTitle className="text-2xl font-bold text-text-primary">
                                         {item.title}
                                     </DialogTitle>
 
-                                    {/* Time ago */}
                                     <div className="flex items-center gap-1 text-text-secondary text-sm">
                                         <Clock className="w-4 h-4" />
-                                        {item.date}
+                                        {formatOpportunityDate(item.createdAt)}
+                                        {item.deadline && (
+                                            <> · Apply before {new Date(item.deadline).toLocaleDateString()}</>
+                                        )}
                                     </div>
                                 </div>
                             </DialogHeader>
@@ -120,40 +133,38 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
 
 
-                                {/* Job Description */}
-                                <section>
-                                    <h3 className="text-lg font-semibold text-text-primary mb-3">
-                                        Job description
-                                    </h3>
-                                    <p className="text-text-primary text-sm leading-relaxed">
-                                        The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.
-                                    </p>
-                                </section>
+                                {item.description && (
+                                    <section>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">
+                                            Description
+                                        </h3>
+                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">
+                                            {item.description}
+                                        </p>
+                                    </section>
+                                )}
 
-                                {/* Job Responsibilities */}
-                                <section>
-                                    <h3 className="text-lg font-semibold text-text-primary mb-3">
-                                        Job responsibilities
-                                    </h3>
-                                    <ul className="text-text-primary ml-[2%] text-sm space-y-2 list-disc list-inside">
-                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                    </ul>
-                                </section>
+                                {item.responsibilities && (
+                                    <section>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">
+                                            Responsibilities
+                                        </h3>
+                                        <div className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">
+                                            {item.responsibilities}
+                                        </div>
+                                    </section>
+                                )}
 
-                                {/* Job Requirements */}
-                                <section >
-                                    <h3 className="text-lg font-semibold text-text-primary mb-3">
-                                        Job requirements
-                                    </h3>
-                                    <ul className="text-text-primary ml-[2%] text-sm space-y-2 list-disc list-inside">
-                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-                                        <li>The developer will aid the engineering team efforts of making the website functional and more responsive, while also improving front-end components that would drive user interaction.</li>
-
-                                    </ul>
-                                </section>
+                                {item.requirements && (
+                                    <section>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">
+                                            Requirements
+                                        </h3>
+                                        <div className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">
+                                            {item.requirements}
+                                        </div>
+                                    </section>
+                                )}
 
 
 
@@ -170,111 +181,87 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
 
 
-                            <section className=" py-4" id="form-header">
-                                <p className="font-heading-xsmall">Apply for this job</p>
-                                <p> <RequiredAsterisk />Required</p>
-                                <form className="space-y-4 mt-4">
-                                    <p>Resume/CV<RequiredAsterisk /></p>
-
-                                    <div className="relative">
-                                        <input
-                                            type="file"
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            accept=".pdf,.doc,.docx,.txt,.rtf"
+                            {item.applicationMethod === "IN_PLATFORM_FORM" && (
+                                <section className=" py-4" id="form-header">
+                                    <p className="font-heading-xsmall">Apply for this opportunity</p>
+                                    <p> <RequiredAsterisk />Required</p>
+                                    <form
+                                        className="space-y-4 mt-4"
+                                        onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            if (!agreedToTerms || submitting) return;
+                                            await submitApplication({
+                                                variables: {
+                                                    input: {
+                                                        opportunityId: item.id,
+                                                        applicationData: {
+                                                            fullName: formData.fullName,
+                                                            email: formData.email,
+                                                            phoneNumber: formData.phoneNumber || undefined,
+                                                            coverLetter: formData.coverLetter || undefined,
+                                                        },
+                                                    },
+                                                },
+                                            });
+                                            setIsDialogOpen(false);
+                                            setFormData({ fullName: "", email: "", phoneNumber: "", coverLetter: "" });
+                                            setAgreedToTerms(false);
+                                        }}
+                                    >
+                                        <TextInput
+                                            id="fullName"
+                                            value={formData.fullName}
+                                            onChange={(e) => setFormData((p) => ({ ...p, fullName: e.target.value }))}
+                                            label="Full name"
+                                            placeholder="Your full name"
                                             required
                                         />
-
-
-
-
-
-                                        <div className=" rounded-md   hover:bg-surface-tertiary transition-colors cursor-pointer">
-                                            <span className="text-text-brand underline underline-offset-2 hover:text-text-brand-dark transition-colors">
-                                                Choose file
-                                            </span>
-                                        </div>
-                                    </div>
-
-
-                                    <p>(File types: pdf,doc,docx,txt,rtf)</p>
-
-                                    <TextInput
-                                        id="rmail"
-                                        value={``}
-                                        onChange={() => console.log("Email")}
-                                        label="Email"
-                                        placeholder="Enter your email"
-                                        required={true}
-                                    />
-                                    <TextInput
-                                        value=""
-                                        onChange={() => console.log("Email")}
-                                        type="text"
-                                        placeholder={t("form.email.placeholder")}
-                                        label="First Name"
-                                        id="firstName"
-                                        required={true}
-                                    />
-
-
-
-                                    <TextInput
-                                        value=""
-                                        onChange={() => console.log("Email")}
-                                        type="phone"
-                                        placeholder={t("form.email.placeholder")}
-                                        label="Phone Number"
-                                        id="phone"
-                                        required={true}
-                                    />
-
-
-
-                                    <div className="w-full">
-                                        <label
-                                            htmlFor="country"
-                                            className="block text-sm font-medium mb-2"
-                                        >
-                                            <LabelMedium>
-                                                {`${tO('location.country.label')} `} <RequiredAsterisk />
-                                            </LabelMedium>
-                                        </label>
-                                        <Select
-                                            value={''}
-                                            onValueChange={() => { }}
-                                        >
-                                            <SelectTrigger className="w-full px-3 py-6 border-1 border-border-default rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition">
-                                                <SelectValue placeholder={tO('location.country.placeholder')} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {/* {countries.map((country) => (
-                            <SelectItem key={country} value={country}>
-                                {country}
-                            </SelectItem>
-                        ))} */}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-
-
-
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox id="terms"
-                                            className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-surface-brand data-[state=checked]:text-white "
-
+                                        <TextInput
+                                            id="email"
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+                                            label="Email"
+                                            placeholder="Enter your email"
+                                            required
                                         />
-                                        <Label htmlFor="terms " className="text-text-primary"> By using this form you agree with the storage and handling of your data by this website</Label>
-                                    </div>
+                                        <TextInput
+                                            id="phone"
+                                            type="tel"
+                                            value={formData.phoneNumber}
+                                            onChange={(e) => setFormData((p) => ({ ...p, phoneNumber: e.target.value }))}
+                                            label="Phone number"
+                                            placeholder="Your phone number"
+                                        />
+                                        <div>
+                                            <Label htmlFor="coverLetter">Cover letter</Label>
+                                            <textarea
+                                                id="coverLetter"
+                                                value={formData.coverLetter}
+                                                onChange={(e) => setFormData((p) => ({ ...p, coverLetter: e.target.value }))}
+                                                placeholder="Why you're a good fit..."
+                                                className="w-full mt-1 px-3 py-2 border border-border-default rounded-sm bg-surface-subtle text-text-primary min-h-[100px]"
+                                            />
+                                        </div>
 
-                                    <ButtonType2 className="px-4 py-2">
-                                        <span>Submit</span>
-                                    </ButtonType2>
+                                        <div className="flex items-center gap-3">
+                                            <Checkbox
+                                                id="terms"
+                                                checked={agreedToTerms}
+                                                onCheckedChange={(v) => setAgreedToTerms(!!v)}
+                                                className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-surface-brand data-[state=checked]:text-white"
+                                            />
+                                            <Label htmlFor="terms" className="text-text-primary">
+                                                By using this form you agree with the storage and handling of your data by this website
+                                            </Label>
+                                        </div>
 
-                                </form>
-
-
-                            </section>
+                                        <ButtonType2 type="submit" className="px-4 py-2" disabled={submitting}>
+                                            <span>{submitting ? "Submitting…" : "Submit"}</span>
+                                        </ButtonType2>
+                                    </form>
+                                </section>
+                            )}
                         </div>
 
 
@@ -285,80 +272,74 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                 {/* Job Meta Information Card */}
                                 <div className="bg-surface-tertiary w-[20rem] rounded-lg p-4 border border-border-subtle">
                                     <div className="space-y-4">
-                                        <div className="text-text-secondary text-sm">
-                                            <strong>Posted by</strong> GhanaConnectGlobal Admin
-                                        </div>
-
                                         <div className="flex items-center gap-2 text-text-primary text-sm">
-                                            Remote |  Full-time |  Apply before Nov 1, 2025
+                                            {[item.workMode, item.engagementType, item.location].filter(Boolean).join(" · ")}
                                         </div>
-
-                                        <div className="flex items-center gap-2 text-text-secondary text-sm">
-                                            <Clock className="w-4 h-4" />
-                                            Posted {item.date}
-                                        </div>
+                                        {item.deadline && (
+                                            <div className="flex items-center gap-2 text-text-secondary text-sm">
+                                                <Clock className="w-4 h-4" />
+                                                Apply before {new Date(item.deadline).toLocaleDateString()}
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* Skills Section */}
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary my-3">
-                                            Skills
-                                        </h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {['React', 'Angular', 'Vue.js', 'Svelte', 'React', 'Vue', 'Angular', 'Ember', 'Backbone'].map((skill, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="px-3 py-1 bg-surface- text-text-brand rounded-full text-sm border border-border-subtle"
-                                                >
-                                                    {skill}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </section>
-
                                     {/* Action Buttons */}
-                                    <div className="mt-2 w-full flex flex-col justify-center gap-3">
-
-                                        <div className="text-text-info bg-surface-info p-2 rounded-md">
-                                            <p>How to apply:</p>
-                                            <p className=" text-sm">Send your resume and portfolio to
-                                                <a href="mailto:ashertettehabotsi@gmail.com" className="text-text-info underline ml-1">
-                                                    carreers@gretesolutions.com
+                                    <div className="mt-4 w-full flex flex-col justify-center gap-3">
+                                        {item.applicationMethod === "EXTERNAL_LINK" && item.externalLink && (
+                                            <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
+                                                <p>How to apply:</p>
+                                                <a href={item.externalLink} target="_blank" rel="noopener noreferrer" className="text-text-info underline">
+                                                    Apply externally
                                                 </a>
-                                            </p>
+                                            </div>
+                                        )}
+                                        {item.applicationMethod === "EMAIL_REQUEST" && item.applicationEmail && (
+                                            <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
+                                                <p>How to apply:</p>
+                                                <a href={`mailto:${item.applicationEmail}`} className="text-text-info underline">
+                                                    {item.applicationEmail}
+                                                </a>
+                                            </div>
+                                        )}
 
-                                        </div>
-
-
+                                        {item.applicationMethod === "EXTERNAL_LINK" && item.externalLink && (
+                                            <button
+                                                type="button"
+                                                className="flex-1 px-6 py-3 text-text-white border bg-surface-brand font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-full"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    window.open(item.externalLink!, "_blank");
+                                                }}
+                                            >
+                                                <span>Apply now</span>
+                                                <ExternalLink className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                        {item.applicationMethod === "IN_PLATFORM_FORM" && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    scrollToForm();
+                                                }}
+                                                id="form-header-trigger"
+                                                className="flex-1 px-6 py-3 bg-surface-brand text-text-white font-medium hover:bg-surface-brand transition-colors cursor-pointer flex items-center justify-center rounded-full"
+                                            >
+                                                Apply now
+                                            </button>
+                                        )}
                                         <button
-                                            className="flex-1 px-6 py-3 text-text-white border bg-surface-brand font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-full"
-                                            onClick={(e) => {
+                                            type="button"
+                                            className="flex-1 px-6 py-3 text-text-brand border border-border-brand font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-full disabled:opacity-50"
+                                            onClick={async (e) => {
                                                 e.stopPropagation();
-                                                window.open('https://gh.linkedin.com/jobs/easy-apply-jobs?countryRedirected=1', '_blank');
+                                                if (saved || saving) return;
+                                                await saveOpportunity({ variables: { id: item.id } });
                                             }}
-                                        >
-                                            <span>Apply now</span>
-                                            <ExternalLink className="w-4 h-4" />
-                                        </button>
-
-
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                scrollToForm();
-                                            }}
-                                            id="form-header-trigger"
-                                            className="flex-1 px-6 py-3 bg-surface-brand text-text-white font-medium hover:bg-surface-brand transition-colors cursor-pointer flex items-center justify-center  rounded-full">
-                                            Apply now
-                                        </button>
-                                        <button
-                                            className="flex-1 px-6 py-3 text-text-brand border border-border-brand font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-full"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                            }}
+                                            disabled={saved || saving}
                                         >
                                             <Bookmark className="w-4 h-4" />
-                                            <span>Save now</span>
+                                            <span>{saved ? "Saved" : "Save"}</span>
                                         </button>
                                     </div>
                                 </div>

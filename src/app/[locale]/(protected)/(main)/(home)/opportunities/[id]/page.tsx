@@ -1,126 +1,86 @@
 'use client';
 import { FilterableList } from '@/components/custom/filterableList';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
+import { useQuery } from '@apollo/client/react';
 import { moreOpportunitiesIDList } from './data';
 import { useTranslations } from 'next-intl';
+import { LIST_OPPORTUNITIES, GET_OPPORTUNITY } from '@/services/gql/opportunities';
+import type { ListOpportunitiesResponse, GetOpportunityData } from '@/services/gql/types/opportunities';
+import type { Opportunity } from '@/services/gql/types/opportunities';
+import { CustomEmploymentComponent } from '@/components/cards/opportunities/CustomEmploymentComponent';
 
-const employmentCareerItems = [
-    {
-        id: "1",
-        title: "Project Manager",
-        company: "Global Tech Solutions",
-        location: "Kigali, Rwanda",
-        type: "On-site",
-        date: "Just now",
-        imageUrl: "/images/global-tech.jpg"
-    },
-    {
-        id: "2",
-        title: "Senior Developer",
-        company: "Tech Startup Inc",
-        location: "Ghana",
-        type: "Remote",
-        date: "2 hours ago"
-    },
-    {
-        id: "3",
-        title: "Project Manager",
-        company: "Global Tech Solutions",
-        location: "Kigali, Rwanda",
-        type: "On-site",
-        date: "Just now",
-        imageUrl: "/images/global-tech.jpg"
-    },
-    {
-        id: "4",
-        title: "Senior Developer",
-        company: "Tech Startup Inc",
-        location: "Ghana",
-        type: "Remote",
-        date: "2 hours ago"
-    },
-    {
-        id: "4",
-        title: "Project Manager",
-        company: "Global Tech Solutions",
-        location: "Kigali, Rwanda",
-        type: "On-site",
-        date: "Just now",
-        imageUrl: "/images/global-tech.jpg"
-    },
-    {
-        id: "6",
-        title: "Senior Developer",
-        company: "Tech Startup Inc",
-        location: "Ghana",
-        type: "Remote",
-        date: "2 hours ago"
-    },
-];
-
-const educationTrainingItems = [
-    {
-        id: "1",
-        title: "Full Stack Web Development Bootcamp",
-        institution: "Tech Academy Africa",
-        location: "Lagos, Nigeria",
-        type: "Online Course",
-        date: "Just now",
-        duration: "12 weeks",
-        level: "Beginner to Advanced",
-        imageUrl: "/images/tech-academy.jpg"
-    },
-    {
-        id: "2",
-        title: "Data Science Certification Program",
-        institution: "African Data Institute",
-        location: "Nairobi, Kenya",
-        type: "Certification Program",
-        date: "1 hour ago",
-        duration: "6 months",
-        level: "Intermediate",
-        imageUrl: "/images/data-institute.jpg"
-    },
-    {
-        id: "3",
-        title: "Digital Marketing Workshop",
-        institution: "Marketing Pro Africa",
-        location: "Accra, Ghana",
-        type: "Workshop",
-        date: "3 hours ago",
-        duration: "2 days",
-        level: "All Levels",
-        imageUrl: "/images/marketing-pro.jpg"
-    },
-
-];
+const CATEGORY_SLUG_TO_API: Record<string, string> = {
+    'employment-career': 'EMPLOYMENT_CAREER',
+    'education-training': 'EDUCATION_TRAINING',
+    'funding-grants': 'FUNDING_GRANTS',
+    'fellowships-leadership': 'FELLOWSHIPS_LEADERSHIP',
+    'business-investment': 'BUSINESS_INVESTMENT',
+    'volunteering-social-impact': 'VOLUNTEERING_SOCIAL_IMPACT',
+    'event-creative-industry': 'EMPLOYMENT_CAREER',
+    'agriculture-sustainability': 'BUSINESS_INVESTMENT',
+    'real-estate-infrastructure': 'BUSINESS_INVESTMENT',
+    'government-embassy-initiatives': 'FELLOWSHIPS_LEADERSHIP',
+    'innovation-research': 'EDUCATION_TRAINING',
+    'finance-economics': 'FUNDING_GRANTS',
+    'return-reintegration': 'EMPLOYMENT_CAREER',
+};
 
 export default function OpportunityId() {
     const t = useTranslations('home.opportunities.notFound');
     const params = useParams();
     const opportunityId = params.id as string;
     const listConfig = moreOpportunitiesIDList.find(config => config.id === opportunityId);
+    const apiCategory = listConfig ? CATEGORY_SLUG_TO_API[opportunityId] ?? undefined : undefined;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [filteredItems, setFilteredItems] = useState<any>([]);
+    const [filteredItems, setFilteredItems] = useState<Opportunity[]>([]);
 
-    // Initialize with all items filtered
+    const { data: listData } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
+        variables: {
+            input: apiCategory
+                ? { category: apiCategory, limit: 50, offset: 0, status: 'PUBLISHED' }
+                : undefined,
+        },
+        skip: !apiCategory,
+    });
+
+    const { data: singleData, loading: singleLoading } = useQuery<GetOpportunityData>(GET_OPPORTUNITY, {
+        variables: { id: opportunityId },
+        skip: !!listConfig,
+    });
+
+    const items = useMemo<Opportunity[]>(
+        () => listData?.opportunities?.opportunities ?? [],
+        [listData?.opportunities?.opportunities]
+    );
+    const singleOpportunity = singleData?.opportunity ?? null;
+
     useEffect(() => {
-
-        if (opportunityId === 'education-training') {
-            setFilteredItems(educationTrainingItems);
-            return;
-        }
-        setFilteredItems(employmentCareerItems);
-    }, [opportunityId]);
+        setFilteredItems(items);
+    }, [items]);
 
     if (!listConfig) {
+        if (singleLoading) {
+            return (
+                <div className="lg:max-w-[60vw] mx-2 py-4 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                </div>
+            );
+        }
+        if (!singleOpportunity) {
+            return (
+                <div className="lg:max-w-[60vw] mx-2 py-4 flex items-center justify-center">
+                    <div className="text-text-secondary font-medium text-center">
+                        <p className="text-2xl mb-2">{t('title')}</p>
+                        <p>{t('description', { id: opportunityId })}</p>
+                    </div>
+                </div>
+            );
+        }
         return (
-            <div className="lg:max-w-[60vw] mx-2 py-4 flex items-center justify-center">
-                <div className="text-text-secondary font-medium text-center">
-                    <p className="text-2xl mb-2">{t('title')}</p>
-                    <p>{t('description', { id: opportunityId })}</p>
+            <div className="h-app-inner overflow-y-auto scrollbar-hide p-4">
+                <div className="max-w-2xl mx-auto">
+                    <CustomEmploymentComponent item={singleOpportunity} />
                 </div>
             </div>
         );
@@ -129,13 +89,12 @@ export default function OpportunityId() {
     return (
         <div className=' h-app-inner  overflow-y-auto scrollbar-hide '>
             <FilterableList
-                items={employmentCareerItems}
+                items={items}
                 filteredItems={filteredItems}
                 setFilteredItems={setFilteredItems}
                 listConfig={listConfig}
                 title={listConfig.title}
             />
-
         </div>
     );
 }

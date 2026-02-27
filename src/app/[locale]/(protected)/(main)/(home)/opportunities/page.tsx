@@ -4,7 +4,16 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { opportunities, Opportunity } from "./data";
+import { useQuery } from "@apollo/client/react";
+import { opportunities, Opportunity as CategoryOpportunity } from "./data";
+import {
+  GET_USER_APPLICATIONS,
+  GET_SAVED_OPPORTUNITIES,
+} from "@/services/gql/opportunities";
+import type {
+  UserApplicationsResponse,
+  GetSavedOpportunitiesData,
+} from "@/services/gql/types/opportunities";
 
 
 
@@ -40,7 +49,14 @@ const ExploreOpportunities = ({ name, imageUrl, icon: Icon, id }: ExploreOpportu
     );
 };
 
-const AppliedComponent = ({ appliedOpportunities }: { appliedOpportunities: Opportunity[] }) => {
+/** List item for Applied/Saved: id is opportunity id for navigation, title for label */
+interface OpportunityListItem {
+  id: string;
+  title: string;
+  imageUrl?: string;
+}
+
+const AppliedComponent = ({ appliedOpportunities }: { appliedOpportunities: OpportunityListItem[] }) => {
     const t = useTranslations("home.opportunities")
 
 
@@ -66,7 +82,7 @@ const AppliedComponent = ({ appliedOpportunities }: { appliedOpportunities: Oppo
     );
 };
 
-const SavedComponent = ({ savedOpportunities }: { savedOpportunities: Opportunity[] }) => {
+const SavedComponent = ({ savedOpportunities }: { savedOpportunities: OpportunityListItem[] }) => {
     const t = useTranslations("home.opportunities")
 
 
@@ -111,12 +127,23 @@ export default function Opportunities() {
 
     const t = useTranslations("home.opportunities")
 
-    const appliedOpportunities: Opportunity[] = [
+    const { data: applicationsData } = useQuery<UserApplicationsResponse>(GET_USER_APPLICATIONS, {
+        variables: { limit: 50, offset: 0 },
+    });
+    const { data: savedData } = useQuery<GetSavedOpportunitiesData>(GET_SAVED_OPPORTUNITIES, {
+        variables: { limit: 50, offset: 0 },
+    });
 
-    ];
-    const savedOpportunities: Opportunity[] = [
-
-    ];
+    const appliedOpportunities: OpportunityListItem[] =
+        applicationsData?.userApplications?.applications?.map((app) => ({
+            id: app.opportunityId,
+            title: "Application",
+        })) ?? [];
+    const savedOpportunities: OpportunityListItem[] =
+        savedData?.getSavedOpportunities?.savedOpportunities?.map((saved) => ({
+            id: saved.opportunity?.id ?? saved.opportunityId,
+            title: saved.opportunity?.title ?? "Saved opportunity",
+        })) ?? [];
 
     return (
         <div className="lg:w-[50rem] h-app-inner  p-4 overflow-y-auto scrollbar-hide ">
@@ -159,9 +186,10 @@ export default function Opportunities() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem]  lg:mb-1 "> {/* 12px, 24px equivalent */}
                     {opportunities.map((opp, index) => (
                         <ExploreOpportunities
-                        id={opp.id}
+                            id={opp.id}
                             key={index}
                             name={opp.title}
+                            imageUrl={opp.imageUrl}
                             icon={opp.icon}
                         />
                     ))}
