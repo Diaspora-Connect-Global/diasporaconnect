@@ -125,7 +125,7 @@ export default function Chat() {
             {/* Chat content */}
             <div className="overflow-hidden h-[96%] my-auto">
                 {activeChat.type === 'direct' ? (
-                    <DirectMessageChat chat={chatInfo} />
+                    <DirectMessageChat chat={chatInfo} onBack={handleBack} />
                 ) : (
                     <GroupChat />
                 )}

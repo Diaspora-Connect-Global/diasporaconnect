@@ -5,13 +5,14 @@
 
 import { formatChatTimestamp } from "@/macros/time";
 import { Check, ChevronRight, InfoIcon, X } from "lucide-react";
+import { ArrowLeft } from "iconsax-reactjs";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
 import { useChatStore, ApiMessage } from "@/store/ChatStore";
+import { useTranslations } from 'next-intl';
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
-import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
 import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
@@ -19,8 +20,9 @@ import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 
-export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
+export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; onBack?: () => void }) {
     const t = useTranslations('chat.direct');
+    const tCommon = useTranslations('common');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
@@ -306,7 +308,7 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
             {/* Main Chat Area */}
             <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full ${isMobile && sidebarOpen ? 'hidden' : 'flex'
                 }`}>
-                {/* Chat Header - Hidden on mobile (shown in page.tsx) */}
+                {/* Chat Header - Desktop */}
                 <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between items-center">
                     <div className="flex items-center space-x-3">
                         <div className="relative">
@@ -332,9 +334,18 @@ export default function DirectMessageChat({ chat }: { chat: ChatInfo }) {
                     </button>
                 </div>
 
-                {/* Mobile: top bar with avatar, display name, and info button */}
+                {/* Mobile: back button, avatar, display name, and info button */}
                 <div className="md:hidden flex flex-shrink-0 border-b border-border-subtle p-3 justify-between items-center bg-surface-default">
                     <div className="flex items-center space-x-3 min-w-0">
+                        {onBack && (
+                            <button
+                                onClick={onBack}
+                                className="p-2 hover:bg-surface-hover rounded-lg transition-colors flex-shrink-0"
+                                aria-label={tCommon('backToChats')}
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                        )}
                         <Avatar className="w-10 h-10 flex-shrink-0">
                             <AvatarImage src={otherAvatar} alt="" />
                             <AvatarFallback>{displayName.slice(0, 1).toUpperCase() || 'U'}</AvatarFallback>
