@@ -10,82 +10,17 @@ export interface Opportunity {
 }
 
   export  const opportunities: Opportunity[] = [
-        {
-            title: "Employment & Career",
-            id: "employment-career",
-            imageUrl: "/images/opportunities/employment-career.jpg",
-            icon: BriefcaseBusiness
-        },
-        {
-            title: "Education & Training",
-            id: "education-training",
-            imageUrl: "/images/opportunities/education-training.jpg",
-            icon: GraduationCap
-        },
-        {
-            title: "Funding & Grants",
-            id: "funding-grants",
-            imageUrl: "/images/opportunities/funding-grants.jpg",
-            icon: DollarSign
-        },
-        {
-            title: "Fellowships & Leadership",
-            id: "fellowships-leadership",
-            imageUrl: "/images/opportunities/fellowships-leadership.jpg",
-            icon: Award
-        },
-        {
-            title: "Business & Investment",
-            id: "business-investment",
-            imageUrl: "/images/opportunities/business-investment.jpg",
-            icon: Building2
-        },
-        {
-            title: "Volunteering & Social Impact",
-            id: "volunteering-social-impact",
-            imageUrl: "/images/opportunities/volunteering-social-impact.jpg",
-            icon: Heart
-        },
-        {
-            title: "Event & Creative Industry",
-            id: "event-creative-industry",
-            imageUrl: "/images/opportunities/event-creative-industry.jpg",
-            icon: Palette
-        },
-        {
-            title: "Agriculture & Sustainability",
-            id: "agriculture-sustainability",
-            imageUrl: "/images/opportunities/agriculture-sustainability.jpg",
-            icon: Sprout
-        },
-        {
-            title: "Real Estate & Infrastructure",
-            id: "real-estate-infrastructure",
-            imageUrl: "/images/opportunities/real-estate-infrastructure.jpg",
-            icon: Home
-        },
-        {
-            title: "Gov't & Embassy Initiatives",
-            id: "government-embassy-initiatives",
-            imageUrl: "/images/opportunities/government-embassy-initiatives.jpg",
-            icon: Landmark
-        },
-        {
-            title: "Innovation & Research",
-            id: "innovation-research",
-            imageUrl: "/images/opportunities/innovation-research.jpg",
-            icon: Lightbulb
-        },
-        {
-            title: "Finance & Economics",
-            id: "finance-economics",
-            imageUrl: "/images/opportunities/finance-economics.jpg",
-            icon: TrendingUp
-        },
-        {
-            title: "Return & Reintegration",
-            id: "return-reintegration",
-            imageUrl: "/images/opportunities/return-reintegration.jpg",
-            icon: StickyNoteIcon
-        }
+        { title: "Employment & Career", id: "employment-career", icon: BriefcaseBusiness },
+        { title: "Education & Training", id: "education-training", icon: GraduationCap },
+        { title: "Funding & Grants", id: "funding-grants", icon: DollarSign },
+        { title: "Fellowships & Leadership", id: "fellowships-leadership", icon: Award },
+        { title: "Business & Investment", id: "business-investment", icon: Building2 },
+        { title: "Volunteering & Social Impact", id: "volunteering-social-impact", icon: Heart },
+        { title: "Event & Creative Industry", id: "event-creative-industry", icon: Palette },
+        { title: "Agriculture & Sustainability", id: "agriculture-sustainability", icon: Sprout },
+        { title: "Real Estate & Infrastructure", id: "real-estate-infrastructure", icon: Home },
+        { title: "Gov't & Embassy Initiatives", id: "government-embassy-initiatives", icon: Landmark },
+        { title: "Innovation & Research", id: "innovation-research", icon: Lightbulb },
+        { title: "Finance & Economics", id: "finance-economics", icon: TrendingUp },
+        { title: "Return & Reintegration", id: "return-reintegration", icon: StickyNoteIcon },
     ];
