@@ -16,7 +16,7 @@ import { Bookmark, Clock, ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
-import { SAVE_OPPORTUNITY, SUBMIT_APPLICATION, GET_SAVED_OPPORTUNITIES, GET_USER_APPLICATIONS } from "@/services/gql/opportunities";
+import { SAVE_OPPORTUNITY, SUBMIT_APPLICATION, UNSAVE_OPPORTUNITY, GET_SAVED_OPPORTUNITIES, GET_USER_APPLICATIONS, WITHDRAW_APPLICATION, GET_OPPORTUNITY } from "@/services/gql/opportunities";
 import type { SaveOpportunityData, SubmitApplicationData } from "@/services/gql/types/opportunities";
 import type { Opportunity } from "@/services/gql/types/opportunities";
 import { formatChatTimestamp } from "@/macros/time";
@@ -36,18 +36,32 @@ function formatOpportunityDate(iso?: string) {
 
 export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [saved, setSaved] = useState(false);
+    const [saved, setSaved] = useState(!!item.isSavedByCurrentUser);
     const [formData, setFormData] = useState({ fullName: "", email: "", phoneNumber: "", coverLetter: "" });
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const t = useTranslations('authentication');
     const tO = useTranslations('onboarding');
 
+    const isSaved = saved || item.isSavedByCurrentUser;
+    const hasApplied = item.hasCurrentUserApplied ?? false;
+    const applicationId = item.currentUserApplicationId ?? null;
+
     const [saveOpportunity, { loading: saving }] = useMutation<SaveOpportunityData>(SAVE_OPPORTUNITY, {
         onCompleted: () => setSaved(true),
         refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
     });
+    const [unsaveOpportunity, { loading: unsaving }] = useMutation(UNSAVE_OPPORTUNITY, {
+        onCompleted: () => setSaved(false),
+        refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
+    });
     const [submitApplication, { loading: submitting }] = useMutation<SubmitApplicationData>(SUBMIT_APPLICATION, {
         refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } }],
+    });
+    const [withdrawApplication, { loading: withdrawing }] = useMutation(WITHDRAW_APPLICATION, {
+        refetchQueries: [
+            { query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } },
+            { query: GET_OPPORTUNITY, variables: { id: item.id } },
+        ],
     });
 
 
@@ -181,7 +195,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
 
 
-                            {item.applicationMethod === "IN_PLATFORM_FORM" && (
+                            {item.applicationMethod === "IN_PLATFORM_FORM" && !hasApplied && (
                                 <section className=" py-4" id="form-header">
                                     <p className="font-heading-xsmall">Apply for this opportunity</p>
                                     <p> <RequiredAsterisk />Required</p>
@@ -315,7 +329,26 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                                 <ExternalLink className="w-4 h-4" />
                                             </button>
                                         )}
-                                        {item.applicationMethod === "IN_PLATFORM_FORM" && (
+                                        {hasApplied && (
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-sm text-text-secondary">You have applied.</p>
+                                                {applicationId && (
+                                                    <button
+                                                        type="button"
+                                                        className="flex-1 px-6 py-3 text-text-danger border border-border-subtle font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full disabled:opacity-50"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            if (withdrawing) return;
+                                                            await withdrawApplication({ variables: { id: applicationId } });
+                                                        }}
+                                                        disabled={withdrawing}
+                                                    >
+                                                        {withdrawing ? "…" : "Withdraw application"}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                        {item.applicationMethod === "IN_PLATFORM_FORM" && !hasApplied && (
                                             <button
                                                 type="button"
                                                 onClick={(e) => {
@@ -333,13 +366,18 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                             className="flex-1 px-6 py-3 text-text-brand border border-border-brand font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-full disabled:opacity-50"
                                             onClick={async (e) => {
                                                 e.stopPropagation();
-                                                if (saved || saving) return;
-                                                await saveOpportunity({ variables: { id: item.id } });
+                                                if (isSaved) {
+                                                    if (unsaving) return;
+                                                    await unsaveOpportunity({ variables: { id: item.id } });
+                                                } else {
+                                                    if (saving) return;
+                                                    await saveOpportunity({ variables: { id: item.id } });
+                                                }
                                             }}
-                                            disabled={saved || saving}
+                                            disabled={saving || unsaving}
                                         >
                                             <Bookmark className="w-4 h-4" />
-                                            <span>{saved ? "Saved" : "Save"}</span>
+                                            <span>{isSaved ? "Unsave" : "Save"}</span>
                                         </button>
                                     </div>
                                 </div>

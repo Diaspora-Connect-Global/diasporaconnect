@@ -429,6 +429,7 @@
         "opportunities": {
             "opportunities": "Opportunities",
             "youropp": "Your opportunities",
+            "create": "Create opportunity",
             "moreopp": "Explore opportunities",
             "none": {
                 "applied": "You have not applied to any opportunities yet",

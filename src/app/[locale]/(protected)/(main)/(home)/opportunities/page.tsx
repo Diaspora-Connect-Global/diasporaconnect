@@ -4,16 +4,19 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { useQuery } from "@apollo/client/react";
-import { opportunities, Opportunity as CategoryOpportunity } from "./data";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { opportunities } from "./data";
 import {
   GET_USER_APPLICATIONS,
   GET_SAVED_OPPORTUNITIES,
+  WITHDRAW_APPLICATION,
+  UNSAVE_OPPORTUNITY,
 } from "@/services/gql/opportunities";
 import type {
   UserApplicationsResponse,
   GetSavedOpportunitiesData,
 } from "@/services/gql/types/opportunities";
+import type { Application } from "@/services/gql/types/opportunities";
 
 
 
@@ -49,63 +52,101 @@ const ExploreOpportunities = ({ name, imageUrl, icon: Icon, id }: ExploreOpportu
     );
 };
 
-/** List item for Applied/Saved: id is opportunity id for navigation, title for label */
-interface OpportunityListItem {
-  id: string;
+/** Saved item: opportunity id, title, and save record id for unsave */
+interface SavedItem {
+  opportunityId: string;
   title: string;
   imageUrl?: string;
 }
 
-const AppliedComponent = ({ appliedOpportunities }: { appliedOpportunities: OpportunityListItem[] }) => {
-    const t = useTranslations("home.opportunities")
+const AppliedComponent = ({
+  applications,
+  onWithdraw,
+  withdrawingId,
+}: {
+  applications: Application[];
+  onWithdraw: (applicationId: string) => void;
+  withdrawingId: string | null;
+}) => {
+  const t = useTranslations("home.opportunities");
 
-
-    return (
-        <>
-            {appliedOpportunities.length === 0 ? (
-                <p className="text-text-primary">
-                    {t("none.applied")}
+  return (
+    <>
+      {applications.length === 0 ? (
+        <p className="text-text-primary">{t("none.applied")}</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {applications.map((app) => (
+            <div
+              key={app.id}
+              className="flex items-center justify-between gap-2 p-3 bg-surface-default rounded-lg border border-border-subtle"
+            >
+              <Link
+                href={`/opportunities/${app.opportunity?.id ?? app.opportunityId}`}
+                className="flex-1 min-w-0"
+              >
+                <p className="font-medium text-text-primary truncate">
+                  {app.opportunity?.title ?? "Application"}
                 </p>
-            ) : (
-                <>
-                    {appliedOpportunities.map((opp, index) => (
-                        <ExploreOpportunities
-                            id={opp.id}
-                            key={index}
-                            name={opp.title}
-                            imageUrl={opp.imageUrl}
-                        />
-                    ))}
-                </>
-            )}
-        </>
-    );
+                <p className="text-xs text-text-secondary capitalize">{app.status}</p>
+              </Link>
+              {app.status !== "ACCEPTED" && app.status !== "REJECTED" && app.status !== "WITHDRAWN" && (
+                <button
+                  type="button"
+                  onClick={() => onWithdraw(app.id)}
+                  disabled={withdrawingId === app.id}
+                  className="shrink-0 px-3 py-1.5 text-sm text-text-danger border border-border-subtle rounded-lg hover:bg-surface-hover disabled:opacity-50"
+                >
+                  {withdrawingId === app.id ? "…" : "Withdraw"}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
 };
 
-const SavedComponent = ({ savedOpportunities }: { savedOpportunities: OpportunityListItem[] }) => {
-    const t = useTranslations("home.opportunities")
+const SavedComponent = ({
+  savedItems,
+  onUnsave,
+  unsavingId,
+}: {
+  savedItems: SavedItem[];
+  onUnsave: (opportunityId: string) => void;
+  unsavingId: string | null;
+}) => {
+  const t = useTranslations("home.opportunities");
 
-
-    return (
-        <>
-            {savedOpportunities.length === 0 ? (
-                <p className="text-text-primary">
-                    {t("none.saved")}
-                </p>
-            ) : (
-                <>
-                    {savedOpportunities.map((opp, index) => (
-                        <ExploreOpportunities
-                            id={opp.id}
-                            key={index}
-                            name={opp.title}
-                            imageUrl={opp.imageUrl}
-                        />
-                    ))}
-                </>
-            )}
-        </>
-    );
+  return (
+    <>
+      {savedItems.length === 0 ? (
+        <p className="text-text-primary">{t("none.saved")}</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {savedItems.map((saved) => (
+            <div
+              key={saved.opportunityId}
+              className="flex items-center justify-between gap-2 p-3 bg-surface-default rounded-lg border border-border-subtle"
+            >
+              <Link href={`/opportunities/${saved.opportunityId}`} className="flex-1 min-w-0">
+                <p className="font-medium text-text-primary truncate">{saved.title}</p>
+              </Link>
+              <button
+                type="button"
+                onClick={() => onUnsave(saved.opportunityId)}
+                disabled={unsavingId === saved.opportunityId}
+                className="shrink-0 px-3 py-1.5 text-sm text-text-brand border border-border-brand rounded-lg hover:bg-surface-hover disabled:opacity-50"
+              >
+                {unsavingId === saved.opportunityId ? "…" : "Unsave"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
 };
 
 export default function Opportunities() {
@@ -127,6 +168,9 @@ export default function Opportunities() {
 
     const t = useTranslations("home.opportunities")
 
+    const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
+    const [unsavingId, setUnsavingId] = useState<string | null>(null);
+
     const { data: applicationsData } = useQuery<UserApplicationsResponse>(GET_USER_APPLICATIONS, {
         variables: { limit: 50, offset: 0 },
     });
@@ -134,22 +178,51 @@ export default function Opportunities() {
         variables: { limit: 50, offset: 0 },
     });
 
-    const appliedOpportunities: OpportunityListItem[] =
-        applicationsData?.userApplications?.applications?.map((app) => ({
-            id: app.opportunityId,
-            title: "Application",
-        })) ?? [];
-    const savedOpportunities: OpportunityListItem[] =
+    const [withdrawApplication] = useMutation(WITHDRAW_APPLICATION, {
+        refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } }],
+    });
+    const [unsaveOpportunity] = useMutation(UNSAVE_OPPORTUNITY, {
+        refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
+    });
+
+    const applications: Application[] =
+        applicationsData?.userApplications?.applications ?? [];
+    const savedItems: SavedItem[] =
         savedData?.getSavedOpportunities?.savedOpportunities?.map((saved) => ({
-            id: saved.opportunity?.id ?? saved.opportunityId,
+            opportunityId: saved.opportunity?.id ?? saved.opportunityId,
             title: saved.opportunity?.title ?? "Saved opportunity",
         })) ?? [];
+
+    const handleWithdraw = async (applicationId: string) => {
+        setWithdrawingId(applicationId);
+        try {
+            await withdrawApplication({ variables: { id: applicationId } });
+        } finally {
+            setWithdrawingId(null);
+        }
+    };
+    const handleUnsave = async (opportunityId: string) => {
+        setUnsavingId(opportunityId);
+        try {
+            await unsaveOpportunity({ variables: { id: opportunityId } });
+        } finally {
+            setUnsavingId(null);
+        }
+    };
 
     return (
         <div className="lg:w-[50rem] h-app-inner  p-4 overflow-y-auto scrollbar-hide ">
             {/* 885px equivalent, 64px header height */}
             <div className="mx-auto mb-h-app-down">
-                <p className="text-2xl font-heading-large my-[1.25rem]">{t("youropp")}</p> {/* 20px equivalent */}
+                {/* <div className="flex flex-wrap items-center justify-between gap-2 my-[1.25rem]">
+                    <p className="text-2xl font-heading-large">{t("youropp")}</p>
+                    <Link
+                        href="/opportunities/create"
+                        className="px-4 py-2 text-sm font-medium bg-surface-brand text-text-white rounded-lg hover:opacity-90 transition-opacity"
+                    >
+                        {t("create") ?? "Create opportunity"}
+                    </Link>
+                </div> */}
 
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
@@ -173,11 +246,19 @@ export default function Opportunities() {
                 </div>
 
                 {/* Opportunities Content */}
-                <div className="overflow-auto scrollbar-hide flex gap-[0.5rem] "> {/* 8px equivalent */}
+                <div className="overflow-auto scrollbar-hide flex gap-[0.5rem] ">
                     {activeTab === "applied" ? (
-                        <AppliedComponent appliedOpportunities={appliedOpportunities} />
+                        <AppliedComponent
+                            applications={applications}
+                            onWithdraw={handleWithdraw}
+                            withdrawingId={withdrawingId}
+                        />
                     ) : (
-                        <SavedComponent savedOpportunities={savedOpportunities} />
+                        <SavedComponent
+                            savedItems={savedItems}
+                            onUnsave={handleUnsave}
+                            unsavingId={unsavingId}
+                        />
                     )}
                 </div>
 

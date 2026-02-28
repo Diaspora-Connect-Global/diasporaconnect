@@ -24,6 +24,7 @@ export const GET_OPPORTUNITY = gql`
       id
       ownerType
       ownerId
+      owner { id name avatarUrl type }
       type
       category
       title
@@ -43,6 +44,9 @@ export const GET_OPPORTUNITY = gql`
       salaryMax
       salaryCurrency
       deadline
+      isSavedByCurrentUser
+      hasCurrentUserApplied
+      currentUserApplicationId
       createdAt
       updatedAt
       publishedAt
@@ -58,6 +62,7 @@ export const LIST_OPPORTUNITIES = gql`
         id
         ownerType
         ownerId
+        owner { id name avatarUrl type }
         type
         category
         title
@@ -71,6 +76,8 @@ export const LIST_OPPORTUNITIES = gql`
         deadline
         status
         priorityLevel
+        isSavedByCurrentUser
+        hasCurrentUserApplied
         createdAt
         publishedAt
       }
@@ -193,17 +200,22 @@ export const GET_APPLICATIONS = gql`
 export const GET_USER_APPLICATIONS = gql`
   query GetUserApplications($limit: Int, $offset: Int, $status: String) {
     userApplications(limit: $limit, offset: $offset, status: $status) {
+      total
       applications {
         id
         opportunityId
         applicantId
         status
-        resumeFileRef
         coverLetter
-        customAnswers
         createdAt
+        opportunity {
+          id
+          title
+          type
+          category
+          owner { id name avatarUrl type }
+        }
       }
-      total
     }
   }
 `;

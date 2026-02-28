@@ -13,6 +13,14 @@ export enum ApplicationStatus {
   REVIEWING = 'REVIEWING',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
+  WITHDRAWN = 'WITHDRAWN',
+}
+
+export interface OpportunityOwnerType {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  type: string;
 }
 
 // Opportunity Types
@@ -20,6 +28,7 @@ export interface Opportunity {
   id: string;
   ownerType: 'USER' | 'COMMUNITY' | 'ASSOCIATION';
   ownerId: string;
+  owner?: OpportunityOwnerType;
   type: 'EMPLOYMENT' | 'SCHOLARSHIP' | 'INVESTMENT' | 'FELLOWSHIP' | 'INITIATIVE' | 'GRANT' | 'PROGRAM' | 'VOLUNTEER' | 'CONTRACT';
   category: 'EMPLOYMENT_CAREER' | 'EDUCATION_TRAINING' | 'FUNDING_GRANTS' | 'FELLOWSHIPS_LEADERSHIP' | 'BUSINESS_INVESTMENT' | 'VOLUNTEERING_SOCIAL_IMPACT';
   title: string;
@@ -43,6 +52,10 @@ export interface Opportunity {
   updatedAt: string;
   publishedAt?: string;
   closedAt?: string;
+  /** Populated when authenticated */
+  isSavedByCurrentUser?: boolean | null;
+  hasCurrentUserApplied?: boolean | null;
+  currentUserApplicationId?: string | null;
 }
 
 export interface CreateOpportunityInput {
@@ -112,11 +125,13 @@ export interface Application {
   opportunityId: string;
   applicantId: string;
   status: 'PENDING' | 'REVIEWING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
-  resumeFileRef?: string;
+  resumeFileRef?: { path?: string; filename?: string; mimeType?: string; sizeBytes?: number };
   coverLetter?: string;
   customAnswers?: string;
   reviewNotes?: string;
   createdAt: string;
+  updatedAt?: string;
+  opportunity?: Opportunity;
 }
 
 export interface SubmitApplicationInput {
