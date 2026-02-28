@@ -84,7 +84,9 @@
         "confirmVerification": {
             "title": "Bestätigungscode eingeben",
             "description": "Geben Sie den Bestätigungscode ein, der an {phoneNumber} gesendet wurde",
-            "resend": "Code erneut senden"
+            "resend": "Code erneut senden",
+            "codeExpiresIn": "Code läuft ab in {time}",
+            "codeExpired": "Code abgelaufen"
         },
         "topics": {
             "title": "Welche Themen möchten Sie auf Diaspo Plug sehen",

@@ -29,11 +29,13 @@ export const Step5: React.FC<Step5Props> = ({
     const tActions = useTranslations('actions');
 
     const [value, setValue] = React.useState("");
+    const [codeExpirySeconds, setCodeExpirySeconds] = useState<number | null>(null);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
     const [isComplete, setIsComplete] = useState(false);
     const [showResend, setShowResend] = useState(false);
 
     const COUNTDOWN_KEY = 'otp_resend_expires_at';
+    const OTP_EXPIRES_AT_KEY = 'otp_expires_at';
 
     const handleChange = (newValue: string) => {
         const numericValue = newValue.replace(/\D/g, '');
@@ -43,8 +45,33 @@ export const Step5: React.FC<Step5Props> = ({
 
     const isNextDisabled = value.length !== 6;
 
+    // "Code expires in X:XX" countdown from otp_expires_at (set when OTP is sent)
     useEffect(() => {
-        // Get resend expiration time from sessionStorage
+        const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
+        if (!expiresAt) {
+            setCodeExpirySeconds(null);
+            setShowResend(true);
+            return;
+        }
+        const updateExpiryCountdown = () => {
+            const now = Date.now();
+            const expirationTime = parseInt(expiresAt, 10);
+            const remaining = Math.floor((expirationTime - now) / 1000);
+            if (remaining <= 0) {
+                setCodeExpirySeconds(0);
+                setShowResend(true);
+            } else {
+                setCodeExpirySeconds(remaining);
+                setShowResend(true);
+            }
+        };
+        updateExpiryCountdown();
+        const timer = setInterval(updateExpiryCountdown, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
+        // Get resend expiration time from sessionStorage (set after resend)
         const expiresAt = sessionStorage.getItem(COUNTDOWN_KEY);
         
         if (!expiresAt) {
@@ -89,17 +116,13 @@ export const Step5: React.FC<Step5Props> = ({
 
     const handleResendCode = async () => {
         await resendCode();
-        
-        // After resend, get the new expiration from backend (stored by submitFormA)
-        const expiresAt = sessionStorage.getItem('otp_expires_at');
+        const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
         if (expiresAt) {
-            // Store it as resend expiration
             sessionStorage.setItem(COUNTDOWN_KEY, expiresAt);
-            
             const now = Date.now();
-            const expirationTime = parseInt(expiresAt);
+            const expirationTime = parseInt(expiresAt, 10);
             const remaining = Math.floor((expirationTime - now) / 1000);
-            
+            setCodeExpirySeconds(remaining > 0 ? remaining : 0);
             setTimeLeft(remaining);
             setIsComplete(false);
             setShowResend(true);
@@ -138,6 +161,14 @@ export const Step5: React.FC<Step5Props> = ({
                         <InputOTPSlot index={5} className="flex-1 h-12 text-lg rounded-md" />
                     </InputOTPGroup>
                 </InputOTP>
+
+                {codeExpirySeconds !== null && (
+                    <p className="text-text-secondary text-sm">
+                        {codeExpirySeconds > 0
+                            ? t('confirmVerification.codeExpiresIn', { time: formatTime(codeExpirySeconds) })
+                            : t('confirmVerification.codeExpired')}
+                    </p>
+                )}
 
                 {showResend && (
                     <div className="flex ">

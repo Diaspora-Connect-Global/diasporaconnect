@@ -125,7 +125,9 @@
         "confirmVerification": {
             "title": "Enter verification code",
             "description": "Enter the verification code that was sent to {phoneNumber}",
-            "resend": "Resend code"
+            "resend": "Resend code",
+            "codeExpiresIn": "Code expires in {time}",
+            "codeExpired": "Code expired"
         },
         "topics": {
             "title": "What topics do you want to see on Diaspo Plug",

@@ -84,7 +84,9 @@
         "confirmVerification": {
             "title": "Entrez le code de vérification",
             "description": "Entrez le code de vérification qui a été envoyé à {phoneNumber}",
-            "resend": "Renvoyer le code"
+            "resend": "Renvoyer le code",
+            "codeExpiresIn": "Le code expire dans {time}",
+            "codeExpired": "Code expiré"
         },
         "topics": {
             "title": "Quels sujets souhaitez-vous voir sur Diaspo Plug",
