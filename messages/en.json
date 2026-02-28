@@ -433,6 +433,9 @@
             "opportunities": "Opportunities",
             "youropp": "Your opportunities",
             "create": "Create opportunity",
+            "createRestricted": "Creating and managing opportunities is restricted to community admins, association admins, and system admins. If you need to post an opportunity, please contact your community or association admin.",
+            "backToOpportunities": "Back to opportunities",
+            "discover": "Discover",
             "moreopp": "Explore opportunities",
             "none": {
                 "applied": "You have not applied to any opportunities yet",
