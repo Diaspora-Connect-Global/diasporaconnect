@@ -3,18 +3,17 @@ import { Bookmark } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-// EventCard1 Component with Props
 interface EventCardProps {
     title: string;
     date: string;
     location: string;
     attendees: number;
-    imageUrl: string; // Required background image URL
+    imageUrl: string;
+    eventId?: string;
     onAttendClick?: () => void;
-
 }
 
-export default function PaidEventCard({ title, date, location, attendees, imageUrl,onAttendClick }: EventCardProps) {
+export default function PaidEventCard({ title, date, location, attendees, imageUrl, eventId, onAttendClick }: EventCardProps) {
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -43,8 +42,8 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
 
             {/* Event Details */}
             <div className="px-4 py-2">
-                <Link href="/events/1">
-                <h2 className="text-2xl font-bold text-primary ">{title}</h2>
+                <Link href={eventId ? `/events/${eventId}` : "/events"}>
+                    <h2 className="text-2xl font-bold text-primary ">{title}</h2>
                 </Link>
                 <p className="text-lg font-semibold text-primary ">{date}</p>
                 <p className="text-secondary ">{location}</p>

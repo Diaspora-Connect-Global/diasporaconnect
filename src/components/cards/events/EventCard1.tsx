@@ -3,18 +3,17 @@ import Image from "next/image";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 import Link from "next/link";
 
-// EventCard1 Component with Props
 interface EventCardProps {
     title: string;
     date: string;
     location: string;
     attendees: number;
-    imageUrl: string; // Required background image URL
+    imageUrl: string;
+    eventId?: string;
     onAttendClick?: () => void;
-
 }
 
-export default function EventCard1({ title, date, location, attendees, imageUrl,onAttendClick }: EventCardProps) {
+export default function EventCard1({ title, date, location, attendees, imageUrl, eventId, onAttendClick }: EventCardProps) {
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -43,8 +42,8 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
 
             {/* Event Details */}
             <div className="p-6">
-                <Link href="/events/1">
-                <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
+                <Link href={eventId ? `/events/${eventId}` : "/events"}>
+                    <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
                 </Link>
                 <p className="text-lg font-semibold text-primary mb-1">{date}</p>
                 <p className="text-secondary mb-1">{location}</p>

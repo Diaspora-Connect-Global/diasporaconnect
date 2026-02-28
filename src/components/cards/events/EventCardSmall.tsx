@@ -7,9 +7,10 @@ interface EventCardProps {
     location: string;
     attendees: number;
     imageUrl: string;
+    eventId?: string;
 }
 
-export default function EventCardSmall({ title, date, location, attendees, imageUrl }: EventCardProps) {
+export default function EventCardSmall({ title, date, location, attendees, imageUrl, eventId }: EventCardProps) {
     return (
         <div className="w-full lg:w-[18.3125rem] flex bg-surface-default rounded-lg overflow-hidden">
             
@@ -39,7 +40,7 @@ export default function EventCardSmall({ title, date, location, attendees, image
 
             {/* Content */}
             <div className="flex-1 px-3 py-2">
-                <Link href="/events/1">
+                <Link href={eventId ? `/events/${eventId}` : "/events"}>
                     <h2 className="font-caption-large text-primary truncate">
                         {title}
                     </h2>

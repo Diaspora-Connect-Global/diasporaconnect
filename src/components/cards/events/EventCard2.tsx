@@ -1,17 +1,21 @@
 import Image from "next/image";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 
-// EventCard1 Component with Props
 interface EventCardProps {
     title: string;
     date: string;
     location: string;
     attendees: number;
-    imageUrl: string; 
-onBuyClick?: () => void;
+    imageUrl: string;
+    description?: string;
+    priceLabel?: string;
+    onBuyClick?: () => void;
+    onSaveClick?: () => void;
+    isSaved?: boolean;
+    isRegistered?: boolean;
 }
 
-export default function EventCard2({ title, date, location, attendees, imageUrl, onBuyClick }: EventCardProps) {
+export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, onBuyClick, onSaveClick, isSaved, isRegistered }: EventCardProps) {
     return (
         <div className="w-full  bg-surface-default rounded-3xl overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -40,10 +44,10 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
             {/* Event Details */}
             <div className="p-6">
                 <div className="flex justify-between">
-
                     <h2 className="text-2xl font-heading-small text-primary mb-2">{title}</h2>
-                    <p className="text-text-primary "><span className="text-lg font-heading-small text-primary">GHC300.00/</span> <span className="text-sm">ticket</span></p>
-
+                    {priceLabel != null && (
+                        <p className="text-text-primary"><span className="text-lg font-heading-small text-primary">{priceLabel}</span></p>
+                    )}
                 </div>
                 <p className="text-lg font-semibold text-primary mb-1">{date}</p>
                 <p className="text-secondary mb-1">{location}</p>
@@ -52,13 +56,14 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                 {/* Action Buttons */}
                 <div className="flex gap-3 text-center items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <ButtonType2 onClick={onBuyClick} className=" py-3 px-10 rounded-full"> {/* Added px-6 for balance */}
-                            Attend
+                        <ButtonType2 onClick={onBuyClick} className="py-3 px-10 rounded-full" disabled={isRegistered}>
+                            {isRegistered ? "Registered" : "Attend"}
                         </ButtonType2>
-                        <ButtonType1 className="flex items-center justify-center  py-3 px-10 rounded-full overflow-hidden">
-                            Saved
-                        </ButtonType1>
-
+                        {onSaveClick && (
+                            <ButtonType1 onClick={onSaveClick} className="flex items-center justify-center py-3 px-10 rounded-full overflow-hidden">
+                                {isSaved ? "Saved" : "Save"}
+                            </ButtonType1>
+                        )}
                     </div>
                     <ButtonType1 className="flex items-center justify-center  rounded-full overflow-hidden">
                         <Image
@@ -71,14 +76,12 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                     </ButtonType1>
                 </div>
 
-                <div className="mt-6 border-t pt-4">
-                    <p className="text-xl font-bold text-primary">About</p>
-                    <p className="text-primary mt-2 text-justify">
-                        Join us for the Accra Arts Festival, a vibrant celebration of Ghanaian culture and creativity. Experience captivating performances, stunning art exhibitions, and engaging workshops that showcase the rich heritage of Ghana. Whether you&apos;re an art enthusiast or simply looking for a fun day out, this festival promises something for everyone. Don&apos;t miss out on this unforgettable event!
-
-
-                    </p>
-                </div>
+                {(description != null && description !== "") && (
+                    <div className="mt-6 border-t pt-4">
+                        <p className="text-xl font-bold text-primary">About</p>
+                        <p className="text-primary mt-2 text-justify whitespace-pre-wrap">{description}</p>
+                    </div>
+                )}
             </div>
         </div>
     );

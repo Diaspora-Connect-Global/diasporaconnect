@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, GetEventsData, GetUserEventsData, RegisterEventData, SaveEventData, Event } from '@/services/gql/events';
+import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, type GetEventsData, type GetUserEventsData, type RegisterEventData, type SaveEventData, type Event } from '@/services/gql/events';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -32,6 +32,7 @@ const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Eve
                     {attendingEvents.map((event) => (
                         <div key={event.id} className="snap-start shrink-0">
                             <EventCardSmall
+                                eventId={event.id}
                                 title={event.title}
                                 date={new Date(event.startAt).toLocaleDateString('en-US', {
                                     month: 'short',
@@ -40,9 +41,9 @@ const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Eve
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical' 
-                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
-                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                location={event.locationType === 'physical'
+                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.trim() || 'Physical'
+                                    : event.locationDetails?.virtual?.platform || 'Virtual'
                                 }
                                 attendees={event.registrationCount}
                                 imageUrl="/EVENT.png"
@@ -77,6 +78,7 @@ const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loadin
                     {savedEvents.map((event) => (
                         <div key={event.id} className="snap-start shrink-0">
                             <EventCardSmall
+                                eventId={event.id}
                                 title={event.title}
                                 date={new Date(event.startAt).toLocaleDateString('en-US', {
                                     month: 'short',
@@ -85,9 +87,9 @@ const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loadin
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical' 
-                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
-                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                location={event.locationType === 'physical'
+                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.trim() || 'Physical'
+                                    : event.locationDetails?.virtual?.platform || 'Virtual'
                                 }
                                 attendees={event.registrationCount}
                                 imageUrl="/EVENT.png"
@@ -110,8 +112,12 @@ export default function Events() {
         variables: { limit: 20, offset: 0 }
     });
     
-    const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT);
-    const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT);
+    const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
+        refetchQueries: [{ query: GET_USER_EVENTS }],
+    });
+    const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
+        refetchQueries: [{ query: GET_USER_EVENTS }],
+    });
 
     const handleAttendEvent = async (eventId: string) => {
         try {
@@ -157,7 +163,7 @@ export default function Events() {
     return (
         <div className="lg:w-[60vw] h-app-inner p-4 overflow-auto scrollbar-hide">
             <div className="mx-auto">
-                <p className="heading-small ">{t("yourevents")}</p>
+                <p className="heading-small mb-2">{t("yourevents")}</p>
 
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
@@ -198,6 +204,7 @@ export default function Events() {
                         {paidEvents.map((event) => (
                             <PaidEventCard
                                 key={event.id}
+                                eventId={event.id}
                                 title={event.title}
                                 date={new Date(event.startAt).toLocaleDateString('en-US', {
                                     month: 'short',
@@ -206,9 +213,9 @@ export default function Events() {
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical' 
-                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
-                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                location={event.locationType === 'physical'
+                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.replace(/^,\s*|,\s*$/g, '').trim() || 'Physical'
+                                    : event.locationDetails?.virtual?.platform || 'Virtual'
                                 }
                                 attendees={event.registrationCount}
                                 imageUrl="/EVENT.png"
@@ -229,6 +236,7 @@ export default function Events() {
                         {freeEvents.map((event) => (
                             <EventCard1
                                 key={event.id}
+                                eventId={event.id}
                                 title={event.title}
                                 date={new Date(event.startAt).toLocaleDateString('en-US', {
                                     month: 'short',
@@ -237,9 +245,9 @@ export default function Events() {
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical' 
-                                    ? `${event.locationDetails.physical?.venue}, ${event.locationDetails.physical?.city}` 
-                                    : event.locationDetails.virtual?.platform || 'Virtual'
+                                location={event.locationType === 'physical'
+                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.replace(/^,\s*|,\s*$/g, '').trim() || 'Physical'
+                                    : event.locationDetails?.virtual?.platform || 'Virtual'
                                 }
                                 attendees={event.registrationCount}
                                 imageUrl="/EVENT.png"

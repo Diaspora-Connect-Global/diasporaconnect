@@ -8,11 +8,11 @@ export interface Event {
   title: string;
   description: string;
   eventCategory: string;
-  visibility: 'public' | 'community_only' | 'private' | 'unlisted';
+  visibility?: 'public' | 'community_only' | 'private' | 'unlisted';
   locationType: 'physical' | 'virtual' | 'hybrid';
-  locationDetails: {
-    physical?: { venue: string; address: string; city: string; country: string };
-    virtual?: { platform: string; joinUrl?: string };
+  locationDetails?: {
+    physical?: { venue?: string; address?: string; city?: string; country?: string };
+    virtual?: { platform?: string; joinUrl?: string };
   };
   startAt: string;
   endAt: string;
@@ -29,6 +29,7 @@ export interface Event {
   }>;
 }
 
+/** Input for createEvent - locationDetails matches API LocationDetailsInput */
 export interface CreateEventInput {
   ownerType: 'user' | 'community';
   ownerId: string;
@@ -37,8 +38,8 @@ export interface CreateEventInput {
   eventCategory: string;
   locationType: 'physical' | 'virtual' | 'hybrid';
   locationDetails: {
-    physical?: { venue: string; address: string; city: string; country: string };
-    virtual?: { platform: string; joinUrl?: string };
+    physical?: { venue?: string; address?: string; city?: string; country?: string };
+    virtual?: { platform?: string; joinUrl?: string };
   };
   startAt: string;
   endAt: string;
@@ -58,7 +59,7 @@ export interface CheckInInput {
 
 // Response Types
 export interface GetEventData {
-  event: Event;
+  event: Event | null;
 }
 
 export interface GetEventsData {
@@ -108,6 +109,23 @@ export const GET_EVENT = gql`
       status
       startAt
       endAt
+      eventCategory
+      locationType
+      locationDetails {
+        physical {
+          venue
+          address
+          city
+          country
+        }
+        virtual {
+          platform
+          joinUrl
+        }
+      }
+      isPaid
+      registrationCount
+      availableSpots
       isRegistered
       canRegister
       tickets {
