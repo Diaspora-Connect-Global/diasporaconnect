@@ -8,7 +8,7 @@ import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ButtonType3 } from "../custom/button";
 import { useTranslations } from 'next-intl';
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import {
     GET_GROUP,
     GET_GROUP_MEMBERS,
@@ -40,7 +40,10 @@ import { messageService, Message as WSMessage, SendMessagePayload } from "@/serv
 import { useMutation as useGqlMutation } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
 import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
+import { GET_UPLOAD_URL } from "@/services/gql/upload";
+import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import { ApiMessage } from "@/store/ChatStore";
+import { toast } from "sonner";
 
 interface Reply {
     id: string;
@@ -85,6 +88,7 @@ export default function GroupChat() {
 
     const [createConversationMutation] = useGqlMutation<CreateConversationData>(CREATE_CONVERSATION);
     const [sendMessageMutation] = useGqlMutation<SendMessageData>(SEND_MESSAGE);
+    const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
     const [markConversationAsRead] = useGqlMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
@@ -437,18 +441,48 @@ export default function GroupChat() {
         return users?.find(u => u.id === userId);
     };
 
-    const handleSendMessage = async (messageText: string, image?: string) => {
-        if (!messageText.trim() && !image) return;
+    const handleSendMessage = async (messageText: string, imageFile?: File) => {
+        if (!messageText.trim() && !imageFile) return;
         if (!currentUserId || !conversationId) {
             console.warn('Cannot send: missing userId or conversationId');
             return;
         }
 
+        let content: string;
+        let messageType: 'TEXT' | 'IMAGE' = 'TEXT';
+
+        if (imageFile) {
+            try {
+                const { data: uploadData } = await getUploadUrl({
+                    variables: { contentType: imageFile.type || 'image/jpeg', category: 'chat' },
+                });
+                if (!uploadData?.getUploadUrl?.url) {
+                    toast.error('Could not upload image. Please try again.');
+                    return;
+                }
+                const { url, publicUrl } = uploadData.getUploadUrl;
+                const uploadRes = await fetch(url, {
+                    method: 'PUT',
+                    body: imageFile,
+                    headers: { 'Content-Type': imageFile.type || 'image/jpeg' },
+                });
+                if (!uploadRes.ok) {
+                    toast.error('Image upload failed. Please try again.');
+                    return;
+                }
+                content = publicUrl;
+                messageType = 'IMAGE';
+            } catch (err) {
+                console.error('Image upload failed:', err);
+                return;
+            }
+        } else {
+            content = messageText.trim();
+        }
+
         const idempotencyKey = crypto.randomUUID();
         if (replyingTo) {
-            const content = messageText?.trim() || (image ? 'Image' : '');
             try {
-                const messageType = image ? 'IMAGE' : 'TEXT';
                 const { data } = await sendMessageMutation({
                     variables: {
                         conversationId,
@@ -469,18 +503,20 @@ export default function GroupChat() {
                         createdAt: new Date().toISOString(),
                         status: 'sent',
                         replyToId: replyingTo,
+                        ...(messageType === 'IMAGE' && {
+                            mediaMetadata: { fileId: '', fileName: imageFile?.name || 'image', fileSize: imageFile?.size || 0, mimeType: imageFile?.type || 'image/jpeg', gcsPath: content },
+                        }),
                     };
                     addApiMessage(sentMsg);
 
-                    // Also add to replies sidebar
                     const newReply: Reply = {
                         id: data.sendMessage,
                         messageId: replyingTo,
                         senderId: currentUserId,
                         text: content,
                         timestamp: new Date().toISOString(),
-                        type: image ? 'image' : 'text',
-                        imageUrl: image
+                        type: messageType === 'IMAGE' ? 'image' : 'text',
+                        imageUrl: messageType === 'IMAGE' ? content : undefined,
                     };
                     setReplies(prev => [...prev, newReply]);
                 }
@@ -489,9 +525,7 @@ export default function GroupChat() {
             }
             setReplyingTo(null);
         } else {
-            const content = messageText?.trim() || (image ? 'Image' : '');
             try {
-                const messageType = image ? 'IMAGE' : 'TEXT';
                 const { data } = await sendMessageMutation({
                     variables: {
                         conversationId,
@@ -510,25 +544,19 @@ export default function GroupChat() {
                         content,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
+                        ...(messageType === 'IMAGE' && {
+                            mediaMetadata: { fileId: '', fileName: imageFile?.name || 'image', fileSize: imageFile?.size || 0, mimeType: imageFile?.type || 'image/jpeg', gcsPath: content },
+                        }),
                     };
                     addApiMessage(sentMsg);
 
                     if (isConnected) {
-                        const payload: SendMessagePayload = {
+                        messageService.sendMessage({
                             conversationId,
-                            type: image ? 'image' : 'text',
+                            type: messageType === 'IMAGE' ? 'image' : 'text',
                             content,
                             idempotencyKey,
-                            ...(image && {
-                                metadata: {
-                                    fileName: 'image.jpg',
-                                    fileSize: 0,
-                                    mimeType: 'image/jpeg',
-                                    gcsPath: image
-                                }
-                            }),
-                        };
-                        messageService.sendMessage(payload);
+                        });
                     }
                 }
             } catch (error) {
@@ -746,7 +774,7 @@ export default function GroupChat() {
                                         className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                                     >
                                         <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
-                                            {message.type === 'IMAGE' && message.mediaMetadata?.gcsPath ? (
+                                            {message.type === 'IMAGE' && (message.mediaMetadata?.gcsPath || (message.content && message.content.startsWith('http'))) ? (
                                                 <div className="mb-2">
                                                     {!isMe && (
                                                         <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
@@ -754,13 +782,10 @@ export default function GroupChat() {
                                                         </p>
                                                     )}
                                                     <img
-                                                        src={message.mediaMetadata.gcsPath}
+                                                        src={message.mediaMetadata?.gcsPath || message.content}
                                                         alt="Shared image"
-                                                        className="rounded-2xl max-w-full h-auto"
+                                                        className="rounded-2xl max-w-full h-auto max-h-80 object-contain"
                                                     />
-                                                    {message.content && (
-                                                        <p className="text-xs sm:text-sm text-text-primary mt-2">{message.content}</p>
-                                                    )}
                                                 </div>
                                             ) : (
                                                 <div

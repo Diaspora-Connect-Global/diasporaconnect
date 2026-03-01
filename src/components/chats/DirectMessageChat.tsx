@@ -13,12 +13,15 @@ import { useTranslations } from 'next-intl';
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
+import { GET_UPLOAD_URL } from "@/services/gql/upload";
+import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
+import { toast } from "sonner";
 
 export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; onBack?: () => void }) {
     const t = useTranslations('chat.direct');
@@ -40,6 +43,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
     const [createConversation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
     const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE);
+    const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
     const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
@@ -257,14 +261,40 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [apiMessages]);
 
-    const handleSendMessage = useCallback(async (messageText: string, image?: string) => {
-        if ((!messageText.trim() && !image) || !conversationId || !currentUserId) return;
+    const handleSendMessage = useCallback(async (messageText: string, imageFile?: File) => {
+        if ((!messageText.trim() && !imageFile) || !conversationId || !currentUserId) return;
 
         const idempotencyKey = crypto.randomUUID();
         setIsSending(true);
         try {
-            const messageType = image ? 'IMAGE' : 'TEXT';
-            const content = messageText?.trim() || (image ? 'Image' : '');
+            let content: string;
+            let messageType: 'TEXT' | 'IMAGE' = 'TEXT';
+
+            if (imageFile) {
+                const { data: uploadData } = await getUploadUrl({
+                    variables: { contentType: imageFile.type || 'image/jpeg', category: 'chat' },
+                });
+                if (!uploadData?.getUploadUrl?.url) {
+                    toast.error('Could not upload image. Please try again.');
+                    setIsSending(false);
+                    return;
+                }
+                const { url, publicUrl } = uploadData.getUploadUrl;
+                const uploadRes = await fetch(url, {
+                    method: 'PUT',
+                    body: imageFile,
+                    headers: { 'Content-Type': imageFile.type || 'image/jpeg' },
+                });
+                if (!uploadRes.ok) {
+                    toast.error('Image upload failed. Please try again.');
+                    setIsSending(false);
+                    return;
+                }
+                content = publicUrl;
+                messageType = 'IMAGE';
+            } else {
+                content = messageText.trim();
+            }
 
             const { data } = await sendMessageMutation({
                 variables: {
@@ -284,13 +314,16 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     content,
                     createdAt: new Date().toISOString(),
                     status: 'sent',
+                    ...(messageType === 'IMAGE' && {
+                        mediaMetadata: { fileId: '', fileName: imageFile?.name || 'image', fileSize: imageFile?.size || 0, mimeType: imageFile?.type || 'image/jpeg', gcsPath: content },
+                    }),
                 };
                 addApiMessage(sentMsg);
 
                 if (isConnected) {
                     messageService.sendMessage({
                         conversationId,
-                        type: image ? 'image' : 'text',
+                        type: messageType === 'IMAGE' ? 'image' : 'text',
                         content,
                         idempotencyKey,
                     });
@@ -301,7 +334,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         } finally {
             setIsSending(false);
         }
-    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, isConnected]);
+    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, isConnected, getUploadUrl]);
 
     return (
         <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
@@ -376,16 +409,13 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
-                                    {message.type === 'IMAGE' && message.mediaMetadata?.gcsPath ? (
+                                    {message.type === 'IMAGE' && (message.mediaMetadata?.gcsPath || (message.content && message.content.startsWith('http'))) ? (
                                         <div className="mb-2">
                                             <img
-                                                src={message.mediaMetadata.gcsPath}
+                                                src={message.mediaMetadata?.gcsPath || message.content}
                                                 alt="Shared image"
-                                                className="rounded-2xl max-w-full h-auto"
+                                                className="rounded-2xl max-w-full h-auto max-h-80 object-contain"
                                             />
-                                            {message.content && (
-                                                <p className="text-sm text-text-primary mt-2">{message.content}</p>
-                                            )}
                                         </div>
                                     ) : (
                                         <div

@@ -12,7 +12,8 @@ import { useTheme } from "next-themes";
 const TYPING_STOP_DEBOUNCE_MS = 2500;
 
 interface MessageInputProps {
-    onSendMessage: (message: string, image?: string) => void;
+    /** When image is sent, parent receives the File to upload; parent then sends message with the resulting URL. */
+    onSendMessage: (message: string, imageFile?: File) => void;
     placeholder?: string;
     disabled?: boolean;
     conversationId?: string;
@@ -33,6 +34,7 @@ export function MessageInput({
     const [newMessage, setNewMessage] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -148,19 +150,21 @@ export function MessageInput({
     };
 
     const handleSendMessage = () => {
-        if ((newMessage.trim() || imagePreview) && !disabled) {
+        if ((newMessage.trim() || selectedImageFile) && !disabled) {
             notifyTyping(false);
             if (typingStopTimerRef.current) {
                 clearTimeout(typingStopTimerRef.current);
                 typingStopTimerRef.current = null;
             }
-            // Only call the original onSendMessage prop - let the parent handle the logic
-            onSendMessage(newMessage, imagePreview || undefined);
+            // Parent uploads imageFile and sends message with the resulting URL
+            onSendMessage(newMessage, selectedImageFile || undefined);
 
             // Reset state
             setNewMessage('');
             setImagePreview(null);
+            setSelectedImageFile(null);
             setShowEmojiPicker(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -186,6 +190,7 @@ export function MessageInput({
                 return;
             }
 
+            setSelectedImageFile(file);
             const reader = new FileReader();
             reader.onload = (e) => {
                 setImagePreview(e.target?.result as string);
@@ -196,6 +201,7 @@ export function MessageInput({
 
     const removeImagePreview = () => {
         setImagePreview(null);
+        setSelectedImageFile(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -379,7 +385,7 @@ export function MessageInput({
                             {/* Send Button */}
                             <ButtonType2
                                 onClick={handleSendMessage}
-                                disabled={(!newMessage.trim() && !imagePreview) || disabled}
+                                disabled={(!newMessage.trim() && !selectedImageFile) || disabled}
                                 className="flex-shrink-0 p-1.5 sm:px-2 sm:py-2 bg-text-brand text-text-white rounded-full hover:bg-text-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[32px] sm:min-w-[40px] h-[32px] sm:h-[40px]"
                             >
                                 <Send className="w-4 h-4 sm:w-5 sm:h-5 text-text-white" />
