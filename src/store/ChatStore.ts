@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { Message, Conversation, UserConversationPreference, User, Group, GroupMember, mockGroupsData, mockGroupMembers, mockUsers } from '@/data/chats';
 import { mockMessages, mockConversations, mockUserConversationPreferences } from '@/data/chats';
 
-// Real API message type (from GraphQL/WebSocket)
+// Real API message type (from GraphQL/WebSocket). attachments replaced mediaMetadata (multi-file).
 export interface ApiMessage {
   id: string;
   conversationId: string;
@@ -11,16 +11,17 @@ export interface ApiMessage {
   content: string;
   mentions?: string[];
   replyToId?: string;
-  mediaMetadata?: {
-    fileId: string;
-    fileName: string;
-    fileSize: number;
-    mimeType: string;
-    gcsPath: string;
+  /** File attachments (replaces mediaMetadata). Use for display and multi-file. */
+  attachments?: Array<{
+    fileName?: string;
+    fileSize?: number;
+    mimeType?: string;
+    gcsPath?: string;
+    fileId?: string;
     width?: number;
     height?: number;
     duration?: number;
-  };
+  }>;
   status?: 'sent' | 'delivered' | 'read';
   createdAt: string;
 }

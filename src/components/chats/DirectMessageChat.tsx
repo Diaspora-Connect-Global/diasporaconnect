@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
-import { GET_UPLOAD_URL } from "@/services/gql/upload";
+import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
 import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
@@ -162,7 +162,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
             replyToId: m.replyToId,
             status: 'read',
-            mediaMetadata: m.mediaMetadata as ApiMessage['mediaMetadata'],
+            attachments: m.attachments ?? [],
         }));
         setApiMessages(conversationId, history);
     }, [messagesData, conversationId, setApiMessages]);
@@ -269,10 +269,13 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         try {
             let content: string;
             let messageType: 'TEXT' | 'IMAGE' = 'TEXT';
+            let mimeType: string | undefined;
 
             if (imageFile) {
+                const contentType = chatMediaContentType(imageFile.type || 'image/jpeg');
+                mimeType = contentType;
                 const { data: uploadData } = await getUploadUrl({
-                    variables: { contentType: imageFile.type || 'image/jpeg', category: 'chat' },
+                    variables: { contentType, category: 'chat' },
                 });
                 if (!uploadData?.getUploadUrl?.uploadUrl) {
                     toast.error('Could not upload image. Please try again.');
@@ -283,7 +286,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 const uploadRes = await fetch(uploadUrl, {
                     method: 'PUT',
                     body: imageFile,
-                    headers: { 'Content-Type': imageFile.type || 'image/jpeg' },
+                    headers: { 'Content-Type': contentType },
                 });
                 if (!uploadRes.ok) {
                     toast.error('Image upload failed. Please try again.');
@@ -301,6 +304,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     conversationId,
                     messageType,
                     content,
+                    mimeType,
                     idempotencyKey,
                 },
             });
@@ -315,7 +319,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     createdAt: new Date().toISOString(),
                     status: 'sent',
                     ...(messageType === 'IMAGE' && {
-                        mediaMetadata: { fileId: '', fileName: imageFile?.name || 'image', fileSize: imageFile?.size || 0, mimeType: imageFile?.type || 'image/jpeg', gcsPath: content },
+                        mediaMetadata: { fileId: '', fileName: imageFile?.name || 'image', fileSize: imageFile?.size || 0, mimeType: mimeType ?? 'image/jpeg', gcsPath: content },
                     }),
                 };
                 addApiMessage(sentMsg);
@@ -409,10 +413,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
-                                    {message.type === 'IMAGE' && (message.mediaMetadata?.gcsPath || (message.content && message.content.startsWith('http'))) ? (
+                                    {message.type === 'IMAGE' && (message.attachments?.[0]?.gcsPath || (message.content && message.content.startsWith('http'))) ? (
                                         <div className="mb-2">
                                             <img
-                                                src={message.mediaMetadata?.gcsPath || message.content}
+                                                src={message.attachments?.[0]?.gcsPath || message.content}
                                                 alt="Shared image"
                                                 className="rounded-2xl max-w-full h-auto max-h-80 object-contain"
                                             />

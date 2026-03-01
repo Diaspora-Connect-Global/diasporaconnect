@@ -40,7 +40,7 @@ import { messageService, Message as WSMessage, SendMessagePayload } from "@/serv
 import { useMutation as useGqlMutation } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
 import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
-import { GET_UPLOAD_URL } from "@/services/gql/upload";
+import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
 import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import { ApiMessage } from "@/store/ChatStore";
 import { toast } from "sonner";
@@ -284,7 +284,7 @@ export default function GroupChat() {
             mentions: m.mentions?.map((mn: any) => mn.userId) || [],
             replyToId: m.replyToId,
             status: 'read',
-            mediaMetadata: m.mediaMetadata,
+            attachments: m.attachments ?? [],
         }));
 
         setApiMessages(conversationId, history);
@@ -450,11 +450,14 @@ export default function GroupChat() {
 
         let content: string;
         let messageType: 'TEXT' | 'IMAGE' = 'TEXT';
+        let mimeType: string | undefined;
 
         if (imageFile) {
             try {
+                const contentType = chatMediaContentType(imageFile.type || 'image/jpeg');
+                mimeType = contentType;
                 const { data: uploadData } = await getUploadUrl({
-                    variables: { contentType: imageFile.type || 'image/jpeg', category: 'chat' },
+                    variables: { contentType, category: 'chat' },
                 });
                 if (!uploadData?.getUploadUrl?.uploadUrl) {
                     toast.error('Could not upload image. Please try again.');
@@ -464,7 +467,7 @@ export default function GroupChat() {
                 const uploadRes = await fetch(uploadUrl, {
                     method: 'PUT',
                     body: imageFile,
-                    headers: { 'Content-Type': imageFile.type || 'image/jpeg' },
+                    headers: { 'Content-Type': contentType },
                 });
                 if (!uploadRes.ok) {
                     toast.error('Image upload failed. Please try again.');
@@ -480,6 +483,10 @@ export default function GroupChat() {
             content = messageText.trim();
         }
 
+        const attachments = imageFile && mimeType
+            ? [{ publicUrl: content, mimeType }]
+            : undefined;
+
         const idempotencyKey = crypto.randomUUID();
         if (replyingTo) {
             try {
@@ -487,7 +494,8 @@ export default function GroupChat() {
                     variables: {
                         conversationId,
                         messageType,
-                        content,
+                        content: messageType === 'IMAGE' ? '' : content,
+                        attachments,
                         replyToId: replyingTo,
                         idempotencyKey,
                     },
@@ -499,12 +507,12 @@ export default function GroupChat() {
                         conversationId,
                         senderId: currentUserId,
                         type: messageType,
-                        content,
+                        content: messageType === 'IMAGE' ? '' : content,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
                         replyToId: replyingTo,
-                        ...(messageType === 'IMAGE' && {
-                            mediaMetadata: { fileId: '', fileName: imageFile?.name || 'image', fileSize: imageFile?.size || 0, mimeType: imageFile?.type || 'image/jpeg', gcsPath: content },
+                        ...(attachments && {
+                            attachments: attachments.map((a) => ({ gcsPath: a.publicUrl, mimeType: a.mimeType, fileName: imageFile?.name, fileSize: imageFile?.size })),
                         }),
                     };
                     addApiMessage(sentMsg);
@@ -530,7 +538,8 @@ export default function GroupChat() {
                     variables: {
                         conversationId,
                         messageType,
-                        content,
+                        content: messageType === 'IMAGE' ? '' : content,
+                        attachments,
                         idempotencyKey,
                     },
                 });
@@ -541,11 +550,11 @@ export default function GroupChat() {
                         conversationId,
                         senderId: currentUserId,
                         type: messageType,
-                        content,
+                        content: messageType === 'IMAGE' ? '' : content,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
-                        ...(messageType === 'IMAGE' && {
-                            mediaMetadata: { fileId: '', fileName: imageFile?.name || 'image', fileSize: imageFile?.size || 0, mimeType: imageFile?.type || 'image/jpeg', gcsPath: content },
+                        ...(attachments && {
+                            attachments: attachments.map((a) => ({ gcsPath: a.publicUrl, mimeType: a.mimeType, fileName: imageFile?.name, fileSize: imageFile?.size })),
                         }),
                     };
                     addApiMessage(sentMsg);
@@ -774,7 +783,7 @@ export default function GroupChat() {
                                         className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                                     >
                                         <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
-                                            {message.type === 'IMAGE' && (message.mediaMetadata?.gcsPath || (message.content && message.content.startsWith('http'))) ? (
+                                            {message.type === 'IMAGE' && (message.attachments?.[0]?.gcsPath || (message.content && message.content.startsWith('http'))) ? (
                                                 <div className="mb-2">
                                                     {!isMe && (
                                                         <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
@@ -782,7 +791,7 @@ export default function GroupChat() {
                                                         </p>
                                                     )}
                                                     <img
-                                                        src={message.mediaMetadata?.gcsPath || message.content}
+                                                        src={message.attachments?.[0]?.gcsPath || message.content}
                                                         alt="Shared image"
                                                         className="rounded-2xl max-w-full h-auto max-h-80 object-contain"
                                                     />

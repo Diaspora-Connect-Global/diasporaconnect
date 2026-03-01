@@ -9,8 +9,8 @@
 ## 1. What the frontend does (you must support this)
 
 1. User selects an image in chat → frontend calls **GraphQL `getUploadUrl`** with `contentType` (e.g. `image/jpeg`) and **`category: "chat"`**.
-2. Frontend receives **`url`** (signed upload URL) and **`publicUrl`** (URL to read the file after upload).
-3. Frontend **PUTs the file** to `url` with header `Content-Type: <contentType>`.
+2. Frontend receives **`uploadUrl`** (signed upload URL) and **`publicUrl`** (URL to read the file after upload).
+3. Frontend **PUTs the file** to `uploadUrl` with header `Content-Type: <contentType>`.
 4. Frontend calls **GraphQL `sendMessage`** with:
    - `messageType: "IMAGE"`
    - **`content: <publicUrl>`** (the exact string returned in step 2).
@@ -29,9 +29,10 @@ The frontend already uses:
 ```graphql
 query GetUploadUrl($contentType: String!, $category: String!) {
   getUploadUrl(contentType: $contentType, category: $category) {
-    url
+    uploadUrl
     publicUrl
-    path
+    objectKey
+    expiresAt
   }
 }
 ```
@@ -42,9 +43,10 @@ Today you may support only `category: "avatar"` and/or `"group_avatar"`. The fro
 
 - **Accept `category: "chat"`** in `getUploadUrl`.
 - **Return exactly**:
-  - **`url`** (string): Signed URL for a **single PUT** upload (e.g. GCS signed PUT). The client will send the file body with `Content-Type: <contentType>`.
+  - **`uploadUrl`** (string): Signed URL for a **single PUT** upload (e.g. GCS signed PUT). The client will send the file body with `Content-Type: <contentType>`.
   - **`publicUrl`** (string): URL that is **publicly readable** (or readable by your app / CDN) after the upload. The frontend stores this in the message `content` and uses it (or `mediaMetadata.gcsPath`) to render the image.
-  - **`path`** (string): Optional internal path; frontend does not rely on it for display.
+  - **`objectKey`** (string): GCS object key/path; frontend does not rely on it for display.
+  - **`expiresAt`** (number): Unix timestamp in milliseconds when the signed URL expires.
 
 ### 2.3 Constraints you may enforce
 
@@ -55,7 +57,7 @@ Today you may support only `category: "avatar"` and/or `"group_avatar"`. The fro
 
 ### 2.4 CORS
 
-- The **`url`** (signed upload URL) is used by the **browser** with `fetch(url, { method: 'PUT', body: file, headers: { 'Content-Type': contentType } })`.
+- The **`uploadUrl`** (signed upload URL) is used by the **browser** with `fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': contentType } })`.
 - So the storage bucket (or proxy) that serves the signed URL must allow **PUT** from the frontend origin and expose any CORS headers required for that request.
 
 ---
@@ -156,7 +158,7 @@ So when the client sends an image, **`content`** is again the **URL string** (th
 
 ## 6. Checklist for backend
 
-- [ ] **getUploadUrl** accepts **`category: "chat"`** and returns **`url`** (signed PUT) and **`publicUrl`** (readable URL).
+- [ ] **getUploadUrl** accepts **`category: "chat"`** and returns **`uploadUrl`** (signed PUT) and **`publicUrl`** (readable URL).
 - [ ] Signed **PUT** endpoint allows the frontend origin (CORS) and accepts the file upload.
 - [ ] **sendMessage** accepts **messageType IMAGE** with **content = publicUrl** and stores it.
 - [ ] **getMessages** returns IMAGE messages with **content** and/or **mediaMetadata.gcsPath** set to a URL that can be used for `<img src="...">`.

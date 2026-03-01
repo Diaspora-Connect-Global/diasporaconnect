@@ -1,28 +1,8 @@
 "use client"
 import { useState } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
-import { gql } from '@apollo/client';
 import { toast } from 'sonner';
-
-const GET_UPLOAD_URL = gql`
-  query GetUploadUrl($contentType: String!, $category: String!) {
-    getUploadUrl(contentType: $contentType, category: $category) {
-      uploadUrl
-      publicUrl
-      objectKey
-      expiresAt
-    }
-  }
-`;
-
-interface GetUploadUrlResponse {
-  getUploadUrl: {
-    uploadUrl: string;
-    publicUrl: string;
-    objectKey?: string;
-    expiresAt?: string;
-  };
-}
+import { GET_UPLOAD_URL, type GetUploadUrlResponse } from '@/services/gql/upload';
 
 type ImageCategory = 'avatar' | 'group_avatar';
 

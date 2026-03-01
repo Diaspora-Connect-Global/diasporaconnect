@@ -29,12 +29,19 @@ export interface Message {
   content: string;
   mentions?: MessageMention[];
   replyToId?: string;
-  mediaMetadata?: MediaMetadata;
+  /** Replaces mediaMetadata; array of file attachments. */
+  attachments?: MediaMetadata[];
   isEdited: boolean;
   editedAt?: string;
   isDeleted: boolean;
   createdAt: string;
   status?: MessageStatus;
+}
+
+/** Input for sendMessage when sending media (single or multiple files). */
+export interface AttachmentInput {
+  publicUrl: string;
+  mimeType: string;
 }
 
 export interface MediaMetadata {
@@ -167,14 +174,14 @@ export interface WebSocketSendPayload {
   metadata?: { fileId: string; fileName: string; fileSize: number; mimeType: string; gcsPath: string };
 }
 
-/** Payload received via 'message:new' WebSocket event */
+/** Payload received via 'message:new' WebSocket event. Use attachments (array); metadata is deprecated. */
 export interface WebSocketMessage {
   messageId: string;
   conversationId: string;
   senderId: string;
   encryptedData: unknown; // Server encrypts; use GraphQL for plaintext content
   type: 'text' | 'image' | 'file' | 'video' | 'audio';
-  metadata?: { fileId?: string; fileName?: string; fileSize?: number; mimeType?: string; gcsPath?: string };
+  attachments?: Array<{ fileName?: string; fileSize?: number; mimeType?: string; gcsPath?: string }>;
   replyToId?: string;
   timestamp: string;
   isOffline?: boolean;

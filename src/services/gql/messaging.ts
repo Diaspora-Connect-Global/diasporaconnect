@@ -20,7 +20,8 @@ export type {
   WebSocketMessage,
   PresenceUpdate,
   MediaMetadata,
-  MediaMetadataInput
+  MediaMetadataInput,
+  AttachmentInput,
 } from './types/messaging';
 
 // ============================================================================
@@ -68,7 +69,7 @@ export const GET_MESSAGES = gql`
           username
         }
         replyToId
-        mediaMetadata {
+        attachments {
           fileName
           fileSize
           mimeType
@@ -121,22 +122,27 @@ export const CREATE_CONVERSATION = gql`
 `;
 
 // Returns: String (message ID). idempotencyKey optional — same key on retry/double-send avoids duplicates.
+// Use attachments for all media (single or multiple). mimeType is deprecated (legacy single-file).
 export const SEND_MESSAGE = gql`
   mutation SendMessage(
     $conversationId: String!
     $messageType: String!
     $content: String!
+    $mimeType: String
     $mentions: [String!]
     $replyToId: String
     $idempotencyKey: String
+    $attachments: [MessageAttachmentInput]
   ) {
     sendMessage(
       conversationId: $conversationId
       messageType: $messageType
       content: $content
+      mimeType: $mimeType
       mentions: $mentions
       replyToId: $replyToId
       idempotencyKey: $idempotencyKey
+      attachments: $attachments
     )
   }
 `;
