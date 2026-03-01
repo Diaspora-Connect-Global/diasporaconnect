@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client"
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
@@ -36,6 +36,7 @@ export function MessageInput({
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputId = useId();
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const cursorAfterEmojiRef = useRef<number | null>(null);
@@ -284,23 +285,25 @@ export function MessageInput({
                 <div className="flex space-x-1 sm:space-x-2 items-center justify-center">
                     {/* Action Buttons Container */}
                     <div className="flex space-x-0.5 sm:space-x-1 flex-shrink-0">
-                        {/* Image Upload Button */}
+                        {/* Image Upload Button - label triggers file input natively for reliable desktop behavior */}
                         <div>
-                            <button
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={disabled}
-                                className="p-1.5 sm:p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            <label
+                                htmlFor={fileInputId}
+                                className={`inline-flex p-1.5 sm:p-2 text-text-secondary hover:text-text-primary transition-colors cursor-pointer ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}
                                 title="Attach image"
                             >
                                 <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-text-brand" />
-                            </button>
+                            </label>
                             <input
+                                id={fileInputId}
                                 type="file"
                                 ref={fileInputRef}
                                 onChange={handleImageSelect}
                                 accept="image/*"
                                 className="hidden"
                                 disabled={disabled}
+                                tabIndex={-1}
+                                aria-hidden
                             />
                         </div>
 
