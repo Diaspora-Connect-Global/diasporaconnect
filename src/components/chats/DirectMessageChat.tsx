@@ -274,13 +274,13 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 const { data: uploadData } = await getUploadUrl({
                     variables: { contentType: imageFile.type || 'image/jpeg', category: 'chat' },
                 });
-                if (!uploadData?.getUploadUrl?.url) {
+                if (!uploadData?.getUploadUrl?.uploadUrl) {
                     toast.error('Could not upload image. Please try again.');
                     setIsSending(false);
                     return;
                 }
-                const { url, publicUrl } = uploadData.getUploadUrl;
-                const uploadRes = await fetch(url, {
+                const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
+                const uploadRes = await fetch(uploadUrl, {
                     method: 'PUT',
                     body: imageFile,
                     headers: { 'Content-Type': imageFile.type || 'image/jpeg' },

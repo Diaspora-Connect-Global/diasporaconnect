@@ -7,18 +7,20 @@ import { toast } from 'sonner';
 const GET_UPLOAD_URL = gql`
   query GetUploadUrl($contentType: String!, $category: String!) {
     getUploadUrl(contentType: $contentType, category: $category) {
-      url
+      uploadUrl
       publicUrl
-      path
+      objectKey
+      expiresAt
     }
   }
 `;
 
 interface GetUploadUrlResponse {
   getUploadUrl: {
-    url: string;
+    uploadUrl: string;
     publicUrl: string;
-    path: string;
+    objectKey?: string;
+    expiresAt?: string;
   };
 }
 
@@ -288,14 +290,14 @@ export const useImageUpload = ({
         throw new Error('Failed to get upload URL');
       }
 
-      const { url, publicUrl } = uploadData.getUploadUrl;
+      const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
 
       // Step 2: Convert base64 to blob
       const response = await fetch(croppedImage);
       const blob = await response.blob();
 
       // Step 3: Upload to the signed URL
-      const uploadResponse = await fetch(url, {
+      const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: blob,
         headers: {
