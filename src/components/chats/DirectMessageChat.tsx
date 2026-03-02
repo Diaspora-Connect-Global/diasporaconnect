@@ -39,6 +39,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
     const [otherUserTyping, setOtherUserTyping] = useState(false);
+    const [blockModalOpen, setBlockModalOpen] = useState(false);
+    const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
+    const [isBlocking, setIsBlocking] = useState(false);
 
     const { addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages, clearApiMessages } = useChatStore();
 
