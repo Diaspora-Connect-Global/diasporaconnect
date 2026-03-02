@@ -125,7 +125,7 @@ export default function EventDetailPage() {
             title={event.title}
             date={dateStr}
             location={locationStr}
-            attendees={event.registrationCount}
+            attendees={event.registrationCount ?? 0}
             imageUrl={getEventCoverImage(event)}
             description={event.description}
             priceLabel={priceStr}
