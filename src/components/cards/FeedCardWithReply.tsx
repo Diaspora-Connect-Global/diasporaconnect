@@ -392,26 +392,24 @@ export default function FeedCardWithReply({
                         ))}
                     </div>
                 ) : imageCount === 3 ? (
-                    <div className="grid grid-cols-2 gap-[0.5rem]">
+                    <div className="grid grid-cols-2 grid-rows-2 gap-2">
                         <div 
-                            className="relative h-[30.5rem] rounded-lg overflow-hidden cursor-pointer"
+                            className="relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]"
                             onClick={() => openImageModal(0)}
                         >
                             <img src={images[0]} alt="post 1" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </div>
-                        <div className="flex flex-col gap-[0.5rem]">
-                            <div 
-                                className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
-                                onClick={() => openImageModal(1)}
-                            >
-                                <img src={images[1]} alt="post 2" className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                            </div>
-                            <div 
-                                className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
-                                onClick={() => openImageModal(2)}
-                            >
-                                <img src={images[2]} alt="post 3" className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                            </div>
+                        <div 
+                            className="relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
+                            onClick={() => openImageModal(1)}
+                        >
+                            <img src={images[1]} alt="post 2" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                        </div>
+                        <div 
+                            className="relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
+                            onClick={() => openImageModal(2)}
+                        >
+                            <img src={images[2]} alt="post 3" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </div>
                     </div>
                 ) : (
@@ -747,8 +745,8 @@ export default function FeedCardWithReply({
         <>
             <div className="w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-[1rem]">
-                    <div className="lg:flex items-center gap-[0.75rem]">
+                <div className="flex items-center justify-between mb-[1rem] gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                         <img
                             src={profileImage}
                             alt={profileName}
@@ -756,9 +754,9 @@ export default function FeedCardWithReply({
                             height={40}
                             loading="lazy"
                             decoding="async"
-                            className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle"
+                            className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle flex-shrink-0"
                         />
-                        <div className="lg:flex-1">
+                        <div className="min-w-0 flex-1">
                             <div className="flex items-center">
                                 <h3 className="font-label-large text-text-primary truncate">{profileName}</h3>
                                 {joinButton && <p className="ml-[0.5rem]">·</p>}

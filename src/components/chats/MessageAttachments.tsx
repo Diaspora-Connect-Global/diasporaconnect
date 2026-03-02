@@ -82,16 +82,10 @@ function SingleAttachment({ att, inGrid }: { att: MessageAttachmentItem; inGrid?
 
 export function MessageAttachments({
   attachments,
-  legacyContentUrl,
 }: {
   attachments?: MessageAttachmentItem[];
-  legacyContentUrl?: string | null;
 }) {
-  const list = attachments?.length
-    ? attachments
-    : legacyContentUrl
-      ? [{ gcsPath: legacyContentUrl, mimeType: "image/jpeg" }]
-      : [];
+  const list = attachments ?? [];
 
   if (!list.length) return null;
 

@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { X, Copy } from 'lucide-react';
+import { X, Copy, Loader2 } from 'lucide-react';
 import { useMutation, useQuery } from '@apollo/client/react';
 import Image from 'next/image';
 import { SHARE_POST, type SharePostData } from '@/services/gql/postsFeed';
@@ -20,6 +20,38 @@ import { useUserStore } from '@/store/useUserStore';
 import { toast } from 'sonner';
 
 const DEFAULT_AVATAR = '/PROFILE.png';
+
+/** Normalize share link to relative URL so changing domain requires no link updates. */
+function toRelativeShareLink(link: string): string {
+  if (!link) return link;
+  if (link.startsWith('http://') || link.startsWith('https://')) {
+    try {
+      const u = new URL(link);
+      return `${u.pathname}${u.search}${u.hash}`;
+    } catch {
+      return link;
+    }
+  }
+  return link.startsWith('/') ? link : `/${link}`;
+}
+
+/** Base URL for prepending to relative share links (copy, send). Uses canonical app URL when set so production (e.g. https://diaspoplug.com) always sends that domain in chat. */
+function getBaseUrl(): string {
+  const canonical = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (canonical) return canonical.replace(/\/$/, '');
+  if (typeof window !== 'undefined') return window.location.origin;
+  return '';
+}
+
+/** Return absolute URL for a relative share link. */
+function withBaseUrl(link: string): string {
+  if (!link) return link;
+  if (link.startsWith('http://') || link.startsWith('https://')) return link;
+  const base = getBaseUrl();
+  if (!base) return link;
+  const path = link.startsWith('/') ? link : `/${link}`;
+  return `${base.replace(/\/$/, '')}${path}`;
+}
 
 export interface SharePostModalProps {
   open: boolean;
@@ -42,6 +74,9 @@ export default function SharePostModal({
   const currentUserId = useUserStore((s) => s.user?.userId ?? null);
   const [shareLink, setShareLink] = useState<string>(initialShareLink ?? '');
   const [copied, setCopied] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const isSendingRef = useRef(false);
+  const isCopyingRef = useRef(false);
   const [sharePostMutation, { loading: shareLoading }] = useMutation<SharePostData>(SHARE_POST);
   const [sendMessageMutation, { loading: sendMessageLoading }] = useMutation<SendMessageData>(SEND_MESSAGE);
   const [createConversationMutation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
@@ -87,17 +122,18 @@ export default function SharePostModal({
 
   useEffect(() => {
     if (open) {
-      if (initialShareLink) setShareLink(initialShareLink);
+      if (initialShareLink) setShareLink(toRelativeShareLink(initialShareLink));
       else setShareLink('');
       setCopied(false);
     }
   }, [open, initialShareLink]);
 
   const ensureShareLink = useCallback(async () => {
-    if (shareLink) return shareLink;
+    if (shareLink) return toRelativeShareLink(shareLink);
     try {
       const { data } = await sharePostMutation({ variables: { postId } });
-      const link = data?.sharePost?.shareLink ?? '';
+      const raw = data?.sharePost?.shareLink ?? '';
+      const link = toRelativeShareLink(raw);
       setShareLink(link);
       onShared?.();
       return link;
@@ -109,29 +145,44 @@ export default function SharePostModal({
   }, [shareLink, postId, sharePostMutation, onShared, t]);
 
   const copyToClipboard = useCallback(async () => {
+    if (isCopyingRef.current) return;
+    isCopyingRef.current = true;
+    setIsCopying(true);
     const link = await ensureShareLink();
-    if (!link) return;
+    if (!link) {
+      isCopyingRef.current = false;
+      setIsCopying(false);
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(withBaseUrl(link));
       setCopied(true);
       toast.success(t('copied'));
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Copy failed:', err);
       toast.error(t('shareLinkFailed'));
+    } finally {
+      isCopyingRef.current = false;
+      setIsCopying(false);
     }
   }, [ensureShareLink, t]);
 
   const handleShareToConversation = useCallback(
     async (conversationId: string) => {
+      if (isSendingRef.current) return;
+      isSendingRef.current = true;
       const link = await ensureShareLink();
-      if (!link) return;
+      if (!link) {
+        isSendingRef.current = false;
+        return;
+      }
       try {
         await sendMessageMutation({
           variables: {
             conversationId,
             messageType: 'TEXT',
-            content: link,
+            content: withBaseUrl(link),
           },
         });
         toast.success(t('shareLinkSent'));
@@ -139,6 +190,8 @@ export default function SharePostModal({
       } catch (err) {
         console.error('Send message failed:', err);
         toast.error(t('shareLinkFailed'));
+      } finally {
+        isSendingRef.current = false;
       }
     },
     [ensureShareLink, sendMessageMutation, t, onClose]
@@ -227,7 +280,7 @@ export default function SharePostModal({
                   type="button"
                   onClick={() => handleShareToFriend(f.userId)}
                   disabled={sendMessageLoading}
-                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem]"
+                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem] disabled:opacity-70"
                 >
                   <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface-subtle">
                     <Image
@@ -237,6 +290,11 @@ export default function SharePostModal({
                       height={48}
                       className="object-cover"
                     />
+                    {sendMessageLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
                   </div>
                   <span className="text-xs font-medium text-text-primary text-center truncate max-w-[4.5rem]">
                     {f.name}
@@ -249,7 +307,7 @@ export default function SharePostModal({
                   type="button"
                   onClick={() => handleShareToGroup(g.id)}
                   disabled={sendMessageLoading}
-                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem]"
+                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem] disabled:opacity-70"
                 >
                   <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface-subtle">
                     <Image
@@ -259,6 +317,11 @@ export default function SharePostModal({
                       height={48}
                       className="object-cover"
                     />
+                    {sendMessageLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
                   </div>
                   <span className="text-xs font-medium text-text-primary text-center truncate max-w-[4.5rem]">
                     {g.name}
@@ -274,17 +337,23 @@ export default function SharePostModal({
           <button
             type="button"
             onClick={copyToClipboard}
-            disabled={shareLoading}
-            className="w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-subtle transition-colors text-left mt-2"
+            disabled={shareLoading || isCopying}
+            className="w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-subtle transition-colors text-left mt-2 disabled:opacity-70 disabled:pointer-events-none"
           >
             <div className="p-2 rounded-full bg-surface-subtle">
-              <Copy className="w-5 h-5 text-text-primary" />
+              {(shareLoading || isCopying) ? (
+                <Loader2 className="w-5 h-5 text-text-primary animate-spin" />
+              ) : (
+                <Copy className="w-5 h-5 text-text-primary" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <span className="font-medium text-text-primary">{t('copyLink')}</span>
               {copied && <span className="ml-2 text-sm text-text-brand">{t('copied')}</span>}
+              {(shareLoading || isCopying) && !copied && (
+                <span className="ml-2 text-sm text-text-tertiary">...</span>
+              )}
             </div>
-            {shareLoading && <span className="text-sm text-text-tertiary">...</span>}
           </button>
         </div>
       </div>

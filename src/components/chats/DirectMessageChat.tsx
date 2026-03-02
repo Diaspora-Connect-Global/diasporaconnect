@@ -9,6 +9,7 @@ import { ArrowLeft } from "iconsax-reactjs";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
+import { LinkPreviewCard, isLinkOnlyContent } from "./LinkPreviewCard";
 import { SendingFilesBubble } from "./SendingFilesBubble";
 import { useChatStore, ApiMessage } from "@/store/ChatStore";
 import { useTranslations } from 'next-intl';
@@ -531,18 +532,24 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                                 <span className="text-sm">Sending...</span>
                                             </div>
                                         )
-                                    ) : (message.attachments?.length || (message.content && message.content.startsWith('http'))) ? (
+                                    ) : message.attachments?.length ? (
                                         <>
-                                            <MessageAttachments
-                                                attachments={message.attachments}
-                                                legacyContentUrl={message.attachments?.length ? undefined : message.content}
-                                            />
-                                            {message.content && !message.content.startsWith('http') && (
+                                            <MessageAttachments attachments={message.attachments} />
+                                            {isLinkOnlyContent(message.content) && (
+                                                <div className="mt-2">
+                                                    <LinkPreviewCard url={message.content!.trim()} />
+                                                </div>
+                                            )}
+                                            {message.content && !isLinkOnlyContent(message.content) && (
                                                 <div className={`mt-2 px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
                                                     {message.content}
                                                 </div>
                                             )}
                                         </>
+                                    ) : isLinkOnlyContent(message.content) ? (
+                                        <div className={isMe ? 'flex justify-end' : ''}>
+                                            <LinkPreviewCard url={message.content.trim()} />
+                                        </div>
                                     ) : (
                                         <div
                                             className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${isMe

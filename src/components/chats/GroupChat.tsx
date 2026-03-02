@@ -3,6 +3,7 @@ import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
+import { LinkPreviewCard, isLinkOnlyContent } from "./LinkPreviewCard";
 import { SendingFilesBubble } from "./SendingFilesBubble";
 import { formatChatTimestamp } from "@/macros/time";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
@@ -879,22 +880,35 @@ export default function GroupChat() {
                                                         <span className="text-sm sm:text-base">Sending...</span>
                                                     </div>
                                                 )
-                                            ) : (message.attachments?.length || (message.content && message.content.startsWith('http'))) ? (
+                                            ) : message.attachments?.length ? (
                                                 <>
                                                     {!isMe && (
                                                         <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
                                                             {getSenderName(message.senderId)}
                                                         </p>
                                                     )}
-                                                    <MessageAttachments
-                                                        attachments={message.attachments}
-                                                        legacyContentUrl={message.attachments?.length ? undefined : message.content}
-                                                    />
-                                                    {message.content && !message.content.startsWith('http') && (
+                                                    <MessageAttachments attachments={message.attachments} />
+                                                    {isLinkOnlyContent(message.content) && (
+                                                        <div className="mt-2">
+                                                            <LinkPreviewCard url={message.content!.trim()} />
+                                                        </div>
+                                                    )}
+                                                    {message.content && !isLinkOnlyContent(message.content) && (
                                                         <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
                                                             {message.content}
                                                         </div>
                                                     )}
+                                                </>
+                                            ) : isLinkOnlyContent(message.content) ? (
+                                                <>
+                                                    {!isMe && (
+                                                        <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
+                                                            {getSenderName(message.senderId)}
+                                                        </p>
+                                                    )}
+                                                    <div className={isMe ? 'flex justify-end' : ''}>
+                                                        <LinkPreviewCard url={message.content.trim()} />
+                                                    </div>
                                                 </>
                                             ) : (
                                                 <div

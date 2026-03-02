@@ -202,7 +202,8 @@ function SidebarLists() {
     } = useQuery<GetUserAssociationsResponse>(
         GET_USER_ASSOCIATIONS,
         {
-            variables: { userId }
+            variables: { userId: userId! },
+            skip: !userId,
         }
     );
 
