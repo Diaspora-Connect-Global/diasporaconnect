@@ -418,7 +418,7 @@ export function MessageInput({
                                         ) : item.file.type.startsWith("video/") ? (
                                             <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded bg-surface-default flex items-center justify-center">
                                                 {item.preview ? (
-                                                    <video src={item.preview} className="w-full h-full object-cover rounded" muted playsInline preLoad="metadata" />
+                                                    <video src={item.preview} className="w-full h-full object-cover rounded" muted playsInline preload="metadata" />
                                                 ) : (
                                                     <Video className="w-5 h-5 text-text-tertiary" />
                                                 )}
