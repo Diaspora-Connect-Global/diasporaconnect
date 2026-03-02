@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 
 interface EventCardProps {
@@ -22,7 +23,7 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
             <div className="relative h-64 rounded-t-3xl overflow-hidden">
                 <Image
                     src={imageUrl}
-                    alt={`${title} background`}
+                    alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
                     layout="fill"
                     className="w-full h-full object-fill"
                     onError={(e) => {
@@ -32,8 +33,8 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                 />
                 <div className="hidden w-full h-full bg-surface-subtle" style={{ display: "none" }}>
                     <Image
-                        src="/EVENT.png"
-                        alt="Fallback event background"
+                        src={EVENT_PLACEHOLDER_IMAGE}
+                        alt={`Default image for event: ${title}`}
                         layout="fill"
                         objectFit="contain"
                         className="w-full h-full object-contain"

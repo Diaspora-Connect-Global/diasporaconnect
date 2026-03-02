@@ -2,6 +2,7 @@ import { ButtonType1, ButtonType2 } from "@/components/custom/button";
 import { Bookmark } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 
 interface EventCardProps {
     title: string;
@@ -20,7 +21,7 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
             <div className="relative h-32 rounded-t-sm overflow-hidden">
                 <Image
                     src={imageUrl}
-                    alt={`${title} background`}
+                    alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
                     layout="fill"
                     objectFit="fill"
                     className="w-full h-full object-fill"
@@ -31,8 +32,8 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
                 />
                 <div className="hidden w-full h-full bg-surface-subtle" style={{ display: "none" }}>
                     <Image
-                        src="/EVENT.png"
-                        alt="Fallback event background"
+                        src={EVENT_PLACEHOLDER_IMAGE}
+                        alt={`Default image for event: ${title}`}
                         layout="fill"
                         objectFit="fill"
                         className="w-full h-full object-fill"

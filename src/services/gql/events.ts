@@ -1,35 +1,46 @@
 import { gql } from '@apollo/client';
 
-// Types
-export interface Event {
-  id: string;
-  ownerType: 'user' | 'community';
-  ownerId: string;
-  title: string;
-  description: string;
-  eventCategory: string;
-  visibility?: 'public' | 'community_only' | 'private' | 'unlisted';
-  locationType: 'physical' | 'virtual' | 'hybrid';
-  locationDetails?: {
-    physical?: { venue?: string; address?: string; city?: string; country?: string };
-    virtual?: { platform?: string; joinUrl?: string };
-  };
-  startAt: string;
-  endAt: string;
-  status: 'draft' | 'published' | 'cancelled' | 'completed';
-  isPaid: boolean;
-  registrationCount: number;
-  availableSpots?: number;
-  isRegistered?: boolean;
-  canRegister?: boolean;
-  tickets?: Array<{
-    id: string;
-    name: string;
-    priceInCents: number;
-  }>;
+// Backend API: EventLocation is flat (type, venueName, address, city, country, virtualLink, platform)
+export interface EventLocation {
+  type: 'physical' | 'virtual' | 'hybrid';
+  venueName?: string | null;
+  address?: string | null;
+  city?: string | null;
+  country?: string | null;
+  virtualLink?: string | null;
+  platform?: string | null;
 }
 
-/** Input for createEvent - locationDetails matches API LocationDetailsInput */
+export interface EventTicket {
+  id: string;
+  name: string;
+  priceInCents: number;
+  description?: string | null;
+  availableQuantity?: number | null;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'draft' | 'published' | 'cancelled' | 'completed';
+  startAt: string;
+  endAt: string;
+  eventCategory: string;
+  locationType: 'physical' | 'virtual' | 'hybrid';
+  locationDetails?: EventLocation | null;
+  isPaid: boolean;
+  registrationCount?: number;
+  availableSpots?: number | null;
+  isRegistered: boolean;
+  canRegister: boolean;
+  tickets?: EventTicket[] | null;
+  coverImageUrl?: string | null;
+  tags?: string[] | null;
+  timezone?: string | null;
+}
+
+/** Input for createEvent - keep for future use */
 export interface CreateEventInput {
   ownerType: 'user' | 'community';
   ownerId: string;
@@ -49,6 +60,7 @@ export interface CreateEventInput {
 export interface RegisterForEventInput {
   eventId: string;
   ticketId?: string;
+  quantity?: number;
 }
 
 export interface CheckInInput {
@@ -80,7 +92,7 @@ export interface CreateEventData {
 export interface RegisterEventData {
   registerForEvent: {
     registrationId: string;
-    paymentIntentClientSecret?: string;
+    paymentIntentClientSecret?: string | null;
   };
 }
 
@@ -99,7 +111,11 @@ export interface SaveEventData {
   };
 }
 
-// Queries
+export interface UnsaveEventData {
+  unsaveEvent: boolean;
+}
+
+// Queries (match backend Events API)
 export const GET_EVENT = gql`
   query GetEvent($id: ID!) {
     event(id: $id) {
@@ -112,26 +128,28 @@ export const GET_EVENT = gql`
       eventCategory
       locationType
       locationDetails {
-        physical {
-          venue
-          address
-          city
-          country
-        }
-        virtual {
-          platform
-          joinUrl
-        }
+        type
+        venueName
+        address
+        city
+        country
+        virtualLink
+        platform
       }
       isPaid
       registrationCount
       availableSpots
       isRegistered
       canRegister
+      coverImageUrl
+      tags
+      timezone
       tickets {
         id
         name
         priceInCents
+        description
+        availableQuantity
       }
     }
   }
@@ -142,26 +160,25 @@ export const GET_EVENTS = gql`
     events(limit: $limit, offset: $offset) {
       id
       title
-      description
-      eventCategory
+      status
       startAt
       endAt
+      eventCategory
       locationType
       locationDetails {
-        physical {
-          venue
-          city
-          country
-        }
-        virtual {
-          platform
-        }
+        type
+        venueName
+        city
+        country
+        virtualLink
       }
       isPaid
       registrationCount
       availableSpots
       isRegistered
       canRegister
+      coverImageUrl
+      tags
     }
   }
 `;
@@ -174,36 +191,32 @@ export const GET_USER_EVENTS = gql`
         title
         startAt
         endAt
+        eventCategory
         locationType
         locationDetails {
-          physical {
-            venue
-            city
-            country
-          }
-          virtual {
-            platform
-          }
+          type
+          venueName
+          city
+          country
         }
-        registrationCount
+        coverImageUrl
+        isRegistered
       }
       saved {
         id
         title
         startAt
         endAt
+        eventCategory
         locationType
         locationDetails {
-          physical {
-            venue
-            city
-            country
-          }
-          virtual {
-            platform
-          }
+          type
+          venueName
+          city
+          country
         }
-        registrationCount
+        coverImageUrl
+        canRegister
       }
     }
   }
@@ -217,7 +230,7 @@ export const CREATE_EVENT = gql`
 `;
 
 export const REGISTER_EVENT = gql`
-  mutation Register($input: RegisterForEventInput!) {
+  mutation RegisterForEvent($input: RegisterForEventInput!) {
     registerForEvent(input: $input) {
       registrationId
       paymentIntentClientSecret
@@ -244,6 +257,12 @@ export const SAVE_EVENT = gql`
   }
 `;
 
+export const UNSAVE_EVENT = gql`
+  mutation UnsaveEvent($eventId: ID!) {
+    unsaveEvent(eventId: $eventId)
+  }
+`;
+
 // Enums
 export enum EventStatus {
   DRAFT = 'draft',
@@ -256,4 +275,29 @@ export enum RegistrationStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled'
+}
+
+// Helpers for UI: backend uses flat EventLocation (venueName, city, virtualLink, platform)
+export function getEventLocationDisplay(event: Pick<Event, 'locationType' | 'locationDetails'>): string {
+  const loc = event.locationDetails;
+  if (!loc) {
+    if (event.locationType === 'physical') return 'Physical';
+    if (event.locationType === 'virtual') return 'Virtual';
+    return 'Hybrid';
+  }
+  if (loc.type === 'physical') {
+    return [loc.venueName, loc.city, loc.country].filter(Boolean).join(', ') || 'Physical';
+  }
+  if (loc.type === 'virtual') {
+    return loc.platform || loc.virtualLink || 'Virtual';
+  }
+  return 'Hybrid';
+}
+
+/** Default/fallback image when event has no cover. Use this for alt and onError fallback. */
+export const EVENT_PLACEHOLDER_IMAGE = '/EVENT.png';
+
+export function getEventCoverImage(event: Pick<Event, 'coverImageUrl'>): string {
+  const url = event.coverImageUrl?.trim();
+  return url ? url : EVENT_PLACEHOLDER_IMAGE;
 }
