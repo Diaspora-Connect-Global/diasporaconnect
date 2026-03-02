@@ -52,6 +52,7 @@ const FRIEND_TYPE_TO_TAB: Record<FriendType, string> = {
   "suggested": "2",
   "request-received": "3",
   "request-sent": "4",
+  "blocked": "5",
 };
 
 export default function FriendListModal({ onClose }: FriendListModalProps) {
@@ -258,14 +259,15 @@ if (requestsReceivedData?.getPendingConnections.connections) {
       // Only show results if we're allowed to (not in the middle of typing/searching)
       if (isSearchingOnSuggestedTab && searchResults?.searchUsers.profiles && shouldShowStaleResults) {
         searchResults.searchUsers.profiles.forEach((profile) => {
+          const connectionStatus = profile.connectionStatus ?? "none";
           friends.push({
             userId: profile.userId,
-            connectionId: profile.connectionId,
+            connectionId: profile.connectionId ?? "",
             name: `${profile.firstName} ${profile.lastName}`,
             imageSrc: `${profile.avatarUrl}`,
             mutualConnections: undefined,
             tier: getTierFromUser(profile),
-            connectionStatus: profile.connectionStatus,
+            connectionStatus: connectionStatus as Friend["connectionStatus"],
             tabType: "suggested",
             searchQuery: debouncedSearchTerm,
             isSearching: true,
@@ -273,14 +275,16 @@ if (requestsReceivedData?.getPendingConnections.connections) {
         });
       } else if (!isSearchingOnSuggestedTab && suggestions?.getFriendSuggestions.suggestions) {
         suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
+          const profile = suggestion.profile;
+          const connectionStatus = profile.connectionStatus ?? "none";
           friends.push({
-            userId: suggestion.profile.userId,
-            connectionId: suggestion.profile.connectionId,
-            name: `${suggestion.profile.firstName} ${suggestion.profile.lastName}`,
-            imageSrc: suggestion.profile.avatarUrl,
+            userId: profile.userId,
+            connectionId: profile.connectionId ?? "",
+            name: `${profile.firstName} ${profile.lastName}`,
+            imageSrc: profile.avatarUrl,
             mutualConnections: suggestion.mutualConnectionsCount,
-            tier: getTierFromUser(suggestion.profile),
-            connectionStatus: suggestion.profile.connectionStatus,
+            tier: getTierFromUser(profile),
+            connectionStatus: connectionStatus as Friend["connectionStatus"],
             tabType: "suggested",
             searchQuery: "",
             isSearching: false,
@@ -341,6 +345,7 @@ if (requestsReceivedData?.getPendingConnections.connections) {
         : (suggestions?.getFriendSuggestions.total || 0),
       "request-received": requestsReceivedData?.getPendingConnections.total || 0,
       "request-sent": requestsSentData?.getPendingConnections.total || 0,
+      "blocked": 0,
     };
 
     return byStatus;
@@ -353,14 +358,16 @@ if (requestsReceivedData?.getPendingConnections.connections) {
     searchResults
   ]);
 
-  const tabTitle = {
+  const tabTitleMap: Record<FriendType, string> = {
     "friends": t("titles.all", { count: counts["friends"] }),
     "suggested": debouncedSearchTerm.length > 0
       ? `${t("titles.searchResults")} (${counts["suggested"]})`
       : t("titles.suggested"),
     "request-received": t("titles.requestReceived", { count: counts["request-received"] }),
     "request-sent": t("titles.requestSent"),
-  }[activeTab];
+    "blocked": "",
+  };
+  const tabTitle = tabTitleMap[activeTab];
 
   /* --------------------- Loading state --------------------- */
   const isLoading = (() => {
