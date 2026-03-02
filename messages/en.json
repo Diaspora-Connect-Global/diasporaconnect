@@ -492,6 +492,7 @@
         "cancelRequest": "Cancel request",
         "removeFriend": "Remove friend",
         "blockFriend": "Block friend",
+        "youHaveBlockedThisUser": "You have blocked this user.",
         "mutualConnection": "{count} mutual connection",
         "mutualConnections": "{count} mutual connections",
         "tabs": {
@@ -703,7 +704,11 @@
             "viewProfile": "View profile",
             "report": "Report",
             "block": "Block",
+            "blockConfirmTitle": "Block this user?",
+            "blockConfirmDescription": "They will no longer be able to message you or see your profile.",
             "deleteConversation": "Delete Conversation",
+            "deleteConversationConfirmTitle": "Delete this conversation?",
+            "deleteConversationConfirmDescription": "Messages will be removed from your view. This cannot be undone.",
             "typeMessage": "Type a message...",
             "cannotSend": "Cannot send messages...",
             "typing": "is typing..."

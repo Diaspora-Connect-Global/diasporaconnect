@@ -430,7 +430,8 @@
         "friendList": "Liste d'amis",
         "friends": "amis",
         "changeProfilePicture": "Changer la photo de profil",
-        "editProfilePicture": "Modifier la photo de profil"
+        "editProfilePicture": "Modifier la photo de profil",
+        "youHaveBlockedThisUser": "Vous avez bloqué cet utilisateur."
     },
     "profile": {
         "workExperience": {
@@ -964,7 +965,11 @@
       "viewProfile": "Voir le profil",
       "report": "Signaler",
       "block": "Bloquer",
+      "blockConfirmTitle": "Bloquer cet utilisateur ?",
+      "blockConfirmDescription": "Il ou elle ne pourra plus vous envoyer de messages ni voir votre profil.",
       "deleteConversation": "Supprimer la conversation",
+      "deleteConversationConfirmTitle": "Supprimer cette conversation ?",
+      "deleteConversationConfirmDescription": "Les messages seront retirés de votre vue. Cette action est irréversible.",
       "typeMessage": "Tapez un message...",
       "cannotSend": "Impossible d'envoyer des messages...",
       "typing": "est en train d'écrire..."

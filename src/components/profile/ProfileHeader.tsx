@@ -25,6 +25,7 @@ interface ProfileHeaderProps {
   showFriendActions?: boolean;
   onEditAvatar?: () => void;
   connectionId: string;
+  onConnectionAction?: () => void;
 }
 
 export function ProfileHeader({
@@ -33,7 +34,8 @@ export function ProfileHeader({
   connectionId,
   userData,
   showFriendActions = false,
-  onEditAvatar
+  onEditAvatar,
+  onConnectionAction,
 }: ProfileHeaderProps) {
   const t = useTranslations('friends');
   const searchParams = useSearchParams();
@@ -121,6 +123,7 @@ export function ProfileHeader({
               userId={userId}
               type={friendType}
               connectionId={connectionId}
+              onConnectionAction={onConnectionAction}
             />
           )}
         </div>

@@ -430,7 +430,8 @@
         "friendList": "Freundesliste",
         "friends": "Freunde",
         "changeProfilePicture": "Profilbild ändern",
-        "editProfilePicture": "Profilbild bearbeiten"
+        "editProfilePicture": "Profilbild bearbeiten",
+        "youHaveBlockedThisUser": "Sie haben diesen Benutzer blockiert."
     },
     "profile": {
         "workExperience": {
@@ -964,7 +965,11 @@
       "viewProfile": "Profil anzeigen",
       "report": "Melden",
       "block": "Blockieren",
+      "blockConfirmTitle": "Diesen Benutzer blockieren?",
+      "blockConfirmDescription": "Er oder sie kann Ihnen keine Nachrichten mehr senden oder Ihr Profil sehen.",
       "deleteConversation": "Unterhaltung löschen",
+      "deleteConversationConfirmTitle": "Diese Unterhaltung löschen?",
+      "deleteConversationConfirmDescription": "Nachrichten werden aus Ihrer Ansicht entfernt. Dies kann nicht rückgängig gemacht werden.",
       "typeMessage": "Nachricht eingeben...",
       "cannotSend": "Nachrichten können nicht gesendet werden...",
       "typing": "schreibt..."

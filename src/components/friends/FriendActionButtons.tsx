@@ -38,6 +38,7 @@ interface FriendActionButtonsProps {
     connectionId: string;
     searchQuery?: string;
     isSearching?: boolean;
+    onConnectionAction?: () => void;
 }
 
 export const FriendActionButtons = ({ 
@@ -48,6 +49,7 @@ export const FriendActionButtons = ({
     className = "flex space-x-2",
     searchQuery = "",
     isSearching = false,
+    onConnectionAction,
 }: FriendActionButtonsProps) => {
     const tCommon = useTranslations('common');
     const {
@@ -60,7 +62,7 @@ export const FriendActionButtons = ({
         blockFriend,
         isActionLoading,
         t,
-    } = useFriendActions({ searchQuery, isSearching });
+    } = useFriendActions({ searchQuery, isSearching, onConnectionAction });
 
     const [confirmAction, setConfirmAction] = useState<'removeFriend' | 'blockFriend' | null>(null);
 

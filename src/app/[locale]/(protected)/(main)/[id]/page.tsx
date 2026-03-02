@@ -20,10 +20,9 @@ export default function FriendProfile() {
 
 
     // Fetch user profile by userId
-    const { data, loading, error } = useQuery<GetProfileResponse>(GET_USER_PROFILE, {
+    const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_USER_PROFILE, {
         variables: { userId },
         fetchPolicy: 'network-only', // Force fresh data
-
     });
 
     console.log("from friends page", data)
@@ -63,14 +62,14 @@ const connectionId = data.getProfile.connectionId
                     userId={userId}
                     userData={profile}
                     connectionId={connectionId}
-
                     friendType={
-                        data.getProfile.connectionStatus === "pending_sent" ? "request-sent"
-                            : data.getProfile.connectionStatus === "pending_request" ? "request-received"
-                                : data.getProfile.connectionStatus === "none" ? "suggested" : "friends"
-
+                        data.getProfile.connectionStatus === "blocked" ? "blocked"
+                            : data.getProfile.connectionStatus === "pending_sent" ? "request-sent"
+                                : data.getProfile.connectionStatus === "pending_request" ? "request-received"
+                                    : data.getProfile.connectionStatus === "none" ? "suggested" : "friends"
                     }
                     showFriendActions={true}
+                    onConnectionAction={refetch}
                 />
                 <NavigationTabs
                     userId={userId}
