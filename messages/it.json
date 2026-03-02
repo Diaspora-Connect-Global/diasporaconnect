@@ -542,7 +542,11 @@
     "common": {
         "scrollLeft": "Scorri a sinistra",
         "scrollRight": "Scorri a destra",
-        "almostThere": "Quasi fatto..."
+        "almostThere": "Quasi fatto...",
+        "remove": "Rimuovi",
+        "delete": "Elimina",
+        "cancel": "Annulla",
+        "confirm": "Conferma"
     },
     "metadata": {
         "title": "Diaspora Connect Global",
@@ -614,6 +618,8 @@
   "marketplace": {
     "title": "Marketplace",
     "cart": "Carrello",
+    "removeCartItemTitle": "Rimuovere l'articolo dal carrello?",
+    "removeCartItemConfirm": "Questo articolo sarà rimosso dal tuo carrello.",
     "products": "Prodotti",
     "services": "Servizi",
     "trending": "Di tendenza",
@@ -960,7 +966,8 @@
       "block": "Blocca",
       "deleteConversation": "Elimina conversazione",
       "typeMessage": "Scrivi un messaggio...",
-      "cannotSend": "Impossibile inviare messaggi..."
+      "cannotSend": "Impossibile inviare messaggi...",
+      "typing": "sta scrivendo..."
     },
     "group": {
       "message": "Messaggio a {name}",

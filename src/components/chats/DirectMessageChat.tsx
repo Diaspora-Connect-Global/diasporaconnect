@@ -575,7 +575,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 {/* Typing indicator */}
                 {otherUserTyping && (
                     <div className="flex-shrink-0 px-3 md:px-4 py-1 text-sm text-text-secondary italic">
-                        {displayName} {t('typing', { defaultValue: 'typing...' })}
+                        {displayName} {t('typing')}
                     </div>
                 )}
 

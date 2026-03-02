@@ -542,7 +542,11 @@
     "common": {
         "scrollLeft": "Nach links scrollen",
         "scrollRight": "Nach rechts scrollen",
-        "almostThere": "Fast geschafft..."
+        "almostThere": "Fast geschafft...",
+        "remove": "Entfernen",
+        "delete": "Löschen",
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen"
     },
     "metadata": {
         "title": "Diaspo Plug",
@@ -614,6 +618,8 @@
   "marketplace": {
     "title": "Marktplatz",
     "cart": "Warenkorb",
+    "removeCartItemTitle": "Artikel aus dem Warenkorb entfernen?",
+    "removeCartItemConfirm": "Dieser Artikel wird aus Ihrem Warenkorb entfernt.",
     "products": "Produkte",
     "services": "Dienstleistungen",
     "trending": "Im Trend",
@@ -960,7 +966,8 @@
       "block": "Blockieren",
       "deleteConversation": "Unterhaltung löschen",
       "typeMessage": "Nachricht eingeben...",
-      "cannotSend": "Nachrichten können nicht gesendet werden..."
+      "cannotSend": "Nachrichten können nicht gesendet werden...",
+      "typing": "schreibt..."
     },
     "group": {
       "message": "Nachricht an {name}",

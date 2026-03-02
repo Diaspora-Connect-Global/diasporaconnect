@@ -659,7 +659,9 @@
         "decreaseRevisions": "Decrease revisions",
         "increaseRevisions": "Increase revisions",
         "decreaseQuantity": "Decrease quantity",
-        "increaseQuantity": "Increase quantity"
+        "increaseQuantity": "Increase quantity",
+        "remove": "Remove",
+        "delete": "Delete"
     },
     "metadata": {
         "title": "Diaspora Connect Global",
@@ -703,7 +705,8 @@
             "block": "Block",
             "deleteConversation": "Delete Conversation",
             "typeMessage": "Type a message...",
-            "cannotSend": "Cannot send messages..."
+            "cannotSend": "Cannot send messages...",
+            "typing": "is typing..."
         },
         "group": {
             "message": "Message {name}",
@@ -856,6 +859,8 @@
     "marketplace": {
         "title": "Marketplace",
         "cart": "Cart",
+        "removeCartItemTitle": "Remove item from cart?",
+        "removeCartItemConfirm": "This item will be removed from your cart.",
         "products": "Products",
         "services": "Services",
         "trending": "Trending",
