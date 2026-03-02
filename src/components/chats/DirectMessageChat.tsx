@@ -17,7 +17,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
+import { BLOCK_USER } from "@/services/gql/users";
+import type { BlockUserResponse } from "@/services/gql/types/users";
 import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
+import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
@@ -37,7 +40,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const [isSending, setIsSending] = useState(false);
     const [otherUserTyping, setOtherUserTyping] = useState(false);
 
-    const { addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
+    const { addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages, clearApiMessages } = useChatStore();
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
@@ -48,6 +51,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE);
     const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
     const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
+        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
+    });
+    const [blockUserMutation] = useMutation<BlockUserResponse>(BLOCK_USER, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
 
@@ -404,6 +410,35 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         }
     }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, removeApiMessage, isConnected, getUploadUrl]);
 
+    const handleBlockConfirm = async () => {
+        setIsBlocking(true);
+        try {
+            const { data } = await blockUserMutation({
+                variables: { input: { blockedId: chat.id } },
+            });
+            if (data?.blockUser?.success) {
+                toast.success(t('blockSuccess') || 'User blocked.');
+                setBlockModalOpen(false);
+                onBack?.();
+            } else {
+                toast.error(data?.blockUser?.message || 'Failed to block user.');
+            }
+        } catch (err) {
+            console.error('Block user error:', err);
+            toast.error('Failed to block user.');
+        } finally {
+            setIsBlocking(false);
+        }
+    };
+
+    const handleDeleteConversationConfirm = () => {
+        if (conversationId) {
+            clearApiMessages(conversationId);
+        }
+        setDeleteConversationModalOpen(false);
+        onBack?.();
+    };
+
     return (
         <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
             {/* Main Chat Area */}
@@ -619,12 +654,18 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
 
-                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                <div
+                                    className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors"
+                                    onClick={() => setBlockModalOpen(true)}
+                                >
                                     <p className="text-sm font-medium">{t('block')}</p>
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
 
-                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                <div
+                                    className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors"
+                                    onClick={() => setDeleteConversationModalOpen(true)}
+                                >
                                     <p className="text-sm font-medium">{t('deleteConversation')}</p>
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
@@ -633,6 +674,26 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     </div>
                 </>
             )}
+
+            <ConfirmationModal
+                open={blockModalOpen}
+                onCancel={() => setBlockModalOpen(false)}
+                onConfirm={handleBlockConfirm}
+                title={t('blockConfirmTitle') || 'Block this user?'}
+                description={t('blockConfirmDescription') || 'They will no longer be able to message you or see your profile.'}
+                confirmText={t('block') || 'Block'}
+                confirmVariant="destructive"
+                isLoading={isBlocking}
+            />
+            <ConfirmationModal
+                open={deleteConversationModalOpen}
+                onCancel={() => setDeleteConversationModalOpen(false)}
+                onConfirm={handleDeleteConversationConfirm}
+                title={t('deleteConversationConfirmTitle') || 'Delete this conversation?'}
+                description={t('deleteConversationConfirmDescription') || 'Messages will be removed from your view. This cannot be undone.'}
+                confirmText={t('deleteConversation') || tCommon('delete') || 'Delete'}
+                confirmVariant="destructive"
+            />
         </div>
     );
 }

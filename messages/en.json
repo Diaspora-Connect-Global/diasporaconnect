@@ -458,6 +458,8 @@
         "discoverMore": "Discover more communities",
         "openInHome": "Open community in home",
         "leaveCommunity": "Leave community",
+        "leaveCommunityTitle": "Leave community?",
+        "leaveCommunityConfirm": "You will need to re-join to see posts and events.",
         "noCommunitiesJoined": "No communities joined yet.",
         "noCommunitiesFound": "No communities found. Try refreshing the page or adjusting your search."
     },

@@ -379,7 +379,9 @@
         "myCommunity": "Meine Community",
         "discoverMore": "Weitere Communities entdecken",
         "openInHome": "Community auf der Startseite öffnen",
-        "leaveCommunity": "Community verlassen"
+        "leaveCommunity": "Community verlassen",
+        "leaveCommunityTitle": "Community verlassen?",
+        "leaveCommunityConfirm": "Sie müssen erneut beitreten, um Beiträge und Veranstaltungen zu sehen."
     },
     "notification": {
         "notifications": "Benachrichtigungen",

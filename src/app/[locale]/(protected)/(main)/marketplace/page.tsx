@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ShoppingCart, Star, Heart, Search, ChevronLeft, ChevronRight, Plus, Minus, Trash2, CheckCircle } from 'lucide-react';
 import { SearchInput } from '@/components/custom/input';
 import { useTranslations } from 'next-intl';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 
 // Types
 interface Product {
@@ -1003,12 +1004,15 @@ const OrderSuccess: React.FC<{
 // Main App Component
 const App: React.FC = () => {
   const t = useTranslations('marketplace');
+  const tCommon = useTranslations('common');
   const [currentView, setCurrentView] = useState<'home' | 'product' | 'service' | 'cart' | 'checkout' | 'service-checkout' | 'success'>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [activeTab, setActiveTab] = useState<'products' | 'services'>('products');
   const [selectedServiceItem, setSelectedServiceItem] = useState<CartItem | null>(null);
+  const [removeCartItemModalOpen, setRemoveCartItemModalOpen] = useState(false);
+  const [cartItemIdToRemove, setCartItemIdToRemove] = useState<string | null>(null);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -1041,8 +1045,17 @@ const App: React.FC = () => {
     setCart(cart.map(item => item.id === id ? { ...item, quantity } : item));
   };
 
-  const handleRemoveItem = (id: string) => {
-    setCart(cart.filter(item => item.id !== id));
+  const requestRemoveCartItem = (id: string) => {
+    setCartItemIdToRemove(id);
+    setRemoveCartItemModalOpen(true);
+  };
+
+  const handleRemoveCartItemConfirm = () => {
+    if (cartItemIdToRemove) {
+      setCart(cart.filter(item => item.id !== cartItemIdToRemove));
+      setCartItemIdToRemove(null);
+      setRemoveCartItemModalOpen(false);
+    }
   };
 
   const handleCheckout = () => {
@@ -1138,12 +1151,20 @@ const App: React.FC = () => {
           cart={cart}
           onClose={() => setShowCart(false)}
           onUpdateQuantity={handleUpdateQuantity}
-          onRemoveItem={handleRemoveItem}
+          onRemoveItem={requestRemoveCartItem}
           onCheckout={handleCheckout}
         />
       )}
 
-
+      <ConfirmationModal
+        open={removeCartItemModalOpen}
+        onCancel={() => { setRemoveCartItemModalOpen(false); setCartItemIdToRemove(null); }}
+        onConfirm={handleRemoveCartItemConfirm}
+        title={t('removeCartItemTitle') || 'Remove item from cart?'}
+        description={t('removeCartItemConfirm') || 'This item will be removed from your cart.'}
+        confirmText={tCommon('remove') || 'Remove'}
+        confirmVariant="destructive"
+      />
     </div>
   );
 };

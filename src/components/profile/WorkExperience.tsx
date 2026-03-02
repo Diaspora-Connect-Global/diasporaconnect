@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/accordionA';
 import { AddWorkExperienceModal } from './modals/AddWorkExperienceModal';
 import { AutocompleteAsync } from '@/components/custom/autoCompleteAsync';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import {
   Dialog,
   DialogContent,
@@ -157,11 +158,15 @@ interface WorkExperienceContentProps {
 
 export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperienceContentProps) {
     const t = useTranslations('profile.workExperience');
+    const tCommon = useTranslations('common');
     const tActions = useTranslations('actions');
     
     const [showSkillModal, setShowSkillModal] = useState(false);
     const [showExperienceModal, setShowExperienceModal] = useState(false);
     const [selectedSkills, setSelectedSkills] = useState<Option[]>([]);
+    const [removeSkillModalOpen, setRemoveSkillModalOpen] = useState(false);
+    const [skillIdToRemove, setSkillIdToRemove] = useState<string | null>(null);
+    const [isRemovingSkill, setIsRemovingSkill] = useState(false);
 
     // Determine which query to use based on isOwnProfile
     const isMyProfile = isOwnProfile;
@@ -255,20 +260,28 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
         }
     };
 
-    // Remove skill handler - only for own profile
-    const handleRemoveSkill = async (skillId: string) => {
+    // Remove skill - open confirmation modal
+    const handleRemoveSkillClick = (skillId: string) => {
         if (!isOwnProfile) return;
-        
-        if (!confirm('Are you sure you want to remove this skill?')) return;
+        setSkillIdToRemove(skillId);
+        setRemoveSkillModalOpen(true);
+    };
 
+    const handleRemoveSkillConfirm = async () => {
+        if (!skillIdToRemove) return;
+        setIsRemovingSkill(true);
         try {
             await removeSkillMutation({
                 variables: {
-                    input: { skillId }
+                    input: { skillId: skillIdToRemove }
                 }
             });
+            setRemoveSkillModalOpen(false);
+            setSkillIdToRemove(null);
         } catch (error) {
             console.error('Error in handleRemoveSkill:', error);
+        } finally {
+            setIsRemovingSkill(false);
         }
     };
 
@@ -300,7 +313,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                                     className={`px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium ${
                                         isOwnProfile ? 'cursor-pointer hover:bg-gray-50' : ''
                                     }`}
-                                    onClick={isOwnProfile ? () => handleRemoveSkill(skill.id) : undefined}
+                                    onClick={isOwnProfile ? () => handleRemoveSkillClick(skill.id) : undefined}
                                     title={isOwnProfile ? "Click to remove" : undefined}
                                 >
                                     {skill.name}
@@ -435,6 +448,20 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                 <AddWorkExperienceModal
                     isOpen={showExperienceModal}
                     onClose={handleExperienceModalClose}
+                />
+            )}
+
+            {/* Remove skill confirmation - Only render for own profile */}
+            {isOwnProfile && (
+                <ConfirmationModal
+                    open={removeSkillModalOpen}
+                    onCancel={() => { setRemoveSkillModalOpen(false); setSkillIdToRemove(null); }}
+                    onConfirm={handleRemoveSkillConfirm}
+                    title={t('removeSkillTitle') || 'Remove skill'}
+                    description={t('removeSkillConfirm') || 'Are you sure you want to remove this skill?'}
+                    confirmText={tCommon('remove') || 'Remove'}
+                    confirmVariant="destructive"
+                    isLoading={isRemovingSkill}
                 />
             )}
         </>
