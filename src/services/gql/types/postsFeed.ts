@@ -270,6 +270,8 @@ export interface GetFeedInput {
   communityId?: string;
   authorId?: string;
   type: FeedType;
+  /** Optional hashtag to filter feed (e.g. "diaspora"). Backend must support. */
+  hashtag?: string;
 }
 
 /**

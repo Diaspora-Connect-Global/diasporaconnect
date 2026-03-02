@@ -191,7 +191,14 @@
         "sharePost": "Share Post",
         "copy": "Copy",
         "copied": "Copied!",
-        "close": "Close"
+        "close": "Close",
+        "copyLink": "Copy link",
+        "shareInMessage": "Share in a message",
+        "shareToGroup": "Share to a group",
+        "shareLinkSent": "Link shared successfully",
+        "shareLinkFailed": "Failed to share link",
+        "noConversations": "No conversations yet",
+        "noGroups": "No groups yet"
     },
     "createPost": {
         "placeholder": "What's on your mind, {name}?",

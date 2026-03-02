@@ -6,13 +6,13 @@ import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
 import { DISCOVER_COMMUNITIES, REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import { 
-  GET_FEED, 
   ADD_ENGAGEMENT, 
   CREATE_COMMENT,
-  GetFeedData,
   AddEngagementData,
   CreateCommentData 
 } from '@/services/gql/postsFeed';
+import type { Post as ApiPost } from '@/services/gql/types/postsFeed';
+import { useFeed } from '@/hooks/useFeed';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -62,7 +62,7 @@ interface Post {
   id: string;
   text: string;
   authorId: string;
-  authorType: 'USER' | 'ORG';
+  authorType: string;
   authorProfile: AuthorProfile;
   createdAt: string;
   attachments?: {
@@ -102,21 +102,16 @@ export default function Home() {
     }
   );
 
-  // Fetch feed
-  const { 
-    data: feedData, 
-    loading: feedLoading, 
+  // Feed with infinite scroll
+  const {
+    posts,
+    loading: feedLoading,
     error: feedError,
-    refetch: refetchFeed 
-  } = useQuery<GetFeedData>(GET_FEED, {
-    variables: {
-      input: {
-        limit: 20,
-        offset: 0,
-        type: 'all'
-      }
-    }
-  });
+    refetch: refetchFeed,
+    loadingMore: feedLoadingMore,
+    hasMore: feedHasMore,
+    feedContainerRef,
+  } = useFeed({ type: 'all' });
 
   // Mutations
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
@@ -261,12 +256,11 @@ export default function Home() {
   const communities = discoverData?.discoverCommunities?.communities || [];
   const hasCommunities = communities.length > 0;
 
-  const posts = feedData?.feed?.posts || [];
   const hasPosts = posts.length > 0;
 
   // Helper function to get profile data based on author type
   // Updated to handle uppercase author types from API
-  const getProfileData = (post: Post) => {
+  const getProfileData = (post: ApiPost) => {
     // Handle organization posts (authorType === 'ORG')
     if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
       return {
@@ -316,7 +310,10 @@ export default function Home() {
   return (
     <div className="h-app-inner flex overflow-hidden">
       {/* Main Feed - Independent Scroll */}
-      <div className="lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col">
+      <div
+        ref={feedContainerRef}
+        className="lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col"
+      >
         {/* Discover Section */}
         <div className="flex justify-between mb-4 shrink-0">
           <h2 className="label-medium">{t('discover')}</h2>
@@ -409,7 +406,7 @@ export default function Home() {
         {/* Feed Posts - Takes remaining space */}
         <div className="space-y-2">
           {/* Feed Loading State — only on initial load */}
-          {feedLoading && !feedData && (
+          {feedLoading && posts.length === 0 && (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="bg-surface-subtle rounded-lg p-4 animate-pulse">
@@ -455,7 +452,7 @@ export default function Home() {
 
           {/* Feed Posts */}
           {hasPosts && posts.map((post) => {
-            const profileData = getProfileData(post as Post);
+            const profileData = getProfileData(post);
             return (
               <div key={post.id} className="mb-2">
                 <FeedCardWithReply
@@ -465,9 +462,13 @@ export default function Home() {
                   category={profileData.type}
                   postDate={formatPostDate(post.createdAt)}
                   content={post.text}
-                  images={(post as Post).attachments
+                  images={post.attachments
                     ?.filter((a) => a.mimeType?.startsWith('image/'))
-                    .map((a) => a.url || '') 
+                    .map((a) => a.url || '')
+                    .filter(Boolean) || []}
+                  videos={post.attachments
+                    ?.filter((a) => a.mimeType?.startsWith('video/'))
+                    .map((a) => a.url || '')
                     .filter(Boolean) || []}
                   likes={post.engagementCounts.likes}
                   comments={post.engagementCounts.comments}
@@ -485,6 +486,13 @@ export default function Home() {
               </div>
             );
           })}
+
+          {/* Load more indicator */}
+          {feedLoadingMore && (
+            <div className="flex justify-center py-4">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-text-brand border-t-transparent" />
+            </div>
+          )}
         </div>
       </div>
 

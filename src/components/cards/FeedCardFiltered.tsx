@@ -11,6 +11,7 @@ import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
+import SharePostModal from '@/components/share/SharePostModal';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
 import { formatCount } from '@/macros/formatCount';
@@ -117,6 +118,7 @@ export default function FeedCardFiltered({
     const [showComments, setShowComments] = useState(forceShowComments);
     const [showCommentInput, setShowCommentInput] = useState(false);
     const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
+    const [showShareModal, setShowShareModal] = useState(false);
     const [loadedComments, setLoadedComments] = useState<Comment[]>(commentsDataProp);
     const [commentsLoaded, setCommentsLoaded] = useState(false);
 
@@ -633,7 +635,7 @@ export default function FeedCardFiltered({
 
                     <button
                         className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
-                        onClick={onShare}
+                        onClick={() => setShowShareModal(true)}
                     >
                         <Image width={20} height={20} src="/SHARE.svg" alt="share" className="w-[1.25rem] h-[1.25rem] object-contain" />
                         <span>{t('share')}</span>
@@ -656,6 +658,13 @@ export default function FeedCardFiltered({
                 {renderCommentInput()}
                 {renderComments()}
             </div>
+
+            <SharePostModal
+                open={showShareModal}
+                onClose={() => setShowShareModal(false)}
+                postId={resolvedPostId}
+                onShared={onShare}
+            />
         </div>
     );
 }

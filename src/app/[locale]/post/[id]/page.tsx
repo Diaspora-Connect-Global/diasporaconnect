@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, useRouter } from 'next/navigation';
-import { GET_POST, ADD_ENGAGEMENT, CREATE_COMMENT, SHARE_POST, GetPostData, AddEngagementData, CreateCommentData, SharePostData } from '@/services/gql/postsFeed';
+import { GET_POST, ADD_ENGAGEMENT, CREATE_COMMENT, GetPostData, AddEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -19,7 +19,6 @@ export default function PostPage() {
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
-  const [sharePost] = useMutation<SharePostData>(SHARE_POST);
 
   const handleLike = async () => {
     try {
@@ -43,11 +42,9 @@ export default function PostPage() {
 
   const handleShare = async () => {
     try {
-      const { data } = await sharePost({ variables: { postId } });
-      if (data?.sharePost.shareLink) {
-        await navigator.clipboard.writeText(data.sharePost.shareLink);
-        toast.success('Link copied to clipboard');
-      }
+      await addEngagement({
+        variables: { input: { postId, engagementType: 'SHARE' } },
+      });
     } catch {
       toast.error('Failed to share post');
     }
@@ -144,6 +141,12 @@ export default function PostPage() {
           images={
             post.attachments
               ?.filter((a) => a.mimeType?.startsWith('image/'))
+              .map((a) => a.url || '')
+              .filter(Boolean) || []
+          }
+          videos={
+            post.attachments
+              ?.filter((a) => a.mimeType?.startsWith('video/'))
               .map((a) => a.url || '')
               .filter(Boolean) || []
           }

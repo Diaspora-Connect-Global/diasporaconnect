@@ -1,6 +1,6 @@
 'use client';
-import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Copy, Check } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { Bookmark, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
@@ -9,9 +9,38 @@ import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { GET_POST_COMMENTS, SHARE_POST, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, SharePostData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
+import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
+import SharePostModal from '@/components/share/SharePostModal';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
+
+/** Video that only loads src when in viewport to save bandwidth. */
+function LazyVideo({ src, className }: { src: string; className?: string }) {
+    const ref = useRef<HTMLVideoElement>(null);
+    const [shouldLoad, setShouldLoad] = useState(false);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(
+            ([entry]) => { if (entry?.isIntersecting) setShouldLoad(true); },
+            { rootMargin: '100px', threshold: 0.1 }
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
+    return (
+        <video
+            ref={ref}
+            src={shouldLoad ? src : undefined}
+            preload="metadata"
+            controls
+            playsInline
+            className={className}
+        />
+    );
+}
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -39,6 +68,8 @@ interface FeedCardProps {
     postDate: string;
     content: string;
     images?: string[];
+    /** Video attachment URLs (e.g. from mimeType video/*). Loaded with preload="metadata" and viewport-aware. */
+    videos?: string[];
     likes: number;
     comments: number;
     shares: number;
@@ -91,6 +122,7 @@ export default function FeedCardWithReply({
     postDate,
     content,
     images,
+    videos = [],
     likes,
     comments,
     shares,
@@ -124,7 +156,6 @@ export default function FeedCardWithReply({
         { fetchPolicy: 'cache-and-network' }
     );
 
-    const [sharePostMutation] = useMutation<SharePostData>(SHARE_POST);
     const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
     const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
 
@@ -182,8 +213,6 @@ export default function FeedCardWithReply({
     const [showImageModal, setShowImageModal] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showShareDialog, setShowShareDialog] = useState(false);
-    const [shareLink, setShareLink] = useState('');
-    const [copied, setCopied] = useState(false);
 
     const t = useTranslations('actions');
 
@@ -231,30 +260,15 @@ export default function FeedCardWithReply({
         onSave?.();
     };
 
-    const handleShare = async () => {
-        try {
-            const { data } = await sharePostMutation({ variables: { postId } });
-            if (data?.sharePost.shareLink) {
-                setShareLink(data.sharePost.shareLink);
-                setShowShareDialog(true);
-                const newSharedState = !isShared;
-                setIsShared(newSharedState);
-                setShareCount((c) => newSharedState ? c + 1 : c - 1);
-            }
-        } catch (error) {
-            console.error('Share failed:', error);
-        }
-        onShare?.();
+    const handleShare = () => {
+        setShowShareDialog(true);
     };
 
-    const copyToClipboard = async () => {
-        try {
-            await navigator.clipboard.writeText(shareLink);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (error) {
-            console.error('Copy failed:', error);
-        }
+    const handleShared = () => {
+        const newSharedState = true;
+        setIsShared(newSharedState);
+        setShareCount((c) => c + 1);
+        onShare?.();
     };
 
     const toggleExpand = () => setIsExpanded((v) => !v);
@@ -363,7 +377,7 @@ export default function FeedCardWithReply({
                         className="relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                         onClick={() => openImageModal(0)}
                     >
-                        <img src={images[0]} alt="post" className="w-full h-full object-cover" />
+                        <img src={images[0]} alt="post" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     </div>
                 ) : imageCount === 2 ? (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
@@ -373,7 +387,7 @@ export default function FeedCardWithReply({
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openImageModal(i)}
                             >
-                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
+                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                             </div>
                         ))}
                     </div>
@@ -383,20 +397,20 @@ export default function FeedCardWithReply({
                             className="relative h-[30.5rem] rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => openImageModal(0)}
                         >
-                            <img src={images[0]} alt="post 1" className="w-full h-full object-cover" />
+                            <img src={images[0]} alt="post 1" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </div>
                         <div className="flex flex-col gap-[0.5rem]">
                             <div 
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openImageModal(1)}
                             >
-                                <img src={images[1]} alt="post 2" className="w-full h-full object-cover" />
+                                <img src={images[1]} alt="post 2" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                             </div>
                             <div 
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openImageModal(2)}
                             >
-                                <img src={images[2]} alt="post 3" className="w-full h-full object-cover" />
+                                <img src={images[2]} alt="post 3" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                             </div>
                         </div>
                     </div>
@@ -414,7 +428,7 @@ export default function FeedCardWithReply({
                                     }
                                 }}
                             >
-                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
+                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                 {i === maxDisplay - 1 && excessCount > 0 && (
                                     <div className="absolute inset-0 bg-black/40 bg-opacity-60 flex items-center justify-center">
                                         <span className="text-white text-3xl font-semibold">
@@ -426,6 +440,22 @@ export default function FeedCardWithReply({
                         ))}
                     </div>
                 )}
+            </div>
+        );
+    };
+
+    const renderVideos = () => {
+        if (!videos?.length) return null;
+        return (
+            <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
+                {videos.map((src, i) => (
+                    <div key={i} className="relative w-full rounded-lg overflow-hidden bg-black/5">
+                        <LazyVideo
+                            src={src}
+                            className="w-full max-h-[24rem] object-contain"
+                        />
+                    </div>
+                ))}
             </div>
         );
     };
@@ -493,6 +523,7 @@ export default function FeedCardWithReply({
                                 src={images[currentImageIndex]}
                                 alt={`Image ${currentImageIndex + 1}`}
                                 className="object-contain w-full h-full"
+                                decoding="async"
                             />
                         </div>
                     </div>
@@ -521,6 +552,7 @@ export default function FeedCardWithReply({
                                                     src={src}
                                                     alt={`Thumbnail ${i + 1}`}
                                                     className="w-full h-full object-cover rounded-lg"
+                                                    decoding="async"
                                                 />
                                                 {i === currentImageIndex && (
                                                     <div className="absolute inset-0 bg-surface-default/10 rounded-lg" />
@@ -749,6 +781,7 @@ export default function FeedCardWithReply({
 
                 {/* Images */}
                 {renderImages()}
+                {renderVideos()}
 
                 {/* Reaction Bar - Using formatCount for all counts */}
                 <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
@@ -826,35 +859,12 @@ export default function FeedCardWithReply({
             {/* Image Modal */}
             {renderImageModal()}
 
-            {/* Share Dialog */}
-            {showShareDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowShareDialog(false)}>
-                    <div className="bg-surface-default rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-lg font-semibold text-text-primary mb-4">{t('sharePost')}</h3>
-                        <div className="flex items-center gap-2 mb-4">
-                            <input
-                                type="text"
-                                value={shareLink}
-                                readOnly
-                                className="flex-1 px-3 py-2 bg-surface-subtle border border-border-subtle rounded-md text-text-primary text-sm"
-                            />
-                            <button
-                                onClick={copyToClipboard}
-                                className="px-4 py-2 bg-surface-brand text-white rounded-md hover:bg-surface-brand-dark transition-colors flex items-center gap-2"
-                            >
-                                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                {copied ? t('copied') : t('copy')}
-                            </button>
-                        </div>
-                        <button
-                            onClick={() => setShowShareDialog(false)}
-                            className="w-full px-4 py-2 bg-surface-subtle text-text-primary rounded-md hover:bg-surface-tertiary transition-colors"
-                        >
-                            {t('close')}
-                        </button>
-                    </div>
-                </div>
-            )}
+            <SharePostModal
+                open={showShareDialog}
+                onClose={() => setShowShareDialog(false)}
+                postId={postId}
+                onShared={handleShared}
+            />
         </>
     );
 }

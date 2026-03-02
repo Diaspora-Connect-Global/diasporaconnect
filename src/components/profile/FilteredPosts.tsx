@@ -284,6 +284,12 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                     .map((a) => a.url || '')
                     .filter(Boolean) || []
                 }
+                videos={
+                  post.attachments
+                    ?.filter((a) => a.mimeType?.startsWith('video/'))
+                    .map((a) => a.url || '')
+                    .filter(Boolean) || []
+                }
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
                 shares={post.engagementCounts.shares}
