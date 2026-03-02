@@ -2,18 +2,28 @@
 "use client"
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
-import { Smile, ImageIcon, Send, X } from "lucide-react";
+import { Smile, ImageIcon, Send, X, FileIcon, Video, Music } from "lucide-react";
 import { ButtonType2 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 import { useTranslations } from "next-intl";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
+import { chatMediaContentType } from "@/services/gql/upload";
+import { toast } from "sonner";
 
 const TYPING_STOP_DEBOUNCE_MS = 2500;
+const MAX_FILES = 10;
+const MAX_TOTAL_BYTES = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_BYTES = 10 * 1024 * 1024;   // 10MB per file
+
+/** Accept string for chat attachments: images, video, audio, PDF, CSV, text, Office. */
+const CHAT_ACCEPT = "image/*,video/*,audio/*,application/pdf,text/plain,text/csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx";
+
+export type FileWithPreview = { file: File; preview?: string };
 
 interface MessageInputProps {
-    /** When image is sent, parent receives the File to upload; parent then sends message with the resulting URL. */
-    onSendMessage: (message: string, imageFile?: File) => void;
+    /** When files are sent, parent receives the File[] to upload; parent then sends message with the resulting URLs. */
+    onSendMessage: (message: string, files?: File[]) => void;
     placeholder?: string;
     disabled?: boolean;
     conversationId?: string;
@@ -33,8 +43,7 @@ export function MessageInput({
     const t = useTranslations('chat.direct');
     const [newMessage, setNewMessage] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const fileInputId = useId();
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
@@ -151,19 +160,17 @@ export function MessageInput({
     };
 
     const handleSendMessage = () => {
-        if ((newMessage.trim() || selectedImageFile) && !disabled) {
+        const filesToSend = selectedFiles.length > 0 ? selectedFiles.map((f) => f.file) : undefined;
+        if ((newMessage.trim() || filesToSend?.length) && !disabled) {
             notifyTyping(false);
             if (typingStopTimerRef.current) {
                 clearTimeout(typingStopTimerRef.current);
                 typingStopTimerRef.current = null;
             }
-            // Parent uploads imageFile and sends message with the resulting URL
-            onSendMessage(newMessage, selectedImageFile || undefined);
+            onSendMessage(newMessage, filesToSend);
 
-            // Reset state
             setNewMessage('');
-            setImagePreview(null);
-            setSelectedImageFile(null);
+            setSelectedFiles([]);
             setShowEmojiPicker(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
@@ -176,36 +183,81 @@ export function MessageInput({
         }
     };
 
-    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file && !disabled) {
-            // Check file size (e.g., 5MB limit)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Image size should be less than 5MB');
-                return;
-            }
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files?.length || disabled) return;
 
-            // Check file type
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
-                return;
-            }
+        const currentTotal = selectedFiles.reduce((sum, f) => sum + f.file.size, 0);
+        const next: FileWithPreview[] = [];
+        let added = 0;
 
-            setSelectedImageFile(file);
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setImagePreview(e.target?.result as string);
-            };
-            reader.readAsDataURL(file);
+        for (let i = 0; i < files.length && selectedFiles.length + next.length < MAX_FILES; i++) {
+            const file = files[i];
+            const contentType = chatMediaContentType(file.type);
+            if (contentType === "application/octet-stream") {
+                toast.error(`File type not supported: ${file.name}`);
+                continue;
+            }
+            if (file.size > MAX_FILE_BYTES) {
+                toast.error(`${file.name} is too large (max 10MB per file)`);
+                continue;
+            }
+            const newTotal = currentTotal + next.reduce((s, f) => s + f.file.size, 0) + file.size;
+            if (newTotal > MAX_TOTAL_BYTES) {
+                toast.error("Total attachment size would exceed 50MB");
+                break;
+            }
+            const item: FileWithPreview = { file };
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    setSelectedFiles((prev) => {
+                        const idx = prev.findIndex((p) => p.file === file);
+                        if (idx === -1) return prev;
+                        const next = [...prev];
+                        next[idx] = { ...next[idx], preview: ev.target?.result as string };
+                        return next;
+                    });
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith("video/")) {
+                const url = URL.createObjectURL(file);
+                item.preview = url;
+            }
+            next.push(item);
+            added++;
         }
+
+        if (next.length) {
+            setSelectedFiles((prev) => {
+                const combined = [...prev, ...next];
+                return combined.slice(0, MAX_FILES);
+            });
+        }
+        if (added < files.length && selectedFiles.length + next.length >= MAX_FILES) {
+            toast.error(`Maximum ${MAX_FILES} files allowed`);
+        }
+        e.target.value = "";
     };
 
-    const removeImagePreview = () => {
-        setImagePreview(null);
-        setSelectedImageFile(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+    const removeFile = (index: number) => {
+        setSelectedFiles((prev) => {
+            const item = prev[index];
+            if (item?.preview && item.file.type.startsWith("video/")) {
+                URL.revokeObjectURL(item.preview);
+            }
+            return prev.filter((_, i) => i !== index);
+        });
+    };
+
+    const clearAllFiles = () => {
+        selectedFiles.forEach((item) => {
+            if (item.preview && item.file.type.startsWith("video/")) {
+                URL.revokeObjectURL(item.preview);
+            }
+        });
+        setSelectedFiles([]);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     // Auto-resize textarea (max 3 lines)
@@ -290,7 +342,7 @@ export function MessageInput({
                             <label
                                 htmlFor={fileInputId}
                                 className={`inline-flex p-1.5 sm:p-2 text-text-secondary hover:text-text-primary transition-colors cursor-pointer ${disabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : ''}`}
-                                title="Attach image"
+                                title="Attach files"
                             >
                                 <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-text-brand" />
                             </label>
@@ -298,8 +350,9 @@ export function MessageInput({
                                 id={fileInputId}
                                 type="file"
                                 ref={fileInputRef}
-                                onChange={handleImageSelect}
-                                accept="image/*"
+                                onChange={handleFileSelect}
+                                accept={CHAT_ACCEPT}
+                                multiple
                                 className="hidden"
                                 disabled={disabled}
                                 tabIndex={-1}
@@ -343,25 +396,64 @@ export function MessageInput({
                     </div>
 
                     {/* Input Container */}
-                    <div className={`border border-border-subtle ${imagePreview ? "rounded-md" : "rounded-full"} p-1.5 sm:p-2 flex-1 flex flex-col min-w-0`}>
-                        {/* Image Preview */}
-                        {imagePreview && (
-                            <div className="p-2 sm:p-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center relative">
-                                        <img
-                                            src={imagePreview}
-                                            alt="Preview"
-                                            className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover"
-                                        />
+                    <div className={`border border-border-subtle ${selectedFiles.length ? "rounded-md" : "rounded-full"} p-1.5 sm:p-2 flex-1 flex flex-col min-w-0`}>
+                        {/* File previews */}
+                        {selectedFiles.length > 0 && (
+                            <div className="p-2 sm:p-4 flex flex-wrap gap-2">
+                                {selectedFiles.map((item, index) => (
+                                    <div
+                                        key={`${item.file.name}-${index}`}
+                                        className="relative flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-hover p-1.5 min-w-0 max-w-[120px] sm:max-w-[140px]"
+                                    >
+                                        {item.file.type.startsWith("image/") ? (
+                                            <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded overflow-hidden bg-surface-default">
+                                                {item.preview ? (
+                                                    <img src={item.preview} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <ImageIcon className="w-5 h-5 text-text-tertiary" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : item.file.type.startsWith("video/") ? (
+                                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded bg-surface-default flex items-center justify-center">
+                                                {item.preview ? (
+                                                    <video src={item.preview} className="w-full h-full object-cover rounded" muted playsInline preLoad="metadata" />
+                                                ) : (
+                                                    <Video className="w-5 h-5 text-text-tertiary" />
+                                                )}
+                                            </div>
+                                        ) : item.file.type.startsWith("audio/") ? (
+                                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded bg-surface-default flex items-center justify-center">
+                                                <Music className="w-5 h-5 text-text-tertiary" />
+                                            </div>
+                                        ) : (
+                                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded bg-surface-default flex items-center justify-center">
+                                                <FileIcon className="w-5 h-5 text-text-tertiary" />
+                                            </div>
+                                        )}
+                                        <span className="text-xs text-text-primary truncate flex-1 min-w-0" title={item.file.name}>
+                                            {item.file.name}
+                                        </span>
                                         <button
-                                            onClick={removeImagePreview}
-                                            className="cursor-pointer p-1 bg-surface-brand rounded-full text-text-white transition-colors absolute -top-1 -right-1 sm:-top-2 sm:-right-2"
+                                            type="button"
+                                            onClick={() => removeFile(index)}
+                                            className="flex-shrink-0 p-0.5 bg-surface-brand rounded-full text-text-white hover:bg-text-brand-dark transition-colors"
+                                            aria-label="Remove file"
                                         >
-                                            <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                                            <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                         </button>
                                     </div>
-                                </div>
+                                ))}
+                                {selectedFiles.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={clearAllFiles}
+                                        className="text-xs text-text-brand hover:underline"
+                                    >
+                                        Clear all
+                                    </button>
+                                )}
                             </div>
                         )}
 
@@ -388,7 +480,7 @@ export function MessageInput({
                             {/* Send Button */}
                             <ButtonType2
                                 onClick={handleSendMessage}
-                                disabled={(!newMessage.trim() && !selectedImageFile) || disabled}
+                                disabled={(!newMessage.trim() && !selectedFiles.length) || disabled}
                                 className="flex-shrink-0 p-1.5 sm:px-2 sm:py-2 bg-text-brand text-text-white rounded-full hover:bg-text-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[32px] sm:min-w-[40px] h-[32px] sm:h-[40px]"
                             >
                                 <Send className="w-4 h-4 sm:w-5 sm:h-5 text-text-white" />

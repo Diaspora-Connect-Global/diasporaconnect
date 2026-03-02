@@ -22,7 +22,9 @@ export interface ApiMessage {
     height?: number;
     duration?: number;
   }>;
-  status?: 'sent' | 'delivered' | 'read';
+  status?: 'sending' | 'sent' | 'delivered' | 'read';
+  /** Blob object URLs for placeholder (status === 'sending') only. Not from API. */
+  sendingPreviews?: Array<{ url?: string; mimeType: string }>;
   createdAt: string;
 }
 
@@ -44,6 +46,7 @@ interface ChatStore {
   setActiveChat: (chat: { id: string; type: 'direct' | 'group' } | null) => void;
   addMessage: (message: Message) => void;
   addApiMessage: (message: ApiMessage) => void;
+  removeApiMessage: (messageId: string) => void;
   updateApiMessageStatus: (messageId: string, status: 'delivered' | 'read') => void;
   getApiMessagesByConversation: (conversationId: string) => ApiMessage[];
   clearApiMessages: (conversationId: string) => void;
@@ -114,6 +117,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       if (exists) return state;
       return { apiMessages: [...state.apiMessages, message] };
     });
+  },
+
+  // Remove an API message by id (e.g. placeholder with temp id when send completes)
+  removeApiMessage: (messageId: string) => {
+    set((state) => ({
+      apiMessages: state.apiMessages.filter(m => m.id !== messageId),
+    }));
   },
 
   updateApiMessageStatus: (messageId: string, status: 'delivered' | 'read') => {

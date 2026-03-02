@@ -2,6 +2,8 @@
 import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
+import { MessageAttachments } from "./MessageAttachments";
+import { SendingFilesBubble } from "./SendingFilesBubble";
 import { formatChatTimestamp } from "@/macros/time";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useChatStore } from "@/store/ChatStore";
@@ -33,7 +35,7 @@ import { EditGroupModal } from "./modals/EditGroupModal";
 import { ManageMemberModal } from "./modals/ManageMemberModal";
 import { ConfirmationModal } from "../custom/confirmationModal";
 import { AddMembersModal } from "./modals/AddMembersModal";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
@@ -60,6 +62,7 @@ export default function GroupChat() {
     const tCommon = useTranslations('common');
     const router = useRouter();
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const pendingRevokeRef = useRef<Record<string, string[]>>({});
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [repliesSidebarOpen, setRepliesSidebarOpen] = useState(false);
     const [selectedMessage, setSelectedMessage] = useState<any>(null);
@@ -82,7 +85,7 @@ export default function GroupChat() {
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
     const [, setTypingUserIds] = useState<Set<string>>(new Set());
 
-    const { messages, users, setActiveChat, addMessage, addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
+    const { messages, users, setActiveChat, addMessage, addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
 
     const [conversationId, setConversationId] = useState<string | null>(null);
 
@@ -441,95 +444,156 @@ export default function GroupChat() {
         return users?.find(u => u.id === userId);
     };
 
-    const handleSendMessage = async (messageText: string, imageFile?: File) => {
-        if (!messageText.trim() && !imageFile) return;
+    const handleSendMessage = async (messageText: string, files?: File[]) => {
+        const hasText = !!messageText.trim();
+        const hasFiles = !!files?.length;
+        if (!hasText && !hasFiles) return;
         if (!currentUserId || !conversationId) {
             console.warn('Cannot send: missing userId or conversationId');
             return;
         }
 
+        const idempotencyKey = crypto.randomUUID();
+        const placeholderId = `pending-${Date.now()}-${idempotencyKey.slice(0, 8)}`;
         let content: string;
-        let messageType: 'TEXT' | 'IMAGE' = 'TEXT';
-        let mimeType: string | undefined;
+        let messageType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' = 'TEXT';
+        let attachments: Array<{ publicUrl: string; mimeType: string }> = [];
 
-        if (imageFile) {
+        if (hasFiles && files) {
+            const sendingPreviews: Array<{ url?: string; mimeType: string }> = [];
+            const urlsToRevoke: string[] = [];
+            for (const file of files) {
+                const mime = file.type || 'application/octet-stream';
+                if (mime.startsWith('image/') || mime.startsWith('video/')) {
+                    const url = URL.createObjectURL(file);
+                    sendingPreviews.push({ url, mimeType: mime });
+                    urlsToRevoke.push(url);
+                } else {
+                    sendingPreviews.push({ mimeType: mime });
+                }
+            }
+            pendingRevokeRef.current[placeholderId] = urlsToRevoke;
+            addApiMessage({
+                id: placeholderId,
+                conversationId,
+                senderId: currentUserId,
+                type: 'IMAGE',
+                content: messageText.trim(),
+                createdAt: new Date().toISOString(),
+                status: 'sending',
+                attachments: [],
+                sendingPreviews,
+            });
+
             try {
-                const contentType = chatMediaContentType(imageFile.type || 'image/jpeg');
-                mimeType = contentType;
-                const { data: uploadData } = await getUploadUrl({
-                    variables: { contentType, category: 'chat' },
-                });
-                if (!uploadData?.getUploadUrl?.uploadUrl) {
-                    toast.error('Could not upload image. Please try again.');
-                    return;
+                for (const file of files) {
+                    const contentType = chatMediaContentType(file.type || 'application/octet-stream');
+                    const { data: uploadData } = await getUploadUrl({
+                        variables: { contentType, category: 'chat' },
+                    });
+                    if (!uploadData?.getUploadUrl?.uploadUrl) {
+                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                        delete pendingRevokeRef.current[placeholderId];
+                        removeApiMessage(placeholderId);
+                        toast.error('Could not get upload URL. Please try again.');
+                        return;
+                    }
+                    const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
+                    const uploadRes = await fetch(uploadUrl, {
+                        method: 'PUT',
+                        body: file,
+                        headers: { 'Content-Type': contentType },
+                    });
+                    if (!uploadRes.ok) {
+                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                        delete pendingRevokeRef.current[placeholderId];
+                        removeApiMessage(placeholderId);
+                        toast.error(`Upload failed for ${file.name}. Please try again.`);
+                        return;
+                    }
+                    attachments.push({ publicUrl, mimeType: contentType });
                 }
-                const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
-                const uploadRes = await fetch(uploadUrl, {
-                    method: 'PUT',
-                    body: imageFile,
-                    headers: { 'Content-Type': contentType },
-                });
-                if (!uploadRes.ok) {
-                    toast.error('Image upload failed. Please try again.');
-                    return;
-                }
-                content = publicUrl;
-                messageType = 'IMAGE';
             } catch (err) {
-                console.error('Image upload failed:', err);
+                console.error('Upload failed:', err);
+                (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                delete pendingRevokeRef.current[placeholderId];
+                removeApiMessage(placeholderId);
+                toast.error('Upload failed. Please try again.');
                 return;
             }
+
+            const firstMime = attachments[0]?.mimeType ?? '';
+            if (firstMime.startsWith('image/')) messageType = 'IMAGE';
+            else if (firstMime.startsWith('video/')) messageType = 'VIDEO';
+            else if (firstMime.startsWith('audio/')) messageType = 'AUDIO';
+            else messageType = 'FILE';
+            content = hasText ? messageText.trim() : (attachments[0]?.publicUrl ?? '');
         } else {
             content = messageText.trim();
         }
 
-        const attachments = imageFile && mimeType
-            ? [{ publicUrl: content, mimeType }]
+        const attachmentInput = attachments.length
+            ? attachments.map((a) => ({ publicUrl: a.publicUrl, mimeType: a.mimeType }))
             : undefined;
+        const sendContent = attachments.length ? (hasText ? messageText.trim() : content) : content;
 
-        const idempotencyKey = crypto.randomUUID();
         if (replyingTo) {
             try {
                 const { data } = await sendMessageMutation({
                     variables: {
                         conversationId,
                         messageType,
-                        content: messageType === 'IMAGE' ? '' : content,
-                        attachments,
+                        content: sendContent,
+                        attachments: attachmentInput,
                         replyToId: replyingTo,
                         idempotencyKey,
                     },
                 });
 
                 if (data?.sendMessage) {
+                    if (hasFiles && files) {
+                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                        delete pendingRevokeRef.current[placeholderId];
+                        removeApiMessage(placeholderId);
+                    }
                     const sentMsg: ApiMessage = {
                         id: data.sendMessage,
                         conversationId,
                         senderId: currentUserId,
                         type: messageType,
-                        content: messageType === 'IMAGE' ? '' : content,
+                        content: sendContent,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
                         replyToId: replyingTo,
-                        ...(attachments && {
-                            attachments: attachments.map((a) => ({ gcsPath: a.publicUrl, mimeType: a.mimeType, fileName: imageFile?.name, fileSize: imageFile?.size })),
+                        ...(attachments.length && {
+                            attachments: attachments.map((a, i) => ({
+                                gcsPath: a.publicUrl,
+                                mimeType: a.mimeType,
+                                fileName: files?.[i]?.name,
+                                fileSize: files?.[i]?.size,
+                            })),
                         }),
                     };
                     addApiMessage(sentMsg);
-
                     const newReply: Reply = {
                         id: data.sendMessage,
                         messageId: replyingTo,
                         senderId: currentUserId,
-                        text: content,
+                        text: sendContent,
                         timestamp: new Date().toISOString(),
-                        type: messageType === 'IMAGE' ? 'image' : 'text',
-                        imageUrl: messageType === 'IMAGE' ? content : undefined,
+                        type: messageType === 'IMAGE' ? 'image' : messageType === 'VIDEO' ? 'image' : 'text',
+                        imageUrl: messageType === 'IMAGE' || messageType === 'VIDEO' ? content : undefined,
                     };
                     setReplies(prev => [...prev, newReply]);
                 }
             } catch (error) {
                 console.error('Failed to send reply:', error);
+                if (hasFiles && files) {
+                    (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                    delete pendingRevokeRef.current[placeholderId];
+                    removeApiMessage(placeholderId);
+                }
+                toast.error('Failed to send reply. Please try again.');
             }
             setReplyingTo(null);
         } else {
@@ -538,38 +602,54 @@ export default function GroupChat() {
                     variables: {
                         conversationId,
                         messageType,
-                        content: messageType === 'IMAGE' ? '' : content,
-                        attachments,
+                        content: sendContent,
+                        attachments: attachmentInput,
                         idempotencyKey,
                     },
                 });
 
                 if (data?.sendMessage) {
+                    if (hasFiles && files) {
+                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                        delete pendingRevokeRef.current[placeholderId];
+                        removeApiMessage(placeholderId);
+                    }
                     const sentMsg: ApiMessage = {
                         id: data.sendMessage,
                         conversationId,
                         senderId: currentUserId,
                         type: messageType,
-                        content: messageType === 'IMAGE' ? '' : content,
+                        content: sendContent,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
-                        ...(attachments && {
-                            attachments: attachments.map((a) => ({ gcsPath: a.publicUrl, mimeType: a.mimeType, fileName: imageFile?.name, fileSize: imageFile?.size })),
+                        ...(attachments.length && {
+                            attachments: attachments.map((a, i) => ({
+                                gcsPath: a.publicUrl,
+                                mimeType: a.mimeType,
+                                fileName: files?.[i]?.name,
+                                fileSize: files?.[i]?.size,
+                            })),
                         }),
                     };
                     addApiMessage(sentMsg);
-
                     if (isConnected) {
+                        const wsType = messageType === 'IMAGE' ? 'image' : messageType === 'VIDEO' ? 'video' : messageType === 'AUDIO' ? 'audio' : 'file';
                         messageService.sendMessage({
                             conversationId,
-                            type: messageType === 'IMAGE' ? 'image' : 'text',
-                            content,
+                            type: messageType === 'TEXT' ? 'text' : wsType,
+                            content: sendContent,
                             idempotencyKey,
                         });
                     }
                 }
             } catch (error) {
                 console.error('Failed to send message:', error);
+                if (hasFiles && files) {
+                    (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                    delete pendingRevokeRef.current[placeholderId];
+                    removeApiMessage(placeholderId);
+                }
+                toast.error('Failed to send message. Please try again.');
             }
         }
     };
@@ -783,19 +863,39 @@ export default function GroupChat() {
                                         className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                                     >
                                         <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
-                                            {message.type === 'IMAGE' && (message.attachments?.[0]?.gcsPath || (message.content && message.content.startsWith('http'))) ? (
-                                                <div className="mb-2">
+                                            {message.status === 'sending' ? (
+                                                message.sendingPreviews?.length ? (
+                                                    <>
+                                                        <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
+                                                        {message.content && (
+                                                            <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                                {message.content}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl ${isMe ? 'bg-text-brand/80 text-text-white' : 'bg-surface-success/50 text-text-primary'}`}>
+                                                        <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                                                        <span className="text-sm sm:text-base">Sending...</span>
+                                                    </div>
+                                                )
+                                            ) : (message.attachments?.length || (message.content && message.content.startsWith('http'))) ? (
+                                                <>
                                                     {!isMe && (
                                                         <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
                                                             {getSenderName(message.senderId)}
                                                         </p>
                                                     )}
-                                                    <img
-                                                        src={message.attachments?.[0]?.gcsPath || message.content}
-                                                        alt="Shared image"
-                                                        className="rounded-2xl max-w-full h-auto max-h-80 object-contain"
+                                                    <MessageAttachments
+                                                        attachments={message.attachments}
+                                                        legacyContentUrl={message.attachments?.length ? undefined : message.content}
                                                     />
-                                                </div>
+                                                    {message.content && !message.content.startsWith('http') && (
+                                                        <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                            {message.content}
+                                                        </div>
+                                                    )}
+                                                </>
                                             ) : (
                                                 <div
                                                     className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe
@@ -821,7 +921,7 @@ export default function GroupChat() {
                                                 )}
                                                 <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center gap-1">
                                                     {formatChatTimestamp(message.createdAt)}
-                                                    {isMe && (
+                                                    {isMe && message.status !== 'sending' && (
                                                         <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
                                                             {message.status === "read" || message.status === "delivered" ? (
                                                                 <span className="inline-flex"><Check className="w-3 h-3 -ml-0.5" /><Check className="w-3 h-3 -ml-1" /></span>
