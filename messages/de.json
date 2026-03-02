@@ -431,6 +431,10 @@
         "friends": "Freunde",
         "changeProfilePicture": "Profilbild ändern",
         "editProfilePicture": "Profilbild bearbeiten",
+        "removeFriendConfirmTitle": "Freund entfernen?",
+        "removeFriendConfirmDescription": "Diese Person wird aus Ihrer Freundesliste entfernt. Sie muss eine neue Anfrage senden, um sich wieder zu verbinden.",
+        "blockFriendConfirmTitle": "Diesen Benutzer blockieren?",
+        "blockFriendConfirmDescription": "Er oder sie kann Ihnen keine Nachrichten mehr senden oder Ihr Profil sehen.",
         "youHaveBlockedThisUser": "Sie haben diesen Benutzer blockiert."
     },
     "profile": {
