@@ -21,15 +21,16 @@ export default function MessageWebSocketProvider({
   const addApiMessage = useChatStore((s) => s.addApiMessage);
   const updateApiMessageStatus = useChatStore((s) => s.updateApiMessageStatus);
 
+  // Connect when we have a token; disconnect only when token is gone (logout).
+  // We do not disconnect in effect cleanup, so the WebSocket is not closed before
+  // the connection is established (avoids "WebSocket is closed before the connection
+  // is established" when React re-runs effects or unmounts/remounts quickly).
   useEffect(() => {
     if (!accessToken?.trim()) {
       messageService.disconnect();
       return;
     }
     messageService.connect(accessToken);
-    return () => {
-      messageService.disconnect();
-    };
   }, [accessToken]);
 
   useEffect(() => {

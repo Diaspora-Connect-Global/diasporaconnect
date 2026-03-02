@@ -201,11 +201,14 @@ class MessageService {
   }
 
   disconnect() {
-    if (this.socket) {
-      this.socket.removeAllListeners();
+    if (!this.socket) return;
+    this.socket.removeAllListeners();
+    try {
       this.socket.disconnect();
-      this.socket = null;
+    } catch (e) {
+      // Socket may still be connecting; ignore close errors
     }
+    this.socket = null;
   }
 
   sendMessage(payload: SendMessagePayload) {
