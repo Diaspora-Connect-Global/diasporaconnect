@@ -84,6 +84,7 @@ export default function Header({
             <Link
               key={item.name}
               href={item.href}
+              prefetch={!item.disabled}
               className={`
                 group relative flex flex-col items-center justify-center
                 lg:px-3 py-2 transition-all duration-200
