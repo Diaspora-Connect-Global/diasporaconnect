@@ -10,17 +10,18 @@ import { classifyUrl, extractPostIdFromUrl, extractYouTubeVideoId, getFileNameFr
 type OgData = { title?: string; description?: string; imageUrl?: string; loading: boolean };
 
 function useLinkPreviewOg(url: string, enabled: boolean): OgData {
-  const [state, setState] = useState<OgData>({ loading: enabled });
+  const [state, setState] = useState<OgData>(() => ({ loading: enabled }));
   useEffect(() => {
     if (!enabled || !url?.trim()) {
-      setState({ loading: false });
+      setState((s) => (s.loading === false ? s : { loading: false }));
       return;
     }
-    setState((s) => ({ ...s, loading: true }));
+    let cancelled = false;
     const encoded = encodeURIComponent(url.trim());
     fetch(`/api/link-preview?url=${encoded}`)
       .then((r) => (r.ok ? r.json() : {}))
       .then((data: { title?: string; description?: string; imageUrl?: string }) => {
+        if (cancelled) return;
         setState({
           title: data.title,
           description: data.description,
@@ -28,7 +29,12 @@ function useLinkPreviewOg(url: string, enabled: boolean): OgData {
           loading: false,
         });
       })
-      .catch(() => setState({ loading: false }));
+      .catch(() => {
+        if (!cancelled) setState((s) => (s.loading === false ? s : { loading: false }));
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [url, enabled]);
   return state;
 }
