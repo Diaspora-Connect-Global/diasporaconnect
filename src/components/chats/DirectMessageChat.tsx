@@ -10,6 +10,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
 import { LinkPreviewCard, isLinkOnlyContent } from "./LinkPreviewCard";
+import { getFirstUrlInText } from "@/lib/urlPreview";
 import { SendingFilesBubble } from "./SendingFilesBubble";
 import { useChatStore, ApiMessage } from "@/store/ChatStore";
 import { useTranslations } from 'next-intl';
@@ -533,32 +534,55 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                             </div>
                                         )
                                     ) : message.attachments?.length ? (
-                                        <>
-                                            <MessageAttachments attachments={message.attachments} />
-                                            {isLinkOnlyContent(message.content) && (
-                                                <div className="mt-2">
-                                                    <LinkPreviewCard url={message.content!.trim()} />
-                                                </div>
-                                            )}
-                                            {message.content && !isLinkOnlyContent(message.content) && (
-                                                <div className={`mt-2 px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
-                                                    {message.content}
-                                                </div>
-                                            )}
-                                        </>
+                                        (() => {
+                                            const attachmentUrls = (message.attachments ?? []).map((a) => a.gcsPath).filter(Boolean) as string[];
+                                            const contentUrl = message.content?.trim();
+                                            const firstUrl = getFirstUrlInText(message.content);
+                                            const contentIsAttachmentUrl = contentUrl && attachmentUrls.some((u) => u === contentUrl);
+                                            const firstUrlIsAttachmentUrl = firstUrl && attachmentUrls.some((u) => u === firstUrl);
+                                            return (
+                                                <>
+                                                    <MessageAttachments attachments={message.attachments} />
+                                                    {isLinkOnlyContent(message.content) && !contentIsAttachmentUrl && (
+                                                        <div className="mt-2">
+                                                            <LinkPreviewCard url={message.content!.trim()} />
+                                                        </div>
+                                                    )}
+                                                    {message.content && !isLinkOnlyContent(message.content) && (
+                                                        <>
+                                                            <div className={`mt-2 px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                                {message.content}
+                                                            </div>
+                                                            {firstUrl && !firstUrlIsAttachmentUrl && (
+                                                                <div className="mt-2">
+                                                                    <LinkPreviewCard url={firstUrl} />
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </>
+                                            );
+                                        })()
                                     ) : isLinkOnlyContent(message.content) ? (
                                         <div className={isMe ? 'flex justify-end' : ''}>
                                             <LinkPreviewCard url={message.content.trim()} />
                                         </div>
                                     ) : (
-                                        <div
-                                            className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${isMe
-                                                ? 'bg-text-brand text-text-white'
-                                                : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                                }`}
-                                        >
-                                            {message.content}
-                                        </div>
+                                        <>
+                                            <div
+                                                className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${isMe
+                                                    ? 'bg-text-brand text-text-white'
+                                                    : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                    }`}
+                                            >
+                                                {message.content}
+                                            </div>
+                                            {getFirstUrlInText(message.content) && (
+                                                <div className="mt-2">
+                                                    <LinkPreviewCard url={getFirstUrlInText(message.content)!} />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                     <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 justify-end ${isMe ? "text-text-tertiary" : ""}`}>
                                         {formatChatTimestamp(message.createdAt)}

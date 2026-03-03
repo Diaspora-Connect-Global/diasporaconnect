@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
 import { LinkPreviewCard, isLinkOnlyContent } from "./LinkPreviewCard";
+import { getFirstUrlInText } from "@/lib/urlPreview";
 import { SendingFilesBubble } from "./SendingFilesBubble";
 import { formatChatTimestamp } from "@/macros/time";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
@@ -881,24 +882,40 @@ export default function GroupChat() {
                                                     </div>
                                                 )
                                             ) : message.attachments?.length ? (
-                                                <>
-                                                    {!isMe && (
-                                                        <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
-                                                            {getSenderName(message.senderId)}
-                                                        </p>
-                                                    )}
-                                                    <MessageAttachments attachments={message.attachments} />
-                                                    {isLinkOnlyContent(message.content) && (
-                                                        <div className="mt-2">
-                                                            <LinkPreviewCard url={message.content!.trim()} />
-                                                        </div>
-                                                    )}
-                                                    {message.content && !isLinkOnlyContent(message.content) && (
-                                                        <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
-                                                            {message.content}
-                                                        </div>
-                                                    )}
-                                                </>
+                                                (() => {
+                                                    const attachmentUrls = (message.attachments ?? []).map((a) => a.gcsPath).filter(Boolean) as string[];
+                                                    const contentUrl = message.content?.trim();
+                                                    const firstUrl = getFirstUrlInText(message.content);
+                                                    const contentIsAttachmentUrl = contentUrl && attachmentUrls.some((u) => u === contentUrl);
+                                                    const firstUrlIsAttachmentUrl = firstUrl && attachmentUrls.some((u) => u === firstUrl);
+                                                    return (
+                                                        <>
+                                                            {!isMe && (
+                                                                <p className="text-[10px] sm:text-xs text-text-primary mb-1 ml-1 font-medium">
+                                                                    {getSenderName(message.senderId)}
+                                                                </p>
+                                                            )}
+                                                            <MessageAttachments attachments={message.attachments} />
+                                                            {isLinkOnlyContent(message.content) && !contentIsAttachmentUrl && (
+                                                                <div className="mt-2">
+                                                                    <LinkPreviewCard url={message.content!.trim()} />
+                                                                </div>
+                                                            )}
+                                                            {message.content && !isLinkOnlyContent(message.content) && (
+                                                                <>
+                                                                    <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                                        {message.content}
+                                                                    </div>
+                                                                    {firstUrl && !firstUrlIsAttachmentUrl && (
+                                                                        <div className="mt-2">
+                                                                            <LinkPreviewCard url={firstUrl} />
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </>
+                                                    );
+                                                })()
                                             ) : isLinkOnlyContent(message.content) ? (
                                                 <>
                                                     {!isMe && (
@@ -911,19 +928,26 @@ export default function GroupChat() {
                                                     </div>
                                                 </>
                                             ) : (
-                                                <div
-                                                    className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe
-                                                        ? 'bg-text-brand text-text-white'
-                                                        : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                                        }`}
-                                                >
-                                                    {!isMe && (
-                                                        <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
-                                                            {getSenderName(message.senderId)}
-                                                        </p>
+                                                <>
+                                                    <div
+                                                        className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe
+                                                            ? 'bg-text-brand text-text-white'
+                                                            : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                            }`}
+                                                    >
+                                                        {!isMe && (
+                                                            <p className="text-[10px] sm:text-xs mb-1 font-medium opacity-80">
+                                                                {getSenderName(message.senderId)}
+                                                            </p>
+                                                        )}
+                                                        {message.content}
+                                                    </div>
+                                                    {getFirstUrlInText(message.content) && (
+                                                        <div className="mt-2">
+                                                            <LinkPreviewCard url={getFirstUrlInText(message.content)!} />
+                                                        </div>
                                                     )}
-                                                    {message.content}
-                                                </div>
+                                                </>
                                             )}
 
                                             <div className={`space-x-2 flex items-center mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
