@@ -215,13 +215,14 @@ export default function MessageInputGlobal({
         <div className="w-full">
             <div className={`flex ${reversed ? "flex-row-reverse" : ""} gap-2 items-end`}>
                 <div className={`flex ${reversed ? "flex-row-reverse" : ""} gap-1 shrink-0 pb-1`}>
-                    {/* Image Upload Button */}
-                    <div>
+                    {/* Image Upload Button - input overlays button for mobile tap */}
+                    <div className="relative group">
                         <button
-                            onClick={() => fileInputRef.current?.click()}
+                            type="button"
                             disabled={disabled}
-                            className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-full hover:bg-surface-subtle"
+                            className="p-2 text-text-secondary group-hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-full group-hover:bg-surface-subtle pointer-events-none"
                             title="Attach image"
+                            aria-hidden
                         >
                             <ImageIcon className="w-5 h-5 text-text-brand" />
                         </button>
@@ -230,8 +231,9 @@ export default function MessageInputGlobal({
                             ref={fileInputRef}
                             onChange={handleImageSelect}
                             accept="image/*"
-                            className="hidden"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:pointer-events-none"
                             disabled={disabled}
+                            title="Attach image"
                         />
                     </div>
 

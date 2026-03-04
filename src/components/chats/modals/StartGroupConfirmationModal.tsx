@@ -134,31 +134,38 @@ export function StartGroupConfirmationModal({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
               >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileInputChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
                 {croppedImage ? (
                   <>
                     <Image
                       src={croppedImage}
                       alt="Group photo preview"
                       fill
-                      className="rounded-full object-cover"
+                      className="rounded-full object-cover pointer-events-none"
                     />
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         removePhoto();
                       }}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-text-error rounded-full flex items-center justify-center text-white hover:bg-text-error-dark transition-colors"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-text-error rounded-full flex items-center justify-center text-white hover:bg-text-error-dark transition-colors z-20"
                     >
                       <X className="w-3 h-3" />
                     </button>
-                    <div className="absolute inset-0 bg-opacity-0 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all">
+                    <div className="absolute inset-0 bg-opacity-0 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all pointer-events-none">
                       <Camera className="w-6 h-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center space-y-2">
+                  <div className="flex flex-col items-center space-y-2 pointer-events-none">
                     <div className="w-12 h-12 rounded-full bg-surface-brand-light flex items-center justify-center">
                       <Plus className="w-6 h-6 text-text-brand" />
                     </div>
@@ -170,14 +177,6 @@ export function StartGroupConfirmationModal({
                   </div>
                 )}
               </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
             </div>
 
             {/* Group Name Section */}

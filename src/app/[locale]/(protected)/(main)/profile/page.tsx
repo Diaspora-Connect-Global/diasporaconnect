@@ -216,6 +216,16 @@ export default function ProfilePage() {
                             htmlFor="avatar-upload"
                             className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex items-center justify-center overflow-hidden relative group transition-all"
                         >
+                            <input
+                                id="avatar-upload"
+                                type="file"
+                                accept="image/*"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleFileSelect(file);
+                                }}
+                            />
                             {croppedImage ? (
                                 <>
                                     <img
@@ -223,12 +233,12 @@ export default function ProfilePage() {
                                         alt="Preview"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-black/20 bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-black/20 bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                                         <span className="text-white text-sm">Change</span>
                                     </div>
                                 </>
                             ) : (
-                                <div className="text-center p-4">
+                                <div className="text-center p-4 pointer-events-none">
                                     <svg
                                         className="w-8 h-8 mx-auto mb-2 text-gray-400"
                                         fill="none"
@@ -246,16 +256,6 @@ export default function ProfilePage() {
                                 </div>
                             )}
                         </label>
-                        <input
-                            id="avatar-upload"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFileSelect(file);
-                            }}
-                        />
                     </div>
 
                     <ButtonType2

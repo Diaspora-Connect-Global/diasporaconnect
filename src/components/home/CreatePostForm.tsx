@@ -371,24 +371,28 @@ export default function CreatePostForm({
       {/* Toolbar */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-1">
-          {/* Image upload */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={submitting}
-            className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 cursor-pointer"
-            title="Attach files"
-          >
-            <ImageIcon className="w-5 h-5 text-text-brand" />
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept="image/*,video/*,.pdf,.doc,.docx"
-            multiple
-            className="hidden"
-            disabled={submitting}
-          />
+          {/* Image upload - input overlays button for mobile tap */}
+          <div className="relative group">
+            <button
+              type="button"
+              disabled={submitting}
+              className="p-2 rounded-full group-hover:bg-surface-subtle text-text-secondary group-hover:text-text-primary transition-colors disabled:opacity-50 pointer-events-none"
+              title="Attach files"
+              aria-hidden
+            >
+              <ImageIcon className="w-5 h-5 text-text-brand" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileSelect}
+              accept="image/*,video/*,.pdf,.doc,.docx"
+              multiple
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:pointer-events-none"
+              disabled={submitting}
+              title="Attach files"
+            />
+          </div>
 
           {/* Emoji picker */}
           <div ref={emojiRef} className="relative">

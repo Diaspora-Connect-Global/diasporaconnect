@@ -278,13 +278,14 @@ export function MessageInput({
                 <div className="flex space-x-1 sm:space-x-2 items-center justify-center">
                     {/* Action Buttons Container */}
                     <div className="flex space-x-0.5 sm:space-x-1 flex-shrink-0">
-                        {/* Image Upload Button */}
-                        <div>
+                        {/* Image Upload Button - input overlays button for mobile tap */}
+                        <div className="relative group">
                             <button
-                                onClick={() => fileInputRef.current?.click()}
+                                type="button"
                                 disabled={disabled}
-                                className="p-1.5 sm:p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                className="p-1.5 sm:p-2 text-text-secondary group-hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors pointer-events-none"
                                 title="Attach image"
+                                aria-hidden
                             >
                                 <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-text-brand" />
                             </button>
@@ -293,8 +294,9 @@ export function MessageInput({
                                 ref={fileInputRef}
                                 onChange={handleImageSelect}
                                 accept="image/*"
-                                className="hidden"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:pointer-events-none"
                                 disabled={disabled}
+                                title="Attach image"
                             />
                         </div>
 
