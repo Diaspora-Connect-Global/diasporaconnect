@@ -270,7 +270,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                             </Label>
                                         </div>
 
-                                        <ButtonType2 type="submit" className="px-4 py-2" disabled={submitting}>
+                                        <ButtonType2 type="submit" disabled={submitting}>
                                             <span>{submitting ? "Submitting…" : "Submit"}</span>
                                         </ButtonType2>
                                     </form>

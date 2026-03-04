@@ -137,10 +137,10 @@ export function EditGroupModal({
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <ButtonType3 onClick={onClose} disabled={isLoading} className="px-4 py-2">
+          <ButtonType3 onClick={onClose} disabled={isLoading} size="lg">
             {t("cancel")}
           </ButtonType3>
-          <ButtonType2 onClick={handleSave} disabled={isLoading} className="px-4 py-2">
+          <ButtonType2 onClick={handleSave} disabled={isLoading} size="lg">
             {isLoading ? t("saving") : t("save")}
           </ButtonType2>
         </div>

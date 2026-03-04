@@ -105,7 +105,7 @@ export default function JoinCommunityCard({
           )}
 
           {/* Button */}
-          <ButtonType1 onClick={onButtonClick} className='py-3 px-6' disabled={isDisabled}>
+          <ButtonType1 onClick={onButtonClick} size="lg" disabled={isDisabled}>
             {buttonText}
           </ButtonType1>
         </div>

@@ -148,7 +148,7 @@ export default function FeedPage() {
           {feedError && (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
               <p className="body-medium text-text-secondary mb-4">Failed to load feed. Please try again.</p>
-              <ButtonType3 onClick={() => refetchFeed()} className="px-4 py-2 bg-primary rounded-lg">
+              <ButtonType3 onClick={() => refetchFeed()} className="bg-primary rounded-lg">
                 Retry
               </ButtonType3>
             </div>

@@ -53,7 +53,7 @@ export function MyAssociationCard({
                         </div>
                     </div>
 
-                    <ButtonType1 className='px-2 py-1'>
+                    <ButtonType1>
                         {buttonText}                    
                         </ButtonType1>
 

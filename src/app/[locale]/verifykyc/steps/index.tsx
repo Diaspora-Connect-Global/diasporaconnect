@@ -24,7 +24,7 @@ export function StartStep({ onNext }: { onNext: () => void }) {
                 </ul>
             </div>
 
-            <ButtonType2 onClick={onNext} className="py-3 rounded-xl w-full">
+            <ButtonType2 onClick={onNext} size="lg" className="rounded-xl w-full">
                 Start verification
             </ButtonType2>
         </div>
@@ -106,7 +106,7 @@ export function CountryStep({
             <ButtonType2
                 onClick={onNext}
                 disabled={!value || !docType}
-                className="py-3 rounded-xl w-full"
+                size="lg" className="rounded-xl w-full"
             >
                 Continue
             </ButtonType2>
@@ -161,7 +161,7 @@ export function IdStep({
             <ButtonType2
                 disabled={!value}
                 onClick={onNext}
-                className="py-3 rounded-xl w-full"
+                size="lg" className="rounded-xl w-full"
             >
                 Continue
             </ButtonType2>
@@ -269,7 +269,7 @@ export function PhotoStep({
             <ButtonType2
                 onClick={onNext}
                 disabled={!frontImage || !backImage}
-                className="py-3 rounded-xl w-full"
+                size="lg" className="rounded-xl w-full"
             >
                 Continue
             </ButtonType2>
@@ -345,7 +345,7 @@ export function SelfieStep({
             <ButtonType2
                 onClick={onNext}
                 disabled={!selfieImage}
-                className="py-3 rounded-xl w-full"
+                size="lg" className="rounded-xl w-full"
             >
                 Continue
             </ButtonType2>
@@ -366,7 +366,7 @@ export function VerifyingStep({ onNext }: { onNext: () => void }) {
 
             <ButtonType2
                 onClick={onNext}
-                className="py-3 rounded-xl w-full"
+                size="lg" className="rounded-xl w-full"
             >
                 Continue
             </ButtonType2>

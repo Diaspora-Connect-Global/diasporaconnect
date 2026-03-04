@@ -67,10 +67,10 @@ export default function CustomDialog({
         {showFooter && (
           <DialogFooter className="h-[10vh] border-t">
             <div className="flex items-end gap-3 px-6 py-4 sticky bottom-0">
-              <ButtonType3 className="px-6 py-3" onClick={handleCancel} disabled={isLoading}>
+              <ButtonType3 size="lg" onClick={handleCancel} disabled={isLoading}>
                 {defaultCancelText}
               </ButtonType3>
-              <ButtonType2 className="px-6 py-3" onClick={onSave} disabled={disabled || isLoading}>
+              <ButtonType2 size="lg" onClick={onSave} disabled={disabled || isLoading}>
                 {isLoading ? t('saving') : defaultSaveText}
               </ButtonType2>
             </div>

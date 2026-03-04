@@ -673,7 +673,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
                                 {/* View Profile Button */}
                                 <div className="flex items-center justify-center mb-6">
-                                    <ButtonType3 className="px-6">
+                                    <ButtonType3 size="lg">
                                         {t('viewProfile')}
                                     </ButtonType3>
                                 </div>

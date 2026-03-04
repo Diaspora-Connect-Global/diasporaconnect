@@ -1,40 +1,40 @@
+/** Consistent padding: default = px-4 py-2, lg = px-6 py-3 */
+const sizeClasses = {
+  default: "px-4 py-2",
+  lg: "px-6 py-3",
+} as const;
+
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
   className?: string;
+  /** Button padding size; use "lg" for dialogs and primary CTAs */
+  size?: keyof typeof sizeClasses;
 }
 
-export function ButtonType1({ 
-  children, 
-  onClick, 
-  type = "button", 
+const baseButtonClass = `
+  rounded-full font-label-medium cursor-pointer transition-colors
+  disabled:opacity-50 disabled:cursor-not-allowed h-fit w-fit whitespace-nowrap
+`;
+
+export function ButtonType1({
+  children,
+  onClick,
+  type = "button",
   disabled = false,
-  className = ""
+  className = "",
+  size = "default",
 }: ButtonProps) {
   return (
-    <button 
+    <button
       type={type}
       onClick={onClick}
       disabled={disabled}
       className={`
-        bg-surface-default 
-        border 
-        border-text-brand 
-        text-text-brand 
-        rounded-full 
-        font-label-medium 
-        ring-text-brand
-        cursor-pointer
-        transition-colors
-        disabled:opacity-50 
-        disabled:cursor-not-allowed
-        h-fit
-        w-fit
-        py-1 px-2
-        whitespace-nowrap
-        ${className}
+        bg-surface-default border border-text-brand text-text-brand ring-text-brand
+        ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
     >
       {children}
@@ -42,40 +42,25 @@ export function ButtonType1({
   );
 }
 
-export function ButtonType2({ 
-  children, 
-  onClick, 
-  type = "button", 
+export function ButtonType2({
+  children,
+  onClick,
+  type = "button",
   disabled = false,
-  className = ""
+  className = "",
+  size = "default",
 }: ButtonProps) {
   return (
-    <button 
+    <button
       type={type}
       onClick={onClick}
       disabled={disabled}
       className={`
-        bg-surface-brand 
-        border 
-        text-text-white 
-        rounded-full 
-        text-xs
-        sm:text-sm
-        md:text-base
-        font-label-medium 
-        cursor-pointer
-        hover:bg-border-brand 
-        hover:text-text-white 
-        transition-colors
-        disabled:text-text-primary
-        disabled:opacity-50 
-        disabled:cursor-not-allowed
-        disabled:bg-surface-disabled
-        h-fit
-        w-fit
-        py-1 px-2
-        whitespace-nowrap
-        ${className}
+        bg-surface-brand border text-text-white
+        text-xs sm:text-sm md:text-base
+        hover:bg-border-brand hover:text-text-white
+        disabled:text-text-primary disabled:bg-surface-disabled
+        ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
     >
       {children}
@@ -83,66 +68,45 @@ export function ButtonType2({
   );
 }
 
-export function ButtonType3({ 
-  children, 
-  onClick, 
-  type = "button", 
+export function ButtonType3({
+  children,
+  onClick,
+  type = "button",
   disabled = false,
-  className = ""
+  className = "",
+  size = "default",
 }: ButtonProps) {
   return (
-    <button 
+    <button
       type={type}
       onClick={onClick}
       disabled={disabled}
       className={`
-        bg-transparent
-        text-text-brand 
-        rounded-full 
-        font-label-medium 
-        ring-text-brand
-        cursor-pointer
-        transition-colors
-        disabled:opacity-50 
-        disabled:cursor-not-allowed
-        h-fit
-        w-fit
-        py-1 px-2
-        whitespace-nowrap
-        ${className}
+        bg-transparent text-text-brand ring-text-brand
+        ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
     >
       {children}
     </button>
   );
 }
-export function ButtonType4Pill({ 
-  children, 
-  onClick, 
-  type = "button", 
+
+export function ButtonType4Pill({
+  children,
+  onClick,
+  type = "button",
   disabled = false,
-  className = ""
+  className = "",
+  size = "default",
 }: ButtonProps) {
   return (
-    <button 
+    <button
       type={type}
       onClick={onClick}
       disabled={disabled}
       className={`
-        bg-surface-danger
-        text-text-danger 
-        rounded-full 
-        font-label-medium 
-        ring-text-danger
-        cursor-pointer
-        transition-colors
-        disabled:opacity-50 
-        disabled:cursor-not-allowed
-        h-fit
-        w-fit
-        py-1 px-2
-        whitespace-nowrap
-        ${className}
+        bg-surface-danger text-text-danger ring-text-danger
+        ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
     >
       {children}

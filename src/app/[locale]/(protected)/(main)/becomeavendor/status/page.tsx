@@ -76,7 +76,7 @@ export default function VendorReadyPage() {
                         >
                             Go to dashboard
                         </ButtonType3>
-                        <ButtonType2 className=" px-6 py-3 rounded-full ">
+                        <ButtonType2 size="lg">
                             List {itemType}
                         </ButtonType2>
                     </div>

@@ -52,12 +52,12 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
 
                 {/* Action Buttons */}
                   <div className="flex mt-1 space-x-2">
-                    <ButtonType1 className=" flex items-center justify-center py-3 px-6 rounded-full overflow-hidden">
+                    <ButtonType1 className="flex items-center justify-center overflow-hidden" size="lg">
                         <Bookmark className="w-6 h-6 " />
                     </ButtonType1>
-                    <ButtonType2 
+                    <ButtonType2 size="lg" 
                     onClick={onAttendClick}
-                    className="flex w-full py-3 px-6 rounded-full text-center justify-center"> {/* Added px-6 for balance */}
+                    className="flex w-full text-center justify-center">
                         Attend
                     </ButtonType2>
                 </div>

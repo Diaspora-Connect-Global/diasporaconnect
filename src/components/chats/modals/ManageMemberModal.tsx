@@ -186,7 +186,7 @@ export function ManageMemberModal({
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
-            <ButtonType3 onClick={onClose} disabled={isProcessing} className="px-4 py-2">
+            <ButtonType3 onClick={onClose} disabled={isProcessing} >
               {t("close")}
             </ButtonType3>
           </div>

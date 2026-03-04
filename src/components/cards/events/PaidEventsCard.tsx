@@ -52,12 +52,13 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
 
                 {/* Action Buttons */}
                 <div className="flex mt-1 space-x-2">
-                    <ButtonType1 className=" flex items-center justify-center py-3 px-6 rounded-full overflow-hidden">
+                    <ButtonType1 className="flex items-center justify-center overflow-hidden" size="lg">
                         <Bookmark className="w-8 h-8 " />
                     </ButtonType1>
-                    <ButtonType2 
+                    <ButtonType2
                     onClick={onAttendClick}
-                    className="flex w-full py-3 px-6 rounded-full text-center justify-center"> {/* Added px-6 for balance */}
+                    size="lg"
+                    className="flex w-full text-center justify-center"> {/* Added px-6 for balance */}
                         Attend
                     </ButtonType2>
                 </div>

@@ -57,11 +57,11 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                 {/* Action Buttons */}
                 <div className="flex gap-3 text-center items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <ButtonType2 onClick={onBuyClick} className="py-3 px-10 rounded-full" disabled={isRegistered}>
+                        <ButtonType2 onClick={onBuyClick} size="lg" disabled={isRegistered}>
                             {isRegistered ? "Registered" : "Attend"}
                         </ButtonType2>
                         {onSaveClick && (
-                            <ButtonType1 onClick={onSaveClick} className="flex items-center justify-center py-3 px-10 rounded-full overflow-hidden">
+                            <ButtonType1 onClick={onSaveClick} className="flex items-center justify-center overflow-hidden" size="lg">
                                 {isSaved ? "Saved" : "Save"}
                             </ButtonType1>
                         )}

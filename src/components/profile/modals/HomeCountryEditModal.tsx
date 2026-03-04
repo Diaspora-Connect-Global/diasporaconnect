@@ -61,10 +61,10 @@ export function HomeCountryEditModal({
         </div>
 
         <div className="flex-shrink-0 flex justify-end items-center space-x-3 pt-4 border-t border-border-subtle">
-          <ButtonType3 onClick={onClose} className="px-6 py-2" disabled={isLoading}>
+          <ButtonType3 onClick={onClose} size="lg" disabled={isLoading}>
             {t('cancel')}
           </ButtonType3>
-          <ButtonType2 onClick={handleSave} className="px-6 py-2" disabled={!country || isLoading}>
+          <ButtonType2 onClick={handleSave} size="lg" disabled={!country || isLoading}>
             {isLoading ? t('saving') : t('save')}
           </ButtonType2>
         </div>

@@ -194,12 +194,12 @@ export function StartGroupConfirmationModal({
 
           {/* Action Buttons */}
           <div className="flex-shrink-0 flex justify-end items-center space-x-3 pt-4 border-t border-border-subtle mt-6">
-            <ButtonType3 onClick={onClose} className="px-6 py-2">
+            <ButtonType3 onClick={onClose} size="lg">
               {t('cancel')}
             </ButtonType3>
             <ButtonType2
               onClick={handleCreate}
-              className="px-6 py-2"
+              size="lg"
               disabled={!isFormValid || uploading}
             >
               {uploading ? t('uploading') : t('createGroup')}

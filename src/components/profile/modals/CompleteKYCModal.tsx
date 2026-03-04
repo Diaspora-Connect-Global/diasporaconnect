@@ -63,7 +63,7 @@ const CompleteKYCModal = forwardRef<CompleteKYCModalRef>((_, ref) => {
             <p className="text-text-brand font-medium">
               Send verification link to my email
             </p>
-            <ButtonType2 className="mt-4 w-full max-w-xs">
+            <ButtonType2 size="lg" className="mt-4 w-full max-w-xs">
               Done
             </ButtonType2>
           </div>
