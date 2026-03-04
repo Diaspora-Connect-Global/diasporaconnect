@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
+import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 
 const Pagination = ({
     LIST,
@@ -60,52 +61,27 @@ const Pagination = ({
 
                 <div className="d-flex d-md-block justify-content-sm-center">
                     {activeTab > 1 && (
-                        <button
-                            onClick={handlePrevious}
-                            style={{
-                                padding: '8px 16px',
-                                marginRight: '4px',
-                                border: 'none',
-                                backgroundColor: '#f0f0f0',
-                                color: '#4D44B5',
-                                cursor: 'pointer'
-                            }}
-                        >
+                        <ButtonType3 onClick={handlePrevious} className="mr-1 bg-[#f0f0f0] text-[#4D44B5] hover:bg-[#e0e0e0]">
                             &lt;
-                        </button>
+                        </ButtonType3>
                     )}
                     {Array.from({ length: numOfTabs }, (_, i) => i + 1)
                         .filter(shouldShowButton)
-                        .map((pageNumber: number) => (
-                            <button
-                                key={pageNumber}
-                                onClick={() => setActiveTab(pageNumber)}
-                                style={{
-                                    padding: '8px 16px',
-                                    margin: '0 4px',
-                                    border: 'none',
-                                    backgroundColor: pageNumber === activeTab ? '#4D44B5' : '#f0f0f0',
-                                    color: pageNumber === activeTab ? 'white' : 'black',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {pageNumber}
-                            </button>
-                        ))}
+                        .map((pageNumber: number) =>
+                            pageNumber === activeTab ? (
+                                <ButtonType2 key={pageNumber} onClick={() => setActiveTab(pageNumber)} className="mx-1">
+                                    {pageNumber}
+                                </ButtonType2>
+                            ) : (
+                                <ButtonType3 key={pageNumber} onClick={() => setActiveTab(pageNumber)} className="mx-1 bg-[#f0f0f0] text-black hover:bg-[#e0e0e0]">
+                                    {pageNumber}
+                                </ButtonType3>
+                            )
+                        )}
                     {activeTab < numOfTabs && (
-                        <button
-                            onClick={handleNext}
-                            style={{
-                                padding: '8px 16px',
-                                marginLeft: '4px',
-                                border: 'none',
-                                backgroundColor: '#f0f0f0',
-                                color: '#4D44B5',
-                                cursor: 'pointer'
-                            }}
-                        >
+                        <ButtonType3 onClick={handleNext} className="ml-1 bg-[#f0f0f0] text-[#4D44B5] hover:bg-[#e0e0e0]">
                             &gt;
-                        </button>
+                        </ButtonType3>
                     )}
                 </div>
             </div>

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { ButtonType1, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { opportunities } from "./data";
 import {
@@ -93,14 +94,14 @@ const AppliedComponent = ({
                 <p className="text-xs text-text-secondary capitalize">{app.status}</p>
               </Link>
               {app.status !== "ACCEPTED" && app.status !== "REJECTED" && app.status !== "WITHDRAWN" && (
-                <button
+                <ButtonType4Pill
                   type="button"
                   onClick={() => onWithdraw(app.id)}
                   disabled={withdrawingId === app.id}
-                  className="shrink-0 px-3 py-1.5 text-sm text-text-danger border border-border-subtle rounded-lg hover:bg-surface-hover disabled:opacity-50"
+                  className="shrink-0 rounded-lg hover:bg-surface-hover"
                 >
                   {withdrawingId === app.id ? "…" : "Withdraw"}
-                </button>
+                </ButtonType4Pill>
               )}
             </div>
           ))}
@@ -135,14 +136,14 @@ const SavedComponent = ({
               <Link href={`/opportunities/${saved.opportunityId}`} className="flex-1 min-w-0">
                 <p className="font-medium text-text-primary truncate">{saved.title}</p>
               </Link>
-              <button
+              <ButtonType1
                 type="button"
                 onClick={() => onUnsave(saved.opportunityId)}
                 disabled={unsavingId === saved.opportunityId}
-                className="shrink-0 px-3 py-1.5 text-sm text-text-brand border border-border-brand rounded-lg hover:bg-surface-hover disabled:opacity-50"
+                className="shrink-0 rounded-lg hover:bg-surface-hover"
               >
                 {unsavingId === saved.opportunityId ? "…" : "Unsave"}
-              </button>
+              </ButtonType1>
             </div>
           ))}
         </div>
@@ -228,15 +229,15 @@ export default function Opportunities() {
                     {
                         TABS.map((tab, idx) => (
                             <div key={idx} className="lg:w-[6.375rem] lg:h-[3.25rem]"> {/* 102px, 52px equivalent */}
-                                <button
+                                <ButtonType3
                                     onClick={() => setActiveTab(`${tab.status}`)}
-                                    className={`h-full px-[0.5rem] text-center transition-all duration-200 relative cursor-pointer font-label-large ${activeTab === `${tab.status}`
+                                    className={`h-full w-full px-[0.5rem] text-center transition-all duration-200 relative font-label-large rounded-none border-0 bg-transparent ${activeTab === `${tab.status}`
                                         ? "text-text-brand border-b-2 border-text-brand"
-                                        : "text-text-secondary hover:text-text-primary border-b-2"
+                                        : "text-text-secondary hover:text-text-primary border-b-2 border-transparent"
                                         }`}
                                 >
                                     {tab.name}
-                                </button>
+                                </ButtonType3>
                             </div>
 
                         ))

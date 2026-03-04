@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { X, Copy, Loader2 } from 'lucide-react';
+import { ButtonType3 } from '@/components/custom/button';
 import { useMutation, useQuery } from '@apollo/client/react';
 import Image from 'next/image';
 import { SHARE_POST, type SharePostData } from '@/services/gql/postsFeed';
@@ -258,14 +259,14 @@ export default function SharePostModal({
       >
         <div className="flex items-center justify-between p-4 border-b border-border-subtle">
           <h3 className="text-lg font-semibold text-text-primary">{t('sharePost')}</h3>
-          <button
+          <ButtonType3
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary"
+            className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary border-0 bg-transparent min-w-0"
             aria-label={t('close')}
           >
             <X className="w-5 h-5" />
-          </button>
+          </ButtonType3>
         </div>
 
         <div className="p-4 overflow-y-auto flex-1">
@@ -275,12 +276,12 @@ export default function SharePostModal({
           {hasFriendsOrGroups ? (
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
               {friends.map((f) => (
-                <button
+                <ButtonType3
                   key={f.userId}
                   type="button"
                   onClick={() => handleShareToFriend(f.userId)}
                   disabled={sendMessageLoading}
-                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem] disabled:opacity-70"
+                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem] disabled:opacity-70 border-0 bg-transparent"
                 >
                   <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface-subtle">
                     <Image
@@ -299,15 +300,15 @@ export default function SharePostModal({
                   <span className="text-xs font-medium text-text-primary text-center truncate max-w-[4.5rem]">
                     {f.name}
                   </span>
-                </button>
+                </ButtonType3>
               ))}
               {groups.map((g) => (
-                <button
+                <ButtonType3
                   key={g.id}
                   type="button"
                   onClick={() => handleShareToGroup(g.id)}
                   disabled={sendMessageLoading}
-                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem] disabled:opacity-70"
+                  className="flex flex-col items-center gap-1.5 flex-shrink-0 p-2 rounded-lg hover:bg-surface-subtle transition-colors min-w-[4rem] disabled:opacity-70 border-0 bg-transparent"
                 >
                   <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface-subtle">
                     <Image
@@ -326,7 +327,7 @@ export default function SharePostModal({
                   <span className="text-xs font-medium text-text-primary text-center truncate max-w-[4.5rem]">
                     {g.name}
                   </span>
-                </button>
+                </ButtonType3>
               ))}
             </div>
           ) : (
@@ -334,11 +335,11 @@ export default function SharePostModal({
           )}
 
           {/* Copy link below */}
-          <button
+          <ButtonType3
             type="button"
             onClick={copyToClipboard}
             disabled={shareLoading || isCopying}
-            className="w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-subtle transition-colors text-left mt-2 disabled:opacity-70 disabled:pointer-events-none"
+            className="w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-subtle transition-colors text-left mt-2 disabled:opacity-70 border-0 bg-transparent"
           >
             <div className="p-2 rounded-full bg-surface-subtle">
               {(shareLoading || isCopying) ? (
@@ -354,7 +355,7 @@ export default function SharePostModal({
                 <span className="ml-2 text-sm text-text-tertiary">...</span>
               )}
             </div>
-          </button>
+          </ButtonType3>
         </div>
       </div>
     </div>

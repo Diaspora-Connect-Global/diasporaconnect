@@ -2,6 +2,7 @@
 import React from 'react';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { useTranslations } from 'next-intl';
 
 interface Step2Props {
@@ -37,18 +38,25 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
     >
       <div className="flex flex-wrap gap-4 w-full">
         {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => updateData({ communityType: option.value })}
-            className={`px-6 py-3 rounded-md border  transition-all cursor-pointer w-full lg:w-auto
-              ${data.communityType === option.value
-                ? ' border-border-brand text-text-primary'
-                : 'bg-surface-subtle  text-text-primary '
-              }`}
-          >
-            {option.label}
-          </button>
+          {data.communityType === option.value ? (
+            <ButtonType2
+              key={option.value}
+              type="button"
+              onClick={() => updateData({ communityType: option.value })}
+              className="rounded-md w-full lg:w-auto"
+            >
+              {option.label}
+            </ButtonType2>
+          ) : (
+            <ButtonType3
+              key={option.value}
+              type="button"
+              onClick={() => updateData({ communityType: option.value })}
+              className="rounded-md border border-border-subtle bg-surface-subtle text-text-primary w-full lg:w-auto"
+            >
+              {option.label}
+            </ButtonType3>
+          )}
         ))}
       </div>
     </MultiStep>

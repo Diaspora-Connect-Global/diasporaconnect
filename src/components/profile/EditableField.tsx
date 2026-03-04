@@ -2,6 +2,7 @@
 
 import { PencilSimpleIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import { ButtonType3 } from '@/components/custom/button';
 
 interface EditableFieldProps {
     title: string;
@@ -24,14 +25,14 @@ export function EditableField({
                 <div className='flex  items-center'>
                     <h3 className="text-sm font-medium text-text-primary mb-1">{title}</h3>
                      {showEditButton && (
-                    <button
+                    <ButtonType3
                         onClick={onEdit}
-                        className="ml-4 p-1 text-text-tertiary hover:text-text-brand hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
+                        className="ml-4 p-1 text-text-tertiary hover:text-text-brand hover:bg-surface-hover rounded-md transition-colors border-0 bg-transparent min-w-0"
                         title={t('edit', { title })}
                     >
                         <PencilSimpleIcon size={32} className="w-3 h-3 text-text-primary" />
 
-                    </button>
+                    </ButtonType3>
 )}
                 </div>
                 <p className="text-sm text-text-secondary whitespace-pre-wrap break-words">

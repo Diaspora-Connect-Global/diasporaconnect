@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { ButtonType2 } from '@/components/custom/button';
+import { ButtonType2, ButtonType3, ButtonType4Pill } from '@/components/custom/button';
 import { toast } from 'sonner';
 import { useUserStore } from '@/store/useUserStore';
 import { MyAvatar } from '@/components/custom/header';
@@ -78,14 +78,14 @@ const VisibilityDropdown: React.FC<{
 
   return (
     <div className="relative">
-      <button
+      <ButtonType3
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 h-8 border border-border-subtle bg-surface-subtle hover:bg-surface-hover rounded-lg text-sm transition-colors"
+        className="flex items-center gap-2 px-3 h-8 border border-border-subtle bg-surface-subtle hover:bg-surface-hover rounded-lg text-sm"
       >
         <SelectedIcon className="w-3.5 h-3.5" />
         <span>{selected?.label}</span>
         <ChevronDown className="w-3.5 h-3.5" />
-      </button>
+      </ButtonType3>
 
       {isOpen && (
         <>
@@ -99,13 +99,13 @@ const VisibilityDropdown: React.FC<{
               const isActive = option.key === value;
 
               return (
-                <button
+                <ButtonType3
                   key={option.key}
                   onClick={() => {
                     onChange(option.key);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-start gap-3 p-3 hover:bg-surface-hover transition-colors ${isActive ? 'bg-surface-hover' : ''
+                  className={`w-full flex items-start gap-3 p-3 hover:bg-surface-hover rounded-lg border-0 ${isActive ? 'bg-surface-hover' : ''
                     }`}
                 >
                   <Icon className="w-5 h-5 mt-0.5 text-text-secondary" />
@@ -120,7 +120,7 @@ const VisibilityDropdown: React.FC<{
                       {option.description}
                     </p>
                   </div>
-                </button>
+                </ButtonType3>
               );
             })}
           </div>
@@ -571,12 +571,12 @@ export default function CreatePostPage() {
                       )}
 
                       {/* Remove Button */}
-                      <button
+                      <ButtonType4Pill
                         onClick={() => handleRemoveAttachment(attachment.id)}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-text-danger hover:bg-text-danger/80 text-text-white flex items-center justify-center transition-all shadow-lg hover:scale-110 z-10"
+                        className="absolute top-2 right-2 w-8 h-8 min-w-0 p-0 rounded-full hover:bg-text-danger/80 text-text-white flex items-center justify-center transition-all shadow-lg hover:scale-110 z-10"
                       >
                         <X className="w-4 h-4" />
-                      </button>
+                      </ButtonType4Pill>
 
                       {/* Type Badge */}
                       <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm">
@@ -607,15 +607,15 @@ export default function CreatePostPage() {
               <div className="flex items-center gap-2">
                 {/* Mobile - Single Attachment Button */}
                 <div className="md:hidden relative">
-                  <button
+                  <ButtonType3
                     onClick={() => setShowMobileAttachMenu(!showMobileAttachMenu)}
-                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-surface-brand/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('attachments.addAttachment')}
                   >
                     <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
                       <Paperclip className="w-5 h-5 text-surface-brand" />
                     </div>
-                  </button>
+                  </ButtonType3>
 
                   {/* Mobile Attachment Menu */}
                   {showMobileAttachMenu && (
@@ -626,9 +626,9 @@ export default function CreatePostPage() {
                       ></div>
                       <div className="absolute left-0 bottom-full mb-2 w-64 bg-surface-default border border-border-subtle rounded-xl shadow-xl overflow-hidden z-50 animate-slide-up">
                         <div className="p-2">
-                          <button
+                          <ButtonType3
                             onClick={handleMobileCamera}
-                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg transition-colors"
+                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg border-0 bg-transparent"
                           >
                             <div className="w-10 h-10 rounded-lg bg-surface-brand/10 flex items-center justify-center">
                               <Camera className="w-5 h-5 text-surface-brand" />
@@ -637,11 +637,11 @@ export default function CreatePostPage() {
                               <p className="font-medium text-sm">{t('mobile.camera')}</p>
                               <p className="text-xs text-text-secondary">{t('mobile.cameraDescription')}</p>
                             </div>
-                          </button>
+                          </ButtonType3>
 
-                          <button
+                          <ButtonType3
                             onClick={handleMobileGallery}
-                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg transition-colors"
+                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg border-0 bg-transparent"
                           >
                             <div className="w-10 h-10 rounded-lg bg-text-danger/10 flex items-center justify-center">
                               <ImageIcon className="w-5 h-5 text-text-danger" />
@@ -650,11 +650,11 @@ export default function CreatePostPage() {
                               <p className="font-medium text-sm">{t('mobile.gallery')}</p>
                               <p className="text-xs text-text-secondary">{t('mobile.galleryDescription')}</p>
                             </div>
-                          </button>
+                          </ButtonType3>
 
-                          <button
+                          <ButtonType3
                             onClick={handleMobileDocument}
-                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg transition-colors"
+                            className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-lg border-0 bg-transparent"
                           >
                             <div className="w-10 h-10 rounded-lg bg-[#cb3500]/10 flex items-center justify-center">
                               <FolderOpen className="w-5 h-5 text-[#cb3500]" />
@@ -663,7 +663,7 @@ export default function CreatePostPage() {
                               <p className="font-medium text-sm">{t('mobile.files')}</p>
                               <p className="text-xs text-text-secondary">{t('mobile.filesDescription')}</p>
                             </div>
-                          </button>
+                          </ButtonType3>
                         </div>
                       </div>
                     </>
@@ -672,65 +672,65 @@ export default function CreatePostPage() {
 
                 {/* Desktop - Separate Buttons */}
                 <div className="hidden md:flex items-center gap-2">
-                  <button
+                  <ButtonType3
                     onClick={() => handleAddAttachment('Photo')}
-                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-surface-brand/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('attachments.addPhoto')}
                   >
                     <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
                       <ImageIcon className="w-5 h-5 text-surface-brand" />
                     </div>
-                  </button>
-                  <button
+                  </ButtonType3>
+                  <ButtonType3
                     onClick={() => handleAddAttachment('Video')}
-                    className="p-2 hover:bg-text-danger/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-text-danger/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('attachments.addVideo')}
                   >
                     <div className="p-1.5 rounded-lg bg-text-danger/10 group-hover:bg-text-danger/20 transition-colors">
                       <Video className="w-5 h-5 text-text-danger" />
                     </div>
-                  </button>
-                  <button
+                  </ButtonType3>
+                  <ButtonType3
                     onClick={() => handleAddAttachment('Document')}
-                    className="p-2 hover:bg-[#cb3500]/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-[#cb3500]/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('attachments.addFile')}
                   >
                     <div className="p-1.5 rounded-lg bg-[#cb3500]/10 group-hover:bg-[#cb3500]/20 transition-colors">
                       <FileText className="w-5 h-5 text-[#cb3500]" />
                     </div>
-                  </button>
+                  </ButtonType3>
                 </div>
 
                 {/* Secondary actions - hidden on mobile */}
                 <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
-                  <button
+                  <ButtonType3
                     onClick={handleAddEmoji}
-                    className="p-2 hover:bg-[#FFD700]/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-[#FFD700]/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('actions.addEmoji')}
                   >
                     <Smile className="w-5 h-5 text-[#FFD700] group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
+                  </ButtonType3>
+                  <ButtonType3
                     onClick={handleAddHashtag}
-                    className="p-2 hover:bg-surface-brand/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-surface-brand/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('actions.addHashtag')}
                   >
                     <Hash className="w-5 h-5 text-surface-brand group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
+                  </ButtonType3>
+                  <ButtonType3
                     onClick={handleAddMention}
-                    className="p-2 hover:bg-[#9333EA]/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-[#9333EA]/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('actions.addMention')}
                   >
                     <AtSign className="w-5 h-5 text-[#9333EA] group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
+                  </ButtonType3>
+                  <ButtonType3
                     onClick={handleAddLocation}
-                    className="p-2 hover:bg-[#00a73e]/10 rounded-lg transition-colors group"
+                    className="p-2 hover:bg-[#00a73e]/10 rounded-lg border-0 bg-transparent min-w-0"
                     title={t('actions.addLocation')}
                   >
                     <MapPin className="w-5 h-5 text-[#00a73e] group-hover:scale-110 transition-transform" />
-                  </button>
+                  </ButtonType3>
                 </div>
               </div>
 

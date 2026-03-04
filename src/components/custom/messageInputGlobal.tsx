@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X } from "lucide-react";
-import { ButtonType2 } from "../custom/button";
+import { ButtonType2, ButtonType3 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -217,15 +217,15 @@ export default function MessageInputGlobal({
                 <div className={`flex ${reversed ? "flex-row-reverse" : ""} gap-1 shrink-0 pb-1`}>
                     {/* Image Upload Button - input overlays button for mobile tap */}
                     <div className="relative group">
-                        <button
+                        <ButtonType3
                             type="button"
                             disabled={disabled}
-                            className="p-2 text-text-secondary group-hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-full group-hover:bg-surface-subtle pointer-events-none"
+                            className="p-2 text-text-secondary group-hover:text-text-primary disabled:opacity-30 rounded-full group-hover:bg-surface-subtle pointer-events-none border-0 bg-transparent min-w-0"
                             title="Attach image"
                             aria-hidden
                         >
                             <ImageIcon className="w-5 h-5 text-text-brand" />
-                        </button>
+                        </ButtonType3>
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -239,15 +239,15 @@ export default function MessageInputGlobal({
 
                     {/* Emoji Button - hidden on mobile, visible from sm and up */}
                     <div className="relative hidden sm:block">
-                        <button
+                        <ButtonType3
                             ref={emojiButtonRef}
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                             disabled={disabled}
-                            className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-full hover:bg-surface-subtle"
+                            className="p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 transition-colors rounded-full hover:bg-surface-subtle border-0 bg-transparent min-w-0"
                             title="Add emoji"
                         >
                             <Smile className="w-5 h-5 text-text-brand" />
-                        </button>
+                        </ButtonType3>
                         {showEmojiPicker &&
                             typeof document !== "undefined" &&
                             createPortal(
@@ -282,12 +282,12 @@ export default function MessageInputGlobal({
                                     alt="Preview"
                                     className="w-16 h-16 rounded-lg object-cover"
                                 />
-                                <button
+                                <ButtonType2
                                     onClick={removeImagePreview}
-                                    className="cursor-pointer p-1 bg-surface-brand rounded-full text-text-white transition-colors absolute -top-2 -right-2 hover:bg-opacity-90"
+                                    className="p-1 min-w-0 rounded-full absolute -top-2 -right-2 hover:opacity-90"
                                 >
                                     <X className="w-4 h-4" />
-                                </button>
+                                </ButtonType2>
                             </div>
                         </div>
                     )}

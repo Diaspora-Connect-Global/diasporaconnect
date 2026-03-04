@@ -10,7 +10,7 @@ import { formatChatTimestamp } from "@/macros/time";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { ButtonType3 } from "../custom/button";
+import { ButtonType3, ButtonType4Pill } from "../custom/button";
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import {
@@ -810,13 +810,13 @@ export default function GroupChat() {
                     {/* Group Header */}
                     <div className="md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                         <div className="flex items-center space-x-3">
-                            <button
+                            <ButtonType3
                                 onClick={handleMBack}
-                                className="p-2 hover:bg-surface-hover rounded-lg transition-colors md:hidden"
+                                className="p-2 hover:bg-surface-hover rounded-lg md:hidden border-0 bg-transparent min-w-0"
                                 aria-label={tCommon('backToChats')}
                             >
                                 <ArrowLeft className="w-5 h-5" />
-                            </button>
+                            </ButtonType3>
                             <div className="relative">
                                 <Avatar className="w-12 h-12">
                                     <AvatarImage src={group.avatarUrl || chat.avatar} alt="avatar" />
@@ -836,18 +836,18 @@ export default function GroupChat() {
                                 </div>
                             </div>
                         </div>
-                        <button onClick={handleSideBarToggle}>
+                        <ButtonType3 onClick={handleSideBarToggle} className="p-0 min-w-0 border-0 bg-transparent">
                             <InfoIcon className={`hidden md:block w-6 h-6 cursor-pointer ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full" : "text-text-brand"}`} />
-                        </button>
+                        </ButtonType3>
                     </div>
 
                     {/* Mobile Info Button */}
-                    <button
+                    <ButtonType3
                         onClick={handleSideBarToggle}
-                        className="md:hidden fixed top-20 right-4 z-10 p-2 bg-surface-brand rounded-full shadow-lg"
+                        className="md:hidden fixed top-20 right-4 z-10 p-2 bg-surface-brand rounded-full shadow-lg border-0"
                     >
                         <Menu className="w-5 h-5 text-text-white" />
-                    </button>
+                    </ButtonType3>
 
                     {/* Messages Area */}
                     <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
@@ -969,12 +969,12 @@ export default function GroupChat() {
                                                         </span>
                                                     )}
                                                 </p>
-                                                <button
+                                                <ButtonType3
                                                     onClick={() => handleViewReplies({ ...message, text: message.content, timestamp: message.createdAt })}
-                                                    className="flex items-center space-x-1 text-[10px] sm:text-xs text-text-brand hover:text-text-brand-dark transition-colors"
+                                                    className="flex items-center space-x-1 text-[10px] sm:text-xs p-0 min-w-0 border-0 bg-transparent"
                                                 >
                                                     <span>{t('reply')}</span>
-                                                </button>
+                                                </ButtonType3>
                                             </div>
                                         </div>
                                     </div>
@@ -1016,12 +1016,12 @@ export default function GroupChat() {
                             {isMobile && (
                                 <div className="flex justify-between items-center p-4 border-b border-border-subtle">
                                     <h3 className="font-semibold text-text-primary">{t('groupInfo')}</h3>
-                                    <button
+                                    <ButtonType3
                                         onClick={() => setSidebarOpen(false)}
-                                        className="p-2 hover:bg-surface-hover rounded-lg"
+                                        className="p-2 hover:bg-surface-hover rounded-lg border-0 bg-transparent min-w-0"
                                     >
                                         <X className="w-5 h-5" />
-                                    </button>
+                                    </ButtonType3>
                                 </div>
                             )}
 
@@ -1092,21 +1092,21 @@ export default function GroupChat() {
 
                             <div className="flex-shrink-0 border-t border-border-subtle p-4">
                                 <div className="space-y-2">
-                                    <button
+                                    <ButtonType4Pill
                                         onClick={() => setShowLeaveModal(true)}
-                                        className="w-full text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer"
+                                        className="w-full flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg"
                                     >
                                         <p className="text-sm">{t('leaveGroup')}</p>
                                         <ChevronRight className="w-4 h-4" />
-                                    </button>
+                                    </ButtonType4Pill>
                                     {isOwner && (
-                                        <button
+                                        <ButtonType4Pill
                                             onClick={() => setShowDeleteModal(true)}
-                                            className="w-full text-text-danger flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg cursor-pointer"
+                                            className="w-full flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg"
                                         >
                                             <p className="text-sm">{t('deleteGroup')}</p>
                                             <ChevronRight className="w-4 h-4" />
-                                        </button>
+                                        </ButtonType4Pill>
                                     )}
                                 </div>
                             </div>
@@ -1131,12 +1131,12 @@ export default function GroupChat() {
                         `}>
                             <div className="flex-shrink-0 p-4 flex justify-between items-center border-b border-border-subtle">
                                 <h3 className="font-semibold text-text-primary text-sm sm:text-base">{t('replies')}</h3>
-                                <button
+                                <ButtonType3
                                     onClick={handleCloseReplies}
-                                    className="p-1 hover:bg-surface-hover rounded-full transition-colors"
+                                    className="p-1 hover:bg-surface-hover rounded-full border-0 bg-transparent min-w-0"
                                 >
                                     <X className="w-4 h-4 text-text-secondary" />
-                                </button>
+                                </ButtonType3>
                             </div>
 
                             {selectedMessage && (

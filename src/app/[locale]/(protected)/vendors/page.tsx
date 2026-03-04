@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Pagination from "@/components/custom/pagination";
+import { ButtonType3 } from "@/components/custom/button";
 import React, { useMemo, useState } from "react";
 
 export default function OverviewPage() {
@@ -84,12 +85,12 @@ export default function OverviewPage() {
       <div className="overflow-hidden">
         <div className="flex items-center  justify-between py-4 border-b border-gray-200">
           <h2 className="heading-xsmall text-primary">Pending orders</h2>
-          <button className="text-brand label-medium flex cursor-pointer items-center gap-1">
+          <ButtonType3 className="label-medium flex items-center gap-1">
             See all
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </ButtonType3>
         </div>
 
         <div className="overflow-x-auto">
@@ -122,9 +123,9 @@ export default function OverviewPage() {
                   <td className="px-6 py-4 body-medium text-primary">{order.customer}</td>
                   <td className="px-6 py-4 body-medium text-primary">{order.amount}</td>
                   <td className="px-6 py-4">
-                    <button className="label-medium text-brand hover:underline">
+                    <ButtonType3 className="label-medium hover:underline">
                       Process order
-                    </button>
+                    </ButtonType3>
                   </td>
                 </tr>
               ))}

@@ -110,26 +110,24 @@ export function EditGroupModal({
               {t("privacy")}
             </label>
             <div className="flex space-x-2">
-              <button
-                onClick={() => setPrivacy(GroupPrivacy.PUBLIC)}
-                className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
-                  privacy === GroupPrivacy.PUBLIC
-                    ? "bg-surface-brand text-text-white border-surface-brand"
-                    : "bg-surface-default text-text-secondary border-border-subtle hover:bg-surface-hover"
-                }`}
-              >
-                {t("public")}
-              </button>
-              <button
-                onClick={() => setPrivacy(GroupPrivacy.PRIVATE)}
-                className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
-                  privacy === GroupPrivacy.PRIVATE
-                    ? "bg-surface-brand text-text-white border-surface-brand"
-                    : "bg-surface-default text-text-secondary border-border-subtle hover:bg-surface-hover"
-                }`}
-              >
-                {t("private")}
-              </button>
+              {privacy === GroupPrivacy.PUBLIC ? (
+                <ButtonType2 onClick={() => setPrivacy(GroupPrivacy.PUBLIC)} className="flex-1 rounded-lg">
+                  {t("public")}
+                </ButtonType2>
+              ) : (
+                <ButtonType3 onClick={() => setPrivacy(GroupPrivacy.PUBLIC)} className="flex-1 rounded-lg border border-border-subtle bg-surface-default text-text-secondary hover:bg-surface-hover">
+                  {t("public")}
+                </ButtonType3>
+              )}
+              {privacy === GroupPrivacy.PRIVATE ? (
+                <ButtonType2 onClick={() => setPrivacy(GroupPrivacy.PRIVATE)} className="flex-1 rounded-lg">
+                  {t("private")}
+                </ButtonType2>
+              ) : (
+                <ButtonType3 onClick={() => setPrivacy(GroupPrivacy.PRIVATE)} className="flex-1 rounded-lg border border-border-subtle bg-surface-default text-text-secondary hover:bg-surface-hover">
+                  {t("private")}
+                </ButtonType3>
+              )}
             </div>
           </div>
 

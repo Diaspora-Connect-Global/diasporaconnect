@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { UserCheck, Users } from 'lucide-react';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 
 export default function ViewFilter() {
   const [view, setView] = useState<'you' | 'following'>('you');
@@ -29,30 +30,30 @@ export default function ViewFilter() {
       />
       
       {/* You Button */}
-      <button
-        onClick={() => handleViewChange('you')}
-        className={`relative z-10 flex items-center justify-center gap-2 flex-1 py-1.5 rounded-full text-sm transition-all duration-200 ${
-          view === 'you' 
-            ? 'text-white' 
-            : 'text-secondary hover:text-primary'
-        }`}
-      >
-        <UserCheck className="w-4 h-4" />
-        <span className="font-medium">You</span>
-      </button>
-      
+      {view === 'you' ? (
+        <ButtonType2 onClick={() => handleViewChange('you')} className="relative z-10 flex items-center justify-center gap-2 flex-1 py-1.5 rounded-full text-sm transition-all duration-200 text-white bg-transparent hover:bg-transparent border-0">
+          <UserCheck className="w-4 h-4" />
+          <span className="font-medium">You</span>
+        </ButtonType2>
+      ) : (
+        <ButtonType3 onClick={() => handleViewChange('you')} className="relative z-10 flex items-center justify-center gap-2 flex-1 py-1.5 rounded-full text-sm transition-all duration-200 text-secondary hover:text-primary bg-transparent">
+          <UserCheck className="w-4 h-4" />
+          <span className="font-medium">You</span>
+        </ButtonType3>
+      )}
+
       {/* Following Button */}
-      <button
-        onClick={() => handleViewChange('following')}
-        className={`relative z-10 flex items-center justify-center gap-2 flex-1 py-1.5 rounded-full text-sm transition-all duration-200 ${
-          view === 'following' 
-            ? 'text-white' 
-            : 'text-secondary hover:text-primary'
-        }`}
-      >
-        <Users className="w-4 h-4" />
-        <span className="font-medium">Following</span>
-      </button>
+      {view === 'following' ? (
+        <ButtonType2 onClick={() => handleViewChange('following')} className="relative z-10 flex items-center justify-center gap-2 flex-1 py-1.5 rounded-full text-sm transition-all duration-200 text-white bg-transparent hover:bg-transparent border-0">
+          <Users className="w-4 h-4" />
+          <span className="font-medium">Following</span>
+        </ButtonType2>
+      ) : (
+        <ButtonType3 onClick={() => handleViewChange('following')} className="relative z-10 flex items-center justify-center gap-2 flex-1 py-1.5 rounded-full text-sm transition-all duration-200 text-secondary hover:text-primary bg-transparent">
+          <Users className="w-4 h-4" />
+          <span className="font-medium">Following</span>
+        </ButtonType3>
+      )}
     </div>
   );
 }

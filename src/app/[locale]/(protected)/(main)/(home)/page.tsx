@@ -349,30 +349,30 @@ export default function Home() {
             <>
               {/* Left Arrow */}
               {canScrollLeft && (
-                <button
+                <ButtonType3
                   onClick={scrollLeft}
                   className="absolute left-0 top-1/2 -translate-y-1/2 z-10
                              flex h-10 w-10 items-center justify-center
                              rounded-full bg-surface-default/80 shadow-md
-                             cursor-pointer transition-colors hover:bg-surface-subtle"
+                             transition-colors hover:bg-surface-subtle border-0 min-w-0"
                   aria-label={tCommon('scrollLeft')}
                 >
                   <ChevronLeftIcon className="h-6 w-6 text-primary" />
-                </button>
+                </ButtonType3>
               )}
 
               {/* Right Arrow */}
               {canScrollRight && (
-                <button
+                <ButtonType3
                   onClick={scrollRight}
                   className="absolute right-0 top-1/2 -translate-y-1/2 z-10
                              flex h-10 w-10 items-center justify-center
                              rounded-full bg-surface-default/80 shadow-md
-                             cursor-pointer transition-colors hover:bg-surface-subtle"
+                             transition-colors hover:bg-surface-subtle border-0 min-w-0"
                   aria-label={tCommon('scrollRight')}
                 >
                   <ChevronRightIcon className="h-6 w-6 text-primary" />
-                </button>
+                </ButtonType3>
               )}
 
               {/* Scrollable Container */}

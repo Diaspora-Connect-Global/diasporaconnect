@@ -24,6 +24,7 @@ import { LogoutCurve, Wallet3 } from 'iconsax-reactjs';
 import { QuestionIcon, StorefrontIcon, X } from "@phosphor-icons/react";
 import { IconFileDollar } from '@tabler/icons-react';
 import React from 'react';
+import { ButtonType3 } from '@/components/custom/button';
 import HomeSidebar from '../home/HomeSidebar';
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
@@ -126,9 +127,9 @@ export default function Header({
             <div className="flex  justify-between h-app-top-down"> {/* Standard header height */}
               <div className='flex'>
                 {/* Mobile menu button */}
-                <button
+                <ButtonType3
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="lg:hidden p-2 rounded-md text-text-primary hover:bg-surface-hover transition-colors"
+                  className="lg:hidden p-2 rounded-md text-text-primary hover:bg-surface-hover border-0 bg-transparent min-w-0"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -138,7 +139,7 @@ export default function Header({
                       d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
                     />
                   </svg>
-                </button>
+                </ButtonType3>
 
                 {/* Logo */}
                 <div className=" flex justify-start items-center">
@@ -214,13 +215,13 @@ export default function Header({
                         className="object-fill bg-amber-900-"
                       />
                     </Link>
-                    <button
+                    <ButtonType3
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="p-2 rounded-lg hover:bg-surface-hover transition-colors"
+                      className="p-2 rounded-lg hover:bg-surface-hover border-0 bg-transparent min-w-0"
                       aria-label={tCommon('closeMenu')}
                     >
                       <X className="w-6 h-6" />
-                    </button>
+                    </ButtonType3>
                   </div>
 
                   {/* Sidebar Content */}
@@ -331,9 +332,9 @@ export function DropdownMenuAvatar() {
   return (
     <><DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button className="focus:outline-none cursor-pointer">
+        <ButtonType3 className="focus:outline-none p-0 min-w-0 border-0 bg-transparent rounded-full">
           <MyAvatar />
-        </button>
+        </ButtonType3>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="lg:w-100 mx-20 mt-4" align="start">
         <DropdownMenuLabel>

@@ -4,6 +4,7 @@ import React from 'react';
 import { CheckCircle } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
+import { ButtonType2 } from '@/components/custom/button';
 
 export default function Step3() {
     const t = useTranslations('home.events.payment.success');
@@ -19,9 +20,9 @@ export default function Step3() {
             </h2>
 
             {/* Primary Action */}
-            <button className="w-full max-w-xs px-6 py-3 bg-surface-brand text-text-white font-medium rounded-full hover:bg-surface-brand/90 transition-colors   cursor-pointer">
+            <ButtonType2 size="lg" className="w-full max-w-xs">
                 {t('viewTicket')}
-            </button>
+            </ButtonType2>
 
             {/* Secondary Action */}
             <Link

@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ButtonType2, ButtonType3 } from '@/components/custom/button';
+import { ButtonType2, ButtonType3, ButtonType4Pill } from '@/components/custom/button';
 import { Camera, Plus, X } from 'lucide-react';
 import Image from 'next/image';
 import { User } from '@/data/chats';
@@ -150,16 +150,16 @@ export function StartGroupConfirmationModal({
                       fill
                       className="rounded-full object-cover pointer-events-none"
                     />
-                    <button
+                    <ButtonType4Pill
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         removePhoto();
                       }}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-text-error rounded-full flex items-center justify-center text-white hover:bg-text-error-dark transition-colors z-20"
+                      className="absolute -top-2 -right-2 w-6 h-6 min-w-0 p-0 flex items-center justify-center hover:bg-text-error-dark transition-colors z-20"
                     >
                       <X className="w-3 h-3" />
-                    </button>
+                    </ButtonType4Pill>
                     <div className="absolute inset-0 bg-opacity-0 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all pointer-events-none">
                       <Camera className="w-6 h-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                     </div>

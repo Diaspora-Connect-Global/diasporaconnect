@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
 import { useTranslations } from "next-intl";
 import { MemberRole } from "@/services/gql/groups";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -131,7 +131,7 @@ export function ManageMemberModal({
                   const canAssign = isOwner || option?.role !== MemberRole?.ADMIN;
 
                   return (
-                    <button
+                    <ButtonType3
                       key={option?.role}
                       onClick={() => canAssign && handleRoleChange(option?.role)}
                       disabled={!canAssign || isProcessing}
@@ -164,7 +164,7 @@ export function ManageMemberModal({
                           {option?.description}
                         </p>
                       </div>
-                    </button>
+                    </ButtonType3>
                   );
                 })}
               </div>
@@ -172,16 +172,16 @@ export function ManageMemberModal({
 
             {/* Remove Member */}
             <div className="pt-4 border-t border-border-subtle">
-              <button
+              <ButtonType4Pill
                 onClick={() => setShowRemoveConfirm(true)}
                 disabled={isProcessing}
-                className="w-full flex items-center justify-center space-x-2 p-3 text-text-danger hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center space-x-2 p-3 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               >
                 <UserMinus className="w-4 h-4" />
                 <span className="text-sm font-medium">
                   {t("removeMember")}
                 </span>
-              </button>
+              </ButtonType4Pill>
             </div>
           </div>
 

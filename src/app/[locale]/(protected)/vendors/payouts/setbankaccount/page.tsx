@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { ButtonType2 } from '@/components/custom/button';
 
 const AddBankAccount = () => {
   const [country, setCountry] = useState('Ghana');
@@ -122,9 +123,9 @@ const AddBankAccount = () => {
 
         {/* Submit Button */}
         <div className="mt-8 flex justify-end">
-          <button className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-3 rounded-full font-medium transition-colors shadow-lg">
+          <ButtonType2 size="lg" className="bg-blue-900 hover:bg-blue-800 shadow-lg">
             Save payout method
-          </button>
+          </ButtonType2>
         </div>
       </div>
     </div>

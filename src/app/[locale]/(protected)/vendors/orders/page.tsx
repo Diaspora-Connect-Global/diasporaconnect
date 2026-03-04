@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo } from "react";
 import { useTranslations } from 'next-intl';
+import { ButtonType3 } from '@/components/custom/button';
 
 type DeliveryStatus = "Delivered" | "Pending" | "Processing" | "In transit";
 
@@ -223,9 +224,9 @@ export default function OrdersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="text-blue-600 hover:underline">
+                    <ButtonType3 className="text-blue-600 hover:underline border-0 bg-transparent p-0 min-w-0">
                       {getLocalizedAction(order.action)}
-                    </button>
+                    </ButtonType3>
                   </td>
                 </tr>
               ))
@@ -258,7 +259,7 @@ export default function OrdersPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
+            <ButtonType3
               disabled={currentPage === 1}
               onClick={() =>
                 setCurrentPage((p) => Math.max(1, p - 1))
@@ -266,13 +267,13 @@ export default function OrdersPage() {
               className="px-2 py-1 border rounded disabled:opacity-50"
             >
               {t('prev')}
-            </button>
+            </ButtonType3>
 
             <span>
               {t('page', { current: currentPage, total: totalPages })}
             </span>
 
-            <button
+            <ButtonType3
               disabled={currentPage === totalPages}
               onClick={() =>
                 setCurrentPage((p) => Math.min(totalPages, p + 1))
@@ -280,7 +281,7 @@ export default function OrdersPage() {
               className="px-2 py-1 border rounded disabled:opacity-50"
             >
               {t('next')}
-            </button>
+            </ButtonType3>
           </div>
         </div>
       </div>

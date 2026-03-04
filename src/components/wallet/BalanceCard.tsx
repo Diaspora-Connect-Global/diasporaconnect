@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { EyeIcon, EyeOffIcon, LockIcon, WalletIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
+import { ButtonType3 } from '@/components/custom/button';
 
 export default function BalanceCard() {
   const [showBalance, setShowBalance] = useState(true);
@@ -28,9 +29,9 @@ export default function BalanceCard() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <p className="body-small text-white/70">{t('totalBalance')}</p>
-              <button
+              <ButtonType3
                 onClick={() => setShowBalance(!showBalance)}
-                className="p-1 hover:bg-white/10 rounded transition-colors"
+                className="p-1 hover:bg-white/10 rounded transition-colors border-0 bg-transparent min-w-0 text-white/70"
                 aria-label={showBalance ? t('hideBalance') : t('showBalance')}
               >
                 {showBalance ? (
@@ -38,7 +39,7 @@ export default function BalanceCard() {
                 ) : (
                   <EyeIcon className="w-4 h-4 text-white/70" />
                 )}
-              </button>
+              </ButtonType3>
             </div>
             <h2 className="text-[36px] font-bold text-white leading-tight">
               {formatCurrency(totalBalance)}

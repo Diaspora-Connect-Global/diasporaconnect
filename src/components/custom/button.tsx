@@ -1,10 +1,17 @@
-/** Consistent padding: default = px-4 py-2, lg = px-6 py-3 */
+import React from "react";
+
+/** Consistent padding: default = px-4 py-2, lg = px-6 py-3, iconSm = small icon-only (e.g. close on thumbnails) */
 const sizeClasses = {
   default: "px-4 py-2",
   lg: "px-6 py-3",
+  iconSm: "p-0.5 min-w-0 w-6 h-6 flex items-center justify-center",
 } as const;
 
-interface ButtonProps {
+interface ButtonProps
+  extends Omit<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    "children" | "className"
+  > {
   children: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
@@ -26,6 +33,7 @@ export function ButtonType1({
   disabled = false,
   className = "",
   size = "default",
+  ...rest
 }: ButtonProps) {
   return (
     <button
@@ -36,6 +44,7 @@ export function ButtonType1({
         bg-surface-default border border-text-brand text-text-brand ring-text-brand
         ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
+      {...rest}
     >
       {children}
     </button>
@@ -49,6 +58,7 @@ export function ButtonType2({
   disabled = false,
   className = "",
   size = "default",
+  ...rest
 }: ButtonProps) {
   return (
     <button
@@ -62,22 +72,20 @@ export function ButtonType2({
         disabled:text-text-primary disabled:bg-surface-disabled
         ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
+      {...rest}
     >
       {children}
     </button>
   );
 }
 
-export function ButtonType3({
-  children,
-  onClick,
-  type = "button",
-  disabled = false,
-  className = "",
-  size = "default",
-}: ButtonProps) {
+export const ButtonType3 = React.forwardRef<HTMLButtonElement, ButtonProps>(function ButtonType3(
+  { children, onClick, type = "button", disabled = false, className = "", size = "default", ...rest },
+  ref
+) {
   return (
     <button
+      ref={ref}
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -85,11 +93,12 @@ export function ButtonType3({
         bg-transparent text-text-brand ring-text-brand
         ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
+      {...rest}
     >
       {children}
     </button>
   );
-}
+});
 
 export function ButtonType4Pill({
   children,
@@ -98,6 +107,7 @@ export function ButtonType4Pill({
   disabled = false,
   className = "",
   size = "default",
+  ...rest
 }: ButtonProps) {
   return (
     <button
@@ -108,6 +118,7 @@ export function ButtonType4Pill({
         bg-surface-danger text-text-danger ring-text-danger
         ${baseButtonClass} ${sizeClasses[size]} ${className}
       `}
+      {...rest}
     >
       {children}
     </button>

@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { ButtonType2 } from "@/components/custom/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tier, UserBadge } from "../custom/userBadge";
 import { PencilSimpleIcon, UsersThreeIcon } from "@phosphor-icons/react";
@@ -80,13 +81,13 @@ export function ProfileHeader({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button
-                      className="absolute bottom-0 right-0 flex items-center justify-center bg-surface-brand h-6 w-6 rounded-full transition-all group-hover:scale-110 shadow-md cursor-pointer"
+                    <ButtonType2
+                      className="absolute bottom-0 right-0 flex items-center justify-center h-6 w-6 rounded-full p-0 min-w-0 transition-all group-hover:scale-110 shadow-md"
                       onClick={onEditAvatar}
                     >
                       <PencilSimpleIcon size={32} className="h-3.5 w-3.5 text-text-white" />
                       <span className="sr-only">{t('editProfilePicture')}</span>
-                    </button>
+                    </ButtonType2>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{t('changeProfilePicture')}</p>

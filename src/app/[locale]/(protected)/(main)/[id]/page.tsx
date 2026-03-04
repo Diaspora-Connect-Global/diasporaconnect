@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
+import { ButtonType2 } from '@/components/custom/button';
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { NavigationTabs } from '@/components/profile/NavigationTabs';
 import { PersonalDetails } from '@/components/profile/PersonalDetails';
@@ -40,12 +41,9 @@ export default function FriendProfile() {
                     <p className="text-destructive">
                         userNotFound
                     </p>
-                    <button
-                        onClick={() => router.back()}
-                        className="px-4 py-2 bg-surface-brand text-white rounded-full"
-                    >
+                    <ButtonType2 onClick={() => router.back()}>
                         Go back
-                    </button>
+                    </ButtonType2>
                 </div>
             </div>
         );

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X, FileIcon, Video, Music } from "lucide-react";
-import { ButtonType2 } from "../custom/button";
+import { ButtonType2, ButtonType3 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 import { useTranslations } from "next-intl";
 import EmojiPicker, { Theme } from "emoji-picker-react";
@@ -339,15 +339,15 @@ export function MessageInput({
                     <div className="flex space-x-0.5 sm:space-x-1 flex-shrink-0">
                         {/* Image Upload Button - input overlays button for mobile tap */}
                         <div className="relative group">
-                            <button
+                            <ButtonType3
                                 type="button"
                                 disabled={disabled}
-                                className="p-1.5 sm:p-2 text-text-secondary group-hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors pointer-events-none"
+                                className="p-1.5 sm:p-2 text-text-secondary group-hover:text-text-primary disabled:opacity-30 pointer-events-none border-0 bg-transparent min-w-0"
                                 title="Attach image"
                                 aria-hidden
                             >
                                 <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-text-brand" />
-                            </button>
+                            </ButtonType3>
                             <input
                                 id={fileInputId}
                                 type="file"
@@ -362,15 +362,15 @@ export function MessageInput({
 
                         {/* Emoji Button - hidden on mobile, visible from sm and up */}
                         <div className="relative hidden sm:block">
-                            <button
+                            <ButtonType3
                                 ref={emojiButtonRef}
                                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                                 disabled={disabled}
-                                className="p-1.5 sm:p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                className="p-1.5 sm:p-2 text-text-secondary hover:text-text-primary disabled:opacity-30 transition-colors border-0 bg-transparent min-w-0"
                                 title="Add emoji"
                             >
                                 <Smile className="w-4 h-4 sm:w-5 sm:h-5 text-text-brand" />
-                            </button>
+                            </ButtonType3>
                             {showEmojiPicker &&
                                 typeof document !== "undefined" &&
                                 createPortal(
@@ -403,10 +403,21 @@ export function MessageInput({
                                 {selectedFiles.map((item, index) => (
                                     <div
                                         key={`${item.file.name}-${index}`}
-                                        className="relative flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-hover p-1.5 min-w-0 max-w-[120px] sm:max-w-[140px]"
+                                        className="relative flex flex-col rounded-lg border border-border-subtle bg-surface-hover overflow-hidden min-w-0 max-w-[120px] sm:max-w-[140px]"
                                     >
+                                        {/* Close button at top right */}
+                                        <ButtonType2
+                                            type="button"
+                                            size="iconSm"
+                                            onClick={() => removeFile(index)}
+                                            className="absolute top-0.5 right-0.5 z-10 rounded-full hover:opacity-90 shadow-sm"
+                                            aria-label="Remove file"
+                                        >
+                                            <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                        </ButtonType2>
+                                        {/* Thumbnail */}
                                         {item.file.type.startsWith("image/") ? (
-                                            <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded overflow-hidden bg-surface-default">
+                                            <div className="relative w-full aspect-square flex-shrink-0 rounded-t-md overflow-hidden bg-surface-default">
                                                 {item.preview ? (
                                                     <img src={item.preview} alt="" className="w-full h-full object-cover" />
                                                 ) : (
@@ -416,43 +427,36 @@ export function MessageInput({
                                                 )}
                                             </div>
                                         ) : item.file.type.startsWith("video/") ? (
-                                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded bg-surface-default flex items-center justify-center">
+                                            <div className="w-full aspect-square flex-shrink-0 rounded-t-md bg-surface-default flex items-center justify-center overflow-hidden">
                                                 {item.preview ? (
-                                                    <video src={item.preview} className="w-full h-full object-cover rounded" muted playsInline preload="metadata" />
+                                                    <video src={item.preview} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                                                 ) : (
                                                     <Video className="w-5 h-5 text-text-tertiary" />
                                                 )}
                                             </div>
                                         ) : item.file.type.startsWith("audio/") ? (
-                                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded bg-surface-default flex items-center justify-center">
+                                            <div className="w-full aspect-square flex-shrink-0 rounded-t-md bg-surface-default flex items-center justify-center">
                                                 <Music className="w-5 h-5 text-text-tertiary" />
                                             </div>
                                         ) : (
-                                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded bg-surface-default flex items-center justify-center">
+                                            <div className="w-full aspect-square flex-shrink-0 rounded-t-md bg-surface-default flex items-center justify-center">
                                                 <FileIcon className="w-5 h-5 text-text-tertiary" />
                                             </div>
                                         )}
-                                        <span className="text-xs text-text-primary truncate flex-1 min-w-0" title={item.file.name}>
+                                        {/* Name beneath the image */}
+                                        <span className="text-xs text-text-primary truncate px-1.5 py-1 text-center block" title={item.file.name}>
                                             {item.file.name}
                                         </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => removeFile(index)}
-                                            className="flex-shrink-0 p-0.5 bg-surface-brand rounded-full text-text-white hover:bg-text-brand-dark transition-colors"
-                                            aria-label="Remove file"
-                                        >
-                                            <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                        </button>
                                     </div>
                                 ))}
                                 {selectedFiles.length > 1 && (
-                                    <button
+                                    <ButtonType3
                                         type="button"
                                         onClick={clearAllFiles}
-                                        className="text-xs text-text-brand hover:underline"
+                                        className="text-xs text-text-brand hover:underline p-0 min-w-0 border-0 bg-transparent"
                                     >
                                         Clear all
-                                    </button>
+                                    </ButtonType3>
                                 )}
                             </div>
                         )}

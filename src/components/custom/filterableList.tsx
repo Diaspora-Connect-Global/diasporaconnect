@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { useState, useEffect } from "react";
+import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 
 
 
@@ -87,19 +88,17 @@ export function FilterableList({
 
             <div>
                 <div className="flex flex-wrap gap-2 w-full mb-4">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.value}
-                            onClick={() => handleFilterChange(tab.value)}
-                            className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-300 ${
-                                tab.value === filter
-                                    ? 'bg-surface-brand text-text-white'
-                                    : 'bg-surface-default text-text-secondary hover:bg-surface-tertiary'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                    {tabs.map((tab) =>
+                            tab.value === filter ? (
+                                <ButtonType2 key={tab.value} onClick={() => handleFilterChange(tab.value)} className="transition-all duration-300">
+                                    {tab.label}
+                                </ButtonType2>
+                            ) : (
+                                <ButtonType3 key={tab.value} onClick={() => handleFilterChange(tab.value)} className="bg-surface-default text-text-secondary hover:bg-surface-tertiary transition-all duration-300">
+                                    {tab.label}
+                                </ButtonType3>
+                            )
+                        )}
                 </div>
             </div>
 

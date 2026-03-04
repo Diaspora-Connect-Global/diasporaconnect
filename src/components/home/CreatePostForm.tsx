@@ -27,6 +27,7 @@ import type {
   AttachmentInput,
 } from '@/services/gql/types/postsFeed';
 import { toast } from 'sonner';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
@@ -354,12 +355,12 @@ export default function CreatePostForm({
                   <span className="text-xs text-red-500 font-medium">!</span>
                 </div>
               )}
-              <button
+              <ButtonType2
                 onClick={() => removeFile(idx)}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-surface-brand rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 min-w-0 p-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <X className="w-3 h-3 text-white" />
-              </button>
+              </ButtonType2>
             </div>
           ))}
         </div>
@@ -373,15 +374,15 @@ export default function CreatePostForm({
         <div className="flex items-center gap-1">
           {/* Image upload - input overlays button for mobile tap */}
           <div className="relative group">
-            <button
+            <ButtonType3
               type="button"
               disabled={submitting}
-              className="p-2 rounded-full group-hover:bg-surface-subtle text-text-secondary group-hover:text-text-primary transition-colors disabled:opacity-50 pointer-events-none"
+              className="p-2 rounded-full group-hover:bg-surface-subtle text-text-secondary group-hover:text-text-primary transition-colors disabled:opacity-50 pointer-events-none border-0 bg-transparent min-w-0"
               title="Attach files"
               aria-hidden
             >
               <ImageIcon className="w-5 h-5 text-text-brand" />
-            </button>
+            </ButtonType3>
             <input
               ref={fileInputRef}
               type="file"
@@ -396,14 +397,14 @@ export default function CreatePostForm({
 
           {/* Emoji picker */}
           <div ref={emojiRef} className="relative">
-            <button
+            <ButtonType3
               onClick={() => setShowEmojiPicker((v) => !v)}
               disabled={submitting}
-              className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 cursor-pointer"
+              className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 border-0 bg-transparent min-w-0"
               title="Add emoji"
             >
               <Smile className="w-5 h-5 text-text-brand" />
-            </button>
+            </ButtonType3>
             {showEmojiPicker && (
               <div className="absolute bottom-full left-0 mb-2 z-50 shadow-xl rounded-lg overflow-hidden">
                 <EmojiPicker
@@ -417,52 +418,52 @@ export default function CreatePostForm({
           </div>
 
           {/* Hashtag shortcut */}
-          <button
+          <ButtonType3
             onClick={addHashtag}
             disabled={submitting}
-            className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 cursor-pointer"
+            className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 border-0 bg-transparent min-w-0"
             title="Add hashtag"
           >
             <Hash className="w-5 h-5 text-text-brand" />
-          </button>
+          </ButtonType3>
 
           {/* Mention shortcut */}
-          <button
+          <ButtonType3
             onClick={addMention}
             disabled={submitting}
-            className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 cursor-pointer"
+            className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 border-0 bg-transparent min-w-0"
             title="Mention someone"
           >
             <AtSign className="w-5 h-5 text-blue-500" />
-          </button>
+          </ButtonType3>
 
           {/* Visibility selector */}
           <div ref={visRef} className="relative ml-1">
-            <button
+            <ButtonType3
               onClick={() => setShowVisibility((v) => !v)}
               disabled={submitting}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border border-border-subtle hover:bg-surface-subtle transition-colors disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border border-border-subtle hover:bg-surface-subtle transition-colors disabled:opacity-50"
             >
               {currentVisOption.icon}
               <span className="hidden sm:inline">{currentVisOption.label}</span>
               <ChevronDown className="w-3 h-3" />
-            </button>
+            </ButtonType3>
             {showVisibility && (
               <div className="absolute top-full left-0 mt-1 w-40 bg-surface-default border border-border-subtle rounded-lg shadow-lg z-50 overflow-hidden">
                 {VISIBILITY_OPTIONS.map((opt) => (
-                  <button
+                  <ButtonType3
                     key={opt.value}
                     onClick={() => {
                       setVisibility(opt.value);
                       setShowVisibility(false);
                     }}
-                    className={`flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-surface-subtle transition-colors cursor-pointer ${
+                    className={`flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-surface-subtle rounded-none border-0 bg-transparent ${
                       visibility === opt.value ? 'text-text-brand font-medium' : 'text-text-primary'
                     }`}
                   >
                     {opt.icon}
                     {opt.label}
-                  </button>
+                  </ButtonType3>
                 ))}
               </div>
             )}
@@ -470,10 +471,10 @@ export default function CreatePostForm({
         </div>
 
         {/* Post button */}
-        <button
+        <ButtonType2
           onClick={handleSubmit}
           disabled={!canSubmit}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-brand text-white font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="flex items-center gap-2 rounded-lg text-sm hover:opacity-90 transition-opacity"
         >
           {submitting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -481,7 +482,7 @@ export default function CreatePostForm({
             <Send className="w-4 h-4" />
           )}
           <span>{submitting ? 'Posting…' : 'Post'}</span>
-        </button>
+        </ButtonType2>
       </div>
     </div>
   );

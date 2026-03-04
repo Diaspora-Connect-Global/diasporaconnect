@@ -7,6 +7,7 @@ import {
   HelpCircle,
   ChevronRight,
 } from 'lucide-react';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { TextInput } from '@/components/custom/input';
 import {
   InputGroup,
@@ -193,13 +194,13 @@ export default function Step2({
                       className="w-full pr-12 pl-4 py-3 rounded-lg border bg-surface-subtle text-gray-900 placeholder-gray-400 focus:border-border-brand focus:ring-0 outline-none"
                       onClick={(e) => e.stopPropagation()}
                     />
-                    <button
+                    <ButtonType3
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary p-0 min-w-0 border-0 bg-transparent"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <HelpCircle className="w-5 h-5" />
-                    </button>
+                    </ButtonType3>
                   </div>
                 </div>
               </div>
@@ -233,24 +234,38 @@ export default function Step2({
                   { id: 'mtn', label: 'MTN MOMO', bg: 'bg-yellow-500' },
                   { id: 'telecel', label: 'TELECASH', bg: 'bg-red-600' },
                   { id: 'at', label: 'AT MONEY', bg: 'bg-blue-600' },
-                ].map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMobileProviderChange(p.id as MobileProvider);
-                    }}
-                    className={`
-                      flex flex-col items-center p-3 rounded-xl border-2 transition-all
-                      ${mobileProvider === p.id ? 'border-border-brand shadow-sm' : 'border-border-subtle'}
-                    `}
-                  >
-                    <div className={`w-10 h-10 rounded-lg ${p.bg}`} />
-                    <p className="mt-2 font-medium text-text-primary text-xs leading-tight">
-                      {p.label}
-                    </p>
-                  </button>
+                ].map((p) =>
+                  mobileProvider === p.id ? (
+                    <ButtonType2
+                      key={p.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMobileProviderChange(p.id as MobileProvider);
+                      }}
+                      className="flex flex-col items-center p-3 rounded-xl border-2 border-border-brand shadow-sm"
+                    >
+                      <div className={`w-10 h-10 rounded-lg ${p.bg}`} />
+                      <p className="mt-2 font-medium text-text-primary text-xs leading-tight">
+                        {p.label}
+                      </p>
+                    </ButtonType2>
+                  ) : (
+                    <ButtonType3
+                      key={p.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMobileProviderChange(p.id as MobileProvider);
+                      }}
+                      className="flex flex-col items-center p-3 rounded-xl border-2 border-border-subtle"
+                    >
+                      <div className={`w-10 h-10 rounded-lg ${p.bg}`} />
+                      <p className="mt-2 font-medium text-text-primary text-xs leading-tight">
+                        {p.label}
+                      </p>
+                    </ButtonType3>
+                  )
                 ))}
               </div>
 

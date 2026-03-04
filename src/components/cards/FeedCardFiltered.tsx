@@ -3,6 +3,7 @@
 import { Bookmark, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
+import { ButtonType1, ButtonType3 } from '@/components/custom/button';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
@@ -480,19 +481,19 @@ export default function FeedCardFiltered({
                                                 </p>
                                             )}
                                             <div className="flex items-center gap-[0.75rem]">
-                                                <button
+                                                <ButtonType3
                                                     type="button"
                                                     onClick={() => handleLikeComment(c.id)}
-                                                    className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
+                                                    className={`text-xs font-semibold p-0 min-w-0 border-0 bg-transparent ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
                                                 >
                                                     {t('like')}
-                                                </button>
-                                                <button
+                                                </ButtonType3>
+                                                <ButtonType3
                                                     onClick={() => handleReplyClick(c.id)}
-                                                    className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors"
+                                                    className="text-xs font-semibold text-text-secondary hover:text-text-brand p-0 min-w-0 border-0 bg-transparent"
                                                 >
                                                     {t('reply')}
-                                                </button>
+                                                </ButtonType3>
                                                 <span className="text-text-tertiary text-xs">
                                                     {formatCount(c.likes)} {t('likes')}
                                                 </span>
@@ -531,13 +532,13 @@ export default function FeedCardFiltered({
                                                             {renderRichText(reply.content, reply.mentionMap)}
                                                         </p>
                                                         <div className="flex items-center gap-[0.75rem]">
-                                                            <button
+                                                            <ButtonType3
                                                                 type="button"
                                                                 onClick={() => handleLikeComment(reply.id)}
-                                                                className={`text-xs font-semibold transition-colors ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
+                                                                className={`text-xs font-semibold p-0 min-w-0 border-0 bg-transparent ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
                                                             >
                                                                 {t('like')}
-                                                            </button>
+                                                            </ButtonType3>
                                                             <span className="text-text-tertiary text-xs">
                                                                 {formatCount(reply.likes)} {t('likes')}
                                                             </span>
@@ -575,9 +576,9 @@ export default function FeedCardFiltered({
                             <h3 className="font-label-large text-text-primary truncate">{profileName}</h3>
                             {joinButton && <span className="text-text-secondary">·</span>}
                             {joinButton && (
-                                <button className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light text-text-brand hover:bg-brand cursor-pointer font-label-medium text-xs min-w-[3.75rem]">
+                                <ButtonType1 className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light hover:bg-brand font-label-medium text-xs min-w-[3.75rem]">
                                     {t('join')}
-                                </button>
+                                </ButtonType1>
                             )}
                         </div>
                         <p className="font-body-small text-text-secondary truncate">
@@ -595,62 +596,62 @@ export default function FeedCardFiltered({
 
             {/* Reaction Bar */}
             <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
-                <button
-                    className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                <ButtonType3
+                    className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
                     onClick={handleLike}
                 >
                     <GoHeartFill
                         className={`w-[1.25rem] h-[1.25rem] ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`}
                     />
                     <span>{likeCount}</span>
-                </button>
+                </ButtonType3>
 
-                <button
-                    className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                <ButtonType3
+                    className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
                     onClick={toggleComments}
                 >
                     <Image width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[amia 1.25rem] h-[1.25rem] object-contain" />
                     <span>{commentCount}</span>
-                </button>
+                </ButtonType3>
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-[1rem]">
-                    <button
-                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                    <ButtonType3
+                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
                         onClick={handleLike}
                     >
                         <Image width={20} height={20} src="/LIKE.svg" alt="like" className="w-[1.25rem] h-[1.25rem] object-contain" />
                         <span>{t('like')}</span>
-                    </button>
+                    </ButtonType3>
 
-                    <button
-                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                    <ButtonType3
+                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
                         onClick={toggleCommentInput}
                     >
                         <Image width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-[1.25rem] h-[1.25rem] object-contain" />
                         <span>{t('comment')}</span>
-                    </button>
+                    </ButtonType3>
 
-                    <button
-                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                    <ButtonType3
+                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
                         onClick={() => setShowShareModal(true)}
                     >
                         <Image width={20} height={20} src="/SHARE.svg" alt="share" className="w-[1.25rem] h-[1.25rem] object-contain" />
                         <span>{t('share')}</span>
-                    </button>
+                    </ButtonType3>
                 </div>
 
-                <button
-                    className="inline-flex items-center gap-[0.5rem] text-sm font-body-small min-w-[3.75rem]"
+                <ButtonType3
+                    className="inline-flex items-center gap-[0.5rem] text-sm font-body-small min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
                     onClick={handleSave}
                 >
                     <Bookmark
                         className={`w-[1.25rem] h-[1.25rem] ${isSaved ? 'fill-brand text-brand' : 'text-text-secondary'}`}
                     />
                     <span className={isSaved ? 'text-brand' : 'text-text-secondary'}>{t('save')}</span>
-                </button>
+                </ButtonType3>
             </div>
 
             {/* Comments Section – only YOUR comments */}
