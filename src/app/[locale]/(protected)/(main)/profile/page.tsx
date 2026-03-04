@@ -51,6 +51,7 @@ export default function ProfilePage() {
     const setUser = useUserStore(state => state.setUser);
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
     const avatarDialogContentRef = useRef<HTMLDivElement | null>(null);
+    const avatarUploadSectionRef = useRef<HTMLDivElement | null>(null);
 
     const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_MY_PROFILE);
     const profile: Profile | undefined = data?.getProfile.profile;
@@ -86,12 +87,15 @@ export default function ProfilePage() {
         },
     });
 
-    // After crop, scroll upload step into view (fixes iPhone not showing upload screen)
+    // After crop, bring upload step into view on mobile (fixes iPhone upload area vanishing)
     useEffect(() => {
         if (!croppedImage || showCropper) return;
         const t = setTimeout(() => {
-            avatarDialogContentRef.current?.scrollTo?.({ top: 0, behavior: 'smooth' });
-        }, 150);
+            requestAnimationFrame(() => {
+                avatarDialogContentRef.current?.scrollTo?.({ top: 0, behavior: 'auto' });
+                avatarUploadSectionRef.current?.scrollIntoView?.({ behavior: 'auto', block: 'center', inline: 'nearest' });
+            });
+        }, 280);
         return () => clearTimeout(t);
     }, [croppedImage, showCropper]);
 
@@ -217,12 +221,12 @@ export default function ProfilePage() {
                 open={editAvatarOpen}
                 onOpenChange={setEditAvatarOpen}
                 showFooter={false}
-                contentClassName="min-h-[50%] lg:min-h-[80%]"
+                contentClassName="min-h-[50%] lg:min-h-[80%] flex flex-col"
                 contentRef={avatarDialogContentRef}
             >
-                <div className="lg:space-y-4 justify-center flex flex-col items-center">
+                <div className="flex flex-col items-center flex-1 min-h-0">
                     {/* Circular Image Preview/Upload Area */}
-                    <div className="flex justify-center lg:mb-20 my-6">
+                    <div className="flex justify-center lg:mb-20 my-6 flex-shrink-0">
                         <label
                             htmlFor="avatar-upload"
                             className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex items-center justify-center overflow-hidden relative group transition-all"
@@ -269,13 +273,15 @@ export default function ProfilePage() {
                         </label>
                     </div>
 
-                    <ButtonType2
-                        onClick={handleAvatarUpload}
-                        disabled={!croppedImage || uploading || updating}
-                        className="w-full py-3"
-                    >
-                        {uploading || updating ? tCommon("uploading") : tCommon("upload")}
-                    </ButtonType2>
+                    <div ref={avatarUploadSectionRef} className={`w-full px-4 pb-4 flex-shrink-0 ${croppedImage ? 'sticky bottom-0 left-0 right-0 bg-surface-default pt-3 z-10' : ''}`}>
+                        <ButtonType2
+                            onClick={handleAvatarUpload}
+                            disabled={!croppedImage || uploading || updating}
+                            className="w-full py-3"
+                        >
+                            {uploading || updating ? tCommon("uploading") : tCommon("upload")}
+                        </ButtonType2>
+                    </div>
                 </div>
             </CustomDialog>
 
