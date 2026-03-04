@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, type GetEventsData, type GetUserEventsData, type RegisterEventData, type SaveEventData, type Event } from '@/services/gql/events';
+import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, type GetEventsData, type GetUserEventsData, type RegisterEventData, type SaveEventData, type Event, getEventLocationDisplay, getEventCoverImage } from '@/services/gql/events';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -41,12 +41,9 @@ const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Eve
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical'
-                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.trim() || 'Physical'
-                                    : event.locationDetails?.virtual?.platform || 'Virtual'
-                                }
-                                attendees={event.registrationCount}
-                                imageUrl="/EVENT.png"
+                                location={getEventLocationDisplay(event)}
+                                attendees={event.registrationCount ?? 0}
+                                imageUrl={getEventCoverImage(event)}
                             />
                         </div>
                     ))}
@@ -87,12 +84,9 @@ const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loadin
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical'
-                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.trim() || 'Physical'
-                                    : event.locationDetails?.virtual?.platform || 'Virtual'
-                                }
-                                attendees={event.registrationCount}
-                                imageUrl="/EVENT.png"
+                                location={getEventLocationDisplay(event)}
+                                attendees={event.registrationCount ?? 0}
+                                imageUrl={getEventCoverImage(event)}
                             />
                         </div>
                     ))}
@@ -213,12 +207,9 @@ export default function Events() {
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical'
-                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.replace(/^,\s*|,\s*$/g, '').trim() || 'Physical'
-                                    : event.locationDetails?.virtual?.platform || 'Virtual'
-                                }
-                                attendees={event.registrationCount}
-                                imageUrl="/EVENT.png"
+                                location={getEventLocationDisplay(event)}
+                                attendees={event.registrationCount ?? 0}
+                                imageUrl={getEventCoverImage(event)}
                                 onAttendClick={() => handleAttendEvent(event.id)}
                             />
                         ))}
@@ -245,12 +236,9 @@ export default function Events() {
                                     hour: 'numeric',
                                     minute: '2-digit'
                                 })}
-                                location={event.locationType === 'physical'
-                                    ? `${event.locationDetails?.physical?.venue ?? ''}, ${event.locationDetails?.physical?.city ?? ''}`.replace(/^,\s*|,\s*$/g, '').trim() || 'Physical'
-                                    : event.locationDetails?.virtual?.platform || 'Virtual'
-                                }
-                                attendees={event.registrationCount}
-                                imageUrl="/EVENT.png"
+                                location={getEventLocationDisplay(event)}
+                                attendees={event.registrationCount ?? 0}
+                                imageUrl={getEventCoverImage(event)}
                                 onAttendClick={() => handleAttendEvent(event.id)}
                             />
                         ))}

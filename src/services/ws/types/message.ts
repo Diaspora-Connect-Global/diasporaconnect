@@ -58,10 +58,19 @@ export interface MessageSentResponse {
   conversationId: string;
 }
 
+/** One file attachment (from 'message:new' attachments array). */
+export interface IncomingMessageAttachment {
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
+  gcsPath?: string;
+}
+
 /**
  * Received via 'message:new'.
  * The server encrypts content at rest; `encryptedData` is opaque here.
  * Fetch plaintext via GraphQL `getMessages`.
+ * Use msg.attachments (array) for file refs; metadata is deprecated.
  */
 export interface IncomingMessage {
   messageId: string;
@@ -69,7 +78,7 @@ export interface IncomingMessage {
   senderId: string;
   encryptedData: unknown;
   type: 'text' | 'image' | 'video' | 'audio' | 'file';
-  metadata?: MessageSendMetadata;
+  attachments?: IncomingMessageAttachment[];
   replyToId?: string;
   timestamp: string;
   /** true when delivered on reconnect (offline queue) */

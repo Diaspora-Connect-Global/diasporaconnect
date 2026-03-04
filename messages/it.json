@@ -84,7 +84,9 @@
         "confirmVerification": {
             "title": "Inserisci il codice di verifica",
             "description": "Inserisci il codice di verifica che è stato inviato a {phoneNumber}",
-            "resend": "Rinvia codice"
+            "resend": "Rinvia codice",
+            "codeExpiresIn": "Il codice scade tra {time}",
+            "codeExpired": "Codice scaduto"
         },
         "topics": {
             "title": "Quali argomenti vuoi vedere su Diaspo Plug",
@@ -377,7 +379,9 @@
         "myCommunity": "La mia Community",
         "discoverMore": "Scopri altre community",
         "openInHome": "Apri community nella home",
-        "leaveCommunity": "Lascia community"
+        "leaveCommunity": "Lascia community",
+        "leaveCommunityTitle": "Lasciare la community?",
+        "leaveCommunityConfirm": "Dovrai rientrare per vedere post e eventi."
     },
     "notification": {
         "notifications": "Notifiche",
@@ -426,7 +430,12 @@
         "friendList": "Lista amici",
         "friends": "amici",
         "changeProfilePicture": "Cambia foto profilo",
-        "editProfilePicture": "Modifica foto profilo"
+        "editProfilePicture": "Modifica foto profilo",
+        "removeFriendConfirmTitle": "Rimuovere amico?",
+        "removeFriendConfirmDescription": "Questa persona sarà rimossa dalla tua lista amici. Dovrà inviare una nuova richiesta per riconnettersi.",
+        "blockFriendConfirmTitle": "Bloccare questo utente?",
+        "blockFriendConfirmDescription": "Non potrà più inviarti messaggi né vedere il tuo profilo.",
+        "youHaveBlockedThisUser": "Hai bloccato questo utente."
     },
     "profile": {
         "workExperience": {
@@ -538,7 +547,11 @@
     "common": {
         "scrollLeft": "Scorri a sinistra",
         "scrollRight": "Scorri a destra",
-        "almostThere": "Quasi fatto..."
+        "almostThere": "Quasi fatto...",
+        "remove": "Rimuovi",
+        "delete": "Elimina",
+        "cancel": "Annulla",
+        "confirm": "Conferma"
     },
     "metadata": {
         "title": "Diaspora Connect Global",
@@ -610,6 +623,8 @@
   "marketplace": {
     "title": "Marketplace",
     "cart": "Carrello",
+    "removeCartItemTitle": "Rimuovere l'articolo dal carrello?",
+    "removeCartItemConfirm": "Questo articolo sarà rimosso dal tuo carrello.",
     "products": "Prodotti",
     "services": "Servizi",
     "trending": "Di tendenza",
@@ -954,9 +969,14 @@
       "viewProfile": "Visualizza profilo",
       "report": "Segnala",
       "block": "Blocca",
+      "blockConfirmTitle": "Bloccare questo utente?",
+      "blockConfirmDescription": "Non potrà più inviarti messaggi né vedere il tuo profilo.",
       "deleteConversation": "Elimina conversazione",
+      "deleteConversationConfirmTitle": "Eliminare questa conversazione?",
+      "deleteConversationConfirmDescription": "I messaggi saranno rimossi dalla tua vista. Questa azione non può essere annullata.",
       "typeMessage": "Scrivi un messaggio...",
-      "cannotSend": "Impossibile inviare messaggi..."
+      "cannotSend": "Impossibile inviare messaggi...",
+      "typing": "sta scrivendo..."
     },
     "group": {
       "message": "Messaggio a {name}",

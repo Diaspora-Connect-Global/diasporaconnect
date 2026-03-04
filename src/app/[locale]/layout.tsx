@@ -14,6 +14,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://diaspoplug.com';
+const metadataBase = new URL(APP_URL.replace(/\/$/, ''));
+
 export async function generateMetadata({
   params
 }: {
@@ -21,13 +24,29 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
+  const title = 'Diaspoplug';
+  const description = t('description');
+  const defaultImage = '/og-default.png';
   return {
-    title: "Diaspoplug",
-    description: t('description'),
+    title,
+    description,
+    metadataBase,
     icons: {
       icon: '/favicon.svg',
       shortcut: '/favicon.svg',
       apple: '/favicon.svg',
+    },
+    openGraph: {
+      title,
+      description,
+      siteName: 'Diaspoplug',
+      images: [{ url: defaultImage, width: 1200, height: 630, alt: 'Diaspoplug' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [defaultImage],
     },
   };
 }

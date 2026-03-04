@@ -1,11 +1,20 @@
 import { io, Socket } from 'socket.io-client';
 
+/** One file attachment on a message (from 'message:new' attachments array). */
+export interface MessageAttachment {
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
+  gcsPath?: string;
+}
+
 /**
  * Message WebSocket client. Per backend spec, connect via the API Gateway (e.g. port 3000).
  * Auth: pass session ID or JWT in auth: { token } (no "Bearer " prefix).
  *
  * Payload received from backend via 'message:new' WebSocket event.
  * Backend encrypts content; use GraphQL getMessages for plaintext.
+ * Use msg.attachments (array) for file refs; metadata is deprecated.
  */
 export interface Message {
   messageId: string;
@@ -18,6 +27,8 @@ export interface Message {
   isOffline?: boolean;
   mentions?: string[];
   replyToId?: string;
+  /** File attachments (replaces metadata). */
+  attachments?: MessageAttachment[];
 }
 
 // Message payload to send to backend (we send plaintext)
@@ -190,11 +201,14 @@ class MessageService {
   }
 
   disconnect() {
-    if (this.socket) {
-      this.socket.removeAllListeners();
+    if (!this.socket) return;
+    this.socket.removeAllListeners();
+    try {
       this.socket.disconnect();
-      this.socket = null;
+    } catch (e) {
+      // Socket may still be connecting; ignore close errors
     }
+    this.socket = null;
   }
 
   sendMessage(payload: SendMessagePayload) {

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { NotificationCard } from "@/components/cards/notification/NotificationCard";
+import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import { Check, Settings } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from "react";
@@ -32,10 +33,14 @@ interface Tab {
 export default function Notification() {
     const t = useTranslations('notification');
 
+    const tCommon = useTranslations('common');
     const [filter, setFilter] = useState<'all' | 'associations' | 'opportunities' | 'events'>('all');
     const [notifications, setNotifications] = useState<UiNotification[]>([]);
     const [filteredNotifications, setFilteredNotifications] = useState<UiNotification[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [removeModalOpen, setRemoveModalOpen] = useState(false);
+    const [notificationIdToRemove, setNotificationIdToRemove] = useState<string | null>(null);
+    const [isRemoving, setIsRemoving] = useState(false);
 
     const TABS: Tab[] = useMemo(() => ([
         { label: t('allnotifications'), value: 'all' },
@@ -109,16 +114,27 @@ export default function Notification() {
         }
     };
 
-    const removeNotification = async (id: string) => {
+    const requestRemoveNotification = (id: string) => {
+        setNotificationIdToRemove(id);
+        setRemoveModalOpen(true);
+    };
+
+    const removeNotificationConfirm = async () => {
+        if (!notificationIdToRemove) return;
+        setIsRemoving(true);
         try {
             await deleteNotificationMutation({
-                variables: { notificationId: id },
+                variables: { notificationId: notificationIdToRemove },
             });
-            const updatedNotifications = notifications.filter(notification => notification.id !== id);
+            const updatedNotifications = notifications.filter(notification => notification.id !== notificationIdToRemove);
             setNotifications(updatedNotifications);
+            setRemoveModalOpen(false);
+            setNotificationIdToRemove(null);
         } catch (error) {
             console.error('Error removing notification:', error);
             setErrorMessage('Unable to update notifications.');
+        } finally {
+            setIsRemoving(false);
         }
     };
 
@@ -232,11 +248,22 @@ export default function Notification() {
                             time={not.date}
                             read={not.read}
                             onMarkAsRead={() => markAsRead(not.id)}
-                            onRemove={() => removeNotification(not.id)}
+                            onRemove={() => requestRemoveNotification(not.id)}
                         />
                     ))}
                 </div>
             )}
+
+            <ConfirmationModal
+                open={removeModalOpen}
+                onCancel={() => { setRemoveModalOpen(false); setNotificationIdToRemove(null); }}
+                onConfirm={removeNotificationConfirm}
+                title={t('removeNotificationTitle') || 'Remove notification?'}
+                description={t('removeNotificationConfirm') || 'This notification will be removed from your list.'}
+                confirmText={t('remove') || tCommon('remove') || 'Remove'}
+                confirmVariant="destructive"
+                isLoading={isRemoving}
+            />
         </div>
     );
 }

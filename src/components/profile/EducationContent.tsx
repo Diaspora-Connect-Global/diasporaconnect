@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { AddEducationModal } from './modals/AddEducationModal';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { ButtonType3 } from '../custom/button';
 import { BodySmall, CaptionLarge } from '../utils';
@@ -59,8 +60,12 @@ interface EducationContentProps {
 
 export default function EducationContent({ userId, isOwnProfile }: EducationContentProps) {
   const t = useTranslations('profile.education');
+  const tCommon = useTranslations('common');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEducation, setEditingEducation] = useState<Education | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [educationIdToDelete, setEducationIdToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Determine which query to use based on isOwnProfile
   const isMyProfile = isOwnProfile;
@@ -124,21 +129,27 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (educationId: string) => {
+  const handleDeleteClick = (educationId: string) => {
     if (!isOwnProfile) return;
-    
-    if (!confirm(t('confirmDelete') || 'Are you sure you want to delete this education?')) {
-      return;
-    }
+    setEducationIdToDelete(educationId);
+    setDeleteModalOpen(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!educationIdToDelete) return;
+    setIsDeleting(true);
     try {
       await deleteEducationMutation({
         variables: {
-          input: { educationId }
+          input: { educationId: educationIdToDelete }
         }
       });
+      setDeleteModalOpen(false);
+      setEducationIdToDelete(null);
     } catch (error) {
       console.error('Error in handleDelete:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -220,7 +231,7 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
                       <Edit className="w-4 h-4 text-text-secondary" />
                     </button>
                     <button
-                      onClick={() => handleDelete(edu.id)}
+                      onClick={() => handleDeleteClick(edu.id)}
                       className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                       title="Delete"
                     >
@@ -241,6 +252,20 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
           onClose={handleCloseModal}
           initialData={editingEducation}
           onSaveSuccess={handleSaveSuccess}
+        />
+      )}
+
+      {/* Delete confirmation - Only render for own profile */}
+      {isOwnProfile && (
+        <ConfirmationModal
+          open={deleteModalOpen}
+          onCancel={() => { setDeleteModalOpen(false); setEducationIdToDelete(null); }}
+          onConfirm={handleDeleteConfirm}
+          title={t('confirmDeleteTitle') || 'Delete education'}
+          description={t('confirmDelete') || 'Are you sure you want to delete this education?'}
+          confirmText={tCommon('delete') || 'Delete'}
+          confirmVariant="destructive"
+          isLoading={isDeleting}
         />
       )}
     </div>

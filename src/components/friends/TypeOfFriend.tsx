@@ -1,11 +1,13 @@
 import { FC } from "react";
+import { useTranslations } from "next-intl";
 import { FriendActionButtons, FriendButtonType } from "./FriendActionButtons";
 
 export type FriendType =
-    | "friends"           
-    | "suggested"         
+    | "friends"
+    | "suggested"
     | "request-received"
-    | "request-sent" ;
+    | "request-sent"
+    | "blocked";
 
 interface DropdownOption {
     type: "removeFriend" | "blockFriend";
@@ -16,7 +18,8 @@ interface TypeOfFriendProps {
     userId: string;
     type: FriendType;
     className?: string;
-    connectionId:string
+    connectionId: string;
+    onConnectionAction?: () => void;
 }
 
 /**
@@ -63,6 +66,9 @@ const getButtonsForType = (type: FriendType): {
                 ]
             };
 
+        case "blocked":
+            return { buttons: [] };
+
         default:
             return { buttons: [] };
     }
@@ -72,9 +78,22 @@ export const TypeOfFriend: FC<TypeOfFriendProps> = ({
     userId,
     type,
     connectionId,
-    className = "mt-4"
+    className = "mt-4",
+    onConnectionAction,
 }) => {
+    const t = useTranslations("friends");
     const { buttons, dropdownOptions } = getButtonsForType(type);
+
+    // Blocked: show label only, no actions
+    if (type === "blocked") {
+        return (
+            <div className={className}>
+                <p className="text-sm text-text-secondary italic">
+                    {t("youHaveBlockedThisUser") || "You have blocked this user."}
+                </p>
+            </div>
+        );
+    }
 
     // Don't render anything if there are no buttons (e.g., viewing own profile)
     if (buttons.length === 0) {
@@ -85,10 +104,11 @@ export const TypeOfFriend: FC<TypeOfFriendProps> = ({
         <div className={className}>
             <FriendActionButtons
                 userId={userId}
-                connectionId= {connectionId}
+                connectionId={connectionId}
                 buttonsToShow={buttons}
                 dropdownOptions={dropdownOptions}
                 className="flex space-x-2 justify-start"
+                onConnectionAction={onConnectionAction}
             />
         </div>
     );

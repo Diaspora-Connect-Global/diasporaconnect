@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Pagination from "@/components/custom/pagination";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 export default function OverviewPage() {
 
@@ -40,15 +40,18 @@ export default function OverviewPage() {
   ];
 
 
-  const data = [
-  { id: 1, name: "Apple" },
-  { id: 2, name: "Banana" },
-  { id: 3, name: "Cherry" },
-  { id: 4, name: "Date" },
-  { id: 5, name: "Elderberry" },
-  { id: 6, name: "Fig" },
-  { id: 7, name: "Grape" },
-];
+  const data = useMemo(
+    () => [
+      { id: 1, name: "Apple" },
+      { id: 2, name: "Banana" },
+      { id: 3, name: "Cherry" },
+      { id: 4, name: "Date" },
+      { id: 5, name: "Elderberry" },
+      { id: 6, name: "Fig" },
+      { id: 7, name: "Grape" },
+    ],
+    []
+  );
   return (
     <div className="">
       <h1 className="text-primary heading-xsmall mb-6">Overview</h1>

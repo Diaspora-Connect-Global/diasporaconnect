@@ -26,11 +26,12 @@ import {
 interface UseFriendActionsOptions {
     searchQuery?: string;
     isSearching?: boolean;
+    onConnectionAction?: () => void;
 }
 
 export const useFriendActions = (options?: UseFriendActionsOptions) => {
     const t = useTranslations('friends');
-    const { searchQuery = '', isSearching = false } = options || {};
+    const { searchQuery = '', isSearching = false, onConnectionAction } = options || {};
     
     // Use ref to get latest values in refetchQueries closure
     const searchStateRef = useRef({ searchQuery, isSearching });
@@ -155,6 +156,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
 
             if (data?.sendConnectionRequest.success) {
                 toast.success(t('toasts.requestSent'));
+                onConnectionAction?.();
             } else {
                 toast.error(data?.sendConnectionRequest.message || 'Failed to send request');
             }
@@ -164,7 +166,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         } finally {
             setActionLoading(actionKey, false);
         }
-    }, [t, sendConnectionRequest]);
+    }, [t, sendConnectionRequest, onConnectionAction]);
 
     const acceptRequest = useCallback(async (connectionId: string) => {
         const actionKey = `acceptRequest-${connectionId}`;
@@ -181,6 +183,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
 
             if (data?.acceptConnection.success) {
                 toast.success(t('toasts.friendAccepted'));
+                onConnectionAction?.();
             } else {
                 toast.error(data?.acceptConnection.message || 'Failed to accept request');
             }
@@ -190,7 +193,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         } finally {
             setActionLoading(actionKey, false);
         }
-    }, [t, acceptConnection]);
+    }, [t, acceptConnection, onConnectionAction]);
 
     const ignoreRequest = useCallback(async (connectionId: string) => {
         const actionKey = `ignoreRequest-${connectionId}`;
@@ -207,6 +210,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
 
             if (data?.rejectConnection.success) {
                 toast.success(t('toasts.requestIgnored'));
+                onConnectionAction?.();
             } else {
                 toast.error(data?.rejectConnection.message || 'Failed to ignore request');
             }
@@ -216,7 +220,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         } finally {
             setActionLoading(actionKey, false);
         }
-    }, [t, rejectConnection]);
+    }, [t, rejectConnection, onConnectionAction]);
 
     const cancelRequest = useCallback(async (connectionId: string) => {
         const actionKey = `cancelRequest-${connectionId}`;
@@ -234,6 +238,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
 
             if (data?.cancelConnection.success) {
                 toast.success(t('toasts.requestCancelled'));
+                onConnectionAction?.();
             } else {
                 toast.error(data?.cancelConnection.message || 'Failed to cancel request');
             }
@@ -243,7 +248,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         } finally {
             setActionLoading(actionKey, false);
         }
-    }, [t, cancelConnection]);
+    }, [t, cancelConnection, onConnectionAction]);
 
     const removeFriend = useCallback(async (connectionId: string) => {
         const actionKey = `removeFriend-${connectionId}`;
@@ -261,6 +266,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
 
             if (data?.rejectConnection.success) {
                 toast.success(t('toasts.friendRemoved'));
+                onConnectionAction?.();
             } else {
                 toast.error(data?.rejectConnection.message || 'Failed to remove friend');
             }
@@ -270,7 +276,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         } finally {
             setActionLoading(actionKey, false);
         }
-    }, [t, rejectConnection]);
+    }, [t, rejectConnection, onConnectionAction]);
 
     const blockFriend = useCallback(async (userId: string) => {
         const actionKey = `blockFriend-${userId}`;
@@ -287,6 +293,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
 
             if (data?.blockUser.success) {
                 toast.success(t('toasts.friendBlocked'));
+                onConnectionAction?.();
             } else {
                 toast.error(data?.blockUser.message || 'Failed to block user');
             }
@@ -296,7 +303,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         } finally {
             setActionLoading(actionKey, false);
         }
-    }, [t, blockUserMutation]);
+    }, [t, blockUserMutation, onConnectionAction]);
 
     // Helper function to check if a specific action is loading
     const isActionLoading = useCallback((actionType: string, id: string) => {

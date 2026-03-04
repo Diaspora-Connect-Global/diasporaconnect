@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
+import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 
 interface EventCardProps {
     title: string;
@@ -18,7 +19,7 @@ export default function EventCardSmall({ title, date, location, attendees, image
             <div className="relative w-[5rem] min-h-full lg:w-[4.6875rem]">
                 <Image
                     src={imageUrl}
-                    alt={`${title} background`}
+                    alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
                     fill
                     className="object-fill"
                     onError={(e) => {
@@ -27,11 +28,11 @@ export default function EventCardSmall({ title, date, location, attendees, image
                     }}
                 />
 
-                {/* Fallback image */}
+                {/* Fallback image when URL fails */}
                 <div className="hidden absolute inset-0 bg-surface-subtle">
                     <Image
-                        src="/EVENT.png"
-                        alt="Fallback event background"
+                        src={EVENT_PLACEHOLDER_IMAGE}
+                        alt={`Default image for event: ${title}`}
                         fill
                         className="object-cover"
                     />

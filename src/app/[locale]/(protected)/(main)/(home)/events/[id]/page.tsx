@@ -10,10 +10,15 @@ import {
   GET_USER_EVENTS,
   REGISTER_EVENT,
   SAVE_EVENT,
+  UNSAVE_EVENT,
   type Event,
   type GetEventData,
+  type GetUserEventsData,
   type RegisterEventData,
   type SaveEventData,
+  type UnsaveEventData,
+  getEventLocationDisplay,
+  getEventCoverImage,
 } from "@/services/gql/events";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,18 +33,6 @@ function formatEventDate(iso: string) {
   });
 }
 
-function formatEventLocation(event: Event) {
-  if (event.locationType === "physical" && event.locationDetails?.physical) {
-    const p = event.locationDetails.physical;
-    return [p.venue, p.city, p.country].filter(Boolean).join(", ") || "Physical event";
-  }
-  if (event.locationType === "virtual" && event.locationDetails?.virtual) {
-    return event.locationDetails.virtual.platform || "Virtual event";
-  }
-  if (event.locationType === "hybrid") return "Hybrid";
-  return "—";
-}
-
 function formatPriceLabel(event: Event) {
   if (!event.isPaid || !event.tickets?.length) return "Free";
   const cents = event.tickets[0]?.priceInCents;
@@ -51,12 +44,14 @@ export default function EventDetailPage() {
   const params = useParams();
   const eventId = params.id as string;
   const modalRef = useRef<PaidEventsModalRef>(null);
-  const [saved, setSaved] = useState(false);
 
   const { data, loading, error } = useQuery<GetEventData>(GET_EVENT, {
     variables: { id: eventId },
     skip: !eventId,
   });
+  const { data: userEventsData } = useQuery<GetUserEventsData>(GET_USER_EVENTS);
+  const savedEventIds = new Set((userEventsData?.userEvents?.saved ?? []).map((e) => e.id));
+  const saved = !!eventId && savedEventIds.has(eventId);
 
   const [registerForEvent, { loading: registering }] = useMutation<RegisterEventData>(REGISTER_EVENT, {
     onCompleted: () => toast.success("Successfully registered for event"),
@@ -67,8 +62,13 @@ export default function EventDetailPage() {
     ],
   });
   const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
-    onCompleted: () => setSaved(true),
+    onCompleted: () => toast.success("Event saved"),
     onError: () => toast.error("Failed to save event"),
+    refetchQueries: [{ query: GET_USER_EVENTS }],
+  });
+  const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, {
+    onCompleted: () => toast.success("Event removed from saved"),
+    onError: () => toast.error("Failed to unsave event"),
     refetchQueries: [{ query: GET_USER_EVENTS }],
   });
 
@@ -83,8 +83,12 @@ export default function EventDetailPage() {
   };
 
   const handleSave = async () => {
-    if (!eventId || saved) return;
-    await saveEvent({ variables: { eventId } });
+    if (!eventId) return;
+    if (saved) {
+      await unsaveEvent({ variables: { eventId } });
+    } else {
+      await saveEvent({ variables: { eventId } });
+    }
   };
 
   if (!eventId) {
@@ -110,7 +114,7 @@ export default function EventDetailPage() {
   }
 
   const dateStr = formatEventDate(event.startAt);
-  const locationStr = formatEventLocation(event);
+  const locationStr = getEventLocationDisplay(event);
   const priceStr = formatPriceLabel(event);
 
   return (
@@ -121,8 +125,8 @@ export default function EventDetailPage() {
             title={event.title}
             date={dateStr}
             location={locationStr}
-            attendees={event.registrationCount}
-            imageUrl="/EVENT.png"
+            attendees={event.registrationCount ?? 0}
+            imageUrl={getEventCoverImage(event)}
             description={event.description}
             priceLabel={priceStr}
             isRegistered={event.isRegistered}

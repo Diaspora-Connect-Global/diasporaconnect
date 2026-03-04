@@ -342,6 +342,8 @@ export const GET_FRIEND_SUGGESTIONS = gql`
           bio
           connectionCount
           avatarUrl
+          connectionStatus
+          connectionId
         }
         score
         matchReasons

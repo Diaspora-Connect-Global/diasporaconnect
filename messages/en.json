@@ -125,7 +125,9 @@
         "confirmVerification": {
             "title": "Enter verification code",
             "description": "Enter the verification code that was sent to {phoneNumber}",
-            "resend": "Resend code"
+            "resend": "Resend code",
+            "codeExpiresIn": "Code expires in {time}",
+            "codeExpired": "Code expired"
         },
         "topics": {
             "title": "What topics do you want to see on Diaspo Plug",
@@ -189,7 +191,14 @@
         "sharePost": "Share Post",
         "copy": "Copy",
         "copied": "Copied!",
-        "close": "Close"
+        "close": "Close",
+        "copyLink": "Copy link",
+        "shareInMessage": "Share in a message",
+        "shareToGroup": "Share to a group",
+        "shareLinkSent": "Link shared successfully",
+        "shareLinkFailed": "Failed to share link",
+        "noConversations": "No conversations yet",
+        "noGroups": "No groups yet"
     },
     "createPost": {
         "placeholder": "What's on your mind, {name}?",
@@ -431,6 +440,9 @@
             "opportunities": "Opportunities",
             "youropp": "Your opportunities",
             "create": "Create opportunity",
+            "createRestricted": "Creating and managing opportunities is restricted to community admins, association admins, and system admins. If you need to post an opportunity, please contact your community or association admin.",
+            "backToOpportunities": "Back to opportunities",
+            "discover": "Discover",
             "moreopp": "Explore opportunities",
             "none": {
                 "applied": "You have not applied to any opportunities yet",
@@ -453,6 +465,8 @@
         "discoverMore": "Discover more communities",
         "openInHome": "Open community in home",
         "leaveCommunity": "Leave community",
+        "leaveCommunityTitle": "Leave community?",
+        "leaveCommunityConfirm": "You will need to re-join to see posts and events.",
         "noCommunitiesJoined": "No communities joined yet.",
         "noCommunitiesFound": "No communities found. Try refreshing the page or adjusting your search."
     },
@@ -485,6 +499,11 @@
         "cancelRequest": "Cancel request",
         "removeFriend": "Remove friend",
         "blockFriend": "Block friend",
+        "removeFriendConfirmTitle": "Remove friend?",
+        "removeFriendConfirmDescription": "This will remove this person from your friends list. They will need to send a new request to connect again.",
+        "blockFriendConfirmTitle": "Block this user?",
+        "blockFriendConfirmDescription": "They will no longer be able to message you or see your profile.",
+        "youHaveBlockedThisUser": "You have blocked this user.",
         "mutualConnection": "{count} mutual connection",
         "mutualConnections": "{count} mutual connections",
         "tabs": {
@@ -652,7 +671,9 @@
         "decreaseRevisions": "Decrease revisions",
         "increaseRevisions": "Increase revisions",
         "decreaseQuantity": "Decrease quantity",
-        "increaseQuantity": "Increase quantity"
+        "increaseQuantity": "Increase quantity",
+        "remove": "Remove",
+        "delete": "Delete"
     },
     "metadata": {
         "title": "Diaspora Connect Global",
@@ -694,9 +715,14 @@
             "viewProfile": "View profile",
             "report": "Report",
             "block": "Block",
+            "blockConfirmTitle": "Block this user?",
+            "blockConfirmDescription": "They will no longer be able to message you or see your profile.",
             "deleteConversation": "Delete Conversation",
+            "deleteConversationConfirmTitle": "Delete this conversation?",
+            "deleteConversationConfirmDescription": "Messages will be removed from your view. This cannot be undone.",
             "typeMessage": "Type a message...",
-            "cannotSend": "Cannot send messages..."
+            "cannotSend": "Cannot send messages...",
+            "typing": "is typing..."
         },
         "group": {
             "message": "Message {name}",
@@ -849,6 +875,8 @@
     "marketplace": {
         "title": "Marketplace",
         "cart": "Cart",
+        "removeCartItemTitle": "Remove item from cart?",
+        "removeCartItemConfirm": "This item will be removed from your cart.",
         "products": "Products",
         "services": "Services",
         "trending": "Trending",

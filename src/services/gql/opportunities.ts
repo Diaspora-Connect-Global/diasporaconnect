@@ -27,6 +27,7 @@ export const GET_OPPORTUNITY = gql`
       owner { id name avatarUrl type }
       type
       category
+      subCategory
       title
       description
       responsibilities
@@ -44,6 +45,9 @@ export const GET_OPPORTUNITY = gql`
       salaryMax
       salaryCurrency
       deadline
+      applicationCount
+      skills
+      tags
       isSavedByCurrentUser
       hasCurrentUserApplied
       currentUserApplicationId
@@ -65,6 +69,7 @@ export const LIST_OPPORTUNITIES = gql`
         owner { id name avatarUrl type }
         type
         category
+        subCategory
         title
         description
         workMode
@@ -76,6 +81,9 @@ export const LIST_OPPORTUNITIES = gql`
         deadline
         status
         priorityLevel
+        applicationCount
+        skills
+        tags
         isSavedByCurrentUser
         hasCurrentUserApplied
         createdAt
@@ -93,6 +101,7 @@ export const GET_OPPORTUNITY_FEED = gql`
         id
         ownerType
         ownerId
+        owner { id name avatarUrl type }
         type
         category
         title
@@ -104,6 +113,7 @@ export const GET_OPPORTUNITY_FEED = gql`
         salaryCurrency
         deadline
         status
+        isSavedByCurrentUser
         createdAt
         publishedAt
       }
@@ -168,11 +178,14 @@ export const GET_APPLICATION = gql`
       opportunityId
       applicantId
       status
-      resumeFileRef
+      resumeFileRef { path filename mimeType sizeBytes }
       coverLetter
       customAnswers
       reviewNotes
+      reviewedBy
+      reviewedAt
       createdAt
+      updatedAt
     }
   }
 `;
@@ -207,7 +220,10 @@ export const GET_USER_APPLICATIONS = gql`
         applicantId
         status
         coverLetter
+        reviewNotes
         createdAt
+        updatedAt
+        resumeFileRef { filename mimeType sizeBytes }
         opportunity {
           id
           title
@@ -280,6 +296,7 @@ export const GET_SAVED_OPPORTUNITIES = gql`
           salaryCurrency
           deadline
           status
+          owner { id name avatarUrl type }
         }
       }
       total

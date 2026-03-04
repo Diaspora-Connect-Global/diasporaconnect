@@ -1,7 +1,13 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { useTranslations } from "next-intl";
+import { ConfirmationModal } from "@/components/custom/confirmationModal";
 
 export default function OrderDetailsPage() {
+  const t = useTranslations("vendors.orders");
+  const tCommon = useTranslations("common");
+  const [declineModalOpen, setDeclineModalOpen] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
   const orderData = {
     orderNumber: "0001",
     orderDate: "23 Nov 2025",
@@ -51,10 +57,19 @@ export default function OrderDetailsPage() {
     total: "GH₵2769.00"
   };
 
-  const handleDeclineOrder = () => {
-    if (confirm("Are you sure you want to decline this order?")) {
+  const handleDeclineOrderClick = () => {
+    setDeclineModalOpen(true);
+  };
+
+  const handleDeclineOrderConfirm = async () => {
+    setIsDeclining(true);
+    try {
+      // TODO: wire to decline order mutation when API is available
       console.log("Order declined");
       alert("Order has been declined");
+      setDeclineModalOpen(false);
+    } finally {
+      setIsDeclining(false);
     }
   };
 
@@ -84,7 +99,7 @@ export default function OrderDetailsPage() {
         <h1 className="text-2xl font-semibold text-gray-900">Orders details</h1>
         <div className="flex gap-3">
           <button
-            onClick={handleDeclineOrder}
+            onClick={handleDeclineOrderClick}
             className="px-6 py-2.5 border-2 border-red-500 text-red-500 rounded-lg font-medium hover:bg-red-50 transition-colors"
           >
             Decline order
@@ -200,6 +215,17 @@ export default function OrderDetailsPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        open={declineModalOpen}
+        onCancel={() => setDeclineModalOpen(false)}
+        onConfirm={handleDeclineOrderConfirm}
+        title={t("declineOrderTitle") || "Decline order"}
+        description={t("declineOrderConfirm") || "Are you sure you want to decline this order?"}
+        confirmText={t("declineOrder") || tCommon("confirm") || "Decline"}
+        confirmVariant="destructive"
+        isLoading={isDeclining}
+      />
     </div>
   );
 }

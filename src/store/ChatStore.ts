@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { Message, Conversation, UserConversationPreference, User, Group, GroupMember, mockGroupsData, mockGroupMembers, mockUsers } from '@/data/chats';
 import { mockMessages, mockConversations, mockUserConversationPreferences } from '@/data/chats';
 
-// Real API message type (from GraphQL/WebSocket)
+// Real API message type (from GraphQL/WebSocket). attachments replaced mediaMetadata (multi-file).
 export interface ApiMessage {
   id: string;
   conversationId: string;
@@ -11,17 +11,20 @@ export interface ApiMessage {
   content: string;
   mentions?: string[];
   replyToId?: string;
-  mediaMetadata?: {
-    fileId: string;
-    fileName: string;
-    fileSize: number;
-    mimeType: string;
-    gcsPath: string;
+  /** File attachments (replaces mediaMetadata). Use for display and multi-file. */
+  attachments?: Array<{
+    fileName?: string;
+    fileSize?: number;
+    mimeType?: string;
+    gcsPath?: string;
+    fileId?: string;
     width?: number;
     height?: number;
     duration?: number;
-  };
-  status?: 'sent' | 'delivered' | 'read';
+  }>;
+  status?: 'sending' | 'sent' | 'delivered' | 'read';
+  /** Blob object URLs for placeholder (status === 'sending') only. Not from API. */
+  sendingPreviews?: Array<{ url?: string; mimeType: string }>;
   createdAt: string;
 }
 
@@ -43,6 +46,7 @@ interface ChatStore {
   setActiveChat: (chat: { id: string; type: 'direct' | 'group' } | null) => void;
   addMessage: (message: Message) => void;
   addApiMessage: (message: ApiMessage) => void;
+  removeApiMessage: (messageId: string) => void;
   updateApiMessageStatus: (messageId: string, status: 'delivered' | 'read') => void;
   getApiMessagesByConversation: (conversationId: string) => ApiMessage[];
   clearApiMessages: (conversationId: string) => void;
@@ -113,6 +117,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       if (exists) return state;
       return { apiMessages: [...state.apiMessages, message] };
     });
+  },
+
+  // Remove an API message by id (e.g. placeholder with temp id when send completes)
+  removeApiMessage: (messageId: string) => {
+    set((state) => ({
+      apiMessages: state.apiMessages.filter(m => m.id !== messageId),
+    }));
   },
 
   updateApiMessageStatus: (messageId: string, status: 'delivered' | 'read') => {

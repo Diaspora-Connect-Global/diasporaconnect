@@ -287,6 +287,21 @@ export default function CompleteAccount() {
   };
 
   /* ------------------------------------------------------------------ */
+  /* Redirect to registration (clear token/session and go to signup) */
+  /* ------------------------------------------------------------------ */
+  const redirectToRegistration = () => {
+    sessionStorage.removeItem('signupEmail');
+    sessionStorage.removeItem('signupPassword');
+    sessionStorage.removeItem('signupDeviceId');
+    sessionStorage.removeItem('registrationToken');
+    sessionStorage.removeItem('otp_expires_at');
+    sessionStorage.removeItem('accountFormData');
+    sessionStorage.removeItem('accountFormStep');
+    sessionStorage.removeItem('oauthRegistration');
+    router.push('/signup');
+  };
+
+  /* ------------------------------------------------------------------ */
   /* Step 5 – Verify OTP */
   /* ------------------------------------------------------------------ */
   const submitFormB = async () => {
@@ -294,6 +309,12 @@ export default function CompleteAccount() {
       setVerifyOTPLoading(true);
       const token =
         sessionStorage.getItem('registrationToken');
+
+      if (!token) {
+        toast.error('Your verification session has expired. Please register again.');
+        redirectToRegistration();
+        return;
+      }
 
       const { data } = await verifyOtp({
         variables: {
@@ -346,7 +367,16 @@ export default function CompleteAccount() {
       toast.success('Phone number verified successfully!');
       nextStep();
     } catch (e: any) {
-      toast.error(e.message);
+      const message = e?.message ?? String(e);
+      if (
+        message.includes('does not exist') ||
+        message.includes('expired')
+      ) {
+        toast.error('Your verification code has expired. Please register again.');
+        redirectToRegistration();
+      } else {
+        toast.error(message);
+      }
     } finally {
       setVerifyOTPLoading(false);
     }

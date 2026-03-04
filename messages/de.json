@@ -84,7 +84,9 @@
         "confirmVerification": {
             "title": "Bestätigungscode eingeben",
             "description": "Geben Sie den Bestätigungscode ein, der an {phoneNumber} gesendet wurde",
-            "resend": "Code erneut senden"
+            "resend": "Code erneut senden",
+            "codeExpiresIn": "Code läuft ab in {time}",
+            "codeExpired": "Code abgelaufen"
         },
         "topics": {
             "title": "Welche Themen möchten Sie auf Diaspo Plug sehen",
@@ -377,7 +379,9 @@
         "myCommunity": "Meine Community",
         "discoverMore": "Weitere Communities entdecken",
         "openInHome": "Community auf der Startseite öffnen",
-        "leaveCommunity": "Community verlassen"
+        "leaveCommunity": "Community verlassen",
+        "leaveCommunityTitle": "Community verlassen?",
+        "leaveCommunityConfirm": "Sie müssen erneut beitreten, um Beiträge und Veranstaltungen zu sehen."
     },
     "notification": {
         "notifications": "Benachrichtigungen",
@@ -426,7 +430,12 @@
         "friendList": "Freundesliste",
         "friends": "Freunde",
         "changeProfilePicture": "Profilbild ändern",
-        "editProfilePicture": "Profilbild bearbeiten"
+        "editProfilePicture": "Profilbild bearbeiten",
+        "removeFriendConfirmTitle": "Freund entfernen?",
+        "removeFriendConfirmDescription": "Diese Person wird aus Ihrer Freundesliste entfernt. Sie muss eine neue Anfrage senden, um sich wieder zu verbinden.",
+        "blockFriendConfirmTitle": "Diesen Benutzer blockieren?",
+        "blockFriendConfirmDescription": "Er oder sie kann Ihnen keine Nachrichten mehr senden oder Ihr Profil sehen.",
+        "youHaveBlockedThisUser": "Sie haben diesen Benutzer blockiert."
     },
     "profile": {
         "workExperience": {
@@ -538,7 +547,11 @@
     "common": {
         "scrollLeft": "Nach links scrollen",
         "scrollRight": "Nach rechts scrollen",
-        "almostThere": "Fast geschafft..."
+        "almostThere": "Fast geschafft...",
+        "remove": "Entfernen",
+        "delete": "Löschen",
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen"
     },
     "metadata": {
         "title": "Diaspo Plug",
@@ -610,6 +623,8 @@
   "marketplace": {
     "title": "Marktplatz",
     "cart": "Warenkorb",
+    "removeCartItemTitle": "Artikel aus dem Warenkorb entfernen?",
+    "removeCartItemConfirm": "Dieser Artikel wird aus Ihrem Warenkorb entfernt.",
     "products": "Produkte",
     "services": "Dienstleistungen",
     "trending": "Im Trend",
@@ -954,9 +969,14 @@
       "viewProfile": "Profil anzeigen",
       "report": "Melden",
       "block": "Blockieren",
+      "blockConfirmTitle": "Diesen Benutzer blockieren?",
+      "blockConfirmDescription": "Er oder sie kann Ihnen keine Nachrichten mehr senden oder Ihr Profil sehen.",
       "deleteConversation": "Unterhaltung löschen",
+      "deleteConversationConfirmTitle": "Diese Unterhaltung löschen?",
+      "deleteConversationConfirmDescription": "Nachrichten werden aus Ihrer Ansicht entfernt. Dies kann nicht rückgängig gemacht werden.",
       "typeMessage": "Nachricht eingeben...",
-      "cannotSend": "Nachrichten können nicht gesendet werden..."
+      "cannotSend": "Nachrichten können nicht gesendet werden...",
+      "typing": "schreibt..."
     },
     "group": {
       "message": "Nachricht an {name}",

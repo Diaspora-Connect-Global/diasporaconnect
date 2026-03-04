@@ -4,34 +4,48 @@
 // File: components/chats/DirectMessageChat.tsx
 
 import { formatChatTimestamp } from "@/macros/time";
-import { Check, ChevronRight, InfoIcon, X } from "lucide-react";
+import { Check, ChevronRight, InfoIcon, Loader2, X } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
+import { MessageAttachments } from "./MessageAttachments";
+import { LinkPreviewCard, isLinkOnlyContent } from "./LinkPreviewCard";
+import { getFirstUrlInText } from "@/lib/urlPreview";
+import { SendingFilesBubble } from "./SendingFilesBubble";
 import { useChatStore, ApiMessage } from "@/store/ChatStore";
 import { useTranslations } from 'next-intl';
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
+import { BLOCK_USER } from "@/services/gql/users";
+import type { BlockUserResponse } from "@/services/gql/types/users";
+import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
+import { ConfirmationModal } from "@/components/custom/confirmationModal";
+import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
+import { toast } from "sonner";
 
 export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; onBack?: () => void }) {
     const t = useTranslations('chat.direct');
     const tCommon = useTranslations('common');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const pendingRevokeRef = useRef<Record<string, string[]>>({});
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
     const [otherUserTyping, setOtherUserTyping] = useState(false);
+    const [blockModalOpen, setBlockModalOpen] = useState(false);
+    const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
+    const [isBlocking, setIsBlocking] = useState(false);
 
-    const { addApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
+    const { addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages, clearApiMessages } = useChatStore();
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
@@ -40,7 +54,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
     const [createConversation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
     const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE);
+    const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
     const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
+        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
+    });
+    const [blockUserMutation] = useMutation<BlockUserResponse>(BLOCK_USER, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
 
@@ -158,7 +176,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
             replyToId: m.replyToId,
             status: 'read',
-            mediaMetadata: m.mediaMetadata as ApiMessage['mediaMetadata'],
+            attachments: m.attachments ?? [],
         }));
         setApiMessages(conversationId, history);
     }, [messagesData, conversationId, setApiMessages]);
@@ -257,25 +275,104 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [apiMessages]);
 
-    const handleSendMessage = useCallback(async (messageText: string, image?: string) => {
-        if ((!messageText.trim() && !image) || !conversationId || !currentUserId) return;
+    const handleSendMessage = useCallback(async (messageText: string, files?: File[]) => {
+        const hasText = !!messageText.trim();
+        const hasFiles = !!files?.length;
+        if ((!hasText && !hasFiles) || !conversationId || !currentUserId) return;
 
         const idempotencyKey = crypto.randomUUID();
         setIsSending(true);
+        const placeholderId = `pending-${Date.now()}-${idempotencyKey.slice(0, 8)}`;
+
         try {
-            const messageType = image ? 'IMAGE' : 'TEXT';
-            const content = messageText?.trim() || (image ? 'Image' : '');
+            let content: string;
+            let messageType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' = 'TEXT';
+            let attachments: Array<{ publicUrl: string; mimeType: string }> = [];
+
+            if (hasFiles && files) {
+                const sendingPreviews: Array<{ url?: string; mimeType: string }> = [];
+                const urlsToRevoke: string[] = [];
+                for (const file of files) {
+                    const mime = file.type || 'application/octet-stream';
+                    if (mime.startsWith('image/') || mime.startsWith('video/')) {
+                        const url = URL.createObjectURL(file);
+                        sendingPreviews.push({ url, mimeType: mime });
+                        urlsToRevoke.push(url);
+                    } else {
+                        sendingPreviews.push({ mimeType: mime });
+                    }
+                }
+                pendingRevokeRef.current[placeholderId] = urlsToRevoke;
+                addApiMessage({
+                    id: placeholderId,
+                    conversationId,
+                    senderId: currentUserId,
+                    type: 'IMAGE',
+                    content: messageText.trim(),
+                    createdAt: new Date().toISOString(),
+                    status: 'sending',
+                    attachments: [],
+                    sendingPreviews,
+                });
+
+                for (const file of files) {
+                    const contentType = chatMediaContentType(file.type || 'application/octet-stream');
+                    const { data: uploadData } = await getUploadUrl({
+                        variables: { contentType, category: 'chat' },
+                    });
+                    if (!uploadData?.getUploadUrl?.uploadUrl) {
+                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                        delete pendingRevokeRef.current[placeholderId];
+                        removeApiMessage(placeholderId);
+                        toast.error('Could not get upload URL. Please try again.');
+                        setIsSending(false);
+                        return;
+                    }
+                    const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
+                    const uploadRes = await fetch(uploadUrl, {
+                        method: 'PUT',
+                        body: file,
+                        headers: { 'Content-Type': contentType },
+                    });
+                    if (!uploadRes.ok) {
+                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                        delete pendingRevokeRef.current[placeholderId];
+                        removeApiMessage(placeholderId);
+                        toast.error(`Upload failed for ${file.name}. Please try again.`);
+                        setIsSending(false);
+                        return;
+                    }
+                    attachments.push({ publicUrl, mimeType: contentType });
+                }
+
+                const firstMime = attachments[0]?.mimeType ?? '';
+                if (firstMime.startsWith('image/')) messageType = 'IMAGE';
+                else if (firstMime.startsWith('video/')) messageType = 'VIDEO';
+                else if (firstMime.startsWith('audio/')) messageType = 'AUDIO';
+                else messageType = 'FILE';
+                content = messageText.trim() || (attachments[0]?.publicUrl ?? '');
+            } else {
+                content = messageText.trim();
+            }
 
             const { data } = await sendMessageMutation({
                 variables: {
                     conversationId,
                     messageType,
                     content,
+                    ...(attachments.length && {
+                        attachments: attachments.map((a) => ({ publicUrl: a.publicUrl, mimeType: a.mimeType })),
+                    }),
                     idempotencyKey,
                 },
             });
 
             if (data?.sendMessage) {
+                if (hasFiles && files) {
+                    (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                    delete pendingRevokeRef.current[placeholderId];
+                    removeApiMessage(placeholderId);
+                }
                 const sentMsg: ApiMessage = {
                     id: data.sendMessage,
                     conversationId,
@@ -284,24 +381,68 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     content,
                     createdAt: new Date().toISOString(),
                     status: 'sent',
+                    ...(attachments.length && {
+                        attachments: attachments.map((a, i) => ({
+                            gcsPath: a.publicUrl,
+                            mimeType: a.mimeType,
+                            fileName: files?.[i]?.name,
+                            fileSize: files?.[i]?.size,
+                        })),
+                    }),
                 };
                 addApiMessage(sentMsg);
 
                 if (isConnected) {
+                    const wsType = messageType === 'IMAGE' ? 'image' : messageType === 'VIDEO' ? 'video' : messageType === 'AUDIO' ? 'audio' : 'file';
                     messageService.sendMessage({
                         conversationId,
-                        type: image ? 'image' : 'text',
+                        type: messageType === 'TEXT' ? 'text' : wsType,
                         content,
                         idempotencyKey,
                     });
                 }
             }
         } catch (error) {
+            if (hasFiles && files) {
+                (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
+                delete pendingRevokeRef.current[placeholderId];
+                removeApiMessage(placeholderId);
+            }
             console.error('❌ Failed to send message:', error);
+            toast.error('Failed to send message. Please try again.');
         } finally {
             setIsSending(false);
         }
-    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, isConnected]);
+    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, removeApiMessage, isConnected, getUploadUrl]);
+
+    const handleBlockConfirm = async () => {
+        setIsBlocking(true);
+        try {
+            const { data } = await blockUserMutation({
+                variables: { input: { blockedId: chat.id } },
+            });
+            if (data?.blockUser?.success) {
+                toast.success(t('blockSuccess') || 'User blocked.');
+                setBlockModalOpen(false);
+                onBack?.();
+            } else {
+                toast.error(data?.blockUser?.message || 'Failed to block user.');
+            }
+        } catch (err) {
+            console.error('Block user error:', err);
+            toast.error('Failed to block user.');
+        } finally {
+            setIsBlocking(false);
+        }
+    };
+
+    const handleDeleteConversationConfirm = () => {
+        if (conversationId) {
+            clearApiMessages(conversationId);
+        }
+        setDeleteConversationModalOpen(false);
+        onBack?.();
+    };
 
     return (
         <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
@@ -376,30 +517,76 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
-                                    {message.type === 'IMAGE' && message.mediaMetadata?.gcsPath ? (
-                                        <div className="mb-2">
-                                            <img
-                                                src={message.mediaMetadata.gcsPath}
-                                                alt="Shared image"
-                                                className="rounded-2xl max-w-full h-auto"
-                                            />
-                                            {message.content && (
-                                                <p className="text-sm text-text-primary mt-2">{message.content}</p>
-                                            )}
+                                    {message.status === 'sending' ? (
+                                        message.sendingPreviews?.length ? (
+                                            <>
+                                                <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
+                                                {message.content && (
+                                                    <div className={`mt-2 px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                        {message.content}
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <div className={`flex items-center gap-2 px-4 py-3 rounded-2xl ${isMe ? 'bg-text-brand/80 text-text-white' : 'bg-surface-success/50 text-text-primary'}`}>
+                                                <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                                                <span className="text-sm">Sending...</span>
+                                            </div>
+                                        )
+                                    ) : message.attachments?.length ? (
+                                        (() => {
+                                            const attachmentUrls = (message.attachments ?? []).map((a) => a.gcsPath).filter(Boolean) as string[];
+                                            const contentUrl = message.content?.trim();
+                                            const firstUrl = getFirstUrlInText(message.content);
+                                            const contentIsAttachmentUrl = contentUrl && attachmentUrls.some((u) => u === contentUrl);
+                                            const firstUrlIsAttachmentUrl = firstUrl && attachmentUrls.some((u) => u === firstUrl);
+                                            return (
+                                                <>
+                                                    <MessageAttachments attachments={message.attachments} />
+                                                    {isLinkOnlyContent(message.content) && !contentIsAttachmentUrl && (
+                                                        <div className="mt-2">
+                                                            <LinkPreviewCard url={message.content!.trim()} />
+                                                        </div>
+                                                    )}
+                                                    {message.content && !isLinkOnlyContent(message.content) && (
+                                                        <>
+                                                            <div className={`mt-2 px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                                {message.content}
+                                                            </div>
+                                                            {firstUrl && !firstUrlIsAttachmentUrl && (
+                                                                <div className="mt-2">
+                                                                    <LinkPreviewCard url={firstUrl} />
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </>
+                                            );
+                                        })()
+                                    ) : isLinkOnlyContent(message.content) ? (
+                                        <div className={isMe ? 'flex justify-end' : ''}>
+                                            <LinkPreviewCard url={message.content.trim()} />
                                         </div>
                                     ) : (
-                                        <div
-                                            className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${isMe
-                                                ? 'bg-text-brand text-text-white'
-                                                : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                                }`}
-                                        >
-                                            {message.content}
-                                        </div>
+                                        <>
+                                            <div
+                                                className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${isMe
+                                                    ? 'bg-text-brand text-text-white'
+                                                    : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                    }`}
+                                            >
+                                                {message.content}
+                                            </div>
+                                            {getFirstUrlInText(message.content) && (
+                                                <div className="mt-2">
+                                                    <LinkPreviewCard url={getFirstUrlInText(message.content)!} />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                     <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 justify-end ${isMe ? "text-text-tertiary" : ""}`}>
                                         {formatChatTimestamp(message.createdAt)}
-                                        {isMe && (
+                                        {isMe && message.status !== 'sending' && (
                                             <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
                                                 {message.status === "read" || message.status === "delivered" ? (
                                                     <span className="inline-flex"><Check className="w-3 h-3 -ml-0.5" /><Check className="w-3 h-3 -ml-1" /></span>
@@ -419,7 +606,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 {/* Typing indicator */}
                 {otherUserTyping && (
                     <div className="flex-shrink-0 px-3 md:px-4 py-1 text-sm text-text-secondary italic">
-                        {displayName} {t('typing', { defaultValue: 'typing...' })}
+                        {displayName} {t('typing')}
                     </div>
                 )}
 
@@ -501,12 +688,18 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
 
-                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                <div
+                                    className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors"
+                                    onClick={() => setBlockModalOpen(true)}
+                                >
                                     <p className="text-sm font-medium">{t('block')}</p>
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
 
-                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
+                                <div
+                                    className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors"
+                                    onClick={() => setDeleteConversationModalOpen(true)}
+                                >
                                     <p className="text-sm font-medium">{t('deleteConversation')}</p>
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
@@ -515,6 +708,26 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     </div>
                 </>
             )}
+
+            <ConfirmationModal
+                open={blockModalOpen}
+                onCancel={() => setBlockModalOpen(false)}
+                onConfirm={handleBlockConfirm}
+                title={t('blockConfirmTitle') || 'Block this user?'}
+                description={t('blockConfirmDescription') || 'They will no longer be able to message you or see your profile.'}
+                confirmText={t('block') || 'Block'}
+                confirmVariant="destructive"
+                isLoading={isBlocking}
+            />
+            <ConfirmationModal
+                open={deleteConversationModalOpen}
+                onCancel={() => setDeleteConversationModalOpen(false)}
+                onConfirm={handleDeleteConversationConfirm}
+                title={t('deleteConversationConfirmTitle') || 'Delete this conversation?'}
+                description={t('deleteConversationConfirmDescription') || 'Messages will be removed from your view. This cannot be undone.'}
+                confirmText={t('deleteConversation') || tCommon('delete') || 'Delete'}
+                confirmVariant="destructive"
+            />
         </div>
     );
 }

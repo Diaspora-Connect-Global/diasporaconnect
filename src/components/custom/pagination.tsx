@@ -19,12 +19,12 @@ const Pagination = ({
 
     useEffect(() => {
         setActiveTab(1);
-    }, [setPerPage]);
+    }, [perPage]);
 
     useEffect(() => {
         const start = (activeTab - 1) * perPage;
         const end = start + perPage;
-        setNewList(LIST?.slice(start, end));
+        setNewList(LIST?.slice(start, end) ?? []);
     }, [LIST, activeTab, perPage, setNewList]);
 
     const numOfTabs = Math.ceil(LIST?.length / perPage);

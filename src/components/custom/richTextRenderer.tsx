@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Map from mention tag (without @) → userId.
@@ -77,14 +77,16 @@ export function renderRichText(
         );
       }
     } else if (token.startsWith('#')) {
-      // Hashtag — bold with brand-ish color (no extra padding in compact)
+      // Hashtag — link to feed filtered by this tag (tag without #)
+      const tagSlug = token.slice(1);
       parts.push(
-        <span
+        <Link
           key={match.index}
-          className="font-bold text-text-brand cursor-pointer hover:underline"
+          href={`/feed?hashtag=${encodeURIComponent(tagSlug)}`}
+          className="font-bold text-text-brand hover:underline no-underline"
         >
           {token}
-        </span>,
+        </Link>,
       );
     }
 

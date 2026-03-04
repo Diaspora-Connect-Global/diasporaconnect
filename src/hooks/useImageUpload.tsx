@@ -1,26 +1,8 @@
 "use client"
 import { useState } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
-import { gql } from '@apollo/client';
 import { toast } from 'sonner';
-
-const GET_UPLOAD_URL = gql`
-  query GetUploadUrl($contentType: String!, $category: String!) {
-    getUploadUrl(contentType: $contentType, category: $category) {
-      url
-      publicUrl
-      path
-    }
-  }
-`;
-
-interface GetUploadUrlResponse {
-  getUploadUrl: {
-    url: string;
-    publicUrl: string;
-    path: string;
-  };
-}
+import { GET_UPLOAD_URL, type GetUploadUrlResponse } from '@/services/gql/upload';
 
 type ImageCategory = 'avatar' | 'group_avatar';
 
@@ -288,14 +270,14 @@ export const useImageUpload = ({
         throw new Error('Failed to get upload URL');
       }
 
-      const { url, publicUrl } = uploadData.getUploadUrl;
+      const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
 
       // Step 2: Convert base64 to blob
       const response = await fetch(croppedImage);
       const blob = await response.blob();
 
       // Step 3: Upload to the signed URL
-      const uploadResponse = await fetch(url, {
+      const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: blob,
         headers: {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRight, MoreHorizontalIcon } from 'lucide-react';
 import {
     DropdownMenu,
@@ -17,6 +17,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useMutation } from '@apollo/client/react';
 import { LEAVE_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, LIST_AVAILABLE_COMMUNITIES } from '@/services/gql/community';
 import { toast } from 'sonner';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 
 
 
@@ -40,6 +41,8 @@ export function MyCommunityCard({
     const tCommon = useTranslations('common');
 
     const setSelectedCommunity = useCommunityStore(state => state.setSelectedCommunity);
+    const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+    const [isLeaving, setIsLeaving] = useState(false);
     
     const [leaveCommunity] = useMutation<{leaveCommunity: {success: boolean, message: string}}>(LEAVE_COMMUNITY, {
         refetchQueries: [
@@ -49,7 +52,12 @@ export function MyCommunityCard({
         awaitRefetchQueries: false,
     });
     
-    const handleLeaveCommunity = async () => {
+    const handleLeaveCommunityClick = () => {
+        setLeaveModalOpen(true);
+    };
+
+    const handleLeaveCommunityConfirm = async () => {
+        setIsLeaving(true);
         try {
             const { data } = await leaveCommunity({
                 variables: { communityId: id }
@@ -57,12 +65,15 @@ export function MyCommunityCard({
 
             if (data?.leaveCommunity?.success) {
                 toast.success(data.leaveCommunity.message || 'Left community successfully');
+                setLeaveModalOpen(false);
             } else {
                 toast.error('Failed to leave community');
             }
         } catch (err) {
             console.error('Failed to leave community:', err);
             toast.error('Failed to leave community');
+        } finally {
+            setIsLeaving(false);
         }
     };
     
@@ -110,13 +121,24 @@ export function MyCommunityCard({
                                 <ChevronRight className="w-4 h-4" />
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={handleLeaveCommunity} className='text-text-danger font-body-large'>
+                            <DropdownMenuItem onSelect={handleLeaveCommunityClick} className='text-text-danger font-body-large'>
                                 {t('leaveCommunity')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
             </div>
+
+            <ConfirmationModal
+                open={leaveModalOpen}
+                onCancel={() => setLeaveModalOpen(false)}
+                onConfirm={handleLeaveCommunityConfirm}
+                title={t('leaveCommunityTitle') || 'Leave community?'}
+                description={t('leaveCommunityConfirm') || 'You will need to re-join to see posts and events.'}
+                confirmText={t('leaveCommunity') || 'Leave'}
+                confirmVariant="destructive"
+                isLoading={isLeaving}
+            />
         </header>
     );
 }

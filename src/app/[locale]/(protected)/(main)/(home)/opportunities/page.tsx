@@ -9,12 +9,14 @@ import { opportunities } from "./data";
 import {
   GET_USER_APPLICATIONS,
   GET_SAVED_OPPORTUNITIES,
+  LIST_OPPORTUNITIES,
   WITHDRAW_APPLICATION,
   UNSAVE_OPPORTUNITY,
 } from "@/services/gql/opportunities";
 import type {
   UserApplicationsResponse,
   GetSavedOpportunitiesData,
+  ListOpportunitiesResponse,
 } from "@/services/gql/types/opportunities";
 import type { Application } from "@/services/gql/types/opportunities";
 
@@ -177,6 +179,11 @@ export default function Opportunities() {
     const { data: savedData } = useQuery<GetSavedOpportunitiesData>(GET_SAVED_OPPORTUNITIES, {
         variables: { limit: 50, offset: 0 },
     });
+    const { data: listData } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
+        variables: {
+            input: { limit: 6, offset: 0, status: "PUBLISHED" },
+        },
+    });
 
     const [withdrawApplication] = useMutation(WITHDRAW_APPLICATION, {
         refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } }],
@@ -192,6 +199,7 @@ export default function Opportunities() {
             opportunityId: saved.opportunity?.id ?? saved.opportunityId,
             title: saved.opportunity?.title ?? "Saved opportunity",
         })) ?? [];
+    const discoverOpportunities = listData?.opportunities?.opportunities ?? [];
 
     const handleWithdraw = async (applicationId: string) => {
         setWithdrawingId(applicationId);
@@ -214,16 +222,6 @@ export default function Opportunities() {
         <div className="lg:w-[50rem] h-app-inner  p-4 overflow-y-auto scrollbar-hide ">
             {/* 885px equivalent, 64px header height */}
             <div className="mx-auto mb-h-app-down">
-                {/* <div className="flex flex-wrap items-center justify-between gap-2 my-[1.25rem]">
-                    <p className="text-2xl font-heading-large">{t("youropp")}</p>
-                    <Link
-                        href="/opportunities/create"
-                        className="px-4 py-2 text-sm font-medium bg-surface-brand text-text-white rounded-lg hover:opacity-90 transition-opacity"
-                    >
-                        {t("create") ?? "Create opportunity"}
-                    </Link>
-                </div> */}
-
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
                     {/* 52px height, 8px margin */}
@@ -262,9 +260,24 @@ export default function Opportunities() {
                     )}
                 </div>
 
-                <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreopp")}</h2> {/* 20px equivalent */}
+                {discoverOpportunities.length > 0 && (
+                    <>
+                        <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("discover") ?? "Discover"}</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem] lg:mb-1">
+                            {discoverOpportunities.map((opp) => (
+                                <ExploreOpportunities
+                                    key={opp.id}
+                                    id={opp.id}
+                                    name={opp.title}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem]  lg:mb-1 "> {/* 12px, 24px equivalent */}
+                <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreopp")}</h2>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem] lg:mb-1 ">
                     {opportunities.map((opp, index) => (
                         <ExploreOpportunities
                             id={opp.id}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ButtonType1, ButtonType2, ButtonType4Pill } from "../custom/button";
 import { Button } from "../ui/button";
 import { BanIcon, MoreHorizontalIcon, Loader2 } from "lucide-react";
@@ -12,6 +13,7 @@ import {
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
 import { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { ConfirmationModal } from "@/components/custom/confirmationModal";
 
 export type FriendButtonType = 
     | "message" 
@@ -36,6 +38,7 @@ interface FriendActionButtonsProps {
     connectionId: string;
     searchQuery?: string;
     isSearching?: boolean;
+    onConnectionAction?: () => void;
 }
 
 export const FriendActionButtons = ({ 
@@ -46,6 +49,7 @@ export const FriendActionButtons = ({
     className = "flex space-x-2",
     searchQuery = "",
     isSearching = false,
+    onConnectionAction,
 }: FriendActionButtonsProps) => {
     const tCommon = useTranslations('common');
     const {
@@ -58,7 +62,9 @@ export const FriendActionButtons = ({
         blockFriend,
         isActionLoading,
         t,
-    } = useFriendActions({ searchQuery, isSearching });
+    } = useFriendActions({ searchQuery, isSearching, onConnectionAction });
+
+    const [confirmAction, setConfirmAction] = useState<'removeFriend' | 'blockFriend' | null>(null);
 
     // Check loading states for each action
     const isAddFriendLoading = isActionLoading('addFriend', userId);
@@ -129,7 +135,7 @@ export const FriendActionButtons = ({
         removeFriend: (
             <ButtonType1 
                 key="removeFriend" 
-                onClick={() => removeFriend(connectionId)}
+                onClick={() => setConfirmAction('removeFriend')}
                 disabled={isRemoveLoading}
             >
                 {isRemoveLoading ? (
@@ -171,7 +177,7 @@ export const FriendActionButtons = ({
                             items.push(
                                 <DropdownMenuItem
                                     key="removeFriend"
-                                    onSelect={() => removeFriend(connectionId)}
+                                    onSelect={() => setConfirmAction('removeFriend')}
                                     className="font-body-large text-text-primary flex items-center"
                                     disabled={isRemoveLoading}
                                 >
@@ -189,7 +195,7 @@ export const FriendActionButtons = ({
                             items.push(
                                 <DropdownMenuItem
                                     key="blockFriend"
-                                    onSelect={() => blockFriend(userId)}
+                                    onSelect={() => setConfirmAction('blockFriend')}
                                     className="font-body-large flex items-center"
                                     disabled={isBlockLoading}
                                 >
@@ -214,9 +220,43 @@ export const FriendActionButtons = ({
         ),
     };
 
+    const handleConfirmAction = () => {
+        if (confirmAction === 'removeFriend') {
+            removeFriend(connectionId);
+            setConfirmAction(null);
+        } else if (confirmAction === 'blockFriend') {
+            blockFriend(userId);
+            setConfirmAction(null);
+        }
+    };
+
+    const isRemoveModal = confirmAction === 'removeFriend';
+    const isBlockModal = confirmAction === 'blockFriend';
+
     return (
         <div className={className}>
             {buttonsToShow.map(buttonType => buttonMap[buttonType])}
+
+            <ConfirmationModal
+                open={isRemoveModal}
+                onCancel={() => setConfirmAction(null)}
+                onConfirm={handleConfirmAction}
+                title={t('removeFriendConfirmTitle') || 'Remove friend?'}
+                description={t('removeFriendConfirmDescription') || 'This will remove this person from your friends list. They will need to send a new request to connect again.'}
+                confirmText={t('removeFriend') || tCommon('remove') || 'Remove'}
+                confirmVariant="destructive"
+                isLoading={isRemoveLoading}
+            />
+            <ConfirmationModal
+                open={isBlockModal}
+                onCancel={() => setConfirmAction(null)}
+                onConfirm={handleConfirmAction}
+                title={t('blockFriendConfirmTitle') || 'Block this user?'}
+                description={t('blockFriendConfirmDescription') || 'They will no longer be able to message you or see your profile.'}
+                confirmText={t('blockFriend') || 'Block'}
+                confirmVariant="destructive"
+                isLoading={isBlockLoading}
+            />
         </div>
     );
 };
