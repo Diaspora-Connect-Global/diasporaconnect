@@ -11,7 +11,7 @@ import { DUMMY_USERS } from '@/data/users';
 import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import CustomDialog from "@/components/custom/customDialog";
 import { ButtonType2 } from "@/components/custom/button";
@@ -50,6 +50,7 @@ export default function ProfilePage() {
     const tCommon = useTranslations("common");
     const setUser = useUserStore(state => state.setUser);
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
+    const avatarDialogContentRef = useRef<HTMLDivElement | null>(null);
 
     const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_MY_PROFILE);
     const profile: Profile | undefined = data?.getProfile.profile;
@@ -84,6 +85,15 @@ export default function ProfilePage() {
             console.error('Avatar upload error:', error);
         },
     });
+
+    // After crop, scroll upload step into view (fixes iPhone not showing upload screen)
+    useEffect(() => {
+        if (!croppedImage || showCropper) return;
+        const t = setTimeout(() => {
+            avatarDialogContentRef.current?.scrollTo?.({ top: 0, behavior: 'smooth' });
+        }, 150);
+        return () => clearTimeout(t);
+    }, [croppedImage, showCropper]);
 
     // Update profile mutation
     const [updateProfile, { loading: updating }] = useMutation<UpdateProfileResponse>(UPDATE_PROFILE, {
@@ -208,6 +218,7 @@ export default function ProfilePage() {
                 onOpenChange={setEditAvatarOpen}
                 showFooter={false}
                 contentClassName="min-h-[50%] lg:min-h-[80%]"
+                contentRef={avatarDialogContentRef}
             >
                 <div className="lg:space-y-4 justify-center flex flex-col items-center">
                     {/* Circular Image Preview/Upload Area */}

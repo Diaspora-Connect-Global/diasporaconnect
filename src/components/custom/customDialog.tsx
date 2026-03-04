@@ -1,6 +1,6 @@
 import { XIcon } from "@phosphor-icons/react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
-import { ReactNode } from "react";
+import { ReactNode, RefObject } from "react";
 import { ButtonType2, ButtonType3 } from "./button";
 import { useTranslations } from 'next-intl';
 
@@ -17,6 +17,8 @@ interface CustomDialogProps {
   saveText?: string;
   cancelText?: string;
   contentClassName?: string;
+  /** Ref for the scrollable content area (e.g. to scroll into view after a step). */
+  contentRef?: RefObject<HTMLDivElement | null>;
 }
 
 export default function CustomDialog({
@@ -31,7 +33,8 @@ export default function CustomDialog({
   disabled = false,
   saveText,
   cancelText,
-  contentClassName = 'min-w-[70dvw] h-[90dvh]'
+  contentClassName = 'min-w-[70dvw] h-[90dvh]',
+  contentRef,
 }: CustomDialogProps) {
   const t = useTranslations('dialog');
   const defaultTitle = title || t('title');
@@ -57,7 +60,7 @@ export default function CustomDialog({
         </DialogHeader>
         
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide ">
+        <div ref={contentRef} className="flex-1 overflow-y-auto scrollbar-hide">
           {children}
         </div>
 
