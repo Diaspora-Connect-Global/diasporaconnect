@@ -34,3 +34,9 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Troubleshooting (Windows)
+
+If you see **"Could not open Step2.tsx"** (or similar) with a message about file names and an "access list", Windows is restricting paths that contain parentheses `()` or brackets `[]`. This project uses Next.js route folders like `[locale]`, `(protected)`, and `[id]`, which can trigger that check when the editor opens a file by full path.
+
+**Workaround:** Open the file from the **file explorer** in the sidebar (navigate to the folder and click the file) instead of using "Go to definition", stack traces, or links that pass the full path. The app and build work normally; only the editor’s "open file" action is affected.
