@@ -623,6 +623,7 @@
   "marketplace": {
     "title": "Marché",
     "cart": "Panier",
+    "searchPlaceholder": "Rechercher des produits et des personnes...",
     "removeCartItemTitle": "Retirer l'article du panier ?",
     "removeCartItemConfirm": "Cet article sera retiré de votre panier.",
     "products": "Produits",

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
 
@@ -16,7 +17,7 @@ export default function OrderDetailsPage() {
     timeRemaining: "You have 24 hours to accept and process the order",
     customer: {
       name: "John Doe",
-      avatar: "👤"
+      avatar: "https://picsum.photos/seed/customer1/80/80"
     },
     shippingAddress: {
       name: "John Doe",
@@ -30,26 +31,29 @@ export default function OrderDetailsPage() {
       {
         id: 1,
         name: "Men's leather shoe",
-        image: "👞",
+        image: "https://picsum.photos/seed/shoe1/128/128",
         quantity: 2,
         size: "M",
-        price: "GH₵699.00"
+        price: "GH₵699.00",
+        sellerAvatar: "https://picsum.photos/seed/seller1/64/64"
       },
       {
         id: 2,
         name: "Men's leather shoe",
-        image: "👞",
+        image: "https://picsum.photos/seed/shoe2/128/128",
         quantity: 2,
         size: "M",
-        price: "GH₵699.00"
+        price: "GH₵699.00",
+        sellerAvatar: "https://picsum.photos/seed/seller1/64/64"
       },
       {
         id: 3,
         name: "Men's leather shoe",
-        image: "👞",
+        image: "https://picsum.photos/seed/shoe3/128/128",
         quantity: 2,
         size: "M",
-        price: "GH₵699.00"
+        price: "GH₵699.00",
+        sellerAvatar: "https://picsum.photos/seed/seller2/64/64"
       }
     ],
     itemsTotal: "GH₵2699.00",
@@ -144,8 +148,13 @@ export default function OrderDetailsPage() {
             <div className="divide-y divide-border-subtle">
               {orderData.items.map((item) => (
                 <div key={item.id} className="p-6 flex gap-4">
-                  <div className="w-16 h-16 bg-surface-subtle rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
-                    {item.image}
+                  {/* Circle = avatar of person who posted the product (seller) */}
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-surface-subtle">
+                    {"sellerAvatar" in item && typeof item.sellerAvatar === "string" && item.sellerAvatar.startsWith("http") ? (
+                      <Image src={item.sellerAvatar} alt="" fill className="object-cover" sizes="64px" />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">👤</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="text-base font-medium text-text-primary mb-2">{item.name}</p>
@@ -183,8 +192,12 @@ export default function OrderDetailsPage() {
           <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
             <h3 className="text-sm font-medium text-text-secondary mb-4">Customer</h3>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-surface-subtle rounded-full flex items-center justify-center text-xl">
-                {orderData.customer.avatar}
+              <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-surface-subtle">
+                {orderData.customer.avatar?.startsWith("http") ? (
+                  <Image src={orderData.customer.avatar} alt={orderData.customer.name} fill className="object-cover" sizes="40px" />
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center text-xl text-text-tertiary">{orderData.customer.avatar || "👤"}</span>
+                )}
               </div>
               <span className="text-base font-medium text-text-primary">{orderData.customer.name}</span>
               <button

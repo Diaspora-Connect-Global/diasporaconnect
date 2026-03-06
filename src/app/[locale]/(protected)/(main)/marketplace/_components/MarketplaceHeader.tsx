@@ -61,13 +61,14 @@ export function MarketplaceHeader({
             {t("services")}
           </ButtonType3>
         </div>
-        <div className="h-[5vh]">
+        <div className="h-12 min-w-[220px] sm:min-w-[280px] w-full max-w-[320px] flex">
           <SearchInput
-            placeholder={"searchPeople"}
-            value={"searchTerm"}
+            placeholder={t("searchPlaceholder")}
+            value=""
             onChange={() => {}}
             onSearch={() => {}}
             bg="bg-surface-default"
+            className="h-full"
           />
         </div>
       </div>

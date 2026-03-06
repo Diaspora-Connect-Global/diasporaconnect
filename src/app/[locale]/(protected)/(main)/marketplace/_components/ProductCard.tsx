@@ -83,9 +83,13 @@ export function ProductCard({
         </button>
       </div>
 
-      {/* Seller row with avatar placeholder */}
+      {/* Seller row: circle = poster's avatar image URL */}
       <div className="flex items-center gap-2 mt-3">
-        <div className="w-5 h-5 rounded-full bg-surface-brand-subtle dark:bg-surface-subtle flex-shrink-0 overflow-hidden" />
+        <div className="relative w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-surface-brand-subtle dark:bg-surface-subtle">
+          {product.sellerAvatar?.startsWith("http") ? (
+            <Image src={product.sellerAvatar} alt="" fill className="object-cover" sizes="20px" />
+          ) : null}
+        </div>
         <p className="text-sm text-text-secondary truncate">{product.seller}</p>
       </div>
     </div>

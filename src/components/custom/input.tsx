@@ -143,6 +143,7 @@ interface SearchInputProps {
     label?: string;
     id?: string;
     bg?: string;
+    className?: string;
 }
 
 
@@ -153,6 +154,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   placeholder = "Search...",
   id = "search",
   bg = "bg-surface-subtle",
+  className = "",
 }) => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -162,7 +164,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
   return (
     
-     <div className={`relative ${bg} border-border-subtle border-2 rounded-full flex items-center w-full overflow-hidden`}>
+     <div className={`relative ${bg} border-border-subtle border-2 rounded-full flex items-center w-full overflow-hidden h-full min-h-10 ${className}`.trim()}>
   <button
     type="button"
     onClick={onSearch}

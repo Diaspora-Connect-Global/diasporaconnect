@@ -1,5 +1,9 @@
 import type { Product } from "./types";
 
+// Placeholder image base – picsum.photos returns stable images per seed (no 404s)
+const img = (seed: string, w = 590, h = 400) =>
+  `https://picsum.photos/seed/${seed}/${w}/${h}`;
+
 // Sample Products Data (placeholder until API wiring) – image URLs for cover display
 export const products: Product[] = [
   {
@@ -8,8 +12,10 @@ export const products: Product[] = [
     price: 520,
     rating: 5,
     reviews: 201,
-    image: "https://images.unsplash.com/photo-1614252369475-531eba835b1d?w=590&q=80",
+    image: img("shoe1"),
+    images: [img("shoe1"), img("shoe1b"), img("shoe1c"), img("shoe1d")],
     seller: "Joshua Kabu",
+    sellerAvatar: img("seller-joshua", 80, 80),
     colors: ["Brown", "Black"],
     category: "shoes",
     isService: false,
@@ -20,8 +26,10 @@ export const products: Product[] = [
     price: 280,
     rating: 4.5,
     reviews: 150,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=590&q=80",
+    image: img("shoe2"),
+    images: [img("shoe2"), img("shoe2b"), img("shoe2c"), img("shoe2d")],
     seller: "Sarah Jane",
+    sellerAvatar: img("seller-sarah", 80, 80),
     category: "shoes",
     isService: false,
   },
@@ -31,8 +39,10 @@ export const products: Product[] = [
     price: 150,
     rating: 4.8,
     reviews: 98,
-    image: "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?w=590&q=80",
+    image: img("shoe3"),
+    images: [img("shoe3"), img("shoe3b"), img("shoe3c"), img("shoe3d")],
     seller: "Fashion Now",
+    sellerAvatar: img("seller-fashion", 80, 80),
     category: "shoes",
     isService: false,
   },
@@ -42,8 +52,10 @@ export const products: Product[] = [
     price: 450,
     rating: 4.2,
     reviews: 215,
-    image: "https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=590&q=80",
+    image: img("shoe4"),
+    images: [img("shoe4"), img("shoe4b"), img("shoe4c"), img("shoe4d")],
     seller: "Joshua Kabu",
+    sellerAvatar: img("seller-joshua", 80, 80),
     category: "shoes",
     isService: false,
   },
@@ -56,8 +68,9 @@ export const services: Product[] = [
     price: 150,
     rating: 5,
     reviews: 201,
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=590&q=80",
+    image: img("service1"),
     seller: "Joshua Kabu",
+    sellerAvatar: img("seller-joshua", 80, 80),
     category: "service",
     isService: true,
     priceType: "hourly",

@@ -623,6 +623,7 @@
   "marketplace": {
     "title": "Marktplatz",
     "cart": "Warenkorb",
+    "searchPlaceholder": "Produkte und Personen suchen...",
     "removeCartItemTitle": "Artikel aus dem Warenkorb entfernen?",
     "removeCartItemConfirm": "Dieser Artikel wird aus Ihrem Warenkorb entfernt.",
     "products": "Produkte",

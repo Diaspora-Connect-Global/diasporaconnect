@@ -128,8 +128,12 @@ export function ServiceDetail({
           <div className="flex items-start justify-between mb-2">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 bg-gray-200 rounded-full" />
-                <span className="text-sm text-gray-600">{service.seller}</span>
+                <div className="relative w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-surface-subtle">
+                  {service.sellerAvatar?.startsWith("http") ? (
+                    <Image src={service.sellerAvatar} alt="" fill className="object-cover" sizes="32px" />
+                  ) : null}
+                </div>
+                <span className="text-sm text-text-secondary">{service.seller}</span>
               </div>
               <h2 className="text-2xl font-bold mb-2">{service.name}</h2>
               <div className="flex items-center gap-2 mb-4">

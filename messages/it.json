@@ -623,6 +623,7 @@
   "marketplace": {
     "title": "Marketplace",
     "cart": "Carrello",
+    "searchPlaceholder": "Cerca prodotti e persone...",
     "removeCartItemTitle": "Rimuovere l'articolo dal carrello?",
     "removeCartItemConfirm": "Questo articolo sarà rimosso dal tuo carrello.",
     "products": "Prodotti",

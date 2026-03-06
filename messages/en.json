@@ -875,6 +875,7 @@
     "marketplace": {
         "title": "Marketplace",
         "cart": "Cart",
+        "searchPlaceholder": "Search products and people...",
         "removeCartItemTitle": "Remove item from cart?",
         "removeCartItemConfirm": "This item will be removed from your cart.",
         "products": "Products",

@@ -16,7 +16,11 @@ export interface Product {
   rating: number;
   reviews: number;
   image: string;
+  /** Optional gallery images for product detail (first used as main image if present) */
+  images?: string[];
   seller: string;
+  /** Avatar image URL of the person who posted the product */
+  sellerAvatar?: string;
   colors?: string[];
   category: string;
   isService?: boolean;

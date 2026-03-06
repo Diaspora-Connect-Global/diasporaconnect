@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Search, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Share2, Star } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button";
 import type { CartItem, Product } from "./types";
 
-const THUMBNAIL_COUNT = 4;
+const DEFAULT_THUMBNAIL_COUNT = 4;
 
 export function ProductDetail({
   product,
@@ -22,15 +22,21 @@ export function ProductDetail({
 }) {
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
+  const galleryImages =
+    product.images && product.images.length > 0
+      ? product.images
+      : Array(DEFAULT_THUMBNAIL_COUNT).fill(product.image);
+  const thumbnailCount = galleryImages.length;
   const [selectedThumbIndex, setSelectedThumbIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
 
   const sizes = ["SM", "M", "LG", "XL", "XXL"];
-  const imageUrl =
-    typeof product.image === "string" && product.image.startsWith("http")
-      ? product.image
+  const mainImageSrc = galleryImages[Math.min(selectedThumbIndex, thumbnailCount - 1)];
+  const mainImageUrl =
+    typeof mainImageSrc === "string" && mainImageSrc.startsWith("http")
+      ? mainImageSrc
       : null;
 
   const handleAddToCart = () => {
@@ -52,11 +58,11 @@ export function ProductDetail({
   };
 
   const handlePrevImage = () => {
-    setSelectedThumbIndex((i) => (i - 1 + THUMBNAIL_COUNT) % THUMBNAIL_COUNT);
+    setSelectedThumbIndex((i) => (i - 1 + thumbnailCount) % thumbnailCount);
   };
 
   const handleNextImage = () => {
-    setSelectedThumbIndex((i) => (i + 1) % THUMBNAIL_COUNT);
+    setSelectedThumbIndex((i) => (i + 1) % thumbnailCount);
   };
 
   return (
@@ -77,32 +83,36 @@ export function ProductDetail({
           {/* Left column: 50% – thumbnails + main image, then about product (same width) */}
           <div className="flex flex-col gap-4 lg:min-w-0">
             <div className="flex flex-col sm:flex-row gap-4 lg:flex-row lg:gap-4">
-            {/* Vertical thumbnails */}
+            {/* Vertical thumbnails – each shows a different image from the gallery */}
             <div className="flex flex-row sm:flex-col gap-2 order-2 sm:order-1 lg:flex-col">
-              {Array.from({ length: THUMBNAIL_COUNT }).map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setSelectedThumbIndex(i)}
-                  className={`relative w-full aspect-[136/97] max-w-[80px] sm:max-w-[136px] lg:w-[112px] rounded-2xl overflow-hidden border-2 flex items-center justify-center bg-surface-subtle transition-colors ${
-                    selectedThumbIndex === i
-                      ? "border-border-brand"
-                      : "border-border-subtle dark:border-surface-brand-light/50"
-                  }`}
-                >
-                  {imageUrl ? (
-                    <Image src={imageUrl} alt="" fill className="object-cover" sizes="136px" />
-                  ) : (
-                    <span className="text-3xl text-text-tertiary">{product.image}</span>
-                  )}
-                </button>
-              ))}
+              {galleryImages.map((src, i) => {
+                const isUrl = typeof src === "string" && src.startsWith("http");
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setSelectedThumbIndex(i)}
+                    className={`relative w-full aspect-[136/97] max-w-[80px] sm:max-w-[136px] lg:w-[112px] rounded-2xl overflow-hidden border-2 flex items-center justify-center bg-surface-subtle transition-colors ${
+                      selectedThumbIndex === i
+                        ? "border-border-brand"
+                        : "border-border-subtle dark:border-surface-brand-light/50"
+                    }`}
+                  >
+                    {isUrl ? (
+                      <Image src={src} alt="" fill className="object-cover" sizes="136px" />
+                    ) : (
+                      <span className="text-3xl text-text-tertiary">{src}</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-            {/* Main image with arrows – shows the currently selected thumbnail’s image */}
+            {/* Main image – shows the image for the selected thumbnail; arrows change selection */}
             <div className="relative w-full max-w-[420px] aspect-[723/516] max-h-[320px] sm:max-h-[380px] rounded-2xl overflow-hidden border border-border-subtle dark:border-surface-brand-light/50 bg-surface-subtle order-1 sm:order-2 lg:order-2">
-              {imageUrl ? (
+              {mainImageUrl ? (
                 <Image
-                  src={imageUrl}
+                  key={selectedThumbIndex}
+                  src={mainImageUrl}
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -110,7 +120,7 @@ export function ProductDetail({
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-8xl text-text-tertiary">
-                  {product.image}
+                  {mainImageSrc}
                 </div>
               )}
               <button
@@ -140,13 +150,17 @@ export function ProductDetail({
 
           {/* Right column: 50% – product info */}
           <div className="lg:min-w-0">
-            {/* Seller + avatar */}
+            {/* Seller: circle = poster's avatar image URL */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-surface-brand-subtle dark:bg-surface-subtle flex-shrink-0 overflow-hidden" />
+              <div className="relative w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-surface-brand-subtle dark:bg-surface-subtle">
+                {product.sellerAvatar?.startsWith("http") ? (
+                  <Image src={product.sellerAvatar} alt="" fill className="object-cover" sizes="32px" />
+                ) : null}
+              </div>
               <p className="text-sm text-text-secondary">{t("bySeller", { seller: product.seller })}</p>
             </div>
 
-            {/* Name + wishlist/search */}
+            {/* Name + wishlist/share */}
             <div className="flex items-start justify-between gap-4 mb-2">
               <h2 className="text-xl md:text-2xl font-bold text-text-primary flex-1 min-w-0">
                 {product.name}
@@ -160,9 +174,9 @@ export function ProductDetail({
                 </ButtonType3>
                 <ButtonType3
                   className="p-2 rounded-full border-0 bg-transparent min-w-0 text-text-secondary hover:text-text-primary"
-                  aria-label="Search"
+                  aria-label="Share"
                 >
-                  <Search className="w-5 h-5" />
+                  <Share2 className="w-5 h-5" />
                 </ButtonType3>
               </div>
             </div>
