@@ -653,6 +653,7 @@
     "bySeller": "Par {seller}",
     "shoppingCart": "Panier d'achat",
     "itemsInCart": "Articles dans le panier",
+    "cartEmpty": "Votre panier est vide. Ajoutez des articles depuis la marketplace pour commencer.",
     "numberOfItems": "Nombre d'articles : {count}",
     "oneTimeFee": "FRAIS UNIQUES",
     "total": "Total",

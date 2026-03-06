@@ -653,6 +653,7 @@
     "bySeller": "Von {seller}",
     "shoppingCart": "Warenkorb",
     "itemsInCart": "Artikel im Warenkorb",
+    "cartEmpty": "Ihr Warenkorb ist leer. Fügen Sie Artikel aus dem Marktplatz hinzu.",
     "numberOfItems": "Anzahl der Artikel: {count}",
     "oneTimeFee": "EINMALIGE GEBÜHR",
     "total": "Gesamt",

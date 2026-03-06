@@ -905,6 +905,7 @@
         "bySeller": "By {seller}",
         "shoppingCart": "Shopping cart",
         "itemsInCart": "Items in cart",
+        "cartEmpty": "Your cart is empty. Add items from the marketplace to get started.",
         "numberOfItems": "Number of items: {count}",
         "oneTimeFee": "ONE TIME FEE",
         "total": "Total",
