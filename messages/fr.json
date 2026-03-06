@@ -650,6 +650,7 @@
     "addExtrasAmount": "Ajouter des extras (GH₵ {amount}.00)",
     "close": "Fermer",
     "size": "Taille",
+    "color": "Couleur",
     "bySeller": "Par {seller}",
     "shoppingCart": "Panier d'achat",
     "itemsInCart": "Articles dans le panier",

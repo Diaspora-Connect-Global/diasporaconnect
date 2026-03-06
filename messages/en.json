@@ -902,6 +902,7 @@
         "addExtrasAmount": "Add extras (GH₵ {amount}.00)",
         "close": "Close",
         "size": "Size",
+        "color": "Color",
         "bySeller": "By {seller}",
         "shoppingCart": "Shopping cart",
         "itemsInCart": "Items in cart",

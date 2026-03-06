@@ -650,6 +650,7 @@
     "addExtrasAmount": "Aggiungi extra (GH₵ {amount}.00)",
     "close": "Chiudi",
     "size": "Taglia",
+    "color": "Colore",
     "bySeller": "Di {seller}",
     "shoppingCart": "Carrello della spesa",
     "itemsInCart": "Articoli nel carrello",

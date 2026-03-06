@@ -650,6 +650,7 @@
     "addExtrasAmount": "Extras hinzufügen (GH₵ {amount}.00)",
     "close": "Schließen",
     "size": "Größe",
+    "color": "Farbe",
     "bySeller": "Von {seller}",
     "shoppingCart": "Warenkorb",
     "itemsInCart": "Artikel im Warenkorb",
