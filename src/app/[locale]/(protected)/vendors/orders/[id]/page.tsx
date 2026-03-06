@@ -86,27 +86,27 @@ export default function OrderDetailsPage() {
   return (
     <div className="p-8 max-w-7xl">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-        <button className="hover:text-gray-900">Orders</button>
+      <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
+        <button className="hover:text-text-primary">Orders</button>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-        <span className="text-gray-900">Order 0001</span>
+        <span className="text-text-primary">Order 0001</span>
       </div>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Orders details</h1>
+        <h1 className="text-2xl font-semibold text-text-primary">Orders details</h1>
         <div className="flex gap-3">
           <button
             onClick={handleDeclineOrderClick}
-            className="px-6 py-2.5 border-2 border-red-500 text-red-500 rounded-lg font-medium hover:bg-red-50 transition-colors"
+            className="px-6 py-2.5 border-2 border-border-danger text-text-danger rounded-lg font-medium hover:bg-surface-danger transition-colors"
           >
             Decline order
           </button>
           <button
             onClick={handleProcessOrder}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="px-6 py-2.5 bg-surface-brand text-text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
           >
             Process order
           </button>
@@ -117,61 +117,61 @@ export default function OrderDetailsPage() {
         {/* Left Column - Order Info */}
         <div className="col-span-2 space-y-6">
           {/* Order Details Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
             <div className="grid grid-cols-3 gap-6 mb-6">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Order number</p>
-                <p className="text-base font-medium text-gray-900">{orderData.orderNumber}</p>
+                <p className="text-sm text-text-secondary mb-1">Order number</p>
+                <p className="text-base font-medium text-text-primary">{orderData.orderNumber}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">Order date</p>
-                <p className="text-base font-medium text-gray-900">{orderData.orderDate}</p>
+                <p className="text-sm text-text-secondary mb-1">Order date</p>
+                <p className="text-base font-medium text-text-primary">{orderData.orderDate}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">Status</p>
-                <p className="text-base font-medium text-orange-500">{orderData.status}</p>
+                <p className="text-sm text-text-secondary mb-1">Status</p>
+                <p className="text-base font-medium text-text-warning">{orderData.status}</p>
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-blue-900 mb-1">{orderData.paymentStatus}</p>
-              <p className="text-sm text-blue-700">{orderData.timeRemaining}</p>
+            <div className="bg-surface-brand-subtle border border-border-brand rounded-lg p-4">
+              <p className="text-sm font-medium text-text-brand mb-1">{orderData.paymentStatus}</p>
+              <p className="text-sm text-text-secondary">{orderData.timeRemaining}</p>
             </div>
           </div>
 
           {/* Order Items */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="divide-y divide-gray-100">
+          <div className="bg-surface-default rounded-xl border border-border-subtle overflow-hidden">
+            <div className="divide-y divide-border-subtle">
               {orderData.items.map((item) => (
                 <div key={item.id} className="p-6 flex gap-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
+                  <div className="w-16 h-16 bg-surface-subtle rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
                     {item.image}
                   </div>
                   <div className="flex-1">
-                    <p className="text-base font-medium text-gray-900 mb-2">{item.name}</p>
-                    <p className="text-sm text-gray-600">Quantity {item.quantity}</p>
-                    <p className="text-sm text-gray-600">Size {item.size}</p>
+                    <p className="text-base font-medium text-text-primary mb-2">{item.name}</p>
+                    <p className="text-sm text-text-secondary">Quantity {item.quantity}</p>
+                    <p className="text-sm text-text-secondary">Size {item.size}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-base font-medium text-gray-900">{item.price}</p>
+                    <p className="text-base font-medium text-text-primary">{item.price}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Totals */}
-            <div className="border-t border-gray-200 p-6 space-y-3">
+            <div className="border-t border-border-subtle p-6 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Items total</span>
-                <span className="text-gray-900">{orderData.itemsTotal}</span>
+                <span className="text-text-secondary">Items total</span>
+                <span className="text-text-primary">{orderData.itemsTotal}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Shipping fee</span>
-                <span className="text-gray-900">{orderData.shippingFee}</span>
+                <span className="text-text-secondary">Shipping fee</span>
+                <span className="text-text-primary">{orderData.shippingFee}</span>
               </div>
-              <div className="flex justify-between text-base font-semibold pt-3 border-t border-gray-200">
-                <span className="text-gray-900">Total</span>
-                <span className="text-gray-900">{orderData.total}</span>
+              <div className="flex justify-between text-base font-semibold pt-3 border-t border-border-subtle">
+                <span className="text-text-primary">Total</span>
+                <span className="text-text-primary">{orderData.total}</span>
               </div>
             </div>
           </div>
@@ -180,16 +180,16 @@ export default function OrderDetailsPage() {
         {/* Right Column - Customer Info */}
         <div className="space-y-6">
           {/* Customer Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-4">Customer</h3>
+          <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
+            <h3 className="text-sm font-medium text-text-secondary mb-4">Customer</h3>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-xl">
+              <div className="w-10 h-10 bg-surface-subtle rounded-full flex items-center justify-center text-xl">
                 {orderData.customer.avatar}
               </div>
-              <span className="text-base font-medium text-gray-900">{orderData.customer.name}</span>
+              <span className="text-base font-medium text-text-primary">{orderData.customer.name}</span>
               <button
                 onClick={handleSendMessage}
-                className="ml-auto text-sm text-blue-600 font-medium hover:text-blue-700"
+                className="ml-auto text-sm text-text-brand font-medium hover:opacity-80"
               >
                 Message
               </button>
@@ -197,9 +197,9 @@ export default function OrderDetailsPage() {
 
             {/* Shipping Address */}
             <div className="mb-6">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Shipping address</h4>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p className="font-medium text-gray-900">{orderData.shippingAddress.name}</p>
+              <h4 className="text-sm font-medium text-text-primary mb-2">Shipping address</h4>
+              <div className="text-sm text-text-secondary space-y-1">
+                <p className="font-medium text-text-primary">{orderData.shippingAddress.name}</p>
                 <p>{orderData.shippingAddress.street}</p>
                 <p>{orderData.shippingAddress.city}</p>
                 <p>{orderData.shippingAddress.country}</p>
@@ -209,8 +209,8 @@ export default function OrderDetailsPage() {
 
             {/* Billing Address */}
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Billing address</h4>
-              <p className="text-sm text-gray-600">{orderData.billingAddress}</p>
+              <h4 className="text-sm font-medium text-text-primary mb-2">Billing address</h4>
+              <p className="text-sm text-text-secondary">{orderData.billingAddress}</p>
             </div>
           </div>
         </div>

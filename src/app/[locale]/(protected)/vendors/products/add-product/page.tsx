@@ -129,32 +129,32 @@ export default function AddProductForm() {
     <div className="p-8 max-w-4xl">
       {/* Header */}
       <div className="mb-6">
-        <button className="text-sm text-gray-600 hover:text-gray-800 mb-2 flex items-center gap-1">
+        <button className="text-sm text-text-secondary hover:text-text-primary mb-2 flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           {t('addNewProduct')}
         </button>
 
-        <h1 className="text-2xl font-semibold text-gray-900">{t('addNewProduct')}</h1>
+        <h1 className="text-2xl font-semibold text-text-primary">{t('addNewProduct')}</h1>
       </div>
 
       <div className="space-y-6">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">{tForm('name')}</label>
+          <label className="block text-sm font-medium text-text-primary mb-2">{tForm('name')}</label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange("name", e.target.value)}
             placeholder={tForm('namePlaceholder')}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-2 border border-border-subtle rounded-lg"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-text-primary mb-2">
             {tForm('description')}
           </label>
           <textarea
@@ -162,13 +162,13 @@ export default function AddProductForm() {
             onChange={(e) => handleInputChange("description", e.target.value)}
             placeholder={tForm('descriptionPlaceholder')}
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none"
+            className="w-full px-4 py-2 border border-border-subtle rounded-lg resize-none"
           />
         </div>
 
         {/* Quantity */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-text-primary mb-2">
             {tForm('quantity')}
           </label>
           <input
@@ -176,13 +176,13 @@ export default function AddProductForm() {
             value={formData.quantity}
             onChange={(e) => handleInputChange("quantity", e.target.value)}
             placeholder={tForm('quantityPlaceholder')}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-2 border border-border-subtle rounded-lg"
           />
         </div>
 
         {/* Images */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-text-primary mb-2">
             {tForm('addImageOfProduct')}
           </label>
 
@@ -190,7 +190,7 @@ export default function AddProductForm() {
             {images.map((img, index) => (
               <div
                 key={index}
-                className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden"
+                className="relative aspect-square bg-surface-subtle rounded-lg overflow-hidden"
               >
                 <img
                   src={img.preview}
@@ -200,7 +200,7 @@ export default function AddProductForm() {
 
                 <button
                   onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full"
+                  className="absolute top-2 right-2 w-6 h-6 bg-surface-danger text-text-white rounded-full"
                   aria-label={tCommon('removeImage')}
                 >
                   ×
@@ -209,7 +209,7 @@ export default function AddProductForm() {
             ))}
 
             {images.length < 4 && (
-              <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer">
+              <label className="aspect-square border-2 border-dashed border-border-subtle rounded-lg flex items-center justify-center cursor-pointer">
                 <input
                   type="file"
                   accept="image/*"
@@ -217,7 +217,7 @@ export default function AddProductForm() {
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                <span className="text-gray-400 text-3xl">+</span>
+                <span className="text-text-tertiary text-3xl">+</span>
               </label>
             )}
           </div>
@@ -225,13 +225,13 @@ export default function AddProductForm() {
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-text-primary mb-2">
             {tForm('productCategory')}
           </label>
           <select
             value={formData.category}
             onChange={(e) => handleInputChange("category", e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white"
+            className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default"
           >
             <option value="Men fashion">{t('menFashion')}</option>
             <option value="Women fashion">{t('womenFashion')}</option>
@@ -248,7 +248,7 @@ export default function AddProductForm() {
               type="number"
               value={formData.price}
               onChange={(e) => handleInputChange("price", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-2 border border-border-subtle rounded-lg"
             />
           </div>
 
@@ -258,7 +258,7 @@ export default function AddProductForm() {
               type="number"
               value={formData.discount}
               onChange={(e) => handleInputChange("discount", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-4 py-2 border border-border-subtle rounded-lg"
             />
           </div>
         </div>
@@ -288,12 +288,12 @@ export default function AddProductForm() {
               value={newFeature}
               onChange={(e) => setNewFeature(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addFeature()}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+              className="flex-1 px-4 py-2 border border-border-subtle rounded-lg"
             />
 
             <button
               onClick={addFeature}
-              className="px-4 py-2 text-blue-600"
+              className="px-4 py-2 text-text-brand"
             >
               {tForm('addFeature')}
             </button>
@@ -303,7 +303,7 @@ export default function AddProductForm() {
             {features.map((feature, index) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-gray-100 rounded-full text-sm"
+                className="px-3 py-1 bg-surface-subtle rounded-full text-sm"
               >
                 {feature}
                 <button
@@ -329,8 +329,8 @@ export default function AddProductForm() {
                 type="button"
                 className={`px-4 py-2 border rounded-lg ${
                   sizes.includes(size.key)
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-300"
+                    ? "border-border-brand bg-surface-brand-subtle text-text-brand"
+                    : "border-border-subtle"
                 }`}
               >
                 {size.label}
@@ -355,7 +355,7 @@ export default function AddProductForm() {
 
             <button
               onClick={handleSaveAndPreview}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg"
+              className="bg-surface-brand text-text-white px-6 py-2 rounded-lg"
             >
               {tForm('saveAndPreview')}
             </button>

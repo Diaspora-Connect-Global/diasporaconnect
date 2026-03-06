@@ -96,15 +96,15 @@ export default function OrdersPage() {
   const getDeliveryStatusColor = (status: DeliveryStatus): string => {
     switch (status) {
       case "Delivered":
-        return "text-green-600";
+        return "text-text-success";
       case "Pending":
-        return "text-orange-500";
+        return "text-text-warning";
       case "Processing":
-        return "text-gray-400";
+        return "text-text-tertiary";
       case "In transit":
-        return "text-blue-600";
+        return "text-text-brand";
       default:
-        return "text-gray-600";
+        return "text-text-secondary";
     }
   };
 
@@ -132,13 +132,13 @@ export default function OrdersPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">{t('title')}</h1>
+      <h1 className="text-2xl font-semibold text-text-primary mb-6">{t('title')}</h1>
 
       {/* Search and Filters */}
       <div className="flex items-center gap-4 mb-6">
         <div className="flex-1 relative">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -159,7 +159,7 @@ export default function OrdersPage() {
               setSearchQuery(e.target.value)
             }
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand focus:border-transparent"
           />
         </div>
 
@@ -169,7 +169,7 @@ export default function OrdersPage() {
             setDeliveryFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand"
           aria-label={t('deliveryStatus')}
         >
           <option value="all">{t('deliveryStatus')}</option>
@@ -181,26 +181,26 @@ export default function OrdersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-surface-default rounded-xl border border-border-subtle overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-surface-subtle">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">
                 {t('orderNumber')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">
                 {t('date')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">
                 {t('customer')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">
                 {t('amount')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">
                 {t('delivery')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">
                 {t('actions')}
               </th>
             </tr>
@@ -209,7 +209,7 @@ export default function OrdersPage() {
           <tbody>
             {paginatedOrders.length > 0 ? (
               paginatedOrders.map((order) => (
-                <tr key={order.id} className="border-t hover:bg-gray-50">
+                <tr key={order.id} className="border-t border-border-subtle hover:bg-surface-subtle">
                   <td className="px-6 py-4">{order.id}</td>
                   <td className="px-6 py-4">{order.date}</td>
                   <td className="px-6 py-4">{order.customer}</td>
@@ -224,7 +224,7 @@ export default function OrdersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <ButtonType3 className="text-blue-600 hover:underline border-0 bg-transparent p-0 min-w-0">
+                    <ButtonType3 className="text-text-brand hover:underline border-0 bg-transparent p-0 min-w-0">
                       {getLocalizedAction(order.action)}
                     </ButtonType3>
                   </td>
@@ -232,7 +232,7 @@ export default function OrdersPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
                   {t('noOrdersFound')}
                 </td>
               </tr>
@@ -250,7 +250,7 @@ export default function OrdersPage() {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border px-2 py-1 rounded"
+              className="border border-border-subtle bg-surface-default text-text-primary px-2 py-1 rounded"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>

@@ -35,8 +35,8 @@ const SalesDashboard = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">{t('title')}</h1>
-          <button className="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2.5 rounded-full font-medium transition-colors">
+          <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
+          <button className="bg-surface-brand text-text-white hover:opacity-90 px-6 py-2.5 rounded-full font-medium transition-colors">
             {t('exportSales')}
           </button>
         </div>
@@ -45,13 +45,13 @@ const SalesDashboard = () => {
         <div className="flex gap-4 mb-6">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" aria-hidden="true" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-tertiary w-5 h-5" aria-hidden="true" />
             <input
               type="text"
               placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full pl-10 pr-4 py-2.5 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default"
             />
           </div>
 
@@ -59,7 +59,7 @@ const SalesDashboard = () => {
           <select
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
-            className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+            className="px-4 py-2.5 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default cursor-pointer"
             aria-label={t('allTime')}
           >
             <option value="all-time">{t('allTime')}</option>
@@ -72,7 +72,7 @@ const SalesDashboard = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+            className="px-4 py-2.5 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default cursor-pointer"
             aria-label={t('payoutStatus')}
           >
             <option value="all-status">{t('payoutStatus')}</option>
@@ -82,38 +82,38 @@ const SalesDashboard = () => {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-surface-default rounded-lg shadow-sm overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-surface-subtle border-b border-border-subtle">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('orderNumber')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('date')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('customer')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('amount')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('payoutStatus')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">{t('actions')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('orderNumber')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('date')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('customer')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('amount')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('payoutStatus')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
               {salesData.map((order) => (
-                <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-gray-900">{order.orderNumber}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{order.date}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{order.customer}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 font-medium">{order.amount}</td>
+                <tr key={order.id} className="border-b border-border-subtle hover:bg-surface-subtle transition-colors">
+                  <td className="px-6 py-4 text-sm text-text-primary">{order.orderNumber}</td>
+                  <td className="px-6 py-4 text-sm text-text-secondary">{order.date}</td>
+                  <td className="px-6 py-4 text-sm text-text-primary">{order.customer}</td>
+                  <td className="px-6 py-4 text-sm text-text-primary font-medium">{order.amount}</td>
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                         order.payoutStatus === 'paid'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-orange-100 text-orange-700'
+                          ? 'bg-surface-success text-text-success'
+                          : 'bg-surface-warning text-text-warning'
                       }`}
                     >
                       {order.payoutStatus === 'paid' ? t('paid') : t('inEscrow')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+                    <button className="text-text-brand hover:opacity-80 text-sm font-medium transition-colors">
                       {t('viewOrder')}
                     </button>
                   </td>
@@ -126,11 +126,11 @@ const SalesDashboard = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">{t('rowsPerPage')}</span>
+            <span className="text-sm text-text-secondary">{t('rowsPerPage')}</span>
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer text-sm"
+              className="px-3 py-1.5 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default cursor-pointer text-sm"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -140,25 +140,25 @@ const SalesDashboard = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-text-secondary">
               {t('page', { current: currentPage, total: totalPages })}
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg hover:bg-surface-subtle disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label={tCommon('previousPage')}
               >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                <ChevronLeft className="w-5 h-5 text-text-secondary" />
               </button>
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg hover:bg-surface-subtle disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label={tCommon('nextPage')}
               >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <ChevronRight className="w-5 h-5 text-text-secondary" />
               </button>
             </div>
           </div>

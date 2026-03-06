@@ -42,8 +42,8 @@ export default function ProductsPage() {
     <div className="p-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+        <h1 className="text-2xl font-semibold text-text-primary">{t('title')}</h1>
+        <button className="bg-surface-brand text-text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2">
           <span className="text-lg">+</span>
           {t('addProduct')}
         </button>
@@ -53,7 +53,7 @@ export default function ProductsPage() {
       <div className="flex items-center gap-4 mb-6">
         <div className="flex-1 relative">
           <svg 
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary"
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24"
@@ -64,14 +64,14 @@ export default function ProductsPage() {
           <input
             type="text"
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-border-brand focus:border-transparent"
           />
         </div>
 
         <button
           onClick={() => setStatusFilter('live')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            statusFilter === 'live' ? 'bg-gray-200 text-gray-900' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            statusFilter === 'live' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
           }`}
         >
           {t('live')}
@@ -80,7 +80,7 @@ export default function ProductsPage() {
         <button
           onClick={() => setStatusFilter('draft')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            statusFilter === 'draft' ? 'bg-gray-200 text-gray-900' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            statusFilter === 'draft' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
           }`}
         >
           {t('draft')}
@@ -89,7 +89,7 @@ export default function ProductsPage() {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface-default focus:outline-none focus:ring-2 focus:ring-border-brand"
           aria-label={t('allCategories')}
         >
           <option value="all">{t('allCategories')}</option>
@@ -99,60 +99,60 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-surface-default rounded-xl border border-border-subtle overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <tr className="bg-surface-subtle border-b border-border-subtle">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   {t('productName')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   {t('inventory')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   {t('category')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   {t('price')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   {t('status')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   {t('action')}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-100">
+            <tbody className="bg-surface-default divide-y divide-border-subtle">
               {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={product.id} className="hover:bg-surface-subtle transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-xl">
+                      <div className="w-10 h-10 bg-surface-subtle rounded-lg flex items-center justify-center text-xl">
                         {product.image}
                       </div>
-                      <span className="text-sm text-gray-900">{product.name}</span>
+                      <span className="text-sm text-text-primary">{product.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{product.inventory}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{getLocalizedCategory(product.category)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{product.price}</td>
+                  <td className="px-6 py-4 text-sm text-text-secondary">{product.inventory}</td>
+                  <td className="px-6 py-4 text-sm text-text-secondary">{getLocalizedCategory(product.category)}</td>
+                  <td className="px-6 py-4 text-sm text-text-primary">{product.price}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                       product.status === 'Live' 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-surface-success text-text-success' 
+                        : 'bg-surface-subtle text-text-secondary'
                     }`}>
                       {getLocalizedStatus(product.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <button className="text-sm text-blue-600 font-medium hover:text-blue-700 hover:underline">
+                      <button className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline">
                         {t('preview')}
                       </button>
-                      <button className="text-sm text-blue-600 font-medium hover:text-blue-700 hover:underline">
+                      <button className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline">
                         {t('edit')}
                       </button>
                     </div>
@@ -164,13 +164,13 @@ export default function ProductsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-border-subtle">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">{t('rowsPerPage')}</span>
+            <span className="text-sm text-text-secondary">{t('rowsPerPage')}</span>
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
-              className="px-2 py-1 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-2 py-1 border border-border-subtle rounded text-sm bg-surface-default focus:outline-none focus:ring-2 focus:ring-border-brand"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -179,15 +179,15 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{t('page', { current: 1, total: 10 })}</span>
+            <span className="text-sm text-text-secondary">{t('page', { current: 1, total: 10 })}</span>
             <div className="flex items-center gap-1">
-              <button className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50" disabled aria-label={tCommon('previousPage')}>
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <button className="p-1 hover:bg-surface-subtle rounded transition-colors disabled:opacity-50" disabled aria-label={tCommon('previousPage')}>
+                <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="p-1 hover:bg-gray-100 rounded transition-colors" aria-label={tCommon('nextPage')}>
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <button className="p-1 hover:bg-surface-subtle rounded transition-colors" aria-label={tCommon('nextPage')}>
+                <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>

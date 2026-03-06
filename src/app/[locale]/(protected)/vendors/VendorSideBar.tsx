@@ -128,7 +128,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg label-large cursor-pointer transition-colors ${
                                     activeTab === item.id
                                         ? 'bg-surface-brand-light text-text-brand'
-                                        : 'text-text-secondary hover:bg-gray-100'
+                                        : 'text-text-secondary hover:bg-surface-subtle'
                                 }`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
