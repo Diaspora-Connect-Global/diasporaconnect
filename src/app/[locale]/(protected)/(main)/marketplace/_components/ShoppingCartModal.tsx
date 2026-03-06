@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import Image from "next/image";
 import { Minus, Plus, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
@@ -47,8 +48,12 @@ export function ShoppingCartModal({
           </div>
           {cart.map((item) => (
             <div key={item.id} className="flex gap-4 mb-4 pb-4 border-b">
-              <div className="bg-gray-100 rounded w-20 h-20 flex items-center justify-center text-3xl flex-shrink-0">
-                {item.image}
+              <div className="relative w-20 h-20 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
+                {typeof item.image === "string" && item.image.startsWith("http") ? (
+                  <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center text-3xl text-text-tertiary">{item.image}</span>
+                )}
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold mb-1">{item.name}</h4>

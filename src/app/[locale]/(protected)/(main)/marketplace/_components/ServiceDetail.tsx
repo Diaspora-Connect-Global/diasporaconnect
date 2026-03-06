@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Image from "next/image";
 import { ChevronLeft, Heart, Minus, Plus, Search, Star, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
@@ -96,16 +97,24 @@ export function ServiceDetail({
 
       <div className="grid md:grid-cols-2 gap-8">
         <div>
-          <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center text-9xl mb-4">
-            {service.image}
+          <div className="relative rounded-lg h-96 overflow-hidden mb-4 bg-surface-subtle">
+            {typeof service.image === "string" && service.image.startsWith("http") ? (
+              <Image src={service.image} alt={service.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+            ) : (
+              <span className="absolute inset-0 flex items-center justify-center text-9xl text-text-tertiary">{service.image}</span>
+            )}
           </div>
           <div className="flex gap-2">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-gray-100 rounded-lg w-20 h-20 flex items-center justify-center text-3xl cursor-pointer hover:ring-2 ring-blue-500"
+                className="relative rounded-lg w-20 h-20 overflow-hidden cursor-pointer hover:ring-2 ring-border-brand bg-surface-subtle"
               >
-                {service.image}
+                {typeof service.image === "string" && service.image.startsWith("http") ? (
+                  <Image src={service.image} alt="" fill className="object-cover" sizes="80px" />
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center text-3xl text-text-tertiary">{service.image}</span>
+                )}
               </div>
             ))}
           </div>

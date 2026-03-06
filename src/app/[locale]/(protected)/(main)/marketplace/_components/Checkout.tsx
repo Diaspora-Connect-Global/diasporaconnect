@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
@@ -61,8 +62,12 @@ export function Checkout({
               <h3 className="font-semibold mb-4">{t("orderDetails")}</h3>
               {cart.map((item) => (
                 <div key={item.id} className="flex gap-3 mb-3">
-                  <div className="bg-gray-100 rounded w-16 h-16 flex items-center justify-center text-2xl">
-                    {item.image}
+                  <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
+                    {typeof item.image === "string" && item.image.startsWith("http") ? (
+                      <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">{item.image}</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{item.name}</p>

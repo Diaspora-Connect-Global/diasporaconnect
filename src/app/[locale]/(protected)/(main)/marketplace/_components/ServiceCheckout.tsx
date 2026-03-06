@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
@@ -56,8 +57,12 @@ export function ServiceCheckout({
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <h3 className="font-semibold mb-4">{t("orderDetails")}</h3>
             <div className="flex gap-4 mb-4">
-              <div className="bg-gray-100 rounded w-16 h-16 flex items-center justify-center text-2xl flex-shrink-0">
-                {serviceItem.image}
+              <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
+                {typeof serviceItem.image === "string" && serviceItem.image.startsWith("http") ? (
+                  <Image src={serviceItem.image} alt={serviceItem.name} fill className="object-cover" sizes="64px" />
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">{serviceItem.image}</span>
+                )}
               </div>
               <div className="flex-1">
                 <p className="font-medium mb-1">{t("revenueStrategyService")}</p>
