@@ -126,7 +126,7 @@ export function ProductDetail({
               <button
                 type="button"
                 onClick={handlePrevImage}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-default/80 border border-border-subtle flex items-center justify-center text-text-secondary hover:bg-surface-default"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-default/80 border border-border-subtle flex items-center justify-center text-text-secondary cursor-pointer hover:border-border-brand hover:text-text-brand hover:bg-surface-default"
                 aria-label={tCommon("previousPage")}
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -134,7 +134,7 @@ export function ProductDetail({
               <button
                 type="button"
                 onClick={handleNextImage}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-default/80 border-2 border-border-brand flex items-center justify-center text-text-brand hover:opacity-90"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-default/80 border border-border-subtle flex items-center justify-center text-text-secondary cursor-pointer hover:border-border-brand hover:text-text-brand hover:bg-surface-default"
                 aria-label={tCommon("nextPage")}
               >
                 <ChevronRight className="w-5 h-5" />
