@@ -109,7 +109,7 @@ export default function MarketplaceContainer() {
             activeTab={activeTab}
           />
 
-          <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-6">
+          <div className="flex-1 overflow-y-auto scrollbar-hide py-6">
             <div className="max-w-7xl mx-auto">
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">

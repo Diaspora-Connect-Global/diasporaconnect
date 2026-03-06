@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, Heart, Minus, Search, Plus, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Search, Star } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button";
 import type { CartItem, Product } from "./types";
+
+const THUMBNAIL_COUNT = 4;
 
 export function ProductDetail({
   product,
@@ -18,11 +21,17 @@ export function ProductDetail({
   onBuyNow?: (item: CartItem) => void;
 }) {
   const t = useTranslations("marketplace");
+  const tCommon = useTranslations("common");
+  const [selectedThumbIndex, setSelectedThumbIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
 
   const sizes = ["SM", "M", "LG", "XL", "XXL"];
+  const imageUrl =
+    typeof product.image === "string" && product.image.startsWith("http")
+      ? product.image
+      : null;
 
   const handleAddToCart = () => {
     onAddToCart({
@@ -42,80 +51,146 @@ export function ProductDetail({
     });
   };
 
+  const handlePrevImage = () => {
+    setSelectedThumbIndex((i) => (i - 1 + THUMBNAIL_COUNT) % THUMBNAIL_COUNT);
+  };
+
+  const handleNextImage = () => {
+    setSelectedThumbIndex((i) => (i + 1) % THUMBNAIL_COUNT);
+  };
+
   return (
-    <>
-      <div className="h-[10%] flex items-center text-center">
+    <div className="min-h-full flex flex-col bg-surface-brand-subtle dark:bg-background">
+      {/* Back: chevron + product name */}
+      <div className="flex-shrink-0 flex items-center px-4 py-4 md:px-6">
         <ButtonType3
           onClick={onBack}
-          className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-primary"
+          className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-text-primary"
         >
           <ChevronLeft className="w-5 h-5" />
-          <span>{product.name}</span>
+          <span className="font-medium truncate max-w-[200px] sm:max-w-none">{product.name}</span>
         </ButtonType3>
       </div>
 
-      <div className="h-[90%] overflow-y-auto max-w-7xl mx-auto px-4 py-6 scrollbar-hide">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* left side */}
-          <div>
-            <div className="flex space-x-2">
-              <div className="flex flex-col gap-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="border-1 rounded-lg w-20 h-20 flex items-center justify-center text-3xl cursor-pointer hover:ring-2 ring-text-brand"
-                  >
-                    {product.image}
-                  </div>
-                ))}
-              </div>
-              <div className="border-1 w-full rounded-lg h-96 flex items-center justify-center text-9xl mb-4">
-                {product.image}
-              </div>
+      <div className="flex-1 overflow-y-auto max-w-7xl mx-auto w-full px-4 pb-8 scrollbar-hide">
+        <div className="grid lg:grid-cols-[1fr_1fr] gap-6 lg:gap-8">
+          {/* Left column: 50% – thumbnails + main image, then about product (same width) */}
+          <div className="flex flex-col gap-4 lg:min-w-0">
+            <div className="flex flex-col sm:flex-row gap-4 lg:flex-row lg:gap-4">
+            {/* Vertical thumbnails */}
+            <div className="flex flex-row sm:flex-col gap-2 order-2 sm:order-1 lg:flex-col">
+              {Array.from({ length: THUMBNAIL_COUNT }).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedThumbIndex(i)}
+                  className={`relative w-full aspect-[136/97] max-w-[80px] sm:max-w-[136px] lg:w-[112px] rounded-2xl overflow-hidden border-2 flex items-center justify-center bg-surface-subtle transition-colors ${
+                    selectedThumbIndex === i
+                      ? "border-border-brand"
+                      : "border-border-subtle dark:border-surface-brand-light/50"
+                  }`}
+                >
+                  {imageUrl ? (
+                    <Image src={imageUrl} alt="" fill className="object-cover" sizes="136px" />
+                  ) : (
+                    <span className="text-3xl text-text-tertiary">{product.image}</span>
+                  )}
+                </button>
+              ))}
             </div>
-
-            <div className="p-2 rounded-lg">
-              <h3 className="font-semibold mb-2">{t("aboutProduct")}</h3>
-              <p className="text-sm text-gray-600">{t("productDescription")}</p>
+            {/* Main image with arrows – shows the currently selected thumbnail’s image */}
+            <div className="relative w-full max-w-[420px] aspect-[723/516] max-h-[320px] sm:max-h-[380px] rounded-2xl overflow-hidden border border-border-subtle dark:border-surface-brand-light/50 bg-surface-subtle order-1 sm:order-2 lg:order-2">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  sizes="420px"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-8xl text-text-tertiary">
+                  {product.image}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-default/80 border border-border-subtle flex items-center justify-center text-text-secondary hover:bg-surface-default"
+                aria-label={tCommon("previousPage")}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextImage}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-default/80 border-2 border-border-brand flex items-center justify-center text-text-brand hover:opacity-90"
+                aria-label={tCommon("nextPage")}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
+          {/* About this product – same width as thumbnails + main image above */}
+          <div className="w-full p-4 rounded-2xl bg-surface-default border border-border-subtle">
+            <h3 className="font-semibold text-text-primary mb-2">{t("aboutProduct")}</h3>
+            <p className="text-sm text-text-secondary leading-relaxed">{t("productDescription")}</p>
+          </div>
+          </div>
 
-          {/* right side */}
-          <div>
-            <p className="text-sm text-gray-600 mb-4">
-              {t("bySeller", { seller: product.seller })}
-            </p>
+          {/* Right column: 50% – product info */}
+          <div className="lg:min-w-0">
+            {/* Seller + avatar */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-surface-brand-subtle dark:bg-surface-subtle flex-shrink-0 overflow-hidden" />
+              <p className="text-sm text-text-secondary">{t("bySeller", { seller: product.seller })}</p>
+            </div>
 
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
-                <div className="flex items-center gap-2 mb-4">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{product.rating}</span>
-                  <span className="text-gray-500">({product.reviews})</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <ButtonType3 className="p-2 rounded-full border-0 bg-transparent min-w-0">
-                  <Heart className="w-5 h-5" />
+            {/* Name + wishlist/search */}
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <h2 className="text-xl md:text-2xl font-bold text-text-primary flex-1 min-w-0">
+                {product.name}
+              </h2>
+              <div className="flex gap-1 flex-shrink-0">
+                <ButtonType3
+                  className="p-2 rounded-full border-0 bg-transparent min-w-0 text-text-secondary hover:text-text-primary"
+                  aria-label={t("addToWishlist")}
+                >
+                  <Heart className="w-5 h-5 fill-text-secondary/30 stroke-current" style={{ strokeWidth: 1.5 }} />
                 </ButtonType3>
-                <ButtonType3 className="p-2 rounded-full border-0 bg-transparent min-w-0">
+                <ButtonType3
+                  className="p-2 rounded-full border-0 bg-transparent min-w-0 text-text-secondary hover:text-text-primary"
+                  aria-label="Search"
+                >
                   <Search className="w-5 h-5" />
                 </ButtonType3>
               </div>
             </div>
 
-            <p className="text-3xl font-bold mb-6">GH₵{product.price.toFixed(2)}</p>
+            {/* Star + rating + reviews */}
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="w-5 h-5 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300" />
+              <span className="font-medium text-text-primary">{product.rating}</span>
+              <span className="text-sm text-text-secondary">({product.reviews})</span>
+            </div>
 
+            {/* Price */}
+            <p className="text-2xl md:text-3xl font-bold text-text-primary mb-6">
+              GH₵{product.price.toFixed(2)}
+            </p>
+
+            {/* Size */}
             <div className="mb-6">
-              <h3 className="font-semibold mb-2">{t("size")}</h3>
-              <div className="flex gap-2">
+              <h3 className="font-semibold text-text-primary mb-2">{t("size")}</h3>
+              <div className="flex flex-wrap gap-2">
                 {sizes.map((size) => (
                   <ButtonType3
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`px-2 py-1 border rounded-xl bg-transparent min-w-0 ${
-                      selectedSize === size ? "border-brand text-brand" : "border-gray-300"
+                    className={`px-4 py-2 rounded-xl border min-w-0 bg-surface-default ${
+                      selectedSize === size
+                        ? "border-border-brand text-text-brand"
+                        : "border-border-subtle text-text-primary"
                     }`}
                   >
                     {size}
@@ -124,37 +199,43 @@ export function ProductDetail({
               </div>
             </div>
 
+            {/* Quantity */}
             <div className="mb-6">
-              <h3 className="font-semibold mb-2">{t("quantity")}</h3>
-              <div className="flex items-center gap-4 border-1 w-fit px-8 py-5 rounded-full text-text-brand border-brand">
+              <h3 className="font-semibold text-text-primary mb-2">{t("quantity")}</h3>
+              <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full border-2 border-border-brand bg-surface-default">
                 <ButtonType3
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2 rounded border-0 bg-transparent min-w-0"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="p-2 rounded-full border-0 bg-transparent min-w-0 text-text-brand hover:opacity-80"
                   aria-label={t("decreaseQuantity")}
                 >
-                  <Minus className="w-4 h-4" />
+                  <Minus className="w-4 h-4" strokeWidth={2} />
                 </ButtonType3>
-                <span className="text-lg font-medium text-primary">{quantity}</span>
+                <span className="text-lg font-medium text-text-primary min-w-[1.5rem] text-center">
+                  {quantity}
+                </span>
                 <ButtonType3
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="p-2 rounded border-0 bg-transparent min-w-0"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="p-2 rounded-full border-0 bg-transparent min-w-0 text-text-brand hover:opacity-80"
                   aria-label={t("increaseQuantity")}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4" strokeWidth={2} />
                 </ButtonType3>
               </div>
             </div>
 
+            {/* Color */}
             {!!product.colors?.length && (
               <div className="mb-6">
-                <h3 className="font-semibold mb-2">{t("color")}</h3>
-                <div className="flex gap-2">
+                <h3 className="font-semibold text-text-primary mb-2">{t("color")}</h3>
+                <div className="flex flex-wrap gap-2">
                   {product.colors.map((c) => (
                     <ButtonType3
                       key={c}
                       onClick={() => setSelectedColor(c)}
-                      className={`px-3 py-1 border rounded-full bg-transparent min-w-0 ${
-                        selectedColor === c ? "border-brand text-brand" : "border-gray-300"
+                      className={`px-4 py-2 rounded-full border min-w-0 bg-surface-default ${
+                        selectedColor === c
+                          ? "border-border-brand text-text-brand"
+                          : "border-border-subtle text-text-primary"
                       }`}
                     >
                       {c}
@@ -164,16 +245,19 @@ export function ProductDetail({
               </div>
             )}
 
-            <div className="flex gap-4 mb-6">
-              <ButtonType2
+            {/* Add to Cart (outline) + Buy Now (filled) */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <ButtonType1
                 onClick={handleAddToCart}
-                className="flex-1 bg-text-primary text-text-white py-3 rounded-full"
+                className="flex-1 py-3 rounded-full"
+                size="lg"
               >
                 {t("addToCart")}
-              </ButtonType2>
+              </ButtonType1>
               <ButtonType2
                 onClick={handleBuyNow}
-                className="flex-1 bg-surface-brand text-text-white py-3 rounded-full"
+                className="flex-1 py-3 rounded-full disabled:opacity-50"
+                size="lg"
                 disabled={!onBuyNow}
               >
                 {t("buyNow")}
@@ -181,8 +265,9 @@ export function ProductDetail({
             </div>
           </div>
         </div>
+
+      
       </div>
-    </>
+    </div>
   );
 }
-
