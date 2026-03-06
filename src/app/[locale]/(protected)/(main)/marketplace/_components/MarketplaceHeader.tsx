@@ -28,13 +28,17 @@ export function MarketplaceHeader({
           onClick={onCartClick}
           className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2"
         >
-          <span className="relative inline-flex">
-            <ShoppingCart className="w-5 h-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-surface-brand text-text-white text-xs font-medium flex items-center justify-center">
-                {cartCount > 99 ? "99+" : cartCount}
-              </span>
-            )}
+          <span className="relative inline-flex flex-shrink-0">
+            <ShoppingCart className="w-5 h-5 shrink-0" />
+            <span
+              className={`absolute top-0 right-0 min-w-[18px] h-[18px] px-1 rounded-full text-xs font-medium flex items-center justify-center translate-x-1/2 -translate-y-1/2 ${
+                cartCount === 0
+                  ? "bg-surface-brand-subtle text-text-danger"
+                  : "bg-surface-brand text-text-white"
+              }`}
+            >
+              {cartCount > 99 ? "99+" : cartCount}
+            </span>
           </span>
           <span>{t("cart")}</span>
         </ButtonType3>

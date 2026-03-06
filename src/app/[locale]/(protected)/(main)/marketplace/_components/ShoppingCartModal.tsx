@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import Image from "next/image";
-import { Minus, Plus, Trash2, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
 import type { CartItem } from "./types";
@@ -47,9 +47,11 @@ export function ShoppingCartModal({
             </span>
           </div>
           {cart.length === 0 ? (
-            <p className="py-8 text-center text-text-secondary">
-              {t("cartEmpty")}
-            </p>
+            <div className="py-10 px-4 flex flex-col items-center justify-center text-center">
+              <ShoppingCart className="w-14 h-14 text-text-tertiary mb-4" strokeWidth={1.5} />
+              <p className="text-text-primary font-medium mb-1">{t("cartEmpty")}</p>
+              <p className="text-text-secondary text-sm">{t("cartEmptySubtitle")}</p>
+            </div>
           ) : (
           <>
           {cart.map((item) => (
