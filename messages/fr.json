@@ -632,6 +632,7 @@
     "servicesYouMayLike": "Services qui pourraient vous plaire",
     "location": "Accra, Ghana",
     "addToCart": "Ajouter au panier",
+    "addServiceToCartConfirm": "Ajouter ce service au panier et passer au paiement ?",
     "addToWishlist": "Ajouter à la liste de souhaits",
     "buyNow": "Acheter maintenant",
     "aboutService": "À propos du service",

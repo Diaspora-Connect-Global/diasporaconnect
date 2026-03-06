@@ -27,7 +27,7 @@ export default function MarketplaceContainer() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [activeTab, setActiveTab] = useState<MarketplaceTab>("products");
-  const [selectedServiceItem, setSelectedServiceItem] = useState<CartItem | null>(null);
+  const [selectedServiceItem] = useState<CartItem | null>(null);
   const [removeCartItemModalOpen, setRemoveCartItemModalOpen] = useState(false);
   const [cartItemIdToRemove, setCartItemIdToRemove] = useState<string | null>(null);
 
@@ -62,8 +62,8 @@ export default function MarketplaceContainer() {
   };
 
   const handleServiceContinue = (item: CartItem) => {
-    setSelectedServiceItem(item);
-    setCurrentView("service-checkout");
+    setCart([...cart, item]);
+    setShowCart(true);
   };
 
   const handleUpdateQuantity = (id: string, quantity: number) => {

@@ -34,7 +34,7 @@ export function ServiceCheckout({
     () => serviceItem.price * serviceItem.quantity,
     [serviceItem.price, serviceItem.quantity]
   );
-  const extrasPrice = (serviceItem.extras?.length || 0) * 125;
+  const extrasPrice = serviceItem.extrasTotal ?? (serviceItem.extras?.length || 0) * 125;
   const serviceFee = 50;
   const total = packagePrice + extrasPrice + serviceFee;
 

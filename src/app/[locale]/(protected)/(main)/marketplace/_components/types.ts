@@ -25,6 +25,8 @@ export interface Product {
   category: string;
   isService?: boolean;
   priceType?: "fixed" | "hourly";
+  /** Optional extras for services (e.g. add-ons); when set, Continue shows extras modal */
+  serviceExtras?: { id: string; name: string; description: string; price: number }[];
 }
 
 export interface CartItem extends Product {
@@ -33,7 +35,10 @@ export interface CartItem extends Product {
   color?: string;
   projectDuration?: number;
   selectedPackage?: "basic" | "standard" | "premium";
+  /** Extra option ids (for services) */
   extras?: string[];
+  /** Sum of selected extra prices (for services); used when extra prices vary */
+  extrasTotal?: number;
 }
 
 export interface ShippingAddress {
