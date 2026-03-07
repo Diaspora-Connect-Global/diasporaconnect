@@ -35,7 +35,12 @@ export function Checkout({
   });
 
   const subtotal = useMemo(
-    () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    () =>
+      cart.reduce(
+        (sum, item) =>
+          sum + item.price * item.quantity + (item.extrasTotal ?? 0),
+        0
+      ),
     [cart]
   );
   const shippingFee = 20;
@@ -60,21 +65,57 @@ export function Checkout({
           <div>
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <h3 className="font-semibold mb-4">{t("orderDetails")}</h3>
-              {cart.map((item) => (
-                <div key={item.id} className="flex gap-3 mb-3">
-                  <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
-                    {typeof item.image === "string" && item.image.startsWith("http") ? (
-                      <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
-                    ) : (
-                      <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">{item.image}</span>
-                    )}
+              {cart.map((item) => {
+                const lineTotal =
+                  item.price * item.quantity + (item.extrasTotal ?? 0);
+                return (
+                  <div
+                    key={item.lineId ?? item.id}
+                    className="flex gap-3 mb-3 items-center"
+                  >
+                    <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
+                      {typeof item.image === "string" && item.image.startsWith("http") ? (
+                        <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+                      ) : (
+                        <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">{item.image}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-sm text-text-secondary">{item.seller}</p>
+                      {item.extras && item.extras.length > 0 && (
+                        <ul className="text-xs text-text-tertiary space-y-0.5 mt-0.5">
+                          {(item.serviceExtras
+                            ? item.extras
+                                .map((id) =>
+                                  item.serviceExtras!.find((e) => e.id === id)
+                                )
+                                .filter(Boolean) as {
+                                id: string;
+                                name: string;
+                                price: number;
+                              }[]
+                            : []
+                          ).map((extra) => (
+                            <li key={extra.id}>
+                              {extra.name} — GH₵{extra.price.toFixed(2)}
+                            </li>
+                          ))}
+                          {(!item.serviceExtras ||
+                            item.serviceExtras.length === 0) &&
+                            item.extrasTotal != null &&
+                            item.extrasTotal > 0 && (
+                              <li>Extras — GH₵{item.extrasTotal.toFixed(2)}</li>
+                            )}
+                        </ul>
+                      )}
+                    </div>
+                    <p className="font-semibold text-text-primary whitespace-nowrap">
+                      GH₵{lineTotal.toFixed(2)}
+                    </p>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-gray-600">{item.seller}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="bg-white rounded-lg shadow p-6 mb-6">

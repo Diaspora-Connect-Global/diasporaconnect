@@ -39,6 +39,8 @@ export interface CartItem extends Product {
   extras?: string[];
   /** Sum of selected extra prices (for services); used when extra prices vary */
   extrasTotal?: number;
+  /** Unique id for this cart line (services with/without extras are different variations) */
+  lineId?: string;
 }
 
 export interface ShippingAddress {

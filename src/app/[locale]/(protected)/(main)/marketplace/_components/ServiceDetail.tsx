@@ -313,15 +313,15 @@ export function ServiceDetail({
       </div>
 
       {showExtras && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-default rounded-lg max-w-md w-full p-6 border border-border-subtle">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-text-primary">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-surface-default rounded-lg max-w-lg w-full p-6 border border-border-subtle my-auto min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-4 min-w-0">
+              <h3 className="text-xl font-bold text-text-primary truncate">
                 {hasExtras ? t("addExtras") : t("addToCart")}
               </h3>
               <ButtonType3
                 onClick={() => setShowExtras(false)}
-                className="p-0 min-w-0 border-0 bg-transparent text-text-secondary hover:text-text-primary"
+                className="p-0 min-w-0 border-0 bg-transparent text-text-secondary hover:text-text-primary flex-shrink-0"
                 aria-label={t("close")}
               >
                 <X className="w-5 h-5" />
@@ -329,21 +329,21 @@ export function ServiceDetail({
             </div>
             {hasExtras ? (
               <>
-                <div className="space-y-4 mb-6">
+                <div className="space-y-4 mb-6 min-w-0">
                   {extras.map((extra) => (
-                    <label key={extra.id} className="flex items-start gap-3 cursor-pointer">
+                    <label key={extra.id} className="flex items-start gap-3 cursor-pointer min-w-0">
                       <input
                         type="checkbox"
                         checked={selectedExtras.includes(extra.id)}
                         onChange={() => toggleExtra(extra.id)}
-                        className="mt-1 rounded border-border-subtle accent-surface-brand focus:ring-2 focus:ring-border-brand"
+                        className="mt-1 rounded border-border-subtle accent-surface-brand focus:ring-2 focus:ring-border-brand flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-text-primary">{extra.name}</span>
-                          <span className="font-bold text-text-primary">GH₵{extra.price.toFixed(2)}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mb-1">
+                          <span className="font-semibold text-text-primary break-words">{extra.name}</span>
+                          <span className="font-bold text-text-primary flex-shrink-0">GH₵{extra.price.toFixed(2)}</span>
                         </div>
-                        <p className="text-sm text-text-secondary">{extra.description}</p>
+                        <p className="text-sm text-text-secondary break-words">{extra.description}</p>
                       </div>
                     </label>
                   ))}

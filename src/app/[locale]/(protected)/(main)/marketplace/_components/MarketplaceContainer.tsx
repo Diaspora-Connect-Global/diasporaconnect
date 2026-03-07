@@ -59,13 +59,34 @@ export default function MarketplaceContainer() {
     setCurrentView("checkout");
   };
 
+  const getServiceVariationKey = (it: CartItem) =>
+    `${it.id}-${it.selectedPackage ?? "basic"}-${(it.extras ?? []).slice().sort().join(",")}`;
+
   const handleServiceContinue = (item: CartItem) => {
-    setCart([...cart, item]);
+    const variationKey = getServiceVariationKey(item);
+    const existing = cart.find((c) => getServiceVariationKey(c) === variationKey);
+    if (existing) {
+      const lineKey = existing.lineId ?? existing.id;
+      setCart(
+        cart.map((c) =>
+          (c.lineId ?? c.id) === lineKey
+            ? { ...c, quantity: c.quantity + item.quantity }
+            : c
+        )
+      );
+    } else {
+      const lineId = `line-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setCart([...cart, { ...item, lineId }]);
+    }
     setShowCart(true);
   };
 
   const handleUpdateQuantity = (id: string, quantity: number) => {
-    setCart(cart.map((item) => (item.id === id ? { ...item, quantity } : item)));
+    setCart(
+      cart.map((item) =>
+        (item.lineId ?? item.id) === id ? { ...item, quantity } : item
+      )
+    );
   };
 
   const requestRemoveCartItem = (id: string) => {
@@ -75,7 +96,11 @@ export default function MarketplaceContainer() {
 
   const handleRemoveCartItemConfirm = () => {
     if (cartItemIdToRemove) {
-      setCart(cart.filter((item) => item.id !== cartItemIdToRemove));
+      setCart(
+        cart.filter(
+          (item) => (item.lineId ?? item.id) !== cartItemIdToRemove
+        )
+      );
       setCartItemIdToRemove(null);
       setRemoveCartItemModalOpen(false);
     }

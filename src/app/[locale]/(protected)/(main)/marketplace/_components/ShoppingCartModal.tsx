@@ -22,7 +22,12 @@ export function ShoppingCartModal({
 }) {
   const t = useTranslations("marketplace");
   const total = useMemo(
-    () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    () =>
+      cart.reduce(
+        (sum, item) =>
+          sum + item.price * item.quantity + (item.extrasTotal ?? 0),
+        0
+      ),
     [cart]
   );
 
@@ -54,49 +59,75 @@ export function ShoppingCartModal({
             </div>
           ) : (
           <>
-          {cart.map((item) => (
-            <div key={item.id} className="flex gap-4 mb-4 pb-4 border-b">
-              <div className="relative w-20 h-20 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
-                {typeof item.image === "string" && item.image.startsWith("http") ? (
-                  <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />
-                ) : (
-                  <span className="absolute inset-0 flex items-center justify-center text-3xl text-text-tertiary">{item.image}</span>
-                )}
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold mb-1">{item.name}</h4>
-                <p className="text-sm text-text-secondary mb-2">{item.seller}</p>
-                <div className="flex items-center gap-3">
-                  <ButtonType3
-                    onClick={() =>
-                      onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
-                    }
-                    className="p-1 border rounded bg-transparent min-w-0"
+          {cart.map((item) => {
+            const lineKey = item.lineId ?? item.id;
+            const lineTotal =
+              item.price * item.quantity + (item.extrasTotal ?? 0);
+            return (
+              <div key={lineKey} className="flex gap-4 mb-4 pb-4 border-b">
+                <div className="relative w-20 h-20 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
+                  {typeof item.image === "string" && item.image.startsWith("http") ? (
+                    <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />
+                  ) : (
+                    <span className="absolute inset-0 flex items-center justify-center text-3xl text-text-tertiary">{item.image}</span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">{item.name}</h4>
+                  <p className="text-sm text-text-secondary mb-2">{item.seller}</p>
+                  {item.extras && item.extras.length > 0 && (
+                    <ul className="text-xs text-text-tertiary space-y-0.5 mb-1">
+                      {(item.serviceExtras
+                        ? item.extras
+                            .map((id) =>
+                              item.serviceExtras!.find((e) => e.id === id)
+                            )
+                            .filter(Boolean) as { id: string; name: string; price: number }[]
+                        : []
+                      ).map((extra) => (
+                        <li key={extra.id}>
+                          {extra.name} — GH₵{extra.price.toFixed(2)}
+                        </li>
+                      ))}
+                      {(!item.serviceExtras || item.serviceExtras.length === 0) &&
+                        item.extrasTotal != null &&
+                        item.extrasTotal > 0 && (
+                          <li>Extras — GH₵{item.extrasTotal.toFixed(2)}</li>
+                        )}
+                    </ul>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <ButtonType3
+                      onClick={() =>
+                        onUpdateQuantity(lineKey, Math.max(1, item.quantity - 1))
+                      }
+                      className="p-1 border rounded bg-transparent min-w-0"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </ButtonType3>
+                    <span className="font-medium">{item.quantity}</span>
+                    <ButtonType3
+                      onClick={() => onUpdateQuantity(lineKey, item.quantity + 1)}
+                      className="p-1 border rounded bg-transparent min-w-0"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </ButtonType3>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold mb-2">
+                    GH₵{lineTotal.toFixed(2)}
+                  </p>
+                  <ButtonType4Pill
+                    onClick={() => onRemoveItem(lineKey)}
+                    className="p-0 min-w-0 bg-transparent hover:bg-transparent"
                   >
-                    <Minus className="w-4 h-4" />
-                  </ButtonType3>
-                  <span className="font-medium">{item.quantity}</span>
-                  <ButtonType3
-                    onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                    className="p-1 border rounded bg-transparent min-w-0"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </ButtonType3>
+                    <Trash2 className="w-4 h-4" />
+                  </ButtonType4Pill>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold mb-2">
-                  GH₵{(item.price * item.quantity).toFixed(2)}
-                </p>
-                <ButtonType4Pill
-                  onClick={() => onRemoveItem(item.id)}
-                  className="p-0 min-w-0 bg-transparent hover:bg-transparent"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </ButtonType4Pill>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           <div className="mt-6 text-right">
             <p className="text-sm text-text-secondary mb-1">
               {t("oneTimeFee")}: GH₵20.00
