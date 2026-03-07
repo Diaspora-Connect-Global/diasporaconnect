@@ -27,7 +27,15 @@ export function Checkout({
 }) {
   const t = useTranslations("marketplace");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit");
+  const [sameAsShipping, setSameAsShipping] = useState(true);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+    name: "",
+    address: "",
+    city: "",
+    country: "",
+    phoneNumber: "",
+  });
+  const [billingAddress, setBillingAddress] = useState<ShippingAddress>({
     name: "",
     address: "",
     city: "",
@@ -206,10 +214,67 @@ export function Checkout({
 
             <div className="bg-surface-default rounded-lg border border-border-subtle p-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("billingAddress")}</h3>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="accent-surface-brand" />
+              <label className="flex items-center gap-2 cursor-pointer mb-4">
+                <input
+                  type="checkbox"
+                  checked={sameAsShipping}
+                  onChange={(e) => setSameAsShipping(e.target.checked)}
+                  className="accent-surface-brand"
+                />
                 <span className="text-sm text-text-primary">{t("sameAsShipping")}</span>
               </label>
+              {!sameAsShipping && (
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder={t("namePlaceholder")}
+                    value={billingAddress.name}
+                    onChange={(e) =>
+                      setBillingAddress({ ...billingAddress, name: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t("addressPlaceholder")}
+                    value={billingAddress.address}
+                    onChange={(e) =>
+                      setBillingAddress({ ...billingAddress, address: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder={t("cityPlaceholder")}
+                      value={billingAddress.city}
+                      onChange={(e) =>
+                        setBillingAddress({ ...billingAddress, city: e.target.value })
+                      }
+                      className="px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                    />
+                    <CountrySelect
+                      value={billingAddress.country}
+                      onChange={(value) =>
+                        setBillingAddress({ ...billingAddress, country: value })
+                      }
+                      id="checkout-billing-country"
+                    />
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder={t("phoneNumberPlaceholder")}
+                    value={billingAddress.phoneNumber}
+                    onChange={(e) =>
+                      setBillingAddress({
+                        ...billingAddress,
+                        phoneNumber: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
