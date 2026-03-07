@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { CountrySelect } from "@/components/custom/input";
 import type { CartItem, PaymentMethod, PaymentResult, ShippingAddress } from "./types";
 
 export function Checkout({
@@ -178,19 +179,14 @@ export function Checkout({
                     className="px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                     required
                   />
-                  <select
+                  <CountrySelect
                     value={shippingAddress.country}
-                    onChange={(e) =>
-                      setShippingAddress({ ...shippingAddress, country: e.target.value })
+                    onChange={(value) =>
+                      setShippingAddress({ ...shippingAddress, country: value })
                     }
-                    className="px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                    id="checkout-country"
                     required
-                  >
-                    <option value="">{t("country")}</option>
-                    <option value="GH">{t("countries.ghana")}</option>
-                    <option value="NG">{t("countries.nigeria")}</option>
-                    <option value="KE">{t("countries.kenya")}</option>
-                  </select>
+                  />
                 </div>
                 <input
                   type="tel"

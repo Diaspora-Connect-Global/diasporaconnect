@@ -214,33 +214,31 @@ export const Select: React.FC<SelectProps> = ({
                 <label htmlFor={id} className="text-sm font-normal">
                     <LabelMedium>
                         {label}
-                        {required && <span className="text-red-500 ml-1">*</span>}
+                        {required && <span className="text-text-danger ml-1">*</span>}
                     </LabelMedium>
                 </label>
             )}
-            <div className="bg-surface-subtle rounded-md">
-                <div className="border-border-subtle border-2 rounded-md relative">
-                    <select
-                        id={id}
-                        value={value}
-                        onChange={(e) => onChange(e.target.value)}
-                        className="h-12 w-full bg-transparent px-3 pr-10 appearance-none focus:outline-none text-text-primary cursor-pointer"
-                        required={required}
-                    >
-                        <option value="" disabled className="text-text-secondary">
-                            {placeholder}
+            <div className="bg-surface-default rounded-lg border border-border-subtle relative focus-within:ring-2 focus-within:ring-border-brand focus-within:ring-inset rounded-lg">
+                <select
+                    id={id}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="h-12 w-full bg-transparent px-3 pr-10 appearance-none focus:outline-none text-text-primary cursor-pointer rounded-lg"
+                    required={required}
+                >
+                    <option value="" disabled className="bg-surface-default text-text-secondary">
+                        {placeholder}
+                    </option>
+                    {options.map((option) => (
+                        <option key={option.value} value={option.value} className="bg-surface-default text-text-primary">
+                            {option.label}
                         </option>
-                        {options.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-                    <ChevronDown
-                        size={20}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
-                    />
-                </div>
+                    ))}
+                </select>
+                <ChevronDown
+                    size={20}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
+                />
             </div>
         </div>
     );
@@ -428,27 +426,45 @@ interface CountrySelectProps {
 export const CountrySelect: React.FC<CountrySelectProps> = ({
     value,
     onChange,
-    label = "Country",
+    label,
     id = "country",
     required = false
 }) => {
-    // Transform COUNTRIES array to match Select component's expected format
-    const countryOptions = COUNTRIES.map(country => ({
-        value: country.code, // or country.name, depending on what you need
-        label: ` ${country.name}`, // Display with emoji
-        // Optionally include dial code: `${country.emoji} ${country.name} (${country.dial_code})`
-    }));
-
     return (
-        <Select
-            value={value}
-            onChange={onChange}
-            options={countryOptions}
-            placeholder="Select country"
-            label={label}
-            id={id}
-            required={required}
-        />
+        <div className="space-y-2">
+            {label && (
+                <label htmlFor={id} className="text-sm font-normal">
+                    <LabelMedium>
+                        {label}
+                        {required && <span className="text-text-danger ml-1">*</span>}
+                    </LabelMedium>
+                </label>
+            )}
+            <SelectA value={value || undefined} onValueChange={onChange} required={required}>
+                <SelectTrigger
+                    id={id}
+                    className="h-12 w-full rounded-lg border border-border-subtle bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand data-[placeholder]:text-text-tertiary [&_svg]:text-text-secondary"
+                >
+                    <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent
+                    className="max-h-60 rounded-lg border border-border-subtle bg-surface-default text-text-primary"
+                    position="popper"
+                >
+                    <SelectGroup>
+                        {COUNTRIES.map((country) => (
+                            <SelectItem
+                                key={country.code}
+                                value={country.code}
+                                className="cursor-pointer rounded-md py-2 pl-2 pr-8 text-text-primary focus:bg-surface-subtle focus:text-text-primary data-[highlighted]:bg-surface-subtle data-[highlighted]:text-text-primary"
+                            >
+                                {country.name}
+                            </SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </SelectA>
+        </div>
     );
 };
 
