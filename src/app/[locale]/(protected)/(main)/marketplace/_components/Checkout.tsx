@@ -55,7 +55,7 @@ export function Checkout({
     <div className="max-w-7xl mx-auto px-4 py-6">
       <ButtonType3
         onClick={onBack}
-        className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-800"
+        className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-text-secondary mb-4 hover:text-text-primary"
       >
         <ChevronLeft className="w-5 h-5" />
         <span>{t("checkout")}</span>
@@ -63,8 +63,8 @@ export function Checkout({
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
           <div>
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="font-semibold mb-4">{t("orderDetails")}</h3>
+            <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+              <h3 className="font-semibold mb-4 text-text-primary">{t("orderDetails")}</h3>
               {cart.map((item) => {
                 const lineTotal =
                   item.price * item.quantity + (item.extrasTotal ?? 0);
@@ -81,7 +81,7 @@ export function Checkout({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium">{item.name}</p>
+                      <p className="font-medium text-text-primary">{item.name}</p>
                       <p className="text-sm text-text-secondary">{item.seller}</p>
                       {item.extras && item.extras.length > 0 && (
                         <ul className="text-xs text-text-tertiary space-y-0.5 mt-0.5">
@@ -118,8 +118,8 @@ export function Checkout({
               })}
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="font-semibold mb-4">{t("paymentMethod")}</h3>
+            <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+              <h3 className="font-semibold mb-4 text-text-primary">{t("paymentMethod")}</h3>
               <label className="flex items-center gap-3 mb-3 cursor-pointer">
                 <input
                   type="radio"
@@ -127,8 +127,9 @@ export function Checkout({
                   value="credit"
                   checked={paymentMethod === "credit"}
                   onChange={() => setPaymentMethod("credit")}
+                  className="accent-surface-brand"
                 />
-                <span>{t("creditCard")}</span>
+                <span className="text-text-primary">{t("creditCard")}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -137,13 +138,14 @@ export function Checkout({
                   value="mobile"
                   checked={paymentMethod === "mobile"}
                   onChange={() => setPaymentMethod("mobile")}
+                  className="accent-surface-brand"
                 />
-                <span>{t("mobilePayment")}</span>
+                <span className="text-text-primary">{t("mobilePayment")}</span>
               </label>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="font-semibold mb-4">{t("shippingAddress")}</h3>
+            <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+              <h3 className="font-semibold mb-4 text-text-primary">{t("shippingAddress")}</h3>
               <div className="space-y-4">
                 <input
                   type="text"
@@ -152,7 +154,7 @@ export function Checkout({
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   required
                 />
                 <input
@@ -162,7 +164,7 @@ export function Checkout({
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, address: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   required
                 />
                 <div className="grid grid-cols-2 gap-4">
@@ -173,7 +175,7 @@ export function Checkout({
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, city: e.target.value })
                     }
-                    className="px-4 py-2 border rounded-lg"
+                    className="px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                     required
                   />
                   <select
@@ -181,7 +183,7 @@ export function Checkout({
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, country: e.target.value })
                     }
-                    className="px-4 py-2 border rounded-lg"
+                    className="px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand"
                     required
                   >
                     <option value="">{t("country")}</option>
@@ -200,41 +202,41 @@ export function Checkout({
                       phoneNumber: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   required
                 />
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold mb-4">{t("billingAddress")}</h3>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" defaultChecked />
-                <span className="text-sm">{t("sameAsShipping")}</span>
+            <div className="bg-surface-default rounded-lg border border-border-subtle p-6">
+              <h3 className="font-semibold mb-4 text-text-primary">{t("billingAddress")}</h3>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" defaultChecked className="accent-surface-brand" />
+                <span className="text-sm text-text-primary">{t("sameAsShipping")}</span>
               </label>
             </div>
           </div>
         </div>
 
         <div className="md:col-span-1">
-          <div className="bg-white rounded-lg shadow p-6 sticky top-24">
-            <h3 className="font-semibold mb-4">{t("priceSummary")}</h3>
+          <div className="bg-surface-default rounded-lg border border-border-subtle p-6 sticky top-24">
+            <h3 className="font-semibold mb-4 text-text-primary">{t("priceSummary")}</h3>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{t("subtotalAmount")}</span>
-                <span>GH₵{subtotal.toFixed(2)}</span>
+                <span className="text-text-secondary">{t("subtotalAmount")}</span>
+                <span className="text-text-primary">GH₵{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{t("shippingFee")}</span>
-                <span>GH₵{shippingFee.toFixed(2)}</span>
+                <span className="text-text-secondary">{t("shippingFee")}</span>
+                <span className="text-text-primary">GH₵{shippingFee.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{t("discount")}</span>
-                <span>GH₵0.00</span>
+                <span className="text-text-secondary">{t("discount")}</span>
+                <span className="text-text-primary">GH₵0.00</span>
               </div>
             </div>
-            <div className="border-t pt-4 mb-6">
-              <div className="flex justify-between font-bold text-lg">
+            <div className="border-t border-border-subtle pt-4 mb-6">
+              <div className="flex justify-between font-bold text-lg text-text-primary">
                 <span>{t("total")}</span>
                 <span>GH₵{total.toFixed(2)}</span>
               </div>
@@ -242,7 +244,7 @@ export function Checkout({
             <ButtonType2
               onClick={handleSubmit}
               disabled={isPaying || cart.length === 0}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+              className="w-full bg-surface-brand text-text-white py-3 rounded-lg hover:opacity-90 disabled:opacity-50"
             >
               {isPaying
                 ? t("processing") ?? "Processing…"
