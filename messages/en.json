@@ -1,7 +1,7 @@
 {
     "authentication": {
         "greetings": {
-            "signup": "Welcome to Diaspo Plug",
+            "signup": "Welcome to DiaspoPlug",
             "login": "Welcome Back!"
         },
         "description": "Creating structured, transparent, and impactful pathways for diaspora engagement.",
@@ -130,7 +130,7 @@
             "codeExpired": "Code expired"
         },
         "topics": {
-            "title": "What topics do you want to see on Diaspo Plug",
+            "title": "What topics do you want to see on DiaspoPlug",
             "description": "Choose your interests to help us personalize your feed with updates, discussions, and opportunities you care about.",
             "technology": "Technology",
             "science": "Science",

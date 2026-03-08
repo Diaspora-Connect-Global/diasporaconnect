@@ -48,7 +48,7 @@ export default function InfoLinks() {
             <span className="flex">
                 <BodySmall>
                     <TextPrimary>
-                        © Diaspo Plug {new Date().getFullYear()}
+                        © DiaspoPlug {new Date().getFullYear()}
                     </TextPrimary>
                 </BodySmall>
             </span>
