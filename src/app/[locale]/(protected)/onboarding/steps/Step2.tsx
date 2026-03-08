@@ -37,7 +37,7 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
       onSkip={() => nextStep()}
     >
       <div className="flex flex-wrap gap-4 w-full">
-        {options.map((option) =>
+        {options.map((option) => (
           data.communityType === option.value ? (
             <ButtonType2
               key={option.value}
