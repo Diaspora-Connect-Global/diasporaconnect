@@ -14,7 +14,7 @@ export type MentionMap = Record<string, string>;
 
 /**
  * Parses post text and renders:
- * - @mentions as LinkedIn-style blue links (with profile navigation when mentionMap is provided)
+ * - @mentions as brand-styled links (with profile navigation when mentionMap is provided)
  * - #hashtags in bold with brand color
  * - Emoji/plain text as-is
  *
@@ -37,11 +37,11 @@ export function renderRichText(
 
   // When compactLayout, use no padding so character positions match textarea (cursor alignment)
   const mentionClass = compactLayout
-    ? 'text-blue-600 dark:text-blue-400 font-semibold cursor-default'
-    : 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded cursor-default';
+    ? 'text-text-brand font-semibold cursor-default'
+    : 'text-text-brand font-semibold bg-surface-brand-subtle px-1 py-0.5 rounded cursor-default';
   const linkClass = compactLayout
-    ? 'inline text-blue-600 dark:text-blue-400 font-semibold no-underline'
-    : 'inline text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-1 py-0.5 rounded hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors no-underline';
+    ? 'inline text-text-brand font-semibold no-underline'
+    : 'inline text-text-brand font-semibold bg-surface-brand-subtle px-1 py-0.5 rounded hover:bg-surface-brand-subtle/80 transition-colors no-underline';
 
   while ((match = pattern.exec(text)) !== null) {
     // Add text before the match
@@ -109,7 +109,7 @@ interface RichTextProps {
 
 /**
  * Component wrapper for renderRichText.
- * Renders post content with styled @mentions (blue pill, optionally linked) and #hashtags (bold).
+ * Renders post content with styled @mentions (brand pill, optionally linked) and #hashtags (bold).
  */
 export default function RichText({ text, mentionMap, className = '' }: RichTextProps) {
   return <span className={className}>{renderRichText(text, mentionMap)}</span>;
