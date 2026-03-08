@@ -38,7 +38,7 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
     >
       <div className="flex flex-wrap gap-4 w-full">
         {options.map((option) => (
-          {data.communityType === option.value ? (
+          data.communityType === option.value ? (
             <ButtonType2
               key={option.value}
               type="button"
@@ -56,7 +56,7 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
             >
               {option.label}
             </ButtonType3>
-          )}
+          )
         ))}
       </div>
     </MultiStep>

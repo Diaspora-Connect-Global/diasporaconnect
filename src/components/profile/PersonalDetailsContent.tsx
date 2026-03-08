@@ -5,7 +5,7 @@ import { EditableField } from './EditableField';
 import { BioEditModal } from './modals/BioEditModal';
 import { DOBEditModal } from './modals/DOBEditModal';
 import { NameEditModal } from './modals/NameEditModal';
-import { ResidenceEditModal } from './modals/ResidenceEdit.tsx';
+import { ResidenceEditModal } from './modals/ResidenceEdit';
 import { HomeCountryEditModal } from './modals/HomeCountryEditModal';
 import { useTranslations } from 'next-intl';
 import { GET_MY_PROFILE, Profile, UpdateProfileInput } from '@/services/gql/profile';

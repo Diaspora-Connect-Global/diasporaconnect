@@ -234,7 +234,7 @@ export default function Step2({
                   { id: 'mtn', label: 'MTN MOMO', bg: 'bg-yellow-500' },
                   { id: 'telecel', label: 'TELECASH', bg: 'bg-red-600' },
                   { id: 'at', label: 'AT MONEY', bg: 'bg-blue-600' },
-                ].map((p) =>
+                ].map((p) => (
                   mobileProvider === p.id ? (
                     <ButtonType2
                       key={p.id}
