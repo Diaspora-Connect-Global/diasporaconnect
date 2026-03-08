@@ -1,7 +1,7 @@
 {
     "authentication": {
         "greetings": {
-            "signup": "Willkommen bei Diaspo Plug",
+            "signup": "Willkommen bei DiaspoPlug",
             "login": "Willkommen zurück!"
         },
         "description": "Schaffung strukturierter, transparenter und wirkungsvoller Wege für die Diaspora-Beteiligung.",
@@ -89,7 +89,7 @@
             "codeExpired": "Code abgelaufen"
         },
         "topics": {
-            "title": "Welche Themen möchten Sie auf Diaspo Plug sehen",
+            "title": "Welche Themen möchten Sie auf DiaspoPlug sehen",
             "description": "Wählen Sie Ihre Interessen, damit wir Ihren Feed mit Updates, Diskussionen und Möglichkeiten, die Sie interessieren, personalisieren können.",
             "technology": "Technologie",
             "science": "Wissenschaft",
@@ -554,7 +554,7 @@
         "confirm": "Bestätigen"
     },
     "metadata": {
-        "title": "Diaspo Plug",
+        "title": "DiaspoPlug",
         "description": "Diaspora-Gemeinschaften weltweit verbinden"
     },
     "settings": {
