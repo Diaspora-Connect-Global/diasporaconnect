@@ -1,9 +1,8 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import React from "react";
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { MyAvatar } from "@/components/custom/header";
 
 export default function VendorSidebar({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -95,16 +94,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     <p className="heading-small text-brand">d</p>
                     <h1 className="heading-xsmall">{t('dashboard')}</h1>
                 </div>
-                <Avatar>
-                    <AvatarImage src="https://github.com/shadcn.png" alt="User avatar" />
-                    <AvatarFallback>
-                        <Image
-                            width={25}
-                            height={25}
-                            src="/PROFILE.png"
-                            alt="Profile" />
-                    </AvatarFallback>
-                </Avatar>
+                <MyAvatar />
             </div>
             <div className="flex h-[90vh]    ">
                 <aside className="w-[22vw] overflow-y-auto px-6 bg-surface-default   flex flex-col">
