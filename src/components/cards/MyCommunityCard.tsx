@@ -116,6 +116,10 @@ export function MyCommunityCard({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default min-w-[200px]'> {/* Wider menu for touch targets */}
+                            <DropdownMenuItem onSelect={() => router.push(`/community/${id}`)} className='font-body-large text-text-primary flex justify-between items-center'>
+                                <span>{t('viewCommunity')}</span>
+                                <ChevronRight className="w-4 h-4" />
+                            </DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => handleCommunitySelect(id)} className='font-body-large text-text-primary flex justify-between items-center'>
                                 <span>{t('openInHome')}</span>
                                 <ChevronRight className="w-4 h-4" />

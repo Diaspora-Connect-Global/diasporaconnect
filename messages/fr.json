@@ -300,6 +300,8 @@
             "discover": "Découvrir des associations",
             "myassociations": "Mes associations à {association}",
             "discovermore": "Découvrir plus d'associations dans {association}",
+            "myAssociationsTitle": "Mes associations",
+            "discoverTitle": "Découvrir des associations",
             "noAssociations": "Aucune association trouvée pour cette communauté",
             "noDiscoverAssociations": "Aucune association à découvrir pour cette communauté",
             "noCommunitySelected": "Aucune communauté sélectionnée",
@@ -312,6 +314,28 @@
                 "title": "Association introuvable",
                 "description": "Nous n'avons pas pu trouver l'association que vous recherchez. Elle a peut-être été supprimée ou le lien est incorrect.",
                 "browse": "Parcourir les associations"
+            },
+            "toasts": {
+                "youAreNowMember": "Vous êtes maintenant membre de {name}",
+                "requestSubmitted": "Demande envoyée — en attente d'approbation",
+                "inviteOnly": "Cette association est sur invitation uniquement",
+                "leftAssociation": "Vous avez quitté {name}",
+                "requestCancelled": "Demande d'adhésion annulée"
+            },
+            "badges": {
+                "suspended": "Suspendu",
+                "inviteOnly": "Sur invitation uniquement",
+                "member": "Membre",
+                "requestPending": "Demande en attente"
+            },
+            "actions": {
+                "requestToJoin": "Demander à rejoindre",
+                "cancelRequest": "Annuler la demande",
+                "leave": "Quitter"
+            },
+            "leaveConfirm": {
+                "title": "Quitter l'association ?",
+                "description": "Vous devrez demander à rejoindre à nouveau pour voir le contenu."
             }
         },
         "groupchats": {
@@ -378,10 +402,37 @@
         "members": "membres",
         "myCommunity": "Ma Communauté",
         "discoverMore": "Découvrir plus de communautés",
+        "viewCommunity": "Voir la communauté",
         "openInHome": "Ouvrir la communauté dans l'accueil",
         "leaveCommunity": "Quitter la communauté",
         "leaveCommunityTitle": "Quitter la communauté ?",
-        "leaveCommunityConfirm": "Vous devrez rejoindre à nouveau pour voir les publications et les événements."
+        "leaveCommunityConfirm": "Vous devrez rejoindre à nouveau pour voir les publications et les événements.",
+        "loading": "Chargement...",
+        "loadingPosts": "Chargement des publications...",
+        "noPosts": "Aucune publication pour le moment.",
+        "notfound": {
+            "title": "Communauté introuvable",
+            "description": "Nous n'avons pas pu trouver cette communauté. Elle a peut-être été supprimée ou le lien est incorrect.",
+            "browse": "Parcourir les communautés"
+        },
+        "toasts": {
+            "youAreNowMember": "Vous êtes maintenant membre de {name}",
+            "requestSubmitted": "Demande envoyée — en attente d'approbation",
+            "inviteOnly": "Cette communauté est sur invitation uniquement",
+            "leftCommunity": "Vous avez quitté {name}",
+            "requestCancelled": "Demande d'adhésion annulée"
+        },
+        "badges": {
+            "suspended": "Suspendu",
+            "inviteOnly": "Sur invitation uniquement",
+            "member": "Membre",
+            "requestPending": "Demande en attente"
+        },
+        "actions": {
+            "requestToJoin": "Demander à rejoindre",
+            "cancelRequest": "Annuler la demande",
+            "leave": "Quitter"
+        }
     },
     "notification": {
         "notifications": "Notifications",

@@ -378,6 +378,8 @@
             "discover": "Discover associations",
             "myassociations": "My associations in {association}",
             "discovermore": "Discover more associations in {association}",
+            "myAssociationsTitle": "My associations",
+            "discoverTitle": "Discover associations",
             "noAssociations": "No associations found for this community",
             "noDiscoverAssociations": "No associations to discover for this community",
             "noCommunitySelected": "No community selected",
@@ -390,6 +392,28 @@
                 "title": "Association not found",
                 "description": "We couldn't find the association you're looking for. It may have been removed or the link is incorrect.",
                 "browse": "Browse associations"
+            },
+            "toasts": {
+                "youAreNowMember": "You are now a member of {name}",
+                "requestSubmitted": "Request submitted — pending approval",
+                "inviteOnly": "This association is invite only",
+                "leftAssociation": "You left {name}",
+                "requestCancelled": "Join request cancelled"
+            },
+            "badges": {
+                "suspended": "Suspended",
+                "inviteOnly": "Invite only",
+                "member": "Member",
+                "requestPending": "Request pending"
+            },
+            "actions": {
+                "requestToJoin": "Request to join",
+                "cancelRequest": "Cancel request",
+                "leave": "Leave"
+            },
+            "leaveConfirm": {
+                "title": "Leave association?",
+                "description": "You will need to request to join again to see content."
             }
         },
         "groupchats": {
@@ -463,12 +487,39 @@
         "members": "members",
         "myCommunity": "My Community",
         "discoverMore": "Discover more communities",
+        "viewCommunity": "View community",
         "openInHome": "Open community in home",
         "leaveCommunity": "Leave community",
         "leaveCommunityTitle": "Leave community?",
         "leaveCommunityConfirm": "You will need to re-join to see posts and events.",
         "noCommunitiesJoined": "No communities joined yet.",
-        "noCommunitiesFound": "No communities found. Try refreshing the page or adjusting your search."
+        "noCommunitiesFound": "No communities found. Try refreshing the page or adjusting your search.",
+        "loading": "Loading...",
+        "loadingPosts": "Loading posts...",
+        "noPosts": "No posts yet.",
+        "notfound": {
+            "title": "Community not found",
+            "description": "We couldn't find this community. It may have been removed or the link is incorrect.",
+            "browse": "Browse communities"
+        },
+        "toasts": {
+            "youAreNowMember": "You are now a member of {name}",
+            "requestSubmitted": "Request submitted — pending approval",
+            "inviteOnly": "This community is invite only",
+            "leftCommunity": "You left {name}",
+            "requestCancelled": "Join request cancelled"
+        },
+        "badges": {
+            "suspended": "Suspended",
+            "inviteOnly": "Invite only",
+            "member": "Member",
+            "requestPending": "Request pending"
+        },
+        "actions": {
+            "requestToJoin": "Request to join",
+            "cancelRequest": "Cancel request",
+            "leave": "Leave"
+        }
     },
     "notification": {
         "notifications": "Notifications",
