@@ -53,6 +53,10 @@ interface SearchAssociationsData {
   };
 }
 
+interface RequestJoinAssociationData {
+  requestMembership: { status: string; message?: string };
+}
+
 export default function AssociationsPage() {
   const tActions = useTranslations('actions');
   const t = useTranslations('home.associations');
@@ -74,7 +78,7 @@ export default function AssociationsPage() {
     }
   );
 
-  const [requestJoin, { loading: joinLoading }] = useMutation(REQUEST_JOIN_ASSOCIATION, {
+  const [requestJoin, { loading: joinLoading }] = useMutation<RequestJoinAssociationData>(REQUEST_JOIN_ASSOCIATION, {
     refetchQueries: [
       { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: PAGE_SIZE } },
       { query: SEARCH_ASSOCIATIONS, variables: { input: { page: 1, limit: PAGE_SIZE } } },
