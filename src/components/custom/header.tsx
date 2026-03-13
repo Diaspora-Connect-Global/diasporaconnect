@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cloneElement, isValidElement, ReactNode, useState } from 'react';
 import Image from 'next/image';
-import LocaleSwitcher from '../LocalSwitcher';
 import { SearchInput } from './input';
 import { ThemeToggle } from '@/app/[locale]/theme-toggle';
 import { useTranslations } from 'next-intl';
@@ -20,13 +19,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronRight as CR, SettingsIcon } from 'lucide-react';
-import { LogoutCurve, Wallet3 } from 'iconsax-reactjs';
-import { QuestionIcon, StorefrontIcon, X } from "@phosphor-icons/react";
-import { IconFileDollar } from '@tabler/icons-react';
+import { LogoutCurve } from 'iconsax-reactjs';
+import { QuestionIcon, X } from "@phosphor-icons/react";
 import React from 'react';
 import { ButtonType3 } from '@/components/custom/button';
 import HomeSidebar from '../home/HomeSidebar';
-import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { LogoutConfirmModal } from '../auth/LogoutConfirmModal';
 import { clearStorage } from '@/lib/logout';
@@ -45,8 +42,6 @@ export default function Header({
   const [searchQuery, setSearchQuery] = useState('');
   const t = useTranslations('home.header');
   const tCommon = useTranslations('common');
-  const router = useRouter();
-
 
   const handleSearch = () => {
     console.log('Searching for:', searchQuery);
