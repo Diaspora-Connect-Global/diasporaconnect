@@ -58,7 +58,8 @@ export default function Header({
 
   const navigation = [
     { name: t('home'), href: `/${currentLocale}`, icon: "/HOME" },
-    { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY" },
+    // prefetch: false avoids "preloaded but not used" console warning for this route's CSS
+    { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY", prefetch: false },
     { name: t('post'), href: `/${currentLocale}/create-post`, icon: "/POST", disabled: true },
     { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT", disabled: true },
     { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION" },
@@ -85,7 +86,7 @@ export default function Header({
             <Link
               key={item.name}
               href={item.href}
-              prefetch={!item.disabled}
+              prefetch={!item.disabled && item.prefetch !== false}
               className={`
                 group relative flex flex-col items-center justify-center
                 lg:px-3 py-2 transition-all duration-200
