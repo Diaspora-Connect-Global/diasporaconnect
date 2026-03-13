@@ -529,6 +529,8 @@
         "associations": "Associations",
         "markasread": "Mark as read",
         "remove": "Remove notification",
+        "removeNotificationTitle": "Remove notification?",
+        "removeNotificationConfirm": "This notification will be removed from your list.",
         "markall": "Mark all as read",
         "preference": "Notifications preference",
         "none": {

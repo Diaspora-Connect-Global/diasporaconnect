@@ -442,6 +442,8 @@
         "associations": "Vereine",
         "markasread": "Als gelesen markieren",
         "remove": "Benachrichtigung entfernen",
+        "removeNotificationTitle": "Benachrichtigung entfernen?",
+        "removeNotificationConfirm": "Diese Benachrichtigung wird aus Ihrer Liste entfernt.",
         "markall": "Alle als gelesen markieren",
         "preference": "Benachrichtigungseinstellungen",
         "none": {

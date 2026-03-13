@@ -190,9 +190,11 @@ export default function CommunityDetailPage() {
           </div>
           <h2 className="text-2xl font-semibold mb-2">{t('notfound.title')}</h2>
           <p className="text-sm text-text-primary mb-6">{t('notfound.description')}</p>
-          <Link href="/community">
-            <ButtonType1>{t('notfound.browse')}</ButtonType1>
-          </Link>
+          <div className="flex justify-center gap-3">
+            <Link href="/community" prefetch={false}>
+              <ButtonType1>{t('notfound.browse')}</ButtonType1>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -203,16 +205,6 @@ export default function CommunityDetailPage() {
   return (
     <div className="lg:flex overflow-y-auto h-app-inner">
       <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
-        {community.bannerUrl && (
-          <div className="relative w-full h-32 sm:h-40 -mx-3 lg:mx-0 lg:rounded-t-lg overflow-hidden bg-surface-subtle">
-            <Image
-              src={community.bannerUrl}
-              alt=""
-              fill
-              className="object-cover"
-            />
-          </div>
-        )}
         <div className="min-h-[6rem] flex space-x-4 my-4 py-3 border-b">
           <div className="h-[6rem] w-[6rem] flex-shrink-0">
             <Image
@@ -224,7 +216,7 @@ export default function CommunityDetailPage() {
             />
           </div>
           <div className="flex flex-col justify-between w-full">
-            <div />
+            <div></div>
             <div className="justify-between items-center w-full">
               <p className="heading-xsmall">{community.name}</p>
               <div className="flex flex-wrap items-center justify-end gap-2">
@@ -232,7 +224,7 @@ export default function CommunityDetailPage() {
                   <span className="label-medium text-text-secondary">{t('badges.suspended')}</span>
                 )}
                 {isInviteOnly && !isActive && !isPending && (
-                  <span className="label-medium text-text-secondary">{t('badges.inviteOnly')}</span>
+                  <span className="label-medium text-text-secondary flex items-center gap-1">{t('badges.inviteOnly')}</span>
                 )}
                 {isActive && (
                   <span className="label-medium text-text-brand">{t('badges.member')}</span>

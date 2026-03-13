@@ -317,7 +317,7 @@ export default function Home() {
         {/* Discover Section */}
         <div className="flex justify-between mb-4 shrink-0">
           <h2 className="label-medium">{t('discover')}</h2>
-          <Link href="/community">
+          <Link href="/community" prefetch={false}>
             <p className="label-medium text-text-brand">{t('seeall')}</p>
           </Link>
         </div>

@@ -442,6 +442,8 @@
         "associations": "Associations",
         "markasread": "Marquer comme lu",
         "remove": "Supprimer la notification",
+        "removeNotificationTitle": "Supprimer la notification ?",
+        "removeNotificationConfirm": "Cette notification sera retirée de votre liste.",
         "markall": "Tout marquer comme lu",
         "preference": "Préférences de notifications",
         "none": {

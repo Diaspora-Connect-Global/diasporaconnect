@@ -79,6 +79,7 @@ export default function ProfileCommunities({
         {isOwnProfile && (
           <Link
             href="/community"
+            prefetch={false}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-brand text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Globe className="w-4 h-4" />
@@ -134,6 +135,7 @@ export default function ProfileCommunities({
       {isOwnProfile && (
         <Link
           href="/community"
+          prefetch={false}
           className="block mt-4 text-center text-sm text-text-brand font-medium hover:underline"
         >
           {tCommunity('discoverMore')}

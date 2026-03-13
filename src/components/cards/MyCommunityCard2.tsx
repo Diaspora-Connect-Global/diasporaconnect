@@ -116,7 +116,7 @@ export function MyCommunityCard2() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default'>
                             <DropdownMenuLabel className='font-body-large text-text-primary'>
-                                <Link href="/community" className="hover:text-text-brand">
+                                <Link href="/community" prefetch={false} className="hover:text-text-brand">
                                     {t('discover') || 'Discover communities'}
                                 </Link>
                             </DropdownMenuLabel>
@@ -150,7 +150,7 @@ export function MyCommunityCard2() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className='bg-surface-default'>
                         <DropdownMenuLabel className='font-body-large text-text-primary'>
-                            <Link href="/community" className="hover:text-text-brand">
+                            <Link href="/community" prefetch={false} className="hover:text-text-brand">
                                 {t('seeall')}
                             </Link>
                         </DropdownMenuLabel>
