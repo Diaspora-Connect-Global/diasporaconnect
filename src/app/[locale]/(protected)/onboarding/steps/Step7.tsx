@@ -1,153 +1,163 @@
-"use client"
-import React from 'react';
-import { FormData } from '../page';
-import { MultiStep } from '@/components/custom/multistep';
+"use client";
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import CommunityCardVariant1 from '@/components/cards/community/CummunityCardVariant1';
+import { toast } from 'sonner';
+import { FormData } from '../page';
+import { MultiStep } from '@/components/custom/multistep';
+import JoinCommunityCard from '@/components/cards/JoinCommunityCard';
+import {
+  DISCOVER_COMMUNITIES,
+  REQUEST_JOIN_COMMUNITY,
+  LIST_MY_JOINED_COMMUNITIES,
+} from '@/services/gql/community';
 
-interface Step7Props {
-    data: FormData;
-    updateData: (data: Partial<FormData>) => void;
-    nextStep: () => void;
-    prevStep: () => void;
+interface DiscoverCommunity {
+  id: string;
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+  memberCount?: number;
+  membershipStatus?: string;
+  visibility?: string;
+  communityType?: { name: string; isEmbassy: boolean };
 }
 
-export const Step7: React.FC<Step7Props> = ({ data, updateData, prevStep }) => {
-    const router = useRouter();
-    const t = useTranslations('onboarding');
-    const tActions = useTranslations('actions');
-    const tC = useTranslations('community');
+interface DiscoverCommunitiesData {
+  discoverCommunities: {
+    communities: DiscoverCommunity[];
+    total: number;
+  };
+}
 
-    const availableCommunities = [
-        {
-            title: "Ghana Innovation Hub",
-            members: 1200,
-            description: "Networking opportunities for tech enthusiasts and professionals in Ghana."
-        },
-        {
-            title: "Ghana Business Network",
-            members: 850,
-            description: "A space for businesses to exchange services and resources effectively."
-        },
-        {
-            title: "Creative Arts Ghana",
-            members: 650,
-            description: "A community for artists, designers, and creative professionals."
-        },
-        {
-            title: "Tech Entrepreneurs Ghana",
-            members: 920,
-            description: "Connect with fellow tech entrepreneurs and startups."
-        },
-        {
-            title: "Creative Arts Ghana",
-            members: 650,
-            description: "A community for artists, designers, and creative professionals."
-        },
-        {
-            title: "Tech Entrepreneurs Ghana I am just testing for long user data",
-            members: 920,
-            description: "Connect with fellow tech entrepreneurs and startups."
-        },
-        {
-            title: "Creative Arts Ghana",
-            members: 650,
-            description: "A community for artists, designers, and creative professionals."
-        },
-        {
-            title: "Tech Entrepreneurs Ghana",
-            members: 920,
-            description: "Connect with fellow tech entrepreneurs and startups."
-        }
-    ];
+interface Step7Props {
+  data: FormData;
+  updateData: (data: Partial<FormData>) => void;
+  nextStep: () => void;
+  prevStep: () => void;
+}
 
-    // Ensure community is always an array
-    const community = data.community || [];
+export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevStep }) => {
+  const router = useRouter();
+  const t = useTranslations('onboarding');
+  const tActions = useTranslations('actions');
+  const tC = useTranslations('community');
+  const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
 
-    const handleSubmit = async (e?: React.FormEvent) => {
-        try {
-            if (e) {
-                e.preventDefault();
-            }
+  const { data: discoverData, loading: discoverLoading } =
+    useQuery<DiscoverCommunitiesData>(DISCOVER_COMMUNITIES, {
+      variables: {
+        includeRecommended: true,
+        limit: 5,
+        offset: 0,
+        country: data.country || undefined,
+      },
+    });
 
-            console.log('Going to home screen');
-            router.push('/');
-        } catch (error) {
-            console.error('Submission error:', error);
-        }
-    };
+  const [requestJoinCommunity] = useMutation<{
+    requestMembership: { status: string; message: string };
+  }>(REQUEST_JOIN_COMMUNITY, {
+    refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
+  });
 
-    const handleCommunityToggle = (communityItem: { title: string; members: number; description: string; }) => {
-        const isSelected = community.some(c => c.title === communityItem.title);
+  const handleJoinCommunity = async (communityId: string, communityName: string) => {
+    try {
+      const { data: res } = await requestJoinCommunity({
+        variables: { communityId },
+      });
+      if (res?.requestMembership?.status === 'ACTIVE') {
+        toast.success(res.requestMembership.message ?? tC('joined'));
+        setJoinedIds((prev) => new Set(prev).add(communityId));
+      } else {
+        toast.error(tC('joinFailed') ?? 'Failed to join community');
+      }
+    } catch {
+      toast.error(tC('joinFailed') ?? 'Failed to join community');
+    }
+  };
 
-        if (isSelected) {
-            updateData({
-                community: community.filter(c => c.title !== communityItem.title)
-            });
-        } else {
-            updateData({
-                community: [...community, communityItem]
-            });
-        }
-    };
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    router.push('/');
+  };
 
-    const getButtonText = (communityTitle: string) => {
-        return community.some(c => c.title === communityTitle)
-            ? tActions('joined')
-            : tC('joincommunity');
-    };
+  const communities = discoverData?.discoverCommunities?.communities ?? [];
 
-    // No need to disable next button since users can skip communities
-    const isNextDisabled = false;
+  const isJoined = (c: DiscoverCommunity) =>
+    c.membershipStatus === 'MEMBER' || joinedIds.has(c.id);
 
-    return (
-        <MultiStep
-            stepNumber={7}
-            totalSteps={7}
-            title={t('community.title')}
-            subtitle={t('community.description')}
-            isNextDisabled={isNextDisabled}
-            nextButtonText={tActions('finish')}
-            showBackButton={true}
-            showStepLabel={true}
-            showSkipButton={false}
-            onNext={handleSubmit}
-            onBack={prevStep}
-        >
-
-
-            <div className="w-full max-w-full  scrollbar-hide
- lg:mx-0 lg:px-0">
+  return (
+    <MultiStep
+      stepNumber={7}
+      totalSteps={7}
+      title={t('community.title')}
+      subtitle={t('community.description')}
+      isNextDisabled={false}
+      nextButtonText={tActions('finish')}
+      showBackButton
+      showStepLabel
+      showSkipButton={false}
+      onNext={handleSubmit}
+      onBack={prevStep}
+    >
+      <div className="w-full max-w-full scrollbar-hide lg:mx-0 lg:px-0">
+        {discoverLoading ? (
+          <div className="flex items-center justify-center py-12 text-text-secondary">
+            {tC('loading') ?? 'Loading communities...'}
+          </div>
+        ) : communities.length === 0 ? (
+          <div className="flex items-center justify-center py-12 text-text-secondary">
+            {tC('noCommunities') ?? 'No communities to show right now.'}
+          </div>
+        ) : (
+          <div
+            className="
+              flex flex-col gap-2
+              overflow-y-auto overflow-x-hidden
+              snap-y snap-mandatory
+              lg:flex-row lg:gap-2
+              lg:overflow-y-hidden lg:overflow-x-auto
+              lg:snap-x
+              scrollbar-hide
+            "
+          >
+            {communities.map((community) => {
+              const joined = isJoined(community);
+              return (
                 <div
-                    className="
-      flex flex-col gap-2
-      overflow-y-auto overflow-x-hidden
-      snap-y snap-mandatory 
-
-      lg:flex-row lg:gap-2
-      lg:overflow-y-hidden lg:overflow-x-auto
-      lg:snap-x
-      scrollbar-hide
-    "
+                  key={community.id}
+                  className="snap-start w-full lg:w-auto lg:flex-shrink-0"
                 >
-                    {availableCommunities.map((communityItem, index) => (
-                        <div
-                            key={index}
-                            className="snap-start w-full lg:w-auto lg:flex-shrink-0"
-                        >
-                            <CommunityCardVariant1
-                                title={communityItem.title}
-                                members={communityItem.members}
-                                onButtonClick={() => handleCommunityToggle(communityItem)}
-                                description={communityItem.description}
-                                buttonText={getButtonText(communityItem.title)}
-                            />
-                        </div>
-                    ))}
+                  <JoinCommunityCard
+                    title={community.name}
+                    members={community.memberCount ?? 0}
+                    description={community.description ?? ''}
+                    buttonText={joined ? tActions('joined') : tC('joincommunity')}
+                    onButtonClick={() =>
+                      !joined && handleJoinCommunity(community.id, community.name)
+                    }
+                    isDisabled={joined}
+                    icon={
+                      community.avatarUrl ? (
+                        <Image
+                          width={48}
+                          height={48}
+                          src={community.avatarUrl}
+                          alt=""
+                          className="rounded-full object-cover w-12 h-12"
+                        />
+                      ) : undefined
+                    }
+                  />
                 </div>
-            </div>
-
-        </MultiStep>
-    );
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </MultiStep>
+  );
 };
