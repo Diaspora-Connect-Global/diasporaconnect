@@ -3,6 +3,12 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  async redirects() {
+    return [
+      { source: '/:locale/communitys/:id', destination: '/:locale/community/:id', permanent: true },
+      { source: '/:locale/associations/:id', destination: '/:locale/association/:id', permanent: true },
+    ];
+  },
   images: {
     remotePatterns: [
       {
