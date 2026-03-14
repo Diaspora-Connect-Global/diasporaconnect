@@ -1,14 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import JoinAssociationCard from '@/components/cards/JoinAssociationCard';
 import { MyAssociationCard } from '@/components/cards/MyAssociationCard';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import {
   GET_MY_ASSOCIATIONS,
   SEARCH_ASSOCIATIONS,
   REQUEST_JOIN_ASSOCIATION,
+  LEAVE_ASSOCIATION,
+  CANCEL_JOIN_REQUEST,
 } from '@/services/gql/associations';
 
 const PAGE_SIZE = 20;
@@ -85,8 +89,30 @@ export default function AssociationsPage() {
     ],
   });
 
+  const [leaveAssociation, { loading: leaveLoading }] = useMutation(LEAVE_ASSOCIATION, {
+    refetchQueries: [
+      { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: PAGE_SIZE } },
+      { query: SEARCH_ASSOCIATIONS, variables: { input: { page: 1, limit: PAGE_SIZE } } },
+    ],
+  });
+
+  const [cancelJoinRequest, { loading: cancelLoading }] = useMutation(CANCEL_JOIN_REQUEST, {
+    refetchQueries: [
+      { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: PAGE_SIZE } },
+      { query: SEARCH_ASSOCIATIONS, variables: { input: { page: 1, limit: PAGE_SIZE } } },
+    ],
+  });
+
+  const [leaveModal, setLeaveModal] = useState<{ open: boolean; id: string; name: string }>({
+    open: false,
+    id: '',
+    name: '',
+  });
+
   const myAssociations = myData?.getMyAssociations?.associations ?? [];
-  const discoverAssociations = searchData?.searchAssociations?.associations ?? [];
+  const allDiscover = searchData?.searchAssociations?.associations ?? [];
+  const myIds = new Set(myAssociations.map((a) => a.id));
+  const discoverAssociations = allDiscover.filter((assn) => !myIds.has(assn.id));
 
   const handleJoin = async (associationId: string, name: string, joinPolicy?: string) => {
     if (joinPolicy === 'INVITE_ONLY') {
@@ -110,10 +136,33 @@ export default function AssociationsPage() {
     }
   };
 
-  const isMember = (id: string) =>
-    myAssociations.some((a) => a.id === id);
-  const getMembershipStatus = (id: string) =>
-    myAssociations.find((a) => a.id === id)?.myMembership?.status;
+  const handleLeaveClick = (id: string, name: string) => {
+    setLeaveModal({ open: true, id, name });
+  };
+
+  const handleLeaveConfirm = async () => {
+    if (!leaveModal.id) return;
+    try {
+      await leaveAssociation({ variables: { associationId: leaveModal.id } });
+      setLeaveModal({ open: false, id: '', name: '' });
+      toast.success(t('toasts.leftAssociation', { name: leaveModal.name }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Failed to leave');
+    }
+  };
+
+  const handleCancelRequest = async (associationId: string) => {
+    try {
+      await cancelJoinRequest({
+        variables: {
+          input: { entityId: associationId, entityType: 'ASSOCIATION' },
+        },
+      });
+      toast.success(t('toasts.requestCancelled'));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Failed to cancel request');
+    }
+  };
 
   return (
     <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
@@ -129,10 +178,18 @@ export default function AssociationsPage() {
               id={assn.id}
               title={assn.name}
               description={assn.description ?? ''}
+              avatarUrl={assn.avatarUrl}
               buttonText={
                 assn.myMembership?.status === 'PENDING'
                   ? tActions('pending')
                   : tActions('joined')
+              }
+              isPending={assn.myMembership?.status === 'PENDING'}
+              onLeaveClick={() => handleLeaveClick(assn.id, assn.name)}
+              onCancelRequestClick={
+                assn.myMembership?.status === 'PENDING'
+                  ? () => handleCancelRequest(assn.id)
+                  : undefined
               }
             />
           ))
@@ -148,17 +205,8 @@ export default function AssociationsPage() {
           <div className="col-span-full text-center py-8 text-text-secondary">{t('loading')}</div>
         ) : discoverAssociations.length > 0 ? (
           discoverAssociations.map((assn) => {
-            const member = isMember(assn.id);
-            const status = getMembershipStatus(assn.id);
-            const isPending = status === 'PENDING';
             const isInviteOnly = assn.joinPolicy === 'INVITE_ONLY';
-            const buttonText = member
-              ? isPending
-                ? tActions('pending')
-                : tActions('joined')
-              : isInviteOnly
-                ? t('badges.inviteOnly')
-                : tActions('join');
+            const buttonText = isInviteOnly ? t('badges.inviteOnly') : tActions('join');
             return (
               <JoinAssociationCard
                 key={assn.id}
@@ -168,7 +216,7 @@ export default function AssociationsPage() {
                 profileImage={assn.avatarUrl || '/ADANSI.png'}
                 profileName={assn.name}
                 buttonText={buttonText}
-                onButtonClick={() => !member && !isInviteOnly && handleJoin(assn.id, assn.name, assn.joinPolicy)}
+                onButtonClick={() => !isInviteOnly && handleJoin(assn.id, assn.name, assn.joinPolicy)}
               />
             );
           })
@@ -178,6 +226,17 @@ export default function AssociationsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        open={leaveModal.open}
+        onCancel={() => setLeaveModal({ open: false, id: '', name: '' })}
+        onConfirm={handleLeaveConfirm}
+        title={t('leaveConfirm.title')}
+        description={t('leaveConfirm.description')}
+        confirmText={t('actions.leave')}
+        confirmVariant="destructive"
+        isLoading={leaveLoading || cancelLoading}
+      />
     </div>
   );
 }

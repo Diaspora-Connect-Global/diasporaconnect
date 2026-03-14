@@ -409,7 +409,8 @@
             "actions": {
                 "requestToJoin": "Request to join",
                 "cancelRequest": "Cancel request",
-                "leave": "Leave"
+                "leave": "Leave",
+                "view": "View"
             },
             "leaveConfirm": {
                 "title": "Leave association?",

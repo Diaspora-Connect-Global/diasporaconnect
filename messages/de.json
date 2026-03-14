@@ -331,7 +331,8 @@
             "actions": {
                 "requestToJoin": "Beitritt anfragen",
                 "cancelRequest": "Anfrage stornieren",
-                "leave": "Verlassen"
+                "leave": "Verlassen",
+                "view": "Anzeigen"
             },
             "leaveConfirm": {
                 "title": "Verein verlassen?",

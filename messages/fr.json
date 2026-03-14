@@ -331,7 +331,8 @@
             "actions": {
                 "requestToJoin": "Demander à rejoindre",
                 "cancelRequest": "Annuler la demande",
-                "leave": "Quitter"
+                "leave": "Quitter",
+                "view": "Voir"
             },
             "leaveConfirm": {
                 "title": "Quitter l'association ?",

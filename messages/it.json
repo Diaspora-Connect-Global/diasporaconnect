@@ -331,7 +331,8 @@
             "actions": {
                 "requestToJoin": "Richiedi di entrare",
                 "cancelRequest": "Annulla richiesta",
-                "leave": "Esci"
+                "leave": "Esci",
+                "view": "Visualizza"
             },
             "leaveConfirm": {
                 "title": "Uscire dall'associazione?",
