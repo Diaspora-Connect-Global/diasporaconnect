@@ -527,17 +527,72 @@
         "events": "Events",
         "allnotifications": "All Notifications",
         "associations": "Associations",
+        "communities": "Communities",
         "markasread": "Mark as read",
         "remove": "Remove notification",
         "removeNotificationTitle": "Remove notification?",
         "removeNotificationConfirm": "This notification will be removed from your list.",
         "markall": "Mark all as read",
         "preference": "Notifications preference",
+        "types": {
+            "connection": {
+                "request": "Connection request",
+                "accepted": "Connection accepted"
+            },
+            "post": {
+                "like": "Like",
+                "comment": "Comment",
+                "mention": "Mention"
+            },
+            "message": {
+                "received": "New message"
+            },
+            "group": {
+                "message": "Group message"
+            },
+            "event": {
+                "reminder": "Event reminder",
+                "invite": "Event invite"
+            },
+            "membership": {
+                "approved": "Membership approved",
+                "request": "Membership request"
+            },
+            "association": {
+                "membership": {
+                    "approved": "Association membership approved",
+                    "request": "Association membership request"
+                }
+            },
+            "opportunity": "Opportunity",
+            "default": "Notification"
+        },
+        "messages": {
+            "membershipApproved": "Membership to join {communityName} approved",
+            "membershipRequest": "Request to join {communityName} is pending",
+            "communityFallback": "the community",
+            "associationApproved": "Membership to join {associationName} approved",
+            "associationRequest": "Request to join {associationName} is pending",
+            "associationFallback": "the association",
+            "connectionRequest": "{actorName} wants to connect with you",
+            "connectionAccepted": "{actorName} accepted your connection request",
+            "postLike": "{actorName} liked your post",
+            "postComment": "{actorName} commented on your post",
+            "postMention": "{actorName} mentioned you in a post",
+            "messageReceived": "{actorName} sent you a message",
+            "groupMessage": "{actorName} sent a message in the group",
+            "eventReminder": "{eventName} is coming up soon",
+            "eventInvite": "{actorName} invited you to {eventName}",
+            "eventFallback": "an event",
+            "opportunityNew": "New opportunity: {title}",
+            "actorFallback": "Someone"
+        },
         "none": {
             "all": "No notifications available",
             "opportunities": "No job opportunities at the moment",
             "events": "No events at the moment",
-            "associations": "No association notifications at the moment"
+            "associations": "No association notifications at the moment",
+            "communities": "No community notifications at the moment"
         }
     },
     "privacy": {

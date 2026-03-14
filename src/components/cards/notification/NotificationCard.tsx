@@ -14,8 +14,12 @@ import Image from 'next/image'
 import { formatDateProximity } from '@/macros/time';
 
 interface NotificationCardProps {
+    /** Main title (e.g. app name or actor). */
     title?: string;
+    /** Body text — can be multi-line; keep descriptive. */
     description?: string;
+    /** Short label for notification type (e.g. "Like", "Comment", "Connection request"). */
+    typeLabel?: string;
     logoIcon?: React.ReactNode;
     imageUrl?: string;
     time: string;
@@ -28,8 +32,9 @@ interface NotificationCardProps {
 }
 
 export function NotificationCard({
-    title = "GhanaConnect:Global",
-    description = "Connect with professionals and businesses across Ghana and abroad.",
+    title,
+    description = "",
+    typeLabel,
     logoIcon,
     imageUrl,
     time = "3d",
@@ -87,18 +92,27 @@ export function NotificationCard({
                             ))}
                         </div>
 
-                        <div className="flex flex-col min-w-0 flex-1">
-                            <h1 className="text-text-primary font-label-large text-sm sm:text-base truncate">
-                                {title}
-                            </h1>
-                            <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-1">
-                                {description}
-                            </p>
-                            <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-1">
-                                {
-                                 formatDateProximity(time)
-                                }
-                            </p>
+                        <div className="flex flex-col min-w-0 flex-1 gap-0.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {typeLabel && (
+                                    <span className="text-text-secondary font-caption-medium uppercase tracking-wide">
+                                        {typeLabel}
+                                    </span>
+                                )}
+                                <span className="text-text-tertiary font-body-small text-xs">
+                                    {formatDateProximity(time)}
+                                </span>
+                            </div>
+                            {title && (
+                                <h2 className="text-text-primary font-label-large text-sm sm:text-base truncate">
+                                    {title}
+                                </h2>
+                            )}
+                            {description && (
+                                <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-2">
+                                    {description}
+                                </p>
+                            )}
                         </div>
                     </div>
 

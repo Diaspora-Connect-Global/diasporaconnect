@@ -440,17 +440,72 @@
         "events": "Veranstaltungen",
         "allnotifications": "Alle Benachrichtigungen",
         "associations": "Vereine",
+        "communities": "Communities",
         "markasread": "Als gelesen markieren",
         "remove": "Benachrichtigung entfernen",
         "removeNotificationTitle": "Benachrichtigung entfernen?",
         "removeNotificationConfirm": "Diese Benachrichtigung wird aus Ihrer Liste entfernt.",
         "markall": "Alle als gelesen markieren",
         "preference": "Benachrichtigungseinstellungen",
+        "types": {
+            "connection": {
+                "request": "Verbindungsanfrage",
+                "accepted": "Verbindung angenommen"
+            },
+            "post": {
+                "like": "Gefällt mir",
+                "comment": "Kommentar",
+                "mention": "Erwähnung"
+            },
+            "message": {
+                "received": "Neue Nachricht"
+            },
+            "group": {
+                "message": "Gruppennachricht"
+            },
+            "event": {
+                "reminder": "Terminerinnerung",
+                "invite": "Termineinladung"
+            },
+            "membership": {
+                "approved": "Mitgliedschaft genehmigt",
+                "request": "Mitgliedschaftsanfrage"
+            },
+            "association": {
+                "membership": {
+                    "approved": "Vereinsmitgliedschaft genehmigt",
+                    "request": "Vereinsmitgliedschaftsanfrage"
+                }
+            },
+            "opportunity": "Gelegenheit",
+            "default": "Benachrichtigung"
+        },
+        "messages": {
+            "membershipApproved": "Mitgliedschaft in {communityName} genehmigt",
+            "membershipRequest": "Anfrage zur Mitgliedschaft in {communityName} ausstehend",
+            "communityFallback": "die Community",
+            "associationApproved": "Mitgliedschaft in {associationName} genehmigt",
+            "associationRequest": "Anfrage zur Mitgliedschaft in {associationName} ausstehend",
+            "associationFallback": "der Verein",
+            "connectionRequest": "{actorName} möchte sich mit Ihnen verbinden",
+            "connectionAccepted": "{actorName} hat Ihre Verbindungsanfrage angenommen",
+            "postLike": "{actorName} gefällt Ihr Beitrag",
+            "postComment": "{actorName} hat Ihren Beitrag kommentiert",
+            "postMention": "{actorName} hat Sie in einem Beitrag erwähnt",
+            "messageReceived": "{actorName} hat Ihnen eine Nachricht geschickt",
+            "groupMessage": "{actorName} hat eine Nachricht in der Gruppe gesendet",
+            "eventReminder": "{eventName} steht bald an",
+            "eventInvite": "{actorName} hat Sie zu {eventName} eingeladen",
+            "eventFallback": "eine Veranstaltung",
+            "opportunityNew": "Neue Gelegenheit: {title}",
+            "actorFallback": "Jemand"
+        },
         "none": {
             "all": "Keine Benachrichtigungen verfügbar",
             "opportunities": "Derzeit keine Stellenangebote",
             "events": "Derzeit keine Veranstaltungen",
-            "associations": "Derzeit keine Vereinsbenachrichtigungen"
+            "associations": "Derzeit keine Vereinsbenachrichtigungen",
+            "communities": "Derzeit keine Community-Benachrichtigungen"
         }
     },
     "privacy": {

@@ -13,6 +13,7 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
 import {
   GET_COMMUNITY_DETAILS,
+  CHECK_COMMUNITY_MEMBERSHIP,
   REQUEST_JOIN_COMMUNITY,
   LEAVE_COMMUNITY,
   CANCEL_JOIN_REQUEST_COMMUNITY,
@@ -69,6 +70,13 @@ const PENDING = 'PENDING';
 const SUSPENDED = 'SUSPENDED';
 const MEMBER = 'MEMBER';
 
+/** Statuses that mean the current user is a member (backend may return ACTIVE, MEMBER, JOINED, APPROVED, etc.) */
+const MEMBER_STATUSES = new Set([ACTIVE, MEMBER, 'JOINED', 'APPROVED'].map((s) => s.toUpperCase()));
+function isMemberStatus(status: string | null | undefined): boolean {
+  if (status == null || status === '') return false;
+  return MEMBER_STATUSES.has(String(status).toUpperCase());
+}
+
 export default function CommunityDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -79,7 +87,19 @@ export default function CommunityDetailPage() {
 
   const { data: detailsData, loading: detailsLoading } = useQuery<GetCommunityDetailsResponse>(
     GET_COMMUNITY_DETAILS,
-    { variables: { communityId } }
+    {
+      variables: { communityId },
+      fetchPolicy: 'cache-and-network',
+    }
+  );
+
+  const { data: membershipData } = useQuery<{ checkCommunityMembership: { isMember: boolean } }>(
+    CHECK_COMMUNITY_MEMBERSHIP,
+    {
+      variables: { communityId },
+      fetchPolicy: 'cache-and-network',
+      skip: !communityId,
+    }
   );
 
   const { data: feedData, loading: feedLoading } = useQuery<GetFeedResponse>(GET_FEED, {
@@ -95,15 +115,24 @@ export default function CommunityDetailPage() {
 
   const [requestJoin, { loading: joinLoading }] = useMutation(REQUEST_JOIN_COMMUNITY, {
     variables: { communityId },
-    refetchQueries: [{ query: GET_COMMUNITY_DETAILS, variables: { communityId } }],
+    refetchQueries: [
+      { query: GET_COMMUNITY_DETAILS, variables: { communityId } },
+      { query: CHECK_COMMUNITY_MEMBERSHIP, variables: { communityId } },
+    ],
   });
 
   const [leaveCommunity, { loading: leaveLoading }] = useMutation(LEAVE_COMMUNITY, {
-    refetchQueries: [{ query: GET_COMMUNITY_DETAILS, variables: { communityId } }],
+    refetchQueries: [
+      { query: GET_COMMUNITY_DETAILS, variables: { communityId } },
+      { query: CHECK_COMMUNITY_MEMBERSHIP, variables: { communityId } },
+    ],
   });
 
   const [cancelJoinRequest, { loading: cancelLoading }] = useMutation(CANCEL_JOIN_REQUEST_COMMUNITY, {
-    refetchQueries: [{ query: GET_COMMUNITY_DETAILS, variables: { communityId } }],
+    refetchQueries: [
+      { query: GET_COMMUNITY_DETAILS, variables: { communityId } },
+      { query: CHECK_COMMUNITY_MEMBERSHIP, variables: { communityId } },
+    ],
   });
 
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
@@ -112,7 +141,8 @@ export default function CommunityDetailPage() {
 
   const status = community?.membershipStatus;
   const joinPolicy = community?.joinPolicy ?? 'OPEN';
-  const isActive = status === ACTIVE || status === MEMBER;
+  const isMemberFromCheck = membershipData?.checkCommunityMembership?.isMember === true;
+  const isActive = isMemberStatus(status) || isMemberFromCheck;
   const isPending = status === PENDING;
   const isSuspended = status === SUSPENDED;
   const isInviteOnly = joinPolicy === 'INVITE_ONLY';
@@ -201,6 +231,9 @@ export default function CommunityDetailPage() {
   }
 
   const actionLoading = joinLoading || leaveLoading || cancelLoading;
+  const displayMemberCount = isActive && (community.memberCount == null || community.memberCount === 0)
+    ? 1
+    : (community.memberCount ?? 0);
 
   return (
     <div className="lg:flex overflow-y-auto h-app-inner">
@@ -275,7 +308,7 @@ export default function CommunityDetailPage() {
 
         <div className="lg:hidden">
           <AboutCommunity
-            members={community.memberCount ?? 0}
+            members={displayMemberCount}
             createdDate={community.createdAt ?? ''}
             visibility={community.visibility ?? 'Public'}
             description={community.description ?? ''}
@@ -315,7 +348,7 @@ export default function CommunityDetailPage() {
         <div className="space-y-6 flex-1 mb-6 mx-3">
           <div className="hidden lg:block">
             <AboutCommunity
-              members={community.memberCount ?? 0}
+              members={displayMemberCount}
               createdDate={community.createdAt ?? ''}
               visibility={community.visibility ?? 'Public'}
               description={community.description ?? ''}

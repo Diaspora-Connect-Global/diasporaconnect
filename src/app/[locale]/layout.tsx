@@ -5,7 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getMessages } from 'next-intl/server';
 import GraphQLProvider from "@/components/provider/apollo-provider";
 import { Toaster } from 'sonner';
 
@@ -68,6 +68,8 @@ export default async function RootLayout({
     notFound();
   }
 
+  const messages = await getMessages().catch(() => null) ?? (await import(`../../../messages/${locale}.json`)).default;
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -93,7 +95,7 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${inter.variable} antialiased`}>
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider 
             attribute="class" 
             defaultTheme="system" 

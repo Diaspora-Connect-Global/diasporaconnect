@@ -440,17 +440,72 @@
         "events": "Eventi",
         "allnotifications": "Tutte le notifiche",
         "associations": "Associazioni",
+        "communities": "Community",
         "markasread": "Segna come letto",
         "remove": "Rimuovi notifica",
         "removeNotificationTitle": "Rimuovere la notifica?",
         "removeNotificationConfirm": "Questa notifica verrà rimossa dall'elenco.",
         "markall": "Segna tutte come lette",
         "preference": "Preferenze notifiche",
+        "types": {
+            "connection": {
+                "request": "Richiesta di connessione",
+                "accepted": "Connessione accettata"
+            },
+            "post": {
+                "like": "Mi piace",
+                "comment": "Commento",
+                "mention": "Menzione"
+            },
+            "message": {
+                "received": "Nuovo messaggio"
+            },
+            "group": {
+                "message": "Messaggio di gruppo"
+            },
+            "event": {
+                "reminder": "Promemoria evento",
+                "invite": "Invito a evento"
+            },
+            "membership": {
+                "approved": "Iscrizione approvata",
+                "request": "Richiesta di iscrizione"
+            },
+            "association": {
+                "membership": {
+                    "approved": "Iscrizione all'associazione approvata",
+                    "request": "Richiesta di iscrizione all'associazione"
+                }
+            },
+            "opportunity": "Opportunità",
+            "default": "Notifica"
+        },
+        "messages": {
+            "membershipApproved": "Iscrizione a {communityName} approvata",
+            "membershipRequest": "Richiesta di iscrizione a {communityName} in attesa",
+            "communityFallback": "la community",
+            "associationApproved": "Iscrizione a {associationName} approvata",
+            "associationRequest": "Richiesta di iscrizione a {associationName} in attesa",
+            "associationFallback": "l'associazione",
+            "connectionRequest": "{actorName} vuole connettersi con te",
+            "connectionAccepted": "{actorName} ha accettato la tua richiesta di connessione",
+            "postLike": "{actorName} ha messo mi piace al tuo post",
+            "postComment": "{actorName} ha commentato il tuo post",
+            "postMention": "{actorName} ti ha menzionato in un post",
+            "messageReceived": "{actorName} ti ha inviato un messaggio",
+            "groupMessage": "{actorName} ha inviato un messaggio nel gruppo",
+            "eventReminder": "{eventName} è in programma a breve",
+            "eventInvite": "{actorName} ti ha invitato a {eventName}",
+            "eventFallback": "un evento",
+            "opportunityNew": "Nuova opportunità: {title}",
+            "actorFallback": "Qualcuno"
+        },
         "none": {
             "all": "Nessuna notifica disponibile",
             "opportunities": "Nessuna opportunità di lavoro al momento",
             "events": "Nessun evento al momento",
-            "associations": "Nessuna notifica di associazione al momento"
+            "associations": "Nessuna notifica di associazione al momento",
+            "communities": "Nessuna notifica di community al momento"
         }
     },
     "privacy": {

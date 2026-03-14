@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import {
     GET_ASSOCIATION_DETAILS,
+    GET_MY_ASSOCIATIONS,
     REQUEST_JOIN_ASSOCIATION,
     LEAVE_ASSOCIATION,
     CANCEL_JOIN_REQUEST,
@@ -69,7 +70,14 @@ interface GetFeedResponse {
 const ACTIVE = 'ACTIVE';
 const PENDING = 'PENDING';
 const SUSPENDED = 'SUSPENDED';
-const MEMBER = 'MEMBER'; // legacy
+const MEMBER = 'MEMBER';
+
+/** Statuses that mean the current user is a member (backend may return ACTIVE, MEMBER, JOINED, APPROVED, etc.) */
+const MEMBER_STATUSES = new Set([ACTIVE, MEMBER, 'JOINED', 'APPROVED'].map((s) => s.toUpperCase()));
+function isMemberStatus(status: string | null | undefined): boolean {
+  if (status == null || status === '') return false;
+  return MEMBER_STATUSES.has(String(status).toUpperCase());
+}
 
 /* ------------------------------------------------------------------ */
 /* Component */
@@ -84,8 +92,19 @@ export default function AssociationPage() {
 
     const { data: detailsData, loading: detailsLoading } = useQuery<GetAssociationDetailsResponse>(
         GET_ASSOCIATION_DETAILS,
-        { variables: { associationId } }
+        {
+            variables: { associationId },
+            fetchPolicy: 'cache-and-network',
+        }
     );
+
+    const { data: myAssociationsData } = useQuery<{
+        getMyAssociations: { associations: { id: string }[] };
+    }>(GET_MY_ASSOCIATIONS, {
+        variables: { page: 1, limit: 500 },
+        fetchPolicy: 'cache-and-network',
+        skip: !associationId,
+    });
 
     const { data: feedData, loading: feedLoading } = useQuery<GetFeedResponse>(GET_FEED, {
         variables: {
@@ -100,15 +119,24 @@ export default function AssociationPage() {
 
     const [requestJoin, { loading: joinLoading }] = useMutation(REQUEST_JOIN_ASSOCIATION, {
         variables: { associationId },
-        refetchQueries: [{ query: GET_ASSOCIATION_DETAILS, variables: { associationId } }],
+        refetchQueries: [
+            { query: GET_ASSOCIATION_DETAILS, variables: { associationId } },
+            { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: 500 } },
+        ],
     });
 
     const [leaveAssociation, { loading: leaveLoading }] = useMutation(LEAVE_ASSOCIATION, {
-        refetchQueries: [{ query: GET_ASSOCIATION_DETAILS, variables: { associationId } }],
+        refetchQueries: [
+            { query: GET_ASSOCIATION_DETAILS, variables: { associationId } },
+            { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: 500 } },
+        ],
     });
 
     const [cancelJoinRequest, { loading: cancelLoading }] = useMutation(CANCEL_JOIN_REQUEST, {
-        refetchQueries: [{ query: GET_ASSOCIATION_DETAILS, variables: { associationId } }],
+        refetchQueries: [
+            { query: GET_ASSOCIATION_DETAILS, variables: { associationId } },
+            { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: 500 } },
+        ],
     });
 
     const [leaveModalOpen, setLeaveModalOpen] = useState(false);
@@ -117,7 +145,11 @@ export default function AssociationPage() {
 
     const status = association?.membershipStatus;
     const joinPolicy = association?.joinPolicy ?? 'OPEN';
-    const isActive = status === ACTIVE || status === MEMBER;
+    const myAssociationIds = new Set(
+        myAssociationsData?.getMyAssociations?.associations?.map((a) => a.id) ?? []
+    );
+    const isMemberFromMyList = associationId ? myAssociationIds.has(associationId) : false;
+    const isActive = isMemberStatus(status) || isMemberFromMyList;
     const isPending = status === PENDING;
     const isSuspended = status === SUSPENDED;
     const isInviteOnly = joinPolicy === 'INVITE_ONLY';
