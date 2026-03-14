@@ -28,9 +28,7 @@ import { useRouter } from "next/navigation";
 import { LogoutConfirmModal } from '../auth/LogoutConfirmModal';
 import { clearStorage } from '@/lib/logout';
 import { useUserStore } from '@/store/useUserStore';
-
-
-
+import { useNotificationBadge } from '@/hooks/useNotificationBadge';
 
 export default function Header({
   children,
@@ -42,6 +40,7 @@ export default function Header({
   const [searchQuery, setSearchQuery] = useState('');
   const t = useTranslations('home.header');
   const tCommon = useTranslations('common');
+  const { count: unreadNotificationCount } = useNotificationBadge(true);
 
   const handleSearch = () => {
     console.log('Searching for:', searchQuery);
@@ -77,6 +76,8 @@ export default function Header({
       <nav className="flex w-full  justify-around lg:space-x-8 bg-surface-default">
         {navigation.map((item) => {
           const active = isActive(item.href);
+          const isNotification = item.href.includes('/notification');
+          const showBadge = isNotification && unreadNotificationCount > 0;
           return (
             <Link
               key={item.name}
@@ -89,7 +90,7 @@ export default function Header({
               `}
             >
               {/* Icon - Slightly raised above text */}
-              <div className="-mt-1">
+              <div className="-mt-1 relative inline-block">
                 <Image
                   width={60}
                   height={60}
@@ -97,6 +98,14 @@ export default function Header({
                   alt={`${item.name} Icon`}
                   className="w-6 h-6 object-contain"
                 />
+                {showBadge && (
+                  <span
+                    className="absolute -top-1 -right-1 min-w-[1rem] h-4 px-1 flex items-center justify-center rounded-full bg-text-danger text-white text-[10px] font-medium"
+                    aria-label={`${unreadNotificationCount} unread notifications`}
+                  >
+                    {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                  </span>
+                )}
               </div>
 
               {/* Label */}

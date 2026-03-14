@@ -17,21 +17,26 @@ interface NotificationCardProps {
     title?: string;
     description?: string;
     logoIcon?: React.ReactNode;
+    imageUrl?: string;
     time: string;
     read: boolean;
     onMarkAsRead?: () => void;
     onRemove?: () => void;
     onMenuClick?: () => void;
+    /** When set, the row is clickable and navigates (e.g. to post/event). */
+    onClick?: () => void;
 }
 
 export function NotificationCard({
     title = "GhanaConnect:Global",
     description = "Connect with professionals and businesses across Ghana and abroad.",
     logoIcon,
+    imageUrl,
     time = "3d",
     read = true,
     onMarkAsRead,
     onRemove,
+    onClick,
 }: NotificationCardProps) {
     const t = useTranslations('notification');
     const tCommon = useTranslations('common');
@@ -54,10 +59,24 @@ export function NotificationCard({
         <header className="w-full border-b">
             <div className="lg:max-w-7xl mx-auto px-2 py-3 sm:px-4">
                 <div className="flex items-center justify-between gap-2">
-                    {/* Left section - Logo and branding */}
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            {logoIcon ||
+                    {/* Left section - Logo and branding (clickable when onClick provided) */}
+                    <div
+                        role={onClick ? 'button' : undefined}
+                        tabIndex={onClick ? 0 : undefined}
+                        onClick={onClick}
+                        onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+                        className={`flex items-center gap-2 sm:gap-3 min-w-0 flex-1 ${onClick ? 'cursor-pointer' : ''}`}
+                    >
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {logoIcon ?? (imageUrl ? (
+                                <Image
+                                    width={40}
+                                    height={40}
+                                    src={imageUrl}
+                                    alt=""
+                                    className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
+                                />
+                            ) : (
                                 <Image
                                     width={32}
                                     height={32}
@@ -65,7 +84,7 @@ export function NotificationCard({
                                     alt="Profile"
                                     className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
                                 />
-                            }
+                            ))}
                         </div>
 
                         <div className="flex flex-col min-w-0 flex-1">
@@ -98,7 +117,7 @@ export function NotificationCard({
                                 </div>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className='bg-surface-default min-w-[200px]'>
-                                {!read && (
+                                {!read && onMarkAsRead && (
                                     <>
                                         <DropdownMenuItem 
                                             onSelect={handleMarkAsRead} 
@@ -108,15 +127,17 @@ export function NotificationCard({
                                                 {t('markasread')}
                                             </span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
+                                        {onRemove && <DropdownMenuSeparator />}
                                     </>
                                 )}
-                                <DropdownMenuItem 
-                                    onSelect={handleRemove} 
-                                    className='text-text-danger font-body-large'
-                                >
-                             {   t('remove')}
-                                </DropdownMenuItem>
+                                {onRemove && (
+                                    <DropdownMenuItem 
+                                        onSelect={handleRemove} 
+                                        className='text-text-danger font-body-large'
+                                    >
+                                        {t('remove')}
+                                    </DropdownMenuItem>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <div className='flex justify-end'>

@@ -1,30 +1,52 @@
 export interface Notification {
   id: string;
+  userId: string;
   recipientId: string;
-  type: string;
+  type: string; // e.g. "connection.request", "post.like", "message.received"
   title: string;
-  body: string;
-  data?: Record<string, any>;
-  isRead: boolean;
-  createdAt: string;
+  message: string;
+  body: string; // alias for message
+  data?: Record<string, unknown>; // contextual payload (postId, groupId, eventId, etc.)
+  read: boolean;
+  isRead: boolean; // alias for read
+  actionUrl?: string; // preferred navigation target
+  link?: string; // alias for actionUrl
+  imageUrl?: string;
+  createdAt: string; // ISO 8601
+  readAt?: string; // ISO 8601, only if read
 }
 
-export interface GetNotificationsResponse {
-  getNotifications: Notification[];
+export interface NotificationList {
+  notifications: Notification[];
+  total: number;
+  limit: number;
+  offset: number;
+  unreadCount: number; // use this for badge count
 }
 
-export interface MarkAsReadResponse {
-  markAsRead: boolean;
+export interface UnreadCountResponse {
+  getUnreadNotificationCount: {
+    count: number;
+  };
 }
 
-export interface DeleteNotificationResponse {
-  deleteNotification: boolean;
+export interface NotificationActionResponse {
+  success: boolean;
+  message?: string;
 }
 
-export enum NotificationType {
-  SYSTEM = 'SYSTEM',
-  MESSAGE = 'MESSAGE',
-  EVENT_REMINDER = 'EVENT_REMINDER',
-  COMMUNITY_UPDATE = 'COMMUNITY_UPDATE',
-  PAYMENT_CONFIRMATION = 'PAYMENT_CONFIRMATION'
+export interface GetNotificationsWithMetaResponse {
+  getNotificationsWithMeta: NotificationList;
+}
+
+export interface GetUnreadNotificationsResponse {
+  getUnreadNotifications: Notification[];
+}
+
+export interface MarkNotificationAsReadResponse {
+  markNotificationAsRead: NotificationActionResponse;
+}
+
+export interface MarkAllNotificationsAsReadResponse {
+  markAllNotificationsAsRead: NotificationActionResponse;
 }

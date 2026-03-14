@@ -2,100 +2,127 @@ import { gql } from '@apollo/client';
 
 export type {
   Notification,
-  GetNotificationsResponse,
-  MarkAsReadResponse,
-  DeleteNotificationResponse,
-  NotificationType,
+  NotificationList,
+  UnreadCountResponse,
+  NotificationActionResponse,
+  GetNotificationsWithMetaResponse,
+  GetUnreadNotificationsResponse,
+  MarkNotificationAsReadResponse,
+  MarkAllNotificationsAsReadResponse,
 } from './types/notification';
 
+import type { Notification } from './types/notification';
+
+/* ------------------------------------------------------------------ */
+/* Queries */
+/* ------------------------------------------------------------------ */
+
 /**
- * Fetches user notifications with optional pagination.
- * 
- * @example
- * ```typescript
- * import { useQuery } from '@apollo/client';
- * import { GET_NOTIFICATIONS, GetNotificationsResponse } from '@/services/gql/notification';
- * 
- * function NotificationList() {
- *   const { data, loading } = useQuery<GetNotificationsResponse>(GET_NOTIFICATIONS, {
- *     variables: { limit: 20, offset: 0 }
- *   });
- * 
- *   return (
- *     <div>
- *       {data?.getNotifications.map(notification => (
- *         <div key={notification.id}>{notification.title}</div>
- *       ))}
- *     </div>
- *   );
- * }
- * ```
+ * Fetch notifications + badge count (preferred — single request).
+ * Variables: { limit?: number, offset?: number } — defaults: limit 50, offset 0.
  */
-export const GET_NOTIFICATIONS = gql`
-  query GetNotifications($limit: Int, $offset: Int) {
-    getNotifications(limit: $limit, offset: $offset) {
+export const GET_NOTIFICATIONS_WITH_META = gql`
+  query GetNotificationsWithMeta($limit: Int, $offset: Int) {
+    getNotificationsWithMeta(limit: $limit, offset: $offset) {
+      notifications {
+        id
+        type
+        title
+        message
+        read
+        isRead
+        actionUrl
+        link
+        imageUrl
+        data
+        createdAt
+        readAt
+      }
+      total
+      limit
+      offset
+      unreadCount
+    }
+  }
+`;
+
+/** Badge count only (lightweight poll). Recommended interval: 30–60s. */
+export const GET_UNREAD_COUNT = gql`
+  query GetUnreadCount {
+    getUnreadNotificationCount {
+      count
+    }
+  }
+`;
+
+/** Unread notifications only. */
+export const GET_UNREAD_NOTIFICATIONS = gql`
+  query GetUnreadNotifications {
+    getUnreadNotifications {
       id
-      recipientId
       type
       title
-      body
-      data
-      isRead
+      message
+      actionUrl
+      link
       createdAt
     }
   }
 `;
 
-/**
- * Marks a notification as read.
- * 
- * @example
- * ```typescript
- * import { useMutation } from '@apollo/client';
- * import { MARK_AS_READ, MarkAsReadResponse } from '@/services/gql/notification';
- * 
- * function NotificationItem({ id }: { id: string }) {
- *   const [markAsRead] = useMutation<MarkAsReadResponse>(MARK_AS_READ);
- * 
- *   const handleMarkRead = async () => {
- *     await markAsRead({
- *       variables: { notificationId: id }
- *     });
- *   };
- * 
- *   return <button onClick={handleMarkRead}>Mark as Read</button>;
- * }
- * ```
- */
-export const MARK_AS_READ = gql`
+/* ------------------------------------------------------------------ */
+/* Mutations */
+/* ------------------------------------------------------------------ */
+
+/** Mark a single notification as read. */
+export const MARK_NOTIFICATION_AS_READ = gql`
   mutation MarkAsRead($notificationId: String!) {
-    markAsRead(notificationId: $notificationId)
+    markNotificationAsRead(notificationId: $notificationId) {
+      success
+      message
+    }
   }
 `;
 
-/**
- * Deletes a notification.
- * 
- * @example
- * ```typescript
- * import { useMutation } from '@apollo/client';
- * import { DELETE_NOTIFICATION, DeleteNotificationResponse } from '@/services/gql/notification';
- * 
- * function NotificationItem({ id }: { id: string }) {
- *   const [deleteNotification] = useMutation<DeleteNotificationResponse>(DELETE_NOTIFICATION);
- * 
- *   const handleDelete = async () => {
- *     await deleteNotification({
- *       variables: { notificationId: id }
- *     });
- *   };
- * 
- *   return <button onClick={handleDelete}>Delete</button>;
- * }
- * ```
- */
-export const DELETE_NOTIFICATION = gql`
-  mutation DeleteNotification($notificationId: String!) {
-    deleteNotification(notificationId: $notificationId)
+/** Mark all notifications as read. */
+export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
+  mutation MarkAllAsRead {
+    markAllNotificationsAsRead {
+      success
+      message
+    }
   }
 `;
+
+/* ------------------------------------------------------------------ */
+/* Navigation */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Returns the path (with leading slash) to navigate to for a notification.
+ * Prefer link/actionUrl; fall back to type + data. Caller should prepend locale, e.g. `/${locale}${path}`.
+ */
+export function getNotificationPath(notification: Pick<Notification, 'type' | 'data' | 'link' | 'actionUrl'>): string {
+  if (notification.link) return notification.link;
+  if (notification.actionUrl) return notification.actionUrl;
+
+  const { type, data } = notification;
+  if (data?.postId) return `/post/${data.postId}`;
+  if (data?.groupId && data?.messageId)
+    return `/messages/group/${data.groupId}?message=${data.messageId}`;
+  if (data?.conversationId) return `/chat`; // or `/messages/${data.conversationId}` if you have that route
+  if (data?.eventId) return `/events/${data.eventId}`;
+  if (data?.connectionId) return `/connections/requests/${data.connectionId}`;
+  if (data?.entityId && data?.entityType) {
+    const section =
+      (data.entityType as string).toLowerCase() === 'association' ? 'association' : 'community';
+    return `/${section}/${data.entityId}`;
+  }
+  if (type?.startsWith('profile.')) return '/profile';
+  if (type?.startsWith('connection.')) return '/connections';
+  if (type?.startsWith('message.') || type?.startsWith('group.message.')) return '/chat';
+  if (type?.startsWith('event.')) return '/events';
+  if (type?.startsWith('membership.')) return '/community';
+
+  return '/notification';
+}
