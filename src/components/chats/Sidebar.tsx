@@ -370,7 +370,7 @@ function isValidUrl(string: string): boolean {
 
 // Avatar Component with URL support and fallback
 interface AvatarProps {
-    src: string;
+    src?: string | null;
     name: string;
     size?: 'sm' | 'md' | 'lg';
     online?: boolean;
@@ -378,7 +378,8 @@ interface AvatarProps {
 
 function Avatar({ src, name, size = 'md', online }: AvatarProps) {
     const [imageError, setImageError] = useState(false);
-    const isUrl = isValidUrl(src);
+    const url = src && src.trim() ? src : '';
+    const isUrl = url ? isValidUrl(url) : false;
 
     const sizeClasses = {
         sm: 'w-8 h-8 text-xs',
@@ -395,9 +396,9 @@ function Avatar({ src, name, size = 'md', online }: AvatarProps) {
     return (
         <div className="relative flex-shrink-0">
             <div className={`${sizeClasses[size]} bg-gray-300 rounded-full flex items-center justify-center overflow-hidden`}>
-                {isUrl && !imageError && src ? (
+                {isUrl && !imageError ? (
                     <Image
-                        src={src}
+                        src={url}
                         alt={name}
                         width={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
                         height={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
