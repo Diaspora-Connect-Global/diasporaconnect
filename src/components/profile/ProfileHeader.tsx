@@ -72,7 +72,7 @@ export function ProfileHeader({
           {/* Avatar with Edit Icon */}
           <div className="relative group">
             <Avatar className="h-25 w-25 ring-4 ring-background">
-              <AvatarImage src={userData?.avatarUrl} alt={userData?.avatarUrl} />
+              <AvatarImage src={userData?.avatarUrl || undefined} alt={userData?.avatarUrl || 'Profile'} />
               <AvatarFallback className="text-4xl">{initials}</AvatarFallback>
             </Avatar>
 

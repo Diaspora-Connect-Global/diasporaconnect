@@ -80,13 +80,19 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
                     className="w-full py-4 flex justify-between items-center  text-text-primary  transition-colors"
                 >
                     <Link href={link} className=" hover:text-text-brand flex space-x-3 items-center text-center justify-center ">
-                        <Image
-                            width={10}
-                            height={10}
-                            src={image}
-                            alt="Profile"
-                            className="w-5 h-5 rounded-full object-cover"
-                        />
+                        {image ? (
+                            <Image
+                                width={10}
+                                height={10}
+                                src={image}
+                                alt="Profile"
+                                className="w-5 h-5 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-5 h-5 rounded-full bg-surface-hover flex items-center justify-center text-xs font-medium text-text-secondary shrink-0">
+                                {title.charAt(0) || '?'}
+                            </div>
+                        )}
                         <span className="font-caption-large truncate">{title}</span>
                     </Link>
                 </div>
@@ -102,13 +108,19 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
                 className="w-full  py-4 flex justify-between text-center items-center cursor-pointer"
             >
                 <div className="flex space-x-3 items-center text-center justify-center ">
-                    <Image
-                        width={10}
-                        height={10}
-                        src={image}
-                        alt="Profile"
-                        className="w-5 h-5 rounded-full object-cover"
-                    />
+                    {image ? (
+                        <Image
+                            width={10}
+                            height={10}
+                            src={image}
+                            alt="Profile"
+                            className="w-5 h-5 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-5 h-5 rounded-full bg-surface-hover flex items-center justify-center text-xs font-medium text-text-secondary shrink-0">
+                            {title.charAt(0) || '?'}
+                        </div>
+                    )}
                     <span className="text-text-primary font-caption-large truncate">{title}</span>
                 </div>
                 <span className="text-text-primary">

@@ -53,7 +53,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const apiMessages = getApiMessagesByConversation(conversationId || '');
 
     const [createConversation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
-    const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE);
+    const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE, {
+        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
+    });
     const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
     const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
@@ -454,7 +456,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     <div className="flex items-center space-x-3">
                         <div className="relative">
                             <Avatar className="w-12 h-12">
-                                <AvatarImage src={otherAvatar} alt="" />
+                                <AvatarImage src={otherAvatar || undefined} alt="" />
                                 <AvatarFallback>{displayName.slice(0, 1).toUpperCase() || 'U'}</AvatarFallback>
                             </Avatar>
                             {chat.online && (
@@ -488,7 +490,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                             </button>
                         )}
                         <Avatar className="w-10 h-10 flex-shrink-0">
-                            <AvatarImage src={otherAvatar} alt="" />
+                            <AvatarImage src={otherAvatar || undefined} alt="" />
                             <AvatarFallback>{displayName.slice(0, 1).toUpperCase() || 'U'}</AvatarFallback>
                         </Avatar>
                         <h2 className="font-semibold text-text-primary truncate">{displayName}</h2>
@@ -658,7 +660,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 {/* User Info */}
                                 <div className="flex flex-col items-center mb-6">
                                     <Avatar className="w-20 h-20 mb-3">
-                                        <AvatarImage src={otherAvatar} alt="avatar" />
+                                        <AvatarImage src={otherAvatar || undefined} alt="avatar" />
                                         <AvatarFallback className="text-2xl">U</AvatarFallback>
                                     </Avatar>
                                     <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>

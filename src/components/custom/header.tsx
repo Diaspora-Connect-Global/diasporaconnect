@@ -265,7 +265,7 @@ export function MyAvatar() {
 
   return (
     <Avatar>
-      <AvatarImage src={url} alt="@shadcn" />
+      <AvatarImage src={url || undefined} alt="@shadcn" />
       <AvatarFallback>
         <Image
           width={32}

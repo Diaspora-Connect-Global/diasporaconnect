@@ -49,16 +49,6 @@ import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import { ApiMessage } from "@/store/ChatStore";
 import { toast } from "sonner";
 
-interface Reply {
-    id: string;
-    messageId: string;
-    senderId: string;
-    text: string;
-    timestamp: string;
-    type: 'text' | 'image';
-    imageUrl?: string;
-}
-
 export default function GroupChat() {
     const t = useTranslations('chat.group');
     const tCommon = useTranslations('common');
@@ -68,7 +58,6 @@ export default function GroupChat() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [repliesSidebarOpen, setRepliesSidebarOpen] = useState(false);
     const [selectedMessage, setSelectedMessage] = useState<any>(null);
-    const [replies, setReplies] = useState<Reply[]>([]);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -85,14 +74,20 @@ export default function GroupChat() {
     const [isDeletingGroup, setIsDeletingGroup] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
-    const [, setTypingUserIds] = useState<Set<string>>(new Set());
+    const [typingUserIds, setTypingUserIds] = useState<Set<string>>(new Set());
 
     const { messages, users, setActiveChat, addMessage, addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
 
     const [conversationId, setConversationId] = useState<string | null>(null);
 
+    /** Lock conversationId + replyToId when reply panel opens so refetches don't change them mid-reply */
+    const replyContextRef = useRef<{ conversationId: string; replyToId: string } | null>(null);
+    const isSendingReplyRef = useRef(false);
+
     const [createConversationMutation] = useGqlMutation<CreateConversationData>(CREATE_CONVERSATION);
-    const [sendMessageMutation] = useGqlMutation<SendMessageData>(SEND_MESSAGE);
+    const [sendMessageMutation] = useGqlMutation<SendMessageData>(SEND_MESSAGE, {
+        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
+    });
     const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
     const [markConversationAsRead] = useGqlMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
@@ -170,6 +165,17 @@ export default function GroupChat() {
     const searchParams = useSearchParams();
 
     const apiMessages = getApiMessagesByConversation(conversationId || '');
+    const mainThreadMessages = useMemo(
+        () => apiMessages.filter((m) => !m.replyToId),
+        [apiMessages]
+    );
+    const repliesForSidebar = useMemo(() => {
+        if (!selectedMessage?.id) return [];
+        return apiMessages
+            .filter((m) => m.replyToId === selectedMessage.id)
+            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }, [apiMessages, selectedMessage?.id]);
+    const getReplyCount = useCallback((messageId: string) => apiMessages.filter((m) => m.replyToId === messageId).length, [apiMessages]);
     const chatchosen = sessionStorage.getItem('activeChat');
 
     useEffect(() => {
@@ -186,7 +192,7 @@ export default function GroupChat() {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [apiMessages]);
+    }, [mainThreadMessages]);
 
     // Create or retrieve group conversation (resolve from store, then GET_CONVERSATIONS, then create)
     useEffect(() => {
@@ -272,12 +278,15 @@ export default function GroupChat() {
         fetchPolicy: 'network-only',
     });
 
-    // Sync GraphQL messages to store whenever we have data for the current conversation (initial load + refetch after new message)
+    // Sync GraphQL messages to store whenever we have data for the current conversation (initial load, refetch, or refresh)
     useEffect(() => {
-        const messages = messagesData?.getMessages?.messages;
-        if (!messages?.length || !conversationId) return;
+        if (!conversationId) return;
+        const getMessagesResult = messagesData?.getMessages;
+        if (getMessagesResult === undefined) return;
+
+        const messages = getMessagesResult.messages ?? [];
         const firstConvId = messages[0]?.conversationId;
-        if (firstConvId && firstConvId !== conversationId) return;
+        if (messages.length > 0 && firstConvId && firstConvId !== conversationId) return;
 
         const history = messages.map((m: any): ApiMessage => ({
             id: m.id,
@@ -415,36 +424,16 @@ export default function GroupChat() {
         router.push(newUrl, { scroll: false });
     };
 
-    const mockReplies: Reply[] = [
-        {
-            id: '1',
-            messageId: '11',
-            senderId: '1',
-            text: 'I agree with this!',
-            timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-            type: 'text'
-        },
-        {
-            id: '2',
-            messageId: '11',
-            senderId: '3',
-            text: 'Great point!',
-            timestamp: new Date(Date.now() - 1000 * 60).toISOString(),
-            type: 'text'
-        },
-    ];
-
-    const getReplyCount = (messageId: string): number => {
-        return mockReplies.filter(reply => reply.messageId === messageId).length;
-    };
-
-    const getRepliesForMessage = (messageId: string): Reply[] => {
-        return mockReplies.filter(reply => reply.messageId === messageId);
-    };
-
     const getUserById = (userId: string) => {
-        return users?.find(u => u.id === userId);
+        const member = groupMembers.find((m) => m.userId === userId);
+        if (member?.profile) {
+            const name = [member.profile.firstName, member.profile.lastName].filter(Boolean).join(' ').trim();
+            return { id: member.userId, name: name || 'Unknown User', avatar: member.profile.avatarUrl };
+        }
+        return users?.find((u) => u.id === userId);
     };
+
+    const getSenderName = (senderId: string): string => getUserById(senderId)?.name ?? 'Unknown User';
 
     const handleSendMessage = async (messageText: string, files?: File[]) => {
         const hasText = !!messageText.trim();
@@ -540,14 +529,30 @@ export default function GroupChat() {
         const sendContent = attachments.length ? (hasText ? messageText.trim() : content) : content;
 
         if (replyingTo) {
+            if (isSendingReplyRef.current) {
+                toast.error('Please wait for the previous reply to send.');
+                return;
+            }
+            const replyCtx = replyContextRef.current?.replyToId === replyingTo ? replyContextRef.current : null;
+            const replyConvId = replyCtx?.conversationId ?? conversationId;
+            const replyTargetId = replyCtx?.replyToId ?? replyingTo;
+            const messagesInConv = getApiMessagesByConversation(replyConvId);
+            const targetInConv = messagesInConv.some((m) => m.id === replyTargetId);
+            if (!targetInConv) {
+                toast.error('Reply target is no longer in this conversation. Send as a new message or reopen the reply.');
+                setReplyingTo(null);
+                replyContextRef.current = null;
+                return;
+            }
+            isSendingReplyRef.current = true;
             try {
                 const { data } = await sendMessageMutation({
                     variables: {
-                        conversationId,
+                        conversationId: replyConvId,
                         messageType,
                         content: sendContent,
                         attachments: attachmentInput,
-                        replyToId: replyingTo,
+                        replyToId: replyTargetId,
                         idempotencyKey,
                     },
                 });
@@ -560,13 +565,13 @@ export default function GroupChat() {
                     }
                     const sentMsg: ApiMessage = {
                         id: data.sendMessage,
-                        conversationId,
+                        conversationId: replyConvId,
                         senderId: currentUserId,
                         type: messageType,
                         content: sendContent,
                         createdAt: new Date().toISOString(),
                         status: 'sent',
-                        replyToId: replyingTo,
+                        replyToId: replyTargetId,
                         ...(attachments.length && {
                             attachments: attachments.map((a, i) => ({
                                 gcsPath: a.publicUrl,
@@ -577,16 +582,6 @@ export default function GroupChat() {
                         }),
                     };
                     addApiMessage(sentMsg);
-                    const newReply: Reply = {
-                        id: data.sendMessage,
-                        messageId: replyingTo,
-                        senderId: currentUserId,
-                        text: sendContent,
-                        timestamp: new Date().toISOString(),
-                        type: messageType === 'IMAGE' ? 'image' : messageType === 'VIDEO' ? 'image' : 'text',
-                        imageUrl: messageType === 'IMAGE' || messageType === 'VIDEO' ? content : undefined,
-                    };
-                    setReplies(prev => [...prev, newReply]);
                 }
             } catch (error) {
                 console.error('Failed to send reply:', error);
@@ -596,8 +591,10 @@ export default function GroupChat() {
                     removeApiMessage(placeholderId);
                 }
                 toast.error('Failed to send reply. Please try again.');
+            } finally {
+                isSendingReplyRef.current = false;
             }
-            setReplyingTo(null);
+            // Keep replyingTo set so further replies in the same section still send as replies; cleared when user closes Reply section
         } else {
             try {
                 const { data } = await sendMessageMutation({
@@ -658,21 +655,19 @@ export default function GroupChat() {
 
     const handleViewReplies = (message: any) => {
         setSelectedMessage(message);
-        setReplies(getRepliesForMessage(message.id));
         setRepliesSidebarOpen(true);
         setReplyingTo(message.id);
         setSidebarOpen(false);
+        if (conversationId && message?.id) {
+            replyContextRef.current = { conversationId, replyToId: message.id };
+        }
     };
 
     const handleCloseReplies = () => {
         setRepliesSidebarOpen(false);
         setSelectedMessage(null);
         setReplyingTo(null);
-    };
-
-    const getSenderName = (senderId: string): string => {
-        const user = getUserById(senderId);
-        return user?.name || 'Unknown User';
+        replyContextRef.current = null;
     };
 
     const handleSideBarToggle = () => {
@@ -819,7 +814,7 @@ export default function GroupChat() {
                             </ButtonType3>
                             <div className="relative">
                                 <Avatar className="w-12 h-12">
-                                    <AvatarImage src={group.avatarUrl || chat.avatar} alt="avatar" />
+                                    <AvatarImage src={group.avatarUrl || chat.avatar || undefined} alt="avatar" />
                                     <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                             </div>
@@ -849,15 +844,15 @@ export default function GroupChat() {
                         <Menu className="w-5 h-5 text-text-white" />
                     </ButtonType3>
 
-                    {/* Messages Area */}
+                    {/* Messages Area - only top-level messages; replies show in Reply section */}
                     <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
-                        {apiMessages.length === 0 ? (
+                        {mainThreadMessages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-text-secondary">
                                 <MessageCircle className="w-12 h-12 mb-4 opacity-50" />
                                 <p>{t('noMessages')}</p>
                             </div>
                         ) : (
-                            apiMessages.map((message) => {
+                            mainThreadMessages.map((message) => {
                                 const isMe = message.senderId === currentUserId;
                                 return (
                                     <div
@@ -953,7 +948,7 @@ export default function GroupChat() {
                                             <div className={`space-x-2 flex items-center mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
                                                 {!isMe && (
                                                     <Avatar className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0">
-                                                        <AvatarImage src={getUserById(message.senderId)?.avatar} alt="avatar" />
+                                                        <AvatarImage src={getUserById(message.senderId)?.avatar || undefined} alt="avatar" />
                                                         <AvatarFallback>{getSenderName(message.senderId).charAt(0)}</AvatarFallback>
                                                     </Avatar>
                                                 )}
@@ -982,6 +977,18 @@ export default function GroupChat() {
                             })
                         )}
                         <div ref={messagesEndRef} />
+                        {typingUserIds.size > 0 && (
+                            <div className="flex-shrink-0 px-3 py-1.5 flex items-center gap-2 text-text-tertiary text-xs sm:text-sm">
+                                <span className="inline-flex gap-0.5">
+                                    {[0, 1, 2].map((i) => (
+                                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-text-tertiary animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                                    ))}
+                                </span>
+                                {typingUserIds.size === 1
+                                    ? `${getSenderName([...typingUserIds][0])} is typing...`
+                                    : `${typingUserIds.size} people are typing...`}
+                            </div>
+                        )}
                     </div>
 
                     {/* Main Message Input */}
@@ -993,6 +1000,7 @@ export default function GroupChat() {
                                 conversationId={conversationId || chat?.id}
                                 senderId={currentUserId ?? 'current-user'}
                                 disabled={!conversationId}
+                                onTyping={handleTyping}
                             />
                         </div>
                     )}
@@ -1028,7 +1036,7 @@ export default function GroupChat() {
                             <div className="p-4 flex-1 min-h-0 flex flex-col overflow-y-auto">
                                 <div className="flex-shrink-0 flex flex-col items-center mb-6">
                                     <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
-                                        <AvatarImage src={group.avatarUrl} alt="avatar" />
+                                        <AvatarImage src={group.avatarUrl || undefined} alt="avatar" />
                                         <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <h4 className="font-semibold text-text-primary text-base sm:text-lg mt-3">{group.name}</h4>
@@ -1073,15 +1081,15 @@ export default function GroupChat() {
                                                 onClick={() => handleMemberClick(member)}
                                             >
                                                 <Avatar className="w-10 h-10">
-                                                    <AvatarImage src={member?.profile?.avatarUrl} alt="avatar" />
+                                                    <AvatarImage src={member?.profile?.avatarUrl || undefined} alt="avatar" />
                                                     <AvatarFallback>U</AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-text-primary truncate">
-                                                        {`${member.profile?.firstName} ${member.profile?.lastName}`}
+                                                        {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
                                                     </p>
                                                     <p className="text-xs text-text-secondary capitalize">
-                                                        {member.role.toLowerCase()}
+                                                        {member.role?.toLowerCase() ?? 'member'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -1149,7 +1157,7 @@ export default function GroupChat() {
                                     </div>
                                     <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center space-x-2">
                                         <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
-                                            <AvatarImage src={getUserById(selectedMessage.senderId)?.avatar} alt="avatar" />
+                                            <AvatarImage src={getUserById(selectedMessage.senderId)?.avatar || undefined} alt="avatar" />
                                             <AvatarFallback>{getSenderName(selectedMessage.senderId).charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <span>{formatChatTimestamp(selectedMessage.timestamp)}</span>
@@ -1158,22 +1166,29 @@ export default function GroupChat() {
                             )}
 
                             <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
-                                {replies.length > 0 ? (
-                                    replies.map((reply) => (
+                                {repliesForSidebar.length > 0 ? (
+                                    repliesForSidebar.map((reply) => (
                                         <div key={reply.id}>
                                             <div className="bg-surface-success/50 rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
                                                 <span className="text-xs sm:text-sm font-medium text-text-primary dark:text-text-white">
                                                     {getSenderName(reply.senderId)}
                                                 </span>
-                                                <p className="text-xs sm:text-sm text-text-primary dark:text-text-white">{reply.text}</p>
+                                                {reply.attachments?.length ? (
+                                                    <>
+                                                        <MessageAttachments attachments={reply.attachments} />
+                                                        {reply.content && <p className="text-xs sm:text-sm text-text-primary dark:text-text-white mt-1">{reply.content}</p>}
+                                                    </>
+                                                ) : (
+                                                    <p className="text-xs sm:text-sm text-text-primary dark:text-text-white">{reply.content}</p>
+                                                )}
                                             </div>
                                             <div className="flex space-x-2 items-center mt-1">
                                                 <Avatar className="w-3 h-3 sm:w-4 sm:h-4">
-                                                    <AvatarImage src={getUserById(reply.senderId)?.avatar} alt="avatar" />
+                                                    <AvatarImage src={getUserById(reply.senderId)?.avatar || undefined} alt="avatar" />
                                                     <AvatarFallback>{getSenderName(reply.senderId).charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <span className="text-[10px] sm:text-xs text-text-tertiary">
-                                                    {formatChatTimestamp(reply.timestamp)}
+                                                    {formatChatTimestamp(reply.createdAt)}
                                                 </span>
                                             </div>
                                         </div>
@@ -1244,6 +1259,7 @@ export default function GroupChat() {
                     onClose={() => setShowAddMembersModal(false)}
                     groupId={chat?.id}
                     onMembersAdded={refetchMembers}
+                    existingMemberIds={groupMembers.map((m) => m.userId)}
                 />
             )}
 

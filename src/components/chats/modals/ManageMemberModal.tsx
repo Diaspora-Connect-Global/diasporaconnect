@@ -84,7 +84,7 @@ export function ManageMemberModal({
     //   icon: Shield,
     // },
     {
-      role: MemberRole.OWNER,
+      role: MemberRole.ADMIN,
       label: t("admin"),
       description: t("adminDescription"),
       icon: Crown,
@@ -103,7 +103,7 @@ export function ManageMemberModal({
             {/* Member Info */}
             <div className="flex items-center space-x-3 p-3 bg-surface-hover rounded-lg">
               <Avatar className="w-12 h-12">
-                <AvatarImage src={member?.profile?.avatarUrl} alt="avatar" />
+                <AvatarImage src={member?.profile?.avatarUrl || undefined} alt="avatar" />
                 <AvatarFallback>
                   {member?.profile?.firstName[0]}
                   {member?.profile?.lastName[0]}

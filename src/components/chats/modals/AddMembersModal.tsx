@@ -12,7 +12,7 @@ import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { SearchInput } from "@/components/custom/input";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { INVITE_TO_GROUP, InviteToGroupResponse } from "@/services/gql/groups";
+import { GET_GROUP_MEMBERS, INVITE_TO_GROUP, InviteToGroupResponse } from "@/services/gql/groups";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Loader2 } from "lucide-react";
@@ -51,6 +51,8 @@ interface AddMembersModalProps {
   onClose: () => void;
   groupId: string;
   onMembersAdded: () => void;
+  /** User IDs already in this group; they will be excluded from the list */
+  existingMemberIds?: string[];
 }
 
 export function AddMembersModal({
@@ -58,6 +60,7 @@ export function AddMembersModal({
   onClose,
   groupId,
   onMembersAdded,
+  existingMemberIds = [],
 }: AddMembersModalProps) {
   const t = useTranslations("chat.group");
 
@@ -65,7 +68,15 @@ export function AddMembersModal({
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isInviting, setIsInviting] = useState(false);
 
-  const [inviteToGroup] = useMutation<InviteToGroupResponse>(INVITE_TO_GROUP);
+  const [inviteToGroup] = useMutation<InviteToGroupResponse>(INVITE_TO_GROUP, {
+    refetchQueries: [
+      {
+        query: GET_GROUP_MEMBERS,
+        variables: { groupId, membersLimit: 100, membersOffset: 0 },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
   const user = useUserStore((state) => state.user);
   
   const currentUserId = user?.userId;
@@ -78,25 +89,23 @@ export function AddMembersModal({
     },
   });
 
-  // Extract users from connections and filter out current user
+  // Extract users from connections, filter out current user and existing group members
   const allUsers = useMemo(() => {
     if (!data?.getConnections?.connections) return [];
-    
+    const existingSet = new Set(existingMemberIds ?? []);
+
     const users: User[] = [];
     data.getConnections.connections.forEach((connection) => {
       // Only include accepted connections (case-insensitive check)
       if (connection.status.toLowerCase() !== "accepted") return;
-      
-      // Add the other user in the connection (not the current user)
-      if (connection.requesterId === currentUserId) {
-        users.push(connection.receiver);
-      } else {
-        users.push(connection.requester);
-      }
+
+      const other = connection.requesterId === currentUserId ? connection.receiver : connection.requester;
+      if (existingSet.has(other.userId)) return;
+      users.push(other);
     });
-    
+
     return users;
-  }, [data, currentUserId]);
+  }, [data, currentUserId, existingMemberIds]);
 
   // Filter users based on search query
   const filteredUsers = useMemo(() => {
@@ -165,13 +174,15 @@ export function AddMembersModal({
         </DialogHeader>
 
         <div className="space-y-4 flex-1 min-h-0 flex flex-col">
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onSearch={() => {}}
-            placeholder={t("searchUsers")}
-            id="user-search"
-          />
+          <div className="w-64">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSearch={() => {}}
+              placeholder={t("searchUsers")}
+              id="user-search"
+            />
+          </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto space-y-2">
             {loading ? (
@@ -200,7 +211,7 @@ export function AddMembersModal({
                     }`}
                   >
                     <Avatar className="w-10 h-10">
-                      <AvatarImage src={user.avatarUrl} alt="avatar" />
+                      <AvatarImage src={user.avatarUrl || undefined} alt="avatar" />
                       <AvatarFallback>
                         {user.firstName[0]}
                         {user.lastName[0]}

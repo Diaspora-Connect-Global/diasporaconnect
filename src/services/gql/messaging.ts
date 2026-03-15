@@ -45,6 +45,7 @@ export const GET_CONVERSATIONS = gql`
         senderId
         type
         content
+        replyToId
         isEdited
         isDeleted
         createdAt

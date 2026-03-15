@@ -16,6 +16,7 @@ export default function PostPage() {
   const { data, loading, error } = useQuery<GetPostData>(GET_POST, {
     variables: { id: postId },
     skip: !postId,
+    errorPolicy: 'ignore',
   });
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);

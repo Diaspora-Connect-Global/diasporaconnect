@@ -95,6 +95,7 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
   const { data: postData } = useQuery<GetPostData>(GET_POST, {
     variables: { id: postId! },
     skip: kind !== 'post' || !postId,
+    errorPolicy: 'ignore',
   });
   const previewUrl = postData?.post ? getPostPreviewUrl(postData.post) : null;
   const postText = postData?.post?.text?.trim() ?? null;
@@ -111,7 +112,7 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
         className={`block rounded-2xl max-w-full overflow-hidden ${className}`}
       >
         <img
-          src={trimmed}
+          src={trimmed || undefined}
           alt=""
           className="rounded-2xl max-w-full h-auto max-h-80 object-contain"
         />
@@ -124,7 +125,7 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
     return (
       <div className={`rounded-2xl overflow-hidden max-w-full bg-black/10 ${className}`}>
         <video
-          src={trimmed}
+          src={trimmed || undefined}
           controls
           className="max-w-full max-h-80 w-full"
           preload="metadata"
@@ -195,7 +196,7 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
           <div className="relative aspect-square w-full overflow-hidden bg-surface-default flex items-center justify-center">
             {previewUrl ? (
               <img
-                src={previewUrl}
+                src={previewUrl || undefined}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
               />
@@ -248,7 +249,7 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
         {og.imageUrl && (
           <div className="relative aspect-video w-full overflow-hidden bg-surface-default">
             <img
-              src={og.imageUrl}
+              src={og.imageUrl || undefined}
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
             />

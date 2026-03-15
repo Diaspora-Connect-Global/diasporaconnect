@@ -99,6 +99,11 @@ export default function ChatSideBar() {
                 console.log(`Checking conversation ${conv.id}: type=${conv.type}, isActive=${conv.isActive}, isDirect=${isDirect}`);
                 return isDirect && conv.isActive;
             })
+            .sort((a: any, b: any) => {
+                const timeA = a.lastMessage?.createdAt || a.lastMessageAt || a.updatedAt || '';
+                const timeB = b.lastMessage?.createdAt || b.lastMessageAt || b.updatedAt || '';
+                return new Date(timeB).getTime() - new Date(timeA).getTime();
+            })
             .map((conv: any) => {
                 // Find the other participant (not the current user)
                 const otherParticipantId = conv.participantIds?.find((id: string) => id !== currentUserId) || '';
@@ -390,7 +395,7 @@ function Avatar({ src, name, size = 'md', online }: AvatarProps) {
     return (
         <div className="relative flex-shrink-0">
             <div className={`${sizeClasses[size]} bg-gray-300 rounded-full flex items-center justify-center overflow-hidden`}>
-                {isUrl && !imageError ? (
+                {isUrl && !imageError && src ? (
                     <Image
                         src={src}
                         alt={name}
@@ -439,7 +444,7 @@ function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
         >
             {/* Avatar with online status */}
             <Avatar
-                src={chat.avatar}
+                src={chat.avatar || undefined}
                 name={chat.name}
                 online={chat.online}
             />
@@ -535,11 +540,29 @@ interface GroupsListProps {
 
 function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], limit = 50, offset = 0 }: GroupsListProps) {
     const t = useTranslations('chat');
+    const setRealConversation = useChatStore((s) => s.setRealConversation);
 
     const { data, loading, error } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
         variables: { limit, offset },
         fetchPolicy: 'network-only',
     });
+
+    // Cache groupId -> conversationId so GroupChat can use it without re-fetching or creating duplicates
+    useEffect(() => {
+        const list = conversations as Array<{ id?: string; type?: string; groupId?: string | null; participantIds?: string[] }>;
+        if (!list?.length) return;
+        list.forEach((conv) => {
+            const isGroup = conv.type === 'GROUP' || conv.type === 'group';
+            const groupId = conv.groupId;
+            if (isGroup && groupId && conv.id) {
+                setRealConversation(groupId, {
+                    conversationId: conv.id,
+                    type: 'GROUP',
+                    participantIds: conv.participantIds ?? [],
+                });
+            }
+        });
+    }, [conversations, setRealConversation]);
 
     if (loading) {
         return (
@@ -568,7 +591,16 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
         group.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    if (filteredGroups.length === 0) {
+    // Sort by latest chat activity (newest first)
+    const sortedGroups = [...filteredGroups].sort((a, b) => {
+        const convA = conversations.find((c: { type?: string; groupId?: string }) => c.type === 'GROUP' && c.groupId === a.id) as { lastMessageAt?: string; lastMessage?: { createdAt?: string }; createdAt?: string } | undefined;
+        const convB = conversations.find((c: { type?: string; groupId?: string }) => c.type === 'GROUP' && c.groupId === b.id) as { lastMessageAt?: string; lastMessage?: { createdAt?: string }; createdAt?: string } | undefined;
+        const timeA = convA?.lastMessageAt || convA?.lastMessage?.createdAt || convA?.createdAt || a.createdAt || '';
+        const timeB = convB?.lastMessageAt || convB?.lastMessage?.createdAt || convB?.createdAt || b.createdAt || '';
+        return new Date(timeB).getTime() - new Date(timeA).getTime();
+    });
+
+    if (sortedGroups.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
                 <p className="text-center">{searchQuery ? t('noGroupsFound') : t('noGroups')}</p>
@@ -581,10 +613,16 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
 
     return (
         <div className="space-y-1 p-2">
-            {filteredGroups.map((group) => {
+            {sortedGroups.map((group) => {
                 const correspondingConversation = conversations.find(
-                    (conv) => conv.type === 'GROUP' && conv.groupId === group.id
-                );
+                    (conv: { type?: string; groupId?: string }) => conv.type === 'GROUP' && conv.groupId === group.id
+                ) as { id?: string; lastMessage?: { content?: string; replyToId?: string | null }; lastMessageAt?: string; unreadCount?: number } | undefined;
+
+                const lastMsg = correspondingConversation?.lastMessage;
+                const isLastMessageReply = !!lastMsg?.replyToId;
+                const previewText = (lastMsg && !isLastMessageReply)
+                    ? (lastMsg.content ?? group.description ?? t('group.memberCount', { count: group.memberCount }))
+                    : (group.description ?? t('group.memberCount', { count: group.memberCount }));
 
                 return (
                     <ChatItem
@@ -594,8 +632,8 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
                             conversationId: correspondingConversation?.id,
                             name: group.name,
                             avatar: group.avatarUrl || getInitials(group.name),
-                            lastMessage: group.description || t('group.memberCount', { count: group.memberCount }),
-                            lastMessageTime: group.createdAt,
+                            lastMessage: previewText,
+                            lastMessageTime: correspondingConversation?.lastMessageAt ?? group.createdAt,
                             unread: correspondingConversation?.unreadCount ?? 0,
                             type: 'group' as const,
                             memberCount: group.memberCount,
