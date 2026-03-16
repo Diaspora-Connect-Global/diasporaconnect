@@ -1,7 +1,7 @@
 // components/chats/modals/EditGroupModal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,10 @@ import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { TextInput, TextArea } from "@/components/custom/input";
 import { useTranslations } from "next-intl";
 import { GroupPrivacy } from "@/services/gql/groups";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CircularImageCropper } from "@/lib/imagecropper";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { Camera } from "lucide-react";
 
 interface EditGroupModalProps {
   isOpen: boolean;
@@ -22,6 +26,8 @@ interface EditGroupModalProps {
     avatarUrl?: string;
     privacy?: GroupPrivacy;
   }) => Promise<void>;
+  /** Called when a new group photo is uploaded (persist to backend immediately, like profile picture). */
+  onAvatarUpload?: (publicUrl: string) => Promise<void>;
   initialData: {
     name: string;
     description: string;
@@ -34,9 +40,11 @@ export function EditGroupModal({
   isOpen,
   onClose,
   onSave,
+  onAvatarUpload,
   initialData,
 }: EditGroupModalProps) {
   const t = useTranslations("chat.group");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(initialData.name);
   const [description, setDescription] = useState(initialData.description);
@@ -45,6 +53,25 @@ export function EditGroupModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const {
+    uploading,
+    rawImage,
+    croppedImage,
+    showCropper,
+    handleFileSelect,
+    handleCropConfirm,
+    handleCropCancel,
+    uploadImage,
+    reset: resetImageUpload,
+  } = useImageUpload({
+    category: "group_avatar",
+    contentType: "image/jpeg",
+    onSuccess: async (publicUrl) => {
+      setAvatarUrl(publicUrl);
+      await onAvatarUpload?.(publicUrl);
+    },
+  });
+
   useEffect(() => {
     if (isOpen) {
       setName(initialData.name);
@@ -52,7 +79,9 @@ export function EditGroupModal({
       setAvatarUrl(initialData.avatarUrl);
       setPrivacy(initialData.privacy);
       setError(null);
+      resetImageUpload();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resetImageUpload is stable; only reset when modal opens
   }, [isOpen, initialData]);
 
   const handleSave = async () => {
@@ -68,7 +97,7 @@ export function EditGroupModal({
       await onSave({
         name: name.trim(),
         description: description.trim(),
-        avatarUrl: avatarUrl.trim(),
+        avatarUrl: avatarUrl.trim() || undefined,
         privacy,
       });
       onClose();
@@ -80,14 +109,75 @@ export function EditGroupModal({
     }
   };
 
+  const handleUsePhoto = async () => {
+    if (!croppedImage) return;
+    const url = await uploadImage();
+    if (url) {
+      setAvatarUrl(url);
+      resetImageUpload();
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileSelect(file);
+    e.target.value = "";
+  };
+
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md h-[90dvh] overflow-auto" autoFocus= {false}>
+      <DialogContent className="max-w-md h-[90dvh] overflow-auto" autoFocus={false}>
         <DialogHeader>
           <DialogTitle>{t("editGroup")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative">
+              <Avatar className="w-20 h-20">
+                {croppedImage ? (
+                  <img src={croppedImage} alt="Preview" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <>
+                    <AvatarImage src={avatarUrl || undefined} alt="avatar" />
+                    <AvatarFallback className="text-lg">{name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </>
+                )}
+              </Avatar>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileInputChange}
+              />
+              {!croppedImage && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute bottom-0 right-0 p-1.5 rounded-full bg-primary text-primary-foreground shadow hover:opacity-90 disabled:opacity-50"
+                  title={t("changeGroupPhoto")}
+                >
+                  <Camera className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            {croppedImage ? (
+              <div className="flex gap-2">
+                <ButtonType3 onClick={() => resetImageUpload()} size="sm">
+                  {t("cancel")}
+                </ButtonType3>
+                <ButtonType2 onClick={handleUsePhoto} disabled={uploading} size="sm">
+                  {uploading ? t("saving") : t("useThisPhoto")}
+                </ButtonType2>
+              </div>
+            ) : (
+              <p className="text-xs text-text-secondary">{t("changeGroupPhoto")}</p>
+            )}
+          </div>
+
           <TextInput
             label={t("groupName")}
             placeholder={t("groupNamePlaceholder")}
@@ -144,5 +234,15 @@ export function EditGroupModal({
         </div>
       </DialogContent>
     </Dialog>
+
+    {showCropper && rawImage && (
+      <CircularImageCropper
+        open={showCropper}
+        src={rawImage}
+        onCancel={handleCropCancel}
+        onConfirm={handleCropConfirm}
+      />
+    )}
+    </>
   );
 }

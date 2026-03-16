@@ -164,6 +164,7 @@ export default function ProfilePage() {
                     showFriendActions={false}
                     userData={profile}
                     connectionId={""}
+                    avatarUploading={uploading || updating}
                     onEditAvatar={() => {
                         reset();
                         setEditAvatarOpen(true);

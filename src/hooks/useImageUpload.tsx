@@ -25,7 +25,8 @@ interface UseImageUploadReturn {
   handleFileSelect: (file: File) => void;
   handleCropConfirm: (croppedImageData: string) => void;
   handleCropCancel: () => void;
-  uploadImage: () => Promise<string | null>;
+  /** Upload the cropped image. Pass the cropped data URL when calling right after crop confirm to avoid state timing issues. */
+  uploadImage: (croppedDataUrl?: string) => Promise<string | null>;
   reset: () => void;
 }
 
@@ -248,8 +249,9 @@ export const useImageUpload = ({
    * - Calls onSuccess callback with public URL
    * - Calls onError callback on failure
    */
-  const uploadImage = async (): Promise<string | null> => {
-    if (!croppedImage) {
+  const uploadImage = async (croppedDataUrl?: string): Promise<string | null> => {
+    const imageToUpload = croppedDataUrl ?? croppedImage;
+    if (!imageToUpload) {
       toast.error('No image selected');
       return null;
     }
@@ -273,7 +275,7 @@ export const useImageUpload = ({
       const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
 
       // Step 2: Convert base64 to blob
-      const response = await fetch(croppedImage);
+      const response = await fetch(imageToUpload);
       const blob = await response.blob();
 
       // Step 3: Upload to the signed URL

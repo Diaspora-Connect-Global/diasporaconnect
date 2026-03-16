@@ -12,7 +12,7 @@ import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { SearchInput } from "@/components/custom/input";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { GET_GROUP_MEMBERS, INVITE_TO_GROUP, InviteToGroupResponse } from "@/services/gql/groups";
+import { ADD_MEMBER, AddMemberResponse, GET_GROUP_MEMBERS, MemberRole } from "@/services/gql/groups";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Loader2 } from "lucide-react";
@@ -68,7 +68,7 @@ export function AddMembersModal({
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isInviting, setIsInviting] = useState(false);
 
-  const [inviteToGroup] = useMutation<InviteToGroupResponse>(INVITE_TO_GROUP, {
+  const [addMember] = useMutation<AddMemberResponse>(ADD_MEMBER, {
     refetchQueries: [
       {
         query: GET_GROUP_MEMBERS,
@@ -134,14 +134,14 @@ export function AddMembersModal({
 
     setIsInviting(true);
     try {
-      // Invite each selected user
       await Promise.all(
         selectedUsers.map((userId) =>
-          inviteToGroup({
+          addMember({
             variables: {
-              inviteInput: {
+              input: {
                 groupId,
                 userId,
+                role: MemberRole.MEMBER,
               },
             },
           })
@@ -153,8 +153,7 @@ export function AddMembersModal({
       setSelectedUsers([]);
       setSearchQuery("");
     } catch (error) {
-      console.error("Failed to invite members:", error);
-      // You might want to show an error toast here
+      console.error("Failed to add members:", error);
     } finally {
       setIsInviting(false);
     }

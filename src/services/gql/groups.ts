@@ -14,6 +14,8 @@ export type {
   UpdateMemberRoleInput,
   RemoveMemberInput,
   InviteToGroupInput,
+  AddMemberInput,
+  TransferGroupOwnershipInput,
   GetGroupResponse,
   GetMyGroupsResponse,
   SearchGroupsResponse,
@@ -28,6 +30,8 @@ export type {
   UpdateMemberRoleResponse,
   RemoveMemberResponse,
   InviteToGroupResponse,
+  AddMemberResponse,
+  TransferGroupOwnershipResponse,
   AcceptGroupInvitationResponse,
   DeclineGroupInvitationResponse,
 } from './types';
@@ -417,10 +421,56 @@ export const UPDATE_MEMBER_ROLE = gql`
  * ```
  */
 export const REMOVE_MEMBER = gql`
-  mutation RemoveMember($removeInput: RemoveMemberInput!) {
-    removeMember(input: $removeInput) {
+  mutation RemoveGroupMember($removeInput: GroupRemoveMemberInput!) {
+    removeGroupMember(input: $removeInput) {
       success
       message
+    }
+  }
+`;
+
+/**
+ * Add a member directly to a group (OWNER or ADMIN only).
+ * Role optional: MEMBER | MODERATOR | ADMIN (default MEMBER).
+ *
+ * @example
+ * ```typescript
+ * const [addMember] = useMutation<AddMemberResponse>(ADD_MEMBER);
+ * await addMember({
+ *   variables: {
+ *     input: { groupId: "...", userId: "...", role: MemberRole.MEMBER }
+ *   }
+ * });
+ * ```
+ */
+export const ADD_MEMBER = gql`
+  mutation AddMember($input: AddMemberInput!) {
+    addMember(input: $input) {
+      success
+      message
+      member { userId role status }
+    }
+  }
+`;
+
+/**
+ * Transfer group ownership to another member (OWNER only). Previous owner becomes ADMIN.
+ *
+ * @example
+ * ```typescript
+ * const [transferOwnership] = useMutation<TransferGroupOwnershipResponse>(TRANSFER_GROUP_OWNERSHIP);
+ * await transferOwnership({
+ *   variables: { input: { groupId: "...", newOwnerId: "..." } }
+ * });
+ * ```
+ */
+export const TRANSFER_GROUP_OWNERSHIP = gql`
+  mutation TransferGroupOwnership($input: TransferGroupOwnershipInput!) {
+    transferGroupOwnership(input: $input) {
+      success
+      message
+      previousOwner { userId role }
+      newOwner { userId role }
     }
   }
 `;

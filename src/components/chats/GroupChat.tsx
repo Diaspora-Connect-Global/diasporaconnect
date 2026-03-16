@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ChevronRight, InfoIcon, MessageCircle, X, Menu } from "lucide-react";
+import { ChevronRight, InfoIcon, MessageCircle, X, Menu, Camera } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
@@ -10,7 +10,7 @@ import { formatChatTimestamp } from "@/macros/time";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { ButtonType3, ButtonType4Pill } from "../custom/button";
+import { ButtonType2, ButtonType3, ButtonType4Pill } from "../custom/button";
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import {
@@ -24,11 +24,13 @@ import {
     UPDATE_GROUP,
     REMOVE_MEMBER,
     UPDATE_MEMBER_ROLE,
+    TRANSFER_GROUP_OWNERSHIP,
     LeaveGroupResponse,
     DeleteGroupResponse,
     UpdateGroupResponse,
     RemoveMemberResponse,
     UpdateMemberRoleResponse,
+    TransferGroupOwnershipResponse,
     MemberRole,
     GroupPrivacy
 } from "@/services/gql/groups";
@@ -36,6 +38,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { EditGroupModal } from "./modals/EditGroupModal";
 import { ManageMemberModal } from "./modals/ManageMemberModal";
 import { ConfirmationModal } from "../custom/confirmationModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AddMembersModal } from "./modals/AddMembersModal";
 import { Check, Loader2 } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
@@ -45,6 +48,8 @@ import { useMutation as useGqlMutation } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
 import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
 import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { CircularImageCropper } from "@/lib/imagecropper";
 import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import { ApiMessage } from "@/store/ChatStore";
 import { toast } from "sonner";
@@ -68,6 +73,7 @@ export default function GroupChat() {
     const [showAddMembersModal, setShowAddMembersModal] = useState(false);
     const [showManageMemberModal, setShowManageMemberModal] = useState(false);
     const [selectedMember, setSelectedMember] = useState<any>(null);
+    const [showTransferModal, setShowTransferModal] = useState(false);
 
     // Loading states
     const [isLeavingGroup, setIsLeavingGroup] = useState(false);
@@ -153,6 +159,13 @@ export default function GroupChat() {
         onCompleted: () => refetchMembers(),
     });
 
+    const [transferOwnership] = useMutation<TransferGroupOwnershipResponse>(TRANSFER_GROUP_OWNERSHIP, {
+        onCompleted: () => {
+            refetchGroup();
+            refetchMembers();
+        },
+    });
+
     const group = groupData?.getGroup?.group;
     const groupMembers = membersData?.getGroupMembers?.members || [];
     const groupMembersCount = membersData?.getGroupMembers?.total || 0;
@@ -162,6 +175,30 @@ export default function GroupChat() {
     const currentUserMember = groupMembers.find(m => m.userId === currentUserId);
     const isOwner = group?.ownerId === currentUserId;
     const isAdmin = currentUserMember?.role === MemberRole.ADMIN || isOwner;
+
+    // Group avatar upload (info sidebar)
+    const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+    const {
+        uploading: avatarUploading,
+        rawImage: avatarRawImage,
+        croppedImage: avatarCroppedImage,
+        showCropper: showAvatarCropper,
+        handleFileSelect: handleAvatarFileSelect,
+        handleCropConfirm: handleAvatarCropConfirm,
+        handleCropCancel: handleAvatarCropCancel,
+        uploadImage: uploadGroupAvatar,
+        reset: resetGroupAvatarUpload,
+    } = useImageUpload({
+        category: "group_avatar",
+        contentType: "image/jpeg",
+        onSuccess: async (publicUrl) => {
+            await handleGroupAvatarUpload(publicUrl);
+            resetGroupAvatarUpload();
+        },
+        onError: () => {
+            toast.error(t('updateFailed'));
+        },
+    });
     const searchParams = useSearchParams();
 
     const apiMessages = getApiMessagesByConversation(conversationId || '');
@@ -733,6 +770,22 @@ export default function GroupChat() {
         }
     };
 
+    const handleGroupAvatarUpload = async (publicUrl: string) => {
+        if (!chat?.id) return;
+        try {
+            const { data } = await updateGroup({
+                variables: { updateInput: { groupId: chat.id, avatarUrl: publicUrl } }
+            });
+            if (data?.updateGroup.success) {
+                toast.success(t('groupPhotoUpdated'));
+            } else {
+                toast.error(data?.updateGroup.message ?? t('updateFailed'));
+            }
+        } catch (error) {
+            toast.error(t('updateFailed'));
+        }
+    };
+
     const handleMemberClick = (member: any) => {
         if (isAdmin && member.userId !== currentUserId) {
             setSelectedMember(member);
@@ -745,11 +798,11 @@ export default function GroupChat() {
             const { data } = await removeMember({
                 variables: { removeInput: { groupId: chat?.id, userId } }
             });
-            if (data?.removeMember.success) {
+            if (data?.removeGroupMember.success) {
                 setShowManageMemberModal(false);
                 setSelectedMember(null);
             } else {
-                console.error('Failed to remove member:', data?.removeMember.message);
+                console.error('Failed to remove member:', data?.removeGroupMember.message);
             }
         } catch (error) {
             console.error('Error removing member:', error);
@@ -1035,10 +1088,46 @@ export default function GroupChat() {
 
                             <div className="p-4 flex-1 min-h-0 flex flex-col overflow-y-auto">
                                 <div className="flex-shrink-0 flex flex-col items-center mb-6">
-                                    <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
-                                        <AvatarImage src={group.avatarUrl || undefined} alt="avatar" />
-                                        <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                                    </Avatar>
+                                    <div className="relative">
+                                        <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
+                                            <AvatarImage src={group.avatarUrl || undefined} alt="avatar" />
+                                            <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                        {avatarUploading && (
+                                            <div
+                                                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center"
+                                                aria-hidden
+                                            >
+                                                <Loader2 className="w-8 h-8 text-white animate-spin" />
+                                            </div>
+                                        )}
+                                        {isAdmin && (
+                                            <>
+                                                <input
+                                                    ref={avatarFileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            handleAvatarFileSelect(file);
+                                                        }
+                                                        e.target.value = "";
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => avatarFileInputRef.current?.click()}
+                                                    disabled={avatarUploading}
+                                                    className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-primary text-primary-foreground shadow hover:opacity-90 disabled:opacity-50"
+                                                    title={t('changeGroupPhoto')}
+                                                >
+                                                    <Camera className="w-4 h-4" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                     <h4 className="font-semibold text-text-primary text-base sm:text-lg mt-3">{group.name}</h4>
                                     {group.description && (
                                         <p className="text-sm text-text-secondary mt-1 text-center">{group.description}</p>
@@ -1108,13 +1197,22 @@ export default function GroupChat() {
                                         <ChevronRight className="w-4 h-4" />
                                     </ButtonType4Pill>
                                     {isOwner && (
-                                        <ButtonType4Pill
-                                            onClick={() => setShowDeleteModal(true)}
-                                            className="w-full flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg"
-                                        >
-                                            <p className="text-sm">{t('deleteGroup')}</p>
-                                            <ChevronRight className="w-4 h-4" />
-                                        </ButtonType4Pill>
+                                        <>
+                                            <ButtonType4Pill
+                                                onClick={() => setShowTransferModal(true)}
+                                                className="w-full flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg"
+                                            >
+                                                <p className="text-sm">{t('transferOwnership')}</p>
+                                                <ChevronRight className="w-4 h-4" />
+                                            </ButtonType4Pill>
+                                            <ButtonType4Pill
+                                                onClick={() => setShowDeleteModal(true)}
+                                                className="w-full flex justify-between items-center p-2 hover:bg-surface-hover rounded-lg"
+                                            >
+                                                <p className="text-sm">{t('deleteGroup')}</p>
+                                                <ChevronRight className="w-4 h-4" />
+                                            </ButtonType4Pill>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -1239,11 +1337,65 @@ export default function GroupChat() {
                 isLoading={isDeletingGroup}
             />
 
+            <Dialog open={showTransferModal} onOpenChange={setShowTransferModal}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{t('transferOwnership')}</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-sm text-text-secondary mb-4">{t('transferOwnershipDescription')}</p>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {groupMembers
+                            .filter((m) => m.userId !== currentUserId)
+                            .map((member) => (
+                                <div
+                                    key={member.userId}
+                                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-hover"
+                                >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <Avatar className="w-10 h-10 flex-shrink-0">
+                                            <AvatarImage src={member?.profile?.avatarUrl || undefined} alt="avatar" />
+                                            <AvatarFallback>U</AvatarFallback>
+                                        </Avatar>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium text-text-primary truncate">
+                                                {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
+                                            </p>
+                                            <p className="text-xs text-text-secondary capitalize">{member.role?.toLowerCase() ?? 'member'}</p>
+                                        </div>
+                                    </div>
+                                    <ButtonType2
+                                        className="text-xs px-3 py-1.5"
+                                        onClick={async () => {
+                                            if (!chat?.id) return;
+                                            try {
+                                                const { data } = await transferOwnership({
+                                                    variables: { input: { groupId: chat.id, newOwnerId: member.userId } },
+                                                });
+                                                if (data?.transferGroupOwnership?.success) {
+                                                    setShowTransferModal(false);
+                                                } else {
+                                                    toast.error(data?.transferGroupOwnership?.message ?? 'Failed to transfer ownership');
+                                                }
+                                            } catch (e) {
+                                                console.error(e);
+                                                toast.error('Failed to transfer ownership');
+                                            }
+                                        }}
+                                    >
+                                        {t('transferOwnership')}
+                                    </ButtonType2>
+                                </div>
+                            ))}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             {showEditModal && group && (
                 <EditGroupModal
                     isOpen={showEditModal}
                     onClose={() => setShowEditModal(false)}
                     onSave={handleEditGroup}
+                    onAvatarUpload={handleGroupAvatarUpload}
                     initialData={{
                         name: group.name,
                         description: group.description || '',
@@ -1274,6 +1426,21 @@ export default function GroupChat() {
                     onRemove={() => handleRemoveMember(selectedMember.userId)}
                     onUpdateRole={(role) => handleUpdateMemberRole(selectedMember.userId, role)}
                     isOwner={isOwner}
+                />
+            )}
+
+            {showAvatarCropper && avatarRawImage && (
+                <CircularImageCropper
+                    open={showAvatarCropper}
+                    src={avatarRawImage}
+                    onCancel={() => {
+                        handleAvatarCropCancel();
+                        resetGroupAvatarUpload();
+                    }}
+                    onConfirm={async (cropped) => {
+                        handleAvatarCropConfirm(cropped);
+                        await uploadGroupAvatar(cropped);
+                    }}
                 />
             )}
         </>

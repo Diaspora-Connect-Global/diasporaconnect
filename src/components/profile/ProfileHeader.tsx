@@ -4,6 +4,7 @@ import { ButtonType2 } from "@/components/custom/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tier, UserBadge } from "../custom/userBadge";
 import { PencilSimpleIcon, UsersThreeIcon } from "@phosphor-icons/react";
+import { Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import CustomDialog from "../custom/customDialog";
 import FriendListModal from "./FriendListModal";
@@ -25,6 +26,8 @@ interface ProfileHeaderProps {
   friendType?: FriendType;
   showFriendActions?: boolean;
   onEditAvatar?: () => void;
+  /** When true, shows a loader overlay on the avatar (e.g. while profile picture is uploading). */
+  avatarUploading?: boolean;
   connectionId: string;
   onConnectionAction?: () => void;
 }
@@ -36,6 +39,7 @@ export function ProfileHeader({
   userData,
   showFriendActions = false,
   onEditAvatar,
+  avatarUploading = false,
   onConnectionAction,
 }: ProfileHeaderProps) {
   const t = useTranslations('friends');
@@ -75,6 +79,14 @@ export function ProfileHeader({
               <AvatarImage src={userData?.avatarUrl || undefined} alt={userData?.avatarUrl || 'Profile'} />
               <AvatarFallback className="text-4xl">{initials}</AvatarFallback>
             </Avatar>
+            {avatarUploading && (
+              <div
+                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center ring-4 ring-background"
+                aria-hidden
+              >
+                <Loader2 className="w-10 h-10 text-white animate-spin" />
+              </div>
+            )}
 
             {/* Edit Icon (Bottom-Right, Overlap) */}
             {!showFriendActions && (

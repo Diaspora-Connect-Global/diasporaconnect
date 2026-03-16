@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from "react"
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop"
 import "react-image-crop/dist/ReactCrop.css"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { ButtonType2, ButtonType3 } from "@/components/custom/button"
 
 interface ImageCropperProps {
@@ -129,9 +129,9 @@ export function CircularImageCropper({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-auto z-[100]">
+      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-auto z-[100]" aria-describedby={undefined}>
+        <DialogTitle className="text-lg font-semibold">Crop Your Image</DialogTitle>
         <div className="flex flex-col gap-4 p-4">
-          <h2 className="text-lg font-semibold">Crop Your Image</h2>
           
           {/* ✅ Add container with proper constraints */}
           <div 

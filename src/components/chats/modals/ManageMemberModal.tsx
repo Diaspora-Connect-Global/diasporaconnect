@@ -128,7 +128,10 @@ export function ManageMemberModal({
                 {roleOptions?.map((option) => {
                   const Icon = option?.icon;
                   const isCurrentRole = member?.role === option?.role;
-                  const canAssign = isOwner || option?.role !== MemberRole?.ADMIN;
+                  const isTargetAdmin = member?.role === MemberRole.ADMIN || member?.role === MemberRole.OWNER;
+const canAssign = isOwner
+  ? true
+  : !isTargetAdmin && option?.role !== MemberRole.ADMIN;
 
                   return (
                     <ButtonType3

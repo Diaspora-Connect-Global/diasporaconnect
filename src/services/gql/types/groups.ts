@@ -268,6 +268,32 @@ export interface InviteToGroupInput {
   invitedUserId: string;
 }
 
+/**
+ * Input for directly adding a member to a group (OWNER/ADMIN only).
+ *
+ * @interface AddMemberInput
+ * @property {string} groupId - ID of the group
+ * @property {string} userId - ID of the user to add
+ * @property {MemberRole} [role] - Optional role: MEMBER | MODERATOR | ADMIN (default MEMBER)
+ */
+export interface AddMemberInput {
+  groupId: string;
+  userId: string;
+  role?: MemberRole;
+}
+
+/**
+ * Input for transferring group ownership (OWNER only). Previous owner becomes ADMIN.
+ *
+ * @interface TransferGroupOwnershipInput
+ * @property {string} groupId - ID of the group
+ * @property {string} newOwnerId - ID of the new owner
+ */
+export interface TransferGroupOwnershipInput {
+  groupId: string;
+  newOwnerId: string;
+}
+
 // ============================================================================
 // GROUP RESPONSE TYPES
 // ============================================================================
@@ -435,7 +461,7 @@ export interface UpdateMemberRoleResponse {
  * @interface RemoveMemberResponse
  */
 export interface RemoveMemberResponse {
-  removeMember: {
+  removeGroupMember: {
     success: boolean;
     message?: string;
   };
@@ -451,6 +477,33 @@ export interface InviteToGroupResponse {
     success: boolean;
     message?: string;
     invitation: GroupInvitation;
+  };
+}
+
+/**
+ * Response from adding a member to a group.
+ *
+ * @interface AddMemberResponse
+ */
+export interface AddMemberResponse {
+  addMember: {
+    success: boolean;
+    message?: string;
+    member?: { userId: string; role: MemberRole; status: string };
+  };
+}
+
+/**
+ * Response from transferring group ownership.
+ *
+ * @interface TransferGroupOwnershipResponse
+ */
+export interface TransferGroupOwnershipResponse {
+  transferGroupOwnership: {
+    success: boolean;
+    message?: string;
+    previousOwner?: { userId: string; role: string };
+    newOwner?: { userId: string; role: string };
   };
 }
 
