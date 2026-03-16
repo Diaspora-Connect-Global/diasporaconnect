@@ -166,10 +166,10 @@ export function EditGroupModal({
             </div>
             {croppedImage ? (
               <div className="flex gap-2">
-                <ButtonType3 onClick={() => resetImageUpload()} size="sm">
+                <ButtonType3 onClick={() => resetImageUpload()} className="text-xs px-3 py-1.5">
                   {t("cancel")}
                 </ButtonType3>
-                <ButtonType2 onClick={handleUsePhoto} disabled={uploading} size="sm">
+                <ButtonType2 onClick={handleUsePhoto} disabled={uploading} className="text-xs px-3 py-1.5">
                   {uploading ? t("saving") : t("useThisPhoto")}
                 </ButtonType2>
               </div>
