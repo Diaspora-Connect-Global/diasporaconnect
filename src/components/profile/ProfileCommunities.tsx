@@ -113,6 +113,7 @@ export default function ProfileCommunities({
                 width={40}
                 height={40}
                 className="w-full h-full object-cover"
+                unoptimized={!!(community.avatarUrl?.startsWith('http://') || community.avatarUrl?.startsWith('https://'))}
               />
             </div>
 

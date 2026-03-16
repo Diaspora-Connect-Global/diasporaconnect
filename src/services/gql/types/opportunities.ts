@@ -249,7 +249,7 @@ export interface ListOpportunitiesResponse {
 
 // GraphQL response types for use with useQuery/useMutation
 export interface GetOpportunityData {
-  opportunity: Opportunity | null;
+  getOpportunity: Opportunity | null;
 }
 
 export interface CreateOpportunityData {

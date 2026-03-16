@@ -404,6 +404,7 @@ function Avatar({ src, name, size = 'md', online }: AvatarProps) {
                         height={size === 'sm' ? 32 : size === 'md' ? 48 : 64}
                         className="w-full h-full object-cover"
                         onError={() => setImageError(true)}
+                        unoptimized
                     />
                 ) : (
                     <span className="font-medium text-text-primary">

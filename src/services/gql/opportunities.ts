@@ -20,7 +20,7 @@ import { gql } from '@apollo/client';
 
 export const GET_OPPORTUNITY = gql`
   query GetOpportunity($id: String!) {
-    opportunity(id: $id) {
+    getOpportunity(id: $id) {
       id
       ownerType
       ownerId

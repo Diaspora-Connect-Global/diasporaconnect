@@ -53,7 +53,7 @@ export default function OpportunityId() {
         () => listData?.opportunities?.opportunities ?? [],
         [listData?.opportunities?.opportunities]
     );
-    const singleOpportunity = singleData?.opportunity ?? null;
+    const singleOpportunity = singleData?.getOpportunity ?? null;
 
     useEffect(() => {
         setFilteredItems(items);
