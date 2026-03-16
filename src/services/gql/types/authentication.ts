@@ -120,7 +120,7 @@ export interface CompleteOAuthRegistrationInput {
   lastName: string;
   phone: string;
   country: string;
-  role: 'diaspora' | 'local';
+  role: 'diaspora' | 'local' | 'community_admin';
 }
 
 /**
@@ -280,4 +280,23 @@ export interface ResendRegistrationOtpResponse {
     verificationTtlSeconds: number;
     smsSent: boolean;
   };
+}
+
+// ============================================================================
+// OAUTH PHONE VERIFICATION (post completeOAuthRegistration)
+// ============================================================================
+
+/**
+ * Response from OAuth phone OTP verification.
+ * On success, backend sets session cookie; user is logged in.
+ */
+export interface VerifyOAuthPhoneOtpResponse {
+  verifyOAuthPhoneOtp: boolean | string;
+}
+
+/**
+ * Response from resending OAuth OTP (verifyOAuthPhone).
+ */
+export interface ResendOAuthOtpResponse {
+  verifyOAuthPhone: boolean;
 }

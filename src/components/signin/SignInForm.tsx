@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -34,8 +35,18 @@ export default function SignInForm() {
     const t = useTranslations('authentication');
     const a = useTranslations('actions');
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [loginUser, { loading }] = useMutation<LoginResponse>(LOGIN_USER);
+
+    // Show OAuth callback error (e.g. access_denied, oauth_failed) and clear from URL
+    useEffect(() => {
+        const error = searchParams.get('error');
+        if (error) {
+            toast.error(decodeURIComponent(error));
+            router.replace('/signin');
+        }
+    }, [searchParams, router]);
 
     // Zustand auth store actions
     const setTokens = useAuthStore((s) => s.setTokens);

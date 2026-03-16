@@ -7,6 +7,8 @@ export type {
   CompleteOAuthRegistrationInput,
   CompleteOAuthRegistrationResponse,
   VerifyOtpResponse,
+  VerifyOAuthPhoneOtpResponse,
+  ResendOAuthOtpResponse,
   CheckEmailAvailabilityResponse,
   CheckPhoneAvailabilityResponse,
   RefreshTokenResponse,
@@ -157,6 +159,36 @@ export const COMPLETE_OAUTH_REGISTRATION = gql`
         phoneNumber
       }
     }
+  }
+`;
+
+/**
+ * Verifies the OTP sent to phone during OAuth registration.
+ * On success, backend creates the user and sets the session cookie.
+ */
+export const VERIFY_OAUTH_PHONE_OTP = gql`
+  mutation VerifyOAuthPhoneOtp($oauthRegistrationToken: String!, $otp: String!) {
+    verifyOAuthPhoneOtp(
+      oauthRegistrationToken: $oauthRegistrationToken,
+      otp: $otp
+    )
+  }
+`;
+
+/**
+ * Resends OTP for in-progress OAuth registration (phone verification).
+ */
+export const RESEND_OAUTH_OTP = gql`
+  mutation ResendOAuthOtp(
+    $oauthRegistrationToken: String!,
+    $phone: String!,
+    $countryCode: String!
+  ) {
+    verifyOAuthPhone(
+      oauthRegistrationToken: $oauthRegistrationToken,
+      phone: $phone,
+      countryCode: $countryCode
+    )
   }
 `;
 

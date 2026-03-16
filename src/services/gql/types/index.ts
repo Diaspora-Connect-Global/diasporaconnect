@@ -44,3 +44,6 @@ export * from './users';
 export * from './work_experience';
 
 export * from './opportunities';
+
+// Vendor service types
+export * from './vendor';

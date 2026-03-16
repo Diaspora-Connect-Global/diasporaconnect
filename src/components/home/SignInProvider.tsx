@@ -18,9 +18,9 @@ const handleProviderClick = (provider: 'google' | 'facebook' | 'twitter') => {
     } else {
       // Redirect to OAuth endpoints
       const endpoints = {
-        google: 'https://api.diasporaconnectglobal.com/auth/oauth/google/start',
-        facebook: 'https://api.diasporaconnectglobal.com/auth/oauth/facebook/start',
-        twitter: 'https://api.diasporaconnectglobal.com/auth/oauth/twitter/start'
+        google: 'https://api.diaspoplug.net/auth/oauth/google/start',
+        facebook: 'https://api.diaspoplug.net/auth/oauth/facebook/start',
+        twitter: 'https://api.diaspoplug.net/auth/oauth/twitter/start'
       };
       window.location.href = endpoints[provider];
     }

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import LoadingScreen from '@/components/custom/LoadingScreen';
 import { useUserStore } from '@/store/useUserStore';
@@ -13,11 +14,38 @@ export default function OAuthCallbackPage() {
   const { setUser } = useUserStore();
 
   useEffect(() => {
+    const error = params.get('error');
+    const description = params.get('description');
+
+    // Error from backend (access_denied, oauth_failed, missing_code)
+    if (error) {
+      const message =
+        description ||
+        (error === 'access_denied'
+          ? 'You cancelled sign in.'
+          : error === 'oauth_failed'
+            ? 'Sign in failed. Please try again.'
+            : error === 'missing_code'
+              ? 'Sign in did not complete. Please try again.'
+              : 'Something went wrong.');
+      router.replace(`/signin?error=${encodeURIComponent(message)}`);
+      return;
+    }
+
     const success = params.get('success') === 'true';
 
-    // Failed OAuth
     if (!success) {
       router.replace('/signin');
+      return;
+    }
+
+    const requires2fa = params.get('requires2fa') === 'true';
+    const twoFaSessionToken = params.get('twoFaSessionToken');
+
+    // Existing user with 2FA enabled — show 2FA code entry
+    if (requires2fa && twoFaSessionToken) {
+      sessionStorage.setItem('twoFaSessionToken', twoFaSessionToken);
+      router.replace('/signin?oauth2fa=1');
       return;
     }
 
