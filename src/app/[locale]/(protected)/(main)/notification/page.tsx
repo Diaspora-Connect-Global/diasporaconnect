@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import {
   GET_NOTIFICATIONS_WITH_META,
+  GET_UNREAD_COUNT,
   MARK_NOTIFICATION_AS_READ,
   MARK_ALL_NOTIFICATIONS_AS_READ,
   getNotificationPath,
@@ -201,11 +202,13 @@ function NotificationRow({
   t,
   onMarkAsRead,
   onClick,
+  isReadOptimistic,
 }: {
   not: Notification;
   t: (key: string) => string;
   onMarkAsRead: () => void;
   onClick: () => void;
+  isReadOptimistic: boolean;
 }) {
   const displayTitle = getNotificationDisplayTitle(not, t);
   const data = not.data as { entityId?: string; entityType?: string } | undefined;
@@ -237,7 +240,7 @@ function NotificationRow({
       description={getNotificationDescription(not, t)}
       imageUrl={not.imageUrl}
       time={not.createdAt}
-      read={not.read ?? not.isRead}
+      read={(not.read ?? not.isRead) || isReadOptimistic}
       onMarkAsRead={onMarkAsRead}
       onClick={onClick}
     />
@@ -269,6 +272,7 @@ export default function NotificationPage() {
   const [offset, setOffset] = useState(0);
   const [accumulated, setAccumulated] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<NotificationFilter>('all');
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
   const { data, loading, error, refetch } = useQuery<GetNotificationsWithMetaResponse>(
     GET_NOTIFICATIONS_WITH_META,
@@ -277,9 +281,12 @@ export default function NotificationPage() {
     }
   );
 
-  const [markAsReadMutation] = useMutation<MarkNotificationAsReadResponse>(MARK_NOTIFICATION_AS_READ);
+  const [markAsReadMutation] = useMutation<MarkNotificationAsReadResponse>(MARK_NOTIFICATION_AS_READ, {
+    refetchQueries: [{ query: GET_UNREAD_COUNT }],
+  });
   const [markAllAsReadMutation] = useMutation<MarkAllNotificationsAsReadResponse>(
-    MARK_ALL_NOTIFICATIONS_AS_READ
+    MARK_ALL_NOTIFICATIONS_AS_READ,
+    { refetchQueries: [{ query: GET_UNREAD_COUNT }] }
   );
 
   const list = data?.getNotificationsWithMeta;
@@ -306,14 +313,26 @@ export default function NotificationPage() {
   }, [list, offset]);
 
   const handleNotificationClick = useCallback(
-    (notification: Notification) => {
+    async (notification: Notification) => {
       const id = notification.id;
       const path = getNotificationPath(notification);
       const target = `/${locale}${path}`;
 
-      // Optimistic: mark as read (fire-and-forget), then navigate
-      markAsReadMutation({ variables: { notificationId: id } }).then(() => refetchBadge());
-      refetch();
+      // Optimistic: show as read immediately
+      setReadIds((prev) => new Set(prev).add(id));
+
+      try {
+        await markAsReadMutation({ variables: { notificationId: id } });
+        await refetchBadge();
+        await refetch();
+      } catch (err) {
+        console.error('Error marking notification as read:', err);
+        setReadIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }
       router.push(target);
     },
     [locale, markAsReadMutation, refetchBadge, refetch, router]
@@ -323,7 +342,7 @@ export default function NotificationPage() {
     try {
       await markAllAsReadMutation();
       await refetch();
-      refetchBadge();
+      await refetchBadge();
     } catch (err) {
       console.error('Error marking all as read:', err);
     }
@@ -331,12 +350,18 @@ export default function NotificationPage() {
 
   const markSingleAsRead = useCallback(
     async (id: string) => {
+      setReadIds((prev) => new Set(prev).add(id));
       try {
         await markAsReadMutation({ variables: { notificationId: id } });
         await refetch();
-        refetchBadge();
+        await refetchBadge();
       } catch (err) {
         console.error('Error marking as read:', err);
+        setReadIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
       }
     },
     [markAsReadMutation, refetch, refetchBadge]
@@ -415,6 +440,7 @@ export default function NotificationPage() {
               t={t}
               onMarkAsRead={() => markSingleAsRead(not.id)}
               onClick={() => handleNotificationClick(not)}
+              isReadOptimistic={readIds.has(not.id)}
             />
           ))}
           {hasMore && (

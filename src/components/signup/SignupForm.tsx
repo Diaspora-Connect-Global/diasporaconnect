@@ -163,24 +163,6 @@ export default function SignUpForm() {
     }
   };
 
-  /**
-   * Handles OAuth provider click
-   * Redirects to backend OAuth endpoints
-   */
-  const handleProviderClick = (provider: 'google' | 'facebook' | 'twitter') => {
-    const endpoints = {
-      google: 'https://api.diasporaconnectglobal.com/auth/oauth/google/start',
-      facebook: 'https://api.diasporaconnectglobal.com/auth/oauth/facebook/start',
-      twitter: 'https://api.diasporaconnectglobal.com/auth/oauth/twitter/start'
-    };
-    
-    // Store current path for redirect after OAuth
-    sessionStorage.setItem('oauthRedirectPath', '/onboarding');
-    
-    // Redirect to OAuth provider
-    window.location.href = endpoints[provider];
-  };
-
   return (
     <div className="space-y-4 lg:space-y-8">
       <div>
@@ -249,7 +231,8 @@ export default function SignUpForm() {
       </div>
 
       <div>
-        <SignInProvider onProviderClick={handleProviderClick} />
+        {/* Same OAuth start URLs as sign-in (api.diaspoplug.net); callback → /callback then onboarding for new users */}
+        <SignInProvider />
       </div>
 
       <div className="flex items-center justify-center gap-2 lg:pt-4">
