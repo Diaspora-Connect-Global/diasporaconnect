@@ -448,6 +448,10 @@
         "removeNotificationTitle": "Benachrichtigung entfernen?",
         "removeNotificationConfirm": "Diese Benachrichtigung wird aus Ihrer Liste entfernt.",
         "markall": "Alle als gelesen markieren",
+        "loading": "Wird geladen…",
+        "loadMore": "Mehr laden",
+        "loadMoreLoading": "Wird geladen…",
+        "errorLoad": "Benachrichtigungen konnten nicht geladen werden.",
         "preference": "Benachrichtigungseinstellungen",
         "types": {
             "connection": {

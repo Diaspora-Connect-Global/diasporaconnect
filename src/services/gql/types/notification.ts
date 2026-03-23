@@ -7,8 +7,9 @@ export interface Notification {
   message: string;
   body: string; // alias for message
   data?: Record<string, unknown>; // contextual payload (postId, groupId, eventId, etc.)
-  read: boolean;
-  isRead: boolean; // alias for read
+  /** @deprecated Prefer isRead from API */
+  read?: boolean;
+  isRead: boolean;
   actionUrl?: string; // preferred navigation target
   link?: string; // alias for actionUrl
   imageUrl?: string;

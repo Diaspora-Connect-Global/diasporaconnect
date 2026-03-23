@@ -13,6 +13,15 @@ export type {
 
 import type { Notification } from './types/notification';
 
+function pickString(data: Record<string, unknown> | undefined, keys: string[]): string | undefined {
+  if (!data) return undefined;
+  for (const k of keys) {
+    const v = data[k];
+    if (typeof v === 'string' && v.trim()) return v.trim();
+  }
+  return undefined;
+}
+
 /* ------------------------------------------------------------------ */
 /* Queries */
 /* ------------------------------------------------------------------ */
@@ -29,7 +38,6 @@ export const GET_NOTIFICATIONS_WITH_META = gql`
         type
         title
         message
-        read
         isRead
         actionUrl
         link
@@ -107,19 +115,36 @@ export function getNotificationPath(notification: Pick<Notification, 'type' | 'd
   if (notification.actionUrl) return notification.actionUrl;
 
   const { type, data } = notification;
-  if (data?.postId) return `/post/${data.postId}`;
-  if (data?.groupId && data?.messageId)
-    return `/messages/group/${data.groupId}?message=${data.messageId}`;
-  if (data?.conversationId) return `/chat`; // or `/messages/${data.conversationId}` if you have that route
-  if (data?.eventId) return `/events/${data.eventId}`;
-  if (data?.connectionId) return `/connections/requests/${data.connectionId}`;
-  if (data?.entityId && data?.entityType) {
+  const d = data as Record<string, unknown> | undefined;
+
+  if (d?.postId) return `/post/${String(d.postId)}`;
+  if (d?.eventId) return `/events/${String(d.eventId)}`;
+
+  if (d?.groupId && d?.messageId) {
+    return '/chat';
+  }
+  if (d?.conversationId) return '/chat';
+
+  if (d?.connectionId) {
+    const peerId = pickString(d, [
+      'requesterId',
+      'senderId',
+      'actorId',
+      'userId',
+      'fromUserId',
+      'receiverId',
+    ]);
+    if (peerId) return `/${peerId}`;
+    return '/feed';
+  }
+
+  if (d?.entityId && d?.entityType) {
     const section =
-      (data.entityType as string).toLowerCase() === 'association' ? 'association' : 'community';
-    return `/${section}/${data.entityId}`;
+      String(d.entityType).toLowerCase() === 'association' ? 'association' : 'community';
+    return `/${section}/${String(d.entityId)}`;
   }
   if (type?.startsWith('profile.')) return '/profile';
-  if (type?.startsWith('connection.')) return '/connections';
+  if (type?.startsWith('connection.')) return '/feed';
   if (type?.startsWith('message.') || type?.startsWith('group.message.')) return '/chat';
   if (type?.startsWith('event.')) return '/events';
   if (type?.startsWith('membership.')) return '/community';

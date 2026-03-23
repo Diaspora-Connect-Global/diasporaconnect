@@ -4,7 +4,8 @@ import { NotificationCard } from '@/components/cards/notification/NotificationCa
 import { Check, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { NetworkStatus } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import {
   GET_NOTIFICATIONS_WITH_META,
@@ -19,7 +20,6 @@ import {
 } from '@/services/gql/notification';
 import { GET_ASSOCIATION } from '@/services/gql/associations';
 import { GET_COMMUNITY } from '@/services/gql/community';
-import { useNotificationBadge } from '@/hooks/useNotificationBadge';
 
 function getNotificationTypeLabel(type: string | undefined, t: (key: string) => string): string {
   if (!type) return t('types.default');
@@ -240,7 +240,7 @@ function NotificationRow({
       description={getNotificationDescription(not, t)}
       imageUrl={not.imageUrl}
       time={not.createdAt}
-      read={(not.read ?? not.isRead) || isReadOptimistic}
+      read={(not.isRead ?? not.read ?? false) || isReadOptimistic}
       onMarkAsRead={onMarkAsRead}
       onClick={onClick}
     />
@@ -267,17 +267,15 @@ export default function NotificationPage() {
   const router = useRouter();
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
-  const { refetch: refetchBadge } = useNotificationBadge(true);
 
-  const [offset, setOffset] = useState(0);
-  const [accumulated, setAccumulated] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
-  const { data, loading, error, refetch } = useQuery<GetNotificationsWithMetaResponse>(
+  const { data, error, fetchMore, networkStatus, refetch } = useQuery<GetNotificationsWithMetaResponse>(
     GET_NOTIFICATIONS_WITH_META,
     {
-      variables: { limit: PAGE_SIZE, offset },
+      variables: { limit: PAGE_SIZE, offset: 0 },
+      notifyOnNetworkStatusChange: true,
     }
   );
 
@@ -290,27 +288,47 @@ export default function NotificationPage() {
   );
 
   const list = data?.getNotificationsWithMeta;
-  const pageNotifications = list?.notifications ?? [];
+  const notifications = list?.notifications ?? [];
   const total = list?.total ?? 0;
   const unreadCount = list?.unreadCount ?? 0;
-  const hasMore = offset + pageNotifications.length < total;
+  const hasMore = notifications.length < total;
 
-  const filtered = filter === 'all' ? accumulated : accumulated.filter((n) => matchesFilter(n, filter));
+  const isInitialLoading = networkStatus === NetworkStatus.loading && !list;
+  const isFetchingMore = networkStatus === NetworkStatus.fetchMore;
+
+  const filtered =
+    filter === 'all' ? notifications : notifications.filter((n) => matchesFilter(n, filter));
   const emptyMessageKey =
     filter === 'all' ? 'none.all' : `none.${filter}` as 'none.all' | 'none.opportunities' | 'none.events' | 'none.associations' | 'none.communities';
 
-  useEffect(() => {
-    if (!list) return;
-    if (offset === 0) {
-      setAccumulated(list.notifications);
-    } else {
-      setAccumulated((prev) => {
-        const existingIds = new Set(prev.map((n) => n.id));
-        const toAdd = list.notifications.filter((n) => !existingIds.has(n.id));
-        return toAdd.length ? [...prev, ...toAdd] : prev;
-      });
-    }
-  }, [list, offset]);
+  const loadMore = useCallback(() => {
+    if (!hasMore || isFetchingMore) return;
+    void fetchMore({
+      variables: { offset: notifications.length },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult?.getNotificationsWithMeta) return prev;
+        if (!prev?.getNotificationsWithMeta) return fetchMoreResult;
+        const prevNotes = prev.getNotificationsWithMeta.notifications;
+        const nextNotes = fetchMoreResult.getNotificationsWithMeta.notifications;
+        const seen = new Set(prevNotes.map((n) => n.id));
+        const merged = [...prevNotes];
+        for (const n of nextNotes) {
+          if (!seen.has(n.id)) {
+            seen.add(n.id);
+            merged.push(n);
+          }
+        }
+        return {
+          getNotificationsWithMeta: {
+            ...fetchMoreResult.getNotificationsWithMeta,
+            notifications: merged,
+            total: fetchMoreResult.getNotificationsWithMeta.total,
+            unreadCount: fetchMoreResult.getNotificationsWithMeta.unreadCount,
+          },
+        };
+      },
+    });
+  }, [fetchMore, hasMore, isFetchingMore, notifications.length]);
 
   const handleNotificationClick = useCallback(
     async (notification: Notification) => {
@@ -318,13 +336,10 @@ export default function NotificationPage() {
       const path = getNotificationPath(notification);
       const target = `/${locale}${path}`;
 
-      // Optimistic: show as read immediately
       setReadIds((prev) => new Set(prev).add(id));
 
       try {
         await markAsReadMutation({ variables: { notificationId: id } });
-        await refetchBadge();
-        await refetch();
       } catch (err) {
         console.error('Error marking notification as read:', err);
         setReadIds((prev) => {
@@ -335,26 +350,24 @@ export default function NotificationPage() {
       }
       router.push(target);
     },
-    [locale, markAsReadMutation, refetchBadge, refetch, router]
+    [locale, markAsReadMutation, router]
   );
 
   const markAllAsRead = useCallback(async () => {
     try {
       await markAllAsReadMutation();
-      await refetch();
-      await refetchBadge();
+      setReadIds(new Set(notifications.map((n) => n.id)));
+      await refetch({ limit: PAGE_SIZE, offset: 0 });
     } catch (err) {
       console.error('Error marking all as read:', err);
     }
-  }, [markAllAsReadMutation, refetch, refetchBadge]);
+  }, [markAllAsReadMutation, notifications, refetch]);
 
   const markSingleAsRead = useCallback(
     async (id: string) => {
       setReadIds((prev) => new Set(prev).add(id));
       try {
         await markAsReadMutation({ variables: { notificationId: id } });
-        await refetch();
-        await refetchBadge();
       } catch (err) {
         console.error('Error marking as read:', err);
         setReadIds((prev) => {
@@ -364,12 +377,12 @@ export default function NotificationPage() {
         });
       }
     },
-    [markAsReadMutation, refetch, refetchBadge]
+    [markAsReadMutation]
   );
 
-  const loadMore = useCallback(() => {
-    setOffset((prev) => prev + PAGE_SIZE);
-  }, []);
+  const openNotificationSettings = useCallback(() => {
+    router.push(`/${locale}/settings`);
+  }, [locale, router]);
 
   return (
     <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4">
@@ -390,6 +403,7 @@ export default function NotificationPage() {
             <button
               type="button"
               className="flex items-center gap-2 text-text-brand hover:text-text-brand-dark transition-colors cursor-pointer"
+              onClick={openNotificationSettings}
             >
               <Settings size={16} />
               <span className="text-sm">{t('preference')}</span>
@@ -423,11 +437,11 @@ export default function NotificationPage() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="text-text-secondary font-medium">Loading...</div>
+      {isInitialLoading ? (
+        <div className="text-text-secondary font-medium">{t('loading')}</div>
       ) : error ? (
-        <div className="text-text-danger font-medium">Unable to load notifications.</div>
-      ) : accumulated.length === 0 ? (
+        <div className="text-text-danger font-medium">{t('errorLoad')}</div>
+      ) : notifications.length === 0 ? (
         <div className="text-text-secondary font-medium">{t('none.all')}</div>
       ) : filtered.length === 0 ? (
         <div className="text-text-secondary font-medium">{t(emptyMessageKey)}</div>
@@ -447,11 +461,11 @@ export default function NotificationPage() {
             <div className="flex justify-center py-4">
               <button
                 type="button"
-                className="text-text-brand text-sm hover:underline"
+                className="text-text-brand text-sm hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={loadMore}
-                disabled={loading}
+                disabled={isFetchingMore}
               >
-                {loading ? 'Loading...' : 'Load more'}
+                {isFetchingMore ? t('loadMoreLoading') : t('loadMore')}
               </button>
             </div>
           )}

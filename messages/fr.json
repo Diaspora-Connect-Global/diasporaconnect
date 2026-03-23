@@ -448,6 +448,10 @@
         "removeNotificationTitle": "Supprimer la notification ?",
         "removeNotificationConfirm": "Cette notification sera retirée de votre liste.",
         "markall": "Tout marquer comme lu",
+        "loading": "Chargement…",
+        "loadMore": "Charger plus",
+        "loadMoreLoading": "Chargement…",
+        "errorLoad": "Impossible de charger les notifications.",
         "preference": "Préférences de notifications",
         "types": {
             "connection": {

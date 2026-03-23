@@ -535,6 +535,10 @@
         "removeNotificationTitle": "Remove notification?",
         "removeNotificationConfirm": "This notification will be removed from your list.",
         "markall": "Mark all as read",
+        "loading": "Loading…",
+        "loadMore": "Load more",
+        "loadMoreLoading": "Loading…",
+        "errorLoad": "Unable to load notifications.",
         "preference": "Notifications preference",
         "types": {
             "connection": {
