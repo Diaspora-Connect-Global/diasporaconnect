@@ -82,8 +82,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         ? (otherUser.requester.userId === chat.id ? otherUser.requester : otherUser.receiver)
         : null;
     const displayName = otherProfile
-        ? [otherProfile.firstName, otherProfile.lastName].filter(Boolean).join(' ').trim() || chat.name || `User ${chat.id.substring(0, 8)}`
-        : (chat.name && chat.name !== chat.id ? chat.name : `User ${chat.id.substring(0, 8)}`);
+        ? [otherProfile.firstName, otherProfile.lastName].filter(Boolean).join(' ').trim() || chat.name || t('unknownUser')
+        : (chat.name && chat.name !== chat.id ? chat.name : t('unknownUser'));
     const otherAvatar = otherProfile?.avatarUrl ?? chat.avatar ?? '';
 
     // Initialize or retrieve conversation
@@ -208,21 +208,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
         const unsubMessage = messageService.onMessage((wsMessage) => {
             if (wsMessage.conversationId === conversationId) {
-                // Backend sends encryptedData via WebSocket (notification only)
-                // Actual decrypted content is fetched via GraphQL
-                console.log('📨 New message notification received:', wsMessage.messageId);
-                const apiMsg: ApiMessage = {
-                    id: wsMessage.messageId,
-                    conversationId: wsMessage.conversationId,
-                    senderId: wsMessage.senderId,
-                    type: (wsMessage.type?.toUpperCase() as ApiMessage['type']) || 'TEXT',
-                    content: '[Loading message...]',
-                    createdAt: wsMessage.timestamp,
-                    mentions: wsMessage.mentions,
-                    replyToId: wsMessage.replyToId,
-                    status: 'sent',
-                };
-                addApiMessage(apiMsg);
+                // New messages are already added globally by MessageWebSocketProvider.
+                // Here we only refresh this conversation's plaintext payload.
                 refetchMessages();
             }
         });
@@ -232,7 +219,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             unsubDisconnect();
             unsubMessage();
         };
-    }, [conversationId, addApiMessage, refetchMessages]);
+    }, [conversationId, refetchMessages]);
 
     // Typing indicator: subscribe to typing:start / typing:stop for the other participant
     useEffect(() => {
@@ -442,6 +429,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         if (conversationId) {
             clearApiMessages(conversationId);
         }
+        toast.success(t('conversationCleared') || 'Conversation cleared from this device.');
         setDeleteConversationModalOpen(false);
         onBack?.();
     };
@@ -725,9 +713,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 open={deleteConversationModalOpen}
                 onCancel={() => setDeleteConversationModalOpen(false)}
                 onConfirm={handleDeleteConversationConfirm}
-                title={t('deleteConversationConfirmTitle') || 'Delete this conversation?'}
-                description={t('deleteConversationConfirmDescription') || 'Messages will be removed from your view. This cannot be undone.'}
-                confirmText={t('deleteConversation') || tCommon('delete') || 'Delete'}
+                title={t('clearConversationConfirmTitle') || 'Clear this conversation on this device?'}
+                description={t('clearConversationConfirmDescription') || 'This only clears messages locally. It does not delete the server conversation.'}
+                confirmText={t('clearConversation') || 'Clear'}
                 confirmVariant="destructive"
             />
         </div>

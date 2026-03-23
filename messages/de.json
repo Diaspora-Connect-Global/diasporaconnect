@@ -1085,6 +1085,7 @@
     "direct": {
       "online": "Online",
       "lastSeen": "Zuletzt gesehen {time}",
+      "unknownUser": "Unbekannter Benutzer",
       "viewProfile": "Profil anzeigen",
       "report": "Melden",
       "block": "Blockieren",
@@ -1093,6 +1094,10 @@
       "deleteConversation": "Unterhaltung löschen",
       "deleteConversationConfirmTitle": "Diese Unterhaltung löschen?",
       "deleteConversationConfirmDescription": "Nachrichten werden aus Ihrer Ansicht entfernt. Dies kann nicht rückgängig gemacht werden.",
+      "clearConversation": "Unterhaltung leeren",
+      "clearConversationConfirmTitle": "Diese Unterhaltung auf diesem Gerät leeren?",
+      "clearConversationConfirmDescription": "Dadurch werden nur lokale Nachrichten gelöscht. Die Server-Unterhaltung wird nicht gelöscht.",
+      "conversationCleared": "Unterhaltung auf diesem Gerät geleert.",
       "typeMessage": "Nachricht eingeben...",
       "cannotSend": "Nachrichten können nicht gesendet werden...",
       "typing": "schreibt..."

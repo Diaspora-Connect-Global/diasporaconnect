@@ -86,7 +86,6 @@ export default function ChatSideBar() {
         }
 
         const apiConversations = conversationsData.getConversations;
-        console.log("Raw API Conversations:", apiConversations);
 
         const dmConversations = apiConversations
             .filter((conv: any) => {
@@ -96,7 +95,6 @@ export default function ChatSideBar() {
                     (conv.groupId == null || conv.groupId === '') &&
                     (conv.participantIds?.length === 2 || conv.participantCount === 2);
                 const isDirect = typeDirect || misclassifiedAsGroup;
-                console.log(`Checking conversation ${conv.id}: type=${conv.type}, isActive=${conv.isActive}, isDirect=${isDirect}`);
                 return isDirect && conv.isActive;
             })
             .sort((a: any, b: any) => {
@@ -111,8 +109,8 @@ export default function ChatSideBar() {
                 // Try to find full profile info from connections
                 const otherUserObj = connectionMap.get(otherParticipantId);
                 const displayName = otherUserObj
-                    ? [otherUserObj.firstName, otherUserObj.lastName].filter(Boolean).join(' ').trim() || `User ${otherParticipantId.substring(0, 8)}`
-                    : `User ${otherParticipantId.substring(0, 8)}`;
+                    ? [otherUserObj.firstName, otherUserObj.lastName].filter(Boolean).join(' ').trim() || t('unknownUser')
+                    : t('unknownUser');
                 const avatar = otherUserObj?.avatarUrl || '';
 
                 // Store the real conversation mapping so DirectMessageChat can look it up by chat.id
@@ -146,9 +144,6 @@ export default function ChatSideBar() {
 
         setDirectChats(dmConversations);
     }, [conversationsData, connectionsData, currentUserId, setRealConversation, t]);
-
-    console.log("=== ALL DIRECT MESSAGE CONVERSATION IDS ===", directChats.map(chat => chat.conversationId).filter(Boolean));
-    console.log("Raw API Conversations on Render:", conversationsData?.getConversations);
 
     const directUnreadCount = directChats.reduce((sum, chat) => sum + chat.unread, 0);
 
@@ -455,9 +450,6 @@ function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
             <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-text-primary truncate">{chat.name}</h3>
                 <p className="text-sm text-text-secondary truncate">{chat.lastMessage}</p>
-                {chat.conversationId && (
-                    <p className="text-[10px] text-text-tertiary truncate font-mono mt-0.5">ID: {chat.conversationId}</p>
-                )}
             </div>
             <div className="flex flex-col items-end space-y-1">
                 <span className={`text-xs ${chat.unread > 0 ? "text-text-brand" : "text-text-secondary"} whitespace-nowrap`}>

@@ -826,6 +826,7 @@
         "direct": {
             "online": "Online",
             "lastSeen": "Last seen {time}",
+            "unknownUser": "Unknown user",
             "viewProfile": "View profile",
             "report": "Report",
             "block": "Block",
@@ -834,6 +835,10 @@
             "deleteConversation": "Delete Conversation",
             "deleteConversationConfirmTitle": "Delete this conversation?",
             "deleteConversationConfirmDescription": "Messages will be removed from your view. This cannot be undone.",
+            "clearConversation": "Clear conversation",
+            "clearConversationConfirmTitle": "Clear this conversation on this device?",
+            "clearConversationConfirmDescription": "This only clears messages locally. It does not delete the server conversation.",
+            "conversationCleared": "Conversation cleared from this device.",
             "typeMessage": "Type a message...",
             "cannotSend": "Cannot send messages...",
             "typing": "is typing..."

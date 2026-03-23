@@ -1085,6 +1085,7 @@
     "direct": {
       "online": "En ligne",
       "lastSeen": "Dernière connexion {time}",
+      "unknownUser": "Utilisateur inconnu",
       "viewProfile": "Voir le profil",
       "report": "Signaler",
       "block": "Bloquer",
@@ -1093,6 +1094,10 @@
       "deleteConversation": "Supprimer la conversation",
       "deleteConversationConfirmTitle": "Supprimer cette conversation ?",
       "deleteConversationConfirmDescription": "Les messages seront retirés de votre vue. Cette action est irréversible.",
+      "clearConversation": "Effacer la conversation",
+      "clearConversationConfirmTitle": "Effacer cette conversation sur cet appareil ?",
+      "clearConversationConfirmDescription": "Cela efface seulement les messages localement. La conversation côté serveur n'est pas supprimée.",
+      "conversationCleared": "Conversation effacée de cet appareil.",
       "typeMessage": "Tapez un message...",
       "cannotSend": "Impossible d'envoyer des messages...",
       "typing": "est en train d'écrire..."

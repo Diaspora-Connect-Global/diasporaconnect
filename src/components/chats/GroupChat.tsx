@@ -34,7 +34,7 @@ import {
     MemberRole,
     GroupPrivacy
 } from "@/services/gql/groups";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { EditGroupModal } from "./modals/EditGroupModal";
 import { ManageMemberModal } from "./modals/ManageMemberModal";
 import { ConfirmationModal } from "../custom/confirmationModal";
@@ -43,7 +43,7 @@ import { AddMembersModal } from "./modals/AddMembersModal";
 import { Check, Loader2 } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
-import { messageService, Message as WSMessage, SendMessagePayload } from "@/services/websocket/messageService";
+import { messageService } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
 import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
@@ -82,7 +82,7 @@ export default function GroupChat() {
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
     const [typingUserIds, setTypingUserIds] = useState<Set<string>>(new Set());
 
-    const { messages, users, setActiveChat, addMessage, addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
+    const { activeChat, users, setActiveChat, addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
 
     const [conversationId, setConversationId] = useState<string | null>(null);
 
@@ -99,15 +99,9 @@ export default function GroupChat() {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
 
-    const chatData = sessionStorage.getItem('activeChat');
-    let chat: ChatInfo | null = null;
-
-    try {
-        chat = chatData ? JSON.parse(chatData) : null;
-    } catch (error) {
-        console.error('Failed to parse activeChat in GroupChat:', error);
-        sessionStorage.removeItem('activeChat');
-    }
+    const params = useParams<{ locale?: string }>();
+    const chat = activeChat?.type === 'group' ? (activeChat as ChatInfo) : null;
+    const localePrefix = params?.locale ? `/${params.locale}` : '';
 
     const { data: groupData, loading: loadingGroup, refetch: refetchGroup } = useQuery<GetGroupResponse>(GET_GROUP, {
         variables: { groupId: chat?.id || '' },
@@ -213,12 +207,10 @@ export default function GroupChat() {
             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }, [apiMessages, selectedMessage?.id]);
     const getReplyCount = useCallback((messageId: string) => apiMessages.filter((m) => m.replyToId === messageId).length, [apiMessages]);
-    const chatchosen = sessionStorage.getItem('activeChat');
-
     useEffect(() => {
         setRepliesSidebarOpen(false);
         setSidebarOpen(false);
-    }, [chatchosen]);
+    }, [activeChat?.id, activeChat?.type]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -364,24 +356,10 @@ export default function GroupChat() {
             setIsConnected(false);
         });
 
-        const unsubMessage = messageService.onMessage((wsMessage: WSMessage) => {
+        const unsubMessage = messageService.onMessage((wsMessage) => {
             if (wsMessage.conversationId === conversationId) {
-                // Backend sends encryptedData via WebSocket (notification only)
-                // Actual decrypted content should be fetched via GraphQL
-                console.log('📨 New message notification received:', wsMessage.messageId);
-
-                const apiMsg: ApiMessage = {
-                    id: wsMessage.messageId,
-                    conversationId: wsMessage.conversationId,
-                    senderId: wsMessage.senderId,
-                    type: (wsMessage.type?.toUpperCase() as ApiMessage['type']) || 'TEXT',
-                    content: '[Loading message...]',
-                    createdAt: wsMessage.timestamp,
-                    mentions: wsMessage.mentions,
-                    replyToId: wsMessage.replyToId,
-                    status: 'sent',
-                };
-                addApiMessage(apiMsg);
+                // New messages are already added globally by MessageWebSocketProvider.
+                // Here we only refresh this conversation's plaintext payload.
                 refetchMessages();
             }
         });
@@ -400,7 +378,7 @@ export default function GroupChat() {
             unsubMessage();
             unsubPresence();
         };
-    }, [conversationId, addApiMessage, refetchMessages]);
+    }, [conversationId, refetchMessages]);
 
     // Typing indicator: subscribe to typing:start / typing:stop (exclude current user)
     useEffect(() => {
@@ -719,7 +697,7 @@ export default function GroupChat() {
             if (data?.leaveGroup.success) {
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
-                router.push('/chat?t=groups');
+                router.push(`${localePrefix}/chat?t=groups`);
                 setShowLeaveModal(false);
             } else {
                 console.error('Failed to leave group:', data?.leaveGroup.message);
@@ -738,7 +716,7 @@ export default function GroupChat() {
             if (data?.deleteGroup.success) {
                 setActiveChat(null);
                 sessionStorage.removeItem('activeChat');
-                router.push('/chat?t=groups');
+                router.push(`${localePrefix}/chat?t=groups`);
                 setShowDeleteModal(false);
             } else {
                 console.error('Failed to delete group:', data?.deleteGroup.message);

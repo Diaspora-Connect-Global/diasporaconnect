@@ -1085,6 +1085,7 @@
     "direct": {
       "online": "Online",
       "lastSeen": "Ultimo accesso {time}",
+      "unknownUser": "Utente sconosciuto",
       "viewProfile": "Visualizza profilo",
       "report": "Segnala",
       "block": "Blocca",
@@ -1093,6 +1094,10 @@
       "deleteConversation": "Elimina conversazione",
       "deleteConversationConfirmTitle": "Eliminare questa conversazione?",
       "deleteConversationConfirmDescription": "I messaggi saranno rimossi dalla tua vista. Questa azione non può essere annullata.",
+      "clearConversation": "Svuota conversazione",
+      "clearConversationConfirmTitle": "Svuotare questa conversazione su questo dispositivo?",
+      "clearConversationConfirmDescription": "Questo rimuove solo i messaggi locali. La conversazione sul server non viene eliminata.",
+      "conversationCleared": "Conversazione rimossa da questo dispositivo.",
       "typeMessage": "Scrivi un messaggio...",
       "cannotSend": "Impossibile inviare messaggi...",
       "typing": "sta scrivendo..."
