@@ -59,6 +59,7 @@ export interface ProfileCompletion {
  * @property {string} [gender] - User's gender
  * @property {string} [dateOfBirth] - User's date of birth (ISO date string)
  * @property {number} connectionCount - Number of connections
+ * @property {number | null} [trustScore] - Reputation score (0-100), nullable when profile setup is incomplete
  * @property {number} version - Profile version for optimistic locking
  * @property {string} [verificationStatus] - User's verification status
  * @property {string} createdAt - ISO timestamp when profile was created
@@ -111,6 +112,7 @@ export interface Profile {
   gender?: string;
   dateOfBirth?: string;
   connectionCount: number;
+  trustScore?: number | null;
   version: number;
   verificationStatus?: string;
   createdAt: string;

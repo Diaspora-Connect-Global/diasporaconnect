@@ -51,6 +51,7 @@ export const GET_MY_PROFILE = gql`
         gender
         dateOfBirth
         connectionCount
+        trustScore
         version
         verificationStatus
         createdAt
@@ -90,6 +91,7 @@ export const GET_USER_PROFILE = gql`
         location
         bio
         avatarUrl
+        trustScore
         updatedAt
       }
     connectionStatus

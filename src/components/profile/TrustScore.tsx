@@ -6,12 +6,13 @@ import { useTranslations } from 'next-intl';
 
 interface TrustScoreProps {
 
-  trustScore: number;
+  trustScore?: number | null;
 
 }
 
 export function TrustScore({ trustScore }: TrustScoreProps) {
   const t = useTranslations('profile.trustScore');
+  const normalizedTrustScore = typeof trustScore === "number" ? trustScore : 0;
 
   return (
     <Card className="h-full p-0">
@@ -23,7 +24,7 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
 
             <div className="p-1">
               
-              <LevelGauge score={trustScore} />
+              <LevelGauge score={normalizedTrustScore} />
 
 
             </div>

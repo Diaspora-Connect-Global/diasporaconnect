@@ -87,7 +87,7 @@ const connectionId = data.getProfile.connectionId
 
                 <div className='mb-5'>
                     <TrustScore
-                        trustScore={2}
+                        trustScore={profile?.trustScore}
                     />
                 </div>
             </div>

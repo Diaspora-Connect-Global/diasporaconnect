@@ -7,7 +7,6 @@ import { PersonalDetails } from '@/components/profile/PersonalDetails';
 import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { KYCVerification } from '@/components/profile/KYCVerification';
 import { TrustScore } from '@/components/profile/TrustScore';
-import { DUMMY_USERS } from '@/data/users';
 import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
 import { toast } from "sonner";
@@ -133,8 +132,6 @@ export default function ProfilePage() {
         }
     }, [profile?.firstName, profile?.lastName, profile?.email, profile, setUser]);
 
-    const currentUser = DUMMY_USERS['me'];
-
     function handleVerifyKYC(): void {
         throw new Error('Function not implemented.');
     }
@@ -160,7 +157,7 @@ export default function ProfilePage() {
             <div className="lg:w-[50vw] order-1 lg:order-none space-y-2 flex flex-col">
                 <ProfileHeader
                     userId='me'
-                    friendType={currentUser.friendType}
+                    friendType="friends"
                     showFriendActions={false}
                     userData={profile}
                     connectionId={""}
@@ -212,7 +209,7 @@ export default function ProfilePage() {
 
                 <div className='min-h-0'>
                     <TrustScore
-                        trustScore={currentUser.trustScore}
+                        trustScore={profile?.trustScore}
                     />
                 </div>
             </div>
