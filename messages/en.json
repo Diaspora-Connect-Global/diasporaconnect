@@ -799,6 +799,7 @@
         "searchMessages": "Search messages",
         "directMessages": "Direct Messages",
         "groups": "Groups",
+        "unknownUser": "Unknown user",
         "createGroup": "Create Group",
         "noDirectMessages": "No direct messages found",
         "noGroups": "No groups found",

@@ -1058,6 +1058,7 @@
     "searchMessages": "Nachrichten suchen",
     "directMessages": "Direktnachrichten",
     "groups": "Gruppen",
+        "unknownUser": "Unbekannter Benutzer",
     "createGroup": "Gruppe erstellen",
     "noDirectMessages": "Keine Direktnachrichten gefunden",
     "noGroups": "Keine Gruppen gefunden",
