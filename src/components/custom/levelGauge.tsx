@@ -27,8 +27,9 @@ export function LevelGauge({
   label,
   size = 200,
 }: LevelGaugeProps): ReactNode {
+  const normalizedScore = Math.max(0, Math.min(score, 100));
   const currentTier = (Object.entries(tierLimits).find(
-    ([, limit]) => score <= limit
+    ([, limit]) => normalizedScore <= limit
   )?.[0] ?? 'elite') as Tier;
 
   // Geometry - adjusted stroke widths
@@ -44,7 +45,7 @@ export function LevelGauge({
   const circumference = (visibleDegrees / 360) * fullOuter;
   const innerCircumference = (visibleDegrees / 360) * fullInner;
 
-  const filled = Math.min(score, 100) / 100;
+  const filled = normalizedScore / 100;
   const dash = filled * innerCircumference;
 
   const startAngle = -180 - (gapDegrees / 2); 
@@ -102,7 +103,7 @@ export function LevelGauge({
         {/* Score & label - positioned absolutely in center */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <p className="text-5xl font-bold" style={{ color: tierColors[currentTier] }}>
-            {Math.round(score)}
+            {Math.round(normalizedScore)}
             <span className="text-2xl text-text-secondary">/100</span>
           </p>
           <p className="text-sm text-text-secondary mt-1">
