@@ -6,13 +6,15 @@ import { useTranslations } from 'next-intl';
 
 interface TrustScoreProps {
 
-  trustScore?: number | null;
+  trustScore?: number | string | null;
 
 }
 
 export function TrustScore({ trustScore }: TrustScoreProps) {
   const t = useTranslations('profile.trustScore');
-  const normalizedTrustScore = typeof trustScore === "number" ? trustScore : 0;
+  const parsedTrustScore = trustScore == null ? 0 : Number(trustScore);
+  const normalizedTrustScore = Number.isFinite(parsedTrustScore) ? parsedTrustScore : 0;
+  const showTrustBadges = normalizedTrustScore >= 10;
 
   return (
     <Card className="h-full p-0">
@@ -29,12 +31,14 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
 
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <UserBadge tier="starter" showLabel />
-              <UserBadge tier="trusted" showLabel />
-              <UserBadge tier="reliable" showLabel />
-              <UserBadge tier="elite" showLabel />
-            </div>
+            {showTrustBadges && (
+              <div className="grid grid-cols-2 gap-4">
+                <UserBadge tier="starter" showLabel />
+                <UserBadge tier="trusted" showLabel />
+                <UserBadge tier="reliable" showLabel />
+                <UserBadge tier="elite" showLabel />
+              </div>
+            )}
             <div className="bg-surface-info text-text-info flex p-2 space-x-2 rounded-md">
               <InfoIcon size={32} />
               <p>{t('description')}</p>

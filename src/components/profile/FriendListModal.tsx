@@ -22,6 +22,8 @@ import {
 } from "@/services/gql/connection";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
+import { resolveUserTier } from "@/lib/userTier";
+import type { Tier } from "@/components/custom/userBadge";
 
 interface Friend {
   userId: string;
@@ -29,7 +31,7 @@ interface Friend {
   name: string;
   imageSrc: string;
   mutualConnections?: number;
-  tier: "starter" | "trusted" | "reliable" | "elite";
+  tier?: Tier;
   connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
   tabType: FriendType;
   searchQuery?: string;
@@ -176,8 +178,12 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
   /* --------------------- Helper: Determine tier --------------------- */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getTierFromUser = (user: any): "starter" | "trusted" | "reliable" | "elite" => {
-    return "starter";
+  const getTierFromUser = (user: any): Tier | undefined => {
+    return resolveUserTier({
+      tier: user?.tier,
+      verificationTier: user?.verificationTier,
+      trustScore: user?.trustScore,
+    });
   };
 
   /* --------------------- Transform API data to Friend[] --------------------- */

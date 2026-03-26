@@ -7,6 +7,7 @@ import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { resolveUserTier } from '@/lib/userTier';
 
 export default function PostPage() {
   const params = useParams();
@@ -71,12 +72,13 @@ export default function PostPage() {
 
   const getProfileData = () => {
     const post = data?.post;
-    if (!post) return { name: 'Unknown', avatar: '/PROFILE.png', type: 'User' as const };
+    if (!post) return { name: 'Unknown', avatar: '/PROFILE.png', tier: undefined, type: 'User' as const };
 
     if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
       return {
         name: post.authorProfile.organizationProfile.name,
         avatar: '/default-avatar.png',
+        tier: undefined,
         type: 'Organization' as const,
       };
     }
@@ -84,10 +86,14 @@ export default function PostPage() {
       return {
         name: post.authorProfile.userProfile.name,
         avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+        tier: resolveUserTier({
+          tier: (post.authorProfile.userProfile as { tier?: string }).tier,
+          verificationTier: post.authorProfile.userProfile.verificationTier,
+        }),
         type: 'User' as const,
       };
     }
-    return { name: 'Unknown', avatar: '/PROFILE.png', type: 'User' as const };
+    return { name: 'Unknown', avatar: '/PROFILE.png', tier: undefined, type: 'User' as const };
   };
 
   const formatPostDate = (dateString: string) => {
@@ -150,6 +156,8 @@ export default function PostPage() {
           postId={post.id}
           profileImage={profileData.avatar}
           profileName={profileData.name}
+          authorUserId={post.authorType === 'USER' ? post.authorId : undefined}
+          profileTier={profileData.tier}
           category={profileData.type}
           postDate={formatPostDate(post.createdAt)}
           content={post.text}

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
-import { UserBadge } from "@/components/custom/userBadge";
+import { UserBadge, type Tier } from "@/components/custom/userBadge";
 import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
@@ -13,6 +13,8 @@ import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsDa
 import SharePostModal from '@/components/share/SharePostModal';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
+import { resolveUserTier } from '@/lib/userTier';
+import { useRouter } from '@/i18n/navigation';
 
 /** Video that only loads src when in viewport to save bandwidth. */
 function LazyVideo({ src, className }: { src: string; className?: string }) {
@@ -51,6 +53,8 @@ interface Comment {
     authorImage: string;
     /** Handle for @mentions (e.g. jsmith); use when building reply text so backend can link mentions. */
     authorHandle?: string;
+    authorId?: string;
+    authorType?: string;
     content: string;
     createdAt: string;
     likes: number;
@@ -58,12 +62,15 @@ interface Comment {
     replies?: number;
     parentId?: string | null;
     mentionMap?: MentionMap;
+    authorTier?: Tier;
 }
 
 interface FeedCardProps {
     postId: string;
     profileImage: string;
     profileName: string;
+    authorUserId?: string;
+    profileTier?: Tier;
     category: string;
     postDate: string;
     content: string;
@@ -104,6 +111,8 @@ function mapApiComment(c: ApiComment): Comment {
         author: authorName,
         authorImage: authorAvatar,
         authorHandle: c.authorHandle ?? selfMention?.handle,
+        authorId: c.authorId,
+        authorType: c.authorType,
         content: c.text,
         createdAt: c.createdAt,
         likes: c.likeCount ?? 0,
@@ -111,6 +120,11 @@ function mapApiComment(c: ApiComment): Comment {
         replies: c.replyCount,
         parentId: c.parentId ?? undefined,
         mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
+        authorTier: resolveUserTier({
+            tier: (c as { authorTier?: string })?.authorTier,
+            verificationTier: (c as { authorVerificationTier?: string })?.authorVerificationTier,
+            trustScore: (c as { authorTrustScore?: number })?.authorTrustScore,
+        }),
     };
 }
 
@@ -118,6 +132,8 @@ export default function FeedCardWithReply({
     postId,
     profileImage,
     profileName,
+    authorUserId,
+    profileTier,
     category,
     postDate,
     content,
@@ -137,6 +153,7 @@ export default function FeedCardWithReply({
     isSaved: initialIsSaved = false,
     isShared: initialIsShared = false,
 }: FeedCardProps) {
+    const router = useRouter();
     const [isLiked, setIsLiked] = useState(initialIsLiked);
     const [isSaved, setIsSaved] = useState(initialIsSaved);
     const [isShared, setIsShared] = useState(initialIsShared);
@@ -278,6 +295,17 @@ export default function FeedCardWithReply({
         if (willShow) loadComments();
     };
     const currentUserAvatar = useUserStore((s) => s.user?.avatarUrl) || '/PROFILE.png';
+    const currentUserId = useUserStore((s) => s.user?.userId);
+
+    const goToProfile = useCallback((userId?: string, authorType?: string) => {
+        if (!userId) return;
+        if (authorType && authorType.toUpperCase() !== 'USER') return;
+        if (currentUserId && userId === currentUserId) {
+            router.push('/profile');
+            return;
+        }
+        router.push(`/${userId}`);
+    }, [router, currentUserId]);
 
     const toggleCommentInput = () => {
         setShowCommentInput((v) => !v);
@@ -654,12 +682,18 @@ export default function FeedCardWithReply({
                                         height={32}
                                         loading="lazy"
                                         decoding="async"
-                                        className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
+                                        className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5 cursor-pointer"
+                                        onClick={() => goToProfile(c.authorId, c.authorType)}
                                     />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
-                                            <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
-                                            <UserBadge tier="starter" size="xs" />
+                                            <span
+                                                className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand"
+                                                onClick={() => goToProfile(c.authorId, c.authorType)}
+                                            >
+                                                {c.author}
+                                            </span>
+                                            {c.authorTier ? <UserBadge tier={c.authorTier} size="xs" /> : null}
                                             <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
                                             <span className="text-text-tertiary text-xs flex-shrink-0">
                                                 {formatDateProximity(c.createdAt)}
@@ -699,12 +733,18 @@ export default function FeedCardWithReply({
                                                     height={32}
                                                     loading="lazy"
                                                     decoding="async"
-                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
+                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5 cursor-pointer"
+                                                    onClick={() => goToProfile(reply.authorId, reply.authorType)}
                                                 />
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
-                                                        <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
-                                                        <UserBadge tier="starter" size="xs" />
+                                                        <span
+                                                            className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand"
+                                                            onClick={() => goToProfile(reply.authorId, reply.authorType)}
+                                                        >
+                                                            {reply.author}
+                                                        </span>
+                                                        {reply.authorTier ? <UserBadge tier={reply.authorTier} size="xs" /> : null}
                                                         <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
                                                         <span className="text-text-tertiary text-xs flex-shrink-0">
                                                             {formatDateProximity(reply.createdAt)}
@@ -754,11 +794,18 @@ export default function FeedCardWithReply({
                             height={40}
                             loading="lazy"
                             decoding="async"
-                            className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle flex-shrink-0"
+                            className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle flex-shrink-0 cursor-pointer"
+                            onClick={() => goToProfile(authorUserId, 'USER')}
                         />
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center">
-                                <h3 className="font-label-large text-text-primary truncate">{profileName}</h3>
+                                <h3
+                                    className="font-label-large text-text-primary truncate cursor-pointer hover:text-text-brand"
+                                    onClick={() => goToProfile(authorUserId, 'USER')}
+                                >
+                                    {profileName}
+                                </h3>
+                                {profileTier ? <UserBadge tier={profileTier} size="sm" className="ml-2" /> : null}
                                 {joinButton && <p className="ml-[0.5rem]">·</p>}
                                 {joinButton && (
                                     <button className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light text-text-brand hover:bg-brand cursor-pointer font-label-medium min-w-[3.75rem] ml-[0.1rem]">

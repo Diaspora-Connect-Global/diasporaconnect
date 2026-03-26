@@ -11,6 +11,7 @@ import FriendListModal from "./FriendListModal";
 import { useTranslations } from "next-intl";
 import { FriendType, TypeOfFriend } from "../friends/TypeOfFriend";
 import { Profile } from "@/services/gql/profile";
+import { mapTrustScoreToTier } from "@/lib/userTier";
 
 interface UserData {
   name: string;
@@ -45,6 +46,7 @@ export function ProfileHeader({
   const t = useTranslations('friends');
   const searchParams = useSearchParams();
   const router = useRouter();
+  const userTier = mapTrustScoreToTier(userData?.trustScore);
 
   const initials = userData?.firstName
     .split(' ')
@@ -115,7 +117,7 @@ export function ProfileHeader({
               <h1 className="text-text-primary heading-small line-clamp-2 break-words max-w-full">
                 {userData?.firstName} {userData?.middleName} {userData?.lastName}
               </h1>
-              {/* <UserBadge tier={userData.tier as Tier} size="md" /> */}
+              {userTier ? <UserBadge tier={userTier} size="sm" /> : null}
             </div>
             <div
               onClick={() => !showFriendActions && openFriendList()}

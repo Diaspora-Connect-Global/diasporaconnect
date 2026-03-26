@@ -15,7 +15,7 @@ interface FriendsCardProps {
     name: string;
     imageSrc: string;
     mutualConnections?: number;
-    tier: Tier;
+    tier?: Tier;
     connectionId: string;
 
     /** Current relationship status */
@@ -79,7 +79,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
     name,
     imageSrc ,
     mutualConnections,
-    tier = "starter",
+    tier,
     status,
     customButtons,
     customDropdownOptions,
@@ -155,7 +155,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
                                 <p className="whitespace-nowrap">
                                     {name?.trim()}
                                 </p>
-                                <UserBadge tier={tier} size="sm" />
+                                {tier ? <UserBadge tier={tier} size="sm" /> : null}
                             </span>
                         </div>
                     </div>

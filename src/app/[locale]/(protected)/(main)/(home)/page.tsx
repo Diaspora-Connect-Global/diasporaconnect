@@ -19,6 +19,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
+import { resolveUserTier } from '@/lib/userTier';
 
 // Type definitions for better type safety
 interface DiscoverCommunitiesData {
@@ -266,6 +267,7 @@ export default function Home() {
       return {
         name: post.authorProfile.organizationProfile.name,
         avatar: post.authorProfile.organizationProfile.logo || '/default-avatar.png',
+        tier: undefined,
         isVerified: post.authorProfile.organizationProfile.isVerified,
         isVip: false,
         type: 'Organization' as const
@@ -276,6 +278,10 @@ export default function Home() {
       return {
         name: post.authorProfile.userProfile.name,
         avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+        tier: resolveUserTier({
+          tier: (post.authorProfile.userProfile as { tier?: string }).tier,
+          verificationTier: post.authorProfile.userProfile.verificationTier,
+        }),
         isVerified: post.authorProfile.userProfile.verificationTier !== 'unverified' && 
                     post.authorProfile.userProfile.verificationTier !== 'NONE',
         isVip: post.authorProfile.userProfile.isVip,
@@ -287,6 +293,7 @@ export default function Home() {
     return {
       name: 'Unknown User',
       avatar: '/PROFILE.png',
+      tier: undefined,
       isVerified: false,
       isVip: false,
       type: 'User' as const
@@ -459,6 +466,8 @@ export default function Home() {
                   postId={post.id}
                   profileImage={profileData.avatar}
                   profileName={profileData.name}
+                    authorUserId={post.authorType === 'USER' ? post.authorId : undefined}
+                    profileTier={profileData.tier}
                   category={profileData.type}
                   postDate={formatPostDate(post.createdAt)}
                   content={post.text}

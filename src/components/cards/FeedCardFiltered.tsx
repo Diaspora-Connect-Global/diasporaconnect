@@ -7,7 +7,7 @@ import { ButtonType1, ButtonType3 } from '@/components/custom/button';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
-import { UserBadge } from '@/components/custom/userBadge';
+import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
@@ -16,6 +16,7 @@ import SharePostModal from '@/components/share/SharePostModal';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
 import { formatCount } from '@/macros/formatCount';
+import { resolveUserTier } from '@/lib/userTier';
 
 /* --------------------------------------------------------------- */
 interface Comment {
@@ -31,6 +32,7 @@ interface Comment {
     replies?: number;
     parentId?: string | null;
     mentionMap?: MentionMap;
+    authorTier?: Tier;
 }
 
 export interface FeedCardFilteredProps {
@@ -38,6 +40,7 @@ export interface FeedCardFilteredProps {
     postId?: string;
     profileImage: string;
     profileName: string;
+    profileTier?: Tier;
     category: string;
     postDate: string;
     content: string;
@@ -80,6 +83,11 @@ function mapApiComment(c: ApiComment): Comment {
         replies: c.replyCount,
         parentId: c.parentId ?? undefined,
         mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
+        authorTier: resolveUserTier({
+            tier: (c as { authorTier?: string }).authorTier,
+            verificationTier: (c as { authorVerificationTier?: string }).authorVerificationTier,
+            trustScore: (c as { authorTrustScore?: number }).authorTrustScore,
+        }),
     };
 }
 
@@ -89,6 +97,7 @@ export default function FeedCardFiltered({
     postId,
     profileImage,
     profileName,
+    profileTier,
     category,
     postDate,
     content,
@@ -463,7 +472,7 @@ export default function FeedCardFiltered({
                                                 className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                                             />
                                             <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
-                                            <UserBadge tier="starter" size="xs" />
+                                            {c.authorTier ? <UserBadge tier={c.authorTier} size="xs" /> : null}
                                             <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
                                             <span className="text-text-tertiary text-xs flex-shrink-0">
                                                 {formatDateProximity(c.createdAt)}
@@ -522,7 +531,7 @@ export default function FeedCardFiltered({
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
                                                             <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
-                                                            <UserBadge tier="starter" size="xs" />
+                                                            {reply.authorTier ? <UserBadge tier={reply.authorTier} size="xs" /> : null}
                                                             <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
                                                             <span className="text-text-tertiary text-xs flex-shrink-0">
                                                                 {formatDateProximity(reply.createdAt)}
@@ -574,6 +583,7 @@ export default function FeedCardFiltered({
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <h3 className="font-label-large text-text-primary truncate">{profileName}</h3>
+                            {profileTier ? <UserBadge tier={profileTier} size="sm" /> : null}
                             {joinButton && <span className="text-text-secondary">·</span>}
                             {joinButton && (
                                 <ButtonType1 className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light hover:bg-brand font-label-medium text-xs min-w-[3.75rem]">

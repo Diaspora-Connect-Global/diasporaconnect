@@ -11,12 +11,14 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ChevronLeft } from 'lucide-react';
+import { resolveUserTier } from '@/lib/userTier';
 
 function getProfileData(post: Post) {
   if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
     return {
       name: post.authorProfile.organizationProfile.name,
       avatar: post.authorProfile.organizationProfile.logo || '/default-avatar.png',
+      tier: undefined,
       type: 'Organization' as const,
     };
   }
@@ -24,10 +26,14 @@ function getProfileData(post: Post) {
     return {
       name: post.authorProfile.userProfile.name,
       avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+      tier: resolveUserTier({
+        tier: (post.authorProfile.userProfile as { tier?: string }).tier,
+        verificationTier: post.authorProfile.userProfile.verificationTier,
+      }),
       type: 'User' as const,
     };
   }
-  return { name: 'Unknown User', avatar: '/PROFILE.png', type: 'User' as const };
+  return { name: 'Unknown User', avatar: '/PROFILE.png', tier: undefined, type: 'User' as const };
 }
 
 function formatPostDate(dateString: string) {
@@ -171,6 +177,8 @@ export default function FeedPage() {
                     postId={post.id}
                     profileImage={profileData.avatar}
                     profileName={profileData.name}
+                    authorUserId={post.authorType === 'USER' ? post.authorId : undefined}
+                    profileTier={profileData.tier}
                     category={profileData.type}
                     postDate={formatPostDate(post.createdAt)}
                     content={post.text}
