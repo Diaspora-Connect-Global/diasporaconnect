@@ -129,6 +129,16 @@ export interface CancelConnectionInput {
   connectionId: string;
 }
 
+/**
+ * Input for removing an existing friend connection.
+ *
+ * @interface RemoveFriendInput
+ * @property {string} connectionId - ID of the accepted connection to remove
+ */
+export interface RemoveFriendInput {
+  connectionId: string;
+}
+
 // ============================================================================
 // CONNECTION RESPONSE TYPES
 // ============================================================================
@@ -213,6 +223,21 @@ export interface CancelConnectionResponse {
  */
 export interface RejectConnectionResponse {
   rejectConnection: {
+    success: boolean;
+    message?: string;
+  };
+}
+
+/**
+ * Response from removing an existing friend connection.
+ *
+ * @interface RemoveFriendResponse
+ * @property {Object} removeFriend - Mutation result
+ * @property {boolean} removeFriend.success - Whether friend removal was successful
+ * @property {string} [removeFriend.message] - Optional message
+ */
+export interface RemoveFriendResponse {
+  removeFriend: {
     success: boolean;
     message?: string;
   };

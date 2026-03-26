@@ -16,6 +16,8 @@ import {
     RejectConnectionResponse,
     CANCEL_CONNECTION,
     CancelConnectionResponse,
+    REMOVE_FRIEND,
+    RemoveFriendResponse,
 } from '@/services/gql/connection';
 import {
     BLOCK_USER,
@@ -116,6 +118,17 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
             refetchQueries: () => [
                 { query: GET_PENDING_REQUESTS_SENT },
                 ...buildRefetchQueries(),
+            ],
+            awaitRefetchQueries: true,
+        }
+    );
+
+    const [removeFriendMutation] = useMutation<RemoveFriendResponse>(
+        REMOVE_FRIEND,
+        {
+            refetchQueries: () => [
+                { query: GET_MY_CONNECTIONS },
+                ...buildRefetchQueries(true),
             ],
             awaitRefetchQueries: true,
         }
@@ -255,8 +268,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         setActionLoading(actionKey, true);
 
         try {
-            // Using rejectConnection to remove/delete the connection
-            const { data } = await rejectConnection({
+            const { data } = await removeFriendMutation({
                 variables: {
                     input: {
                         connectionId,
@@ -264,11 +276,11 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
                 },
             });
 
-            if (data?.rejectConnection.success) {
+            if (data?.removeFriend.success) {
                 toast.success(t('toasts.friendRemoved'));
                 onConnectionAction?.();
             } else {
-                toast.error(data?.rejectConnection.message || 'Failed to remove friend');
+                toast.error(data?.removeFriend.message || 'Failed to remove friend');
             }
         } catch (error) {
             console.error('Error removing friend:', error);
@@ -276,7 +288,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         } finally {
             setActionLoading(actionKey, false);
         }
-    }, [t, rejectConnection, onConnectionAction]);
+    }, [t, removeFriendMutation, onConnectionAction]);
 
     const blockFriend = useCallback(async (userId: string) => {
         const actionKey = `blockFriend-${userId}`;

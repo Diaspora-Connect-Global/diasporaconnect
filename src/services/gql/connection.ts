@@ -9,11 +9,13 @@ export type {
   AcceptConnectionInput,
   RejectConnectionInput,
   CancelConnectionInput,
+  RemoveFriendInput,
   GetConnectionsResponse,
   SendConnectionRequestResponse,
   AcceptConnectionResponse,
   CancelConnectionResponse,
   RejectConnectionResponse,
+  RemoveFriendResponse,
   GetPendingConnectionsResponse,
   GetMutualFriendsResponse,
   FriendSuggestionProfile,
@@ -308,6 +310,15 @@ export const REJECT_CONNECTION = gql`
 export const CANCEL_CONNECTION = gql`
   mutation CancelConnection($input: CancelConnectionInput!) {
     cancelConnection(input: $input) {
+      success
+      message
+    }
+  }
+`;
+
+export const REMOVE_FRIEND = gql`
+  mutation RemoveFriend($input: RemoveFriendInput!) {
+    removeFriend(input: $input) {
       success
       message
     }
