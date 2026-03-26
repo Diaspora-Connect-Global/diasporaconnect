@@ -466,7 +466,7 @@ export default function Home() {
                   postId={post.id}
                   profileImage={profileData.avatar}
                   profileName={profileData.name}
-                    authorUserId={post.authorType === 'USER' ? post.authorId : undefined}
+                    authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
                     profileTier={profileData.tier}
                   category={profileData.type}
                   postDate={formatPostDate(post.createdAt)}

@@ -275,7 +275,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 postId={post.id}
                 profileImage={profileData.avatar}
                 profileName={profileData.name}
-                authorUserId={post.authorType === 'USER' ? post.authorId : undefined}
+                authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
                 category={profileData.type}
                 postDate={formatPostDate(post.createdAt)}
                 content={post.text}
