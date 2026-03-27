@@ -1,11 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLazyQuery, useQuery } from "@apollo/client/react";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import { ButtonType3 } from "@/components/custom/button";
-import { products, services } from "./mockData";
+import {
+  GET_MARKETPLACE_SERVICE,
+  GET_PRODUCT,
+  SEARCH_MARKETPLACE_SERVICES,
+  SEARCH_PRODUCTS,
+} from "@/services/gql/marketplace";
+import type {
+  GetMarketplaceServiceResponse,
+  GetProductResponse,
+  SearchMarketplaceServicesResponse,
+  SearchProductsResponse,
+} from "@/services/gql/types/marketplace";
 import type { CartItem, MarketplaceTab, MarketplaceView, Product } from "./types";
 import { MarketplaceHeader } from "./MarketplaceHeader";
 import { ProductCard } from "./ProductCard";
@@ -15,6 +27,50 @@ import { ShoppingCartModal } from "./ShoppingCartModal";
 import { Checkout } from "./Checkout";
 import { OrderSuccess } from "./OrderSuccess";
 import { useMarketplacePayment } from "./payments/useMarketplacePayment";
+
+function toUiProductFromProductApi(item: {
+  id: string;
+  vendor_id: string;
+  title: string;
+  price: number;
+  images?: string[];
+  tags?: string[];
+}): Product {
+  return {
+    id: item.id,
+    name: item.title,
+    price: item.price,
+    rating: 5,
+    reviews: 0,
+    image: item.images?.[0] ?? "🛍️",
+    images: item.images ?? [],
+    seller: item.vendor_id,
+    category: item.tags?.[0] ?? "products",
+    isService: false,
+  };
+}
+
+function toUiProductFromServiceApi(item: {
+  id: string;
+  vendor_id: string;
+  title: string;
+  base_price: number;
+  tags?: string[];
+}): Product {
+  return {
+    id: item.id,
+    name: item.title,
+    price: item.base_price,
+    rating: 5,
+    reviews: 0,
+    image: "🧑‍💼",
+    images: [],
+    seller: item.vendor_id,
+    category: item.tags?.[0] ?? "services",
+    isService: true,
+    priceType: "fixed",
+  };
+}
 
 export default function MarketplaceContainer() {
   const t = useTranslations("marketplace");
@@ -26,16 +82,76 @@ export default function MarketplaceContainer() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [activeTab, setActiveTab] = useState<MarketplaceTab>("products");
+  const [searchValue, setSearchValue] = useState("");
   const [removeCartItemModalOpen, setRemoveCartItemModalOpen] = useState(false);
   const [cartItemIdToRemove, setCartItemIdToRemove] = useState<string | null>(null);
 
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    if (product.isService) {
-      setCurrentView("service");
-    } else {
-      setCurrentView("product");
+  const {
+    data: productsData,
+    loading: productsLoading,
+    refetch: refetchProducts,
+  } = useQuery<SearchProductsResponse>(SEARCH_PRODUCTS, {
+    variables: { input: { query: searchValue || undefined, page: 1, limit: 20 } },
+    skip: activeTab !== "products",
+    fetchPolicy: "cache-and-network",
+  });
+
+  const {
+    data: servicesData,
+    loading: servicesLoading,
+    refetch: refetchServices,
+  } = useQuery<SearchMarketplaceServicesResponse>(SEARCH_MARKETPLACE_SERVICES, {
+    variables: { input: { query: searchValue || undefined, page: 1, limit: 20 } },
+    skip: activeTab !== "services",
+    fetchPolicy: "cache-and-network",
+  });
+
+  const [fetchProduct] = useLazyQuery<GetProductResponse>(GET_PRODUCT);
+  const [fetchService] = useLazyQuery<GetMarketplaceServiceResponse>(GET_MARKETPLACE_SERVICE);
+
+  const listingItems = useMemo(() => {
+    if (activeTab === "products") {
+      return (productsData?.searchProducts.products ?? []).map(toUiProductFromProductApi);
     }
+    return (servicesData?.searchMarketplaceServices.services ?? []).map(
+      toUiProductFromServiceApi
+    );
+  }, [activeTab, productsData, servicesData]);
+
+  const handleProductClick = (product: Product) => {
+    const openWith = (item: Product) => {
+      setSelectedProduct(item);
+      if (item.isService) {
+        setCurrentView("service");
+      } else {
+        setCurrentView("product");
+      }
+    };
+
+    if (product.isService) {
+      fetchService({ variables: { service_id: product.id } })
+        .then((res) => {
+          const service = res.data?.getMarketplaceService.service;
+          if (!service) {
+            openWith(product);
+            return;
+          }
+          openWith(toUiProductFromServiceApi(service));
+        })
+        .catch(() => openWith(product));
+      return;
+    }
+
+    fetchProduct({ variables: { product_id: product.id } })
+      .then((res) => {
+        const fullProduct = res.data?.getProduct.product;
+        if (!fullProduct) {
+          openWith(product);
+          return;
+        }
+        openWith(toUiProductFromProductApi(fullProduct));
+      })
+      .catch(() => openWith(product));
   };
 
   const handleAddToCart = (item: Product | CartItem) => {
@@ -121,6 +237,14 @@ export default function MarketplaceContainer() {
     setSelectedProduct(null);
   };
 
+  const handleSearch = () => {
+    if (activeTab === "products") {
+      void refetchProducts({ input: { query: searchValue || undefined, page: 1, limit: 20 } });
+      return;
+    }
+    void refetchServices({ input: { query: searchValue || undefined, page: 1, limit: 20 } });
+  };
+
   return (
     <div className="h-app-inner flex flex-col px-[10%]">
       {currentView === "home" && (
@@ -130,6 +254,9 @@ export default function MarketplaceContainer() {
             onCartClick={() => setShowCart(true)}
             setActiveTab={setActiveTab}
             activeTab={activeTab}
+            searchValue={searchValue}
+            onSearchValueChange={setSearchValue}
+            onSearch={handleSearch}
           />
 
           <div className="flex-1 overflow-y-auto scrollbar-hide py-6">
@@ -155,12 +282,18 @@ export default function MarketplaceContainer() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                  {(activeTab === "products" ? products : services).map((item) => (
+                  {listingItems.map((item) => (
                     <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
                       <ProductCard product={item} onAddToCart={handleAddToCart} />
                     </div>
                   ))}
                 </div>
+                {((activeTab === "products" && productsLoading) ||
+                  (activeTab === "services" && servicesLoading)) && (
+                  <p className="mt-3 text-sm text-text-secondary">
+                    {t("loading")}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -191,7 +324,13 @@ export default function MarketplaceContainer() {
           cart={cart}
           onBack={() => setCurrentView("home")}
           isPaying={isPaying}
-          onPay={async ({ cart: c, method }) => pay({ kind: "cart", cart: c }, method)}
+          onPay={async ({ cart: c, method, shippingAddress }) =>
+            pay(
+              { kind: "cart", cart: c },
+              method,
+              `${shippingAddress.name}, ${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.country}, ${shippingAddress.phoneNumber}`
+            )
+          }
           onComplete={handleOrderComplete}
         />
       )}

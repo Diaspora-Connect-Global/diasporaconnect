@@ -1,6 +1,19 @@
 "use client";
 import React from "react";
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from "next/navigation";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { toast } from "sonner";
+import {
+  CREATE_PRODUCT,
+  GET_MY_VENDOR,
+  PUBLISH_PRODUCT,
+  REQUEST_UPLOAD_URL,
+} from "@/services/gql/vendor";
+import { uploadFileToVendorSignedUrl } from "@/lib/vendor-upload";
+import type { GetMyVendorResponse, RequestVendorUploadUrlResponse } from "@/services/gql/types/vendor";
+import { handleVendorError } from "@/lib/vendor-error-mapper";
+import VendorKycRequiredModal from "@/components/vendors/VendorKycRequiredModal";
 
 type FormDataType = {
   name: string;
@@ -21,6 +34,8 @@ export default function AddProductForm() {
   const t = useTranslations('vendors.products');
   const tForm = useTranslations('vendors.products.form');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const router = useRouter();
   
   const [formData, setFormData] = React.useState<FormDataType>({
     name: "",
@@ -36,6 +51,12 @@ export default function AddProductForm() {
   const [features, setFeatures] = React.useState<string[]>([]);
   const [newFeature, setNewFeature] = React.useState<string>("");
   const [sizes, setSizes] = React.useState<string[]>([]);
+  const [isKycModalOpen, setIsKycModalOpen] = React.useState(false);
+  const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
+  const vendorId = vendorData?.getMyVendor?.id;
+  const [requestUploadUrl] = useMutation<RequestVendorUploadUrlResponse>(REQUEST_UPLOAD_URL);
+  const [createProduct, { loading: creatingProduct }] = useMutation<{ createProduct: string }>(CREATE_PRODUCT);
+  const [publishProduct, { loading: publishingProduct }] = useMutation<{ publishProduct: boolean }>(PUBLISH_PRODUCT);
 
   const availableSizes = [
     { key: "Small", label: tForm('small') },
@@ -90,21 +111,68 @@ export default function AddProductForm() {
     );
   };
 
-  const handleSaveDraft = () => {
-    console.log("Saving as draft:", { ...formData, images, features, sizes });
-    alert(tForm('savedAsDraft'));
+  const uploadImagesAndGetReadUrls = async (): Promise<string[]> => {
+    if (!vendorId || images.length === 0) {
+      return [];
+    }
+
+    const uploaded: string[] = [];
+    for (const image of images) {
+      const { data } = await requestUploadUrl({
+        variables: {
+          vendorId,
+          fileName: image.file.name,
+          contentType: image.file.type || "image/jpeg",
+          fileType: "product",
+        },
+      });
+
+      const uploadPayload = data?.requestUploadUrl ?? data?.requestVendorUploadUrl;
+      if (!uploadPayload) {
+        throw new Error("Failed to request upload URL");
+      }
+
+      await uploadFileToVendorSignedUrl(uploadPayload.uploadUrl, image.file, image.file.type);
+      uploaded.push(uploadPayload.readUrl);
+    }
+
+    return uploaded;
   };
 
-  const handleSaveAndAddAnother = () => {
-    console.log("Saving and adding another:", {
-      ...formData,
-      images,
-      features,
-      sizes,
+  const createProductDraft = async (): Promise<string | null> => {
+    if (!vendorId) {
+      handleVendorError({
+        error: new Error("Vendor profile not found"),
+        locale,
+        router,
+      });
+      return null;
+    }
+    if (!formData.name.trim() || !formData.description.trim() || !formData.price || !formData.quantity) {
+      toast.error("Please complete required fields");
+      return null;
+    }
+
+    const imageUrls = await uploadImagesAndGetReadUrls();
+
+    const { data } = await createProduct({
+      variables: {
+        vendorId,
+        title: formData.name.trim(),
+        description: formData.description.trim(),
+        price: Number(formData.price),
+        currency: "GHS",
+        inventoryCount: Number(formData.quantity),
+        productType: "PHYSICAL",
+        images: imageUrls,
+        tags: [...features, ...sizes],
+      },
     });
 
-    alert(tForm('savedReadyAnother'));
+    return data?.createProduct ?? null;
+  };
 
+  const resetForm = () => {
     setFormData({
       name: "",
       description: "",
@@ -120,9 +188,51 @@ export default function AddProductForm() {
     setSizes([]);
   };
 
-  const handleSaveAndPreview = () => {
-    console.log("Saving and previewing:", { ...formData, images, features, sizes });
-    alert(tForm('savedAsDraft'));
+  const handleSaveDraft = async () => {
+    try {
+      const productId = await createProductDraft();
+      if (!productId) return;
+      toast.success(tForm('savedAsDraft'));
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+        openKycModal: () => setIsKycModalOpen(true),
+      });
+    }
+  };
+
+  const handleSaveAndAddAnother = async () => {
+    try {
+      const productId = await createProductDraft();
+      if (!productId) return;
+      toast.success(tForm('savedReadyAnother'));
+      resetForm();
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+        openKycModal: () => setIsKycModalOpen(true),
+      });
+    }
+  };
+
+  const handleSaveAndPreview = async () => {
+    try {
+      const productId = await createProductDraft();
+      if (!productId) return;
+      await publishProduct({ variables: { productId } });
+      toast.success("Product published");
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+        openKycModal: () => setIsKycModalOpen(true),
+      });
+    }
   };
 
   return (
@@ -342,7 +452,7 @@ export default function AddProductForm() {
         {/* Buttons */}
         <div className="flex justify-between pt-6 border-t">
           <button onClick={handleSaveDraft} className="border px-6 py-2 rounded-lg">
-            {tForm('saveToDraft')}
+            {(creatingProduct || publishingProduct) ? "Saving..." : tForm('saveToDraft')}
           </button>
 
           <div className="flex gap-3">
@@ -362,6 +472,10 @@ export default function AddProductForm() {
           </div>
         </div>
       </div>
+      <VendorKycRequiredModal
+        open={isKycModalOpen}
+        onClose={() => setIsKycModalOpen(false)}
+      />
     </div>
   );
 }

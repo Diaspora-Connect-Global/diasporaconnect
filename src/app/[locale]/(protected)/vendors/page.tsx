@@ -1,6 +1,12 @@
 "use client";
 import { ButtonType3 } from "@/components/custom/button";
-import React, { useState } from "react";
+import { GET_VENDOR_DASHBOARD, LIST_VENDOR_ORDERS } from "@/services/gql/vendor";
+import type {
+  GetVendorDashboardResponse,
+  ListVendorOrdersResponse,
+} from "@/services/gql/types/vendor";
+import { useQuery } from "@apollo/client/react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -8,43 +14,57 @@ export default function OverviewPage() {
   const t = useTranslations("vendors.orders");
   const router = useRouter();
   const locale = useLocale();
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { data: dashboardData, loading: dashboardLoading } =
+    useQuery<GetVendorDashboardResponse>(GET_VENDOR_DASHBOARD);
+  const { data: ordersData, loading: ordersLoading } = useQuery<ListVendorOrdersResponse>(
+    LIST_VENDOR_ORDERS,
+    { variables: { limit: 5, offset: 0 } }
+  );
 
-  const statsCards = [
+  const dashboard = dashboardData?.getVendorDashboard;
+  const orders = ordersData?.listVendorOrders.items ?? [];
+
+  const statsCards = dashboard
+    ? [
+        {
+          id: "sales",
+          title: "Sales",
+          value: `${dashboard.totalSales}`,
+          subtitle: "sales made",
+        },
+        {
+          id: "orders",
+          title: "Orders",
+          value: `${dashboard.completedOrders}`,
+          subtitle: "completed orders",
+        },
+        {
+          id: "earnings",
+          title: "Earnings",
+          value: `${dashboard.totalEarnings}`,
+          subtitle: "total earnings",
+        },
+      ]
+    : [
     {
       id: 'sales',
       title: 'Sales',
-      value: 'GH₵5000.00',
+      value: '0',
       subtitle: 'sales made',
-      hasDropdown: true
     },
     {
       id: 'orders',
       title: 'Orders',
-      value: '25',
-      subtitle: 'pending orders',
-      hasDropdown: false
+      value: '0',
+      subtitle: 'completed orders',
     },
     {
-      id: 'escrow',
-      title: 'Amount in Escrow',
-      value: 'GH₵1500.00',
-      subtitle: 'in escrow',
-      hasDropdown: false,
-      valueColor: 'text-tertiary'
+      id: 'earnings',
+      title: 'Earnings',
+      value: '0',
+      subtitle: 'total earnings',
     }
   ];
-
-  const orders = [
-    { id: "0001", date: "25 Nov 2025", customer: "John Doe", amount: "GH₵390.00", payment: "Paid" },
-    { id: "0002", date: "30 Nov 2025", customer: "Jane Smith", amount: "GH₵450.00", payment: "Paid" },
-    { id: "0003", date: "10 Dec 2025", customer: "Linda Brown", amount: "GH₵550.00", payment: "Paid" },
-  ];
-
-  const totalPages = Math.max(1, Math.ceil(orders.length / rowsPerPage));
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedOrders = orders.slice(startIndex, startIndex + rowsPerPage);
 
   const handleSeeAll = () => {
     router.push(`/${locale}/vendors/orders`);
@@ -60,15 +80,8 @@ export default function OverviewPage() {
           <div key={card.id} className="bg-surface-default rounded-xl border border-border-default p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-text-primary label-large">{card.title}</h3>
-              {card.hasDropdown && (
-                <select className="rounded-md py-1 bg-surface-subtle border border-border-subtle text-text-primary caption-medium">
-                  <option>All time</option>
-                  <option>Last 30 days</option>
-                  <option>Last 7 days</option>
-                </select>
-              )}
             </div>
-            <p className={`heading-small mb-1 ${card.valueColor ? "text-text-tertiary" : "text-text-primary"}`}>
+            <p className="heading-small mb-1 text-text-primary">
               {card.value}
             </p>
             <p className="label-large text-text-secondary">
@@ -115,13 +128,17 @@ export default function OverviewPage() {
               </tr>
             </thead>
             <tbody>
-              {paginatedOrders.length > 0 ? (
-                paginatedOrders.map((order) => (
+              {orders.length > 0 ? (
+                orders.map((order) => (
                   <tr key={order.id} className="border-t border-border-subtle hover:bg-surface-subtle transition-colors">
                     <td className="px-6 py-4 text-sm text-text-primary">{order.id}</td>
-                    <td className="px-6 py-4 text-sm text-text-primary">{order.date}</td>
-                    <td className="px-6 py-4 text-sm text-text-primary">{order.customer}</td>
-                    <td className="px-6 py-4 text-sm text-text-primary">{order.amount}</td>
+                    <td className="px-6 py-4 text-sm text-text-primary">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-primary">{order.buyerId}</td>
+                    <td className="px-6 py-4 text-sm text-text-primary">
+                      {order.currency} {order.totalAmount}
+                    </td>
                     <td className="px-6 py-4">
                       <ButtonType3
                         onClick={() => router.push(`/${locale}/vendors/orders/${order.id}`)}
@@ -135,52 +152,17 @@ export default function OverviewPage() {
               ) : (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-text-secondary">
-                    {t("noOrdersFound")}
+                    {ordersLoading ? "Loading orders..." : t("noOrdersFound")}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
-        <div className="flex justify-between items-center px-6 py-4 border-t border-border-subtle">
-          <div className="flex gap-2 items-center">
-            <span className="text-sm text-text-secondary">{t("rowsPerPage")}</span>
-            <select
-              value={rowsPerPage}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="border border-border-subtle bg-surface-default text-text-primary px-2 py-1 rounded text-sm"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-3">
-            <ButtonType3
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="px-2 py-1 border border-border-subtle rounded disabled:opacity-50"
-            >
-              {t("prev")}
-            </ButtonType3>
-            <span className="text-sm text-text-secondary">
-              {t("page", { current: currentPage, total: totalPages })}
-            </span>
-            <ButtonType3
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="px-2 py-1 border border-border-subtle rounded disabled:opacity-50"
-            >
-              {t("next")}
-            </ButtonType3>
-          </div>
-        </div>
       </div>
+      {dashboardLoading && (
+        <p className="text-sm text-text-secondary mt-4">Loading dashboard...</p>
+      )}
     </div>
   );
 }

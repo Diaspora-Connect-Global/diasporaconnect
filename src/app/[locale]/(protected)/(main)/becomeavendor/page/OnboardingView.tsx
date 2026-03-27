@@ -5,15 +5,24 @@ import Onboarding from '@/components/vendors/OnboardingVendor';
 import React, { useState } from 'react';
 import { Step1 } from '../steps/Step1';
 import { Step2 } from '../steps/Step2';
+import { useMutation } from '@apollo/client/react';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { useUserStore } from '@/store/useUserStore';
+import { toast } from 'sonner';
+import { CREATE_VENDOR } from '@/services/gql/vendor';
+import { handleVendorError } from '@/lib/vendor-error-mapper';
 
 
 export default function OnboardingView() {
+    const router = useRouter();
+    const locale = useLocale();
+    const currentUser = useUserStore((state) => state.user);
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<any>({
-        email: '',
-        password: '',
-        verificationCode: '',
+        communityType: '',
     });
+    const [createVendor, { loading: isSubmitting }] = useMutation<{ createVendor: string }>(CREATE_VENDOR);
 
 
 
@@ -29,6 +38,44 @@ export default function OnboardingView() {
         setCurrentStep(prev => Math.max(prev - 1, 1));
     };
 
+    const submitVendor = async () => {
+        if (!currentUser?.userId) {
+            toast.error('Unable to identify user. Please login again.');
+            return;
+        }
+
+        try {
+            const vendorType = formData.communityType === 'products' ? 'BUSINESS' : 'INDIVIDUAL';
+            const displayName = `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim() || 'Vendor';
+            const description =
+                formData.communityType === 'services'
+                    ? 'Service provider on DiasporaConnect'
+                    : 'Product seller on DiasporaConnect';
+
+            const { data } = await createVendor({
+                variables: {
+                    userId: currentUser.userId,
+                    vendorType,
+                    displayName,
+                    description,
+                },
+            });
+
+            if (!data?.createVendor) {
+                toast.error('Failed to create vendor profile');
+                return;
+            }
+
+            toast.success('Vendor profile created');
+            router.push(`/${locale}/vendors`);
+        } catch (error) {
+            handleVendorError({
+                error,
+                locale,
+                router,
+            });
+        }
+    };
 
     const renderStep = () => {
         switch (currentStep) {
@@ -56,6 +103,8 @@ export default function OnboardingView() {
                             updateData={updateFormData}
                             nextStep={nextStep}
                             prevStep={prevStep}
+                            onSubmit={submitVendor}
+                            isSubmitting={isSubmitting}
                         />
 
 

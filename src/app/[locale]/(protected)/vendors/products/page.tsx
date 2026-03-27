@@ -1,37 +1,93 @@
 "use client";
 import React from "react";
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from "next/navigation";
+import { useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
+import { toast } from "sonner";
+import { DELETE_PRODUCT, LIST_VENDOR_PRODUCTS, PUBLISH_PRODUCT } from "@/services/gql/vendor";
+import type { ListVendorProductsResponse } from "@/services/gql/types/vendor";
+import { handleVendorError } from "@/lib/vendor-error-mapper";
+import VendorKycRequiredModal from "@/components/vendors/VendorKycRequiredModal";
 
 export default function ProductsPage() {
   const t = useTranslations('vendors.products');
   const tCommon = useTranslations('common');
-  const [statusFilter, setStatusFilter] = React.useState('all');
+  const router = useRouter();
+  const locale = useLocale();
+  const [statusFilter, setStatusFilter] = React.useState<'all' | 'PUBLISHED' | 'DRAFT'>('all');
   const [categoryFilter, setCategoryFilter] = React.useState('all');
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [isKycModalOpen, setIsKycModalOpen] = React.useState(false);
+  const offset = (currentPage - 1) * rowsPerPage;
 
-  const products = [
-    {
-      id: 1,
-      name: "Men's leather shoe",
-      image: "👞",
-      inventory: 25,
-      category: "Men fashion",
-      price: "GH₵25.00",
-      status: "Draft"
+  const { data, loading } = useQuery<ListVendorProductsResponse>(LIST_VENDOR_PRODUCTS, {
+    variables: {
+      status: statusFilter === 'all' ? undefined : statusFilter,
+      limit: rowsPerPage,
+      offset,
     },
-    {
-      id: 2,
-      name: "Men's leather shoe",
-      image: "👞",
-      inventory: 1,
-      category: "Men fashion",
-      price: "GH₵28.00",
-      status: "Live"
+  });
+  const [publishProduct, { loading: publishing }] = useMutation<{ publishProduct: boolean }>(PUBLISH_PRODUCT);
+  const [deleteProduct, { loading: deleting }] = useMutation<{ deleteProduct: boolean }>(DELETE_PRODUCT);
+  const handlePublish = async (productId: string) => {
+    try {
+      await publishProduct({
+        variables: { productId },
+        refetchQueries: [
+          {
+            query: LIST_VENDOR_PRODUCTS,
+            variables: {
+              status: statusFilter === 'all' ? undefined : statusFilter,
+              limit: rowsPerPage,
+              offset,
+            },
+          },
+        ],
+      });
+      toast.success("Product published");
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+        openKycModal: () => setIsKycModalOpen(true),
+      });
     }
-  ];
+  };
+
+  const handleDelete = async (productId: string) => {
+    try {
+      await deleteProduct({
+        variables: { productId },
+        refetchQueries: [
+          {
+            query: LIST_VENDOR_PRODUCTS,
+            variables: {
+              status: statusFilter === 'all' ? undefined : statusFilter,
+              limit: rowsPerPage,
+              offset,
+            },
+          },
+        ],
+      });
+      toast.success("Product deleted");
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+      });
+    }
+  };
+
+  const products = data?.listVendorProducts.items ?? [];
+  const totalCount = data?.listVendorProducts.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
   const getLocalizedStatus = (status: string): string => {
-    return status === 'Live' ? t('live') : t('draft');
+    return status === 'PUBLISHED' ? t('live') : t('draft');
   };
 
   const getLocalizedCategory = (category: string): string => {
@@ -43,7 +99,10 @@ export default function ProductsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-text-primary">{t('title')}</h1>
-        <button className="bg-surface-brand text-text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2">
+        <button
+          onClick={() => router.push(`/${locale}/vendors/products/add-product`)}
+          className="bg-surface-brand text-text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+        >
           <span className="text-lg">+</span>
           {t('addProduct')}
         </button>
@@ -69,18 +128,18 @@ export default function ProductsPage() {
         </div>
 
         <button
-          onClick={() => setStatusFilter('live')}
+          onClick={() => setStatusFilter('PUBLISHED')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            statusFilter === 'live' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
+            statusFilter === 'PUBLISHED' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
           }`}
         >
           {t('live')}
         </button>
 
         <button
-          onClick={() => setStatusFilter('draft')}
+          onClick={() => setStatusFilter('DRAFT')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            statusFilter === 'draft' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
+            statusFilter === 'DRAFT' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
           }`}
         >
           {t('draft')}
@@ -130,17 +189,23 @@ export default function ProductsPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-surface-subtle rounded-lg flex items-center justify-center text-xl">
-                        {product.image}
+                        {product.images?.[0] ? (
+                          <img src={product.images[0]} alt={product.title} className="w-10 h-10 rounded-lg object-cover" />
+                        ) : (
+                          "📦"
+                        )}
                       </div>
-                      <span className="text-sm text-text-primary">{product.name}</span>
+                      <span className="text-sm text-text-primary">{product.title}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">{product.inventory}</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">{getLocalizedCategory(product.category)}</td>
-                  <td className="px-6 py-4 text-sm text-text-primary">{product.price}</td>
+                  <td className="px-6 py-4 text-sm text-text-secondary">{product.inventoryCount}</td>
+                  <td className="px-6 py-4 text-sm text-text-secondary">
+                    {getLocalizedCategory('Men fashion')}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-text-primary">{product.currency} {product.price}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                      product.status === 'Live' 
+                      product.status === 'PUBLISHED' 
                         ? 'bg-surface-success text-text-success' 
                         : 'bg-surface-subtle text-text-secondary'
                     }`}>
@@ -155,10 +220,33 @@ export default function ProductsPage() {
                       <button className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline">
                         {t('edit')}
                       </button>
+                      {product.status !== 'PUBLISHED' && (
+                        <button
+                          onClick={() => handlePublish(product.id)}
+                          disabled={publishing}
+                          className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline disabled:opacity-50"
+                        >
+                          Publish
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        disabled={deleting}
+                        className="text-sm text-text-danger font-medium hover:opacity-80 hover:underline disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
+              {!loading && products.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
+                    {t('noProductsFound')}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -169,7 +257,10 @@ export default function ProductsPage() {
             <span className="text-sm text-text-secondary">{t('rowsPerPage')}</span>
             <select
               value={rowsPerPage}
-              onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
               className="px-2 py-1 border border-border-subtle rounded text-sm bg-surface-default focus:outline-none focus:ring-2 focus:ring-border-brand"
             >
               <option value={10}>10</option>
@@ -179,14 +270,24 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-text-secondary">{t('page', { current: 1, total: 10 })}</span>
+            <span className="text-sm text-text-secondary">{t('page', { current: currentPage, total: totalPages })}</span>
             <div className="flex items-center gap-1">
-              <button className="p-1 hover:bg-surface-subtle rounded transition-colors disabled:opacity-50" disabled aria-label={tCommon('previousPage')}>
+              <button
+                className="p-1 hover:bg-surface-subtle rounded transition-colors disabled:opacity-50"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                aria-label={tCommon('previousPage')}
+              >
                 <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="p-1 hover:bg-surface-subtle rounded transition-colors" aria-label={tCommon('nextPage')}>
+              <button
+                className="p-1 hover:bg-surface-subtle rounded transition-colors disabled:opacity-50"
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                aria-label={tCommon('nextPage')}
+              >
                 <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -195,6 +296,10 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
+      <VendorKycRequiredModal
+        open={isKycModalOpen}
+        onClose={() => setIsKycModalOpen(false)}
+      />
     </div>
   );
 }

@@ -58,16 +58,18 @@ export default PdfUpload;
 interface Step2Props {
     data?: any;
     updateData: (data: Partial<any>) => void;
-    nextStep: () => void; 
+    nextStep: () => void;
     prevStep: () => void;
+    onSubmit?: () => void;
+    isSubmitting?: boolean;
 }
 
-export const Step2: React.FC<Step2Props> = ({ data, nextStep, prevStep }) => {
+export const Step2: React.FC<Step2Props> = ({ nextStep, prevStep, onSubmit, isSubmitting = false }) => {
     const t = useTranslations('passwordReset');
     const tActions = useTranslations('actions');
 
 
-    const isNextDisabled = false; // Add your validation logic here
+    const isNextDisabled = isSubmitting;
 
     return (
         <MultiStep
@@ -79,7 +81,13 @@ export const Step2: React.FC<Step2Props> = ({ data, nextStep, prevStep }) => {
             nextButtonText={tActions('submit')}
             showBackButton={true}
             showSkipButton={false}
-            onNext={() => nextStep()}
+            onNext={() => {
+                if (onSubmit) {
+                    onSubmit();
+                    return;
+                }
+                nextStep();
+            }}
             onBack={() => prevStep()}
             showStepLabel={false}
         >

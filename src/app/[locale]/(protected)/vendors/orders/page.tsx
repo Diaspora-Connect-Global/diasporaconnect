@@ -1,37 +1,45 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslations } from 'next-intl';
 import { ButtonType3 } from '@/components/custom/button';
-
-type DeliveryStatus = "Delivered" | "Pending" | "Processing" | "In transit";
+import { useQuery } from "@apollo/client/react";
+import { LIST_VENDOR_ORDERS } from "@/services/gql/vendor";
+import type { ListVendorOrdersResponse, OrderStatus } from "@/services/gql/types/vendor";
 
 interface Order {
   id: string;
   date: string;
   customer: string;
   amount: string;
-  delivery: DeliveryStatus;
+  delivery: OrderStatus;
   action: string;
 }
 
 export default function OrdersPage() {
   const t = useTranslations('vendors.orders');
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [timeFilter] = useState<string>("all");
   const [deliveryFilter, setDeliveryFilter] = useState<string>("all");
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const offset = (currentPage - 1) * rowsPerPage;
+  const { data, loading } = useQuery<ListVendorOrdersResponse>(LIST_VENDOR_ORDERS, {
+    variables: {
+      status: deliveryFilter === "all" ? undefined : deliveryFilter,
+      limit: rowsPerPage,
+      offset,
+    },
+  });
 
-  const getLocalizedStatus = (status: DeliveryStatus): string => {
+  const getLocalizedStatus = (status: OrderStatus): string => {
     switch (status) {
-      case "Delivered":
+      case "DELIVERED":
         return t('delivered');
-      case "Pending":
+      case "CREATED":
         return t('pending');
-      case "Processing":
-        return t('processing');
-      case "In transit":
+      case "SHIPPED":
         return t('inTransit');
+      case "REFUNDED":
+        return t('refunded');
       default:
         return status;
     }
@@ -50,59 +58,29 @@ export default function OrdersPage() {
     }
   };
 
-  const allOrders: Order[] = [
-    {
-      id: "0001",
-      date: "25 Nov 2025",
-      customer: "John Doe",
-      amount: "GH₵390.00",
-      delivery: "Delivered",
-      action: "View order",
-    },
-    {
-      id: "0002",
-      date: "26 Nov 2025",
-      customer: "Jane Smith",
-      amount: "GH₵220.00",
-      delivery: "Pending",
-      action: "Process order",
-    },
-    {
-      id: "0003",
-      date: "27 Nov 2025",
-      customer: "Mike Brown",
-      amount: "GH₵150.00",
-      delivery: "Processing",
-      action: "Track order",
-    },
-    {
-      id: "0004",
-      date: "28 Nov 2025",
-      customer: "Sarah White",
-      amount: "GH₵510.00",
-      delivery: "In transit",
-      action: "Track order",
-    },
-    {
-      id: "0005",
-      date: "29 Nov 2025",
-      customer: "David King",
-      amount: "GH₵99.00",
-      delivery: "Delivered",
-      action: "View order",
-    },
-  ];
+  const allOrders: Order[] = useMemo(
+    () =>
+      (data?.listVendorOrders.items ?? []).map((order) => ({
+        id: order.id,
+        date: new Date(order.createdAt).toLocaleDateString(),
+        customer: order.buyerId,
+        amount: `${order.currency} ${order.totalAmount}`,
+        delivery: order.status,
+        action: "View order",
+      })),
+    [data]
+  );
 
-  const getDeliveryStatusColor = (status: DeliveryStatus): string => {
+  const getDeliveryStatusColor = (status: OrderStatus): string => {
     switch (status) {
-      case "Delivered":
+      case "DELIVERED":
         return "text-text-success";
-      case "Pending":
+      case "CREATED":
         return "text-text-warning";
-      case "Processing":
-        return "text-text-tertiary";
-      case "In transit":
+      case "SHIPPED":
         return "text-text-brand";
+      case "REFUNDED":
+        return "text-text-tertiary";
       default:
         return "text-text-secondary";
     }
@@ -116,19 +94,14 @@ export default function OrdersPage() {
 
       const matchesDelivery =
         deliveryFilter === "all" ||
-        order.delivery.toLowerCase() === deliveryFilter.toLowerCase();
+        order.delivery === deliveryFilter;
 
       return matchesSearch && matchesDelivery;
     });
   }, [allOrders, searchQuery, deliveryFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / rowsPerPage));
-  const startIndex = (currentPage - 1) * rowsPerPage;
-
-  const paginatedOrders = filteredOrders.slice(
-    startIndex,
-    startIndex + rowsPerPage
-  );
+  const totalCount = data?.listVendorOrders.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
   return (
     <div className="p-8">
@@ -173,10 +146,10 @@ export default function OrdersPage() {
           aria-label={t('deliveryStatus')}
         >
           <option value="all">{t('deliveryStatus')}</option>
-          <option value="delivered">{t('delivered')}</option>
-          <option value="pending">{t('pending')}</option>
-          <option value="processing">{t('processing')}</option>
-          <option value="in transit">{t('inTransit')}</option>
+          <option value="DELIVERED">{t('delivered')}</option>
+          <option value="CREATED">{t('pending')}</option>
+          <option value="SHIPPED">{t('inTransit')}</option>
+          <option value="REFUNDED">{t('refunded')}</option>
         </select>
       </div>
 
@@ -207,8 +180,8 @@ export default function OrdersPage() {
           </thead>
 
           <tbody>
-            {paginatedOrders.length > 0 ? (
-              paginatedOrders.map((order) => (
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
                 <tr key={order.id} className="border-t border-border-subtle hover:bg-surface-subtle">
                   <td className="px-6 py-4">{order.id}</td>
                   <td className="px-6 py-4">{order.date}</td>
@@ -233,7 +206,7 @@ export default function OrdersPage() {
             ) : (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
-                  {t('noOrdersFound')}
+                  {loading ? "Loading orders..." : t('noOrdersFound')}
                 </td>
               </tr>
             )}

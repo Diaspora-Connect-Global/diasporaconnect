@@ -1,37 +1,69 @@
 "use client";
 import React from "react";
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useQuery } from "@apollo/client/react";
+import { useMutation } from "@apollo/client/react";
+import { toast } from "sonner";
+import { LIST_VENDOR_SERVICE_PACKAGES, PUBLISH_SERVICE_PACKAGE } from "@/services/gql/vendor";
+import type { ListVendorServicePackagesResponse } from "@/services/gql/types/vendor";
+import { handleVendorError } from "@/lib/vendor-error-mapper";
+import VendorKycRequiredModal from "@/components/vendors/VendorKycRequiredModal";
 
 export default function ServicesPage() {
   const t = useTranslations('vendors.services');
   const tCommon = useTranslations('common');
-  const [statusFilter, setStatusFilter] = React.useState('all');
+  const locale = useLocale();
+  const router = useRouter();
+  const [statusFilter, setStatusFilter] = React.useState<'all' | 'PUBLISHED' | 'DRAFT'>('all');
   const [categoryFilter, setCategoryFilter] = React.useState('all');
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const products = [
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [isKycModalOpen, setIsKycModalOpen] = React.useState(false);
+  const offset = (currentPage - 1) * rowsPerPage;
+  const { data, loading } = useQuery<ListVendorServicePackagesResponse>(
+    LIST_VENDOR_SERVICE_PACKAGES,
     {
-      id: 1,
-      name: "Men's leather shoe",
-      image: "👞",
-      inventory: 25,
-      category: "Men fashion",
-      price: "GH₵25.00",
-      status: "Draft"
-    },
-    {
-      id: 2,
-      name: "Men's leather shoe",
-      image: "👞",
-      inventory: 1,
-      category: "Men fashion",
-      price: "GH₵28.00",
-      status: "Live"
+      variables: {
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        limit: rowsPerPage,
+        offset,
+      },
     }
-  ];
+  );
+  const [publishServicePackage, { loading: publishing }] = useMutation<{ publishServicePackage: boolean }>(PUBLISH_SERVICE_PACKAGE);
+  const handlePublish = async (packageId: string) => {
+    try {
+      await publishServicePackage({
+        variables: { packageId },
+        refetchQueries: [
+          {
+            query: LIST_VENDOR_SERVICE_PACKAGES,
+            variables: {
+              status: statusFilter === 'all' ? undefined : statusFilter,
+              limit: rowsPerPage,
+              offset,
+            },
+          },
+        ],
+      });
+      toast.success("Service package published");
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+        openKycModal: () => setIsKycModalOpen(true),
+      });
+    }
+  };
+
+  const services = data?.listVendorServicePackages.items ?? [];
+  const totalCount = data?.listVendorServicePackages.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
   const getLocalizedStatus = (status: string): string => {
-    return status === 'Live' ? t('live') : t('draft');
+    return status === 'PUBLISHED' ? t('live') : t('draft');
   };
 
   const getLocalizedCategory = (category: string): string => {
@@ -43,7 +75,10 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-text-primary">{t('title')}</h1>
-        <button className="bg-surface-brand text-text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2">
+        <button
+          onClick={() => router.push(`/${locale}/vendors/services/add`)}
+          className="bg-surface-brand text-text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+        >
           <span className="text-lg">+</span>
           {t('addService')}
         </button>
@@ -69,18 +104,18 @@ export default function ServicesPage() {
         </div>
 
         <button
-          onClick={() => setStatusFilter('live')}
+          onClick={() => setStatusFilter('PUBLISHED')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            statusFilter === 'live' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
+            statusFilter === 'PUBLISHED' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
           }`}
         >
           {t('live')}
         </button>
 
         <button
-          onClick={() => setStatusFilter('draft')}
+          onClick={() => setStatusFilter('DRAFT')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            statusFilter === 'draft' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
+            statusFilter === 'DRAFT' ? 'bg-surface-disabled text-text-primary' : 'bg-surface-subtle text-text-secondary hover:bg-surface-disabled'
           }`}
         >
           {t('draft')}
@@ -125,26 +160,26 @@ export default function ServicesPage() {
               </tr>
             </thead>
             <tbody className="bg-surface-default divide-y divide-border-subtle">
-              {products.map((Service) => (
-                <tr key={Service.id} className="hover:bg-surface-subtle transition-colors">
+              {services.map((service) => (
+                <tr key={service.id} className="hover:bg-surface-subtle transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-surface-subtle rounded-lg flex items-center justify-center text-xl">
-                        {Service.image}
+                        🧰
                       </div>
-                      <span className="text-sm text-text-primary">{Service.name}</span>
+                      <span className="text-sm text-text-primary">{service.title}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">{Service.inventory}</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">{getLocalizedCategory(Service.category)}</td>
-                  <td className="px-6 py-4 text-sm text-text-primary">{Service.price}</td>
+                  <td className="px-6 py-4 text-sm text-text-secondary">{service.milestones?.length ?? 0}</td>
+                  <td className="px-6 py-4 text-sm text-text-secondary">{getLocalizedCategory('Men fashion')}</td>
+                  <td className="px-6 py-4 text-sm text-text-primary">{service.currency} {service.basePrice}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                      Service.status === 'Live' 
+                      service.status === 'PUBLISHED' 
                         ? 'bg-surface-success text-text-success' 
                         : 'bg-surface-subtle text-text-secondary'
                     }`}>
-                      {getLocalizedStatus(Service.status)}
+                      {getLocalizedStatus(service.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -155,10 +190,26 @@ export default function ServicesPage() {
                       <button className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline">
                         {t('edit')}
                       </button>
+                      {service.status !== 'PUBLISHED' && (
+                        <button
+                          onClick={() => handlePublish(service.id)}
+                          disabled={publishing}
+                          className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline disabled:opacity-50"
+                        >
+                          Publish
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
+              {!loading && services.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
+                    No services found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -169,7 +220,10 @@ export default function ServicesPage() {
             <span className="text-sm text-text-secondary">{t('rowsPerPage')}</span>
             <select
               value={rowsPerPage}
-              onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
               className="px-2 py-1 border border-border-subtle rounded text-sm bg-surface-default focus:outline-none focus:ring-2 focus:ring-border-brand"
             >
               <option value={10}>10</option>
@@ -179,14 +233,24 @@ export default function ServicesPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-text-secondary">{t('page', { current: 1, total: 10 })}</span>
+            <span className="text-sm text-text-secondary">{t('page', { current: currentPage, total: totalPages })}</span>
             <div className="flex items-center gap-1">
-              <button className="p-1 hover:bg-surface-subtle rounded transition-colors disabled:opacity-50" disabled aria-label={tCommon('previousPage')}>
+              <button
+                className="p-1 hover:bg-surface-subtle rounded transition-colors disabled:opacity-50"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                aria-label={tCommon('previousPage')}
+              >
                 <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <button className="p-1 hover:bg-surface-subtle rounded transition-colors" aria-label={tCommon('nextPage')}>
+              <button
+                className="p-1 hover:bg-surface-subtle rounded transition-colors disabled:opacity-50"
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                aria-label={tCommon('nextPage')}
+              >
                 <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -195,6 +259,10 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
+      <VendorKycRequiredModal
+        open={isKycModalOpen}
+        onClose={() => setIsKycModalOpen(false)}
+      />
     </div>
   );
 }

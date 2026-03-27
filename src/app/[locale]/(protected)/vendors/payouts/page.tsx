@@ -1,7 +1,14 @@
 "use client";
 import React, { useState } from 'react';
 import { Search, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery } from '@apollo/client/react';
+import { toast } from 'sonner';
+import { GET_MY_VENDOR, GET_VENDOR_ELIGIBILITY, REQUEST_PAYOUT } from '@/services/gql/vendor';
+import type { GetMyVendorResponse, GetVendorEligibilityResponse } from '@/services/gql/types/vendor';
+import { handleVendorError } from '@/lib/vendor-error-mapper';
+import VendorKycRequiredModal from '@/components/vendors/VendorKycRequiredModal';
 
 interface Transaction {
   id: string;
@@ -11,12 +18,37 @@ interface Transaction {
   amount: string;
 }
 
+const DEFAULT_KYC_MANDATORY_PAYOUT_THRESHOLD = 10000;
+const parsedThreshold = Number.parseFloat(
+  process.env.NEXT_PUBLIC_KYC_MANDATORY_PAYOUT_THRESHOLD ?? ""
+);
+const KYC_MANDATORY_PAYOUT_THRESHOLD =
+  Number.isFinite(parsedThreshold) && parsedThreshold > 0
+    ? parsedThreshold
+    : DEFAULT_KYC_MANDATORY_PAYOUT_THRESHOLD;
+
 const PayoutsDashboard = () => {
   const t = useTranslations('vendors.payouts');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [payoutAmount, setPayoutAmount] = useState('');
+  const [currency, setCurrency] = useState('GHS');
+  const [isKycModalOpen, setIsKycModalOpen] = useState(false);
+  const [isKycMandatory, setIsKycMandatory] = useState(true);
+  const [pendingPayout, setPendingPayout] = useState<{
+    vendorId: string;
+    amount: number;
+    currency: string;
+  } | null>(null);
+  const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
+  const { data: eligibilityData } = useQuery<GetVendorEligibilityResponse>(GET_VENDOR_ELIGIBILITY);
+  const [requestPayout, { loading: requestingPayout }] = useMutation<{ requestPayout: string }>(REQUEST_PAYOUT);
+  const canReceivePayout = eligibilityData?.getVendorEligibility?.canReceivePayout ?? false;
+  const eligibilityStatus = eligibilityData?.getVendorEligibility?.status;
 
   const transactions: Transaction[] = [
     { id: '1', transactionId: '0001', date: '25 Nov 2025', type: 'Withdrawal', amount: 'GH₵390.00' },
@@ -30,6 +62,68 @@ const PayoutsDashboard = () => {
 
   const totalPages = 10;
 
+  const executePayout = async (vendorId: string, amount: number, payoutCurrency: string) => {
+    const { data } = await requestPayout({
+      variables: {
+        vendorId,
+        amount,
+        currency: payoutCurrency,
+      },
+    });
+    if (!data?.requestPayout) {
+      toast.error('Failed to request payout');
+      return;
+    }
+    toast.success(`Payout requested: ${data.requestPayout}`);
+    setPayoutAmount('');
+  };
+
+  const submitPayout = async () => {
+    const vendorId = vendorData?.getMyVendor?.id;
+    const amount = Number.parseFloat(payoutAmount);
+    if (!vendorId) {
+      handleVendorError({
+        error: new Error('Vendor profile not found'),
+        locale,
+        router,
+      });
+      return;
+    }
+    const isHugeTransaction = amount >= KYC_MANDATORY_PAYOUT_THRESHOLD;
+
+    if (!canReceivePayout && isHugeTransaction) {
+      setIsKycMandatory(true);
+      setIsKycModalOpen(true);
+      return;
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error('Enter a valid payout amount');
+      return;
+    }
+
+    try {
+      if (!canReceivePayout) {
+        setPendingPayout({
+          vendorId,
+          amount,
+          currency,
+        });
+        setIsKycMandatory(false);
+        setIsKycModalOpen(true);
+        return;
+      }
+
+      await executePayout(vendorId, amount, currency);
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+        openKycModal: () => setIsKycModalOpen(true),
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen  p-6">
       <div className="max-w-7xl mx-auto">
@@ -42,9 +136,37 @@ const PayoutsDashboard = () => {
           <div className="bg-surface-default rounded-2xl p-6 shadow-sm border border-border-subtle">
             <p className="text-sm text-text-secondary mb-2">{t('walletBalance')}</p>
             <p className="text-4xl font-bold text-text-primary mb-4">GH₵0.00</p>
-            <button className="bg-surface-brand text-text-white hover:opacity-90 px-6 py-2.5 rounded-full font-medium transition-colors">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <input
+                value={payoutAmount}
+                onChange={(e) => setPayoutAmount(e.target.value)}
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Amount"
+                className="px-3 py-2 border border-border-subtle rounded-lg"
+              />
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="px-3 py-2 border border-border-subtle rounded-lg"
+              >
+                <option value="GHS">GHS</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+            <button
+              onClick={submitPayout}
+              disabled={requestingPayout}
+              className="bg-surface-brand text-text-white hover:opacity-90 px-6 py-2.5 rounded-full font-medium transition-colors disabled:opacity-50"
+            >
               {t('withdraw')}
             </button>
+            {!canReceivePayout && (
+              <p className="text-xs text-text-warning mt-2">
+                KYC is recommended. It becomes mandatory for payouts above {currency} {KYC_MANDATORY_PAYOUT_THRESHOLD.toLocaleString()}. Status: {eligibilityStatus ?? 'UNKNOWN'}
+              </p>
+            )}
           </div>
 
           {/* Escrow Account Card */}
@@ -157,6 +279,34 @@ const PayoutsDashboard = () => {
           </div>
         </div>
       </div>
+      <VendorKycRequiredModal
+        open={isKycModalOpen}
+        mandatory={isKycMandatory}
+        onContinueWithoutKyc={async () => {
+          const payload = pendingPayout;
+          if (!payload) {
+            setIsKycModalOpen(false);
+            return;
+          }
+          try {
+            await executePayout(payload.vendorId, payload.amount, payload.currency);
+          } catch (error) {
+            handleVendorError({
+              error,
+              locale,
+              router,
+              openKycModal: () => setIsKycModalOpen(true),
+            });
+          } finally {
+            setPendingPayout(null);
+            setIsKycModalOpen(false);
+          }
+        }}
+        onClose={() => {
+          setPendingPayout(null);
+          setIsKycModalOpen(false);
+        }}
+      />
     </div>
   );
 };

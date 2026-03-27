@@ -236,11 +236,13 @@ export const LIST_VENDOR_ORDERS = gql`
 /** Create vendor profile. Auth: Yes. vendorType: "INDIVIDUAL" | "BUSINESS". Returns vendorId. */
 export const CREATE_VENDOR = gql`
   mutation CreateVendor(
+    $userId: String!
     $vendorType: String!
     $displayName: String!
     $description: String!
   ) {
     createVendor(
+      userId: $userId
       vendorType: $vendorType
       displayName: $displayName
       description: $description
@@ -248,15 +250,15 @@ export const CREATE_VENDOR = gql`
   }
 `;
 
-/** Get signed GCS upload URL. Auth: Yes. fileType: "product" | "logo" | "download". */
-export const REQUEST_VENDOR_UPLOAD_URL = gql`
-  mutation RequestVendorUploadUrl(
+/** Get signed upload URL. Auth: Yes. fileType: "product" | "logo" | "download". */
+export const REQUEST_UPLOAD_URL = gql`
+  mutation RequestUploadUrl(
     $vendorId: String!
     $fileName: String!
     $contentType: String!
     $fileType: String!
   ) {
-    requestVendorUploadUrl(
+    requestUploadUrl(
       vendorId: $vendorId
       fileName: $fileName
       contentType: $contentType
@@ -268,6 +270,9 @@ export const REQUEST_VENDOR_UPLOAD_URL = gql`
     }
   }
 `;
+
+// Backward-compatible alias for older callers.
+export const REQUEST_VENDOR_UPLOAD_URL = REQUEST_UPLOAD_URL;
 
 /** Create product (status DRAFT). Auth: Yes. productType: "PHYSICAL" | "DIGITAL". Returns productId. */
 export const CREATE_PRODUCT = gql`

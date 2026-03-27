@@ -737,7 +737,7 @@
   "marketplace": {
     "title": "Marktplatz",
     "cart": "Warenkorb",
-    "searchPlaceholder": "Produkte und Personen suchen...",
+    "searchPlaceholder": "Produkte und Dienstleistungen suchen...",
     "removeCartItemTitle": "Artikel aus dem Warenkorb entfernen?",
     "removeCartItemConfirm": "Dieser Artikel wird aus Ihrem Warenkorb entfernt.",
     "products": "Produkte",
@@ -812,6 +812,7 @@
     "doneOrder": "Bestellung abschließen",
     "scrollLeft": "Nach links scrollen",
     "scrollRight": "Nach rechts scrollen",
+    "loading": "Wird geladen...",
     "countries": {
       "ghana": "Ghana",
       "nigeria": "Nigeria",

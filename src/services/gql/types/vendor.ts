@@ -210,5 +210,6 @@ export interface ListVendorOrdersResponse {
 // ============================================================================
 
 export interface RequestVendorUploadUrlResponse {
-  requestVendorUploadUrl: UploadUrlDTO;
+  requestUploadUrl?: UploadUrlDTO;
+  requestVendorUploadUrl?: UploadUrlDTO;
 }

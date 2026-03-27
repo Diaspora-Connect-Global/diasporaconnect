@@ -47,3 +47,6 @@ export * from './opportunities';
 
 // Vendor service types
 export * from './vendor';
+
+// Marketplace service types (buyer/user)
+export * from './marketplace';

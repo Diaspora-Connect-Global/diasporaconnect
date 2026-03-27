@@ -12,11 +12,17 @@ export function MarketplaceHeader({
   onCartClick,
   setActiveTab,
   activeTab,
+  searchValue,
+  onSearchValueChange,
+  onSearch,
 }: {
   cartCount: number;
   onCartClick: () => void;
   setActiveTab: (item: MarketplaceTab) => void;
   activeTab: MarketplaceTab;
+  searchValue: string;
+  onSearchValueChange: (value: string) => void;
+  onSearch: () => void;
 }) {
   const t = useTranslations("marketplace");
 
@@ -70,9 +76,9 @@ export function MarketplaceHeader({
         <div className="h-12 min-w-[220px] sm:min-w-[280px] w-full max-w-[320px] flex">
           <SearchInput
             placeholder={t("searchPlaceholder")}
-            value=""
-            onChange={() => {}}
-            onSearch={() => {}}
+            value={searchValue}
+            onChange={onSearchValueChange}
+            onSearch={onSearch}
             bg="bg-surface-default"
             className="h-full"
           />

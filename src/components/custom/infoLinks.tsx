@@ -1,6 +1,7 @@
 import { BodySmall, TextPrimary } from "../utils";
 import { useTranslations } from 'next-intl';
 import LocaleSwitcher from "@/components/LocalSwitcher"
+import { Link } from "@/i18n/navigation";
 
 
 export default function InfoLinks() {
@@ -13,37 +14,37 @@ export default function InfoLinks() {
                 optionClassName="bg-surface-default"
             />
             <span >·</span>
-            <a href="#" className="hover:underline text-foreground">
+            <Link href="/about" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
                         {t('about')}
                     </TextPrimary>
                 </BodySmall>
-            </a>
+            </Link>
             <span>·</span>
-            <a href="#" className="hover:underline text-foreground flex-wrap">
+            <Link href="/terms" className="hover:underline text-foreground flex-wrap">
                 <BodySmall>
                     <TextPrimary>
                         {t('terms')}
                     </TextPrimary>
                 </BodySmall>
-            </a>
+            </Link>
             <span>·</span>
-            <a href="#" className="hover:underline text-foreground">
+            <Link href="/privacy" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
                         {t('privacyPolicy')}
                     </TextPrimary>
                 </BodySmall>
-            </a>
+            </Link>
             <span>·</span>
-            <a href="#" className="hover:underline text-foreground">
+            <Link href="/contact" className="hover:underline text-foreground">
                 <BodySmall>
                     <TextPrimary>
                         {t('contact')}
                     </TextPrimary>
                 </BodySmall>
-            </a>
+            </Link>
             <span>·</span>
             <span className="flex">
                 <BodySmall>

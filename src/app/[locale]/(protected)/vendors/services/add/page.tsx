@@ -2,7 +2,19 @@
 "use client";
 import React, { useState } from 'react';
 import { ChevronDown, Plus, ChevronRight, Minus } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery } from '@apollo/client/react';
+import { toast } from 'sonner';
+import {
+  ADD_MILESTONE,
+  CREATE_SERVICE_PACKAGE,
+  GET_MY_VENDOR,
+  PUBLISH_SERVICE_PACKAGE,
+} from '@/services/gql/vendor';
+import type { GetMyVendorResponse } from '@/services/gql/types/vendor';
+import { handleVendorError } from '@/lib/vendor-error-mapper';
+import VendorKycRequiredModal from '@/components/vendors/VendorKycRequiredModal';
 
 type Step = 1 | 2;
 type PricingMode = 'single' | 'multiple';
@@ -11,6 +23,8 @@ const AddServiceFlow = () => {
   const t = useTranslations('vendors.services');
   const tForm = useTranslations('vendors.services.form');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const router = useRouter();
   
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [pricingMode, setPricingMode] = useState<PricingMode>('single');
@@ -32,6 +46,12 @@ const AddServiceFlow = () => {
     { id: 'standard', name: tForm('standard'), price: '0.00', features: '', duration: '', revisions: 0 },
     { id: 'premium', name: tForm('premium'), price: '0.00', features: '', duration: '', revisions: 0 },
   ]);
+  const [isKycModalOpen, setIsKycModalOpen] = useState(false);
+  const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
+  const vendorId = vendorData?.getMyVendor?.id;
+  const [createServicePackage, { loading: creatingPackage }] = useMutation<{ createServicePackage: string }>(CREATE_SERVICE_PACKAGE);
+  const [addMilestone] = useMutation<{ addMilestone: string }>(ADD_MILESTONE);
+  const [publishServicePackage, { loading: publishingPackage }] = useMutation<{ publishServicePackage: boolean }>(PUBLISH_SERVICE_PACKAGE);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,6 +68,94 @@ const AddServiceFlow = () => {
     setPackages(packages.map(pkg => 
       pkg.id === id ? { ...pkg, [field]: value } : pkg
     ));
+  };
+
+  const parseEstimatedDuration = () => {
+    const candidate = pricingMode === 'single' ? billingType : packages[0]?.duration ?? '';
+    const parsed = Number.parseInt(candidate.replace(/\D/g, ''), 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 7;
+  };
+
+  const deriveBasePrice = () => {
+    if (pricingMode === 'single') {
+      return Number.parseFloat(singlePrice) || 0;
+    }
+    const prices = packages.map((pkg) => Number.parseFloat(pkg.price) || 0).filter((value) => value > 0);
+    return prices[0] ?? 0;
+  };
+
+  const createDraftServicePackage = async (): Promise<string | null> => {
+    if (!vendorId) {
+      handleVendorError({
+        error: new Error('Vendor profile not found'),
+        locale,
+        router,
+      });
+      return null;
+    }
+    if (!serviceTitle.trim() || !description.trim()) {
+      toast.error('Please add a title and description');
+      return null;
+    }
+
+    const basePrice = deriveBasePrice();
+    if (basePrice <= 0) {
+      toast.error('Please add a valid price');
+      return null;
+    }
+
+    const { data } = await createServicePackage({
+      variables: {
+        vendorId,
+        title: serviceTitle.trim(),
+        description: description.trim(),
+        basePrice,
+        currency: 'GHS',
+        estimatedDuration: parseEstimatedDuration(),
+        benefits:
+          pricingMode === 'multiple'
+            ? packages.filter((pkg) => pkg.features.trim()).map((pkg) => `${pkg.name}: ${pkg.features}`)
+            : [],
+      },
+    });
+
+    return data?.createServicePackage ?? null;
+  };
+
+  const createMilestonesForPackage = async (packageId: string) => {
+    if (pricingMode === 'multiple') {
+      const activePackages = packages.filter((pkg) => Number.parseFloat(pkg.price) > 0);
+      const total = activePackages.reduce((sum, pkg) => sum + (Number.parseFloat(pkg.price) || 0), 0) || 1;
+
+      for (let index = 0; index < activePackages.length; index += 1) {
+        const pkg = activePackages[index];
+        const percent = ((Number.parseFloat(pkg.price) || 0) / total) * 100;
+        await addMilestone({
+          variables: {
+            packageId,
+            title: `${pkg.name} package`,
+            description: pkg.features || `Deliverables for ${pkg.name}`,
+            percentageOfTotal: Number(percent.toFixed(2)),
+            estimatedDays: Number.parseInt(pkg.duration.replace(/\D/g, ''), 10) || 7,
+            deliverables: pkg.features ? [pkg.features] : [`${pkg.name} deliverable`],
+            order: index + 1,
+          },
+        });
+      }
+      return;
+    }
+
+    await addMilestone({
+      variables: {
+        packageId,
+        title: 'Delivery',
+        description: description || 'Service delivery',
+        percentageOfTotal: 100,
+        estimatedDays: parseEstimatedDuration(),
+        deliverables: [serviceTitle || 'Service deliverable'],
+        order: 1,
+      },
+    });
   };
 
   return (
@@ -151,12 +259,28 @@ const AddServiceFlow = () => {
 
             {/* Buttons */}
             <div className="flex justify-between">
-              <button className="px-6 py-2.5 border-2 border-border-brand text-text-brand rounded-full font-medium hover:bg-surface-brand-subtle transition-colors">
+              <button
+                onClick={async () => {
+                  try {
+                    const packageId = await createDraftServicePackage();
+                    if (!packageId) return;
+                    toast.success(tForm('saveToDraft'));
+                  } catch (error) {
+                    handleVendorError({
+                      error,
+                      locale,
+                      router,
+                      openKycModal: () => setIsKycModalOpen(true),
+                    });
+                  }
+                }}
+                className="px-6 py-2.5 border-2 border-border-brand text-text-brand rounded-full font-medium hover:bg-surface-brand-subtle transition-colors"
+              >
                 {tForm('saveToDraft')}
               </button>
               <button
                 onClick={() => setCurrentStep(2)}
-                className="px-8 py-2.5 bg-surface-disabled text-text-secondary rounded-full font-medium cursor-not-allowed"
+                className="px-8 py-2.5 bg-surface-brand text-text-white rounded-full font-medium"
               >
                 {tForm('saveAndContinue')}
               </button>
@@ -348,16 +472,70 @@ const AddServiceFlow = () => {
             {/* Buttons */}
             <div className="flex justify-between mt-8">
               <button
-                onClick={() => setCurrentStep(1)}
+                onClick={async () => {
+                  try {
+                    const packageId = await createDraftServicePackage();
+                    if (!packageId) return;
+                    toast.success(tForm('saveToDraft'));
+                    setCurrentStep(1);
+                  } catch (error) {
+                    handleVendorError({
+                      error,
+                      locale,
+                      router,
+                      openKycModal: () => setIsKycModalOpen(true),
+                    });
+                  }
+                }}
                 className="px-6 py-2.5 border-2 border-border-brand text-text-brand rounded-full font-medium hover:bg-surface-brand-subtle transition-colors"
               >
                 {tForm('saveToDraft')}
               </button>
               <div className="flex gap-3">
-                <button className="px-6 py-2.5 bg-surface-disabled text-text-secondary rounded-full font-medium hover:bg-surface-disabled transition-colors">
+                <button
+                  onClick={async () => {
+                    try {
+                      const packageId = await createDraftServicePackage();
+                      if (!packageId) return;
+                      toast.success(tForm('saveAndAddAnother'));
+                      setServiceTitle('');
+                      setServiceCategory('');
+                      setDescription('');
+                      setSinglePrice('0.00');
+                      setBillingType('');
+                    } catch (error) {
+                    handleVendorError({
+                      error,
+                      locale,
+                      router,
+                      openKycModal: () => setIsKycModalOpen(true),
+                    });
+                    }
+                  }}
+                  className="px-6 py-2.5 bg-surface-disabled text-text-secondary rounded-full font-medium hover:bg-surface-disabled transition-colors"
+                >
                   {tForm('saveAndAddAnother')}
                 </button>
-                <button className="px-8 py-2.5 bg-surface-disabled text-text-secondary rounded-full font-medium cursor-not-allowed">
+                <button
+                  onClick={async () => {
+                    try {
+                      const packageId = await createDraftServicePackage();
+                      if (!packageId) return;
+                      await createMilestonesForPackage(packageId);
+                      await publishServicePackage({ variables: { packageId } });
+                      toast.success('Service package published');
+                    } catch (error) {
+                    handleVendorError({
+                      error,
+                      locale,
+                      router,
+                      openKycModal: () => setIsKycModalOpen(true),
+                    });
+                    }
+                  }}
+                  disabled={creatingPackage || publishingPackage}
+                  className="px-8 py-2.5 bg-surface-brand text-text-white rounded-full font-medium disabled:opacity-60"
+                >
                   {tForm('saveAndPreview')}
                 </button>
               </div>
@@ -365,6 +543,10 @@ const AddServiceFlow = () => {
           </div>
         )}
       </div>
+      <VendorKycRequiredModal
+        open={isKycModalOpen}
+        onClose={() => setIsKycModalOpen(false)}
+      />
     </div>
   );
 };
