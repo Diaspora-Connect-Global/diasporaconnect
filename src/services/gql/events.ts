@@ -71,7 +71,7 @@ export interface CheckInInput {
 
 // Response Types
 export interface GetEventData {
-  event: Event | null;
+  getEvent: Event | null;
 }
 
 export interface GetEventsData {
@@ -118,7 +118,7 @@ export interface UnsaveEventData {
 // Queries (match backend Events API)
 export const GET_EVENT = gql`
   query GetEvent($id: ID!) {
-    event(id: $id) {
+    getEvent(id: $id) {
       id
       title
       description

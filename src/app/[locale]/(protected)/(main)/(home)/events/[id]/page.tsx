@@ -54,12 +54,11 @@ export default function EventDetailPage() {
   const saved = !!eventId && savedEventIds.has(eventId);
 
   const [registerForEvent, { loading: registering }] = useMutation<RegisterEventData>(REGISTER_EVENT, {
-    onCompleted: () => toast.success("Successfully registered for event"),
-    onError: () => toast.error("Failed to register"),
     refetchQueries: [
       { query: GET_EVENT, variables: { id: eventId } },
       { query: GET_USER_EVENTS },
     ],
+    awaitRefetchQueries: true,
   });
   const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
     onCompleted: () => toast.success("Event saved"),
@@ -72,7 +71,7 @@ export default function EventDetailPage() {
     refetchQueries: [{ query: GET_USER_EVENTS }],
   });
 
-  const event = data?.event ?? null;
+  const event = data?.getEvent ?? null;
 
   const handleAttend = async () => {
     if (!eventId) return;
@@ -88,6 +87,7 @@ export default function EventDetailPage() {
             },
           },
         });
+        toast.success("Successfully registered for event");
       },
       event: event
         ? {

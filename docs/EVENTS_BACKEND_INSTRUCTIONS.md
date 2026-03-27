@@ -65,7 +65,7 @@ This document is the single reference for the backend team to implement or align
 
 | Query | Arguments | Return | Notes |
 |-------|-----------|--------|--------|
-| `event(id: ID!)` | `id` | `Event` (nullable) | Single event; return `null` if not found or not allowed. |
+| `getEvent(id: ID!)` | `id` | `Event` (nullable) | Single event; return `null` if not found or not allowed. |
 | `events(limit: Int, offset: Int)` | `limit`, `offset` | `[Event!]!` | Paginated list. Frontend currently sends `limit: 20, offset: 0` only; no filters. Return only **published** events (or product rule). |
 | `userEvents` | — | `UserEvents!` | `UserEvents = { attending: [Event!]!, saved: [Event!]! }` for the current user. |
 
@@ -85,7 +85,7 @@ This document is the single reference for the backend team to implement or align
 ## 3. Auth and context
 
 - All operations above (except possibly a public `events` list) should run in an **authenticated** context.
-- `event(id)`, `userEvents`, `registerForEvent`, `saveEvent` must use the **current user** to compute `isRegistered`, `canRegister`, and to resolve attending/saved lists.
+- `getEvent(id)`, `userEvents`, `registerForEvent`, `saveEvent` must use the **current user** to compute `isRegistered`, `canRegister`, and to resolve attending/saved lists.
 
 ---
 
@@ -130,7 +130,7 @@ Frontend shows generic toasts today but can be improved once errors are stable.
 
 ## 8. Summary checklist for backend
 
-- [ ] **Queries:** Implement `event(id)`, `events(limit, offset)`, `userEvents` with field shapes and auth as above.
+- [ ] **Queries:** Implement `getEvent(id)`, `events(limit, offset)`, `userEvents` with field shapes and auth as above.
 - [ ] **Mutations:** Implement `registerForEvent` (with `eventId`, optional `ticketId`; return `registrationId` and `paymentIntentClientSecret` for paid) and `saveEvent(eventId)`.
 - [ ] **Auth:** Use current user for `isRegistered`, `canRegister`, and for `userEvents.attending` / `userEvents.saved`.
 - [ ] **Listing:** `events` returns published-only (or product rule); document default sort.

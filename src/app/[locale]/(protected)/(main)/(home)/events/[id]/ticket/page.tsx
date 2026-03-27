@@ -39,7 +39,7 @@ export default function EventTicketPage() {
     skip: !eventId,
   });
 
-  const event = data?.event ?? null;
+  const event = data?.getEvent ?? null;
   const holderName = useMemo(() => {
     if (!user) return "Guest User";
     return `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || "Guest User";

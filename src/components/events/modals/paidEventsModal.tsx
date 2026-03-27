@@ -6,6 +6,7 @@ import CustomDialog from "@/components/custom/customDialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useImperativeHandle, useState, forwardRef } from "react";
+import { toast } from "sonner";
 
 type CheckoutEvent = {
     id: string;
@@ -114,8 +115,13 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
             console.log("PAYMENT →", { ticketQty, totalAmount, billing });
             openSuccess();
         } catch (error) {
-            alert(t('paymentFailed'));
-            console.log(error)
+            const message =
+                error instanceof Error && error.message
+                    ? error.message
+                    : t("paymentFailed");
+            toast.error(message);
+            console.error(error);
+            // Stay on current step; do not open success dialog
         } finally {
             setIsProcessingPayment(false);
         }
