@@ -195,6 +195,7 @@ function CommunityItem({ name, type, link, onClick }: { name: string, type?: str
 }
 
 function SidebarLists() {
+    const PREVIEW_LIMIT = 3;
     const [openSections, setOpenSections] = useState({
         associations: true,
         groupChats: true,
@@ -204,6 +205,7 @@ function SidebarLists() {
 
     const tPrivacy = useTranslations('privacy');
     const t = useTranslations('home');
+    const tActions = useTranslations('actions');
     const userId = useUserStore(state => state.user?.userId);
 
     // Fetch available associations
@@ -240,6 +242,10 @@ function SidebarLists() {
     const myGroups = groupsData?.getMyGroups?.groups || [];
     const myAssociations =
         userAssociationsData?.getUserAssociations || [];
+    const visibleAssociations = myAssociations.slice(0, PREVIEW_LIMIT);
+    const hasMoreAssociations = myAssociations.length > PREVIEW_LIMIT;
+    const visibleGroups = myGroups.slice(0, PREVIEW_LIMIT);
+    const hasMoreGroups = myGroups.length > PREVIEW_LIMIT;
 
     const handleGroupClick = (groupId: string) => {
         // Set active chat in session storage
@@ -279,7 +285,7 @@ function SidebarLists() {
                             <span className="text-secondary">Loading associations...</span>
                         </BodySmall>
                     ) : myAssociations.length > 0 ? (
-                        myAssociations.map((association) => (
+                        visibleAssociations.map((association) => (
                             <div key={association.id}>
                                 <CommunityItem
                                     link={`/association/${association.id}`}
@@ -293,7 +299,15 @@ function SidebarLists() {
                             <span className="text-secondary">No associations joined yet</span>
                         </BodySmall>
                     )}
-
+                    {hasMoreAssociations && (
+                        <BodySmall>
+                            <TextBrand className="cursor-pointer hover:underline block">
+                                <Link href="/association">
+                                    {tActions('seemore')}
+                                </Link>
+                            </TextBrand>
+                        </BodySmall>
+                    )}
                 </div>
             </Section>
 
@@ -312,7 +326,7 @@ function SidebarLists() {
                             <span className="text-secondary">Loading groups...</span>
                         </BodySmall>
                     ) : myGroups.length > 0 ? (
-                        myGroups.map((group) => (
+                        visibleGroups.map((group) => (
                             <div key={group.id}>
                                 <CommunityItem
                                     link={`/chat?t=groups&ct=group`}
@@ -325,6 +339,15 @@ function SidebarLists() {
                     ) : (
                         <BodySmall>
                             <span className="text-secondary">No groups yet</span>
+                        </BodySmall>
+                    )}
+                    {hasMoreGroups && (
+                        <BodySmall>
+                            <TextBrand className="cursor-pointer hover:underline block">
+                                <Link href="/chat?t=groups">
+                                    {tActions('seemore')}
+                                </Link>
+                            </TextBrand>
                         </BodySmall>
                     )}
                 </div>

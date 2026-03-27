@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, type GetEventsData, type GetUserEventsData, type RegisterEventData, type SaveEventData, type Event, getEventLocationDisplay, getEventCoverImage } from '@/services/gql/events';
+import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, UNSAVE_EVENT, type GetEventsData, type GetUserEventsData, type RegisterEventData, type SaveEventData, type UnsaveEventData, type Event, getEventLocationDisplay, getEventCoverImage } from '@/services/gql/events';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -112,6 +112,9 @@ export default function Events() {
     const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
         refetchQueries: [{ query: GET_USER_EVENTS }],
     });
+    const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, {
+        refetchQueries: [{ query: GET_USER_EVENTS }],
+    });
 
     const handleAttendEvent = async (eventId: string) => {
         try {
@@ -124,14 +127,21 @@ export default function Events() {
         }
     };
 
-    const handleSaveEvent = async (eventId: string) => {
+    const handleSaveEvent = async (eventId: string, isSaved: boolean) => {
         try {
-            await saveEvent({
-                variables: { eventId }
-            });
-            toast.success('Event saved successfully');
+            if (isSaved) {
+                await unsaveEvent({
+                    variables: { eventId }
+                });
+                toast.success('Event removed from saved');
+            } else {
+                await saveEvent({
+                    variables: { eventId }
+                });
+                toast.success('Event saved successfully');
+            }
         } catch {
-            toast.error('Failed to save event');
+            toast.error(isSaved ? 'Failed to unsave event' : 'Failed to save event');
         }
     };
 
@@ -153,6 +163,7 @@ export default function Events() {
     const allEvents = eventsData?.events || [];
     const paidEvents = allEvents.filter(event => event.isPaid);
     const freeEvents = allEvents.filter(event => !event.isPaid);
+    const savedEventIds = new Set(savedEvents.map((event) => event.id));
 
     return (
         <div className="lg:w-[60vw] h-app-inner p-4 overflow-auto scrollbar-hide">
@@ -211,6 +222,8 @@ export default function Events() {
                                 attendees={event.registrationCount ?? 0}
                                 imageUrl={getEventCoverImage(event)}
                                 onAttendClick={() => handleAttendEvent(event.id)}
+                                onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
+                                isSaved={savedEventIds.has(event.id)}
                             />
                         ))}
                     </div>
@@ -240,6 +253,8 @@ export default function Events() {
                                 attendees={event.registrationCount ?? 0}
                                 imageUrl={getEventCoverImage(event)}
                                 onAttendClick={() => handleAttendEvent(event.id)}
+                                onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
+                                isSaved={savedEventIds.has(event.id)}
                             />
                         ))}
                     </div>

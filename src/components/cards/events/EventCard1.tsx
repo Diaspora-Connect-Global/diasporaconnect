@@ -12,9 +12,11 @@ interface EventCardProps {
     imageUrl: string;
     eventId?: string;
     onAttendClick?: () => void;
+    onSaveClick?: () => void;
+    isSaved?: boolean;
 }
 
-export default function EventCard1({ title, date, location, attendees, imageUrl, eventId, onAttendClick }: EventCardProps) {
+export default function EventCard1({ title, date, location, attendees, imageUrl, eventId, onAttendClick, onSaveClick, isSaved }: EventCardProps) {
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -52,8 +54,13 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
 
                 {/* Action Buttons */}
                   <div className="flex mt-1 space-x-2">
-                    <ButtonType1 className="flex items-center justify-center overflow-hidden" size="lg">
+                    <ButtonType1
+                        onClick={onSaveClick}
+                        className="flex items-center justify-center overflow-hidden"
+                        size="lg"
+                    >
                         <Bookmark className="w-6 h-6 " />
+                        <span className="sr-only">{isSaved ? "Saved" : "Save"}</span>
                     </ButtonType1>
                     <ButtonType2 size="lg" 
                     onClick={onAttendClick}
