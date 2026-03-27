@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { EllipsisVertical } from "lucide-react";
 
 interface EventCardProps {
     title: string;
@@ -14,9 +16,10 @@ interface EventCardProps {
     onSaveClick?: () => void;
     isSaved?: boolean;
     isRegistered?: boolean;
+    onCancelAttend?: () => void;
 }
 
-export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, onBuyClick, onSaveClick, isSaved, isRegistered }: EventCardProps) {
+export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, onBuyClick, onSaveClick, isSaved, isRegistered, onCancelAttend }: EventCardProps) {
     return (
         <div className="w-full  bg-surface-default rounded-3xl overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -64,6 +67,20 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                             <ButtonType1 onClick={onSaveClick} className="flex items-center justify-center overflow-hidden" size="lg">
                                 {isSaved ? "Saved" : "Save"}
                             </ButtonType1>
+                        )}
+                        {isRegistered && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <ButtonType1 className="flex items-center justify-center overflow-hidden" size="lg">
+                                        <EllipsisVertical className="w-5 h-5" />
+                                    </ButtonType1>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={onCancelAttend}>
+                                        Not attending anymore
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         )}
                     </div>
                     <ButtonType1 className="flex items-center justify-center  rounded-full overflow-hidden">

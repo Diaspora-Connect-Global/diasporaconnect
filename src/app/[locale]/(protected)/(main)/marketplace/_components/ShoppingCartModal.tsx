@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import Image from "next/image";
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
 import type { CartItem } from "./types";
 
@@ -21,6 +21,12 @@ export function ShoppingCartModal({
   onCheckout: () => void;
 }) {
   const t = useTranslations("marketplace");
+  const locale = useLocale();
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   const total = useMemo(
     () =>
       cart.reduce(
@@ -86,13 +92,13 @@ export function ShoppingCartModal({
                         : []
                       ).map((extra) => (
                         <li key={extra.id}>
-                          {extra.name} — GH₵{extra.price.toFixed(2)}
+                          {extra.name} — GH₵{formatAmount(extra.price)}
                         </li>
                       ))}
                       {(!item.serviceExtras || item.serviceExtras.length === 0) &&
                         item.extrasTotal != null &&
                         item.extrasTotal > 0 && (
-                          <li>Extras — GH₵{item.extrasTotal.toFixed(2)}</li>
+                          <li>Extras — GH₵{formatAmount(item.extrasTotal)}</li>
                         )}
                     </ul>
                   )}
@@ -116,7 +122,7 @@ export function ShoppingCartModal({
                 </div>
                 <div className="text-right">
                   <p className="font-bold mb-2">
-                    GH₵{lineTotal.toFixed(2)}
+                    GH₵{formatAmount(lineTotal)}
                   </p>
                   <ButtonType4Pill
                     onClick={() => onRemoveItem(lineKey)}
@@ -130,10 +136,10 @@ export function ShoppingCartModal({
           })}
           <div className="mt-6 text-right">
             <p className="text-sm text-text-secondary mb-1">
-              {t("oneTimeFee")}: GH₵20.00
+              {t("oneTimeFee")}: GH₵{formatAmount(20)}
             </p>
             <p className="text-2xl font-bold mb-4 text-text-primary">
-              {t("total")}: GH₵{(total + 20).toFixed(2)}
+              {t("total")}: GH₵{formatAmount(total + 20)}
             </p>
             <ButtonType2
               onClick={onCheckout}

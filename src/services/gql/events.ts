@@ -179,6 +179,13 @@ export const GET_EVENTS = gql`
       canRegister
       coverImageUrl
       tags
+      tickets {
+        id
+        name
+        priceInCents
+        description
+        availableQuantity
+      }
     }
   }
 `;
@@ -189,33 +196,55 @@ export const GET_USER_EVENTS = gql`
       attending {
         id
         title
+        description
+        status
         startAt
         endAt
         eventCategory
+        isPaid
+        registrationCount
+        availableSpots
         locationType
         locationDetails {
           type
           venueName
+          address
           city
           country
+          virtualLink
+          platform
         }
         coverImageUrl
+        tags
+        timezone
         isRegistered
+        canRegister
       }
       saved {
         id
         title
+        description
+        status
         startAt
         endAt
         eventCategory
+        isPaid
+        registrationCount
+        availableSpots
         locationType
         locationDetails {
           type
           venueName
+          address
           city
           country
+          virtualLink
+          platform
         }
         coverImageUrl
+        tags
+        timezone
+        isRegistered
         canRegister
       }
     }

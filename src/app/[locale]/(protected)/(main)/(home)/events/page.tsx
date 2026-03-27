@@ -1,7 +1,7 @@
 "use client";
 import EventCard1 from "@/components/cards/events/EventCard1";
 import EventCardSmall from "@/components/cards/events/EventCardSmall";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
@@ -98,36 +98,69 @@ const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loadin
 
 export default function Events() {
     const [activeTab, setActiveTab] = useState<string>("events");
+    const [optimisticSavedState, setOptimisticSavedState] = useState<Record<string, boolean>>({});
+    const [optimisticAttendingState, setOptimisticAttendingState] = useState<Record<string, boolean>>({});
     const tActions = useTranslations("actions");
     const modalRef = useRef<PaidEventsModalRef>(null);
     
-    const { data: userEventsData, loading: userEventsLoading } = useQuery<GetUserEventsData>(GET_USER_EVENTS);
+    const { data: userEventsData, loading: userEventsLoading } = useQuery<GetUserEventsData>(GET_USER_EVENTS, {
+        fetchPolicy: "cache-and-network",
+        notifyOnNetworkStatusChange: true,
+    });
     const { data: eventsData, loading: eventsLoading } = useQuery<GetEventsData>(GET_EVENTS, {
         variables: { limit: 20, offset: 0 }
     });
     
     const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
         refetchQueries: [{ query: GET_USER_EVENTS }],
+        awaitRefetchQueries: true,
     });
     const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
         refetchQueries: [{ query: GET_USER_EVENTS }],
+        awaitRefetchQueries: true,
     });
     const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, {
         refetchQueries: [{ query: GET_USER_EVENTS }],
+        awaitRefetchQueries: true,
     });
 
-    const handleAttendEvent = async (eventId: string) => {
-        try {
-            await registerForEvent({
-                variables: { input: { eventId } }
-            });
-            toast.success('Successfully registered for event');
-        } catch {
-            toast.error('Failed to register for event');
-        }
+    const handleAttendEvent = (event: Event) => {
+        const primaryTicket = event.tickets?.[0];
+        modalRef.current?.open({
+            onPaymentSuccess: async ({ ticketId, quantity }) => {
+                await registerForEvent({
+                    variables: {
+                        input: {
+                            eventId: event.id,
+                            ticketId: event.isPaid ? ticketId : undefined,
+                            quantity,
+                        }
+                    }
+                });
+                setOptimisticAttendingState((prev) => ({ ...prev, [event.id]: true }));
+                toast.success('Successfully registered for event');
+            },
+            event: {
+                id: event.id,
+                title: event.title,
+                startAt: event.startAt,
+                isPaid: event.isPaid,
+                ticketId: primaryTicket?.id,
+                ticketName: primaryTicket?.name,
+                ticketDescription: primaryTicket?.description ?? undefined,
+                ticketPriceInCents: primaryTicket?.priceInCents ?? 0,
+            },
+        });
+    };
+
+    const handleCancelAttend = () => {
+        toast.info('Cancel attendance will be available once backend support is added');
     };
 
     const handleSaveEvent = async (eventId: string, isSaved: boolean) => {
+        const nextSavedState = !isSaved;
+        setOptimisticSavedState((prev) => ({ ...prev, [eventId]: nextSavedState }));
+
         try {
             if (isSaved) {
                 await unsaveEvent({
@@ -141,6 +174,8 @@ export default function Events() {
                 toast.success('Event saved successfully');
             }
         } catch {
+            // Roll back optimistic toggle when request fails
+            setOptimisticSavedState((prev) => ({ ...prev, [eventId]: isSaved }));
             toast.error(isSaved ? 'Failed to unsave event' : 'Failed to save event');
         }
     };
@@ -163,7 +198,49 @@ export default function Events() {
     const allEvents = eventsData?.events || [];
     const paidEvents = allEvents.filter(event => event.isPaid);
     const freeEvents = allEvents.filter(event => !event.isPaid);
-    const savedEventIds = new Set(savedEvents.map((event) => event.id));
+    const savedEventIds = useMemo(() => {
+        const ids = new Set(savedEvents.map((event) => event.id));
+        for (const [eventId, saved] of Object.entries(optimisticSavedState)) {
+            if (saved) {
+                ids.add(eventId);
+            } else {
+                ids.delete(eventId);
+            }
+        }
+        return ids;
+    }, [savedEvents, optimisticSavedState]);
+
+    const savedEventsToRender = useMemo(() => {
+        const eventsById = new Map(savedEvents.map((event) => [event.id, event]));
+        for (const event of allEvents) {
+            if (savedEventIds.has(event.id) && !eventsById.has(event.id)) {
+                eventsById.set(event.id, event);
+            }
+        }
+        return Array.from(eventsById.values());
+    }, [savedEvents, allEvents, savedEventIds]);
+
+    const attendingEventIds = useMemo(() => {
+        const ids = new Set(attendingEvents.map((event) => event.id));
+        for (const [eventId, attending] of Object.entries(optimisticAttendingState)) {
+            if (attending) {
+                ids.add(eventId);
+            } else {
+                ids.delete(eventId);
+            }
+        }
+        return ids;
+    }, [attendingEvents, optimisticAttendingState]);
+
+    const attendingEventsToRender = useMemo(() => {
+        const eventsById = new Map(attendingEvents.map((event) => [event.id, event]));
+        for (const event of allEvents) {
+            if (attendingEventIds.has(event.id) && !eventsById.has(event.id)) {
+                eventsById.set(event.id, event);
+            }
+        }
+        return Array.from(eventsById.values());
+    }, [attendingEvents, allEvents, attendingEventIds]);
 
     return (
         <div className="lg:w-[60vw] h-app-inner p-4 overflow-auto scrollbar-hide">
@@ -192,9 +269,9 @@ export default function Events() {
                 {/* Events Content */}
                 <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory">
                     {activeTab === "events" ? (
-                        <AttendingComponent attendingEvents={attendingEvents} loading={userEventsLoading} />
+                        <AttendingComponent attendingEvents={attendingEventsToRender} loading={userEventsLoading} />
                     ) : (
-                        <SavedComponent savedEvents={savedEvents} loading={userEventsLoading} />
+                        <SavedComponent savedEvents={savedEventsToRender} loading={userEventsLoading} />
                     )}
                 </div>
 
@@ -221,9 +298,11 @@ export default function Events() {
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
                                 imageUrl={getEventCoverImage(event)}
-                                onAttendClick={() => handleAttendEvent(event.id)}
+                                onAttendClick={() => handleAttendEvent(event)}
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
                                 isSaved={savedEventIds.has(event.id)}
+                                isRegistered={attendingEventIds.has(event.id)}
+                                onCancelAttend={handleCancelAttend}
                             />
                         ))}
                     </div>
@@ -252,9 +331,11 @@ export default function Events() {
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
                                 imageUrl={getEventCoverImage(event)}
-                                onAttendClick={() => handleAttendEvent(event.id)}
+                                onAttendClick={() => handleAttendEvent(event)}
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
                                 isSaved={savedEventIds.has(event.id)}
+                                isRegistered={attendingEventIds.has(event.id)}
+                                onCancelAttend={handleCancelAttend}
                             />
                         ))}
                     </div>

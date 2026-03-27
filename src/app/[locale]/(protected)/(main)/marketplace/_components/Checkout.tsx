@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { CountrySelect } from "@/components/custom/input";
 import type { CartItem, PaymentMethod, PaymentResult, ShippingAddress } from "./types";
@@ -26,6 +26,12 @@ export function Checkout({
   onComplete: () => void;
 }) {
   const t = useTranslations("marketplace");
+  const locale = useLocale();
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit");
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
@@ -107,20 +113,20 @@ export function Checkout({
                             : []
                           ).map((extra) => (
                             <li key={extra.id}>
-                              {extra.name} — GH₵{extra.price.toFixed(2)}
+                              {extra.name} — GH₵{formatAmount(extra.price)}
                             </li>
                           ))}
                           {(!item.serviceExtras ||
                             item.serviceExtras.length === 0) &&
                             item.extrasTotal != null &&
                             item.extrasTotal > 0 && (
-                              <li>Extras — GH₵{item.extrasTotal.toFixed(2)}</li>
+                              <li>Extras — GH₵{formatAmount(item.extrasTotal)}</li>
                             )}
                         </ul>
                       )}
                     </div>
                     <p className="font-semibold text-text-primary whitespace-nowrap">
-                      GH₵{lineTotal.toFixed(2)}
+                      GH₵{formatAmount(lineTotal)}
                     </p>
                   </div>
                 );
@@ -285,21 +291,21 @@ export function Checkout({
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">{t("subtotalAmount")}</span>
-                <span className="text-text-primary">GH₵{subtotal.toFixed(2)}</span>
+                <span className="text-text-primary">GH₵{formatAmount(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">{t("shippingFee")}</span>
-                <span className="text-text-primary">GH₵{shippingFee.toFixed(2)}</span>
+                <span className="text-text-primary">GH₵{formatAmount(shippingFee)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">{t("discount")}</span>
-                <span className="text-text-primary">GH₵0.00</span>
+                <span className="text-text-primary">GH₵{formatAmount(0)}</span>
               </div>
             </div>
             <div className="border-t border-border-subtle pt-4 mb-6">
               <div className="flex justify-between font-bold text-lg text-text-primary">
                 <span>{t("total")}</span>
-                <span>GH₵{total.toFixed(2)}</span>
+                <span>GH₵{formatAmount(total)}</span>
               </div>
             </div>
             <ButtonType2
@@ -309,7 +315,7 @@ export function Checkout({
             >
               {isPaying
                 ? t("processing") ?? "Processing…"
-                : t("payAmount", { amount: total.toFixed(2) })}
+                : t("payAmount", { amount: formatAmount(total) })}
             </ButtonType2>
           </div>
         </div>

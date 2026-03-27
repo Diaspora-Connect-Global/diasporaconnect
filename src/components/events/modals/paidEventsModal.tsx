@@ -4,15 +4,30 @@ import Step3 from "@/app/[locale]/(protected)/(main)/(home)/events/[id]/Step3";
 import { ButtonType2 } from "@/components/custom/button";
 import CustomDialog from "@/components/custom/customDialog";
 import { Spinner } from "@/components/ui/spinner";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useImperativeHandle, useState, forwardRef } from "react";
 
+type CheckoutEvent = {
+    id: string;
+    title: string;
+    startAt: string;
+    isPaid: boolean;
+    ticketId?: string;
+    ticketName?: string;
+    ticketDescription?: string;
+    ticketPriceInCents?: number;
+};
+
 export interface PaidEventsModalRef {
-    open: () => void;
+    open: (options?: {
+        onPaymentSuccess?: (args: { ticketId?: string; quantity: number }) => Promise<void> | void;
+        event?: CheckoutEvent
+    }) => void;
 }
 
 const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const t = useTranslations('home.events.payment');
+    const locale = useLocale();
 
     // All state is INTERNAL
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -22,6 +37,8 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [openMethod, setOpenMethod] = useState<'card' | 'mobile' | null>(null);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+    const [onPaymentSuccess, setOnPaymentSuccess] = useState<((args: { ticketId?: string; quantity: number }) => Promise<void> | void) | null>(null);
+    const [selectedEvent, setSelectedEvent] = useState<CheckoutEvent | null>(null);
 
     const [billing, setBilling] = useState({
         firstName: "", lastName: "", email: "",
@@ -32,16 +49,21 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
 
     // Expose open() method to parent via ref
     useImperativeHandle(ref, () => ({
-        open: () => {
-            resetAndOpen();
+        open: (options) => {
+            resetAndOpen(options?.onPaymentSuccess, options?.event);
         },
     }));
 
-    const resetAndOpen = () => {
+    const resetAndOpen = (
+        paymentSuccessHandler?: (args: { ticketId?: string; quantity: number }) => Promise<void> | void,
+        event?: CheckoutEvent
+    ) => {
         setCurrentStep(1);
-        setTicketQty(0);
+        setTicketQty(1);
         setTotalAmount(0);
         setOpenMethod(null);
+        setOnPaymentSuccess(() => paymentSuccessHandler ?? null);
+        setSelectedEvent(event ?? null);
         setBilling({
             firstName: "", lastName: "", email: "",
             cardNumber: "", expDate: "", cvv: "",
@@ -59,13 +81,18 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
 
     // Recalculate total
     useEffect(() => {
-        const subtotal = ticketQty * 300;
-        const serviceFee = subtotal * 0.1;
+        const unitPrice = selectedEvent?.isPaid ? (selectedEvent.ticketPriceInCents ?? 0) / 100 : 0;
+        const subtotal = ticketQty * unitPrice;
+        const serviceFee = selectedEvent?.isPaid ? subtotal * 0.1 : 0;
         setTotalAmount(subtotal + serviceFee);
-    }, [ticketQty]);
+    }, [ticketQty, selectedEvent]);
 
     const goToNextStep = () => {
         if (currentStep === 1 && ticketQty > 0) {
+            if (!selectedEvent?.isPaid) {
+                processPayment();
+                return;
+            }
             setCurrentStep(2);
         }
     };
@@ -78,6 +105,12 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
         setIsProcessingPayment(true);
         try {
             await new Promise(res => setTimeout(res, 1500));
+            if (onPaymentSuccess) {
+                await onPaymentSuccess({
+                    ticketId: selectedEvent?.ticketId,
+                    quantity: ticketQty,
+                });
+            }
             console.log("PAYMENT →", { ticketQty, totalAmount, billing });
             openSuccess();
         } catch (error) {
@@ -89,6 +122,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     };
 
     const isBillingComplete = () => {
+        if (!selectedEvent?.isPaid) return true;
         const common = billing.firstName && billing.lastName && billing.email;
         if (!common) return false;
         if (openMethod === 'card') {
@@ -99,6 +133,28 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
         }
         return false;
     };
+
+    const formattedEventDate = selectedEvent
+        ? new Date(selectedEvent.startAt).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        })
+        : "";
+    const ticketPriceLabel = selectedEvent?.isPaid
+        ? `GH¢ ${new Intl.NumberFormat(locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format((selectedEvent.ticketPriceInCents ?? 0) / 100)}`
+        : t('free');
+    const unitPrice = selectedEvent?.isPaid ? (selectedEvent.ticketPriceInCents ?? 0) / 100 : 0;
+    const formatAmount = (value: number) =>
+        new Intl.NumberFormat(locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value);
 
     return (
         <>
@@ -112,7 +168,17 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
             >
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[70vh] overflow-y-auto p-6 scrollbar-hide bg-surface-default">
                     <div className="lg:col-span-2 space-y-6">
-                        {currentStep === 1 && <Step1 quantity={ticketQty} onQuantityChange={setTicketQty} />}
+                        {currentStep === 1 && (
+                            <Step1
+                                quantity={ticketQty}
+                                onQuantityChange={setTicketQty}
+                                eventTitle={selectedEvent?.title ?? ""}
+                                eventDate={formattedEventDate}
+                                ticketTitle={selectedEvent?.ticketName ?? t('ticketTypeRegular')}
+                                ticketPrice={ticketPriceLabel}
+                                ticketDescription={selectedEvent?.ticketDescription}
+                            />
+                        )}
                         {currentStep === 2 && (
                             <Step2
                                 firstName={billing.firstName}
@@ -135,7 +201,15 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                 onOpenMethodChange={setOpenMethod}
                             />
                         )}
-                        {currentStep === 3 && <Step3 />}
+                        {currentStep === 3 && (
+                            <Step3
+                                ticketHref={
+                                    selectedEvent?.id
+                                        ? `/events/${selectedEvent.id}/ticket`
+                                        : undefined
+                                }
+                            />
+                        )}
                     </div>
 
                     <div className="lg:col-span-1">
@@ -146,21 +220,21 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                 <div className="space-y-2 border-b border-b-border-subtle pb-3">
                                     <div className="flex justify-between">
                                         <span>{ticketQty} × {t('ticketType')}</span>
-                                        <span>GH¢ {(ticketQty * 300).toFixed(2)}</span>
+                                        <span>GH¢ {formatAmount(ticketQty * unitPrice)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span>{t('subtotal')}</span>
-                                        <span>GH¢ {(ticketQty * 300).toFixed(2)}</span>
+                                        <span>GH¢ {formatAmount(ticketQty * unitPrice)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span>{t('serviceFee')}</span>
-                                        <span>GH¢ {(ticketQty * 30).toFixed(2)}</span>
+                                        <span>GH¢ {formatAmount(selectedEvent?.isPaid ? (ticketQty * unitPrice * 0.1) : 0)}</span>
                                     </div>
                                 </div>
 
                                 <div className="flex justify-between font-caption-large py-2">
                                     <span>{t('total')}</span>
-                                    <span>GH¢ {totalAmount.toFixed(2)}</span>
+                                    <span>GH¢ {formatAmount(totalAmount)}</span>
                                 </div>
 
                                 <div className="mt-6 space-y-3">
@@ -170,7 +244,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                             disabled={ticketQty === 0}
                                             className="w-full"
                                         >
-                                            {t('payToAttend')}
+                                            {selectedEvent?.isPaid ? t('payToAttend') : 'Attend'}
                                         </ButtonType2>
                                     )}
                                     {currentStep === 2 && (
@@ -182,7 +256,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                             {isProcessingPayment ? (
                                                 <Spinner className="h-5 w-5" />
                                             ) : (
-                                                t('payAmount', { amount: totalAmount.toFixed(2) })
+                                                t('payAmount', { amount: formatAmount(totalAmount) })
                                             )}
                                         </ButtonType2>
                                     )}
@@ -203,7 +277,13 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
             >
                 <div className="p-6">
 
-                    <Step3 />
+                    <Step3
+                        ticketHref={
+                            selectedEvent?.id
+                                ? `/events/${selectedEvent.id}/ticket`
+                                : undefined
+                        }
+                    />
                 </div>
             </CustomDialog>
         </>

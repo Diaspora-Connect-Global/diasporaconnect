@@ -231,9 +231,9 @@ export default function Step2({
               {/* Providers */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { id: 'mtn', label: 'MTN MOMO', bg: 'bg-yellow-500' },
-                  { id: 'telecel', label: 'TELECASH', bg: 'bg-red-600' },
-                  { id: 'at', label: 'AT MONEY', bg: 'bg-blue-600' },
+                  { id: 'mtn', label: t('mobileProviders.mtn'), bg: 'bg-yellow-500' },
+                  { id: 'telecel', label: t('mobileProviders.telecel'), bg: 'bg-red-600' },
+                  { id: 'at', label: t('mobileProviders.at'), bg: 'bg-blue-600' },
                 ].map((p) => (
                   mobileProvider === p.id ? (
                     <ButtonType2

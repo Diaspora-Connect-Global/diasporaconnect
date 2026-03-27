@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import type { CartItem, PaymentMethod, PaymentResult } from "./types";
 
@@ -21,6 +21,12 @@ export function ServiceCheckout({
   onComplete: () => void;
 }) {
   const t = useTranslations("marketplace");
+  const locale = useLocale();
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit");
   const [billingAddress, setBillingAddress] = useState({
     name: "",
@@ -74,7 +80,7 @@ export function ServiceCheckout({
             </div>
             <div className="text-sm text-gray-600">
               <p>
-                {t("premiumPackage")} (GH₵{packagePrice.toFixed(2)})
+                {t("premiumPackage")} (GH₵{formatAmount(packagePrice)})
               </p>
             </div>
             {serviceItem.extras && serviceItem.extras.length > 0 && (
@@ -205,23 +211,23 @@ export function ServiceCheckout({
             <div className="space-y-3 mb-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">{serviceItem.name}</span>
-                <span className="font-medium">GH₵{packagePrice.toFixed(2)}</span>
+                <span className="font-medium">GH₵{formatAmount(packagePrice)}</span>
               </div>
               {serviceItem.extras && serviceItem.extras.length > 0 && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t("includeSourceFile")}</span>
-                  <span className="font-medium">GH₵{extrasPrice.toFixed(2)}</span>
+                  <span className="font-medium">GH₵{formatAmount(extrasPrice)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-gray-600">{t("serviceFee")}</span>
-                <span className="font-medium">GH₵{serviceFee.toFixed(2)}</span>
+                <span className="font-medium">GH₵{formatAmount(serviceFee)}</span>
               </div>
             </div>
             <div className="border-t pt-4 mb-6">
               <div className="flex justify-between font-bold text-lg">
                 <span>{t("total")}</span>
-                <span>GH₵{total.toFixed(2)}</span>
+                <span>GH₵{formatAmount(total)}</span>
               </div>
             </div>
             <ButtonType2
@@ -231,7 +237,7 @@ export function ServiceCheckout({
             >
               {isPaying
                 ? t("processing") ?? "Processing…"
-                : t("payAmount", { amount: total.toFixed(2) })}
+                : t("payAmount", { amount: formatAmount(total) })}
             </ButtonType2>
           </div>
         </div>

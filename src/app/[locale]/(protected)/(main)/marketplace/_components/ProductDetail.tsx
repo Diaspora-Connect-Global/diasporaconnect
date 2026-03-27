@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Share2, Star } from "lucide-react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button";
 import type { CartItem, Product } from "./types";
 
@@ -22,6 +22,12 @@ export function ProductDetail({
 }) {
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   const galleryImages =
     product.images && product.images.length > 0
       ? product.images
@@ -190,7 +196,7 @@ export function ProductDetail({
 
             {/* Price */}
             <p className="text-2xl md:text-3xl font-bold text-text-primary mb-6">
-              GH₵{product.price.toFixed(2)}
+              GH₵{formatAmount(product.price)}
             </p>
 
             {/* Size */}

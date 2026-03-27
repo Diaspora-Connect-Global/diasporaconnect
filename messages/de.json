@@ -358,6 +358,8 @@
                 "serviceFee": "Servicegebühr",
                 "total": "Gesamt",
                 "payToAttend": "Bezahlen, um teilzunehmen",
+                "attend": "Teilnehmen",
+                "free": "Kostenlos",
                 "payAmount": "GH¢ {amount} bezahlen",
                 "paymentFailed": "Zahlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
                 "ticketTypeRegular": "Standard-Ticket",
@@ -366,6 +368,11 @@
                 "payWith": "Bezahlen mit",
                 "creditCard": "Kreditkarte",
                 "mobilePayment": "Mobilzahlung",
+                "mobileProviders": {
+                    "mtn": "MTN MOMO",
+                    "telecel": "TELECASH",
+                    "at": "AT MONEY"
+                },
                 "cardNumber": "Kartennummer",
                 "cardNumberPlaceholder": "0000 0000 0000 0000",
                 "expDate": "Ablaufdatum",

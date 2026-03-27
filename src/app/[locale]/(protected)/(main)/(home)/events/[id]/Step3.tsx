@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { ButtonType2 } from '@/components/custom/button';
 
-export default function Step3() {
+export default function Step3({ ticketHref }: { ticketHref?: string }) {
     const t = useTranslations('home.events.payment.success');
     
     return (
@@ -20,9 +20,17 @@ export default function Step3() {
             </h2>
 
             {/* Primary Action */}
-            <ButtonType2 size="lg" className="w-full max-w-xs">
-                {t('viewTicket')}
-            </ButtonType2>
+            {ticketHref ? (
+                <Link href={ticketHref} className="w-full max-w-xs">
+                    <ButtonType2 size="lg" className="w-full">
+                        {t('viewTicket')}
+                    </ButtonType2>
+                </Link>
+            ) : (
+                <ButtonType2 size="lg" className="w-full max-w-xs">
+                    {t('viewTicket')}
+                </ButtonType2>
+            )}
 
             {/* Secondary Action */}
             <Link

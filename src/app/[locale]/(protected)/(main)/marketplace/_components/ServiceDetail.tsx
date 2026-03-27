@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Search, Star, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import type { CartItem, Product } from "./types";
 
@@ -18,6 +18,12 @@ export function ServiceDetail({
 }) {
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   const DEFAULT_THUMBNAIL_COUNT = 4;
   const galleryImages =
     service.images && service.images.length > 0
@@ -268,7 +274,7 @@ export function ServiceDetail({
                 >
                   <div className="mb-2">
                     <p className="font-semibold capitalize text-text-primary">{key}</p>
-                    <p className="font-bold text-text-primary mt-0.5">GH₵{pkg.price.toFixed(2)}</p>
+                    <p className="font-bold text-text-primary mt-0.5">GH₵{formatAmount(pkg.price)}</p>
                   </div>
                   <ul className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-text-secondary">
                     {pkg.features.map((feature, idx) => (
@@ -341,7 +347,7 @@ export function ServiceDetail({
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mb-1">
                           <span className="font-semibold text-text-primary break-words">{extra.name}</span>
-                          <span className="font-bold text-text-primary flex-shrink-0">GH₵{extra.price.toFixed(2)}</span>
+                          <span className="font-bold text-text-primary flex-shrink-0">GH₵{formatAmount(extra.price)}</span>
                         </div>
                         <p className="text-sm text-text-secondary break-words">{extra.description}</p>
                       </div>
@@ -364,7 +370,10 @@ export function ServiceDetail({
                       amount: selectedExtras.reduce(
                         (sum, id) => sum + (extras.find((e) => e.id === id)?.price ?? 0),
                         0
-                      ),
+                      ).toLocaleString(locale, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }),
                     })}
                   </ButtonType2>
                 </div>

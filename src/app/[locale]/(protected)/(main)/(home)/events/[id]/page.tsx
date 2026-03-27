@@ -75,11 +75,33 @@ export default function EventDetailPage() {
   const event = data?.event ?? null;
 
   const handleAttend = async () => {
-    if (!eventId || event?.isPaid) {
-      modalRef.current?.open();
-      return;
-    }
-    await registerForEvent({ variables: { input: { eventId } } });
+    if (!eventId) return;
+    const primaryTicket = event?.tickets?.[0];
+    modalRef.current?.open({
+      onPaymentSuccess: async ({ ticketId, quantity }) => {
+        await registerForEvent({
+          variables: {
+            input: {
+              eventId,
+              ticketId: event?.isPaid ? ticketId : undefined,
+              quantity,
+            },
+          },
+        });
+      },
+      event: event
+        ? {
+            id: event.id,
+            title: event.title,
+            startAt: event.startAt,
+            isPaid: event.isPaid,
+            ticketId: primaryTicket?.id,
+            ticketName: primaryTicket?.name,
+            ticketDescription: primaryTicket?.description ?? undefined,
+            ticketPriceInCents: primaryTicket?.priceInCents ?? 0,
+          }
+        : undefined,
+    });
   };
 
   const handleSave = async () => {
@@ -89,6 +111,10 @@ export default function EventDetailPage() {
     } else {
       await saveEvent({ variables: { eventId } });
     }
+  };
+
+  const handleCancelAttend = () => {
+    toast.info("Cancel attendance will be available once backend support is added");
   };
 
   if (!eventId) {
@@ -133,6 +159,7 @@ export default function EventDetailPage() {
             isSaved={saved}
             onBuyClick={handleAttend}
             onSaveClick={handleSave}
+            onCancelAttend={handleCancelAttend}
           />
         </div>
       </div>

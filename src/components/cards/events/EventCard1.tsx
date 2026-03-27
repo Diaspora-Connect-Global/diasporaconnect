@@ -1,8 +1,10 @@
 import { Bookmark } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 import Link from "next/link";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface EventCardProps {
     title: string;
@@ -14,9 +16,11 @@ interface EventCardProps {
     onAttendClick?: () => void;
     onSaveClick?: () => void;
     isSaved?: boolean;
+    isRegistered?: boolean;
+    onCancelAttend?: () => void;
 }
 
-export default function EventCard1({ title, date, location, attendees, imageUrl, eventId, onAttendClick, onSaveClick, isSaved }: EventCardProps) {
+export default function EventCard1({ title, date, location, attendees, imageUrl, eventId, onAttendClick, onSaveClick, isSaved, isRegistered, onCancelAttend }: EventCardProps) {
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -56,17 +60,32 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
                   <div className="flex mt-1 space-x-2">
                     <ButtonType1
                         onClick={onSaveClick}
-                        className="flex items-center justify-center overflow-hidden"
+                        className={`flex items-center justify-center overflow-hidden ${isSaved ? "bg-text-brand text-text-white border-text-brand" : ""}`}
                         size="lg"
                     >
-                        <Bookmark className="w-6 h-6 " />
+                        <Bookmark className={`w-6 h-6 ${isSaved ? "fill-current" : ""}`} />
                         <span className="sr-only">{isSaved ? "Saved" : "Save"}</span>
                     </ButtonType1>
                     <ButtonType2 size="lg" 
                     onClick={onAttendClick}
+                    disabled={isRegistered}
                     className="flex w-full text-center justify-center">
-                        Attend
+                        {isRegistered ? "Attending" : "Attend"}
                     </ButtonType2>
+                    {isRegistered && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <ButtonType1 className="flex items-center justify-center overflow-hidden" size="lg">
+                                    <EllipsisVertical className="w-5 h-5" />
+                                </ButtonType1>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={onCancelAttend}>
+                                    Not attending anymore
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
             </div>
         </div>

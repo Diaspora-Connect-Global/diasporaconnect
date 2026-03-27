@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import Image from "next/image";
 import { CheckCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2 } from "@/components/custom/button";
 import type { CartItem } from "./types";
 
@@ -15,6 +15,12 @@ export function OrderSuccess({
   onBackToHome: () => void;
 }) {
   const t = useTranslations("marketplace");
+  const locale = useLocale();
+  const formatAmount = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   const total = useMemo(
     () =>
       cart.reduce(
@@ -68,19 +74,19 @@ export function OrderSuccess({
                         : []
                       ).map((extra) => (
                         <li key={extra.id}>
-                          {extra.name} — GH₵{extra.price.toFixed(2)}
+                          {extra.name} — GH₵{formatAmount(extra.price)}
                         </li>
                       ))}
                       {(!item.serviceExtras ||
                         item.serviceExtras.length === 0) &&
                         item.extrasTotal != null &&
                         item.extrasTotal > 0 && (
-                          <li>Extras — GH₵{item.extrasTotal.toFixed(2)}</li>
+                          <li>Extras — GH₵{formatAmount(item.extrasTotal)}</li>
                         )}
                     </ul>
                   )}
                 </div>
-                <p className="font-bold">GH₵{lineTotal.toFixed(2)}</p>
+                <p className="font-bold">GH₵{formatAmount(lineTotal)}</p>
               </div>
             );
           })}
@@ -113,9 +119,9 @@ export function OrderSuccess({
             </div>
             <div />
             <div className="text-right">
-              <p>GH₵{(total - 20).toFixed(2)}</p>
-              <p>GH₵20.00</p>
-              <p className="font-bold text-lg">GH₵{total.toFixed(2)}</p>
+              <p>GH₵{formatAmount(total - 20)}</p>
+              <p>GH₵{formatAmount(20)}</p>
+              <p className="font-bold text-lg">GH₵{formatAmount(total)}</p>
             </div>
           </div>
         </div>

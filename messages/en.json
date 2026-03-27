@@ -438,6 +438,8 @@
                 "serviceFee": "Service fee",
                 "total": "Total",
                 "payToAttend": "Pay to attend",
+                "attend": "Attend",
+                "free": "Free",
                 "payAmount": "Pay GH¢ {amount}",
                 "paymentFailed": "Payment failed. Please try again.",
                 "ticketTypeRegular": "Regular Ticket",
@@ -446,6 +448,11 @@
                 "payWith": "Pay with",
                 "creditCard": "Credit card",
                 "mobilePayment": "Mobile payment",
+                "mobileProviders": {
+                    "mtn": "MTN MOMO",
+                    "telecel": "TELECASH",
+                    "at": "AT MONEY"
+                },
                 "cardNumber": "Card number",
                 "cardNumberPlaceholder": "0000 0000 0000 0000",
                 "expDate": "Exp. date",
