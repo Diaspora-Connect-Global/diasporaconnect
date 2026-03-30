@@ -21,6 +21,10 @@ import type { SaveOpportunityData, SubmitApplicationData } from "@/services/gql/
 import type { Opportunity } from "@/services/gql/types/opportunities";
 import { formatChatTimestamp } from "@/macros/time";
 
+/** Returns true if the string looks like a UUID (v4) — used to filter bad location data */
+const isUUID = (s?: string | null) =>
+    !!s && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+
 interface OpportunityItemProps {
     item: Opportunity;
 }
@@ -81,41 +85,102 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
         <>
             {/* Clickable card that opens dialog */}
             <div
-                className=" p-4 border border-border-subtle rounded-lg hover:border-border-brand hover:shadow-sm transition-all duration-200 cursor-pointer bg-surface-default"
+                className="p-5 border border-border-subtle rounded-2xl hover:border-border-brand hover:shadow-md transition-all duration-300 cursor-pointer bg-surface-default group flex flex-col h-full relative min-h-[160px]"
                 onClick={() => setIsDialogOpen(true)}
             >
-                <div className="">
-                    <div className="flex justify-between text-center">
-                        <p className="heading-xsmall text-text-primary mb-1">
-                            {item.title}
-                        </p>
-                        <p className=" body-small inline-flex items-center gap-1">
-                            {formatOpportunityDate(item.createdAt)}
-                        </p>
-                    </div>
+                <button 
+                    className="absolute top-5 right-5 transition-transform hover:scale-110 z-10 p-1"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (isSaved) {
+                            if (!unsaving) unsaveOpportunity({ variables: { id: item.id } });
+                        } else {
+                            if (!saving) saveOpportunity({ variables: { id: item.id } });
+                        }
+                    }}
+                >
+                    <Bookmark className={`w-6 h-6 ${isSaved ? "fill-text-brand text-text-brand" : "text-text-secondary hover:text-text-brand"}`} />
+                </button>
 
-                    <div className=" body-medium flex items-center gap-2 text-text-primary text-sm mb-2">
-                        {item.location && (
-                            <p className="">{item.location}</p>
+                <div className="flex justify-between items-start mb-5 pr-8">
+                    <div className="flex gap-4">
+                        <div className="w-12 h-12 bg-surface-subtle border border-border-subtle rounded-xl flex items-center justify-center shrink-0">
+                            <span className="text-xl font-bold text-text-primary capitalize">
+                                {item.owner?.name?.charAt(0) || item.title?.charAt(0) || "O"}
+                            </span>
+                        </div>
+                        <div className="flex flex-col justify-center">
+                            <h3 className="text-[17px] font-semibold text-text-primary group-hover:text-text-brand transition-colors line-clamp-1 leading-tight">
+                                {item.title}
+                            </h3>
+                            <p className="text-[14px] text-text-secondary mt-1 line-clamp-1">
+                                {item.owner?.name || "Diaspora Connect"}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-3 mb-5 flex-grow">
+                    {item.location && !isUUID(item.location) && (
+                        <div className="flex items-center gap-2 text-[14px] text-text-secondary">
+                            <span className="font-medium">•</span>
+                            <span>{item.location}</span>
+                        </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                        {item.workMode && (
+                            <span className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-[13px] font-medium rounded-lg capitalize">
+                                {item.workMode.replace(/_/g, ' ').toLowerCase()}
+                            </span>
                         )}
-                    </div>
-
-                    <div className="flex items-center gap-3 text-text-primary text-sm">
-                        {(item.workMode || item.engagementType) && (
-                            <span className=" body-small inline-flex items-center gap-1">
-                                {[item.workMode, item.engagementType].filter(Boolean).join(" · ")}
+                        {item.engagementType && (
+                            <span className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-[13px] font-medium rounded-lg capitalize">
+                                {item.engagementType.replace(/_/g, ' ').toLowerCase()}
                             </span>
                         )}
                     </div>
                 </div>
 
-
+                <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-1.5 text-text-secondary text-[13px] font-medium">
+                        <Clock className="w-4 h-4" />
+                        <span>
+                            {item.deadline 
+                                ? `Deadline: ${new Date(item.deadline).toLocaleDateString()}` 
+                                : `Posted: ${formatOpportunityDate(item.createdAt)}`
+                            }
+                        </span>
+                    </div>
+                    
+                    <span className="text-[13px] text-text-brand font-medium group-hover:underline flex items-center gap-1">
+                        View details
+                    </span>
+                </div>
             </div>
 
             {/* Dialog */}
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="lg:min-w-[70rem] max-h-[90vh] overflow-y-auto">
+                    <button
+                        type="button"
+                        onClick={async (e) => {
+                            e.stopPropagation();
+                            if (isSaved) {
+                                if (unsaving) return;
+                                await unsaveOpportunity({ variables: { id: item.id } });
+                            } else {
+                                if (saving) return;
+                                await saveOpportunity({ variables: { id: item.id } });
+                            }
+                        }}
+                        disabled={saving || unsaving}
+                        className="absolute top-4 right-12 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none hover:text-text-brand text-text-secondary"
+                    >
+                        <Bookmark className={`w-4 h-4 ${isSaved ? "fill-text-brand text-text-brand" : "text-text-secondary"}`} />
+                        <span className="sr-only">{isSaved ? "Unsave" : "Save"}</span>
+                    </button>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column - Main Content */}
                         <div className="lg:col-span-2 space-y-6">
@@ -134,9 +199,6 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                     <div className="flex items-center gap-1 text-text-secondary text-sm">
                                         <Clock className="w-4 h-4" />
                                         {formatOpportunityDate(item.createdAt)}
-                                        {item.deadline && (
-                                            <> · Apply before {new Date(item.deadline).toLocaleDateString()}</>
-                                        )}
                                     </div>
                                 </div>
                             </DialogHeader>
@@ -361,25 +423,16 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                                 Apply now
                                             </button>
                                         )}
-                                        <button
-                                            type="button"
-                                            className="flex-1 px-6 py-3 text-text-brand border border-border-brand font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 rounded-full disabled:opacity-50"
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                if (isSaved) {
-                                                    if (unsaving) return;
-                                                    await unsaveOpportunity({ variables: { id: item.id } });
-                                                } else {
-                                                    if (saving) return;
-                                                    await saveOpportunity({ variables: { id: item.id } });
-                                                }
-                                            }}
-                                            disabled={saving || unsaving}
-                                        >
-                                            <Bookmark className="w-4 h-4" />
-                                            <span>{isSaved ? "Unsave" : "Save"}</span>
-                                        </button>
                                     </div>
+                                    
+                                    {item.deadline && (
+                                        <div className="mt-6 pt-4 border-t border-border-subtle flex items-center justify-between text-sm">
+                                            <span className="text-text-secondary">Deadline</span>
+                                            <span className="font-medium text-text-primary">
+                                                {new Date(item.deadline).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                             </div>

@@ -12,7 +12,10 @@ interface EventCardProps {
     location: string;
     attendees: number;
     imageUrl: string;
+    visibility?: string;
     eventId?: string;
+    priceLabel?: string;
+    isSoldOut?: boolean;
     onAttendClick?: () => void;
     onSaveClick?: () => void;
     isSaved?: boolean;
@@ -20,7 +23,7 @@ interface EventCardProps {
     onCancelAttend?: () => void;
 }
 
-export default function EventCard1({ title, date, location, attendees, imageUrl, eventId, onAttendClick, onSaveClick, isSaved, isRegistered, onCancelAttend }: EventCardProps) {
+export default function EventCard1({ title, date, location, attendees, imageUrl, visibility, eventId, priceLabel, isSoldOut, onAttendClick, onSaveClick, isSaved, isRegistered, onCancelAttend }: EventCardProps) {
     return (
         <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
             {/* Header Image */}
@@ -49,10 +52,20 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
 
             {/* Event Details */}
             <div className="p-6">
-                <Link href={eventId ? `/events/${eventId}` : "/events"}>
-                    <h2 className="text-2xl font-bold text-primary mb-2">{title}</h2>
-                </Link>
-                <p className="text-lg font-semibold text-primary mb-1">{date}</p>
+                <div className="flex justify-between items-start mb-2 gap-4">
+                    <Link href={eventId ? `/events/${eventId}` : "/events"} className="flex flex-col items-start min-w-0">
+                        <h2 className="text-2xl font-bold text-primary truncate max-w-full">{title}</h2>
+                        {visibility && visibility !== 'public' && (
+                            <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-surface-subtle text-text-secondary capitalize border border-border-subtle">
+                                {visibility.replace('_', ' ')}
+                            </span>
+                        )}
+                    </Link>
+                    {priceLabel && (
+                        <p className="text-text-primary whitespace-nowrap"><span className="text-lg font-bold text-primary">{priceLabel}</span></p>
+                    )}
+                </div>
+                <p className="text-lg font-semibold text-primary mt-1">{date}</p>
                 <p className="text-secondary mb-1">{location}</p>
                 <p className="text-secondary text-sm mb-6">{attendees} going</p>
 
@@ -68,9 +81,9 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
                     </ButtonType1>
                     <ButtonType2 size="lg" 
                     onClick={onAttendClick}
-                    disabled={isRegistered}
+                    disabled={isRegistered || isSoldOut}
                     className="flex w-full text-center justify-center">
-                        {isRegistered ? "Attending" : "Attend"}
+                        {isRegistered ? "Attending" : isSoldOut ? "Sold Out" : "Attend"}
                     </ButtonType2>
                     {isRegistered && (
                         <DropdownMenu>

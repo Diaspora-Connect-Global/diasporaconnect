@@ -1,7 +1,8 @@
 'use client';
 import { FilterableList } from '@/components/custom/filterableList';
 import { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { useQuery } from '@apollo/client/react';
 import { moreOpportunitiesIDList } from './data';
 import { useTranslations } from 'next-intl';
@@ -29,6 +30,7 @@ const CATEGORY_SLUG_TO_API: Record<string, string> = {
 export default function OpportunityId() {
     const t = useTranslations('home.opportunities.notFound');
     const params = useParams();
+    const router = useRouter();
     const opportunityId = params.id as string;
     const listConfig = moreOpportunitiesIDList.find(config => config.id === opportunityId);
     const apiCategory = listConfig ? CATEGORY_SLUG_TO_API[opportunityId] ?? undefined : undefined;
@@ -80,6 +82,13 @@ export default function OpportunityId() {
         return (
             <div className="h-app-inner overflow-y-auto scrollbar-hide p-4">
                 <div className="max-w-2xl mx-auto">
+                    <button 
+                        onClick={() => router.back()} 
+                        className="flex items-center gap-2 mb-6 text-text-secondary hover:text-text-primary transition-colors"
+                    >
+                        <ArrowLeft size={20} />
+                        <span className="font-medium text-sm">Back to Opportunities</span>
+                    </button>
                     <CustomEmploymentComponent item={singleOpportunity} />
                 </div>
             </div>

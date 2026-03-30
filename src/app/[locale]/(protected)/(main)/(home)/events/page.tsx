@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_EVENTS, GET_USER_EVENTS, REGISTER_EVENT, SAVE_EVENT, UNSAVE_EVENT, type GetEventsData, type GetUserEventsData, type RegisterEventData, type SaveEventData, type UnsaveEventData, type Event, getEventLocationDisplay, getEventCoverImage } from '@/services/gql/events';
+import { SEARCH_EVENTS, GET_MY_EVENTS, GET_MY_SAVED_EVENTS, REGISTER_EVENT, SAVE_EVENT, UNSAVE_EVENT, type SearchEventsData, type GetMyEventsData, type GetMySavedEventsData, type RegisterEventData, type SaveEventData, type UnsaveEventData, type Event, getEventLocationDisplay, getEventCoverImage } from '@/services/gql/events';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -43,6 +43,7 @@ const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Eve
                                 })}
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
+                                visibility={event.visibility}
                                 imageUrl={getEventCoverImage(event)}
                             />
                         </div>
@@ -96,6 +97,15 @@ const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loadin
     );
 };
 
+function formatPriceLabel(event: Event) {
+    if (!event.isPaid || !event.tickets?.length) return "Free";
+    const ticket = event.tickets[0];
+    const cents = ticket?.priceInCents;
+    if (cents == null) return "Free";
+    const currency = ticket?.currency || event.currency || "GHC";
+    return `${currency} ${(cents / 100).toFixed(2)}/ticket`;
+}
+
 export default function Events() {
     const [activeTab, setActiveTab] = useState<string>("events");
     const [optimisticSavedState, setOptimisticSavedState] = useState<Record<string, boolean>>({});
@@ -103,26 +113,32 @@ export default function Events() {
     const tActions = useTranslations("actions");
     const modalRef = useRef<PaidEventsModalRef>(null);
     
-    const { data: userEventsData, loading: userEventsLoading } = useQuery<GetUserEventsData>(GET_USER_EVENTS, {
+    const { data: myEventsData, loading: myEventsLoading } = useQuery<GetMyEventsData>(GET_MY_EVENTS, {
         fetchPolicy: "cache-and-network",
         notifyOnNetworkStatusChange: true,
     });
-    const { data: eventsData, loading: eventsLoading } = useQuery<GetEventsData>(GET_EVENTS, {
+    const { data: mySavedEventsData, loading: mySavedEventsLoading } = useQuery<GetMySavedEventsData>(GET_MY_SAVED_EVENTS, {
+        fetchPolicy: "cache-and-network",
+        notifyOnNetworkStatusChange: true,
+    });
+    const { data: eventsData, loading: eventsLoading } = useQuery<SearchEventsData>(SEARCH_EVENTS, {
         variables: { limit: 20, offset: 0 }
     });
     
     const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
-        refetchQueries: [{ query: GET_USER_EVENTS }],
+        refetchQueries: [{ query: GET_MY_EVENTS }],
         awaitRefetchQueries: true,
     });
     const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
-        refetchQueries: [{ query: GET_USER_EVENTS }],
+        refetchQueries: [{ query: GET_MY_SAVED_EVENTS }],
         awaitRefetchQueries: true,
     });
     const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, {
-        refetchQueries: [{ query: GET_USER_EVENTS }],
+        refetchQueries: [{ query: GET_MY_SAVED_EVENTS }],
         awaitRefetchQueries: true,
     });
+
+    const userEventsLoading = myEventsLoading || mySavedEventsLoading;
 
     const handleAttendEvent = (event: Event) => {
         const primaryTicket = event.tickets?.[0];
@@ -193,9 +209,9 @@ export default function Events() {
 
     const t = useTranslations("home.events");
 
-    const attendingEvents = userEventsData?.userEvents.attending || [];
-    const savedEvents = userEventsData?.userEvents.saved || [];
-    const allEvents = eventsData?.events || [];
+    const attendingEvents = myEventsData?.getMyEvents || [];
+    const savedEvents = mySavedEventsData?.getMySavedEvents || [];
+    const allEvents = eventsData?.searchEvents.events || [];
     const paidEvents = allEvents.filter(event => event.isPaid);
     const freeEvents = allEvents.filter(event => !event.isPaid);
     const savedEventIds = useMemo(() => {
@@ -297,7 +313,10 @@ export default function Events() {
                                 })}
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
+                                visibility={event.visibility}
                                 imageUrl={getEventCoverImage(event)}
+                                priceLabel={formatPriceLabel(event)}
+                                isSoldOut={event.isPaid ? event.capacityType === 'limited' && (event.tickets?.every(t => t.availableQuantity === 0) ?? false) : event.capacityType === 'limited' && event.registrationCount === event.capacity}
                                 onAttendClick={() => handleAttendEvent(event)}
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
                                 isSaved={savedEventIds.has(event.id)}
@@ -330,7 +349,10 @@ export default function Events() {
                                 })}
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
+                                visibility={event.visibility}
                                 imageUrl={getEventCoverImage(event)}
+                                priceLabel={formatPriceLabel(event)}
+                                isSoldOut={event.isPaid ? event.capacityType === 'limited' && (event.tickets?.every(t => t.availableQuantity === 0) ?? false) : event.capacityType === 'limited' && event.registrationCount === event.capacity}
                                 onAttendClick={() => handleAttendEvent(event)}
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
                                 isSaved={savedEventIds.has(event.id)}

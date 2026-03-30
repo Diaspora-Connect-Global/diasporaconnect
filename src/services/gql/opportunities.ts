@@ -229,6 +229,8 @@ export const GET_USER_APPLICATIONS = gql`
           title
           type
           category
+          deadline
+          applicationMethod
           owner { id name avatarUrl type }
         }
       }

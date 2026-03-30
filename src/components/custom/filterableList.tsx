@@ -2,6 +2,8 @@
 'use client';
 import { useState, useEffect } from "react";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 
 
@@ -41,6 +43,7 @@ export function FilterableList({
     // Set 'all' as the default filter
     const [filter, setFilter] = useState<string>('all');
     const CustomComponent = listConfig.customComponent;
+    const router = useRouter();
 
     // Convert the config tabs to the format needed for the component
     const tabs = listConfig.tabs.map(tab => ({
@@ -81,9 +84,17 @@ export function FilterableList({
     return (
         <div className="lg:w-[60vw] h-[calc(100vh-4rem)] p-4 mb-6">
                 <div className="flex justify-between items-center mb-4">
-                    <p className="heading-small">
-                        {listConfig.title}
-                    </p>
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => router.back()} 
+                            className="p-1.5 hover:bg-surface-tertiary rounded-full transition-colors text-text-secondary hover:text-text-primary"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <p className="heading-small">
+                            {listConfig.title}
+                        </p>
+                    </div>
                 </div>
 
             <div>

@@ -7,13 +7,13 @@ import { useRef, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
   GET_EVENT,
-  GET_USER_EVENTS,
+  IS_EVENT_SAVED,
   REGISTER_EVENT,
   SAVE_EVENT,
   UNSAVE_EVENT,
   type Event,
   type GetEventData,
-  type GetUserEventsData,
+  type IsEventSavedData,
   type RegisterEventData,
   type SaveEventData,
   type UnsaveEventData,
@@ -35,9 +35,11 @@ function formatEventDate(iso: string) {
 
 function formatPriceLabel(event: Event) {
   if (!event.isPaid || !event.tickets?.length) return "Free";
-  const cents = event.tickets[0]?.priceInCents;
+  const ticket = event.tickets[0];
+  const cents = ticket?.priceInCents;
   if (cents == null) return "Free";
-  return `GHC ${(cents / 100).toFixed(2)}/ticket`;
+  const currency = ticket?.currency || event.currency || "GHC";
+  return `${currency} ${(cents / 100).toFixed(2)}/ticket`;
 }
 
 export default function EventDetailPage() {
@@ -49,26 +51,28 @@ export default function EventDetailPage() {
     variables: { id: eventId },
     skip: !eventId,
   });
-  const { data: userEventsData } = useQuery<GetUserEventsData>(GET_USER_EVENTS);
-  const savedEventIds = new Set((userEventsData?.userEvents?.saved ?? []).map((e) => e.id));
-  const saved = !!eventId && savedEventIds.has(eventId);
+  const { data: savedData } = useQuery<IsEventSavedData>(IS_EVENT_SAVED, {
+    variables: { eventId },
+    skip: !eventId,
+  });
+  const saved = savedData?.isEventSaved ?? false;
 
   const [registerForEvent, { loading: registering }] = useMutation<RegisterEventData>(REGISTER_EVENT, {
     refetchQueries: [
       { query: GET_EVENT, variables: { id: eventId } },
-      { query: GET_USER_EVENTS },
+      { query: IS_EVENT_SAVED, variables: { eventId } },
     ],
     awaitRefetchQueries: true,
   });
   const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
     onCompleted: () => toast.success("Event saved"),
     onError: () => toast.error("Failed to save event"),
-    refetchQueries: [{ query: GET_USER_EVENTS }],
+    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }],
   });
   const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, {
     onCompleted: () => toast.success("Event removed from saved"),
     onError: () => toast.error("Failed to unsave event"),
-    refetchQueries: [{ query: GET_USER_EVENTS }],
+    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }],
   });
 
   const event = data?.getEvent ?? null;
@@ -155,6 +159,8 @@ export default function EventDetailPage() {
             imageUrl={getEventCoverImage(event)}
             description={event.description}
             priceLabel={priceStr}
+            visibility={event.visibility}
+            isSoldOut={event.isPaid ? event.tickets?.[0]?.availableQuantity === 0 : event.capacityType === 'limited' ? event.registrationCount === event.capacity : false}
             isRegistered={event.isRegistered}
             isSaved={saved}
             onBuyClick={handleAttend}

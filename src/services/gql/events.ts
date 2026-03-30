@@ -1,6 +1,5 @@
 import { gql } from '@apollo/client';
 
-// Backend API: EventLocation is flat (type, venueName, address, city, country, virtualLink, platform)
 export interface EventLocation {
   type: 'physical' | 'virtual' | 'hybrid';
   venueName?: string | null;
@@ -15,38 +14,51 @@ export interface EventTicket {
   id: string;
   name: string;
   priceInCents: number;
+  currency?: string | null;
   description?: string | null;
   availableQuantity?: number | null;
 }
 
 export interface Event {
   id: string;
+  ownerType: 'user' | 'community' | 'association';
+  ownerId: string;
   title: string;
   description?: string;
   status: 'draft' | 'published' | 'cancelled' | 'completed';
+  visibility: 'public' | 'community' | 'association' | 'invite_only';
   startAt: string;
   endAt: string;
   eventCategory: string;
   locationType: 'physical' | 'virtual' | 'hybrid';
   locationDetails?: EventLocation | null;
+  capacityType?: 'limited' | 'unlimited';
+  capacity?: number | null;
   isPaid: boolean;
+  currency?: string | null;
   registrationCount?: number;
-  availableSpots?: number | null;
+  viewCount?: number;
+  saveCount?: number;
   isRegistered: boolean;
   canRegister: boolean;
   tickets?: EventTicket[] | null;
   coverImageUrl?: string | null;
   tags?: string[] | null;
   timezone?: string | null;
+  publishedAt?: string | null;
+  cancelledAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  recurringEventId?: string | null;
 }
 
-/** Input for createEvent - keep for future use */
 export interface CreateEventInput {
-  ownerType: 'user' | 'community';
-  ownerId: string;
+  ownerType: 'user' | 'community' | 'association';
+  ownerId?: string;
   title: string;
   description: string;
   eventCategory: string;
+  visibility: 'public' | 'community' | 'association' | 'invite_only';
   locationType: 'physical' | 'virtual' | 'hybrid';
   locationDetails: {
     physical?: { venue?: string; address?: string; city?: string; country?: string };
@@ -54,7 +66,15 @@ export interface CreateEventInput {
   };
   startAt: string;
   endAt: string;
+  timezone: string;
+  capacityType: 'limited' | 'unlimited';
+  capacity?: number;
   isPaid: boolean;
+  currency?: string;
+}
+
+export interface UpdateEventInput extends Partial<CreateEventInput> {
+  id: string;
 }
 
 export interface RegisterForEventInput {
@@ -74,19 +94,35 @@ export interface GetEventData {
   getEvent: Event | null;
 }
 
-export interface GetEventsData {
-  events: Event[];
-}
-
-export interface GetUserEventsData {
-  userEvents: {
-    attending: Event[];
-    saved: Event[];
+export interface SearchEventsData {
+  searchEvents: {
+    events: Event[];
+    totalCount: number;
+    pageInfo: {
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
   };
 }
 
+export interface GetMyEventsData {
+  getMyEvents: Event[];
+}
+
+export interface GetMySavedEventsData {
+  getMySavedEvents: Event[];
+}
+
+export interface IsEventSavedData {
+  isEventSaved: boolean;
+}
+
 export interface CreateEventData {
-  createEvent: string;
+  createEvent: Event;
+}
+
+export interface UpdateEventData {
+  updateEvent: Event;
 }
 
 export interface RegisterEventData {
@@ -105,17 +141,14 @@ export interface CheckInData {
 }
 
 export interface SaveEventData {
-  saveEvent: {
-    id: string;
-    savedAt: string;
-  };
+  saveEvent: boolean;
 }
 
 export interface UnsaveEventData {
   unsaveEvent: boolean;
 }
 
-// Queries (match backend Events API)
+// Queries
 export const GET_EVENT = gql`
   query GetEvent($id: ID!) {
     getEvent(id: $id) {
@@ -123,6 +156,7 @@ export const GET_EVENT = gql`
       title
       description
       status
+      visibility
       startAt
       endAt
       eventCategory
@@ -136,125 +170,212 @@ export const GET_EVENT = gql`
         virtualLink
         platform
       }
+      capacityType
+      capacity
       isPaid
+      currency
       registrationCount
-      availableSpots
+      viewCount
+      saveCount
       isRegistered
       canRegister
       coverImageUrl
       tags
       timezone
+      ownerType
+      ownerId
       tickets {
         id
         name
         priceInCents
+        currency
         description
         availableQuantity
       }
+      publishedAt
+      createdAt
+      updatedAt
     }
   }
 `;
 
-export const GET_EVENTS = gql`
-  query GetEvents($limit: Int, $offset: Int) {
-    events(limit: $limit, offset: $offset) {
+export const SEARCH_EVENTS = gql`
+  query SearchEvents($query: String, $category: String, $locationType: String, $limit: Int, $offset: Int) {
+    searchEvents(query: $query, category: $category, locationType: $locationType, limit: $limit, offset: $offset) {
+      events {
+        id
+        title
+        status
+        visibility
+        startAt
+        endAt
+        eventCategory
+        locationType
+        locationDetails {
+          type
+          venueName
+          city
+          country
+          virtualLink
+        }
+        capacityType
+        capacity
+        isPaid
+        currency
+        registrationCount
+        isRegistered
+        canRegister
+        coverImageUrl
+        tags
+        ownerType
+        ownerId
+        tickets {
+          id
+          name
+          priceInCents
+          currency
+          description
+          availableQuantity
+        }
+      }
+      totalCount
+    }
+  }
+`;
+
+export const GET_MY_EVENTS = gql`
+  query GetMyEvents {
+    getMyEvents {
       id
       title
+      description
       status
+      visibility
       startAt
       endAt
       eventCategory
+      isPaid
+      currency
+      registrationCount
+      capacityType
+      capacity
       locationType
       locationDetails {
         type
         venueName
+        address
         city
         country
         virtualLink
+        platform
       }
-      isPaid
-      registrationCount
-      availableSpots
-      isRegistered
-      canRegister
       coverImageUrl
       tags
-      tickets {
-        id
-        name
-        priceInCents
-        description
-        availableQuantity
-      }
+      timezone
+      isRegistered
+      canRegister
+      ownerType
+      ownerId
     }
   }
 `;
 
-export const GET_USER_EVENTS = gql`
-  query GetUserEvents {
-    userEvents {
-      attending {
-        id
-        title
-        description
-        status
-        startAt
-        endAt
-        eventCategory
-        isPaid
-        registrationCount
-        availableSpots
-        locationType
-        locationDetails {
-          type
-          venueName
-          address
-          city
-          country
-          virtualLink
-          platform
-        }
-        coverImageUrl
-        tags
-        timezone
-        isRegistered
-        canRegister
+export const GET_MY_SAVED_EVENTS = gql`
+  query GetMySavedEvents {
+    getMySavedEvents {
+      id
+      title
+      description
+      status
+      visibility
+      startAt
+      endAt
+      eventCategory
+      isPaid
+      currency
+      registrationCount
+      capacityType
+      capacity
+      locationType
+      locationDetails {
+        type
+        venueName
+        address
+        city
+        country
+        virtualLink
+        platform
       }
-      saved {
-        id
-        title
-        description
-        status
-        startAt
-        endAt
-        eventCategory
-        isPaid
-        registrationCount
-        availableSpots
-        locationType
-        locationDetails {
-          type
-          venueName
-          address
-          city
-          country
-          virtualLink
-          platform
-        }
-        coverImageUrl
-        tags
-        timezone
-        isRegistered
-        canRegister
-      }
+      coverImageUrl
+      tags
+      timezone
+      isRegistered
+      canRegister
+      ownerType
+      ownerId
     }
+  }
+`;
+
+export const IS_EVENT_SAVED = gql`
+  query IsEventSaved($eventId: ID!) {
+    isEventSaved(eventId: $eventId)
   }
 `;
 
 // Mutations
 export const CREATE_EVENT = gql`
   mutation CreateEvent($input: CreateEventInput!) {
-    createEvent(input: $input)
+    createEvent(input: $input) {
+      id
+      title
+      status
+    }
+  }
+`;
+
+export const UPDATE_EVENT = gql`
+  mutation UpdateEvent($input: UpdateEventInput!) {
+    updateEvent(input: $input) {
+      id
+      title
+      status
+    }
+  }
+`;
+
+export const PUBLISH_EVENT = gql`
+  mutation PublishEvent($id: ID!) {
+    publishEvent(id: $id) {
+      id
+      status
+      publishedAt
+    }
+  }
+`;
+
+export const UNPUBLISH_EVENT = gql`
+  mutation UnpublishEvent($id: ID!) {
+    unpublishEvent(id: $id) {
+      id
+      status
+    }
+  }
+`;
+
+export const CANCEL_EVENT = gql`
+  mutation CancelEvent($id: ID!) {
+    cancelEvent(id: $id) {
+      id
+      status
+      cancelledAt
+    }
+  }
+`;
+
+export const DELETE_EVENT = gql`
+  mutation DeleteEvent($id: ID!) {
+    deleteEvent(id: $id)
   }
 `;
 
@@ -264,6 +385,12 @@ export const REGISTER_EVENT = gql`
       registrationId
       paymentIntentClientSecret
     }
+  }
+`;
+
+export const CANCEL_REGISTRATION = gql`
+  mutation CancelRegistration($registrationId: ID!) {
+    cancelRegistration(registrationId: $registrationId)
   }
 `;
 
@@ -279,10 +406,7 @@ export const CHECK_IN = gql`
 
 export const SAVE_EVENT = gql`
   mutation SaveEvent($eventId: ID!) {
-    saveEvent(eventId: $eventId) {
-      id
-      savedAt
-    }
+    saveEvent(eventId: $eventId)
   }
 `;
 
