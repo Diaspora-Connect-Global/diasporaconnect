@@ -1,10 +1,9 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
-import { LucideIcon, Calendar, Search, ChevronRight, MoreHorizontal, ExternalLink, Mail, ChevronDown, Briefcase } from "lucide-react";
+import { Calendar, Search, ChevronRight, ExternalLink, Mail, ChevronDown, Briefcase } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { ButtonType1, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
+import { ButtonType3 } from "@/components/custom/button";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { opportunities } from "./data";
 import {
@@ -55,11 +54,12 @@ const ExploreOpportunities = ({ name, imageUrl, icon: Icon, id }: ExploreOpportu
     );
 };
 
-/** Saved item: opportunity id, title, and save record id for unsave */
 interface SavedItem {
   opportunityId: string;
   title: string;
-  imageUrl?: string;
+  category?: string;
+  ownerName?: string;
+  deadline?: string | null;
 }
 
 /* ─── Status helpers ─── */
@@ -343,54 +343,6 @@ const AppliedComponent = ({
   );
 };
 
-const MOCK_SAVED_OPPORTUNITIES = [
-  {
-    opportunityId: "mock-saved-1",
-    title: "African Development Fund Grant",
-    category: "Funding & Grants",
-    owner: { name: "African Development Bank" },
-    statusType: "success",
-    statusText: "View Details",
-    deadline: "2026-09-15T00:00:00.000Z",
-  },
-  {
-    opportunityId: "mock-saved-2",
-    title: "Diaspora Entrepreneur Mentorship",
-    category: "Fellowships & Leadership",
-    owner: { name: "Diaspora Business Network" },
-    statusType: "warning",
-    statusText: "State Details",
-    deadline: "2026-08-31T00:00:00.000Z",
-  },
-  {
-    opportunityId: "mock-saved-3",
-    title: "HealthTech Innovation Challenge",
-    category: "Innovation & Research",
-    owner: { name: "Accra, Ghana" },
-    statusType: "success",
-    statusText: "View Details",
-    deadline: "2026-07-15T00:00:00.000Z",
-  },
-  {
-    opportunityId: "mock-saved-4",
-    title: "Diaspora Investment Partnerships",
-    category: "Business & Investment",
-    owner: { name: "Diaspora Investment Group" },
-    statusType: "success",
-    statusText: "View Details",
-    deadline: "2026-06-30T00:00:00.000Z",
-  },
-  {
-    opportunityId: "mock-saved-5",
-    title: "Gov't Digital Transformation Initiative",
-    category: "Gov't & Embassy Initiatives",
-    owner: { name: "Ghana Government" },
-    statusType: "neutral",
-    statusText: "View Details",
-    deadline: "2026-06-10T00:00:00.000Z",
-  }
-];
-
 const SavedComponent = ({
   savedItems,
   onUnsave,
@@ -406,7 +358,7 @@ const SavedComponent = ({
     return new Date(dateStr).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   };
 
-  const displayItems = MOCK_SAVED_OPPORTUNITIES;
+  const displayItems = savedItems;
 
   return (
     <div className="flex flex-col w-full">
@@ -438,13 +390,13 @@ const SavedComponent = ({
                 <Briefcase className="w-4 h-4 shrink-0" />
                 <span className="truncate">{saved.category}</span>
               </div>
-              <p className="text-sm text-text-secondary truncate">{saved.owner.name}</p>
+              <p className="text-sm text-text-secondary truncate">{saved.ownerName}</p>
             </div>
 
             {/* Bottom section: Deadline and Button */}
             <div className="flex items-center justify-between gap-4 pt-4 mt-auto">
               <p className="text-xs text-text-secondary line-clamp-1">
-                Open until {formatDate(saved.deadline)}
+                {saved.deadline ? `Open until ${formatDate(saved.deadline)}` : 'No deadline'}
               </p>
               <div className="flex items-center gap-2">
                 <Link
@@ -472,84 +424,6 @@ const SavedComponent = ({
     </div>
   );
 };
-
-const MOCK_APPLICATIONS: Application[] = [
-  {
-    id: "app-1",
-    applicantId: "",
-    status: "REVIEWING",
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-    opportunityId: "opp-1",
-    opportunity: {
-      id: "opp-1",
-      title: "Google Africa Developer Scholarship 2026",
-      category: "Education & Training",
-      applicationMethod: "INTERNAL",
-      deadline: new Date(Date.now() + 10 * 86400000).toISOString(),
-      owner: { name: "Google Africa" }
-    } as any
-  },
-  {
-    id: "app-2",
-    applicantId: "",
-    status: "ACCEPTED", // Shortlisted
-    createdAt: new Date(Date.now() - 15 * 86400000).toISOString(),
-    opportunityId: "opp-2",
-    opportunity: {
-      id: "opp-2",
-      title: "Y Combinator Summer 2026 Batch",
-      category: "Business & Investment",
-      applicationMethod: "INTERNAL",
-      deadline: new Date(Date.now() - 5 * 86400000).toISOString(),
-      owner: { name: "Y Combinator" }
-    } as any
-  },
-  {
-    id: "app-3",
-    applicantId: "",
-    status: "PENDING", // Interview
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    opportunityId: "opp-3",
-    opportunity: {
-      id: "opp-3",
-      title: "Tony Elumelu Foundation Entrepreneurship Programme",
-      category: "Funding & Grants",
-      applicationMethod: "INTERNAL",
-      deadline: new Date(Date.now() + 2 * 86400000).toISOString(),
-      owner: { name: "TEF" }
-    } as any
-  },
-  {
-    id: "app-4",
-    applicantId: "",
-    status: "REJECTED",
-    createdAt: new Date(Date.now() - 30 * 86400000).toISOString(),
-    opportunityId: "opp-4",
-    opportunity: {
-      id: "opp-4",
-      title: "Global Innovation Fund",
-      category: "Funding & Grants",
-      applicationMethod: "INTERNAL",
-      deadline: new Date(Date.now() - 10 * 86400000).toISOString(),
-      owner: { name: "GIF" }
-    } as any
-  },
-  {
-    id: "app-5",
-    applicantId: "",
-    status: "PENDING",
-    createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
-    opportunityId: "opp-5",
-    opportunity: {
-      id: "opp-5",
-      title: "Chevening Scholarship 2026",
-      category: "Education & Training",
-      applicationMethod: "EXTERNAL_LINK",
-      deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
-      owner: { name: "UK Government" }
-    } as any
-  }
-];
 
 export default function Opportunities() {
     const [activeTab, setActiveTab] = useState<string>("applied");
@@ -581,7 +455,7 @@ export default function Opportunities() {
     });
     const { data: listData } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
         variables: {
-            input: { limit: 6, offset: 0, status: "PUBLISHED" },
+            input: { limit: 6, offset: 0 },
         },
     });
 
@@ -592,14 +466,16 @@ export default function Opportunities() {
         refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
     });
 
-    const applications: Application[] = MOCK_APPLICATIONS; // TEMPORARY DEMO DATA
-        // applicationsData?.userApplications?.applications ?? [];
+    const applications: Application[] = applicationsData?.userApplications?.applications ?? [];
     const savedItems: SavedItem[] =
         savedData?.getSavedOpportunities?.savedOpportunities?.map((saved) => ({
             opportunityId: saved.opportunity?.id ?? saved.opportunityId,
             title: saved.opportunity?.title ?? "Saved opportunity",
+            category: saved.opportunity?.category,
+            ownerName: saved.opportunity?.owner?.name,
+            deadline: saved.opportunity?.deadline,
         })) ?? [];
-    const discoverOpportunities = listData?.opportunities?.opportunities ?? [];
+    const discoverOpportunities = listData?.listOpportunities?.opportunities ?? [];
 
     const handleWithdraw = async (applicationId: string) => {
         setWithdrawingId(applicationId);

@@ -1,20 +1,6 @@
 import { gql } from '@apollo/client';
 
 // ============================================
-// Opportunity Service GraphQL API
-// ============================================
-// Matches backend: opportunity, createOpportunity, submitApplication, saveOpportunity.
-// Types: @/services/gql/types/opportunities (Opportunity, CreateOpportunityInput,
-// SubmitApplicationInput, OpportunityType, ApplicationStatus).
-//
-// Usage:
-//   const { data } = useQuery<GetOpportunityData>(GET_OPPORTUNITY, { variables: { id } });
-//   const [createOpportunity] = useMutation<CreateOpportunityData>(CREATE_OPPORTUNITY);
-//   const [submitApplication] = useMutation<SubmitApplicationData>(SUBMIT_APPLICATION);
-//   const [saveOpportunity] = useMutation<SaveOpportunityData>(SAVE_OPPORTUNITY);
-// ============================================
-
-// ============================================
 // OPPORTUNITY QUERIES
 // ============================================
 
@@ -39,6 +25,7 @@ export const GET_OPPORTUNITY = gql`
       applicationMethod
       externalLink
       applicationEmail
+      formFields { key label type required }
       status
       priorityLevel
       salaryMin
@@ -61,7 +48,7 @@ export const GET_OPPORTUNITY = gql`
 
 export const LIST_OPPORTUNITIES = gql`
   query ListOpportunities($input: ListOpportunitiesInput) {
-    opportunities(input: $input) {
+    listOpportunities(input: $input) {
       opportunities {
         id
         ownerType
@@ -71,7 +58,6 @@ export const LIST_OPPORTUNITIES = gql`
         category
         subCategory
         title
-        description
         workMode
         engagementType
         location
@@ -79,6 +65,7 @@ export const LIST_OPPORTUNITIES = gql`
         salaryMax
         salaryCurrency
         deadline
+        applicationMethod
         status
         priorityLevel
         applicationCount
@@ -105,15 +92,18 @@ export const GET_OPPORTUNITY_FEED = gql`
         type
         category
         title
-        description
+        applicationMethod
         workMode
+        engagementType
         location
         salaryMin
         salaryMax
         salaryCurrency
         deadline
+        applicationCount
         status
         isSavedByCurrentUser
+        hasCurrentUserApplied
         createdAt
         publishedAt
       }
@@ -130,9 +120,6 @@ export const CREATE_OPPORTUNITY = gql`
   mutation CreateOpportunity($input: CreateOpportunityInput!) {
     createOpportunity(input: $input) {
       id
-      title
-      status
-      createdAt
     }
   }
 `;
@@ -149,6 +136,12 @@ export const PUBLISH_OPPORTUNITY = gql`
   }
 `;
 
+export const DRAFT_OPPORTUNITY = gql`
+  mutation DraftOpportunity($id: String!) {
+    draftOpportunity(id: $id)
+  }
+`;
+
 export const CLOSE_OPPORTUNITY = gql`
   mutation CloseOpportunity($id: String!, $reason: String) {
     closeOpportunity(id: $id, reason: $reason)
@@ -161,19 +154,13 @@ export const DELETE_OPPORTUNITY = gql`
   }
 `;
 
-export const SET_OPPORTUNITY_PRIORITY = gql`
-  mutation SetOpportunityPriority($input: SetOpportunityPriorityInput!) {
-    setOpportunityPriority(input: $input)
-  }
-`;
-
 // ============================================
 // APPLICATION QUERIES
 // ============================================
 
 export const GET_APPLICATION = gql`
   query GetApplication($id: String!) {
-    application(id: $id) {
+    getApplication(id: $id) {
       id
       opportunityId
       applicantId
@@ -190,36 +177,16 @@ export const GET_APPLICATION = gql`
   }
 `;
 
-export const GET_APPLICATIONS = gql`
-  query GetApplications($input: GetApplicationsInput!) {
-    getApplications(input: $input) {
+export const GET_USER_APPLICATIONS = gql`
+  query UserApplications($limit: Int, $offset: Int, $status: String) {
+    userApplications(limit: $limit, offset: $offset, status: $status) {
       applications {
         id
         opportunityId
         applicantId
         status
-        resumeFileRef
         coverLetter
         customAnswers
-        reviewNotes
-        createdAt
-      }
-      total
-    }
-  }
-`;
-
-
-export const GET_USER_APPLICATIONS = gql`
-  query GetUserApplications($limit: Int, $offset: Int, $status: String) {
-    userApplications(limit: $limit, offset: $offset, status: $status) {
-      total
-      applications {
-        id
-        opportunityId
-        applicantId
-        status
-        coverLetter
         reviewNotes
         createdAt
         updatedAt
@@ -230,14 +197,16 @@ export const GET_USER_APPLICATIONS = gql`
           type
           category
           deadline
+          closedAt
+          status
           applicationMethod
           owner { id name avatarUrl type }
         }
       }
+      total
     }
   }
 `;
-
 
 // ============================================
 // APPLICATION MUTATIONS
@@ -250,14 +219,14 @@ export const SUBMIT_APPLICATION = gql`
 `;
 
 export const REVIEW_APPLICATION = gql`
-  mutation ReviewApplication($input: ReviewApplicationInput!) {
-    reviewApplication(input: $input)
+  mutation ReviewApplication($applicationId: String!, $notes: String) {
+    reviewApplication(applicationId: $applicationId, notes: $notes)
   }
 `;
 
 export const ACCEPT_APPLICATION = gql`
-  mutation AcceptApplication($id: String!) {
-    acceptApplication(id: $id)
+  mutation AcceptApplication($id: String!, $notes: String) {
+    acceptApplication(id: $id, notes: $notes)
   }
 `;
 
@@ -290,15 +259,18 @@ export const GET_SAVED_OPPORTUNITIES = gql`
           type
           category
           title
-          description
           workMode
           location
           salaryMin
           salaryMax
           salaryCurrency
           deadline
+          applicationMethod
           status
           owner { id name avatarUrl type }
+          isSavedByCurrentUser
+          hasCurrentUserApplied
+          publishedAt
         }
       }
       total

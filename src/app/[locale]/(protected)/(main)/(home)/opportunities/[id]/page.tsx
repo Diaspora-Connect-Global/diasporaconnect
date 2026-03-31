@@ -40,7 +40,7 @@ export default function OpportunityId() {
     const { data: listData } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
         variables: {
             input: apiCategory
-                ? { category: apiCategory, limit: 50, offset: 0, status: 'PUBLISHED' }
+                ? { category: apiCategory, limit: 50, offset: 0 }
                 : undefined,
         },
         skip: !apiCategory,
@@ -52,8 +52,8 @@ export default function OpportunityId() {
     });
 
     const items = useMemo<Opportunity[]>(
-        () => listData?.opportunities?.opportunities ?? [],
-        [listData?.opportunities?.opportunities]
+        () => listData?.listOpportunities?.opportunities ?? [],
+        [listData?.listOpportunities?.opportunities]
     );
     const singleOpportunity = singleData?.getOpportunity ?? null;
 

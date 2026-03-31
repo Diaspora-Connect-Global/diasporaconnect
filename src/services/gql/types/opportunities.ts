@@ -1,4 +1,5 @@
-// Enums (align with Opportunity Service GraphQL user API)
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
 export enum OpportunityTypeEnum {
   EMPLOYMENT = 'EMPLOYMENT',
   SCHOLARSHIP = 'SCHOLARSHIP',
@@ -19,15 +20,33 @@ export enum ApplicationStatus {
   WITHDRAWN = 'WITHDRAWN',
 }
 
+// Re-export for backward compatibility
+export const OpportunityType = OpportunityTypeEnum;
+
+export type FormFieldType = 'text' | 'email' | 'textarea' | 'file_upload';
+
+// ─── Objects ──────────────────────────────────────────────────────────────────
+
+export interface FormField {
+  key: string;
+  label: string;
+  type: FormFieldType;
+  required: boolean;
+}
+
+export interface FormFieldInput {
+  key: string;
+  label: string;
+  type: FormFieldType;
+  required: boolean;
+}
+
 export interface OpportunityOwnerType {
   id: string;
   name: string;
   avatarUrl?: string;
   type: string;
 }
-
-// Re-export for backward compatibility
-export const OpportunityType = OpportunityTypeEnum;
 
 export interface FileRefType {
   path: string;
@@ -36,7 +55,6 @@ export interface FileRefType {
   sizeBytes: number;
 }
 
-// Opportunity Types (align with OpportunityType from API)
 export interface Opportunity {
   id: string;
   ownerType: 'USER' | 'COMMUNITY' | 'ASSOCIATION';
@@ -56,6 +74,7 @@ export interface Opportunity {
   applicationMethod: 'EXTERNAL_LINK' | 'IN_PLATFORM_FORM' | 'EMAIL_REQUEST';
   externalLink?: string | null;
   applicationEmail?: string | null;
+  formFields?: FormField[] | null;
   status: 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
   priorityLevel?: 'HIGH' | 'NORMAL' | 'LOW';
   salaryMin?: number | null;
@@ -82,15 +101,16 @@ export interface CreateOpportunityInput {
   category: string;
   title: string;
   description: string;
+  visibility: string;
+  applicationMethod: string;
   responsibilities?: string;
   requirements?: string;
   workMode?: string;
   engagementType?: string;
   location?: string;
-  visibility: string;
-  applicationMethod: string;
   externalLink?: string;
   applicationEmail?: string;
+  formFields?: FormFieldInput[];
   salaryMin?: number;
   salaryMax?: number;
   salaryCurrency?: string;
@@ -108,14 +128,17 @@ export interface UpdateOpportunityInput {
   workMode?: string;
   engagementType?: string;
   location?: string;
-  visibility?: string;
   applicationMethod?: string;
   externalLink?: string;
   applicationEmail?: string;
+  formFields?: FormFieldInput[];
   salaryMin?: number;
   salaryMax?: number;
   salaryCurrency?: string;
   deadline?: string;
+  subCategory?: string;
+  skills?: string[];
+  tags?: string[];
 }
 
 export interface ListOpportunitiesInput {
@@ -130,8 +153,7 @@ export interface ListOpportunitiesInput {
   location?: string;
   ownerType?: string;
   ownerId?: string;
-  status?: string;
-  sortBy?: 'CREATED_AT' | 'DEADLINE' | 'SALARY' | 'RELEVANCE';
+  sortBy?: 'createdAt' | 'applicationCount';
   sortOrder?: 'ASC' | 'DESC';
 }
 
@@ -142,12 +164,8 @@ export interface GetOpportunityFeedInput {
   type?: string;
 }
 
-export interface SetOpportunityPriorityInput {
-  opportunityId: string;
-  priorityLevel: 'HIGH' | 'NORMAL' | 'LOW';
-}
-
 // Application Types
+
 export interface Application {
   id: string;
   opportunityId: string;
@@ -175,19 +193,7 @@ export interface SubmitApplicationInput {
     coverLetter?: string;
     customAnswers?: string;
   };
-  resumeFileRef?: {
-    path: string;
-    filename: string;
-    mimeType: string;
-    sizeBytes: number;
-  };
-}
-
-export interface GetApplicationsInput {
-  opportunityId: string;
-  limit?: number;
-  offset?: number;
-  status?: string;
+  resumeFileRef?: FileRefType;
 }
 
 export interface GetUserApplicationsInput {
@@ -196,12 +202,8 @@ export interface GetUserApplicationsInput {
   status?: string;
 }
 
-export interface ReviewApplicationInput {
-  applicationId: string;
-  reviewNotes?: string;
-}
-
 // Saved Opportunities Types
+
 export interface SavedOpportunity {
   id: string;
   opportunityId: string;
@@ -211,6 +213,7 @@ export interface SavedOpportunity {
 }
 
 // Response Types
+
 export interface OpportunitiesResponse {
   opportunities: Opportunity[];
   total: number;
@@ -241,19 +244,20 @@ export interface GetSavedOpportunitiesData {
 }
 
 export interface ListOpportunitiesResponse {
-  opportunities: {
+  listOpportunities: {
     opportunities: Opportunity[];
     total: number;
   };
 }
 
-// GraphQL response types for use with useQuery/useMutation
+// GraphQL response types
+
 export interface GetOpportunityData {
   getOpportunity: Opportunity | null;
 }
 
 export interface CreateOpportunityData {
-  createOpportunity: { id: string; title?: string; status?: string; createdAt?: string };
+  createOpportunity: { id: string };
 }
 
 export interface SubmitApplicationData {
@@ -276,7 +280,7 @@ export interface GetOpportunityFeedData {
 }
 
 export interface GetApplicationData {
-  application: Application | null;
+  getApplication: Application | null;
 }
 
 export interface WithdrawApplicationData {
