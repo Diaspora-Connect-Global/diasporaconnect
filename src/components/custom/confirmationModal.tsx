@@ -34,6 +34,8 @@ interface ConfirmationModalProps {
   isLoading?: boolean;
   /** Maximum width of the modal */
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Optional custom content rendered between description and actions */
+  children?: React.ReactNode;
 }
 
 /**
@@ -87,6 +89,7 @@ export function ConfirmationModal({
   confirmVariant = "default",
   isLoading = false,
   maxWidth = "sm",
+  children,
 }: ConfirmationModalProps) {
   const tCommon = useTranslations("common");
   const maxWidthClasses = {
@@ -105,6 +108,8 @@ export function ConfirmationModal({
             {description}
           </DialogDescription>
         </DialogHeader>
+
+        {children}
 
         <div className="flex justify-end gap-2 mt-4">
           <ButtonType3

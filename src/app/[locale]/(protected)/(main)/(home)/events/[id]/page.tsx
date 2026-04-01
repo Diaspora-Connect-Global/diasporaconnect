@@ -3,11 +3,12 @@
 import EventCard2 from "@/components/cards/events/EventCard2";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
   GET_EVENT,
   IS_EVENT_SAVED,
+  USER_EVENTS,
   REGISTER_EVENT,
   SAVE_EVENT,
   UNSAVE_EVENT,
@@ -19,9 +20,11 @@ import {
   type UnsaveEventData,
   getEventLocationDisplay,
   getEventCoverImage,
+  isEventSoldOut,
 } from "@/services/gql/events";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/useAuthStore";
 
 function formatEventDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -38,7 +41,7 @@ function formatPriceLabel(event: Event) {
   const ticket = event.tickets[0];
   const cents = ticket?.priceInCents;
   if (cents == null) return "Free";
-  const currency = ticket?.currency || event.currency || "GHC";
+  const currency = event.currency || "GHS";
   return `${currency} ${(cents / 100).toFixed(2)}/ticket`;
 }
 
@@ -46,6 +49,9 @@ export default function EventDetailPage() {
   const params = useParams();
   const eventId = params.id as string;
   const modalRef = useRef<PaidEventsModalRef>(null);
+  const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
+  const isAuthHydrated = useAuthStore.persist.hasHydrated();
+  const shouldLoadUserEventState = isAuthHydrated && !!sessionToken;
 
   const { data, loading, error } = useQuery<GetEventData>(GET_EVENT, {
     variables: { id: eventId },
@@ -53,14 +59,15 @@ export default function EventDetailPage() {
   });
   const { data: savedData } = useQuery<IsEventSavedData>(IS_EVENT_SAVED, {
     variables: { eventId },
-    skip: !eventId,
+    skip: !eventId || !shouldLoadUserEventState,
   });
   const saved = savedData?.isEventSaved ?? false;
 
-  const [registerForEvent, { loading: registering }] = useMutation<RegisterEventData>(REGISTER_EVENT, {
+  const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
     refetchQueries: [
       { query: GET_EVENT, variables: { id: eventId } },
       { query: IS_EVENT_SAVED, variables: { eventId } },
+      { query: USER_EVENTS },
     ],
     awaitRefetchQueries: true,
   });
@@ -81,16 +88,29 @@ export default function EventDetailPage() {
     if (!eventId) return;
     const primaryTicket = event?.tickets?.[0];
     modalRef.current?.open({
-      onPaymentSuccess: async ({ ticketId, quantity }) => {
-        await registerForEvent({
+      onPaymentSuccess: async ({ ticketId, quantity, promoCode, formResponsesJson }) => {
+        const result = await registerForEvent({
           variables: {
             input: {
               eventId,
               ticketId: event?.isPaid ? ticketId : undefined,
               quantity,
+              promoCode: promoCode || undefined,
+              formResponsesJson: formResponsesJson || undefined,
             },
           },
         });
+        const waitlistPosition = result.data?.registerForEvent?.waitlistPosition ?? null;
+        if (waitlistPosition != null) {
+          return { waitlistPosition };
+        }
+
+        const paymentIntentClientSecret = result.data?.registerForEvent?.paymentIntentClientSecret;
+        if (paymentIntentClientSecret) {
+          toast.info("Registration created. Complete payment to confirm attendance.");
+          return;
+        }
+
         toast.success("Successfully registered for event");
       },
       event: event
@@ -103,6 +123,7 @@ export default function EventDetailPage() {
             ticketName: primaryTicket?.name,
             ticketDescription: primaryTicket?.description ?? undefined,
             ticketPriceInCents: primaryTicket?.priceInCents ?? 0,
+            registrationFormFields: event.registrationFormFields ?? undefined,
           }
         : undefined,
     });
@@ -160,7 +181,7 @@ export default function EventDetailPage() {
             description={event.description}
             priceLabel={priceStr}
             visibility={event.visibility}
-            isSoldOut={event.isPaid ? event.tickets?.[0]?.availableQuantity === 0 : event.capacityType === 'limited' ? event.registrationCount === event.capacity : false}
+            isSoldOut={isEventSoldOut(event)}
             isRegistered={event.isRegistered}
             isSaved={saved}
             onBuyClick={handleAttend}

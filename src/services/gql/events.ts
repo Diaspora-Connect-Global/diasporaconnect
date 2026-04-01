@@ -10,15 +10,41 @@ export interface EventLocation {
   platform?: string | null;
 }
 
+// EventTicketGQL on the backend has no `currency` field
 export interface EventTicket {
   id: string;
   name: string;
   priceInCents: number;
-  currency?: string | null;
   description?: string | null;
   availableQuantity?: number | null;
 }
 
+export interface EventTicketFull {
+  id: string;
+  name: string;
+  priceInCents: number;
+  description?: string | null;
+  totalQuantity?: number | null;
+  soldQuantity?: number | null;
+  reservedQuantity?: number | null;
+  availableQuantity?: number | null;
+  ticketType?: string | null;
+  isActive: boolean;
+  salesStart?: string | null;
+  salesEnd?: string | null;
+  createdAt?: string | null;
+}
+
+export interface RegistrationFormField {
+  id: string;
+  label: string;
+  type: 'text' | 'select' | 'multiselect' | 'checkbox';
+  required: boolean;
+  options?: string[] | null;
+}
+
+// EventGQL on the backend has no `capacityType` — use `capacity` (null = unlimited)
+// and `availableSpots` (null = unlimited, 0 = sold out)
 export interface Event {
   id: string;
   ownerType: 'user' | 'community' | 'association';
@@ -32,8 +58,8 @@ export interface Event {
   eventCategory: string;
   locationType: 'physical' | 'virtual' | 'hybrid';
   locationDetails?: EventLocation | null;
-  capacityType?: 'limited' | 'unlimited';
   capacity?: number | null;
+  availableSpots?: number | null;
   isPaid: boolean;
   currency?: string | null;
   registrationCount?: number;
@@ -50,6 +76,68 @@ export interface Event {
   createdAt?: string;
   updatedAt?: string;
   recurringEventId?: string | null;
+  registrationFormFields?: RegistrationFormField[] | null;
+}
+
+export interface EventStats {
+  eventId: string;
+  totalRegistrations: number;
+  confirmedRegistrations: number;
+  pendingRegistrations: number;
+  cancelledRegistrations: number;
+  totalTicketsSold: number;
+  totalCapacity: number;
+  availableCapacity: number;
+  totalCheckIns: number;
+  currentlyAttending: number;
+  saveCount: number;
+  totalRevenue?: string | null;
+  currency?: string | null;
+}
+
+export interface EventRegistration {
+  id: string;
+  eventId: string;
+  userId: string;
+  ticketId?: string | null;
+  quantity: number;
+  status: string;
+  totalAmount?: string | null;
+  currency?: string | null;
+  registeredAt?: string | null;
+  confirmedAt?: string | null;
+  cancelledAt?: string | null;
+  createdAt?: string | null;
+}
+
+export interface EventAttendanceRecord {
+  id: string;
+  userId: string;
+  registrationId: string;
+  checkInMethod: string;
+  checkedInAt: string;
+  checkedOutAt?: string | null;
+}
+
+export interface EventPromoCode {
+  id: string;
+  eventId: string;
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  maxUses: number;
+  usesCount: number;
+  isActive: boolean;
+  expiresAt?: string | null;
+  createdAt: string;
+}
+
+export interface ValidatePromoCodeResult {
+  valid: boolean;
+  promoCodeId?: string | null;
+  discountAmountCents: number;
+  finalAmountCents: number;
+  reason?: string | null;
 }
 
 export interface CreateEventInput {
@@ -61,26 +149,33 @@ export interface CreateEventInput {
   visibility: 'public' | 'community' | 'association' | 'invite_only';
   locationType: 'physical' | 'virtual' | 'hybrid';
   locationDetails: {
-    physical?: { venue?: string; address?: string; city?: string; country?: string };
-    virtual?: { platform?: string; joinUrl?: string };
+    type?: string;
+    venue?: string;
+    address?: string;
+    city?: string;
+    country?: string;
+    virtualLink?: string;
+    platform?: string;
   };
   startAt: string;
   endAt: string;
   timezone: string;
-  capacityType: 'limited' | 'unlimited';
   capacity?: number;
   isPaid: boolean;
+  ticketPrice?: number;
   currency?: string;
+  coverImageUrl?: string;
+  tags?: string[];
 }
 
-export interface UpdateEventInput extends Partial<CreateEventInput> {
-  id: string;
-}
+export interface UpdateEventInput extends Partial<Omit<CreateEventInput, 'ownerType' | 'ownerId'>> {}
 
 export interface RegisterForEventInput {
   eventId: string;
   ticketId?: string;
   quantity?: number;
+  promoCode?: string;
+  formResponsesJson?: string;
 }
 
 export interface CheckInInput {
@@ -94,23 +189,21 @@ export interface GetEventData {
   getEvent: Event | null;
 }
 
-export interface SearchEventsData {
-  searchEvents: {
+export interface ListEventsData {
+  listEvents: {
     events: Event[];
-    totalCount: number;
-    pageInfo: {
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-    };
+    total: number;
+    hasMore: boolean;
+    page?: number;
+    limit?: number;
   };
 }
 
-export interface GetMyEventsData {
-  getMyEvents: Event[];
-}
-
-export interface GetMySavedEventsData {
-  getMySavedEvents: Event[];
+export interface UserEventsData {
+  userEvents: {
+    attending: Event[];
+    saved: Event[];
+  };
 }
 
 export interface IsEventSavedData {
@@ -129,6 +222,7 @@ export interface RegisterEventData {
   registerForEvent: {
     registrationId: string;
     paymentIntentClientSecret?: string | null;
+    waitlistPosition?: number | null;
   };
 }
 
@@ -141,14 +235,70 @@ export interface CheckInData {
 }
 
 export interface SaveEventData {
-  saveEvent: boolean;
+  saveEvent: { id: string; savedAt: string };
 }
 
 export interface UnsaveEventData {
   unsaveEvent: boolean;
 }
 
-// Queries
+export interface GetEventStatsData {
+  getEventStats: EventStats;
+}
+
+export interface GetEventRegistrationsData {
+  getEventRegistrations: {
+    registrations: EventRegistration[];
+    total: number;
+    page?: number;
+    limit?: number;
+    hasMore?: boolean;
+  };
+}
+
+export interface GetEventAttendanceData {
+  getEventAttendance: {
+    attendance: EventAttendanceRecord[];
+    total: number;
+  };
+}
+
+export interface GetEventTicketsData {
+  getEventTickets: {
+    tickets: EventTicketFull[];
+  };
+}
+
+export interface EventPromoCodesData {
+  eventPromoCodes: EventPromoCode[];
+}
+
+export interface ValidatePromoCodeData {
+  validatePromoCode: ValidatePromoCodeResult;
+}
+
+export interface CloneEventData {
+  cloneEvent: Event;
+}
+
+export interface UpdateEventFormFieldsData {
+  updateEventFormFields: Event;
+}
+
+export interface CreateEventTicketData {
+  createEventTicket: EventTicketFull;
+}
+
+export interface UpdateEventTicketData {
+  updateEventTicket: EventTicketFull;
+}
+
+export interface CreateEventPromoCodeData {
+  createEventPromoCode: EventPromoCode;
+}
+
+// ─── Queries ─────────────────────────────────────────────────────────────────
+
 export const GET_EVENT = gql`
   query GetEvent($id: ID!) {
     getEvent(id: $id) {
@@ -170,13 +320,11 @@ export const GET_EVENT = gql`
         virtualLink
         platform
       }
-      capacityType
       capacity
+      availableSpots
       isPaid
       currency
       registrationCount
-      viewCount
-      saveCount
       isRegistered
       canRegister
       coverImageUrl
@@ -188,20 +336,27 @@ export const GET_EVENT = gql`
         id
         name
         priceInCents
-        currency
         description
         availableQuantity
       }
-      publishedAt
+      registrationFormFields {
+        id
+        label
+        type
+        required
+        options
+      }
       createdAt
       updatedAt
     }
   }
 `;
 
-export const SEARCH_EVENTS = gql`
-  query SearchEvents($query: String, $category: String, $locationType: String, $limit: Int, $offset: Int) {
-    searchEvents(query: $query, category: $category, locationType: $locationType, limit: $limit, offset: $offset) {
+export const LIST_EVENTS = gql`
+  query ListEvents($input: ListEventsInput) {
+    listEvents(input: $input) {
+      total
+      hasMore
       events {
         id
         title
@@ -218,8 +373,8 @@ export const SEARCH_EVENTS = gql`
           country
           virtualLink
         }
-        capacityType
         capacity
+        availableSpots
         isPaid
         currency
         registrationCount
@@ -233,86 +388,51 @@ export const SEARCH_EVENTS = gql`
           id
           name
           priceInCents
-          currency
           description
           availableQuantity
         }
       }
-      totalCount
     }
   }
 `;
 
-export const GET_MY_EVENTS = gql`
-  query GetMyEvents {
-    getMyEvents {
-      id
-      title
-      description
-      status
-      visibility
-      startAt
-      endAt
-      eventCategory
-      isPaid
-      currency
-      registrationCount
-      capacityType
-      capacity
-      locationType
-      locationDetails {
-        type
-        venueName
-        address
-        city
-        country
-        virtualLink
-        platform
+export const USER_EVENTS = gql`
+  query UserEvents {
+    userEvents {
+      attending {
+        id
+        title
+        startAt
+        endAt
+        status
+        visibility
+        locationType
+        locationDetails { type venueName city country virtualLink platform }
+        coverImageUrl
+        registrationCount
+        isPaid
+        currency
+        isRegistered
+        canRegister
+        tickets { id name priceInCents description availableQuantity }
       }
-      coverImageUrl
-      tags
-      timezone
-      isRegistered
-      canRegister
-      ownerType
-      ownerId
-    }
-  }
-`;
-
-export const GET_MY_SAVED_EVENTS = gql`
-  query GetMySavedEvents {
-    getMySavedEvents {
-      id
-      title
-      description
-      status
-      visibility
-      startAt
-      endAt
-      eventCategory
-      isPaid
-      currency
-      registrationCount
-      capacityType
-      capacity
-      locationType
-      locationDetails {
-        type
-        venueName
-        address
-        city
-        country
-        virtualLink
-        platform
+      saved {
+        id
+        title
+        startAt
+        endAt
+        status
+        visibility
+        locationType
+        locationDetails { type venueName city country virtualLink platform }
+        coverImageUrl
+        registrationCount
+        isPaid
+        currency
+        isRegistered
+        canRegister
+        tickets { id name priceInCents description availableQuantity }
       }
-      coverImageUrl
-      tags
-      timezone
-      isRegistered
-      canRegister
-      ownerType
-      ownerId
     }
   }
 `;
@@ -323,23 +443,156 @@ export const IS_EVENT_SAVED = gql`
   }
 `;
 
-// Mutations
+export const VALIDATE_PROMO_CODE = gql`
+  query ValidatePromoCode($eventId: ID!, $code: String!, $totalAmountCents: Int!) {
+    validatePromoCode(eventId: $eventId, code: $code, totalAmountCents: $totalAmountCents) {
+      valid
+      promoCodeId
+      discountAmountCents
+      finalAmountCents
+      reason
+    }
+  }
+`;
+
+export const GET_EVENT_STATS = gql`
+  query GetEventStats($eventId: ID!) {
+    getEventStats(eventId: $eventId) {
+      eventId
+      totalRegistrations
+      confirmedRegistrations
+      pendingRegistrations
+      cancelledRegistrations
+      totalTicketsSold
+      totalCapacity
+      availableCapacity
+      totalCheckIns
+      currentlyAttending
+      saveCount
+      totalRevenue
+      currency
+    }
+  }
+`;
+
+export const GET_EVENT_REGISTRATIONS = gql`
+  query GetEventRegistrations($eventId: ID!, $limit: Int, $offset: Int, $status: String) {
+    getEventRegistrations(eventId: $eventId, limit: $limit, offset: $offset, status: $status) {
+      total
+      hasMore
+      registrations {
+        id
+        userId
+        ticketId
+        quantity
+        status
+        totalAmount
+        currency
+        registeredAt
+        confirmedAt
+        cancelledAt
+      }
+    }
+  }
+`;
+
+export const GET_EVENT_ATTENDANCE = gql`
+  query GetEventAttendance($eventId: ID!, $limit: Int, $offset: Int) {
+    getEventAttendance(eventId: $eventId, limit: $limit, offset: $offset) {
+      total
+      attendance {
+        id
+        userId
+        registrationId
+        checkInMethod
+        checkedInAt
+        checkedOutAt
+      }
+    }
+  }
+`;
+
+export const GET_EVENT_TICKETS = gql`
+  query GetEventTickets($eventId: ID!, $activeOnly: Boolean) {
+    getEventTickets(eventId: $eventId, activeOnly: $activeOnly) {
+      tickets {
+        id
+        name
+        priceInCents
+        description
+        totalQuantity
+        soldQuantity
+        availableQuantity
+        ticketType
+        isActive
+        salesStart
+        salesEnd
+        createdAt
+      }
+    }
+  }
+`;
+
+export const EVENT_PROMO_CODES = gql`
+  query EventPromoCodes($eventId: ID!) {
+    eventPromoCodes(eventId: $eventId) {
+      id
+      code
+      discountType
+      discountValue
+      maxUses
+      usesCount
+      isActive
+      expiresAt
+      createdAt
+    }
+  }
+`;
+
+export const GET_EVENTS_BY_OWNER = gql`
+  query GetEventsByOwner($ownerId: ID!, $ownerType: String!, $status: String, $limit: Int, $offset: Int) {
+    getEventsByOwner(ownerId: $ownerId, ownerType: $ownerType, status: $status, limit: $limit, offset: $offset) {
+      total
+      events {
+        id
+        title
+        status
+        startAt
+        endAt
+        registrationCount
+        availableSpots
+        isPaid
+        coverImageUrl
+        ownerType
+        ownerId
+      }
+    }
+  }
+`;
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
 export const CREATE_EVENT = gql`
   mutation CreateEvent($input: CreateEventInput!) {
     createEvent(input: $input) {
       id
       title
       status
+      startAt
+      endAt
+      isPaid
+      currency
     }
   }
 `;
 
 export const UPDATE_EVENT = gql`
-  mutation UpdateEvent($input: UpdateEventInput!) {
-    updateEvent(input: $input) {
+  mutation UpdateEvent($id: ID!, $input: UpdateEventInput!) {
+    updateEvent(id: $id, input: $input) {
       id
       title
       status
+      updatedAt
     }
   }
 `;
@@ -364,8 +617,8 @@ export const UNPUBLISH_EVENT = gql`
 `;
 
 export const CANCEL_EVENT = gql`
-  mutation CancelEvent($id: ID!) {
-    cancelEvent(id: $id) {
+  mutation CancelEvent($id: ID!, $reason: String!) {
+    cancelEvent(id: $id, reason: $reason) {
       id
       status
       cancelledAt
@@ -375,7 +628,92 @@ export const CANCEL_EVENT = gql`
 
 export const DELETE_EVENT = gql`
   mutation DeleteEvent($id: ID!) {
-    deleteEvent(id: $id)
+    deleteEvent(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
+export const CLONE_EVENT = gql`
+  mutation CloneEvent($input: CloneEventInput!) {
+    cloneEvent(input: $input) {
+      id
+      title
+      status
+      startAt
+      endAt
+    }
+  }
+`;
+
+export const UPDATE_EVENT_FORM_FIELDS = gql`
+  mutation UpdateEventFormFields($input: UpdateEventFormFieldsInput!) {
+    updateEventFormFields(input: $input) {
+      id
+      registrationFormFields {
+        id
+        label
+        type
+        required
+        options
+      }
+    }
+  }
+`;
+
+export const CREATE_EVENT_TICKET = gql`
+  mutation CreateEventTicket($eventId: ID!, $input: CreateTicketInput!) {
+    createEventTicket(eventId: $eventId, input: $input) {
+      id
+      name
+      priceInCents
+      totalQuantity
+      isActive
+      ticketType
+      salesStart
+      salesEnd
+    }
+  }
+`;
+
+export const UPDATE_EVENT_TICKET = gql`
+  mutation UpdateEventTicket($ticketId: ID!, $input: UpdateTicketInput!) {
+    updateEventTicket(ticketId: $ticketId, input: $input) {
+      id
+      name
+      priceInCents
+      totalQuantity
+      isActive
+    }
+  }
+`;
+
+export const CREATE_EVENT_PROMO_CODE = gql`
+  mutation CreateEventPromoCode($input: CreatePromoCodeInput!) {
+    createEventPromoCode(input: $input) {
+      id
+      code
+      discountType
+      discountValue
+      maxUses
+      usesCount
+      isActive
+      expiresAt
+      createdAt
+    }
+  }
+`;
+
+export const DEACTIVATE_EVENT_PROMO_CODE = gql`
+  mutation DeactivateEventPromoCode($promoCodeId: ID!) {
+    deactivateEventPromoCode(promoCodeId: $promoCodeId)
+  }
+`;
+
+export const DELETE_EVENT_PROMO_CODE = gql`
+  mutation DeleteEventPromoCode($promoCodeId: ID!) {
+    deleteEventPromoCode(promoCodeId: $promoCodeId)
   }
 `;
 
@@ -384,6 +722,7 @@ export const REGISTER_EVENT = gql`
     registerForEvent(input: $input) {
       registrationId
       paymentIntentClientSecret
+      waitlistPosition
     }
   }
 `;
@@ -406,7 +745,10 @@ export const CHECK_IN = gql`
 
 export const SAVE_EVENT = gql`
   mutation SaveEvent($eventId: ID!) {
-    saveEvent(eventId: $eventId)
+    saveEvent(eventId: $eventId) {
+      id
+      savedAt
+    }
   }
 `;
 
@@ -416,7 +758,8 @@ export const UNSAVE_EVENT = gql`
   }
 `;
 
-// Enums
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
 export enum EventStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
@@ -430,7 +773,8 @@ export enum RegistrationStatus {
   CANCELLED = 'cancelled'
 }
 
-// Helpers for UI: backend uses flat EventLocation (venueName, city, virtualLink, platform)
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 export function getEventLocationDisplay(event: Pick<Event, 'locationType' | 'locationDetails'>): string {
   const loc = event.locationDetails;
   if (!loc) {
@@ -447,10 +791,18 @@ export function getEventLocationDisplay(event: Pick<Event, 'locationType' | 'loc
   return 'Hybrid';
 }
 
-/** Default/fallback image when event has no cover. Use this for alt and onError fallback. */
+/** `availableSpots === 0` means sold out. `null` means unlimited. */
+export function isEventSoldOut(event: Pick<Event, 'availableSpots'>): boolean {
+  return event.availableSpots === 0;
+}
+
 export const EVENT_PLACEHOLDER_IMAGE = '/EVENT.png';
 
 export function getEventCoverImage(event: Pick<Event, 'coverImageUrl'>): string {
   const url = event.coverImageUrl?.trim();
   return url ? url : EVENT_PLACEHOLDER_IMAGE;
+}
+
+export function formatPrice(cents: number, currency = 'GHS'): string {
+  return `${currency} ${(cents / 100).toFixed(2)}`;
 }

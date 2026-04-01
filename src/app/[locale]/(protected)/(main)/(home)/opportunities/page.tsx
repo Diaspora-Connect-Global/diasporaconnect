@@ -1,7 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Calendar, Search, ChevronRight, ExternalLink, Mail, ChevronDown, Briefcase } from "lucide-react";
+import Image from "next/image";
+import { Calendar, Search, ChevronRight, ExternalLink, Mail, ChevronDown, Briefcase, type LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { ButtonType3 } from "@/components/custom/button";
 import { useQuery, useMutation } from "@apollo/client/react";
