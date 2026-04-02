@@ -478,7 +478,7 @@
             "moreopp": "Explore opportunities",
             "none": {
                 "applied": "You have not applied to any opportunities yet",
-                "saved": "You have no saved opportunities"
+                "saved": "You have not saved to any opportunities yet"
             },
             "notFound": {
                 "title": "Opportunity not found",

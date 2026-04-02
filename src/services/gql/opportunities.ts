@@ -8,26 +8,21 @@ export const GET_OPPORTUNITY = gql`
   query GetOpportunity($id: String!) {
     getOpportunity(id: $id) {
       id
-      ownerType
-      ownerId
-      owner { id name avatarUrl type }
-      type
-      category
-      subCategory
       title
       description
       responsibilities
       requirements
+      status
+      category
+      type
+      subCategory
       workMode
       engagementType
       location
-      visibility
       applicationMethod
       externalLink
       applicationEmail
       formFields { key label type required }
-      status
-      priorityLevel
       salaryMin
       salaryMax
       salaryCurrency
@@ -35,13 +30,14 @@ export const GET_OPPORTUNITY = gql`
       applicationCount
       skills
       tags
+      currentUserApplicationId
       isSavedByCurrentUser
       hasCurrentUserApplied
-      currentUserApplicationId
       createdAt
       updatedAt
       publishedAt
       closedAt
+      owner { id name avatarUrl type }
     }
   }
 `;
@@ -49,34 +45,35 @@ export const GET_OPPORTUNITY = gql`
 export const LIST_OPPORTUNITIES = gql`
   query ListOpportunities($input: ListOpportunitiesInput) {
     listOpportunities(input: $input) {
+      total
       opportunities {
         id
-        ownerType
-        ownerId
-        owner { id name avatarUrl type }
-        type
-        category
-        subCategory
         title
+        description
+        status
+        category
+        type
         workMode
         engagementType
         location
+        deadline
+        applicationMethod
+        externalLink
+        applicationEmail
         salaryMin
         salaryMax
         salaryCurrency
-        deadline
-        applicationMethod
-        status
-        priorityLevel
-        applicationCount
         skills
         tags
+        applicationCount
+        priorityLevel
         isSavedByCurrentUser
         hasCurrentUserApplied
+        currentUserApplicationId
         createdAt
         publishedAt
+        owner { id name avatarUrl type }
       }
-      total
     }
   }
 `;
@@ -84,30 +81,35 @@ export const LIST_OPPORTUNITIES = gql`
 export const GET_OPPORTUNITY_FEED = gql`
   query GetOpportunityFeed($input: GetOpportunityFeedInput!) {
     getOpportunityFeed(input: $input) {
+      total
       opportunities {
         id
-        ownerType
-        ownerId
-        owner { id name avatarUrl type }
-        type
-        category
         title
-        applicationMethod
+        description
+        status
+        category
+        type
         workMode
         engagementType
         location
+        deadline
+        applicationMethod
+        externalLink
+        applicationEmail
         salaryMin
         salaryMax
         salaryCurrency
-        deadline
+        skills
+        tags
         applicationCount
-        status
+        priorityLevel
         isSavedByCurrentUser
         hasCurrentUserApplied
+        currentUserApplicationId
         createdAt
         publishedAt
+        owner { id name avatarUrl type }
       }
-      total
     }
   }
 `;
@@ -118,9 +120,7 @@ export const GET_OPPORTUNITY_FEED = gql`
 
 export const CREATE_OPPORTUNITY = gql`
   mutation CreateOpportunity($input: CreateOpportunityInput!) {
-    createOpportunity(input: $input) {
-      id
-    }
+    createOpportunity(input: $input)
   }
 `;
 
@@ -162,17 +162,15 @@ export const GET_APPLICATION = gql`
   query GetApplication($id: String!) {
     getApplication(id: $id) {
       id
-      opportunityId
-      applicantId
       status
-      resumeFileRef { path filename mimeType sizeBytes }
       coverLetter
-      customAnswers
       reviewNotes
-      reviewedBy
       reviewedAt
       createdAt
-      updatedAt
+      opportunity {
+        id
+        title
+      }
     }
   }
 `;
@@ -180,30 +178,38 @@ export const GET_APPLICATION = gql`
 export const GET_USER_APPLICATIONS = gql`
   query UserApplications($limit: Int, $offset: Int, $status: String) {
     userApplications(limit: $limit, offset: $offset, status: $status) {
+      total
       applications {
         id
-        opportunityId
-        applicantId
         status
-        coverLetter
-        customAnswers
-        reviewNotes
         createdAt
         updatedAt
-        resumeFileRef { filename mimeType sizeBytes }
+        reviewNotes
         opportunity {
           id
           title
-          type
           category
-          deadline
-          closedAt
-          status
-          applicationMethod
+          type
           owner { id name avatarUrl type }
         }
       }
+    }
+  }
+`;
+
+export const GET_APPLICATIONS = gql`
+  query GetApplications($input: GetApplicationsInput!) {
+    getApplications(input: $input) {
       total
+      applications {
+        id
+        status
+        createdAt
+        reviewNotes
+        applicantId
+        coverLetter
+        resumeFileRef { path filename mimeType sizeBytes }
+      }
     }
   }
 `;
@@ -249,31 +255,21 @@ export const WITHDRAW_APPLICATION = gql`
 export const GET_SAVED_OPPORTUNITIES = gql`
   query GetSavedOpportunities($limit: Int, $offset: Int) {
     getSavedOpportunities(limit: $limit, offset: $offset) {
+      total
       savedOpportunities {
         id
         opportunityId
-        userId
         savedAt
         opportunity {
           id
-          type
-          category
           title
-          workMode
-          location
-          salaryMin
-          salaryMax
-          salaryCurrency
-          deadline
-          applicationMethod
+          category
+          type
           status
+          deadline
           owner { id name avatarUrl type }
-          isSavedByCurrentUser
-          hasCurrentUserApplied
-          publishedAt
         }
       }
-      total
     }
   }
 `;

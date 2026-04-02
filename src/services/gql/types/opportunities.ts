@@ -12,6 +12,59 @@ export enum OpportunityTypeEnum {
   CONTRACT = 'CONTRACT',
 }
 
+export enum OpportunityCategoryEnum {
+  EMPLOYMENT_CAREER = 'EMPLOYMENT_CAREER',
+  EDUCATION_TRAINING = 'EDUCATION_TRAINING',
+  FUNDING_GRANTS = 'FUNDING_GRANTS',
+  FELLOWSHIPS_LEADERSHIP = 'FELLOWSHIPS_LEADERSHIP',
+  BUSINESS_INVESTMENT = 'BUSINESS_INVESTMENT',
+  VOLUNTEERING_SOCIAL_IMPACT = 'VOLUNTEERING_SOCIAL_IMPACT',
+  EVENT_CREATIVE_INDUSTRY = 'EVENT_CREATIVE_INDUSTRY',
+  AGRICULTURE_SUSTAINABILITY = 'AGRICULTURE_SUSTAINABILITY',
+  REAL_ESTATE_INFRASTRUCTURE = 'REAL_ESTATE_INFRASTRUCTURE',
+  GOVERNMENT_EMBASSY_INITIATIVES = 'GOVERNMENT_EMBASSY_INITIATIVES',
+  INNOVATION_RESEARCH = 'INNOVATION_RESEARCH',
+  FINANCE_ECONOMICS = 'FINANCE_ECONOMICS',
+  RETURN_REINTEGRATION = 'RETURN_REINTEGRATION',
+}
+
+export enum WorkModeEnum {
+  REMOTE = 'REMOTE',
+  HYBRID = 'HYBRID',
+  ONSITE = 'ONSITE',
+}
+
+export enum EngagementTypeEnum {
+  FULL_TIME = 'FULL_TIME',
+  PART_TIME = 'PART_TIME',
+  CONTRACT = 'CONTRACT',
+}
+
+export enum VisibilityEnum {
+  PUBLIC = 'PUBLIC',
+  COMMUNITY_ONLY = 'COMMUNITY_ONLY',
+  ASSOCIATION_ONLY = 'ASSOCIATION_ONLY',
+}
+
+export enum ApplicationMethodEnum {
+  EXTERNAL_LINK = 'EXTERNAL_LINK',
+  IN_PLATFORM_FORM = 'IN_PLATFORM_FORM',
+  EMAIL_REQUEST = 'EMAIL_REQUEST',
+}
+
+export enum OwnerTypeEnum {
+  USER = 'USER',
+  COMMUNITY = 'COMMUNITY',
+  ASSOCIATION = 'ASSOCIATION',
+}
+
+export enum OpportunityStatusEnum {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  CLOSED = 'CLOSED',
+  ARCHIVED = 'ARCHIVED',
+}
+
 export enum ApplicationStatus {
   PENDING = 'PENDING',
   REVIEWING = 'REVIEWING',
@@ -57,25 +110,25 @@ export interface FileRefType {
 
 export interface Opportunity {
   id: string;
-  ownerType: 'USER' | 'COMMUNITY' | 'ASSOCIATION';
-  ownerId: string;
+  ownerType?: OwnerTypeEnum | 'USER' | 'COMMUNITY' | 'ASSOCIATION';
+  ownerId?: string;
   owner?: OpportunityOwnerType;
-  type: string;
-  category: string;
+  type: OpportunityTypeEnum | string;
+  category: OpportunityCategoryEnum | string;
   subCategory?: string | null;
   title: string;
   description: string;
   responsibilities?: string | null;
   requirements?: string | null;
-  workMode?: 'REMOTE' | 'HYBRID' | 'ONSITE' | null;
-  engagementType?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | null;
+  workMode?: WorkModeEnum | 'REMOTE' | 'HYBRID' | 'ONSITE' | null;
+  engagementType?: EngagementTypeEnum | 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | null;
   location?: string | null;
-  visibility?: 'PUBLIC' | 'COMMUNITY_ONLY' | 'ASSOCIATION_ONLY';
-  applicationMethod: 'EXTERNAL_LINK' | 'IN_PLATFORM_FORM' | 'EMAIL_REQUEST';
+  visibility?: VisibilityEnum | 'PUBLIC' | 'COMMUNITY_ONLY' | 'ASSOCIATION_ONLY';
+  applicationMethod: ApplicationMethodEnum | 'EXTERNAL_LINK' | 'IN_PLATFORM_FORM' | 'EMAIL_REQUEST';
   externalLink?: string | null;
   applicationEmail?: string | null;
   formFields?: FormField[] | null;
-  status: 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
+  status: OpportunityStatusEnum | 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
   priorityLevel?: 'HIGH' | 'NORMAL' | 'LOW';
   salaryMin?: number | null;
   salaryMax?: number | null;
@@ -168,8 +221,8 @@ export interface GetOpportunityFeedInput {
 
 export interface Application {
   id: string;
-  opportunityId: string;
-  applicantId: string;
+  opportunityId?: string;
+  applicantId?: string;
   status: ApplicationStatus | string;
   resumeFileRef?: FileRefType | null;
   coverLetter?: string | null;
@@ -207,9 +260,16 @@ export interface GetUserApplicationsInput {
 export interface SavedOpportunity {
   id: string;
   opportunityId: string;
-  userId: string;
+  userId?: string;
   savedAt: string;
   opportunity?: Opportunity;
+}
+
+export interface GetApplicationsInput {
+  opportunityId: string;
+  limit?: number;
+  offset?: number;
+  status?: string;
 }
 
 // Response Types
@@ -257,19 +317,19 @@ export interface GetOpportunityData {
 }
 
 export interface CreateOpportunityData {
-  createOpportunity: { id: string };
+  createOpportunity: string;
 }
 
 export interface SubmitApplicationData {
-  submitApplication: string | boolean;
+  submitApplication: string;
 }
 
 export interface SaveOpportunityData {
-  saveOpportunity: string | boolean;
+  saveOpportunity: boolean;
 }
 
 export interface UnsaveOpportunityData {
-  unsaveOpportunity: string | boolean;
+  unsaveOpportunity: boolean;
 }
 
 export interface GetOpportunityFeedData {
@@ -285,4 +345,11 @@ export interface GetApplicationData {
 
 export interface WithdrawApplicationData {
   withdrawApplication: boolean;
+}
+
+export interface GetApplicationsData {
+  getApplications: {
+    applications: Application[];
+    total: number;
+  };
 }

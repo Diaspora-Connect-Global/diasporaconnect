@@ -361,6 +361,10 @@ const SavedComponent = ({
 
   const displayItems = savedItems;
 
+  if (displayItems.length === 0) {
+    return <p className="text-text-secondary py-8 text-center">{t("none.saved")}</p>;
+  }
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between mb-4">
