@@ -18,13 +18,13 @@ const CATEGORY_SLUG_TO_API: Record<string, string> = {
     'fellowships-leadership': 'FELLOWSHIPS_LEADERSHIP',
     'business-investment': 'BUSINESS_INVESTMENT',
     'volunteering-social-impact': 'VOLUNTEERING_SOCIAL_IMPACT',
-    'event-creative-industry': 'EMPLOYMENT_CAREER',
-    'agriculture-sustainability': 'BUSINESS_INVESTMENT',
-    'real-estate-infrastructure': 'BUSINESS_INVESTMENT',
-    'government-embassy-initiatives': 'FELLOWSHIPS_LEADERSHIP',
-    'innovation-research': 'EDUCATION_TRAINING',
-    'finance-economics': 'FUNDING_GRANTS',
-    'return-reintegration': 'EMPLOYMENT_CAREER',
+    'event-creative-industry': 'EVENT_CREATIVE_INDUSTRY',
+    'agriculture-sustainability': 'AGRICULTURE_SUSTAINABILITY',
+    'real-estate-infrastructure': 'REAL_ESTATE_INFRASTRUCTURE',
+    'government-embassy-initiatives': 'GOVERNMENT_EMBASSY_INITIATIVES',
+    'innovation-research': 'INNOVATION_RESEARCH',
+    'finance-economics': 'FINANCE_ECONOMICS',
+    'return-reintegration': 'RETURN_REINTEGRATION',
 };
 
 export default function OpportunityId() {
