@@ -12,7 +12,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Bookmark, Clock, ExternalLink, Mail, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import {
     SAVE_OPPORTUNITY,
@@ -31,6 +31,7 @@ import type {
 } from "@/services/gql/types/opportunities";
 import type { Opportunity } from "@/services/gql/types/opportunities";
 import { formatChatTimestamp } from "@/macros/time";
+import { useUserStore } from "@/store/useUserStore";
 
 const isUUID = (s?: string | null) =>
     !!s && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
@@ -144,6 +145,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
     // Dynamic field values keyed by formField.key
     const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
     const [resumeFile, setResumeFile] = useState<File | null>(null);
+    const user = useUserStore((state) => state.user);
 
     const isSaved = saved || item.isSavedByCurrentUser;
     const hasApplied = item.hasCurrentUserApplied ?? false;
@@ -186,6 +188,49 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             { key: 'phone', label: 'Phone Number', type: 'text' as const, required: false },
             { key: 'cover_letter', label: 'Cover Letter', type: 'textarea' as const, required: false },
         ];
+
+    useEffect(() => {
+        if (item.applicationMethod !== 'IN_PLATFORM_FORM' || !user) return;
+
+        const fullName = [user.firstName, user.middleName, user.lastName]
+            .filter(Boolean)
+            .join(' ')
+            .trim();
+
+        const fullNameField = displayFields.find((f) => {
+            const key = f.key.toLowerCase();
+            const label = f.label.toLowerCase();
+            return key === 'full_name' || key === 'fullname' || label === 'full name';
+        });
+
+        const emailField = displayFields.find((f) => {
+            const key = f.key.toLowerCase();
+            const label = f.label.toLowerCase();
+            return key === 'email' || label === 'email';
+        });
+
+        const phoneField = displayFields.find((f) => {
+            const key = f.key.toLowerCase();
+            const label = f.label.toLowerCase();
+            return key === 'phone' || key === 'phone_number' || key === 'phonenumber' || label === 'phone number';
+        });
+
+        setFieldValues((prev) => {
+            const next = { ...prev };
+
+            if (fullNameField && !next[fullNameField.key] && fullName) {
+                next[fullNameField.key] = fullName;
+            }
+            if (emailField && !next[emailField.key] && user.email) {
+                next[emailField.key] = user.email;
+            }
+            if (phoneField && !next[phoneField.key] && user.phone) {
+                next[phoneField.key] = user.phone;
+            }
+
+            return next;
+        });
+    }, [item.applicationMethod, user, displayFields]);
 
     const handleFieldChange = (key: string, val: string) => {
         setFieldValues(prev => ({ ...prev, [key]: val }));
