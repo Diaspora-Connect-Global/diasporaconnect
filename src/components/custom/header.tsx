@@ -51,12 +51,12 @@ export default function Header({
   const currentLocale = segments[0] || 'en';
 
   const navigation = [
-    { name: t('home'), href: `/${currentLocale}`, icon: "/HOME" },
+    { name: t('home'), href: `/${currentLocale}`, icon: "/HOME", prefetch: false },
     // prefetch: false avoids "preloaded but not used" console warning for this route's CSS
     { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY", prefetch: false },
     { name: t('post'), href: `/${currentLocale}/create-post`, icon: "/POST", disabled: true },
     { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT", disabled: true },
-    { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION" },
+    { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION", prefetch: false },
   ];
 
   const isActive = (href: string) => {
@@ -148,7 +148,7 @@ export default function Header({
 
                 {/* Logo */}
                 <div className=" flex justify-start items-center">
-                  <Link href={`/${currentLocale}`}>
+                  <Link href={`/${currentLocale}`} prefetch={false}>
                     <Image
                       src="/LOGO.svg"
                       alt="Logo"
@@ -211,7 +211,7 @@ export default function Header({
                 <div className="fixed top-0 left-0 h-full w-[85%] max-w-sm bg-surface-default z-50 lg:hidden overflow-y-auto shadow-2xl">
                   {/* Sidebar Header */}
                   <div className="flex justify-between items-center p-4 border-b border-border-subtle sticky top-0 bg-surface-default z-10">
-                    <Link href={`/${currentLocale}`} onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link href={`/${currentLocale}`} prefetch={false} onClick={() => setIsMobileMenuOpen(false)}>
                       <Image
                         src="/LOGO.svg"
                         alt="Logo"
@@ -343,7 +343,7 @@ export function DropdownMenuAvatar() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="lg:w-100 mx-20 mt-4" align="start">
         <DropdownMenuLabel>
-          <Link onClick={() => setOpen(false)} href={"/profile"} className='flex items-center justify-between'>
+          <Link onClick={() => setOpen(false)} href={"/profile"} prefetch={false} className='flex items-center justify-between'>
             <div className='flex space-x-4 items-center my-2'>
               <MyAvatar />
               <p className='text-xl'>{firstName} {middleName} {lastName}</p>
@@ -367,12 +367,12 @@ export function DropdownMenuAvatar() {
           {/* <DropdownMenuItem asChild>
     </DropdownMenuItem> */}
           <DropdownMenuItem asChild>
-            <Link href="/settings">
+            <Link href="/settings" prefetch={false}>
               <DMItem icon={<SettingsIcon className='w-full h-full' />} text={t('settingsPrivacy')} />
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link onClick={() => setOpen(false)} href={"/help"} className='flex items-center justify-between'>
+            <Link onClick={() => setOpen(false)} href={"/help"} prefetch={false} className='flex items-center justify-between'>
               <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
 
             </Link>

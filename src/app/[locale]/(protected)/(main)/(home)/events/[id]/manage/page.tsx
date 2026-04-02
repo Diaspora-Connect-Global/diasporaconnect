@@ -699,7 +699,7 @@ function SettingsTab({ eventId }: { eventId: string }) {
             Cancel event
           </ButtonType1>
         )}
-        <Link href={`/events/${eventId}`} className="text-sm text-text-brand hover:underline">
+        <Link href={`/events/${eventId}`} prefetch={false} className="text-sm text-text-brand hover:underline">
           View public page →
         </Link>
       </div>
@@ -801,7 +801,7 @@ export default function EventManagePage() {
           <h1 className="heading-small">Event management unavailable</h1>
           <p className="text-sm text-text-secondary">Users are not allowed to manage events.</p>
           <div>
-            <Link href={`/events/${eventId}`} className="text-sm text-text-brand hover:underline">
+            <Link href={`/events/${eventId}`} prefetch={false} className="text-sm text-text-brand hover:underline">
               Back to event
             </Link>
           </div>
@@ -815,7 +815,7 @@ export default function EventManagePage() {
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Link href={`/events/${eventId}`} className="text-text-secondary hover:text-text-brand">
+          <Link href={`/events/${eventId}`} prefetch={false} className="text-text-secondary hover:text-text-brand">
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div className="min-w-0">
