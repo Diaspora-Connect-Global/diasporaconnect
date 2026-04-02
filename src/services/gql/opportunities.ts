@@ -265,6 +265,7 @@ export const GET_SAVED_OPPORTUNITIES = gql`
           title
           category
           type
+          ownerType
           status
           deadline
           owner { id name avatarUrl type }

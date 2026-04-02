@@ -393,6 +393,9 @@
             "opportunities": "Opportunità",
             "youropp": "Le tue opportunità",
             "moreopp": "Esplora opportunità",
+            "posterBy": "Pubblicato da {user}",
+            "communityPoster": "Community",
+            "associationPoster": "Associazione",
             "none": {
                 "applied": "Non hai ancora fatto domanda per nessuna opportunità",
                 "saved": "Non hai opportunità salvate"

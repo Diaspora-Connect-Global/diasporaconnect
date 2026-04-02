@@ -393,6 +393,9 @@
             "opportunities": "Opportunités",
             "youropp": "Vos opportunités",
             "moreopp": "Explorer les opportunités",
+            "posterBy": "Publié par {user}",
+            "communityPoster": "Communauté",
+            "associationPoster": "Association",
             "none": {
                 "applied": "Vous n'avez pas encore postulé à des opportunités",
                 "saved": "Vous n'avez aucune opportunité sauvegardée"

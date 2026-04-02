@@ -476,6 +476,9 @@
             "backToOpportunities": "Back to opportunities",
             "discover": "Discover",
             "moreopp": "Explore opportunities",
+            "posterBy": "Poster by {user}",
+            "communityPoster": "Community",
+            "associationPoster": "Association",
             "none": {
                 "applied": "You have not applied to any opportunities yet",
                 "saved": "You have not saved to any opportunities yet"

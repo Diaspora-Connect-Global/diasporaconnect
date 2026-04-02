@@ -1,8 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Calendar, Search, ChevronRight, ExternalLink, Mail, ChevronDown, Briefcase, type LucideIcon } from "lucide-react";
+import { Calendar, Search, ChevronRight, ExternalLink, Mail, ChevronDown, Briefcase, Bookmark, type LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { ButtonType3 } from "@/components/custom/button";
 import { useQuery, useMutation } from "@apollo/client/react";
@@ -10,14 +10,12 @@ import { opportunities } from "./data";
 import {
   GET_USER_APPLICATIONS,
   GET_SAVED_OPPORTUNITIES,
-  LIST_OPPORTUNITIES,
   WITHDRAW_APPLICATION,
   UNSAVE_OPPORTUNITY,
 } from "@/services/gql/opportunities";
 import type {
   UserApplicationsResponse,
   GetSavedOpportunitiesData,
-  ListOpportunitiesResponse,
 } from "@/services/gql/types/opportunities";
 import type { Application } from "@/services/gql/types/opportunities";
 
@@ -60,6 +58,8 @@ interface SavedItem {
   title: string;
   category?: string;
   ownerName?: string;
+  ownerType?: string;
+  ownerEntityType?: string;
   deadline?: string | null;
 }
 
@@ -355,6 +355,28 @@ const SavedComponent = ({
 }) => {
   const t = useTranslations("home.opportunities");
 
+  const isLikelyId = (value?: string) => {
+    if (!value) return false;
+    const v = value.trim();
+    return /^[0-9a-f]{24}$/i.test(v) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+  };
+
+  const getPosterName = (saved: SavedItem) => {
+    const ownerType = (saved.ownerType ?? saved.ownerEntityType ?? "").toUpperCase();
+    const ownerName = saved.ownerName?.trim();
+    const hasReadableOwnerName = !!ownerName && !isLikelyId(ownerName);
+
+    if (ownerType === "COMMUNITY") {
+      return hasReadableOwnerName ? ownerName : t("communityPoster");
+    }
+
+    if (ownerType === "ASSOCIATION") {
+      return hasReadableOwnerName ? ownerName : t("associationPoster");
+    }
+
+    return "DiasporaPlug";
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   };
@@ -380,10 +402,23 @@ const SavedComponent = ({
         {displayItems.map((saved) => (
           <div
             key={saved.opportunityId}
-            className="flex flex-col justify-between p-4 bg-surface-default rounded-xl border border-border-subtle hover:border-border-default transition-colors"
+            className="relative flex flex-col justify-between p-4 bg-surface-default rounded-xl border border-border-subtle hover:border-border-default transition-colors"
           >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                onUnsave(saved.opportunityId);
+              }}
+              disabled={unsavingId === saved.opportunityId}
+              className="absolute top-4 right-4 transition-transform hover:scale-110 z-10 p-1 disabled:opacity-50"
+              aria-label="Unsave opportunity"
+            >
+              <Bookmark className="w-5 h-5 fill-text-brand text-text-brand" />
+            </button>
+
             {/* Top section: Title */}
-            <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="flex items-start justify-between gap-3 mb-2 pr-8">
               <h3 className="font-semibold text-text-primary text-base leading-tight line-clamp-2">
                 {saved.title}
               </h3>
@@ -395,7 +430,7 @@ const SavedComponent = ({
                 <Briefcase className="w-4 h-4 shrink-0" />
                 <span className="truncate">{saved.category}</span>
               </div>
-              <p className="text-sm text-text-secondary truncate">{saved.ownerName}</p>
+              <p className="text-sm text-text-secondary truncate">{t("posterBy", { user: getPosterName(saved) })}</p>
             </div>
 
             {/* Bottom section: Deadline and Button */}
@@ -410,17 +445,6 @@ const SavedComponent = ({
                 >
                   View Details <ChevronRight className="w-3 h-3" />
                 </Link>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onUnsave(saved.opportunityId);
-                  }}
-                  disabled={unsavingId === saved.opportunityId}
-                  className="px-3 py-1.5 text-sm font-medium text-red-500 border border-red-100 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-1 shrink-0 disabled:opacity-50"
-                >
-                  {unsavingId === saved.opportunityId ? "Unsaving..." : "Unsave"}
-                </button>
               </div>
             </div>
           </div>
@@ -432,6 +456,7 @@ const SavedComponent = ({
 
 export default function Opportunities() {
     const [activeTab, setActiveTab] = useState<string>("applied");
+  const [prefetchInactiveTab, setPrefetchInactiveTab] = useState(false);
     const tActions = useTranslations("actions")
 
     const TABS = [
@@ -452,16 +477,30 @@ export default function Opportunities() {
     const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
     const [unsavingId, setUnsavingId] = useState<string | null>(null);
 
-    const { data: applicationsData } = useQuery<UserApplicationsResponse>(GET_USER_APPLICATIONS, {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPrefetchInactiveTab(true);
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const shouldLoadApplications = activeTab === "applied" || prefetchInactiveTab;
+  const shouldLoadSaved = activeTab === "saved" || prefetchInactiveTab;
+
+  const { data: applicationsData, loading: applicationsLoading } = useQuery<UserApplicationsResponse>(GET_USER_APPLICATIONS, {
         variables: { limit: 50, offset: 0 },
+    skip: !shouldLoadApplications,
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
+    notifyOnNetworkStatusChange: false,
     });
-    const { data: savedData } = useQuery<GetSavedOpportunitiesData>(GET_SAVED_OPPORTUNITIES, {
+  const { data: savedData, loading: savedLoading } = useQuery<GetSavedOpportunitiesData>(GET_SAVED_OPPORTUNITIES, {
         variables: { limit: 50, offset: 0 },
-    });
-    const { data: listData } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
-        variables: {
-            input: { limit: 6, offset: 0 },
-        },
+    skip: !shouldLoadSaved,
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
+    notifyOnNetworkStatusChange: false,
     });
 
     const [withdrawApplication] = useMutation(WITHDRAW_APPLICATION, {
@@ -478,9 +517,10 @@ export default function Opportunities() {
             title: saved.opportunity?.title ?? "Saved opportunity",
             category: saved.opportunity?.category,
             ownerName: saved.opportunity?.owner?.name,
+        ownerType: saved.opportunity?.ownerType,
+        ownerEntityType: saved.opportunity?.owner?.type,
             deadline: saved.opportunity?.deadline,
         })) ?? [];
-    const discoverOpportunities = listData?.listOpportunities?.opportunities ?? [];
 
     const handleWithdraw = async (applicationId: string) => {
         setWithdrawingId(applicationId);
@@ -527,17 +567,25 @@ export default function Opportunities() {
                 {/* Opportunities Content */}
                 <div className="overflow-auto scrollbar-hide flex gap-[0.5rem] ">
                     {activeTab === "applied" ? (
+                    applicationsLoading && !applicationsData ? (
+                      <p className="text-text-secondary py-8 text-center">Loading...</p>
+                    ) : (
                         <AppliedComponent
                             applications={applications}
                             onWithdraw={handleWithdraw}
                             withdrawingId={withdrawingId}
                         />
+                    )
+                    ) : (
+                    savedLoading && !savedData ? (
+                      <p className="text-text-secondary py-8 text-center">Loading...</p>
                     ) : (
                         <SavedComponent
                             savedItems={savedItems}
                             onUnsave={handleUnsave}
                             unsavingId={unsavingId}
                         />
+                    )
                     )}
                 </div>
 

@@ -393,6 +393,9 @@
             "opportunities": "Möglichkeiten",
             "youropp": "Ihre Möglichkeiten",
             "moreopp": "Möglichkeiten erkunden",
+            "posterBy": "Gepostet von {user}",
+            "communityPoster": "Community",
+            "associationPoster": "Verein",
             "none": {
                 "applied": "Sie haben sich noch nicht auf Möglichkeiten beworben",
                 "saved": "Sie haben keine gespeicherten Möglichkeiten"
