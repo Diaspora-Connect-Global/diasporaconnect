@@ -139,26 +139,55 @@ const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProp
 
 export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [saved, setSaved] = useState(!!item.isSavedByCurrentUser);
+    const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const t = useTranslations("home.opportunities");
 
     // Dynamic field values keyed by formField.key
     const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
     const [resumeFile, setResumeFile] = useState<File | null>(null);
     const user = useUserStore((state) => state.user);
 
-    const isSaved = saved || item.isSavedByCurrentUser;
+    const isSaved = savedOverride ?? !!item.isSavedByCurrentUser;
     const hasApplied = item.hasCurrentUserApplied ?? false;
     const applicationId = item.currentUserApplicationId ?? null;
+
+    const isLikelyId = (value?: string | null) => {
+        if (!value) return false;
+        const v = value.trim();
+        return /^[0-9a-f]{24}$/i.test(v) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+    };
+
+    const getPosterName = () => {
+        const ownerType = (item.ownerType ?? item.owner?.type ?? "").toUpperCase();
+        const ownerName = item.owner?.name?.trim();
+        const hasReadableOwnerName = !!ownerName && !isLikelyId(ownerName);
+
+        if (ownerType === "COMMUNITY") {
+            return hasReadableOwnerName ? ownerName : t("communityPoster");
+        }
+
+        if (ownerType === "ASSOCIATION") {
+            return hasReadableOwnerName ? ownerName : t("associationPoster");
+        }
+
+        return "DiasporaPlug";
+    };
+
+    const posterName = getPosterName();
+
+    useEffect(() => {
+        setSavedOverride(null);
+    }, [item.id, item.isSavedByCurrentUser]);
 
     const salary = formatSalary(item.salaryMin, item.salaryMax, item.salaryCurrency);
 
     const [saveOpportunity, { loading: saving }] = useMutation<SaveOpportunityData>(SAVE_OPPORTUNITY, {
-        onCompleted: () => setSaved(true),
+        onCompleted: () => setSavedOverride(true),
         refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
     });
     const [unsaveOpportunity, { loading: unsaving }] = useMutation(UNSAVE_OPPORTUNITY, {
-        onCompleted: () => setSaved(false),
+        onCompleted: () => setSavedOverride(false),
         refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
     });
     const [submitApplication, { loading: submitting }] = useMutation<SubmitApplicationData>(SUBMIT_APPLICATION, {
@@ -299,8 +328,10 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                 onClick={() => setIsDialogOpen(true)}
             >
                 <button
+                    type="button"
                     className="absolute top-5 right-5 transition-transform hover:scale-110 z-10 p-1"
                     onClick={handleSaveToggle}
+                    disabled={saving || unsaving}
                 >
                     <Bookmark className={`w-6 h-6 ${isSaved ? "fill-text-brand text-text-brand" : "text-text-secondary hover:text-text-brand"}`} />
                 </button>
@@ -309,7 +340,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                     <div className="flex gap-4">
                         <div className="w-12 h-12 bg-surface-subtle border border-border-subtle rounded-xl flex items-center justify-center shrink-0">
                             <span className="text-xl font-bold text-text-primary capitalize">
-                                {item.owner?.name?.charAt(0) || item.title?.charAt(0) || "O"}
+                                {posterName?.charAt(0) || item.title?.charAt(0) || "O"}
                             </span>
                         </div>
                         <div className="flex flex-col justify-center">
@@ -317,7 +348,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                 {item.title}
                             </h3>
                             <p className="text-[14px] text-text-secondary mt-1 line-clamp-1">
-                                {item.owner?.name || "Diaspora Connect"}
+                                {t("posterBy", { user: posterName })}
                             </p>
                         </div>
                     </div>

@@ -8,6 +8,7 @@ export const GET_OPPORTUNITY = gql`
   query GetOpportunity($id: String!) {
     getOpportunity(id: $id) {
       id
+      ownerType
       title
       description
       responsibilities
@@ -48,6 +49,7 @@ export const LIST_OPPORTUNITIES = gql`
       total
       opportunities {
         id
+        ownerType
         title
         description
         status
@@ -84,6 +86,7 @@ export const GET_OPPORTUNITY_FEED = gql`
       total
       opportunities {
         id
+        ownerType
         title
         description
         status
