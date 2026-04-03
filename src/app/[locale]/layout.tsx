@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { notFound } from 'next/navigation';
@@ -8,11 +7,6 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, getMessages } from 'next-intl/server';
 import GraphQLProvider from "@/components/provider/apollo-provider";
 import { Toaster } from 'sonner';
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://diaspoplug.com';
 const metadataBase = new URL(APP_URL.replace(/\/$/, ''));
@@ -94,7 +88,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} antialiased`}>
+      <body className="antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider 
             attribute="class" 
