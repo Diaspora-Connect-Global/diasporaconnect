@@ -51,13 +51,19 @@ function formatOpportunityDate(iso?: string) {
     }
 }
 
-function formatSalary(min?: number | null, max?: number | null, currency?: string | null) {
+function formatCompensation(
+    min?: number | null,
+    max?: number | null,
+    currency?: string | null,
+    compensationType?: string | null,
+) {
     if (!min && !max) return null;
     const fmt = (n: number) => n.toLocaleString();
     const cur = currency ?? '';
-    if (min && max) return `${cur} ${fmt(min)} – ${fmt(max)}`;
-    if (min) return `${cur} ${fmt(min)}+`;
-    return `Up to ${cur} ${fmt(max!)}`;
+    const typeLabel = compensationType ? ` (${compensationType.replace(/_/g, ' ').toLowerCase()})` : '';
+    if (min && max) return `${cur} ${fmt(min)} – ${fmt(max)}${typeLabel}`;
+    if (min) return `${cur} ${fmt(min)}+${typeLabel}`;
+    return `Up to ${cur} ${fmt(max!)}${typeLabel}`;
 }
 
 // ─── Dynamic form field renderer ─────────────────────────────────────────────
@@ -180,7 +186,12 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
         setSavedOverride(null);
     }, [item.id, item.isSavedByCurrentUser]);
 
-    const salary = formatSalary(item.salaryMin, item.salaryMax, item.salaryCurrency);
+    const compensation = formatCompensation(
+        item.compensationMin,
+        item.compensationMax,
+        item.compensationCurrency,
+        item.compensationType,
+    );
 
     const [saveOpportunity, { loading: saving }] = useMutation<SaveOpportunityData>(SAVE_OPPORTUNITY, {
         onCompleted: () => setSavedOverride(true),
@@ -366,18 +377,18 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                     {item.location && !isUUID(item.location) && (
                         <p className="text-[14px] text-text-secondary">{item.location}</p>
                     )}
-                    {salary && (
-                        <p className="text-[14px] font-medium text-text-success">{salary}</p>
+                    {compensation && (
+                        <p className="text-[14px] font-medium text-text-success">{compensation}</p>
                     )}
                     <div className="flex flex-wrap items-center gap-2 mt-1">
-                        {item.workMode && (
+                        {item.deliveryMode && (
                             <span className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-[13px] font-medium rounded-lg capitalize">
-                                {item.workMode.replace(/_/g, ' ').toLowerCase()}
+                                {item.deliveryMode.replace(/_/g, ' ').toLowerCase()}
                             </span>
                         )}
-                        {item.engagementType && (
+                        {item.commitmentType && (
                             <span className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-[13px] font-medium rounded-lg capitalize">
-                                {item.engagementType.replace(/_/g, ' ').toLowerCase()}
+                                {item.commitmentType.replace(/_/g, ' ').toLowerCase()}
                             </span>
                         )}
                     </div>
@@ -436,16 +447,16 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                         <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.description}</p>
                                     </section>
                                 )}
-                                {item.responsibilities && (
+                                {item.scope && (
                                     <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Responsibilities</h3>
-                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.responsibilities}</p>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Scope</h3>
+                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.scope}</p>
                                     </section>
                                 )}
-                                {item.requirements && (
+                                {item.eligibilityCriteria && (
                                     <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Requirements</h3>
-                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.requirements}</p>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Eligibility Criteria</h3>
+                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.eligibilityCriteria}</p>
                                     </section>
                                 )}
                                 {item.skills && item.skills.length > 0 && (
@@ -506,16 +517,16 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                 <div className="bg-surface-tertiary w-full rounded-lg p-4 border border-border-subtle space-y-4">
                                     {/* Meta info */}
                                     <div className="space-y-2 text-sm text-text-secondary">
-                                        {[item.workMode, item.engagementType, !isUUID(item.location) ? item.location : null]
+                                        {[item.deliveryMode, item.commitmentType, !isUUID(item.location) ? item.location : null]
                                             .filter(Boolean)
                                             .join(' · ') && (
                                             <p className="text-text-primary">
-                                                {[item.workMode, item.engagementType, !isUUID(item.location) ? item.location : null]
+                                                {[item.deliveryMode, item.commitmentType, !isUUID(item.location) ? item.location : null]
                                                     .filter(Boolean).join(' · ')}
                                             </p>
                                         )}
-                                        {salary && (
-                                            <p className="font-medium text-text-success">{salary}</p>
+                                        {compensation && (
+                                            <p className="font-medium text-text-success">{compensation}</p>
                                         )}
                                         {item.deadline && (
                                             <div className="flex items-center gap-2">

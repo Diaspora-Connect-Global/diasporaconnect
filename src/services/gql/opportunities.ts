@@ -11,22 +11,26 @@ export const GET_OPPORTUNITY = gql`
       ownerType
       title
       description
-      responsibilities
-      requirements
+      scope
+      eligibilityCriteria
       status
       category
       type
       subCategory
-      workMode
-      engagementType
+      deliveryMode
+      commitmentType
       location
+      duration
       applicationMethod
       externalLink
       applicationEmail
       formFields { key label type required }
-      salaryMin
-      salaryMax
-      salaryCurrency
+      compensationMin
+      compensationMax
+      compensationCurrency
+      compensationType
+      benefitsSummary
+      eligibilityRegions
       deadline
       applicationCount
       skills
@@ -55,16 +59,18 @@ export const LIST_OPPORTUNITIES = gql`
         status
         category
         type
-        workMode
-        engagementType
+        deliveryMode
+        commitmentType
         location
+        duration
         deadline
         applicationMethod
         externalLink
         applicationEmail
-        salaryMin
-        salaryMax
-        salaryCurrency
+        compensationMin
+        compensationMax
+        compensationCurrency
+        compensationType
         skills
         tags
         applicationCount
@@ -92,16 +98,18 @@ export const GET_OPPORTUNITY_FEED = gql`
         status
         category
         type
-        workMode
-        engagementType
+        deliveryMode
+        commitmentType
         location
+        duration
         deadline
         applicationMethod
         externalLink
         applicationEmail
-        salaryMin
-        salaryMax
-        salaryCurrency
+        compensationMin
+        compensationMax
+        compensationCurrency
+        compensationType
         skills
         tags
         applicationCount
