@@ -133,7 +133,7 @@ const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProp
             id={field.key}
             type={field.type === 'email' ? 'email' : 'text'}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(val) => onChange(val)}
             label={field.label}
             placeholder={field.label}
             required={field.required}
