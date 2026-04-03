@@ -583,7 +583,8 @@
             "opportunity": {
                 "default": "Opportunity",
                 "application": {
-                    "submitted": "Application submitted"
+                    "submitted": "Application submitted",
+                    "accepted": "Application accepted"
                 }
             },
             "default": "Notification"

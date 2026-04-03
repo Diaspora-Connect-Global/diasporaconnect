@@ -497,7 +497,8 @@
             "opportunity": {
                 "default": "Gelegenheit",
                 "application": {
-                    "submitted": "Bewerbung eingereicht"
+                    "submitted": "Bewerbung eingereicht",
+                    "accepted": "Bewerbung angenommen"
                 }
             },
             "default": "Benachrichtigung"
