@@ -24,8 +24,19 @@ import { GET_COMMUNITY } from '@/services/gql/community';
 function getNotificationTypeLabel(type: string | undefined, t: (key: string) => string): string {
   if (!type) return t('types.default');
   const key = `types.${type}`;
-  const label = t(key);
-  return label !== key ? label : t('types.default');
+  try {
+    return t(key);
+  } catch {
+    if (type.startsWith('opportunity.')) {
+      try {
+        return t('types.opportunity.default');
+      } catch {
+        return t('types.default');
+      }
+    }
+
+    return t('types.default');
+  }
 }
 
 type NotificationData = {

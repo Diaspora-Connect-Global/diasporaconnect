@@ -494,7 +494,12 @@
                     "request": "Demande d'adhésion à l'association"
                 }
             },
-            "opportunity": "Opportunité",
+            "opportunity": {
+                "default": "Opportunité",
+                "application": {
+                    "submitted": "Candidature soumise"
+                }
+            },
             "default": "Notification"
         },
         "messages": {

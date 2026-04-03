@@ -580,7 +580,12 @@
                     "request": "Association membership request"
                 }
             },
-            "opportunity": "Opportunity",
+            "opportunity": {
+                "default": "Opportunity",
+                "application": {
+                    "submitted": "Application submitted"
+                }
+            },
             "default": "Notification"
         },
         "messages": {

@@ -494,7 +494,12 @@
                     "request": "Vereinsmitgliedschaftsanfrage"
                 }
             },
-            "opportunity": "Gelegenheit",
+            "opportunity": {
+                "default": "Gelegenheit",
+                "application": {
+                    "submitted": "Bewerbung eingereicht"
+                }
+            },
             "default": "Benachrichtigung"
         },
         "messages": {

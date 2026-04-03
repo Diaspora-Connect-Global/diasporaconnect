@@ -494,7 +494,12 @@
                     "request": "Richiesta di iscrizione all'associazione"
                 }
             },
-            "opportunity": "Opportunità",
+            "opportunity": {
+                "default": "Opportunità",
+                "application": {
+                    "submitted": "Candidatura inviata"
+                }
+            },
             "default": "Notifica"
         },
         "messages": {
