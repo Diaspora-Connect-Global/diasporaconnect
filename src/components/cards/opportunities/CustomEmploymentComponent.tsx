@@ -12,7 +12,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Bookmark, Clock, ExternalLink, Mail, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import {
     SAVE_OPPORTUNITY,
@@ -200,23 +200,27 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
         ],
     });
 
-    const formFields = item.formFields ?? [];
+    const formFields = useMemo(() => item.formFields ?? [], [item.formFields]);
 
     // Build a sorted list: standard fields first, then custom
     const standardFieldOrder = ['full_name', 'email', 'phone', 'cover_letter', 'resume'];
-    const orderedFields = [
-        ...standardFieldOrder.map(k => formFields.find(f => f.key === k)).filter(Boolean),
-        ...formFields.filter(f => !STANDARD_KEYS.has(f.key)),
-    ] as typeof formFields;
+    const orderedFields = useMemo(() => (
+        [
+            ...standardFieldOrder.map(k => formFields.find(f => f.key === k)).filter(Boolean),
+            ...formFields.filter(f => !STANDARD_KEYS.has(f.key)),
+        ] as typeof formFields
+    ), [formFields]);
 
-    const displayFields = orderedFields.length > 0
-        ? orderedFields
-        : [
-            { key: 'full_name', label: 'Full Name', type: 'text' as const, required: true },
-            { key: 'email', label: 'Email', type: 'email' as const, required: true },
-            { key: 'phone', label: 'Phone Number', type: 'text' as const, required: false },
-            { key: 'cover_letter', label: 'Cover Letter', type: 'textarea' as const, required: false },
-        ];
+    const displayFields = useMemo(() => (
+        orderedFields.length > 0
+            ? orderedFields
+            : [
+                { key: 'full_name', label: 'Full Name', type: 'text' as const, required: true },
+                { key: 'email', label: 'Email', type: 'email' as const, required: true },
+                { key: 'phone', label: 'Phone Number', type: 'text' as const, required: false },
+                { key: 'cover_letter', label: 'Cover Letter', type: 'textarea' as const, required: false },
+            ]
+    ), [orderedFields]);
 
     useEffect(() => {
         if (item.applicationMethod !== 'IN_PLATFORM_FORM' || !user) return;
@@ -246,18 +250,22 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
 
         setFieldValues((prev) => {
             const next = { ...prev };
+            let changed = false;
 
             if (fullNameField && !next[fullNameField.key] && fullName) {
                 next[fullNameField.key] = fullName;
+                changed = true;
             }
             if (emailField && !next[emailField.key] && user.email) {
                 next[emailField.key] = user.email;
+                changed = true;
             }
             if (phoneField && !next[phoneField.key] && user.phone) {
                 next[phoneField.key] = user.phone;
+                changed = true;
             }
 
-            return next;
+            return changed ? next : prev;
         });
     }, [item.applicationMethod, user, displayFields]);
 
