@@ -14,6 +14,11 @@ export default function OAuthCallbackPage() {
   const { setUser } = useUserStore();
 
   useEffect(() => {
+    const isAllowedUserRole = (role?: string | null) => {
+      const normalized = (role || '').trim().toLowerCase();
+      return normalized === 'local' || normalized === 'diaspora';
+    };
+
     const error = params.get('error');
     const description = params.get('description');
 
@@ -54,12 +59,18 @@ export default function OAuthCallbackPage() {
 
     // CASE 1: Existing user - has sessionToken
     if (sessionToken) {
+      const role = params.get('role') || '';
+      if (!isAllowedUserRole(role)) {
+        router.replace(`/signin?error=${encodeURIComponent('Access denied. Only local or diaspora users can sign in here.')}`);
+        return;
+      }
+
       const user = {
         userId: params.get('userId') || '',
         email: params.get('email') || '',
         firstName: decodeURIComponent(params.get('firstName') || ''),
         lastName: decodeURIComponent(params.get('lastName') || ''),
-        role: params.get('role') || '',
+        role,
         middleName:decodeURIComponent(params.get('middleName') || '') ,
         residenceSinceYear: 0,
         residenceSinceMonth: 0,

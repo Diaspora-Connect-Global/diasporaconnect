@@ -54,6 +54,11 @@ export default function SignInForm() {
     const setDeviceMetadata = useAuthStore((s) => s.setDeviceMetadata);
     const setRememberMeStore = useUserStore((s) => s.setRememberMe);
 
+    const isAllowedUserRole = (role?: string | null) => {
+        const normalized = (role || '').trim().toLowerCase();
+        return normalized === 'local' || normalized === 'diaspora';
+    };
+
     /* ============ Validation ============ */
     const validateEmail = (email: string): string | undefined => {
         if (!email.trim()) return t('validation.email.required');
@@ -121,6 +126,13 @@ export default function SignInForm() {
             }
 
             if (data?.login.success) {
+                if (!isAllowedUserRole(data.login.user?.role)) {
+                    toast.error('Access denied. Only local or diaspora users can sign in here.');
+                    setShowTwoFactor(false);
+                    setTwoFactorCode('');
+                    return;
+                }
+
                 // 🔥 Zustand storage instead of authStorage
                 setTokens({
                     accessToken: data.login.accessToken,

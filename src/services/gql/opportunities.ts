@@ -8,7 +8,10 @@ export const GET_OPPORTUNITY = gql`
   query GetOpportunity($id: String!) {
     getOpportunity(id: $id) {
       id
+      ownerId
       ownerType
+      visibility
+      priorityLevel
       title
       description
       scope
@@ -24,7 +27,6 @@ export const GET_OPPORTUNITY = gql`
       applicationMethod
       externalLink
       applicationEmail
-      formFields { key label type required }
       compensationMin
       compensationMax
       compensationCurrency
@@ -48,12 +50,15 @@ export const GET_OPPORTUNITY = gql`
 `;
 
 export const LIST_OPPORTUNITIES = gql`
-  query ListOpportunities($input: ListOpportunitiesInput) {
+  query ListOpportunities($input: ListOpportunitiesInput!) {
     listOpportunities(input: $input) {
       total
       opportunities {
         id
+        ownerId
         ownerType
+        visibility
+        priorityLevel
         title
         description
         status
@@ -74,7 +79,47 @@ export const LIST_OPPORTUNITIES = gql`
         skills
         tags
         applicationCount
+        isSavedByCurrentUser
+        hasCurrentUserApplied
+        currentUserApplicationId
+        createdAt
+        publishedAt
+        owner { id name avatarUrl type }
+      }
+    }
+  }
+`;
+
+export const OPPORTUNITIES = gql`
+  query Opportunities($input: ListOpportunitiesInput!) {
+    opportunities(input: $input) {
+      total
+      opportunities {
+        id
+        ownerId
+        ownerType
+        visibility
         priorityLevel
+        title
+        description
+        status
+        category
+        type
+        deliveryMode
+        commitmentType
+        location
+        duration
+        deadline
+        applicationMethod
+        externalLink
+        applicationEmail
+        compensationMin
+        compensationMax
+        compensationCurrency
+        compensationType
+        skills
+        tags
+        applicationCount
         isSavedByCurrentUser
         hasCurrentUserApplied
         currentUserApplicationId
@@ -92,7 +137,10 @@ export const GET_OPPORTUNITY_FEED = gql`
       total
       opportunities {
         id
+        ownerId
         ownerType
+        visibility
+        priorityLevel
         title
         description
         status
@@ -113,7 +161,6 @@ export const GET_OPPORTUNITY_FEED = gql`
         skills
         tags
         applicationCount
-        priorityLevel
         isSavedByCurrentUser
         hasCurrentUserApplied
         currentUserApplicationId
@@ -129,58 +176,47 @@ export const GET_OPPORTUNITY_FEED = gql`
 // OPPORTUNITY MUTATIONS
 // ============================================
 
-export const CREATE_OPPORTUNITY = gql`
-  mutation CreateOpportunity($input: CreateOpportunityInput!) {
-    createOpportunity(input: $input)
-  }
-`;
-
-export const UPDATE_OPPORTUNITY = gql`
-  mutation UpdateOpportunity($id: String!, $input: UpdateOpportunityInput!) {
-    updateOpportunity(id: $id, input: $input)
-  }
-`;
-
-export const PUBLISH_OPPORTUNITY = gql`
-  mutation PublishOpportunity($id: String!) {
-    publishOpportunity(id: $id)
-  }
-`;
-
-export const DRAFT_OPPORTUNITY = gql`
-  mutation DraftOpportunity($id: String!) {
-    draftOpportunity(id: $id)
-  }
-`;
-
-export const CLOSE_OPPORTUNITY = gql`
-  mutation CloseOpportunity($id: String!, $reason: String) {
-    closeOpportunity(id: $id, reason: $reason)
-  }
-`;
-
-export const DELETE_OPPORTUNITY = gql`
-  mutation DeleteOpportunity($id: String!) {
-    deleteOpportunity(id: $id)
-  }
-`;
-
 // ============================================
 // APPLICATION QUERIES
 // ============================================
 
 export const GET_APPLICATION = gql`
-  query GetApplication($id: String!) {
-    getApplication(id: $id) {
+  query GetApplication($applicationId: String!) {
+    getApplication(applicationId: $applicationId) {
       id
+      opportunityId
+      applicantId
       status
+      resumeFileRef { path filename mimeType sizeBytes }
       coverLetter
+      customAnswers
       reviewNotes
+      reviewedBy
       reviewedAt
       createdAt
+      updatedAt
       opportunity {
         id
         title
+        category
+        type
+        applicationMethod
+        deadline
+      }
+      applicantProfile {
+        userId
+        firstName
+        middleName
+        lastName
+        email
+        phone
+        bio
+        avatarUrl
+        location
+        city
+        countryOfOrigin
+        residenceCountry
+        role
       }
     }
   }
@@ -201,6 +237,8 @@ export const GET_USER_APPLICATIONS = gql`
           title
           category
           type
+          deadline
+          applicationMethod
           owner { id name avatarUrl type }
         }
       }
@@ -214,12 +252,39 @@ export const GET_APPLICATIONS = gql`
       total
       applications {
         id
+        opportunityId
+        applicantId
         status
         createdAt
+        updatedAt
         reviewNotes
-        applicantId
         coverLetter
         resumeFileRef { path filename mimeType sizeBytes }
+        applicantProfile {
+          userId
+          firstName
+          middleName
+          lastName
+          email
+          phone
+          bio
+          avatarUrl
+          location
+          city
+          countryOfOrigin
+          residenceCountry
+          role
+        }
+        opportunity {
+          id
+          title
+          category
+          type
+          ownerType
+          applicationMethod
+          deadline
+          owner { id name avatarUrl type }
+        }
       }
     }
   }
@@ -235,27 +300,9 @@ export const SUBMIT_APPLICATION = gql`
   }
 `;
 
-export const REVIEW_APPLICATION = gql`
-  mutation ReviewApplication($applicationId: String!, $notes: String) {
-    reviewApplication(applicationId: $applicationId, notes: $notes)
-  }
-`;
-
-export const ACCEPT_APPLICATION = gql`
-  mutation AcceptApplication($id: String!, $notes: String) {
-    acceptApplication(id: $id, notes: $notes)
-  }
-`;
-
-export const REJECT_APPLICATION = gql`
-  mutation RejectApplication($id: String!, $reason: String) {
-    rejectApplication(id: $id, reason: $reason)
-  }
-`;
-
 export const WITHDRAW_APPLICATION = gql`
-  mutation WithdrawApplication($id: String!) {
-    withdrawApplication(id: $id)
+  mutation WithdrawApplication($applicationId: String!) {
+    withdrawApplication(applicationId: $applicationId)
   }
 `;
 

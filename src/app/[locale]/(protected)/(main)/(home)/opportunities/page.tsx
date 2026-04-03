@@ -510,7 +510,7 @@ export default function Opportunities() {
         refetchQueries: [{ query: GET_SAVED_OPPORTUNITIES, variables: { limit: 50, offset: 0 } }],
     });
 
-    const applications: Application[] = applicationsData?.userApplications?.applications ?? [];
+    const applications: Application[] = applicationsData?.getUserApplications?.applications ?? applicationsData?.userApplications?.applications ?? [];
     const savedItems: SavedItem[] =
         savedData?.getSavedOpportunities?.savedOpportunities?.map((saved) => ({
             opportunityId: saved.opportunity?.id ?? saved.opportunityId,
@@ -525,7 +525,7 @@ export default function Opportunities() {
     const handleWithdraw = async (applicationId: string) => {
         setWithdrawingId(applicationId);
         try {
-            await withdrawApplication({ variables: { id: applicationId } });
+          await withdrawApplication({ variables: { applicationId } });
         } finally {
             setWithdrawingId(null);
         }
@@ -533,7 +533,7 @@ export default function Opportunities() {
     const handleUnsave = async (opportunityId: string) => {
         setUnsavingId(opportunityId);
         try {
-            await unsaveOpportunity({ variables: { id: opportunityId } });
+          await unsaveOpportunity({ variables: { id: opportunityId } });
         } finally {
             setUnsavingId(null);
         }

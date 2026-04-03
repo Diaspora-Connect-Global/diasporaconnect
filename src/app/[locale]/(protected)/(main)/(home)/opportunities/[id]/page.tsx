@@ -89,7 +89,7 @@ export default function OpportunityId() {
                         <ArrowLeft size={20} />
                         <span className="font-medium text-sm">Back to Opportunities</span>
                     </button>
-                    <CustomEmploymentComponent item={singleOpportunity} />
+                    <CustomEmploymentComponent item={singleOpportunity} displayMode="details" />
                 </div>
             </div>
         );

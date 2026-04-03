@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -40,6 +39,7 @@ const STANDARD_KEYS = new Set(['full_name', 'email', 'phone', 'cover_letter', 'r
 
 interface OpportunityItemProps {
     item: Opportunity;
+    displayMode?: 'card' | 'details';
 }
 
 function formatOpportunityDate(iso?: string) {
@@ -155,7 +155,7 @@ const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProp
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
+export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: OpportunityItemProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -169,6 +169,10 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
     const isSaved = savedOverride ?? !!item.isSavedByCurrentUser;
     const hasApplied = item.hasCurrentUserApplied ?? false;
     const applicationId = item.currentUserApplicationId ?? null;
+    const isExternalLinkMethod = item.applicationMethod === "EXTERNAL_LINK";
+    const isEmailRequestMethod = item.applicationMethod === "EMAIL_REQUEST";
+    const isInPlatformFormMethod = item.applicationMethod === "IN_PLATFORM_FORM"
+        || (!item.applicationMethod || !["EXTERNAL_LINK", "EMAIL_REQUEST", "IN_PLATFORM_FORM"].includes(item.applicationMethod));
 
     const isLikelyId = (value?: string | null) => {
         if (!value) return false;
@@ -254,7 +258,6 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                 { key: 'full_name', label: 'Full Name', type: 'text' as const, required: true },
                 { key: 'email', label: 'Email', type: 'email' as const, required: true },
                 { key: 'phone', label: 'Phone Number', type: 'text' as const, required: false },
-                { key: 'cover_letter', label: 'Cover Letter', type: 'textarea' as const, required: false },
             ]
     ), [orderedFields]);
 
@@ -309,6 +312,30 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             const next = { ...prev };
             let changed = false;
 
+            const fullNameTargets = displayFields
+                .filter((f) => {
+                    const key = f.key.toLowerCase();
+                    const label = f.label.toLowerCase();
+                    return key === 'full_name' || key === 'fullname' || key === 'fullName'.toLowerCase() || label.includes('full name');
+                })
+                .map((f) => f.key);
+
+            const emailTargets = displayFields
+                .filter((f) => {
+                    const key = f.key.toLowerCase();
+                    const label = f.label.toLowerCase();
+                    return key === 'email' || label.includes('email');
+                })
+                .map((f) => f.key);
+
+            const phoneTargets = displayFields
+                .filter((f) => {
+                    const key = f.key.toLowerCase();
+                    const label = f.label.toLowerCase();
+                    return key === 'phone' || key === 'phone_number' || key === 'phonenumber' || label.includes('phone');
+                })
+                .map((f) => f.key);
+
             if (fullNameField && !next[fullNameField.key] && fullName) {
                 next[fullNameField.key] = fullName;
                 changed = true;
@@ -322,9 +349,41 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                 changed = true;
             }
 
+            for (const key of fullNameTargets) {
+                if (!next[key] && fullName) {
+                    next[key] = fullName;
+                    changed = true;
+                }
+            }
+            for (const key of emailTargets) {
+                if (!next[key] && user.email) {
+                    next[key] = user.email;
+                    changed = true;
+                }
+            }
+            for (const key of phoneTargets) {
+                if (!next[key] && userPhone) {
+                    next[key] = userPhone;
+                    changed = true;
+                }
+            }
+
+            if (!next['full_name'] && fullName) {
+                next['full_name'] = fullName;
+                changed = true;
+            }
+            if (!next['email'] && user.email) {
+                next['email'] = user.email;
+                changed = true;
+            }
+            if (!next['phone'] && userPhone) {
+                next['phone'] = userPhone;
+                changed = true;
+            }
+
             return changed ? next : prev;
         });
-    }, [item.applicationMethod, user, fullNameField, emailField, phoneField]);
+    }, [item.applicationMethod, user, fullNameField, emailField, phoneField, displayFields]);
 
     const handleFieldChange = (key: string, val: string) => {
         setFieldValues(prev => ({ ...prev, [key]: val }));
@@ -384,6 +443,287 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             if (!saving) saveOpportunity({ variables: { id: item.id } });
         }
     };
+
+    const detailContent = (
+        <>
+            <button
+                type="button"
+                onClick={handleSaveToggle}
+                disabled={saving || unsaving}
+                className="absolute top-4 right-4 rounded-full p-2.5 opacity-100 ring-offset-background transition-all hover:scale-105 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-text-secondary bg-surface-default border border-border-subtle shadow-sm hover:text-text-brand"
+            >
+                <Bookmark className={`w-5 h-5 ${isSaved ? "fill-text-brand text-text-brand" : "text-text-secondary"}`} />
+                <span className="sr-only">{isSaved ? "Unsave" : "Save"}</span>
+            </button>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="text-left">
+                        <div className="space-y-2">
+                            {item.location && !isUUID(item.location) && (
+                                <p className="text-text-secondary text-sm">{item.location}</p>
+                            )}
+                            <h2 className="text-2xl font-bold text-text-primary">
+                                {item.title}
+                            </h2>
+                            {showHeaderBadges && (
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {item.status && (
+                                        <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                            {formatEnumLabel(item.status)}
+                                        </span>
+                                    )}
+                                    {item.type && (
+                                        <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                            {formatEnumLabel(String(item.type))}
+                                        </span>
+                                    )}
+                                    {item.category && (
+                                        <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                            {formatEnumLabel(String(item.category))}
+                                        </span>
+                                    )}
+                                    {safeSubCategory && (
+                                        <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                            {safeSubCategory}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            <div className="flex items-center gap-1 text-text-secondary text-sm">
+                                <Clock className="w-4 h-4" />
+                                {formatOpportunityDate(item.createdAt)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="border-b border-b-border-subtle pb-4 space-y-6">
+                        {item.description && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Description</h3>
+                                <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.description}</p>
+                            </section>
+                        )}
+                        {item.scope && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Scope</h3>
+                                <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.scope}</p>
+                            </section>
+                        )}
+                        {item.eligibilityCriteria && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Eligibility Criteria</h3>
+                                <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.eligibilityCriteria}</p>
+                            </section>
+                        )}
+                        {safeDuration && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Duration</h3>
+                                <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{safeDuration}</p>
+                            </section>
+                        )}
+                        {safeBenefitsSummary && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Benefits</h3>
+                                <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{safeBenefitsSummary}</p>
+                            </section>
+                        )}
+                        {safeEligibilityRegions.length > 0 && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Eligibility Regions</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {safeEligibilityRegions.map((region) => (
+                                        <span key={region} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
+                                            {region}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                        {item.skills && item.skills.length > 0 && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Skills</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {item.skills.map(skill => (
+                                        <span key={skill} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                        {safeTags.length > 0 && (
+                            <section>
+                                <h3 className="text-lg font-semibold text-text-primary mb-3">Tags</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {safeTags.map((tag) => (
+                                        <span key={tag} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </div>
+
+                    {/* Application Form — IN_PLATFORM_FORM only */}
+                    {isInPlatformFormMethod && !hasApplied && (
+                        <section className="py-4" id="form-header">
+                            <p className="font-heading-xsmall text-lg font-semibold mb-1">Apply for this opportunity</p>
+                            <p className="text-sm text-text-secondary mb-4">
+                                <span className="text-red-500">*</span> Required fields
+                            </p>
+                            <form className="space-y-4" onSubmit={handleSubmit}>
+                                {displayFields.map(field => (
+                                    <DynamicField
+                                        key={field.key}
+                                        field={field}
+                                        value={fieldValues[field.key] ?? ''}
+                                        onChange={(val) => handleFieldChange(field.key, val)}
+                                        onFileChange={field.key === 'resume' ? setResumeFile : undefined}
+                                    />
+                                ))}
+
+                                <div className="flex items-center gap-3">
+                                    <Checkbox
+                                        id="terms"
+                                        checked={agreedToTerms}
+                                        onCheckedChange={(v) => setAgreedToTerms(!!v)}
+                                        className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-surface-brand data-[state=checked]:text-white"
+                                    />
+                                    <Label htmlFor="terms" className="text-text-primary text-sm">
+                                        By using this form you agree with the storage and handling of your data by this website
+                                    </Label>
+                                </div>
+
+                                <ButtonType2 type="submit" disabled={!agreedToTerms || submitting}>
+                                    <span>{submitting ? "Submitting…" : "Submit Application"}</span>
+                                </ButtonType2>
+                            </form>
+                        </section>
+                    )}
+                </div>
+
+                {/* Right Column — Meta + Actions */}
+                <div className="lg:col-span-1">
+                    <div className="sticky top-4 space-y-6 mt-12">
+                        <div className="bg-surface-tertiary w-full rounded-lg p-4 border border-border-subtle space-y-4">
+                            {/* Action buttons */}
+                            <div className="flex flex-col gap-2">
+                                {isExternalLinkMethod && item.externalLink && (
+                                    <button
+                                        type="button"
+                                        className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
+                                        onClick={(e) => { e.stopPropagation(); window.open(item.externalLink!, "_blank"); }}
+                                    >
+                                        <span>Apply now</span>
+                                        <ExternalLink className="w-4 h-4" />
+                                    </button>
+                                )}
+                                {isEmailRequestMethod && item.applicationEmail && (
+                                    <a
+                                        href={`mailto:${item.applicationEmail}`}
+                                        className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <span>Apply via email</span>
+                                        <Mail className="w-4 h-4" />
+                                    </a>
+                                )}
+                                {isInPlatformFormMethod && !hasApplied && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); scrollToForm(); }}
+                                        className="w-full px-6 py-3 bg-surface-brand text-text-white font-medium hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center rounded-full"
+                                    >
+                                        Apply now
+                                    </button>
+                                )}
+                                {hasApplied && (
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-sm text-text-secondary text-center">You have already applied.</p>
+                                        {applicationId && (
+                                            <button
+                                                type="button"
+                                                className="w-full px-6 py-3 text-text-danger border border-border-subtle font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full disabled:opacity-50 hover:bg-surface-danger transition-colors"
+                                                onClick={async (e) => { e.stopPropagation(); if (!withdrawing) await withdrawApplication({ variables: { applicationId } }); }}
+                                                disabled={withdrawing}
+                                            >
+                                                {withdrawing ? "Withdrawing…" : "Withdraw application"}
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Meta info */}
+                            <div className="space-y-2 text-sm text-text-secondary">
+                                {[item.deliveryMode, item.commitmentType, !isUUID(item.location) ? item.location : null]
+                                    .filter(Boolean)
+                                    .join(' · ') && (
+                                    <p className="text-text-primary">
+                                        {[item.deliveryMode, item.commitmentType, !isUUID(item.location) ? item.location : null]
+                                            .filter(Boolean).join(' · ')}
+                                    </p>
+                                )}
+                                {compensation && (
+                                    <p className="font-medium text-text-success">{compensation}</p>
+                                )}
+                                {item.deadline && (
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 shrink-0" />
+                                        Apply before {new Date(item.deadline).toLocaleDateString()}
+                                    </div>
+                                )}
+                                {typeof item.applicationCount === 'number' && item.applicationCount > 0 && (
+                                    <div className="text-sm">
+                                        {item.applicationCount} application{item.applicationCount === 1 ? '' : 's'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* How to apply info */}
+                            {isExternalLinkMethod && item.externalLink && (
+                                <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
+                                    <p className="font-medium mb-1">How to apply:</p>
+                                    <a href={item.externalLink} target="_blank" rel="noopener noreferrer" className="underline break-all">
+                                        Apply externally
+                                    </a>
+                                </div>
+                            )}
+                            {isEmailRequestMethod && item.applicationEmail && (
+                                <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
+                                    <p className="font-medium mb-1">How to apply:</p>
+                                    <a href={`mailto:${item.applicationEmail}`} className="underline break-all flex items-center gap-1">
+                                        <Mail className="w-3.5 h-3.5 shrink-0" />
+                                        {item.applicationEmail}
+                                    </a>
+                                </div>
+                            )}
+
+                            {item.deadline && (
+                                <div className="pt-4 border-t border-border-subtle flex items-center justify-between text-sm">
+                                    <span className="text-text-secondary">Deadline</span>
+                                    <span className="font-medium text-text-primary">
+                                        {new Date(item.deadline).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+
+    if (displayMode === 'details') {
+        return (
+            <div className="relative p-4 lg:p-6 rounded-2xl bg-surface-default">
+                {detailContent}
+            </div>
+        );
+    }
 
     return (
         <>
@@ -458,274 +798,8 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             {/* Detail Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="lg:min-w-[70rem] max-h-[90vh] overflow-y-auto">
-                    <button
-                        type="button"
-                        onClick={handleSaveToggle}
-                        disabled={saving || unsaving}
-                        className="absolute top-4 right-12 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none hover:text-text-brand text-text-secondary"
-                    >
-                        <Bookmark className={`w-4 h-4 ${isSaved ? "fill-text-brand text-text-brand" : "text-text-secondary"}`} />
-                        <span className="sr-only">{isSaved ? "Unsave" : "Save"}</span>
-                    </button>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Left Column */}
-                        <div className="lg:col-span-2 space-y-6">
-                            <DialogHeader className="text-left">
-                                <div className="space-y-2">
-                                    {item.location && !isUUID(item.location) && (
-                                        <p className="text-text-secondary text-sm">{item.location}</p>
-                                    )}
-                                    <DialogTitle className="text-2xl font-bold text-text-primary">
-                                        {item.title}
-                                    </DialogTitle>
-                                    {showHeaderBadges && (
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            {item.status && (
-                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
-                                                    {formatEnumLabel(item.status)}
-                                                </span>
-                                            )}
-                                            {item.type && (
-                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
-                                                    {formatEnumLabel(String(item.type))}
-                                                </span>
-                                            )}
-                                            {item.category && (
-                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
-                                                    {formatEnumLabel(String(item.category))}
-                                                </span>
-                                            )}
-                                            {safeSubCategory && (
-                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
-                                                    {safeSubCategory}
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-1 text-text-secondary text-sm">
-                                        <Clock className="w-4 h-4" />
-                                        {formatOpportunityDate(item.createdAt)}
-                                    </div>
-                                </div>
-                            </DialogHeader>
-
-                            <div className="border-b border-b-border-subtle pb-4 space-y-6">
-                                {item.description && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Description</h3>
-                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.description}</p>
-                                    </section>
-                                )}
-                                {item.scope && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Scope</h3>
-                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.scope}</p>
-                                    </section>
-                                )}
-                                {item.eligibilityCriteria && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Eligibility Criteria</h3>
-                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.eligibilityCriteria}</p>
-                                    </section>
-                                )}
-                                {safeDuration && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Duration</h3>
-                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{safeDuration}</p>
-                                    </section>
-                                )}
-                                {safeBenefitsSummary && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Benefits</h3>
-                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{safeBenefitsSummary}</p>
-                                    </section>
-                                )}
-                                {safeEligibilityRegions.length > 0 && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Eligibility Regions</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {safeEligibilityRegions.map((region) => (
-                                                <span key={region} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
-                                                    {region}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </section>
-                                )}
-                                {item.skills && item.skills.length > 0 && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Skills</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {item.skills.map(skill => (
-                                                <span key={skill} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
-                                                    {skill}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </section>
-                                )}
-                                {safeTags.length > 0 && (
-                                    <section>
-                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Tags</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {safeTags.map((tag) => (
-                                                <span key={tag} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
-                                                    #{tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </section>
-                                )}
-                            </div>
-
-                            {/* Application Form — IN_PLATFORM_FORM only */}
-                            {item.applicationMethod === "IN_PLATFORM_FORM" && !hasApplied && (
-                                <section className="py-4" id="form-header">
-                                    <p className="font-heading-xsmall text-lg font-semibold mb-1">Apply for this opportunity</p>
-                                    <p className="text-sm text-text-secondary mb-4">
-                                        <span className="text-red-500">*</span> Required fields
-                                    </p>
-                                    <form className="space-y-4" onSubmit={handleSubmit}>
-                                        {displayFields.map(field => (
-                                            <DynamicField
-                                                key={field.key}
-                                                field={field}
-                                                value={fieldValues[field.key] ?? ''}
-                                                onChange={(val) => handleFieldChange(field.key, val)}
-                                                onFileChange={field.key === 'resume' ? setResumeFile : undefined}
-                                            />
-                                        ))}
-
-                                        <div className="flex items-center gap-3">
-                                            <Checkbox
-                                                id="terms"
-                                                checked={agreedToTerms}
-                                                onCheckedChange={(v) => setAgreedToTerms(!!v)}
-                                                className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-surface-brand data-[state=checked]:text-white"
-                                            />
-                                            <Label htmlFor="terms" className="text-text-primary text-sm">
-                                                By using this form you agree with the storage and handling of your data by this website
-                                            </Label>
-                                        </div>
-
-                                        <ButtonType2 type="submit" disabled={!agreedToTerms || submitting}>
-                                            <span>{submitting ? "Submitting…" : "Submit Application"}</span>
-                                        </ButtonType2>
-                                    </form>
-                                </section>
-                            )}
-                        </div>
-
-                        {/* Right Column — Meta + Actions */}
-                        <div className="lg:col-span-1">
-                            <div className="sticky top-4 space-y-6">
-                                <div className="bg-surface-tertiary w-full rounded-lg p-4 border border-border-subtle space-y-4">
-                                    {/* Meta info */}
-                                    <div className="space-y-2 text-sm text-text-secondary">
-                                        {[item.deliveryMode, item.commitmentType, !isUUID(item.location) ? item.location : null]
-                                            .filter(Boolean)
-                                            .join(' · ') && (
-                                            <p className="text-text-primary">
-                                                {[item.deliveryMode, item.commitmentType, !isUUID(item.location) ? item.location : null]
-                                                    .filter(Boolean).join(' · ')}
-                                            </p>
-                                        )}
-                                        {compensation && (
-                                            <p className="font-medium text-text-success">{compensation}</p>
-                                        )}
-                                        {item.deadline && (
-                                            <div className="flex items-center gap-2">
-                                                <Clock className="w-4 h-4 shrink-0" />
-                                                Apply before {new Date(item.deadline).toLocaleDateString()}
-                                            </div>
-                                        )}
-                                        {typeof item.applicationCount === 'number' && item.applicationCount > 0 && (
-                                            <div className="text-sm">
-                                                {item.applicationCount} application{item.applicationCount === 1 ? '' : 's'}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* How to apply info */}
-                                    {item.applicationMethod === "EXTERNAL_LINK" && item.externalLink && (
-                                        <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
-                                            <p className="font-medium mb-1">How to apply:</p>
-                                            <a href={item.externalLink} target="_blank" rel="noopener noreferrer" className="underline break-all">
-                                                Apply externally
-                                            </a>
-                                        </div>
-                                    )}
-                                    {item.applicationMethod === "EMAIL_REQUEST" && item.applicationEmail && (
-                                        <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
-                                            <p className="font-medium mb-1">How to apply:</p>
-                                            <a href={`mailto:${item.applicationEmail}`} className="underline break-all flex items-center gap-1">
-                                                <Mail className="w-3.5 h-3.5 shrink-0" />
-                                                {item.applicationEmail}
-                                            </a>
-                                        </div>
-                                    )}
-
-                                    {/* Action buttons */}
-                                    <div className="flex flex-col gap-2">
-                                        {item.applicationMethod === "EXTERNAL_LINK" && item.externalLink && (
-                                            <button
-                                                type="button"
-                                                className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
-                                                onClick={(e) => { e.stopPropagation(); window.open(item.externalLink!, "_blank"); }}
-                                            >
-                                                <span>Apply now</span>
-                                                <ExternalLink className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                        {item.applicationMethod === "EMAIL_REQUEST" && item.applicationEmail && (
-                                            <a
-                                                href={`mailto:${item.applicationEmail}`}
-                                                className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <span>Apply via email</span>
-                                                <Mail className="w-4 h-4" />
-                                            </a>
-                                        )}
-                                        {item.applicationMethod === "IN_PLATFORM_FORM" && !hasApplied && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { e.stopPropagation(); scrollToForm(); }}
-                                                className="w-full px-6 py-3 bg-surface-brand text-text-white font-medium hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center rounded-full"
-                                            >
-                                                Apply now
-                                            </button>
-                                        )}
-                                        {hasApplied && (
-                                            <div className="flex flex-col gap-2">
-                                                <p className="text-sm text-text-secondary text-center">You have already applied.</p>
-                                                {applicationId && (
-                                                    <button
-                                                        type="button"
-                                                        className="w-full px-6 py-3 text-text-danger border border-border-subtle font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full disabled:opacity-50 hover:bg-surface-danger transition-colors"
-                                                        onClick={async (e) => { e.stopPropagation(); if (!withdrawing) await withdrawApplication({ variables: { id: applicationId } }); }}
-                                                        disabled={withdrawing}
-                                                    >
-                                                        {withdrawing ? "Withdrawing…" : "Withdraw application"}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {item.deadline && (
-                                        <div className="pt-4 border-t border-border-subtle flex items-center justify-between text-sm">
-                                            <span className="text-text-secondary">Deadline</span>
-                                            <span className="font-medium text-text-primary">
-                                                {new Date(item.deadline).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <DialogTitle className="sr-only">{item.title || 'Opportunity details'}</DialogTitle>
+                    {detailContent}
                 </DialogContent>
             </Dialog>
         </>

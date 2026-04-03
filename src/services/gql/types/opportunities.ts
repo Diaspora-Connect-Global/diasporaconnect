@@ -1,3 +1,5 @@
+import type { Profile } from './profile';
+
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export enum OpportunityTypeEnum {
@@ -87,7 +89,7 @@ export enum PriorityLevelEnum {
   LOW = 'LOW',
 }
 
-export enum ApplicationStatus {
+export enum ApplicationStatusEnum {
   PENDING = 'PENDING',
   REVIEWING = 'REVIEWING',
   ACCEPTED = 'ACCEPTED',
@@ -99,6 +101,7 @@ export enum ApplicationStatus {
 export const OpportunityType = OpportunityTypeEnum;
 export const WorkModeEnum = DeliveryModeEnum;
 export const EngagementTypeEnum = CommitmentTypeEnum;
+export const ApplicationStatus = ApplicationStatusEnum;
 
 export type FormFieldType = 'text' | 'email' | 'textarea' | 'file_upload';
 
@@ -206,8 +209,13 @@ export interface CreateOpportunityInput {
 }
 
 export interface UpdateOpportunityInput {
+  ownerType?: string;
+  ownerId?: string;
+  type?: string;
+  category?: string;
   title?: string;
   description?: string;
+  visibility?: string;
   scope?: string;
   eligibilityCriteria?: string;
   deliveryMode?: string;
@@ -259,7 +267,7 @@ export interface Application {
   id: string;
   opportunityId?: string;
   applicantId?: string;
-  status: ApplicationStatus | string;
+  status: ApplicationStatusEnum | string;
   resumeFileRef?: FileRefType | null;
   coverLetter?: string | null;
   customAnswers?: string | null;
@@ -269,6 +277,7 @@ export interface Application {
   createdAt: string;
   updatedAt?: string | null;
   opportunity?: Opportunity | null;
+  applicantProfile?: Profile | null;
 }
 
 export interface SubmitApplicationInput {
@@ -326,7 +335,11 @@ export interface SavedOpportunitiesResponse {
 }
 
 export interface UserApplicationsResponse {
-  userApplications: {
+  getUserApplications: {
+    applications: Application[];
+    total: number;
+  };
+  userApplications?: {
     applications: Application[];
     total: number;
   };
@@ -344,6 +357,33 @@ export interface ListOpportunitiesResponse {
     opportunities: Opportunity[];
     total: number;
   };
+}
+
+export interface OpportunityListResponse {
+  opportunities: Opportunity[];
+  total: number;
+}
+
+export interface ApplicationListResponse {
+  applications: Application[];
+  total: number;
+}
+
+export interface SavedOpportunityListResponse {
+  savedOpportunities: SavedOpportunity[];
+  total: number;
+}
+
+export interface OpportunityListResponseData {
+  listOpportunities: OpportunityListResponse;
+}
+
+export interface SavedOpportunityListResponseData {
+  getSavedOpportunities: SavedOpportunityListResponse;
+}
+
+export interface ApplicationListResponseData {
+  getApplications: ApplicationListResponse;
 }
 
 // GraphQL response types
