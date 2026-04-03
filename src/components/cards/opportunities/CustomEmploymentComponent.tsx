@@ -233,6 +233,28 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             ]
     ), [orderedFields]);
 
+    const fullNameField = useMemo(() => displayFields.find((f) => {
+        const key = f.key.toLowerCase();
+        const label = f.label.toLowerCase();
+        return key === 'full_name' || key === 'fullname' || label === 'full name';
+    }), [displayFields]);
+
+    const emailField = useMemo(() => displayFields.find((f) => {
+        const key = f.key.toLowerCase();
+        const label = f.label.toLowerCase();
+        return key === 'email' || label.includes('email');
+    }), [displayFields]);
+
+    const phoneField = useMemo(() => displayFields.find((f) => {
+        const key = f.key.toLowerCase();
+        const label = f.label.toLowerCase();
+        return key === 'phone'
+            || key === 'phone_number'
+            || key === 'phonenumber'
+            || key === 'phoneNumber'.toLowerCase()
+            || label.includes('phone');
+    }), [displayFields]);
+
     useEffect(() => {
         if (item.applicationMethod !== 'IN_PLATFORM_FORM' || !user) return;
 
@@ -241,23 +263,12 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             .join(' ')
             .trim();
 
-        const fullNameField = displayFields.find((f) => {
-            const key = f.key.toLowerCase();
-            const label = f.label.toLowerCase();
-            return key === 'full_name' || key === 'fullname' || label === 'full name';
-        });
-
-        const emailField = displayFields.find((f) => {
-            const key = f.key.toLowerCase();
-            const label = f.label.toLowerCase();
-            return key === 'email' || label === 'email';
-        });
-
-        const phoneField = displayFields.find((f) => {
-            const key = f.key.toLowerCase();
-            const label = f.label.toLowerCase();
-            return key === 'phone' || key === 'phone_number' || key === 'phonenumber' || label === 'phone number';
-        });
+        const typedUser = user as typeof user & { phoneNumber?: string | null; phone_number?: string | null; mobile?: string | null };
+        const userPhone = typedUser.phone
+            || typedUser.phoneNumber
+            || typedUser.phone_number
+            || typedUser.mobile
+            || '';
 
         setFieldValues((prev) => {
             const next = { ...prev };
@@ -271,14 +282,14 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                 next[emailField.key] = user.email;
                 changed = true;
             }
-            if (phoneField && !next[phoneField.key] && user.phone) {
-                next[phoneField.key] = user.phone;
+            if (phoneField && !next[phoneField.key] && userPhone) {
+                next[phoneField.key] = userPhone;
                 changed = true;
             }
 
             return changed ? next : prev;
         });
-    }, [item.applicationMethod, user, displayFields]);
+    }, [item.applicationMethod, user, fullNameField, emailField, phoneField]);
 
     const handleFieldChange = (key: string, val: string) => {
         setFieldValues(prev => ({ ...prev, [key]: val }));
@@ -313,7 +324,7 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                     applicationData: {
                         fullName: fieldValues['full_name'] ?? '',
                         email: fieldValues['email'] ?? '',
-                        phoneNumber: fieldValues['phone'] || undefined,
+                            phoneNumber: (phoneField ? fieldValues[phoneField.key] : fieldValues['phone']) || undefined,
                         coverLetter: fieldValues['cover_letter'] || undefined,
                         customAnswers: Object.keys(customAnswers).length > 0
                             ? JSON.stringify(customAnswers)
