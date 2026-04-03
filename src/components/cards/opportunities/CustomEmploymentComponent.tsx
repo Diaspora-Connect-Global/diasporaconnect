@@ -280,6 +280,16 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
             || label.includes('phone');
     }), [displayFields]);
 
+    const coverLetterField = useMemo(() => displayFields.find((f) => {
+        const key = f.key.toLowerCase();
+        const label = f.label.toLowerCase();
+        return key === 'cover_letter'
+            || key === 'coverletter'
+            || key === 'motivation_letter'
+            || label.includes('cover letter')
+            || label.includes('motivation');
+    }), [displayFields]);
+
     useEffect(() => {
         if (item.applicationMethod !== 'IN_PLATFORM_FORM' || !user) return;
 
@@ -347,10 +357,10 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                 input: {
                     opportunityId: item.id,
                     applicationData: {
-                        fullName: fieldValues['full_name'] ?? '',
-                        email: fieldValues['email'] ?? '',
+                        fullName: (fullNameField ? fieldValues[fullNameField.key] : fieldValues['full_name']) ?? '',
+                        email: (emailField ? fieldValues[emailField.key] : fieldValues['email']) ?? '',
                             phoneNumber: (phoneField ? fieldValues[phoneField.key] : fieldValues['phone']) || undefined,
-                        coverLetter: fieldValues['cover_letter'] || undefined,
+                        coverLetter: (coverLetterField ? fieldValues[coverLetterField.key] : fieldValues['cover_letter']) || undefined,
                         customAnswers: Object.keys(customAnswers).length > 0
                             ? JSON.stringify(customAnswers)
                             : undefined,
