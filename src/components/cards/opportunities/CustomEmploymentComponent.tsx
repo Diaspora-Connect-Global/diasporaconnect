@@ -66,6 +66,18 @@ function formatCompensation(
     return `Up to ${cur} ${fmt(max!)}${typeLabel}`;
 }
 
+function formatEnumLabel(value?: string | null) {
+    if (!value) return '';
+    return value
+        .replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function hasText(value?: string | null) {
+    return typeof value === 'string' && value.trim().length > 0;
+}
+
 // ─── Dynamic form field renderer ─────────────────────────────────────────────
 
 interface DynamicFieldProps {
@@ -192,6 +204,19 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
         item.compensationCurrency,
         item.compensationType,
     );
+
+    const safeSubCategory = hasText(item.subCategory) ? item.subCategory!.trim() : null;
+    const safeDuration = hasText(item.duration) ? item.duration!.trim() : null;
+    const safeBenefitsSummary = hasText(item.benefitsSummary) ? item.benefitsSummary!.trim() : null;
+    const safeEligibilityRegions = useMemo(
+        () => (item.eligibilityRegions ?? []).map((r) => r?.trim()).filter((r): r is string => !!r),
+        [item.eligibilityRegions]
+    );
+    const safeTags = useMemo(
+        () => (item.tags ?? []).map((tag) => tag?.trim()).filter((tag): tag is string => !!tag),
+        [item.tags]
+    );
+    const showHeaderBadges = !!item.status || !!item.type || !!item.category || !!safeSubCategory;
 
     const [saveOpportunity, { loading: saving }] = useMutation<SaveOpportunityData>(SAVE_OPPORTUNITY, {
         onCompleted: () => setSavedOverride(true),
@@ -444,6 +469,30 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                     <DialogTitle className="text-2xl font-bold text-text-primary">
                                         {item.title}
                                     </DialogTitle>
+                                    {showHeaderBadges && (
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {item.status && (
+                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                                    {formatEnumLabel(item.status)}
+                                                </span>
+                                            )}
+                                            {item.type && (
+                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                                    {formatEnumLabel(String(item.type))}
+                                                </span>
+                                            )}
+                                            {item.category && (
+                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                                    {formatEnumLabel(String(item.category))}
+                                                </span>
+                                            )}
+                                            {safeSubCategory && (
+                                                <span className="px-2.5 py-1 bg-surface-subtle border border-border-subtle rounded-full text-xs font-medium text-text-primary">
+                                                    {safeSubCategory}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-1 text-text-secondary text-sm">
                                         <Clock className="w-4 h-4" />
                                         {formatOpportunityDate(item.createdAt)}
@@ -470,6 +519,30 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                         <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.eligibilityCriteria}</p>
                                     </section>
                                 )}
+                                {safeDuration && (
+                                    <section>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Duration</h3>
+                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{safeDuration}</p>
+                                    </section>
+                                )}
+                                {safeBenefitsSummary && (
+                                    <section>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Benefits</h3>
+                                        <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{safeBenefitsSummary}</p>
+                                    </section>
+                                )}
+                                {safeEligibilityRegions.length > 0 && (
+                                    <section>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Eligibility Regions</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {safeEligibilityRegions.map((region) => (
+                                                <span key={region} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
+                                                    {region}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
                                 {item.skills && item.skills.length > 0 && (
                                     <section>
                                         <h3 className="text-lg font-semibold text-text-primary mb-3">Skills</h3>
@@ -477,6 +550,18 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                             {item.skills.map(skill => (
                                                 <span key={skill} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
                                                     {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                                {safeTags.length > 0 && (
+                                    <section>
+                                        <h3 className="text-lg font-semibold text-text-primary mb-3">Tags</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {safeTags.map((tag) => (
+                                                <span key={tag} className="px-3 py-1 bg-surface-subtle border border-border-subtle text-text-primary text-sm rounded-full">
+                                                    #{tag}
                                                 </span>
                                             ))}
                                         </div>
@@ -543,6 +628,11 @@ export const CustomEmploymentComponent = ({ item }: OpportunityItemProps) => {
                                             <div className="flex items-center gap-2">
                                                 <Clock className="w-4 h-4 shrink-0" />
                                                 Apply before {new Date(item.deadline).toLocaleDateString()}
+                                            </div>
+                                        )}
+                                        {typeof item.applicationCount === 'number' && item.applicationCount > 0 && (
+                                            <div className="text-sm">
+                                                {item.applicationCount} application{item.applicationCount === 1 ? '' : 's'}
                                             </div>
                                         )}
                                     </div>
