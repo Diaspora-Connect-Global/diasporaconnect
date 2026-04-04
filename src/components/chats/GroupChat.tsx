@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronRight, InfoIcon, MessageCircle, X, Menu, Camera } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
@@ -46,13 +45,24 @@ import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
+import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData, Message, MessageMention } from "@/services/gql/types/messaging";
 import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { CircularImageCropper } from "@/lib/imagecropper";
 import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import { ApiMessage } from "@/store/ChatStore";
 import { toast } from "sonner";
+
+type ManageableGroupMember = {
+    id: string;
+    userId: string;
+    role: MemberRole;
+    profile: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
+};
 
 export default function GroupChat() {
     const t = useTranslations('chat.group');
@@ -62,7 +72,7 @@ export default function GroupChat() {
     const pendingRevokeRef = useRef<Record<string, string[]>>({});
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [repliesSidebarOpen, setRepliesSidebarOpen] = useState(false);
-    const [selectedMessage, setSelectedMessage] = useState<any>(null);
+    const [selectedMessage, setSelectedMessage] = useState<ApiMessage | null>(null);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -72,7 +82,7 @@ export default function GroupChat() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddMembersModal, setShowAddMembersModal] = useState(false);
     const [showManageMemberModal, setShowManageMemberModal] = useState(false);
-    const [selectedMember, setSelectedMember] = useState<any>(null);
+    const [selectedMember, setSelectedMember] = useState<ManageableGroupMember | null>(null);
     const [showTransferModal, setShowTransferModal] = useState(false);
 
     // Loading states
@@ -317,16 +327,16 @@ export default function GroupChat() {
         const firstConvId = messages[0]?.conversationId;
         if (messages.length > 0 && firstConvId && firstConvId !== conversationId) return;
 
-        const history = messages.map((m: any): ApiMessage => ({
+        const history = messages.map((m: Message): ApiMessage => ({
             id: m.id,
             conversationId: m.conversationId,
             senderId: m.senderId,
             type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
             content: m.content || '',
             createdAt: m.createdAt,
-            mentions: m.mentions?.map((mn: any) => mn.userId) || [],
+            mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
             replyToId: m.replyToId,
-            status: 'read',
+            status: m.status ? (m.status.toLowerCase() as ApiMessage['status']) : 'sent',
             attachments: m.attachments ?? [],
         }));
 
@@ -468,6 +478,14 @@ export default function GroupChat() {
         if (hasFiles && files) {
             const sendingPreviews: Array<{ url?: string; mimeType: string }> = [];
             const urlsToRevoke: string[] = [];
+            const firstFileMime = files[0]?.type || '';
+            const placeholderType: ApiMessage['type'] = firstFileMime.startsWith('video/')
+                ? 'VIDEO'
+                : firstFileMime.startsWith('audio/')
+                    ? 'AUDIO'
+                    : firstFileMime.startsWith('image/')
+                        ? 'IMAGE'
+                        : 'FILE';
             for (const file of files) {
                 const mime = file.type || 'application/octet-stream';
                 if (mime.startsWith('image/') || mime.startsWith('video/')) {
@@ -483,7 +501,7 @@ export default function GroupChat() {
                 id: placeholderId,
                 conversationId,
                 senderId: currentUserId,
-                type: 'IMAGE',
+                type: placeholderType,
                 content: messageText.trim(),
                 createdAt: new Date().toISOString(),
                 status: 'sending',
@@ -646,15 +664,6 @@ export default function GroupChat() {
                         }),
                     };
                     addApiMessage(sentMsg);
-                    if (isConnected) {
-                        const wsType = messageType === 'IMAGE' ? 'image' : messageType === 'VIDEO' ? 'video' : messageType === 'AUDIO' ? 'audio' : 'file';
-                        messageService.sendMessage({
-                            conversationId,
-                            type: messageType === 'TEXT' ? 'text' : wsType,
-                            content: sendContent,
-                            idempotencyKey,
-                        });
-                    }
                 }
             } catch (error) {
                 console.error('Failed to send message:', error);
@@ -668,7 +677,7 @@ export default function GroupChat() {
         }
     };
 
-    const handleViewReplies = (message: any) => {
+    const handleViewReplies = (message: ApiMessage) => {
         setSelectedMessage(message);
         setRepliesSidebarOpen(true);
         setReplyingTo(message.id);
@@ -764,7 +773,7 @@ export default function GroupChat() {
         }
     };
 
-    const handleMemberClick = (member: any) => {
+    const handleMemberClick = (member: ManageableGroupMember) => {
         if (isAdmin && member.userId !== currentUserId) {
             setSelectedMember(member);
             setShowManageMemberModal(true);
@@ -1229,14 +1238,14 @@ export default function GroupChat() {
                                         <span className="text-xs sm:text-sm font-medium text-text-white">
                                             {getSenderName(selectedMessage.senderId)}
                                         </span>
-                                        <p className="text-xs sm:text-sm text-text-white">{selectedMessage.text}</p>
+                                        <p className="text-xs sm:text-sm text-text-white">{selectedMessage.content}</p>
                                     </div>
                                     <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center space-x-2">
                                         <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
                                             <AvatarImage src={getUserById(selectedMessage.senderId)?.avatar || undefined} alt="avatar" />
                                             <AvatarFallback>{getSenderName(selectedMessage.senderId).charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <span>{formatChatTimestamp(selectedMessage.timestamp)}</span>
+                                        <span>{formatChatTimestamp(selectedMessage.createdAt)}</span>
                                     </p>
                                 </div>
                             )}

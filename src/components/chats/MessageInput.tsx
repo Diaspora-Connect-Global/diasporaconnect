@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useId } from
 import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X, FileIcon, Video, Music } from "lucide-react";
 import { ButtonType2, ButtonType3 } from "../custom/button";
-import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 import { useTranslations } from "next-intl";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -92,72 +91,6 @@ export function MessageInput({
             left: Math.max(8, Math.min(rect.right - 320, window.innerWidth - 320 - 8)),
         });
     }, [showEmojiPicker]);
-
-    const updateMockData = (messageText: string, image?: string) => {
-        if (!conversationId) return;
-
-        // Create new message object
-        const newMessageObj = {
-            id: Date.now().toString(),
-            conversationId: conversationId,
-            senderId: senderId,
-            text: messageText,
-            type: image ? 'image' as const : 'text' as const,
-            timestamp: new Date().toISOString(),
-            status: 'sent' as const
-        };
-
-        // Add to mockMessages array
-        mockMessages.push(newMessageObj);
-
-        // Update conversation's updatedAt timestamp
-        const conversation = mockConversations.find(conv => conv.id === conversationId);
-        if (conversation) {
-            conversation.updatedAt = new Date().toISOString();
-        }
-
-        // Update user conversation preferences (reset unread count for current user)
-        const preference = mockUserConversationPreferences.find(pref => 
-            pref.conversationId === conversationId && pref.userId === senderId
-        );
-        if (preference) {
-            preference.unreadCount = 0;
-            preference.lastReadMessageId = newMessageObj.id;
-        }
-
-        // Update other users' unread counts in the conversation
-        if (conversation?.type === 'direct') {
-            // For direct messages, increment unread count for the other user
-            const otherUserPreference = mockUserConversationPreferences.find(pref => 
-                pref.conversationId === conversationId && pref.userId !== senderId
-            );
-            if (otherUserPreference) {
-                otherUserPreference.unreadCount += 1;
-            }
-        } else if (conversation?.type === 'group') {
-            // For group messages, increment unread count for all other members
-            mockUserConversationPreferences
-                .filter(pref => 
-                    pref.conversationId === conversationId && 
-                    pref.userId !== senderId
-                )
-                .forEach(pref => {
-                    pref.unreadCount += 1;
-                });
-        }
-
-        // Dispatch custom event to notify other components about the data update
-        window.dispatchEvent(new CustomEvent('chatDataUpdated', {
-            detail: { 
-                conversationId, 
-                newMessage: newMessageObj,
-                updatedConversations: mockConversations,
-                updatedPreferences: mockUserConversationPreferences
-            }
-        }));
-
-        console.log('Message added to mock data:', newMessageObj);
-    };
 
     const handleSendMessage = () => {
         const filesToSend = selectedFiles.length > 0 ? selectedFiles.map((f) => f.file) : undefined;
@@ -353,7 +286,7 @@ export function MessageInput({
                                 type="file"
                                 ref={fileInputRef}
                                 onChange={handleFileSelect}
-                                accept="image/*"
+                                accept={CHAT_ACCEPT}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:pointer-events-none"
                                 disabled={disabled}
                                 title="Attach image"

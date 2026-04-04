@@ -17,10 +17,14 @@ import { useTranslations } from 'next-intl';
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
 import { BLOCK_USER } from "@/services/gql/users";
 import type { BlockUserResponse } from "@/services/gql/types/users";
+import { GET_USER_PROFILE } from "@/services/gql/profile";
+import type { GetProfileResponse } from "@/services/gql/profile";
 import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import type { GetUploadUrlResponse } from "@/services/gql/upload";
@@ -31,13 +35,15 @@ import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
 
 export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; onBack?: () => void }) {
+    const router = useRouter();
+    const params = useParams<{ locale?: string }>();
+    const localePrefix = params?.locale ? `/${params.locale}` : '';
     const t = useTranslations('chat.direct');
     const tCommon = useTranslations('common');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const pendingRevokeRef = useRef<Record<string, string[]>>({});
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [isConnected, setIsConnected] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
     const [otherUserTyping, setOtherUserTyping] = useState(false);
@@ -78,13 +84,22 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         (c: { requester: { userId: string }; receiver: { userId: string } }) =>
             c.requester.userId === chat.id || c.receiver.userId === chat.id
     );
+    const { data: otherUserProfileData } = useQuery<GetProfileResponse>(GET_USER_PROFILE, {
+        variables: { userId: chat.id },
+        skip: !chat.id,
+        fetchPolicy: 'cache-first',
+    });
     const otherProfile = otherUser
         ? (otherUser.requester.userId === chat.id ? otherUser.requester : otherUser.receiver)
         : null;
+    const profileFallback = otherUserProfileData?.getProfile?.profile;
     const displayName = otherProfile
         ? [otherProfile.firstName, otherProfile.lastName].filter(Boolean).join(' ').trim() || chat.name || t('unknownUser')
-        : (chat.name && chat.name !== chat.id ? chat.name : t('unknownUser'));
-    const otherAvatar = otherProfile?.avatarUrl ?? chat.avatar ?? '';
+        : (
+            [profileFallback?.firstName, profileFallback?.lastName].filter(Boolean).join(' ').trim() ||
+            (chat.name && chat.name !== chat.id ? chat.name : t('unknownUser'))
+        );
+    const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
 
     // Initialize or retrieve conversation
     useEffect(() => {
@@ -177,7 +192,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             createdAt: m.createdAt,
             mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
             replyToId: m.replyToId,
-            status: 'read',
+            status: m.status ? (m.status.toLowerCase() as ApiMessage['status']) : 'sent',
             attachments: m.attachments ?? [],
         }));
         setApiMessages(conversationId, history);
@@ -196,16 +211,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     useEffect(() => {
         if (!conversationId) return;
 
-        setIsConnected(messageService.isConnected);
-
-        const unsubConnect = messageService.onConnect(() => {
-            setIsConnected(true);
-        });
-
-        const unsubDisconnect = messageService.onDisconnect(() => {
-            setIsConnected(false);
-        });
-
         const unsubMessage = messageService.onMessage((wsMessage) => {
             if (wsMessage.conversationId === conversationId) {
                 // New messages are already added globally by MessageWebSocketProvider.
@@ -215,8 +220,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         });
 
         return () => {
-            unsubConnect();
-            unsubDisconnect();
             unsubMessage();
         };
     }, [conversationId, refetchMessages]);
@@ -281,6 +284,14 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             if (hasFiles && files) {
                 const sendingPreviews: Array<{ url?: string; mimeType: string }> = [];
                 const urlsToRevoke: string[] = [];
+                const firstFileMime = files[0]?.type || '';
+                const placeholderType: ApiMessage['type'] = firstFileMime.startsWith('video/')
+                    ? 'VIDEO'
+                    : firstFileMime.startsWith('audio/')
+                        ? 'AUDIO'
+                        : firstFileMime.startsWith('image/')
+                            ? 'IMAGE'
+                            : 'FILE';
                 for (const file of files) {
                     const mime = file.type || 'application/octet-stream';
                     if (mime.startsWith('image/') || mime.startsWith('video/')) {
@@ -296,7 +307,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     id: placeholderId,
                     conversationId,
                     senderId: currentUserId,
-                    type: 'IMAGE',
+                    type: placeholderType,
                     content: messageText.trim(),
                     createdAt: new Date().toISOString(),
                     status: 'sending',
@@ -380,16 +391,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     }),
                 };
                 addApiMessage(sentMsg);
-
-                if (isConnected) {
-                    const wsType = messageType === 'IMAGE' ? 'image' : messageType === 'VIDEO' ? 'video' : messageType === 'AUDIO' ? 'audio' : 'file';
-                    messageService.sendMessage({
-                        conversationId,
-                        type: messageType === 'TEXT' ? 'text' : wsType,
-                        content,
-                        idempotencyKey,
-                    });
-                }
             }
         } catch (error) {
             if (hasFiles && files) {
@@ -402,7 +403,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         } finally {
             setIsSending(false);
         }
-    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, removeApiMessage, isConnected, getUploadUrl]);
+    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, removeApiMessage, getUploadUrl]);
 
     const handleBlockConfirm = async () => {
         setIsBlocking(true);
@@ -434,6 +435,12 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         onBack?.();
     };
 
+    const handleViewProfile = () => {
+        if (!chat.id) return;
+        router.push(`${localePrefix}/${chat.id}`);
+        setSidebarOpen(false);
+    };
+
     return (
         <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
             {/* Main Chat Area */}
@@ -453,9 +460,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                         </div>
                         <div>
                             <h2 className="font-semibold text-text-primary">{displayName}</h2>
-                            <p className="text-sm text-text-secondary">
-                                {chat.online ? t('online') : t('lastSeen', { time: formatChatTimestamp(chat.lastMessageTime) })}
-                            </p>
+                            {chat.online && (
+                                <p className="text-sm text-text-secondary">{t('online')}</p>
+                            )}
                         </div>
                     </div>
 
@@ -654,16 +661,12 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>
                                     {chat.online ? (
                                         <p className="text-sm text-text-success font-medium">{t('online')}</p>
-                                    ) : (
-                                        <p className="text-sm text-text-secondary">
-                                            {t('lastSeen', { time: formatChatTimestamp(chat.lastMessageTime) })}
-                                        </p>
-                                    )}
+                                    ) : null}
                                 </div>
 
                                 {/* View Profile Button */}
                                 <div className="flex items-center justify-center mb-6">
-                                    <ButtonType3 size="lg">
+                                    <ButtonType3 size="lg" onClick={handleViewProfile}>
                                         {t('viewProfile')}
                                     </ButtonType3>
                                 </div>

@@ -8,13 +8,16 @@ import { useChatStore } from "@/store/ChatStore";
 import { ButtonType3 } from "../custom/button";
 import { StartConversationModal } from "./modals/StartConversationModal";
 import { useTranslations } from 'next-intl';
-import { useQuery } from "@apollo/client/react";
+import { useApolloClient, useQuery } from "@apollo/client/react";
 import { GET_MY_GROUPS } from "@/services/gql/groups";
 import { GET_CONVERSATIONS } from "@/services/gql/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import type { GetConversationsData } from "@/services/gql/types/messaging";
 import { useUserStore } from "@/store/useUserStore";
 import Image from "next/image";
+import { messageService } from "@/services/websocket/messageService";
+import { GET_USER_PROFILE } from "@/services/gql/profile";
+import type { GetProfileResponse } from "@/services/gql/profile";
 
 type TabType = 'direct' | 'groups';
 
@@ -42,6 +45,9 @@ export default function ChatSideBar() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'direct' | 'group'>('direct');
     const [directChats, setDirectChats] = useState<ChatItem[]>([]);
+    const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
+    const [profileFallbackById, setProfileFallbackById] = useState<Record<string, { name: string; avatar?: string }>>({});
+    const apolloClient = useApolloClient();
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
@@ -108,10 +114,11 @@ export default function ChatSideBar() {
 
                 // Try to find full profile info from connections
                 const otherUserObj = connectionMap.get(otherParticipantId);
+                const fallbackProfile = profileFallbackById[otherParticipantId];
                 const displayName = otherUserObj
                     ? [otherUserObj.firstName, otherUserObj.lastName].filter(Boolean).join(' ').trim() || t('unknownUser')
-                    : t('unknownUser');
-                const avatar = otherUserObj?.avatarUrl || '';
+                    : (fallbackProfile?.name || t('unknownUser'));
+                const avatar = otherUserObj?.avatarUrl || fallbackProfile?.avatar || '';
 
                 // Store the real conversation mapping so DirectMessageChat can look it up by chat.id
                 const chatId = otherParticipantId || conv.id;
@@ -137,13 +144,116 @@ export default function ChatSideBar() {
                     lastMessage: conv.lastMessage?.content || t('empty.title'),
                     lastMessageTime: conv.lastMessage?.createdAt || conv.lastMessageAt || '',
                     unread: conv.unreadCount ?? 0,
-                    online: false,
+                    online: !!otherParticipantId && onlineUserIds.has(otherParticipantId),
                     avatar: avatar,
                 };
             });
 
         setDirectChats(dmConversations);
-    }, [conversationsData, connectionsData, currentUserId, setRealConversation, t]);
+    }, [conversationsData, connectionsData, currentUserId, onlineUserIds, profileFallbackById, setRealConversation, t]);
+
+    // Fallback user profiles for direct conversations not present in connections
+    useEffect(() => {
+        if (!conversationsData?.getConversations || !currentUserId) return;
+
+        const connectionIds = new Set<string>();
+        if (connectionsData?.getConnections?.connections) {
+            connectionsData.getConnections.connections.forEach((conn: any) => {
+                const otherUser = conn.requesterId === currentUserId ? conn.receiver : conn.requester;
+                if (otherUser?.userId) connectionIds.add(otherUser.userId);
+            });
+        }
+
+        const missingParticipantIds = Array.from(new Set(
+            conversationsData.getConversations
+                .filter((conv: any) => {
+                    const typeDirect = conv.type === 'DIRECT' || conv.type === 'direct';
+                    const misclassifiedAsGroup =
+                        (conv.type === 'GROUP' || conv.type === 'group') &&
+                        (conv.groupId == null || conv.groupId === '') &&
+                        (conv.participantIds?.length === 2 || conv.participantCount === 2);
+                    return (typeDirect || misclassifiedAsGroup) && conv.isActive;
+                })
+                .map((conv: any) => conv.participantIds?.find((id: string) => id !== currentUserId))
+                .filter((id: string | undefined) => !!id && !connectionIds.has(id) && !profileFallbackById[id])
+        )) as string[];
+
+        if (!missingParticipantIds.length) return;
+
+        void Promise.all(
+            missingParticipantIds.map(async (userId) => {
+                try {
+                    const { data } = await apolloClient.query<GetProfileResponse>({
+                        query: GET_USER_PROFILE,
+                        variables: { userId },
+                        fetchPolicy: 'cache-first',
+                    });
+                    const profile = data?.getProfile?.profile;
+                    if (!profile) return null;
+                    const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
+                    return { userId, name, avatar: profile.avatarUrl };
+                } catch {
+                    return null;
+                }
+            })
+        ).then((resolved) => {
+            const next: Record<string, { name: string; avatar?: string }> = {};
+            resolved.forEach((item) => {
+                if (item) next[item.userId] = { name: item.name, avatar: item.avatar };
+            });
+            if (Object.keys(next).length) {
+                setProfileFallbackById((prev) => ({ ...prev, ...next }));
+            }
+        });
+    }, [apolloClient, connectionsData, conversationsData, currentUserId, profileFallbackById]);
+
+    // Presence updates for direct chats
+    useEffect(() => {
+        if (!currentUserId) return;
+
+        const list = conversationsData?.getConversations ?? [];
+        const directParticipantIds = Array.from(new Set(
+            list
+                .filter((conv: any) => {
+                    const typeDirect = conv.type === 'DIRECT' || conv.type === 'direct';
+                    const misclassifiedAsGroup =
+                        (conv.type === 'GROUP' || conv.type === 'group') &&
+                        (conv.groupId == null || conv.groupId === '') &&
+                        (conv.participantIds?.length === 2 || conv.participantCount === 2);
+                    return typeDirect || misclassifiedAsGroup;
+                })
+                .map((conv: any) => conv.participantIds?.find((id: string) => id !== currentUserId))
+                .filter(Boolean)
+        )) as string[];
+
+        const requestPresence = () => {
+            if (directParticipantIds.length > 0) {
+                messageService.queryOnlineUsers(directParticipantIds);
+            }
+        };
+
+        const unsubPresence = messageService.onPresenceUpdate((data) => {
+            setOnlineUserIds((prev) => {
+                const next = new Set(prev);
+                if (data.isOnline) next.add(data.userId);
+                else next.delete(data.userId);
+                return next;
+            });
+        });
+
+        const unsubConnect = messageService.onConnect(() => {
+            requestPresence();
+        });
+
+        if (messageService.isConnected) {
+            requestPresence();
+        }
+
+        return () => {
+            unsubPresence();
+            unsubConnect();
+        };
+    }, [conversationsData, currentUserId]);
 
     const directUnreadCount = directChats.reduce((sum, chat) => sum + chat.unread, 0);
 
