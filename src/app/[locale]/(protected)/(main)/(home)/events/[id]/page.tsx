@@ -36,7 +36,7 @@ function formatEventDate(iso: string, locale: string) {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-  });
+  }).format(new Date(iso));
 }
 
 function formatPriceLabel(event: Event) {

@@ -351,11 +351,6 @@
             "moreevents": "Weitere Veranstaltungen",
             "noevents": "Sie haben keine gespeicherten Veranstaltungen",
             "noattending": "Sie nehmen derzeit an keiner Veranstaltung teil",
-            "pastEvents": "Vergangene Veranstaltungen",
-            "paidEvents": "Bezahlte Veranstaltungen",
-            "cancelAttendanceUnavailable": "Die Teilnahme kann für diese Registrierung noch nicht storniert werden.",
-            "attendanceCancelled": "Teilnahme storniert",
-            "cancelAttendanceFailed": "Stornierung der Teilnahme fehlgeschlagen",
             "payment": {
                 "title": "Tickets bezahlen",
                 "ticketSummary": "Ticket-Zusammenfassung",
@@ -456,6 +451,7 @@
                 "submitSuccess": "Bewerbung erfolgreich eingereicht",
                 "submitError": "Bewerbung konnte nicht eingereicht werden",
                 "resumeRequired": "Bitte laden Sie vor dem Senden Ihren Lebenslauf hoch",
+                "requiredFileMissing": "Bitte laden Sie die erforderliche Datei hoch: {field}",
                 "saveToggleError": "Gespeicherter Status konnte nicht aktualisiert werden"
             },
             "none": {
@@ -737,19 +733,6 @@
             "verified": "Verifiziert",
             "notVerified": "Nicht verifiziert"
         }
-    },
-    "common": {
-        "scrollLeft": "Nach links scrollen",
-        "scrollRight": "Nach rechts scrollen",
-        "almostThere": "Fast geschafft...",
-        "remove": "Entfernen",
-        "delete": "Löschen",
-        "cancel": "Abbrechen",
-        "confirm": "Bestätigen"
-    },
-    "metadata": {
-        "title": "DiaspoPlug",
-        "description": "Diaspora-Gemeinschaften weltweit verbinden"
     },
     "settings": {
     "title": "Einstellungen",

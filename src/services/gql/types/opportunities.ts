@@ -103,7 +103,7 @@ export const WorkModeEnum = DeliveryModeEnum;
 export const EngagementTypeEnum = CommitmentTypeEnum;
 export const ApplicationStatus = ApplicationStatusEnum;
 
-export type FormFieldType = 'text' | 'email' | 'textarea' | 'file_upload';
+export type FormFieldType = 'text' | 'email' | 'textarea' | 'file_upload' | 'radio' | 'select' | 'checkbox' | 'date' | 'number';
 
 // ─── Objects ──────────────────────────────────────────────────────────────────
 
@@ -112,6 +112,7 @@ export interface FormField {
   label: string;
   type: FormFieldType;
   required: boolean;
+  options?: string[];
 }
 
 export interface FormFieldInput {
@@ -119,6 +120,7 @@ export interface FormFieldInput {
   label: string;
   type: FormFieldType;
   required: boolean;
+  options?: string[];
 }
 
 export interface OpportunityOwnerType {

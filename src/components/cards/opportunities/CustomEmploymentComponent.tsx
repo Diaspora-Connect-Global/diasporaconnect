@@ -89,10 +89,47 @@ interface DynamicFieldProps {
     onFileChange?: (file: File | null) => void;
 }
 
+const isFileUploadType = (type?: string | null) => {
+    if (!type) return false;
+    const normalized = String(type).toLowerCase().replace(/-/g, '_');
+    return normalized === 'file_upload' || normalized === 'file';
+};
+
+const isRadioType = (type?: string | null) => {
+    if (!type) return false;
+    const normalized = String(type).toLowerCase().replace(/-/g, '_');
+    return normalized === 'radio';
+};
+
+const isSelectType = (type?: string | null) => {
+    if (!type) return false;
+    const normalized = String(type).toLowerCase().replace(/-/g, '_');
+    return normalized === 'select';
+};
+
+const isCheckboxType = (type?: string | null) => {
+    if (!type) return false;
+    const normalized = String(type).toLowerCase().replace(/-/g, '_');
+    return normalized === 'checkbox';
+};
+
+const isDateType = (type?: string | null) => {
+    if (!type) return false;
+    const normalized = String(type).toLowerCase().replace(/-/g, '_');
+    return normalized === 'date';
+};
+
+const isNumberType = (type?: string | null) => {
+    if (!type) return false;
+    const normalized = String(type).toLowerCase().replace(/-/g, '_');
+    return normalized === 'number';
+};
+
 const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProps) => {
     const fileRef = useRef<HTMLInputElement>(null);
+    const fieldWithOptions = field as FormField & { options?: string[] };
 
-    if (field.type === 'file_upload') {
+    if (isFileUploadType(field.type)) {
         return (
             <div>
                 <Label htmlFor={field.key}>
@@ -142,10 +179,148 @@ const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProp
         );
     }
 
+    if (isRadioType(field.type)) {
+        const options = Array.isArray(fieldWithOptions.options)
+            ? fieldWithOptions.options.filter((option) => typeof option === 'string' && option.trim().length > 0)
+            : [];
+
+        if (options.length === 0) {
+            return (
+                <TextInput
+                    id={field.key}
+                    type="text"
+                    value={value}
+                    onChange={(val) => onChange(val)}
+                    label={`${field.label} (missing radio options)`}
+                    placeholder={field.label}
+                    required={field.required}
+                />
+            );
+        }
+
+        return (
+            <div>
+                <Label>
+                    {field.label}{field.required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+                <div className="mt-2 space-y-2">
+                    {options.map((option, index) => (
+                        <label key={`${field.key}-${option}-${index}`} className="flex items-center gap-2 text-sm text-text-primary">
+                            <input
+                                type="radio"
+                                name={field.key}
+                                value={option}
+                                checked={value === option}
+                                required={field.required && index === 0 && !value}
+                                onChange={(e) => onChange(e.target.value)}
+                            />
+                            <span>{option}</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (isSelectType(field.type)) {
+        const options = Array.isArray(fieldWithOptions.options)
+            ? fieldWithOptions.options.filter((option) => typeof option === 'string' && option.trim().length > 0)
+            : [];
+
+        return (
+            <div>
+                <Label htmlFor={field.key}>
+                    {field.label}{field.required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+                <select
+                    id={field.key}
+                    value={value}
+                    required={field.required}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full mt-1 px-3 py-2 border border-border-default rounded-sm bg-surface-subtle text-text-primary text-sm"
+                >
+                    <option value="">Select an option</option>
+                    {options.map((option, index) => (
+                        <option key={`${field.key}-select-${option}-${index}`} value={option}>
+                            {option}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        );
+    }
+
+    if (isCheckboxType(field.type)) {
+        const options = Array.isArray(fieldWithOptions.options)
+            ? fieldWithOptions.options.filter((option) => typeof option === 'string' && option.trim().length > 0)
+            : [];
+
+        if (options.length > 0) {
+            let selectedValues: string[] = [];
+            try {
+                const parsed = JSON.parse(value || '[]');
+                if (Array.isArray(parsed)) {
+                    selectedValues = parsed.filter((v): v is string => typeof v === 'string');
+                }
+            } catch {
+                selectedValues = [];
+            }
+
+            const handleToggleOption = (option: string, checked: boolean) => {
+                const next = checked
+                    ? Array.from(new Set([...selectedValues, option]))
+                    : selectedValues.filter((v) => v !== option);
+                onChange(JSON.stringify(next));
+            };
+
+            return (
+                <div>
+                    <Label>
+                        {field.label}{field.required && <span className="text-red-500 ml-1">*</span>}
+                    </Label>
+                    <div className="mt-2 space-y-2">
+                        {options.map((option, index) => (
+                            <label key={`${field.key}-checkbox-${option}-${index}`} className="flex items-center gap-2 text-sm text-text-primary">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedValues.includes(option)}
+                                    required={field.required && index === 0 && selectedValues.length === 0}
+                                    onChange={(e) => handleToggleOption(option, e.target.checked)}
+                                />
+                                <span>{option}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex items-center gap-3">
+                <input
+                    id={field.key}
+                    type="checkbox"
+                    checked={value === 'true'}
+                    required={field.required}
+                    onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
+                />
+                <Label htmlFor={field.key}>
+                    {field.label}{field.required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+            </div>
+        );
+    }
+
     return (
         <TextInput
             id={field.key}
-            type={field.type === 'email' ? 'email' : 'text'}
+            type={isDateType(field.type)
+                ? 'date'
+                : isNumberType(field.type)
+                    ? 'number'
+                    : field.type === 'email'
+                        ? 'email'
+                        : 'text'}
             value={value}
             onChange={(val) => onChange(val)}
             label={field.label}
@@ -165,7 +340,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
 
     // Dynamic field values keyed by formField.key
     const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
-    const [resumeFile, setResumeFile] = useState<File | null>(null);
+    const [filesByField, setFilesByField] = useState<Record<string, File | null>>({});
     const user = useUserStore((state) => state.user);
 
     const isSaved = savedOverride ?? !!item.isSavedByCurrentUser;
@@ -400,9 +575,10 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
         e.preventDefault();
         if (!agreedToTerms || submitting) return;
 
-        const hasRequiredFileField = displayFields.some((field) => field.type === 'file_upload' && field.required);
-        if (hasRequiredFileField && !resumeFile) {
-            toast.error(t("toasts.resumeRequired"));
+        const requiredFileFields = displayFields.filter((field) => isFileUploadType(field.type) && field.required);
+        const missingRequiredFileField = requiredFileFields.find((field) => !filesByField[field.key]);
+        if (missingRequiredFileField) {
+            toast.error(t("toasts.requiredFileMissing", { field: missingRequiredFileField.label }));
             return;
         }
 
@@ -417,8 +593,12 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
         try {
             let resumeFileRef: FileRefType | undefined;
 
-            if (resumeFile) {
-                const contentType = resumeFile.type || 'application/octet-stream';
+            // Upload all file fields first
+            const uploadedFileRefs: Record<string, FileRefType> = {};
+            const fileEntries = Object.entries(filesByField).filter(([, file]) => !!file) as Array<[string, File]>;
+
+            for (const [fieldKey, file] of fileEntries) {
+                const contentType = file.type || 'application/octet-stream';
                 const { data: uploadData } = await getUploadUrl({
                     variables: {
                         contentType,
@@ -432,7 +612,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
 
                 const uploadRes = await fetch(uploadData.getUploadUrl.uploadUrl, {
                     method: 'PUT',
-                    body: resumeFile,
+                    body: file,
                     headers: {
                         'Content-Type': contentType,
                     },
@@ -442,12 +622,23 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                     throw new Error('Failed to upload resume file');
                 }
 
-                resumeFileRef = {
+                uploadedFileRefs[fieldKey] = {
                     path: uploadData.getUploadUrl.objectKey,
-                    filename: resumeFile.name,
+                    filename: file.name,
                     mimeType: contentType,
-                    sizeBytes: resumeFile.size,
+                    sizeBytes: file.size,
                 };
+            }
+
+            // `resume` remains first-class backend field
+            if (uploadedFileRefs.resume) {
+                resumeFileRef = uploadedFileRefs.resume;
+            }
+
+            // Other file uploads are passed inside customAnswers as object key paths
+            for (const [fieldKey, fileRef] of Object.entries(uploadedFileRefs)) {
+                if (fieldKey === 'resume') continue;
+                customAnswers[fieldKey] = fileRef.path;
             }
 
             await submitApplication({
@@ -471,7 +662,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
             toast.success(t("toasts.submitSuccess"));
             setIsDialogOpen(false);
             setFieldValues({});
-            setResumeFile(null);
+            setFilesByField({});
             setAgreedToTerms(false);
         } catch {
             toast.error(t("toasts.submitError"));
@@ -632,7 +823,9 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         field={field}
                                         value={fieldValues[field.key] ?? ''}
                                         onChange={(val) => handleFieldChange(field.key, val)}
-                                        onFileChange={field.key === 'resume' ? setResumeFile : undefined}
+                                        onFileChange={isFileUploadType(field.type)
+                                            ? (file) => setFilesByField((prev) => ({ ...prev, [field.key]: file }))
+                                            : undefined}
                                     />
                                 ))}
 

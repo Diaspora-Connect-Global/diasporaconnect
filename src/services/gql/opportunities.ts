@@ -72,6 +72,7 @@ export const LIST_OPPORTUNITIES = gql`
         applicationMethod
         externalLink
         applicationEmail
+        formFields { key label type required }
         compensationMin
         compensationMax
         compensationCurrency
@@ -113,6 +114,7 @@ export const OPPORTUNITIES = gql`
         applicationMethod
         externalLink
         applicationEmail
+        formFields { key label type required }
         compensationMin
         compensationMax
         compensationCurrency
@@ -154,6 +156,7 @@ export const GET_OPPORTUNITY_FEED = gql`
         applicationMethod
         externalLink
         applicationEmail
+        formFields { key label type required }
         compensationMin
         compensationMax
         compensationCurrency

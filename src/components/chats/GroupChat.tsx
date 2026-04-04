@@ -1005,7 +1005,7 @@ export default function GroupChat() {
                                                     )}
                                                 </p>
                                                 <ButtonType3
-                                                    onClick={() => handleViewReplies({ ...message, text: message.content, timestamp: message.createdAt })}
+                                                    onClick={() => handleViewReplies(message)}
                                                     className="flex items-center space-x-1 text-[10px] sm:text-xs p-0 min-w-0 border-0 bg-transparent"
                                                 >
                                                     <span>{t('reply')}</span>

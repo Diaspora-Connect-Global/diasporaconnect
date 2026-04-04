@@ -430,11 +430,6 @@
             "moreevents": "More events",
             "noevents": "You have no saved events",
             "noattending": " You are not attending any event now",
-            "pastEvents": "Past events",
-            "paidEvents": "Paid events",
-            "cancelAttendanceUnavailable": "Unable to cancel attendance yet for this registration.",
-            "attendanceCancelled": "Attendance cancelled",
-            "cancelAttendanceFailed": "Failed to cancel attendance",
             "payment": {
                 "title": "Pay for tickets",
                 "ticketSummary": "Ticket Summary",
@@ -538,6 +533,7 @@
                 "submitSuccess": "Application submitted successfully",
                 "submitError": "Failed to submit application",
                 "resumeRequired": "Please upload your resume before submitting",
+                "requiredFileMissing": "Please upload the required file: {field}",
                 "saveToggleError": "Unable to update saved state"
             },
             "none": {
@@ -992,26 +988,6 @@
         "save": "Save",
         "cancel": "Cancel",
         "saving": "Saving..."
-    },
-    "wallet": {
-        "title": "My Wallet",
-        "subtitle": "Manage your funds and transactions",
-        "totalBalance": "Total Balance",
-        "inEscrow": "In Escrow",
-        "available": "Available",
-        "quickActions": "Quick Actions",
-        "deposit": "Deposit",
-        "withdraw": "Withdraw",
-        "send": "Send",
-        "cards": "Cards",
-        "transactionHistory": "Transaction History",
-        "allTransactions": "All Transactions",
-        "completed": "Completed",
-        "pending": "Pending",
-        "failed": "Failed",
-        "loadMore": "Load More",
-        "noTransactions": "No transactions found",
-        "fromLastMonth": "from last month"
     },
     "settings": {
         "title": "Settings",

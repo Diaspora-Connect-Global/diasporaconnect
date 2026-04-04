@@ -351,11 +351,6 @@
             "moreevents": "Altri eventi",
             "noevents": "Non hai eventi salvati",
             "noattending": "Non stai partecipando a nessun evento al momento",
-            "pastEvents": "Eventi passati",
-            "paidEvents": "Eventi a pagamento",
-            "cancelAttendanceUnavailable": "Impossibile annullare la partecipazione per questa registrazione al momento.",
-            "attendanceCancelled": "Partecipazione annullata",
-            "cancelAttendanceFailed": "Annullamento della partecipazione non riuscito",
             "payment": {
                 "title": "Paga i biglietti",
                 "ticketSummary": "Riepilogo biglietti",
@@ -456,6 +451,7 @@
                 "submitSuccess": "Candidatura inviata con successo",
                 "submitError": "Impossibile inviare la candidatura",
                 "resumeRequired": "Carica il tuo CV prima di inviare",
+                "requiredFileMissing": "Carica il file richiesto: {field}",
                 "saveToggleError": "Impossibile aggiornare lo stato di salvataggio"
             },
             "none": {
@@ -737,19 +733,6 @@
             "verified": "Verificato",
             "notVerified": "Non verificato"
         }
-    },
-    "common": {
-        "scrollLeft": "Scorri a sinistra",
-        "scrollRight": "Scorri a destra",
-        "almostThere": "Quasi fatto...",
-        "remove": "Rimuovi",
-        "delete": "Elimina",
-        "cancel": "Annulla",
-        "confirm": "Conferma"
-    },
-    "metadata": {
-        "title": "Diaspora Connect Global",
-        "description": "Collegare le comunità della diaspora in tutto il mondo"
     },
     "settings": {
     "title": "Impostazioni",
