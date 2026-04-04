@@ -68,16 +68,16 @@ type StatusFilter = "ALL" | "SUBMITTED" | "ACCEPTED" | "REJECTED";
 
 const STATUS_FILTERS: { label: string; value: StatusFilter; dot?: string }[] = [
   { label: "All", value: "ALL" },
-  { label: "Submitted", value: "SUBMITTED", dot: "bg-blue-500" },
-  { label: "Accepted", value: "ACCEPTED", dot: "bg-amber-500" },
+  { label: "Submitted", value: "SUBMITTED", dot: "bg-amber-500" },
+  { label: "Accepted", value: "ACCEPTED", dot: "bg-text-brand" },
   { label: "Rejected", value: "REJECTED", dot: "bg-red-500" },
 ];
 
 const statusBadgeConfig: Record<string, { label: string; bg: string; text: string }> = {
   PENDING: { label: "Submitted", bg: "bg-surface-info", text: "text-text-info" },
   REVIEWING: { label: "Submitted", bg: "bg-surface-info", text: "text-text-info" },
-  ACCEPTED: { label: "Accepted", bg: "bg-surface-warning", text: "text-text-warning" },
-  REJECTED: { label: "Rejected", bg: "bg-surface-danger", text: "text-text-danger" },
+  ACCEPTED: { label: "Accepted", bg: "bg-text-brand", text: "text-text-white" },
+  REJECTED: { label: "Rejected", bg: "bg-text-brand", text: "text-text-white" },
   WITHDRAWN: { label: "Withdrawn", bg: "bg-surface-subtle", text: "text-text-secondary" },
 };
 
@@ -126,22 +126,6 @@ function formatDate(dateStr: string | undefined | null): string {
   } catch { return ""; }
 }
 
-/* ─── Category icon mapping (reuse the opportunity categories from data) ─── */
-const categoryIcons: Record<string, string> = {
-  "Funding & Grants": "💰",
-  "Education & Training": "🎓",
-  "Employment & Career": "💼",
-  "Fellowships & Leadership": "🏆",
-  "Business & Investment": "🏢",
-  "Volunteering & Social Impact": "❤️",
-  "Event & Creative Industry": "🎨",
-  "Agriculture & Sustainability": "🌱",
-  "Real Estate & Infrastructure": "🏠",
-  "Gov't & Embassy Initiatives": "🏛️",
-  "Innovation & Research": "💡",
-  "Finance & Economics": "📈",
-};
-
 const isLikelyId = (value?: string | null) => {
   if (!value) return false;
   const v = value.trim();
@@ -154,6 +138,36 @@ function formatEnumLabel(value?: string | null): string {
     .replace(/_/g, ' ')
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function normalizeCategoryKey(value?: string | null): string {
+  if (!value) return "";
+  return value
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/['’]/g, "")
+    .replace(/_/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+const opportunityIconMap = new Map<string, LucideIcon>(
+  opportunities.flatMap((item) => {
+    if (!item.icon) return [];
+    return [
+      [normalizeCategoryKey(item.id), item.icon],
+      [normalizeCategoryKey(item.title), item.icon],
+    ] as [string, LucideIcon][];
+  })
+);
+
+function getOpportunityTypeIcon(value?: string | null): LucideIcon | undefined {
+  const normalizedRaw = normalizeCategoryKey(value);
+  if (!normalizedRaw) return undefined;
+
+  const normalizedLabel = normalizeCategoryKey(formatEnumLabel(value));
+  return opportunityIconMap.get(normalizedRaw) ?? opportunityIconMap.get(normalizedLabel);
 }
 
 /* ─── Application Card ─── */
@@ -172,9 +186,10 @@ const ApplicationCard = ({
   const isExternal = opp?.applicationMethod === "EXTERNAL_LINK" || opp?.applicationMethod === "EMAIL_REQUEST";
   const activeStep = getActiveStep(app.status);
   const isRejectedOutcome = app.status === "REJECTED" || app.status === "WITHDRAWN";
-  const stepColor = getStepperColor(app.status);
+  const stepColor = "bg-text-brand";
   const canWithdraw = app.status !== "ACCEPTED" && app.status !== "REJECTED" && app.status !== "WITHDRAWN";
   const timelineSteps = ["Submitted", isRejectedOutcome ? "Rejected" : "Accepted"];
+  const CategoryIcon = getOpportunityTypeIcon(opp?.category);
 
   const getPosterName = () => {
     const ownerType = (opp?.owner?.type ?? "").toUpperCase();
@@ -213,7 +228,7 @@ const ApplicationCard = ({
       <div className="flex flex-col gap-0.5">
         {opp?.category && (
           <p className="text-xs text-text-secondary flex items-center gap-1.5">
-            <span>{categoryIcons[opp.category] ?? "📋"}</span>
+            {CategoryIcon ? <CategoryIcon className="w-3.5 h-3.5 shrink-0" /> : <Briefcase className="w-3.5 h-3.5 shrink-0" />}
             {formatEnumLabel(opp.category)}
           </p>
         )}
@@ -223,27 +238,23 @@ const ApplicationCard = ({
       {/* Progress Stepper — only for in-platform applications with trackable status */}
       {!isExternal && (
         <div className="mt-1 flex justify-center">
-          <div className="flex items-start gap-0">
+          <div className="relative w-[224px]">
+            <div className={`absolute left-[6px] right-[6px] top-[5px] h-[2px] ${activeStep >= 1 ? stepColor : "bg-border-subtle"} transition-colors`} />
+            <div className="relative flex items-start justify-between">
             {timelineSteps.map((step, i) => {
               const isActive = i <= activeStep;
               const isCurrent = i === activeStep;
-              const showConnector = i < timelineSteps.length - 1;
 
               return (
-                <div key={step} className="flex items-start gap-0">
-                  <div className="flex min-w-[82px] flex-col items-center">
+                <div key={step} className="flex w-[96px] flex-col items-center">
                     <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isActive ? stepColor : "bg-border-subtle"} transition-colors ${isCurrent ? "ring-2 ring-offset-1 ring-offset-surface-default" : ""}`} />
                     <span className={`text-[10px] mt-1 text-center leading-tight ${isCurrent ? "font-semibold text-text-primary" : "text-text-secondary"}`}>
                       {step}
                     </span>
-                  </div>
-
-                  {showConnector && (
-                    <div className={`mt-[5px] -mx-[1px] h-[2px] w-12 ${activeStep >= i + 1 ? stepColor : "bg-border-subtle"} transition-colors`} />
-                  )}
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
       )}
@@ -444,7 +455,9 @@ const SavedComponent = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {displayItems.map((saved) => (
+        {displayItems.map((saved) => {
+          const CategoryIcon = getOpportunityTypeIcon(saved.category);
+          return (
           <div
             key={saved.opportunityId}
             className="relative flex flex-col justify-between p-4 bg-surface-default rounded-xl border border-border-subtle hover:border-border-default transition-colors"
@@ -472,7 +485,7 @@ const SavedComponent = ({
             {/* Middle section: Category and Owner */}
             <div className="flex flex-col gap-1.5 mb-4">
               <div className="flex items-center gap-1.5 text-sm font-medium text-[#2d528b]">
-                <Briefcase className="w-4 h-4 shrink-0" />
+                {CategoryIcon ? <CategoryIcon className="w-4 h-4 shrink-0" /> : <Briefcase className="w-4 h-4 shrink-0" />}
                 <span className="truncate">{formatEnumLabel(saved.category) || "Opportunity"}</span>
               </div>
               <p className="text-sm text-text-secondary truncate">Posted by {getPosterName(saved)}</p>
@@ -493,7 +506,8 @@ const SavedComponent = ({
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
