@@ -20,11 +20,32 @@ type CheckoutEvent = {
     title: string;
     startAt: string;
     isPaid: boolean;
+    currency?: string;
     ticketId?: string;
     ticketName?: string;
     ticketDescription?: string;
     ticketPriceInCents?: number;
     registrationFormFields?: RegistrationFormField[];
+};
+
+const LOCALE_REGION_MAP: Record<string, { flag: string; dialCode: string; currency: string }> = {
+    gh: { flag: '🇬🇭', dialCode: '+233', currency: 'GHS' },
+    ng: { flag: '🇳🇬', dialCode: '+234', currency: 'NGN' },
+    ke: { flag: '🇰🇪', dialCode: '+254', currency: 'KES' },
+    us: { flag: '🇺🇸', dialCode: '+1', currency: 'USD' },
+    gb: { flag: '🇬🇧', dialCode: '+44', currency: 'GBP' },
+    fr: { flag: '🇫🇷', dialCode: '+33', currency: 'EUR' },
+    de: { flag: '🇩🇪', dialCode: '+49', currency: 'EUR' },
+    it: { flag: '🇮🇹', dialCode: '+39', currency: 'EUR' },
+};
+
+const CURRENCY_SYMBOL_FALLBACK: Record<string, string> = {
+    GHS: 'GH₵',
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    NGN: '₦',
+    KES: 'KSh',
 };
 
 export interface PaidEventsModalRef {
@@ -42,6 +63,8 @@ export interface PaidEventsModalRef {
 const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const t = useTranslations('home.events.payment');
     const locale = useLocale();
+    const region = locale.split('-')[1]?.toLowerCase() ?? locale.toLowerCase();
+    const localeRegion = LOCALE_REGION_MAP[region] ?? LOCALE_REGION_MAP.gh;
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -245,11 +268,21 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const discountedSubtotal = Math.max(0, subtotal - discountAmount);
     const serviceFee = selectedEvent?.isPaid ? discountedSubtotal * 0.1 : 0;
 
-    const ticketPriceLabel = selectedEvent?.isPaid
-        ? `GH¢ ${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(unitPrice)}`
-        : t('free');
-    const formatAmount = (value: number) =>
-        new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    const currencyCode = selectedEvent?.currency ?? localeRegion.currency;
+    const formatAmount = (value: number) => {
+        try {
+            return new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency: currencyCode,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(value);
+        } catch {
+            const symbol = CURRENCY_SYMBOL_FALLBACK[currencyCode] ?? currencyCode;
+            return `${symbol} ${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+        }
+    };
+    const ticketPriceLabel = selectedEvent?.isPaid ? formatAmount(unitPrice) : t('free');
 
     const canProceedStep1 = ticketQty > 0 && isFormValid();
 
@@ -295,6 +328,8 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                             onCvvChange={v => updateBilling("cvv", v)}
                             onMobileProviderChange={v => updateBilling("mobileProvider", v)}
                             onPhoneNumberChange={v => updateBilling("phoneNumber", v)}
+                            countryFlag={localeRegion.flag}
+                            dialCode={localeRegion.dialCode}
                             openMethod={openMethod}
                             onOpenMethodChange={setOpenMethod}
                         />
@@ -317,27 +352,27 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                 <div className="space-y-2 border-b border-b-border-subtle pb-3">
                                     <div className="flex justify-between text-sm">
                                         <span>{ticketQty} × {t('ticketType')}</span>
-                                        <span>GH¢ {formatAmount(subtotal)}</span>
+                                        <span>{formatAmount(subtotal)}</span>
                                     </div>
                                     {appliedPromo && (
                                         <div className="flex justify-between text-sm text-text-success">
                                             <span>Discount ({appliedPromo.code})</span>
-                                            <span>−GH¢ {formatAmount(discountAmount)}</span>
+                                            <span>−{formatAmount(discountAmount)}</span>
                                         </div>
                                     )}
                                     <div className="flex justify-between text-sm">
                                         <span>{t('subtotal')}</span>
-                                        <span>GH¢ {formatAmount(discountedSubtotal)}</span>
+                                        <span>{formatAmount(discountedSubtotal)}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span>{t('serviceFee')}</span>
-                                        <span>GH¢ {formatAmount(serviceFee)}</span>
+                                        <span>{formatAmount(serviceFee)}</span>
                                     </div>
                                 </div>
 
                                 <div className="flex justify-between font-caption-large py-1">
                                     <span>{t('total')}</span>
-                                    <span>GH¢ {formatAmount(totalAmount)}</span>
+                                    <span>{formatAmount(totalAmount)}</span>
                                 </div>
 
                                 {/* Promo code input (paid events only) */}
@@ -400,7 +435,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                         >
                                             {isProcessingPayment
                                                 ? <Spinner className="h-5 w-5" />
-                                                : t('payAmount', { amount: formatAmount(totalAmount) })}
+                                                : `${t('payToAttend')} (${formatAmount(totalAmount)})`}
                                         </ButtonType2>
                                     )}
                                 </div>

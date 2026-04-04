@@ -351,6 +351,11 @@
             "moreevents": "Weitere Veranstaltungen",
             "noevents": "Sie haben keine gespeicherten Veranstaltungen",
             "noattending": "Sie nehmen derzeit an keiner Veranstaltung teil",
+            "pastEvents": "Vergangene Veranstaltungen",
+            "paidEvents": "Bezahlte Veranstaltungen",
+            "cancelAttendanceUnavailable": "Die Teilnahme kann für diese Registrierung noch nicht storniert werden.",
+            "attendanceCancelled": "Teilnahme storniert",
+            "cancelAttendanceFailed": "Stornierung der Teilnahme fehlgeschlagen",
             "payment": {
                 "title": "Tickets bezahlen",
                 "ticketSummary": "Ticket-Zusammenfassung",

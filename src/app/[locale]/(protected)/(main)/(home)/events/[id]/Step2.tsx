@@ -16,7 +16,6 @@ import {
   InputGroupText,
 } from '@/components/ui/input-group';
 import { TextPrimary } from '@/components/utils';
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 type Method = 'card' | 'mobile' | null;
@@ -36,6 +35,8 @@ interface Step2Props {
   // Mobile fields
   mobileProvider: MobileProvider;
   phoneNumber: string;
+  countryFlag: string;
+  dialCode: string;
 
   // Payment method selection (accordion open state)
   openMethod: Method;
@@ -61,6 +62,8 @@ export default function Step2({
   cvv,
   mobileProvider,
   phoneNumber,
+  countryFlag,
+  dialCode,
   openMethod,
   onOpenMethodChange,
 
@@ -277,12 +280,12 @@ export default function Step2({
                 <InputGroup className="px-3 py-6 border border-border-default rounded-sm bg-surface-subtle focus-within:border-border-brand">
                   <InputGroupAddon>
                     <InputGroupText>
-                      <Image src="/FLAG.png" alt="Ghana flag" width={15} height={15} />
+                      <span aria-hidden>{countryFlag}</span>
                     </InputGroupText>
                   </InputGroupAddon>
                   <InputGroupAddon>
                     <InputGroupText className="text-text-primary">
-                      <TextPrimary>+233</TextPrimary>
+                      <TextPrimary>{dialCode}</TextPrimary>
                     </InputGroupText>
                   </InputGroupAddon>
                   <InputGroupInput

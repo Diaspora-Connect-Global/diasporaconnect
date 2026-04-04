@@ -430,6 +430,11 @@
             "moreevents": "More events",
             "noevents": "You have no saved events",
             "noattending": " You are not attending any event now",
+            "pastEvents": "Past events",
+            "paidEvents": "Paid events",
+            "cancelAttendanceUnavailable": "Unable to cancel attendance yet for this registration.",
+            "attendanceCancelled": "Attendance cancelled",
+            "cancelAttendanceFailed": "Failed to cancel attendance",
             "payment": {
                 "title": "Pay for tickets",
                 "ticketSummary": "Ticket Summary",

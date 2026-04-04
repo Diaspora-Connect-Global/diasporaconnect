@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
@@ -507,6 +507,9 @@ function FormBuilderTab({ eventId }: { eventId: string }) {
   const event = data?.getEvent;
 
   const [fields, setFields] = useState<RegistrationFormField[]>(() => event?.registrationFormFields ?? []);
+  useEffect(() => {
+    setFields(event?.registrationFormFields ?? []);
+  }, [event?.registrationFormFields]);
   const [updateFormFields, { loading: saving }] = useMutation(UPDATE_EVENT_FORM_FIELDS, {
     onCompleted: () => toast.success('Form saved'),
     onError: (e) => toast.error(e.message),

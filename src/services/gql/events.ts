@@ -242,6 +242,10 @@ export interface UnsaveEventData {
   unsaveEvent: boolean;
 }
 
+export interface CancelRegistrationData {
+  cancelRegistration: boolean;
+}
+
 export interface GetEventStatsData {
   getEventStats: EventStats;
 }

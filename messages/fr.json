@@ -351,6 +351,11 @@
             "moreevents": "Plus d'événements",
             "noevents": "Vous n'avez aucun événement sauvegardé",
             "noattending": "Vous ne participez à aucun événement pour le moment",
+            "pastEvents": "Événements passés",
+            "paidEvents": "Événements payants",
+            "cancelAttendanceUnavailable": "Impossible d'annuler la participation pour cette inscription pour le moment.",
+            "attendanceCancelled": "Participation annulée",
+            "cancelAttendanceFailed": "Échec de l'annulation de la participation",
             "payment": {
                 "title": "Payer les billets",
                 "ticketSummary": "Résumé des billets",

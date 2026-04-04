@@ -102,9 +102,46 @@ const INITIAL: FormData = {
   tags: '',
 };
 
-function toIso(localDatetimeStr: string): string {
+function getTimeZoneOffsetMs(date: Date, timeZone: string): number {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  const parts = dtf.formatToParts(date);
+  const values = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const asUtc = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second)
+  );
+  return asUtc - date.getTime();
+}
+
+function toIsoInTimezone(localDatetimeStr: string, timeZone: string): string {
   if (!localDatetimeStr) return '';
-  return new Date(localDatetimeStr).toISOString();
+
+  const [datePart, timePart] = localDatetimeStr.split('T');
+  if (!datePart || !timePart) return '';
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute] = timePart.split(':').map(Number);
+
+  const wallClockUtcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+  const offset1 = getTimeZoneOffsetMs(wallClockUtcGuess, timeZone);
+  const candidate = new Date(wallClockUtcGuess.getTime() - offset1);
+  const offset2 = getTimeZoneOffsetMs(candidate, timeZone);
+  const corrected = new Date(wallClockUtcGuess.getTime() - offset2);
+
+  return corrected.toISOString();
 }
 
 export default function CreateEventPage() {
@@ -165,8 +202,8 @@ export default function CreateEventPage() {
               virtualLink: form.virtualLink || undefined,
               platform: form.platform || undefined,
             },
-            startAt: toIso(form.startAt),
-            endAt: toIso(form.endAt),
+            startAt: toIsoInTimezone(form.startAt, form.timezone),
+            endAt: toIsoInTimezone(form.endAt, form.timezone),
             timezone: form.timezone,
             isPaid: form.isPaid,
             ticketPrice,

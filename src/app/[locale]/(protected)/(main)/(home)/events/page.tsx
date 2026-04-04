@@ -2,7 +2,7 @@
 import EventCard1 from "@/components/cards/events/EventCard1";
 import EventCardSmall from "@/components/cards/events/EventCardSmall";
 import { useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
 import { useQuery, useMutation } from '@apollo/client/react';
@@ -10,11 +10,13 @@ import {
     LIST_EVENTS,
     USER_EVENTS,
     REGISTER_EVENT,
+    CANCEL_REGISTRATION,
     SAVE_EVENT,
     UNSAVE_EVENT,
     type ListEventsData,
     type UserEventsData,
     type RegisterEventData,
+    type CancelRegistrationData,
     type SaveEventData,
     type UnsaveEventData,
     type Event,
@@ -26,7 +28,17 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 
-const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Event[], loading: boolean }) => {
+function formatEventDate(iso: string, locale: string) {
+    return new Intl.DateTimeFormat(locale, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+    }).format(new Date(iso));
+}
+
+const AttendingComponent = ({ attendingEvents, loading, locale }: { attendingEvents: Event[], loading: boolean, locale: string }) => {
     const t = useTranslations("home.events");
 
     if (loading) {
@@ -50,13 +62,7 @@ const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Eve
                             <EventCardSmall
                                 eventId={event.id}
                                 title={event.title}
-                                date={new Date(event.startAt).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit'
-                                })}
+                                date={formatEventDate(event.startAt, locale)}
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
                                 visibility={event.visibility}
@@ -70,7 +76,7 @@ const AttendingComponent = ({ attendingEvents, loading }: { attendingEvents: Eve
     );
 };
 
-const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loading: boolean }) => {
+const SavedComponent = ({ savedEvents, loading, locale }: { savedEvents: Event[], loading: boolean, locale: string }) => {
     const t = useTranslations("home.events");
 
     if (loading) {
@@ -94,13 +100,7 @@ const SavedComponent = ({ savedEvents, loading }: { savedEvents: Event[], loadin
                             <EventCardSmall
                                 eventId={event.id}
                                 title={event.title}
-                                date={new Date(event.startAt).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit'
-                                })}
+                                date={formatEventDate(event.startAt, locale)}
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
                                 imageUrl={getEventCoverImage(event)}
@@ -126,7 +126,10 @@ export default function Events() {
     const [activeTab, setActiveTab] = useState<string>("events");
     const [optimisticSavedState, setOptimisticSavedState] = useState<Record<string, boolean>>({});
     const [optimisticAttendingState, setOptimisticAttendingState] = useState<Record<string, boolean>>({});
+    const [registrationIdsByEvent, setRegistrationIdsByEvent] = useState<Record<string, string>>({});
     const tActions = useTranslations("actions");
+    const t = useTranslations("home.events");
+    const locale = useLocale();
     const modalRef = useRef<PaidEventsModalRef>(null);
     const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
     const isAuthHydrated = useAuthStore.persist.hasHydrated();
@@ -156,6 +159,10 @@ export default function Events() {
         refetchQueries: [{ query: USER_EVENTS }],
         awaitRefetchQueries: true,
     });
+    const [cancelRegistration] = useMutation<CancelRegistrationData>(CANCEL_REGISTRATION, {
+        refetchQueries: [{ query: USER_EVENTS }],
+        awaitRefetchQueries: true,
+    });
 
     const handleAttendEvent = (event: Event) => {
         const primaryTicket = event.tickets?.[0];
@@ -177,6 +184,11 @@ export default function Events() {
                     return { waitlistPosition };
                 }
 
+                const registrationId = result.data?.registerForEvent?.registrationId;
+                if (registrationId) {
+                    setRegistrationIdsByEvent((prev) => ({ ...prev, [event.id]: registrationId }));
+                }
+
                 const paymentIntentClientSecret = result.data?.registerForEvent?.paymentIntentClientSecret;
                 if (paymentIntentClientSecret) {
                     toast.info('Registration created. Complete payment to confirm attendance.');
@@ -191,6 +203,7 @@ export default function Events() {
                 title: event.title,
                 startAt: event.startAt,
                 isPaid: event.isPaid,
+                currency: event.currency ?? undefined,
                 ticketId: primaryTicket?.id,
                 ticketName: primaryTicket?.name,
                 ticketDescription: primaryTicket?.description ?? undefined,
@@ -200,8 +213,26 @@ export default function Events() {
         });
     };
 
-    const handleCancelAttend = () => {
-        toast.info('Cancel attendance will be available once backend support is added');
+    const handleCancelAttend = async (eventId: string) => {
+        const registrationId = registrationIdsByEvent[eventId];
+        if (!registrationId) {
+            toast.error(t("cancelAttendanceUnavailable"));
+            return;
+        }
+
+        setOptimisticAttendingState((prev) => ({ ...prev, [eventId]: false }));
+        try {
+            await cancelRegistration({ variables: { registrationId } });
+            setRegistrationIdsByEvent((prev) => {
+                const next = { ...prev };
+                delete next[eventId];
+                return next;
+            });
+            toast.success(t("attendanceCancelled"));
+        } catch {
+            setOptimisticAttendingState((prev) => ({ ...prev, [eventId]: true }));
+            toast.error(t("cancelAttendanceFailed"));
+        }
     };
 
     const handleSaveEvent = async (eventId: string, isSaved: boolean) => {
@@ -226,8 +257,6 @@ export default function Events() {
         { name: `${tActions("attending")}`, status: "events" },
         { name: `${tActions("saved")}`, status: "saved" },
     ];
-
-    const t = useTranslations("home.events");
 
     const attendingEvents = userEventsData?.userEvents.attending ?? [];
     const savedEvents = userEventsData?.userEvents.saved ?? [];
@@ -309,22 +338,22 @@ export default function Events() {
                 {/* Events Content */}
                 <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory">
                     {activeTab === "events" ? (
-                        <AttendingComponent attendingEvents={upcomingAttending} loading={userEventsLoading} />
+                        <AttendingComponent attendingEvents={upcomingAttending} loading={userEventsLoading} locale={locale} />
                     ) : (
-                        <SavedComponent savedEvents={savedEventsToRender} loading={userEventsLoading} />
+                        <SavedComponent savedEvents={savedEventsToRender} loading={userEventsLoading} locale={locale} />
                     )}
                 </div>
 
                 {activeTab === "events" && !userEventsLoading && pastAttending.length > 0 && (
                     <>
-                        <p className="heading-small mt-6 mb-2 text-text-secondary">Past Events</p>
+                        <p className="heading-small mt-6 mb-2 text-text-secondary">{t("pastEvents")}</p>
                         <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory opacity-70">
-                            <AttendingComponent attendingEvents={pastAttending} loading={false} />
+                            <AttendingComponent attendingEvents={pastAttending} loading={false} locale={locale} />
                         </div>
                     </>
                 )}
 
-                <p className="heading-small my-4">Paid Events</p>
+                <p className="heading-small my-4">{t("paidEvents")}</p>
 
                 {eventsLoading ? (
                     <div className="flex items-center justify-center p-8">
@@ -337,13 +366,7 @@ export default function Events() {
                                 key={event.id}
                                 eventId={event.id}
                                 title={event.title}
-                                date={new Date(event.startAt).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit'
-                                })}
+                                date={formatEventDate(event.startAt, locale)}
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
                                 visibility={event.visibility}
@@ -354,7 +377,7 @@ export default function Events() {
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
                                 isSaved={savedEventIds.has(event.id)}
                                 isRegistered={attendingEventIds.has(event.id)}
-                                onCancelAttend={handleCancelAttend}
+                                onCancelAttend={() => handleCancelAttend(event.id)}
                             />
                         ))}
                     </div>
@@ -373,13 +396,7 @@ export default function Events() {
                                 key={event.id}
                                 eventId={event.id}
                                 title={event.title}
-                                date={new Date(event.startAt).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit'
-                                })}
+                                date={formatEventDate(event.startAt, locale)}
                                 location={getEventLocationDisplay(event)}
                                 attendees={event.registrationCount ?? 0}
                                 visibility={event.visibility}
@@ -390,7 +407,7 @@ export default function Events() {
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
                                 isSaved={savedEventIds.has(event.id)}
                                 isRegistered={attendingEventIds.has(event.id)}
-                                onCancelAttend={handleCancelAttend}
+                                onCancelAttend={() => handleCancelAttend(event.id)}
                             />
                         ))}
                     </div>

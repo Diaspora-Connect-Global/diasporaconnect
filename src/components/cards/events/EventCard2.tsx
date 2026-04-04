@@ -2,7 +2,7 @@ import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical, Lock, Globe } from "lucide-react";
+import { EllipsisVertical, Lock, Globe, Users, Shield } from "lucide-react";
 
 interface EventCardProps {
     title: string;
@@ -22,6 +22,14 @@ interface EventCardProps {
 }
 
 export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, visibility = "public", onBuyClick, onSaveClick, isSaved, isRegistered, isSoldOut, onCancelAttend }: EventCardProps) {
+    const visibilityMeta: Record<string, { label: string; icon: React.ReactNode }> = {
+        public: { label: "Public", icon: <Globe size={12} /> },
+        community: { label: "Community", icon: <Users size={12} /> },
+        association: { label: "Association", icon: <Shield size={12} /> },
+        invite_only: { label: "Invite only", icon: <Lock size={12} /> },
+    };
+    const badge = visibilityMeta[visibility] ?? visibilityMeta.public;
+
     return (
         <div className="w-full  bg-surface-default border border-border-default rounded-3xl overflow-hidden shadow-sm">
             {/* Header Image */}
@@ -52,17 +60,10 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                 <div className="flex justify-between items-start mb-2 gap-4">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                         <h2 className="text-2xl font-bold text-text-primary break-words">{title}</h2>
-                        {visibility === "private" ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-surface-subtle border border-border-default px-2.5 py-0.5 text-xs font-semibold text-text-secondary whitespace-nowrap">
-                                <Lock size={12} />
-                                Private
-                            </span>
-                        ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-surface-subtle border border-border-default px-2.5 py-0.5 text-xs font-semibold text-text-secondary whitespace-nowrap">
-                                <Globe size={12} />
-                                Public
-                            </span>
-                        )}
+                        <span className="inline-flex items-center gap-1 rounded-full bg-surface-subtle border border-border-default px-2.5 py-0.5 text-xs font-semibold text-text-secondary whitespace-nowrap">
+                            {badge.icon}
+                            {badge.label}
+                        </span>
                     </div>
                     {priceLabel != null && (
                         <div className="flex-shrink-0">

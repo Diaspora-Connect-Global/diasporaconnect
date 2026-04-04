@@ -3,19 +3,21 @@
 import EventCard2 from "@/components/cards/events/EventCard2";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useParams } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
   GET_EVENT,
   IS_EVENT_SAVED,
   USER_EVENTS,
   REGISTER_EVENT,
+  CANCEL_REGISTRATION,
   SAVE_EVENT,
   UNSAVE_EVENT,
   type Event,
   type GetEventData,
   type IsEventSavedData,
   type RegisterEventData,
+  type CancelRegistrationData,
   type SaveEventData,
   type UnsaveEventData,
   getEventLocationDisplay,
@@ -25,9 +27,10 @@ import {
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useLocale, useTranslations } from "next-intl";
 
-function formatEventDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
+function formatEventDate(iso: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -49,6 +52,10 @@ export default function EventDetailPage() {
   const params = useParams();
   const eventId = params.id as string;
   const modalRef = useRef<PaidEventsModalRef>(null);
+  const locale = useLocale();
+  const tEvents = useTranslations("home.events");
+  const [registrationId, setRegistrationId] = useState<string | null>(null);
+  const [optimisticRegistered, setOptimisticRegistered] = useState<boolean | null>(null);
   const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
   const isAuthHydrated = useAuthStore.persist.hasHydrated();
   const shouldLoadUserEventState = isAuthHydrated && !!sessionToken;
@@ -81,6 +88,10 @@ export default function EventDetailPage() {
     onError: () => toast.error("Failed to unsave event"),
     refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }],
   });
+  const [cancelRegistration] = useMutation<CancelRegistrationData>(CANCEL_REGISTRATION, {
+    refetchQueries: [{ query: GET_EVENT, variables: { id: eventId } }, { query: USER_EVENTS }],
+    awaitRefetchQueries: true,
+  });
 
   const event = data?.getEvent ?? null;
 
@@ -105,12 +116,18 @@ export default function EventDetailPage() {
           return { waitlistPosition };
         }
 
+        const nextRegistrationId = result.data?.registerForEvent?.registrationId;
+        if (nextRegistrationId) {
+          setRegistrationId(nextRegistrationId);
+        }
+
         const paymentIntentClientSecret = result.data?.registerForEvent?.paymentIntentClientSecret;
         if (paymentIntentClientSecret) {
           toast.info("Registration created. Complete payment to confirm attendance.");
           return;
         }
 
+        setOptimisticRegistered(true);
         toast.success("Successfully registered for event");
       },
       event: event
@@ -119,6 +136,7 @@ export default function EventDetailPage() {
             title: event.title,
             startAt: event.startAt,
             isPaid: event.isPaid,
+            currency: event.currency ?? undefined,
             ticketId: primaryTicket?.id,
             ticketName: primaryTicket?.name,
             ticketDescription: primaryTicket?.description ?? undefined,
@@ -138,8 +156,21 @@ export default function EventDetailPage() {
     }
   };
 
-  const handleCancelAttend = () => {
-    toast.info("Cancel attendance will be available once backend support is added");
+  const handleCancelAttend = async () => {
+    if (!registrationId) {
+      toast.error(tEvents("cancelAttendanceUnavailable"));
+      return;
+    }
+
+    setOptimisticRegistered(false);
+    try {
+      await cancelRegistration({ variables: { registrationId } });
+      setRegistrationId(null);
+      toast.success(tEvents("attendanceCancelled"));
+    } catch {
+      setOptimisticRegistered(true);
+      toast.error(tEvents("cancelAttendanceFailed"));
+    }
   };
 
   if (!eventId) {
@@ -164,9 +195,10 @@ export default function EventDetailPage() {
     );
   }
 
-  const dateStr = formatEventDate(event.startAt);
+  const dateStr = formatEventDate(event.startAt, locale);
   const locationStr = getEventLocationDisplay(event);
   const priceStr = formatPriceLabel(event);
+  const isRegistered = optimisticRegistered ?? event.isRegistered;
 
   return (
     <>
@@ -182,7 +214,7 @@ export default function EventDetailPage() {
             priceLabel={priceStr}
             visibility={event.visibility}
             isSoldOut={isEventSoldOut(event)}
-            isRegistered={event.isRegistered}
+            isRegistered={isRegistered}
             isSaved={saved}
             onBuyClick={handleAttend}
             onSaveClick={handleSave}
