@@ -20,7 +20,7 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
-    const isNextDisabled = !data.phoneNumber.trim();
+    const isNextDisabled = !data.phoneNumber.trim() || !data.countryCode;
 
 
     const handleCodeChange = (value: string) => {
@@ -30,7 +30,10 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
         const selectedCountry = COUNTRIES.find(country => country.code === value);
 
         if (selectedCountry) {
-            updateData({ countryCode: selectedCountry.dial_code });
+            updateData({
+                country: selectedCountry.code,
+                countryCode: selectedCountry.dial_code
+            });
         }
     };
 
@@ -66,7 +69,7 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
                     <InputGroupAddon>
                         <InputGroupText>
                             <CountryCodeSelect
-                                value={data.countryCode}
+                                value={data.country}
                                 onChange={handleCodeChange}
                                 label={t('location.country.label')}
 

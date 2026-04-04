@@ -17,10 +17,12 @@ import { Step7 } from './steps/Step7';
 import {
   REGISTER_USER,
   COMPLETE_OAUTH_REGISTRATION,
+  RESEND_REGISTRATION_OTP,
   VERIFY_OTP,
   VERIFY_OAUTH_PHONE_OTP,
   RegisterUserResponse,
   CompleteOAuthRegistrationResponse,
+  ResendRegistrationOtpResponse,
   VerifyOtpResponse,
   VerifyOAuthPhoneOtpResponse,
 } from '@/services/gql/authentication';
@@ -79,6 +81,9 @@ export default function CompleteAccount() {
     useMutation<CompleteOAuthRegistrationResponse>(
       COMPLETE_OAUTH_REGISTRATION
     );
+
+  const [resendRegistrationOtp] =
+    useMutation<ResendRegistrationOtpResponse>(RESEND_REGISTRATION_OTP);
 
   const [verifyOtp] =
     useMutation<VerifyOtpResponse>(VERIFY_OTP);
@@ -186,13 +191,34 @@ export default function CompleteAccount() {
     setCurrentStep(s => Math.max(s - 1, 1));
 
   const formatPhone = (phone: string, countryCode: string) => {
-    const clean = phone.replace(/[^\d]/g, '');
+    const raw = (phone || '').trim();
+    const countryDigits = (countryCode || '').replace(/\D/g, '');
 
-    // Remove leading 0 if present
-    const phoneWithoutLeadingZero = clean.startsWith('0') ? clean.slice(1) : clean;
+    if (!raw || !countryDigits) return '';
 
-    // Append country code
-    return `${countryCode}${phoneWithoutLeadingZero}`;
+    // Accept already international format: +<country><number>
+    if (raw.startsWith('+')) {
+      const normalized = `+${raw.slice(1).replace(/\D/g, '')}`;
+      return normalized;
+    }
+
+    // Accept international prefix 00<country><number>
+    if (raw.startsWith('00')) {
+      const normalized = `+${raw.slice(2).replace(/\D/g, '')}`;
+      return normalized;
+    }
+
+    const digits = raw.replace(/\D/g, '');
+    if (!digits) return '';
+
+    // If user entered country prefix without + (e.g. 3247...), normalize it
+    if (digits.startsWith(countryDigits)) {
+      return `+${digits}`;
+    }
+
+    // Remove one local trunk zero for local input (e.g. 0470...)
+    const localDigits = digits.startsWith('0') ? digits.slice(1) : digits;
+    return `+${countryDigits}${localDigits}`;
   };
 
   /* ------------------------------------------------------------------ */
@@ -224,10 +250,20 @@ export default function CompleteAccount() {
   const submitFormA = async (continueToNext: boolean = false) => {
     try {
       setSendCodeLoading(true);
+
+      if (!formData.countryCode) {
+        throw new Error('Please select your country code.');
+      }
+
       const phone = formatPhone(formData.phoneNumber, formData.countryCode);
+      if (!phone) {
+        throw new Error('Please enter a valid phone number.');
+      }
+
       console.log('Formatted Phone:', phone);
       let token = '';
       let verificationExpiresAt = '';
+      let smsSent = false;
 
       if (isOAuth) {
         const { data } = await completeOAuthRegistration({
@@ -250,6 +286,7 @@ export default function CompleteAccount() {
 
         token = data.completeOAuthRegistration.registrationToken;
         verificationExpiresAt = data.completeOAuthRegistration.verificationExpiresAt;
+        smsSent = data.completeOAuthRegistration.smsSent;
       } else {
         const { data } = await registerUser({
           variables: {
@@ -270,6 +307,11 @@ export default function CompleteAccount() {
 
         token = data.registerUser.registrationToken;
         verificationExpiresAt = data.registerUser.verificationExpiresAt;
+        smsSent = data.registerUser.smsSent;
+      }
+
+      if (!smsSent) {
+        throw new Error('Verification SMS could not be delivered. Please verify your phone format and try again.');
       }
 
       sessionStorage.setItem('registrationToken', token);
@@ -286,6 +328,47 @@ export default function CompleteAccount() {
       }
     } catch (e: any) {
       toast.error(e.message);
+    } finally {
+      setSendCodeLoading(false);
+    }
+  };
+
+  const resendCode = async () => {
+    if (isOAuth) {
+      await submitFormA(false);
+      return;
+    }
+
+    try {
+      setSendCodeLoading(true);
+
+      const registrationToken = sessionStorage.getItem('registrationToken');
+      if (!registrationToken) {
+        toast.error('Your verification session has expired. Please register again.');
+        redirectToRegistration();
+        return;
+      }
+
+      const { data } = await resendRegistrationOtp({
+        variables: { registrationToken }
+      });
+
+      if (!data?.resendRegistrationOtp.success) {
+        throw new Error(data?.resendRegistrationOtp.message || 'Unable to resend verification code.');
+      }
+
+      if (!data.resendRegistrationOtp.smsSent) {
+        throw new Error('Verification SMS could not be delivered. Please verify your phone format and try again.');
+      }
+
+      if (data.resendRegistrationOtp.verificationExpiresAt) {
+        const expirationTime = new Date(data.resendRegistrationOtp.verificationExpiresAt).getTime();
+        sessionStorage.setItem('otp_expires_at', expirationTime.toString());
+      }
+
+      toast.success('Code resent successfully!');
+    } catch (e: any) {
+      toast.error(e.message ?? 'Failed to resend code.');
     } finally {
       setSendCodeLoading(false);
     }
@@ -449,7 +532,7 @@ export default function CompleteAccount() {
           nextStep={submitFormB}
           loading={verifyOTPLoading}
           prevStep={prevStep}
-          resendCode={async () => await submitFormA(false)}
+          resendCode={resendCode}
           resendLoading={sendCodeLoading}
 
         />
