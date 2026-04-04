@@ -72,10 +72,12 @@ export const Step5: React.FC<Step5Props> = ({
 
     useEffect(() => {
         // Get resend expiration time from sessionStorage (set after resend)
-        const expiresAt = sessionStorage.getItem(COUNTDOWN_KEY);
+        const expiresAt =
+            sessionStorage.getItem(COUNTDOWN_KEY) ||
+            sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
         
         if (!expiresAt) {
-            // First time on this page - show resend button without countdown
+            // No expiration metadata available: allow resend
             setShowResend(true);
             setIsComplete(true);
             setTimeLeft(null);
@@ -115,6 +117,8 @@ export const Step5: React.FC<Step5Props> = ({
     };
 
     const handleResendCode = async () => {
+        if (!isComplete) return;
+
         await resendCode();
         const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
         if (expiresAt) {
@@ -123,8 +127,8 @@ export const Step5: React.FC<Step5Props> = ({
             const expirationTime = parseInt(expiresAt, 10);
             const remaining = Math.floor((expirationTime - now) / 1000);
             setCodeExpirySeconds(remaining > 0 ? remaining : 0);
-            setTimeLeft(remaining);
-            setIsComplete(false);
+            setTimeLeft(remaining > 0 ? remaining : 0);
+            setIsComplete(remaining <= 0);
             setShowResend(true);
         }
     };
@@ -172,18 +176,16 @@ export const Step5: React.FC<Step5Props> = ({
 
                 {showResend && (
                     <div className="flex ">
-                        {!isComplete && timeLeft !== null ? (
-                            <p className="text-text-secondary text-sm">
-                                Resend code in <span className="font-medium text-text-brand">{formatTime(timeLeft)}</span>
-                            </p>
-                        ) : (
-                            <ButtonType3 
-                                onClick={handleResendCode}
-                                disabled={resendLoading}
-                            >
-                                {resendLoading ? 'Sending...' : 'Resend code'}
-                            </ButtonType3>
-                        )}
+                        <ButtonType3
+                            onClick={handleResendCode}
+                            disabled={resendLoading || !isComplete}
+                        >
+                            {resendLoading
+                                ? 'Sending...'
+                                : !isComplete && timeLeft !== null
+                                    ? `Resend code in ${formatTime(timeLeft)}`
+                                    : 'Resend code'}
+                        </ButtonType3>
                     </div>
                 )}
             </div>

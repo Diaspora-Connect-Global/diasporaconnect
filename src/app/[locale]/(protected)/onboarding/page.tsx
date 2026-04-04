@@ -199,13 +199,19 @@ export default function CompleteAccount() {
     // Accept already international format: +<country><number>
     if (raw.startsWith('+')) {
       const normalized = `+${raw.slice(1).replace(/\D/g, '')}`;
-      return normalized;
+      // Enforce consistency between selected country and phone prefix
+      return normalized.startsWith(`+${countryDigits}`)
+        ? normalized
+        : '';
     }
 
     // Accept international prefix 00<country><number>
     if (raw.startsWith('00')) {
       const normalized = `+${raw.slice(2).replace(/\D/g, '')}`;
-      return normalized;
+      // Enforce consistency between selected country and phone prefix
+      return normalized.startsWith(`+${countryDigits}`)
+        ? normalized
+        : '';
     }
 
     const digits = raw.replace(/\D/g, '');
