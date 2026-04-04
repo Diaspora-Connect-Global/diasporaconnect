@@ -64,43 +64,58 @@ interface SavedItem {
 }
 
 /* ─── Status helpers ─── */
-type StatusFilter = "ALL" | "REVIEWING" | "ACCEPTED" | "REJECTED" | "PENDING";
+type StatusFilter = "ALL" | "SUBMITTED" | "ACCEPTED" | "REJECTED";
 
 const STATUS_FILTERS: { label: string; value: StatusFilter; dot?: string }[] = [
   { label: "All", value: "ALL" },
-  { label: "Under Review", value: "REVIEWING", dot: "bg-green-500" },
-  { label: "Shortlisted", value: "ACCEPTED", dot: "bg-amber-500" },
-  { label: "Interview", value: "PENDING", dot: "bg-blue-500" },
+  { label: "Submitted", value: "SUBMITTED", dot: "bg-blue-500" },
+  { label: "Accepted", value: "ACCEPTED", dot: "bg-amber-500" },
   { label: "Rejected", value: "REJECTED", dot: "bg-red-500" },
 ];
 
 const statusBadgeConfig: Record<string, { label: string; bg: string; text: string }> = {
   PENDING: { label: "Submitted", bg: "bg-surface-info", text: "text-text-info" },
-  REVIEWING: { label: "Under Review", bg: "bg-surface-success", text: "text-text-success" },
-  ACCEPTED: { label: "Shortlisted", bg: "bg-surface-warning", text: "text-text-warning" },
+  REVIEWING: { label: "Submitted", bg: "bg-surface-info", text: "text-text-info" },
+  ACCEPTED: { label: "Accepted", bg: "bg-surface-warning", text: "text-text-warning" },
   REJECTED: { label: "Rejected", bg: "bg-surface-danger", text: "text-text-danger" },
   WITHDRAWN: { label: "Withdrawn", bg: "bg-surface-subtle", text: "text-text-secondary" },
 };
 
-const STEPPER_STEPS = ["Submitted", "Review", "Shortlist", "Interview", "Final"];
+function getStatusFilterValue(status: string): Exclude<StatusFilter, "ALL"> {
+  switch (status) {
+    case "ACCEPTED":
+      return "ACCEPTED";
+    case "REJECTED":
+    case "WITHDRAWN":
+      return "REJECTED";
+    case "PENDING":
+    case "REVIEWING":
+    default:
+      return "SUBMITTED";
+  }
+}
 
 function getActiveStep(status: string): number {
   switch (status) {
-    case "PENDING": return 0;
-    case "REVIEWING": return 1;
-    case "ACCEPTED": return 2;
-    case "REJECTED": return -1;
-    case "WITHDRAWN": return -1;
-    default: return 0;
+    case "ACCEPTED": return 1;
+    case "REJECTED": return 1;
+    case "WITHDRAWN": return 1;
+    case "PENDING":
+    case "REVIEWING":
+    default:
+      return 0;
   }
 }
 
 function getStepperColor(status: string): string {
   switch (status) {
-    case "REVIEWING": return "bg-green-500";
-    case "ACCEPTED": return "bg-amber-500";
-    case "PENDING": return "bg-blue-500";
-    default: return "bg-surface-brand";
+    case "ACCEPTED":
+      return "bg-amber-500";
+    case "REJECTED":
+    case "WITHDRAWN":
+      return "bg-red-500";
+    default:
+      return "bg-blue-500";
   }
 }
 
@@ -127,6 +142,20 @@ const categoryIcons: Record<string, string> = {
   "Finance & Economics": "📈",
 };
 
+const isLikelyId = (value?: string | null) => {
+  if (!value) return false;
+  const v = value.trim();
+  return /^[0-9a-f]{24}$/i.test(v) || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+};
+
+function formatEnumLabel(value?: string | null): string {
+  if (!value) return '';
+  return value
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /* ─── Application Card ─── */
 const ApplicationCard = ({
   app,
@@ -137,12 +166,31 @@ const ApplicationCard = ({
   onWithdraw: (id: string) => void;
   withdrawingId: string | null;
 }) => {
+  const t = useTranslations("home.opportunities");
   const badge = statusBadgeConfig[app.status] ?? statusBadgeConfig.PENDING;
   const opp = app.opportunity;
   const isExternal = opp?.applicationMethod === "EXTERNAL_LINK" || opp?.applicationMethod === "EMAIL_REQUEST";
   const activeStep = getActiveStep(app.status);
+  const isRejectedOutcome = app.status === "REJECTED" || app.status === "WITHDRAWN";
   const stepColor = getStepperColor(app.status);
   const canWithdraw = app.status !== "ACCEPTED" && app.status !== "REJECTED" && app.status !== "WITHDRAWN";
+  const timelineSteps = ["Submitted", isRejectedOutcome ? "Rejected" : "Accepted"];
+
+  const getPosterName = () => {
+    const ownerType = (opp?.owner?.type ?? "").toUpperCase();
+    const ownerName = opp?.owner?.name?.trim();
+    const hasReadableOwnerName = !!ownerName && !isLikelyId(ownerName);
+
+    if (ownerType === "COMMUNITY") {
+      return hasReadableOwnerName ? ownerName : t("communityPoster");
+    }
+
+    if (ownerType === "ASSOCIATION") {
+      return hasReadableOwnerName ? ownerName : t("associationPoster");
+    }
+
+    return "DiasporaPlug";
+  };
 
   return (
     <div className="bg-surface-default rounded-xl border border-border-subtle p-4 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
@@ -166,41 +214,37 @@ const ApplicationCard = ({
         {opp?.category && (
           <p className="text-xs text-text-secondary flex items-center gap-1.5">
             <span>{categoryIcons[opp.category] ?? "📋"}</span>
-            {opp.category}
+            {formatEnumLabel(opp.category)}
           </p>
         )}
-        {opp?.owner?.name && (
-          <p className="text-xs text-text-secondary pl-5">{opp.owner.name}</p>
-        )}
+        <p className="text-xs text-text-secondary pl-5">Posted by {getPosterName()}</p>
       </div>
 
       {/* Progress Stepper — only for in-platform applications with trackable status */}
-      {!isExternal && app.status !== "REJECTED" && app.status !== "WITHDRAWN" && (
-        <div className="flex items-center gap-0 mt-1">
-          {STEPPER_STEPS.map((step, i) => {
-            const isActive = i <= activeStep;
-            const isCurrent = i === activeStep;
-            return (
-              <div key={step} className="flex items-center flex-1">
-                {/* Dot */}
-                <div className="flex flex-col items-center gap-1 flex-1">
-                  <div className="flex items-center w-full">
-                    {i > 0 && (
-                      <div className={`h-[2px] flex-1 ${i <= activeStep ? stepColor : "bg-border-subtle"} transition-colors`} />
-                    )}
-                    <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isActive ? stepColor : "bg-border-subtle"} transition-colors ${isCurrent ? "ring-2 ring-offset-1 ring-offset-surface-default" : ""}`}
-                    />
-                    {i < STEPPER_STEPS.length - 1 && (
-                      <div className={`h-[2px] flex-1 ${i < activeStep ? stepColor : "bg-border-subtle"} transition-colors`} />
-                    )}
+      {!isExternal && (
+        <div className="mt-1 flex justify-center">
+          <div className="flex items-start gap-0">
+            {timelineSteps.map((step, i) => {
+              const isActive = i <= activeStep;
+              const isCurrent = i === activeStep;
+              const showConnector = i < timelineSteps.length - 1;
+
+              return (
+                <div key={step} className="flex items-start gap-0">
+                  <div className="flex min-w-[82px] flex-col items-center">
+                    <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${isActive ? stepColor : "bg-border-subtle"} transition-colors ${isCurrent ? "ring-2 ring-offset-1 ring-offset-surface-default" : ""}`} />
+                    <span className={`text-[10px] mt-1 text-center leading-tight ${isCurrent ? "font-semibold text-text-primary" : "text-text-secondary"}`}>
+                      {step}
+                    </span>
                   </div>
-                  <span className={`text-[10px] ${isCurrent ? "font-semibold text-text-primary" : "text-text-secondary"}`}>
-                    {step}
-                  </span>
+
+                  {showConnector && (
+                    <div className={`mt-[5px] -mx-[1px] h-[2px] w-12 ${activeStep >= i + 1 ? stepColor : "bg-border-subtle"} transition-colors`} />
+                  )}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -267,7 +311,7 @@ const AppliedComponent = ({
   const filtered = useMemo(() => {
     let list = applications;
     if (statusFilter !== "ALL") {
-      list = list.filter((a) => a.status === statusFilter);
+      list = list.filter((a) => getStatusFilterValue(a.status) === statusFilter);
     }
     // newest first (default)
     return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -276,7 +320,8 @@ const AppliedComponent = ({
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const a of applications) {
-      counts[a.status] = (counts[a.status] ?? 0) + 1;
+      const key = getStatusFilterValue(a.status);
+      counts[key] = (counts[key] ?? 0) + 1;
     }
     return counts;
   }, [applications]);
@@ -428,9 +473,9 @@ const SavedComponent = ({
             <div className="flex flex-col gap-1.5 mb-4">
               <div className="flex items-center gap-1.5 text-sm font-medium text-[#2d528b]">
                 <Briefcase className="w-4 h-4 shrink-0" />
-                <span className="truncate">{saved.category}</span>
+                <span className="truncate">{formatEnumLabel(saved.category) || "Opportunity"}</span>
               </div>
-              <p className="text-sm text-text-secondary truncate">{t("posterBy", { user: getPosterName(saved) })}</p>
+              <p className="text-sm text-text-secondary truncate">Posted by {getPosterName(saved)}</p>
             </div>
 
             {/* Bottom section: Deadline and Button */}
