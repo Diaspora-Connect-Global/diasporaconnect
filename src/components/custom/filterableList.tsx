@@ -51,6 +51,17 @@ export function FilterableList({
         value: tab.filter
     }));
 
+    const normalizeFilterValue = (value?: string | null) =>
+        (value ?? '')
+            .toLowerCase()
+            .replace(/&/g, 'and')
+            .replace(/['’]/g, '')
+            .replace(/_/g, ' ')
+            .replace(/-/g, ' ')
+            .replace(/[^a-z0-9]+/g, ' ')
+            .trim()
+            .replace(/\s+/g, ' ');
+
     // Create empty state messages object
     const emptyStateMessages = listConfig.tabs.reduce((acc, tab) => {
         acc[tab.filter] = tab.emptystateMessage;
@@ -62,7 +73,19 @@ export function FilterableList({
         if (filter === 'all') {
             setFilteredItems(items);
         } else {
-            const filtered = items.filter(item => item.type === filter);
+            const normalizedFilter = normalizeFilterValue(filter);
+            const filtered = items.filter((item) => {
+                const candidates: string[] = [
+                    item?.type,
+                    item?.subCategory,
+                    item?.category,
+                    ...(Array.isArray(item?.tags) ? item.tags : []),
+                ]
+                    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+                    .map((value) => normalizeFilterValue(value));
+
+                return candidates.some((candidate) => candidate === normalizedFilter);
+            });
             setFilteredItems(filtered);
         }
     }, [filter, items, setFilteredItems]);

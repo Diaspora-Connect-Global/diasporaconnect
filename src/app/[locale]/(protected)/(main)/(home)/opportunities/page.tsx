@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { ButtonType3 } from "@/components/custom/button";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { opportunities } from "./data";
+import { toast } from "sonner";
 import {
   GET_USER_APPLICATIONS,
   GET_SAVED_OPPORTUNITIES,
@@ -61,16 +62,21 @@ interface SavedItem {
   ownerType?: string;
   ownerEntityType?: string;
   deadline?: string | null;
+  savedAt?: string;
 }
 
 /* ─── Status helpers ─── */
-type StatusFilter = "ALL" | "SUBMITTED" | "ACCEPTED" | "REJECTED";
+type StatusFilter = "ALL" | "SUBMITTED" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
 
-const STATUS_FILTERS: { label: string; value: StatusFilter; dot?: string }[] = [
-  { label: "All", value: "ALL" },
-  { label: "Submitted", value: "SUBMITTED", dot: "bg-amber-500" },
-  { label: "Accepted", value: "ACCEPTED", dot: "bg-text-brand" },
-  { label: "Rejected", value: "REJECTED", dot: "bg-red-500" },
+type AppliedSortMode = "NEWEST" | "OLDEST" | "DEADLINE" | "STATUS";
+type SavedSortMode = "NEWEST" | "OLDEST" | "DEADLINE";
+
+const STATUS_FILTERS: { labelKey: string; value: StatusFilter; dot?: string }[] = [
+  { labelKey: "tabs.all", value: "ALL" },
+  { labelKey: "tabs.submitted", value: "SUBMITTED", dot: "bg-amber-500" },
+  { labelKey: "tabs.accepted", value: "ACCEPTED", dot: "bg-text-brand" },
+  { labelKey: "tabs.rejected", value: "REJECTED", dot: "bg-red-500" },
+  { labelKey: "tabs.withdrawn", value: "WITHDRAWN", dot: "bg-surface-subtle" },
 ];
 
 const statusBadgeConfig: Record<string, { label: string; bg: string; text: string }> = {
@@ -86,8 +92,9 @@ function getStatusFilterValue(status: string): Exclude<StatusFilter, "ALL"> {
     case "ACCEPTED":
       return "ACCEPTED";
     case "REJECTED":
-    case "WITHDRAWN":
       return "REJECTED";
+    case "WITHDRAWN":
+      return "WITHDRAWN";
     case "PENDING":
     case "REVIEWING":
     default:
@@ -182,13 +189,20 @@ const ApplicationCard = ({
 }) => {
   const t = useTranslations("home.opportunities");
   const badge = statusBadgeConfig[app.status] ?? statusBadgeConfig.PENDING;
+  const badgeLabelMap: Record<string, string> = {
+    PENDING: t("status.submitted"),
+    REVIEWING: t("status.submitted"),
+    ACCEPTED: t("status.accepted"),
+    REJECTED: t("status.rejected"),
+    WITHDRAWN: t("status.withdrawn"),
+  };
   const opp = app.opportunity;
   const isExternal = opp?.applicationMethod === "EXTERNAL_LINK" || opp?.applicationMethod === "EMAIL_REQUEST";
   const activeStep = getActiveStep(app.status);
   const isRejectedOutcome = app.status === "REJECTED" || app.status === "WITHDRAWN";
   const stepColor = "bg-text-brand";
   const canWithdraw = app.status !== "ACCEPTED" && app.status !== "REJECTED" && app.status !== "WITHDRAWN";
-  const timelineSteps = ["Submitted", isRejectedOutcome ? "Rejected" : "Accepted"];
+  const timelineSteps = [t("status.submitted"), isRejectedOutcome ? t("status.rejected") : t("status.accepted")];
   const CategoryIcon = getOpportunityTypeIcon(opp?.category);
 
   const getPosterName = () => {
@@ -204,7 +218,7 @@ const ApplicationCard = ({
       return hasReadableOwnerName ? ownerName : t("associationPoster");
     }
 
-    return "DiasporaPlug";
+    return t("labels.defaultPoster");
   };
 
   return (
@@ -212,15 +226,15 @@ const ApplicationCard = ({
       {/* Title + Status Badge */}
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold text-text-primary text-[15px] leading-tight line-clamp-2 flex-1">
-          {opp?.title ?? "Application"}
+          {opp?.title ?? t("labels.application")}
         </h3>
         <span className={`${badge.bg} ${badge.text} text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap shrink-0`}>
           {isExternal ? (
             <span className="flex items-center gap-1">
               {opp?.applicationMethod === "EXTERNAL_LINK" ? <ExternalLink className="w-3 h-3" /> : <Mail className="w-3 h-3" />}
-              Applied Externally
+              {t("status.appliedExternally")}
             </span>
-          ) : badge.label}
+          ) : (badgeLabelMap[app.status] ?? t("status.submitted"))}
         </span>
       </div>
 
@@ -232,7 +246,7 @@ const ApplicationCard = ({
             {formatEnumLabel(opp.category)}
           </p>
         )}
-        <p className="text-xs text-text-secondary pl-5">Posted by {getPosterName()}</p>
+        <p className="text-xs text-text-secondary pl-5">{t("labels.postedBy")} {getPosterName()}</p>
       </div>
 
       {/* Progress Stepper — only for in-platform applications with trackable status */}
@@ -263,10 +277,10 @@ const ApplicationCard = ({
       <div className="flex items-center justify-between text-xs text-text-secondary mt-1">
         <span className="flex items-center gap-1">
           <Calendar className="w-3 h-3" />
-          Applied: {formatDate(app.createdAt)}
+          {t("labels.appliedDate")}: {formatDate(app.createdAt)}
         </span>
         {opp?.deadline && (
-          <span>Deadline: {formatDate(opp.deadline)}</span>
+          <span>{t("labels.deadline")}: {formatDate(opp.deadline)}</span>
         )}
       </div>
 
@@ -279,7 +293,7 @@ const ApplicationCard = ({
             className="flex items-center gap-1 text-xs font-medium text-text-primary bg-surface-subtle hover:bg-surface-disabled px-3 py-1.5 rounded-lg transition-colors"
           >
             <Search className="w-3 h-3" />
-            View Details
+            {t("labels.viewDetails")}
             <ChevronRight className="w-3 h-3" />
           </Link>
         ) : canWithdraw ? (
@@ -288,7 +302,7 @@ const ApplicationCard = ({
             disabled={withdrawingId === app.id}
             className="flex items-center gap-1 text-xs font-medium text-text-secondary hover:text-text-danger bg-surface-subtle hover:bg-surface-danger px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
           >
-            {withdrawingId === app.id ? "…" : "Withdraw"}
+            {withdrawingId === app.id ? "…" : t("labels.withdraw")}
             <ChevronRight className="w-3 h-3" />
           </button>
         ) : (
@@ -296,7 +310,7 @@ const ApplicationCard = ({
             href={`/opportunities/${opp?.id ?? app.opportunityId}`}
             className="flex items-center gap-1 text-xs font-medium text-text-primary bg-surface-subtle hover:bg-surface-disabled px-3 py-1.5 rounded-lg transition-colors"
           >
-            View Details
+            {t("labels.viewDetails")}
             <ChevronRight className="w-3 h-3" />
           </Link>
         )}
@@ -317,16 +331,56 @@ const AppliedComponent = ({
 }) => {
   const t = useTranslations("home.opportunities");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
-  const [sortOpen, setSortOpen] = useState(false);
+  const [sortMode, setSortMode] = useState<AppliedSortMode>("NEWEST");
+
+  const sortModeLabelMap: Record<AppliedSortMode, string> = {
+    NEWEST: t("labels.newest"),
+    OLDEST: t("labels.oldest"),
+    DEADLINE: t("labels.sortByDeadline"),
+    STATUS: t("labels.sortByStatus"),
+  };
+
+  const cycleAppliedSortMode = () => {
+    setSortMode((prev) => {
+      const modes: AppliedSortMode[] = ["NEWEST", "OLDEST", "DEADLINE", "STATUS"];
+      const nextIndex = (modes.indexOf(prev) + 1) % modes.length;
+      return modes[nextIndex];
+    });
+  };
 
   const filtered = useMemo(() => {
     let list = applications;
     if (statusFilter !== "ALL") {
       list = list.filter((a) => getStatusFilterValue(a.status) === statusFilter);
     }
-    // newest first (default)
-    return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [applications, statusFilter]);
+    const statusRank: Record<string, number> = {
+      ACCEPTED: 0,
+      REVIEWING: 1,
+      PENDING: 2,
+      REJECTED: 3,
+      WITHDRAWN: 4,
+    };
+
+    const sorted = [...list].sort((a, b) => {
+      if (sortMode === "STATUS") {
+        const aRank = statusRank[a.status] ?? 99;
+        const bRank = statusRank[b.status] ?? 99;
+        if (aRank !== bRank) return aRank - bRank;
+      }
+
+      if (sortMode === "DEADLINE") {
+        const aDeadline = a.opportunity?.deadline ? new Date(a.opportunity.deadline).getTime() : Number.POSITIVE_INFINITY;
+        const bDeadline = b.opportunity?.deadline ? new Date(b.opportunity.deadline).getTime() : Number.POSITIVE_INFINITY;
+        if (aDeadline !== bDeadline) return aDeadline - bDeadline;
+      }
+
+      const aCreated = new Date(a.createdAt).getTime();
+      const bCreated = new Date(b.createdAt).getTime();
+      return bCreated - aCreated;
+    });
+
+    return sortMode === "OLDEST" ? sorted.reverse() : sorted;
+  }, [applications, statusFilter, sortMode]);
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -346,14 +400,14 @@ const AppliedComponent = ({
       {/* Header: count + sort */}
       <div className="flex items-center justify-between">
         <h2 className="text-text-primary font-semibold text-base">
-          Applied Opportunities ({applications.length})
+          {t("labels.appliedOpportunities")} ({applications.length})
         </h2>
         <div className="relative">
           <button
-            onClick={() => setSortOpen(!sortOpen)}
+            onClick={cycleAppliedSortMode}
             className="flex items-center gap-1 text-sm text-text-secondary border border-border-subtle rounded-lg px-3 py-1.5 hover:bg-surface-subtle transition-colors cursor-pointer"
           >
-            Newest
+            {sortModeLabelMap[sortMode]}
             <ChevronDown className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -375,7 +429,7 @@ const AppliedComponent = ({
               }`}
             >
               {filter.dot && <span className={`w-2 h-2 rounded-full ${filter.dot}`} />}
-              {filter.value === "ALL" ? filter.label : `${count}. ${filter.label}`}
+              {filter.value === "ALL" ? t(filter.labelKey) : `${count}. ${t(filter.labelKey)}`}
             </button>
           );
         })}
@@ -383,7 +437,7 @@ const AppliedComponent = ({
 
       {/* Card Grid */}
       {filtered.length === 0 ? (
-        <p className="text-text-secondary text-sm py-4 text-center">No applications with this status.</p>
+        <p className="text-text-secondary text-sm py-4 text-center">{t("none.noApplicationsForStatus")}</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((app) => (
@@ -410,6 +464,21 @@ const SavedComponent = ({
   unsavingId: string | null;
 }) => {
   const t = useTranslations("home.opportunities");
+  const [sortMode, setSortMode] = useState<SavedSortMode>("NEWEST");
+
+  const sortModeLabelMap: Record<SavedSortMode, string> = {
+    NEWEST: t("labels.newest"),
+    OLDEST: t("labels.oldest"),
+    DEADLINE: t("labels.sortByDeadline"),
+  };
+
+  const cycleSavedSortMode = () => {
+    setSortMode((prev) => {
+      const modes: SavedSortMode[] = ["NEWEST", "OLDEST", "DEADLINE"];
+      const nextIndex = (modes.indexOf(prev) + 1) % modes.length;
+      return modes[nextIndex];
+    });
+  };
 
   const isLikelyId = (value?: string) => {
     if (!value) return false;
@@ -430,14 +499,28 @@ const SavedComponent = ({
       return hasReadableOwnerName ? ownerName : t("associationPoster");
     }
 
-    return "DiasporaPlug";
+    return t("labels.defaultPoster");
   };
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   };
 
-  const displayItems = savedItems;
+  const displayItems = useMemo(() => {
+    const sorted = [...savedItems].sort((a, b) => {
+      if (sortMode === "DEADLINE") {
+        const aDeadline = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
+        const bDeadline = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
+        if (aDeadline !== bDeadline) return aDeadline - bDeadline;
+      }
+
+      const aTime = a.savedAt ? new Date(a.savedAt).getTime() : 0;
+      const bTime = b.savedAt ? new Date(b.savedAt).getTime() : 0;
+      return bTime - aTime;
+    });
+
+    return sortMode === "OLDEST" ? sorted.reverse() : sorted;
+  }, [savedItems, sortMode]);
 
   if (displayItems.length === 0) {
     return <p className="text-text-secondary py-8 text-center">{t("none.saved")}</p>;
@@ -447,10 +530,13 @@ const SavedComponent = ({
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading-medium text-lg text-text-primary">
-          Saved Opportunities ({displayItems.length})
+          {t("labels.savedOpportunities")} ({displayItems.length})
         </h2>
-        <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary border border-border-subtle rounded-lg bg-surface-default hover:bg-surface-hover transition-colors">
-          Newest <ChevronDown className="w-4 h-4" />
+        <button
+          onClick={cycleSavedSortMode}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary border border-border-subtle rounded-lg bg-surface-default hover:bg-surface-hover transition-colors"
+        >
+          {sortModeLabelMap[sortMode]} <ChevronDown className="w-4 h-4" />
         </button>
       </div>
 
@@ -486,22 +572,22 @@ const SavedComponent = ({
             <div className="flex flex-col gap-1.5 mb-4">
               <div className="flex items-center gap-1.5 text-sm font-medium text-[#2d528b]">
                 {CategoryIcon ? <CategoryIcon className="w-4 h-4 shrink-0" /> : <Briefcase className="w-4 h-4 shrink-0" />}
-                <span className="truncate">{formatEnumLabel(saved.category) || "Opportunity"}</span>
+                <span className="truncate">{formatEnumLabel(saved.category) || t("labels.opportunity")}</span>
               </div>
-              <p className="text-sm text-text-secondary truncate">Posted by {getPosterName(saved)}</p>
+              <p className="text-sm text-text-secondary truncate">{t("labels.postedBy")} {getPosterName(saved)}</p>
             </div>
 
             {/* Bottom section: Deadline and Button */}
             <div className="flex items-center justify-between gap-4 pt-4 mt-auto">
               <p className="text-xs text-text-secondary line-clamp-1">
-                {saved.deadline ? `Open until ${formatDate(saved.deadline)}` : 'No deadline'}
+                {saved.deadline ? `${t("labels.openUntil")} ${formatDate(saved.deadline)}` : t("labels.noDeadline")}
               </p>
               <div className="flex items-center gap-2">
                 <Link
                   href={`/opportunities/${saved.opportunityId}`}
                   className="px-3 py-1.5 text-sm font-medium text-text-secondary border border-border-default rounded-lg hover:bg-surface-hover transition-colors flex items-center justify-center gap-1 shrink-0 bg-white"
                 >
-                  View Details <ChevronRight className="w-3 h-3" />
+                  {t("labels.viewDetails")} <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
             </div>
@@ -573,18 +659,22 @@ export default function Opportunities() {
     const savedItems: SavedItem[] =
         savedData?.getSavedOpportunities?.savedOpportunities?.map((saved) => ({
             opportunityId: saved.opportunity?.id ?? saved.opportunityId,
-            title: saved.opportunity?.title ?? "Saved opportunity",
+          title: saved.opportunity?.title ?? t("labels.savedOpportunityFallback"),
             category: saved.opportunity?.category,
             ownerName: saved.opportunity?.owner?.name,
         ownerType: saved.opportunity?.ownerType,
         ownerEntityType: saved.opportunity?.owner?.type,
             deadline: saved.opportunity?.deadline,
+        savedAt: saved.savedAt,
         })) ?? [];
 
     const handleWithdraw = async (applicationId: string) => {
         setWithdrawingId(applicationId);
         try {
           await withdrawApplication({ variables: { applicationId } });
+          toast.success(t("toasts.withdrawSuccess"));
+        } catch {
+          toast.error(t("toasts.withdrawError"));
         } finally {
             setWithdrawingId(null);
         }
@@ -593,6 +683,9 @@ export default function Opportunities() {
         setUnsavingId(opportunityId);
         try {
           await unsaveOpportunity({ variables: { id: opportunityId } });
+          toast.success(t("toasts.unsaveSuccess"));
+        } catch {
+          toast.error(t("toasts.unsaveError"));
         } finally {
             setUnsavingId(null);
         }
@@ -627,7 +720,7 @@ export default function Opportunities() {
                 <div className="overflow-auto scrollbar-hide flex gap-[0.5rem] ">
                     {activeTab === "applied" ? (
                     applicationsLoading && !applicationsData ? (
-                      <p className="text-text-secondary py-8 text-center">Loading...</p>
+                      <p className="text-text-secondary py-8 text-center">{t("labels.loading")}</p>
                     ) : (
                         <AppliedComponent
                             applications={applications}
@@ -637,7 +730,7 @@ export default function Opportunities() {
                     )
                     ) : (
                     savedLoading && !savedData ? (
-                      <p className="text-text-secondary py-8 text-center">Loading...</p>
+                      <p className="text-text-secondary py-8 text-center">{t("labels.loading")}</p>
                     ) : (
                         <SavedComponent
                             savedItems={savedItems}
@@ -651,10 +744,10 @@ export default function Opportunities() {
                 <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreopp")}</h2>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem] lg:mb-1 ">
-                    {opportunities.map((opp, index) => (
+                  {opportunities.map((opp) => (
                         <ExploreOpportunities
                             id={opp.id}
-                            key={index}
+                      key={opp.id}
                             name={opp.title}
                             imageUrl={opp.imageUrl}
                             icon={opp.icon}

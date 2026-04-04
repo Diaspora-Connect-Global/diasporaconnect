@@ -29,6 +29,7 @@ const CATEGORY_SLUG_TO_API: Record<string, string> = {
 
 export default function OpportunityId() {
     const t = useTranslations('home.opportunities.notFound');
+    const tOpportunities = useTranslations('home.opportunities');
     const params = useParams();
     const router = useRouter();
     const opportunityId = params.id as string;
@@ -87,7 +88,7 @@ export default function OpportunityId() {
                         className="flex items-center gap-2 mb-6 text-text-secondary hover:text-text-primary transition-colors"
                     >
                         <ArrowLeft size={20} />
-                        <span className="font-medium text-sm">Back to Opportunities</span>
+                        <span className="font-medium text-sm">{tOpportunities("backToOpportunities")}</span>
                     </button>
                     <CustomEmploymentComponent item={singleOpportunity} displayMode="details" />
                 </div>

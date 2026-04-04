@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Bookmark, Clock, ExternalLink, Mail, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation } from "@apollo/client/react";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 import {
     SAVE_OPPORTUNITY,
     SUBMIT_APPLICATION,
@@ -22,6 +22,7 @@ import {
     WITHDRAW_APPLICATION,
     GET_OPPORTUNITY,
 } from "@/services/gql/opportunities";
+import { GET_UPLOAD_URL, type GetUploadUrlResponse } from "@/services/gql/upload";
 import type {
     SaveOpportunityData,
     SubmitApplicationData,
@@ -31,6 +32,7 @@ import type {
 import type { Opportunity } from "@/services/gql/types/opportunities";
 import { formatChatTimestamp } from "@/macros/time";
 import { useUserStore } from "@/store/useUserStore";
+import { toast } from "sonner";
 
 const isUUID = (s?: string | null) =>
     !!s && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
@@ -239,6 +241,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
             { query: GET_OPPORTUNITY, variables: { id: item.id } },
         ],
     });
+    const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
 
     const formFields = useMemo(() => item.formFields ?? [], [item.formFields]);
 
@@ -397,6 +400,12 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
         e.preventDefault();
         if (!agreedToTerms || submitting) return;
 
+        const hasRequiredFileField = displayFields.some((field) => field.type === 'file_upload' && field.required);
+        if (hasRequiredFileField && !resumeFile) {
+            toast.error(t("toasts.resumeRequired"));
+            return;
+        }
+
         // Separate standard vs custom answers
         const customAnswers: Record<string, string> = {};
         for (const field of formFields) {
@@ -405,42 +414,84 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
             }
         }
 
-        let resumeFileRef: FileRefType | undefined;
-        // If a resume file was selected, we'd upload it first and get back a FileReference.
-        // For now we pass the reference if already available; file upload integration
-        // depends on the upload service (see src/services/gql/upload.ts).
-        // resumeFileRef = await uploadFile(resumeFile);
+        try {
+            let resumeFileRef: FileRefType | undefined;
 
-        await submitApplication({
-            variables: {
-                input: {
-                    opportunityId: item.id,
-                    applicationData: {
-                        fullName: (fullNameField ? fieldValues[fullNameField.key] : fieldValues['full_name']) ?? '',
-                        email: (emailField ? fieldValues[emailField.key] : fieldValues['email']) ?? '',
-                            phoneNumber: (phoneField ? fieldValues[phoneField.key] : fieldValues['phone']) || undefined,
-                        coverLetter: (coverLetterField ? fieldValues[coverLetterField.key] : fieldValues['cover_letter']) || undefined,
-                        customAnswers: Object.keys(customAnswers).length > 0
-                            ? JSON.stringify(customAnswers)
-                            : undefined,
+            if (resumeFile) {
+                const contentType = resumeFile.type || 'application/octet-stream';
+                const { data: uploadData } = await getUploadUrl({
+                    variables: {
+                        contentType,
+                        category: 'chat',
                     },
-                    resumeFileRef,
-                },
-            },
-        });
+                });
 
-        setIsDialogOpen(false);
-        setFieldValues({});
-        setResumeFile(null);
-        setAgreedToTerms(false);
+                if (!uploadData?.getUploadUrl?.uploadUrl || !uploadData.getUploadUrl.objectKey) {
+                    throw new Error('Failed to get upload URL');
+                }
+
+                const uploadRes = await fetch(uploadData.getUploadUrl.uploadUrl, {
+                    method: 'PUT',
+                    body: resumeFile,
+                    headers: {
+                        'Content-Type': contentType,
+                    },
+                });
+
+                if (!uploadRes.ok) {
+                    throw new Error('Failed to upload resume file');
+                }
+
+                resumeFileRef = {
+                    path: uploadData.getUploadUrl.objectKey,
+                    filename: resumeFile.name,
+                    mimeType: contentType,
+                    sizeBytes: resumeFile.size,
+                };
+            }
+
+            await submitApplication({
+                variables: {
+                    input: {
+                        opportunityId: item.id,
+                        applicationData: {
+                            fullName: (fullNameField ? fieldValues[fullNameField.key] : fieldValues['full_name']) ?? '',
+                            email: (emailField ? fieldValues[emailField.key] : fieldValues['email']) ?? '',
+                            phoneNumber: (phoneField ? fieldValues[phoneField.key] : fieldValues['phone']) || undefined,
+                            coverLetter: (coverLetterField ? fieldValues[coverLetterField.key] : fieldValues['cover_letter']) || undefined,
+                            customAnswers: Object.keys(customAnswers).length > 0
+                                ? JSON.stringify(customAnswers)
+                                : undefined,
+                        },
+                        resumeFileRef,
+                    },
+                },
+            });
+
+            toast.success(t("toasts.submitSuccess"));
+            setIsDialogOpen(false);
+            setFieldValues({});
+            setResumeFile(null);
+            setAgreedToTerms(false);
+        } catch {
+            toast.error(t("toasts.submitError"));
+        }
     };
 
     const handleSaveToggle = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (isSaved) {
-            if (!unsaving) unsaveOpportunity({ variables: { id: item.id } });
-        } else {
-            if (!saving) saveOpportunity({ variables: { id: item.id } });
+        try {
+            if (isSaved) {
+                if (!unsaving) {
+                    await unsaveOpportunity({ variables: { id: item.id } });
+                }
+            } else {
+                if (!saving) {
+                    await saveOpportunity({ variables: { id: item.id } });
+                }
+            }
+        } catch {
+            toast.error(t("toasts.saveToggleError"));
         }
     };
 
@@ -570,9 +621,9 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                     {/* Application Form — IN_PLATFORM_FORM only */}
                     {isInPlatformFormMethod && !hasApplied && (
                         <section className="py-4" id="form-header">
-                            <p className="font-heading-xsmall text-lg font-semibold mb-1">Apply for this opportunity</p>
+                            <p className="font-heading-xsmall text-lg font-semibold mb-1">{t("labels.applyForOpportunity")}</p>
                             <p className="text-sm text-text-secondary mb-4">
-                                <span className="text-red-500">*</span> Required fields
+                                <span className="text-red-500">*</span> {t("labels.requiredFieldsHint")}
                             </p>
                             <form className="space-y-4" onSubmit={handleSubmit}>
                                 {displayFields.map(field => (
@@ -593,12 +644,12 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-surface-brand data-[state=checked]:text-white"
                                     />
                                     <Label htmlFor="terms" className="text-text-primary text-sm">
-                                        By using this form you agree with the storage and handling of your data by this website
+                                        {t("labels.termsAgreement")}
                                     </Label>
                                 </div>
 
                                 <ButtonType2 type="submit" disabled={!agreedToTerms || submitting}>
-                                    <span>{submitting ? "Submitting…" : "Submit Application"}</span>
+                                    <span>{submitting ? t("labels.submitting") : t("labels.submitApplication")}</span>
                                 </ButtonType2>
                             </form>
                         </section>
@@ -615,9 +666,9 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                     <button
                                         type="button"
                                         className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
-                                        onClick={(e) => { e.stopPropagation(); window.open(item.externalLink!, "_blank"); }}
+                                        onClick={(e) => { e.stopPropagation(); window.open(item.externalLink!, "_blank", "noopener,noreferrer"); }}
                                     >
-                                        <span>Apply now</span>
+                                        <span>{t("labels.applyNow")}</span>
                                         <ExternalLink className="w-4 h-4" />
                                     </button>
                                 )}
@@ -627,7 +678,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <span>Apply via email</span>
+                                        <span>{t("labels.applyViaEmail")}</span>
                                         <Mail className="w-4 h-4" />
                                     </a>
                                 )}
@@ -637,20 +688,29 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         onClick={(e) => { e.stopPropagation(); scrollToForm(); }}
                                         className="w-full px-6 py-3 bg-surface-brand text-text-white font-medium hover:opacity-90 transition-opacity cursor-pointer flex items-center justify-center rounded-full"
                                     >
-                                        Apply now
+                                        {t("labels.applyNow")}
                                     </button>
                                 )}
                                 {hasApplied && (
                                     <div className="flex flex-col gap-2">
-                                        <p className="text-sm text-text-secondary text-center">You have already applied.</p>
+                                        <p className="text-sm text-text-secondary text-center">{t("labels.alreadyApplied")}</p>
                                         {applicationId && (
                                             <button
                                                 type="button"
                                                 className="w-full px-6 py-3 text-text-danger border border-border-subtle font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full disabled:opacity-50 hover:bg-surface-danger transition-colors"
-                                                onClick={async (e) => { e.stopPropagation(); if (!withdrawing) await withdrawApplication({ variables: { applicationId } }); }}
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    if (withdrawing) return;
+                                                    try {
+                                                        await withdrawApplication({ variables: { applicationId } });
+                                                        toast.success(t("toasts.withdrawSuccess"));
+                                                    } catch {
+                                                        toast.error(t("toasts.withdrawError"));
+                                                    }
+                                                }}
                                                 disabled={withdrawing}
                                             >
-                                                {withdrawing ? "Withdrawing…" : "Withdraw application"}
+                                                {withdrawing ? t("labels.withdrawing") : t("labels.withdrawApplication")}
                                             </button>
                                         )}
                                     </div>
@@ -686,15 +746,15 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                             {/* How to apply info */}
                             {isExternalLinkMethod && item.externalLink && (
                                 <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
-                                    <p className="font-medium mb-1">How to apply:</p>
+                                    <p className="font-medium mb-1">{t("labels.howToApply")}</p>
                                     <a href={item.externalLink} target="_blank" rel="noopener noreferrer" className="underline break-all">
-                                        Apply externally
+                                        {t("labels.applyExternally")}
                                     </a>
                                 </div>
                             )}
                             {isEmailRequestMethod && item.applicationEmail && (
                                 <div className="text-text-info bg-surface-info p-2 rounded-md text-sm">
-                                    <p className="font-medium mb-1">How to apply:</p>
+                                    <p className="font-medium mb-1">{t("labels.howToApply")}</p>
                                     <a href={`mailto:${item.applicationEmail}`} className="underline break-all flex items-center gap-1">
                                         <Mail className="w-3.5 h-3.5 shrink-0" />
                                         {item.applicationEmail}

@@ -9,9 +9,9 @@ export const moreOpportunitiesIDList = [
         tabs: [
             { name: "All", filter: "all", emptystateMessage: "No employment career available." },
             { name: "Internships", filter: "internships", emptystateMessage: "No internships available." },
-            { name: "Apprenticeships/Vocal Training", filter: "vocal-training", emptystateMessage: "No job openings available." },
+            { name: "Apprenticeships/Vocational Training", filter: "vocational-training", emptystateMessage: "No job openings available." },
             { name: "Graduate Trainee Programs", filter: "graduate-trainee-programs", emptystateMessage: "No Graduate Trainee Programs available." },
-            { name: "Career Fairs", filter: "carreer-fairs", emptystateMessage: "No Career Fairs available." },
+            { name: "Career Fairs", filter: "career-fairs", emptystateMessage: "No Career Fairs available." },
         ],
     },
     {
