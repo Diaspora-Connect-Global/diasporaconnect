@@ -217,11 +217,6 @@ export default function CompleteAccount() {
     const digits = raw.replace(/\D/g, '');
     if (!digits) return '';
 
-    // If user entered country prefix without + (e.g. 3247...), normalize it
-    if (digits.startsWith(countryDigits)) {
-      return `+${digits}`;
-    }
-
     // Remove one local trunk zero for local input (e.g. 0470...)
     const localDigits = digits.startsWith('0') ? digits.slice(1) : digits;
     return `+${countryDigits}${localDigits}`;
