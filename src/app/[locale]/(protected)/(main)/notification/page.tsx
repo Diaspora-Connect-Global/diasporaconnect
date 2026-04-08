@@ -53,6 +53,38 @@ type NotificationData = {
   [key: string]: unknown;
 };
 
+function isGenericOpportunityText(value: string | undefined): boolean {
+  if (!value) return true;
+  const normalized = value.toLowerCase().replace(/[!?.]/g, '').trim();
+  return (
+    normalized === 'application accepted' ||
+    normalized === 'application submitted' ||
+    normalized === 'application rejected' ||
+    normalized === 'opportunity' ||
+    normalized === 'profile' ||
+    normalized === 'new opportunity'
+  );
+}
+
+function getOpportunityName(data: NotificationData | undefined, not: Notification): string {
+  const d = (data || {}) as Record<string, unknown>;
+  const fromPayload =
+    (d.opportunityTitle as string) ||
+    (d.opportunityName as string) ||
+    (d.jobTitle as string) ||
+    (d.roleTitle as string) ||
+    (d.positionTitle as string) ||
+    (d.listingTitle as string) ||
+    (d.entityName as string) ||
+    (d.title as string) ||
+    (d.name as string) ||
+    '';
+
+  if (fromPayload && !isGenericOpportunityText(fromPayload)) return String(fromPayload).trim();
+  if (not.title && !isGenericOpportunityText(not.title)) return not.title.trim();
+  return '';
+}
+
 function getEntityName(
   data: NotificationData | undefined,
   kind: 'community' | 'association',
@@ -92,7 +124,7 @@ function getNotificationDescription(
   const communityName = getEntityName(data, 'community', not);
   const associationName = getEntityName(data, 'association', not);
   const eventName = data?.eventName || data?.eventTitle || data?.name || '';
-  const opportunityTitle = data?.title || data?.name || '';
+  const opportunityTitle = getOpportunityName(data, not);
 
   const actorLabel = actor || t('messages.actorFallback');
   const communityLabel = communityName || t('messages.communityFallback');
@@ -140,8 +172,20 @@ function getNotificationDescription(
   if (type === 'event.invite') {
     return t('messages.eventInvite', { actorName: actorLabel, eventName: eventLabel });
   }
+  if (type === 'opportunity.application.accepted') {
+    return opportunityTitle
+      ? `Your application for ${opportunityTitle} was accepted.`
+      : 'Your application was accepted.';
+  }
+  if (type === 'opportunity.application.submitted') {
+    return opportunityTitle
+      ? `Your application for ${opportunityTitle} was submitted successfully.`
+      : 'Your application was submitted successfully.';
+  }
   if (type.includes('opportunity')) {
-    return t('messages.opportunityNew', { title: opportunityTitle || not.title || not.message || '' });
+    if (opportunityTitle) {
+      return t('messages.opportunityNew', { title: opportunityTitle });
+    }
   }
 
   const msg = not.message || (not as { body?: string }).body || '';
@@ -164,7 +208,7 @@ function getNotificationDisplayTitle(
   const communityName = getEntityName(data, 'community', not);
   const associationName = getEntityName(data, 'association', not);
   const eventName = data?.eventName || data?.eventTitle || data?.name || '';
-  const opportunityTitle = data?.title || data?.name || '';
+  const opportunityTitle = getOpportunityName(data, not);
 
   const isAssociation = entityType === 'association' || type.includes('association');
 
@@ -198,7 +242,9 @@ function getNotificationDisplayTitle(
   }
   if (type === 'event.reminder') return eventName || not.title || '';
   if (type === 'event.invite') return eventName || not.title || '';
-  if (type.includes('opportunity')) return opportunityTitle || not.title || not.message || '';
+  if (type.includes('opportunity')) {
+    return opportunityTitle || t('types.opportunity.default');
+  }
 
   return not.title || '';
 }
