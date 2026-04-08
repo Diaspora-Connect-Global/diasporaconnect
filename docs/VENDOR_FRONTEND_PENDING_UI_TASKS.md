@@ -45,12 +45,11 @@ This note tracks vendor-related backend integrations that are already available 
 
 ### Current state
 - Marketplace mutation exists (`confirmOrderDelivery`).
-- Vendor order table currently shows action labels but no delivery-confirm action wiring.
+- Vendor orders page now wires a row action for `IN_PROGRESS` orders to `confirmOrderDelivery`.
+- Integration includes success/error toasts, optimistic status update to `DELIVERED`, and `LIST_VENDOR_ORDERS` refresh.
 
 ### Pending work
-- Add vendor order row action button for delivery confirmation where status allows it.
-- Call `confirmOrderDelivery` mutation and refresh `LIST_VENDOR_ORDERS`.
-- Add success/error toast handling and optimistic status update if desired.
+- Optional: add the same delivery-confirm action in the dashboard "Pending orders" mini-table for consistency.
 
 ---
 
@@ -119,3 +118,15 @@ This note tracks vendor-related backend integrations that are already available 
 4. Logo/document upload UI
 5. Product/service preview + edit routes
 6. Utility/status mapping cleanup
+
+---
+
+## Could not be integrated yet (no dedicated UI surface)
+
+These backend/service-layer capabilities are available but remain blocked by missing UX/screens:
+
+- KYC progress/status display (`kycStatus`, `kycLevel`) — no dashboard/onboarding banner components yet.
+- Sellability gating states (`SUSPENDED`, `BANNED`, `canSell === false`) — no centralized vendor account-state gate/banners yet.
+- Vendor logo/business document persistence flow — no profile/onboarding upload sections for these file types yet.
+- Product/service preview + edit actions — list buttons exist, but preview/edit routes and forms are not implemented yet.
+- Vendor order near-real-time refresh controls — no polling behavior in current orders UX yet.

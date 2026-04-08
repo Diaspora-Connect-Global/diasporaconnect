@@ -95,6 +95,8 @@ export interface Profile {
   userId: string;
   email: string;
   phone?: string;
+  timezone?: string;
+  timeZone?: string;
   firstName: string;
   lastName: string;
   middleName: string;

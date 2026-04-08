@@ -2,9 +2,12 @@
 import React, { useMemo, useState } from "react";
 import { useTranslations } from 'next-intl';
 import { ButtonType3 } from '@/components/custom/button';
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { LIST_VENDOR_ORDERS } from "@/services/gql/vendor";
 import type { ListVendorOrdersResponse, OrderStatus } from "@/services/gql/types/vendor";
+import { CONFIRM_ORDER_DELIVERY } from "@/services/gql/marketplace";
+import type { ConfirmOrderDeliveryResponse } from "@/services/gql/types/marketplace";
+import { toast } from "sonner";
 
 interface Order {
   id: string;
@@ -21,14 +24,56 @@ export default function OrdersPage() {
   const [deliveryFilter, setDeliveryFilter] = useState<string>("all");
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
+  const [optimisticStatuses, setOptimisticStatuses] = useState<Record<string, OrderStatus>>({});
   const offset = (currentPage - 1) * rowsPerPage;
-  const { data, loading } = useQuery<ListVendorOrdersResponse>(LIST_VENDOR_ORDERS, {
+  const { data, loading, refetch } = useQuery<ListVendorOrdersResponse>(LIST_VENDOR_ORDERS, {
     variables: {
       status: deliveryFilter === "all" ? undefined : deliveryFilter,
       limit: rowsPerPage,
       offset,
     },
   });
+  const [confirmOrderDelivery] = useMutation<ConfirmOrderDeliveryResponse>(
+    CONFIRM_ORDER_DELIVERY
+  );
+
+  const canConfirmDelivery = (status: OrderStatus): boolean => status === "IN_PROGRESS";
+
+  const handleConfirmDelivery = async (orderId: string) => {
+    if (confirmingOrderId) {
+      return;
+    }
+
+    const previousStatus = allOrders.find((order) => order.id === orderId)?.delivery;
+    if (!previousStatus || !canConfirmDelivery(previousStatus)) {
+      return;
+    }
+
+    setConfirmingOrderId(orderId);
+    setOptimisticStatuses((prev) => ({ ...prev, [orderId]: "DELIVERED" }));
+
+    try {
+      const { data: mutationData } = await confirmOrderDelivery({
+        variables: { order_id: orderId },
+      });
+
+      const result = mutationData?.confirmOrderDelivery;
+      if (!result?.success) {
+        setOptimisticStatuses((prev) => ({ ...prev, [orderId]: previousStatus }));
+        toast.error(result?.message || "Failed to confirm delivery");
+        return;
+      }
+
+      toast.success(result.message || "Delivery confirmed");
+      await refetch();
+    } catch (error) {
+      setOptimisticStatuses((prev) => ({ ...prev, [orderId]: previousStatus }));
+      toast.error(error instanceof Error ? error.message : "Failed to confirm delivery");
+    } finally {
+      setConfirmingOrderId(null);
+    }
+  };
 
   const getLocalizedStatus = (status: OrderStatus): string => {
     switch (status) {
@@ -72,10 +117,10 @@ export default function OrdersPage() {
         date: new Date(order.createdAt).toLocaleDateString(),
         customer: order.buyerId,
         amount: `${order.currency} ${(order.totalAmount / 100).toFixed(2)}`,
-        delivery: order.status,
+        delivery: optimisticStatuses[order.id] ?? order.status,
         action: "View order",
       })),
-    [data]
+    [data, optimisticStatuses]
   );
 
   const getDeliveryStatusColor = (status: OrderStatus): string => {
@@ -214,9 +259,19 @@ export default function OrdersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <ButtonType3 className="text-text-brand hover:underline border-0 bg-transparent p-0 min-w-0">
-                      {getLocalizedAction(order.action)}
-                    </ButtonType3>
+                    {canConfirmDelivery(order.delivery) ? (
+                      <ButtonType3
+                        disabled={confirmingOrderId === order.id}
+                        onClick={() => handleConfirmDelivery(order.id)}
+                        className="text-text-brand hover:underline border-0 bg-transparent p-0 min-w-0 disabled:opacity-50"
+                      >
+                        {confirmingOrderId === order.id ? "Confirming..." : "Confirm delivery"}
+                      </ButtonType3>
+                    ) : (
+                      <ButtonType3 className="text-text-brand hover:underline border-0 bg-transparent p-0 min-w-0">
+                        {getLocalizedAction(order.action)}
+                      </ButtonType3>
+                    )}
                   </td>
                 </tr>
               ))

@@ -55,6 +55,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
+    const userTimeZone = user?.timezone || user?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const apiMessages = getApiMessagesByConversation(conversationId || '');
 
@@ -582,7 +583,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                         </>
                                     )}
                                     <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 justify-end ${isMe ? "text-text-tertiary" : ""}`}>
-                                        {formatChatTimestamp(message.createdAt)}
+                                        {formatChatTimestamp(message.createdAt, { timeZone: userTimeZone })}
                                         {isMe && message.status !== 'sending' && (
                                             <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
                                                 {message.status === "read" || message.status === "delivered" ? (

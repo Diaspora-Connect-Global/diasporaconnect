@@ -174,6 +174,7 @@ export default function GroupChat() {
     const groupMembers = membersData?.getGroupMembers?.members || [];
     const groupMembersCount = membersData?.getGroupMembers?.total || 0;
     const user = useUserStore((state) => state.user);
+    const userTimeZone = user?.timezone || user?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const currentUserId = user?.userId;
     const currentUserMember = groupMembers.find(m => m.userId === currentUserId);
@@ -993,7 +994,7 @@ export default function GroupChat() {
                                                     </Avatar>
                                                 )}
                                                 <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center gap-1">
-                                                    {formatChatTimestamp(message.createdAt)}
+                                                    {formatChatTimestamp(message.createdAt, { timeZone: userTimeZone })}
                                                     {isMe && message.status !== 'sending' && (
                                                         <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
                                                             {message.status === "read" || message.status === "delivered" ? (
@@ -1245,7 +1246,7 @@ export default function GroupChat() {
                                             <AvatarImage src={getUserById(selectedMessage.senderId)?.avatar || undefined} alt="avatar" />
                                             <AvatarFallback>{getSenderName(selectedMessage.senderId).charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <span>{formatChatTimestamp(selectedMessage.createdAt)}</span>
+                                        <span>{formatChatTimestamp(selectedMessage.createdAt, { timeZone: userTimeZone })}</span>
                                     </p>
                                 </div>
                             )}
@@ -1273,7 +1274,7 @@ export default function GroupChat() {
                                                     <AvatarFallback>{getSenderName(reply.senderId).charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <span className="text-[10px] sm:text-xs text-text-tertiary">
-                                                    {formatChatTimestamp(reply.createdAt)}
+                                                    {formatChatTimestamp(reply.createdAt, { timeZone: userTimeZone })}
                                                 </span>
                                             </div>
                                         </div>

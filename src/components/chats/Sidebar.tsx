@@ -51,6 +51,7 @@ export default function ChatSideBar() {
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
+    const userTimeZone = user?.timezone || user?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Fetch real conversations from API
     const { data: conversationsData, loading: loadingConversations, error: conversationsError } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
@@ -379,6 +380,7 @@ export default function ChatSideBar() {
                                 chats={filteredDirectMessages}
                                 activeChat={activeChat}
                                 onChatClick={handleChatClick}
+                                userTimeZone={userTimeZone}
                             />
                         )
                     ) : (
@@ -387,6 +389,7 @@ export default function ChatSideBar() {
                             activeChat={activeChat}
                             onChatClick={handleChatClick}
                             conversations={conversationsData?.getConversations || []}
+                            userTimeZone={userTimeZone}
                         />
                     )}
                 </div>
@@ -540,9 +543,10 @@ interface ChatItemProps {
     };
     isActive: boolean;
     onClick: () => void;
+    userTimeZone?: string;
 }
 
-function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
+function ChatItem({ chat, isActive, onClick, userTimeZone }: ChatItemProps) {
     return (
         <div
             onClick={onClick}
@@ -563,7 +567,7 @@ function ChatItem({ chat, isActive, onClick }: ChatItemProps) {
             </div>
             <div className="flex flex-col items-end space-y-1">
                 <span className={`text-xs ${chat.unread > 0 ? "text-text-brand" : "text-text-secondary"} whitespace-nowrap`}>
-                    {formatDateProximity(chat.lastMessageTime)}
+                    {formatDateProximity(chat.lastMessageTime, { timeZone: userTimeZone })}
                 </span>
 
                 {chat.unread > 0 ? (
@@ -584,9 +588,10 @@ interface DirectMessagesListProps {
     chats: ChatItem[];
     activeChat: { id: string; type: 'direct' | 'group' } | null;
     onChatClick: (chat: { id: string; type: 'direct' | 'group' }) => void;
+    userTimeZone?: string;
 }
 
-function DirectMessagesList({ chats, activeChat, onChatClick }: DirectMessagesListProps) {
+function DirectMessagesList({ chats, activeChat, onChatClick, userTimeZone }: DirectMessagesListProps) {
     const t = useTranslations('chat');
 
     if (chats.length === 0) {
@@ -606,6 +611,7 @@ function DirectMessagesList({ chats, activeChat, onChatClick }: DirectMessagesLi
                     chat={chat}
                     isActive={activeChat?.id === chat.id && activeChat?.type === 'direct'}
                     onClick={() => onChatClick({ id: chat.id, type: 'direct' })}
+                    userTimeZone={userTimeZone}
                 />
             ))}
         </div>
@@ -640,9 +646,10 @@ interface GroupsListProps {
     conversations?: any[];
     limit?: number;
     offset?: number;
+    userTimeZone?: string;
 }
 
-function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], limit = 50, offset = 0 }: GroupsListProps) {
+function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], limit = 50, offset = 0, userTimeZone }: GroupsListProps) {
     const t = useTranslations('chat');
     const setRealConversation = useChatStore((s) => s.setRealConversation);
 
@@ -744,6 +751,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
                         }}
                         isActive={activeChat?.id === group.id && activeChat?.type === 'group'}
                         onClick={() => onChatClick({ id: group.id, type: 'group' })}
+                        userTimeZone={userTimeZone}
                     />
                 );
             })}
