@@ -3,7 +3,15 @@
 import React from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
-import { ButtonType1 } from '../custom/button';
+import { ChevronRight, MoreHorizontalIcon } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 
 interface MyAssociationCardProps {
@@ -13,7 +21,7 @@ interface MyAssociationCardProps {
   logoIcon?: React.ReactNode;
   avatarUrl?: string | null;
   onMenuClick?: () => void;
-  buttonText: string;
+  buttonText?: string;
   isPending?: boolean;
   onLeaveClick?: () => void;
   onCancelRequestClick?: () => void;
@@ -37,6 +45,7 @@ export function MyAssociationCard({
   cancelRequestLabel,
 }: MyAssociationCardProps) {
   const t = useTranslations('home.associations.actions');
+  const tCommon = useTranslations('common');
   const view = viewLabel ?? t('view');
   const leave = leaveLabel ?? t('leave');
   const cancelRequest = cancelRequestLabel ?? t('cancelRequest');
@@ -52,7 +61,7 @@ export function MyAssociationCard({
                   width={32}
                   height={32}
                   src={avatarUrl || '/GLOBE.png'}
-                  alt=""
+                  alt={title}
                   className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
                 />
               )}
@@ -68,32 +77,53 @@ export function MyAssociationCard({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Link href={`/association/${id}`} prefetch={false}>
-              <ButtonType1 className="py-1 px-3 label-medium">
-                {view}
-              </ButtonType1>
-            </Link>
-            {isPending && onCancelRequestClick && (
-              <ButtonType1
-                className="py-1 px-3 label-medium border-border-subtle text-text-secondary"
-                onClick={onCancelRequestClick}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className="bg-surface-default border-0 shadow-none text-text-primary p-1"
+                variant="outline"
+                aria-label={tCommon('openMenu')}
+                size="icon-sm"
               >
-                {cancelRequest}
-              </ButtonType1>
-            )}
-            {!isPending && onLeaveClick && (
-              <ButtonType1
-                className="py-1 px-3 label-medium border-border-subtle text-text-secondary"
-                onClick={onLeaveClick}
-              >
-                {leave}
-              </ButtonType1>
-            )}
-            {!onLeaveClick && !onCancelRequestClick && (
-              <span className="label-medium text-text-secondary">{buttonText}</span>
-            )}
-          </div>
+                <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="bg-surface-default min-w-[200px]">
+              <DropdownMenuItem asChild className="font-body-large text-text-primary flex justify-between items-center">
+                <Link href={`/association/${id}`} prefetch={false} className="flex w-full items-center justify-between">
+                  <span>{view}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              {isPending && onCancelRequestClick ? (
+                <DropdownMenuItem
+                  onSelect={onCancelRequestClick}
+                  className="font-body-large text-text-primary flex justify-between items-center"
+                >
+                  <span>{cancelRequest}</span>
+                </DropdownMenuItem>
+              ) : onLeaveClick ? (
+                <DropdownMenuItem
+                  onSelect={onLeaveClick}
+                  className="font-body-large text-text-primary flex justify-between items-center"
+                >
+                  <span>{leave}</span>
+                </DropdownMenuItem>
+              ) : buttonText ? (
+                <DropdownMenuItem
+                  disabled
+                  className="font-body-large text-text-secondary flex justify-between items-center"
+                >
+                  <span>{buttonText}</span>
+                </DropdownMenuItem>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
