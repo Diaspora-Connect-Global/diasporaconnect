@@ -23,6 +23,7 @@ export default function OverviewPage() {
 
   const dashboard = dashboardData?.getVendorDashboard;
   const orders = ordersData?.listVendorOrders.items ?? [];
+  const formatMinor = (amount: number) => (amount / 100).toFixed(2);
 
   const statsCards = dashboard
     ? [
@@ -41,7 +42,7 @@ export default function OverviewPage() {
         {
           id: "earnings",
           title: "Earnings",
-          value: `${dashboard.totalEarnings}`,
+          value: `${formatMinor(dashboard.totalEarnings)}`,
           subtitle: "total earnings",
         },
       ]
@@ -137,7 +138,7 @@ export default function OverviewPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-text-primary">{order.buyerId}</td>
                     <td className="px-6 py-4 text-sm text-text-primary">
-                      {order.currency} {order.totalAmount}
+                      {order.currency} {formatMinor(order.totalAmount)}
                     </td>
                     <td className="px-6 py-4">
                       <ButtonType3

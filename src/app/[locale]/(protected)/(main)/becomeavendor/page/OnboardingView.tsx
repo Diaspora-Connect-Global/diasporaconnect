@@ -39,14 +39,9 @@ export default function OnboardingView() {
     };
 
     const submitVendor = async () => {
-        if (!currentUser?.userId) {
-            toast.error('Unable to identify user. Please login again.');
-            return;
-        }
-
         try {
             const vendorType = formData.communityType === 'products' ? 'BUSINESS' : 'INDIVIDUAL';
-            const displayName = `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim() || 'Vendor';
+            const displayName = `${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''}`.trim() || 'Vendor';
             const description =
                 formData.communityType === 'services'
                     ? 'Service provider on DiasporaConnect'
@@ -54,7 +49,6 @@ export default function OnboardingView() {
 
             const { data } = await createVendor({
                 variables: {
-                    userId: currentUser.userId,
                     vendorType,
                     displayName,
                     description,

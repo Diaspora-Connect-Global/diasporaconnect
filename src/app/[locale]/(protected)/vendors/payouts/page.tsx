@@ -5,8 +5,21 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { toast } from 'sonner';
-import { GET_MY_VENDOR, GET_VENDOR_ELIGIBILITY, REQUEST_PAYOUT } from '@/services/gql/vendor';
-import type { GetMyVendorResponse, GetVendorEligibilityResponse } from '@/services/gql/types/vendor';
+import {
+  CREATE_PAYOUT_ACCOUNT,
+  GET_MY_VENDOR,
+  GET_VENDOR_ELIGIBILITY,
+  MY_PAYOUT_ACCOUNTS,
+  REQUEST_PAYOUT,
+  SET_PRIMARY_PAYOUT_ACCOUNT,
+} from '@/services/gql/vendor';
+import type {
+  CreatePayoutAccountResponse,
+  GetMyVendorResponse,
+  GetVendorEligibilityResponse,
+  MyPayoutAccountsResponse,
+  SetPrimaryPayoutAccountResponse,
+} from '@/services/gql/types/vendor';
 import { handleVendorError } from '@/lib/vendor-error-mapper';
 import VendorKycRequiredModal from '@/components/vendors/VendorKycRequiredModal';
 
@@ -18,15 +31,6 @@ interface Transaction {
   amount: string;
 }
 
-const DEFAULT_KYC_MANDATORY_PAYOUT_THRESHOLD = 10000;
-const parsedThreshold = Number.parseFloat(
-  process.env.NEXT_PUBLIC_KYC_MANDATORY_PAYOUT_THRESHOLD ?? ""
-);
-const KYC_MANDATORY_PAYOUT_THRESHOLD =
-  Number.isFinite(parsedThreshold) && parsedThreshold > 0
-    ? parsedThreshold
-    : DEFAULT_KYC_MANDATORY_PAYOUT_THRESHOLD;
-
 const PayoutsDashboard = () => {
   const t = useTranslations('vendors.payouts');
   const tCommon = useTranslations('common');
@@ -37,18 +41,20 @@ const PayoutsDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [payoutAmount, setPayoutAmount] = useState('');
   const [currency, setCurrency] = useState('GHS');
+  const [payoutProvider, setPayoutProvider] = useState('MOBILE_MONEY');
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   const [isKycMandatory, setIsKycMandatory] = useState(true);
-  const [pendingPayout, setPendingPayout] = useState<{
-    vendorId: string;
-    amount: number;
-    currency: string;
-  } | null>(null);
   const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
   const { data: eligibilityData } = useQuery<GetVendorEligibilityResponse>(GET_VENDOR_ELIGIBILITY);
+  const { data: payoutAccountsData } = useQuery<MyPayoutAccountsResponse>(MY_PAYOUT_ACCOUNTS);
   const [requestPayout, { loading: requestingPayout }] = useMutation<{ requestPayout: string }>(REQUEST_PAYOUT);
+  const [createPayoutAccount, { loading: creatingPayoutAccount }] =
+    useMutation<CreatePayoutAccountResponse>(CREATE_PAYOUT_ACCOUNT);
+  const [setPrimaryPayoutAccount, { loading: settingPrimaryPayout }] =
+    useMutation<SetPrimaryPayoutAccountResponse>(SET_PRIMARY_PAYOUT_ACCOUNT);
   const canReceivePayout = eligibilityData?.getVendorEligibility?.canReceivePayout ?? false;
   const eligibilityStatus = eligibilityData?.getVendorEligibility?.status;
+  const payoutAccounts = payoutAccountsData?.myPayoutAccounts ?? [];
 
   const transactions: Transaction[] = [
     { id: '1', transactionId: '0001', date: '25 Nov 2025', type: 'Withdrawal', amount: 'GH₵390.00' },
@@ -62,7 +68,8 @@ const PayoutsDashboard = () => {
 
   const totalPages = 10;
 
-  const executePayout = async (vendorId: string, amount: number, payoutCurrency: string) => {
+  const executePayout = async (vendorId: string, amountMajor: number, payoutCurrency: string) => {
+    const amount = Math.round(amountMajor * 100);
     const { data } = await requestPayout({
       variables: {
         vendorId,
@@ -80,7 +87,7 @@ const PayoutsDashboard = () => {
 
   const submitPayout = async () => {
     const vendorId = vendorData?.getMyVendor?.id;
-    const amount = Number.parseFloat(payoutAmount);
+    const amountMajor = Number.parseFloat(payoutAmount);
     if (!vendorId) {
       handleVendorError({
         error: new Error('Vendor profile not found'),
@@ -89,37 +96,71 @@ const PayoutsDashboard = () => {
       });
       return;
     }
-    const isHugeTransaction = amount >= KYC_MANDATORY_PAYOUT_THRESHOLD;
-
-    if (!canReceivePayout && isHugeTransaction) {
-      setIsKycMandatory(true);
-      setIsKycModalOpen(true);
-      return;
-    }
-    if (!Number.isFinite(amount) || amount <= 0) {
+    if (!Number.isFinite(amountMajor) || amountMajor <= 0) {
       toast.error('Enter a valid payout amount');
       return;
     }
 
     try {
       if (!canReceivePayout) {
-        setPendingPayout({
-          vendorId,
-          amount,
-          currency,
-        });
-        setIsKycMandatory(false);
+        setIsKycMandatory(true);
         setIsKycModalOpen(true);
+        toast.error('Payout is unavailable until your vendor account is payout-eligible.');
         return;
       }
 
-      await executePayout(vendorId, amount, currency);
+      await executePayout(vendorId, amountMajor, currency);
     } catch (error) {
       handleVendorError({
         error,
         locale,
         router,
         openKycModal: () => setIsKycModalOpen(true),
+      });
+    }
+  };
+
+  const handleAddPayoutMethod = async () => {
+    try {
+      const { data } = await createPayoutAccount({
+        variables: {
+          type: payoutProvider,
+          currency,
+        },
+        refetchQueries: [{ query: MY_PAYOUT_ACCOUNTS }, { query: GET_VENDOR_ELIGIBILITY }],
+      });
+
+      if (!data?.createPayoutAccount?.id) {
+        toast.error('Unable to add payout account');
+        return;
+      }
+
+      toast.success('Payout account added');
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
+      });
+    }
+  };
+
+  const handleSetPrimary = async (accountId: string) => {
+    try {
+      const { data } = await setPrimaryPayoutAccount({
+        variables: { accountId },
+        refetchQueries: [{ query: MY_PAYOUT_ACCOUNTS }, { query: GET_VENDOR_ELIGIBILITY }],
+      });
+      if (!data?.setPrimaryPayoutAccount) {
+        toast.error('Failed to set primary payout account');
+        return;
+      }
+      toast.success('Primary payout account updated');
+    } catch (error) {
+      handleVendorError({
+        error,
+        locale,
+        router,
       });
     }
   };
@@ -164,7 +205,7 @@ const PayoutsDashboard = () => {
             </button>
             {!canReceivePayout && (
               <p className="text-xs text-text-warning mt-2">
-                KYC is recommended. It becomes mandatory for payouts above {currency} {KYC_MANDATORY_PAYOUT_THRESHOLD.toLocaleString()}. Status: {eligibilityStatus ?? 'UNKNOWN'}
+                Payouts are unavailable until your account is payout-ready. Status: {eligibilityStatus ?? 'UNKNOWN'}
               </p>
             )}
           </div>
@@ -183,9 +224,57 @@ const PayoutsDashboard = () => {
         <div className="bg-surface-default rounded-2xl p-6 shadow-sm border border-border-subtle mb-8">
           <p className="text-base font-semibold text-text-primary mb-2">{t('payoutMethod')}</p>
           <p className="text-sm text-text-secondary mb-4">{t('payoutMethodDescription')}</p>
-          <button className="bg-surface-brand text-text-white hover:opacity-90 px-6 py-2.5 rounded-full font-medium transition-colors">
-            {t('addPayoutMethod')}
-          </button>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <select
+              value={payoutProvider}
+              onChange={(e) => setPayoutProvider(e.target.value)}
+              className="px-3 py-2 border border-border-subtle rounded-lg"
+            >
+              <option value="MOBILE_MONEY">MOBILE_MONEY</option>
+              <option value="BANK_ACCOUNT">BANK_ACCOUNT</option>
+              <option value="PAYPAL">PAYPAL</option>
+              <option value="STRIPE_CONNECT">STRIPE_CONNECT</option>
+            </select>
+            <button
+              onClick={handleAddPayoutMethod}
+              disabled={creatingPayoutAccount}
+              className="bg-surface-brand text-text-white hover:opacity-90 px-6 py-2.5 rounded-full font-medium transition-colors disabled:opacity-50"
+            >
+              {t('addPayoutMethod')}
+            </button>
+          </div>
+
+          {payoutAccounts.length > 0 ? (
+            <div className="space-y-2">
+              {payoutAccounts.map((account) => (
+                <div
+                  key={account.id}
+                  className="flex items-center justify-between border border-border-subtle rounded-lg p-3"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">
+                      {account.provider} · {account.currency}
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      {account.isVerified ? 'Verified' : 'Not verified'}
+                      {account.isDefault ? ' · Primary' : ''}
+                    </p>
+                  </div>
+                  {!account.isDefault && (
+                    <button
+                      onClick={() => handleSetPrimary(account.id)}
+                      disabled={settingPrimaryPayout}
+                      className="text-sm text-text-brand hover:underline disabled:opacity-50"
+                    >
+                      Set primary
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-text-secondary">No payout accounts yet.</p>
+          )}
         </div>
 
         {/* History Section */}
@@ -282,28 +371,7 @@ const PayoutsDashboard = () => {
       <VendorKycRequiredModal
         open={isKycModalOpen}
         mandatory={isKycMandatory}
-        onContinueWithoutKyc={async () => {
-          const payload = pendingPayout;
-          if (!payload) {
-            setIsKycModalOpen(false);
-            return;
-          }
-          try {
-            await executePayout(payload.vendorId, payload.amount, payload.currency);
-          } catch (error) {
-            handleVendorError({
-              error,
-              locale,
-              router,
-              openKycModal: () => setIsKycModalOpen(true),
-            });
-          } finally {
-            setPendingPayout(null);
-            setIsKycModalOpen(false);
-          }
-        }}
         onClose={() => {
-          setPendingPayout(null);
           setIsKycModalOpen(false);
         }}
       />

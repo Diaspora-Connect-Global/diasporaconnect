@@ -8,26 +8,53 @@
 // ENUMS / LITERALS
 // ============================================================================
 
-export type VendorStatus = 'DRAFT' | 'ACTIVE' | 'KYC_PENDING' | 'SUSPENDED';
-export type VendorType = 'INDIVIDUAL' | 'BUSINESS';
+export type VendorStatus =
+  | 'REGISTERED'
+  | 'AWAITING_KYC'
+  | 'KYC_UNDER_REVIEW'
+  | 'VERIFIED'
+  | 'ACTIVE'
+  | 'SUSPENDED'
+  | 'BANNED';
+export type VendorType = 'INDIVIDUAL' | 'BUSINESS' | 'COMMUNITY' | 'ASSOCIATION';
 export type ProductStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type ServicePackageStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type ProductType = 'PHYSICAL' | 'DIGITAL';
-export type OrderStatus = 'CREATED' | 'SHIPPED' | 'DELIVERED' | 'REFUNDED';
+export type OrderStatus =
+  | 'PENDING_PAYMENT'
+  | 'PAYMENT_CONFIRMED'
+  | 'IN_PROGRESS'
+  | 'DELIVERED'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'DISPUTED'
+  | 'REFUNDED';
 
-export type VendorUploadFileType = 'product' | 'logo' | 'download';
+export type CapabilityType =
+  | 'PHYSICAL_PRODUCTS'
+  | 'DIGITAL_PRODUCTS'
+  | 'SERVICES'
+  | 'MILESTONE_BASED_SERVICES'
+  | 'SUBSCRIPTIONS';
+
+export type PayoutProvider = 'BANK_ACCOUNT' | 'MOBILE_MONEY' | 'PAYPAL' | 'STRIPE_CONNECT';
+
+export type KycStatus = 'NOT_STARTED' | 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
+
+export type VendorUploadFileType = 'logo' | 'product-image' | 'document';
 
 // ============================================================================
 // CAPABILITIES & PAYOUT
 // ============================================================================
 
 export interface VendorCapability {
-  type: string;
+  type: CapabilityType;
   enabled: boolean;
 }
 
 export interface PayoutAccount {
   id: string;
-  provider: string;
+  provider: PayoutProvider;
   currency: string;
   isDefault: boolean;
   isVerified: boolean;
@@ -80,6 +107,8 @@ export interface VendorEligibilityDTO {
   payoutAccountCount: number;
   verifiedPayoutAccounts: number;
   activeSuspensionCount: number;
+  kycStatus?: KycStatus;
+  kycLevel?: number;
 }
 
 // ============================================================================
@@ -131,7 +160,7 @@ export interface VendorServicePackage {
   basePrice: number;
   currency: string;
   estimatedDuration: number;
-  status: ProductStatus;
+  status: ServicePackageStatus;
   benefits: string[];
   milestones: ServicePackageMilestone[];
   createdAt: string;
@@ -205,6 +234,10 @@ export interface ListVendorOrdersResponse {
   listVendorOrders: VendorOrderListPaginatedDTO;
 }
 
+export interface MyPayoutAccountsResponse {
+  myPayoutAccounts: PayoutAccount[];
+}
+
 // ============================================================================
 // MUTATION RESPONSE TYPES
 // ============================================================================
@@ -212,4 +245,12 @@ export interface ListVendorOrdersResponse {
 export interface RequestVendorUploadUrlResponse {
   requestUploadUrl?: UploadUrlDTO;
   requestVendorUploadUrl?: UploadUrlDTO;
+}
+
+export interface CreatePayoutAccountResponse {
+  createPayoutAccount: PayoutAccount;
+}
+
+export interface SetPrimaryPayoutAccountResponse {
+  setPrimaryPayoutAccount: boolean;
 }

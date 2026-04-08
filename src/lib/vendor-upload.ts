@@ -1,9 +1,9 @@
 /**
- * Vendor file upload: PUT file to a signed URL from requestUploadUrl.
+ * Vendor file upload: PUT file to a signed URL from requestVendorUploadUrl.
  * Use the readUrl returned by the mutation in product.images, logoUrl, or downloadUrl.
  *
  * Flow:
- * 1. requestUploadUrl({ vendorId, fileName, contentType, fileType }) → { uploadUrl, readUrl }
+ * 1. requestVendorUploadUrl({ vendorId, fileName, contentType, fileType }) → { uploadUrl, readUrl }
  * 2. uploadFileToVendorSignedUrl(uploadUrl, file) (this function)
  * 3. Pass readUrl into createProduct.images, updateVendor logoUrl, or downloadUrl
  */
@@ -12,7 +12,7 @@
  * Uploads a file directly to GCS using a signed upload URL.
  * No auth header is sent to the upload URL.
  *
- * @param uploadUrl - Signed URL from requestUploadUrl
+ * @param uploadUrl - Signed URL from requestVendorUploadUrl
  * @param file - File to upload
  * @param contentType - Optional; defaults to file.type
  * @throws If the PUT request fails (non-2xx)

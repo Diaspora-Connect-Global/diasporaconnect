@@ -34,10 +34,17 @@ export default function OrdersPage() {
     switch (status) {
       case "DELIVERED":
         return t('delivered');
-      case "CREATED":
+      case "PENDING_PAYMENT":
+      case "PAYMENT_CONFIRMED":
         return t('pending');
-      case "SHIPPED":
+      case "IN_PROGRESS":
         return t('inTransit');
+      case "COMPLETED":
+        return t('completed');
+      case "CANCELLED":
+        return t('cancelled');
+      case "DISPUTED":
+        return t('disputed');
       case "REFUNDED":
         return t('refunded');
       default:
@@ -64,7 +71,7 @@ export default function OrdersPage() {
         id: order.id,
         date: new Date(order.createdAt).toLocaleDateString(),
         customer: order.buyerId,
-        amount: `${order.currency} ${order.totalAmount}`,
+        amount: `${order.currency} ${(order.totalAmount / 100).toFixed(2)}`,
         delivery: order.status,
         action: "View order",
       })),
@@ -75,10 +82,16 @@ export default function OrdersPage() {
     switch (status) {
       case "DELIVERED":
         return "text-text-success";
-      case "CREATED":
+      case "PENDING_PAYMENT":
+      case "PAYMENT_CONFIRMED":
         return "text-text-warning";
-      case "SHIPPED":
+      case "IN_PROGRESS":
         return "text-text-brand";
+      case "COMPLETED":
+        return "text-text-success";
+      case "CANCELLED":
+      case "DISPUTED":
+        return "text-text-danger";
       case "REFUNDED":
         return "text-text-tertiary";
       default:
@@ -147,8 +160,12 @@ export default function OrdersPage() {
         >
           <option value="all">{t('deliveryStatus')}</option>
           <option value="DELIVERED">{t('delivered')}</option>
-          <option value="CREATED">{t('pending')}</option>
-          <option value="SHIPPED">{t('inTransit')}</option>
+          <option value="PENDING_PAYMENT">{t('pending')}</option>
+          <option value="PAYMENT_CONFIRMED">{t('pending')}</option>
+          <option value="IN_PROGRESS">{t('inTransit')}</option>
+          <option value="COMPLETED">{t('completed')}</option>
+          <option value="CANCELLED">{t('cancelled')}</option>
+          <option value="DISPUTED">{t('disputed')}</option>
           <option value="REFUNDED">{t('refunded')}</option>
         </select>
       </div>

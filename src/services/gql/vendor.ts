@@ -19,9 +19,13 @@ export type {
   UploadUrlDTO,
   VendorStatus,
   VendorType,
+  ServicePackageStatus,
   ProductStatus,
   ProductType,
   OrderStatus,
+  CapabilityType,
+  PayoutProvider,
+  KycStatus,
   VendorUploadFileType,
 } from './types/vendor';
 
@@ -34,7 +38,6 @@ export const GET_VENDOR = gql`
   query GetVendor($vendorId: String!) {
     getVendor(vendorId: $vendorId) {
       id
-      userId
       displayName
       description
       type
@@ -46,17 +49,18 @@ export const GET_VENDOR = gql`
         type
         enabled
       }
-      payoutAccounts {
-        id
-        provider
-        currency
-        isDefault
-        isVerified
-        createdAt
-        verifiedAt
-      }
       createdAt
-      updatedAt
+    }
+  }
+`;
+
+/** Vendor by userId. Auth: Yes. */
+export const GET_VENDOR_BY_USER_ID = gql`
+  query GetVendorByUserId($userId: String!) {
+    getVendorByUserId(userId: $userId) {
+      id
+      displayName
+      status
     }
   }
 `;
@@ -229,20 +233,33 @@ export const LIST_VENDOR_ORDERS = gql`
   }
 `;
 
+/** Payment module: list current user's payout accounts. Auth: Yes. */
+export const MY_PAYOUT_ACCOUNTS = gql`
+  query MyPayoutAccounts {
+    myPayoutAccounts {
+      id
+      provider
+      currency
+      isDefault
+      isVerified
+      createdAt
+      verifiedAt
+    }
+  }
+`;
+
 // ============================================================================
 // MUTATIONS
 // ============================================================================
 
-/** Create vendor profile. Auth: Yes. vendorType: "INDIVIDUAL" | "BUSINESS". Returns vendorId. */
+/** Create vendor profile. Auth: Yes. Returns vendorId. */
 export const CREATE_VENDOR = gql`
   mutation CreateVendor(
-    $userId: String!
     $vendorType: String!
     $displayName: String!
     $description: String!
   ) {
     createVendor(
-      userId: $userId
       vendorType: $vendorType
       displayName: $displayName
       description: $description
@@ -250,15 +267,15 @@ export const CREATE_VENDOR = gql`
   }
 `;
 
-/** Get signed upload URL. Auth: Yes. fileType: "product" | "logo" | "download". */
-export const REQUEST_UPLOAD_URL = gql`
-  mutation RequestUploadUrl(
+/** Get signed upload URL. Auth: Yes. fileType: "logo" | "product-image" | "document". */
+export const REQUEST_VENDOR_UPLOAD_URL = gql`
+  mutation RequestVendorUploadUrl(
     $vendorId: String!
     $fileName: String!
     $contentType: String!
     $fileType: String!
   ) {
-    requestUploadUrl(
+    requestVendorUploadUrl(
       vendorId: $vendorId
       fileName: $fileName
       contentType: $contentType
@@ -272,7 +289,7 @@ export const REQUEST_UPLOAD_URL = gql`
 `;
 
 // Backward-compatible alias for older callers.
-export const REQUEST_VENDOR_UPLOAD_URL = REQUEST_UPLOAD_URL;
+export const REQUEST_UPLOAD_URL = REQUEST_VENDOR_UPLOAD_URL;
 
 /** Create product (status DRAFT). Auth: Yes. productType: "PHYSICAL" | "DIGITAL". Returns productId. */
 export const CREATE_PRODUCT = gql`
@@ -403,6 +420,28 @@ export const REQUEST_PAYOUT = gql`
     $currency: String!
   ) {
     requestPayout(vendorId: $vendorId, amount: $amount, currency: $currency)
+  }
+`;
+
+/** Payment module: add payout account. Auth: Yes. */
+export const CREATE_PAYOUT_ACCOUNT = gql`
+  mutation CreatePayoutAccount($type: String!, $currency: String!) {
+    createPayoutAccount(type: $type, currency: $currency) {
+      id
+      provider
+      currency
+      isDefault
+      isVerified
+      createdAt
+      verifiedAt
+    }
+  }
+`;
+
+/** Payment module: set primary payout account. Auth: Yes. */
+export const SET_PRIMARY_PAYOUT_ACCOUNT = gql`
+  mutation SetPrimaryPayoutAccount($accountId: String!) {
+    setPrimaryPayoutAccount(accountId: $accountId)
   }
 `;
 

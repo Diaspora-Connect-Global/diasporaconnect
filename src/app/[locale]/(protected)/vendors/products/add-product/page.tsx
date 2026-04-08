@@ -8,7 +8,7 @@ import {
   CREATE_PRODUCT,
   GET_MY_VENDOR,
   PUBLISH_PRODUCT,
-  REQUEST_UPLOAD_URL,
+  REQUEST_VENDOR_UPLOAD_URL,
 } from "@/services/gql/vendor";
 import { uploadFileToVendorSignedUrl } from "@/lib/vendor-upload";
 import type { GetMyVendorResponse, RequestVendorUploadUrlResponse } from "@/services/gql/types/vendor";
@@ -54,7 +54,7 @@ export default function AddProductForm() {
   const [isKycModalOpen, setIsKycModalOpen] = React.useState(false);
   const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
   const vendorId = vendorData?.getMyVendor?.id;
-  const [requestUploadUrl] = useMutation<RequestVendorUploadUrlResponse>(REQUEST_UPLOAD_URL);
+  const [requestUploadUrl] = useMutation<RequestVendorUploadUrlResponse>(REQUEST_VENDOR_UPLOAD_URL);
   const [createProduct, { loading: creatingProduct }] = useMutation<{ createProduct: string }>(CREATE_PRODUCT);
   const [publishProduct, { loading: publishingProduct }] = useMutation<{ publishProduct: boolean }>(PUBLISH_PRODUCT);
 
@@ -123,7 +123,7 @@ export default function AddProductForm() {
           vendorId,
           fileName: image.file.name,
           contentType: image.file.type || "image/jpeg",
-          fileType: "product",
+          fileType: "product-image",
         },
       });
 
@@ -160,7 +160,7 @@ export default function AddProductForm() {
         vendorId,
         title: formData.name.trim(),
         description: formData.description.trim(),
-        price: Number(formData.price),
+        price: Math.round(Number(formData.price) * 100),
         currency: "GHS",
         inventoryCount: Number(formData.quantity),
         productType: "PHYSICAL",

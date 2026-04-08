@@ -85,6 +85,7 @@ export default function ProductsPage() {
   const products = data?.listVendorProducts.items ?? [];
   const totalCount = data?.listVendorProducts.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
+  const formatMinor = (amount: number) => (amount / 100).toFixed(2);
 
   const getLocalizedStatus = (status: string): string => {
     return status === 'PUBLISHED' ? t('live') : t('draft');
@@ -202,7 +203,7 @@ export default function ProductsPage() {
                   <td className="px-6 py-4 text-sm text-text-secondary">
                     {getLocalizedCategory('Men fashion')}
                   </td>
-                  <td className="px-6 py-4 text-sm text-text-primary">{product.currency} {product.price}</td>
+                  <td className="px-6 py-4 text-sm text-text-primary">{product.currency} {formatMinor(product.price)}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                       product.status === 'PUBLISHED' 

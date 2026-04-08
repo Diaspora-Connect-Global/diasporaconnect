@@ -109,7 +109,7 @@ const AddServiceFlow = () => {
         vendorId,
         title: serviceTitle.trim(),
         description: description.trim(),
-        basePrice,
+        basePrice: Math.round(basePrice * 100),
         currency: 'GHS',
         estimatedDuration: parseEstimatedDuration(),
         benefits:
@@ -126,16 +126,20 @@ const AddServiceFlow = () => {
     if (pricingMode === 'multiple') {
       const activePackages = packages.filter((pkg) => Number.parseFloat(pkg.price) > 0);
       const total = activePackages.reduce((sum, pkg) => sum + (Number.parseFloat(pkg.price) || 0), 0) || 1;
+      let allocated = 0;
 
       for (let index = 0; index < activePackages.length; index += 1) {
         const pkg = activePackages[index];
-        const percent = ((Number.parseFloat(pkg.price) || 0) / total) * 100;
+        const isLast = index === activePackages.length - 1;
+        const rawPercent = ((Number.parseFloat(pkg.price) || 0) / total) * 100;
+        const percent = isLast ? Number((100 - allocated).toFixed(2)) : Number(rawPercent.toFixed(2));
+        allocated += percent;
         await addMilestone({
           variables: {
             packageId,
             title: `${pkg.name} package`,
             description: pkg.features || `Deliverables for ${pkg.name}`,
-            percentageOfTotal: Number(percent.toFixed(2)),
+            percentageOfTotal: percent,
             estimatedDays: Number.parseInt(pkg.duration.replace(/\D/g, ''), 10) || 7,
             deliverables: pkg.features ? [pkg.features] : [`${pkg.name} deliverable`],
             order: index + 1,
