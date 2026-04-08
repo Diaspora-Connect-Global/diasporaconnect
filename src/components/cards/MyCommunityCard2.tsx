@@ -84,7 +84,7 @@ export function MyCommunityCard2() {
                     <div className="border p-2 rounded-2xl border-border-disabled flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1 min-w-0 flex-1">
                             <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Image width={24} height={24} src="/GLOBE.png" alt="Loading" className="w-6 h-6 rounded-full object-cover" />
+                                <Image width={24} height={24} src="/GLOBE.png" alt="Loading" className="rounded-full object-cover" />
                             </div>
                             <h1 className="font-body-large text-text-secondary truncate">
                                 Loading communities...
@@ -105,7 +105,7 @@ export function MyCommunityCard2() {
                             <div className="border p-2 rounded-2xl border-border-disabled flex items-center justify-between gap-2 cursor-pointer">
                                 <div className="flex items-center gap-1 min-w-0 flex-1">
                                     <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <Image width={24} height={24} src="/GLOBE.png" alt="Profile" className="w-6 h-6 rounded-full object-cover" />
+                                        <Image width={24} height={24} src="/GLOBE.png" alt="Profile" className="rounded-full object-cover" />
                                     </div>
                                     <h1 className="font-body-large text-text-secondary truncate">
                                         {'No community'}
@@ -138,7 +138,7 @@ export function MyCommunityCard2() {
                                     {displayCommunity?.avatarUrl ? (
                                         <Image width={24} height={24} src={displayCommunity.avatarUrl} alt={displayCommunity.name} className="w-6 h-6 rounded-full object-cover" />
                                     ) : (
-                                        <Image width={24} height={24} src="/GLOBE.png" alt="Community" className="w-6 h-6 rounded-full object-cover" />
+                                        <Image width={24} height={24} src="/GLOBE.png" alt="Community" className="rounded-full object-cover" />
                                     )}
                                 </div>
                                 <h1 className="font-body-large text-text-primary truncate">
@@ -164,7 +164,7 @@ export function MyCommunityCard2() {
                             >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                     {community.avatarUrl && (
-                                        <Image width={20} height={20} src={community.avatarUrl} alt={community.name} className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                                        <Image width={20} height={20} src={community.avatarUrl} alt={community.name} className="rounded-full object-cover flex-shrink-0" />
                                     )}
                                     <span className="truncate flex-1">{community.name}</span>
                                 </div>

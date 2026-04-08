@@ -152,9 +152,9 @@ export default function Header({
                     <Image
                       src="/LOGO.svg"
                       alt="Logo"
-                      width={100}
-                      height={100}
-                      className="object-fill bg-amber-900-"
+                      width={160}
+                      height={40}
+                      className="h-10 w-auto object-contain"
                     />
                   </Link>
                 </div>
@@ -215,9 +215,9 @@ export default function Header({
                       <Image
                         src="/LOGO.svg"
                         alt="Logo"
-                        width={100}
-                        height={100}
-                        className="object-fill bg-amber-900-"
+                        width={160}
+                        height={40}
+                        className="h-10 w-auto object-contain"
                       />
                     </Link>
                     <ButtonType3

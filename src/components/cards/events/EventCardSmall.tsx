@@ -22,6 +22,7 @@ export default function EventCardSmall({ title, date, location, attendees, image
                     src={imageUrl}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
                     fill
+                    sizes="80px"
                     className="object-fill"
                     onError={(e) => {
                         e.currentTarget.style.display = "none";
@@ -35,6 +36,7 @@ export default function EventCardSmall({ title, date, location, attendees, image
                         src={EVENT_PLACEHOLDER_IMAGE}
                         alt={`Default image for event: ${title}`}
                         fill
+                        sizes="80px"
                         className="object-cover"
                     />
                 </div>

@@ -31,8 +31,8 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
                 <Image
                     src={imageUrl}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
-                    layout="fill"
-                    objectFit="fill"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 33vw"
                     className="w-full h-full object-fill"
                     onError={(e) => {
                         e.currentTarget.style.display = "none";
@@ -43,8 +43,8 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
                     <Image
                         src={EVENT_PLACEHOLDER_IMAGE}
                         alt={`Default image for event: ${title}`}
-                        layout="fill"
-                        objectFit="fill"
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 33vw"
                         className="w-full h-full object-fill"
                     />
                 </div>
