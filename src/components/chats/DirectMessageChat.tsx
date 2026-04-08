@@ -17,7 +17,6 @@ import { useTranslations } from 'next-intl';
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
-import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
 import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
@@ -36,8 +35,6 @@ import { toast } from "sonner";
 
 export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; onBack?: () => void }) {
     const router = useRouter();
-    const params = useParams<{ locale?: string }>();
-    const localePrefix = params?.locale ? `/${params.locale}` : '';
     const t = useTranslations('chat.direct');
     const tCommon = useTranslations('common');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -438,7 +435,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
     const handleViewProfile = () => {
         if (!chat.id) return;
-        router.push(`${localePrefix}/${chat.id}`);
+        router.push(`/${chat.id}`);
         setSidebarOpen(false);
     };
 

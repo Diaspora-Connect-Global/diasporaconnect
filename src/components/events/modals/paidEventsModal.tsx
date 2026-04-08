@@ -9,6 +9,7 @@ import {
     type RegistrationFormField,
     type ValidatePromoCodeData,
 } from "@/services/gql/events";
+import { useUserStore } from "@/store/useUserStore";
 import { useLazyQuery } from "@apollo/client/react";
 import { Tag, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -63,6 +64,7 @@ export interface PaidEventsModalRef {
 const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const t = useTranslations('home.events.payment');
     const locale = useLocale();
+    const user = useUserStore((state) => state.user);
     const region = locale.split('-')[1]?.toLowerCase() ?? locale.toLowerCase();
     const localeRegion = LOCALE_REGION_MAP[region] ?? LOCALE_REGION_MAP.gh;
 
@@ -86,12 +88,16 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     // Form fields state
     const [formResponses, setFormResponses] = useState<Record<string, string | string[]>>({});
 
-    const [billing, setBilling] = useState({
-        firstName: "", lastName: "", email: "",
+    const buildInitialBilling = () => ({
+        firstName: user?.firstName ?? "",
+        lastName: user?.lastName ?? "",
+        email: user?.email ?? "",
         cardNumber: "", expDate: "", cvv: "",
         mobileProvider: "mtn" as "mtn" | "telecel" | "at",
         phoneNumber: "",
     });
+
+    const [billing, setBilling] = useState(buildInitialBilling);
 
     const [validatePromoCode, { loading: validatingPromo }] = useLazyQuery<ValidatePromoCodeData>(VALIDATE_PROMO_CODE, {
         fetchPolicy: 'no-cache',
@@ -118,11 +124,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
         setFormResponses({});
         setOnPaymentSuccess(() => paymentSuccessHandler ?? null);
         setSelectedEvent(event ?? null);
-        setBilling({
-            firstName: "", lastName: "", email: "",
-            cardNumber: "", expDate: "", cvv: "",
-            mobileProvider: "mtn", phoneNumber: "",
-        });
+        setBilling(buildInitialBilling());
         setIsDialogOpen(true);
     };
 
