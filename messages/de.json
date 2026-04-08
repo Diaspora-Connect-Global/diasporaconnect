@@ -349,6 +349,8 @@
             "yourevents": "Ihre Veranstaltungen",
             "create": "Veranstaltung erstellen",
             "moreevents": "Weitere Veranstaltungen",
+            "pastEvents": "Vergangene Veranstaltungen",
+            "paidEvents": "Bezahlte Veranstaltungen",
             "noevents": "Sie haben keine gespeicherten Veranstaltungen",
             "noattending": "Sie nehmen derzeit an keiner Veranstaltung teil",
             "payment": {

@@ -428,6 +428,8 @@
             "yourevents": "Your events",
             "create": "Create event",
             "moreevents": "More events",
+            "pastEvents": "Past events",
+            "paidEvents": "Paid events",
             "noevents": "You have no saved events",
             "noattending": " You are not attending any event now",
             "payment": {

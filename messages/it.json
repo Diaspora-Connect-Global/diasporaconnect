@@ -349,6 +349,8 @@
             "yourevents": "I tuoi eventi",
             "create": "Crea evento",
             "moreevents": "Altri eventi",
+            "pastEvents": "Eventi passati",
+            "paidEvents": "Eventi a pagamento",
             "noevents": "Non hai eventi salvati",
             "noattending": "Non stai partecipando a nessun evento al momento",
             "payment": {
