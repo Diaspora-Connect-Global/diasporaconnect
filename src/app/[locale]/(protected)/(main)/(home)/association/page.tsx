@@ -108,6 +108,12 @@ export default function AssociationsPage() {
     id: '',
     name: '',
   });
+  const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string; isRequest: boolean }>({
+    open: false,
+    id: '',
+    name: '',
+    isRequest: false,
+  });
 
   const myAssociations = myData?.getMyAssociations?.associations ?? [];
   const allDiscover = searchData?.searchAssociations?.associations ?? [];
@@ -134,6 +140,25 @@ export default function AssociationsPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Failed to join');
     }
+  };
+
+  const handleJoinClick = (associationId: string, name: string, joinPolicy?: string) => {
+    if (joinPolicy === 'INVITE_ONLY') {
+      toast.error(t('toasts.inviteOnly'));
+      return;
+    }
+    setJoinModal({
+      open: true,
+      id: associationId,
+      name,
+      isRequest: joinPolicy === 'REQUEST',
+    });
+  };
+
+  const handleJoinConfirm = async () => {
+    if (!joinModal.id) return;
+    await handleJoin(joinModal.id, joinModal.name, joinModal.isRequest ? 'REQUEST' : 'OPEN');
+    setJoinModal({ open: false, id: '', name: '', isRequest: false });
   };
 
   const handleLeaveClick = (id: string, name: string) => {
@@ -216,7 +241,7 @@ export default function AssociationsPage() {
                 profileImage={assn.avatarUrl || '/ADANSI.png'}
                 profileName={assn.name}
                 buttonText={buttonText}
-                onButtonClick={() => !isInviteOnly && handleJoin(assn.id, assn.name, assn.joinPolicy)}
+                onButtonClick={() => handleJoinClick(assn.id, assn.name, assn.joinPolicy)}
               />
             );
           })
@@ -226,6 +251,16 @@ export default function AssociationsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        open={joinModal.open}
+        onCancel={() => setJoinModal({ open: false, id: '', name: '', isRequest: false })}
+        onConfirm={handleJoinConfirm}
+        title={joinModal.isRequest ? 'Request to join association?' : 'Join association?'}
+        description={joinModal.name ? `You are about to ${joinModal.isRequest ? 'request to join' : 'join'} ${joinModal.name}.` : `You are about to ${joinModal.isRequest ? 'request to join this association' : 'join this association'}.`}
+        confirmText={joinModal.isRequest ? t('actions.requestToJoin') : tActions('join')}
+        isLoading={joinLoading}
+      />
 
       <ConfirmationModal
         open={leaveModal.open}

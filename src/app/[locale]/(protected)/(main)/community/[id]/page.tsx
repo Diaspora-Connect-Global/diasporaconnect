@@ -136,6 +136,7 @@ export default function CommunityDetailPage() {
   });
 
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
   const community = detailsData?.getCommunity;
   const posts = feedData?.feed?.posts || [];
 
@@ -169,6 +170,13 @@ export default function CommunityDetailPage() {
         toast.error(e instanceof Error ? e.message : 'Request failed');
       }
     }
+  };
+
+  const handleJoinClick = () => setJoinModalOpen(true);
+
+  const handleJoinConfirm = async () => {
+    await handleJoin();
+    setJoinModalOpen(false);
   };
 
   const handleLeaveClick = () => setLeaveModalOpen(true);
@@ -268,7 +276,7 @@ export default function CommunityDetailPage() {
                 {canShowJoin && (
                   <ButtonType1
                     className="py-1 px-3 label-medium"
-                    onClick={handleJoin}
+                    onClick={handleJoinClick}
                     disabled={actionLoading}
                   >
                     {joinLoading ? tActions('joining') : tActions('join')}
@@ -277,7 +285,7 @@ export default function CommunityDetailPage() {
                 {canShowRequestToJoin && (
                   <ButtonType1
                     className="py-1 px-3 label-medium"
-                    onClick={handleJoin}
+                    onClick={handleJoinClick}
                     disabled={actionLoading}
                   >
                     {joinLoading ? tActions('joining') : t('actions.requestToJoin')}
@@ -357,6 +365,16 @@ export default function CommunityDetailPage() {
           <PeopleYouMayKnow />
         </div>
       </div>
+
+      <ConfirmationModal
+        open={joinModalOpen}
+        onCancel={() => setJoinModalOpen(false)}
+        onConfirm={handleJoinConfirm}
+        title={canShowRequestToJoin ? 'Request to join community?' : 'Join community?'}
+        description={community?.name ? `You are about to ${canShowRequestToJoin ? 'request to join' : 'join'} ${community.name}.` : `You are about to ${canShowRequestToJoin ? 'request to join this community' : 'join this community'}.`}
+        confirmText={canShowRequestToJoin ? t('actions.requestToJoin') : tActions('join')}
+        isLoading={joinLoading}
+      />
 
       <ConfirmationModal
         open={leaveModalOpen}

@@ -19,6 +19,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { resolveUserTier } from '@/lib/userTier';
 
 // Type definitions for better type safety
@@ -117,12 +118,17 @@ export default function Home() {
   // Mutations
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
-  const [requestJoinCommunity] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
+  const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
     awaitRefetchQueries: false,
   });
   const [joiningCommunities, setJoiningCommunities] = useState<Set<string>>(new Set());
   const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
+  const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string }>({
+    open: false,
+    id: '',
+    name: '',
+  });
 
   // Handle join community
   const handleJoinCommunity = async (communityId: string) => {
@@ -143,6 +149,16 @@ export default function Home() {
       console.error('Failed to join community:', err);
       toast.error('Failed to join community');
     }
+  };
+
+  const handleJoinClick = (communityId: string, communityName: string) => {
+    setJoinModal({ open: true, id: communityId, name: communityName });
+  };
+
+  const handleJoinConfirm = async () => {
+    if (!joinModal.id) return;
+    await handleJoinCommunity(joinModal.id);
+    setJoinModal({ open: false, id: '', name: '' });
   };
 
   // Handle like
@@ -395,7 +411,7 @@ export default function Home() {
                       icon={community.avatarUrl}
                       title={community.name}
                       members={community?.memberCount || 0}
-                      onButtonClick={() => handleJoinCommunity(community.id)}
+                      onButtonClick={() => handleJoinClick(community.id, community.name)}
                       buttonText={
                         community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
                           ? 'Joined'
@@ -509,6 +525,16 @@ export default function Home() {
       <div className="hidden lg:block min-w-0 overflow-y-auto py-4">
         <PeopleYouMayKnow />
       </div>
+
+      <ConfirmationModal
+        open={joinModal.open}
+        onCancel={() => setJoinModal({ open: false, id: '', name: '' })}
+        onConfirm={handleJoinConfirm}
+        title="Join community?"
+        description={joinModal.name ? `You are about to join ${joinModal.name}.` : 'You are about to join this community.'}
+        confirmText={t('joincommunity')}
+        isLoading={joinLoading}
+      />
     </div>
   );
 }

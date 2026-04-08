@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from '@apollo/client/react';
 import JoinCommunityCard from "@/components/cards/JoinCommunityCard";
 import { MyCommunityCard } from "@/components/cards/MyCommunityCard";
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { useTranslations } from 'next-intl';
 import { DISCOVER_COMMUNITIES, LIST_MY_JOINED_COMMUNITIES, REQUEST_JOIN_COMMUNITY } from '@/services/gql/community';
 import { toast } from 'sonner';
@@ -42,6 +43,11 @@ export default function Community() {
     const tActions = useTranslations('actions');
     
     const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
+    const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string }>({
+        open: false,
+        id: '',
+        name: '',
+    });
     
     // Fetch user's joined communities
     const { data: myCommunitiesData, loading: myCommunitiesLoading, refetch: refetchMyCommunities } = useQuery<ListUserCommunitiesData>(
@@ -60,12 +66,12 @@ export default function Community() {
         }
     );
 
-    const [requestJoinCommunity] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
+    const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
         refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
         awaitRefetchQueries: false,
     });
 
-    const handleJoinCommunity = async (communityId: string, communityName: string) => {
+    const handleJoinCommunity = async (communityId: string) => {
         try {
             const { data } = await requestJoinCommunity({
                 variables: { communityId }
@@ -86,6 +92,16 @@ export default function Community() {
             console.error('Failed to join community:', err);
             toast.error('Failed to join community');
         }
+    };
+
+    const handleJoinClick = (communityId: string, communityName: string) => {
+        setJoinModal({ open: true, id: communityId, name: communityName });
+    };
+
+    const handleJoinConfirm = async () => {
+        if (!joinModal.id) return;
+        await handleJoinCommunity(joinModal.id);
+        setJoinModal({ open: false, id: '', name: '' });
     };
 
     return (
@@ -126,7 +142,7 @@ export default function Community() {
                             key={community.id}
                             title={community.name}
                             members={0}
-                            onButtonClick={() => handleJoinCommunity(community.id, community.name)}
+                            onButtonClick={() => handleJoinClick(community.id, community.name)}
                             buttonText={
                                 community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
                                     ? 'Joined'
@@ -142,6 +158,16 @@ export default function Community() {
                     </div>
                 )}
             </div>
+
+            <ConfirmationModal
+                open={joinModal.open}
+                onCancel={() => setJoinModal({ open: false, id: '', name: '' })}
+                onConfirm={handleJoinConfirm}
+                title="Join community?"
+                description={joinModal.name ? `You are about to join ${joinModal.name}.` : 'You are about to join this community.'}
+                confirmText={tActions('join')}
+                isLoading={joinLoading}
+            />
         </div>
     );
 }

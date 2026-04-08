@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
 import JoinCommunityCard from '@/components/cards/JoinCommunityCard';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import {
   DISCOVER_COMMUNITIES,
   REQUEST_JOIN_COMMUNITY,
@@ -46,6 +47,11 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
   const tActions = useTranslations('actions');
   const tC = useTranslations('community');
   const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
+  const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string }>({
+    open: false,
+    id: '',
+    name: '',
+  });
 
   const { data: discoverData, loading: discoverLoading } =
     useQuery<DiscoverCommunitiesData>(DISCOVER_COMMUNITIES, {
@@ -57,7 +63,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
       },
     });
 
-  const [requestJoinCommunity] = useMutation<{
+  const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{
     requestMembership: { status: string; message: string };
   }>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
@@ -77,6 +83,16 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
     } catch {
       toast.error(tC('joinFailed') ?? 'Failed to join community');
     }
+  };
+
+  const handleJoinClick = (communityId: string, communityName: string) => {
+    setJoinModal({ open: true, id: communityId, name: communityName });
+  };
+
+  const handleJoinConfirm = async () => {
+    if (!joinModal.id) return;
+    await handleJoinCommunity(joinModal.id, joinModal.name);
+    setJoinModal({ open: false, id: '', name: '' });
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -137,7 +153,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
                     description={community.description ?? ''}
                     buttonText={joined ? tActions('joined') : tC('joincommunity')}
                     onButtonClick={() =>
-                      !joined && handleJoinCommunity(community.id, community.name)
+                      !joined && handleJoinClick(community.id, community.name)
                     }
                     isDisabled={joined}
                     icon={
@@ -157,6 +173,16 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
             })}
           </div>
         )}
+
+        <ConfirmationModal
+          open={joinModal.open}
+          onCancel={() => setJoinModal({ open: false, id: '', name: '' })}
+          onConfirm={handleJoinConfirm}
+          title="Join community?"
+          description={joinModal.name ? `You are about to join ${joinModal.name}.` : 'You are about to join this community.'}
+          confirmText={tActions('join')}
+          isLoading={joinLoading}
+        />
       </div>
     </MultiStep>
   );
