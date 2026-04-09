@@ -10,7 +10,7 @@ export interface MessageAttachment {
 
 /**
  * Message WebSocket client. Per backend spec, connect via the API Gateway (e.g. port 3000).
- * Auth: pass session ID or JWT in auth: { token } (no "Bearer " prefix).
+ * Auth: pass JWT in auth: { token: "Bearer <accessToken>" }.
  *
  * Payload received from backend via 'message:new' WebSocket event.
  * Backend encrypts content; use GraphQL getMessages for plaintext.
@@ -102,8 +102,8 @@ class MessageService {
       this.socket = null;
     }
 
-    // Pass raw JWT token - server handles auth directly
-    const authToken = token.startsWith('Bearer ') ? token.slice(7) : token;
+    // Backend now expects auth.token in the format: "Bearer <accessToken>"
+    const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
 
     // Connect via API Gateway (spec: port 3000). Set NEXT_PUBLIC_MESSAGE_WS_URL to your gateway (e.g. https://your-domain:3000).
     const SOCKET_URL = process.env.NEXT_PUBLIC_MESSAGE_WS_URL || 'https://api.diaspoplug.net';

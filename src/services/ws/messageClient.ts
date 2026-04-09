@@ -34,8 +34,8 @@ export class MessageClient {
 
     this.socket = io(finalConfig.url!, {
       path: finalConfig.path,
-      // Spec: auth token without 'Bearer ' prefix
-      auth: { token: jwtToken.startsWith('Bearer ') ? jwtToken.slice(7) : jwtToken },
+      // Backend expects auth.token as: "Bearer <accessToken>"
+      auth: { token: jwtToken.startsWith('Bearer ') ? jwtToken : `Bearer ${jwtToken}` },
       transports: finalConfig.transports,
     });
 

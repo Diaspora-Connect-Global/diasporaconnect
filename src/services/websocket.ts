@@ -8,9 +8,13 @@ class WebSocketService {
   connect(token: string) {
     if (this.socket?.connected) return;
 
-    this.socket = io('ws://localhost:3006', {
-      auth: { token },
-      transports: ['websocket']
+    const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    const socketUrl = process.env.NEXT_PUBLIC_MESSAGE_WS_URL || 'https://api.diaspoplug.net';
+
+    this.socket = io(socketUrl, {
+      path: '/socket.io/',
+      auth: { token: authToken },
+      transports: ['websocket', 'polling']
     });
 
     this.socket.on('connect', () => {
