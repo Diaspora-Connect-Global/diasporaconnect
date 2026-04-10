@@ -38,9 +38,11 @@ import { Link } from "@/i18n/navigation";
 import {
   Loader2, ChevronLeft, Users, TicketIcon, Tag, BarChart2,
   ClipboardList, Settings, Plus, Trash2, PauseCircle,
-  CheckSquare, Edit2, QrCode,
+  CheckSquare, Edit2, QrCode, ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { CircularImageCropper } from "@/lib/imagecropper";
 
 type Tab = 'overview' | 'registrations' | 'attendance' | 'tickets' | 'promoCodes' | 'formBuilder' | 'settings';
 
@@ -660,6 +662,26 @@ function SettingsTab({ eventId }: { eventId: string }) {
   const [deleteModal, setDeleteModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
 
+  // Banner image upload
+  const {
+    uploading: bannerUploading,
+    rawImage: bannerRawImage,
+    croppedImage: bannerCroppedImage,
+    showCropper: bannerShowCropper,
+    handleFileSelect: handleBannerFileSelect,
+    handleCropConfirm: handleBannerCropConfirm,
+    handleCropCancel: handleBannerCropCancel,
+    uploadImage: uploadBannerImage,
+    reset: resetBanner,
+  } = useImageUpload({
+    category: 'event_cover',
+    onSuccess: async (publicUrl) => {
+      await updateEvent({ variables: { id: eventId, input: { coverImageUrl: publicUrl } } });
+      resetBanner();
+    },
+    onError: () => { resetBanner(); },
+  });
+
   const startEdit = () => {
     setEditTitle(event?.title ?? '');
     setEditDesc(event?.description ?? '');
@@ -734,6 +756,49 @@ function SettingsTab({ eventId }: { eventId: string }) {
             <p className="text-sm text-text-secondary line-clamp-3">{event.description}</p>
           </>
         )}
+      </div>
+
+      {/* Banner image */}
+      <div className="rounded-lg border border-border-subtle p-4 space-y-3">
+        <p className="font-medium text-text-primary">Banner image</p>
+        {event.coverImageUrl && (
+          <img src={event.coverImageUrl} alt="Event banner" className="w-full h-40 object-cover rounded-lg" />
+        )}
+        {bannerCroppedImage && (
+          <img src={bannerCroppedImage} alt="Preview" className="w-full h-40 object-cover rounded-lg border-2 border-border-brand" />
+        )}
+        {bannerRawImage && (
+          <CircularImageCropper
+            open={bannerShowCropper}
+            src={bannerRawImage}
+            onCancel={handleBannerCropCancel}
+            onConfirm={handleBannerCropConfirm}
+          />
+        )}
+        <div className="flex items-center gap-3">
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBannerFileSelect(f); e.target.value = ''; }}
+            />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border-subtle rounded-md hover:bg-surface-subtle transition-colors text-text-primary">
+              <ImageIcon className="w-4 h-4" /> {event.coverImageUrl ? 'Change image' : 'Upload image'}
+            </span>
+          </label>
+          {bannerCroppedImage && (
+            <ButtonType2
+              size="default"
+              onClick={() => uploadBannerImage()}
+              disabled={bannerUploading || updating}
+              className="flex items-center gap-2"
+            >
+              {bannerUploading || updating ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              Save banner
+            </ButtonType2>
+          )}
+        </div>
       </div>
 
       {/* Danger zone */}

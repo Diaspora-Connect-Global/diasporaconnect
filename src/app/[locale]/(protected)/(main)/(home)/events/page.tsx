@@ -236,15 +236,26 @@ export default function Events() {
     };
 
     const handleSaveEvent = async (eventId: string, isSaved: boolean) => {
+        if (!sessionToken) {
+            toast.error('Please sign in to save events');
+            return;
+        }
+
         const nextSavedState = !isSaved;
         setOptimisticSavedState((prev) => ({ ...prev, [eventId]: nextSavedState }));
 
         try {
             if (isSaved) {
-                await unsaveEvent({ variables: { eventId } });
+                const result = await unsaveEvent({ variables: { eventId } });
+                if (!result.data?.unsaveEvent) {
+                    throw new Error('Unsave failed');
+                }
                 toast.success('Event removed from saved');
             } else {
-                await saveEvent({ variables: { eventId } });
+                const result = await saveEvent({ variables: { eventId } });
+                if (!result.data?.saveEvent?.id) {
+                    throw new Error('Save failed');
+                }
                 toast.success('Event saved successfully');
             }
         } catch {

@@ -2,7 +2,7 @@
 
 import EventCard2 from "@/components/cards/events/EventCard2";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
@@ -24,7 +24,7 @@ import {
   getEventCoverImage,
   isEventSoldOut,
 } from "@/services/gql/events";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useLocale, useTranslations } from "next-intl";
@@ -50,12 +50,14 @@ function formatPriceLabel(event: Event) {
 
 export default function EventDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const eventId = params.id as string;
   const modalRef = useRef<PaidEventsModalRef>(null);
   const locale = useLocale();
   const tEvents = useTranslations("home.events");
   const [registrationId, setRegistrationId] = useState<string | null>(null);
   const [optimisticRegistered, setOptimisticRegistered] = useState<boolean | null>(null);
+  const [optimisticSaved, setOptimisticSaved] = useState<boolean | null>(null);
   const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
   const isAuthHydrated = useAuthStore.persist.hasHydrated();
   const shouldLoadUserEventState = isAuthHydrated && !!sessionToken;
@@ -68,7 +70,7 @@ export default function EventDetailPage() {
     variables: { eventId },
     skip: !eventId || !shouldLoadUserEventState,
   });
-  const saved = savedData?.isEventSaved ?? false;
+  const saved = optimisticSaved ?? (savedData?.isEventSaved ?? false);
 
   const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
     refetchQueries: [
@@ -79,14 +81,12 @@ export default function EventDetailPage() {
     awaitRefetchQueries: true,
   });
   const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
-    onCompleted: () => toast.success("Event saved"),
-    onError: () => toast.error("Failed to save event"),
-    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }],
+    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }, { query: USER_EVENTS }],
+    awaitRefetchQueries: true,
   });
   const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, {
-    onCompleted: () => toast.success("Event removed from saved"),
-    onError: () => toast.error("Failed to unsave event"),
-    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }],
+    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }, { query: USER_EVENTS }],
+    awaitRefetchQueries: true,
   });
   const [cancelRegistration] = useMutation<CancelRegistrationData>(CANCEL_REGISTRATION, {
     refetchQueries: [{ query: GET_EVENT, variables: { id: eventId } }, { query: USER_EVENTS }],
@@ -149,10 +149,33 @@ export default function EventDetailPage() {
 
   const handleSave = async () => {
     if (!eventId) return;
-    if (saved) {
-      await unsaveEvent({ variables: { eventId } });
-    } else {
-      await saveEvent({ variables: { eventId } });
+    if (!sessionToken) {
+      toast.error("Please sign in to save events");
+      return;
+    }
+
+    const nextSavedState = !saved;
+    setOptimisticSaved(nextSavedState);
+
+    try {
+      if (saved) {
+        const result = await unsaveEvent({ variables: { eventId } });
+        if (!result.data?.unsaveEvent) {
+          throw new Error("Unsave failed");
+        }
+        setOptimisticSaved(null);
+        toast.success("Event removed from saved");
+      } else {
+        const result = await saveEvent({ variables: { eventId } });
+        if (!result.data?.saveEvent?.id) {
+          throw new Error("Save failed");
+        }
+        setOptimisticSaved(null);
+        toast.success("Event saved");
+      }
+    } catch {
+      setOptimisticSaved(null);
+      toast.error(saved ? "Failed to unsave event" : "Failed to save event");
     }
   };
 
@@ -204,6 +227,20 @@ export default function EventDetailPage() {
     <>
       <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
         <div className="lg:min-w-[40rem] mx-auto">
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+                return;
+              }
+              router.push(`/${locale}/events`);
+            }}
+            className="mb-4 inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft size={18} />
+            <span className="font-medium text-sm">Back</span>
+          </button>
           <EventCard2
             title={event.title}
             date={dateStr}

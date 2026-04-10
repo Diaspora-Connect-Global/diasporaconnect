@@ -10,11 +10,12 @@ export interface EventLocation {
   platform?: string | null;
 }
 
-// EventTicketGQL on the backend has no `currency` field
+// Some backend responses include ticket `currency`; keep it optional.
 export interface EventTicket {
   id: string;
   name: string;
   priceInCents: number;
+  currency?: string | null;
   description?: string | null;
   availableQuantity?: number | null;
 }
@@ -23,6 +24,7 @@ export interface EventTicketFull {
   id: string;
   name: string;
   priceInCents: number;
+  currency?: string | null;
   description?: string | null;
   totalQuantity?: number | null;
   soldQuantity?: number | null;
@@ -406,36 +408,76 @@ export const USER_EVENTS = gql`
       attending {
         id
         title
+        description
         startAt
         endAt
         status
+        eventCategory
         visibility
+        timezone
+        tags
         locationType
-        locationDetails { type venueName city country virtualLink platform }
+        locationDetails {
+          type
+          venueName
+          address
+          city
+          country
+        }
+        capacity
+        availableSpots
         coverImageUrl
         registrationCount
         isPaid
         currency
         isRegistered
         canRegister
-        tickets { id name priceInCents description availableQuantity }
+        tickets {
+          id
+          name
+          priceInCents
+          currency
+          description
+          availableQuantity
+        }
       }
       saved {
         id
         title
+        description
         startAt
         endAt
         status
+        eventCategory
         visibility
+        timezone
+        tags
         locationType
-        locationDetails { type venueName city country virtualLink platform }
+        locationDetails {
+          type
+          venueName
+          address
+          city
+          country
+          virtualLink
+          platform
+        }
+        capacity
+        availableSpots
         coverImageUrl
         registrationCount
         isPaid
         currency
         isRegistered
         canRegister
-        tickets { id name priceInCents description availableQuantity }
+        tickets {
+          id
+          name
+          priceInCents
+          currency
+          description
+          availableQuantity
+        }
       }
     }
   }

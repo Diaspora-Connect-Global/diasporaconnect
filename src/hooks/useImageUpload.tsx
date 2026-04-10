@@ -4,7 +4,7 @@ import { useLazyQuery } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { GET_UPLOAD_URL, type GetUploadUrlResponse } from '@/services/gql/upload';
 
-type ImageCategory = 'avatar' | 'group_avatar';
+type ImageCategory = 'avatar' | 'group_avatar' | 'event_cover';
 
 interface UseImageUploadOptions {
   category: ImageCategory;
