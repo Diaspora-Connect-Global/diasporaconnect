@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
-import { useQuery, useMutation } from '@apollo/client/react';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import {
     LIST_EVENTS,
     USER_EVENTS,
@@ -24,9 +24,17 @@ import {
     getEventCoverImage,
     isEventSoldOut,
 } from '@/services/gql/events';
+import {
+    CONFIRM_PAYMENT_INTENT,
+    MY_PAYMENT_METHODS,
+    type ConfirmPaymentIntentResponse,
+    type MyPaymentMethodsResponse,
+} from '@/services/gql/payments';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useUserStore } from '@/store/useUserStore';
+import { openPaystackMobileMoney } from '@/lib/paystack';
 
 function formatEventDate(iso: string, locale: string) {
     return new Intl.DateTimeFormat(locale, {
@@ -132,6 +140,7 @@ export default function Events() {
     const locale = useLocale();
     const modalRef = useRef<PaidEventsModalRef>(null);
     const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
+    const userEmail = useUserStore((s) => s.user?.email);
     const isAuthHydrated = useAuthStore.persist.hasHydrated();
     const shouldLoadUserEvents = isAuthHydrated && !!sessionToken;
 
@@ -151,6 +160,10 @@ export default function Events() {
         refetchQueries: [{ query: USER_EVENTS }],
         awaitRefetchQueries: true,
     });
+    const [confirmPaymentIntent] = useMutation<ConfirmPaymentIntentResponse>(CONFIRM_PAYMENT_INTENT);
+    const [fetchMyPaymentMethods] = useLazyQuery<MyPaymentMethodsResponse>(MY_PAYMENT_METHODS, {
+        fetchPolicy: 'network-only',
+    });
     const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
         refetchQueries: [{ query: USER_EVENTS }],
         awaitRefetchQueries: true,
@@ -164,10 +177,35 @@ export default function Events() {
         awaitRefetchQueries: true,
     });
 
+    const parsePaymentIntentIdFromClientSecret = (clientSecret?: string | null): string | null => {
+        if (!clientSecret) return null;
+        const marker = '_secret_';
+        const index = clientSecret.indexOf(marker);
+        if (index <= 0) return null;
+        return clientSecret.slice(0, index);
+    };
+
+    const getPrimaryStripeCardPaymentMethodId = async (): Promise<string | null> => {
+        const { data } = await fetchMyPaymentMethods();
+        const methods = data?.myPaymentMethods?.payment_methods ?? [];
+        const stripeCards = methods.filter(
+            (m) => m.provider === 'STRIPE' && m.type === 'card'
+        );
+        const primary = stripeCards.find((m) => Boolean(m.is_primary));
+        return (primary ?? stripeCards[0])?.id ?? null;
+    };
+
     const handleAttendEvent = (event: Event) => {
         const primaryTicket = event.tickets?.[0];
         modalRef.current?.open({
-            onPaymentSuccess: async ({ ticketId, quantity, promoCode, formResponsesJson }) => {
+            onPaymentSuccess: async ({
+                ticketId,
+                quantity,
+                promoCode,
+                formResponsesJson,
+                paymentMethod,
+                totalAmount,
+            }) => {
                 const result = await registerForEvent({
                     variables: {
                         input: {
@@ -191,8 +229,51 @@ export default function Events() {
 
                 const paymentIntentClientSecret = result.data?.registerForEvent?.paymentIntentClientSecret;
                 if (paymentIntentClientSecret) {
-                    toast.info('Registration created. Complete payment to confirm attendance.');
-                    return;
+                    const paymentIntentId = parsePaymentIntentIdFromClientSecret(paymentIntentClientSecret);
+                    if (!paymentIntentId) {
+                        toast.error('Unable to resolve payment intent for this event payment.');
+                        return;
+                    }
+
+                    if (paymentMethod === 'mobile') {
+                        if (!userEmail) {
+                            toast.error('Email is required for mobile money checkout.');
+                            return;
+                        }
+
+                        const amountInPesewas = Math.round((totalAmount ?? 0) * 100);
+                        const { reference } = await openPaystackMobileMoney({
+                            email: userEmail,
+                            amountInPesewas,
+                            currency: event.currency ?? 'GHS',
+                        });
+
+                        await confirmPaymentIntent({
+                            variables: {
+                                input: {
+                                    payment_intent_id: paymentIntentId,
+                                    payment_method_id: reference,
+                                    provider: 'PAYSTACK',
+                                },
+                            },
+                        });
+                    } else {
+                        const stripePaymentMethodId = await getPrimaryStripeCardPaymentMethodId();
+                        if (!stripePaymentMethodId) {
+                            toast.error('No Stripe card found. Please save a card first.');
+                            return;
+                        }
+
+                        await confirmPaymentIntent({
+                            variables: {
+                                input: {
+                                    payment_intent_id: paymentIntentId,
+                                    payment_method_id: stripePaymentMethodId,
+                                    provider: 'STRIPE',
+                                },
+                            },
+                        });
+                    }
                 }
 
                 setOptimisticAttendingState((prev) => ({ ...prev, [event.id]: true }));

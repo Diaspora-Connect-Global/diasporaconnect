@@ -3,14 +3,16 @@
 import { useCallback, useState } from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@apollo/client/react";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
 import {
   CREATE_PRODUCT_ORDER,
   CREATE_SERVICE_ORDER,
 } from "@/services/gql/marketplace";
 import {
   CONFIRM_PAYMENT_INTENT,
+  MY_PAYMENT_METHODS,
   type ConfirmPaymentIntentResponse,
+  type MyPaymentMethodsResponse,
 } from "@/services/gql/payments";
 import type {
   CreateProductOrderResponse,
@@ -43,6 +45,10 @@ export function useMarketplacePayment() {
     useMutation<CreateServiceOrderResponse>(CREATE_SERVICE_ORDER);
   const [confirmPaymentIntent] =
     useMutation<ConfirmPaymentIntentResponse>(CONFIRM_PAYMENT_INTENT);
+  const [fetchMyPaymentMethods] = useLazyQuery<MyPaymentMethodsResponse>(
+    MY_PAYMENT_METHODS,
+    { fetchPolicy: "network-only" }
+  );
 
   const resolvePaymentIntentId = (payload: unknown): string | undefined => {
     const root = payload as {
@@ -70,6 +76,16 @@ export function useMarketplacePayment() {
     );
   };
 
+  const resolvePrimaryStripeCardPaymentMethodId = async (): Promise<string | null> => {
+    const { data } = await fetchMyPaymentMethods();
+    const methods = data?.myPaymentMethods?.payment_methods ?? [];
+    const stripeCards = methods.filter(
+      (m) => m.provider === "STRIPE" && m.type === "card"
+    );
+    const primary = stripeCards.find((m) => Boolean(m.is_primary));
+    return (primary ?? stripeCards[0])?.id ?? null;
+  };
+
   const pay = useCallback(
     async (
       ctx: PaymentContext,
@@ -78,6 +94,19 @@ export function useMarketplacePayment() {
     ): Promise<PaymentResult> => {
       setIsPaying(true);
       try {
+        const stripePaymentMethodId =
+          method === "credit"
+            ? await resolvePrimaryStripeCardPaymentMethodId()
+            : null;
+
+        if (method === "credit" && !stripePaymentMethodId) {
+          return { success: false };
+        }
+
+        if (method === "mobile" && !userEmail) {
+          return { success: false };
+        }
+
         if (ctx.kind === "service") {
           const amountInPesewas = Math.round(ctx.item.price * ctx.item.quantity * 100);
           const input: CreateServiceOrderInput = {
@@ -90,26 +119,40 @@ export function useMarketplacePayment() {
           const { data } = await createServiceOrder({ variables: { input } });
           const order = data?.createServiceOrder.order;
           const success = Boolean(data?.createServiceOrder.success && order?.id);
+          const paymentIntentId = resolvePaymentIntentId(data?.createServiceOrder);
 
-          if (success && method === "mobile" && userEmail) {
-            const paymentIntentId = resolvePaymentIntentId(data?.createServiceOrder);
-            if (paymentIntentId) {
-              const { reference } = await openPaystackMobileMoney({
-                email: userEmail,
-                amountInPesewas,
-                currency: "GHS",
-              });
+          if (!success || !paymentIntentId) {
+            return { success: false, reference: order?.id };
+          }
 
-              await confirmPaymentIntent({
-                variables: {
-                  input: {
-                    payment_intent_id: paymentIntentId,
-                    payment_method_id: reference,
-                    provider: "PAYSTACK",
-                  },
+          if (method === "mobile" && userEmail) {
+            const { reference } = await openPaystackMobileMoney({
+              email: userEmail,
+              amountInPesewas,
+              currency: "GHS",
+            });
+
+            await confirmPaymentIntent({
+              variables: {
+                input: {
+                  payment_intent_id: paymentIntentId,
+                  payment_method_id: reference,
+                  provider: "PAYSTACK",
                 },
-              });
-            }
+              },
+            });
+          }
+
+          if (method === "credit" && stripePaymentMethodId) {
+            await confirmPaymentIntent({
+              variables: {
+                input: {
+                  payment_intent_id: paymentIntentId,
+                  payment_method_id: stripePaymentMethodId,
+                  provider: "STRIPE",
+                },
+              },
+            });
           }
 
           const result: PaymentResult = {
@@ -152,29 +195,40 @@ export function useMarketplacePayment() {
 
           const { data } = await createProductOrder({ variables: { input } });
           const orderId = data?.createProductOrder.order?.id;
-          if (!data?.createProductOrder.success || !orderId) {
+          const paymentIntentId = resolvePaymentIntentId(data?.createProductOrder);
+
+          if (!data?.createProductOrder.success || !orderId || !paymentIntentId) {
             return { success: false };
           }
 
           if (method === "mobile" && userEmail) {
-            const paymentIntentId = resolvePaymentIntentId(data?.createProductOrder);
-            if (paymentIntentId) {
-              const { reference } = await openPaystackMobileMoney({
-                email: userEmail,
-                amountInPesewas,
-                currency: "GHS",
-              });
+            const { reference } = await openPaystackMobileMoney({
+              email: userEmail,
+              amountInPesewas,
+              currency: "GHS",
+            });
 
-              await confirmPaymentIntent({
-                variables: {
-                  input: {
-                    payment_intent_id: paymentIntentId,
-                    payment_method_id: reference,
-                    provider: "PAYSTACK",
-                  },
+            await confirmPaymentIntent({
+              variables: {
+                input: {
+                  payment_intent_id: paymentIntentId,
+                  payment_method_id: reference,
+                  provider: "PAYSTACK",
                 },
-              });
-            }
+              },
+            });
+          }
+
+          if (method === "credit" && stripePaymentMethodId) {
+            await confirmPaymentIntent({
+              variables: {
+                input: {
+                  payment_intent_id: paymentIntentId,
+                  payment_method_id: stripePaymentMethodId,
+                  provider: "STRIPE",
+                },
+              },
+            });
           }
 
           if (!firstOrderId) {
@@ -199,6 +253,7 @@ export function useMarketplacePayment() {
       confirmPaymentIntent,
       createProductOrder,
       createServiceOrder,
+      fetchMyPaymentMethods,
       locale,
       router,
       userEmail,

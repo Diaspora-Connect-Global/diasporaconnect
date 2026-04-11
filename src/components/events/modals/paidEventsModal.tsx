@@ -56,6 +56,8 @@ export interface PaidEventsModalRef {
             quantity: number;
             promoCode?: string;
             formResponsesJson?: string;
+            paymentMethod?: 'card' | 'mobile';
+            totalAmount?: number;
         }) => Promise<{ waitlistPosition?: number | null } | void> | void;
         event?: CheckoutEvent;
     }) => void;
@@ -76,7 +78,14 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null);
     const [onPaymentSuccess, setOnPaymentSuccess] = useState<
-        ((args: { ticketId?: string; quantity: number; promoCode?: string; formResponsesJson?: string }) => Promise<{ waitlistPosition?: number | null } | void> | void) | null
+        ((args: {
+            ticketId?: string;
+            quantity: number;
+            promoCode?: string;
+            formResponsesJson?: string;
+            paymentMethod?: 'card' | 'mobile';
+            totalAmount?: number;
+        }) => Promise<{ waitlistPosition?: number | null } | void> | void) | null
     >(null);
     const [selectedEvent, setSelectedEvent] = useState<CheckoutEvent | null>(null);
 
@@ -110,7 +119,14 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     }));
 
     const resetAndOpen = (
-        paymentSuccessHandler?: (args: { ticketId?: string; quantity: number; promoCode?: string; formResponsesJson?: string }) => Promise<{ waitlistPosition?: number | null } | void> | void,
+        paymentSuccessHandler?: (args: {
+            ticketId?: string;
+            quantity: number;
+            promoCode?: string;
+            formResponsesJson?: string;
+            paymentMethod?: 'card' | 'mobile';
+            totalAmount?: number;
+        }) => Promise<{ waitlistPosition?: number | null } | void> | void,
         event?: CheckoutEvent
     ) => {
         setCurrentStep(1);
@@ -225,6 +241,8 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                     quantity: ticketQty,
                     promoCode: appliedPromo?.code,
                     formResponsesJson,
+                    paymentMethod: openMethod ?? undefined,
+                    totalAmount,
                 }) ?? undefined;
             }
             const pos = (result as { waitlistPosition?: number | null } | undefined)?.waitlistPosition ?? null;
