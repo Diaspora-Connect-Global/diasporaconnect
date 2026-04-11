@@ -122,11 +122,11 @@ const SavedComponent = ({ savedEvents, loading, locale }: { savedEvents: Event[]
 };
 
 function formatPriceLabel(event: Event) {
-    if (!event.isPaid || !event.tickets?.length) return "Free";
-    const ticket = event.tickets[0];
+    if (!event.isPaid) return "Free";
+    const ticket = event.tickets?.find((t) => (t?.priceInCents ?? 0) > 0) ?? event.tickets?.[0];
     const cents = ticket?.priceInCents;
-    if (cents == null) return "Free";
-    const currency = event.currency || "GHS";
+    if (cents == null || cents <= 0) return "Paid";
+    const currency = ticket?.currency || event.currency || "GHS";
     return `${currency} ${(cents / 100).toFixed(2)}/ticket`;
 }
 
