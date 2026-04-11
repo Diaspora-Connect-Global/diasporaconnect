@@ -13,6 +13,40 @@ const CURRENCY_BY_COUNTRY: Record<string, SupportedDisplayCurrency> = {
   GB: 'GBP',
 };
 
+const CURRENCY_BY_LANGUAGE: Record<string, SupportedDisplayCurrency> = {
+  fr: 'EUR',
+  de: 'EUR',
+  it: 'EUR',
+  es: 'EUR',
+  pt: 'EUR',
+};
+
+const COUNTRY_NAME_TO_CODE: Array<{ keywords: string[]; code: string }> = [
+  { keywords: ['ghana'], code: 'GH' },
+  { keywords: ['united states', 'usa', 'us', 'america'], code: 'US' },
+  { keywords: ['united kingdom', 'uk', 'great britain', 'britain', 'england', 'scotland', 'wales'], code: 'GB' },
+  { keywords: ['france'], code: 'FR' },
+  { keywords: ['germany', 'deutschland'], code: 'DE' },
+  { keywords: ['italy', 'italia'], code: 'IT' },
+  { keywords: ['spain', 'espana'], code: 'ES' },
+  { keywords: ['netherlands', 'holland'], code: 'NL' },
+  { keywords: ['belgium'], code: 'BE' },
+  { keywords: ['austria'], code: 'AT' },
+  { keywords: ['portugal'], code: 'PT' },
+  { keywords: ['ireland'], code: 'IE' },
+  { keywords: ['greece'], code: 'GR' },
+  { keywords: ['finland'], code: 'FI' },
+  { keywords: ['luxembourg'], code: 'LU' },
+  { keywords: ['slovakia'], code: 'SK' },
+  { keywords: ['slovenia'], code: 'SI' },
+  { keywords: ['latvia'], code: 'LV' },
+  { keywords: ['lithuania'], code: 'LT' },
+  { keywords: ['estonia'], code: 'EE' },
+  { keywords: ['cyprus'], code: 'CY' },
+  { keywords: ['malta'], code: 'MT' },
+  { keywords: ['croatia'], code: 'HR' },
+];
+
 function normalizeCurrencyInput(raw?: string | null): SupportedDisplayCurrency | null {
   if (!raw) return null;
   const value = raw.trim().toUpperCase();
@@ -35,6 +69,18 @@ function toCountryCode(value?: string | null): string | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
 
+  const normalized = trimmed.toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+
+  if (/^[a-z]{2}$/i.test(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+
+  for (const entry of COUNTRY_NAME_TO_CODE) {
+    if (entry.keywords.some((keyword) => normalized.includes(keyword))) {
+      return entry.code;
+    }
+  }
+
   const twoLetter = trimmed.slice(0, 2).toUpperCase();
   return twoLetter.length === 2 ? twoLetter : null;
 }
@@ -53,14 +99,25 @@ function getCountryFromLocale(locale?: string | null): string | null {
   return toCountryCode(parts[1]);
 }
 
+function getCurrencyFromLocaleLanguage(locale?: string | null): SupportedDisplayCurrency | null {
+  if (!locale) return null;
+  const language = locale.replace('_', '-').split('-')[0]?.toLowerCase();
+  if (!language) return null;
+  return CURRENCY_BY_LANGUAGE[language] ?? null;
+}
+
 export function getStoredDisplayCurrencyPreference(): SupportedDisplayCurrency | null {
   if (typeof window === 'undefined') return null;
 
   const candidateKeys = ['preferredCurrency', 'currencyPreference', 'displayCurrency', 'currency'];
   for (const key of candidateKeys) {
-    const value = window.localStorage.getItem(key);
-    const normalized = normalizeCurrencyInput(value);
-    if (normalized) return normalized;
+    const fromLocalStorage = window.localStorage.getItem(key);
+    const normalizedFromLocalStorage = normalizeCurrencyInput(fromLocalStorage);
+    if (normalizedFromLocalStorage) return normalizedFromLocalStorage;
+
+    const fromSessionStorage = window.sessionStorage.getItem(key);
+    const normalizedFromSessionStorage = normalizeCurrencyInput(fromSessionStorage);
+    if (normalizedFromSessionStorage) return normalizedFromSessionStorage;
   }
 
   return null;
@@ -83,6 +140,9 @@ export function resolveDisplayCurrency(options: {
 
   const fromLocale = getCurrencyFromCountry(getCountryFromLocale(options.locale));
   if (fromLocale) return fromLocale;
+
+  const fromLocaleLanguage = getCurrencyFromLocaleLanguage(options.locale);
+  if (fromLocaleLanguage) return fromLocaleLanguage;
 
   return 'USD';
 }
