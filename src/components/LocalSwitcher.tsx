@@ -34,6 +34,10 @@ export default function LocaleSwitcher({
 
   const switchLocale = (newLocale: string) => {
     if (newLocale !== locale) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('preferredLocale', newLocale);
+        document.cookie = `preferredLocale=${newLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+      }
       router.replace(pathname, { locale: newLocale });
       router.refresh();
     }
