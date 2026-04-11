@@ -29,6 +29,8 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@stripe/react-stripe-js": "^6.1.0",
+    "@stripe/stripe-js": "^9.1.0",
     "@swc/helpers": "^0.5.19",
     "@tabler/icons-react": "^3.35.0",
     "@xstate/react": "^6.0.0",

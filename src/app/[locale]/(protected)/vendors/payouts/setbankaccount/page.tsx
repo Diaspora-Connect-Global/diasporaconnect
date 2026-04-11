@@ -1,15 +1,63 @@
 "use client";
 import React, { useState } from 'react';
+import { useMutation } from '@apollo/client/react';
 import { ChevronDown } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { ButtonType2 } from '@/components/custom/button';
+import {
+  CREATE_PAYOUT_ACCOUNT,
+  MY_PAYOUT_ACCOUNTS,
+  type CreatePayoutAccountResponse,
+  type CreatePayoutAccountInput,
+} from '@/services/gql/payments';
 
 const AddBankAccount = () => {
+  const locale = useLocale();
+  const router = useRouter();
   const [country, setCountry] = useState('Ghana');
-  const [currency, setCurrency] = useState('Ghana cedis');
+  const [currency, setCurrency] = useState('GHS');
   const [bankName, setBankName] = useState('Fidelity Bank');
   const [accountNumber, setAccountNumber] = useState('2100223343213');
   const [accountName, setAccountName] = useState('John Doe');
   const [routingCode, setRoutingCode] = useState('2034542');
+  const [createPayoutAccount, { loading: saving }] =
+    useMutation<CreatePayoutAccountResponse>(CREATE_PAYOUT_ACCOUNT);
+
+  const handleSave = async () => {
+    if (!accountName.trim() || !accountNumber.trim() || !routingCode.trim()) {
+      toast.error('Please fill all required bank account fields.');
+      return;
+    }
+
+    const input: CreatePayoutAccountInput = {
+      provider: 'STRIPE',
+      account_type: 'BANK_ACCOUNT',
+      currency,
+      account_number: accountNumber.trim(),
+      routing_number: routingCode.trim(),
+      account_name: accountName.trim(),
+    };
+
+    try {
+      const { data } = await createPayoutAccount({
+        variables: { input },
+        refetchQueries: [{ query: MY_PAYOUT_ACCOUNTS }],
+      });
+
+      if (!data?.createPayoutAccount?.success) {
+        toast.error(data?.createPayoutAccount?.message || 'Unable to save payout method.');
+        return;
+      }
+
+      toast.success('Bank payout account saved.');
+      router.push(`/${locale}/vendors/payouts`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to save payout method.';
+      toast.error(message);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-surface-brand-subtle dark:bg-background p-6">
@@ -59,9 +107,9 @@ const AddBankAccount = () => {
                   onChange={(e) => setCurrency(e.target.value)}
                   className="w-full px-4 py-3 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default appearance-none cursor-pointer"
                 >
-                  <option>Ghana cedis</option>
-                  <option>US Dollars</option>
-                  <option>Euros</option>
+                  <option value="GHS">GHS</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-tertiary pointer-events-none" />
               </div>
@@ -123,7 +171,12 @@ const AddBankAccount = () => {
 
         {/* Submit Button */}
         <div className="mt-8 flex justify-end">
-          <ButtonType2 size="lg" className="bg-surface-brand hover:opacity-90 shadow-lg">
+          <ButtonType2
+            size="lg"
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-surface-brand hover:opacity-90 shadow-lg disabled:opacity-60"
+          >
             Save payout method
           </ButtonType2>
         </div>

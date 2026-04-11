@@ -121,6 +121,16 @@ const PayoutsDashboard = () => {
   };
 
   const handleAddPayoutMethod = async () => {
+    if (payoutProvider === 'BANK_ACCOUNT') {
+      router.push(`/${locale}/vendors/payouts/setbankaccount`);
+      return;
+    }
+
+    if (payoutProvider === 'MOBILE_MONEY') {
+      router.push(`/${locale}/vendors/payouts/setmomo`);
+      return;
+    }
+
     try {
       const { data } = await createPayoutAccount({
         variables: {

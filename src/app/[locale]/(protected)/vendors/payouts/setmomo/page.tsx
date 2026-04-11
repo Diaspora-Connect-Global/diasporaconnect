@@ -1,20 +1,69 @@
 "use client";
 import React, { useState } from 'react';
+import { useMutation } from '@apollo/client/react';
 import { ChevronDown } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import {
+  CREATE_PAYOUT_ACCOUNT,
+  MY_PAYOUT_ACCOUNTS,
+  type CreatePayoutAccountResponse,
+  type CreatePayoutAccountInput,
+} from '@/services/gql/payments';
 
 const AddMobileAccount = () => {
+  const locale = useLocale();
+  const router = useRouter();
   const t = useTranslations('vendors.payouts.momo');
   const tCommon = useTranslations('common');
   const [selectedProvider, setSelectedProvider] = useState('mtn');
   const [phoneNumber, setPhoneNumber] = useState('24 123 4567');
   const [accountName, setAccountName] = useState('John Doe');
+  const [countryCode, setCountryCode] = useState('+233');
+  const [createPayoutAccount, { loading: saving }] =
+    useMutation<CreatePayoutAccountResponse>(CREATE_PAYOUT_ACCOUNT);
 
   const providers = [
     { id: 'mtn', name: t('mtnMomo'), logo: '📱', bgColor: 'bg-yellow-500' },
     { id: 'telecel', name: t('telecelCash'), logo: '📱', bgColor: 'bg-surface-danger' },
     { id: 'at', name: t('atMoney'), logo: '📱', bgColor: 'bg-surface-default border border-border-subtle text-text-primary' },
   ];
+
+  const handleSave = async () => {
+    const sanitized = phoneNumber.replace(/\s+/g, '');
+    if (!sanitized || !accountName.trim()) {
+      toast.error('Please enter phone number and account name.');
+      return;
+    }
+
+    const input: CreatePayoutAccountInput = {
+      provider: 'HUBTEL',
+      account_type: 'MOBILE_MONEY',
+      currency: 'GHS',
+      account_number: sanitized,
+      mobile_number: `${countryCode}${sanitized}`,
+      account_name: accountName.trim(),
+    };
+
+    try {
+      const { data } = await createPayoutAccount({
+        variables: { input },
+        refetchQueries: [{ query: MY_PAYOUT_ACCOUNTS }],
+      });
+
+      if (!data?.createPayoutAccount?.success) {
+        toast.error(data?.createPayoutAccount?.message || 'Unable to save payout method.');
+        return;
+      }
+
+      toast.success('Mobile money payout account saved.');
+      router.push(`/${locale}/vendors/payouts`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to save payout method.';
+      toast.error(message);
+    }
+  };
 
   return (
     <div className="min-h-screen p-6">
@@ -75,10 +124,15 @@ const AddMobileAccount = () => {
             </label>
             <div className="flex gap-3">
               <div className="relative w-28">
-                <select className="w-full px-3 py-3 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default appearance-none cursor-pointer text-sm" aria-label={tCommon('countryCode')}>
-                  <option>🇬🇭 +233</option>
-                  <option>🇳🇬 +234</option>
-                  <option>🇰🇪 +254</option>
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="w-full px-3 py-3 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default appearance-none cursor-pointer text-sm"
+                  aria-label={tCommon('countryCode')}
+                >
+                  <option value="+233">🇬🇭 +233</option>
+                  <option value="+234">🇳🇬 +234</option>
+                  <option value="+254">🇰🇪 +254</option>
                 </select>
                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-tertiary pointer-events-none" aria-hidden="true" />
               </div>
@@ -109,7 +163,11 @@ const AddMobileAccount = () => {
 
         {/* Submit Button */}
         <div className="mt-8 flex justify-end">
-          <button className="bg-surface-brand text-text-text-white hover:opacity-90 px-8 py-3 rounded-full font-medium transition-colors shadow-lg">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-surface-brand text-text-text-white hover:opacity-90 px-8 py-3 rounded-full font-medium transition-colors shadow-lg disabled:opacity-60"
+          >
             {t('savePayoutMethod')}
           </button>
         </div>
