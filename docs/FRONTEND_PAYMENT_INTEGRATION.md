@@ -8,6 +8,14 @@ This guide describes how to integrate frontend payment flows with the GraphQL pa
 - Auth header for all requests: `Authorization: Bearer <jwt_token>`
 - Stripe publishable key (test): `pk_test_51TJeEwIH1dxyvgROX495JCiQ3gXVWdLWwgSLcW1gFVTUbU8otqehzz0wQuVWndR7gSTA7dFNjNkX3EiUwHAsoSIF0024ZEAQRt`
 
+## Provider matrix
+
+| Provider | Keys | Webhook | Mobile Money |
+| --- | --- | --- | --- |
+| Stripe | ✅ | `https://api.diaspoplug.net/webhooks/stripe` | ❌ (cards only) |
+| Paystack | ✅ | `https://api.diaspoplug.net/webhooks/paystack` | ✅ MTN / Vodafone / AirtelTigo |
+| PayPal | ✅ | `https://api.diaspoplug.net/webhooks/paypal` | ❌ |
+
 ## 1) Install Stripe.js
 
 ```bash
@@ -150,6 +158,57 @@ If `requires_action = true`, redirect to `action_url` or run Stripe next-action 
 await stripe.handleNextAction({
   clientSecret: providerTransactionId,
 });
+```
+
+## 4b) Paystack mobile money (mobile money only)
+
+Install:
+
+```bash
+npm install @paystack/inline-js
+```
+
+Client flow:
+
+```ts
+import PaystackPop from '@paystack/inline-js';
+
+const paystack = new PaystackPop();
+paystack.newTransaction({
+  key: 'pk_test_a941b987b0cc71abf69f358dbe5b5bdeff170533',
+  email: user.email,
+  amount: amountInPesewas,
+  currency: 'GHS',
+  channels: ['mobile_money'],
+  onSuccess: (transaction) => {
+    // transaction.reference -> send as payment_method_id
+  },
+  onCancel: () => {
+    // handle cancel
+  },
+});
+```
+
+Confirm payment:
+
+```graphql
+mutation ConfirmPaymentIntent($input: ConfirmPaymentIntentInput!) {
+  confirmPaymentIntent(input: $input) {
+    success
+  }
+}
+```
+
+Variables:
+
+```json
+{
+  "input": {
+    "payment_intent_id": "<id>",
+    "payment_method_id": "<transaction.reference>",
+    "provider": "PAYSTACK"
+  }
+}
 ```
 
 ## 5) Check payment status

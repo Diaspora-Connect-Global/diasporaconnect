@@ -8,6 +8,10 @@ import {
   CREATE_PRODUCT_ORDER,
   CREATE_SERVICE_ORDER,
 } from "@/services/gql/marketplace";
+import {
+  CONFIRM_PAYMENT_INTENT,
+  type ConfirmPaymentIntentResponse,
+} from "@/services/gql/payments";
 import type {
   CreateProductOrderResponse,
   CreateServiceOrderResponse,
@@ -15,6 +19,8 @@ import type {
   CreateServiceOrderInput,
 } from "@/services/gql/types/marketplace";
 import { handleMarketplaceError } from "@/lib/marketplace-error-mapper";
+import { openPaystackMobileMoney } from "@/lib/paystack";
+import { useUserStore } from "@/store/useUserStore";
 import type { PaymentContext, PaymentResult, PaymentMethod } from "../types";
 
 /**
@@ -30,10 +36,39 @@ export function useMarketplacePayment() {
   const [lastResult, setLastResult] = useState<PaymentResult | null>(null);
   const locale = useLocale();
   const router = useRouter();
+  const userEmail = useUserStore((state) => state.user?.email);
   const [createProductOrder] =
     useMutation<CreateProductOrderResponse>(CREATE_PRODUCT_ORDER);
   const [createServiceOrder] =
     useMutation<CreateServiceOrderResponse>(CREATE_SERVICE_ORDER);
+  const [confirmPaymentIntent] =
+    useMutation<ConfirmPaymentIntentResponse>(CONFIRM_PAYMENT_INTENT);
+
+  const resolvePaymentIntentId = (payload: unknown): string | undefined => {
+    const root = payload as {
+      payment_intent_id?: string;
+      paymentIntentId?: string;
+      payment_intent?: { id?: string };
+      paymentIntent?: { id?: string };
+      order?: {
+        payment_intent_id?: string;
+        paymentIntentId?: string;
+        payment_intent?: { id?: string };
+        paymentIntent?: { id?: string };
+      };
+    };
+
+    return (
+      root.payment_intent_id ||
+      root.paymentIntentId ||
+      root.payment_intent?.id ||
+      root.paymentIntent?.id ||
+      root.order?.payment_intent_id ||
+      root.order?.paymentIntentId ||
+      root.order?.payment_intent?.id ||
+      root.order?.paymentIntent?.id
+    );
+  };
 
   const pay = useCallback(
     async (
@@ -44,6 +79,7 @@ export function useMarketplacePayment() {
       setIsPaying(true);
       try {
         if (ctx.kind === "service") {
+          const amountInPesewas = Math.round(ctx.item.price * ctx.item.quantity * 100);
           const input: CreateServiceOrderInput = {
             vendor_id: ctx.item.seller || "",
             service_id: ctx.item.id,
@@ -54,6 +90,28 @@ export function useMarketplacePayment() {
           const { data } = await createServiceOrder({ variables: { input } });
           const order = data?.createServiceOrder.order;
           const success = Boolean(data?.createServiceOrder.success && order?.id);
+
+          if (success && method === "mobile" && userEmail) {
+            const paymentIntentId = resolvePaymentIntentId(data?.createServiceOrder);
+            if (paymentIntentId) {
+              const { reference } = await openPaystackMobileMoney({
+                email: userEmail,
+                amountInPesewas,
+                currency: "GHS",
+              });
+
+              await confirmPaymentIntent({
+                variables: {
+                  input: {
+                    payment_intent_id: paymentIntentId,
+                    payment_method_id: reference,
+                    provider: "PAYSTACK",
+                  },
+                },
+              });
+            }
+          }
+
           const result: PaymentResult = {
             success,
             reference: order?.id,
@@ -77,6 +135,9 @@ export function useMarketplacePayment() {
         let firstOrderId: string | undefined;
 
         for (const [vendorId, items] of Object.entries(groupedByVendor)) {
+          const amountInPesewas = Math.round(
+            items.reduce((sum, item) => sum + item.price * item.quantity, 0) * 100
+          );
           const input: CreateProductOrderInput = {
             vendor_id: vendorId,
             items: items.map((item) => ({
@@ -94,6 +155,28 @@ export function useMarketplacePayment() {
           if (!data?.createProductOrder.success || !orderId) {
             return { success: false };
           }
+
+          if (method === "mobile" && userEmail) {
+            const paymentIntentId = resolvePaymentIntentId(data?.createProductOrder);
+            if (paymentIntentId) {
+              const { reference } = await openPaystackMobileMoney({
+                email: userEmail,
+                amountInPesewas,
+                currency: "GHS",
+              });
+
+              await confirmPaymentIntent({
+                variables: {
+                  input: {
+                    payment_intent_id: paymentIntentId,
+                    payment_method_id: reference,
+                    provider: "PAYSTACK",
+                  },
+                },
+              });
+            }
+          }
+
           if (!firstOrderId) {
             firstOrderId = orderId;
           }
@@ -112,7 +195,14 @@ export function useMarketplacePayment() {
         setIsPaying(false);
       }
     },
-    [createProductOrder, createServiceOrder, locale, router]
+    [
+      confirmPaymentIntent,
+      createProductOrder,
+      createServiceOrder,
+      locale,
+      router,
+      userEmail,
+    ]
   );
 
   return { pay, isPaying, lastResult };
