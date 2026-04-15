@@ -32,10 +32,12 @@ export class MessageClient {
 
     const finalConfig = { ...defaultConfig, ...config };
 
+    const socketAuthToken = jwtToken.replace(/^Bearer\s+/i, '').trim();
+
     this.socket = io(finalConfig.url!, {
       path: finalConfig.path,
-      // Backend expects auth.token as: "Bearer <accessToken>"
-      auth: { token: jwtToken.startsWith('Bearer ') ? jwtToken : `Bearer ${jwtToken}` },
+      // Socket.IO: raw JWT only (not "Bearer …"; REST headers still use Bearer separately)
+      auth: { token: socketAuthToken },
       transports: finalConfig.transports,
     });
 

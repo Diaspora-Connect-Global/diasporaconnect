@@ -10,7 +10,7 @@ export interface MessageAttachment {
 
 /**
  * Message WebSocket client. Per backend spec, connect via the API Gateway (e.g. port 3000).
- * Auth: pass JWT in auth: { token: "Bearer <accessToken>" }.
+ * Auth: pass raw JWT in auth: { token: accessToken } (no "Bearer " prefix; Socket.IO only).
  *
  * Payload received from backend via 'message:new' WebSocket event.
  * Backend encrypts content; use GraphQL getMessages for plaintext.
@@ -102,18 +102,17 @@ class MessageService {
       this.socket = null;
     }
 
-    // Backend now expects auth.token in the format: "Bearer <accessToken>"
-    const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    const socketAuthToken = token.replace(/^Bearer\s+/i, '').trim();
 
     // Connect via API Gateway (spec: port 3000). Set NEXT_PUBLIC_MESSAGE_WS_URL to your gateway (e.g. https://your-domain:3000).
     const SOCKET_URL = process.env.NEXT_PUBLIC_MESSAGE_WS_URL || 'https://api.diaspoplug.net';
 
     console.log(`🔌 Connecting to WebSocket: ${SOCKET_URL}`);
-    console.log(`🔑 Token length: ${authToken.length} characters`);
+    console.log(`🔑 Token length: ${socketAuthToken.length} characters`);
 
     this.socket = io(SOCKET_URL, {
       path: '/socket.io/',
-      auth: { token: authToken },
+      auth: { token: socketAuthToken },
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
