@@ -261,10 +261,8 @@ export default function CompleteAccount() {
         throw new Error('Please enter a valid phone number.');
       }
 
-      console.log('Formatted Phone:', phone);
       let token = '';
       let verificationExpiresAt = '';
-      let smsSent = false;
 
       if (isOAuth) {
         const { data } = await completeOAuthRegistration({
@@ -287,7 +285,6 @@ export default function CompleteAccount() {
 
         token = data.completeOAuthRegistration.registrationToken;
         verificationExpiresAt = data.completeOAuthRegistration.verificationExpiresAt;
-        smsSent = data.completeOAuthRegistration.smsSent;
       } else {
         const { data } = await registerUser({
           variables: {
@@ -308,12 +305,9 @@ export default function CompleteAccount() {
 
         token = data.registerUser.registrationToken;
         verificationExpiresAt = data.registerUser.verificationExpiresAt;
-        smsSent = data.registerUser.smsSent;
       }
 
-      if (!smsSent) {
-        throw new Error('Verification SMS could not be delivered. Please verify your phone format and try again.');
-      }
+      // smsSent is not authoritative here; backend may return false while OTP is sent.
 
       sessionStorage.setItem('registrationToken', token);
 
@@ -356,10 +350,6 @@ export default function CompleteAccount() {
 
       if (!data?.resendRegistrationOtp.success) {
         throw new Error(data?.resendRegistrationOtp.message || 'Unable to resend verification code.');
-      }
-
-      if (!data.resendRegistrationOtp.smsSent) {
-        throw new Error('Verification SMS could not be delivered. Please verify your phone format and try again.');
       }
 
       if (data.resendRegistrationOtp.verificationExpiresAt) {
