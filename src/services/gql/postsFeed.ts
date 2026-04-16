@@ -20,6 +20,10 @@ export type {
   LikeCommentInput,
   DeleteCommentInput,
   GetFeedData,
+  GetPostsByHashtagData,
+  GetPostsByHashtagInput,
+  FeedModeType,
+  FeedViewMode,
   GetPostData,
   GetPostCommentsData,
   CreatePostData,
@@ -44,91 +48,144 @@ export type {
 // QUERIES
 // ============================================================================
 
+export const FULL_POST_FRAGMENT = gql`
+  fragment FullPost on Post {
+    id
+    text
+    content
+    visibility
+    status
+    authorType
+    authorId
+    author {
+      id
+      authorType
+      displayName
+      avatarUrl
+    }
+    authorProfile {
+      authorType
+      userProfile {
+        id
+        name
+        displayName
+        avatarUrl
+        bio
+        isVip
+        verificationTier
+      }
+      organizationProfile {
+        id
+        name
+        logoUrl
+        description
+        isVip
+        verificationTier
+      }
+    }
+    attachments {
+      id
+      type
+      objectKey
+      mimeType
+      url
+    }
+    mentions {
+      entityId
+      entityType
+      handle
+      displayName
+      avatarUrl
+      startPosition
+      endPosition
+    }
+    hashtags {
+      id
+      tag
+      usageCount
+    }
+    engagementCounts {
+      likes
+      comments
+      shares
+      saves
+    }
+    userEngagement {
+      hasLiked
+      hasShared
+      hasSaved
+    }
+    recentComments {
+      id
+      text
+      authorDisplayName
+      authorAvatarUrl
+      createdAt
+    }
+    score
+    reason
+    isSponsored
+    postUrl
+    createdAt
+    updatedAt
+  }
+`;
+
 export const GET_FEED = gql`
   query GetFeed($input: GetFeedInput!) {
     feed(input: $input) {
-      total
       posts {
-        id
-        text
-        authorId
-        authorType
-        authorProfile {
-          organizationProfile {
-            name
-          
-          }
-          userProfile {
-            name
-            avatar
-            isVip
-            verificationTier
-          }
-        }
-        createdAt
-        attachments {
-          id
-          objectKey
-          url
-          type
-          mimeType
-        }
-        engagementCounts {
-          likes
-          comments
-          shares
-          saves
-        }
-        userEngagement {
-          hasLiked
-          hasSaved
-          hasShared
-        }
+        ...FullPost
       }
+      total
+      limit
+      offset
+      hasMore
+      nextCursor
+      isExhausted
+      isSeenFallback
+      hasSeenFallbackOption
     }
   }
+  ${FULL_POST_FRAGMENT}
+`;
+
+/** Dedicated social-graph feed (no discovery). Optional; use `feed` with type NETWORK if unavailable. */
+export const GET_NETWORK_FEED = gql`
+  query GetNetworkFeed($limit: Int, $cursor: String, $refreshSeed: String) {
+    networkFeed(limit: $limit, cursor: $cursor, refreshSeed: $refreshSeed) {
+      posts {
+        ...FullPost
+      }
+      hasMore
+      nextCursor
+      isExhausted
+      isSeenFallback
+    }
+  }
+  ${FULL_POST_FRAGMENT}
+`;
+
+export const GET_POSTS_BY_HASHTAG = gql`
+  query GetPostsByHashtag($input: GetPostsByHashtagInput!) {
+    postsByHashtag(input: $input) {
+      posts {
+        ...FullPost
+      }
+      total
+      hasMore
+    }
+  }
+  ${FULL_POST_FRAGMENT}
 `;
 
 export const GET_POST = gql`
   query GetPost($id: String!) {
     post(id: $id) {
-      id
-      text
-      authorId
-      authorType
-      authorProfile {
-        organizationProfile {
-          name
-         
-        }
-        userProfile {
-          name
-          avatar
-          isVip
-          verificationTier
-        }
-      }
-      createdAt
-      attachments {
-        id
-        objectKey
-        url
-        type
-        mimeType
-      }
-      engagementCounts {
-        likes
-        comments
-        shares
-        saves
-      }
-      userEngagement {
-        hasLiked
-        hasSaved
-        hasShared
-      }
+      ...FullPost
     }
   }
+  ${FULL_POST_FRAGMENT}
 `;
 
 /** When parentId is not sent, backend returns a flat list of all comments + replies; build tree client-side. */

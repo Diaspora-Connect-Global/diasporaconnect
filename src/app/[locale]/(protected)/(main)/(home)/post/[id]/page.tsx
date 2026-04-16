@@ -3,6 +3,8 @@
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, useRouter } from 'next/navigation';
 import { GET_POST, ADD_ENGAGEMENT, CREATE_COMMENT, GetPostData, AddEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
+import type { Post } from '@/services/gql/types/postsFeed';
+import { normalizeFeedPost } from '@/lib/normalizeFeedPost';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Loader2 } from 'lucide-react';
@@ -163,13 +165,19 @@ export default function PostPage() {
           content={post.text}
           images={
             post.attachments
-              ?.filter((a) => a.mimeType?.startsWith('image/'))
+              ?.filter(
+                (a) =>
+                  a.mimeType?.startsWith('image/') || String(a.type ?? '').toUpperCase() === 'IMAGE'
+              )
               .map((a) => a.url || '')
               .filter(Boolean) || []
           }
           videos={
             post.attachments
-              ?.filter((a) => a.mimeType?.startsWith('video/'))
+              ?.filter(
+                (a) =>
+                  a.mimeType?.startsWith('video/') || String(a.type ?? '').toUpperCase() === 'VIDEO'
+              )
               .map((a) => a.url || '')
               .filter(Boolean) || []
           }

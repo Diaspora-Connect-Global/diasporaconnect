@@ -18,6 +18,7 @@ export default function ViewFilter() {
   const handleViewChange = (newView: 'you' | 'following') => {
     setView(newView);
     sessionStorage.setItem('viewFilter', newView);
+    window.dispatchEvent(new CustomEvent('viewFilterChange', { detail: newView }));
   };
 
   return (

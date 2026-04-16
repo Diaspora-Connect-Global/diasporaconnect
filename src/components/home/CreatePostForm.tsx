@@ -92,7 +92,12 @@ export default function CreatePostForm({
 
   /* — mutations — */
   const [createPost] = useMutation<CreatePostData>(CREATE_POST, {
-    refetchQueries: [{ query: GET_FEED, variables: { input: { limit: 20, offset: 0, type: 'all' } } }],
+    refetchQueries: [
+      {
+        query: GET_FEED,
+        variables: { input: { type: 'FOR_YOU', limit: 20, offset: 0, includeDiscovery: false } },
+      },
+    ],
   });
   const [requestUploadUrl] = useMutation<RequestUploadUrlData>(REQUEST_UPLOAD_URL);
 

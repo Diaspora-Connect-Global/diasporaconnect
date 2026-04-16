@@ -105,7 +105,7 @@ export default function CommunityDetailPage() {
   const { data: feedData, loading: feedLoading } = useQuery<GetFeedResponse>(GET_FEED, {
     variables: {
       input: {
-        type: 'community',
+        type: 'COMMUNITY',
         communityId,
         limit: 20,
         offset: 0,

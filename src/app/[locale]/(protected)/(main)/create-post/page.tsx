@@ -155,11 +155,12 @@ export default function CreatePostPage() {
         query: GET_FEED,
         variables: {
           input: {
+            type: 'FOR_YOU',
             limit: 20,
             offset: 0,
-            type: 'all'
-          }
-        }
+            includeDiscovery: false,
+          },
+        },
       }
     ]
   });

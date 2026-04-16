@@ -168,12 +168,60 @@ export interface Post {
   id: string;
   text: string;
   authorId: string;
+  /** Normalized for UI: "USER" | "ORG" (COMMUNITY/ASSOCIATION collapsed to ORG). */
   authorType: string;
   authorProfile?: AuthorProfile;
   createdAt: string;
   attachments?: Attachment[];
   engagementCounts: EngagementCounts;
   userEngagement: UserEngagement;
+}
+
+/**
+ * Raw post shape from GraphQL `FullPost` fragment (before `normalizeFeedPost`).
+ */
+export interface FeedPostFragment {
+  id: string;
+  text?: string | null;
+  content?: string | null;
+  authorId: string;
+  authorType?: string | null;
+  author?: {
+    id: string;
+    authorType?: string | null;
+    displayName?: string | null;
+    avatarUrl?: string | null;
+  } | null;
+  authorProfile?: {
+    authorType?: string | null;
+    userProfile?: {
+      id?: string;
+      name?: string | null;
+      displayName?: string | null;
+      avatarUrl?: string | null;
+      bio?: string | null;
+      isVip?: boolean | null;
+      verificationTier?: string | null;
+    } | null;
+    organizationProfile?: {
+      id?: string;
+      name?: string | null;
+      logoUrl?: string | null;
+      description?: string | null;
+      isVip?: boolean | null;
+      verificationTier?: string | null;
+    } | null;
+  } | null;
+  attachments?: Array<{
+    id: string;
+    type?: string | null;
+    objectKey?: string | null;
+    mimeType?: string | null;
+    url?: string | null;
+  }> | null;
+  engagementCounts?: Partial<EngagementCounts> | null;
+  userEngagement?: Partial<UserEngagement> | null;
+  createdAt: string;
 }
 
 /**
@@ -239,39 +287,41 @@ export interface Comment {
 // ============================================================================
 
 /**
- * Feed type options for filtering posts.
- *
- * @type FeedType
+ * Feed mode for `feed(input)` — matches backend GetFeedInput.type.
  */
-export type FeedType = 'all' | 'following' | 'community';
+export type FeedModeType =
+  | 'FOR_YOU'
+  | 'FOLLOWING'
+  | 'NETWORK'
+  | 'TRENDING'
+  | 'ALL'
+  | 'LATEST'
+  | 'USERS'
+  | 'COMMUNITIES'
+  | 'ASSOCIATIONS'
+  | 'COMMUNITIES_AND_ASSOCIATIONS'
+  | 'COMMUNITY'
+  | 'ASSOCIATION';
+
+/** @deprecated Use FeedModeType — kept for legacy call sites. */
+export type FeedType = FeedModeType;
 
 /**
- * Input for fetching the feed.
- *
- * @interface GetFeedInput
- * @property {number} [limit] - Maximum number of posts to return
- * @property {number} [offset] - Offset for pagination
- * @property {string} [communityId] - Filter by community ID
- * @property {string} [authorId] - Filter by author ID
- * @property {FeedType} type - Type of feed to fetch
- *
- * @example
- * ```typescript
- * const input: GetFeedInput = {
- *   limit: 20,
- *   offset: 0,
- *   type: 'all'
- * };
- * ```
+ * Input for fetching the feed (`feed` query).
  */
 export interface GetFeedInput {
+  type: string;
   limit?: number;
   offset?: number;
-  communityId?: string;
-  authorId?: string;
-  type: FeedType;
-  /** Optional hashtag to filter feed (e.g. "diaspora"). Backend must support. */
-  hashtag?: string;
+  cursor?: string | null;
+  refreshSeed?: string | null;
+  communityId?: string | null;
+  associationId?: string | null;
+  includeDiscovery?: boolean;
+  clearHistory?: boolean;
+  viewSeenPosts?: boolean;
+  strictOrganic?: boolean;
+  allowSeenFallback?: boolean;
 }
 
 /**
@@ -359,10 +409,37 @@ export interface DeleteCommentInput {
  * @property {number} feed.total - Total number of posts available
  * @property {Post[]} feed.posts - Array of posts
  */
+export interface FeedQueryResult {
+  posts: Post[];
+  total: number;
+  limit?: number | null;
+  offset?: number | null;
+  hasMore?: boolean | null;
+  nextCursor?: string | null;
+  isExhausted?: boolean | null;
+  isSeenFallback?: boolean | null;
+  hasSeenFallbackOption?: boolean | null;
+}
+
+/** Raw `feed` query payload (posts before normalization in the hook). */
 export interface GetFeedData {
-  feed: {
+  feed: Omit<FeedQueryResult, 'posts'> & { posts: FeedPostFragment[] };
+}
+
+export type FeedViewMode = 'you' | 'following';
+
+/** Input for `postsByHashtag` — hashtag without #. */
+export interface GetPostsByHashtagInput {
+  hashtag: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetPostsByHashtagData {
+  postsByHashtag: {
+    posts: FeedPostFragment[];
     total: number;
-    posts: Post[];
+    hasMore?: boolean | null;
   };
 }
 
@@ -373,7 +450,8 @@ export interface GetFeedData {
  * @property {Post} post - The requested post
  */
 export interface GetPostData {
-  post: Post;
+  /** Raw `FullPost` from API; normalize with `normalizeFeedPost` for UI `Post`. */
+  post: FeedPostFragment;
 }
 
 /**

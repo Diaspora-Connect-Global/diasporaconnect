@@ -60,7 +60,7 @@ export default function FeedPage() {
     refetch: refetchFeed,
     loadingMore: feedLoadingMore,
     feedContainerRef,
-  } = useFeed({ type: 'all', hashtag });
+  } = useFeed({ hashtag });
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
@@ -184,13 +184,21 @@ export default function FeedPage() {
                     content={post.text}
                     images={
                       post.attachments
-                        ?.filter((a) => a.mimeType?.startsWith('image/'))
+                        ?.filter(
+                          (a) =>
+                            a.mimeType?.startsWith('image/') ||
+                            String(a.type ?? '').toUpperCase() === 'IMAGE'
+                        )
                         .map((a) => a.url || '')
                         .filter(Boolean) || []
                     }
                     videos={
                       post.attachments
-                        ?.filter((a) => a.mimeType?.startsWith('video/'))
+                        ?.filter(
+                          (a) =>
+                            a.mimeType?.startsWith('video/') ||
+                            String(a.type ?? '').toUpperCase() === 'VIDEO'
+                        )
                         .map((a) => a.url || '')
                         .filter(Boolean) || []
                     }

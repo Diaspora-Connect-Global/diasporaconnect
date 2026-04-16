@@ -11,7 +11,7 @@ import {
   AddEngagementData,
   CreateCommentData 
 } from '@/services/gql/postsFeed';
-import type { Post as ApiPost } from '@/services/gql/types/postsFeed';
+import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
@@ -91,6 +91,7 @@ interface Post {
 export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
+  const [viewMode, setViewMode] = useState<FeedViewMode>('you');
 
   // Fetch communities
   const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<DiscoverCommunitiesData>(
@@ -111,9 +112,27 @@ export default function Home() {
     error: feedError,
     refetch: refetchFeed,
     loadingMore: feedLoadingMore,
-    hasMore: feedHasMore,
     feedContainerRef,
-  } = useFeed({ type: 'all' });
+  } = useFeed({ mode: viewMode });
+
+  useEffect(() => {
+    const savedView = sessionStorage.getItem('viewFilter');
+    if (savedView === 'you' || savedView === 'following') {
+      setViewMode(savedView);
+    }
+
+    const handleViewFilterChange = (event: Event) => {
+      const customEvent = event as CustomEvent<FeedViewMode>;
+      if (customEvent.detail === 'you' || customEvent.detail === 'following') {
+        setViewMode(customEvent.detail);
+      }
+    };
+
+    window.addEventListener('viewFilterChange', handleViewFilterChange as EventListener);
+    return () => {
+      window.removeEventListener('viewFilterChange', handleViewFilterChange as EventListener);
+    };
+  }, []);
 
   // Mutations
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
@@ -488,11 +507,19 @@ export default function Home() {
                   postDate={formatPostDate(post.createdAt)}
                   content={post.text}
                   images={post.attachments
-                    ?.filter((a) => a.mimeType?.startsWith('image/'))
+                    ?.filter(
+                      (a) =>
+                        a.mimeType?.startsWith('image/') ||
+                        String(a.type ?? '').toUpperCase() === 'IMAGE'
+                    )
                     .map((a) => a.url || '')
                     .filter(Boolean) || []}
                   videos={post.attachments
-                    ?.filter((a) => a.mimeType?.startsWith('video/'))
+                    ?.filter(
+                      (a) =>
+                        a.mimeType?.startsWith('video/') ||
+                        String(a.type ?? '').toUpperCase() === 'VIDEO'
+                    )
                     .map((a) => a.url || '')
                     .filter(Boolean) || []}
                   likes={post.engagementCounts.likes}

@@ -1,20 +1,52 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useQuery, useLazyQuery } from '@apollo/client/react';
-import { GET_FEED, type GetFeedData } from '@/services/gql/postsFeed';
-import type { Post } from '@/services/gql/types/postsFeed';
-import type { FeedType } from '@/services/gql/types/postsFeed';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLazyQuery, useQuery } from '@apollo/client/react';
+import { GET_FEED, GET_POSTS_BY_HASHTAG, type GetFeedData, type GetPostsByHashtagData } from '@/services/gql/postsFeed';
+import { normalizeFeedPost } from '@/lib/normalizeFeedPost';
+import type { FeedModeType, FeedViewMode, GetFeedInput, Post } from '@/services/gql/types/postsFeed';
 
 const INITIAL_LIMIT = 12;
 const PAGE_SIZE = 12;
 const SCROLL_THRESHOLD_PX = 200;
 
+function mapPosts(raw: GetFeedData['feed']['posts']): Post[] {
+  return raw.map((p) => normalizeFeedPost(p));
+}
+
+/** Keep first occurrence of each id (stable order). */
+function dedupePostsById(posts: Post[]): Post[] {
+  const seen = new Set<string>();
+  return posts.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+}
+
+/** Append only posts whose ids are not already present (avoids duplicate React keys). */
+function appendPostsUnique(existing: Post[], incoming: Post[]): Post[] {
+  const seen = new Set(existing.map((p) => p.id));
+  const novel = incoming.filter((p) => !seen.has(p.id));
+  if (!novel.length) return existing;
+  return [...existing, ...novel];
+}
+
 export interface UseFeedOptions {
-  type?: FeedType;
+  mode?: FeedViewMode;
+  /** When set, overrides `mode` mapping (e.g. TRENDING). */
+  feedType?: FeedModeType;
   hashtag?: string | null;
   initialLimit?: number;
   pageSize?: number;
+}
+
+export interface FeedStateMeta {
+  hasMore?: boolean | null;
+  isExhausted?: boolean | null;
+  isSeenFallback?: boolean | null;
+  hasSeenFallbackOption?: boolean | null;
+  nextCursor?: string | null;
 }
 
 export interface UseFeedResult {
@@ -27,69 +59,207 @@ export interface UseFeedResult {
   hasMore: boolean;
   loadMore: () => void;
   feedContainerRef: React.RefObject<HTMLDivElement | null>;
+  feedMeta: FeedStateMeta;
 }
 
 export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   const {
-    type = 'all',
+    mode = 'you',
+    feedType: feedTypeOverride,
     hashtag = null,
     initialLimit = INITIAL_LIMIT,
     pageSize = PAGE_SIZE,
   } = options;
 
+  const isHashtagFeed = Boolean(hashtag && hashtag.trim());
+  const trimmedHashtag = (hashtag ?? '').trim();
+
   const [mergedPosts, setMergedPosts] = useState<Post[]>([]);
   const [total, setTotal] = useState(0);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [feedMeta, setFeedMeta] = useState<FeedStateMeta>({});
   const feedContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const input = {
-    limit: initialLimit,
-    offset: 0,
-    type,
-    ...(hashtag != null && hashtag !== '' ? { hashtag } : {}),
-  };
+  const resolvedFeedType: FeedModeType =
+    feedTypeOverride ?? (mode === 'following' ? 'FOLLOWING' : 'FOR_YOU');
 
-  const { data, loading, error, refetch: refetchInitial } = useQuery<GetFeedData>(GET_FEED, {
-    variables: { input },
+  const feedInputBase = useMemo((): Omit<GetFeedInput, 'limit' | 'offset' | 'cursor' | 'refreshSeed'> => {
+    const input: GetFeedInput = { type: resolvedFeedType };
+    if (resolvedFeedType === 'FOR_YOU') input.includeDiscovery = false;
+    if (resolvedFeedType === 'TRENDING') input.includeDiscovery = true;
+    return input;
+  }, [resolvedFeedType]);
+
+  const initialFeedVariables = useMemo(
+    () => ({
+      input: {
+        ...feedInputBase,
+        limit: initialLimit,
+        offset: 0,
+      } as GetFeedInput,
+    }),
+    [feedInputBase, initialLimit]
+  );
+
+  const {
+    data: feedData,
+    loading: feedLoading,
+    error: feedError,
+    refetch: refetchFeedQuery,
+  } = useQuery<GetFeedData>(GET_FEED, {
+    variables: initialFeedVariables,
+    skip: isHashtagFeed,
     notifyOnNetworkStatusChange: true,
   });
 
-  const [fetchMore, { loading: loadingMore }] = useLazyQuery<GetFeedData>(GET_FEED, {
+  const {
+    data: hashtagData,
+    loading: hashtagLoading,
+    error: hashtagError,
+    refetch: refetchHashtagQuery,
+  } = useQuery<GetPostsByHashtagData>(GET_POSTS_BY_HASHTAG, {
+    variables: { input: { hashtag: trimmedHashtag, limit: initialLimit, offset: 0 } },
+    skip: !isHashtagFeed,
+    notifyOnNetworkStatusChange: true,
+  });
+
+  const [fetchMoreFeed, { loading: loadingMoreFeed }] = useLazyQuery<GetFeedData>(GET_FEED, {
     fetchPolicy: 'network-only',
   });
 
-  // Sync first page into merged list and total
-  useEffect(() => {
-    if (!data?.feed) return;
-    setMergedPosts(data.feed.posts ?? []);
-    setTotal(data.feed.total ?? 0);
-  }, [data?.feed?.posts, data?.feed?.total]);
+  const [fetchMoreHashtag, { loading: loadingMoreHashtag }] = useLazyQuery<GetPostsByHashtagData>(
+    GET_POSTS_BY_HASHTAG,
+    { fetchPolicy: 'network-only' }
+  );
 
-  const hasMore = mergedPosts.length < total;
+  useEffect(() => {
+    if (isHashtagFeed) return;
+    if (!feedData?.feed) return;
+    const f = feedData.feed;
+    setMergedPosts(mapPosts(f.posts));
+    setTotal(f.total ?? 0);
+    setNextCursor(f.nextCursor ?? null);
+    setFeedMeta({
+      hasMore: f.hasMore,
+      isExhausted: f.isExhausted,
+      isSeenFallback: f.isSeenFallback,
+      hasSeenFallbackOption: f.hasSeenFallbackOption,
+      nextCursor: f.nextCursor ?? null,
+    });
+  }, [feedData?.feed, isHashtagFeed]);
+
+  useEffect(() => {
+    if (!isHashtagFeed) return;
+    if (!hashtagData?.postsByHashtag) return;
+    const h = hashtagData.postsByHashtag;
+    setMergedPosts(mapPosts(h.posts));
+    setTotal(h.total ?? 0);
+    setNextCursor(null);
+    setFeedMeta({ hasMore: h.hasMore });
+  }, [hashtagData?.postsByHashtag, isHashtagFeed]);
+
+  const hasMore = useMemo(() => {
+    if (isHashtagFeed) {
+      if (feedMeta.hasMore === false) return false;
+      if (feedMeta.hasMore === true) return true;
+      return mergedPosts.length < total;
+    }
+    if (feedMeta.hasMore === false) return false;
+    if (feedMeta.hasMore === true) return true;
+    if (nextCursor) return true;
+    return mergedPosts.length < total;
+  }, [feedMeta.hasMore, isHashtagFeed, mergedPosts.length, nextCursor, total]);
 
   const loadMore = useCallback(() => {
-    if (loadingMore || !hasMore) return;
-    const nextOffset = mergedPosts.length;
-    fetchMore({
-      variables: {
-        input: {
-          limit: pageSize,
-          offset: nextOffset,
-          type,
-          ...(hashtag != null && hashtag !== '' ? { hashtag } : {}),
+    if (isHashtagFeed) {
+      if (loadingMoreHashtag || !hasMore) return;
+      const nextOffset = mergedPosts.length;
+      fetchMoreHashtag({
+        variables: {
+          input: { hashtag: trimmedHashtag, limit: pageSize, offset: nextOffset },
         },
-      },
-    }).then((result) => {
-      const next = result.data?.feed?.posts ?? [];
-      if (next.length > 0) {
-        setMergedPosts((prev) => [...prev, ...next]);
-      }
-      if (result.data?.feed?.total != null) {
-        setTotal(result.data.feed.total);
-      }
-    });
-  }, [fetchMore, loadingMore, hasMore, mergedPosts.length, pageSize, type, hashtag]);
+      }).then((res) => {
+        const h = res.data?.postsByHashtag;
+        if (!h) return;
+        const more = mapPosts(h.posts);
+        if (more.length) setMergedPosts((prev) => [...prev, ...more]);
+        setTotal(h.total ?? 0);
+        setFeedMeta({ hasMore: h.hasMore });
+      });
+      return;
+    }
 
-  // Scroll listener: when user scrolls near bottom, load more
+    if (loadingMoreFeed || !hasMore) return;
+
+    const input: GetFeedInput = {
+      ...feedInputBase,
+      limit: pageSize,
+      ...(nextCursor ? { cursor: nextCursor } : { offset: mergedPosts.length }),
+    };
+
+    fetchMoreFeed({ variables: { input } }).then((res) => {
+      const f = res.data?.feed;
+      if (!f) return;
+      const more = mapPosts(f.posts);
+      if (more.length) setMergedPosts((prev) => [...prev, ...more]);
+      setTotal(f.total ?? 0);
+      setNextCursor(f.nextCursor ?? null);
+      setFeedMeta({
+        hasMore: f.hasMore,
+        isExhausted: f.isExhausted,
+        isSeenFallback: f.isSeenFallback,
+        hasSeenFallbackOption: f.hasSeenFallbackOption,
+        nextCursor: f.nextCursor ?? null,
+      });
+    });
+  }, [
+    fetchMoreFeed,
+    fetchMoreHashtag,
+    feedInputBase,
+    hasMore,
+    isHashtagFeed,
+    loadingMoreFeed,
+    loadingMoreHashtag,
+    mergedPosts.length,
+    nextCursor,
+    pageSize,
+    trimmedHashtag,
+  ]);
+
+  const loading = isHashtagFeed ? hashtagLoading : feedLoading;
+  const error = isHashtagFeed ? hashtagError : feedError;
+  const loadingMore = isHashtagFeed ? loadingMoreHashtag : loadingMoreFeed;
+
+  const refetch = useCallback(() => {
+    if (isHashtagFeed) {
+      refetchHashtagQuery();
+      return;
+    }
+    // Pull-to-refresh: client-generated seed only; no cursor; reshuffles tier ordering on the server.
+    const newSeed = Date.now().toString();
+    refetchFeedQuery({
+      input: {
+        ...feedInputBase,
+        limit: initialLimit,
+        offset: 0,
+        refreshSeed: newSeed,
+      } as GetFeedInput,
+    }).then((result) => {
+      const f = result.data?.feed;
+      if (!f) return;
+      setMergedPosts(mapPosts(f.posts));
+      setTotal(f.total ?? 0);
+      setNextCursor(f.nextCursor ?? null);
+      setFeedMeta({
+        hasMore: f.hasMore,
+        isExhausted: f.isExhausted,
+        isSeenFallback: f.isSeenFallback,
+        hasSeenFallbackOption: f.hasSeenFallbackOption,
+        nextCursor: f.nextCursor ?? null,
+      });
+    });
+  }, [feedInputBase, initialLimit, isHashtagFeed, refetchFeedQuery, refetchHashtagQuery]);
+
   useEffect(() => {
     const el = feedContainerRef.current;
     if (!el) return;
@@ -104,11 +274,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
     el.addEventListener('scroll', checkScroll, { passive: true });
     return () => el.removeEventListener('scroll', checkScroll);
-  }, [hasMore, loading, loadingMore, loadMore]);
-
-  const refetch = useCallback(() => {
-    refetchInitial();
-  }, [refetchInitial]);
+  }, [hasMore, loadMore, loading, loadingMore]);
 
   return {
     posts: mergedPosts,
@@ -120,5 +286,6 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     hasMore,
     loadMore,
     feedContainerRef,
+    feedMeta,
   };
 }

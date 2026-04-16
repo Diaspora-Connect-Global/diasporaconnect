@@ -109,7 +109,7 @@ export default function AssociationPage() {
     const { data: feedData, loading: feedLoading } = useQuery<GetFeedResponse>(GET_FEED, {
         variables: {
             input: {
-                type: 'association',
+                type: 'ASSOCIATION',
                 associationId,
                 limit: 20,
                 offset: 0,
