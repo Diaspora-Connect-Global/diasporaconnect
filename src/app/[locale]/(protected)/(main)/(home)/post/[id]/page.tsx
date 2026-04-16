@@ -72,30 +72,37 @@ export default function PostPage() {
     }
   };
 
-  const getProfileData = () => {
+  const getProfileData = (): {
+    name: string;
+    avatar: string;
+    tier: ReturnType<typeof resolveUserTier> | undefined;
+    type: 'User' | 'Organization';
+  } => {
     const post = data?.post;
-    if (!post) return { name: 'Unknown', avatar: '/PROFILE.png', tier: undefined, type: 'User' as const };
+    if (!post) return { name: 'Unknown', avatar: '/PROFILE.png', tier: undefined, type: 'User' };
 
     if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
+      const org = post.authorProfile.organizationProfile;
       return {
-        name: post.authorProfile.organizationProfile.name,
-        avatar: '/default-avatar.png',
+        name: org.name?.trim() || 'Unknown',
+        avatar: org.logoUrl?.trim() || '/default-avatar.png',
         tier: undefined,
-        type: 'Organization' as const,
+        type: 'Organization',
       };
     }
     if (post.authorProfile?.userProfile) {
+      const user = post.authorProfile.userProfile;
       return {
-        name: post.authorProfile.userProfile.name,
-        avatar: post.authorProfile.userProfile.avatarUrl || '/PROFILE.png',
+        name: user.displayName?.trim() || user.name?.trim() || 'Unknown',
+        avatar: user.avatarUrl?.trim() || '/PROFILE.png',
         tier: resolveUserTier({
-          tier: (post.authorProfile.userProfile as { tier?: string }).tier,
-          verificationTier: post.authorProfile.userProfile.verificationTier,
+          tier: (user as { tier?: string }).tier,
+          verificationTier: user.verificationTier,
         }),
-        type: 'User' as const,
+        type: 'User',
       };
     }
-    return { name: 'Unknown', avatar: '/PROFILE.png', tier: undefined, type: 'User' as const };
+    return { name: 'Unknown', avatar: '/PROFILE.png', tier: undefined, type: 'User' };
   };
 
   const formatPostDate = (dateString: string) => {
@@ -158,11 +165,11 @@ export default function PostPage() {
           postId={post.id}
           profileImage={profileData.avatar}
           profileName={profileData.name}
-          authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
+          {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
           profileTier={profileData.tier}
           category={profileData.type}
           postDate={formatPostDate(post.createdAt)}
-          content={post.text}
+          content={post.text ?? post.content ?? ''}
           images={
             post.attachments
               ?.filter(
