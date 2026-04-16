@@ -87,7 +87,7 @@ export default function PostPage() {
     if (post.authorProfile?.userProfile) {
       return {
         name: post.authorProfile.userProfile.name,
-        avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+        avatar: post.authorProfile.userProfile.avatarUrl || '/PROFILE.png',
         tier: resolveUserTier({
           tier: (post.authorProfile.userProfile as { tier?: string }).tier,
           verificationTier: post.authorProfile.userProfile.verificationTier,
