@@ -182,7 +182,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
     if (post.authorProfile?.userProfile) {
       return {
         name: post.authorProfile.userProfile.name,
-        avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+        avatar: post.authorProfile.userProfile.avatarUrl || '/PROFILE.png',
         type: 'User' as const,
       };
     }

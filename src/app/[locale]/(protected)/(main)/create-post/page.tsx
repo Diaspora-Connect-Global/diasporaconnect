@@ -158,7 +158,7 @@ export default function CreatePostPage() {
             type: 'FOR_YOU',
             limit: 20,
             offset: 0,
-            includeDiscovery: false,
+            includeDiscovery: true,
           },
         },
       }

@@ -95,7 +95,7 @@ export default function CreatePostForm({
     refetchQueries: [
       {
         query: GET_FEED,
-        variables: { input: { type: 'FOR_YOU', limit: 20, offset: 0, includeDiscovery: false } },
+        variables: { input: { type: 'FOR_YOU', limit: 20, offset: 0, includeDiscovery: true } },
       },
     ],
   });

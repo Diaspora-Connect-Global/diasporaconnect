@@ -85,8 +85,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const feedInputBase = useMemo((): Omit<GetFeedInput, 'limit' | 'offset' | 'cursor' | 'refreshSeed'> => {
     const input: GetFeedInput = { type: resolvedFeedType };
-    if (resolvedFeedType === 'FOR_YOU') input.includeDiscovery = false;
-    if (resolvedFeedType === 'TRENDING') input.includeDiscovery = true;
+    // For You: personalized feed plus trending and discovery surfacing (backend GetFeedInput).
+    if (resolvedFeedType === 'FOR_YOU' || resolvedFeedType === 'TRENDING') {
+      input.includeDiscovery = true;
+    }
     return input;
   }, [resolvedFeedType]);
 
