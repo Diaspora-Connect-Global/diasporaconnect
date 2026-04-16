@@ -136,7 +136,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     if (isHashtagFeed) return;
     if (!feedData?.feed) return;
     const f = feedData.feed;
-    setMergedPosts(mapPosts(f.posts));
+    setMergedPosts(dedupePostsById(mapPosts(f.posts)));
     setTotal(f.total ?? 0);
     setNextCursor(f.nextCursor ?? null);
     setFeedMeta({
@@ -152,7 +152,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     if (!isHashtagFeed) return;
     if (!hashtagData?.postsByHashtag) return;
     const h = hashtagData.postsByHashtag;
-    setMergedPosts(mapPosts(h.posts));
+    setMergedPosts(dedupePostsById(mapPosts(h.posts)));
     setTotal(h.total ?? 0);
     setNextCursor(null);
     setFeedMeta({ hasMore: h.hasMore });
@@ -182,7 +182,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         const h = res.data?.postsByHashtag;
         if (!h) return;
         const more = mapPosts(h.posts);
-        if (more.length) setMergedPosts((prev) => [...prev, ...more]);
+        if (more.length) setMergedPosts((prev) => appendPostsUnique(prev, more));
         setTotal(h.total ?? 0);
         setFeedMeta({ hasMore: h.hasMore });
       });
@@ -201,7 +201,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       const f = res.data?.feed;
       if (!f) return;
       const more = mapPosts(f.posts);
-      if (more.length) setMergedPosts((prev) => [...prev, ...more]);
+      if (more.length) setMergedPosts((prev) => appendPostsUnique(prev, more));
       setTotal(f.total ?? 0);
       setNextCursor(f.nextCursor ?? null);
       setFeedMeta({
@@ -247,7 +247,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     }).then((result) => {
       const f = result.data?.feed;
       if (!f) return;
-      setMergedPosts(mapPosts(f.posts));
+      setMergedPosts(dedupePostsById(mapPosts(f.posts)));
       setTotal(f.total ?? 0);
       setNextCursor(f.nextCursor ?? null);
       setFeedMeta({
