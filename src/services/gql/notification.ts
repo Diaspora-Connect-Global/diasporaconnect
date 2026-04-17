@@ -151,8 +151,14 @@ export type GetNotificationPathOptions = {
  * Returns the path (with leading slash) to navigate to for a notification.
  * Caller builds the full URL, e.g. `/${locale}${path}` (path already starts with `/`).
  *
- * For `connection.*` types, we always resolve the **peer user's profile** from `data` and ignore
- * `link` / `actionUrl`, which may point at API-style routes like `connections/requests/{connectionId}`.
+ * Resolution order is deliberate:
+ *   1. Type-specific rules that need to ignore the raw `link`/`actionUrl` (connections,
+ *      post comments with commentId deep-link, opportunities, events, memberships).
+ *      These take precedence because the server may return API-style URLs that aren't
+ *      valid in the app (e.g. `connections/requests/{connectionId}`).
+ *   2. Direct entity ids present in `data` (postId, opportunityId, eventId, …).
+ *   3. Server-provided `link` / `actionUrl` (as a last resort, for types we don't know about).
+ *   4. Section-level fallbacks derived from `type`.
  */
 export function getNotificationPath(
   notification: Pick<Notification, 'type' | 'data' | 'link' | 'actionUrl'>,
@@ -160,20 +166,24 @@ export function getNotificationPath(
 ): string {
   const { type, data } = notification;
   const d = data as Record<string, unknown> | undefined;
+  const t = (type || '').toLowerCase();
+  const entityType = pickString(d, ['entityType'])?.toLowerCase();
 
-  if (type?.startsWith('connection.')) {
+  // ── 1. Type-specific routing (must run before link/actionUrl) ────────────────
+
+  // Connections → peer profile
+  if (t.startsWith('connection.')) {
     const peer = resolveConnectionPeerUserId(d, options?.currentUserId);
     if (peer) return `/${peer}`;
     return '/feed';
   }
 
-  // Post comment / reply: open the post with comments and deep-link to the triggering comment
-  // (must run before link/actionUrl — API may send non-app URLs).
+  // Post comment / reply: open the post and deep-link to the triggering comment
   if (
-    (type === 'post.comment' ||
-      type === 'post.commented' ||
-      type === 'post.reply' ||
-      type === 'post.replied') &&
+    (t === 'post.comment' ||
+      t === 'post.commented' ||
+      t === 'post.reply' ||
+      t === 'post.replied') &&
     d?.postId
   ) {
     const pid = String(d.postId);
@@ -190,16 +200,52 @@ export function getNotificationPath(
     return `/post/${pid}`;
   }
 
-  if (notification.link) return ensureLeadingSlash(notification.link);
-  if (notification.actionUrl) return ensureLeadingSlash(notification.actionUrl);
+  // Other post interactions (like, mention, …) → post detail
+  if (t.startsWith('post.') && d?.postId) {
+    return `/post/${String(d.postId)}`;
+  }
+
+  // Opportunities (new, application submitted/accepted/rejected, …) → opportunity detail
+  const opportunityId = pickString(d, [
+    'opportunityId',
+    'jobId',
+    'listingId',
+    'applicationOpportunityId',
+  ]);
+  if (t.includes('opportunity') && opportunityId) {
+    return `/opportunities/${opportunityId}`;
+  }
+
+  // Events → event detail when we have an id, else the events list
+  if (t.startsWith('event.')) {
+    if (d?.eventId) return `/events/${String(d.eventId)}`;
+    return '/events';
+  }
+
+  // Association / community membership — route to the specific page when we can
+  const isAssociationHint = entityType === 'association' || t.includes('association');
+  const isCommunityHint = entityType === 'community' || t.includes('community');
+  if ((t.startsWith('membership.') || isAssociationHint || isCommunityHint) && d?.entityId) {
+    const section = isAssociationHint ? 'association' : 'community';
+    return `/${section}/${String(d.entityId)}`;
+  }
+
+  // Messages → chat, with a tab hint so the right panel opens
+  if (t.startsWith('group.message') || t === 'group.message.received') {
+    return '/chat?ct=group';
+  }
+  if (t.startsWith('message.')) {
+    return '/chat?ct=direct';
+  }
+
+  // ── 2. Direct entity ids in `data` ───────────────────────────────────────────
 
   if (d?.postId) return `/post/${String(d.postId)}`;
+  if (opportunityId) return `/opportunities/${opportunityId}`;
   if (d?.eventId) return `/events/${String(d.eventId)}`;
 
-  if (d?.groupId && d?.messageId) {
-    return '/chat';
-  }
-  if (d?.conversationId) return '/chat';
+  if (d?.groupId && d?.messageId) return '/chat?ct=group';
+  if (d?.conversationId) return '/chat?ct=direct';
 
   if (d?.connectionId) {
     const peerId = pickString(d, [
@@ -214,15 +260,22 @@ export function getNotificationPath(
     return '/feed';
   }
 
-  if (d?.entityId && d?.entityType) {
-    const section =
-      String(d.entityType).toLowerCase() === 'association' ? 'association' : 'community';
+  if (d?.entityId && entityType) {
+    const section = entityType === 'association' ? 'association' : 'community';
     return `/${section}/${String(d.entityId)}`;
   }
-  if (type?.startsWith('profile.')) return '/profile';
-  if (type?.startsWith('message.') || type?.startsWith('group.message.')) return '/chat';
-  if (type?.startsWith('event.')) return '/events';
-  if (type?.startsWith('membership.')) return '/community';
+
+  // ── 3. Server-provided link (last resort — may be external/API style) ────────
+
+  if (notification.link) return ensureLeadingSlash(notification.link);
+  if (notification.actionUrl) return ensureLeadingSlash(notification.actionUrl);
+
+  // ── 4. Section-level fallbacks based on type ─────────────────────────────────
+
+  if (t.startsWith('profile.')) return '/profile';
+  if (t.includes('opportunity')) return '/opportunities';
+  if (t.includes('association')) return '/association';
+  if (t.includes('community') || t.startsWith('membership.')) return '/community';
 
   return '/notification';
 }

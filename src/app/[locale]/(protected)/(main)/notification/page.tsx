@@ -18,11 +18,16 @@ import {
   type MarkNotificationAsReadResponse,
   type MarkAllNotificationsAsReadResponse,
 } from '@/services/gql/notification';
-import { GET_ASSOCIATION } from '@/services/gql/associations';
-import { GET_COMMUNITY } from '@/services/gql/community';
 import { useUserStore } from '@/store/useUserStore';
+import {
+  useEnrichedNotification,
+  type EnrichedNotification,
+} from '@/hooks/useEnrichedNotification';
+import { formatDateProximity } from '@/macros/time';
 
-function getNotificationTypeLabel(type: string | undefined, t: (key: string) => string): string {
+type Translator = (key: string, values?: Record<string, string>) => string;
+
+function getNotificationTypeLabel(type: string | undefined, t: Translator): string {
   if (!type) return t('types.default');
   const key = `types.${type}`;
   try {
@@ -35,268 +40,239 @@ function getNotificationTypeLabel(type: string | undefined, t: (key: string) => 
         return t('types.default');
       }
     }
-
     return t('types.default');
   }
 }
 
-type NotificationData = {
-  actorName?: string;
-  actor?: string;
-  communityName?: string;
-  associationName?: string;
-  entityName?: string;
-  entityType?: string;
-  name?: string;
-  eventName?: string;
-  eventTitle?: string;
-  title?: string;
-  [key: string]: unknown;
-};
-
-function isGenericOpportunityText(value: string | undefined): boolean {
-  if (!value) return true;
-  const normalized = value.toLowerCase().replace(/[!?.]/g, '').trim();
-  return (
-    normalized === 'application accepted' ||
-    normalized === 'application submitted' ||
-    normalized === 'application rejected' ||
-    normalized === 'opportunity' ||
-    normalized === 'profile' ||
-    normalized === 'new opportunity'
-  );
+interface NotificationView {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  actorHref?: string;
 }
 
-function getOpportunityName(data: NotificationData | undefined, not: Notification): string {
-  const d = (data || {}) as Record<string, unknown>;
-  const fromPayload =
-    (d.opportunityTitle as string) ||
-    (d.opportunityName as string) ||
-    (d.jobTitle as string) ||
-    (d.roleTitle as string) ||
-    (d.positionTitle as string) ||
-    (d.listingTitle as string) ||
-    (d.entityName as string) ||
-    (d.title as string) ||
-    (d.name as string) ||
-    '';
-
-  if (fromPayload && !isGenericOpportunityText(fromPayload)) return String(fromPayload).trim();
-  if (not.title && !isGenericOpportunityText(not.title)) return not.title.trim();
-  return '';
-}
-
-function getEntityName(
-  data: NotificationData | undefined,
-  kind: 'community' | 'association',
-  not?: Notification
-): string {
-  const entityType = (data?.entityType || '').toString().toLowerCase();
-  const d = (data || {}) as Record<string, unknown>;
-  const name =
-    (d.communityName as string) ||
-    (d.associationName as string) ||
-    (d.entityName as string) ||
-    (d.name as string) ||
-    (d.groupName as string) ||
-    (d.targetName as string) ||
-    (d.association as string) ||
-    (d.community as string) ||
-    (d.entityTitle as string) ||
-    (d.title as string) ||
-    '';
-  if (name) return String(name).trim();
-  if (kind === 'association' && entityType === 'association') return String((d.entityName as string) || (d.name as string) || '').trim();
-  if (kind === 'community' && entityType === 'community') return String((d.entityName as string) || (d.name as string) || '').trim();
-  if (not?.title && not.title.length > 0 && not.title.length < 80 && (kind === 'association' ? entityType === 'association' : entityType === 'community')) {
-    return not.title.trim();
-  }
-  return '';
-}
-
-function getNotificationDescription(
+/**
+ * Build the "who/what happened" sentence for a notification, using enriched
+ * data pulled from the API (actor profile, post, opportunity, event, etc.).
+ *
+ * The returned `title` is the one-line descriptive sentence shown in the card
+ * heading. `description` carries optional extra detail (post snippet, event
+ * start date) when it adds value beyond the title.
+ */
+function buildNotificationView(
   not: Notification,
-  t: (key: string, values?: Record<string, string>) => string
-): string {
+  enriched: EnrichedNotification,
+  t: Translator,
+  locale: string
+): NotificationView {
   const type = (not.type || '').toLowerCase();
-  const data = not.data as NotificationData | undefined;
-  const entityType = (data?.entityType || '').toString().toLowerCase();
-  const actor = data?.actorName || data?.actor || '';
-  const communityName = getEntityName(data, 'community', not);
-  const associationName = getEntityName(data, 'association', not);
-  const eventName = data?.eventName || data?.eventTitle || data?.name || '';
-  const opportunityTitle = getOpportunityName(data, not);
+  const data = (not.data as Record<string, unknown> | undefined) || {};
+  const entityType = String(data.entityType || '').toLowerCase();
 
-  const actorLabel = actor || t('messages.actorFallback');
-  const communityLabel = communityName || t('messages.communityFallback');
-  const associationLabel = associationName || t('messages.associationFallback');
-  const eventLabel = eventName || t('messages.eventFallback');
+  const actorName = enriched.actorName || t('messages.actorFallback');
+  // Whenever a user actor is involved in the notification (comment, like,
+  // connection, message, invite, …) we want to show either their real avatar
+  // or the default user silhouette — never the system/globe icon. We detect
+  // "user actor present" by having either a resolved userId, a resolved name,
+  // or a backend-provided imageUrl already pointing at a person.
+  const hasUserActor = Boolean(
+    enriched.actorUserId || enriched.actorName
+  );
+  const actorAvatar =
+    enriched.actorAvatarUrl ||
+    not.imageUrl ||
+    (hasUserActor ? '/PROFILE.png' : undefined);
+  const actorHref = enriched.actorUserId ? `/${locale}/${enriched.actorUserId}` : undefined;
 
-  const isAssociation = entityType === 'association' || type.includes('association');
-
-  if (isAssociation && (type.includes('approved') || type === 'membership.approved')) {
-    return t('messages.associationApproved', { associationName: associationLabel });
-  }
-  if (isAssociation && (type.includes('request') || type === 'membership.request')) {
-    return t('messages.associationRequest', { associationName: associationLabel });
-  }
-  if (type === 'membership.approved') {
-    return t('messages.membershipApproved', { communityName: communityLabel });
-  }
-  if (type === 'membership.request') {
-    return t('messages.membershipRequest', { communityName: communityLabel });
-  }
+  // Connections
   if (type === 'connection.request' || type === 'connection.requested') {
-    return t('messages.connectionRequest', { actorName: actorLabel });
+    return {
+      title: t('messages.connectionRequest', { actorName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
   }
   if (type === 'connection.accepted') {
-    return t('messages.connectionAccepted', { actorName: actorLabel });
+    return {
+      title: t('messages.connectionAccepted', { actorName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
   }
-  if (type === 'post.like') {
-    return t('messages.postLike', { actorName: actorLabel });
+
+  // Posts — attach the post snippet when we have one
+  if (type === 'post.like' || type === 'post.comment' || type === 'post.commented' || type === 'post.mention') {
+    const hasTitle = Boolean(enriched.targetTitle);
+    const key =
+      type === 'post.like'
+        ? (hasTitle ? 'messages.postLikeWithTitle' : 'messages.postLike')
+        : type === 'post.mention'
+          ? (hasTitle ? 'messages.postMentionWithTitle' : 'messages.postMention')
+          : (hasTitle ? 'messages.postCommentWithTitle' : 'messages.postComment');
+    return {
+      title: t(key, { actorName, postTitle: enriched.targetTitle || '' }),
+      description: enriched.targetSnippet || undefined,
+      imageUrl: actorAvatar,
+      actorHref,
+    };
   }
-  if (type === 'post.comment' || type === 'post.commented') {
-    return t('messages.postComment', { actorName: actorLabel });
-  }
-  if (type === 'post.mention') {
-    return t('messages.postMention', { actorName: actorLabel });
-  }
+
+  // Direct / group messages
   if (type === 'message.received') {
-    return t('messages.messageReceived', { actorName: actorLabel });
+    return {
+      title: t('messages.messageReceived', { actorName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
   }
   if (type === 'group.message') {
-    return t('messages.groupMessage', { actorName: actorLabel });
+    const groupName = enriched.entityName || '';
+    return {
+      title: groupName
+        ? t('messages.groupMessageWithName', { actorName, groupName })
+        : t('messages.groupMessage', { actorName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
   }
+
+  // Events
   if (type === 'event.reminder') {
-    return t('messages.eventReminder', { eventName: eventLabel });
+    const eventName = enriched.targetTitle || not.title || t('messages.eventFallback');
+    const when = enriched.eventWhenISO ? formatDateProximity(enriched.eventWhenISO) : '';
+    return {
+      title: when
+        ? t('messages.eventReminderWithDate', { eventName, when })
+        : t('messages.eventReminder', { eventName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
   }
   if (type === 'event.invite') {
-    return t('messages.eventInvite', { actorName: actorLabel, eventName: eventLabel });
+    const eventName = enriched.targetTitle || not.title || t('messages.eventFallback');
+    return {
+      title: t('messages.eventInvite', { actorName, eventName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
+  }
+
+  // Opportunities
+  if (type === 'opportunity.application.submitted') {
+    const title = enriched.targetTitle || '';
+    const poster = enriched.opportunityPoster || '';
+    return {
+      title: title
+        ? poster
+          ? t('messages.opportunityApplicationSubmittedWithPoster', { title, poster })
+          : t('messages.opportunityApplicationSubmitted', { title })
+        : t('messages.opportunityApplicationSubmittedFallback'),
+    };
   }
   if (type === 'opportunity.application.accepted') {
-    return opportunityTitle
-      ? `Your application for ${opportunityTitle} was accepted.`
-      : 'Your application was accepted.';
+    const title = enriched.targetTitle || '';
+    const poster = enriched.opportunityPoster || '';
+    return {
+      title: title
+        ? poster
+          ? t('messages.opportunityApplicationAcceptedWithPoster', { title, poster })
+          : t('messages.opportunityApplicationAccepted', { title })
+        : t('messages.opportunityApplicationAcceptedFallback'),
+    };
   }
-  if (type === 'opportunity.application.submitted') {
-    return opportunityTitle
-      ? `Your application for ${opportunityTitle} was submitted successfully.`
-      : 'Your application was submitted successfully.';
+  if (type === 'opportunity.application.rejected') {
+    const title = enriched.targetTitle || '';
+    const poster = enriched.opportunityPoster || '';
+    return {
+      title: title
+        ? poster
+          ? t('messages.opportunityApplicationRejectedWithPoster', { title, poster })
+          : t('messages.opportunityApplicationRejected', { title })
+        : t('messages.opportunityApplicationRejectedFallback'),
+    };
   }
   if (type.includes('opportunity')) {
-    if (opportunityTitle) {
-      return t('messages.opportunityNew', { title: opportunityTitle });
+    const title = enriched.targetTitle || '';
+    const poster = enriched.opportunityPoster || '';
+    if (title) {
+      return {
+        title: poster
+          ? t('messages.opportunityNewWithPoster', { title, poster })
+          : t('messages.opportunityNew', { title }),
+      };
     }
   }
 
-  const msg = not.message || (not as { body?: string }).body || '';
-  const title = not.title || '';
-  if (actor && msg) return `${actor} — ${msg}`;
-  if (actor) return actor;
-  if (title && msg) return `${title}. ${msg}`;
-  return msg || title;
-}
-
-/** Returns the entity/organisation name (or actor, event name) to show as the card title line. */
-function getNotificationDisplayTitle(
-  not: Notification,
-  t: (key: string) => string
-): string {
-  const type = (not.type || '').toLowerCase();
-  const data = not.data as NotificationData | undefined;
-  const entityType = (data?.entityType || '').toString().toLowerCase();
-  const actor = data?.actorName || data?.actor || '';
-  const communityName = getEntityName(data, 'community', not);
-  const associationName = getEntityName(data, 'association', not);
-  const eventName = data?.eventName || data?.eventTitle || data?.name || '';
-  const opportunityTitle = getOpportunityName(data, not);
-
+  // Association / community membership
   const isAssociation = entityType === 'association' || type.includes('association');
+  if (isAssociation && (type.includes('approved') || type === 'membership.approved')) {
+    const associationName = enriched.entityName || t('messages.associationFallback');
+    return { title: t('messages.associationApproved', { associationName }) };
+  }
+  if (isAssociation && (type.includes('request') || type === 'membership.request')) {
+    const associationName = enriched.entityName || t('messages.associationFallback');
+    return {
+      title: enriched.actorName
+        ? t('messages.associationRequestFromActor', { actorName, associationName })
+        : t('messages.associationRequest', { associationName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
+  }
+  if (type === 'membership.approved') {
+    const communityName = enriched.entityName || t('messages.communityFallback');
+    return { title: t('messages.membershipApproved', { communityName }) };
+  }
+  if (type === 'membership.request') {
+    const communityName = enriched.entityName || t('messages.communityFallback');
+    return {
+      title: enriched.actorName
+        ? t('messages.membershipRequestFromActor', { actorName, communityName })
+        : t('messages.membershipRequest', { communityName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
+  }
 
-  const isGenericTitle = (title: string) => {
-    const lower = title.toLowerCase().trim();
-    return (
-      /^(membership\s+)?approved$/i.test(lower) ||
-      /^adhésion\s+approuvée$/i.test(lower) ||
-      /^membership\s+approved$/i.test(lower) ||
-      /^iscrizione\s+approvata$/i.test(lower) ||
-      /^mitgliedschaft\s+genehmigt$/i.test(lower) ||
-      /^request\s+to\s+join$/i.test(lower) ||
-      /^demande\s+d'adhésion$/i.test(lower) ||
-      lower === 'membership approved' ||
-      lower === 'membership request'
-    );
+  // Default — fall back to whatever the backend provided.
+  const fallback = not.message || (not as { body?: string }).body || not.title || '';
+  return {
+    title: not.title || fallback || t('types.default'),
+    description: not.title && fallback && fallback !== not.title ? fallback : undefined,
   };
-
-  if (isAssociation && (type.includes('approved') || type.includes('request') || type === 'membership.approved' || type === 'membership.request')) {
-    if (associationName) return associationName;
-    if (not.title && !isGenericTitle(not.title)) return not.title;
-    return t('messages.associationFallback');
-  }
-  if (type === 'membership.approved' || type === 'membership.request') {
-    if (communityName) return communityName;
-    if (not.title && !isGenericTitle(not.title)) return not.title;
-    return t('messages.communityFallback');
-  }
-  if (type === 'connection.request' || type === 'connection.accepted' || type === 'post.like' || type === 'post.comment' || type === 'post.mention' || type === 'message.received' || type === 'group.message') {
-    return actor || '';
-  }
-  if (type === 'event.reminder') return eventName || not.title || '';
-  if (type === 'event.invite') return eventName || not.title || '';
-  if (type.includes('opportunity')) {
-    return opportunityTitle || t('types.opportunity.default');
-  }
-
-  return not.title || '';
 }
 
 const PAGE_SIZE = 20;
 
 type NotificationFilter = 'all' | 'opportunities' | 'events' | 'associations' | 'communities';
 
-/** Resolves association/community name by entityId when not in notification payload. */
 function NotificationRow({
   not,
   t,
+  locale,
+  currentUserId,
   onMarkAsRead,
   onClick,
   isReadOptimistic,
 }: {
   not: Notification;
-  t: (key: string) => string;
+  t: Translator;
+  locale: string;
+  currentUserId?: string;
   onMarkAsRead: () => void;
   onClick: () => void;
   isReadOptimistic: boolean;
 }) {
-  const displayTitle = getNotificationDisplayTitle(not, t);
-  const data = not.data as { entityId?: string; entityType?: string } | undefined;
-  const entityId = data?.entityId as string | undefined;
-  const entityType = (data?.entityType || '').toString().toLowerCase();
-  const isFallback =
-    displayTitle === t('messages.associationFallback') || displayTitle === t('messages.communityFallback');
-  const shouldResolve = Boolean(
-    entityId && (entityType === 'association' || entityType === 'community') && isFallback
-  );
-
-  const { data: assocData } = useQuery<{ getAssociation: { name: string } }>(GET_ASSOCIATION, {
-    variables: { id: entityId! },
-    skip: !shouldResolve || entityType !== 'association',
-  });
-  const { data: commData } = useQuery<{ getCommunity: { name: string } }>(GET_COMMUNITY, {
-    variables: { id: entityId! },
-    skip: !shouldResolve || entityType !== 'community',
-  });
-
-  const resolvedName =
-    entityType === 'association' ? assocData?.getAssociation?.name : commData?.getCommunity?.name;
-  const title = shouldResolve ? (resolvedName ?? '') : displayTitle;
+  const enriched = useEnrichedNotification(not, currentUserId);
+  const view = buildNotificationView(not, enriched, t, locale);
 
   return (
     <NotificationCard
       typeLabel={getNotificationTypeLabel(not.type, t)}
-      title={title || undefined}
-      description={getNotificationDescription(not, t)}
-      imageUrl={not.imageUrl}
+      title={view.title || undefined}
+      description={view.description}
+      imageUrl={view.imageUrl}
+      actorHref={view.actorHref}
       time={not.createdAt}
       read={(not.isRead ?? not.read ?? false) || isReadOptimistic}
       onMarkAsRead={onMarkAsRead}
@@ -315,7 +291,11 @@ function matchesFilter(not: Notification, filter: NotificationFilter): boolean {
   if (filter === 'associations') return type.includes('association') || entityType === 'association';
   if (filter === 'communities') {
     if (entityType === 'association') return false;
-    return type.includes('community') || entityType === 'community' || (type.includes('membership') && entityType !== 'association');
+    return (
+      type.includes('community') ||
+      entityType === 'community' ||
+      (type.includes('membership') && entityType !== 'association')
+    );
   }
   return true;
 }
@@ -358,7 +338,9 @@ export default function NotificationPage() {
   const filtered =
     filter === 'all' ? notifications : notifications.filter((n) => matchesFilter(n, filter));
   const emptyMessageKey =
-    filter === 'all' ? 'none.all' : `none.${filter}` as 'none.all' | 'none.opportunities' | 'none.events' | 'none.associations' | 'none.communities';
+    filter === 'all'
+      ? 'none.all'
+      : (`none.${filter}` as 'none.all' | 'none.opportunities' | 'none.events' | 'none.associations' | 'none.communities');
 
   const loadMore = useCallback(() => {
     if (!hasMore || isFetchingMore) return;
@@ -511,6 +493,8 @@ export default function NotificationPage() {
               key={not.id}
               not={not}
               t={t}
+              locale={locale}
+              currentUserId={currentUserId}
               onMarkAsRead={() => markSingleAsRead(not.id)}
               onClick={() => handleNotificationClick(not)}
               isReadOptimistic={readIds.has(not.id)}

@@ -11,6 +11,7 @@ import {
 import { Button } from '../../ui/button';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image'
+import Link from 'next/link';
 import { formatDateProximity } from '@/macros/time';
 
 interface NotificationCardProps {
@@ -21,7 +22,10 @@ interface NotificationCardProps {
     /** Short label for notification type (e.g. "Like", "Comment", "Connection request"). */
     typeLabel?: string;
     logoIcon?: React.ReactNode;
+    /** Actor/avatar image displayed on the left of the row. */
     imageUrl?: string;
+    /** When set, the avatar becomes a link to this URL (e.g. actor profile). */
+    actorHref?: string;
     time: string;
     read: boolean;
     onMarkAsRead?: () => void;
@@ -37,6 +41,7 @@ export function NotificationCard({
     typeLabel,
     logoIcon,
     imageUrl,
+    actorHref,
     time = "3d",
     read = true,
     onMarkAsRead,
@@ -64,35 +69,52 @@ export function NotificationCard({
         <header className="w-full border-b">
             <div className="lg:max-w-7xl mx-auto px-2 py-3 sm:px-4">
                 <div className="flex items-center justify-between gap-2">
-                    {/* Left section - Logo and branding (clickable when onClick provided) */}
-                    <div
-                        role={onClick ? 'button' : undefined}
-                        tabIndex={onClick ? 0 : undefined}
-                        onClick={onClick}
-                        onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
-                        className={`flex items-center gap-2 sm:gap-3 min-w-0 flex-1 ${onClick ? 'cursor-pointer' : ''}`}
-                    >
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {logoIcon ?? (imageUrl ? (
-                                <Image
-                                    width={40}
-                                    height={40}
-                                    src={imageUrl}
-                                    alt=""
-                                    className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
-                                />
-                            ) : (
-                                <Image
-                                    width={32}
-                                    height={32}
-                                    src="/GLOBE.png"
-                                    alt="Profile"
-                                    className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
-                                />
-                            ))}
-                        </div>
+                    {/* Left section — avatar (optionally linkable) + row body (optionally clickable) */}
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        {(() => {
+                            const avatar = (
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                    {logoIcon ?? (imageUrl ? (
+                                        <Image
+                                            width={40}
+                                            height={40}
+                                            src={imageUrl}
+                                            alt=""
+                                            className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
+                                        />
+                                    ) : (
+                                        <Image
+                                            width={32}
+                                            height={32}
+                                            src="/GLOBE.png"
+                                            alt="Profile"
+                                            className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
+                                        />
+                                    ))}
+                                </div>
+                            );
+                            if (actorHref) {
+                                return (
+                                    <Link
+                                        href={actorHref}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-surface-brand"
+                                        aria-label={title}
+                                    >
+                                        {avatar}
+                                    </Link>
+                                );
+                            }
+                            return avatar;
+                        })()}
 
-                        <div className="flex flex-col min-w-0 flex-1 gap-0.5">
+                        <div
+                            role={onClick ? 'button' : undefined}
+                            tabIndex={onClick ? 0 : undefined}
+                            onClick={onClick}
+                            onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+                            className={`flex flex-col min-w-0 flex-1 gap-0.5 ${onClick ? 'cursor-pointer' : ''}`}
+                        >
                             <div className="flex items-center gap-2 flex-wrap">
                                 {typeLabel && (
                                     <span className="text-text-secondary font-caption-medium uppercase tracking-wide">
