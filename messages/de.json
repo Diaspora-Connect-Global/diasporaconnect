@@ -632,6 +632,7 @@
             "requestSent": "Anfrage gesendet"
         },
         "toasts": {
+            "cannotOpenChat": "Chat konnte nicht geöffnet werden.",
             "openingChat": "Chat wird geöffnet…",
             "requestSent": "Freundschaftsanfrage gesendet!",
             "friendAccepted": "Freund akzeptiert!",

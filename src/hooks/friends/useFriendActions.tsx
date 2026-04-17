@@ -2,6 +2,8 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { useMutation } from '@apollo/client/react';
+import { useRouter } from '@/i18n/navigation';
+import { useChatStore } from '@/store/ChatStore';
 import {
     SEND_CONNECTION_REQUEST,
     ACCEPT_CONNECTION,
@@ -32,6 +34,7 @@ interface UseFriendActionsOptions {
 
 export const useFriendActions = (options?: UseFriendActionsOptions) => {
     const t = useTranslations('friends');
+    const router = useRouter();
     const { searchQuery = '', isSearching = false, onConnectionAction } = options || {};
     
     // Use ref to get latest values in refetchQueries closure
@@ -146,12 +149,21 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         }
     );
 
-    const sendMessage = useCallback(async (userId: string) => {
-        console.log('Opening chat with user:', userId);
-        toast.success(t('toasts.openingChat'));
-        // TODO: Implement chat navigation
-        // await router.push(`/messages/${userId}`);
-    }, [t]);
+    /** Open direct messages with this user (peer userId, not connectionId). */
+    const sendMessage = useCallback(
+        (peerUserId: string) => {
+            const id = peerUserId?.trim();
+            if (!id) {
+                toast.error(t('toasts.cannotOpenChat'));
+                return;
+            }
+            useChatStore.getState().setActiveChat({ id, type: 'direct' });
+            sessionStorage.setItem('activeChat', JSON.stringify({ id, type: 'direct' }));
+            toast.success(t('toasts.openingChat'));
+            router.push('/chat?t=direct&ct=direct');
+        },
+        [router, t]
+    );
 
     const addFriend = useCallback(async (userId: string) => {
         const actionKey = `addFriend-${userId}`;

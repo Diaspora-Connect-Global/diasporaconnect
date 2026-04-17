@@ -632,6 +632,7 @@
             "requestSent": "Demande envoyée"
         },
         "toasts": {
+            "cannotOpenChat": "Impossible d'ouvrir le chat.",
             "openingChat": "Ouverture du chat…",
             "requestSent": "Demande d'ami envoyée !",
             "friendAccepted": "Ami accepté !",

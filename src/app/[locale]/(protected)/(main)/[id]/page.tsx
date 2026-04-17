@@ -11,22 +11,19 @@ import { GET_USER_PROFILE, GetProfileResponse } from '@/services/gql/profile';
 import LoadingScreen from '@/components/custom/LoadingScreen';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { mapApiConnectionStatusToFriendType } from '@/lib/mapProfileConnectionStatus';
 
 export default function FriendProfile() {
     const params = useParams();
     const userId = params.id as string;
     const t = useTranslations('profile');
     const router = useRouter();
-    console.log('userId:', userId);
-
 
     // Fetch user profile by userId
     const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_USER_PROFILE, {
         variables: { userId },
         fetchPolicy: 'network-only', // Force fresh data
     });
-
-    console.log("from friends page", data)
 
     // Show loading screen while fetching data
     if (loading) {
@@ -50,7 +47,8 @@ export default function FriendProfile() {
     }
 
     const profile = data.getProfile.profile;
-const connectionId = data.getProfile.connectionId
+    const connectionId = data.getProfile.connectionId ?? '';
+    const friendType = mapApiConnectionStatusToFriendType(data.getProfile.connectionStatus);
 
     return (
         <div className="lg:flex space-x-5 my-2 mx-2">
@@ -60,12 +58,7 @@ const connectionId = data.getProfile.connectionId
                     userId={userId}
                     userData={profile}
                     connectionId={connectionId}
-                    friendType={
-                        data.getProfile.connectionStatus === "blocked" ? "blocked"
-                            : data.getProfile.connectionStatus === "pending_sent" ? "request-sent"
-                                : data.getProfile.connectionStatus === "pending_request" ? "request-received"
-                                    : data.getProfile.connectionStatus === "none" ? "suggested" : "friends"
-                    }
+                    friendType={friendType}
                     showFriendActions={true}
                     onConnectionAction={refetch}
                 />

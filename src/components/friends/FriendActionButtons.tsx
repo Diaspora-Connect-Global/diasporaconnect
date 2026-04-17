@@ -76,7 +76,7 @@ export const FriendActionButtons = ({
 
     const buttonMap: Record<FriendButtonType, ReactNode> = {
         message: (
-            <ButtonType1 key="message" onClick={() => sendMessage(connectionId)}>
+            <ButtonType1 key="message" onClick={() => sendMessage(userId)}>
                 {t('message')}
             </ButtonType1>
         ),

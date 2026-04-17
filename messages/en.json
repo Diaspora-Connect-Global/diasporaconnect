@@ -716,6 +716,7 @@
             "searchResults": "Search Results"
         },
         "toasts": {
+            "cannotOpenChat": "Could not open chat.",
             "openingChat": "Opening chat…",
             "requestSent": "Friend request sent!",
             "friendAccepted": "Friend accepted!",
