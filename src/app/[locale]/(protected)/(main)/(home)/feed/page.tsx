@@ -25,7 +25,7 @@ function getProfileData(post: Post) {
   if (post.authorType === 'USER' && post.authorProfile?.userProfile) {
     return {
       name: post.authorProfile.userProfile.name,
-      avatar: post.authorProfile.userProfile.avatarUrl || '/PROFILE.png',
+      avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
       tier: resolveUserTier({
         tier: (post.authorProfile.userProfile as { tier?: string }).tier,
         verificationTier: post.authorProfile.userProfile.verificationTier,
@@ -177,7 +177,7 @@ export default function FeedPage() {
                     postId={post.id}
                     profileImage={profileData.avatar}
                     profileName={profileData.name}
-                    authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
+                    {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
                     profileTier={profileData.tier}
                     category={profileData.type}
                     postDate={formatPostDate(post.createdAt)}
