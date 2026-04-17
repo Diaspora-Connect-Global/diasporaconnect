@@ -252,7 +252,7 @@ export default function PostPage() {
           {...(normalizedPostResolved.authorType === 'USER' ? { authorUserId: normalizedPostResolved.authorId } : {})}
           profileTier={profileData.tier}
           category={profileData.type}
-          postDate={formatPostDate(post.createdAt)}
+          postDate={formatPostDate(normalizedPostResolved.createdAt)}
           content={normalizedPostResolved.text}
           images={
             normalizedPostResolved.attachments
