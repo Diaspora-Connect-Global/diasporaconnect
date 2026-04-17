@@ -12,7 +12,7 @@ import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { resolveUserTier } from '@/lib/userTier';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { FEED_COLUMN_POST_PAGE_CLASS } from '@/lib/feedColumnLayout';
 import { cn } from '@/lib/utils';
 import { useUserStore } from '@/store/useUserStore';
 import type { Profile } from '@/services/gql/types/profile';
@@ -54,8 +54,9 @@ export default function PostPage() {
   const nameFromCurrentUser = isAuthorCurrentUser ? formatFullNameFromProfile(currentUser) : '';
 
   const needsAuthorProfileFetch =
-    Boolean(normalizedPost?.authorId) &&
+    normalizedPost != null &&
     normalizedPost.authorType === 'USER' &&
+    Boolean(normalizedPost.authorId) &&
     (!nameFromPostPayload || nameFromPostPayload === 'Unknown') &&
     !nameFromCurrentUser;
 
@@ -133,10 +134,10 @@ export default function PostPage() {
   if (loading) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={cn(FEED_COLUMN_CLASS, 'items-center justify-center')}>
+        <div className={cn(FEED_COLUMN_POST_PAGE_CLASS, 'items-center justify-center')}>
           <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
         </div>
-        <div className="hidden lg:block min-w-0 overflow-y-auto py-4">
+        <div className="hidden lg:block lg:flex-1 lg:min-w-0 overflow-y-auto py-4">
           <PeopleYouMayKnow />
         </div>
       </div>
@@ -146,7 +147,7 @@ export default function PostPage() {
   if (error || !data?.post) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={cn(FEED_COLUMN_CLASS, 'items-center justify-center p-4')}>
+        <div className={cn(FEED_COLUMN_POST_PAGE_CLASS, 'items-center justify-center p-4')}>
           <div className="text-center">
             <h1 className="text-2xl font-bold text-text-primary mb-2">Post not found</h1>
             <p className="text-text-secondary mb-4">The post you&apos;re looking for doesn&apos;t exist or has been removed.</p>
@@ -158,7 +159,7 @@ export default function PostPage() {
             </button>
           </div>
         </div>
-        <div className="hidden lg:block min-w-0 overflow-y-auto py-4">
+        <div className="hidden lg:block lg:flex-1 lg:min-w-0 overflow-y-auto py-4">
           <PeopleYouMayKnow />
         </div>
       </div>
@@ -240,10 +241,10 @@ export default function PostPage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      {/* Main content — same feed column as home (`FEED_COLUMN_CLASS`) */}
-      <div className={FEED_COLUMN_CLASS}>
-        <div className="space-y-2">
-          <div className="mb-2">
+      {/* Fixed `40vw` on lg+ so width does not track the right rail (`FEED_COLUMN_POST_PAGE_CLASS`) */}
+      <div className={FEED_COLUMN_POST_PAGE_CLASS}>
+        <div className="w-full min-w-0 max-w-full space-y-2">
+          <div className="mb-2 w-full min-w-0">
             <FeedCardWithReply
           postId={normalizedPostResolved.id}
           profileImage={profileData.avatar}
@@ -288,8 +289,8 @@ export default function PostPage() {
           </div>
         </div>
       </div>
-      {/* People you may know - same as homepage */}
-      <div className="hidden lg:block min-w-0 overflow-y-auto py-4">
+      {/* Takes remaining width so the post column stays a fixed `40vw` */}
+      <div className="hidden lg:block lg:flex-1 lg:min-w-0 overflow-y-auto py-4">
         <PeopleYouMayKnow />
       </div>
     </div>
