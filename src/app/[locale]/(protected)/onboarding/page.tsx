@@ -19,12 +19,10 @@ import {
   COMPLETE_OAUTH_REGISTRATION,
   RESEND_REGISTRATION_OTP,
   VERIFY_OTP,
-  VERIFY_OAUTH_PHONE_OTP,
   RegisterUserResponse,
   CompleteOAuthRegistrationResponse,
   ResendRegistrationOtpResponse,
   VerifyOtpResponse,
-  VerifyOAuthPhoneOtpResponse,
 } from '@/services/gql/authentication';
 
 import { useAuthStore } from '@/store/useAuthStore';
@@ -87,9 +85,6 @@ export default function CompleteAccount() {
 
   const [verifyOtp] =
     useMutation<VerifyOtpResponse>(VERIFY_OTP);
-
-  const [verifyOAuthPhoneOtp] =
-    useMutation<VerifyOAuthPhoneOtpResponse>(VERIFY_OAUTH_PHONE_OTP);
 
   /* ------------------------------------------------------------------ */
   /* Detect OAuth FIRST */
@@ -392,24 +387,6 @@ export default function CompleteAccount() {
       if (!token) {
         toast.error('Your verification session has expired. Please register again.');
         redirectToRegistration();
-        return;
-      }
-
-      if (isOAuth) {
-        const { data } = await verifyOAuthPhoneOtp({
-          variables: {
-            oauthRegistrationToken: token,
-            otp: formData.verificationCode,
-          },
-        });
-        const success = data?.verifyOAuthPhoneOtp;
-        if (!success) {
-          throw new Error('Verification failed. Please try again.');
-        }
-        sessionStorage.removeItem('registrationToken');
-        sessionStorage.removeItem('otp_expires_at');
-        toast.success('Phone number verified successfully!');
-        nextStep();
         return;
       }
 
