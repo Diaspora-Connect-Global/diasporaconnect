@@ -3,6 +3,57 @@
 import React from 'react';
 import { Link } from '@/i18n/navigation';
 
+/** http(s)://… or www.… — trailing punctuation stripped from the link target. */
+const URL_IN_TEXT =
+  /https?:\/\/[^\s<>'"()[\]{}]+|www\.[^\s<>'"()[\]{}]+/gi;
+
+function stripTrailingUrlPunctuation(href: string): string {
+  return href.replace(/[.,;:!?)]+$/g, '');
+}
+
+/**
+ * Split a plain-text segment into strings and external `<a>` nodes for URLs.
+ */
+function linkifyPlainSegment(segment: string, keyBase: string): React.ReactNode[] {
+  const text = segment.replace(/\u200B/g, '');
+  if (!text) return [];
+
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let sub = 0;
+  URL_IN_TEXT.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = URL_IN_TEXT.exec(text)) !== null) {
+    const full = m[0];
+    const trimmed = stripTrailingUrlPunctuation(full);
+    if (m.index > last) {
+      out.push(text.slice(last, m.index));
+    }
+    if (trimmed.length > 0) {
+      const href = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+      out.push(
+        <a
+          key={`${keyBase}-url-${sub++}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-text-brand underline decoration-text-brand/50 underline-offset-2 break-all hover:opacity-90"
+        >
+          {trimmed}
+        </a>,
+      );
+    }
+    if (full.length > trimmed.length) {
+      out.push(full.slice(trimmed.length));
+    }
+    last = m.index + full.length;
+  }
+  if (last < text.length) {
+    out.push(text.slice(last));
+  }
+  return out.length ? out : [text];
+}
+
 /**
  * Map from mention tag (without @) → userId.
  * e.g. { "StephenBedzrah": "user-uuid-123" }
@@ -14,6 +65,7 @@ export type MentionMap = Record<string, string>;
 
 /**
  * Parses post text and renders:
+ * - http(s):// and www. URLs as external links (opens new tab)
  * - @mentions as brand-styled links (with profile navigation when mentionMap is provided)
  * - #hashtags in bold with brand color
  * - Emoji/plain text as-is
@@ -44,9 +96,9 @@ export function renderRichText(
     : 'inline text-text-brand font-semibold bg-surface-brand-subtle px-1 py-0.5 rounded hover:bg-surface-brand-subtle/80 transition-colors no-underline';
 
   while ((match = pattern.exec(text)) !== null) {
-    // Add text before the match
+    // Add text before the match (with URL autolink)
     if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
+      parts.push(...linkifyPlainSegment(text.slice(lastIndex, match.index), `pre-${lastIndex}`));
     }
 
     const token = match[1];
@@ -93,9 +145,9 @@ export function renderRichText(
     lastIndex = match.index + match[0].length;
   }
 
-  // Add remaining text (filter out zero-width spaces for display)
+  // Remaining text after last @/# token (with URL autolink)
   if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex).replace(/\u200B/g, ''));
+    parts.push(...linkifyPlainSegment(text.slice(lastIndex), `tail-${lastIndex}`));
   }
 
   return parts;
@@ -109,7 +161,7 @@ interface RichTextProps {
 
 /**
  * Component wrapper for renderRichText.
- * Renders post content with styled @mentions (brand pill, optionally linked) and #hashtags (bold).
+ * Renders post content with clickable URLs, styled @mentions (brand pill, optionally linked), and #hashtags (bold).
  */
 export default function RichText({ text, mentionMap, className = '' }: RichTextProps) {
   return <span className={className}>{renderRichText(text, mentionMap)}</span>;
