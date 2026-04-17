@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   async redirects() {
     return [
+      // "login" is not a user id — avoid matching [id] profile route; real auth is /signin
+      { source: '/login', destination: '/en/signin', permanent: false },
+      { source: '/:locale/login', destination: '/:locale/signin', permanent: false },
       { source: '/:locale/communitys/:id', destination: '/:locale/community/:id', permanent: true },
       { source: '/:locale/associations/:id', destination: '/:locale/association/:id', permanent: true },
     ];

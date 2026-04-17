@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ChevronLeft } from 'lucide-react';
 import { resolveUserTier } from '@/lib/userTier';
+import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 
 function getProfileData(post: Post) {
   if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
@@ -110,10 +111,7 @@ export default function FeedPage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div
-        ref={feedContainerRef}
-        className="lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col"
-      >
+      <div ref={feedContainerRef} className={FEED_COLUMN_CLASS}>
         {/* Header: back + hashtag title */}
         <div className="flex items-center gap-3 mb-4 shrink-0">
           <Link

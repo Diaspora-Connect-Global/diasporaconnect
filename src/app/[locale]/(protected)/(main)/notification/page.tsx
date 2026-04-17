@@ -20,6 +20,7 @@ import {
 } from '@/services/gql/notification';
 import { GET_ASSOCIATION } from '@/services/gql/associations';
 import { GET_COMMUNITY } from '@/services/gql/community';
+import { useUserStore } from '@/store/useUserStore';
 
 function getNotificationTypeLabel(type: string | undefined, t: (key: string) => string): string {
   if (!type) return t('types.default');
@@ -145,7 +146,7 @@ function getNotificationDescription(
   if (type === 'membership.request') {
     return t('messages.membershipRequest', { communityName: communityLabel });
   }
-  if (type === 'connection.request') {
+  if (type === 'connection.request' || type === 'connection.requested') {
     return t('messages.connectionRequest', { actorName: actorLabel });
   }
   if (type === 'connection.accepted') {
@@ -154,7 +155,7 @@ function getNotificationDescription(
   if (type === 'post.like') {
     return t('messages.postLike', { actorName: actorLabel });
   }
-  if (type === 'post.comment') {
+  if (type === 'post.comment' || type === 'post.commented') {
     return t('messages.postComment', { actorName: actorLabel });
   }
   if (type === 'post.mention') {
@@ -324,6 +325,7 @@ export default function NotificationPage() {
   const router = useRouter();
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
+  const currentUserId = useUserStore((s) => s.user?.userId);
 
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
@@ -390,7 +392,7 @@ export default function NotificationPage() {
   const handleNotificationClick = useCallback(
     async (notification: Notification) => {
       const id = notification.id;
-      const path = getNotificationPath(notification);
+      const path = getNotificationPath(notification, { currentUserId });
       const target = `/${locale}${path}`;
 
       setReadIds((prev) => new Set(prev).add(id));
@@ -407,7 +409,7 @@ export default function NotificationPage() {
       }
       router.push(target);
     },
-    [locale, markAsReadMutation, router]
+    [locale, markAsReadMutation, router, currentUserId]
   );
 
   const markAllAsRead = useCallback(async () => {

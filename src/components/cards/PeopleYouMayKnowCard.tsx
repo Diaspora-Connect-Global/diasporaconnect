@@ -2,10 +2,11 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { LabelMedium } from '../utils';
 import { Spinner } from '@/components/ui/spinner';
+import { Link } from '@/i18n/navigation';
 
 interface PeopleYouMayKnowCardProps {
+  userId: string;
   profileImage: string;
   name: string;
   mutualConnections: number;
@@ -16,6 +17,7 @@ interface PeopleYouMayKnowCardProps {
 }
 
 export default function PeopleYouMayKnowCard({
+  userId,
   profileImage,
   name,
   mutualConnections,
@@ -75,8 +77,10 @@ export default function PeopleYouMayKnowCard({
 
   return (
     <div className="h-[2.5rem] flex space-x-6 items-center justify-between transition-colors rounded-lg">
-      {/* Left side - Profile info */}
-      <div className="flex items-center mr-2 gap-[0.5rem]">
+      <Link
+        href={`/${userId}`}
+        className="flex min-w-0 flex-1 items-center gap-[0.5rem] rounded-md mr-2 outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-text-brand"
+      >
         <div className="h-[1.5rem] w-[1.5rem] flex-shrink-0">
           {shouldShowFallback ? (
             <div
@@ -95,17 +99,18 @@ export default function PeopleYouMayKnowCard({
             />
           )}
         </div>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h3 className="caption-medium text-text-primary truncate">{name}</h3>
           <p className="body-small text-text-secondary truncate">
             {mutualConnections} {t('mutualConnections', { count: mutualConnections })}
           </p>
         </div>
-      </div>
+      </Link>
 
       {/* Right side - Action button */}
       <div className="flex items-center">
         <button
+          type="button"
           className="inline-flex items-center gap-1 text-text-brand cursor-pointer whitespace-nowrap"
           onClick={handleClick}
           disabled={isAdded || isLoading}

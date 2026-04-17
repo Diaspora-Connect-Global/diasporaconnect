@@ -39,10 +39,10 @@ export default function FriendProfile() {
             <div className="flex items-center justify-center h-app-inner">
                 <div className="text-center space-y-4">
                     <p className="text-destructive">
-                        userNotFound
+                        {t('userNotFound')}
                     </p>
                     <ButtonType2 onClick={() => router.back()}>
-                        Go back
+                        {t('goBack')}
                     </ButtonType2>
                 </div>
             </div>

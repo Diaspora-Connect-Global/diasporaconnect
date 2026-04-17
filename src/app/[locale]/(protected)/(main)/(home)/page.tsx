@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { resolveUserTier } from '@/lib/userTier';
+import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 
 // Type definitions for better type safety
 interface DiscoverCommunitiesData {
@@ -354,7 +355,7 @@ export default function Home() {
       {/* Main Feed - Independent Scroll */}
       <div
         ref={feedContainerRef}
-        className="lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col"
+        className={FEED_COLUMN_CLASS}
       >
         {/* Discover Section */}
         <div className="flex justify-between mb-4 shrink-0">

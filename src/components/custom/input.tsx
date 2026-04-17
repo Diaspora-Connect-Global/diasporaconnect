@@ -83,7 +83,10 @@ interface TextInputProps {
     id?: string;
     required?: boolean;
     disabled?: boolean;
-
+    /** Shown below the field; also sets border and aria-invalid when set. */
+    errorMessage?: string;
+    /** Green border when true and no errorMessage. */
+    success?: boolean;
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
@@ -94,8 +97,17 @@ export const TextInput: React.FC<TextInputProps> = ({
     label = "Email",
     id = "email",
     required = false,
-    disabled = false
+    disabled = false,
+    errorMessage,
+    success = false,
 }) => {
+    const errorId = errorMessage ? `${id}-error` : undefined;
+    const borderClass = errorMessage
+        ? 'border-amber-600/80 dark:border-amber-500/80 border-2'
+        : success
+          ? 'border-emerald-600/70 dark:border-emerald-500/70 border-2'
+          : 'border-border-subtle border-2';
+
     return (
         <div className="space-y-2">
             <label htmlFor={id}>
@@ -112,7 +124,7 @@ export const TextInput: React.FC<TextInputProps> = ({
                     disabled ? 'opacity-60' : ''
                 }`}
             >
-                <div className="border-border-subtle border-2 rounded-md">
+                <div className={`${borderClass} rounded-md`}>
                     <input
                         id={id}
                         type={type}
@@ -127,9 +139,22 @@ export const TextInput: React.FC<TextInputProps> = ({
                         `}
                         required={required}
                         aria-disabled={disabled}
+                        aria-invalid={Boolean(errorMessage)}
+                        aria-describedby={errorId ?? undefined}
+                        autoComplete={type === 'email' ? 'email' : undefined}
+                        inputMode={type === 'email' ? 'email' : undefined}
                     />
                 </div>
             </div>
+            {errorMessage ? (
+                <p
+                    id={errorId}
+                    role="alert"
+                    className="text-sm text-amber-800 dark:text-amber-200/90"
+                >
+                    {errorMessage}
+                </p>
+            ) : null}
         </div>
     );
 };

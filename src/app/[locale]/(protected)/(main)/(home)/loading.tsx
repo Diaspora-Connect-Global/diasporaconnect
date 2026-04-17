@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { FEED_COLUMN_CLASS } from "@/lib/feedColumnLayout";
 
 export default function HomeLoading() {
   return (
@@ -20,7 +21,7 @@ export default function HomeLoading() {
       <div className="min-w-0">
         <div className="h-app-inner flex overflow-hidden">
           {/* Main Feed Skeleton */}
-          <div className="lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col">
+          <div className={FEED_COLUMN_CLASS}>
             {/* Discover Section Header */}
             <div className="flex justify-between mb-4 shrink-0">
               <Skeleton className="h-6 w-24" />

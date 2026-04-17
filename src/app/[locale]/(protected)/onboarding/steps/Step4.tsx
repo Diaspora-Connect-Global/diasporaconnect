@@ -1,5 +1,5 @@
 // steps/Step4.tsx - Phone Number
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
 import { LabelMedium } from '@/components/utils';
@@ -7,6 +7,12 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/
 import { useTranslations } from 'next-intl';
 import { CountryCodeSelect } from '@/components/custom/input';
 import { COUNTRIES } from '@/data/CountryCodesWithFlags';
+import { getRegistrationPhonePlaceholder } from '@/lib/registrationPhonePlaceholder';
+import {
+    getNationalNumberBounds,
+    getRegistrationPhoneInputStatus,
+    normalizeNationalPhoneInput,
+} from '@/lib/registrationPhoneValidation';
 
 interface Step4Props {
     data: FormData;
@@ -20,8 +26,61 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
-    const isNextDisabled = !data.phoneNumber.trim() || !data.countryCode;
+    const phonePlaceholder = useMemo(
+        () => getRegistrationPhonePlaceholder(data.country),
+        [data.country]
+    );
 
+    const nationalDigits = useMemo(
+        () => normalizeNationalPhoneInput(data.phoneNumber || '', data.countryCode || ''),
+        [data.phoneNumber, data.countryCode]
+    );
+
+    const phoneInputStatus = useMemo(
+        () => getRegistrationPhoneInputStatus(data.countryCode, nationalDigits),
+        [data.countryCode, nationalDigits]
+    );
+
+    const bounds = useMemo(
+        () => getNationalNumberBounds(data.countryCode || ''),
+        [data.countryCode]
+    );
+
+    const isNextDisabled =
+        !data.countryCode || phoneInputStatus !== 'valid';
+
+    const showShortHint =
+        Boolean(data.countryCode) &&
+        nationalDigits.length > 0 &&
+        phoneInputStatus === 'incomplete' &&
+        nationalDigits.length < bounds.min;
+
+    const inputRingClass = useMemo(() => {
+        if (!data.countryCode || nationalDigits.length === 0) {
+            return 'border-border-default';
+        }
+        if (phoneInputStatus === 'valid') {
+            return 'border-emerald-600/70 dark:border-emerald-500/70';
+        }
+        if (showShortHint) {
+            return 'border-amber-600/80 dark:border-amber-500/80';
+        }
+        return 'border-border-default';
+    }, [data.countryCode, nationalDigits.length, phoneInputStatus, showShortHint]);
+
+    const handlePhoneChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            if (!data.countryCode) {
+                return;
+            }
+            const next = normalizeNationalPhoneInput(
+                e.target.value,
+                data.countryCode
+            );
+            updateData({ phoneNumber: next });
+        },
+        [data.countryCode, updateData]
+    );
 
     const handleCodeChange = (value: string) => {
 
@@ -65,7 +124,9 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
 
 
 
-                <InputGroup className='px-3 py-6 border-1 border-border-default rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition'>
+                <InputGroup
+                    className={`px-3 py-6 border-1 rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition ${inputRingClass}`}
+                >
                     <InputGroupAddon>
                         <InputGroupText>
                             <CountryCodeSelect
@@ -78,12 +139,35 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
                     </InputGroupAddon>
 
                     <InputGroupInput
-                        onChange={(e) => updateData({ phoneNumber: e.target.value })}
+                        id="phoneNumber"
+                        inputMode="tel"
+                        autoComplete="tel-national"
+                        onChange={handlePhoneChange}
                         value={data.phoneNumber || ''}
-                        placeholder={t('phoneVerification.phoneNumber.placeholder')}
+                        placeholder={phonePlaceholder}
+                        aria-invalid={showShortHint}
+                        aria-describedby={
+                            showShortHint ? 'phone-national-hint' : undefined
+                        }
                         className='text-text-primary font-body-large  px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0'
                     />
                 </InputGroup>
+                {showShortHint ? (
+                    <p
+                        id="phone-national-hint"
+                        className="mt-2 text-sm text-amber-800 dark:text-amber-200/90"
+                        role="status"
+                    >
+                        {bounds.min === bounds.max
+                            ? t('phoneVerification.phoneNumber.validation.needExact', {
+                                  n: bounds.min,
+                              })
+                            : t('phoneVerification.phoneNumber.validation.needMin', {
+                                  min: bounds.min,
+                                  max: bounds.max,
+                              })}
+                    </p>
+                ) : null}
             </div>
         </MultiStep>
     );

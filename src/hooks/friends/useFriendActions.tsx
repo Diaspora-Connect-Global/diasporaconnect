@@ -7,8 +7,7 @@ import {
     ACCEPT_CONNECTION,
     REJECT_CONNECTION,
     GET_MY_CONNECTIONS,
-    GET_PENDING_REQUESTS_SENT,
-    GET_PENDING_REQUESTS_RECEIVED,
+    GET_ALL_PENDING_CONNECTIONS,
     GET_FRIEND_SUGGESTIONS,
     SEARCH_USERS,
     SendConnectionRequestResponse,
@@ -81,7 +80,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         {
             refetchQueries: () => [
                 { query: GET_MY_CONNECTIONS },
-                { query: GET_PENDING_REQUESTS_SENT },
+                { query: GET_ALL_PENDING_CONNECTIONS, variables: { limit: 100, offset: 0 } },
                 ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,
@@ -93,7 +92,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         {
             refetchQueries: () => [
                 { query: GET_MY_CONNECTIONS },
-                { query: GET_PENDING_REQUESTS_RECEIVED },
+                { query: GET_ALL_PENDING_CONNECTIONS, variables: { limit: 100, offset: 0 } },
                 ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,
@@ -105,7 +104,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         {
             refetchQueries: () => [
                 { query: GET_MY_CONNECTIONS },
-                { query: GET_PENDING_REQUESTS_RECEIVED },
+                { query: GET_ALL_PENDING_CONNECTIONS, variables: { limit: 100, offset: 0 } },
                 ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,
@@ -116,7 +115,7 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         CANCEL_CONNECTION,
         {
             refetchQueries: () => [
-                { query: GET_PENDING_REQUESTS_SENT },
+                { query: GET_ALL_PENDING_CONNECTIONS, variables: { limit: 100, offset: 0 } },
                 ...buildRefetchQueries(),
             ],
             awaitRefetchQueries: true,

@@ -20,7 +20,8 @@
             },
             "confirmPassword": {
                 "label": "Passwort bestätigen",
-                "placeholder": "Bestätigen Sie Ihr neues Passwort"
+                "placeholder": "Bestätigen Sie Ihr neues Passwort",
+                "mismatch": "Die Passwörter stimmen nicht überein"
             }
         },
         "policies": {
@@ -41,6 +42,21 @@
                 "prompt": "Neu bei Diaspora Connect Global?",
                 "action": "Konto erstellen"
             }
+        },
+        "validation": {
+            "email": {
+                "required": "E-Mail ist erforderlich",
+                "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+            },
+            "password": {
+                "required": "Passwort ist erforderlich",
+                "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein"
+            },
+            "twoFactor": {
+                "required": "Zwei-Faktor-Code ist erforderlich",
+                "invalid": "Bitte geben Sie einen gültigen 6-stelligen Code ein"
+            },
+            "formError": "Bitte beheben Sie die Fehler, bevor Sie fortfahren"
         },
         "forgotPassword": "Passwort vergessen?"
     },
@@ -78,7 +94,11 @@
             "description": "Wir senden Ihnen einen Kurzcode zur Bestätigung Ihrer Nummer. Dies hilft, Ihr Konto sicher zu halten und erleichtert die Verbindung mit Ihrer Community.",
             "phoneNumber": {
                 "label": "Telefonnummer",
-                "placeholder": "Handynummer"
+                "placeholder": "Handynummer",
+                "validation": {
+                    "needExact": "Geben Sie {n} Ziffern ein (nur nationale Nummer, ohne Landesvorwahl).",
+                    "needMin": "Geben Sie zwischen {min} und {max} Ziffern ein (nur nationale Nummer, ohne Landesvorwahl)."
+                }
             }
         },
         "confirmVerification": {
@@ -528,11 +548,13 @@
         "types": {
             "connection": {
                 "request": "Verbindungsanfrage",
+                "requested": "Verbindungsanfrage",
                 "accepted": "Verbindung angenommen"
             },
             "post": {
                 "like": "Gefällt mir",
                 "comment": "Kommentar",
+                "commented": "Kommentar",
                 "mention": "Erwähnung"
             },
             "message": {
@@ -630,6 +652,8 @@
         "youHaveBlockedThisUser": "Sie haben diesen Benutzer blockiert."
     },
     "profile": {
+        "userNotFound": "Dieses Profil wurde nicht gefunden.",
+        "goBack": "Zurück",
         "workExperience": {
             "title": "Berufserfahrung",
             "addExperience": "Erfahrung hinzufügen",

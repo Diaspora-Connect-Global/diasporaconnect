@@ -365,9 +365,12 @@ export const GET_FRIEND_SUGGESTIONS = gql`
 `;
 
 
-// Get pending requests SENT (where current user is requester)
-export const GET_PENDING_REQUESTS_SENT = gql`
-  query GetPendingRequestsSent($limit: Float, $offset: Float) {
+/**
+ * All pending connections for the current user (outbound + inbound).
+ * Split client-side: requesterId === me → sent; receiverId === me → received.
+ */
+export const GET_ALL_PENDING_CONNECTIONS = gql`
+  query GetAllPendingConnections($limit: Float, $offset: Float) {
     getPendingConnections(limit: $limit, offset: $offset) {
       success
       message
@@ -409,49 +412,10 @@ export const GET_PENDING_REQUESTS_SENT = gql`
   }
 `;
 
-// Get pending requests RECEIVED (where current user is receiver)
-export const GET_PENDING_REQUESTS_RECEIVED = gql`
-  query GetPendingRequestsReceived($limit: Float, $offset: Float) {
-    getPendingConnections(limit: $limit, offset: $offset) {
-      success
-      message
-      total
-      connections {
-        id
-        status
-        requesterId
-        receiverId
-        message
-        createdAt
-        connectionStatus
-        requester {
-          userId
-          firstName
-          lastName
-          email
-          avatarUrl
-          bio
-          occupation
-          sector
-          location
-          country
-        }
-        receiver {
-          userId
-          firstName
-          lastName
-          email
-          avatarUrl
-          bio
-          occupation
-          sector
-          location
-          country
-        }
-      }
-    }
-  }
-`;
+/** @deprecated Use GET_ALL_PENDING_CONNECTIONS — same document for cache compatibility */
+export const GET_PENDING_REQUESTS_SENT = GET_ALL_PENDING_CONNECTIONS;
+/** @deprecated Use GET_ALL_PENDING_CONNECTIONS — same document for cache compatibility */
+export const GET_PENDING_REQUESTS_RECEIVED = GET_ALL_PENDING_CONNECTIONS;
 
 // ============================================================================
 // SEARCH QUERY

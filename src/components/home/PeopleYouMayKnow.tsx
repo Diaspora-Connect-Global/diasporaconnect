@@ -8,7 +8,7 @@ import { useQuery } from "@apollo/client/react";
 import { GET_FRIEND_SUGGESTIONS, GetFriendSuggestionsResponse } from "@/services/gql/connection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 // Loading skeleton for friend suggestions
 function FriendSuggestionSkeleton() {
@@ -43,7 +43,17 @@ export function PeopleYouMayKnow() {
         }
     );
 
-    const suggestions = data?.getFriendSuggestions.suggestions || [];
+    const suggestions = useMemo(() => {
+        const list = data?.getFriendSuggestions.suggestions ?? [];
+        return list.filter((s) => {
+            const st = s.profile.connectionStatus ?? "none";
+            return (
+                st !== "pending_sent" &&
+                st !== "connected" &&
+                st !== "blocked"
+            );
+        });
+    }, [data]);
 
     const handleAddFriend = async (userId: string) => {
         setLoadingUserId(userId); // Set loading state for this specific user
@@ -88,6 +98,7 @@ export function PeopleYouMayKnow() {
                         suggestions.map((suggestion) => (
                             <PeopleYouMayKnowCard
                                 key={suggestion.profile.userId}
+                                userId={suggestion.profile.userId}
                                 profileImage={suggestion.profile.avatarUrl }
                                 name={`${suggestion.profile.firstName} ${suggestion.profile.lastName}`}
                                 mutualConnections={suggestion.mutualConnectionsCount}

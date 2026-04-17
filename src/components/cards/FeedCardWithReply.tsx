@@ -90,6 +90,8 @@ interface FeedCardProps {
     isLiked?: boolean;
     isSaved?: boolean;
     isShared?: boolean;
+    /** From e.g. /post/[id]?commentId=… — expand comments, load list, scroll to and highlight that comment */
+    initialFocusCommentId?: string;
 }
 
 /* --------------------------------------------------------------- */
@@ -152,6 +154,7 @@ export default function FeedCardWithReply({
     isLiked: initialIsLiked = false,
     isSaved: initialIsSaved = false,
     isShared: initialIsShared = false,
+    initialFocusCommentId,
 }: FeedCardProps) {
     const router = useRouter();
     const [isLiked, setIsLiked] = useState(initialIsLiked);
@@ -224,6 +227,41 @@ export default function FeedCardWithReply({
             fetchComments({ variables: { postId, limit: 20, offset: 0 } });
         }
     }, [commentsLoaded, postId, fetchComments]);
+
+    /** Notification deep-link: show comments and fetch enough rows to include the target id */
+    useEffect(() => {
+        const cid = initialFocusCommentId?.trim();
+        if (!cid || !postId) return;
+        setShowComments(true);
+        fetchComments({ variables: { postId, limit: 100, offset: 0 } });
+    }, [initialFocusCommentId, postId, fetchComments]);
+
+    useEffect(() => {
+        const cid = initialFocusCommentId?.trim();
+        if (!cid || !commentsLoaded || commentsLoading) return;
+        const timer = window.setTimeout(() => {
+            const el = document.getElementById(`post-comment-${cid}`);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add(
+                'ring-2',
+                'ring-text-brand',
+                'rounded-md',
+                'transition-shadow',
+                'duration-300'
+            );
+            window.setTimeout(() => {
+                el.classList.remove(
+                    'ring-2',
+                    'ring-text-brand',
+                    'rounded-md',
+                    'transition-shadow',
+                    'duration-300'
+                );
+            }, 3500);
+        }, 120);
+        return () => window.clearTimeout(timer);
+    }, [initialFocusCommentId, commentsLoaded, commentsLoading, loadedComments]);
 
     /** Derived commentsData — prefer loaded from API, fall back to prop */
     const commentsData = commentsLoaded ? loadedComments : commentsDataProp;
@@ -673,7 +711,7 @@ export default function FeedCardWithReply({
                         </p>
                     ) : (
                         topLevel.map((c) => (
-                            <div key={c.id}>
+                            <div key={c.id} id={`post-comment-${c.id}`}>
                                 <div className="flex gap-[0.75rem]">
                                     <img
                                         src={c.authorImage || '/PROFILE.png'}
@@ -725,7 +763,7 @@ export default function FeedCardWithReply({
                                 {(repliesByParentId.get(c.id)?.length ?? 0) > 0 && (
                                     <div className="ml-8 mt-3 space-y-3">
                                         {repliesByParentId.get(c.id)!.map((reply) => (
-                                            <div key={reply.id} className="flex gap-[0.75rem]">
+                                            <div key={reply.id} id={`post-comment-${reply.id}`} className="flex gap-[0.75rem]">
                                                 <img
                                                     src={reply.authorImage || '/PROFILE.png'}
                                                     alt={reply.author}

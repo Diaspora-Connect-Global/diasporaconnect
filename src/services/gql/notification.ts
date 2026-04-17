@@ -22,6 +22,42 @@ function pickString(data: Record<string, unknown> | undefined, keys: string[]): 
   return undefined;
 }
 
+/** Other party in a connection (for profile links); uses requester/receiver vs current user when possible. */
+function resolveConnectionPeerUserId(
+  data: Record<string, unknown> | undefined,
+  currentUserId?: string
+): string | undefined {
+  if (!data) return undefined;
+
+  const requesterId = pickString(data, ['requesterId']);
+  const receiverId = pickString(data, ['receiverId']);
+
+  if (currentUserId && requesterId && receiverId) {
+    if (requesterId === currentUserId) return receiverId;
+    if (receiverId === currentUserId) return requesterId;
+  }
+
+  const fromActor = pickString(data, [
+    'actorId',
+    'fromUserId',
+    'senderId',
+    'userId',
+    'peerUserId',
+  ]);
+  if (fromActor) return fromActor;
+
+  if (requesterId) return requesterId;
+  if (receiverId) return receiverId;
+
+  return undefined;
+}
+
+function ensureLeadingSlash(path: string): string {
+  const p = path.trim();
+  if (!p) return '/notification';
+  return p.startsWith('/') ? p : `/${p}`;
+}
+
 /* ------------------------------------------------------------------ */
 /* Queries */
 /* ------------------------------------------------------------------ */
@@ -106,16 +142,56 @@ export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
 /* Navigation */
 /* ------------------------------------------------------------------ */
 
+export type GetNotificationPathOptions = {
+  /** Current user's id — used to pick the *other* user for connection notifications. */
+  currentUserId?: string;
+};
+
 /**
  * Returns the path (with leading slash) to navigate to for a notification.
- * Prefer link/actionUrl; fall back to type + data. Caller should prepend locale, e.g. `/${locale}${path}`.
+ * Caller builds the full URL, e.g. `/${locale}${path}` (path already starts with `/`).
+ *
+ * For `connection.*` types, we always resolve the **peer user's profile** from `data` and ignore
+ * `link` / `actionUrl`, which may point at API-style routes like `connections/requests/{connectionId}`.
  */
-export function getNotificationPath(notification: Pick<Notification, 'type' | 'data' | 'link' | 'actionUrl'>): string {
-  if (notification.link) return notification.link;
-  if (notification.actionUrl) return notification.actionUrl;
-
+export function getNotificationPath(
+  notification: Pick<Notification, 'type' | 'data' | 'link' | 'actionUrl'>,
+  options?: GetNotificationPathOptions
+): string {
   const { type, data } = notification;
   const d = data as Record<string, unknown> | undefined;
+
+  if (type?.startsWith('connection.')) {
+    const peer = resolveConnectionPeerUserId(d, options?.currentUserId);
+    if (peer) return `/${peer}`;
+    return '/feed';
+  }
+
+  // Post comment / reply: open the post with comments and deep-link to the triggering comment
+  // (must run before link/actionUrl — API may send non-app URLs).
+  if (
+    (type === 'post.comment' ||
+      type === 'post.commented' ||
+      type === 'post.reply' ||
+      type === 'post.replied') &&
+    d?.postId
+  ) {
+    const pid = String(d.postId);
+    const commentId = pickString(d, [
+      'commentId',
+      'targetCommentId',
+      'targetId',
+      'replyCommentId',
+      'replyId',
+    ]);
+    if (commentId) {
+      return `/post/${pid}?commentId=${encodeURIComponent(commentId)}`;
+    }
+    return `/post/${pid}`;
+  }
+
+  if (notification.link) return ensureLeadingSlash(notification.link);
+  if (notification.actionUrl) return ensureLeadingSlash(notification.actionUrl);
 
   if (d?.postId) return `/post/${String(d.postId)}`;
   if (d?.eventId) return `/events/${String(d.eventId)}`;
@@ -144,7 +220,6 @@ export function getNotificationPath(notification: Pick<Notification, 'type' | 'd
     return `/${section}/${String(d.entityId)}`;
   }
   if (type?.startsWith('profile.')) return '/profile';
-  if (type?.startsWith('connection.')) return '/feed';
   if (type?.startsWith('message.') || type?.startsWith('group.message.')) return '/chat';
   if (type?.startsWith('event.')) return '/events';
   if (type?.startsWith('membership.')) return '/community';

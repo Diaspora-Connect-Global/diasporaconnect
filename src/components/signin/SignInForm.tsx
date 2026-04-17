@@ -17,6 +17,10 @@ import { ButtonType2 } from '../custom/button';
 import { Link } from '@/i18n/navigation';
 import { HeadingMedium, BodyMedium, LabelLarge } from '../utils';
 import { useUserStore } from '@/store/useUserStore';
+import {
+  isValidEmailFormat,
+  shouldShowEmailFormatError,
+} from '@/lib/emailValidation';
 
 interface ValidationErrors {
     email?: string;
@@ -62,8 +66,7 @@ export default function SignInForm() {
     /* ============ Validation ============ */
     const validateEmail = (email: string): string | undefined => {
         if (!email.trim()) return t('validation.email.required');
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) return t('validation.email.invalid');
+        if (!isValidEmailFormat(email)) return t('validation.email.invalid');
         return undefined;
     };
 
@@ -187,6 +190,10 @@ export default function SignInForm() {
         }
     };
 
+    const emailTrimmed = email.trim();
+    const emailFormatOk = isValidEmailFormat(emailTrimmed);
+    const showEmailFormatError =
+        shouldShowEmailFormatError(email) && !emailFormatOk;
 
     return (
         <div className="space-y-4 lg:space-y-8">
@@ -205,6 +212,14 @@ export default function SignInForm() {
                         placeholder={t("form.email.placeholder")}
                         label={t("form.email.label")}
                         id="email"
+                        errorMessage={
+                            showEmailFormatError
+                                ? t('validation.email.invalid')
+                                : undefined
+                        }
+                        success={
+                            emailFormatOk && emailTrimmed.length > 0
+                        }
                     />
 
                     <PasswordInput

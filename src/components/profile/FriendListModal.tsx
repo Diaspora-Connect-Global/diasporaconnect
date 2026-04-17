@@ -16,8 +16,7 @@ import {
   SearchUsersResponse,
 } from "@/services/gql/connection";
 import {
-  GET_PENDING_REQUESTS_SENT,
-  GET_PENDING_REQUESTS_RECEIVED,
+  GET_ALL_PENDING_CONNECTIONS,
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -93,21 +92,12 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   });
 
   const {
-    data: requestsSentData,
-    loading: requestsSentLoading,
-    refetch: refetchRequestsSent
-  } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_SENT, {
+    data: pendingConnectionsData,
+    loading: pendingConnectionsLoading,
+  } = useQuery<GetPendingRequestsResponse>(GET_ALL_PENDING_CONNECTIONS, {
     variables: { limit: 100.0, offset: 0.0 },
-    skip: activeTab !== "request-sent",
-  });
-
-  const {
-    data: requestsReceivedData,
-    loading: requestsReceivedLoading,
-    refetch: refetchRequestsReceived
-  } = useQuery<GetPendingRequestsResponse>(GET_PENDING_REQUESTS_RECEIVED, {
-    variables: { limit: 100.0, offset: 0.0 },
-    skip: activeTab !== "request-received",
+    skip:
+      activeTab !== "request-sent" && activeTab !== "request-received",
   });
 
   const {
@@ -220,45 +210,43 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       });
     }
 
- // Process pending requests SENT (where I am the requester)
-if (requestsSentData?.getPendingConnections.connections) {
-  requestsSentData.getPendingConnections.connections
-    .filter(connection => connection.requesterId === currentUserId) // Only show requests I sent
-    .forEach((connection) => {
-      friends.push({
-        userId: connection.receiver.userId,
-        connectionId: connection.id,
-        name: `${connection.receiver.firstName} ${connection.receiver.lastName}`,
-        imageSrc: connection.receiver.avatarUrl || '',
-        mutualConnections: undefined,
-        tier: getTierFromUser(connection.receiver),
-        connectionStatus: "pending_sent",
-        tabType: "request-sent",
-        searchQuery: "",
-        isSearching: false,
-      });
-    });
-}
+    // Pending (outbound + inbound) — one query, split by role vs current user
+    const pendingList = pendingConnectionsData?.getPendingConnections.connections;
+    if (pendingList) {
+      pendingList
+        .filter((connection) => connection.requesterId === currentUserId)
+        .forEach((connection) => {
+          friends.push({
+            userId: connection.receiver.userId,
+            connectionId: connection.id,
+            name: `${connection.receiver.firstName} ${connection.receiver.lastName}`,
+            imageSrc: connection.receiver.avatarUrl || "",
+            mutualConnections: undefined,
+            tier: getTierFromUser(connection.receiver),
+            connectionStatus: "pending_sent",
+            tabType: "request-sent",
+            searchQuery: "",
+            isSearching: false,
+          });
+        });
 
-// Process pending requests RECEIVED (where I am the receiver)
-if (requestsReceivedData?.getPendingConnections.connections) {
-  requestsReceivedData.getPendingConnections.connections
-    .filter(connection => connection.receiverId === currentUserId) // Only show requests I received
-    .forEach((connection) => {
-      friends.push({
-        userId: connection.requester.userId,
-        connectionId: connection.id,
-        name: `${connection.requester.firstName} ${connection.requester.lastName}`,
-        imageSrc: connection.requester.avatarUrl || '',
-        mutualConnections: undefined,
-        tier: getTierFromUser(connection.requester),
-        connectionStatus: "pending_received",
-        tabType: "request-received",
-        searchQuery: "",
-        isSearching: false,
-      });
-    });
-}
+      pendingList
+        .filter((connection) => connection.receiverId === currentUserId)
+        .forEach((connection) => {
+          friends.push({
+            userId: connection.requester.userId,
+            connectionId: connection.id,
+            name: `${connection.requester.firstName} ${connection.requester.lastName}`,
+            imageSrc: connection.requester.avatarUrl || "",
+            mutualConnections: undefined,
+            tier: getTierFromUser(connection.requester),
+            connectionStatus: "pending_received",
+            tabType: "request-received",
+            searchQuery: "",
+            isSearching: false,
+          });
+        });
+    }
 
     // Process friend suggestions OR search results (for suggested tab)
     if (activeTab === "suggested") {
@@ -304,11 +292,10 @@ if (requestsReceivedData?.getPendingConnections.connections) {
     activeTab,
     debouncedSearchTerm,
     connectionsData,
-    requestsSentData,
-    requestsReceivedData,
+    pendingConnectionsData,
     suggestions,
     searchResults,
-    shouldShowStaleResults
+    shouldShowStaleResults,
   ]);
 
   /* --------------------- Clear search on tab change --------------------- */
@@ -344,24 +331,33 @@ if (requestsReceivedData?.getPendingConnections.connections) {
 
   /* --------------------- Dynamic counts --------------------- */
   const counts = useMemo(() => {
+    const pendingConns =
+      pendingConnectionsData?.getPendingConnections.connections;
+    const receivedCount =
+      pendingConns?.filter((c) => c.receiverId === useUserStore.getState().user?.userId)
+        .length ?? 0;
+    const sentCount =
+      pendingConns?.filter((c) => c.requesterId === useUserStore.getState().user?.userId)
+        .length ?? 0;
+
     const byStatus: Record<FriendType, number> = {
-      "friends": connectionsData?.getConnections.total || 0,
-      "suggested": debouncedSearchTerm.length > 0
-        ? (searchResults?.searchUsers.total || 0)
-        : (suggestions?.getFriendSuggestions.total || 0),
-      "request-received": requestsReceivedData?.getPendingConnections.total || 0,
-      "request-sent": requestsSentData?.getPendingConnections.total || 0,
-      "blocked": 0,
+      friends: connectionsData?.getConnections.total || 0,
+      suggested:
+        debouncedSearchTerm.length > 0
+          ? searchResults?.searchUsers.total || 0
+          : suggestions?.getFriendSuggestions.total || 0,
+      "request-received": receivedCount,
+      "request-sent": sentCount,
+      blocked: 0,
     };
 
     return byStatus;
   }, [
     debouncedSearchTerm,
     connectionsData,
-    requestsSentData,
-    requestsReceivedData,
+    pendingConnectionsData,
     suggestions,
-    searchResults
+    searchResults,
   ]);
 
   const tabTitleMap: Record<FriendType, string> = {
@@ -389,13 +385,16 @@ if (requestsReceivedData?.getPendingConnections.connections) {
     if (activeTab === "suggested") {
       return suggestionsLoading;
     }
-    
-    // For other tabs
-    return (
-      connectionsLoading ||
-      requestsSentLoading ||
-      requestsReceivedLoading
-    );
+
+    if (activeTab === "friends") {
+      return connectionsLoading;
+    }
+
+    if (activeTab === "request-sent" || activeTab === "request-received") {
+      return pendingConnectionsLoading;
+    }
+
+    return false;
   })();
 
   /* --------------------- Card renderer --------------------- */

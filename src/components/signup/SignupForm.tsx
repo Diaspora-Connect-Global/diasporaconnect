@@ -19,6 +19,10 @@ import { toast } from 'sonner';
 import { ButtonType2 } from '../custom/button';
 import { generateDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { useAuthStore } from '@/store/useAuthStore';
+import {
+  isValidEmailFormat,
+  shouldShowEmailFormatError,
+} from '@/lib/emailValidation';
 
 export default function SignUpForm() {
   const tCommon = useTranslations("common");
@@ -56,13 +60,6 @@ export default function SignUpForm() {
   );
 
   /**
-   * Validates email format
-   */
-  const isValidEmail = (email: string): boolean => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  /**
    * Validates password strength
    * Requirements: min 8 chars, uppercase, lowercase, number, special char
    */
@@ -89,7 +86,7 @@ export default function SignUpForm() {
       toast.error(t('form.email.label') + ' is required');
       return;
     }
-    if (!isValidEmail(trimmedEmail)) {
+    if (!isValidEmailFormat(trimmedEmail)) {
       toast.error(t('form.email.label') + ' is invalid');
       return;
     }
@@ -163,6 +160,16 @@ export default function SignUpForm() {
     }
   };
 
+  const emailTrimmed = email.trim();
+  const emailOk = isValidEmailFormat(emailTrimmed);
+  const showEmailError =
+    shouldShowEmailFormatError(email) && !emailOk;
+  const passwordOk = password.length > 0 && isValidPassword(password);
+  const confirmOk =
+    confirmPassword.length > 0 && password === confirmPassword;
+  const canContinue =
+    emailOk && passwordOk && confirmOk && !isChecking && !registerLoading;
+
   return (
     <div className="space-y-4 lg:space-y-8">
       <div>
@@ -176,7 +183,12 @@ export default function SignUpForm() {
             onChange={setEmail}
             type="email"
             placeholder={t("form.email.placeholder")}
+            label={t('form.email.label')}
             id="email"
+            errorMessage={
+              showEmailError ? t('validation.email.invalid') : undefined
+            }
+            success={emailOk && emailTrimmed.length > 0}
           />
 
           <PasswordInput
@@ -214,7 +226,7 @@ export default function SignUpForm() {
         <div className="flex justify-end">
           <ButtonType2
             onClick={handleSubmit}
-            disabled={isChecking || registerLoading}
+            disabled={!canContinue}
             className="px-8 py-4 w-full lg:w-fit"
           >
             {isChecking || registerLoading ? tCommon("processing") : a("continue")}
