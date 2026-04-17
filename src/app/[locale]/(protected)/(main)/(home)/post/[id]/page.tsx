@@ -188,9 +188,9 @@ export default function PostPage() {
               .map((a) => a.url || '')
               .filter(Boolean) || []
           }
-          likes={post.engagementCounts.likes}
-          comments={post.engagementCounts.comments}
-          shares={post.engagementCounts.shares}
+          likes={post.engagementCounts?.likes ?? 0}
+          comments={post.engagementCounts?.comments ?? 0}
+          shares={post.engagementCounts?.shares ?? 0}
           onLike={handleLike}
           onComment={() => {}}
           onShare={handleShare}
