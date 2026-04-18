@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import {
   GET_USER_POSTS,
   GET_SAVED_POSTS,
@@ -33,8 +34,24 @@ interface FilteredPostsProps {
 
 export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsProps) {
   const t = useTranslations('profile.navigation');
+  const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<TabId>('myPosts');
+
+  // Navigate to the post detail page unless the click originated from an
+  // interactive child (buttons, links, inputs, media, or any element
+  // explicitly marked as clickable via `cursor-pointer`).
+  const handlePostCardClick = (postId: string) => (e: ReactMouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    const interactive = target.closest(
+      'button, a, input, textarea, select, label, img, video, [role="button"], .cursor-pointer'
+    );
+    if (interactive && e.currentTarget.contains(interactive)) return;
+
+    router.push(`/post/${postId}`);
+  };
 
   // ---- Tabs config ----
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = isOwnProfile
@@ -270,7 +287,20 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
         {posts.map((post) => {
           const profileData = getProfileData(post);
           return (
-            <div key={post.id} className="mb-2">
+            <div
+              key={post.id}
+              className="mb-2"
+              role="link"
+              tabIndex={0}
+              style={{ cursor: 'pointer' }}
+              onClick={handlePostCardClick(post.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  router.push(`/post/${post.id}`);
+                }
+              }}
+            >
               <FeedCardWithReply
                 postId={post.id}
                 profileImage={profileData.avatar}

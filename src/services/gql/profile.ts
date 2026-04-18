@@ -85,12 +85,14 @@ export const GET_USER_PROFILE = gql`
         userId
         email
         firstName
+        middleName
         lastName
         countryOfOrigin
         residenceCountry
         location
         bio
         avatarUrl
+        connectionCount
         trustScore
         updatedAt
       }

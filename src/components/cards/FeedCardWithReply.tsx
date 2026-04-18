@@ -741,7 +741,11 @@ export default function FeedCardWithReply({
                                             {renderRichText(c.content, c.mentionMap)}
                                         </p>
                                         <div className="flex items-center gap-[0.75rem]">
-                                            <button className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleLikeComment(c.id)}
+                                                className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}
+                                            >
                                                 {t('like')}
                                             </button>
                                             <button
