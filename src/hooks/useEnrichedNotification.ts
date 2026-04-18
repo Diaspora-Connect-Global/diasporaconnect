@@ -415,8 +415,15 @@ export function useEnrichedNotification(
   ]);
   const splitName = [splitFirst, splitLast].filter(Boolean).join(' ').trim() || undefined;
 
-  const actorNameInPayload =
+  // Some backends interpolate "Someone" (or a locale equivalent) into the
+  // structured name fields instead of leaving them empty. Treat those as
+  // unresolved so our fallback queries still run.
+  const rawPayloadName =
     flatNameInPayload || splitName || nestedUserName(nestedActor);
+  const actorNameInPayload =
+    rawPayloadName && !isGenericActorLabel(rawPayloadName) && !isUuidLike(rawPayloadName)
+      ? rawPayloadName
+      : undefined;
 
   const actorAvatarInPayload =
     pickString(data, [
