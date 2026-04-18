@@ -117,6 +117,75 @@ function cleanDisplayName(value: string | null | undefined): string | null {
   return v;
 }
 
+/**
+ * Generic "someone" placeholders the backend might interpolate into the
+ * notification `title`/`message`. If we extract one of these from a message
+ * string we treat it as an unresolved name rather than a real one.
+ */
+const GENERIC_ACTOR_WORDS = new Set([
+  'someone',
+  "quelqu'un",
+  'quelquun',
+  'qualcuno',
+  'jemand',
+  'alguien',
+  'user',
+  'a user',
+  'new',
+]);
+
+function isGenericActorLabel(value: string | null | undefined): boolean {
+  const v = (value || '').trim().toLowerCase();
+  if (!v) return true;
+  return GENERIC_ACTOR_WORDS.has(v);
+}
+
+/**
+ * Keywords that typically come right after the actor name in a human-readable
+ * notification message (EN + common translations). We use these as anchors to
+ * grab the leading name when the structured `data.actorName` isn't set.
+ */
+const NAME_SPLIT_PATTERNS: RegExp[] = [
+  /^(.+?)\s+(?:sent|wants|accepted|declined|rejected|commented|replied|liked|loved|reacted|mentioned|tagged|invited|shared|started|added|joined|followed|posted|applied|viewed)\b/i,
+  // French
+  /^(.+?)\s+(?:a\s+envoyé|veut|souhaite|a\s+accepté|a\s+commenté|a\s+aimé|vous\s+a)/i,
+  // Italian
+  /^(.+?)\s+(?:ha\s+inviato|vuole|ha\s+accettato|ha\s+commentato|ha\s+apprezzato)/i,
+  // German
+  /^(.+?)\s+(?:hat|möchte|moechte)/i,
+];
+
+/**
+ * Try to extract an actor's display name from a free-form notification message
+ * such as "John Doe sent you a connection request". Returns `null` when the
+ * resulting name looks generic (e.g. "Someone") so callers can keep searching.
+ */
+function extractNameFromMessage(
+  ...messages: Array<string | null | undefined>
+): string | null {
+  for (const raw of messages) {
+    if (!raw) continue;
+    const msg = String(raw).trim();
+    if (!msg) continue;
+    for (const re of NAME_SPLIT_PATTERNS) {
+      const m = msg.match(re);
+      const candidate = m?.[1]?.trim();
+      if (!candidate) continue;
+      if (isGenericActorLabel(candidate)) continue;
+      if (isUuidLike(candidate)) continue;
+      // Plausible names are short; reject obviously long captures that are
+      // probably an entire sentence the regex couldn't split cleanly.
+      if (candidate.length > 60) continue;
+      // Realistic human names fit in 4 words or fewer. Longer captures usually
+      // mean the regex swallowed modifiers like "just" or "recently" before
+      // reaching the action verb.
+      if (candidate.split(/\s+/).filter(Boolean).length > 4) continue;
+      return candidate;
+    }
+  }
+  return null;
+}
+
 /** Common nested object keys that could hold a user-shaped payload. */
 const USER_NEST_KEYS = [
   'actor',
@@ -245,7 +314,39 @@ export function useEnrichedNotification(
   currentUserId?: string
 ): EnrichedNotification {
   const type = (notification.type || '').toLowerCase();
-  const data = normalizeData(notification.data) || {};
+  const rawData = normalizeData(notification.data) || {};
+
+  // Some backends wrap the actual payload inside a `data`/`payload`/`metadata`
+  // envelope. Flatten a single level so later lookups find the expected keys
+  // without each caller having to know where the body lives.
+  const data: Record<string, unknown> = { ...rawData };
+  for (const envelope of ['data', 'payload', 'metadata', 'body']) {
+    const inner = rawData[envelope];
+    if (inner && typeof inner === 'object' && !Array.isArray(inner)) {
+      for (const [k, v] of Object.entries(inner as Record<string, unknown>)) {
+        if (!(k in data)) data[k] = v;
+      }
+    }
+  }
+
+  // Broad connection-type detection — keep in sync with `getNotificationPath`
+  // so anything that routes to the connection UI also tries connection-aware
+  // peer/name resolution. We normalize by also matching variants without a dot
+  // separator (e.g. `connectionRequest`).
+  const isConnectionRequest =
+    type.startsWith('connection.request') ||
+    type === 'connectionrequest' ||
+    type === 'connection_request' ||
+    type === 'new_connection_request';
+  const isConnectionAccepted =
+    type.startsWith('connection.accept') ||
+    type === 'connectionaccepted' ||
+    type === 'connection_accepted';
+  const isConnectionType =
+    type.startsWith('connection.') ||
+    type.includes('connection') ||
+    isConnectionRequest ||
+    isConnectionAccepted;
 
   // Find any embedded user object on `data`. Backends sometimes put the full
   // actor payload under `actor`, `user`, `from`, or (for connection rows) a
@@ -254,7 +355,7 @@ export function useEnrichedNotification(
   let nestedActor: NestedUserShape | undefined;
   let actorUserId: string | undefined;
 
-  if (type.startsWith('connection.')) {
+  if (isConnectionType) {
     const resolved = resolveConnectionPeerId(data, currentUserId);
     actorUserId = resolved.peerId;
     nestedActor = resolved.peerUser;
@@ -275,23 +376,47 @@ export function useEnrichedNotification(
       ]) || nestedUserId(nestedActor);
   }
 
+  // Try flat "name" fields first; if none are present, also try to compose a
+  // full name from split firstName/lastName fields (some backends emit those).
+  const flatNameInPayload = pickString(data, [
+    'actorName',
+    'actorFullName',
+    'senderName',
+    'fromUserName',
+    'fromUserFullName',
+    'requesterName',
+    'receiverName',
+    'authorName',
+    'initiatorName',
+    'commenterName',
+    'likerName',
+    'userName',
+    'fullName',
+    'displayName',
+  ]);
+
+  const splitFirst = pickString(data, [
+    'actorFirstName',
+    'senderFirstName',
+    'fromUserFirstName',
+    'requesterFirstName',
+    'receiverFirstName',
+    'authorFirstName',
+    'firstName',
+  ]);
+  const splitLast = pickString(data, [
+    'actorLastName',
+    'senderLastName',
+    'fromUserLastName',
+    'requesterLastName',
+    'receiverLastName',
+    'authorLastName',
+    'lastName',
+  ]);
+  const splitName = [splitFirst, splitLast].filter(Boolean).join(' ').trim() || undefined;
+
   const actorNameInPayload =
-    pickString(data, [
-      'actorName',
-      'actorFullName',
-      'senderName',
-      'fromUserName',
-      'fromUserFullName',
-      'requesterName',
-      'receiverName',
-      'authorName',
-      'initiatorName',
-      'commenterName',
-      'likerName',
-      'userName',
-      'fullName',
-      'displayName',
-    ]) || nestedUserName(nestedActor);
+    flatNameInPayload || splitName || nestedUserName(nestedActor);
 
   const actorAvatarInPayload =
     pickString(data, [
@@ -447,26 +572,15 @@ export function useEnrichedNotification(
   );
 
   // Connection fallback: when the notification payload doesn't expose a peer
-  // user id (or even a name), we resolve it by listing the current user's
+  // name (or even a user id), we resolve it by listing the current user's
   // connections and picking the matching row. Apollo cache-first makes this a
   // single network hit shared across every connection notification on the page.
-  const isConnectionAccepted =
-    type === 'connection.accepted' ||
-    type === 'connection.removed' ||
-    type === 'connectionaccepted';
-  const isConnectionRequest =
-    type === 'connection.request' ||
-    type === 'connection.request.received' ||
-    type === 'connection.requested' ||
-    type === 'connectionrequest';
-
-  // We fire the fallback whenever we still don't have a usable actor name in
-  // the payload — having an id alone isn't enough because GET_USER_PROFILE may
-  // fail silently and leave us with "Someone".
-  const needsConnectionAcceptedFallback =
-    isConnectionAccepted && !actorNameInPayload;
-  const needsConnectionPendingFallback =
-    isConnectionRequest && !actorNameInPayload;
+  //
+  // We fire BOTH the pending and accepted lookups whenever the payload doesn't
+  // give us a ready-to-render name. A pending row may already have been accepted
+  // between the notification being created and the list being opened, and
+  // vice-versa, so trying both gives us the best chance of matching the peer.
+  const needsConnectionFallback = isConnectionType && !actorNameInPayload;
 
   const myConnectionsQuery = useQuery<{
     getConnections: {
@@ -475,7 +589,7 @@ export function useEnrichedNotification(
     };
   }>(GET_MY_CONNECTIONS, {
     variables: { limit: 100, offset: 0 },
-    skip: !needsConnectionAcceptedFallback,
+    skip: !needsConnectionFallback,
     fetchPolicy: 'cache-first',
   });
 
@@ -486,7 +600,7 @@ export function useEnrichedNotification(
     };
   }>(GET_ALL_PENDING_CONNECTIONS, {
     variables: { limit: 100, offset: 0 },
-    skip: !needsConnectionPendingFallback,
+    skip: !needsConnectionFallback,
     fetchPolicy: 'cache-first',
   });
 
@@ -503,11 +617,23 @@ export function useEnrichedNotification(
     if (connectionIdInPayload) {
       const match = rows.find((r) => r.id === connectionIdInPayload);
       if (match) {
-        const peer =
+        // Prefer the side that isn't the current user. When we don't know the
+        // current user, fall back to whichever side has a name/avatar populated.
+        const preferredByUser =
           currentUserId && match.requesterId === currentUserId
             ? match.receiver
-            : match.requester;
-        if (peer) return peer;
+            : currentUserId && match.receiverId === currentUserId
+              ? match.requester
+              : null;
+        const fallback =
+          (match.requester?.userId && match.requester.userId !== currentUserId
+            ? match.requester
+            : null) ||
+          (match.receiver?.userId && match.receiver.userId !== currentUserId
+            ? match.receiver
+            : null);
+        const peer = preferredByUser || fallback;
+        if (peer?.userId) return peer;
       }
     }
 
@@ -529,13 +655,20 @@ export function useEnrichedNotification(
     return null;
   }
 
-  const connectionPeer: ConnectionPeer | null = needsConnectionAcceptedFallback
-    ? pickPeerFromConnections(myConnectionsQuery.data?.getConnections?.connections)
-    : needsConnectionPendingFallback
-      ? pickPeerFromConnections(
-          pendingConnectionsQuery.data?.getPendingConnections?.connections
-        )
-      : null;
+  // Try the appropriate list first based on the notification subtype, but
+  // fall back to the other one if it didn't match (e.g. a request that has
+  // since been accepted, or vice-versa).
+  const preferPending = isConnectionRequest;
+  const firstList = preferPending
+    ? pendingConnectionsQuery.data?.getPendingConnections?.connections
+    : myConnectionsQuery.data?.getConnections?.connections;
+  const secondList = preferPending
+    ? myConnectionsQuery.data?.getConnections?.connections
+    : pendingConnectionsQuery.data?.getPendingConnections?.connections;
+
+  const connectionPeer: ConnectionPeer | null = needsConnectionFallback
+    ? pickPeerFromConnections(firstList) || pickPeerFromConnections(secondList)
+    : null;
 
   // Comment fallback: when a post-comment notification doesn't include the
   // commenter id/name, pull the most recent comment on that post (or match on
@@ -651,12 +784,24 @@ export function useEnrichedNotification(
     .join(' ')
     .trim();
 
+  // Last-resort: many backends interpolate the actor's name into the human-
+  // readable `title`/`message` fields (e.g. "John Doe sent you a connection
+  // request") even when the structured `data` payload has no actorName. Parse
+  // that string and reject obvious placeholders like "Someone".
+  const messageExtractedName =
+    extractNameFromMessage(
+      notification.title,
+      notification.message,
+      notification.body
+    ) || null;
+
   const actorName =
     actorNameInPayload ||
     fromQueryFullName ||
     fallbackFullName ||
     peerName ||
     commentAuthorName ||
+    messageExtractedName ||
     null;
   const actorFirstName =
     (actorNameInPayload ? actorNameInPayload.split(' ')[0] : undefined) ||
@@ -664,6 +809,7 @@ export function useEnrichedNotification(
     fallbackFirst ||
     connectionPeer?.firstName ||
     (commentAuthorName ? commentAuthorName.split(' ')[0] : undefined) ||
+    (messageExtractedName ? messageExtractedName.split(' ')[0] : undefined) ||
     null;
   const actorAvatarUrl =
     actorAvatarInPayload ||
@@ -678,20 +824,40 @@ export function useEnrichedNotification(
     commentAuthor?.authorId ||
     null;
 
-  // Dev-only: surface the raw payload shape when we still couldn't resolve
-  // anything useful about the actor. This helps during integration because
-  // backend field names vary (actorId vs fromUserId vs senderId …).
+  // Dev-only: surface the raw payload shape + query state whenever we still
+  // don't have a display name. We also log connection notifications where we
+  // had to fall back, so it's obvious why "Someone" appeared.
   if (
     process.env.NODE_ENV !== 'production' &&
     !actorName &&
-    !resolvedActorUserId &&
     typeof window !== 'undefined'
   ) {
     // eslint-disable-next-line no-console
     console.debug('[useEnrichedNotification] unresolved actor', {
       id: notification.id,
       type: notification.type,
-      data: notification.data,
+      title: notification.title,
+      message: notification.message,
+      body: notification.body,
+      imageUrl: notification.imageUrl,
+      rawData: notification.data,
+      flattenedData: data,
+      actorUserId,
+      resolvedActorUserId,
+      actorNameInPayload,
+      isConnectionType,
+      needsConnectionFallback,
+      myConnections: myConnectionsQuery.data?.getConnections?.connections?.length,
+      pendingConnections:
+        pendingConnectionsQuery.data?.getPendingConnections?.connections?.length,
+      connectionPeer,
+      needsCommentFallback,
+      commentAuthor,
+      profileQueryLoading: actorQuery.loading,
+      profileResult: profile,
+      fallbackProfileLoading: fallbackProfileQuery.loading,
+      fallbackProfileResult: fallbackProfile,
+      messageExtractedName,
     });
   }
 
@@ -781,8 +947,8 @@ export function useEnrichedNotification(
     (needsEvent && eventQuery.loading) ||
     (needsAssociation && associationQuery.loading) ||
     (needsCommunity && communityQuery.loading) ||
-    (needsConnectionAcceptedFallback && myConnectionsQuery.loading) ||
-    (needsConnectionPendingFallback && pendingConnectionsQuery.loading) ||
+    (needsConnectionFallback &&
+      (myConnectionsQuery.loading || pendingConnectionsQuery.loading)) ||
     (needsCommentFallback && postCommentsQuery.loading) ||
     (Boolean(fallbackUserId) && fallbackProfileQuery.loading);
 

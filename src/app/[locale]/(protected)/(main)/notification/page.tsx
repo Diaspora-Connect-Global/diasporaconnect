@@ -73,10 +73,18 @@ function buildNotificationView(
   // Whenever a user actor is involved in the notification (comment, like,
   // connection, message, invite, …) we want to show either their real avatar
   // or the default user silhouette — never the system/globe icon. We detect
-  // "user actor present" by having either a resolved userId, a resolved name,
-  // or a backend-provided imageUrl already pointing at a person.
+  // "user actor present" by having a resolved userId, a resolved name, OR
+  // any obvious person-typed notification (connection/comment/like/message)
+  // so we still render the person silhouette while loading.
+  const isPersonNotification =
+    type.includes('connection') ||
+    type.includes('comment') ||
+    type.includes('like') ||
+    type.includes('message') ||
+    type.includes('mention') ||
+    type.includes('invite');
   const hasUserActor = Boolean(
-    enriched.actorUserId || enriched.actorName
+    enriched.actorUserId || enriched.actorName || isPersonNotification
   );
   const actorAvatar =
     enriched.actorAvatarUrl ||
@@ -84,15 +92,26 @@ function buildNotificationView(
     (hasUserActor ? '/PROFILE.png' : undefined);
   const actorHref = enriched.actorUserId ? `/${locale}/${enriched.actorUserId}` : undefined;
 
-  // Connections
-  if (type === 'connection.request' || type === 'connection.requested') {
+  // Connections — match any backend naming variant (dot, camel, snake).
+  const isConnectionRequestType =
+    type === 'connection.request' ||
+    type === 'connection.requested' ||
+    type === 'connectionrequest' ||
+    type === 'connection_request' ||
+    type === 'new_connection_request';
+  const isConnectionAcceptedType =
+    type === 'connection.accepted' ||
+    type === 'connectionaccepted' ||
+    type === 'connection_accepted';
+
+  if (isConnectionRequestType) {
     return {
       title: t('messages.connectionRequest', { actorName }),
       imageUrl: actorAvatar,
       actorHref,
     };
   }
-  if (type === 'connection.accepted') {
+  if (isConnectionAcceptedType) {
     return {
       title: t('messages.connectionAccepted', { actorName }),
       imageUrl: actorAvatar,
