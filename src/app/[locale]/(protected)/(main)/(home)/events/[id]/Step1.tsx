@@ -137,7 +137,7 @@ export default function Step1({
 
       {hasFormFields && (
         <section className="space-y-4">
-          <p className="font-label-large text-text-primary">Registration Details</p>
+          <p className="label-large text-text-primary">Registration Details</p>
           {registrationFormFields.map((field) => (
             <div key={field.id} className="space-y-1">
               {field.type !== 'checkbox' && (

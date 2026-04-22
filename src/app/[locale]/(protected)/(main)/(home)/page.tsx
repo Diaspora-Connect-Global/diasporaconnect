@@ -358,10 +358,10 @@ export default function Home() {
         className={FEED_COLUMN_CLASS}
       >
         {/* Discover Section */}
-        <div className="flex justify-between mb-4 shrink-0">
-          <h2 className="label-medium">{t('discover')}</h2>
-          <Link href="/community" prefetch={false}>
-            <p className="label-medium text-text-brand">{t('seeall')}</p>
+        <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
+          <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">{t('discover')}</h2>
+          <Link href="/community" prefetch={false} className="flex-shrink-0">
+            <p className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium text-text-brand whitespace-nowrap">{t('seeall')}</p>
           </Link>
         </div>
 

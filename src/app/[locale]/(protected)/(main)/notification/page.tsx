@@ -448,7 +448,7 @@ export default function NotificationPage() {
     <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4">
       <div className="h-[30%] lg:h-[20%]">
         <div className="lg:flex justify-between items-center mb-4">
-          <p className="text-2xl font-heading-large">{t('notifications')}</p>
+          <p className="text-2xl heading-large">{t('notifications')}</p>
           <div className="flex items-center gap-4">
             <button
               type="button"

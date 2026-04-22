@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { ButtonType3 } from '@/components/custom/button';
 import { useTranslations } from 'next-intl';
 
 interface MyAssociationCardProps {
@@ -68,11 +68,11 @@ export function MyAssociationCard({
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <Link href={`/association/${id}`} prefetch={false}>
-                <h1 className="text-text-primary font-label-large hover:text-text-brand truncate">
+                <h1 className="text-text-primary label-large hover:text-text-brand truncate">
                   {title}
                 </h1>
               </Link>
-              <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-1">
+              <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-1">
                 {description}
               </p>
             </div>
@@ -80,18 +80,16 @@ export function MyAssociationCard({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                className="bg-surface-default border-0 shadow-none text-text-primary p-1"
-                variant="outline"
+              <ButtonType3
+                className="p-1 min-w-0"
                 aria-label={tCommon('openMenu')}
-                size="icon-sm"
               >
                 <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
+              </ButtonType3>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="bg-surface-default min-w-[200px]">
-              <DropdownMenuItem asChild className="font-body-large text-text-primary flex justify-between items-center">
+              <DropdownMenuItem asChild className="body-large text-text-primary flex justify-between items-center">
                 <Link href={`/association/${id}`} prefetch={false} className="flex w-full items-center justify-between">
                   <span>{view}</span>
                   <ChevronRight className="w-4 h-4" />
@@ -103,21 +101,21 @@ export function MyAssociationCard({
               {isPending && onCancelRequestClick ? (
                 <DropdownMenuItem
                   onSelect={onCancelRequestClick}
-                  className="font-body-large text-text-primary flex justify-between items-center"
+                  className="body-large text-text-primary flex justify-between items-center"
                 >
                   <span>{cancelRequest}</span>
                 </DropdownMenuItem>
               ) : onLeaveClick ? (
                 <DropdownMenuItem
                   onSelect={onLeaveClick}
-                  className="font-body-large text-text-primary flex justify-between items-center"
+                  className="body-large text-text-primary flex justify-between items-center"
                 >
                   <span>{leave}</span>
                 </DropdownMenuItem>
               ) : buttonText ? (
                 <DropdownMenuItem
                   disabled
-                  className="font-body-large text-text-secondary flex justify-between items-center"
+                  className="body-large text-text-secondary flex justify-between items-center"
                 >
                   <span>{buttonText}</span>
                 </DropdownMenuItem>

@@ -367,7 +367,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                     <div className="lg:col-span-1">
                         <div className="sticky top-4">
                             <div className="w-full rounded-lg p-4 border border-border-subtle space-y-5">
-                                <p className="text-text-primary font-caption-large">{t('ticketSummary')}</p>
+                                <p className="text-text-primary caption-large">{t('ticketSummary')}</p>
 
                                 <div className="space-y-2 border-b border-b-border-subtle pb-3">
                                     <div className="flex justify-between text-sm">
@@ -390,7 +390,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                     </div>
                                 </div>
 
-                                <div className="flex justify-between font-caption-large py-1">
+                                <div className="flex justify-between caption-large py-1">
                                     <span>{t('total')}</span>
                                     <span>{formatAmount(totalAmount)}</span>
                                 </div>

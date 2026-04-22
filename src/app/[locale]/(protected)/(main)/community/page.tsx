@@ -106,7 +106,7 @@ export default function Community() {
 
     return (
         <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
-            <p className="text-2xl font-heading-large my-5">{t('myCommunity')}</p>
+            <p className="text-2xl heading-large my-5">{t('myCommunity')}</p>
 
             <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
                 {myCommunitiesLoading ? (
@@ -129,7 +129,7 @@ export default function Community() {
                 )}
             </div>
 
-            <p className="text-2xl font-heading-medium my-5">{t('discoverMore')}</p>
+            <p className="text-2xl heading-medium my-5">{t('discoverMore')}</p>
 
             <div className="overflow-auto scrollbar-hide grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
                 {discoverLoading ? (

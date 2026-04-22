@@ -154,7 +154,7 @@ export default function Step2({
             <div className="border-t p-6 space-y-5">
               {/* Card number */}
               <div>
-                <label className="block font-label-medium text-gray-700 mb-1">
+                <label className="block label-medium text-gray-700 mb-1">
                   {t('cardNumber')}
                 </label>
                 <div className="relative">
@@ -184,7 +184,7 @@ export default function Step2({
 
                 {/* CVV */}
                 <div>
-                  <label className="block font-label-medium text-text-primary mb-1">
+                  <label className="block label-medium text-text-primary mb-1">
                     {t('cvv')}
                   </label>
                   <div className="relative">
@@ -292,7 +292,7 @@ export default function Step2({
                     value={phoneNumber}
                     onChange={(e) => onPhoneNumberChange(e.target.value)}
                     placeholder={t('phoneNumberPlaceholder')}
-                    className="text-text-primary font-body-large px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0"
+                    className="text-text-primary body-large px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0"
                     maxLength={10}
                   />
                 </InputGroup>

@@ -58,7 +58,7 @@ export default function CommunityCardVariant1({
           {isTitleTruncated ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <h2 className="font-caption-large truncate cursor-help">
+                <h2 className="caption-large truncate cursor-help">
                   {title}
                 </h2>
               </TooltipTrigger>
@@ -67,7 +67,7 @@ export default function CommunityCardVariant1({
               </TooltipContent>
             </Tooltip>
           ) : (
-            <h2 className="font-caption-large truncate">{title}</h2>
+            <h2 className="caption-large truncate">{title}</h2>
           )}
         </div>
 
@@ -77,7 +77,7 @@ export default function CommunityCardVariant1({
             isDescriptionTruncated ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <p className="font-body-small text-text-primary line-clamp-3 cursor-help">
+                  <p className="body-small text-text-primary line-clamp-3 cursor-help">
                     {description}
                   </p>
                 </TooltipTrigger>
@@ -86,7 +86,7 @@ export default function CommunityCardVariant1({
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <p className="font-body-small text-text-primary line-clamp-3">
+              <p className="body-small text-text-primary line-clamp-3">
                 {description}
               </p>
             )
@@ -96,7 +96,7 @@ export default function CommunityCardVariant1({
         {/* Members */}
         <div className="w-full text-center lg:h-[1rem]">
           {members !== undefined && (
-            <p className="font-caption-medium text-text-primary">
+            <p className="caption-medium text-text-primary">
               {members.toLocaleString()} {t('members')}
             </p>
           )}

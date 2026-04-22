@@ -63,7 +63,7 @@ export default function JoinCommunityCard({
           {isTitleTruncated ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <h2 className="font-caption-large line-clamp-2 min-h-[2.5rem] cursor-help">
+                <h2 className="caption-large line-clamp-2 min-h-[2.5rem] cursor-help">
                   {title}
                 </h2>
               </TooltipTrigger>
@@ -72,7 +72,7 @@ export default function JoinCommunityCard({
               </TooltipContent>
             </Tooltip>
           ) : (
-            <h2 className="font-caption-large line-clamp-2 min-h-[2.5rem]">
+            <h2 className="caption-large line-clamp-2 min-h-[2.5rem]">
               {title}
             </h2>
           )}
@@ -82,7 +82,7 @@ export default function JoinCommunityCard({
             isDescriptionTruncated ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <p className="font-body-small text-text-primary line-clamp-3 min-h-[3.5rem] cursor-help">
+                  <p className="body-small text-text-primary line-clamp-3 min-h-[3.5rem] cursor-help">
                     {description}
                   </p>
                 </TooltipTrigger>
@@ -91,7 +91,7 @@ export default function JoinCommunityCard({
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <p className="font-body-small text-text-primary line-clamp-3 min-h-[3.5rem]">
+              <p className="body-small text-text-primary line-clamp-3 min-h-[3.5rem]">
                 {description}
               </p>
             )
@@ -99,7 +99,7 @@ export default function JoinCommunityCard({
 
           {/* Members */}
           {members !== undefined && (
-            <p className="font-caption-medium text-text-primary">
+            <p className="caption-medium text-text-primary">
               {members.toLocaleString()} {t('members')}
             </p>
           )}

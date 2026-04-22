@@ -3,6 +3,7 @@ import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical, Lock, Globe, Users, Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface EventCardProps {
     title: string;
@@ -22,6 +23,8 @@ interface EventCardProps {
 }
 
 export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, visibility = "public", onBuyClick, onSaveClick, isSaved, isRegistered, isSoldOut, onCancelAttend }: EventCardProps) {
+    const tActions = useTranslations('actions');
+
     const visibilityMeta: Record<string, { label: string; icon: React.ReactNode }> = {
         public: { label: "Public", icon: <Globe size={12} /> },
         community: { label: "Community", icon: <Users size={12} /> },
@@ -31,9 +34,9 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
     const badge = visibilityMeta[visibility] ?? visibilityMeta.public;
 
     return (
-        <div className="w-full  bg-surface-default border border-border-default rounded-3xl overflow-hidden shadow-sm">
+        <div className="w-full bg-surface-default border border-border-default rounded-2xl overflow-hidden shadow-sm">
             {/* Header Image */}
-            <div className="relative h-64 rounded-t-3xl overflow-hidden bg-surface-subtle">
+            <div className="relative h-64 rounded-t-2xl overflow-hidden bg-surface-subtle">
                 <Image
                     src={imageUrl}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
@@ -71,19 +74,19 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                         </div>
                     )}
                 </div>
-                <p className="text-lg font-semibold text-primary mb-1">{date}</p>
-                <p className="text-secondary mb-1">{location}</p>
-                <p className="text-secondary text-sm mb-6">{attendees} going</p>
+                <p className="text-lg font-semibold text-text-primary mb-1">{date}</p>
+                <p className="text-text-secondary mb-1">{location}</p>
+                <p className="text-text-secondary text-sm mb-6">{tActions('going', { count: attendees })}</p>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 text-center items-center justify-between">
                     <div className="flex items-center gap-4">
                         <ButtonType2 onClick={onBuyClick} size="lg" disabled={isRegistered || isSoldOut}>
-                            {isRegistered ? "Registered" : isSoldOut ? "Sold Out" : "Attend"}
+                            {isRegistered ? tActions('attending') : isSoldOut ? tActions('soldOut') : tActions('attend')}
                         </ButtonType2>
                         {onSaveClick && (
                             <ButtonType1 onClick={onSaveClick} className="flex items-center justify-center overflow-hidden" size="lg">
-                                {isSaved ? "Saved" : "Save"}
+                                {isSaved ? tActions('saved') : tActions('save')}
                             </ButtonType1>
                         )}
                         {isRegistered && (
@@ -95,13 +98,13 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={onCancelAttend}>
-                                        Not attending anymore
+                                        {tActions('notAttendingAnymore')}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
                     </div>
-                    <ButtonType1 className="flex items-center justify-center  rounded-full overflow-hidden">
+                    <ButtonType1 className="flex items-center justify-center rounded-full overflow-hidden">
                         <Image
                             src="/SHARE.svg"
                             alt="Share Icon"
@@ -114,8 +117,8 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
 
                 {(description != null && description !== "") && (
                     <div className="mt-6 border-t pt-4">
-                        <p className="text-xl font-bold text-primary">About</p>
-                        <p className="text-primary mt-2 text-justify whitespace-pre-wrap">{description}</p>
+                        <p className="text-xl font-bold text-text-primary">About</p>
+                        <p className="text-text-primary mt-2 text-justify whitespace-pre-wrap">{description}</p>
                     </div>
                 )}
             </div>

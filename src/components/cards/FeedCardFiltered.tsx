@@ -262,7 +262,7 @@ export default function FeedCardFiltered({
         const displayText = truncated ? `${content.slice(0, max)}...` : content;
 
         return (
-            <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
+            <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
                 {renderRichText(displayText)}
                 {truncated && (
                     <span
@@ -481,11 +481,11 @@ export default function FeedCardFiltered({
 
                                         <div className="ml-10">
                                             {stubParentIds.has(c.id) ? (
-                                                <p className="font-body-small text-text-tertiary italic mb-[0.5rem]">
+                                                <p className="body-small text-text-tertiary italic mb-[0.5rem]">
                                                     Reply to this comment
                                                 </p>
                                             ) : (
-                                                <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                                                     {renderRichText(c.content, c.mentionMap)}
                                                 </p>
                                             )}
@@ -537,7 +537,7 @@ export default function FeedCardFiltered({
                                                                 {formatDateProximity(reply.createdAt)}
                                                             </span>
                                                         </div>
-                                                        <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                        <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                                                             {renderRichText(reply.content, reply.mentionMap)}
                                                         </p>
                                                         <div className="flex items-center gap-[0.75rem]">
@@ -582,16 +582,16 @@ export default function FeedCardFiltered({
                     />
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <h3 className="font-label-large text-text-primary truncate">{profileName}</h3>
+                            <h3 className="label-large text-text-primary truncate">{profileName}</h3>
                             {profileTier ? <UserBadge tier={profileTier} size="sm" /> : null}
                             {joinButton && <span className="text-text-secondary">·</span>}
                             {joinButton && (
-                                <ButtonType1 className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light hover:bg-brand font-label-medium text-xs min-w-[3.75rem]">
+                                <ButtonType1 className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light hover:bg-brand label-medium text-xs min-w-[3.75rem]">
                                     {t('join')}
                                 </ButtonType1>
                             )}
                         </div>
-                        <p className="font-body-small text-text-secondary truncate">
+                        <p className="body-small text-text-secondary truncate">
                             {t('postedBy', { user: 'Admin' })} · {category} · {postDate}
                         </p>
                     </div>
@@ -629,7 +629,7 @@ export default function FeedCardFiltered({
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-[1rem]">
                     <ButtonType3
-                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
+                        className="inline-flex items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-0 p-0 border-0 bg-transparent max-lg:flex-col max-lg:gap-[0.25rem]"
                         onClick={handleLike}
                     >
                         <Image width={20} height={20} src="/LIKE.svg" alt="like" className="w-[1.25rem] h-[1.25rem] object-contain" />
@@ -637,7 +637,7 @@ export default function FeedCardFiltered({
                     </ButtonType3>
 
                     <ButtonType3
-                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
+                        className="inline-flex items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-0 p-0 border-0 bg-transparent max-lg:flex-col max-lg:gap-[0.25rem]"
                         onClick={toggleCommentInput}
                     >
                         <Image width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-[1.25rem] h-[1.25rem] object-contain" />
@@ -645,7 +645,7 @@ export default function FeedCardFiltered({
                     </ButtonType3>
 
                     <ButtonType3
-                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
+                        className="inline-flex items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-0 p-0 border-0 bg-transparent max-lg:flex-col max-lg:gap-[0.25rem]"
                         onClick={() => setShowShareModal(true)}
                     >
                         <Image width={20} height={20} src="/SHARE.svg" alt="share" className="w-[1.25rem] h-[1.25rem] object-contain" />
@@ -654,7 +654,7 @@ export default function FeedCardFiltered({
                 </div>
 
                 <ButtonType3
-                    className="inline-flex items-center gap-[0.5rem] text-sm font-body-small min-w-[3.75rem] p-0 min-w-0 border-0 bg-transparent"
+                    className="inline-flex items-center gap-[0.5rem] text-sm body-small min-w-0 p-0 border-0 bg-transparent max-lg:flex-col max-lg:gap-[0.25rem]"
                     onClick={handleSave}
                 >
                     <Bookmark

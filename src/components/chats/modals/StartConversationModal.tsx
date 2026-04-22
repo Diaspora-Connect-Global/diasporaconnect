@@ -307,7 +307,7 @@ export function StartConversationModal({
                                                     {isSelected && <Check />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-primary font-body-large truncate">
+                                                    <p className="text-primary body-large truncate">
                                                         {user.name}
                                                     </p>
                                                 </div>

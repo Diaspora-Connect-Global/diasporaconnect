@@ -117,21 +117,21 @@ export function NotificationCard({
                         >
                             <div className="flex items-center gap-2 flex-wrap">
                                 {typeLabel && (
-                                    <span className="text-text-secondary font-caption-medium uppercase tracking-wide">
+                                    <span className="text-text-secondary caption-medium uppercase tracking-wide">
                                         {typeLabel}
                                     </span>
                                 )}
-                                <span className="text-text-tertiary font-body-small text-xs">
+                                <span className="text-text-tertiary body-small text-xs">
                                     {formatDateProximity(time)}
                                 </span>
                             </div>
                             {title && (
-                                <h2 className="text-text-primary font-label-large text-sm sm:text-base truncate">
+                                <h2 className="text-text-primary label-large text-sm sm:text-base truncate">
                                     {title}
                                 </h2>
                             )}
                             {description && (
-                                <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-2">
+                                <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-2">
                                     {description}
                                 </p>
                             )}
@@ -157,7 +157,7 @@ export function NotificationCard({
                                     <>
                                         <DropdownMenuItem 
                                             onSelect={handleMarkAsRead} 
-                                            className='font-body-large text-text-primary flex justify-between items-center'
+                                            className='body-large text-text-primary flex justify-between items-center'
                                         >
                                             <span>
                                                 {t('markasread')}
@@ -169,7 +169,7 @@ export function NotificationCard({
                                 {onRemove && (
                                     <DropdownMenuItem 
                                         onSelect={handleRemove} 
-                                        className='text-text-danger font-body-large'
+                                        className='text-text-danger body-large'
                                     >
                                         {t('remove')}
                                     </DropdownMenuItem>

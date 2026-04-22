@@ -29,10 +29,10 @@ const CompleteKYCModal = forwardRef<CompleteKYCModalRef>((_, ref) => {
       <div className=" h-[80vh] overflow-y-auto scrollbar-hide bg-surface-default">
         {/* Main centered layout */}
           <div className=" px-5">
-            <p className="text-text-primary font-heading-medium">
+            <p className="text-text-primary heading-medium">
               Verify your identity
             </p>
-            <p className=" text-text-secondary font-body-large">
+            <p className=" text-text-secondary body-large">
               You will be redirected to your mobile device to verify your
               identity
             </p>

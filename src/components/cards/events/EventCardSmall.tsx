@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
+import { useTranslations } from "next-intl";
 
 interface EventCardProps {
     title: string;
@@ -13,6 +14,8 @@ interface EventCardProps {
 }
 
 export default function EventCardSmall({ title, date, location, attendees, imageUrl, visibility, eventId }: EventCardProps) {
+    const tActions = useTranslations('actions');
+
     return (
         <div className="w-full lg:w-[18.3125rem] flex bg-surface-default rounded-lg overflow-hidden">
             
@@ -45,26 +48,26 @@ export default function EventCardSmall({ title, date, location, attendees, image
             {/* Content */}
             <div className="flex-1 px-3 py-2 min-w-0">
                 <Link href={eventId ? `/events/${eventId}` : "/events"} className="flex gap-2 items-center">
-                    <h2 className="font-caption-large text-primary truncate min-w-0">
+                    <h2 className="caption-large text-text-primary truncate min-w-0">
                         {title}
                     </h2>
                     {visibility && visibility !== 'public' && (
-                        <span className="shrink-0 px-1.5 py-0.5 text-[0.65rem] rounded bg-surface-subtle text-text-secondary capitalize border border-border-subtle">
+                        <span className="shrink-0 px-1.5 py-0.5 text-[0.65rem] rounded bg-surface-subtle text-text-text-secondary capitalize border border-border-subtle">
                             {visibility.replace('_', ' ')}
                         </span>
                     )}
                 </Link>
 
-                <p className="font-caption-medium text-primary mt-1">
+                <p className="caption-medium text-text-primary mt-1">
                     {date}
                 </p>
 
                 <div className="flex flex-wrap items-start mt-1">
-                    <span className="text-secondary font-caption-small">
+                    <span className="text-text-secondary caption-small">
                         {location} |
                     </span>
-                    <p className="text-secondary font-caption-small ml-1">
-                        {attendees} going
+                    <p className="text-text-secondary caption-small ml-1">
+                        {tActions('going', { count: attendees })}
                     </p>
                 </div>
             </div>

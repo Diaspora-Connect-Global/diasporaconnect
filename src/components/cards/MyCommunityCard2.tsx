@@ -86,7 +86,7 @@ export function MyCommunityCard2() {
                             <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Image width={24} height={24} src="/GLOBE.png" alt="Loading" className="rounded-full object-cover" />
                             </div>
-                            <h1 className="font-body-large text-text-secondary truncate">
+                            <h1 className="body-large text-text-secondary truncate">
                                 Loading communities...
                             </h1>
                         </div>
@@ -107,7 +107,7 @@ export function MyCommunityCard2() {
                                     <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <Image width={24} height={24} src="/GLOBE.png" alt="Profile" className="rounded-full object-cover" />
                                     </div>
-                                    <h1 className="font-body-large text-text-secondary truncate">
+                                    <h1 className="body-large text-text-secondary truncate">
                                         {'No community'}
                                     </h1>
                                 </div>
@@ -115,7 +115,7 @@ export function MyCommunityCard2() {
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default'>
-                            <DropdownMenuLabel className='font-body-large text-text-primary'>
+                            <DropdownMenuLabel className='body-large text-text-primary'>
                                 <Link href="/community" prefetch={false} className="hover:text-text-brand">
                                     {t('discover') || 'Discover communities'}
                                 </Link>
@@ -141,7 +141,7 @@ export function MyCommunityCard2() {
                                         <Image width={24} height={24} src="/GLOBE.png" alt="Community" className="rounded-full object-cover" />
                                     )}
                                 </div>
-                                <h1 className="font-body-large text-text-primary truncate">
+                                <h1 className="body-large text-text-primary truncate">
                                     {displayCommunity?.name}
                                 </h1>
                             </div>
@@ -149,7 +149,7 @@ export function MyCommunityCard2() {
                         </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className='bg-surface-default'>
-                        <DropdownMenuLabel className='font-body-large text-text-primary'>
+                        <DropdownMenuLabel className='body-large text-text-primary'>
                             <Link href="/community" prefetch={false} className="hover:text-text-brand">
                                 {t('seeall')}
                             </Link>
@@ -160,7 +160,7 @@ export function MyCommunityCard2() {
                             <DropdownMenuItem
                                 key={community.id}
                                 onSelect={() => handleCommunitySelect(community)}
-                                className='font-body-large text-text-primary flex items-center justify-between'
+                                className='body-large text-text-primary flex items-center justify-between'
                             >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                     {community.avatarUrl && (

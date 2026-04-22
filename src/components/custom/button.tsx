@@ -22,7 +22,7 @@ interface ButtonProps
 }
 
 const baseButtonClass = `
-  rounded-full font-label-medium cursor-pointer transition-colors
+  rounded-full label-medium cursor-pointer transition-colors
   disabled:opacity-50 disabled:cursor-not-allowed h-fit w-fit whitespace-nowrap
 `;
 

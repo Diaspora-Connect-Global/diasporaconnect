@@ -325,7 +325,7 @@ export default function CreatePostForm({
             onChange={(e) => setText(e.target.value)}
             placeholder={placeholder}
             rows={2}
-            className="w-full bg-transparent resize-none focus:outline-none text-text-primary placeholder:text-text-secondary font-body-medium"
+            className="w-full bg-transparent resize-none focus:outline-none text-text-primary placeholder:text-text-secondary body-medium"
             style={{ lineHeight: '1.5rem' }}
             disabled={submitting}
           />

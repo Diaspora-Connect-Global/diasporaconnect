@@ -414,7 +414,7 @@ export default function FeedCardWithReply({
 
         return (
             <>
-                <p className="font-body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
+                <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
                     {renderRichText(displayText)}
                     {truncated && (
                         <span
@@ -737,7 +737,7 @@ export default function FeedCardWithReply({
                                                 {formatDateProximity(c.createdAt)}
                                             </span>
                                         </div>
-                                        <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                        <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                                             {renderRichText(c.content, c.mentionMap)}
                                         </p>
                                         <div className="flex items-center gap-[0.75rem]">
@@ -792,7 +792,7 @@ export default function FeedCardWithReply({
                                                             {formatDateProximity(reply.createdAt)}
                                                         </span>
                                                     </div>
-                                                    <p className="font-body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                    <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                                                         {renderRichText(reply.content, reply.mentionMap)}
                                                     </p>
                                                     <div className="flex items-center gap-[0.75rem]">
@@ -842,7 +842,7 @@ export default function FeedCardWithReply({
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center">
                                 <h3
-                                    className="font-label-large text-text-primary truncate cursor-pointer hover:text-text-brand"
+                                    className="label-large text-text-primary truncate cursor-pointer hover:text-text-brand"
                                     onClick={() => goToProfile(authorUserId, 'USER')}
                                 >
                                     {profileName}
@@ -850,13 +850,13 @@ export default function FeedCardWithReply({
                                 {profileTier ? <UserBadge tier={profileTier} size="sm" className="ml-2" /> : null}
                                 {joinButton && <p className="ml-[0.5rem]">·</p>}
                                 {joinButton && (
-                                    <button className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light text-text-brand hover:bg-brand cursor-pointer font-label-medium min-w-[3.75rem] ml-[0.1rem]">
+                                    <button className="inline-flex items-center justify-center py-[0.25rem] px-[0.5rem] rounded-md bg-brand-light text-text-brand hover:bg-brand cursor-pointer label-medium min-w-[3.75rem] ml-[0.1rem]">
                                         {t('join')}
                                     </button>
                                 )}
                             </div>
 
-                            <p className="font-body-small text-text-secondary text-wrap">
+                            <p className="body-small text-text-secondary text-wrap">
                                 {postDate}
                             </p>
                         </div>
@@ -904,21 +904,21 @@ export default function FeedCardWithReply({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[1rem]">
                         <button
-                            className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                            className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
                             onClick={handleLike}
                         >
                             <img width={20} height={20} src="/LIKE.svg" alt="like" className="w-[1.25rem] h-[1.25rem] object-contain" />
                             <span>{t('like')}</span>
                         </button>
                         <button
-                            className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                            className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
                             onClick={toggleCommentInput}
                         >
                             <img width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-[1.25rem] h-[1.25rem] object-contain" />
                             <span>{t('comment')}</span>
                         </button>
                         <button
-                            className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                            className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
                             onClick={handleShare}
                         >
                             <img width={20} height={20} src="/SHARE.svg" alt="share" className="w-[1.25rem] h-[1.25rem] object-contain" />
@@ -926,7 +926,7 @@ export default function FeedCardWithReply({
                         </button>
                     </div>
                     <button
-                        className="inline-flex items-center gap-[0.5rem] text-sm font-body-small text-text-secondary hover:text-text-primary min-w-[3.75rem]"
+                        className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
                         onClick={handleSave}
                     >
                         <Bookmark

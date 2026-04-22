@@ -812,7 +812,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                     {/* Application Form — IN_PLATFORM_FORM only */}
                     {isInPlatformFormMethod && !hasApplied && (
                         <section className="py-4" id="form-header">
-                            <p className="font-heading-xsmall text-lg font-semibold mb-1">{t("labels.applyForOpportunity")}</p>
+                            <p className="heading-xsmall text-lg font-semibold mb-1">{t("labels.applyForOpportunity")}</p>
                             <p className="text-sm text-text-secondary mb-4">
                                 <span className="text-red-500">*</span> {t("labels.requiredFieldsHint")}
                             </p>

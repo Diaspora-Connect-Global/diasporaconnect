@@ -202,7 +202,11 @@
         "shareLinkSent": "Link shared successfully",
         "shareLinkFailed": "Failed to share link",
         "noConversations": "No conversations yet",
-        "noGroups": "No groups yet"
+        "noGroups": "No groups yet",
+        "soldOut": "Sold Out",
+        "notAttendingAnymore": "Not attending anymore",
+        "going": "{count} going",
+        "registered": "Registered"
     },
     "createPost": {
         "placeholder": "What's on your mind, {name}?",
@@ -305,24 +309,24 @@
     },
     "passwordReset": {
         "step3": {
-      "title": "Create New Password",
-      "description": "Choose a strong password for your account",
-      "newPassword": "New Password",
-      "confirmPassword": "Confirm Password",
-      "passwordPlaceholder": "Enter new password",
-      "confirmPasswordPlaceholder": "Re-enter password",
-      "resetting": "Resetting..."
-    },
-    "errors": {
-      "passwordTooShort": "Password must be at least 8 characters",
-      "passwordMismatch": "Passwords do not match",
-      "invalidOrExpiredCode": "Reset code is invalid or expired",
-      "weakPassword": "Password does not meet security requirements",
-      "resetFailed": "Failed to reset password. Please try again."
-    },
-    "success": {
-      "passwordReset": "Password reset successfully! Redirecting to sign in..."
-    },
+            "title": "Create New Password",
+            "description": "Choose a strong password for your account",
+            "newPassword": "New Password",
+            "confirmPassword": "Confirm Password",
+            "passwordPlaceholder": "Enter new password",
+            "confirmPasswordPlaceholder": "Re-enter password",
+            "resetting": "Resetting..."
+        },
+        "errors": {
+            "passwordTooShort": "Password must be at least 8 characters",
+            "passwordMismatch": "Passwords do not match",
+            "invalidOrExpiredCode": "Reset code is invalid or expired",
+            "weakPassword": "Password does not meet security requirements",
+            "resetFailed": "Failed to reset password. Please try again."
+        },
+        "success": {
+            "passwordReset": "Password reset successfully! Redirecting to sign in..."
+        },
         "confirmVerification": {
             "title": "Enter verification code",
             "description": "Enter the verification code that was sent to {email}",

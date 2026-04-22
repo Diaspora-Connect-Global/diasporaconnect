@@ -503,7 +503,7 @@ export default function Events() {
                         <div key={idx} className="lg:w-[6.375rem] lg:h-[3.25rem]">
                             <button
                                 onClick={() => setActiveTab(`${tab.status}`)}
-                                className={`h-full px-[0.5rem] text-center transition-all duration-200 relative cursor-pointer font-label-large ${activeTab === `${tab.status}`
+                                className={`h-full px-[0.5rem] text-center transition-all duration-200 relative cursor-pointer label-large ${activeTab === `${tab.status}`
                                     ? "text-text-brand border-b-2 border-text-brand"
                                     : "text-text-secondary hover:text-text-primary border-b-2"
                                     }`}

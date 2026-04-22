@@ -93,7 +93,7 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
                                 {title.charAt(0) || '?'}
                             </div>
                         )}
-                        <span className="font-caption-large truncate">{title}</span>
+                        <span className="caption-large truncate">{title}</span>
                     </Link>
                 </div>
             </div>
@@ -121,7 +121,7 @@ function Section({ image, title, isOpen, onToggle, defaultAction, children, link
                             {title.charAt(0) || '?'}
                         </div>
                     )}
-                    <span className="text-text-primary font-caption-large truncate">{title}</span>
+                    <span className="text-text-primary caption-large truncate">{title}</span>
                 </div>
                 <span className="text-text-primary">
                     {isOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}

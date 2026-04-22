@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 
 interface EventCardProps {
     title: string;
@@ -23,10 +24,12 @@ interface EventCardProps {
 }
 
 export default function PaidEventCard({ title, date, location, attendees, imageUrl, visibility, eventId, priceLabel, isSoldOut, onAttendClick, onSaveClick, isSaved, isRegistered, onCancelAttend }: EventCardProps) {
+    const tActions = useTranslations('actions');
+
     return (
-        <div className="w-full max-w-lg bg-surface-default rounded-lg overflow-hidden shadow-lg">
+        <div className="w-full max-w-lg bg-surface-default rounded-2xl overflow-hidden shadow-sm border border-border-subtle">
             {/* Header Image */}
-            <div className="relative h-32 rounded-t-sm overflow-hidden">
+            <div className="relative h-32 rounded-t-2xl overflow-hidden">
                 <Image
                     src={imageUrl}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
@@ -53,7 +56,7 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
             <div className="px-4 py-2">
                 <div className="flex justify-between items-start mb-2 gap-4">
                     <Link href={eventId ? `/events/${eventId}` : "/events"} className="flex flex-col items-start min-w-0">
-                        <h2 className="text-2xl font-bold text-primary truncate max-w-full">{title}</h2>
+                        <h2 className="text-2xl font-bold text-text-primary truncate max-w-full">{title}</h2>
                         {visibility && visibility !== 'public' && (
                             <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-surface-subtle text-text-secondary capitalize border border-border-subtle">
                                 {visibility.replace('_', ' ')}
@@ -61,12 +64,12 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
                         )}
                     </Link>
                     {priceLabel && (
-                        <p className="text-text-primary whitespace-nowrap"><span className="text-lg font-bold text-primary">{priceLabel}</span></p>
+                        <p className="text-text-primary whitespace-nowrap"><span className="text-lg font-bold text-text-primary">{priceLabel}</span></p>
                     )}
                 </div>
-                <p className="text-lg font-semibold text-primary ">{date}</p>
-                <p className="text-secondary ">{location}</p>
-                <p className="text-secondary text-sm ">{attendees} going</p>
+                <p className="text-lg font-semibold text-text-primary">{date}</p>
+                <p className="text-text-secondary">{location}</p>
+                <p className="text-text-secondary text-sm">{tActions('going', { count: attendees })}</p>
 
                 {/* Action Buttons */}
                 <div className="flex mt-1 space-x-2">
@@ -76,14 +79,14 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
                         size="lg"
                     >
                         <Bookmark className={`w-8 h-8 ${isSaved ? "fill-current" : ""}`} />
-                        <span className="sr-only">{isSaved ? "Saved" : "Save"}</span>
+                        <span className="sr-only">{isSaved ? tActions('saved') : tActions('save')}</span>
                     </ButtonType1>
                     <ButtonType2
-                    onClick={onAttendClick}
-                    disabled={isRegistered || isSoldOut}
-                    size="lg"
-                    className="flex w-full text-center justify-center"> {/* Added px-6 for balance */}
-                        {isRegistered ? "Attending" : isSoldOut ? "Sold Out" : "Attend"}
+                        onClick={onAttendClick}
+                        disabled={isRegistered || isSoldOut}
+                        size="lg"
+                        className="flex w-full text-center justify-center">
+                        {isRegistered ? tActions('attending') : isSoldOut ? tActions('soldOut') : tActions('attend')}
                     </ButtonType2>
                     {isRegistered && (
                         <DropdownMenu>
@@ -94,7 +97,7 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={onCancelAttend}>
-                                    Not attending anymore
+                                    {tActions('notAttendingAnymore')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

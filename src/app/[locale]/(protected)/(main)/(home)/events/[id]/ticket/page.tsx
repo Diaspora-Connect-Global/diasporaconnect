@@ -91,7 +91,7 @@ export default function EventTicketPage() {
           ref={ticketRef}
           className="bg-surface-default border border-border-subtle rounded-2xl p-6 md:p-8"
         >
-          <p className="text-text-brand font-caption-large uppercase tracking-wide mb-2">
+          <p className="text-text-brand caption-large uppercase tracking-wide mb-2">
             {tHomeEvents("events")}
           </p>
           <h1 className="heading-small text-text-primary mb-6">{event.title}</h1>
@@ -99,23 +99,23 @@ export default function EventTicketPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="rounded-lg border border-border-subtle p-4">
               <p className="text-sm text-text-secondary mb-1">Ticket Holder</p>
-              <p className="font-label-large text-text-primary">{holderName}</p>
+              <p className="label-large text-text-primary">{holderName}</p>
             </div>
             <div className="rounded-lg border border-border-subtle p-4">
               <p className="text-sm text-text-secondary mb-1">Event Date</p>
-              <p className="font-label-large text-text-primary">
+              <p className="label-large text-text-primary">
                 {formatTicketDate(event.startAt, locale)}
               </p>
             </div>
             <div className="rounded-lg border border-border-subtle p-4">
               <p className="text-sm text-text-secondary mb-1">Location</p>
-              <p className="font-label-large text-text-primary">
+              <p className="label-large text-text-primary">
                 {getEventLocationDisplay(event)}
               </p>
             </div>
             <div className="rounded-lg border border-border-subtle p-4">
               <p className="text-sm text-text-secondary mb-1">Ticket ID</p>
-              <p className="font-label-large text-text-primary break-all">{event.id}</p>
+              <p className="label-large text-text-primary break-all">{event.id}</p>
             </div>
           </div>
         </div>

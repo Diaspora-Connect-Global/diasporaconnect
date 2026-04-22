@@ -149,7 +149,7 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
                         aria-describedby={
                             showShortHint ? 'phone-national-hint' : undefined
                         }
-                        className='text-text-primary font-body-large  px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0'
+                        className='text-text-primary body-large  px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0'
                     />
                 </InputGroup>
                 {showShortHint ? (

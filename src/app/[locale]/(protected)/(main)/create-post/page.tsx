@@ -13,7 +13,7 @@ import {
   Globe,
   Users,
   Lock,
-  Sparkles,
+  Plus,
   X,
   ChevronDown,
   Paperclip,
@@ -138,6 +138,7 @@ export default function CreatePostPage() {
   const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
   const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
   const textareaRef = React.useRef<RichTextareaHandle>(null);
+  const submittingRef = React.useRef(false);
 
   const t = useTranslations('createPost');
   const tActions = useTranslations('actions');
@@ -370,11 +371,13 @@ export default function CreatePostPage() {
   };
 
   const handlePost = async () => {
+    if (submittingRef.current) return;
     if (!postContent.trim() && attachments.length === 0) {
       toast.error(t('emptyError'));
       return;
     }
 
+    submittingRef.current = true;
     try {
       let attachmentInputs: AttachmentInput[] = [];
 
@@ -457,6 +460,8 @@ export default function CreatePostPage() {
     } catch (error: any) {
       console.error('Failed to create post:', error);
       toast.error(error?.message || t('errorMessage'));
+    } finally {
+      submittingRef.current = false;
     }
   };
 
@@ -510,8 +515,8 @@ export default function CreatePostPage() {
                     <span>{t('posting')}</span>
                   </>
                 ) : (
-                  <div className='px-2 py-1 flex'>
-                    <Sparkles className="w-4 h-4" />
+                  <div className='px-2 py-1 flex items-center gap-1'>
+                    <Plus className="w-4 h-4" strokeWidth={5} />
                     <span>{tActions('post')}</span>
                   </div>
                 )}
@@ -750,7 +755,7 @@ export default function CreatePostPage() {
         >
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-surface-brand to-surface-brand/80 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-text-white" />
+              <Plus className="w-5 h-5 text-text-white" strokeWidth={5} />
             </div>
             <div>
               <h3 className="label-large mb-1">{t('proTips.title')}</h3>

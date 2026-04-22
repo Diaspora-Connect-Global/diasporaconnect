@@ -44,9 +44,9 @@ export default function JoinAssociationCard({
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1 sm:gap-2">
-              <h3 className="font-label-large text-text-primary text-sm sm:text-base truncate">{title}</h3>
+              <h3 className="label-large text-text-primary text-sm sm:text-base truncate">{title}</h3>
             </div>
-            <p className="font-body-small text-text-secondary text-xs sm:text-sm flex flex-start">
+            <p className="body-small text-text-secondary text-xs sm:text-sm flex flex-start">
               {members ? `${members.toLocaleString()} ${t('members')}` : t('noMembers')}
             </p>
           </div>
@@ -61,7 +61,7 @@ export default function JoinAssociationCard({
 
       {/* Content */}
       {description && (
-        <p className="font-body-small leading-relaxed text-xs sm:text-sm text-left px-2">
+        <p className="body-small leading-relaxed text-xs sm:text-sm text-left px-2">
           {description}
         </p>
       )}

@@ -230,9 +230,12 @@ export default function Header({
                   </div>
 
                   {/* Sidebar Content */}
-                  <div className="p-4 " onClick={() => setIsMobileMenuOpen(false)}
+                  <div
+                    className="p-4"
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest('a')) setIsMobileMenuOpen(false);
+                    }}
                   >
-                    {/** TODO: prop drill the modal closing to the links */}
                     <HomeSidebar />
                   </div>
                 </div>

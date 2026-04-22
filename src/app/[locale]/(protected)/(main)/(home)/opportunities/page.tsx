@@ -529,7 +529,7 @@ const SavedComponent = ({
   return (
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-heading-medium text-lg text-text-primary">
+        <h2 className="heading-medium text-lg text-text-primary">
           {t("labels.savedOpportunities")} ({displayItems.length})
         </h2>
         <button
@@ -703,7 +703,7 @@ export default function Opportunities() {
                             <div key={idx} className="lg:w-[6.375rem] lg:h-[3.25rem]"> {/* 102px, 52px equivalent */}
                                 <ButtonType3
                                     onClick={() => setActiveTab(`${tab.status}`)}
-                                    className={`h-full w-full px-[0.5rem] text-center transition-all duration-200 relative font-label-large rounded-none border-0 bg-transparent ${activeTab === `${tab.status}`
+                                    className={`h-full w-full px-[0.5rem] text-center transition-all duration-200 relative label-large rounded-none border-0 bg-transparent ${activeTab === `${tab.status}`
                                         ? "text-text-brand border-b-2 border-text-brand"
                                         : "text-text-secondary hover:text-text-primary border-b-2 border-transparent"
                                         }`}
@@ -741,7 +741,7 @@ export default function Opportunities() {
                     )}
                 </div>
 
-                <h2 className="font-heading-medium my-[1.25rem] text-2xl">{t("moreopp")}</h2>
+                <h2 className="heading-medium my-[1.25rem] text-2xl">{t("moreopp")}</h2>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-[0.75rem] lg:mb-1 ">
                   {opportunities.map((opp) => (

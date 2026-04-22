@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from '../ui/button';
+import { ButtonType3 } from '../custom/button';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image'
 import { useCommunityStore } from '@/store/useCommunityStore';
@@ -101,31 +101,31 @@ export function MyCommunityCard({
                         </div>
 
                         <div className="flex flex-col min-w-0 flex-1"> {/* Allow text truncation */}
-                            <h1 className="text-text-primary font-label-large text-sm sm:text-base truncate cursor-pointer hover:text-text-brand" onClick={() => handleCommunitySelect(id)}> {/* Responsive font and truncate long titles */}
+                            <h1 className="text-text-primary label-large text-sm sm:text-base truncate cursor-pointer hover:text-text-brand" onClick={() => handleCommunitySelect(id)}> {/* Responsive font and truncate long titles */}
                                 {title}
                             </h1>
-                            <p className="text-text-primary font-body-small text-xs sm:text-sm text-wrap line-clamp-1"> {/* Smaller font, clamp description on small screens */}
+                            <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-1"> {/* Smaller font, clamp description on small screens */}
                                 {description}
                             </p>
                         </div>
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button className='bg-surface-default border-0 shadow-none text-text-primary p-1' variant="outline" aria-label={tCommon('openMenu')} size="icon-sm">
-                                <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" /> {/* Smaller icon on mobile */}
-                            </Button>
+                            <ButtonType3 className='p-1 min-w-0' aria-label={tCommon('openMenu')}>
+                                <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </ButtonType3>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className='bg-surface-default min-w-[200px]'> {/* Wider menu for touch targets */}
-                            <DropdownMenuItem onSelect={() => router.push(`/community/${id}`)} className='font-body-large text-text-primary flex justify-between items-center'>
+                            <DropdownMenuItem onSelect={() => router.push(`/community/${id}`)} className='body-large text-text-primary flex justify-between items-center'>
                                 <span>{t('viewCommunity')}</span>
                                 <ChevronRight className="w-4 h-4" />
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => handleCommunitySelect(id)} className='font-body-large text-text-primary flex justify-between items-center'>
+                            <DropdownMenuItem onSelect={() => handleCommunitySelect(id)} className='body-large text-text-primary flex justify-between items-center'>
                                 <span>{t('openInHome')}</span>
                                 <ChevronRight className="w-4 h-4" />
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={handleLeaveCommunityClick} className='text-text-danger font-body-large'>
+                            <DropdownMenuItem onSelect={handleLeaveCommunityClick} className='text-text-danger body-large'>
                                 {t('leaveCommunity')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>

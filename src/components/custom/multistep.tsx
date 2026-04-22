@@ -79,7 +79,7 @@ export const MultiStep: React.FC<StepProps> = ({
         )}
 
         {showStepLabel && stepNumber && totalSteps && (
-          <p className="font-label-medium text-text-secondary lg:h-[1.5rem] lg:w-[5.125rem]">
+          <p className="label-medium text-text-secondary lg:h-[1.5rem] lg:w-[5.125rem]">
             Step {stepNumber} of {totalSteps}
           </p>
         )}

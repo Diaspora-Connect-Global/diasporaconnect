@@ -171,7 +171,7 @@ export const Step5: React.FC<Step5Props> = ({
                     inputMode="numeric"
                     className="w-full"
                 >
-                    <InputOTPGroup className="w-full gap-2 text-text-primary font-body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
+                    <InputOTPGroup className="w-full gap-2 text-text-primary body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
                         <InputOTPSlot index={0} className="flex-1 h-12 text-lg rounded-md" />
                         <InputOTPSlot index={1} className="flex-1 h-12 text-lg rounded-md" />
                         <InputOTPSlot index={2} className="flex-1 h-12 text-lg rounded-md" />

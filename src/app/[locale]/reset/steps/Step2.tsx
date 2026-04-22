@@ -47,7 +47,7 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
                     inputMode="numeric"
                     className="w-full"
                 >
-                    <InputOTPGroup className="w-full gap-2 text-text-primary font-body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
+                    <InputOTPGroup className="w-full gap-2 text-text-primary body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
                         {Array.from({ length: 6 }).map((_, index) => (
                             <InputOTPSlot key={index} index={index} className="flex-1 h-12 text-lg rounded-md" />
                         ))}

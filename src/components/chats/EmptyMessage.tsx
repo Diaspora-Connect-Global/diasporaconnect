@@ -16,7 +16,7 @@ export function EmptyMessage() {
   return (
     <>
       <div className="flex flex-col items-center justify-center w-full h-full p-6">
-        <p className="font-body-medium my-5 text-center text-text-primary">
+        <p className="body-medium my-5 text-center text-text-primary">
           {t('empty.title')}
         </p>
         

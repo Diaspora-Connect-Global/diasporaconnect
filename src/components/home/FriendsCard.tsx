@@ -149,7 +149,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
                     <div className="flex items-center flex-wrap">
                         <div
                             onClick={handleNameClick}
-                            className="font-body-large text-text-primary text-sm cursor-pointer hover:text-text-brand transition-colors inline-flex items-center gap-1"
+                            className="body-large text-text-primary text-sm cursor-pointer hover:text-text-brand transition-colors inline-flex items-center gap-1"
                         >
                             <span className="flex items-center space-x-2 flex-wrap">
                                 <p className="whitespace-nowrap">

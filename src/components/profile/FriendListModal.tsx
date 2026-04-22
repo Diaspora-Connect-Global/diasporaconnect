@@ -456,7 +456,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       <div className="lg:w-[80vw] overflow-y-auto bg-surface-default lg:h-[90dvh]">
         <div className="lg:w-[75vw] m-auto">
           <div className="lg:flex justify-between items-center my-4">
-            <p className="font-heading-xsmall w-[75vw] mx-auto lg:w-fit">{tabTitle}</p>
+            <p className="heading-xsmall w-[75vw] mx-auto lg:w-fit">{tabTitle}</p>
 
             <div className="w-[75vw] lg:w-fit mx-auto">
               <SearchInput

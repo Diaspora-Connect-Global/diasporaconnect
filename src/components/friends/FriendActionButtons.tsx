@@ -178,7 +178,7 @@ export const FriendActionButtons = ({
                                 <DropdownMenuItem
                                     key="removeFriend"
                                     onSelect={() => setConfirmAction('removeFriend')}
-                                    className="font-body-large text-text-primary flex items-center"
+                                    className="body-large text-text-primary flex items-center"
                                     disabled={isRemoveLoading}
                                 >
                                     {isRemoveLoading ? (
@@ -196,7 +196,7 @@ export const FriendActionButtons = ({
                                 <DropdownMenuItem
                                     key="blockFriend"
                                     onSelect={() => setConfirmAction('blockFriend')}
-                                    className="font-body-large flex items-center"
+                                    className="body-large flex items-center"
                                     disabled={isBlockLoading}
                                 >
                                     {isBlockLoading ? (
