@@ -14,7 +14,7 @@ export default function InfoLinks() {
                 optionClassName="bg-surface-default"
             />
             <span >·</span>
-            <Link href="/about" className="hover:underline text-foreground">
+            <Link href="/about" className="hover:underline text-foreground" target="_blank" rel="noopener noreferrer">
                 <BodySmall>
                     <TextPrimary>
                         {t('about')}
@@ -22,7 +22,7 @@ export default function InfoLinks() {
                 </BodySmall>
             </Link>
             <span>·</span>
-            <Link href="/terms" className="hover:underline text-foreground flex-wrap">
+            <Link href="/terms" className="hover:underline text-foreground flex-wrap" target="_blank" rel="noopener noreferrer">
                 <BodySmall>
                     <TextPrimary>
                         {t('terms')}
@@ -30,7 +30,7 @@ export default function InfoLinks() {
                 </BodySmall>
             </Link>
             <span>·</span>
-            <Link href="/privacy" className="hover:underline text-foreground">
+            <Link href="/privacy" className="hover:underline text-foreground" target="_blank" rel="noopener noreferrer">
                 <BodySmall>
                     <TextPrimary>
                         {t('privacyPolicy')}
@@ -38,7 +38,7 @@ export default function InfoLinks() {
                 </BodySmall>
             </Link>
             <span>·</span>
-            <Link href="/contact" className="hover:underline text-foreground">
+            <Link href="/contact" className="hover:underline text-foreground" target="_blank" rel="noopener noreferrer">
                 <BodySmall>
                     <TextPrimary>
                         {t('contact')}
