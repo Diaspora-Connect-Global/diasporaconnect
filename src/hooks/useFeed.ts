@@ -98,6 +98,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         ...feedInputBase,
         limit: initialLimit,
         offset: 0,
+        clearHistory: true,
       } as GetFeedInput,
     }),
     [feedInputBase, initialLimit]
