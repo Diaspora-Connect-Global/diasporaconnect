@@ -242,6 +242,7 @@ export default function Home() {
           input: {
             postId,
             text: content,
+            idempotencyKey: crypto.randomUUID(),
             ...(parentId ? { parentId } : {}),
           }
         }

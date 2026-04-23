@@ -177,6 +177,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
           input: {
             postId,
             text: content,
+            idempotencyKey: crypto.randomUUID(),
             ...(parentId ? { parentId } : {}),
           },
         },

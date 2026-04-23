@@ -435,6 +435,7 @@ export default function CreatePostPage() {
           input: {
             text: postContent,
             visibility: visibility,
+            idempotencyKey: crypto.randomUUID(),
             ...(attachmentInputs.length > 0 && { attachments: attachmentInputs }),
             ...(mentionedUsers.length > 0 && {
               mentionedUserIds: mentionedUsers.map((m) => m.userId),

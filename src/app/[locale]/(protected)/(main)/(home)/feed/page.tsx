@@ -97,7 +97,7 @@ export default function FeedPage() {
     if (!content.trim()) return;
     try {
       await createComment({
-        variables: { input: { postId, text: content, ...(parentId ? { parentId } : {}) } },
+        variables: { input: { postId, text: content, idempotencyKey: crypto.randomUUID(), ...(parentId ? { parentId } : {}) } },
       });
       toast.success('Comment posted!');
     } catch (err) {

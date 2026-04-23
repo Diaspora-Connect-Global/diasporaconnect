@@ -242,6 +242,7 @@ export default function CreatePostForm({
             text: text.trim(),
             visibility,
             publishImmediately: true,
+            idempotencyKey: crypto.randomUUID(),
             ...(attachments.length > 0 && { attachments }),
           },
         },

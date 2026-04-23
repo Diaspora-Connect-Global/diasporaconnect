@@ -109,6 +109,7 @@ export default function PostPage() {
           input: {
             postId,
             text: content,
+            idempotencyKey: crypto.randomUUID(),
             ...(parentId ? { parentId } : {}),
           },
         },
