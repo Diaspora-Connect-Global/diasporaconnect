@@ -1,5 +1,73 @@
+import type { Metadata } from 'next';
 import { Mail, Handshake, Clock, MessageCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import JsonLd from '@/components/seo/JsonLd';
+import { BASE, SITE_NAME, buildAlternates, publicRobots } from '@/lib/seo';
+
+export const metadata: Metadata = {
+  title: 'Contact Us',
+  description:
+    'Get in touch with DiaspoPlug. Reach our support, partnerships, or press teams. We reply within 24–48 hours on business days.',
+  robots: publicRobots,
+  alternates: buildAlternates('/contact'),
+  openGraph: {
+    title: `Contact Us | ${SITE_NAME}`,
+    description: 'Reach the DiaspoPlug team for support, partnerships, or press enquiries.',
+    url: `${BASE}/en/contact`,
+    siteName: SITE_NAME,
+    type: 'website',
+  },
+};
+
+const contactPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  '@id': `${BASE}/en/contact`,
+  url: `${BASE}/en/contact`,
+  name: `Contact Us | ${SITE_NAME}`,
+  description: 'Contact DiaspoPlug for support, partnerships, or press enquiries.',
+  inLanguage: 'en',
+  isPartOf: { '@id': `${BASE}/#website` },
+  about: { '@id': `${BASE}/#organization` },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: 'Contact', item: `${BASE}/en/contact` },
+    ],
+  },
+};
+
+const contactFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'How quickly does DiaspoPlug respond to support requests?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'DiaspoPlug typically responds within 24–48 hours on business days. Urgent account security issues are prioritised — include "URGENT" in your subject line.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How do I report a bug on DiaspoPlug?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Send a detailed description including steps to reproduce to support@diaspoplug.com. Screenshots and screen recordings are very helpful.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How do I submit a privacy request to DiaspoPlug?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Privacy-related requests such as data access, deletion, or correction should be sent to privacy@diaspoplug.com.',
+      },
+    },
+  ],
+};
 
 const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@diaspoplug.com';
 const businessEmail = 'partners@diaspoplug.com';
@@ -49,6 +117,8 @@ const faqs = [
 
 export default function ContactPage() {
   return (
+    <>
+      <JsonLd schema={[contactPageSchema, contactFaqSchema]} />
     <main className="min-h-screen bg-surface-default">
 
       {/* Hero */}
@@ -137,5 +207,6 @@ export default function ContactPage() {
       </section>
 
     </main>
+    </>
   );
 }

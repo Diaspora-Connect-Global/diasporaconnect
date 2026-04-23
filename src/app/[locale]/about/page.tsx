@@ -1,5 +1,104 @@
+import type { Metadata } from 'next';
 import { Globe, Users, Target, Zap, Building2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import JsonLd from '@/components/seo/JsonLd';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, organisationSchema, websiteSchema } from '@/lib/seo';
+
+export const metadata: Metadata = {
+  title: 'About DiaspoPlug — Connecting the diaspora across borders',
+  description:
+    'DiaspoPlug is the platform built for diaspora communities worldwide. Discover how we help members, associations, and vendors connect, collaborate, and create opportunities across borders.',
+  keywords: [
+    'about DiaspoPlug',
+    'diaspora platform',
+    'diaspora community',
+    'diaspora network',
+    'cross-border collaboration',
+    'diaspora associations',
+    'immigrant network',
+    'expat community platform',
+  ],
+  robots: publicRobots,
+  alternates: buildAlternates('/about'),
+  openGraph: {
+    title: 'About DiaspoPlug — Connecting the diaspora across borders',
+    description:
+      'DiaspoPlug helps diaspora communities stay connected, build trust, and create opportunities across borders — one meaningful connection at a time.',
+    url: `${BASE}/en/about`,
+    siteName: SITE_NAME,
+    type: 'website',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'About DiaspoPlug' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About DiaspoPlug',
+    description: 'The platform connecting diaspora communities worldwide.',
+    images: ['/og-default.png'],
+  },
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'What is DiaspoPlug?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'DiaspoPlug is a platform designed for diaspora communities worldwide. It connects members, associations, and vendors to enable collaboration, discovery of opportunities, and community engagement across borders.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Who is DiaspoPlug for?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'DiaspoPlug is for diaspora members living abroad, local community leaders, diaspora associations, and trusted vendors who want to connect and create value together.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What can I do on DiaspoPlug?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'On DiaspoPlug you can join diaspora communities, discover events, find job opportunities, access a marketplace of diaspora-focused vendors, connect with associations, and network with other diaspora members.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How many countries is DiaspoPlug available in?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'DiaspoPlug has members from over 50 countries and supports four languages: English, French, German, and Italian.',
+      },
+    },
+  ],
+};
+
+const aboutPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': `${BASE}/en/about`,
+  url: `${BASE}/en/about`,
+  name: `About ${SITE_NAME}`,
+  description:
+    'DiaspoPlug is a platform connecting diaspora communities worldwide, providing community spaces, events, marketplace services, and professional networking tools.',
+  inLanguage: 'en',
+  isPartOf: { '@id': `${BASE}/#website` },
+  about: { '@id': `${BASE}/#organization` },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: 'About', item: `${BASE}/en/about` },
+    ],
+  },
+  speakable: {
+    '@type': 'SpeakableSpecification',
+    cssSelector: ['h1', 'h2', '.speakable'],
+  },
+};
 
 const stats = [
   { value: '50+', label: 'Countries represented' },
@@ -34,112 +133,115 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-surface-default">
+    <>
+      <JsonLd schema={[organisationSchema, websiteSchema, aboutPageSchema, faqSchema]} />
+      <main className="min-h-screen bg-surface-default">
 
-      {/* Hero */}
-      <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-text-brand">
-            About DiaspoPlug
-          </p>
-          <h1 className="max-w-2xl text-4xl font-black tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
-            Built for the diaspora,<br />
-            <span className="text-text-brand">by the diaspora.</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-lg font-light leading-relaxed text-text-secondary">
-            DiaspoPlug helps diaspora communities stay connected, build trust, and create
-            opportunities across borders — one meaningful connection at a time.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/community"
-              className="inline-flex items-center gap-2 rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-            >
-              Explore communities <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-border-subtle px-6 py-3 text-sm font-semibold text-text-primary hover:bg-surface-subtle transition-colors"
-            >
-              Get in touch
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats bar */}
-      <section className="border-b border-border-subtle bg-surface-subtle">
-        <div className="mx-auto max-w-5xl px-6 py-8">
-          <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {stats.map((s) => (
-              <div key={s.label}>
-                <dt className="text-3xl font-black text-text-brand">{s.value}</dt>
-                <dd className="mt-1 text-sm font-medium text-text-secondary">{s.label}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-
-      {/* Three pillars */}
-      <section className="mx-auto max-w-5xl px-6 py-16">
-        <h2 className="mb-10 text-2xl font-bold tracking-tight text-text-primary">
-          What makes DiaspoPlug different
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-3">
-          {pillars.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-xl border border-border-subtle bg-surface-default p-6 hover:border-text-brand/40 transition-colors">
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-text-brand/10">
-                <Icon className="h-5 w-5 text-text-brand" />
-              </div>
-              <h3 className="mb-2 text-base font-bold text-text-primary">{title}</h3>
-              <p className="text-sm font-light leading-relaxed text-text-secondary">{body}</p>
+        {/* Hero */}
+        <section className="border-b border-border-subtle">
+          <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-text-brand">
+              About DiaspoPlug
+            </p>
+            <h1 className="max-w-2xl text-4xl font-black tracking-tight text-text-primary sm:text-5xl lg:text-6xl speakable">
+              Built for the diaspora,<br />
+              <span className="text-text-brand">by the diaspora.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg font-light leading-relaxed text-text-secondary speakable">
+              DiaspoPlug helps diaspora communities stay connected, build trust, and create
+              opportunities across borders — one meaningful connection at a time.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/community"
+                className="inline-flex items-center gap-2 rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+              >
+                Explore communities <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-full border border-border-subtle px-6 py-3 text-sm font-semibold text-text-primary hover:bg-surface-subtle transition-colors"
+              >
+                Get in touch
+              </Link>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* Values */}
-      <section className="border-t border-border-subtle bg-surface-subtle">
-        <div className="mx-auto max-w-5xl px-6 py-16">
-          <h2 className="mb-10 text-2xl font-bold tracking-tight text-text-primary">Our values</h2>
-          <div className="space-y-6">
-            {values.map(({ icon: Icon, title, body }, i) => (
-              <div key={title} className="flex gap-5">
-                <div className="flex-shrink-0">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-text-brand text-white text-xs font-bold">
-                    {i + 1}
-                  </div>
+        {/* Stats bar */}
+        <section className="border-b border-border-subtle bg-surface-subtle">
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              {stats.map((s) => (
+                <div key={s.label}>
+                  <dt className="text-3xl font-black text-text-brand">{s.value}</dt>
+                  <dd className="mt-1 text-sm font-medium text-text-secondary">{s.label}</dd>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Icon className="h-4 w-4 text-text-brand" />
-                    <h3 className="text-base font-bold text-text-primary">{title}</h3>
-                  </div>
-                  <p className="text-sm font-light leading-relaxed text-text-secondary">{body}</p>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        {/* Three pillars */}
+        <section className="mx-auto max-w-5xl px-6 py-16">
+          <h2 className="mb-10 text-2xl font-bold tracking-tight text-text-primary">
+            What makes DiaspoPlug different
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {pillars.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-xl border border-border-subtle bg-surface-default p-6 hover:border-text-brand/40 transition-colors">
+                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-text-brand/10">
+                  <Icon className="h-5 w-5 text-text-brand" />
                 </div>
+                <h3 className="mb-2 text-base font-bold text-text-primary">{title}</h3>
+                <p className="text-sm font-light leading-relaxed text-text-secondary">{body}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA footer */}
-      <section className="border-t border-border-subtle">
-        <div className="mx-auto max-w-5xl px-6 py-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-base font-semibold text-text-primary">Ready to connect?</p>
-            <p className="text-sm text-text-secondary">Join thousands of diaspora members already on the platform.</p>
+        {/* Values */}
+        <section className="border-t border-border-subtle bg-surface-subtle">
+          <div className="mx-auto max-w-5xl px-6 py-16">
+            <h2 className="mb-10 text-2xl font-bold tracking-tight text-text-primary">Our values</h2>
+            <div className="space-y-6">
+              {values.map(({ icon: Icon, title, body }, i) => (
+                <div key={title} className="flex gap-5">
+                  <div className="flex-shrink-0">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-text-brand text-white text-xs font-bold">
+                      {i + 1}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Icon className="h-4 w-4 text-text-brand" />
+                      <h3 className="text-base font-bold text-text-primary">{title}</h3>
+                    </div>
+                    <p className="text-sm font-light leading-relaxed text-text-secondary">{body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-2 rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity whitespace-nowrap"
-          >
-            Join DiaspoPlug <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
+        </section>
 
-    </main>
+        {/* CTA footer */}
+        <section className="border-t border-border-subtle">
+          <div className="mx-auto max-w-5xl px-6 py-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-base font-semibold text-text-primary">Ready to connect?</p>
+              <p className="text-sm text-text-secondary">Join thousands of diaspora members already on the platform.</p>
+            </div>
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-2 rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity whitespace-nowrap"
+            >
+              Join DiaspoPlug <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+
+      </main>
+    </>
   );
 }

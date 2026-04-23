@@ -1,3 +1,11 @@
+import type { Metadata } from 'next';
+import { privateRobots } from '@/lib/seo';
+
+export const metadata: Metadata = {
+  title: 'Reset Password',
+  robots: privateRobots,
+};
+
 export default function ResetLayout({
   children,
 }: {

@@ -1,6 +1,45 @@
+import type { Metadata } from 'next';
 import { FileText } from 'lucide-react';
+import JsonLd from '@/components/seo/JsonLd';
+import { BASE, SITE_NAME, buildAlternates, publicRobots } from '@/lib/seo';
 
-const LAST_UPDATED = "March 27, 2026";
+const LAST_UPDATED = '2026-03-27';
+const LAST_UPDATED_DISPLAY = 'March 27, 2026';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description:
+    'Read the DiaspoPlug Terms of Service. These terms govern your use of the platform, your account responsibilities, acceptable use, marketplace activity, and your rights.',
+  robots: publicRobots,
+  alternates: buildAlternates('/terms'),
+  openGraph: {
+    title: `Terms of Service | ${SITE_NAME}`,
+    description: 'The terms that govern your use of the DiaspoPlug platform.',
+    url: `${BASE}/en/terms`,
+    siteName: SITE_NAME,
+    type: 'website',
+  },
+};
+
+const termsPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${BASE}/en/terms`,
+  url: `${BASE}/en/terms`,
+  name: `Terms of Service | ${SITE_NAME}`,
+  description: 'The terms of service governing use of the DiaspoPlug platform.',
+  inLanguage: 'en',
+  dateModified: LAST_UPDATED,
+  isPartOf: { '@id': `${BASE}/#website` },
+  about: { '@id': `${BASE}/#organization` },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: 'Terms of Service', item: `${BASE}/en/terms` },
+    ],
+  },
+};
 
 const sections = [
   {
@@ -11,7 +50,7 @@ const sections = [
   {
     id: 'account',
     title: 'Account responsibilities',
-    body: 'You are responsible for safeguarding your account credentials and for all activity under your account. You must provide accurate information and keep it up to date. You may not share your account with others or use another member\'s account.',
+    body: "You are responsible for safeguarding your account credentials and for all activity under your account. You must provide accurate information and keep it up to date. You may not share your account with others or use another member's account.",
   },
   {
     id: 'acceptable-use',
@@ -54,94 +93,70 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-surface-default">
+    <>
+      <JsonLd schema={termsPageSchema} />
+      <main className="min-h-screen bg-surface-default">
 
-      {/* Header */}
-      <section className="border-b border-border-subtle">
+        <section className="border-b border-border-subtle">
+          <div className="mx-auto max-w-5xl px-6 py-12">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-text-brand/10">
+                <FileText className="h-5 w-5 text-text-brand" />
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-text-brand">Legal</p>
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-text-primary sm:text-5xl">
+              Terms of Service
+            </h1>
+            <p className="mt-3 text-sm text-text-secondary">
+              Last updated: <time dateTime={LAST_UPDATED} className="font-medium text-text-primary">{LAST_UPDATED_DISPLAY}</time>
+            </p>
+            <p className="mt-4 max-w-xl text-base font-light leading-relaxed text-text-secondary">
+              Please read these terms carefully. They govern your use of DiaspoPlug and form a
+              binding agreement between you and DiaspoPlug.
+            </p>
+          </div>
+        </section>
+
         <div className="mx-auto max-w-5xl px-6 py-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-text-brand/10">
-              <FileText className="h-5 w-5 text-text-brand" />
-            </div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-text-brand">Legal</p>
-          </div>
-          <h1 className="text-4xl font-black tracking-tight text-text-primary sm:text-5xl">
-            Terms of Service
-          </h1>
-          <p className="mt-3 text-sm text-text-secondary">
-            Last updated: <span className="font-medium text-text-primary">{LAST_UPDATED}</span>
-          </p>
-          <p className="mt-4 max-w-xl text-base font-light leading-relaxed text-text-secondary">
-            Please read these terms carefully. They govern your use of DiaspoPlug and form a
-            binding agreement between you and DiaspoPlug.
-          </p>
-        </div>
-      </section>
+          <div className="flex gap-10">
+            <aside className="hidden lg:block w-56 flex-shrink-0">
+              <div className="sticky top-6">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-secondary">Contents</p>
+                <nav className="space-y-1" aria-label="Terms sections">
+                  {sections.map((s, i) => (
+                    <a key={s.id} href={`#${s.id}`} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-text-secondary hover:bg-surface-subtle hover:text-text-primary transition-colors">
+                      <span className="text-xs font-bold text-text-brand w-4">{i + 1}</span>
+                      {s.title}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </aside>
 
-      {/* Two-column layout */}
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <div className="flex gap-10">
-
-          {/* Sticky TOC – desktop only */}
-          <aside className="hidden lg:block w-56 flex-shrink-0">
-            <div className="sticky top-6">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-secondary">
-                Contents
-              </p>
-              <nav className="space-y-1">
-                {sections.map((s, i) => (
-                  <a
-                    key={s.id}
-                    href={`#${s.id}`}
-                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-text-secondary hover:bg-surface-subtle hover:text-text-primary transition-colors"
-                  >
-                    <span className="text-xs font-bold text-text-brand w-4">{i + 1}</span>
-                    {s.title}
-                  </a>
-                ))}
-              </nav>
-            </div>
-          </aside>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0 space-y-0">
-            {sections.map((s, i) => (
-              <section
-                key={s.id}
-                id={s.id}
-                className="py-8 border-b border-border-subtle last:border-0"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="mt-1 flex-shrink-0 text-2xl font-black text-text-brand/20 leading-none w-7">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold text-text-primary mb-3">{s.title}</h2>
-                    {s.body && (
-                      <p className="text-sm font-light leading-relaxed text-text-secondary">
-                        {s.body}
-                      </p>
-                    )}
-                    {s.email && (
-                      <p className="text-sm font-light leading-relaxed text-text-secondary">
-                        {s.emailLabel}{' '}
-                        <a
-                          href={`mailto:${s.email}`}
-                          className="font-medium text-text-brand hover:underline"
-                        >
-                          {s.email}
-                        </a>
-                        .
-                      </p>
-                    )}
+            <div className="flex-1 min-w-0">
+              {sections.map((s, i) => (
+                <section key={s.id} id={s.id} className="py-8 border-b border-border-subtle last:border-0">
+                  <div className="flex items-start gap-4">
+                    <span className="mt-1 flex-shrink-0 text-2xl font-black text-text-brand/20 leading-none w-7">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg font-bold text-text-primary mb-3">{s.title}</h2>
+                      {s.body && <p className="text-sm font-light leading-relaxed text-text-secondary">{s.body}</p>}
+                      {s.email && (
+                        <p className="text-sm font-light leading-relaxed text-text-secondary">
+                          {s.emailLabel}{' '}
+                          <a href={`mailto:${s.email}`} className="font-medium text-text-brand hover:underline">{s.email}</a>.
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </section>
-            ))}
+                </section>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-    </main>
+      </main>
+    </>
   );
 }

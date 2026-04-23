@@ -7,41 +7,82 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, getMessages } from 'next-intl/server';
 import GraphQLProvider from "@/components/provider/apollo-provider";
 import { Toaster } from 'sonner';
+import { BASE, SITE_NAME, LOCALES, publicRobots } from '@/lib/seo';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://diaspoplug.com';
-const metadataBase = new URL(APP_URL.replace(/\/$/, ''));
+const metadataBase = new URL(BASE);
 
 export async function generateMetadata({
-  params
+  params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
-  const title = 'Diaspoplug';
+
   const description = t('description');
-  const defaultImage = '/og-default.png';
+  const ogImage = '/og-default.png';
+
+  const hreflangLanguages: Record<string, string> = {};
+  for (const l of LOCALES) hreflangLanguages[l] = `${BASE}/${l}`;
+  hreflangLanguages['x-default'] = `${BASE}/en`;
+
   return {
-    title,
-    description,
     metadataBase,
+    title: {
+      default: SITE_NAME,
+      template: `%s | ${SITE_NAME}`,
+    },
+    description,
+    keywords: [
+      'diaspora community',
+      'diaspora network',
+      'diaspora platform',
+      'diaspora connect',
+      'diaspora association',
+      'diaspora events',
+      'diaspora marketplace',
+      'diaspora jobs',
+      'immigrant community',
+      'expat network',
+      'cross-border community',
+      'diaspoplug',
+    ],
+    authors: [{ name: SITE_NAME, url: BASE }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
+    robots: publicRobots,
     icons: {
       icon: '/favicon.svg',
       shortcut: '/favicon.svg',
       apple: '/favicon.svg',
     },
     openGraph: {
-      title,
+      title: SITE_NAME,
       description,
-      siteName: 'Diaspoplug',
-      images: [{ url: defaultImage, width: 1200, height: 630, alt: 'Diaspoplug' }],
+      url: `${BASE}/${locale}`,
+      siteName: SITE_NAME,
+      locale: locale,
+      alternateLocale: LOCALES.filter((l) => l !== locale),
+      type: 'website',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `${SITE_NAME} — Connecting diaspora communities worldwide` }],
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: SITE_NAME,
       description,
-      images: [defaultImage],
+      site: '@diaspoplug',
+      creator: '@diaspoplug',
+      images: [ogImage],
     },
+    alternates: {
+      canonical: `${BASE}/en`,
+      languages: hreflangLanguages,
+    },
+    verification: {
+      // Add Google / Bing verification tokens here when available
+      // google: 'GOOGLE_SITE_VERIFICATION_TOKEN',
+    },
+    category: 'social network',
   };
 }
 
@@ -51,40 +92,28 @@ export function generateStaticParams() {
 
 export default async function RootLayout({
   children,
-  params
+  params,
 }: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  
+
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
 
-  const messages = await getMessages().catch(() => null) ?? (await import(`../../../messages/${locale}.json`)).default;
+  const messages =
+    (await getMessages().catch(() => null)) ??
+    (await import(`../../../messages/${locale}.json`)).default;
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* Prevent flash of wrong theme by checking localStorage before hydration */}
+        {/* Prevent flash of wrong theme. Default: light (matches ThemeProvider defaultTheme). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const theme = localStorage.getItem('theme') || 'system';
-                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  const activeTheme = theme === 'system' ? systemTheme : theme;
-                  
-                  if (activeTheme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'light';var s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';var a=t==='system'?s:t;if(a==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})();`,
           }}
         />
       </head>
@@ -98,10 +127,7 @@ export default async function RootLayout({
           >
             <GraphQLProvider>
               {children}
-              <Toaster
-                position="top-center"
-                richColors
-              />
+              <Toaster position="top-center" richColors />
             </GraphQLProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
