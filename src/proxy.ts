@@ -1,6 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
-import {routing} from './i18n/routing';
-import {NextRequest, NextResponse} from 'next/server';
+import { routing } from './i18n/routing';
+import { NextRequest, NextResponse } from 'next/server';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -14,6 +14,7 @@ const COUNTRY_TO_LOCALE: Record<string, string> = {
   FR: 'fr',
   BE: 'fr',
   LU: 'fr',
+  NL: 'nl',
 };
 
 function getLocaleFromPath(pathname: string): string | null {
@@ -32,19 +33,14 @@ function normalizeLocale(locale?: string | null): string | null {
 
 function localeFromAcceptLanguage(headerValue?: string | null): string | null {
   if (!headerValue) return null;
-
   const candidates = headerValue
     .split(',')
     .map((entry) => entry.split(';')[0]?.trim().toLowerCase())
     .filter(Boolean) as string[];
-
   for (const candidate of candidates) {
     const base = candidate.split('-')[0];
-    if (base && SUPPORTED_LOCALES.has(base as (typeof routing.locales)[number])) {
-      return base;
-    }
+    if (base && SUPPORTED_LOCALES.has(base as (typeof routing.locales)[number])) return base;
   }
-
   return null;
 }
 
@@ -70,9 +66,9 @@ function withLocalePrefix(pathname: string, locale: string): string {
 }
 
 export default function proxy(req: NextRequest) {
-  const {pathname, search} = req.nextUrl;
+  const { pathname, search } = req.nextUrl;
 
-  // Priority 1: URL locale
+  // Priority 1: locale already in URL — let next-intl handle it
   const localeInPath = getLocaleFromPath(pathname);
   if (localeInPath) {
     const response = intlMiddleware(req);
@@ -84,20 +80,14 @@ export default function proxy(req: NextRequest) {
     return response;
   }
 
-  // Priority 2: saved preference
-  const savedPreference = normalizeLocale(
-    req.cookies.get('preferredLocale')?.value ?? req.cookies.get('NEXT_LOCALE')?.value ?? null
-  );
-
-  // Priority 3: browser language
-  const browserLocale = localeFromAcceptLanguage(req.headers.get('accept-language'));
-
-  // Priority 4: IP location
-  const countryLocale = localeFromCountry(detectCountryFromHeaders(req));
-
-  // Priority 5: fallback
+  // Priority 2: saved preference → browser language → IP country → default
   const detectedLocale =
-    savedPreference ?? browserLocale ?? countryLocale ?? routing.defaultLocale;
+    normalizeLocale(
+      req.cookies.get('preferredLocale')?.value ?? req.cookies.get('NEXT_LOCALE')?.value ?? null,
+    ) ??
+    localeFromAcceptLanguage(req.headers.get('accept-language')) ??
+    localeFromCountry(detectCountryFromHeaders(req)) ??
+    routing.defaultLocale;
 
   const url = req.nextUrl.clone();
   url.pathname = withLocalePrefix(pathname, detectedLocale);
@@ -118,5 +108,5 @@ export default function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'
-}
+  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)',
+};
