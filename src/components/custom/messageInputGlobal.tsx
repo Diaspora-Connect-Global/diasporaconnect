@@ -2,7 +2,7 @@
 "use client"
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import { Smile, ImageIcon, Send, X } from "lucide-react";
+import { Smile, ImageIcon, Send, X, Loader2 } from "lucide-react";
 import { ButtonType2, ButtonType3 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 import EmojiPicker, { Theme } from "emoji-picker-react";
@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 
 
 interface MessageInputProps {
-    onSendMessage: (message: string, image?: string) => void;
+    onSendMessage: (message: string, image?: string) => void | Promise<void>;
     placeholder?: string;
     disabled?: boolean;
     conversationId?: string;
@@ -31,6 +31,7 @@ export default function MessageInputGlobal({
     const [newMessage, setNewMessage] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isSending, setIsSending] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -134,23 +135,23 @@ export default function MessageInputGlobal({
         console.log('Message added to mock data:', newMessageObj);
     };
 
-    const handleSendMessage = () => {
-        if ((newMessage.trim() || imagePreview) && !disabled) {
-            // Call the original onSendMessage prop
-            onSendMessage(newMessage, imagePreview || undefined);
-            
-            // Update mock data
+    const handleSendMessage = async () => {
+        if (!(newMessage.trim() || imagePreview) || disabled || isSending) return;
+
+        setIsSending(true);
+        try {
+            await onSendMessage(newMessage, imagePreview || undefined);
             updateMockData(newMessage, imagePreview || undefined);
-            
-            // Reset state
             setNewMessage('');
             setImagePreview(null);
             setShowEmojiPicker(false);
+        } finally {
+            setIsSending(false);
         }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey && !disabled) {
+        if (e.key === 'Enter' && !e.shiftKey && !disabled && !isSending) {
             e.preventDefault();
             handleSendMessage();
         }
@@ -313,10 +314,12 @@ export default function MessageInputGlobal({
                         <div className="flex justify-end">
                         <ButtonType2
                             onClick={handleSendMessage}
-                            disabled={(!newMessage.trim() && !imagePreview) || disabled}
+                            disabled={(!newMessage.trim() && !imagePreview) || disabled || isSending}
                             className="shrink-0 px-3 py-2 bg-text-brand text-white rounded-lg hover:bg-text-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[40px]"
                         >
-                            {reversed ? (
+                            {isSending ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : reversed ? (
                                 <>
                                     <span className="hidden lg:inline text-sm font-medium">{reversedText}</span>
                                     <Send className="lg:hidden w-3 h-3" />

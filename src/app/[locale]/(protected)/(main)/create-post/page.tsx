@@ -139,6 +139,7 @@ export default function CreatePostPage() {
   const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
   const textareaRef = React.useRef<RichTextareaHandle>(null);
   const submittingRef = React.useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const t = useTranslations('createPost');
   const tActions = useTranslations('actions');
@@ -378,6 +379,7 @@ export default function CreatePostPage() {
     }
 
     submittingRef.current = true;
+    setIsSubmitting(true);
     try {
       let attachmentInputs: AttachmentInput[] = [];
 
@@ -463,6 +465,7 @@ export default function CreatePostPage() {
       toast.error(error?.message || t('errorMessage'));
     } finally {
       submittingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -507,10 +510,10 @@ export default function CreatePostPage() {
               {/* Post Button */}
               <ButtonType2
                 onClick={handlePost}
-                disabled={isPosting || (!postContent.trim() && attachments.length === 0)}
+                disabled={isSubmitting || (!postContent.trim() && attachments.length === 0)}
                 className="flex items-center gap-2 px-6 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:hover:scale-100"
               >
-                {isPosting ? (
+                {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-text-white border-t-transparent rounded-full animate-spin"></div>
                     <span>{t('posting')}</span>
