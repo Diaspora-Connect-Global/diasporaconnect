@@ -20,6 +20,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import PrivacyPolicyModal from '@/components/custom/PrivacyPolicyModal';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 
@@ -353,6 +354,7 @@ export default function Home() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
+      <PrivacyPolicyModal />
       {/* Main Feed - Independent Scroll */}
       <div
         ref={feedContainerRef}
