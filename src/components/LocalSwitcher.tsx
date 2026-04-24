@@ -21,6 +21,7 @@ const languages = [
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'it', name: 'Italian', nativeName: 'Italiano' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
 ];
 
 export default function LocaleSwitcher({
@@ -49,16 +50,16 @@ export default function LocaleSwitcher({
     <div className={className}>
       <Select  value={locale} onValueChange={switchLocale}>
         <SelectTrigger className={`w-fit border-none shadow-none focus-visible:ring-transparent  ${selectClassName}`}>
-          <SelectValue >{currentLanguage?.nativeName}</SelectValue>
+          <SelectValue >{currentLanguage?.name}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {languages.map((language) => (
-            <SelectItem 
-              key={language.code} 
+            <SelectItem
+              key={language.code}
               value={language.code}
               className={optionClassName}
             >
-              {language.nativeName}
+              {language.name}
             </SelectItem>
           ))}
         </SelectContent>
