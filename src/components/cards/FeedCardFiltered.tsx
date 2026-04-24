@@ -559,7 +559,7 @@ export default function FeedCardFiltered({
         );
 
         return (
-            <div className="fixed inset-0 z-50 flex bg-black/90 animate-in fade-in duration-200" onClick={closeMediaModal}>
+            <div className="fixed inset-0 z-50 flex bg-black animate-in fade-in duration-200" onClick={closeMediaModal}>
                 {/* ---- DESKTOP LAYOUT ---- */}
                 <div className="hidden md:flex w-full h-full" onClick={(e) => e.stopPropagation()}>
                     {/* Left: media */}
