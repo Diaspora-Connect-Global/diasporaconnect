@@ -221,6 +221,7 @@ export default function ProfilePage() {
                 showFooter={false}
                 contentClassName="min-h-[50%] lg:min-h-[80%] flex flex-col"
                 contentRef={avatarDialogContentRef}
+                preventOutsideClose
             >
                 <div className="flex flex-col items-center flex-1 min-h-0">
                     {/* Circular Image Preview/Upload Area */}
@@ -271,7 +272,7 @@ export default function ProfilePage() {
                         </label>
                     </div>
 
-                    <div ref={avatarUploadSectionRef} className={`w-full px-4 pb-4 flex-shrink-0 ${croppedImage ? 'sticky bottom-0 left-0 right-0 bg-surface-default pt-3 z-10' : ''}`}>
+                    <div ref={avatarUploadSectionRef} className="w-full px-4 pb-4 flex-shrink-0 sticky bottom-0 left-0 right-0 bg-surface-default pt-3 z-10">
                         <ButtonType2
                             onClick={handleAvatarUpload}
                             disabled={!croppedImage || uploading || updating}

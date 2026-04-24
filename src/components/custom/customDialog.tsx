@@ -19,6 +19,8 @@ interface CustomDialogProps {
   contentClassName?: string;
   /** Ref for the scrollable content area (e.g. to scroll into view after a step). */
   contentRef?: RefObject<HTMLDivElement | null>;
+  /** Prevent the dialog from closing when clicking outside (e.g. when another dialog is layered on top). */
+  preventOutsideClose?: boolean;
 }
 
 export default function CustomDialog({
@@ -35,6 +37,7 @@ export default function CustomDialog({
   cancelText,
   contentClassName = 'min-w-[70dvw] h-[90dvh]',
   contentRef,
+  preventOutsideClose = false,
 }: CustomDialogProps) {
   const t = useTranslations('dialog');
   const defaultTitle = title || t('title');
@@ -48,7 +51,10 @@ export default function CustomDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`p-0 gap-0 flex flex-col ${contentClassName}`}>
+      <DialogContent
+        className={`p-0 gap-0 flex flex-col ${contentClassName}`}
+        onInteractOutside={preventOutsideClose ? (e) => e.preventDefault() : undefined}
+      >
         <DialogHeader className="rounded-t-md px-6 py-3 h-[10vh] border-b sticky top-0 bg-surface-default z-10 flex">
           <DialogTitle className="text-xl font-semibold flex justify-between w-full">
             {defaultTitle}

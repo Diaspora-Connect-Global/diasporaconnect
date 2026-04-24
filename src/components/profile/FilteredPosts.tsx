@@ -312,13 +312,13 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 content={post.text}
                 images={
                   post.attachments
-                    ?.filter((a) => a.mimeType?.startsWith('image/'))
+                    ?.filter((a) => a.mimeType?.startsWith('image/') || a.type?.toUpperCase() === 'IMAGE')
                     .map((a) => a.url || '')
                     .filter(Boolean) || []
                 }
                 videos={
                   post.attachments
-                    ?.filter((a) => a.mimeType?.startsWith('video/'))
+                    ?.filter((a) => a.mimeType?.startsWith('video/') || a.type?.toUpperCase() === 'VIDEO')
                     .map((a) => a.url || '')
                     .filter(Boolean) || []
                 }
