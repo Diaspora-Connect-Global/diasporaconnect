@@ -129,18 +129,20 @@ export function CircularImageCropper({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-auto z-[100]" aria-describedby={undefined}>
-        <DialogTitle className="text-lg font-semibold">Crop Your Image</DialogTitle>
-        <div className="flex flex-col gap-4 p-4">
-          
-          {/* ✅ Add container with proper constraints */}
-          <div 
+      <DialogContent
+        className="flex flex-col h-[85dvh] w-full lg:h-[90vh] lg:max-w-2xl p-0 gap-0 z-[100]"
+        aria-describedby={undefined}
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 px-6 py-4 border-b">
+          <DialogTitle className="text-lg font-semibold">Crop Your Image</DialogTitle>
+        </div>
+
+        {/* Scrollable crop area */}
+        <div className="flex-1 overflow-y-auto flex items-center justify-center p-4">
+          <div
             className="relative mx-auto max-w-full"
-            style={{ 
-              touchAction: 'none',
-              WebkitUserSelect: 'none',
-              userSelect: 'none'
-            }}
+            style={{ touchAction: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}
           >
             <ReactCrop
               crop={crop}
@@ -148,34 +150,27 @@ export function CircularImageCropper({
               onComplete={(c) => setCompletedCrop(c)}
               circularCrop
               aspect={1}
-              // ✅ Add these props for better mobile support
               ruleOfThirds={false}
-              style={{ 
-                maxWidth: '100%',
-                touchAction: 'none'
-              }}
+              style={{ maxWidth: '100%', touchAction: 'none' }}
             >
               <img
                 ref={imgRef}
                 alt="Crop preview"
                 src={src}
                 onLoad={onImageLoad}
-                style={{ 
-                  maxWidth: "100%", 
-                  height: "auto",
-                  display: "block"
-                }}
+                style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
               />
             </ReactCrop>
           </div>
+        </div>
 
-          {/* Hidden canvas */}
-          <canvas ref={canvasRef} style={{ display: "none" }} />
+        {/* Hidden canvas */}
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-          <div className="flex justify-end  items-center gap-2 mt-4">
-            <ButtonType3 onClick={onCancel}>Cancel</ButtonType3>
-            <ButtonType2 onClick={generateCroppedImage}>Done</ButtonType2>
-          </div>
+        {/* Footer — always visible */}
+        <div className="flex-shrink-0 px-6 py-4 border-t flex justify-end items-center gap-2">
+          <ButtonType3 onClick={onCancel}>Cancel</ButtonType3>
+          <ButtonType2 onClick={generateCroppedImage}>Done</ButtonType2>
         </div>
       </DialogContent>
     </Dialog>
