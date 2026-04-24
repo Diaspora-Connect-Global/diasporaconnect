@@ -88,6 +88,7 @@ export interface FeedCardFilteredProps {
     onSendComment?: (content: string, parentId?: string) => void;
     joinButton?: boolean;
     forceShowComments?: boolean;
+    onNavigatePost?: (direction: 'next' | 'prev') => void;
 }
 
 function mapApiComment(c: ApiComment): Comment {
@@ -143,6 +144,7 @@ export default function FeedCardFiltered({
     onSendComment,
     joinButton = true,
     forceShowComments = false,
+    onNavigatePost,
 }: FeedCardFilteredProps) {
     const resolvedPostId = postId ?? id;
     const storeAvatar = useUserStore((s) => s.user?.avatarUrl);
@@ -157,6 +159,31 @@ export default function FeedCardFiltered({
     const [showCommentInput, setShowCommentInput] = useState(false);
     const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
     const [showShareModal, setShowShareModal] = useState(false);
+
+    // Swipe tracking
+    const touchStartX = useRef(0);
+    const touchStartY = useRef(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+        const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+        const THRESHOLD = 50;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > THRESHOLD) {
+            // Horizontal swipe → navigate within post media
+            if (deltaX < 0) nextMedia();
+            else prevMedia();
+        } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > THRESHOLD) {
+            // Vertical swipe → navigate between posts
+            if (deltaY < 0) onNavigatePost?.('next');
+            else onNavigatePost?.('prev');
+        }
+    };
 
     // Media modal state
     const [showMediaModal, setShowMediaModal] = useState(false);
@@ -563,7 +590,7 @@ export default function FeedCardFiltered({
                 {/* ---- DESKTOP LAYOUT ---- */}
                 <div className="hidden md:flex w-full h-full" onClick={(e) => e.stopPropagation()}>
                     {/* Left: media */}
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-w-0">
+                    <div className="relative flex-1 flex items-center justify-center bg-black min-w-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                         {/* Close */}
                         <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
@@ -644,7 +671,7 @@ export default function FeedCardFiltered({
                 {/* ---- MOBILE LAYOUT ---- */}
                 <div className="flex md:hidden flex-col w-full h-full" onClick={(e) => e.stopPropagation()}>
                     {/* Media area */}
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-h-0">
+                    <div className="relative flex-1 flex items-center justify-center bg-black min-h-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                         <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
                         </button>
