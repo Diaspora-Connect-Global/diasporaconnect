@@ -1,0 +1,1374 @@
+{
+    "authentication": {
+        "greetings": {
+            "signup": "Welkom bij DiaspoPlug",
+            "login": "Welkom terug!"
+        },
+        "description": "Gestructureerde, transparante en impactvolle wegen creëren voor diaspora-betrokkenheid.",
+        "form": {
+            "email": {
+                "label": "E-mail",
+                "placeholder": "Uw e-mailadres",
+                "exists": "E-mailadres bestaat al",
+                "checkFailed": "Controleren van e-mailadres mislukt"
+            },
+            "password": {
+                "label": "Wachtwoord",
+                "placeholder": "Uw wachtwoord"
+            },
+            "createPassword": {
+                "label": "Wachtwoord aanmaken",
+                "placeholder": "Maak uw nieuwe wachtwoord aan"
+            },
+            "confirmPassword": {
+                "label": "Wachtwoord bevestigen",
+                "placeholder": "Bevestig uw nieuwe wachtwoord",
+                "mismatch": "Wachtwoorden komen niet overeen"
+            },
+            "signup": {
+                "success": "Account succesvol aangemaakt!"
+            },
+            "twoFactor": {
+                "label": "Tweefactorauthenticatiecode",
+                "placeholder": "Voer 6-cijferige code in"
+            }
+        },
+        "validation": {
+            "email": {
+                "required": "E-mailadres is verplicht",
+                "invalid": "Voer een geldig e-mailadres in"
+            },
+            "password": {
+                "required": "Wachtwoord is verplicht",
+                "minLength": "Wachtwoord moet minimaal 8 tekens bevatten"
+            },
+            "twoFactor": {
+                "required": "Tweefactorauthenticatiecode is verplicht",
+                "invalid": "Voer een geldige 6-cijferige code in"
+            },
+            "formError": "Los de fouten op voordat u verzendt"
+        },
+        "policies": {
+            "agreement": "Door verder te gaan met registratie, gaat u akkoord met onze",
+            "privacyPolicy": "Privacybeleid",
+            "and": "en",
+            "termsOfService": "Gebruiksvoorwaarden"
+        },
+        "socialAuth": {
+            "divider": "of ga verder met"
+        },
+        "accountSwitch": {
+            "existingAccount": {
+                "prompt": "Heeft u al een account?",
+                "action": "Inloggen"
+            },
+            "newAccount": {
+                "prompt": "Nieuw bij Diaspora Connect Global?",
+                "action": "Maak een account aan"
+            }
+        },
+        "forgotPassword": "Wachtwoord vergeten?",
+        "rememberMe": "Onthoud mij",
+        "login": {
+            "loading": "Inloggen...",
+            "success": "Inloggen geslaagd",
+            "failed": "Inloggen mislukt",
+            "welcomeBack": "Welkom terug, {name}!",
+            "invalidCredentials": "Ongeldig e-mailadres of wachtwoord",
+            "accountLocked": "Uw account is vergrendeld. Neem contact op met ondersteuning.",
+            "networkError": "Netwerkfout. Controleer uw verbinding.",
+            "tooManyAttempts": "Te veel inlogpogingen. Probeer het later opnieuw.",
+            "genericError": "Er is een fout opgetreden. Probeer het opnieuw."
+        },
+        "twoFactor": {
+            "required": "Tweefactorauthenticatie vereist",
+            "enterCode": "Voer uw 6-cijferige verificatiecode in"
+        }
+    },
+    "onboarding": {
+        "personalInfo": {
+            "title": "Wat is uw naam",
+            "description": "Laten we u leren kennen! Dit helpt ons uw ervaring te personaliseren en hoe anderen u zien op Diasplug.",
+            "firstName": {
+                "label": "Voornaam",
+                "placeholder": "Uw voornaam"
+            },
+            "lastName": {
+                "label": "Achternaam",
+                "placeholder": "Uw achternaam"
+            }
+        },
+        "community": {
+            "title": "Vertel ons uw gemeenschap",
+            "description": "Deel de gemeenschap waarmee u zich identificeert. Het helpt ons u te verbinden met mensen en verhalen die voor u van belang zijn.",
+            "options": {
+                "localCitizen": "Lokale burger",
+                "diasporaMember": "Diaspora-lid"
+            }
+        },
+        "location": {
+            "title": "Wat is uw land van verblijf?",
+            "description": "Laat ons weten waar u momenteel woont, zodat we kansen, evenementen en connecties in uw buurt kunnen afstemmen.",
+            "country": {
+                "label": "Land",
+                "placeholder": "Selecteer uw land"
+            }
+        },
+        "phoneVerification": {
+            "title": "Verifieer uw telefoonnummer",
+            "description": "We sturen u een korte code om uw nummer te bevestigen. Dit helpt uw account veilig te houden en maakt het gemakkelijker om verbonden te blijven met uw gemeenschap.",
+            "phoneNumber": {
+                "label": "Telefoonnummer",
+                "placeholder": "Mobiel nummer",
+                "validation": {
+                    "needExact": "Voer {n} cijfers in (alleen nationaal nummer, zonder landcode).",
+                    "needMin": "Voer tussen {min} en {max} cijfers in (alleen nationaal nummer, zonder landcode)."
+                }
+            }
+        },
+        "confirmVerification": {
+            "title": "Voer verificatiecode in",
+            "description": "Voer de verificatiecode in die naar {phoneNumber} is verzonden",
+            "resend": "Code opnieuw verzenden",
+            "codeExpiresIn": "Code verloopt over {time}",
+            "codeExpired": "Code verlopen"
+        },
+        "topics": {
+            "title": "Welke onderwerpen wilt u zien op DiaspoPlug",
+            "description": "Kies uw interesses om ons te helpen uw feed te personaliseren met updates, discussies en kansen die u interesseren.",
+            "technology": "Technologie",
+            "science": "Wetenschap",
+            "artsCulture": "Kunst & Cultuur",
+            "sports": "Sport",
+            "healthWellness": "Gezondheid & Welzijn",
+            "business": "Zakelijk",
+            "entertainment": "Amusement",
+            "education": "Onderwijs",
+            "travel": "Reizen",
+            "foodCooking": "Eten & Koken",
+            "politics": "Politiek",
+            "environment": "Milieu"
+        }
+    },
+    "static": {
+        "about": "Over",
+        "members": "leden"
+    },
+    "actions": {
+        "continue": "Doorgaan",
+        "finish": "Voltooien",
+        "sendCode": "Code verzenden",
+        "submit": "Verzenden",
+        "skip": "Overslaan",
+        "setNewPassword": "Nieuw wachtwoord instellen",
+        "like": "Vind ik leuk",
+        "share": "Delen",
+        "comment": "Reageren",
+        "save": "Opslaan",
+        "seemore": "Meer zien",
+        "addFriend": "Vriend toevoegen",
+        "join": "Deelnemen",
+        "joined": "Deelgenomen",
+        "joining": "Deelnemen...",
+        "pending": "In behandeling",
+        "attending": "Aanwezig",
+        "saved": "Opgeslagen",
+        "attend": "Bijwonen",
+        "login": "Inloggen",
+        "postedBy": "Geplaatst door {user}",
+        "added": "Toegevoegd",
+        "adding": "Toevoegen...",
+        "applied": "Toegepast",
+        "showMore": "Meer weergeven",
+        "showLess": "Minder weergeven",
+        "addComment": "Een reactie toevoegen...",
+        "noComments": "Nog geen reacties. Wees de eerste om te reageren!",
+        "likes": "Vind-ik-leuks",
+        "replies": "Antwoorden",
+        "reply": "Antwoorden",
+        "replyPlaceholder": "Typ een antwoord...",
+        "cancel": "Annuleren",
+        "post": "Plaatsen",
+        "anyone": "Iedereen",
+        "connections": "Connecties",
+        "onlyMe": "Alleen ik",
+        "sharePost": "Bericht delen",
+        "copy": "Kopiëren",
+        "copied": "Gekopieerd!",
+        "close": "Sluiten",
+        "copyLink": "Link kopiëren",
+        "shareInMessage": "Delen in een bericht",
+        "shareToGroup": "Delen met een groep",
+        "shareLinkSent": "Link succesvol gedeeld",
+        "shareLinkFailed": "Delen van link mislukt",
+        "noConversations": "Nog geen gesprekken",
+        "noGroups": "Nog geen groepen",
+        "soldOut": "Uitverkocht",
+        "notAttendingAnymore": "Niet meer aanwezig",
+        "going": "{count} gaan",
+        "registered": "Geregistreerd"
+    },
+    "createPost": {
+        "placeholder": "Wat denkt u, {name}?",
+        "posting": "Plaatsen...",
+        "emptyError": "Kan geen leeg bericht plaatsen",
+        "successMessage": "Bericht succesvol gepubliceerd!",
+        "errorMessage": "Bericht maken mislukt. Probeer het opnieuw.",
+        "visibility": {
+            "public": "Iedereen",
+            "publicDescription": "Zichtbaar voor iedereen",
+            "connections": "Connecties",
+            "connectionsDescription": "Alleen uw connecties",
+            "private": "Alleen ik",
+            "privateDescription": "Alleen zichtbaar voor u"
+        },
+        "attachments": {
+            "photo": "Foto",
+            "video": "Video",
+            "document": "Document",
+            "addPhoto": "Foto toevoegen",
+            "addVideo": "Video toevoegen",
+            "addFile": "Bestand toevoegen",
+            "addAttachment": "Bijlage toevoegen",
+            "filesAdded": "{count} bestand(en) toegevoegd",
+            "photosAdded": "{count} foto('s) toegevoegd",
+            "videosAdded": "{count} video('s) toegevoegd",
+            "documentsAdded": "{count} document(en) toegevoegd",
+            "filesAddedFromGallery": "{count} bestand(en) toegevoegd uit galerij",
+            "photoCaptured": "Foto gemaakt",
+            "videoCaptured": "Video opgenomen"
+        },
+        "mobile": {
+            "camera": "Camera",
+            "cameraDescription": "Foto of video maken",
+            "gallery": "Galerij",
+            "galleryDescription": "Kies uit galerij",
+            "files": "Bestanden",
+            "filesDescription": "Kies document"
+        },
+        "actions": {
+            "addEmoji": "Emoji toevoegen",
+            "addHashtag": "Hashtag toevoegen",
+            "addMention": "Iemand vermelden",
+            "addLocation": "Locatie toevoegen",
+            "emojiAdded": "Emoji toegevoegd",
+            "hashtagPrompt": "Voeg uw hashtag toe",
+            "hashtagDescription": "Typ uw hashtag na het # symbool",
+            "mentionPrompt": "Iemand vermelden",
+            "mentionDescription": "Typ de naam na het @ symbool",
+            "locationAdded": "Locatie toegevoegd"
+        },
+        "proTips": {
+            "title": "Pro tips",
+            "description": "Voeg afbeeldingen of video's toe voor meer betrokkenheid. Gebruik hashtags om een breder publiek te bereiken. Tag mensen om hen te informeren."
+        }
+    },
+    "wallet": {
+        "title": "Overzicht",
+        "subtitle": "Beheer uw fondsen en transacties",
+        "withdraw": "Opnemen",
+        "refreshWallet": "Portemonnee vernieuwen",
+        "balance": {
+            "totalBalance": "Totaal saldo",
+            "inEscrow": "In bewaring",
+            "available": "Beschikbaar",
+            "hideBalance": "Saldo verbergen",
+            "showBalance": "Saldo weergeven"
+        },
+        "transactions": {
+            "title": "Transactiegeschiedenis",
+            "allTransactions": "Alle transacties",
+            "completed": "Voltooid",
+            "pending": "In behandeling",
+            "failed": "Mislukt",
+            "noTransactions": "Geen transacties gevonden",
+            "noFilteredTransactions": "Geen {filter} transacties gevonden",
+            "columns": {
+                "date": "Datum",
+                "type": "Type",
+                "amount": "Bedrag",
+                "status": "Status"
+            },
+            "types": {
+                "deposit": "Storting",
+                "withdrawal": "Opname",
+                "refund": "Terugbetaling"
+            }
+        },
+        "loading": {
+            "balance": "Saldo laden...",
+            "transactions": "Transacties laden..."
+        }
+    },
+    "legal": {
+        "about": "Over",
+        "terms": "Voorwaarden",
+        "privacyPolicy": "Privacybeleid",
+        "contact": "Neem contact op",
+        "and": "en"
+    },
+    "passwordReset": {
+        "step3": {
+            "title": "Nieuw wachtwoord aanmaken",
+            "description": "Kies een sterk wachtwoord voor uw account",
+            "newPassword": "Nieuw wachtwoord",
+            "confirmPassword": "Wachtwoord bevestigen",
+            "passwordPlaceholder": "Nieuw wachtwoord invoeren",
+            "confirmPasswordPlaceholder": "Wachtwoord opnieuw invoeren",
+            "resetting": "Opnieuw instellen..."
+        },
+        "errors": {
+            "passwordTooShort": "Wachtwoord moet minimaal 8 tekens bevatten",
+            "passwordMismatch": "Wachtwoorden komen niet overeen",
+            "invalidOrExpiredCode": "Resetcode is ongeldig of verlopen",
+            "weakPassword": "Wachtwoord voldoet niet aan beveiligingseisen",
+            "resetFailed": "Wachtwoord opnieuw instellen mislukt. Probeer het opnieuw."
+        },
+        "success": {
+            "passwordReset": "Wachtwoord succesvol opnieuw ingesteld! Doorsturen naar inloggen..."
+        },
+        "confirmVerification": {
+            "title": "Voer verificatiecode in",
+            "description": "Voer de verificatiecode in die naar {email} is verzonden",
+            "resend": "Code opnieuw verzenden"
+        },
+        "request": {
+            "title": "Uw wachtwoord opnieuw instellen",
+            "description": "Voer het e-mailadres in dat bij uw account hoort en we sturen u een verificatiecode",
+            "email": {
+                "label": "E-mail",
+                "placeholder": "Uw e-mailadres"
+            }
+        },
+        "newPassword": {
+            "title": "Voer uw nieuwe wachtwoord in",
+            "createPassword": {
+                "label": "Nieuw wachtwoord aanmaken",
+                "placeholder": "Uw nieuwe wachtwoord"
+            },
+            "confirmPassword": {
+                "label": "Nieuw wachtwoord bevestigen",
+                "placeholder": "Bevestig uw nieuwe wachtwoord"
+            }
+        }
+    },
+    "toasts": {
+        "errors": {
+            "emailRequired": "E-mailadres is verplicht",
+            "invalidEmail": "Voer een geldig e-mailadres in",
+            "passwordTooShort": "Wachtwoord moet minimaal 8 tekens bevatten"
+        },
+        "success": {
+            "attendingEvent": "U woont het evenement {event} bij",
+            "savedEvent": "U heeft het evenement {event} opgeslagen"
+        }
+    },
+    "home": {
+        "mutualConnections": "gemeenschappelijke connecties",
+        "peopleYouMayKnow": "Mensen die u misschien kent",
+        "noSuggestions": "Geen vriendschapssuggesties beschikbaar",
+        "header": {
+            "home": "Startpagina",
+            "community": "Gemeenschap",
+            "marketplace": "Marktplaats",
+            "post": "Plaatsen",
+            "chat": "Chat",
+            "notification": "Melding",
+            "searchLabel": "Diasplug doorzoeken ...",
+            "profile": "Profiel",
+            "becomeVendor": "Verkoper worden",
+            "wallet": "Portemonnee",
+            "settingsPrivacy": "Instellingen & Privacy",
+            "helpSupport": "Hulp & Ondersteuning",
+            "logout": "Uitloggen"
+        },
+        "associations": {
+            "discover": "Verenigingen ontdekken",
+            "myassociations": "Mijn verenigingen in {association}",
+            "discovermore": "Meer verenigingen ontdekken in {association}",
+            "myAssociationsTitle": "Mijn verenigingen",
+            "discoverTitle": "Verenigingen ontdekken",
+            "noAssociations": "Geen verenigingen gevonden voor deze gemeenschap",
+            "noDiscoverAssociations": "Geen te ontdekken verenigingen voor deze gemeenschap",
+            "noCommunitySelected": "Geen gemeenschap geselecteerd",
+            "selectCommunityMessage": "Selecteer een gemeenschap om verenigingen te bekijken",
+            "loading": "Laden...",
+            "loadingPosts": "Berichten laden...",
+            "noPosts": "Nog geen berichten.",
+            "joining": "Deelnemen...",
+            "notfound": {
+                "title": "Vereniging niet gevonden",
+                "description": "We konden de vereniging die u zoekt niet vinden. Deze is mogelijk verwijderd of de link is onjuist.",
+                "browse": "Verenigingen doorbladeren"
+            },
+            "toasts": {
+                "youAreNowMember": "U bent nu lid van {name}",
+                "requestSubmitted": "Verzoek ingediend — in afwachting van goedkeuring",
+                "inviteOnly": "Deze vereniging is alleen op uitnodiging",
+                "leftAssociation": "U heeft {name} verlaten",
+                "requestCancelled": "Lidmaatschapsverzoek geannuleerd"
+            },
+            "badges": {
+                "suspended": "Geschorst",
+                "inviteOnly": "Alleen op uitnodiging",
+                "member": "Lid",
+                "requestPending": "Verzoek in behandeling"
+            },
+            "actions": {
+                "requestToJoin": "Verzoek om deel te nemen",
+                "cancelRequest": "Verzoek annuleren",
+                "leave": "Verlaten",
+                "view": "Bekijken"
+            },
+            "leaveConfirm": {
+                "title": "Vereniging verlaten?",
+                "description": "U moet opnieuw een verzoek indienen om content te bekijken."
+            }
+        },
+        "groupchats": {
+            "groupchats": "Groepsgesprekken",
+            "create": "Groepsgesprek aanmaken",
+            "discover": "Groepsgesprekken ontdekken"
+        },
+        "events": {
+            "events": "Evenementen",
+            "near": "Evenementen bij u in de buurt",
+            "yourevents": "Uw evenementen",
+            "create": "Evenement aanmaken",
+            "moreevents": "Meer evenementen",
+            "pastEvents": "Afgelopen evenementen",
+            "paidEvents": "Betaalde evenementen",
+            "noevents": "U heeft geen opgeslagen evenementen",
+            "noattending": "U woont momenteel geen enkel evenement bij",
+            "payment": {
+                "title": "Betalen voor kaartjes",
+                "ticketSummary": "Kaartjesoverzicht",
+                "ticketType": "kaartjestype",
+                "subtotal": "Subtotaal",
+                "serviceFee": "Servicekosten",
+                "total": "Totaal",
+                "payToAttend": "Betalen om bij te wonen",
+                "attend": "Bijwonen",
+                "free": "Gratis",
+                "payAmount": "Betaal GH¢ {amount}",
+                "paymentFailed": "Betaling mislukt. Probeer het opnieuw.",
+                "ticketTypeRegular": "Regulier kaartje",
+                "ticketDescription": "Standaardtoegang tot het evenement",
+                "billingInformation": "Factuurgegevens",
+                "payWith": "Betalen met",
+                "creditCard": "Creditcard",
+                "mobilePayment": "Mobiele betaling",
+                "mobileProviders": {
+                    "mtn": "MTN MOMO",
+                    "telecel": "TELECASH",
+                    "at": "AT MONEY"
+                },
+                "cardNumber": "Kaartnummer",
+                "cardNumberPlaceholder": "0000 0000 0000 0000",
+                "expDate": "Vervaldatum",
+                "expDatePlaceholder": "MM/JJ",
+                "cvv": "CVV",
+                "cvvPlaceholder": "***",
+                "phoneNumber": "Telefoonnummer",
+                "phoneNumberPlaceholder": "24 000 0000",
+                "success": {
+                    "title": "Kaartje succesvol gekocht",
+                    "viewTicket": "Kaartje bekijken",
+                    "browseMore": "Meer evenementen bekijken"
+                }
+            }
+        },
+        "opportunities": {
+            "opportunities": "Kansen",
+            "youropp": "Uw kansen",
+            "create": "Kans aanmaken",
+            "createRestricted": "Het aanmaken en beheren van kansen is beperkt tot gemeenschapsbeheerders, verenigingsbeheerders en systeembeheerders. Als u een kans wilt plaatsen, neem dan contact op met uw gemeenschaps- of verenigingsbeheerder.",
+            "backToOpportunities": "Terug naar kansen",
+            "discover": "Ontdekken",
+            "moreopp": "Kansen verkennen",
+            "posterBy": "Geplaatst door {user}",
+            "communityPoster": "Gemeenschap",
+            "associationPoster": "Vereniging",
+            "tabs": {
+                "all": "Alle",
+                "submitted": "Ingediend",
+                "accepted": "Geaccepteerd",
+                "rejected": "Afgewezen",
+                "withdrawn": "Ingetrokken"
+            },
+            "status": {
+                "submitted": "Ingediend",
+                "accepted": "Geaccepteerd",
+                "rejected": "Afgewezen",
+                "withdrawn": "Ingetrokken",
+                "appliedExternally": "Extern gesolliciteerd"
+            },
+            "labels": {
+                "defaultPoster": "DiasporaPlug",
+                "application": "Sollicitatie",
+                "postedBy": "Geplaatst door",
+                "appliedDate": "Gesolliciteerd",
+                "deadline": "Deadline",
+                "viewDetails": "Details bekijken",
+                "withdraw": "Intrekken",
+                "appliedOpportunities": "Gesolliciteerde kansen",
+                "savedOpportunities": "Opgeslagen kansen",
+                "newest": "Nieuwste",
+                "oldest": "Oudste",
+                "sortByDeadline": "Deadline",
+                "sortByStatus": "Status",
+                "opportunity": "Kans",
+                "openUntil": "Open tot",
+                "noDeadline": "Geen deadline",
+                "loading": "Laden...",
+                "savedOpportunityFallback": "Opgeslagen kans",
+                "applyForOpportunity": "Solliciteren voor deze kans",
+                "requiredFieldsHint": "Verplichte velden",
+                "termsAgreement": "Door dit formulier te gebruiken gaat u akkoord met de opslag en verwerking van uw gegevens door deze website",
+                "submitApplication": "Sollicitatie indienen",
+                "submitting": "Indienen…",
+                "applyNow": "Nu solliciteren",
+                "applyViaEmail": "Solliciteren via e-mail",
+                "alreadyApplied": "U heeft al gesolliciteerd.",
+                "withdrawing": "Intrekken…",
+                "withdrawApplication": "Sollicitatie intrekken",
+                "howToApply": "Hoe te solliciteren:",
+                "applyExternally": "Extern solliciteren"
+            },
+            "toasts": {
+                "withdrawSuccess": "Sollicitatie succesvol ingetrokken",
+                "withdrawError": "Intrekken van sollicitatie mislukt",
+                "unsaveSuccess": "Kans verwijderd uit opgeslagen lijst",
+                "unsaveError": "Verwijderen van opgeslagen kans mislukt",
+                "submitSuccess": "Sollicitatie succesvol ingediend",
+                "submitError": "Indienen van sollicitatie mislukt",
+                "resumeRequired": "Upload uw cv voor het indienen",
+                "requiredFileMissing": "Upload het vereiste bestand: {field}",
+                "saveToggleError": "Kan opgeslagen status niet bijwerken"
+            },
+            "none": {
+                "applied": "U heeft nog niet gesolliciteerd voor kansen",
+                "saved": "U heeft nog geen kansen opgeslagen",
+                "noApplicationsForStatus": "Geen sollicitaties met deze status."
+            },
+            "notFound": {
+                "title": "Kans niet gevonden",
+                "description": "De kans met ID `{id}` bestaat niet."
+            }
+        }
+    },
+    "community": {
+        "discover": "Gemeenschap ontdekken",
+        "seeall": "Alle gemeenschappen bekijken",
+        "join": "Sluit u aan bij een gemeenschap om te zien wat er gebeurt",
+        "joincommunity": "Gemeenschap deelnemen",
+        "joined": "Deelgenomen",
+        "members": "leden",
+        "noMembers": "Geen leden",
+        "myCommunity": "Mijn gemeenschap",
+        "discoverMore": "Meer gemeenschappen ontdekken",
+        "viewCommunity": "Gemeenschap bekijken",
+        "openInHome": "Gemeenschap openen op startpagina",
+        "leaveCommunity": "Gemeenschap verlaten",
+        "leaveCommunityTitle": "Gemeenschap verlaten?",
+        "leaveCommunityConfirm": "U moet opnieuw deelnemen om berichten en evenementen te zien.",
+        "noCommunitiesJoined": "Nog geen gemeenschappen deelgenomen.",
+        "noCommunitiesFound": "Geen gemeenschappen gevonden. Probeer de pagina te vernieuwen of uw zoekopdracht aan te passen.",
+        "loading": "Laden...",
+        "loadingPosts": "Berichten laden...",
+        "noPosts": "Nog geen berichten.",
+        "notfound": {
+            "title": "Gemeenschap niet gevonden",
+            "description": "We konden deze gemeenschap niet vinden. Deze is mogelijk verwijderd of de link is onjuist.",
+            "browse": "Gemeenschappen doorbladeren"
+        },
+        "toasts": {
+            "youAreNowMember": "U bent nu lid van {name}",
+            "requestSubmitted": "Verzoek ingediend — in afwachting van goedkeuring",
+            "inviteOnly": "Deze gemeenschap is alleen op uitnodiging",
+            "leftCommunity": "U heeft {name} verlaten",
+            "requestCancelled": "Lidmaatschapsverzoek geannuleerd"
+        },
+        "badges": {
+            "suspended": "Geschorst",
+            "inviteOnly": "Alleen op uitnodiging",
+            "member": "Lid",
+            "requestPending": "Verzoek in behandeling"
+        },
+        "actions": {
+            "requestToJoin": "Verzoek om deel te nemen",
+            "cancelRequest": "Verzoek annuleren",
+            "leave": "Verlaten"
+        }
+    },
+    "notification": {
+        "notifications": "Meldingen",
+        "opportunities": "Kansen",
+        "events": "Evenementen",
+        "allnotifications": "Alle meldingen",
+        "associations": "Verenigingen",
+        "communities": "Gemeenschappen",
+        "markasread": "Als gelezen markeren",
+        "remove": "Melding verwijderen",
+        "removeNotificationTitle": "Melding verwijderen?",
+        "removeNotificationConfirm": "Deze melding wordt verwijderd uit uw lijst.",
+        "markall": "Alles als gelezen markeren",
+        "loading": "Laden…",
+        "loadMore": "Meer laden",
+        "loadMoreLoading": "Laden…",
+        "errorLoad": "Kan meldingen niet laden.",
+        "preference": "Meldingsvoorkeur",
+        "types": {
+            "connection": {
+                "request": "Verbindingsverzoek",
+                "requested": "Verbindingsverzoek",
+                "accepted": "Verbinding geaccepteerd"
+            },
+            "post": {
+                "like": "Vind ik leuk",
+                "comment": "Reactie",
+                "commented": "Reactie",
+                "mention": "Vermelding"
+            },
+            "message": {
+                "received": "Nieuw bericht"
+            },
+            "group": {
+                "message": "Groepsbericht"
+            },
+            "event": {
+                "reminder": "Evenementherinnering",
+                "invite": "Evenementuitnodiging"
+            },
+            "membership": {
+                "approved": "Lidmaatschap goedgekeurd",
+                "request": "Lidmaatschapsverzoek"
+            },
+            "association": {
+                "membership": {
+                    "approved": "Verenigingslidmaatschap goedgekeurd",
+                    "request": "Verenigingslidmaatschapsverzoek"
+                }
+            },
+            "opportunity": {
+                "default": "Kans",
+                "application": {
+                    "submitted": "Sollicitatie ingediend",
+                    "accepted": "Sollicitatie geaccepteerd"
+                }
+            },
+            "default": "Melding"
+        },
+        "messages": {
+            "membershipApproved": "Uw lidmaatschap voor {communityName} is goedgekeurd",
+            "membershipRequest": "Verzoek om lid te worden van {communityName} is in behandeling",
+            "membershipRequestFromActor": "{actorName} heeft verzocht om lid te worden van {communityName}",
+            "communityFallback": "de gemeenschap",
+            "associationApproved": "Uw lidmaatschap voor {associationName} is goedgekeurd",
+            "associationRequest": "Verzoek om lid te worden van {associationName} is in behandeling",
+            "associationRequestFromActor": "{actorName} heeft verzocht om lid te worden van {associationName}",
+            "associationFallback": "de vereniging",
+            "connectionRequest": "{actorName} heeft u een verbindingsverzoek gestuurd",
+            "connectionAccepted": "{actorName} heeft uw verbindingsverzoek geaccepteerd",
+            "postLike": "{actorName} vindt uw bericht leuk",
+            "postLikeWithTitle": "{actorName} vindt uw bericht \"{postTitle}\" leuk",
+            "postComment": "{actorName} heeft gereageerd op uw bericht",
+            "postCommentWithTitle": "{actorName} heeft gereageerd op uw bericht \"{postTitle}\"",
+            "postMention": "{actorName} heeft u vermeld in een bericht",
+            "postMentionWithTitle": "{actorName} heeft u vermeld in \"{postTitle}\"",
+            "messageReceived": "{actorName} heeft u een bericht gestuurd",
+            "groupMessage": "{actorName} heeft een bericht gestuurd in de groep",
+            "groupMessageWithName": "{actorName} heeft een bericht gestuurd in {groupName}",
+            "eventReminder": "{eventName} komt er binnenkort aan",
+            "eventReminderWithDate": "{eventName} begint {when}",
+            "eventInvite": "{actorName} heeft u uitgenodigd voor {eventName}",
+            "eventFallback": "een evenement",
+            "opportunityNew": "Nieuwe kans: {title}",
+            "opportunityNewWithPoster": "{poster} heeft een nieuwe kans geplaatst: {title}",
+            "opportunityApplicationSubmitted": "U heeft gesolliciteerd voor {title}",
+            "opportunityApplicationSubmittedWithPoster": "U heeft gesolliciteerd voor {title} bij {poster}",
+            "opportunityApplicationSubmittedFallback": "Uw sollicitatie is ingediend",
+            "opportunityApplicationAccepted": "Uw sollicitatie voor {title} is geaccepteerd",
+            "opportunityApplicationAcceptedWithPoster": "Uw sollicitatie voor {title} bij {poster} is geaccepteerd",
+            "opportunityApplicationAcceptedFallback": "Uw sollicitatie is geaccepteerd",
+            "opportunityApplicationRejected": "Uw sollicitatie voor {title} is niet geselecteerd",
+            "opportunityApplicationRejectedWithPoster": "Uw sollicitatie voor {title} bij {poster} is niet geselecteerd",
+            "opportunityApplicationRejectedFallback": "Uw sollicitatie is niet geselecteerd",
+            "actorFallback": "Iemand"
+        },
+        "none": {
+            "all": "Geen meldingen beschikbaar",
+            "opportunities": "Momenteel geen vacatures",
+            "events": "Momenteel geen evenementen",
+            "associations": "Momenteel geen verenigingsmeldingen",
+            "communities": "Momenteel geen gemeenschapsmeldingen"
+        }
+    },
+    "privacy": {
+        "public": "Openbaar",
+        "private": "Privé"
+    },
+    "friends": {
+        "message": "Bericht",
+        "addFriend": "Vriend toevoegen",
+        "accept": "Accepteren",
+        "ignore": "Negeren",
+        "cancelRequest": "Verzoek annuleren",
+        "removeFriend": "Vriend verwijderen",
+        "blockFriend": "Vriend blokkeren",
+        "removeFriendConfirmTitle": "Vriend verwijderen?",
+        "removeFriendConfirmDescription": "Dit verwijdert deze persoon uit uw vriendenlijst. Ze moeten een nieuw verzoek sturen om opnieuw verbinding te maken.",
+        "blockFriendConfirmTitle": "Deze gebruiker blokkeren?",
+        "blockFriendConfirmDescription": "Ze kunnen u niet meer berichten of uw profiel bekijken.",
+        "youHaveBlockedThisUser": "U heeft deze gebruiker geblokkeerd.",
+        "mutualConnection": "{count} gemeenschappelijke connectie",
+        "mutualConnections": "{count} gemeenschappelijke connecties",
+        "tabs": {
+            "all": "Alle vrienden",
+            "suggested": "Vriendschapssuggesties",
+            "requestReceived": "Vriendschapsverzoek",
+            "requestSent": "Verzonden verzoek"
+        },
+        "titles": {
+            "all": "{count} vrienden",
+            "suggested": "Voorgestelde vrienden",
+            "requestReceived": "Vriendschapsverzoeken ({count})",
+            "requestSent": "Verzonden verzoek",
+            "searchResults": "Zoekresultaten"
+        },
+        "toasts": {
+            "cannotOpenChat": "Kan chat niet openen.",
+            "openingChat": "Chat openen…",
+            "requestSent": "Vriendschapsverzoek verzonden!",
+            "friendAccepted": "Vriend geaccepteerd!",
+            "requestIgnored": "Verzoek genegeerd.",
+            "requestCancelled": "Verzoek geannuleerd.",
+            "friendRemoved": "Vriend verwijderd.",
+            "friendBlocked": "Vriend geblokkeerd."
+        },
+        "empty": "Geen vrienden komen overeen met het huidige filter.",
+        "friendList": "Vriendenlijst",
+        "friends": "vrienden",
+        "changeProfilePicture": "Profielfoto wijzigen",
+        "editProfilePicture": "Profielfoto bewerken",
+        "loading": "Laden....",
+        "search": "Zoeken...",
+        "searchUsers": "Gebruikers zoeken...",
+        "noSearchResults": "Geen gebruikers gevonden die overeenkomen met uw zoekopdracht"
+    },
+    "profile": {
+        "userNotFound": "Dit profiel kon niet worden gevonden.",
+        "goBack": "Terug gaan",
+        "workExperience": {
+            "title": "Werkervaring",
+            "addExperience": "Ervaring toevoegen",
+            "skill": "Vaardigheid",
+            "addSkill": "Vaardigheid toevoegen",
+            "addNewSkill": "Nieuwe vaardigheid toevoegen",
+            "contract": "Contract",
+            "addWorkExperience": "Werkervaring toevoegen",
+            "company": "Bedrijf",
+            "companyPlaceholder": "bijv. Google, Microsoft",
+            "role": "Functie",
+            "rolePlaceholder": "bijv. Senior Frontend Engineer",
+            "employmentType": "Soort dienstverband",
+            "employmentTypePlaceholder": "Voltijd, Deeltijd, Contract, Stage",
+            "startDate": "Startdatum",
+            "endDate": "Einddatum",
+            "month": "Maand",
+            "year": "Jaar",
+            "yearPlaceholder": "2024",
+            "present": "Heden",
+            "currentlyWorkHere": "Ik werk hier momenteel",
+            "description": "Beschrijving",
+            "descriptionPlaceholder": "Wat deed u? Gebruikte technologieën? Prestaties?",
+            "skills": "Vaardigheden",
+            "skillsPlaceholder": "Typ om te zoeken of nieuwe vaardigheid toe te voegen...",
+            "skillPlaceholder": "bijv. TypeScript",
+            "saving": "Opslaan...",
+            "cancel": "Annuleren",
+            "save": "Opslaan"
+        },
+        "education": {
+            "title": "Opleidingsgeschiedenis",
+            "addEducation": "Opleiding toevoegen",
+            "editEducation": "Opleiding bewerken",
+            "institution": "Instelling",
+            "institutionPlaceholder": "bijv. Universiteit Leiden",
+            "degree": "Diploma",
+            "degreePlaceholder": "bijv. Bachelor of Science",
+            "program": "Programma",
+            "programPlaceholder": "bijv. Informatietechnologie",
+            "startDate": "Startdatum",
+            "expectedCompletion": "Verwachte afstudeerdatum",
+            "year": "Jaar",
+            "yearPlaceholder": "2022",
+            "endYearPlaceholder": "2026",
+            "currentlyStudyHere": "Ik studeer hier momenteel",
+            "activities": "Activiteiten & Prestaties",
+            "activitiesPlaceholder": "Clubs, GPA, projecten, onderscheidingen..."
+        },
+        "personalDetails": {
+            "bio": "Bio",
+            "fullName": "Volledige naam",
+            "dateOfBirth": "Geboortedatum",
+            "residenceAddress": "Woonadres",
+            "homeCountry": "Thuisland",
+            "firstName": "Voornaam",
+            "firstNamePlaceholder": "Voornaam invoeren",
+            "middleName": "Tweede naam",
+            "middleNamePlaceholder": "Tweede naam invoeren",
+            "lastName": "Achternaam",
+            "lastNamePlaceholder": "Achternaam invoeren",
+            "bioPlaceholder": "Vertel ons over uzelf, uw interesses en waar u gepassioneerd over bent...",
+            "characters": "tekens",
+            "words": "woorden",
+            "notProvided": "Niet opgegeven",
+            "edit": "{title} bewerken",
+            "saving": "Opslaan...",
+            "save": "Opslaan",
+            "cancel": "Annuleren",
+            "day": "Dag",
+            "dayPlaceholder": "Dag",
+            "countryOfResidence": "Land van verblijf",
+            "city": "Stad",
+            "cityPlaceholder": "Stad",
+            "livingHereSince": "Woon hier sinds",
+            "country": "Land",
+            "whenJoined": "Wanneer deelgenomen"
+        },
+        "navigation": {
+            "about": "Over",
+            "posts": "Berichten",
+            "communities": "Gemeenschappen",
+            "personalDetails": "Persoonlijke gegevens",
+            "workExperience": "Werkervaring",
+            "education": "Opleiding",
+            "saved": "Opgeslagen",
+            "liked": "Geliked",
+            "commented": "Gereageerd",
+            "noCommunities": "Nog geen gemeenschappen deelgenomen.",
+            "noPosts": "Nog geen {type} berichten."
+        },
+        "profileCompletion": {
+            "title": "Profielafronding",
+            "complete": "voltooid",
+            "completeProfile": "Profiel voltooien"
+        },
+        "trustScore": {
+            "title": "Vertrouwensscore",
+            "description": "Beschrijving van de vertrouwensscore"
+        },
+        "kyc": {
+            "title": "KYC-verificatie",
+            "verified": "Geverifieerd",
+            "notVerified": "Niet geverifieerd"
+        }
+    },
+    "common": {
+        "scrollLeft": "Naar links scrollen",
+        "scrollRight": "Naar rechts scrollen",
+        "almostThere": "Bijna klaar...",
+        "loading": "Laden",
+        "loadingDots": "Laden...",
+        "processing": "Verwerken...",
+        "uploading": "Uploaden...",
+        "upload": "Uploaden",
+        "cancel": "Annuleren",
+        "confirm": "Bevestigen",
+        "save": "Opslaan",
+        "saving": "Opslaan...",
+        "continue": "Doorgaan",
+        "openMenu": "Menu openen",
+        "closeMenu": "Menu sluiten",
+        "close": "Sluiten",
+        "previousPage": "Vorige pagina",
+        "nextPage": "Volgende pagina",
+        "backToChats": "Terug naar chats",
+        "unread": "Ongelezen",
+        "removeImage": "Afbeelding verwijderen",
+        "countryCode": "Landcode",
+        "decreaseRevisions": "Revisies verminderen",
+        "increaseRevisions": "Revisies verhogen",
+        "decreaseQuantity": "Hoeveelheid verminderen",
+        "increaseQuantity": "Hoeveelheid verhogen",
+        "remove": "Verwijderen",
+        "delete": "Verwijderen"
+    },
+    "metadata": {
+        "title": "Diaspora Connect Global",
+        "description": "Diasporagemeenschappen wereldwijd verbinden"
+    },
+    "chat": {
+        "chats": "Chats",
+        "newMessage": "Nieuw bericht",
+        "searchMessages": "Berichten zoeken",
+        "directMessages": "Directe berichten",
+        "groups": "Groepen",
+        "unknownUser": "Onbekende gebruiker",
+        "createGroup": "Groep aanmaken",
+        "noDirectMessages": "Geen directe berichten gevonden",
+        "noGroups": "Geen groepen gevonden",
+        "tryAdjustingSearch": "Probeer uw zoekopdracht aan te passen",
+        "createFirstGroup": "Maak uw eerste groepsgesprek aan door leden toe te voegen en een gesprek te starten.",
+        "empty": {
+            "title": "U heeft hier geen berichten. Start een gesprek om hun berichten te zien"
+        },
+        "conversation": {
+            "startConversation": "Gesprek starten",
+            "createGroup": "Groep aanmaken",
+            "searchPeople": "Mensen zoeken...",
+            "loadingUsers": "Gebruikers laden...",
+            "noUsersFound": "Geen gebruikers gevonden",
+            "cancel": "Annuleren",
+            "groupName": "Groepsnaam",
+            "enterGroupName": "Voer groepsnaam in",
+            "addGroupPhoto": "Groepsfoto toevoegen",
+            "dropPhotoHere": "Foto hier neerzetten",
+            "chooseHowToMessage": "Kies hoe u wilt berichten",
+            "selectedContacts": "U heeft {count} contacten geselecteerd. Wilt u een groepsgesprek starten of het bericht individueel naar elke persoon sturen?",
+            "sendIndividually": "Individueel verzenden",
+            "processing": "Verwerken..."
+        },
+        "direct": {
+            "online": "Online",
+            "lastSeen": "Laatst gezien {time}",
+            "unknownUser": "Onbekende gebruiker",
+            "viewProfile": "Profiel bekijken",
+            "report": "Melden",
+            "block": "Blokkeren",
+            "blockConfirmTitle": "Deze gebruiker blokkeren?",
+            "blockConfirmDescription": "Ze kunnen u niet meer berichten of uw profiel bekijken.",
+            "deleteConversation": "Gesprek verwijderen",
+            "deleteConversationConfirmTitle": "Dit gesprek verwijderen?",
+            "deleteConversationConfirmDescription": "Berichten worden uit uw weergave verwijderd. Dit kan niet ongedaan worden gemaakt.",
+            "clearConversation": "Gesprek wissen",
+            "clearConversationConfirmTitle": "Dit gesprek op dit apparaat wissen?",
+            "clearConversationConfirmDescription": "Dit wist alleen berichten lokaal. Het verwijdert het servergesprek niet.",
+            "conversationCleared": "Gesprek van dit apparaat gewist.",
+            "typeMessage": "Typ een bericht...",
+            "cannotSend": "Kan geen berichten verzenden...",
+            "typing": "is aan het typen..."
+        },
+        "group": {
+            "message": "Bericht aan {name}",
+            "selectChat": "Selecteer een chat",
+            "edit": "Bewerken",
+            "members": "Leden",
+            "memberCount": "{count} leden",
+            "groupInfo": "Groepsinfo",
+            "addPeople": "Mensen toevoegen",
+            "you": " (U)",
+            "leaveGroup": "Groep verlaten",
+            "deleteGroup": "Groep verwijderen",
+            "transferOwnership": "Eigendom overdragen",
+            "transferOwnershipDescription": "Selecteer de nieuwe eigenaar. U wordt beheerder.",
+            "replies": "Antwoorden",
+            "reply": "Antwoorden",
+            "repliesCount": "{count} {count, plural, =1 {antwoord} other {antwoorden}}",
+            "writeReply": "Schrijf een antwoord...",
+            "noReplies": "Nog geen antwoorden",
+            "beFirstToReply": "Wees de eerste om te antwoorden",
+            "groupNotFound": "Groep niet gevonden",
+            "groupsNotFound": "Groepen niet gevonden. Probeer de pagina te vernieuwen of uw zoekopdracht aan te passen.",
+            "noMessages": "Nog geen berichten",
+            "leaveGroupConfirmation": "Weet u zeker dat u {groupName} wilt verlaten? U moet opnieuw worden uitgenodigd om opnieuw deel te nemen.",
+            "deleteGroupConfirmation": "Weet u zeker dat u {groupName} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt en alle berichten worden permanent verwijderd.",
+            "leave": "Verlaten",
+            "delete": "Verwijderen",
+            "cancel": "Annuleren",
+            "editGroup": "Groep bewerken",
+            "groupName": "Groepsnaam",
+            "groupNamePlaceholder": "Voer groepsnaam in",
+            "description": "Beschrijving",
+            "descriptionPlaceholder": "Waar gaat deze groep over?",
+            "avatarUrl": "Avatar-URL",
+            "avatarUrlPlaceholder": "https://example.com/avatar.jpg",
+            "changeGroupPhoto": "Groepsfoto wijzigen",
+            "useThisPhoto": "Deze foto gebruiken",
+            "privacy": "Privacy",
+            "public": "Openbaar",
+            "private": "Privé",
+            "nameRequired": "Groepsnaam is verplicht",
+            "groupPhotoUpdated": "Groepsfoto bijgewerkt",
+            "updateFailed": "Bijwerken van groep mislukt",
+            "saving": "Opslaan...",
+            "save": "Opslaan",
+            "addMembers": "Leden toevoegen",
+            "searchUsers": "Gebruikers zoeken...",
+            "noUsersFound": "Geen gebruikers gevonden",
+            "selectedCount": "{count} geselecteerd",
+            "inviting": "Uitnodigen...",
+            "invite": "Uitnodigen",
+            "manageMember": "Lid beheren",
+            "currentRole": "Huidige rol",
+            "changeRole": "Rol wijzigen",
+            "member": "Lid",
+            "memberDescription": "Kan gesprekken bekijken en deelnemen",
+            "moderator": "Moderator",
+            "moderatorDescription": "Kan berichten beheren en content modereren",
+            "admin": "Beheerder",
+            "adminDescription": "Kan leden en groepsinstellingen beheren",
+            "removeMember": "Uit groep verwijderen",
+            "removeMemberConfirmation": "Weet u zeker dat u {name} uit deze groep wilt verwijderen?",
+            "remove": "Verwijderen",
+            "close": "Sluiten"
+        }
+    },
+    "dialog": {
+        "title": "Titel",
+        "save": "Opslaan",
+        "cancel": "Annuleren",
+        "saving": "Opslaan..."
+    },
+    "settings": {
+        "title": "Instellingen",
+        "notifications": {
+            "title": "Meldingen",
+            "email": {
+                "title": "E-mailmeldingen",
+                "description": "Meldingen ontvangen via e-mail"
+            },
+            "sms": {
+                "title": "SMS-meldingen",
+                "description": "Meldingen ontvangen via SMS"
+            },
+            "push": {
+                "title": "Pushmeldingen",
+                "description": "Pushmeldingen ontvangen op uw apparaat"
+            }
+        },
+        "security": {
+            "title": "Beveiliging",
+            "twoFactor": {
+                "title": "Tweefactorauthenticatie",
+                "description": "Voeg een extra beveiligingslaag toe"
+            },
+            "changePassword": {
+                "title": "Wachtwoord wijzigen",
+                "description": "Uw accountwachtwoord bijwerken",
+                "button": "Wijzigen"
+            }
+        },
+        "privacy": {
+            "title": "Privacy",
+            "dataSharing": {
+                "title": "Gegevens delen",
+                "description": "Gebruiksgegevens delen om services te verbeteren"
+            },
+            "adPersonalization": {
+                "title": "Advertentiepersonalisatie",
+                "description": "Advertenties personaliseren op basis van uw activiteit"
+            }
+        },
+        "language": {
+            "title": "Taal",
+            "appLanguage": {
+                "title": "App-taal",
+                "description": "Kies uw voorkeurstaal"
+            }
+        },
+        "theme": {
+            "title": "Thema",
+            "dark": {
+                "title": "Donkere modus",
+                "description": "Donker thema gebruiken in de app"
+            },
+            "light": {
+                "title": "Lichte modus",
+                "description": "Licht thema gebruiken in de app"
+            },
+            "system": {
+                "title": "Systeemstandaard",
+                "description": "Systeemthema-instellingen volgen"
+            }
+        }
+    },
+    "marketplace": {
+        "title": "Marktplaats",
+        "cart": "Winkelwagen",
+        "searchPlaceholder": "Zoek producten en diensten...",
+        "removeCartItemTitle": "Artikel uit winkelwagen verwijderen?",
+        "removeCartItemConfirm": "Dit artikel wordt verwijderd uit uw winkelwagen.",
+        "products": "Producten",
+        "services": "Diensten",
+        "trending": "Trending",
+        "servicesYouMayLike": "Diensten die u misschien leuk vindt",
+        "location": "Accra, Ghana",
+        "addToCart": "Aan winkelwagen toevoegen",
+        "addServiceToCartConfirm": "Deze dienst aan uw winkelwagen toevoegen en doorgaan naar afrekenen?",
+        "addToWishlist": "Aan verlanglijst toevoegen",
+        "buyNow": "Nu kopen",
+        "aboutService": "Over de dienst",
+        "aboutProduct": "Over het product",
+        "serviceDescription": "Onze premium dienst, vakkundig gemaakt voor kwaliteit en betrouwbaarheid. Met professionele uitvoering en uitstekende ondersteuning is deze dienst perfect voor zowel persoonlijke als zakelijke behoeften.",
+        "productDescription": "Een klassiek leren heerenschoen, gemaakt van hoogwaardige materialen voor duurzaamheid en stijl. Met een strak ontwerp en comfortabele pasvorm zijn deze schoenen perfect voor zowel formele als casual gelegenheden.",
+        "projectDuration": "Projectduur (in uren)",
+        "projectDurationPlaceholder": "Voer in hoe lang het project duurt in uren",
+        "packages": "Pakketten",
+        "quantity": "Hoeveelheid",
+        "decreaseQuantity": "Hoeveelheid verminderen",
+        "increaseQuantity": "Hoeveelheid verhogen",
+        "continue": "Doorgaan",
+        "addExtras": "Extra's toevoegen",
+        "noExtraServices": "Ik wil geen extra diensten",
+        "addExtrasAmount": "Extra's toevoegen (GH₵ {amount}.00)",
+        "close": "Sluiten",
+        "size": "Maat",
+        "color": "Kleur",
+        "bySeller": "Door {seller}",
+        "shoppingCart": "Winkelwagen",
+        "itemsInCart": "Artikelen in winkelwagen",
+        "cartEmpty": "Uw winkelwagen is leeg",
+        "cartEmptySubtitle": "Voeg artikelen toe om te beginnen",
+        "numberOfItems": "Aantal artikelen: {count}",
+        "oneTimeFee": "EENMALIGE KOSTEN",
+        "total": "Totaal",
+        "proceedToCheckout": "Doorgaan naar afrekenen",
+        "checkout": "Afrekenen",
+        "orderDetails": "Bestellingsdetails",
+        "revenueStrategyService": "Ik ontwikkel een inkomstenstrategie voor uw bedrijf",
+        "premiumPackage": "Premium pakket",
+        "extras": "Extra's",
+        "includeSourceFile": "Bronbestand includeren",
+        "paymentDetails": "Betalingsdetails",
+        "paymentMethod": "Betaalmethode",
+        "creditCard": "Creditcard",
+        "mobilePayment": "Mobiele betaling",
+        "debitPayment": "Debet/betaling",
+        "billingAddress": "Factuuradres",
+        "shippingAddress": "Verzendadres",
+        "name": "Naam",
+        "namePlaceholder": "Naam",
+        "address": "Adres",
+        "addressPlaceholder": "Adres",
+        "city": "Stad",
+        "cityPlaceholder": "Stad",
+        "country": "Land",
+        "selectCountry": "Land selecteren",
+        "phoneNumber": "Telefoonnummer",
+        "phonePlaceholder": "50 000 0000",
+        "phoneNumberPlaceholder": "Telefoonnummer",
+        "priceSummary": "Prijsoverzicht",
+        "serviceFee": "Servicekosten",
+        "payAmount": "Betaal GH₵ {amount}",
+        "subtotalAmount": "Subtotaalbedrag",
+        "subtotal": "Subtotaal",
+        "shippingFee": "Verzendkosten",
+        "discount": "Korting",
+        "sameAsShipping": "Hetzelfde als verzendadres",
+        "orderSuccess": "Uw bestelling is succesvol betaald",
+        "visaEnding": "Visa eindigend op {digits}",
+        "doneOrder": "Bestelling voltooid",
+        "scrollLeft": "Naar links scrollen",
+        "scrollRight": "Naar rechts scrollen",
+        "loading": "Laden...",
+        "countries": {
+            "ghana": "Ghana",
+            "nigeria": "Nigeria",
+            "kenya": "Kenia"
+        }
+    },
+    "vendors": {
+        "dashboard": "Verkopersdashboard",
+        "addNewService": "Nieuwe dienst toevoegen",
+        "sidebar": {
+            "overview": "Overzicht",
+            "orders": "Bestellingen",
+            "services": "Diensten",
+            "products": "Producten",
+            "sales": "Verkoop",
+            "payouts": "Uitbetalingen"
+        },
+        "orders": {
+            "title": "Bestellingen",
+            "searchPlaceholder": "Bestelling zoeken op bestelnummer",
+            "deliveryStatus": "Leveringsstatus",
+            "delivered": "Geleverd",
+            "pending": "In behandeling",
+            "processing": "Verwerken",
+            "inTransit": "Onderweg",
+            "orderNumber": "Bestelnummer",
+            "date": "Datum",
+            "customer": "Klant",
+            "amount": "Bedrag",
+            "delivery": "Levering",
+            "actions": "Acties",
+            "viewOrder": "Bestelling bekijken",
+            "processOrder": "Bestelling verwerken",
+            "trackOrder": "Bestelling volgen",
+            "noOrdersFound": "Geen bestellingen gevonden",
+            "rowsPerPage": "Rijen per pagina:",
+            "page": "Pagina {current} van {total}",
+            "prev": "Vorige",
+            "next": "Volgende"
+        },
+        "products": {
+            "title": "Producten",
+            "addProduct": "Product toevoegen",
+            "addNewProduct": "Nieuw product toevoegen",
+            "searchPlaceholder": "Product zoeken op naam",
+            "live": "Live",
+            "draft": "Concept",
+            "allCategories": "Alle categorieën",
+            "menFashion": "Herenmode",
+            "womenFashion": "Damesmode",
+            "productName": "Productnaam",
+            "inventory": "Voorraad",
+            "category": "Categorie",
+            "price": "Prijs",
+            "status": "Status",
+            "action": "Actie",
+            "preview": "Voorbeeld",
+            "edit": "Bewerken",
+            "rowsPerPage": "Rijen per pagina:",
+            "page": "Pagina {current} van {total}",
+            "form": {
+                "name": "Naam",
+                "namePlaceholder": "Leren heerenschoen",
+                "description": "Beschrijving",
+                "descriptionPlaceholder": "Introductie van onze premium leren heerenschoen...",
+                "quantity": "Hoeveelheid",
+                "quantityPlaceholder": "300",
+                "addImageOfProduct": "Afbeelding van product toevoegen",
+                "productImage": "Product {number}",
+                "productCategory": "Productcategorie",
+                "electronics": "Elektronica",
+                "homeGarden": "Huis & Tuin",
+                "discount": "Korting",
+                "applyDiscount": "Korting toepassen",
+                "productFeatures": "Productkenmerken",
+                "addFeature": "+ Kenmerk toevoegen",
+                "size": "Maat",
+                "small": "Klein",
+                "medium": "Middel",
+                "large": "Groot",
+                "xLarge": "Extra groot",
+                "saveToDraft": "Als concept opslaan",
+                "saveAndAnother": "Opslaan en nog een",
+                "saveAndPreview": "Opslaan en voorbeeld",
+                "savedAsDraft": "Product opgeslagen als concept!",
+                "savedReadyAnother": "Product opgeslagen! Klaar om nog een toe te voegen."
+            }
+        },
+        "services": {
+            "title": "Diensten",
+            "addService": "Dienst toevoegen",
+            "addNewService": "Nieuwe dienst toevoegen",
+            "searchPlaceholder": "Dienst zoeken op naam",
+            "live": "Live",
+            "draft": "Concept",
+            "allCategories": "Alle categorieën",
+            "menFashion": "Herenmode",
+            "womenFashion": "Damesmode",
+            "serviceName": "Dienstnaam",
+            "inventory": "Voorraad",
+            "category": "Categorie",
+            "price": "Prijs",
+            "status": "Status",
+            "action": "Actie",
+            "preview": "Voorbeeld",
+            "edit": "Bewerken",
+            "rowsPerPage": "Rijen per pagina:",
+            "page": "Pagina {current} van {total}",
+            "breadcrumbProducts": "Producten",
+            "form": {
+                "serviceDetails": "Dienstdetails",
+                "serviceDetailsDescription": "Voeg titel, beschrijvingen en afbeeldingen toe voor uw dienst",
+                "step": "Stap {current} van {total}",
+                "serviceTitle": "Diensttitel",
+                "serviceTitlePlaceholder": "Voer titel in voor de dienst die u wilt aanbieden",
+                "serviceCategory": "Dienstcategorie",
+                "serviceCategoryPlaceholder": "Selecteer categorie van de dienst",
+                "webDevelopment": "Webontwikkeling",
+                "graphicDesign": "Grafisch ontwerp",
+                "digitalMarketing": "Digitale marketing",
+                "writingTranslation": "Schrijven & Vertaling",
+                "description": "Beschrijving",
+                "descriptionPlaceholder": "Voer beschrijving van de dienst in",
+                "addImageOfService": "Afbeelding van dienst toevoegen",
+                "preview": "Voorbeeld",
+                "saveToDraft": "Als concept opslaan",
+                "saveAndContinue": "Opslaan en doorgaan",
+                "pricing": "Prijsstelling",
+                "pricingDescription": "Welk prijsmodel beschrijft het beste uw dienst",
+                "singlePricing": "Enkelvoudige prijsstelling",
+                "singlePricingDescription": "Stel één vaste prijs in voor deze dienst. Klanten betalen een vast tarief op basis van de eenheid die u kiest (per uur, per sessie, per klus, etc.). Ideaal voor eenvoudige diensten met voorspelbare kosten.",
+                "price": "Prijs",
+                "billingType": "Factureringstype",
+                "billingTypePlaceholder": "Selecteer het factureringstype voor prijsstelling",
+                "perHour": "Per uur",
+                "perSession": "Per sessie",
+                "perProject": "Per project",
+                "addExtras": "Extra diensten toevoegen gerelateerd aan de dienst die u aanbiedt",
+                "multiplePackagePricing": "Meervoudige pakketprijsstelling",
+                "multiplePackagePricingDescription": "Maak meerdere prijsniveaus voor deze dienst. Elk pakket kan verschillende functies, duur of deliverables bevatten. Dit helpt klanten de optie te kiezen die het beste bij hun behoeften past en vergroot uw kans op meer inkomsten.",
+                "basic": "Basis",
+                "standard": "Standaard",
+                "premium": "Premium",
+                "featuresIncluded": "Inbegrepen functies",
+                "featuresPlaceholder": "Voer functies in die in dit pakket zijn inbegrepen",
+                "duration": "Duur",
+                "durationPlaceholder": "Voer duur in voor dit pakket",
+                "maxRevisions": "Maximum aantal toegestane revisies",
+                "saveAndAddAnother": "Opslaan en nog een dienst toevoegen",
+                "saveAndPreview": "Opslaan en voorbeeld"
+            }
+        },
+        "sales": {
+            "title": "Verkoop",
+            "exportSales": "Verkoop exporteren",
+            "searchPlaceholder": "Verkoop zoeken op bestelnummer",
+            "allTime": "Altijd",
+            "today": "Vandaag",
+            "thisWeek": "Deze week",
+            "thisMonth": "Deze maand",
+            "payoutStatus": "Uitbetalingsstatus",
+            "paid": "Betaald",
+            "inEscrow": "In bewaring",
+            "orderNumber": "Bestelnummer",
+            "date": "Datum",
+            "customer": "Klant",
+            "amount": "Bedrag",
+            "actions": "Acties",
+            "viewOrder": "Bestelling bekijken",
+            "rowsPerPage": "Rijen per pagina:",
+            "page": "Pagina {current} van {total}"
+        },
+        "payouts": {
+            "title": "Uitbetalingen",
+            "walletBalance": "Portemonnee-saldo",
+            "withdraw": "Opnemen",
+            "escrowAccount": "Bewaringrekening",
+            "escrowDescription": "Bedrag wordt automatisch vrijgegeven aan uw portemonnee wanneer klanten hun product succesvol hebben ontvangen",
+            "payoutMethod": "Uitbetalingsmethode",
+            "payoutMethodDescription": "Vertel ons hoe u uw fondsen uit uw portemonnee wilt ontvangen",
+            "addPayoutMethod": "Uitbetalingsmethode toevoegen",
+            "history": "Geschiedenis",
+            "searchPlaceholder": "Geschiedenis zoeken op transactie-ID",
+            "allTime": "Altijd",
+            "transactionId": "Transactie-ID",
+            "date": "Datum",
+            "transactionType": "Transactietype",
+            "amount": "Bedrag",
+            "withdrawal": "Opname",
+            "escrowToWallet": "Bewaring naar portemonnee",
+            "rowsPerPage": "Rijen per pagina:",
+            "page": "Pagina {current} van {total}",
+            "momo": {
+                "breadcrumbPayouts": "Uitbetalingen",
+                "addMobileAccount": "Mobiel account toevoegen",
+                "payoutSetup": "Uitbetalingsinstellingen",
+                "mobileMoneyDetails": "Mobiel geld account details",
+                "mtnMomo": "MTN MOMO",
+                "telecelCash": "TELECEL CASH",
+                "atMoney": "AT MONEY",
+                "phoneNumber": "Telefoonnummer",
+                "phonePlaceholder": "24 123 4567",
+                "accountName": "Accountnaam",
+                "accountNamePlaceholder": "Jan de Vries",
+                "savePayoutMethod": "Uitbetalingsmethode opslaan"
+            }
+        }
+    }
+}
