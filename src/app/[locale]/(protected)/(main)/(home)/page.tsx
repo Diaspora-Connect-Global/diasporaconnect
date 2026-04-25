@@ -2,6 +2,7 @@
 
 import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVariant2';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
 import { DISCOVER_COMMUNITIES, REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
@@ -94,6 +95,7 @@ export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
   const [viewMode, setViewMode] = useState<FeedViewMode>('you');
+  const [modalState, setModalState] = useState<{ postIndex: number; mediaIndex: number } | null>(null);
 
   // Fetch communities
   const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<DiscoverCommunitiesData>(
@@ -352,6 +354,32 @@ export default function Home() {
     }
   };
 
+  const getPostMedia = (post: ApiPost): ModalMediaItem[] => [
+    ...(post.attachments ?? [])
+      .filter(a => a.mimeType?.startsWith('image/') || String(a.type ?? '').toUpperCase() === 'IMAGE')
+      .map(a => ({ type: 'image' as const, src: a.url || '' }))
+      .filter(m => m.src),
+    ...(post.attachments ?? [])
+      .filter(a => a.mimeType?.startsWith('video/') || String(a.type ?? '').toUpperCase() === 'VIDEO')
+      .map(a => ({ type: 'video' as const, src: a.url || '' }))
+      .filter(m => m.src),
+  ];
+
+  const handleNavigatePost = (dir: 'next' | 'prev') => {
+    if (modalState === null) return;
+    let i = dir === 'next' ? modalState.postIndex + 1 : modalState.postIndex - 1;
+    while (i >= 0 && i < posts.length) {
+      if (getPostMedia(posts[i]!).length > 0) {
+        setModalState({ postIndex: i, mediaIndex: 0 });
+        return;
+      }
+      i = dir === 'next' ? i + 1 : i - 1;
+    }
+  };
+
+  const modalPost = modalState !== null ? posts[modalState.postIndex] ?? null : null;
+  const modalProfileData = modalPost ? getProfileData(modalPost) : null;
+
   return (
     <div className="h-app-inner flex overflow-hidden">
       <PrivacyPolicyModal />
@@ -497,10 +525,10 @@ export default function Home() {
           )}
 
           {/* Feed Posts */}
-          {hasPosts && posts.map((post) => {
+          {hasPosts && posts.map((post, postIndex) => {
             const profileData = getProfileData(post);
             return (
-              <div key={post.id} className="mb-2">
+              <div key={post.id} id={`feed-post-${post.id}`} className="mb-2">
                 <FeedCardWithReply
                   postId={post.id}
                   profileImage={profileData.avatar}
@@ -538,6 +566,7 @@ export default function Home() {
                   isLiked={post.userEngagement.hasLiked}
                   isSaved={post.userEngagement.hasSaved}
                   isShared={post.userEngagement.hasShared}
+                  onOpenMedia={(mediaIndex) => setModalState({ postIndex, mediaIndex })}
                 />
               </div>
             );
@@ -566,6 +595,31 @@ export default function Home() {
         confirmText={t('joincommunity')}
         isLoading={joinLoading}
       />
+
+      {modalPost && modalProfileData && (
+        <PostMediaModal
+          postId={modalPost.id}
+          profileImage={modalProfileData.avatar}
+          profileName={modalProfileData.name}
+          profileTier={modalProfileData.tier}
+          category={modalProfileData.type}
+          postDate={formatPostDate(modalPost.createdAt)}
+          content={modalPost.text}
+          allMedia={getPostMedia(modalPost)}
+          initialMediaIndex={modalState!.mediaIndex}
+          isLiked={modalPost.userEngagement.hasLiked}
+          isSaved={modalPost.userEngagement.hasSaved}
+          likeCount={modalPost.engagementCounts.likes}
+          commentCount={modalPost.engagementCounts.comments}
+          shareCount={modalPost.engagementCounts.shares}
+          onLike={() => handleLike(modalPost.id)}
+          onSave={() => handleSave(modalPost.id)}
+          onShare={() => handleShare(modalPost.id)}
+          onSendComment={(text, parentId) => handleSendComment(modalPost.id, text, parentId)}
+          onClose={() => setModalState(null)}
+          onNavigatePost={handleNavigatePost}
+        />
+      )}
     </div>
   );
 }

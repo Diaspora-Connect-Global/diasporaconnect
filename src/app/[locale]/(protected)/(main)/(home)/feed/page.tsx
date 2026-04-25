@@ -1,6 +1,7 @@
 'use client';
 
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { Link } from '@/i18n/navigation';
 import { ADD_ENGAGEMENT, CREATE_COMMENT, AddEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
 import type { Post } from '@/services/gql/types/postsFeed';
@@ -8,6 +9,7 @@ import { useFeed } from '@/hooks/useFeed';
 import { useMutation } from '@apollo/client/react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ChevronLeft } from 'lucide-react';
@@ -53,6 +55,7 @@ export default function FeedPage() {
   const t = useTranslations('community');
   const searchParams = useSearchParams();
   const hashtag = searchParams.get('hashtag') ?? null;
+  const [modalState, setModalState] = useState<{ postIndex: number; mediaIndex: number } | null>(null);
 
   const {
     posts,
@@ -108,6 +111,32 @@ export default function FeedPage() {
   };
 
   const hasPosts = posts.length > 0;
+
+  const getPostMedia = (post: Post): ModalMediaItem[] => [
+    ...(post.attachments ?? [])
+      .filter(a => a.mimeType?.startsWith('image/') || String(a.type ?? '').toUpperCase() === 'IMAGE')
+      .map(a => ({ type: 'image' as const, src: a.url || '' }))
+      .filter(m => m.src),
+    ...(post.attachments ?? [])
+      .filter(a => a.mimeType?.startsWith('video/') || String(a.type ?? '').toUpperCase() === 'VIDEO')
+      .map(a => ({ type: 'video' as const, src: a.url || '' }))
+      .filter(m => m.src),
+  ];
+
+  const handleNavigatePost = (dir: 'next' | 'prev') => {
+    if (modalState === null) return;
+    let i = dir === 'next' ? modalState.postIndex + 1 : modalState.postIndex - 1;
+    while (i >= 0 && i < posts.length) {
+      if (getPostMedia(posts[i]!).length > 0) {
+        setModalState({ postIndex: i, mediaIndex: 0 });
+        return;
+      }
+      i = dir === 'next' ? i + 1 : i - 1;
+    }
+  };
+
+  const modalPost = modalState !== null ? posts[modalState.postIndex] ?? null : null;
+  const modalProfileData = modalPost ? getProfileData(modalPost) : null;
 
   return (
     <div className="h-app-inner flex overflow-hidden">
@@ -167,10 +196,10 @@ export default function FeedPage() {
           )}
 
           {hasPosts &&
-            posts.map((post: Post) => {
+            posts.map((post: Post, postIndex: number) => {
               const profileData = getProfileData(post);
               return (
-                <div key={post.id} className="mb-2">
+                <div key={post.id} id={`feed-post-${post.id}`} className="mb-2">
                   <FeedCardWithReply
                     postId={post.id}
                     profileImage={profileData.avatar}
@@ -212,6 +241,7 @@ export default function FeedPage() {
                     isLiked={post.userEngagement.hasLiked}
                     isSaved={post.userEngagement.hasSaved}
                     isShared={post.userEngagement.hasShared}
+                    onOpenMedia={(mediaIndex) => setModalState({ postIndex, mediaIndex })}
                   />
                 </div>
               );
@@ -224,6 +254,31 @@ export default function FeedPage() {
           )}
         </div>
       </div>
+
+      {modalPost && modalProfileData && (
+        <PostMediaModal
+          postId={modalPost.id}
+          profileImage={modalProfileData.avatar}
+          profileName={modalProfileData.name}
+          profileTier={modalProfileData.tier}
+          category={modalProfileData.type}
+          postDate={formatPostDate(modalPost.createdAt)}
+          content={modalPost.text}
+          allMedia={getPostMedia(modalPost)}
+          initialMediaIndex={modalState!.mediaIndex}
+          isLiked={modalPost.userEngagement.hasLiked}
+          isSaved={modalPost.userEngagement.hasSaved}
+          likeCount={modalPost.engagementCounts.likes}
+          commentCount={modalPost.engagementCounts.comments}
+          shareCount={modalPost.engagementCounts.shares}
+          onLike={() => handleLike(modalPost.id)}
+          onSave={() => handleSave(modalPost.id)}
+          onShare={() => handleShare(modalPost.id)}
+          onSendComment={(text, parentId) => handleSendComment(modalPost.id, text, parentId)}
+          onClose={() => setModalState(null)}
+          onNavigatePost={handleNavigatePost}
+        />
+      )}
     </div>
   );
 }

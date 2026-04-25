@@ -93,6 +93,8 @@ interface FeedCardProps {
     /** From e.g. /post/[id]?commentId=… — expand comments, load list, scroll to and highlight that comment */
     initialFocusCommentId?: string;
     onNavigatePost?: (direction: 'next' | 'prev') => void;
+    /** When provided the card skips its internal modal and delegates to the page-level one. */
+    onOpenMedia?: (mediaIndex: number) => void;
 }
 
 /* --------------------------------------------------------------- */
@@ -157,6 +159,7 @@ export default function FeedCardWithReply({
     isShared: initialIsShared = false,
     initialFocusCommentId,
     onNavigatePost,
+    onOpenMedia,
 }: FeedCardProps) {
     const router = useRouter();
     const [isLiked, setIsLiked] = useState(initialIsLiked);
@@ -275,6 +278,7 @@ export default function FeedCardWithReply({
 
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
+    const wheelCooldown = useRef(false);
 
     const allMedia: Array<{ type: 'image' | 'video'; src: string }> = [
         ...(images ?? []).map(src => ({ type: 'image' as const, src })),
@@ -378,11 +382,22 @@ export default function FeedCardWithReply({
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > THRESHOLD) {
             if (deltaX < 0) nextMedia(); else prevMedia();
         } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > THRESHOLD) {
+            closeMediaModal();
             if (deltaY < 0) onNavigatePost?.('next'); else onNavigatePost?.('prev');
         }
     };
 
+    const handleWheel = (e: React.WheelEvent) => {
+        if (wheelCooldown.current) return;
+        wheelCooldown.current = true;
+        setTimeout(() => { wheelCooldown.current = false; }, 600);
+        closeMediaModal();
+        if (e.deltaY > 0) onNavigatePost?.('next');
+        else onNavigatePost?.('prev');
+    };
+
     const openMediaModal = (index: number) => {
+        if (onOpenMedia) { onOpenMedia(index); return; }
         setCurrentMediaIndex(index);
         setShowMediaModal(true);
         loadComments();
@@ -548,7 +563,7 @@ export default function FeedCardWithReply({
     };
 
     const renderMediaModal = () => {
-        if (!showMediaModal || allMedia.length === 0) return null;
+        if (onOpenMedia || !showMediaModal || allMedia.length === 0) return null;
         const current = allMedia[currentMediaIndex]!;
 
         const mediaEl = current.type === 'image' ? (
@@ -669,7 +684,7 @@ export default function FeedCardWithReply({
                 <div className="hidden md:flex w-full h-full" onClick={e => e.stopPropagation()}>
 
                     {/* Left: media viewer */}
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-w-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                    <div className="relative flex-1 flex items-center justify-center bg-black min-w-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
                         {/* Close */}
                         <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
@@ -738,7 +753,7 @@ export default function FeedCardWithReply({
                 <div className="flex md:hidden flex-col w-full h-full" onClick={e => e.stopPropagation()}>
 
                     {/* Media area */}
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-h-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                    <div className="relative flex-1 flex items-center justify-center bg-black min-h-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
                         <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
                         </button>
