@@ -65,20 +65,21 @@ export default function OAuthCallbackPage() {
         return;
       }
 
+      const avatarUrl = params.get('avatarUrl') || undefined;
       const user = {
         userId: params.get('userId') || '',
         email: params.get('email') || '',
         firstName: decodeURIComponent(params.get('firstName') || ''),
         lastName: decodeURIComponent(params.get('lastName') || ''),
         role,
-        middleName:decodeURIComponent(params.get('middleName') || '') ,
+        middleName: decodeURIComponent(params.get('middleName') || ''),
+        avatarUrl,
         residenceSinceYear: 0,
         residenceSinceMonth: 0,
         connectionCount: 0,
         version: 1,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        
       };
 
       const deviceMetadata = {

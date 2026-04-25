@@ -15,25 +15,34 @@ export default function MainLayout({
   const router = useRouter();
   const pathname = usePathname();
   const hasRedirectedRef = useRef(false);
-  const [mounted, setMounted] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
 
-  // Wait for client-side hydration before rendering auth-dependent UI
+  // Wait for Zustand to rehydrate from localStorage before checking auth
   useEffect(() => {
-    setMounted(true);
+    const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+
+    // If already hydrated (fast path), set immediately
+    if (useAuthStore.persist.hasHydrated()) {
+      setHydrated(true);
+    }
+
+    return unsubscribe;
   }, []);
 
-  // Redirect to signin if not authenticated
+  // Redirect to signin only after hydration confirms no valid session
   useEffect(() => {
-    if (mounted && !isAuthenticated && !hasRedirectedRef.current) {
+    if (hydrated && !isAuthenticated && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
       router.replace("/signin");
     }
-  }, [mounted, isAuthenticated, router]);
+  }, [hydrated, isAuthenticated, router]);
 
   // Show loading until hydrated and authenticated
-  if (!mounted || !isAuthenticated) {
+  if (!hydrated || !isAuthenticated) {
     return <LoadingScreen />;
   }
 

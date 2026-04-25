@@ -92,6 +92,7 @@ interface FeedCardProps {
     isShared?: boolean;
     /** From e.g. /post/[id]?commentId=… — expand comments, load list, scroll to and highlight that comment */
     initialFocusCommentId?: string;
+    onNavigatePost?: (direction: 'next' | 'prev') => void;
 }
 
 /* --------------------------------------------------------------- */
@@ -155,6 +156,7 @@ export default function FeedCardWithReply({
     isSaved: initialIsSaved = false,
     isShared: initialIsShared = false,
     initialFocusCommentId,
+    onNavigatePost,
 }: FeedCardProps) {
     const router = useRouter();
     const [isLiked, setIsLiked] = useState(initialIsLiked);
@@ -265,9 +267,19 @@ export default function FeedCardWithReply({
 
     /** Derived commentsData — prefer loaded from API, fall back to prop */
     const commentsData = commentsLoaded ? loadedComments : commentsDataProp;
-    const [showImageModal, setShowImageModal] = useState(false);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [showMediaModal, setShowMediaModal] = useState(false);
+    const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+    const [showCommentSheet, setShowCommentSheet] = useState(false);
+    const [modalReplyToId, setModalReplyToId] = useState<string | null>(null);
     const [showShareDialog, setShowShareDialog] = useState(false);
+
+    const touchStartX = useRef(0);
+    const touchStartY = useRef(0);
+
+    const allMedia: Array<{ type: 'image' | 'video'; src: string }> = [
+        ...(images ?? []).map(src => ({ type: 'image' as const, src })),
+        ...(videos ?? []).map(src => ({ type: 'video' as const, src })),
+    ];
 
     const t = useTranslations('actions');
 
@@ -354,25 +366,40 @@ export default function FeedCardWithReply({
         setReplyToCommentId((cur) => (cur === commentId ? null : commentId));
     };
 
-    const openImageModal = (index: number = 0) => {
-        setCurrentImageIndex(index);
-        setShowImageModal(true);
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0]!.clientX;
+        touchStartY.current = e.touches[0]!.clientY;
     };
 
-    const closeImageModal = () => {
-        setShowImageModal(false);
-    };
-
-    const nextImage = () => {
-        if (images) {
-            setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const deltaX = e.changedTouches[0]!.clientX - touchStartX.current;
+        const deltaY = e.changedTouches[0]!.clientY - touchStartY.current;
+        const THRESHOLD = 50;
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > THRESHOLD) {
+            if (deltaX < 0) nextMedia(); else prevMedia();
+        } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > THRESHOLD) {
+            if (deltaY < 0) onNavigatePost?.('next'); else onNavigatePost?.('prev');
         }
     };
 
-    const prevImage = () => {
-        if (images) {
-            setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-        }
+    const openMediaModal = (index: number) => {
+        setCurrentMediaIndex(index);
+        setShowMediaModal(true);
+        loadComments();
+    };
+
+    const closeMediaModal = () => {
+        setShowMediaModal(false);
+        setShowCommentSheet(false);
+        setModalReplyToId(null);
+    };
+
+    const nextMedia = () => {
+        setCurrentMediaIndex((prev) => (prev + 1) % allMedia.length);
+    };
+
+    const prevMedia = () => {
+        setCurrentMediaIndex((prev) => (prev - 1 + allMedia.length) % allMedia.length);
     };
 
     /** Called by MessageInputGlobal – adds a comment or a reply. Updates local state only after mutation succeeds. */
@@ -439,19 +466,19 @@ export default function FeedCardWithReply({
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {imageCount === 1 ? (
-                    <div 
+                    <div
                         className="relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer"
-                        onClick={() => openImageModal(0)}
+                        onClick={() => openMediaModal(0)}
                     >
                         <img src={images[0]} alt="post" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     </div>
                 ) : imageCount === 2 ? (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
                         {images.map((src, i) => (
-                            <div 
-                                key={i} 
+                            <div
+                                key={i}
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
-                                onClick={() => openImageModal(i)}
+                                onClick={() => openMediaModal(i)}
                             >
                                 <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                             </div>
@@ -459,21 +486,21 @@ export default function FeedCardWithReply({
                     </div>
                 ) : imageCount === 3 ? (
                     <div className="grid grid-cols-2 grid-rows-2 gap-2">
-                        <div 
+                        <div
                             className="relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]"
-                            onClick={() => openImageModal(0)}
+                            onClick={() => openMediaModal(0)}
                         >
                             <img src={images[0]} alt="post 1" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </div>
-                        <div 
+                        <div
                             className="relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
-                            onClick={() => openImageModal(1)}
+                            onClick={() => openMediaModal(1)}
                         >
                             <img src={images[1]} alt="post 2" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </div>
-                        <div 
+                        <div
                             className="relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
-                            onClick={() => openImageModal(2)}
+                            onClick={() => openMediaModal(2)}
                         >
                             <img src={images[2]} alt="post 3" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         </div>
@@ -484,13 +511,7 @@ export default function FeedCardWithReply({
                             <div
                                 key={i}
                                 className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
-                                onClick={() => {
-                                    if (i === maxDisplay - 1 && excessCount > 0) {
-                                        openImageModal(0);
-                                    } else {
-                                        openImageModal(i);
-                                    }
-                                }}
+                                onClick={() => openMediaModal(i === maxDisplay - 1 && excessCount > 0 ? 0 : i)}
                             >
                                 <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                 {i === maxDisplay - 1 && excessCount > 0 && (
@@ -510,123 +531,281 @@ export default function FeedCardWithReply({
 
     const renderVideos = () => {
         if (!videos?.length) return null;
+        const offset = images?.length ?? 0;
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {videos.map((src, i) => (
-                    <div key={i} className="relative w-full rounded-lg overflow-hidden bg-black/5">
-                        <LazyVideo
-                            src={src}
-                            className="w-full max-h-[24rem] object-contain"
-                        />
+                    <div
+                        key={i}
+                        className="relative w-full rounded-lg overflow-hidden bg-black/5 cursor-pointer"
+                        onClick={() => openMediaModal(offset + i)}
+                    >
+                        <LazyVideo src={src} className="w-full max-h-[24rem] object-contain pointer-events-none" />
                     </div>
                 ))}
             </div>
         );
     };
 
-    const renderImageModal = () => {
-        if (!showImageModal || !images?.length) return null;
+    const renderMediaModal = () => {
+        if (!showMediaModal || allMedia.length === 0) return null;
+        const current = allMedia[currentMediaIndex]!;
 
-        return (
-            <div 
-                className="fixed inset-0 z-50 flex items-center bg-surface-default/80 justify-center animate-in fade-in duration-200"
-                onClick={closeImageModal}
-            >
-                <div 
-                    className="relative w-[100%] h-[100%] flex flex-col rounded-2xl overflow-hidden"
-                >
-                    <div 
-                        className="flex items-center justify-between p-4 border-border-subtle"
+        const mediaEl = current.type === 'image' ? (
+            <img src={current.src} alt={`Media ${currentMediaIndex + 1}`} className="object-contain w-full h-full" decoding="async" />
+        ) : (
+            <video src={current.src} controls autoPlay playsInline className="object-contain w-full h-full max-h-full" />
+        );
+
+        const thumbnailStrip = allMedia.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 rounded-xl p-2 max-w-[80%] overflow-x-auto">
+                {allMedia.map((m, i) => (
+                    <div
+                        key={i}
+                        onClick={(e) => { e.stopPropagation(); setCurrentMediaIndex(i); }}
+                        className={`relative w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden cursor-pointer transition-all duration-150 ${i === currentMediaIndex ? 'ring-2 ring-white scale-110' : 'opacity-50 hover:opacity-80'}`}
                     >
-                        <div className="backdrop-blur-md rounded-full px-4 py-2 border border-subtle/20">
-                            <span className="text-brand font-medium text-sm">
-                                {currentImageIndex + 1} / {images.length}
-                            </span>
-                        </div>
-
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                closeImageModal();
-                            }}
-                            className="bg-surface-default/10 backdrop-blur-md hover:bg-surface-default/20 rounded-full p-3 transition-all duration-200 border border-subtle/20 group cursor-pointer"
-                        >
-                            <X className="w-6 h-6 text-brand group-hover:rotate-90 transition-transform duration-200" />
-                        </button>
+                        {m.type === 'image'
+                            ? <img src={m.src} alt={`thumb ${i + 1}`} className="w-full h-full object-cover" decoding="async" />
+                            : <video src={m.src} className="w-full h-full object-cover" preload="metadata" />}
                     </div>
+                ))}
+            </div>
+        );
 
-                    <div className="relative flex-1 flex items-center justify-center min-h-0">
-                        {images.length > 1 && (
-                            <>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        prevImage();
-                                    }}
-                                    className="absolute left-6 bg-surface-default/10 backdrop-blur-md hover:bg-white/20 rounded-full p-4 transition-all duration-200 border border-subtle/20 z-10 group cursor-pointer"
-                                >
-                                    <ChevronLeft className="w-7 h-7 text-brand group-hover:-translate-x-1 transition-transform duration-200" />
-                                </button>
-
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        nextImage();
-                                    }}
-                                    className="absolute right-6 bg-surface-default/10 backdrop-blur-md hover:bg-surface-default/20 rounded-full p-4 transition-all duration-200 border border-subtle/20 z-10 group cursor-pointer"
-                                >
-                                    <ChevronRight className="w-7 h-7 text-brand group-hover:translate-x-1 transition-transform duration-200" />
-                                </button>
-                            </>
-                        )}
-
-                        <div 
-                            className="relative w-full h-full flex items-center justify-center"
-                        >
-                            <img
-                                src={images[currentImageIndex]}
-                                alt={`Image ${currentImageIndex + 1}`}
-                                className="object-contain w-full h-full"
-                                decoding="async"
-                            />
-                        </div>
+        const postInfoEl = (
+            <div className="flex items-center gap-3 mb-3">
+                <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                        <span className="font-semibold text-text-primary text-sm truncate">{profileName}</span>
+                        {profileTier && <UserBadge tier={profileTier} size="xs" />}
                     </div>
+                    <p className="text-text-secondary text-xs">{category} · {postDate}</p>
+                </div>
+            </div>
+        );
 
-                    {images.length > 1 && (
-                        <div 
-                            className="border-border-subtle p-4"
-                        >
-                            <div className="flex justify-center">
-                                <div className="bg-surface-default rounded-2xl p-3 border border-subtle/20 max-w-4xl overflow-x-auto">
-                                    <div className="flex gap-3">
-                                        {images.map((src, i) => (
-                                            <div
-                                                key={i}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setCurrentImageIndex(i);
-                                                }}
-                                                className={`relative w-20 h-20 rounded-lg cursor-pointer flex-shrink-0 transition-all duration-200 overflow-hidden ${
-                                                    i === currentImageIndex 
-                                                        ? 'ring-3 ring-text-brand scale-110' 
-                                                        : 'opacity-50 hover:opacity-100 hover:scale-105'
-                                                }`}
-                                            >
-                                                <img
-                                                    src={src}
-                                                    alt={`Thumbnail ${i + 1}`}
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                    decoding="async"
-                                                />
-                                                {i === currentImageIndex && (
-                                                    <div className="absolute inset-0 bg-surface-default/10 rounded-lg" />
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+        /* Comment list shared between desktop sidebar and mobile sheet */
+        const topLevelM = commentsData.filter(c => !c.parentId);
+        const repliesByParentM = new Map<string, Comment[]>();
+        commentsData.forEach(c => {
+            if (c.parentId) {
+                const list = repliesByParentM.get(c.parentId) ?? [];
+                list.push(c);
+                repliesByParentM.set(c.parentId, list);
+            }
+        });
+
+        const commentListEl = commentsLoading ? (
+            <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 animate-spin text-text-brand" />
+            </div>
+        ) : topLevelM.length === 0 ? (
+            <p className="text-text-secondary text-sm text-center py-8">{t('noComments')}</p>
+        ) : (
+            <div className="space-y-4">
+                {topLevelM.map(c => (
+                    <div key={c.id}>
+                        <div className="flex gap-3">
+                            <img src={c.authorImage || '/PROFILE.png'} alt={c.author} width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(c.authorId, c.authorType)} />
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <span className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand" onClick={() => goToProfile(c.authorId, c.authorType)}>{c.author}</span>
+                                    {c.authorTier && <UserBadge tier={c.authorTier} size="xs" />}
+                                    <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(c.createdAt)}</span>
+                                </div>
+                                <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderRichText(c.content, c.mentionMap)}</p>
+                                <div className="flex items-center gap-3">
+                                    <button type="button" onClick={() => handleLikeComment(c.id)} className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>{t('like')}</button>
+                                    <button onClick={() => setModalReplyToId(cur => cur === c.id ? null : c.id)} className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">{t('reply')}</button>
+                                    <span className="text-text-tertiary text-xs">{formatCount(c.likes)} {t('likes')}</span>
                                 </div>
                             </div>
                         </div>
+                        {modalReplyToId === c.id && (
+                            <div className="mt-3 ml-11 flex items-center gap-2">
+                                <img src={currentUserAvatar} alt="You" width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                <div className="flex-1">
+                                    <MessageInputGlobal onSendMessage={txt => handleSend(txt, c.id)} placeholder={t('replyPlaceholder')} reversed={true} reversedText={t('reply')} />
+                                </div>
+                            </div>
+                        )}
+                        {(repliesByParentM.get(c.id)?.length ?? 0) > 0 && (
+                            <div className="ml-11 mt-3 space-y-3">
+                                {repliesByParentM.get(c.id)!.map(reply => (
+                                    <div key={reply.id} className="flex gap-3">
+                                        <img src={reply.authorImage || '/PROFILE.png'} alt={reply.author} width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
+                                                {reply.authorTier && <UserBadge tier={reply.authorTier} size="xs" />}
+                                                <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(reply.createdAt)}</span>
+                                            </div>
+                                            <p className="body-small text-text-primary break-words whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
+
+        const commentInputEl = (
+            <div className="flex items-center gap-2">
+                <img src={currentUserAvatar} alt="You" width={36} height={36} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                <div className="flex-1">
+                    <MessageInputGlobal onSendMessage={txt => handleSend(txt)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} />
+                </div>
+            </div>
+        );
+
+        return (
+            <div className="fixed inset-0 z-50 flex bg-black animate-in fade-in duration-200" onClick={closeMediaModal}>
+
+                {/* ---- DESKTOP (md+): left media panel + right sidebar ---- */}
+                <div className="hidden md:flex w-full h-full" onClick={e => e.stopPropagation()}>
+
+                    {/* Left: media viewer */}
+                    <div className="relative flex-1 flex items-center justify-center bg-black min-w-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                        {/* Close */}
+                        <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
+                            <X className="w-5 h-5 text-white" />
+                        </button>
+                        {/* Counter */}
+                        {allMedia.length > 1 && (
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-black/40 rounded-full px-3 py-1">
+                                <span className="text-white text-sm font-medium">{currentMediaIndex + 1} / {allMedia.length}</span>
+                            </div>
+                        )}
+                        {/* Nav arrows */}
+                        {allMedia.length > 1 && (
+                            <>
+                                <button onClick={(e) => { e.stopPropagation(); prevMedia(); }} className="absolute left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-3 transition-colors cursor-pointer">
+                                    <ChevronLeft className="w-6 h-6 text-white" />
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); nextMedia(); }} className="absolute right-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-3 transition-colors cursor-pointer">
+                                    <ChevronRight className="w-6 h-6 text-white" />
+                                </button>
+                            </>
+                        )}
+                        {/* Media */}
+                        <div className="w-full h-full flex items-center justify-center p-4">
+                            {mediaEl}
+                        </div>
+                        {/* Thumbnail strip */}
+                        {thumbnailStrip}
+                    </div>
+
+                    {/* Right: sidebar */}
+                    <div className="w-[360px] xl:w-[400px] flex-shrink-0 bg-surface-default flex flex-col h-full border-l border-border-subtle">
+                        <div className="p-4 border-b border-border-subtle">
+                            {postInfoEl}
+                            <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{content}</p>
+                        </div>
+                        {/* Action bar */}
+                        <div className="px-4 py-3 border-b border-border-subtle flex items-center gap-4">
+                            <button onClick={handleLike} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
+                                <GoHeartFill className={`w-5 h-5 ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`} />
+                                <span>{formatCount(likeCount)}</span>
+                            </button>
+                            <button className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
+                                <img width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-5 h-5 object-contain" />
+                                <span>{formatCount(commentCount)}</span>
+                            </button>
+                            <button onClick={handleShare} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
+                                <img width={20} height={20} src="/SHARE.svg" alt="share" className="w-5 h-5 object-contain" />
+                                <span>{formatCount(shareCount)}</span>
+                            </button>
+                            <button onClick={handleSave} className="inline-flex items-center gap-2 text-sm ml-auto">
+                                <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-current text-text-brand' : 'text-text-secondary'}`} />
+                            </button>
+                        </div>
+                        {/* Comment list */}
+                        <div className="flex-1 overflow-y-auto px-4 py-3">
+                            {commentListEl}
+                        </div>
+                        {/* Comment input */}
+                        <div className="p-4 border-t border-border-subtle">
+                            {commentInputEl}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ---- MOBILE (< md): stacked media + bottom bar + comment sheet ---- */}
+                <div className="flex md:hidden flex-col w-full h-full" onClick={e => e.stopPropagation()}>
+
+                    {/* Media area */}
+                    <div className="relative flex-1 flex items-center justify-center bg-black min-h-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                        <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
+                            <X className="w-5 h-5 text-white" />
+                        </button>
+                        {allMedia.length > 1 && (
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-black/40 rounded-full px-3 py-1">
+                                <span className="text-white text-sm font-medium">{currentMediaIndex + 1} / {allMedia.length}</span>
+                            </div>
+                        )}
+                        {allMedia.length > 1 && (
+                            <>
+                                <button onClick={(e) => { e.stopPropagation(); prevMedia(); }} className="absolute left-3 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 cursor-pointer">
+                                    <ChevronLeft className="w-5 h-5 text-white" />
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); nextMedia(); }} className="absolute right-3 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 cursor-pointer">
+                                    <ChevronRight className="w-5 h-5 text-white" />
+                                </button>
+                            </>
+                        )}
+                        <div className="w-full h-full flex items-center justify-center">
+                            {mediaEl}
+                        </div>
+                    </div>
+
+                    {/* Bottom bar */}
+                    <div className="bg-surface-default px-4 pt-3 pb-2 border-t border-border-subtle">
+                        {postInfoEl}
+                        <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{content}</p>
+                        <div className="flex items-center gap-4">
+                            <button onClick={handleLike} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
+                                <GoHeartFill className={`w-5 h-5 ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`} />
+                                <span>{formatCount(likeCount)}</span>
+                            </button>
+                            <button onClick={() => setShowCommentSheet(true)} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
+                                <img width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-5 h-5 object-contain" />
+                                <span>{formatCount(commentCount)}</span>
+                            </button>
+                            <button onClick={handleShare} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
+                                <img width={20} height={20} src="/SHARE.svg" alt="share" className="w-5 h-5 object-contain" />
+                                <span>{formatCount(shareCount)}</span>
+                            </button>
+                            <button onClick={handleSave} className="inline-flex items-center gap-2 text-sm ml-auto">
+                                <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-current text-text-brand' : 'text-text-secondary'}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Comment bottom sheet */}
+                    <div
+                        className={`fixed inset-x-0 bottom-0 z-[60] bg-surface-default rounded-t-2xl shadow-2xl transition-transform duration-300 ${showCommentSheet ? 'translate-y-0' : 'translate-y-full'}`}
+                        style={{ maxHeight: '75vh' }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
+                            <span className="font-semibold text-text-primary text-sm">{t('comment')}s</span>
+                            <button onClick={() => setShowCommentSheet(false)} className="p-1 hover:bg-surface-subtle rounded-full cursor-pointer">
+                                <X className="w-4 h-4 text-text-secondary" />
+                            </button>
+                        </div>
+                        <div className="overflow-y-auto px-4 py-3" style={{ maxHeight: 'calc(75vh - 8rem)' }}>
+                            {commentListEl}
+                        </div>
+                        <div className="p-4 border-t border-border-subtle">
+                            {commentInputEl}
+                        </div>
+                    </div>
+                    {showCommentSheet && (
+                        <div className="fixed inset-0 z-[59] bg-black/40" onClick={() => setShowCommentSheet(false)} />
                     )}
                 </div>
             </div>
@@ -943,8 +1122,8 @@ export default function FeedCardWithReply({
                 </div>
             </div>
 
-            {/* Image Modal */}
-            {renderImageModal()}
+            {/* Media Modal */}
+            {renderMediaModal()}
 
             <SharePostModal
                 open={showShareDialog}

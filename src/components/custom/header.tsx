@@ -268,18 +268,25 @@ export function MyAvatar() {
 
   return (
     <Avatar>
-      <AvatarImage src={url || undefined} alt="@shadcn" />
-      <AvatarFallback>
-        <Image
-          width={32}
-          height={32}
-          src="/PROFILE.png"
-          alt="Profile" />
-
-      </AvatarFallback>
+      {url ? (
+        // Plain <img> so the browser can serve cached images instantly without
+        // Radix's JS-managed loading state, which briefly shows the fallback
+        // every time this component mounts (e.g. when the dropdown opens).
+        <img
+          src={url}
+          alt="Profile"
+          className="aspect-square size-full rounded-full object-cover"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = '/PROFILE.png';
+          }}
+        />
+      ) : (
+        <AvatarFallback>
+          <Image width={32} height={32} src="/PROFILE.png" alt="Profile" />
+        </AvatarFallback>
+      )}
     </Avatar>
-
-  )
+  );
 }
 
 

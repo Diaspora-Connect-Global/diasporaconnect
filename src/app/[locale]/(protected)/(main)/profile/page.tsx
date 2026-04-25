@@ -115,22 +115,23 @@ export default function ProfilePage() {
         },
     });
 
-    console.log("Data response", data);
-    console.log("profile info", profile);
-
     useEffect(() => {
-        if (profile) {
-            setUser({
-                ...profile,
-                firstName: profile.firstName,
-                lastName: profile.lastName,
-                email: profile.email,
-                userId: profile.userId,
-                role: profile.role,
-                countryOfOrigin: profile.countryOfOrigin?.slice(0, 2).toUpperCase(),
-            });
-        }
-    }, [profile?.firstName, profile?.lastName, profile?.email, profile, setUser]);
+        if (!profile) return;
+        // Only update the store when meaningful fields actually change.
+        // Depending on profile (full object) caused setUser to fire on every
+        // Apollo network response even when data was identical, because Apollo
+        // always returns a new object reference with network-only policy.
+        setUser({
+            ...profile,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            email: profile.email,
+            userId: profile.userId,
+            role: profile.role,
+            countryOfOrigin: profile.countryOfOrigin?.slice(0, 2).toUpperCase(),
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile?.userId, profile?.firstName, profile?.lastName, profile?.email, profile?.avatarUrl, profile?.version, setUser]);
 
     function handleVerifyKYC(): void {
         throw new Error('Function not implemented.');
