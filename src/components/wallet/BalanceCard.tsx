@@ -5,26 +5,39 @@ import { EyeIcon, EyeOffIcon, LockIcon, WalletIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
 import { ButtonType3 } from '@/components/custom/button';
+import { useQuery } from '@apollo/client/react';
+import { MY_PAYMENT_INTENTS } from '@/services/gql/payments';
+import type { MyPaymentIntentsResponse } from '@/services/gql/types/payments';
 
 export default function BalanceCard() {
   const [showBalance, setShowBalance] = useState(true);
   const t = useTranslations('wallet.balance');
-  
-  // Mock data - replace with real data from your API
-  const totalBalance = 1200.00;
-  const inEscrow = 500.00;
-  const available = 700.00;
+
+  const { data } = useQuery<MyPaymentIntentsResponse>(MY_PAYMENT_INTENTS, {
+    variables: { page: 1, limit: 100 },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const intents = data?.myPaymentIntents?.payment_intents ?? [];
+
+  const totalSpent = intents
+    .filter((i) => i.status === 'CONFIRMED')
+    .reduce((sum, i) => sum + (i.gross_amount ?? 0), 0) / 100;
+
+  const inEscrow = intents
+    .filter((i) => i.status === 'PENDING')
+    .reduce((sum, i) => sum + (i.gross_amount ?? 0), 0) / 100;
+
+  const currency = intents[0]?.currency ?? 'GHS';
 
   const formatCurrency = (amount: number) => {
-    return showBalance 
-      ? `$${amount.toFixed(2)}` 
-      : '••••••';
+    if (!showBalance) return '••••••';
+    return `${currency} ${amount.toFixed(2)}`;
   };
 
   return (
     <Card className="bg-[#0D1B2A] border-none shadow-lg h-[200px]">
       <CardContent className="p-6 h-full flex flex-col justify-between relative">
-        {/* Top Section with Balance and Withdraw Button */}
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -42,12 +55,11 @@ export default function BalanceCard() {
               </ButtonType3>
             </div>
             <h2 className="text-[36px] font-bold text-white leading-tight">
-              {formatCurrency(totalBalance)}
+              {formatCurrency(totalSpent)}
             </h2>
           </div>
         </div>
 
-        {/* Bottom Section with Sub-balances */}
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 rounded-lg">
@@ -68,7 +80,7 @@ export default function BalanceCard() {
             <div>
               <p className="caption-small text-white/60">{t('available')}</p>
               <p className="body-medium font-semibold text-white">
-                {formatCurrency(available)}
+                {formatCurrency(Math.max(0, totalSpent - inEscrow))}
               </p>
             </div>
           </div>

@@ -6,20 +6,31 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { toast } from 'sonner';
 import {
-  CREATE_PAYOUT_ACCOUNT,
   GET_MY_VENDOR,
+  GET_VENDOR_DASHBOARD,
   GET_VENDOR_ELIGIBILITY,
-  MY_PAYOUT_ACCOUNTS,
+  LIST_VENDOR_ORDERS,
   REQUEST_PAYOUT,
-  SET_PRIMARY_PAYOUT_ACCOUNT,
 } from '@/services/gql/vendor';
+import {
+  MY_PAYOUT_ACCOUNTS,
+  CREATE_PAYOUT_ACCOUNT,
+  SET_PRIMARY_PAYOUT_ACCOUNT,
+  MY_PAYMENT_INTENTS,
+} from '@/services/gql/payments';
 import type {
-  CreatePayoutAccountResponse,
   GetMyVendorResponse,
+  GetVendorDashboardResponse,
   GetVendorEligibilityResponse,
-  MyPayoutAccountsResponse,
-  SetPrimaryPayoutAccountResponse,
+  ListVendorOrdersResponse,
+  OrderStatus,
 } from '@/services/gql/types/vendor';
+import type {
+  MyPayoutAccountsResponse,
+  CreatePayoutAccountResponse,
+  SetPrimaryPayoutAccountResponse,
+  MyPaymentIntentsResponse,
+} from '@/services/gql/types/payments';
 import { handleVendorError } from '@/lib/vendor-error-mapper';
 import VendorKycRequiredModal from '@/components/vendors/VendorKycRequiredModal';
 
@@ -45,8 +56,16 @@ const PayoutsDashboard = () => {
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   const [isKycMandatory, setIsKycMandatory] = useState(true);
   const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
+  const { data: dashboardData } = useQuery<GetVendorDashboardResponse>(GET_VENDOR_DASHBOARD);
+  const { data: escrowOrdersData } = useQuery<ListVendorOrdersResponse>(LIST_VENDOR_ORDERS, {
+    variables: { status: 'IN_PROGRESS', limit: 100, offset: 0 },
+  });
   const { data: eligibilityData } = useQuery<GetVendorEligibilityResponse>(GET_VENDOR_ELIGIBILITY);
   const { data: payoutAccountsData } = useQuery<MyPayoutAccountsResponse>(MY_PAYOUT_ACCOUNTS);
+  const { data: paymentIntentsData } = useQuery<MyPaymentIntentsResponse>(MY_PAYMENT_INTENTS, {
+    variables: { page: currentPage, limit: rowsPerPage },
+    fetchPolicy: 'cache-and-network',
+  });
   const [requestPayout, { loading: requestingPayout }] = useMutation<{ requestPayout: string }>(REQUEST_PAYOUT);
   const [createPayoutAccount, { loading: creatingPayoutAccount }] =
     useMutation<CreatePayoutAccountResponse>(CREATE_PAYOUT_ACCOUNT);
@@ -54,19 +73,22 @@ const PayoutsDashboard = () => {
     useMutation<SetPrimaryPayoutAccountResponse>(SET_PRIMARY_PAYOUT_ACCOUNT);
   const canReceivePayout = eligibilityData?.getVendorEligibility?.canReceivePayout ?? false;
   const eligibilityStatus = eligibilityData?.getVendorEligibility?.status;
-  const payoutAccounts = payoutAccountsData?.myPayoutAccounts ?? [];
+  const payoutAccounts = payoutAccountsData?.myPayoutAccounts?.payout_accounts ?? [];
 
-  const transactions: Transaction[] = [
-    { id: '1', transactionId: '0001', date: '25 Nov 2025', type: 'Withdrawal', amount: 'GH₵390.00' },
-    { id: '2', transactionId: '0001', date: '25 Nov 2025', type: 'Withdrawal', amount: 'GH₵390.00' },
-    { id: '3', transactionId: '0001', date: '25 Nov 2025', type: 'Escrow to wallet', amount: 'GH₵390.00' },
-  ];
+  const rawIntents = paymentIntentsData?.myPaymentIntents?.payment_intents ?? [];
+  const totalIntentCount = paymentIntentsData?.myPaymentIntents?.total ?? 0;
+  const transactions: Transaction[] = rawIntents.map((intent) => ({
+    id: intent.id,
+    transactionId: intent.id.slice(0, 8),
+    date: intent.created_at ? new Date(intent.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
+    type: intent.purpose === 'SERVICE_ORDER' ? 'Escrow to wallet' : 'Withdrawal',
+    amount: `${intent.currency} ${(intent.gross_amount / 100).toFixed(2)}`,
+  }));
+  const totalPages = Math.max(1, Math.ceil(totalIntentCount / rowsPerPage));
 
   const getLocalizedType = (type: string): string => {
     return type === 'Withdrawal' ? t('withdrawal') : t('escrowToWallet');
   };
-
-  const totalPages = 10;
 
   const executePayout = async (vendorId: string, amountMajor: number, payoutCurrency: string) => {
     const amount = Math.round(amountMajor * 100);
@@ -134,13 +156,18 @@ const PayoutsDashboard = () => {
     try {
       const { data } = await createPayoutAccount({
         variables: {
-          type: payoutProvider,
-          currency,
+          input: {
+            provider: payoutProvider,
+            account_type: payoutProvider,
+            currency,
+            account_number: '',
+            account_name: '',
+          },
         },
         refetchQueries: [{ query: MY_PAYOUT_ACCOUNTS }, { query: GET_VENDOR_ELIGIBILITY }],
       });
 
-      if (!data?.createPayoutAccount?.id) {
+      if (!data?.createPayoutAccount?.payout_account?.id) {
         toast.error('Unable to add payout account');
         return;
       }
@@ -158,10 +185,10 @@ const PayoutsDashboard = () => {
   const handleSetPrimary = async (accountId: string) => {
     try {
       const { data } = await setPrimaryPayoutAccount({
-        variables: { accountId },
+        variables: { payout_account_id: accountId },
         refetchQueries: [{ query: MY_PAYOUT_ACCOUNTS }, { query: GET_VENDOR_ELIGIBILITY }],
       });
-      if (!data?.setPrimaryPayoutAccount) {
+      if (!data?.setPrimaryPayoutAccount?.success) {
         toast.error('Failed to set primary payout account');
         return;
       }
@@ -186,7 +213,11 @@ const PayoutsDashboard = () => {
           {/* Wallet Balance Card */}
           <div className="bg-surface-default rounded-2xl p-6 shadow-sm border border-border-subtle">
             <p className="text-sm text-text-secondary mb-2">{t('walletBalance')}</p>
-            <p className="text-4xl font-bold text-text-primary mb-4">GH₵0.00</p>
+            <p className="text-4xl font-bold text-text-primary mb-4">
+              {dashboardData?.getVendorDashboard
+                ? `${currency} ${(dashboardData.getVendorDashboard.totalEarnings / 100).toFixed(2)}`
+                : '—'}
+            </p>
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <input
                 value={payoutAmount}
@@ -223,7 +254,15 @@ const PayoutsDashboard = () => {
           {/* Escrow Account Card */}
           <div className="bg-surface-default rounded-2xl p-6 shadow-sm border border-border-subtle">
             <p className="text-sm text-text-secondary mb-2">{t('escrowAccount')}</p>
-            <p className="text-4xl font-bold text-text-tertiary mb-2">GH₵5000.00</p>
+            <p className="text-4xl font-bold text-text-tertiary mb-2">
+              {currency}{' '}
+              {(
+                (escrowOrdersData?.listVendorOrders.items ?? []).reduce(
+                  (sum, o) => sum + (o.totalAmount ?? 0),
+                  0
+                ) / 100
+              ).toFixed(2)}
+            </p>
             <p className="text-xs text-text-brand">
               {t('escrowDescription')}
             </p>
@@ -266,11 +305,11 @@ const PayoutsDashboard = () => {
                       {account.provider} · {account.currency}
                     </p>
                     <p className="text-xs text-text-secondary">
-                      {account.isVerified ? 'Verified' : 'Not verified'}
-                      {account.isDefault ? ' · Primary' : ''}
+                      {account.last4 ? `····${account.last4}` : account.account_name ?? ''}
+                      {account.is_primary ? ' · Primary' : ''}
                     </p>
                   </div>
-                  {!account.isDefault && (
+                  {!account.is_primary && (
                     <button
                       onClick={() => handleSetPrimary(account.id)}
                       disabled={settingPrimaryPayout}

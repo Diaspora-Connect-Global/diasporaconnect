@@ -1,168 +1,257 @@
 "use client";
-import React, { useState } from "react";
-import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useState, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useMutation, useQuery, useApolloClient } from "@apollo/client/react";
+import { toast } from "sonner";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
+import {
+  GET_MARKETPLACE_ORDER,
+  CANCEL_MARKETPLACE_ORDER,
+  CONFIRM_ORDER_DELIVERY,
+  GET_PRODUCT,
+} from "@/services/gql/marketplace";
+import type {
+  GetMarketplaceOrderResponse,
+  CancelMarketplaceOrderResponse,
+  ConfirmOrderDeliveryResponse,
+  GetProductResponse,
+} from "@/services/gql/types/marketplace";
+
+const STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: "Pending Payment",
+  PAYMENT_CONFIRMED: "Payment Confirmed",
+  IN_PROGRESS: "In Progress",
+  DELIVERED: "Delivered",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+  DISPUTED: "Disputed",
+  REFUNDED: "Refunded",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  PENDING_PAYMENT: "text-text-warning",
+  PAYMENT_CONFIRMED: "text-text-brand",
+  IN_PROGRESS: "text-text-brand",
+  DELIVERED: "text-text-success",
+  COMPLETED: "text-text-success",
+  CANCELLED: "text-text-danger",
+  DISPUTED: "text-text-danger",
+  REFUNDED: "text-text-secondary",
+};
 
 export default function OrderDetailsPage() {
   const t = useTranslations("vendors.orders");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const router = useRouter();
+  const params = useParams();
+  const orderId = params?.id as string;
+
   const [declineModalOpen, setDeclineModalOpen] = useState(false);
-  const [isDeclining, setIsDeclining] = useState(false);
-  const orderData = {
-    orderNumber: "0001",
-    orderDate: "23 Nov 2025",
-    status: "Pending",
-    paymentStatus: "Payment secured in escrow",
-    timeRemaining: "You have 24 hours to accept and process the order",
-    customer: {
-      name: "John Doe",
-      avatar: "https://picsum.photos/seed/customer1/80/80"
-    },
-    shippingAddress: {
-      name: "John Doe",
-      street: "Block factory, Agya herbal Pokuase,",
-      city: "Greater Accra",
-      country: "Ghana",
-      phone: "+233 24 000 0000"
-    },
-    billingAddress: "Same as shipping address",
-    items: [
-      {
-        id: 1,
-        name: "Men's leather shoe",
-        image: "https://picsum.photos/seed/shoe1/128/128",
-        quantity: 2,
-        size: "M",
-        price: "GH₵699.00",
-        sellerAvatar: "https://picsum.photos/seed/seller1/64/64"
-      },
-      {
-        id: 2,
-        name: "Men's leather shoe",
-        image: "https://picsum.photos/seed/shoe2/128/128",
-        quantity: 2,
-        size: "M",
-        price: "GH₵699.00",
-        sellerAvatar: "https://picsum.photos/seed/seller1/64/64"
-      },
-      {
-        id: 3,
-        name: "Men's leather shoe",
-        image: "https://picsum.photos/seed/shoe3/128/128",
-        quantity: 2,
-        size: "M",
-        price: "GH₵699.00",
-        sellerAvatar: "https://picsum.photos/seed/seller2/64/64"
+  const [declineReason, setDeclineReason] = useState("");
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
+  const fetchedIds = useRef<Set<string>>(new Set());
+  const client = useApolloClient();
+
+  const { data, loading, error } = useQuery<GetMarketplaceOrderResponse>(GET_MARKETPLACE_ORDER, {
+    variables: { order_id: orderId },
+    skip: !orderId,
+  });
+
+  const order = data?.getMarketplaceOrder?.order;
+
+  useEffect(() => {
+    const items = order?.items ?? [];
+    if (items.length === 0) return;
+    const unfetched = items.filter((i) => i.product_id && !fetchedIds.current.has(i.product_id));
+    if (unfetched.length === 0) return;
+
+    for (const i of unfetched) fetchedIds.current.add(i.product_id);
+
+    Promise.all(
+      unfetched.map((i) =>
+        client
+          .query<GetProductResponse>({ query: GET_PRODUCT, variables: { product_id: i.product_id } })
+          .then((res) => ({ id: i.product_id, title: res.data?.getProduct?.product?.title ?? null }))
+          .catch(() => ({ id: i.product_id, title: null }))
+      )
+    ).then((results) => {
+      const names: Record<string, string> = {};
+      for (const r of results) {
+        if (r.id && r.title) names[r.id] = r.title;
       }
-    ],
-    itemsTotal: "GH₵2699.00",
-    shippingFee: "GH₵69.00",
-    total: "GH₵2769.00"
-  };
+      if (Object.keys(names).length > 0) {
+        setProductNames((prev) => ({ ...prev, ...names }));
+      }
+    });
+  }, [order?.items, client]);
 
-  const handleDeclineOrderClick = () => {
-    setDeclineModalOpen(true);
-  };
+  const [cancelOrder, { loading: cancelling }] = useMutation<CancelMarketplaceOrderResponse>(
+    CANCEL_MARKETPLACE_ORDER
+  );
+  const [confirmDelivery, { loading: confirming }] = useMutation<ConfirmOrderDeliveryResponse>(
+    CONFIRM_ORDER_DELIVERY
+  );
 
-  const handleDeclineOrderConfirm = async () => {
-    setIsDeclining(true);
+  const formatAmount = (amount: number, currency: string) =>
+    `${currency} ${(amount / 100).toFixed(2)}`;
+
+  const handleDeclineConfirm = async () => {
     try {
-      // TODO: wire to decline order mutation when API is available
-      console.log("Order declined");
-      alert("Order has been declined");
+      const { data: mutData } = await cancelOrder({
+        variables: { order_id: orderId, reason: declineReason || undefined },
+      });
+      if (!mutData?.cancelMarketplaceOrder?.success) {
+        toast.error(mutData?.cancelMarketplaceOrder?.message ?? "Failed to decline order");
+        return;
+      }
+      toast.success("Order declined");
       setDeclineModalOpen(false);
-    } finally {
-      setIsDeclining(false);
+      router.push(`/${locale}/vendors/orders`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to decline order";
+      toast.error(msg);
     }
   };
 
-  const handleProcessOrder = () => {
-    console.log("Processing order");
-    alert("Order is being processed");
+  const handleProcessOrder = async () => {
+    try {
+      const { data: mutData } = await confirmDelivery({ variables: { order_id: orderId } });
+      if (!mutData?.confirmOrderDelivery?.success) {
+        toast.error(mutData?.confirmOrderDelivery?.message ?? "Failed to confirm delivery");
+        return;
+      }
+      toast.success("Delivery confirmed");
+      router.push(`/${locale}/vendors/orders`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to confirm delivery";
+      toast.error(msg);
+    }
   };
 
-  const handleSendMessage = () => {
-    console.log("Opening message to customer");
-    alert("Opening message interface");
-  };
+  if (loading) {
+    return (
+      <div className="p-8">
+        <p className="text-text-secondary">Loading order…</p>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="p-8">
+        <p className="text-text-danger">Order not found.</p>
+      </div>
+    );
+  }
+
+  const canDecline = !["COMPLETED", "CANCELLED", "REFUNDED"].includes(order.status ?? "");
+  const canConfirmDelivery = order.status === "IN_PROGRESS";
 
   return (
     <div className="p-8 max-w-7xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
-        <button className="hover:text-text-primary">Orders</button>
+        <button
+          onClick={() => router.push(`/${locale}/vendors/orders`)}
+          className="hover:text-text-primary"
+        >
+          {t("title")}
+        </button>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-        <span className="text-text-primary">Order 0001</span>
+        <span className="text-text-primary font-mono">{orderId.slice(0, 8)}</span>
       </div>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-text-primary">Orders details</h1>
+        <h1 className="text-2xl font-semibold text-text-primary">{t("orderDetails") || "Order details"}</h1>
         <div className="flex gap-3">
-          <button
-            onClick={handleDeclineOrderClick}
-            className="px-6 py-2.5 border-2 border-border-danger text-text-danger rounded-lg font-medium hover:bg-surface-danger transition-colors"
-          >
-            Decline order
-          </button>
-          <button
-            onClick={handleProcessOrder}
-            className="px-6 py-2.5 bg-surface-brand text-text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
-          >
-            Process order
-          </button>
+          {canDecline && (
+            <button
+              onClick={() => setDeclineModalOpen(true)}
+              disabled={cancelling}
+              className="px-6 py-2.5 border-2 border-border-danger text-text-danger rounded-lg font-medium hover:bg-surface-danger transition-colors disabled:opacity-50"
+            >
+              Decline order
+            </button>
+          )}
+          {canConfirmDelivery && (
+            <button
+              onClick={handleProcessOrder}
+              disabled={confirming}
+              className="px-6 py-2.5 bg-surface-brand text-text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {confirming ? "Confirming…" : "Confirm delivery"}
+            </button>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Left Column - Order Info */}
+        {/* Left Column */}
         <div className="col-span-2 space-y-6">
           {/* Order Details Card */}
           <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
             <div className="grid grid-cols-3 gap-6 mb-6">
               <div>
                 <p className="text-sm text-text-secondary mb-1">Order number</p>
-                <p className="text-base font-medium text-text-primary">{orderData.orderNumber}</p>
+                <p className="text-base font-medium text-text-primary font-mono">{orderId.slice(0, 8)}</p>
               </div>
               <div>
                 <p className="text-sm text-text-secondary mb-1">Order date</p>
-                <p className="text-base font-medium text-text-primary">{orderData.orderDate}</p>
+                <p className="text-base font-medium text-text-primary">
+                  {order.created_at
+                    ? new Date(order.created_at).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "—"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-text-secondary mb-1">Status</p>
-                <p className="text-base font-medium text-text-warning">{orderData.status}</p>
+                <p className={`text-base font-medium ${STATUS_COLORS[order.status ?? ""] ?? "text-text-primary"}`}>
+                  {STATUS_LABELS[order.status ?? ""] ?? order.status}
+                </p>
               </div>
             </div>
 
-            <div className="bg-surface-brand-subtle border border-border-brand rounded-lg p-4">
-              <p className="text-sm font-medium text-text-brand mb-1">{orderData.paymentStatus}</p>
-              <p className="text-sm text-text-secondary">{orderData.timeRemaining}</p>
-            </div>
+            {["PAYMENT_CONFIRMED", "IN_PROGRESS"].includes(order.status ?? "") && (
+              <div className="bg-surface-brand-subtle border border-border-brand rounded-lg p-4">
+                <p className="text-sm font-medium text-text-brand mb-1">Payment secured in escrow</p>
+                <p className="text-sm text-text-secondary">
+                  {order.status === "PAYMENT_CONFIRMED"
+                    ? "Payment confirmed — fulfill and confirm delivery when done."
+                    : "Order in progress — confirm delivery once fulfilled."}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Order Items */}
           <div className="bg-surface-default rounded-xl border border-border-subtle overflow-hidden">
             <div className="divide-y divide-border-subtle">
-              {orderData.items.map((item) => (
-                <div key={item.id} className="p-6 flex gap-4">
-                  {/* Circle = avatar of person who posted the product (seller) */}
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-surface-subtle">
-                    {"sellerAvatar" in item && typeof item.sellerAvatar === "string" && item.sellerAvatar.startsWith("http") ? (
-                      <Image src={item.sellerAvatar} alt="" fill className="object-cover" sizes="64px" />
-                    ) : (
-                      <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">👤</span>
-                    )}
+              {(order.items ?? []).map((item, idx) => (
+                <div key={`${item.product_id}-${idx}`} className="p-6 flex gap-4">
+                  <div className="w-16 h-16 rounded-lg bg-surface-subtle flex items-center justify-center text-2xl flex-shrink-0">
+                    📦
                   </div>
                   <div className="flex-1">
-                    <p className="text-base font-medium text-text-primary mb-2">{item.name}</p>
-                    <p className="text-sm text-text-secondary">Quantity {item.quantity}</p>
-                    <p className="text-sm text-text-secondary">Size {item.size}</p>
+                    <p className="text-base font-medium text-text-primary mb-1">
+                      {productNames[item.product_id] ?? (
+                        <span className="font-mono text-sm text-text-tertiary">{item.product_id.slice(0, 12)}…</span>
+                      )}
+                    </p>
+                    <p className="text-sm text-text-secondary">Qty: {item.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-base font-medium text-text-primary">{item.price}</p>
+                    <p className="text-base font-medium text-text-primary">
+                      {item.currency} {((item.price ?? 0) / 100).toFixed(2)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -170,75 +259,63 @@ export default function OrderDetailsPage() {
 
             {/* Totals */}
             <div className="border-t border-border-subtle p-6 space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Items total</span>
-                <span className="text-text-primary">{orderData.itemsTotal}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Shipping fee</span>
-                <span className="text-text-primary">{orderData.shippingFee}</span>
-              </div>
-              <div className="flex justify-between text-base font-semibold pt-3 border-t border-border-subtle">
+              <div className="flex justify-between text-base font-semibold">
                 <span className="text-text-primary">Total</span>
-                <span className="text-text-primary">{orderData.total}</span>
+                <span className="text-text-primary">
+                  {formatAmount(order.total_amount ?? 0, order.currency ?? "GHS")}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column - Customer Info */}
+        {/* Right Column */}
         <div className="space-y-6">
-          {/* Customer Card */}
+          {/* Buyer Info */}
           <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
-            <h3 className="text-sm font-medium text-text-secondary mb-4">Customer</h3>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-surface-subtle">
-                {orderData.customer.avatar?.startsWith("http") ? (
-                  <Image src={orderData.customer.avatar} alt={orderData.customer.name} fill className="object-cover" sizes="40px" />
-                ) : (
-                  <span className="absolute inset-0 flex items-center justify-center text-xl text-text-tertiary">{orderData.customer.avatar || "👤"}</span>
-                )}
-              </div>
-              <span className="text-base font-medium text-text-primary">{orderData.customer.name}</span>
-              <button
-                onClick={handleSendMessage}
-                className="ml-auto text-sm text-text-brand font-medium hover:opacity-80"
-              >
-                Message
-              </button>
-            </div>
-
-            {/* Shipping Address */}
-            <div className="mb-6">
-              <h4 className="text-sm font-medium text-text-primary mb-2">Shipping address</h4>
-              <div className="text-sm text-text-secondary space-y-1">
-                <p className="font-medium text-text-primary">{orderData.shippingAddress.name}</p>
-                <p>{orderData.shippingAddress.street}</p>
-                <p>{orderData.shippingAddress.city}</p>
-                <p>{orderData.shippingAddress.country}</p>
-                <p className="pt-2">{orderData.shippingAddress.phone}</p>
-              </div>
-            </div>
-
-            {/* Billing Address */}
-            <div>
-              <h4 className="text-sm font-medium text-text-primary mb-2">Billing address</h4>
-              <p className="text-sm text-text-secondary">{orderData.billingAddress}</p>
-            </div>
+            <h3 className="text-sm font-medium text-text-secondary mb-4">Customer ID</h3>
+            <p className="text-sm font-mono text-text-primary break-all">{order.buyer_id}</p>
           </div>
+
+          {/* Shipping Address */}
+          {order.shipping_address && (
+            <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
+              <h3 className="text-sm font-medium text-text-secondary mb-4">Shipping Address</h3>
+              <p className="text-sm text-text-primary whitespace-pre-wrap">{order.shipping_address}</p>
+            </div>
+          )}
+
+          {/* Notes */}
+          {order.notes && (
+            <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
+              <h3 className="text-sm font-medium text-text-secondary mb-2">Notes</h3>
+              <p className="text-sm text-text-primary">{order.notes}</p>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Decline Modal */}
       <ConfirmationModal
         open={declineModalOpen}
         onCancel={() => setDeclineModalOpen(false)}
-        onConfirm={handleDeclineOrderConfirm}
-        title={t("declineOrderTitle") || "Decline order"}
-        description={t("declineOrderConfirm") || "Are you sure you want to decline this order?"}
-        confirmText={t("declineOrder") || tCommon("confirm") || "Decline"}
+        onConfirm={handleDeclineConfirm}
+        title="Decline this order?"
+        description="This will cancel the order and release the payment back to the buyer."
+        confirmText={cancelling ? "Declining…" : "Decline order"}
         confirmVariant="destructive"
-        isLoading={isDeclining}
-      />
+      >
+        <div className="mt-2">
+          <label className="block text-sm text-text-secondary mb-1">Reason (optional)</label>
+          <input
+            type="text"
+            value={declineReason}
+            onChange={(e) => setDeclineReason(e.target.value)}
+            placeholder="e.g. Out of stock"
+            className="w-full px-3 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-border-brand"
+          />
+        </div>
+      </ConfirmationModal>
     </div>
   );
 }

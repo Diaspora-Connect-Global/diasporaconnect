@@ -215,10 +215,16 @@ export default function ProductsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <button className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline">
+                      <button
+                        onClick={() => router.push(`/${locale}/marketplace`)}
+                        className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline"
+                      >
                         {t('preview')}
                       </button>
-                      <button className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline">
+                      <button
+                        onClick={() => router.push(`/${locale}/vendors/products/${product.id}/edit`)}
+                        className="text-sm text-text-brand font-medium hover:opacity-80 hover:underline"
+                      >
                         {t('edit')}
                       </button>
                       {product.status !== 'PUBLISHED' && (
