@@ -19,6 +19,7 @@ import {
   Paperclip,
   Camera,
   FolderOpen,
+  RotateCcw,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -31,6 +32,7 @@ import { CREATE_POST, CreatePostData, GET_FEED, REQUEST_UPLOAD_URL, RequestUploa
 import { useRouter } from 'next/navigation';
 import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
 import { AttachmentInput } from '@/services/gql/types/postsFeed';
+import { usePostDraft } from '@/hooks/usePostDraft';
 
 // Types
 type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
@@ -137,9 +139,13 @@ export default function CreatePostPage() {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
   const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
+  const [draftRestored, setDraftRestored] = useState(false);
   const textareaRef = React.useRef<RichTextareaHandle>(null);
   const submittingRef = React.useRef(false);
+  const saveTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { saveDraft, loadDraft, clearDraft } = usePostDraft();
 
   const t = useTranslations('createPost');
   const tActions = useTranslations('actions');
@@ -180,6 +186,40 @@ export default function CreatePostPage() {
       });
     };
   }, [attachments]);
+
+  // Restore draft on mount
+  React.useEffect(() => {
+    loadDraft().then(draft => {
+      if (!draft) return;
+      if (draft.text) setPostContent(draft.text);
+      if (draft.visibility) setVisibility(draft.visibility as Visibility);
+      if (draft.attachments.length > 0) {
+        const restored: Attachment[] = draft.attachments.map(a => ({
+          id: a.id,
+          type: a.type,
+          name: a.name,
+          file: a.file,
+          preview: (a.file.type.startsWith('image/') || a.file.type.startsWith('video/'))
+            ? URL.createObjectURL(a.file)
+            : undefined,
+        }));
+        setAttachments(restored);
+      }
+      setDraftRestored(true);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-save draft with debounce
+  React.useEffect(() => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveDraft(postContent, visibility, attachments);
+    }, 600);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [postContent, visibility, attachments, saveDraft]);
 
   // Function to insert text at cursor position
   const insertAtCursor = (textToInsert: string) => {
@@ -363,6 +403,16 @@ export default function CreatePostPage() {
     input.click();
   };
 
+  const handleDiscardDraft = async () => {
+    attachments.forEach(a => { if (a.preview) URL.revokeObjectURL(a.preview); });
+    await clearDraft();
+    setPostContent('');
+    setAttachments([]);
+    setVisibility('PUBLIC');
+    setMentionedUsers([]);
+    setDraftRestored(false);
+  };
+
   const handleRemoveAttachment = (id: string) => {
     const attachment = attachments.find(a => a.id === id);
     if (attachment?.preview) {
@@ -449,11 +499,13 @@ export default function CreatePostPage() {
       if (data?.createPost) {
         toast.success(t('successMessage'));
 
-        // Reset form
+        // Clear draft and reset form
+        await clearDraft();
         setPostContent('');
         setAttachments([]);
         setVisibility('PUBLIC');
         setMentionedUsers([]);
+        setDraftRestored(false);
 
         // Redirect to home after short delay
         setTimeout(() => {
@@ -495,6 +547,22 @@ export default function CreatePostPage() {
   return (
     <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide py-4 flex justify-center mx-auto ">
       <div className="w-full max-w-3xl mb-2">
+        {/* Draft restored banner */}
+        {draftRestored && (
+          <div className="flex items-center justify-between gap-3 mb-4 px-4 py-3 bg-surface-brand/10 border border-surface-brand/30 rounded-xl">
+            <div className="flex items-center gap-2 text-sm text-text-primary">
+              <RotateCcw className="w-4 h-4 text-surface-brand flex-shrink-0" />
+              <span>Draft restored — pick up where you left off.</span>
+            </div>
+            <button
+              onClick={handleDiscardDraft}
+              className="text-xs text-text-secondary hover:text-text-danger transition-colors flex-shrink-0"
+            >
+              Discard
+            </button>
+          </div>
+        )}
+
         {/* Main Composer Card */}
         <div className="bg-surface-default/80 backdrop-blur-md rounded-2xl border border-border-subtle shadow-xl">
           {/* User Header */}
