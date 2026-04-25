@@ -10,6 +10,9 @@ import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
+import { SEARCH_USERS } from '@/services/gql/connection';
+import type { SearchUsersResponse } from '@/services/gql/types/connection';
+import type { MentionUser } from '@/components/custom/messageInputGlobal';
 import SharePostModal from '@/components/share/SharePostModal';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
@@ -183,6 +186,16 @@ export default function FeedCardWithReply({
 
     const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
     const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
+    const [searchUsers] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, { fetchPolicy: 'network-only' });
+    const fetchMentions = useCallback(async (query: string): Promise<MentionUser[]> => {
+        if (!query) return [];
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 6 } } });
+        return (data?.searchUsers.profiles ?? []).map(p => ({
+            id: p.userId,
+            name: `${p.firstName} ${p.lastName}`.trim(),
+            avatarUrl: p.avatarUrl,
+        }));
+    }, [searchUsers]);
 
     const handleLikeComment = useCallback(
         async (commentId: string) => {
@@ -222,7 +235,18 @@ export default function FeedCardWithReply({
 
     useEffect(() => {
         if (commentsQueryData?.postComments) {
-            setLoadedComments(commentsQueryData.postComments.map(mapApiComment));
+            setLoadedComments(prev => {
+                const prevMap = new Map(prev.map(c => [c.id, c]));
+                return commentsQueryData.postComments.map(c => {
+                    const mapped = mapApiComment(c);
+                    const existing = prevMap.get(mapped.id);
+                    if (existing) {
+                        mapped.hasLiked = existing.hasLiked;
+                        mapped.likes = existing.likes;
+                    }
+                    return mapped;
+                });
+            });
             setCommentsLoaded(true);
         }
     }, [commentsQueryData]);
@@ -417,8 +441,11 @@ export default function FeedCardWithReply({
         setCurrentMediaIndex((prev) => (prev - 1 + allMedia.length) % allMedia.length);
     };
 
-    /** Called by MessageInputGlobal – adds a comment or a reply. Updates local state only after mutation succeeds. */
-    const handleSend = async (text: string, parentId?: string) => {
+    const currentUserFirstName = useUserStore((s) => s.user?.firstName);
+    const currentUserLastName = useUserStore((s) => s.user?.lastName);
+
+    /** Called by MessageInputGlobal – adds a comment or a reply. */
+    const handleSend = async (text: string, parentId?: string, mentionMap?: MentionMap) => {
         if (!text.trim() || !onSendComment) return;
 
         let preparedText = text.trim();
@@ -438,13 +465,24 @@ export default function FeedCardWithReply({
             setShowComments(true);
             setShowCommentInput(false);
             setReplyToCommentId(null);
+            // Optimistically add the new comment so mentions are clickable immediately
+            const optimisticComment: Comment = {
+                id: `optimistic-${Date.now()}`,
+                author: `${currentUserFirstName ?? ''} ${currentUserLastName ?? ''}`.trim() || 'You',
+                authorImage: currentUserAvatar,
+                authorId: currentUserId,
+                content: preparedText,
+                createdAt: new Date().toISOString(),
+                likes: 0,
+                parentId: parentId ?? null,
+                mentionMap,
+            };
+            setLoadedComments((prev) => [...prev, optimisticComment]);
             setTimeout(() => {
-                fetchComments({
-                    variables: { postId, limit: 20, offset: 0 },
-                });
+                fetchComments({ variables: { postId, limit: 20, offset: 0 } });
             }, 500);
         } catch {
-            // Mutation failed; parent shows toast; don't update local count or refresh
+            // Mutation failed; parent shows toast
         }
     };
 
@@ -642,7 +680,7 @@ export default function FeedCardWithReply({
                             <div className="mt-3 ml-11 flex items-center gap-2">
                                 <img src={currentUserAvatar} alt="You" width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                                 <div className="flex-1">
-                                    <MessageInputGlobal onSendMessage={txt => handleSend(txt, c.id)} placeholder={t('replyPlaceholder')} reversed={true} reversedText={t('reply')} />
+                                    <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, c.id, mm)} placeholder={t('replyPlaceholder')} reversed={true} reversedText={t('reply')} onMentionSearch={fetchMentions} />
                                 </div>
                             </div>
                         )}
@@ -672,7 +710,7 @@ export default function FeedCardWithReply({
             <div className="flex items-center gap-2">
                 <img src={currentUserAvatar} alt="You" width={36} height={36} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                 <div className="flex-1">
-                    <MessageInputGlobal onSendMessage={txt => handleSend(txt)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} />
+                    <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                 </div>
             </div>
         );
@@ -843,10 +881,11 @@ export default function FeedCardWithReply({
                 />
                 <div className="flex-1 min-w-0">
                     <MessageInputGlobal
-                        onSendMessage={(txt: string) => handleSend(txt)}
+                        onSendMessage={(txt: string, _img, mm) => handleSend(txt, undefined, mm)}
                         placeholder={t('addComment')}
                         reversed={true}
                         reversedText={t('comment')}
+                        onMentionSearch={fetchMentions}
                     />
                 </div>
             </div>
@@ -869,10 +908,11 @@ export default function FeedCardWithReply({
                 />
                 <div className="flex-1 min-w-0">
                     <MessageInputGlobal
-                        onSendMessage={(txt: string) => handleSend(txt, commentId)}
+                        onSendMessage={(txt: string, _img, mm) => handleSend(txt, commentId, mm)}
                         placeholder={t('replyPlaceholder')}
                         reversed={true}
                         reversedText={t('reply')}
+                        onMentionSearch={fetchMentions}
                     />
                 </div>
             </div>

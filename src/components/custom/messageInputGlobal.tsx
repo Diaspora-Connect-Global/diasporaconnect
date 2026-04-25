@@ -7,16 +7,25 @@ import { ButtonType2, ButtonType3 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
+import type { MentionMap } from "@/components/custom/richTextRenderer";
 
+
+export interface MentionUser {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+}
 
 interface MessageInputProps {
-    onSendMessage: (message: string, image?: string) => void | Promise<void>;
+    onSendMessage: (message: string, image?: string, mentionMap?: MentionMap) => void | Promise<void>;
     placeholder?: string;
     disabled?: boolean;
     conversationId?: string;
     senderId?: string;
     reversed?:boolean;
     reversedText?:string;
+    /** When provided, enables @mention suggestions. Called with the text after @. */
+    onMentionSearch?: (query: string) => Promise<MentionUser[]>;
 }
 
 export default function MessageInputGlobal({
@@ -26,7 +35,8 @@ export default function MessageInputGlobal({
     conversationId,
     senderId = 'current-user',
     reversed= true,
-    reversedText="Text"
+    reversedText="Text",
+    onMentionSearch,
 }: MessageInputProps) {
     const [newMessage, setNewMessage] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -37,6 +47,11 @@ export default function MessageInputGlobal({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const cursorAfterEmojiRef = useRef<number | null>(null);
     const { resolvedTheme } = useTheme();
+
+    const [mentionSuggestions, setMentionSuggestions] = useState<MentionUser[]>([]);
+    const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+    const [insertedMentions, setInsertedMentions] = useState<MentionMap>({});
+    const mentionDebounce = useRef<ReturnType<typeof setTimeout>>();
 
     const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
@@ -139,15 +154,58 @@ export default function MessageInputGlobal({
         if (!(newMessage.trim() || imagePreview) || disabled || isSending) return;
 
         setIsSending(true);
+        const mentionMapSnapshot = Object.keys(insertedMentions).length > 0 ? { ...insertedMentions } : undefined;
         try {
-            await onSendMessage(newMessage, imagePreview || undefined);
+            await onSendMessage(newMessage, imagePreview || undefined, mentionMapSnapshot);
             updateMockData(newMessage, imagePreview || undefined);
             setNewMessage('');
             setImagePreview(null);
             setShowEmojiPicker(false);
+            setInsertedMentions({});
         } finally {
             setIsSending(false);
         }
+    };
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const val = e.target.value;
+        setNewMessage(val);
+
+        if (!onMentionSearch) return;
+        const cursor = e.target.selectionStart ?? val.length;
+        const before = val.slice(0, cursor);
+        const match = before.match(/@(\w*)$/);
+        if (match) {
+            setMentionStartIndex(cursor - match[0].length);
+            const query = match[1];
+            clearTimeout(mentionDebounce.current);
+            mentionDebounce.current = setTimeout(async () => {
+                const results = await onMentionSearch(query).catch(() => [] as MentionUser[]);
+                setMentionSuggestions(results);
+            }, 250);
+        } else {
+            setMentionSuggestions([]);
+        }
+    };
+
+    const handleSelectMention = (user: MentionUser) => {
+        const textarea = textareaRef.current;
+        const cursor = textarea?.selectionStart ?? newMessage.length;
+        const before = newMessage.slice(0, mentionStartIndex);
+        const after = newMessage.slice(cursor);
+        // ​ delimits the mention so renderRichText regex correctly stops at multi-word names
+        const inserted = `@${user.name}​ `;
+        const newText = before + inserted + after;
+        setNewMessage(newText);
+        setInsertedMentions(prev => ({ ...prev, [user.name]: user.id }));
+        setMentionSuggestions([]);
+        setTimeout(() => {
+            if (textarea) {
+                const pos = before.length + inserted.length;
+                textarea.focus();
+                textarea.setSelectionRange(pos, pos);
+            }
+        }, 0);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -293,11 +351,28 @@ export default function MessageInputGlobal({
                         </div>
                     )}
 
-                    <div className=" gap-2 items-center">
+                    <div className="relative gap-2 items-center">
+                        {mentionSuggestions.length > 0 && (
+                            <div className="absolute bottom-full left-0 right-0 mb-1 bg-surface-default border border-border-subtle rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                                {mentionSuggestions.map(user => (
+                                    <button
+                                        key={user.id}
+                                        type="button"
+                                        onMouseDown={e => { e.preventDefault(); handleSelectMention(user); }}
+                                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-surface-subtle text-left"
+                                    >
+                                        {user.avatarUrl
+                                            ? <img src={user.avatarUrl} alt={user.name} className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                                            : <div className="w-7 h-7 rounded-full bg-surface-subtle flex-shrink-0" />}
+                                        <span className="text-sm text-text-primary truncate">{user.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                         <textarea
                             ref={textareaRef}
                             value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
+                            onChange={handleTextChange}
                             onKeyPress={handleKeyPress}
                             placeholder={disabled ? "Cannot send messages..." : placeholder}
                             disabled={disabled}

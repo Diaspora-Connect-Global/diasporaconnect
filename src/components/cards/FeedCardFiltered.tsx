@@ -12,6 +12,9 @@ import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
+import { SEARCH_USERS } from '@/services/gql/connection';
+import type { SearchUsersResponse } from '@/services/gql/types/connection';
+import type { MentionUser } from '@/components/custom/messageInputGlobal';
 import SharePostModal from '@/components/share/SharePostModal';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
@@ -207,6 +210,16 @@ export default function FeedCardFiltered({
     );
     const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
     const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
+    const [searchUsers] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, { fetchPolicy: 'network-only' });
+    const fetchMentions = useCallback(async (query: string): Promise<MentionUser[]> => {
+        if (!query) return [];
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 6 } } });
+        return (data?.searchUsers.profiles ?? []).map(p => ({
+            id: p.userId,
+            name: `${p.firstName} ${p.lastName}`.trim(),
+            avatarUrl: p.avatarUrl,
+        }));
+    }, [searchUsers]);
 
     const handleLikeComment = useCallback(async (commentId: string) => {
         const comment = loadedComments.find((c) => c.id === commentId);
@@ -233,7 +246,18 @@ export default function FeedCardFiltered({
 
     useEffect(() => {
         if (commentsQueryData?.postComments) {
-            setLoadedComments(commentsQueryData.postComments.map(mapApiComment));
+            setLoadedComments(prev => {
+                const prevMap = new Map(prev.map(c => [c.id, c]));
+                return commentsQueryData.postComments.map(c => {
+                    const mapped = mapApiComment(c);
+                    const existing = prevMap.get(mapped.id);
+                    if (existing) {
+                        mapped.hasLiked = existing.hasLiked;
+                        mapped.likes = existing.likes;
+                    }
+                    return mapped;
+                });
+            });
             setCommentsLoaded(true);
         }
     }, [commentsQueryData]);
@@ -296,7 +320,7 @@ export default function FeedCardFiltered({
         setModalReplyToId((cur) => (cur === commentId ? null : commentId));
     };
 
-    const handleSend = async (text: string, parentId?: string) => {
+    const handleSend = async (text: string, parentId?: string, mentionMap?: MentionMap) => {
         if (!text.trim() || !onSendComment) return;
         let preparedText = text.trim();
         if (parentId) {
@@ -315,6 +339,17 @@ export default function FeedCardFiltered({
             setModalCommentInput(false);
             setReplyToCommentId(null);
             setModalReplyToId(null);
+            const optimistic: Comment = {
+                id: `optimistic-${Date.now()}`,
+                author: currentUser.name,
+                authorImage: resolvedAvatar,
+                content: preparedText,
+                createdAt: new Date().toISOString(),
+                likes: 0,
+                parentId: parentId ?? null,
+                mentionMap,
+            };
+            setLoadedComments((prev) => [...prev, optimistic]);
             setTimeout(() => {
                 fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0 } });
             }, 500);
@@ -481,7 +516,7 @@ export default function FeedCardFiltered({
                             {replyToId === c.id && (
                                 <div className="mt-[1rem] ml-[3rem] flex items-center space-x-2">
                                     <img src={resolvedAvatar} alt={currentUser.name} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                                    <MessageInputGlobal onSendMessage={(txt) => onSendReply(txt, c.id)} placeholder={t('replyPlaceholder')} reversed={true} reversedText={t('reply')} />
+                                    <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, c.id, mm)} placeholder={t('replyPlaceholder')} reversed={true} reversedText={t('reply')} onMentionSearch={fetchMentions} />
                                 </div>
                             )}
                             {(repliesByParentId.get(c.id)?.length ?? 0) > 0 && (
@@ -519,7 +554,7 @@ export default function FeedCardFiltered({
             <div className="my-[1rem] flex items-center space-x-2">
                 <img src={resolvedAvatar} alt={currentUser.name} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                 <div className="flex-1">
-                    <MessageInputGlobal onSendMessage={(txt) => handleSend(txt)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} />
+                    <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                 </div>
             </div>
         );
@@ -661,7 +696,7 @@ export default function FeedCardFiltered({
                             <div className="flex items-center space-x-2">
                                 <img src={resolvedAvatar} alt={currentUser.name} width={36} height={36} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                                 <div className="flex-1">
-                                    <MessageInputGlobal onSendMessage={(txt) => handleSend(txt)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} />
+                                    <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                                 </div>
                             </div>
                         </div>
@@ -722,7 +757,7 @@ export default function FeedCardFiltered({
                             <div className="flex items-center space-x-2">
                                 <img src={resolvedAvatar} alt={currentUser.name} width={36} height={36} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                                 <div className="flex-1">
-                                    <MessageInputGlobal onSendMessage={(txt) => handleSend(txt)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} />
+                                    <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                                 </div>
                             </div>
                         </div>

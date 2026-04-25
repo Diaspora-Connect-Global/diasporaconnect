@@ -13,14 +13,16 @@ import {
     LikeCommentData,
     RemoveCommentLikeData,
 } from '@/services/gql/postsFeed';
+import { SEARCH_USERS } from '@/services/gql/connection';
+import type { SearchUsersResponse } from '@/services/gql/types/connection';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { formatCount } from '@/macros/formatCount';
 import { formatDateProximity } from '@/macros/time';
-import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
+import { renderRichText, type MentionMap } from '@/components/custom/richTextRenderer';
 import { resolveUserTier } from '@/lib/userTier';
 import { useUserStore } from '@/store/useUserStore';
-import MessageInputGlobal from '@/components/custom/messageInputGlobal';
+import MessageInputGlobal, { type MentionUser } from '@/components/custom/messageInputGlobal';
 import SharePostModal from '@/components/share/SharePostModal';
 
 /* ------------------------------------------------------------------ */
@@ -123,6 +125,8 @@ export default function PostMediaModal({
     const [showCommentSheet, setShowCommentSheet] = useState(false);
     const [replyToId, setReplyToId] = useState<string | null>(null);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [contentExpanded, setContentExpanded] = useState(false);
+    const CONTENT_LIMIT = 180;
 
     /* optimistic action state */
     const [isLiked, setIsLiked] = useState(initialIsLiked);
@@ -140,6 +144,7 @@ export default function PostMediaModal({
         setCommentCount(initialCommentCount);
         setReplyToId(null);
         setShowCommentSheet(false);
+        setContentExpanded(false);
     }, [postId, initialMediaIndex, initialIsLiked, initialIsSaved, initialLikeCount, initialCommentCount]);
 
     /* comments */
@@ -152,6 +157,17 @@ export default function PostMediaModal({
     const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
     const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
 
+    const [searchUsers] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, { fetchPolicy: 'network-only' });
+    const fetchMentions = useCallback(async (query: string): Promise<MentionUser[]> => {
+        if (!query) return [];
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 6 } } });
+        return (data?.searchUsers.profiles ?? []).map(p => ({
+            id: p.userId,
+            name: `${p.firstName} ${p.lastName}`.trim(),
+            avatarUrl: p.avatarUrl,
+        }));
+    }, [searchUsers]);
+
     useEffect(() => {
         setLoadedComments([]);
         setCommentsLoaded(false);
@@ -160,7 +176,19 @@ export default function PostMediaModal({
 
     useEffect(() => {
         if (commentsData?.postComments) {
-            setLoadedComments(commentsData.postComments.map(mapApiComment));
+            setLoadedComments(prev => {
+                const prevMap = new Map(prev.map(c => [c.id, c]));
+                return commentsData.postComments.map(c => {
+                    const mapped = mapApiComment(c);
+                    const existing = prevMap.get(mapped.id);
+                    if (existing) {
+                        // Preserve local interaction state — cache may be stale
+                        mapped.hasLiked = existing.hasLiked;
+                        mapped.likes = existing.likes;
+                    }
+                    return mapped;
+                });
+            });
             setCommentsLoaded(true);
         }
     }, [commentsData]);
@@ -230,19 +258,37 @@ export default function PostMediaModal({
         onSave();
     };
 
-    const handleSend = async (text: string, parentId?: string) => {
+    const currentUserFirstName = useUserStore(s => s.user?.firstName);
+    const currentUserLastName = useUserStore(s => s.user?.lastName);
+
+    const handleSend = async (text: string, parentId?: string, mentionMap?: MentionMap) => {
         if (!text.trim()) return;
         let prepared = text.trim();
         if (parentId) {
             const parent = loadedComments.find(c => c.id === parentId);
             if (parent) prepared = `@${parent.authorHandle ?? parent.author} ${prepared}`;
         }
+        setCommentCount(c => c + 1);
+        setReplyToId(null);
+        // Optimistically add comment so mentions are clickable immediately
+        const optimistic: Comment = {
+            id: `optimistic-${Date.now()}`,
+            author: `${currentUserFirstName ?? ''} ${currentUserLastName ?? ''}`.trim() || 'You',
+            authorImage: currentUserAvatar,
+            content: prepared,
+            createdAt: new Date().toISOString(),
+            likes: 0,
+            parentId: parentId ?? null,
+            mentionMap,
+        };
+        setLoadedComments(prev => [...prev, optimistic]);
         try {
             await onSendComment(prepared, parentId);
-            setCommentCount(c => c + 1);
-            setReplyToId(null);
             setTimeout(() => fetchComments({ variables: { postId, limit: 20, offset: 0 } }), 500);
-        } catch { /* parent shows toast */ }
+        } catch {
+            setCommentCount(c => c - 1);
+            setLoadedComments(prev => prev.filter(c => c.id !== optimistic.id));
+        }
     };
 
     /* ── derived comment tree ── */
@@ -288,6 +334,21 @@ export default function PostMediaModal({
                 <p className="text-text-secondary text-xs">{category} · {postDate}</p>
             </div>
         </div>
+    );
+
+    const isTruncated = content.length > CONTENT_LIMIT && !contentExpanded;
+    const contentEl = (
+        <p className="body-small text-text-primary whitespace-pre-wrap break-words">
+            {isTruncated ? `${content.slice(0, CONTENT_LIMIT)}…` : content}
+            {content.length > CONTENT_LIMIT && (
+                <button
+                    onClick={() => setContentExpanded(v => !v)}
+                    className="ml-1 text-text-brand text-xs font-medium hover:underline cursor-pointer"
+                >
+                    {contentExpanded ? 'Show less' : 'Show more'}
+                </button>
+            )}
+        </p>
     );
 
     const actionBar = (onComment: () => void) => (
@@ -348,8 +409,8 @@ export default function PostMediaModal({
                             <img src={currentUserAvatar} alt="You" width={32} height={32}
                                 loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                             <div className="flex-1">
-                                <MessageInputGlobal onSendMessage={txt => handleSend(txt, c.id)}
-                                    placeholder={t('replyPlaceholder')} reversed reversedText={t('reply')} />
+                                <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, c.id, mm)}
+                                    placeholder={t('replyPlaceholder')} reversed reversedText={t('reply')} onMentionSearch={fetchMentions} />
                             </div>
                         </div>
                     )}
@@ -381,8 +442,8 @@ export default function PostMediaModal({
             <img src={currentUserAvatar} alt="You" width={36} height={36}
                 loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
             <div className="flex-1">
-                <MessageInputGlobal onSendMessage={txt => handleSend(txt)}
-                    placeholder={t('addComment')} reversed reversedText={t('comment')} />
+                <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)}
+                    placeholder={t('addComment')} reversed reversedText={t('comment')} onMentionSearch={fetchMentions} />
             </div>
         </div>
     );
@@ -425,7 +486,7 @@ export default function PostMediaModal({
                     <div className="w-[360px] xl:w-[400px] flex-shrink-0 bg-surface-default flex flex-col h-full border-l border-border-subtle">
                         <div className="p-4 border-b border-border-subtle">
                             {postInfoEl}
-                            <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{content}</p>
+                            {contentEl}
                         </div>
                         <div className="px-4 py-3 border-b border-border-subtle">
                             {actionBar(() => {})}
@@ -464,7 +525,7 @@ export default function PostMediaModal({
                     </div>
                     <div className="bg-surface-default px-4 pt-3 pb-2 border-t border-border-subtle">
                         {postInfoEl}
-                        <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{content}</p>
+                        <div className="mb-3">{contentEl}</div>
                         {actionBar(() => setShowCommentSheet(true))}
                     </div>
                     {/* Comment sheet */}
