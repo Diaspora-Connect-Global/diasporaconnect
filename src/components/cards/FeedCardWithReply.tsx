@@ -1064,35 +1064,43 @@ export default function FeedCardWithReply({
                 {renderImages()}
                 {renderVideos()}
 
-                {/* Reaction Bar - Using formatCount for all counts */}
-                <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
-                    <button
-                        className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem]"
-                        onClick={handleLike}
-                        title={`${likeCount.toLocaleString()} likes`}
-                    >
-                        <GoHeartFill
-                            className={`w-[1.25rem] h-[1.25rem] ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`}
-                        />
-                        <span>{formatCount(likeCount)}</span>
-                    </button>
-                    <button
-                        className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem]"
-                        onClick={toggleComments}
-                        title={`${commentCount.toLocaleString()} comments`}
-                    >
-                        <img width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[1.25rem] h-[1.25rem] object-contain" />
-                        <span>{formatCount(commentCount)}</span>
-                    </button>
-                    <button
-                        className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary min-w-[3.75rem]"
-                        onClick={handleShare}
-                        title={`${shareCount.toLocaleString()} shares`}
-                    >
-                        <img width={20} height={20} src="/SHARE.svg" alt="shares" className="w-[1.25rem] h-[1.25rem] object-contain" />
-                        <span>{formatCount(shareCount)}</span>
-                    </button>
-                </div>
+                {/* Reaction Bar - only visible when at least one count > 0 */}
+                {(likeCount > 0 || commentCount > 0 || shareCount > 0) && (
+                    <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
+                        {likeCount > 0 && (
+                            <button
+                                className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
+                                onClick={handleLike}
+                                title={`${likeCount.toLocaleString()} likes`}
+                            >
+                                <GoHeartFill
+                                    className={`w-[1.25rem] h-[1.25rem] ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`}
+                                />
+                                <span>{formatCount(likeCount)}</span>
+                            </button>
+                        )}
+                        {commentCount > 0 && (
+                            <button
+                                className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
+                                onClick={toggleComments}
+                                title={`${commentCount.toLocaleString()} comments`}
+                            >
+                                <img width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                                <span>{formatCount(commentCount)}</span>
+                            </button>
+                        )}
+                        {shareCount > 0 && (
+                            <button
+                                className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
+                                onClick={handleShare}
+                                title={`${shareCount.toLocaleString()} shares`}
+                            >
+                                <img width={20} height={20} src="/SHARE.svg" alt="shares" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                                <span>{formatCount(shareCount)}</span>
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between">
