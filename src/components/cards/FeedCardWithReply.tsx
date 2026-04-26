@@ -638,7 +638,7 @@ export default function FeedCardWithReply({
                     </div>
                     <p className="text-text-secondary text-xs flex items-center gap-1">
                         {category} · {postDate}
-                        {visibility === 'CONNECTIONS' ? <Users className="w-3 h-3 inline" /> : visibility === 'PRIVATE' ? <Lock className="w-3 h-3 inline" /> : <Globe className="w-3 h-3 inline" />}
+                        {visibility === 'CONNECTIONS' ? <Users className="w-3.5 h-3.5 flex-shrink-0" /> : visibility === 'PRIVATE' ? <Lock className="w-3.5 h-3.5 flex-shrink-0" /> : <Globe className="w-3.5 h-3.5 flex-shrink-0" />}
                     </p>
                 </div>
             </div>
@@ -1097,7 +1097,7 @@ export default function FeedCardWithReply({
 
                             <p className="body-small text-text-secondary text-wrap flex items-center gap-1">
                                 {postDate}
-                                {visibility === 'CONNECTIONS' ? <Users className="w-3 h-3 inline" /> : visibility === 'PRIVATE' ? <Lock className="w-3 h-3 inline" /> : <Globe className="w-3 h-3 inline" />}
+                                {visibility === 'CONNECTIONS' ? <Users className="w-3.5 h-3.5 flex-shrink-0" /> : visibility === 'PRIVATE' ? <Lock className="w-3.5 h-3.5 flex-shrink-0" /> : <Globe className="w-3.5 h-3.5 flex-shrink-0" />}
                             </p>
                         </div>
                     </div>

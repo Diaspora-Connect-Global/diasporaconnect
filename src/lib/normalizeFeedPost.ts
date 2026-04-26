@@ -86,6 +86,7 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     authorType: isOrgAuthor ? 'ORG' : 'USER',
     authorProfile,
     createdAt: p.createdAt,
+    visibility: (p.visibility ?? 'PUBLIC') as import('@/services/gql/types/postsFeed').PostVisibility,
     attachments: mapAttachments(p.attachments),
     engagementCounts,
     userEngagement,

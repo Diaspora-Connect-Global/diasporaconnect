@@ -219,6 +219,7 @@ export interface FeedPostFragment {
     mimeType?: string | null;
     url?: string | null;
   }> | null;
+  visibility?: string | null;
   engagementCounts?: Partial<EngagementCounts> | null;
   userEngagement?: Partial<UserEngagement> | null;
   createdAt: string;
