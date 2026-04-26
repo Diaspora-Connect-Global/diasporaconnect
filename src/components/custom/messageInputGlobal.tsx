@@ -26,6 +26,8 @@ interface MessageInputProps {
     reversedText?:string;
     /** When provided, enables @mention suggestions. Called with the text after @. */
     onMentionSearch?: (query: string) => Promise<MentionUser[]>;
+    /** Increment this value to programmatically focus the textarea. */
+    focusTrigger?: number;
 }
 
 export default function MessageInputGlobal({
@@ -37,6 +39,7 @@ export default function MessageInputGlobal({
     reversed= true,
     reversedText="Text",
     onMentionSearch,
+    focusTrigger,
 }: MessageInputProps) {
     const [newMessage, setNewMessage] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -54,6 +57,10 @@ export default function MessageInputGlobal({
     const mentionDebounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+
+    useEffect(() => {
+        if (focusTrigger) textareaRef.current?.focus();
+    }, [focusTrigger]);
 
     const handleEmojiClick = (emojiData: { emoji: string }) => {
         const textarea = textareaRef.current;

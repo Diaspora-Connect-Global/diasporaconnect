@@ -123,6 +123,7 @@ export default function PostMediaModal({
 
     const [mediaIndex, setMediaIndex] = useState(initialMediaIndex);
     const [showCommentSheet, setShowCommentSheet] = useState(false);
+    const [commentFocusTrigger, setCommentFocusTrigger] = useState(0);
     const [replyToId, setReplyToId] = useState<string | null>(null);
     const [showShareModal, setShowShareModal] = useState(false);
     const [contentExpanded, setContentExpanded] = useState(false);
@@ -443,7 +444,8 @@ export default function PostMediaModal({
                 loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
             <div className="flex-1">
                 <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)}
-                    placeholder={t('addComment')} reversed reversedText={t('comment')} onMentionSearch={fetchMentions} />
+                    placeholder={t('addComment')} reversed reversedText={t('comment')} onMentionSearch={fetchMentions}
+                    focusTrigger={commentFocusTrigger} />
             </div>
         </div>
     );
@@ -489,7 +491,7 @@ export default function PostMediaModal({
                             {contentEl}
                         </div>
                         <div className="px-4 py-3 border-b border-border-subtle">
-                            {actionBar(() => {})}
+                            {actionBar(() => setCommentFocusTrigger(n => n + 1))}
                         </div>
                         <div className="flex-1 overflow-y-auto px-4 py-3">{commentListEl}</div>
                         <div className="p-4 border-t border-border-subtle">{commentInputEl}</div>
@@ -526,7 +528,7 @@ export default function PostMediaModal({
                     <div className="bg-surface-default px-4 pt-3 pb-2 border-t border-border-subtle">
                         {postInfoEl}
                         <div className="mb-3">{contentEl}</div>
-                        {actionBar(() => setShowCommentSheet(true))}
+                        {actionBar(() => { setShowCommentSheet(true); setTimeout(() => setCommentFocusTrigger(n => n + 1), 320); })}
                     </div>
                     {/* Comment sheet */}
                     <div
