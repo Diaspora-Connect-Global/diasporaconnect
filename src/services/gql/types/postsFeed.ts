@@ -394,6 +394,12 @@ export interface LikeCommentInput {
   commentId: string;
 }
 
+/** Input for editComment. */
+export interface EditCommentInput {
+  commentId: string;
+  text: string;
+}
+
 /** Input for deleteComment. */
 export interface DeleteCommentInput {
   commentId: string;
@@ -554,9 +560,19 @@ export interface RemoveCommentLikeData {
   removeCommentLike: { success: boolean; likeCount: number };
 }
 
+/** Response from editComment. */
+export interface EditCommentData {
+  editComment: Comment;
+}
+
 /** Response from deleteComment. */
 export interface DeleteCommentData {
   deleteComment: { success: boolean };
+}
+
+/** Response from deletePost. */
+export interface DeletePostData {
+  deletePost: { success: boolean };
 }
 
 // ============================================================================

@@ -1,5 +1,5 @@
 'use client';
-import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Globe, Users, Lock } from 'lucide-react';
+import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Globe, Users, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
@@ -9,7 +9,7 @@ import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
+import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, DELETE_POST, EDIT_POST, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import type { SearchUsersResponse } from '@/services/gql/types/connection';
 import type { MentionUser } from '@/components/custom/messageInputGlobal';
@@ -18,6 +18,8 @@ import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
 import { resolveUserTier } from '@/lib/userTier';
 import { useRouter } from '@/i18n/navigation';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 /** Video that only loads src when in viewport to save bandwidth. */
 function LazyVideo({ src, className }: { src: string; className?: string }) {
@@ -76,6 +78,7 @@ interface FeedCardProps {
     profileTier?: Tier;
     category: string;
     postDate: string;
+    createdAt?: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
     images?: string[];
@@ -145,6 +148,7 @@ export default function FeedCardWithReply({
     profileTier,
     category,
     postDate,
+    createdAt,
     visibility,
     content,
     images,
@@ -180,6 +184,38 @@ export default function FeedCardWithReply({
     useEffect(() => { setLikeCount(likes); }, [likes]);
     useEffect(() => { setShareCount(shares); }, [shares]);
     useEffect(() => { setCommentCount(comments); }, [comments]);
+
+    const [postContent, setPostContent] = useState(content);
+    useEffect(() => { setPostContent(content); }, [content]);
+    const [isEditingPost, setIsEditingPost] = useState(false);
+    const [editPostText, setEditPostText] = useState(content);
+    const [deletePost] = useMutation(DELETE_POST);
+    const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
+
+    const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
+    const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
+
+    const handleDeletePost = async () => {
+        if (!window.confirm('Delete this post? This cannot be undone.')) return;
+        try {
+            await deletePost({ variables: { id: postId } });
+            toast.success('Post deleted');
+        } catch {
+            toast.error('Failed to delete post');
+        }
+    };
+
+    const handleEditPostSubmit = async () => {
+        if (!editPostText.trim()) return;
+        try {
+            await editPostMutation({ variables: { input: { id: postId, text: editPostText } } });
+            setPostContent(editPostText);
+            setIsEditingPost(false);
+            toast.success('Post updated');
+        } catch {
+            toast.error('Failed to update post');
+        }
+    };
     const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
     const [loadedComments, setLoadedComments] = useState<Comment[]>(commentsDataProp);
     const [commentsLoaded, setCommentsLoaded] = useState(false);
@@ -494,9 +530,37 @@ export default function FeedCardWithReply({
 
     /* ------------------- Render Helpers ------------------- */
     const renderContent = () => {
+        if (isEditingPost) {
+            return (
+                <div className="mb-4">
+                    <textarea
+                        className="w-full border border-border-subtle rounded-lg p-3 body-medium text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                        rows={4}
+                        value={editPostText}
+                        onChange={(e) => setEditPostText(e.target.value)}
+                        autoFocus
+                    />
+                    <div className="flex gap-2 justify-end mt-2">
+                        <button
+                            className="px-3 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt"
+                            onClick={() => { setIsEditingPost(false); setEditPostText(postContent); }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="px-3 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark disabled:opacity-50"
+                            onClick={handleEditPostSubmit}
+                            disabled={editPostLoading || !editPostText.trim()}
+                        >
+                            {editPostLoading ? 'Saving…' : 'Save'}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
         const max = 200;
-        const truncated = content.length > max && !isExpanded;
-        const displayText = truncated ? `${content.slice(0, max)}...` : content;
+        const truncated = postContent.length > max && !isExpanded;
+        const displayText = truncated ? `${postContent.slice(0, max)}...` : postContent;
 
         return (
             <>
@@ -1105,6 +1169,26 @@ export default function FeedCardWithReply({
                             </p>
                         </div>
                     </div>
+                    {isOwnPost && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="p-1 rounded-full hover:bg-surface-alt text-text-secondary flex-shrink-0">
+                                    <MoreHorizontal className="w-5 h-5" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                                {canEditPost && (
+                                    <DropdownMenuItem onSelect={() => { setEditPostText(postContent); setIsEditingPost(true); }}>
+                                        <Pencil className="w-4 h-4 mr-2" /> Edit
+                                    </DropdownMenuItem>
+                                )}
+                                {canEditPost && <DropdownMenuSeparator />}
+                                <DropdownMenuItem variant="destructive" onSelect={handleDeletePost}>
+                                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
 
                 {/* Content */}

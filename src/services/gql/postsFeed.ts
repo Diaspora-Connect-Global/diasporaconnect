@@ -32,7 +32,10 @@ export type {
   CreateCommentData,
   LikeCommentData,
   RemoveCommentLikeData,
+  EditCommentData,
   DeleteCommentData,
+  DeletePostData,
+  EditCommentInput,
   RequestUploadUrlData,
   EngagedPostsType,
   GetEngagedPostsInput,
@@ -322,6 +325,33 @@ export const REMOVE_COMMENT_LIKE = gql`
     removeCommentLike(input: $input) {
       success
       likeCount
+    }
+  }
+`;
+
+export const DELETE_POST = gql`
+  mutation DeletePost($id: String!) {
+    deletePost(id: $id) {
+      success
+    }
+  }
+`;
+
+export const EDIT_COMMENT = gql`
+  mutation EditComment($input: EditCommentInput!) {
+    editComment(input: $input) {
+      id
+      postId
+      text
+      authorId
+      parentId
+      createdAt
+      authorDisplayName
+      authorAvatarUrl
+      authorHandle
+      replyCount
+      likeCount
+      hasLiked
     }
   }
 `;
