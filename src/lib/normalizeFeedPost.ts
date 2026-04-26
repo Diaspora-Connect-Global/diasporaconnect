@@ -4,6 +4,7 @@ import type {
   EngagementCounts,
   FeedPostFragment,
   Post,
+  PostVisibility,
   UserEngagement,
 } from '@/services/gql/types/postsFeed';
 
@@ -86,7 +87,7 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     authorType: isOrgAuthor ? 'ORG' : 'USER',
     authorProfile,
     createdAt: p.createdAt,
-    visibility: (p.visibility ?? 'PUBLIC') as import('@/services/gql/types/postsFeed').PostVisibility,
+    visibility: (p.visibility ?? 'PUBLIC') as PostVisibility,
     attachments: mapAttachments(p.attachments),
     engagementCounts,
     userEngagement,

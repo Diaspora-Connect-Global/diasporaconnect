@@ -172,6 +172,7 @@ export interface Post {
   authorType: string;
   authorProfile?: AuthorProfile;
   createdAt: string;
+  visibility?: PostVisibility;
   attachments?: Attachment[];
   engagementCounts: EngagementCounts;
   userEngagement: UserEngagement;
