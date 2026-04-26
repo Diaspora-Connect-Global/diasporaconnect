@@ -57,10 +57,23 @@ export default function MessageInputGlobal({
     const mentionDebounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+    const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0, width: 0 });
 
     useEffect(() => {
         if (focusTrigger) textareaRef.current?.focus();
     }, [focusTrigger]);
+
+    useLayoutEffect(() => {
+        if (!mentionSuggestions.length || !textareaRef.current) return;
+        const rect = textareaRef.current.getBoundingClientRect();
+        const listHeight = Math.min(mentionSuggestions.length * 48, 192);
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const top = spaceAbove >= listHeight + 8 || spaceAbove > spaceBelow
+            ? rect.top - listHeight - 4
+            : rect.bottom + 4;
+        setMentionPosition({ top, left: rect.left, width: rect.width });
+    }, [mentionSuggestions]);
 
     const handleEmojiClick = (emojiData: { emoji: string }) => {
         const textarea = textareaRef.current;
@@ -359,8 +372,11 @@ export default function MessageInputGlobal({
                     )}
 
                     <div className="relative gap-2 items-center">
-                        {mentionSuggestions.length > 0 && (
-                            <div className="absolute bottom-full left-0 right-0 mb-1 bg-surface-default border border-border-subtle rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                        {mentionSuggestions.length > 0 && typeof document !== 'undefined' && createPortal(
+                            <div
+                                style={{ position: 'fixed', top: mentionPosition.top, left: mentionPosition.left, width: mentionPosition.width, zIndex: 9999 }}
+                                className="bg-surface-default border border-border-subtle rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                            >
                                 {mentionSuggestions.map(user => (
                                     <button
                                         key={user.id}
@@ -374,7 +390,8 @@ export default function MessageInputGlobal({
                                         <span className="text-sm text-text-primary truncate">{user.name}</span>
                                     </button>
                                 ))}
-                            </div>
+                            </div>,
+                            document.body
                         )}
                         <textarea
                             ref={textareaRef}
