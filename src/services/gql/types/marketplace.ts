@@ -6,10 +6,14 @@
 export type MarketplaceStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 export type MarketplaceOrderStatus =
   | "CREATED"
+  | "PENDING_PAYMENT"
+  | "PAYMENT_CONFIRMED"
+  | "IN_PROGRESS"
   | "SHIPPED"
   | "DELIVERED"
   | "COMPLETED"
   | "CANCELLED"
+  | "DISPUTED"
   | "REFUNDED";
 
 export interface MarketplaceProductType {
