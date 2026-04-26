@@ -159,6 +159,9 @@ export default function FeedCardFiltered({
     const [likeCount, setLikeCount] = useState(initialLikes);
     const [commentCount, setCommentCount] = useState(initialComments);
 
+    useEffect(() => { setLikeCount(initialLikes); }, [initialLikes]);
+    useEffect(() => { setCommentCount(initialComments); }, [initialComments]);
+
     const [isExpanded, setIsExpanded] = useState(false);
     const [showComments, setShowComments] = useState(forceShowComments);
     const [showCommentInput, setShowCommentInput] = useState(false);

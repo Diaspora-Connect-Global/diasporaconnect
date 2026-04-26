@@ -54,33 +54,40 @@ export default function FeedPage() {
     refetch: refetchFeed,
     loadingMore: feedLoadingMore,
     feedContainerRef,
+    updatePostCounts,
   } = useFeed({ hashtag });
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
   const handleLike = async (postId: string) => {
+    updatePostCounts(postId, { likes: 1 });
     try {
       await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
     } catch (err) {
+      updatePostCounts(postId, { likes: -1 });
       console.error('Failed to like post:', err);
       toast.error('Failed to like post');
     }
   };
 
   const handleSave = async (postId: string) => {
+    updatePostCounts(postId, { saves: 1 });
     try {
       await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
     } catch (err) {
+      updatePostCounts(postId, { saves: -1 });
       console.error('Failed to save post:', err);
       toast.error('Failed to save post');
     }
   };
 
   const handleShare = async (postId: string) => {
+    updatePostCounts(postId, { shares: 1 });
     try {
       await addEngagement({ variables: { input: { postId, engagementType: 'SHARE' } } });
     } catch (err) {
+      updatePostCounts(postId, { shares: -1 });
       console.error('Failed to share post:', err);
       toast.error('Failed to share post');
     }
@@ -88,12 +95,14 @@ export default function FeedPage() {
 
   const handleSendComment = async (postId: string, content: string, parentId?: string) => {
     if (!content.trim()) return;
+    updatePostCounts(postId, { comments: 1 });
     try {
       await createComment({
         variables: { input: { postId, text: content, idempotencyKey: crypto.randomUUID(), ...(parentId ? { parentId } : {}) } },
       });
       toast.success('Comment posted!');
     } catch (err) {
+      updatePostCounts(postId, { comments: -1 });
       console.error('Failed to post comment:', err);
       toast.error('Failed to post comment');
       throw err;

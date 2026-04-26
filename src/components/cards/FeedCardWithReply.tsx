@@ -176,6 +176,10 @@ export default function FeedCardWithReply({
     const [showComments, setShowComments] = useState(false);
     const [showCommentInput, setShowCommentInput] = useState(false);
     const [commentCount, setCommentCount] = useState(comments);
+
+    useEffect(() => { setLikeCount(likes); }, [likes]);
+    useEffect(() => { setShareCount(shares); }, [shares]);
+    useEffect(() => { setCommentCount(comments); }, [comments]);
     const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
     const [loadedComments, setLoadedComments] = useState<Comment[]>(commentsDataProp);
     const [commentsLoaded, setCommentsLoaded] = useState(false);

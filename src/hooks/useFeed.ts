@@ -60,6 +60,7 @@ export interface UseFeedResult {
   loadMore: () => void;
   feedContainerRef: React.RefObject<HTMLDivElement | null>;
   feedMeta: FeedStateMeta;
+  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number }>) => void;
 }
 
 export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
@@ -279,6 +280,24 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     return () => el.removeEventListener('scroll', checkScroll);
   }, [hasMore, loadMore, loading, loadingMore]);
 
+  const updatePostCounts = useCallback((
+    postId: string,
+    delta: Partial<{ likes: number; comments: number; shares: number; saves: number }>,
+  ) => {
+    setMergedPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      return {
+        ...p,
+        engagementCounts: {
+          likes: (p.engagementCounts?.likes ?? 0) + (delta.likes ?? 0),
+          comments: (p.engagementCounts?.comments ?? 0) + (delta.comments ?? 0),
+          shares: (p.engagementCounts?.shares ?? 0) + (delta.shares ?? 0),
+          saves: (p.engagementCounts?.saves ?? 0) + (delta.saves ?? 0),
+        },
+      };
+    }));
+  }, []);
+
   return {
     posts: mergedPosts,
     total,
@@ -290,5 +309,6 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     loadMore,
     feedContainerRef,
     feedMeta,
+    updatePostCounts,
   };
 }
