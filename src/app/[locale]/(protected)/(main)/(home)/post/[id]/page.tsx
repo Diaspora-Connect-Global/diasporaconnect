@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation } from '@apollo/client/react';
+import { formatDateProximity } from '@/macros/time';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { GET_POST, ADD_ENGAGEMENT, CREATE_COMMENT, GetPostData, AddEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
 import type { FeedPostFragment, Post } from '@/services/gql/types/postsFeed';
@@ -120,17 +121,6 @@ export default function PostPage() {
     }
   };
 
-  const formatPostDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: new Date(dateString).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-      });
-    } catch {
-      return '';
-    }
-  };
 
   if (loading) {
     return (
@@ -253,7 +243,8 @@ export default function PostPage() {
           {...(normalizedPostResolved.authorType === 'USER' ? { authorUserId: normalizedPostResolved.authorId } : {})}
           profileTier={profileData.tier}
           category={profileData.type}
-          postDate={formatPostDate(normalizedPostResolved.createdAt)}
+          postDate={formatDateProximity(normalizedPostResolved.createdAt)}
+          visibility={normalizedPostResolved.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={normalizedPostResolved.text}
           images={
             normalizedPostResolved.attachments

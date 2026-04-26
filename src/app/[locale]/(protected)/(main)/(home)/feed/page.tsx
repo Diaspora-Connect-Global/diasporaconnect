@@ -1,6 +1,7 @@
 'use client';
 
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import { formatDateProximity } from '@/macros/time';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { Link } from '@/i18n/navigation';
 import { ADD_ENGAGEMENT, CREATE_COMMENT, AddEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
@@ -39,17 +40,6 @@ function getProfileData(post: Post) {
   return { name: 'Unknown User', avatar: '/PROFILE.png', tier: undefined, type: 'User' as const };
 }
 
-function formatPostDate(dateString: string) {
-  try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: new Date(dateString).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-    });
-  } catch {
-    return 'Unknown date';
-  }
-}
 
 export default function FeedPage() {
   const t = useTranslations('community');
@@ -207,7 +197,8 @@ export default function FeedPage() {
                     {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
                     profileTier={profileData.tier}
                     category={profileData.type}
-                    postDate={formatPostDate(post.createdAt)}
+                    postDate={formatDateProximity(post.createdAt)}
+                    visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                     content={post.text}
                     images={
                       post.attachments
@@ -262,7 +253,8 @@ export default function FeedPage() {
           profileName={modalProfileData.name}
           profileTier={modalProfileData.tier}
           category={modalProfileData.type}
-          postDate={formatPostDate(modalPost.createdAt)}
+          postDate={formatDateProximity(modalPost.createdAt)}
+          visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={modalPost.text}
           allMedia={getPostMedia(modalPost)}
           initialMediaIndex={modalState!.mediaIndex}

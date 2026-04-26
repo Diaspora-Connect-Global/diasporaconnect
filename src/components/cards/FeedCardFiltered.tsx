@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, Loader2, X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { Bookmark, Loader2, X, ChevronLeft, ChevronRight, MessageCircle, Globe, Users, Lock } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ButtonType1, ButtonType3 } from '@/components/custom/button';
@@ -75,6 +75,7 @@ export interface FeedCardFilteredProps {
     profileTier?: Tier;
     category: string;
     postDate: string;
+    visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
     images?: string[];
     videos?: string[];
@@ -131,6 +132,7 @@ export default function FeedCardFiltered({
     profileTier,
     category,
     postDate,
+    visibility,
     content,
     images,
     videos,
@@ -609,7 +611,10 @@ export default function FeedCardFiltered({
                         <span className="font-semibold text-text-primary text-sm truncate">{profileName}</span>
                         {profileTier ? <UserBadge tier={profileTier} size="xs" /> : null}
                     </div>
-                    <p className="text-text-secondary text-xs">{category} · {postDate}</p>
+                    <p className="text-text-secondary text-xs flex items-center gap-1">
+                        {category} · {postDate}
+                        {visibility === 'CONNECTIONS' ? <Users className="w-3 h-3 inline" /> : visibility === 'PRIVATE' ? <Lock className="w-3 h-3 inline" /> : <Globe className="w-3 h-3 inline" />}
+                    </p>
                 </div>
             </div>
         );
@@ -786,8 +791,9 @@ export default function FeedCardFiltered({
                                 </ButtonType1>
                             )}
                         </div>
-                        <p className="body-small text-text-secondary truncate">
+                        <p className="body-small text-text-secondary truncate flex items-center gap-1">
                             {t('postedBy', { user: 'Admin' })} · {category} · {postDate}
+                            {visibility === 'CONNECTIONS' ? <Users className="w-3 h-3 inline flex-shrink-0" /> : visibility === 'PRIVATE' ? <Lock className="w-3 h-3 inline flex-shrink-0" /> : <Globe className="w-3 h-3 inline flex-shrink-0" />}
                         </p>
                     </div>
                 </div>

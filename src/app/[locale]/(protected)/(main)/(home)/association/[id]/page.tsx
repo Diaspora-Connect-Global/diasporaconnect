@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { formatDateProximity } from '@/macros/time';
 import AboutAssociation from "@/components/cards/association/AboutAssociation";
 import { ButtonType1 } from "@/components/custom/button";
 import { PeopleYouMayKnow } from "@/components/home/PeopleYouMayKnow";
@@ -345,7 +346,8 @@ export default function AssociationPage() {
                                 profileImage={association.avatarUrl || '/ADANSI.PNG'}
                                 profileName={association.name}
                                 category={association.name}
-                                postDate={post.createdAt}
+                                postDate={formatDateProximity(post.createdAt)}
+                                visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                                 content={post.text}
                                 shares={post.engagementCounts.shares}
                                 likes={post.engagementCounts.likes}

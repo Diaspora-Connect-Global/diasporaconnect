@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type MouseEvent as ReactMouseEvent } from 'react';
+import { formatDateProximity } from '@/macros/time';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -207,20 +208,6 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
     return { name: 'Unknown', avatar: '/PROFILE.png', type: 'User' as const };
   };
 
-  const formatPostDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year:
-          new Date(dateString).getFullYear() !== new Date().getFullYear()
-            ? 'numeric'
-            : undefined,
-      });
-    } catch {
-      return '';
-    }
-  };
 
   // ---- Render ----
   return (
@@ -308,7 +295,8 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 profileName={profileData.name}
                 authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
                 category={profileData.type}
-                postDate={formatPostDate(post.createdAt)}
+                postDate={formatDateProximity(post.createdAt)}
+                visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                 content={post.text}
                 images={
                   post.attachments

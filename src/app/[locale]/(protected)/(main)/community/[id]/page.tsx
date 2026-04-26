@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { formatDateProximity } from '@/macros/time';
 import AboutCommunity from '@/components/cards/community/AboutCommunity';
 import { ButtonType1 } from '@/components/custom/button';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
@@ -334,7 +335,8 @@ export default function CommunityDetailPage() {
                 profileImage={community.avatarUrl || '/GLOBE.png'}
                 profileName={community.name}
                 category={community.name}
-                postDate={post.createdAt}
+                postDate={formatDateProximity(post.createdAt)}
+                visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                 content={post.text}
                 shares={post.engagementCounts.shares}
                 likes={post.engagementCounts.likes}

@@ -53,24 +53,21 @@ export const formatDateProximity = (dateString: string, options: TimeFormatOptio
         const diffHours = Math.floor(diffMinutes / 60);
 
         if (diffSeconds < 60) return 'Just now';
-        if (diffMinutes < 60) return `${diffMinutes}m ago`;
-        return `${diffHours}h ago`;
+        if (diffMinutes < 60) return `${diffMinutes}m`;
+        return `${diffHours}h`;
     }
 
-    if (diffDayCount === 1) return 'Yesterday';
+    if (diffDayCount < 7) return `${diffDayCount}d`;
+    if (diffDayCount < 28) return `${Math.floor(diffDayCount / 7)}w`;
+    if (diffDayCount < 365) return `${Math.floor(diffDayCount / 30)}mo`;
 
-    if (diffDayCount < 7) {
-        return `${diffDayCount}d ago`;
-    } else if (diffDayCount < 30) {
-        const weeks = Math.floor(diffDayCount / 7);
-        return `${weeks}w ago`;
-    } else if (diffDayCount < 365) {
-        const months = Math.floor(diffDayCount / 30);
-        return `${months}mo ago`;
-    } else {
-        const years = Math.floor(diffDayCount / 365);
-        return `${years}y ago`;
-    }
+    // older than a year — show actual date
+    return date.toLocaleDateString(options.locale ?? 'en-US', {
+        timeZone,
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
 };
 
 export function formatChatTimestamp(dateString: string | Date, options: TimeFormatOptions = {}): string {

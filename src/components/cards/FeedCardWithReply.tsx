@@ -1,5 +1,5 @@
 'use client';
-import { Bookmark, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Globe, Users, Lock } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
@@ -76,6 +76,7 @@ interface FeedCardProps {
     profileTier?: Tier;
     category: string;
     postDate: string;
+    visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
     images?: string[];
     /** Video attachment URLs (e.g. from mimeType video/*). Loaded with preload="metadata" and viewport-aware. */
@@ -144,6 +145,7 @@ export default function FeedCardWithReply({
     profileTier,
     category,
     postDate,
+    visibility,
     content,
     images,
     videos = [],
@@ -634,7 +636,10 @@ export default function FeedCardWithReply({
                         <span className="font-semibold text-text-primary text-sm truncate">{profileName}</span>
                         {profileTier && <UserBadge tier={profileTier} size="xs" />}
                     </div>
-                    <p className="text-text-secondary text-xs">{category} · {postDate}</p>
+                    <p className="text-text-secondary text-xs flex items-center gap-1">
+                        {category} · {postDate}
+                        {visibility === 'CONNECTIONS' ? <Users className="w-3 h-3 inline" /> : visibility === 'PRIVATE' ? <Lock className="w-3 h-3 inline" /> : <Globe className="w-3 h-3 inline" />}
+                    </p>
                 </div>
             </div>
         );
@@ -1090,8 +1095,9 @@ export default function FeedCardWithReply({
                                 )}
                             </div>
 
-                            <p className="body-small text-text-secondary text-wrap">
+                            <p className="body-small text-text-secondary text-wrap flex items-center gap-1">
                                 {postDate}
+                                {visibility === 'CONNECTIONS' ? <Users className="w-3 h-3 inline" /> : visibility === 'PRIVATE' ? <Lock className="w-3 h-3 inline" /> : <Globe className="w-3 h-3 inline" />}
                             </p>
                         </div>
                     </div>

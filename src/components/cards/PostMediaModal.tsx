@@ -1,6 +1,6 @@
 'use client';
 
-import { X, ChevronLeft, ChevronRight, Bookmark, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Bookmark, Loader2, Globe, Users, Lock } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
@@ -35,6 +35,7 @@ export interface PostMediaModalProps {
     profileTier?: Tier;
     category: string;
     postDate: string;
+    visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
     allMedia: ModalMediaItem[];
     initialMediaIndex: number;
@@ -103,6 +104,7 @@ export default function PostMediaModal({
     profileTier,
     category,
     postDate,
+    visibility,
     content,
     allMedia,
     initialMediaIndex,
@@ -332,7 +334,10 @@ export default function PostMediaModal({
                     <span className="font-semibold text-text-primary text-sm truncate">{profileName}</span>
                     {profileTier && <UserBadge tier={profileTier} size="xs" />}
                 </div>
-                <p className="text-text-secondary text-xs">{category} · {postDate}</p>
+                <p className="text-text-secondary text-xs flex items-center gap-1">
+                    {category} · {postDate}
+                    {visibility === 'CONNECTIONS' ? <Users className="w-3 h-3 inline" /> : visibility === 'PRIVATE' ? <Lock className="w-3 h-3 inline" /> : <Globe className="w-3 h-3 inline" />}
+                </p>
             </div>
         </div>
     );

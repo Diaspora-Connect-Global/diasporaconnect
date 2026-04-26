@@ -1,6 +1,7 @@
 'use client';
 
 import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVariant2';
+import { formatDateProximity } from '@/macros/time';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
@@ -340,19 +341,6 @@ export default function Home() {
     };
   };
 
-  // Helper function to format post date
-  const formatPostDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: new Date(dateString).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-      });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Unknown date';
-    }
-  };
 
   const getPostMedia = (post: ApiPost): ModalMediaItem[] => [
     ...(post.attachments ?? [])
@@ -536,7 +524,8 @@ export default function Home() {
                     authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
                     profileTier={profileData.tier}
                   category={profileData.type}
-                  postDate={formatPostDate(post.createdAt)}
+                  postDate={formatDateProximity(post.createdAt)}
+                  visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                   content={post.text}
                   images={post.attachments
                     ?.filter(
@@ -603,7 +592,8 @@ export default function Home() {
           profileName={modalProfileData.name}
           profileTier={modalProfileData.tier}
           category={modalProfileData.type}
-          postDate={formatPostDate(modalPost.createdAt)}
+          postDate={formatDateProximity(modalPost.createdAt)}
+          visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={modalPost.text}
           allMedia={getPostMedia(modalPost)}
           initialMediaIndex={modalState!.mediaIndex}
