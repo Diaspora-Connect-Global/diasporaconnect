@@ -51,7 +51,7 @@ export default function MessageInputGlobal({
     const [mentionSuggestions, setMentionSuggestions] = useState<MentionUser[]>([]);
     const [mentionStartIndex, setMentionStartIndex] = useState(-1);
     const [insertedMentions, setInsertedMentions] = useState<MentionMap>({});
-    const mentionDebounce = useRef<ReturnType<typeof setTimeout>>();
+    const mentionDebounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
