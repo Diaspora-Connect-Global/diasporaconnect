@@ -49,6 +49,7 @@ interface FeedPost {
     authorId: string;
     authorType: string;
     createdAt: string;
+    visibility?: string;
     engagementCounts: {
         likes: number;
         comments: number;
