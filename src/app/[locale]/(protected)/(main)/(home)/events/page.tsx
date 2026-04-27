@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import PaidEventCard from "@/components/cards/events/PaidEventsCard";
-import { useApolloClient, useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import {
     LIST_EVENTS,
     USER_EVENTS,
@@ -30,18 +30,11 @@ import {
     type ConfirmPaymentIntentResponse,
     type MyPaymentMethodsResponse,
 } from '@/services/gql/payments';
-import { CONVERT_CURRENCY } from '@/services/gql/marketplace';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { openPaystackMobileMoney } from '@/lib/paystack';
-import {
-    formatAmountWithCurrency,
-    getStoredDisplayCurrencyPreference,
-    resolveDisplayCurrency,
-} from '@/lib/displayCurrency';
-
 function formatEventDate(iso: string, locale: string) {
     return new Intl.DateTimeFormat(locale, {
         month: 'short',
@@ -136,30 +129,17 @@ function formatPriceLabel(event: Event) {
     return `${currency} ${(cents / 100).toFixed(2)}/ticket`;
 }
 
-type ConvertCurrencyData = {
-    convertCurrency: {
-        success: boolean;
-        converted_amount: number;
-        to_currency: string;
-    };
-};
-
 export default function Events() {
-    const apolloClient = useApolloClient();
     const [activeTab, setActiveTab] = useState<string>("events");
     const [optimisticSavedState, setOptimisticSavedState] = useState<Record<string, boolean>>({});
     const [optimisticAttendingState, setOptimisticAttendingState] = useState<Record<string, boolean>>({});
     const [registrationIdsByEvent, setRegistrationIdsByEvent] = useState<Record<string, string>>({});
-    const [displayCurrencyPreference, setDisplayCurrencyPreference] = useState<string | null>(null);
-    const [convertedPriceLabels, setConvertedPriceLabels] = useState<Record<string, string>>({});
     const tActions = useTranslations("actions");
     const t = useTranslations("home.events");
     const locale = useLocale();
     const modalRef = useRef<PaidEventsModalRef>(null);
     const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
     const userEmail = useUserStore((s) => s.user?.email);
-    const residenceCountry = useUserStore((s) => s.user?.residenceCountry);
-    const countryOfOrigin = useUserStore((s) => s.user?.countryOfOrigin);
     const isAuthHydrated = useAuthStore.persist.hasHydrated();
     const shouldLoadUserEvents = isAuthHydrated && !!sessionToken;
 
@@ -380,74 +360,6 @@ export default function Events() {
     const paidEvents = useMemo(() => allEvents.filter(event => event.isPaid), [allEvents]);
     const freeEvents = useMemo(() => allEvents.filter(event => !event.isPaid), [allEvents]);
 
-    useEffect(() => {
-        setDisplayCurrencyPreference(getStoredDisplayCurrencyPreference());
-    }, []);
-
-    const preferredDisplayCurrency = useMemo(
-        () => resolveDisplayCurrency({
-            preferredCurrency: displayCurrencyPreference,
-            residenceCountry,
-            countryOfOrigin,
-            locale,
-        }),
-        [displayCurrencyPreference, residenceCountry, countryOfOrigin, locale]
-    );
-
-    useEffect(() => {
-        let cancelled = false;
-
-        const computePriceLabels = async () => {
-            const pairs = await Promise.all(allEvents.map(async (event) => {
-                const fallbackLabel = formatPriceLabel(event);
-                if (!event.isPaid) return [event.id, fallbackLabel] as const;
-
-                const ticket = event.tickets?.find((t) => (t?.priceInCents ?? 0) > 0) ?? event.tickets?.[0];
-                const cents = ticket?.priceInCents;
-                if (cents == null || cents <= 0) return [event.id, "Paid"] as const;
-
-                const fromCurrency = (ticket?.currency ?? event.currency ?? 'USD').toUpperCase();
-                if (fromCurrency === preferredDisplayCurrency) {
-                    const localAmount = cents / 100;
-                    return [event.id, `${formatAmountWithCurrency(localAmount, preferredDisplayCurrency, locale)}/ticket`] as const;
-                }
-
-                try {
-                    const { data } = await apolloClient.query<ConvertCurrencyData>({
-                        query: CONVERT_CURRENCY,
-                        variables: {
-                            amount: cents / 100,
-                            from_currency: fromCurrency,
-                            to_currency: preferredDisplayCurrency,
-                        },
-                        fetchPolicy: 'no-cache',
-                    });
-
-                    const result = data?.convertCurrency;
-                    if (!result?.success || typeof result.converted_amount !== 'number') {
-                        return [event.id, fallbackLabel] as const;
-                    }
-
-                    return [
-                        event.id,
-                        `${formatAmountWithCurrency(result.converted_amount, preferredDisplayCurrency, locale)}/ticket`,
-                    ] as const;
-                } catch {
-                    return [event.id, fallbackLabel] as const;
-                }
-            }));
-
-            if (cancelled) return;
-            setConvertedPriceLabels(Object.fromEntries(pairs));
-        };
-
-        void computePriceLabels();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [allEvents, apolloClient, locale, preferredDisplayCurrency]);
-
     const savedEventIds = useMemo(() => {
         const ids = new Set(savedEvents.map((event) => event.id));
         for (const [eventId, saved] of Object.entries(optimisticSavedState)) {
@@ -553,7 +465,7 @@ export default function Events() {
                                 attendees={event.registrationCount ?? 0}
                                 visibility={event.visibility}
                                 imageUrl={getEventCoverImage(event)}
-                                priceLabel={convertedPriceLabels[event.id] ?? formatPriceLabel(event)}
+                                priceLabel={formatPriceLabel(event)}
                                 isSoldOut={isEventSoldOut(event)}
                                 onAttendClick={() => handleAttendEvent(event)}
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
@@ -583,7 +495,7 @@ export default function Events() {
                                 attendees={event.registrationCount ?? 0}
                                 visibility={event.visibility}
                                 imageUrl={getEventCoverImage(event)}
-                                priceLabel={convertedPriceLabels[event.id] ?? formatPriceLabel(event)}
+                                priceLabel={formatPriceLabel(event)}
                                 isSoldOut={isEventSoldOut(event)}
                                 onAttendClick={() => handleAttendEvent(event)}
                                 onSaveClick={() => handleSaveEvent(event.id, savedEventIds.has(event.id))}
