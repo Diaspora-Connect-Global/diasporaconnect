@@ -207,6 +207,7 @@ export default function FeedPage() {
                     profileTier={profileData.tier}
                     category={profileData.type}
                     postDate={formatDateProximity(post.createdAt)}
+                    createdAt={post.createdAt}
                     visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                     content={post.text}
                     images={

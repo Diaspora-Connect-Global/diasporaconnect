@@ -511,6 +511,7 @@ export default function Home() {
                     profileTier={profileData.tier}
                   category={profileData.type}
                   postDate={formatDateProximity(post.createdAt)}
+                  createdAt={post.createdAt}
                   visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                   content={post.text}
                   images={post.attachments

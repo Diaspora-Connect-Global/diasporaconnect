@@ -296,6 +296,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
                 category={profileData.type}
                 postDate={formatDateProximity(post.createdAt)}
+                createdAt={post.createdAt}
                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                 content={post.text}
                 images={

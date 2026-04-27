@@ -192,9 +192,6 @@ export default function FeedCardWithReply({
     const [deletePost] = useMutation(DELETE_POST);
     const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
 
-    const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
-    const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
-
     const handleDeletePost = async () => {
         if (!window.confirm('Delete this post? This cannot be undone.')) return;
         try {
@@ -416,6 +413,9 @@ export default function FeedCardWithReply({
     };
     const currentUserAvatar = useUserStore((s) => s.user?.avatarUrl) || '/PROFILE.png';
     const currentUserId = useUserStore((s) => s.user?.userId);
+
+    const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
+    const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
 
     const goToProfile = useCallback((userId?: string, authorType?: string) => {
         if (!userId) return;

@@ -244,6 +244,7 @@ export default function PostPage() {
           profileTier={profileData.tier}
           category={profileData.type}
           postDate={formatDateProximity(normalizedPostResolved.createdAt)}
+          createdAt={normalizedPostResolved.createdAt}
           visibility={normalizedPostResolved.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={normalizedPostResolved.text}
           images={

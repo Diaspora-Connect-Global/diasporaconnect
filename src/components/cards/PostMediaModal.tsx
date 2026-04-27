@@ -1,6 +1,6 @@
 'use client';
 
-import { X, ChevronLeft, ChevronRight, Bookmark, Loader2, Globe, Users, Lock } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Bookmark, Loader2, Globe, Users, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
@@ -9,10 +9,14 @@ import {
     GET_POST_COMMENTS,
     LIKE_COMMENT,
     REMOVE_COMMENT_LIKE,
+    DELETE_COMMENT,
+    EDIT_COMMENT,
     GetPostCommentsData,
     LikeCommentData,
     RemoveCommentLikeData,
 } from '@/services/gql/postsFeed';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import type { SearchUsersResponse } from '@/services/gql/types/connection';
 import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
@@ -159,6 +163,41 @@ export default function PostMediaModal({
 
     const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
     const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
+    const [deleteCommentMutation] = useMutation(DELETE_COMMENT);
+    const [editCommentMutation] = useMutation(EDIT_COMMENT);
+
+    const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+    const [editingText, setEditingText] = useState('');
+    const currentUserId = useUserStore((s) => s.user?.userId);
+
+    const canEditComment = (createdAt: string) =>
+        (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
+
+    const handleDeleteComment = async (commentId: string) => {
+        if (!window.confirm('Delete this comment? This cannot be undone.')) return;
+        try {
+            await deleteCommentMutation({ variables: { input: { commentId } } });
+            setLoadedComments(prev => prev.filter(c => c.id !== commentId));
+            toast.success('Comment deleted');
+        } catch {
+            toast.error('Failed to delete comment');
+        }
+    };
+
+    const handleEditCommentSubmit = async (commentId: string) => {
+        if (!editingText.trim()) return;
+        try {
+            const result = await editCommentMutation({ variables: { input: { commentId, text: editingText } } });
+            const updatedText = (result.data as { editComment?: { text?: string } } | null)?.editComment?.text ?? editingText;
+            setLoadedComments(prev => prev.map(c =>
+                c.id === commentId ? { ...c, content: updatedText } : c
+            ));
+            setEditingCommentId(null);
+            toast.success('Comment updated');
+        } catch {
+            toast.error('Failed to update comment');
+        }
+    };
 
     const [searchUsers] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, { fetchPolicy: 'network-only' });
     const fetchMentions = useCallback(async (query: string): Promise<MentionUser[]> => {
@@ -395,8 +434,47 @@ export default function PostMediaModal({
                                 <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
                                 {c.authorTier && <UserBadge tier={c.authorTier} size="xs" />}
                                 <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(c.createdAt)}</span>
+                                {currentUserId && c.authorId === currentUserId && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <button className="ml-auto p-1 rounded-full hover:bg-surface-alt text-text-secondary">
+                                                <MoreHorizontal className="w-4 h-4" />
+                                            </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-36">
+                                            {canEditComment(c.createdAt) && (
+                                                <DropdownMenuItem onSelect={() => { setEditingCommentId(c.id); setEditingText(c.content); }}>
+                                                    <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                                                </DropdownMenuItem>
+                                            )}
+                                            {canEditComment(c.createdAt) && <DropdownMenuSeparator />}
+                                            <DropdownMenuItem variant="destructive" onSelect={() => handleDeleteComment(c.id)}>
+                                                <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                )}
                             </div>
-                            <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderRichText(c.content, c.mentionMap)}</p>
+                            {editingCommentId === c.id ? (
+                                <div className="mb-2">
+                                    <textarea
+                                        className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                                        rows={3}
+                                        value={editingText}
+                                        onChange={(e) => setEditingText(e.target.value)}
+                                        autoFocus
+                                    />
+                                    <div className="flex gap-2 justify-end mt-1">
+                                        <button className="px-2 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
+                                            onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                        <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
+                                            onClick={() => handleEditCommentSubmit(c.id)}
+                                            disabled={!editingText.trim()}>Save</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderRichText(c.content, c.mentionMap)}</p>
+                            )}
                             <div className="flex items-center gap-3">
                                 <button type="button" onClick={() => handleLikeComment(c.id)}
                                     className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>
@@ -431,8 +509,47 @@ export default function PostMediaModal({
                                             <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
                                             {reply.authorTier && <UserBadge tier={reply.authorTier} size="xs" />}
                                             <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(reply.createdAt)}</span>
+                                            {currentUserId && reply.authorId === currentUserId && (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button className="ml-auto p-1 rounded-full hover:bg-surface-alt text-text-secondary">
+                                                            <MoreHorizontal className="w-4 h-4" />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-36">
+                                                        {canEditComment(reply.createdAt) && (
+                                                            <DropdownMenuItem onSelect={() => { setEditingCommentId(reply.id); setEditingText(reply.content); }}>
+                                                                <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        {canEditComment(reply.createdAt) && <DropdownMenuSeparator />}
+                                                        <DropdownMenuItem variant="destructive" onSelect={() => handleDeleteComment(reply.id)}>
+                                                            <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            )}
                                         </div>
-                                        <p className="body-small text-text-primary break-words whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                        {editingCommentId === reply.id ? (
+                                            <div className="mb-2">
+                                                <textarea
+                                                    className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                                                    rows={2}
+                                                    value={editingText}
+                                                    onChange={(e) => setEditingText(e.target.value)}
+                                                    autoFocus
+                                                />
+                                                <div className="flex gap-2 justify-end mt-1">
+                                                    <button className="px-2 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
+                                                        onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                                    <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
+                                                        onClick={() => handleEditCommentSubmit(reply.id)}
+                                                        disabled={!editingText.trim()}>Save</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="body-small text-text-primary break-words whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                        )}
                                     </div>
                                 </div>
                             ))}
