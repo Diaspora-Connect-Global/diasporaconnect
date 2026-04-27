@@ -18,6 +18,15 @@ import {
   Building2, Network, SearchX, Clock, ChevronRight,
 } from 'lucide-react';
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function generateVariants(query: string): string[] {
+  const trimmed = query.trim();
+  const tokens = trimmed.split(/\s+/).filter((t) => t.length >= 3);
+  const variants = [trimmed, ...tokens];
+  return [...new Set(variants)].slice(0, 3);
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UserProfile {
@@ -231,12 +240,35 @@ function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
 
 // ─── Empty / No-query States ──────────────────────────────────────────────────
 
-function EmptyState({ query }: { query: string }) {
+function FallbackBanner({ originalQuery, fallbackQuery }: { originalQuery: string; fallbackQuery: string }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 mb-4 rounded-lg bg-surface-subtle border border-border-subtle text-sm">
+      <span className="text-text-secondary">No exact results for</span>
+      <span className="font-medium text-text-primary">&ldquo;{originalQuery}&rdquo;</span>
+      <span className="text-text-secondary">— showing similar results for</span>
+      <span className="font-medium text-text-brand">&ldquo;{fallbackQuery}&rdquo;</span>
+    </div>
+  );
+}
+
+function EmptyState({ query, suggestion, onTrySuggestion }: {
+  query: string;
+  suggestion?: string;
+  onTrySuggestion?: (q: string) => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <SearchX className="w-12 h-12 text-text-secondary mb-3" />
       <p className="text-text-primary font-medium">No results for &ldquo;{query}&rdquo;</p>
       <p className="text-text-secondary text-sm mt-1">Try different keywords or check spelling</p>
+      {suggestion && onTrySuggestion && (
+        <button
+          onClick={() => onTrySuggestion(suggestion)}
+          className="mt-3 px-4 py-1.5 rounded-full bg-text-brand/10 text-text-brand text-sm font-medium hover:bg-text-brand/20 transition-colors"
+        >
+          Try &ldquo;{suggestion}&rdquo; instead
+        </button>
+      )}
     </div>
   );
 }
@@ -315,6 +347,9 @@ export default function SearchPage() {
   }, [urlQuery]);
 
   // ── Lazy queries ────────────────────────────────────────────────────────────
+  const [fallbackQuery, setFallbackQuery] = useState<string | null>(null);
+
+  // Primary queries
   const [searchUsers,         usersResult]    = useLazyQuery(SEARCH_USERS);
   const [searchGroups,        groupsResult]   = useLazyQuery(SEARCH_GROUPS);
   const [searchCommunities,   commsResult]    = useLazyQuery(SEARCH_COMMUNITIES);
@@ -322,6 +357,15 @@ export default function SearchPage() {
   const [searchProducts,      productsResult] = useLazyQuery(SEARCH_PRODUCTS);
   const [searchEvents,        eventsResult]   = useLazyQuery(SEARCH_EVENTS);
   const [searchOpportunities, oppsResult]     = useLazyQuery(SEARCH_OPPORTUNITIES);
+
+  // Fallback queries — fired automatically when exact results are empty
+  const [searchUsersFb,        usersFbResult]    = useLazyQuery(SEARCH_USERS);
+  const [searchGroupsFb,       groupsFbResult]   = useLazyQuery(SEARCH_GROUPS);
+  const [searchCommsFb,        commsFbResult]    = useLazyQuery(SEARCH_COMMUNITIES);
+  const [searchAssocsFb,       assocsFbResult]   = useLazyQuery(SEARCH_ASSOCIATIONS);
+  const [searchProductsFb,     productsFbResult] = useLazyQuery(SEARCH_PRODUCTS);
+  const [searchEventsFb,       eventsFbResult]   = useLazyQuery(SEARCH_EVENTS);
+  const [searchOppsFb,         oppsFbResult]     = useLazyQuery(SEARCH_OPPORTUNITIES);
 
   const runAll = (q: string, tab: SearchTab, pg: typeof pages) => {
     if (!q.trim()) return;
@@ -353,8 +397,26 @@ export default function SearchPage() {
     }
   };
 
+  const runFallback = (q: string, tab: SearchTab) => {
+    const variants = generateVariants(q);
+    if (variants.length <= 1) return;
+    const fbQ = variants[1];
+    setFallbackQuery(fbQ);
+    const limit = PAGE_SIZE;
+    const offset = 0;
+    const page = 1;
+    if (tab === 'all' || tab === 'people')        searchUsersFb({ variables: { searchUsersInput: { query: fbQ, limit, offset } } });
+    if (tab === 'all' || tab === 'groups')        searchGroupsFb({ variables: { query: fbQ, searchLimit: limit, searchOffset: offset } });
+    if (tab === 'all' || tab === 'communities')   searchCommsFb({ variables: { input: { query: fbQ, page, limit } } });
+    if (tab === 'all' || tab === 'associations')  searchAssocsFb({ variables: { input: { query: fbQ, page, limit } } });
+    if (tab === 'all' || tab === 'marketplace')   searchProductsFb({ variables: { input: { query: fbQ, page, limit } } });
+    if (tab === 'all' || tab === 'events')        searchEventsFb({ variables: { query: fbQ, limit, offset } });
+    if (tab === 'all' || tab === 'opportunities') searchOppsFb({ variables: { query: fbQ, limit, offset } });
+  };
+
   useEffect(() => {
     runAll(query, activeTab, pages);
+    setFallbackQuery(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, activeTab]);
 
@@ -382,23 +444,34 @@ export default function SearchPage() {
   };
 
   // ── Data extraction ─────────────────────────────────────────────────────────
-  const users:   UserProfile[] = usersResult.data?.searchUsers?.profiles ?? [];
-  const groups:  Group[]       = groupsResult.data?.searchGroups?.groups ?? [];
-  const comms:   Community[]   = commsResult.data?.searchCommunities?.communities ?? [];
-  const assocs:  Association[]  = assocsResult.data?.searchAssociations?.associations ?? [];
-  const products: Product[]    = productsResult.data?.searchProducts?.products ?? [];
-  const events:  Event[]       = eventsResult.data?.searchEvents?.events ?? [];
-  const opps:    Opportunity[]  = oppsResult.data?.searchOpportunities?.opportunities ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const d = (r: { data?: any }) => r.data as any;
+  const users:    UserProfile[] = d(usersResult)?.searchUsers?.profiles ?? [];
+  const groups:   Group[]       = d(groupsResult)?.searchGroups?.groups ?? [];
+  const comms:    Community[]   = d(commsResult)?.searchCommunities?.communities ?? [];
+  const assocs:   Association[] = d(assocsResult)?.searchAssociations?.associations ?? [];
+  const products: Product[]     = d(productsResult)?.searchProducts?.products ?? [];
+  const events:   Event[]       = d(eventsResult)?.searchEvents?.events ?? [];
+  const opps:     Opportunity[] = d(oppsResult)?.searchOpportunities?.opportunities ?? [];
+
+  // Fallback data
+  const fbUsers:    UserProfile[] = d(usersFbResult)?.searchUsers?.profiles ?? [];
+  const fbGroups:   Group[]       = d(groupsFbResult)?.searchGroups?.groups ?? [];
+  const fbComms:    Community[]   = d(commsFbResult)?.searchCommunities?.communities ?? [];
+  const fbAssocs:   Association[] = d(assocsFbResult)?.searchAssociations?.associations ?? [];
+  const fbProducts: Product[]     = d(productsFbResult)?.searchProducts?.products ?? [];
+  const fbEvents:   Event[]       = d(eventsFbResult)?.searchEvents?.events ?? [];
+  const fbOpps:     Opportunity[] = d(oppsFbResult)?.searchOpportunities?.opportunities ?? [];
 
   const totals: Record<SearchTab, number> = {
     all:           0,
-    people:        usersResult.data?.searchUsers?.total ?? 0,
-    groups:        groupsResult.data?.searchGroups?.total ?? 0,
-    communities:   commsResult.data?.searchCommunities?.total ?? 0,
-    associations:  assocsResult.data?.searchAssociations?.total ?? 0,
-    marketplace:   productsResult.data?.searchProducts?.total ?? 0,
-    events:        eventsResult.data?.searchEvents?.total ?? 0,
-    opportunities: oppsResult.data?.searchOpportunities?.total ?? 0,
+    people:        d(usersResult)?.searchUsers?.total ?? 0,
+    groups:        d(groupsResult)?.searchGroups?.total ?? 0,
+    communities:   d(commsResult)?.searchCommunities?.total ?? 0,
+    associations:  d(assocsResult)?.searchAssociations?.total ?? 0,
+    marketplace:   d(productsResult)?.searchProducts?.total ?? 0,
+    events:        d(eventsResult)?.searchEvents?.total ?? 0,
+    opportunities: d(oppsResult)?.searchOpportunities?.total ?? 0,
   };
 
   const isLoading = (tab: SearchTab): boolean => {
@@ -411,6 +484,27 @@ export default function SearchPage() {
     if (tab === 'all' || tab === 'opportunities') if (oppsResult.loading)     return true;
     return false;
   };
+
+  // Trigger fallback queries when exact results are empty after loading finishes
+  useEffect(() => {
+    if (!query.trim()) return;
+    if (isLoading(activeTab)) return;
+    const exactEmpty =
+      (activeTab === 'all' && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !events.length && !opps.length) ||
+      (activeTab === 'people' && !users.length) ||
+      (activeTab === 'groups' && !groups.length) ||
+      (activeTab === 'communities' && !comms.length) ||
+      (activeTab === 'associations' && !assocs.length) ||
+      (activeTab === 'marketplace' && !products.length) ||
+      (activeTab === 'events' && !events.length) ||
+      (activeTab === 'opportunities' && !opps.length);
+    if (exactEmpty && !fallbackQuery) {
+      runFallback(query, activeTab);
+    } else if (!exactEmpty) {
+      setFallbackQuery(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usersResult.loading, groupsResult.loading, commsResult.loading, assocsResult.loading, productsResult.loading, eventsResult.loading, oppsResult.loading, activeTab, query]);
 
   const hasMore = (): boolean => {
     const total = totals[activeTab];
@@ -497,74 +591,125 @@ export default function SearchPage() {
           {query.trim() && (
             <>
               {/* ALL tab */}
-              {activeTab === 'all' && (
-                <div>
-                  {!loading && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !events.length && !opps.length ? (
-                    <EmptyState query={query} />
-                  ) : (
-                    <>
-                      <AllSection tab="people"        title={t('people')}        items={users}    loading={usersResult.loading}    renderItem={(u) => <PeopleCard      key={u.userId}  profile={u} />} />
-                      <AllSection tab="opportunities" title={t('opportunities')} items={opps}     loading={oppsResult.loading}     renderItem={(o) => <OpportunityCard key={o.id}       opportunity={o} />} />
-                      <AllSection tab="groups"        title={t('groups')}        items={groups}   loading={groupsResult.loading}   renderItem={(g) => <GroupCard       key={g.id}       group={g} />} />
-                      <AllSection tab="events"        title={t('events')}        items={events}   loading={eventsResult.loading}   renderItem={(e) => <EventCard       key={e.id}       event={e} />} />
-                      <AllSection tab="marketplace"   title={t('marketplace')}   items={products} loading={productsResult.loading} renderItem={(p) => <ProductCard     key={p.id}       product={p} />} />
-                      <AllSection tab="communities"   title={t('communities')}   items={comms}    loading={commsResult.loading}    renderItem={(c) => <CommunityCard   key={c.id}       community={c} />} />
-                      <AllSection tab="associations"  title={t('associations')}  items={assocs}   loading={assocsResult.loading}   renderItem={(a) => <AssociationCard key={a.id}       association={a} />} />
-                    </>
-                  )}
-                </div>
-              )}
+              {activeTab === 'all' && (() => {
+                const dUsers    = users.length    ? users    : fbUsers;
+                const dGroups   = groups.length   ? groups   : fbGroups;
+                const dComms    = comms.length    ? comms    : fbComms;
+                const dAssocs   = assocs.length   ? assocs   : fbAssocs;
+                const dProducts = products.length ? products : fbProducts;
+                const dEvents   = events.length   ? events   : fbEvents;
+                const dOpps     = opps.length     ? opps     : fbOpps;
+                const usingFallback = fallbackQuery && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !events.length && !opps.length;
+                const hasAny = dUsers.length || dGroups.length || dComms.length || dAssocs.length || dProducts.length || dEvents.length || dOpps.length;
+                return (
+                  <div>
+                    {usingFallback && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !hasAny ? (
+                      <EmptyState
+                        query={query}
+                        suggestion={generateVariants(query)[1]}
+                        onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }}
+                      />
+                    ) : (
+                      <>
+                        <AllSection tab="people"        title={t('people')}        items={dUsers}    loading={usersResult.loading}    renderItem={(u) => <PeopleCard      key={u.userId} profile={u} />} />
+                        <AllSection tab="opportunities" title={t('opportunities')} items={dOpps}     loading={oppsResult.loading}     renderItem={(o) => <OpportunityCard key={o.id}      opportunity={o} />} />
+                        <AllSection tab="groups"        title={t('groups')}        items={dGroups}   loading={groupsResult.loading}   renderItem={(g) => <GroupCard       key={g.id}      group={g} />} />
+                        <AllSection tab="events"        title={t('events')}        items={dEvents}   loading={eventsResult.loading}   renderItem={(e) => <EventCard       key={e.id}      event={e} />} />
+                        <AllSection tab="marketplace"   title={t('marketplace')}   items={dProducts} loading={productsResult.loading} renderItem={(p) => <ProductCard     key={p.id}      product={p} />} />
+                        <AllSection tab="communities"   title={t('communities')}   items={dComms}    loading={commsResult.loading}    renderItem={(c) => <CommunityCard   key={c.id}      community={c} />} />
+                        <AllSection tab="associations"  title={t('associations')}  items={dAssocs}   loading={assocsResult.loading}   renderItem={(a) => <AssociationCard key={a.id}      association={a} />} />
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
 
-              {/* Individual tabs */}
-              {activeTab === 'people' && (
-                <div className="space-y-1">
-                  {loading && <SectionSkeleton />}
-                  {!loading && !users.length && <EmptyState query={query} />}
-                  {users.map((u) => <PeopleCard key={u.userId} profile={u} />)}
-                </div>
-              )}
-              {activeTab === 'groups' && (
-                <div className="space-y-1">
-                  {loading && <SectionSkeleton />}
-                  {!loading && !groups.length && <EmptyState query={query} />}
-                  {groups.map((g) => <GroupCard key={g.id} group={g} />)}
-                </div>
-              )}
-              {activeTab === 'communities' && (
-                <div className="space-y-1">
-                  {loading && <SectionSkeleton />}
-                  {!loading && !comms.length && <EmptyState query={query} />}
-                  {comms.map((c) => <CommunityCard key={c.id} community={c} />)}
-                </div>
-              )}
-              {activeTab === 'associations' && (
-                <div className="space-y-1">
-                  {loading && <SectionSkeleton />}
-                  {!loading && !assocs.length && <EmptyState query={query} />}
-                  {assocs.map((a) => <AssociationCard key={a.id} association={a} />)}
-                </div>
-              )}
-              {activeTab === 'marketplace' && (
-                <div className="space-y-1">
-                  {loading && <SectionSkeleton />}
-                  {!loading && !products.length && <EmptyState query={query} />}
-                  {products.map((p) => <ProductCard key={p.id} product={p} />)}
-                </div>
-              )}
-              {activeTab === 'events' && (
-                <div className="space-y-1">
-                  {loading && <SectionSkeleton />}
-                  {!loading && !events.length && <EmptyState query={query} />}
-                  {events.map((e) => <EventCard key={e.id} event={e} />)}
-                </div>
-              )}
-              {activeTab === 'opportunities' && (
-                <div className="space-y-1">
-                  {loading && <SectionSkeleton />}
-                  {!loading && !opps.length && <EmptyState query={query} />}
-                  {opps.map((o) => <OpportunityCard key={o.id} opportunity={o} />)}
-                </div>
-              )}
+              {/* Individual tabs — each falls back to fb* data when exact results are empty */}
+              {activeTab === 'people' && (() => {
+                const show = users.length ? users : fbUsers;
+                const useFb = !users.length && !!fbUsers.length && !!fallbackQuery;
+                return (
+                  <div className="space-y-1">
+                    {loading && <SectionSkeleton />}
+                    {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {show.map((u) => <PeopleCard key={u.userId} profile={u} />)}
+                  </div>
+                );
+              })()}
+              {activeTab === 'groups' && (() => {
+                const show = groups.length ? groups : fbGroups;
+                const useFb = !groups.length && !!fbGroups.length && !!fallbackQuery;
+                return (
+                  <div className="space-y-1">
+                    {loading && <SectionSkeleton />}
+                    {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {show.map((g) => <GroupCard key={g.id} group={g} />)}
+                  </div>
+                );
+              })()}
+              {activeTab === 'communities' && (() => {
+                const show = comms.length ? comms : fbComms;
+                const useFb = !comms.length && !!fbComms.length && !!fallbackQuery;
+                return (
+                  <div className="space-y-1">
+                    {loading && <SectionSkeleton />}
+                    {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {show.map((c) => <CommunityCard key={c.id} community={c} />)}
+                  </div>
+                );
+              })()}
+              {activeTab === 'associations' && (() => {
+                const show = assocs.length ? assocs : fbAssocs;
+                const useFb = !assocs.length && !!fbAssocs.length && !!fallbackQuery;
+                return (
+                  <div className="space-y-1">
+                    {loading && <SectionSkeleton />}
+                    {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {show.map((a) => <AssociationCard key={a.id} association={a} />)}
+                  </div>
+                );
+              })()}
+              {activeTab === 'marketplace' && (() => {
+                const show = products.length ? products : fbProducts;
+                const useFb = !products.length && !!fbProducts.length && !!fallbackQuery;
+                return (
+                  <div className="space-y-1">
+                    {loading && <SectionSkeleton />}
+                    {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {show.map((p) => <ProductCard key={p.id} product={p} />)}
+                  </div>
+                );
+              })()}
+              {activeTab === 'events' && (() => {
+                const show = events.length ? events : fbEvents;
+                const useFb = !events.length && !!fbEvents.length && !!fallbackQuery;
+                return (
+                  <div className="space-y-1">
+                    {loading && <SectionSkeleton />}
+                    {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {show.map((e) => <EventCard key={e.id} event={e} />)}
+                  </div>
+                );
+              })()}
+              {activeTab === 'opportunities' && (() => {
+                const show = opps.length ? opps : fbOpps;
+                const useFb = !opps.length && !!fbOpps.length && !!fallbackQuery;
+                return (
+                  <div className="space-y-1">
+                    {loading && <SectionSkeleton />}
+                    {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
+                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {show.map((o) => <OpportunityCard key={o.id} opportunity={o} />)}
+                  </div>
+                );
+              })()}
 
               {/* Load more */}
               {activeTab !== 'all' && !loading && hasMore() && (

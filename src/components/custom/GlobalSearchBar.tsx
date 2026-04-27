@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { Search, X, Clock, TrendingUp, Users, Briefcase, CalendarDays } from 'lucide-react';
+import Fuse from 'fuse.js';
 
 import { useSearchStore } from '@/store/useSearchStore';
 import { SEARCH_USERS } from '@/services/gql/connection';
@@ -19,11 +20,19 @@ interface ResultRow {
   subtext?: string;
   icon: React.ReactNode;
   href: string;
+  isFallback?: boolean;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildRows(uData: any, oData: any, eData: any, locale: string): ResultRow[] {
+function generateVariants(query: string): string[] {
+  const trimmed = query.trim();
+  const tokens = trimmed.split(/\s+/).filter((t) => t.length >= 3);
+  const variants = [trimmed, ...tokens];
+  return [...new Set(variants)].slice(0, 3);
+}
+
+function buildRows(uData: any, oData: any, eData: any, locale: string, isFallback = false): ResultRow[] {
   const rows: ResultRow[] = [];
 
   (uData?.searchUsers?.profiles ?? []).slice(0, 2).forEach((p: any) => {
@@ -33,6 +42,7 @@ function buildRows(uData: any, oData: any, eData: any, locale: string): ResultRo
       subtext: p.headline ?? p.sector ?? p.residenceCountry,
       icon: <Users className="w-4 h-4 shrink-0 text-text-secondary" />,
       href: `/${locale}/profile/${p.userId}`,
+      isFallback,
     });
   });
 
@@ -43,6 +53,7 @@ function buildRows(uData: any, oData: any, eData: any, locale: string): ResultRo
       subtext: o.category ?? o.type,
       icon: <Briefcase className="w-4 h-4 shrink-0 text-text-secondary" />,
       href: `/${locale}/opportunities/${o.id}`,
+      isFallback,
     });
   });
 
@@ -53,6 +64,7 @@ function buildRows(uData: any, oData: any, eData: any, locale: string): ResultRo
       subtext: e.startAt ? new Date(e.startAt).toLocaleDateString() : e.eventCategory,
       icon: <CalendarDays className="w-4 h-4 shrink-0 text-text-secondary" />,
       href: `/${locale}/events/${e.id}`,
+      isFallback,
     });
   });
 
@@ -135,6 +147,9 @@ function ResultsList({
           {row.subtext && (
             <span className="text-xs text-text-secondary truncate max-w-[7rem]">{row.subtext}</span>
           )}
+          {row.isFallback && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-surface-hover text-text-secondary shrink-0">Similar</span>
+          )}
         </button>
       ))}
       <button
@@ -169,16 +184,49 @@ export default function GlobalSearchBar() {
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [searchUsers, { loading: uLoading, data: uData }] = useLazyQuery(SEARCH_USERS);
-  const [searchOpps, { loading: oLoading, data: oData }] = useLazyQuery(SEARCH_OPPORTUNITIES);
+  // Primary queries
+  const [searchUsers,  { loading: uLoading, data: uData }] = useLazyQuery(SEARCH_USERS);
+  const [searchOpps,   { loading: oLoading, data: oData }] = useLazyQuery(SEARCH_OPPORTUNITIES);
   const [searchEvents, { loading: eLoading, data: eData }] = useLazyQuery(SEARCH_EVENTS);
+
+  // Fallback queries (fire with first token when multi-word query returns nothing)
+  const [searchUsersFb,  { data: uFallback }] = useLazyQuery(SEARCH_USERS);
+  const [searchOppsFb,   { data: oFallback }] = useLazyQuery(SEARCH_OPPORTUNITIES);
+  const [searchEventsFb, { data: eFallback }] = useLazyQuery(SEARCH_EVENTS);
 
   const loading = uLoading || oLoading || eLoading;
 
   useEffect(() => {
     if (inputValue.trim().length < 2) { setResultRows([]); return; }
-    setResultRows(buildRows(uData, oData, eData, locale));
-  }, [uData, oData, eData, locale, inputValue]);
+
+    const primary = buildRows(uData, oData, eData, locale, false);
+    const fallback = buildRows(uFallback, oFallback, eFallback, locale, true);
+
+    // Deduplicate fallbacks against primary by id
+    const primaryIds = new Set(primary.map((r) => r.id));
+    const uniqueFallback = fallback.filter((r) => !primaryIds.has(r.id));
+
+    const combined = [...primary, ...uniqueFallback];
+
+    if (inputValue.trim().length >= 3 && combined.length > 0) {
+      const fuse = new Fuse(combined, {
+        keys: ['label', 'subtext'],
+        threshold: 0.5,
+        includeScore: true,
+      });
+      const fuseResults = fuse.search(inputValue.trim());
+      const seen = new Set<string>();
+      const merged: ResultRow[] = [];
+      fuseResults.forEach(({ item }) => {
+        if (!seen.has(item.id)) { seen.add(item.id); merged.push(item); }
+      });
+      // Ensure exact-match primaries aren't dropped by fuse threshold
+      primary.forEach((r) => { if (!seen.has(r.id)) { seen.add(r.id); merged.unshift(r); } });
+      setResultRows(merged.slice(0, 8));
+    } else {
+      setResultRows(combined.slice(0, 6));
+    }
+  }, [uData, oData, eData, uFallback, oFallback, eFallback, locale, inputValue]);
 
   useEffect(() => { setActiveIndex(-1); }, [resultRows, inputValue]);
 
@@ -206,10 +254,20 @@ export default function GlobalSearchBar() {
   const runTypeahead = useCallback((q: string) => {
     const trimmed = q.trim();
     if (trimmed.length < 2) { setResultRows([]); return; }
-    searchUsers({ variables: { searchUsersInput: { query: trimmed, limit: 3, offset: 0 } } });
-    searchOpps({ variables: { query: trimmed, limit: 3, offset: 0 } });
-    searchEvents({ variables: { query: trimmed, limit: 3, offset: 0 } });
-  }, [searchUsers, searchOpps, searchEvents]);
+
+    searchUsers({ variables: { searchUsersInput: { query: trimmed, limit: 5, offset: 0 } } });
+    searchOpps({ variables: { query: trimmed, limit: 5, offset: 0 } });
+    searchEvents({ variables: { query: trimmed, limit: 5, offset: 0 } });
+
+    // Fire fallback with first individual token for multi-word or possible-typo queries
+    const variants = generateVariants(trimmed);
+    if (variants.length > 1) {
+      const fbQ = variants[1];
+      searchUsersFb({ variables: { searchUsersInput: { query: fbQ, limit: 3, offset: 0 } } });
+      searchOppsFb({ variables: { query: fbQ, limit: 3, offset: 0 } });
+      searchEventsFb({ variables: { query: fbQ, limit: 3, offset: 0 } });
+    }
+  }, [searchUsers, searchOpps, searchEvents, searchUsersFb, searchOppsFb, searchEventsFb]);
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
