@@ -640,12 +640,12 @@ export default function PostMediaModal({
     /* ── render ── */
     return (
         <>
-            <div className="fixed inset-0 z-50 flex bg-black animate-in fade-in duration-200" onClick={onClose}>
+            <div className="fixed inset-0 z-50 flex bg-surface-default animate-in fade-in duration-200" onClick={onClose}>
 
                 {/* DESKTOP */}
                 <div className="hidden md:flex w-full h-full" onClick={e => e.stopPropagation()}>
                     {/* Left: media */}
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-w-0"
+                    <div className="relative flex-1 flex items-center justify-center bg-neutral-900 dark:bg-black min-w-0"
                         onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
                         <button onClick={onClose}
                             className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
@@ -687,7 +687,7 @@ export default function PostMediaModal({
 
                 {/* MOBILE */}
                 <div className="flex md:hidden flex-col w-full h-full" onClick={e => e.stopPropagation()}>
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-h-0"
+                    <div className="relative flex-1 flex items-center justify-center bg-neutral-900 dark:bg-black min-h-0"
                         onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
                         <button onClick={onClose}
                             className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
