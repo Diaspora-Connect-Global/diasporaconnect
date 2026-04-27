@@ -79,6 +79,7 @@ export interface Event {
   updatedAt?: string;
   recurringEventId?: string | null;
   registrationFormFields?: RegistrationFormField[] | null;
+  myRegistrationId?: string | null;
 }
 
 export interface EventStats {
@@ -352,6 +353,7 @@ export const GET_EVENT = gql`
         required
         options
       }
+      myRegistrationId
       createdAt
       updatedAt
     }

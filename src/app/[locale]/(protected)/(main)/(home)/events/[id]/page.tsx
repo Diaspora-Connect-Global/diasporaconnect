@@ -4,7 +4,7 @@ import EventCard2 from "@/components/cards/events/EventCard2";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useApolloClient, useQuery, useMutation } from "@apollo/client/react";
+import { useApolloClient, useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import {
   GET_EVENT,
   IS_EVENT_SAVED,
@@ -24,12 +24,19 @@ import {
   getEventCoverImage,
   isEventSoldOut,
 } from "@/services/gql/events";
+import {
+  CONFIRM_PAYMENT_INTENT,
+  MY_PAYMENT_METHODS,
+  type ConfirmPaymentIntentResponse,
+  type MyPaymentMethodsResponse,
+} from "@/services/gql/payments";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useLocale, useTranslations } from "next-intl";
 import { CONVERT_CURRENCY } from "@/services/gql/marketplace";
+import { openPaystackMobileMoney } from "@/lib/paystack";
 import {
   formatAmountWithCurrency,
   getStoredDisplayCurrencyPreference,
@@ -79,6 +86,7 @@ export default function EventDetailPage() {
   const [displayCurrencyPreference, setDisplayCurrencyPreference] = useState<string | null>(null);
   const [convertedPriceLabel, setConvertedPriceLabel] = useState<string | null>(null);
   const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
+  const userEmail = useUserStore((s) => s.user?.email);
   const isAuthHydrated = useAuthStore.persist.hasHydrated();
   const shouldLoadUserEventState = isAuthHydrated && !!sessionToken;
 
@@ -100,6 +108,10 @@ export default function EventDetailPage() {
     ],
     awaitRefetchQueries: true,
   });
+  const [confirmPaymentIntent] = useMutation<ConfirmPaymentIntentResponse>(CONFIRM_PAYMENT_INTENT);
+  const [fetchMyPaymentMethods] = useLazyQuery<MyPaymentMethodsResponse>(MY_PAYMENT_METHODS, {
+    fetchPolicy: 'network-only',
+  });
   const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
     refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }, { query: USER_EVENTS }],
     awaitRefetchQueries: true,
@@ -118,6 +130,13 @@ export default function EventDetailPage() {
   useEffect(() => {
     setDisplayCurrencyPreference(getStoredDisplayCurrencyPreference());
   }, []);
+
+  // Seed registrationId from server if the user is already registered
+  useEffect(() => {
+    if (event?.myRegistrationId && !registrationId) {
+      setRegistrationId(event.myRegistrationId);
+    }
+  }, [event?.myRegistrationId]);
 
   const preferredDisplayCurrency = useMemo(
     () =>
@@ -195,11 +214,27 @@ export default function EventDetailPage() {
     };
   }, [event, apolloClient, locale, preferredDisplayCurrency]);
 
+  const parsePaymentIntentIdFromClientSecret = (clientSecret?: string | null): string | null => {
+    if (!clientSecret) return null;
+    const marker = '_secret_';
+    const index = clientSecret.indexOf(marker);
+    if (index <= 0) return null;
+    return clientSecret.slice(0, index);
+  };
+
+  const getPrimaryStripeCardPaymentMethodId = async (): Promise<string | null> => {
+    const { data } = await fetchMyPaymentMethods();
+    const methods = data?.myPaymentMethods?.payment_methods ?? [];
+    const stripeCards = methods.filter((m) => m.provider === 'STRIPE' && m.type === 'card');
+    const primary = stripeCards.find((m) => Boolean(m.is_primary));
+    return (primary ?? stripeCards[0])?.id ?? null;
+  };
+
   const handleAttend = async () => {
     if (!eventId) return;
     const primaryTicket = event?.tickets?.[0];
     modalRef.current?.open({
-      onPaymentSuccess: async ({ ticketId, quantity, promoCode, formResponsesJson }) => {
+      onPaymentSuccess: async ({ ticketId, quantity, promoCode, formResponsesJson, paymentMethod, totalAmount }) => {
         const result = await registerForEvent({
           variables: {
             input: {
@@ -223,8 +258,48 @@ export default function EventDetailPage() {
 
         const paymentIntentClientSecret = result.data?.registerForEvent?.paymentIntentClientSecret;
         if (paymentIntentClientSecret) {
-          toast.info("Registration created. Complete payment to confirm attendance.");
-          return;
+          const paymentIntentId = parsePaymentIntentIdFromClientSecret(paymentIntentClientSecret);
+          if (!paymentIntentId) {
+            toast.error('Unable to resolve payment intent for this event payment.');
+            return;
+          }
+
+          if (paymentMethod === 'mobile') {
+            if (!userEmail) {
+              toast.error('Email is required for mobile money checkout.');
+              return;
+            }
+            const amountInPesewas = Math.round((totalAmount ?? 0) * 100);
+            const { reference } = await openPaystackMobileMoney({
+              email: userEmail,
+              amountInPesewas,
+              currency: event?.currency ?? 'GHS',
+            });
+            await confirmPaymentIntent({
+              variables: {
+                input: {
+                  payment_intent_id: paymentIntentId,
+                  payment_method_id: reference,
+                  provider: 'PAYSTACK',
+                },
+              },
+            });
+          } else {
+            const stripePaymentMethodId = await getPrimaryStripeCardPaymentMethodId();
+            if (!stripePaymentMethodId) {
+              toast.error('No Stripe card found. Please save a card first.');
+              return;
+            }
+            await confirmPaymentIntent({
+              variables: {
+                input: {
+                  payment_intent_id: paymentIntentId,
+                  payment_method_id: stripePaymentMethodId,
+                  provider: 'STRIPE',
+                },
+              },
+            });
+          }
         }
 
         setOptimisticRegistered(true);
