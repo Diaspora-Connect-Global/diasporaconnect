@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, CreditCard, Smartphone, CheckCircle2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
@@ -53,15 +53,15 @@ export function ServiceCheckout({
     <div className="max-w-7xl mx-auto px-4 py-6">
       <ButtonType3
         onClick={onBack}
-        className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-gray-600 mb-4 hover:text-gray-800"
+        className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-text-secondary mb-4 hover:text-text-primary"
       >
         <ChevronLeft className="w-5 h-5" />
         <span>{t("checkout")}</span>
       </ButtonType3>
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="font-semibold mb-4">{t("orderDetails")}</h3>
+          <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+            <h3 className="font-semibold mb-4 text-text-primary">{t("orderDetails")}</h3>
             <div className="flex gap-4 mb-4">
               <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
                 {typeof serviceItem.image === "string" && serviceItem.image.startsWith("http") ? (
@@ -71,61 +71,72 @@ export function ServiceCheckout({
                 )}
               </div>
               <div className="flex-1">
-                <p className="font-medium mb-1">{t("revenueStrategyService")}</p>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="w-6 h-6 bg-gray-200 rounded-full" />
+                <p className="font-medium mb-1 text-text-primary">{t("revenueStrategyService")}</p>
+                <div className="flex items-center gap-2 text-sm text-text-secondary">
+                  <div className="w-6 h-6 bg-surface-subtle rounded-full" />
                   <span>{serviceItem.seller}</span>
                 </div>
               </div>
             </div>
-            <div className="text-sm text-gray-600">
-              <p>
-                {t("premiumPackage")} ({formatAmount(packagePrice)})
-              </p>
+            <div className="text-sm text-text-secondary">
+              <p>{t("premiumPackage")} ({formatAmount(packagePrice)})</p>
             </div>
             {serviceItem.extras && serviceItem.extras.length > 0 && (
-              <div className="mt-3 pt-3 border-t">
-                <p className="text-sm font-medium mb-1">{t("extras")}</p>
-                <p className="text-sm text-gray-600">{t("includeSourceFile")}</p>
+              <div className="mt-3 pt-3 border-t border-border-subtle">
+                <p className="text-sm font-medium mb-1 text-text-primary">{t("extras")}</p>
+                <p className="text-sm text-text-secondary">{t("includeSourceFile")}</p>
               </div>
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 className="font-semibold mb-4">{t("paymentDetails")}</h3>
-
-            <ButtonType3
-              onClick={() => setPaymentMethod("credit")}
-              className={`flex items-center justify-between w-full p-4 border rounded-lg mb-3 hover:bg-gray-50 ${
-                paymentMethod === "credit" ? "border-border-brand" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 border rounded flex items-center justify-center">
-                  💳
+          <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+            <h3 className="font-semibold mb-4 text-text-primary">{t("paymentDetails")}</h3>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("credit")}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                  paymentMethod === "credit"
+                    ? "border-border-brand bg-surface-brand/5"
+                    : "border-border-subtle bg-surface-subtle hover:bg-surface-hover"
+                }`}
+              >
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
+                  paymentMethod === "credit" ? "bg-surface-brand text-text-white" : "bg-surface-default text-text-primary"
+                }`}>
+                  <CreditCard className="w-5 h-5" />
                 </div>
-                <span>{t("creditCard")}</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400" />
-            </ButtonType3>
-
-            <ButtonType3
-              onClick={() => setPaymentMethod("mobile")}
-              className={`flex items-center justify-between w-full p-4 border rounded-lg hover:bg-gray-50 ${
-                paymentMethod === "mobile" ? "border-border-brand" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 border rounded flex items-center justify-center">
-                  📱
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-text-primary text-sm">{t("creditCard")}</p>
+                  <p className="text-xs text-text-secondary mt-0.5">Powered by Stripe · Your saved card will be charged</p>
                 </div>
-                <span>{t("mobilePayment")}</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400" />
-            </ButtonType3>
+                {paymentMethod === "credit" && <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("mobile")}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                  paymentMethod === "mobile"
+                    ? "border-border-brand bg-surface-brand/5"
+                    : "border-border-subtle bg-surface-subtle hover:bg-surface-hover"
+                }`}
+              >
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
+                  paymentMethod === "mobile" ? "bg-surface-brand text-text-white" : "bg-surface-default text-text-primary"
+                }`}>
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-text-primary text-sm">{t("mobilePayment")}</p>
+                  <p className="text-xs text-text-secondary mt-0.5">Powered by Paystack · Complete in Paystack's secure popup</p>
+                </div>
+                {paymentMethod === "mobile" && <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />}
+              </button>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-surface-default rounded-lg border border-border-subtle p-6">
             <h3 className="font-semibold mb-4">{t("billingAddress")}</h3>
             <div className="space-y-4">
               <div>
@@ -206,21 +217,21 @@ export function ServiceCheckout({
         </div>
 
         <div className="md:col-span-1">
-          <div className="bg-white rounded-lg shadow p-6 sticky top-24">
+          <div className="bg-surface-default rounded-lg border border-border-subtle p-6 sticky top-24">
             <h3 className="font-semibold mb-4">{t("priceSummary")}</h3>
             <div className="space-y-3 mb-4">
               <div className="flex justify-between">
-                <span className="text-gray-600">{serviceItem.name}</span>
+                <span className="text-text-secondary">{serviceItem.name}</span>
                 <span className="font-medium">{formatAmount(packagePrice)}</span>
               </div>
               {serviceItem.extras && serviceItem.extras.length > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t("includeSourceFile")}</span>
+                  <span className="text-text-secondary">{t("includeSourceFile")}</span>
                   <span className="font-medium">{formatAmount(extrasPrice)}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-gray-600">{t("serviceFee")}</span>
+                <span className="text-text-secondary">{t("serviceFee")}</span>
                 <span className="font-medium">{formatAmount(serviceFee)}</span>
               </div>
             </div>
@@ -233,7 +244,7 @@ export function ServiceCheckout({
             <ButtonType2
               onClick={handlePay}
               disabled={isPaying}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+              className="w-full bg-surface-brand text-text-white py-3 rounded-lg hover:opacity-90"
             >
               {isPaying
                 ? t("processing") ?? "Processing…"

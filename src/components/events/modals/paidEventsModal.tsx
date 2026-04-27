@@ -9,7 +9,6 @@ import {
     type RegistrationFormField,
     type ValidatePromoCodeData,
 } from "@/services/gql/events";
-import { useUserStore } from "@/store/useUserStore";
 import { useLazyQuery } from "@apollo/client/react";
 import { Tag, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -29,25 +28,6 @@ type CheckoutEvent = {
     registrationFormFields?: RegistrationFormField[];
 };
 
-const LOCALE_REGION_MAP: Record<string, { flag: string; dialCode: string; currency: string }> = {
-    gh: { flag: '🇬🇭', dialCode: '+233', currency: 'GHS' },
-    ng: { flag: '🇳🇬', dialCode: '+234', currency: 'NGN' },
-    ke: { flag: '🇰🇪', dialCode: '+254', currency: 'KES' },
-    us: { flag: '🇺🇸', dialCode: '+1', currency: 'USD' },
-    gb: { flag: '🇬🇧', dialCode: '+44', currency: 'GBP' },
-    fr: { flag: '🇫🇷', dialCode: '+33', currency: 'EUR' },
-    de: { flag: '🇩🇪', dialCode: '+49', currency: 'EUR' },
-    it: { flag: '🇮🇹', dialCode: '+39', currency: 'EUR' },
-};
-
-const CURRENCY_SYMBOL_FALLBACK: Record<string, string> = {
-    GHS: 'GH₵',
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    NGN: '₦',
-    KES: 'KSh',
-};
 
 export interface PaidEventsModalRef {
     open: (options?: {
@@ -66,9 +46,6 @@ export interface PaidEventsModalRef {
 const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const t = useTranslations('home.events.payment');
     const locale = useLocale();
-    const user = useUserStore((state) => state.user);
-    const region = locale.split('-')[1]?.toLowerCase() ?? locale.toLowerCase();
-    const localeRegion = LOCALE_REGION_MAP[region] ?? LOCALE_REGION_MAP.gh;
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -96,17 +73,6 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
 
     // Form fields state
     const [formResponses, setFormResponses] = useState<Record<string, string | string[]>>({});
-
-    const buildInitialBilling = () => ({
-        firstName: user?.firstName ?? "",
-        lastName: user?.lastName ?? "",
-        email: user?.email ?? "",
-        cardNumber: "", expDate: "", cvv: "",
-        mobileProvider: "mtn" as "mtn" | "telecel" | "at",
-        phoneNumber: "",
-    });
-
-    const [billing, setBilling] = useState(buildInitialBilling);
 
     const [validatePromoCode, { loading: validatingPromo }] = useLazyQuery<ValidatePromoCodeData>(VALIDATE_PROMO_CODE, {
         fetchPolicy: 'no-cache',
@@ -140,7 +106,6 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
         setFormResponses({});
         setOnPaymentSuccess(() => paymentSuccessHandler ?? null);
         setSelectedEvent(event ?? null);
-        setBilling(buildInitialBilling());
         setIsDialogOpen(true);
     };
 
@@ -202,10 +167,6 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
         }
     };
 
-    const updateBilling = (field: keyof typeof billing, value: string) => {
-        setBilling(prev => ({ ...prev, [field]: value }));
-    };
-
     const handleFormResponseChange = (fieldId: string, value: string | string[]) => {
         setFormResponses(prev => ({ ...prev, [fieldId]: value }));
     };
@@ -233,7 +194,6 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
             : undefined;
 
         try {
-            await new Promise(res => setTimeout(res, 1500));
             let result: { waitlistPosition?: number | null } | void = undefined;
             if (onPaymentSuccess) {
                 result = await onPaymentSuccess({
@@ -263,15 +223,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
 
     const isBillingComplete = () => {
         if (!selectedEvent?.isPaid) return true;
-        const common = billing.firstName && billing.lastName && billing.email;
-        if (!common) return false;
-        if (openMethod === 'card') {
-            return !!(billing.cardNumber && billing.expDate && billing.cvv);
-        }
-        if (openMethod === 'mobile') {
-            return billing.phoneNumber.length >= 9;
-        }
-        return false;
+        return openMethod !== null;
     };
 
     const formattedEventDate = selectedEvent
@@ -288,7 +240,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const discountedSubtotal = Math.max(0, subtotal - discountAmount);
     const serviceFee = selectedEvent?.isPaid ? discountedSubtotal * 0.1 : 0;
 
-    const currencyCode = selectedEvent?.currency ?? localeRegion.currency;
+    const currencyCode = selectedEvent?.currency ?? 'GHS';
     const formatAmount = (value: number) => {
         try {
             return new Intl.NumberFormat(locale, {
@@ -298,8 +250,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                 maximumFractionDigits: 2,
             }).format(value);
         } catch {
-            const symbol = CURRENCY_SYMBOL_FALLBACK[currencyCode] ?? currencyCode;
-            return `${symbol} ${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
+            return `${currencyCode} ${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
         }
     };
     const ticketPriceLabel = selectedEvent?.isPaid ? formatAmount(unitPrice) : t('free');
@@ -332,24 +283,6 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                     )}
                     {currentStep === 2 && (
                         <Step2
-                            firstName={billing.firstName}
-                            lastName={billing.lastName}
-                            email={billing.email}
-                            cardNumber={billing.cardNumber}
-                            expDate={billing.expDate}
-                            cvv={billing.cvv}
-                            mobileProvider={billing.mobileProvider}
-                            phoneNumber={billing.phoneNumber}
-                            onFirstNameChange={v => updateBilling("firstName", v)}
-                            onLastNameChange={v => updateBilling("lastName", v)}
-                            onEmailChange={v => updateBilling("email", v)}
-                            onCardNumberChange={v => updateBilling("cardNumber", v)}
-                            onExpDateChange={v => updateBilling("expDate", v)}
-                            onCvvChange={v => updateBilling("cvv", v)}
-                            onMobileProviderChange={v => updateBilling("mobileProvider", v)}
-                            onPhoneNumberChange={v => updateBilling("phoneNumber", v)}
-                            countryFlag={localeRegion.flag}
-                            dialCode={localeRegion.dialCode}
                             openMethod={openMethod}
                             onOpenMethodChange={setOpenMethod}
                         />

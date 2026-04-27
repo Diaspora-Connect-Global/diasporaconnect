@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CreditCard, Smartphone, CheckCircle2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { CountrySelect } from "@/components/custom/input";
@@ -135,28 +135,49 @@ export function Checkout({
 
             <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("paymentMethod")}</h3>
-              <label className="flex items-center gap-3 mb-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="credit"
-                  checked={paymentMethod === "credit"}
-                  onChange={() => setPaymentMethod("credit")}
-                  className="accent-surface-brand"
-                />
-                <span className="text-text-primary">{t("creditCard")}</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="mobile"
-                  checked={paymentMethod === "mobile"}
-                  onChange={() => setPaymentMethod("mobile")}
-                  className="accent-surface-brand"
-                />
-                <span className="text-text-primary">{t("mobilePayment")}</span>
-              </label>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("credit")}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                    paymentMethod === "credit"
+                      ? "border-border-brand bg-surface-brand/5"
+                      : "border-border-subtle bg-surface-subtle hover:bg-surface-hover"
+                  }`}
+                >
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
+                    paymentMethod === "credit" ? "bg-surface-brand text-text-white" : "bg-surface-default text-text-primary"
+                  }`}>
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-text-primary text-sm">{t("creditCard")}</p>
+                    <p className="text-xs text-text-secondary mt-0.5">Powered by Stripe · Your saved card will be charged</p>
+                  </div>
+                  {paymentMethod === "credit" && <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("mobile")}
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                    paymentMethod === "mobile"
+                      ? "border-border-brand bg-surface-brand/5"
+                      : "border-border-subtle bg-surface-subtle hover:bg-surface-hover"
+                  }`}
+                >
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
+                    paymentMethod === "mobile" ? "bg-surface-brand text-text-white" : "bg-surface-default text-text-primary"
+                  }`}>
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-text-primary text-sm">{t("mobilePayment")}</p>
+                    <p className="text-xs text-text-secondary mt-0.5">Powered by Paystack · Complete in Paystack's secure popup</p>
+                  </div>
+                  {paymentMethod === "mobile" && <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />}
+                </button>
+              </div>
             </div>
 
             <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
