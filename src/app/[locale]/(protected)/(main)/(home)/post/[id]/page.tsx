@@ -135,16 +135,22 @@ export default function PostPage() {
     );
   }
 
-  if (error || !data?.post) {
+  if (error || (!loading && !data?.post)) {
     return (
       <div className="h-app-inner flex overflow-hidden">
         <div className={cn(FEED_COLUMN_POST_PAGE_CLASS, 'items-center justify-center p-4')}>
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-text-primary mb-2">Post not found</h1>
-            <p className="text-text-secondary mb-4">The post you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+          <div className="text-center max-w-sm">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-alt flex items-center justify-center">
+              <Loader2 className="w-0 h-0" />
+              <svg className="w-8 h-8 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-text-primary mb-2">This post has been deleted</h1>
+            <p className="text-text-secondary text-sm mb-6">The post you&apos;re looking for no longer exists.</p>
             <button
               onClick={() => router.push('/')}
-              className="px-4 py-2 bg-surface-brand text-white rounded-md hover:bg-surface-brand-dark transition-colors"
+              className="px-5 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors label-medium"
             >
               Go to Home
             </button>
@@ -245,6 +251,7 @@ export default function PostPage() {
           category={profileData.type}
           postDate={formatDateProximity(normalizedPostResolved.createdAt)}
           createdAt={normalizedPostResolved.createdAt}
+          onDelete={() => router.push('/')}
           visibility={normalizedPostResolved.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={normalizedPostResolved.text}
           images={

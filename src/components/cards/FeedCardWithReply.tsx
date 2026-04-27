@@ -19,6 +19,7 @@ import { formatDateProximity } from '@/macros/time';
 import { resolveUserTier } from '@/lib/userTier';
 import { useRouter } from '@/i18n/navigation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { toast } from 'sonner';
 
 /** Video that only loads src when in viewport to save bandwidth. */
@@ -93,6 +94,7 @@ interface FeedCardProps {
     onShare?: () => void;
     onSave?: () => void;
     onSendComment?: (content: string, parentId?: string) => void;
+    onDelete?: (postId: string) => void;
     joinButton?: boolean;
     isLiked?: boolean;
     isSaved?: boolean;
@@ -162,6 +164,7 @@ export default function FeedCardWithReply({
     onShare,
     onSave,
     onSendComment,
+    onDelete,
     joinButton = true,
     isLiked: initialIsLiked = false,
     isSaved: initialIsSaved = false,
@@ -189,14 +192,16 @@ export default function FeedCardWithReply({
     useEffect(() => { setPostContent(content); }, [content]);
     const [isEditingPost, setIsEditingPost] = useState(false);
     const [editPostText, setEditPostText] = useState(content);
-    const [deletePost] = useMutation(DELETE_POST);
+    const [deletePostModalOpen, setDeletePostModalOpen] = useState(false);
+    const [deletePost, { loading: deletePostLoading }] = useMutation(DELETE_POST);
     const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
 
-    const handleDeletePost = async () => {
-        if (!window.confirm('Delete this post? This cannot be undone.')) return;
+    const handleDeletePostConfirm = async () => {
         try {
             await deletePost({ variables: { id: postId } });
+            setDeletePostModalOpen(false);
             toast.success('Post deleted');
+            onDelete?.(postId);
         } catch {
             toast.error('Failed to delete post');
         }
@@ -1183,7 +1188,7 @@ export default function FeedCardWithReply({
                                     </DropdownMenuItem>
                                 )}
                                 {canEditPost && <DropdownMenuSeparator />}
-                                <DropdownMenuItem variant="destructive" onSelect={handleDeletePost}>
+                                <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
                                     <Trash2 className="w-4 h-4 mr-2" /> Delete
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -1287,6 +1292,17 @@ export default function FeedCardWithReply({
                 onClose={() => setShowShareDialog(false)}
                 postId={postId}
                 onShared={handleShared}
+            />
+
+            <ConfirmationModal
+                open={deletePostModalOpen}
+                onCancel={() => setDeletePostModalOpen(false)}
+                onConfirm={handleDeletePostConfirm}
+                title="Delete post?"
+                description="This will permanently delete the post. This action cannot be undone."
+                confirmText="Delete"
+                confirmVariant="destructive"
+                isLoading={deletePostLoading}
             />
         </>
     );

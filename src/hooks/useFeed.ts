@@ -61,6 +61,7 @@ export interface UseFeedResult {
   feedContainerRef: React.RefObject<HTMLDivElement | null>;
   feedMeta: FeedStateMeta;
   updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number }>) => void;
+  removePost: (postId: string) => void;
 }
 
 export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
@@ -280,6 +281,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     return () => el.removeEventListener('scroll', checkScroll);
   }, [hasMore, loadMore, loading, loadingMore]);
 
+  const removePost = useCallback((postId: string) => {
+    setMergedPosts(prev => prev.filter(p => p.id !== postId));
+  }, []);
+
   const updatePostCounts = useCallback((
     postId: string,
     delta: Partial<{ likes: number; comments: number; shares: number; saves: number }>,
@@ -310,5 +315,6 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     feedContainerRef,
     feedMeta,
     updatePostCounts,
+    removePost,
   };
 }

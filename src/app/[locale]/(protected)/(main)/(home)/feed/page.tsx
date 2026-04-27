@@ -55,6 +55,7 @@ export default function FeedPage() {
     loadingMore: feedLoadingMore,
     feedContainerRef,
     updatePostCounts,
+    removePost,
   } = useFeed({ hashtag });
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
@@ -238,6 +239,7 @@ export default function FeedPage() {
                     onShare={() => handleShare(post.id)}
                     onSave={() => handleSave(post.id)}
                     onSendComment={(content, parentId) => handleSendComment(post.id, content, parentId)}
+                    onDelete={removePost}
                     joinButton={false}
                     isLiked={post.userEngagement.hasLiked}
                     isSaved={post.userEngagement.hasSaved}

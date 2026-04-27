@@ -119,6 +119,7 @@ export default function Home() {
     loadingMore: feedLoadingMore,
     feedContainerRef,
     updatePostCounts,
+    removePost,
   } = useFeed({ mode: viewMode });
 
   useEffect(() => {
@@ -538,6 +539,7 @@ export default function Home() {
                   onShare={() => handleShare(post.id)}
                   onSave={() => handleSave(post.id)}
                   onSendComment={(content, parentId) => handleSendComment(post.id, content, parentId)}
+                  onDelete={removePost}
                   joinButton={false}
                   isLiked={post.userEngagement.hasLiked}
                   isSaved={post.userEngagement.hasSaved}
