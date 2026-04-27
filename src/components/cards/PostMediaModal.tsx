@@ -11,11 +11,15 @@ import {
     REMOVE_COMMENT_LIKE,
     DELETE_COMMENT,
     EDIT_COMMENT,
+    DELETE_POST,
     GetPostCommentsData,
     LikeCommentData,
     RemoveCommentLikeData,
+    EditCommentData,
+    DeleteCommentData,
 } from '@/services/gql/postsFeed';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { toast } from 'sonner';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import type { SearchUsersResponse } from '@/services/gql/types/connection';
@@ -37,8 +41,10 @@ export interface PostMediaModalProps {
     profileImage: string;
     profileName: string;
     profileTier?: Tier;
+    authorUserId?: string;
     category: string;
     postDate: string;
+    createdAt?: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
     allMedia: ModalMediaItem[];
@@ -54,6 +60,7 @@ export interface PostMediaModalProps {
     onSendComment: (text: string, parentId?: string) => void;
     onClose: () => void;
     onNavigatePost: (dir: 'next' | 'prev') => void;
+    onDelete?: (postId: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -106,8 +113,10 @@ export default function PostMediaModal({
     profileImage,
     profileName,
     profileTier,
+    authorUserId,
     category,
     postDate,
+    createdAt,
     visibility,
     content,
     allMedia,
@@ -123,6 +132,7 @@ export default function PostMediaModal({
     onSendComment,
     onClose,
     onNavigatePost,
+    onDelete,
 }: PostMediaModalProps) {
     const t = useTranslations('actions');
     const currentUserAvatar = useUserStore(s => s.user?.avatarUrl) || '/PROFILE.png';
@@ -163,38 +173,61 @@ export default function PostMediaModal({
 
     const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
     const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
-    const [deleteCommentMutation] = useMutation(DELETE_COMMENT);
-    const [editCommentMutation] = useMutation(EDIT_COMMENT);
+    const [deleteCommentMutation, { loading: deleteCommentLoading }] = useMutation<DeleteCommentData>(DELETE_COMMENT);
+    const [editCommentMutation, { loading: editCommentLoading }] = useMutation<EditCommentData>(EDIT_COMMENT);
+    const [deletePostMutation, { loading: deletePostLoading }] = useMutation(DELETE_POST);
 
     const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
     const [editingText, setEditingText] = useState('');
+    const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+    const [deletePostModalOpen, setDeletePostModalOpen] = useState(false);
     const currentUserId = useUserStore((s) => s.user?.userId);
 
-    const canEditComment = (createdAt: string) =>
-        (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
+    const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
+    const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
+    const isOwnComment = (c: Comment) => !!currentUserId && c.authorId === currentUserId;
+    const canEditComment = (c: Comment) =>
+        isOwnComment(c) && (Date.now() - new Date(c.createdAt).getTime()) < 24 * 60 * 60 * 1000;
 
-    const handleDeleteComment = async (commentId: string) => {
-        if (!window.confirm('Delete this comment? This cannot be undone.')) return;
+    const handleDeletePostConfirm = async () => {
+        try {
+            await deletePostMutation({ variables: { id: postId } });
+            setDeletePostModalOpen(false);
+            toast.success('Post deleted');
+            onDelete?.(postId);
+            onNavigatePost('next');
+        } catch {
+            toast.error('Failed to delete post');
+        }
+    };
+
+    const handleDeleteCommentConfirm = async () => {
+        const commentId = deleteCommentId!;
+        setLoadedComments(prev => prev.filter(c => c.id !== commentId));
+        setCommentCount(n => Math.max(0, n - 1));
+        setDeleteCommentId(null);
         try {
             await deleteCommentMutation({ variables: { input: { commentId } } });
-            setLoadedComments(prev => prev.filter(c => c.id !== commentId));
             toast.success('Comment deleted');
         } catch {
+            setLoadedComments(prev => { /* revert handled externally */ return prev; });
+            setCommentCount(n => n + 1);
             toast.error('Failed to delete comment');
         }
     };
 
     const handleEditCommentSubmit = async (commentId: string) => {
-        if (!editingText.trim()) return;
+        const newText = editingText.trim();
+        if (!newText) return;
+        const previous = loadedComments.find(c => c.id === commentId);
+        setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: newText } : c));
+        setEditingCommentId(null);
         try {
-            const result = await editCommentMutation({ variables: { input: { commentId, text: editingText } } });
-            const updatedText = (result.data as { editComment?: { text?: string } } | null)?.editComment?.text ?? editingText;
-            setLoadedComments(prev => prev.map(c =>
-                c.id === commentId ? { ...c, content: updatedText } : c
-            ));
-            setEditingCommentId(null);
+            await editCommentMutation({ variables: { input: { commentId, text: newText } } });
             toast.success('Comment updated');
         } catch {
+            if (previous) setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: previous.content } : c));
+            setEditingCommentId(commentId);
             toast.error('Failed to update comment');
         }
     };
@@ -224,9 +257,9 @@ export default function PostMediaModal({
                     const mapped = mapApiComment(c);
                     const existing = prevMap.get(mapped.id);
                     if (existing) {
-                        // Preserve local interaction state — cache may be stale
                         mapped.hasLiked = existing.hasLiked;
                         mapped.likes = existing.likes;
+                        if (existing.content !== mapped.content) mapped.content = existing.content;
                     }
                     return mapped;
                 });
@@ -378,6 +411,26 @@ export default function PostMediaModal({
                     {visibility === 'CONNECTIONS' ? <Users className="w-3.5 h-3.5 flex-shrink-0" /> : visibility === 'PRIVATE' ? <Lock className="w-3.5 h-3.5 flex-shrink-0" /> : <Globe className="w-3.5 h-3.5 flex-shrink-0" />}
                 </p>
             </div>
+            {isOwnPost && (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="p-1 rounded-full hover:bg-surface-alt text-text-secondary flex-shrink-0">
+                            <MoreHorizontal className="w-5 h-5" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                        {canEditPost && (
+                            <DropdownMenuItem>
+                                <Pencil className="w-4 h-4 mr-2" /> Edit
+                            </DropdownMenuItem>
+                        )}
+                        {canEditPost && <DropdownMenuSeparator />}
+                        <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
         </div>
     );
 
@@ -424,7 +477,10 @@ export default function PostMediaModal({
         <p className="text-text-secondary text-sm text-center py-8">{t('noComments')}</p>
     ) : (
         <div className="space-y-4">
-            {topLevel.map(c => (
+            {topLevel.map(c => {
+                const cOwn = isOwnComment(c);
+                const cEditable = cOwn && canEditComment(c);
+                return (
                 <div key={c.id}>
                     <div className="flex gap-3">
                         <img src={c.authorImage || '/PROFILE.png'} alt={c.author} width={32} height={32}
@@ -434,21 +490,21 @@ export default function PostMediaModal({
                                 <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
                                 {c.authorTier && <UserBadge tier={c.authorTier} size="xs" />}
                                 <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(c.createdAt)}</span>
-                                {currentUserId && c.authorId === currentUserId && (
+                                {cOwn && (
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <button className="ml-auto p-1 rounded-full hover:bg-surface-alt text-text-secondary">
                                                 <MoreHorizontal className="w-4 h-4" />
                                             </button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-36">
-                                            {canEditComment(c.createdAt) && (
+                                        <DropdownMenuContent align="end" className="w-32">
+                                            {cEditable && (
                                                 <DropdownMenuItem onSelect={() => { setEditingCommentId(c.id); setEditingText(c.content); }}>
                                                     <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
                                                 </DropdownMenuItem>
                                             )}
-                                            {canEditComment(c.createdAt) && <DropdownMenuSeparator />}
-                                            <DropdownMenuItem variant="destructive" onSelect={() => handleDeleteComment(c.id)}>
+                                            {cEditable && <DropdownMenuSeparator />}
+                                            <DropdownMenuItem variant="destructive" onSelect={() => setDeleteCommentId(c.id)}>
                                                 <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
@@ -469,7 +525,9 @@ export default function PostMediaModal({
                                             onClick={() => setEditingCommentId(null)}>Cancel</button>
                                         <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
                                             onClick={() => handleEditCommentSubmit(c.id)}
-                                            disabled={!editingText.trim()}>Save</button>
+                                            disabled={editCommentLoading || !editingText.trim()}>
+                                            {editCommentLoading ? 'Saving…' : 'Save'}
+                                        </button>
                                     </div>
                                 </div>
                             ) : (
@@ -500,7 +558,10 @@ export default function PostMediaModal({
                     )}
                     {(repliesByParent.get(c.id)?.length ?? 0) > 0 && (
                         <div className="ml-11 mt-3 space-y-3">
-                            {repliesByParent.get(c.id)!.map(reply => (
+                            {repliesByParent.get(c.id)!.map(reply => {
+                                const rOwn = isOwnComment(reply);
+                                const rEditable = rOwn && canEditComment(reply);
+                                return (
                                 <div key={reply.id} className="flex gap-3">
                                     <img src={reply.authorImage || '/PROFILE.png'} alt={reply.author} width={28} height={28}
                                         loading="lazy" decoding="async" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
@@ -509,21 +570,21 @@ export default function PostMediaModal({
                                             <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
                                             {reply.authorTier && <UserBadge tier={reply.authorTier} size="xs" />}
                                             <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(reply.createdAt)}</span>
-                                            {currentUserId && reply.authorId === currentUserId && (
+                                            {rOwn && (
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <button className="ml-auto p-1 rounded-full hover:bg-surface-alt text-text-secondary">
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-36">
-                                                        {canEditComment(reply.createdAt) && (
+                                                    <DropdownMenuContent align="end" className="w-32">
+                                                        {rEditable && (
                                                             <DropdownMenuItem onSelect={() => { setEditingCommentId(reply.id); setEditingText(reply.content); }}>
                                                                 <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
                                                             </DropdownMenuItem>
                                                         )}
-                                                        {canEditComment(reply.createdAt) && <DropdownMenuSeparator />}
-                                                        <DropdownMenuItem variant="destructive" onSelect={() => handleDeleteComment(reply.id)}>
+                                                        {rEditable && <DropdownMenuSeparator />}
+                                                        <DropdownMenuItem variant="destructive" onSelect={() => setDeleteCommentId(reply.id)}>
                                                             <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
@@ -544,7 +605,9 @@ export default function PostMediaModal({
                                                         onClick={() => setEditingCommentId(null)}>Cancel</button>
                                                     <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
                                                         onClick={() => handleEditCommentSubmit(reply.id)}
-                                                        disabled={!editingText.trim()}>Save</button>
+                                                        disabled={editCommentLoading || !editingText.trim()}>
+                                                        {editCommentLoading ? 'Saving…' : 'Save'}
+                                                    </button>
                                                 </div>
                                             </div>
                                         ) : (
@@ -552,11 +615,13 @@ export default function PostMediaModal({
                                         )}
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>
-            ))}
+                );
+            })}
         </div>
     );
 
@@ -676,6 +741,28 @@ export default function PostMediaModal({
             </div>
 
             <SharePostModal open={showShareModal} onClose={() => setShowShareModal(false)} postId={postId} onShared={onShare} />
+
+            <ConfirmationModal
+                open={!!deleteCommentId}
+                onCancel={() => setDeleteCommentId(null)}
+                onConfirm={handleDeleteCommentConfirm}
+                title="Delete comment?"
+                description="This will permanently delete the comment. This action cannot be undone."
+                confirmText="Delete"
+                confirmVariant="destructive"
+                isLoading={deleteCommentLoading}
+            />
+
+            <ConfirmationModal
+                open={deletePostModalOpen}
+                onCancel={() => setDeletePostModalOpen(false)}
+                onConfirm={handleDeletePostConfirm}
+                title="Delete post?"
+                description="This will permanently delete the post. This action cannot be undone."
+                confirmText="Delete"
+                confirmVariant="destructive"
+                isLoading={deletePostLoading}
+            />
         </>
     );
 }

@@ -242,28 +242,38 @@ export default function FeedCardWithReply({
         isOwnComment(c) && (Date.now() - new Date(c.createdAt).getTime()) < 24 * 60 * 60 * 1000;
 
     const handleEditCommentSubmit = async (commentId: string) => {
-        if (!editCommentText.trim()) return;
+        const newText = editCommentText.trim();
+        if (!newText) return;
+        const previous = loadedComments.find((c) => c.id === commentId);
+        setLoadedComments((prev) => prev.map((c) => c.id === commentId ? { ...c, content: newText } : c));
+        setEditingCommentId(null);
         try {
-            await editCommentMutation({ variables: { input: { commentId, text: editCommentText } } });
-            setLoadedComments((prev) =>
-                prev.map((c) => c.id === commentId ? { ...c, content: editCommentText } : c)
-            );
-            setEditingCommentId(null);
+            await editCommentMutation({ variables: { input: { commentId, text: newText } } });
             toast.success('Comment updated');
         } catch {
+            if (previous) {
+                setLoadedComments((prev) => prev.map((c) => c.id === commentId ? { ...c, content: previous.content } : c));
+            }
+            setEditingCommentId(commentId);
             toast.error('Failed to update comment');
         }
     };
 
     const handleDeleteCommentConfirm = async () => {
-        if (!deleteCommentId) return;
+        const commentId = deleteCommentId!;
+        const previous = loadedComments.filter((c) => c.id !== commentId);
+        setLoadedComments(previous);
+        setCommentCount((c) => Math.max(0, c - 1));
+        setDeleteCommentId(null);
         try {
-            await deleteCommentMutation({ variables: { input: { commentId: deleteCommentId } } });
-            setLoadedComments((prev) => prev.filter((c) => c.id !== deleteCommentId));
-            setCommentCount((c) => Math.max(0, c - 1));
-            setDeleteCommentId(null);
+            await deleteCommentMutation({ variables: { input: { commentId } } });
             toast.success('Comment deleted');
         } catch {
+            setLoadedComments((prev) => {
+                const exists = prev.some((c) => c.id === commentId);
+                return exists ? prev : loadedComments;
+            });
+            setCommentCount((c) => c + 1);
             toast.error('Failed to delete comment');
         }
     };
@@ -324,6 +334,8 @@ export default function FeedCardWithReply({
                     if (existing) {
                         mapped.hasLiked = existing.hasLiked;
                         mapped.likes = existing.likes;
+                        // Preserve locally-edited content so a background refetch doesn't overwrite it
+                        if (existing.content !== mapped.content) mapped.content = existing.content;
                     }
                     return mapped;
                 });
@@ -1034,6 +1046,59 @@ export default function FeedCardWithReply({
         );
     };
 
+    const renderCommentMenu = (c: Comment, editable: boolean) => (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <button className="ml-auto p-0.5 rounded-full hover:bg-surface-alt text-text-tertiary flex-shrink-0">
+                    <MoreHorizontal className="w-4 h-4" />
+                </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+                {editable && (
+                    <DropdownMenuItem onSelect={() => { setEditCommentText(c.content); setEditingCommentId(c.id); }}>
+                        <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                    </DropdownMenuItem>
+                )}
+                {editable && <DropdownMenuSeparator />}
+                <DropdownMenuItem variant="destructive" onSelect={() => setDeleteCommentId(c.id)}>
+                    <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+
+    const renderCommentBody = (c: Comment) =>
+        editingCommentId === c.id ? (
+            <div className="mb-2">
+                <textarea
+                    className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                    rows={3}
+                    value={editCommentText}
+                    onChange={(e) => setEditCommentText(e.target.value)}
+                    autoFocus
+                />
+                <div className="flex gap-2 justify-end mt-1">
+                    <button
+                        className="px-2 py-1 label-small text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
+                        onClick={() => setEditingCommentId(null)}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className="px-2 py-1 label-small text-white bg-brand rounded-md hover:bg-brand-dark disabled:opacity-50 text-xs"
+                        onClick={() => handleEditCommentSubmit(c.id)}
+                        disabled={editCommentLoading || !editCommentText.trim()}
+                    >
+                        {editCommentLoading ? 'Saving…' : 'Save'}
+                    </button>
+                </div>
+            </div>
+        ) : (
+            <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                {renderRichText(c.content, c.mentionMap)}
+            </p>
+        );
+
     const renderComments = () => {
         if (!showComments) return null;
 
@@ -1085,57 +1150,9 @@ export default function FeedCardWithReply({
                                             <span className="text-text-tertiary text-xs flex-shrink-0">
                                                 {formatDateProximity(c.createdAt)}
                                             </span>
-                                            {isOwnComment(c) && (
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <button className="ml-auto p-0.5 rounded-full hover:bg-surface-alt text-text-tertiary flex-shrink-0">
-                                                            <MoreHorizontal className="w-4 h-4" />
-                                                        </button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-32">
-                                                        {canEditComment(c) && (
-                                                            <DropdownMenuItem onSelect={() => { setEditCommentText(c.content); setEditingCommentId(c.id); }}>
-                                                                <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                        {canEditComment(c) && <DropdownMenuSeparator />}
-                                                        <DropdownMenuItem variant="destructive" onSelect={() => setDeleteCommentId(c.id)}>
-                                                            <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            )}
+                                            {isOwnComment(c) && renderCommentMenu(c, canEditComment(c))}
                                         </div>
-                                        {editingCommentId === c.id ? (
-                                            <div className="mb-2">
-                                                <textarea
-                                                    className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
-                                                    rows={3}
-                                                    value={editCommentText}
-                                                    onChange={(e) => setEditCommentText(e.target.value)}
-                                                    autoFocus
-                                                />
-                                                <div className="flex gap-2 justify-end mt-1">
-                                                    <button
-                                                        className="px-2 py-1 label-small text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
-                                                        onClick={() => setEditingCommentId(null)}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        className="px-2 py-1 label-small text-white bg-brand rounded-md hover:bg-brand-dark disabled:opacity-50 text-xs"
-                                                        onClick={() => handleEditCommentSubmit(c.id)}
-                                                        disabled={editCommentLoading || !editCommentText.trim()}
-                                                    >
-                                                        {editCommentLoading ? 'Saving…' : 'Save'}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
-                                                {renderRichText(c.content, c.mentionMap)}
-                                            </p>
-                                        )}
+                                        {renderCommentBody(c)}
                                         <div className="flex items-center gap-[0.75rem]">
                                             <button
                                                 type="button"
@@ -1187,57 +1204,9 @@ export default function FeedCardWithReply({
                                                         <span className="text-text-tertiary text-xs flex-shrink-0">
                                                             {formatDateProximity(reply.createdAt)}
                                                         </span>
-                                                        {isOwnComment(reply) && (
-                                                            <DropdownMenu>
-                                                                <DropdownMenuTrigger asChild>
-                                                                    <button className="ml-auto p-0.5 rounded-full hover:bg-surface-alt text-text-tertiary flex-shrink-0">
-                                                                        <MoreHorizontal className="w-4 h-4" />
-                                                                    </button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end" className="w-32">
-                                                                    {canEditComment(reply) && (
-                                                                        <DropdownMenuItem onSelect={() => { setEditCommentText(reply.content); setEditingCommentId(reply.id); }}>
-                                                                            <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
-                                                                        </DropdownMenuItem>
-                                                                    )}
-                                                                    {canEditComment(reply) && <DropdownMenuSeparator />}
-                                                                    <DropdownMenuItem variant="destructive" onSelect={() => setDeleteCommentId(reply.id)}>
-                                                                        <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-                                                                    </DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                            </DropdownMenu>
-                                                        )}
+                                                        {isOwnComment(reply) && renderCommentMenu(reply, canEditComment(reply))}
                                                     </div>
-                                                    {editingCommentId === reply.id ? (
-                                                        <div className="mb-2">
-                                                            <textarea
-                                                                className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
-                                                                rows={3}
-                                                                value={editCommentText}
-                                                                onChange={(e) => setEditCommentText(e.target.value)}
-                                                                autoFocus
-                                                            />
-                                                            <div className="flex gap-2 justify-end mt-1">
-                                                                <button
-                                                                    className="px-2 py-1 label-small text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
-                                                                    onClick={() => setEditingCommentId(null)}
-                                                                >
-                                                                    Cancel
-                                                                </button>
-                                                                <button
-                                                                    className="px-2 py-1 label-small text-white bg-brand rounded-md hover:bg-brand-dark disabled:opacity-50 text-xs"
-                                                                    onClick={() => handleEditCommentSubmit(reply.id)}
-                                                                    disabled={editCommentLoading || !editCommentText.trim()}
-                                                                >
-                                                                    {editCommentLoading ? 'Saving…' : 'Save'}
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
-                                                            {renderRichText(reply.content, reply.mentionMap)}
-                                                        </p>
-                                                    )}
+                                                    {renderCommentBody(reply)}
                                                     <div className="flex items-center gap-[0.75rem]">
                                                         <button
                                                             type="button"

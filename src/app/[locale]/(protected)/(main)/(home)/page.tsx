@@ -580,6 +580,8 @@ export default function Home() {
           profileImage={modalProfileData.avatar}
           profileName={modalProfileData.name}
           profileTier={modalProfileData.tier}
+          authorUserId={modalPost.authorType?.toUpperCase() === 'USER' ? modalPost.authorId : undefined}
+          createdAt={modalPost.createdAt}
           category={modalProfileData.type}
           postDate={formatDateProximity(modalPost.createdAt)}
           visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
@@ -597,6 +599,7 @@ export default function Home() {
           onSendComment={(text, parentId) => handleSendComment(modalPost.id, text, parentId)}
           onClose={() => setModalState(null)}
           onNavigatePost={handleNavigatePost}
+          onDelete={removePost}
         />
       )}
     </div>
