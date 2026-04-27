@@ -371,11 +371,14 @@ export default function Events() {
 
     const attendingEvents = userEventsData?.userEvents.attending ?? [];
     const savedEvents = userEventsData?.userEvents.saved ?? [];
-    const allEvents = (eventsData?.listEvents.events ?? []).filter(
-        (e) => e.status !== 'completed' && new Date(e.endAt) >= new Date()
+    const allEvents = useMemo(
+        () => (eventsData?.listEvents.events ?? []).filter(
+            (e) => e.status !== 'completed' && new Date(e.endAt) >= new Date()
+        ),
+        [eventsData]
     );
-    const paidEvents = allEvents.filter(event => event.isPaid);
-    const freeEvents = allEvents.filter(event => !event.isPaid);
+    const paidEvents = useMemo(() => allEvents.filter(event => event.isPaid), [allEvents]);
+    const freeEvents = useMemo(() => allEvents.filter(event => !event.isPaid), [allEvents]);
 
     useEffect(() => {
         setDisplayCurrencyPreference(getStoredDisplayCurrencyPreference());
