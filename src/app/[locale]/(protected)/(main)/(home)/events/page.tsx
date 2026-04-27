@@ -542,7 +542,7 @@ export default function Events() {
                         <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 w-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 w-full">
                         {paidEvents.map((event) => (
                             <PaidEventCard
                                 key={event.id}
