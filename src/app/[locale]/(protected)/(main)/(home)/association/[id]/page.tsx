@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatDateProximity } from '@/macros/time';
 import AboutAssociation from "@/components/cards/association/AboutAssociation";
 import { ButtonType1 } from "@/components/custom/button";
@@ -143,8 +143,14 @@ export default function AssociationPage() {
 
     const [leaveModalOpen, setLeaveModalOpen] = useState(false);
     const [joinModalOpen, setJoinModalOpen] = useState(false);
+    const [localPosts, setLocalPosts] = useState<FeedPost[]>([]);
+
+    useEffect(() => {
+        if (feedData?.feed?.posts) setLocalPosts(feedData.feed.posts);
+    }, [feedData]);
+
     const association = detailsData?.getAssociation;
-    const posts = feedData?.feed?.posts || [];
+    const posts = localPosts;
 
     const status = association?.membershipStatus;
     const joinPolicy = association?.joinPolicy ?? 'OPEN';
@@ -346,6 +352,8 @@ export default function AssociationPage() {
                                 postId={post.id}
                                 profileImage={association.avatarUrl || '/ADANSI.PNG'}
                                 profileName={association.name}
+                                {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
+                                createdAt={post.createdAt}
                                 category={association.name}
                                 postDate={formatDateProximity(post.createdAt)}
                                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
@@ -357,6 +365,7 @@ export default function AssociationPage() {
                                 onComment={() => {}}
                                 onShare={() => {}}
                                 onSave={() => {}}
+                                onDelete={(id) => setLocalPosts(prev => prev.filter(p => p.id !== id))}
                                 joinButton={!isActive}
                             />
                         ))

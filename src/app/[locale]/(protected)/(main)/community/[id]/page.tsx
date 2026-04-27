@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatDateProximity } from '@/macros/time';
 import AboutCommunity from '@/components/cards/community/AboutCommunity';
 import { ButtonType1 } from '@/components/custom/button';
@@ -139,8 +139,14 @@ export default function CommunityDetailPage() {
 
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [localPosts, setLocalPosts] = useState<FeedPost[]>([]);
+
+  useEffect(() => {
+    if (feedData?.feed?.posts) setLocalPosts(feedData.feed.posts);
+  }, [feedData]);
+
   const community = detailsData?.getCommunity;
-  const posts = feedData?.feed?.posts || [];
+  const posts = localPosts;
 
   const status = community?.membershipStatus;
   const joinPolicy = community?.joinPolicy ?? 'OPEN';
@@ -335,6 +341,8 @@ export default function CommunityDetailPage() {
                 postId={post.id}
                 profileImage={community.avatarUrl || '/GLOBE.png'}
                 profileName={community.name}
+                {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
+                createdAt={post.createdAt}
                 category={community.name}
                 postDate={formatDateProximity(post.createdAt)}
                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
@@ -346,6 +354,7 @@ export default function CommunityDetailPage() {
                 onComment={() => {}}
                 onShare={() => {}}
                 onSave={() => {}}
+                onDelete={(id) => setLocalPosts(prev => prev.filter(p => p.id !== id))}
                 joinButton={!isActive}
               />
             ))

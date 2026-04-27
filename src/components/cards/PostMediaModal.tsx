@@ -12,6 +12,7 @@ import {
     DELETE_COMMENT,
     EDIT_COMMENT,
     DELETE_POST,
+    EDIT_POST,
     GetPostCommentsData,
     LikeCommentData,
     RemoveCommentLikeData,
@@ -162,6 +163,7 @@ export default function PostMediaModal({
         setReplyToId(null);
         setShowCommentSheet(false);
         setContentExpanded(false);
+        setIsEditingPost(false);
     }, [postId, initialMediaIndex, initialIsLiked, initialIsSaved, initialLikeCount, initialCommentCount]);
 
     /* comments */
@@ -181,6 +183,9 @@ export default function PostMediaModal({
     const [editingText, setEditingText] = useState('');
     const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false);
+    const [isEditingPost, setIsEditingPost] = useState(false);
+    const [editPostText, setEditPostText] = useState('');
+    const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
     const currentUserId = useUserStore((s) => s.user?.userId);
 
     const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
@@ -188,6 +193,18 @@ export default function PostMediaModal({
     const isOwnComment = (c: Comment) => !!currentUserId && c.authorId === currentUserId;
     const canEditComment = (c: Comment) =>
         isOwnComment(c) && (Date.now() - new Date(c.createdAt).getTime()) < 24 * 60 * 60 * 1000;
+
+    const handleEditPostConfirm = async () => {
+        const newText = editPostText.trim();
+        if (!newText) return;
+        try {
+            await editPostMutation({ variables: { input: { id: postId, text: newText } } });
+            setIsEditingPost(false);
+            toast.success('Post updated');
+        } catch {
+            toast.error('Failed to update post');
+        }
+    };
 
     const handleDeletePostConfirm = async () => {
         try {
@@ -203,6 +220,7 @@ export default function PostMediaModal({
 
     const handleDeleteCommentConfirm = async () => {
         const commentId = deleteCommentId!;
+        const snapshot = [...loadedComments];
         setLoadedComments(prev => prev.filter(c => c.id !== commentId));
         setCommentCount(n => Math.max(0, n - 1));
         setDeleteCommentId(null);
@@ -210,7 +228,7 @@ export default function PostMediaModal({
             await deleteCommentMutation({ variables: { input: { commentId } } });
             toast.success('Comment deleted');
         } catch {
-            setLoadedComments(prev => { /* revert handled externally */ return prev; });
+            setLoadedComments(snapshot);
             setCommentCount(n => n + 1);
             toast.error('Failed to delete comment');
         }
@@ -420,7 +438,7 @@ export default function PostMediaModal({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40">
                         {canEditPost && (
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => { setEditPostText(content); setIsEditingPost(true); }}>
                                 <Pencil className="w-4 h-4 mr-2" /> Edit
                             </DropdownMenuItem>
                         )}
@@ -435,7 +453,26 @@ export default function PostMediaModal({
     );
 
     const isTruncated = content.length > CONTENT_LIMIT && !contentExpanded;
-    const contentEl = (
+    const contentEl = isEditingPost ? (
+        <div>
+            <textarea
+                className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                rows={5}
+                value={editPostText}
+                onChange={e => setEditPostText(e.target.value)}
+                autoFocus
+            />
+            <div className="flex gap-2 justify-end mt-1">
+                <button className="px-2 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
+                    onClick={() => setIsEditingPost(false)}>Cancel</button>
+                <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
+                    onClick={handleEditPostConfirm}
+                    disabled={editPostLoading || !editPostText.trim()}>
+                    {editPostLoading ? 'Saving…' : 'Save'}
+                </button>
+            </div>
+        </div>
+    ) : (
         <p className="body-small text-text-primary whitespace-pre-wrap break-words">
             {isTruncated ? `${content.slice(0, CONTENT_LIMIT)}…` : content}
             {content.length > CONTENT_LIMIT && (
