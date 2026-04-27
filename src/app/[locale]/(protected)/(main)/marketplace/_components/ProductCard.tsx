@@ -5,6 +5,7 @@ import { Heart, Plus, Star } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType3 } from "@/components/custom/button";
+import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import type { CartItem, Product } from "./types";
 
 export function ProductCard({
@@ -17,10 +18,7 @@ export function ProductCard({
   const t = useTranslations("marketplace");
   const locale = useLocale();
   const formatAmount = (value: number) =>
-    new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+    formatAmountWithCurrency(value, product.currency || "GHS", locale);
 
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -77,7 +75,7 @@ export function ProductCard({
       {/* Price (left) + add button (right) */}
       <div className="flex items-center justify-between mt-2">
         <span className="text-base font-bold text-text-primary">
-          GH₵{formatAmount(product.price)}
+          {formatAmount(product.price)}
         </span>
         <button
           type="button"

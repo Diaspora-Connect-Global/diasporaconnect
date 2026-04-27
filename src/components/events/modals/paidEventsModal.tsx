@@ -308,14 +308,14 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
 
     return (
         <CustomDialog
-            contentClassName="lg:min-w-[70rem] h-[80vh] overflow-y-auto scrollbar-hidden"
+            contentClassName="w-full max-w-[95vw] lg:max-w-[70rem] max-h-[90vh] overflow-y-auto scrollbar-hidden"
             showFooter={false}
             title={currentStep === 3 ? (waitlistPosition != null ? 'Waitlisted' : t('title')) : t('title')}
             open={isDialogOpen}
             onOpenChange={closeDialog}
         >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full overflow-y-auto p-6 scrollbar-hide bg-surface-default">
-                <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-y-auto p-3 sm:p-6 scrollbar-hide bg-surface-default">
+                <div className="lg:col-span-2 space-y-4">
                     {currentStep === 1 && (
                         <Step1
                             quantity={ticketQty}

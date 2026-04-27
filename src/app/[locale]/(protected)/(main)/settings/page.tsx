@@ -13,46 +13,17 @@ import {
 } from "@/components/ui/select";
 import LocaleSwitcher from "@/components/LocalSwitcher";
 import { useTheme } from "next-themes";
-import { useLocale, useTranslations } from "next-intl";
-import { useUserStore } from "@/store/useUserStore";
-import {
-  getStoredDisplayCurrencyPreference,
-  resolveDisplayCurrency,
-} from "@/lib/displayCurrency";
-
-type DisplayCurrency = "GHS" | "USD" | "EUR" | "GBP";
+import { useTranslations } from "next-intl";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
-  const locale = useLocale();
   const { theme, setTheme } = useTheme();
-  const residenceCountry = useUserStore((s) => s.user?.residenceCountry);
-  const countryOfOrigin = useUserStore((s) => s.user?.countryOfOrigin);
   const [mounted, setMounted] = useState(false);
-  const [currency, setCurrency] = useState<DisplayCurrency>("USD");
+  const { currency, setDisplayCurrency } = useDisplayCurrency();
 
-  // Ensure component is mounted before rendering theme-dependent UI
   useEffect(() => {
     setMounted(true);
-
-    const stored = getStoredDisplayCurrencyPreference();
-    const resolved = resolveDisplayCurrency({
-      preferredCurrency: stored,
-      residenceCountry,
-      countryOfOrigin,
-      locale,
-    });
-    setCurrency(resolved);
-  }, []);
-
-  useEffect(() => {
-    const onStorage = () => {
-      const stored = getStoredDisplayCurrencyPreference();
-      if (stored) setCurrency(stored);
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   // State for notifications
@@ -79,12 +50,8 @@ export default function SettingsPage() {
     sessionStorage.setItem("theme", newTheme);
   };
 
-  const handleCurrencyChange = (newCurrency: DisplayCurrency) => {
-    setCurrency(newCurrency);
-    localStorage.setItem("preferredCurrency", newCurrency);
-    localStorage.setItem("displayCurrency", newCurrency);
-    sessionStorage.setItem("preferredCurrency", newCurrency);
-    sessionStorage.setItem("displayCurrency", newCurrency);
+  const handleCurrencyChange = (newCurrency: "GHS" | "USD" | "EUR" | "GBP") => {
+    setDisplayCurrency(newCurrency);
   };
 
   return (

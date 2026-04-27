@@ -3,7 +3,7 @@
 import EventCard2 from "@/components/cards/events/EventCard2";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useApolloClient, useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import {
   GET_EVENT,
@@ -37,11 +37,8 @@ import { useUserStore } from "@/store/useUserStore";
 import { useLocale, useTranslations } from "next-intl";
 import { CONVERT_CURRENCY } from "@/services/gql/marketplace";
 import { openPaystackMobileMoney } from "@/lib/paystack";
-import {
-  formatAmountWithCurrency,
-  getStoredDisplayCurrencyPreference,
-  resolveDisplayCurrency,
-} from "@/lib/displayCurrency";
+import { formatAmountWithCurrency } from "@/lib/displayCurrency";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 
 function formatEventDate(iso: string, locale: string) {
   return new Intl.DateTimeFormat(locale, {
@@ -78,12 +75,10 @@ export default function EventDetailPage() {
   const modalRef = useRef<PaidEventsModalRef>(null);
   const locale = useLocale();
   const tEvents = useTranslations("home.events");
-  const residenceCountry = useUserStore((s) => s.user?.residenceCountry);
-  const countryOfOrigin = useUserStore((s) => s.user?.countryOfOrigin);
   const [registrationId, setRegistrationId] = useState<string | null>(null);
   const [optimisticRegistered, setOptimisticRegistered] = useState<boolean | null>(null);
   const [optimisticSaved, setOptimisticSaved] = useState<boolean | null>(null);
-  const [displayCurrencyPreference, setDisplayCurrencyPreference] = useState<string | null>(null);
+  const { currency: preferredDisplayCurrency } = useDisplayCurrency();
   const [convertedPriceLabel, setConvertedPriceLabel] = useState<string | null>(null);
   const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
   const userEmail = useUserStore((s) => s.user?.email);
@@ -127,27 +122,12 @@ export default function EventDetailPage() {
 
   const event = data?.getEvent ?? null;
 
-  useEffect(() => {
-    setDisplayCurrencyPreference(getStoredDisplayCurrencyPreference());
-  }, []);
-
   // Seed registrationId from server if the user is already registered
   useEffect(() => {
     if (event?.myRegistrationId && !registrationId) {
       setRegistrationId(event.myRegistrationId);
     }
   }, [event?.myRegistrationId]);
-
-  const preferredDisplayCurrency = useMemo(
-    () =>
-      resolveDisplayCurrency({
-        preferredCurrency: displayCurrencyPreference,
-        residenceCountry,
-        countryOfOrigin,
-        locale,
-      }),
-    [displayCurrencyPreference, residenceCountry, countryOfOrigin, locale]
-  );
 
   useEffect(() => {
     let cancelled = false;

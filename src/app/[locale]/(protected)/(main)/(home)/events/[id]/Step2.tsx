@@ -96,12 +96,12 @@ export default function Step2({
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 p-4 bg-surface-default">
+    <div className="w-full space-y-6 bg-surface-default">
       {/* ---------- Billing Information ---------- */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900">{t('billingInformation')}</h2>
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-text-primary">{t('billingInformation')}</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <TextInput
             label={tOnboarding('personalInfo.firstName.label')}
             placeholder={tOnboarding('personalInfo.firstName.placeholder')}
@@ -129,51 +129,48 @@ export default function Step2({
       </section>
 
       {/* ---------- Pay with ---------- */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-gray-900">{t('payWith')}</h2>
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-text-primary">{t('payWith')}</h2>
 
-        {/* ---- Credit Card ---- */}
+        {/* ---- Credit Card (Stripe) ---- */}
         <div
-          className={`
-            rounded-xl border overflow-hidden transition-all
-            ${localOpenMethod === 'card' ? 'border-border-brand' : 'border-border-subtle'}
-          `}
+          className={`rounded-xl border overflow-hidden transition-all ${
+            localOpenMethod === 'card' ? 'border-border-brand' : 'border-border-subtle'
+          }`}
         >
           <div
-            className="flex items-center justify-between p-4 cursor-pointer bg-surface-subtle hover:bg-surface-hover transition-colors"
+            className="flex items-center justify-between p-3 cursor-pointer bg-surface-subtle hover:bg-surface-hover transition-colors"
             onClick={(e) => toggleMethod(e, 'card')}
           >
             <div className="flex items-center gap-3">
-              <CreditCard className="w-5 h-5 text-gray-700" />
-              <span className="font-medium text-gray-900">{t('creditCard')}</span>
+              <CreditCard className="w-5 h-5 text-text-primary" />
+              <span className="font-medium text-text-primary text-sm">{t('creditCard')}</span>
             </div>
-            {localOpenMethod === 'card' ? null : <ChevronRight className="w-5 h-5 text-gray-500" />}
+            {localOpenMethod === 'card' ? null : <ChevronRight className="w-4 h-4 text-text-secondary" />}
           </div>
 
           {localOpenMethod === 'card' && (
-            <div className="border-t p-6 space-y-5">
-              {/* Card number */}
+            <div className="border-t p-3 space-y-3">
               <div>
-                <label className="block label-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-primary mb-1">
                   {t('cardNumber')}
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                    <CreditCard className="w-5 h-5 text-text-secondary" />
+                    <CreditCard className="w-4 h-4 text-text-secondary" />
                   </div>
                   <input
                     type="text"
                     placeholder={t('cardNumberPlaceholder')}
                     value={cardNumber}
                     onChange={(e) => onCardNumberChange(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-lg border bg-surface-subtle text-text-primary placeholder-text-secondary focus:border-border-brand focus:ring-0 outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border bg-surface-subtle text-text-primary placeholder:text-text-secondary focus:border-border-brand focus:ring-0 outline-none text-sm"
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Exp date */}
+              <div className="grid grid-cols-2 gap-3">
                 <TextInput
                   label={t('expDate')}
                   placeholder={t('expDatePlaceholder')}
@@ -181,10 +178,8 @@ export default function Step2({
                   onChange={onExpDateChange}
                   id="expDate"
                 />
-
-                {/* CVV */}
                 <div>
-                  <label className="block label-medium text-text-primary mb-1">
+                  <label className="block text-sm font-medium text-text-primary mb-1">
                     {t('cvv')}
                   </label>
                   <div className="relative">
@@ -194,15 +189,15 @@ export default function Step2({
                       value={cvv}
                       onChange={(e) => onCvvChange(e.target.value)}
                       maxLength={4}
-                      className="w-full pr-12 pl-4 py-3 rounded-lg border bg-surface-subtle text-gray-900 placeholder-gray-400 focus:border-border-brand focus:ring-0 outline-none"
+                      className="w-full pr-10 pl-3 py-2.5 rounded-lg border bg-surface-subtle text-text-primary placeholder:text-text-secondary focus:border-border-brand focus:ring-0 outline-none text-sm"
                       onClick={(e) => e.stopPropagation()}
                     />
                     <ButtonType3
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary p-0 min-w-0 border-0 bg-transparent"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary p-0 min-w-0 border-0 bg-transparent"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <HelpCircle className="w-5 h-5" />
+                      <HelpCircle className="w-4 h-4" />
                     </ButtonType3>
                   </div>
                 </div>
@@ -211,33 +206,31 @@ export default function Step2({
           )}
         </div>
 
-        {/* ---- Mobile Payment ---- */}
+        {/* ---- Mobile Money (Paystack) ---- */}
         <div
-          className={`
-            rounded-xl border overflow-hidden transition-all
-            ${localOpenMethod === 'mobile' ? 'border-border-brand' : 'border-border-subtle'}
-          `}
+          className={`rounded-xl border overflow-hidden transition-all ${
+            localOpenMethod === 'mobile' ? 'border-border-brand' : 'border-border-subtle'
+          }`}
         >
           <div
-            className="flex items-center justify-between p-4 cursor-pointer bg-surface-subtle hover:bg-surface-hover transition-colors"
+            className="flex items-center justify-between p-3 cursor-pointer bg-surface-subtle hover:bg-surface-hover transition-colors"
             onClick={(e) => toggleMethod(e, 'mobile')}
           >
             <div className="flex items-center gap-3">
-              <Smartphone className="w-5 h-5 text-gray-700" />
-              <span className="font-medium text-gray-900">{t('mobilePayment')}</span>
+              <Smartphone className="w-5 h-5 text-text-primary" />
+              <span className="font-medium text-text-primary text-sm">{t('mobilePayment')}</span>
             </div>
-            {localOpenMethod === 'mobile' ? null : <ChevronRight className="w-5 h-5 text-text-primary" />}
+            {localOpenMethod === 'mobile' ? null : <ChevronRight className="w-4 h-4 text-text-secondary" />}
           </div>
 
           {localOpenMethod === 'mobile' && (
-            <div className="border-t p-6 space-y-6">
-              {/* Providers */}
-              <div className="grid grid-cols-3 gap-3">
+            <div className="border-t p-3 space-y-4">
+              <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: 'mtn', label: t('mobileProviders.mtn'), bg: 'bg-yellow-500' },
                   { id: 'telecel', label: t('mobileProviders.telecel'), bg: 'bg-red-600' },
                   { id: 'at', label: t('mobileProviders.at'), bg: 'bg-blue-600' },
-                ].map((p) => (
+                ].map((p) =>
                   mobileProvider === p.id ? (
                     <ButtonType2
                       key={p.id}
@@ -246,10 +239,10 @@ export default function Step2({
                         e.stopPropagation();
                         onMobileProviderChange(p.id as MobileProvider);
                       }}
-                      className="flex flex-col items-center p-3 rounded-xl border-2 border-border-brand shadow-sm"
+                      className="flex flex-col items-center p-2 rounded-xl border-2 border-border-brand shadow-sm"
                     >
-                      <div className={`w-10 h-10 rounded-lg ${p.bg}`} />
-                      <p className="mt-2 font-medium text-text-primary text-xs leading-tight">
+                      <div className={`w-8 h-8 rounded-lg ${p.bg}`} />
+                      <p className="mt-1.5 font-medium text-text-primary text-xs leading-tight text-center">
                         {p.label}
                       </p>
                     </ButtonType2>
@@ -261,30 +254,29 @@ export default function Step2({
                         e.stopPropagation();
                         onMobileProviderChange(p.id as MobileProvider);
                       }}
-                      className="flex flex-col items-center p-3 rounded-xl border-2 border-border-subtle"
+                      className="flex flex-col items-center p-2 rounded-xl border-2 border-border-subtle"
                     >
-                      <div className={`w-10 h-10 rounded-lg ${p.bg}`} />
-                      <p className="mt-2 font-medium text-text-primary text-xs leading-tight">
+                      <div className={`w-8 h-8 rounded-lg ${p.bg}`} />
+                      <p className="mt-1.5 font-medium text-text-primary text-xs leading-tight text-center">
                         {p.label}
                       </p>
                     </ButtonType3>
                   )
-                ))}
+                )}
               </div>
 
-              {/* Phone number */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-primary mb-1">
                   {t('phoneNumber')}
                 </label>
-                <InputGroup className="px-3 py-6 border border-border-default rounded-sm bg-surface-subtle focus-within:border-border-brand">
+                <InputGroup className="px-3 py-2 border border-border-default rounded-lg bg-surface-subtle focus-within:border-border-brand">
                   <InputGroupAddon>
                     <InputGroupText>
                       <span aria-hidden>{countryFlag}</span>
                     </InputGroupText>
                   </InputGroupAddon>
                   <InputGroupAddon>
-                    <InputGroupText className="text-text-primary">
+                    <InputGroupText className="text-text-primary text-sm">
                       <TextPrimary>{dialCode}</TextPrimary>
                     </InputGroupText>
                   </InputGroupAddon>
@@ -292,7 +284,7 @@ export default function Step2({
                     value={phoneNumber}
                     onChange={(e) => onPhoneNumberChange(e.target.value)}
                     placeholder={t('phoneNumberPlaceholder')}
-                    className="text-text-primary body-large px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0"
+                    className="text-text-primary text-sm px-2 py-1 ml-2 focus:outline-none focus:ring-0 border-0 min-w-0"
                     maxLength={10}
                   />
                 </InputGroup>

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
+import { formatAmountWithCurrency } from "@/lib/displayCurrency";
+import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import type { CartItem } from "./types";
 
 export function ShoppingCartModal({
@@ -22,11 +24,9 @@ export function ShoppingCartModal({
 }) {
   const t = useTranslations("marketplace");
   const locale = useLocale();
+  const { currency } = useDisplayCurrency();
   const formatAmount = (value: number) =>
-    new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+    formatAmountWithCurrency(value, currency, locale);
   const total = useMemo(
     () =>
       cart.reduce(
@@ -92,13 +92,13 @@ export function ShoppingCartModal({
                         : []
                       ).map((extra) => (
                         <li key={extra.id}>
-                          {extra.name} — GH₵{formatAmount(extra.price)}
+                          {extra.name} — {formatAmount(extra.price)}
                         </li>
                       ))}
                       {(!item.serviceExtras || item.serviceExtras.length === 0) &&
                         item.extrasTotal != null &&
                         item.extrasTotal > 0 && (
-                          <li>Extras — GH₵{formatAmount(item.extrasTotal)}</li>
+                          <li>Extras — {formatAmount(item.extrasTotal)}</li>
                         )}
                     </ul>
                   )}
@@ -122,7 +122,7 @@ export function ShoppingCartModal({
                 </div>
                 <div className="text-right">
                   <p className="font-bold mb-2">
-                    GH₵{formatAmount(lineTotal)}
+                    {formatAmount(lineTotal)}
                   </p>
                   <ButtonType4Pill
                     onClick={() => onRemoveItem(lineKey)}
@@ -136,10 +136,10 @@ export function ShoppingCartModal({
           })}
           <div className="mt-6 text-right">
             <p className="text-sm text-text-secondary mb-1">
-              {t("oneTimeFee")}: GH₵{formatAmount(20)}
+              {t("oneTimeFee")}: {formatAmount(20)}
             </p>
             <p className="text-2xl font-bold mb-4 text-text-primary">
-              {t("total")}: GH₵{formatAmount(total + 20)}
+              {t("total")}: {formatAmount(total + 20)}
             </p>
             <ButtonType2
               onClick={onCheckout}
