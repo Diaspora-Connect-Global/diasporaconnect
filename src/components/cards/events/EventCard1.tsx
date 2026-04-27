@@ -28,15 +28,15 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
     const tActions = useTranslations('actions');
 
     return (
-        <div className="w-full max-w-lg bg-surface-default rounded-2xl overflow-hidden shadow-sm border border-border-subtle">
+        <div className="w-full bg-surface-default rounded-2xl overflow-hidden shadow-sm border border-border-subtle">
             {/* Header Image */}
-            <div className="relative h-64 rounded-t-2xl overflow-hidden">
+            <div className="relative h-40 rounded-t-2xl overflow-hidden">
                 <Image
                     src={imageUrl}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
                     fill
                     sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="w-full h-full object-fill"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
                         e.currentTarget.style.display = "none";
                         e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
@@ -48,51 +48,52 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
                         alt={`Default image for event: ${title}`}
                         fill
                         sizes="(max-width: 1024px) 100vw, 33vw"
-                        className="w-full h-full object-fill"
+                        className="w-full h-full object-cover"
                     />
                 </div>
+                {priceLabel && (
+                    <span className="absolute top-2 right-2 bg-surface-default/90 backdrop-blur-sm text-text-primary text-xs font-semibold px-2 py-1 rounded-full border border-border-subtle">
+                        {priceLabel}
+                    </span>
+                )}
             </div>
 
             {/* Event Details */}
-            <div className="p-6">
-                <div className="flex justify-between items-start mb-2 gap-4">
-                    <Link href={eventId ? `/events/${eventId}` : "/events"} className="flex flex-col items-start min-w-0">
-                        <h2 className="text-2xl font-bold text-text-primary truncate max-w-full">{title}</h2>
-                        {visibility && visibility !== 'public' && (
-                            <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-surface-subtle text-text-secondary capitalize border border-border-subtle">
-                                {visibility.replace('_', ' ')}
-                            </span>
-                        )}
+            <div className="px-4 py-3">
+                <div className="flex flex-col items-start min-w-0 mb-1">
+                    <Link href={eventId ? `/events/${eventId}` : "/events"} className="min-w-0 w-full">
+                        <h2 className="text-base font-bold text-text-primary truncate">{title}</h2>
                     </Link>
-                    {priceLabel && (
-                        <p className="text-text-primary whitespace-nowrap"><span className="text-lg font-bold text-text-primary">{priceLabel}</span></p>
+                    {visibility && visibility !== 'public' && (
+                        <span className="inline-block mt-0.5 px-2 py-0.5 text-xs rounded-full bg-surface-subtle text-text-secondary capitalize border border-border-subtle">
+                            {visibility.replace('_', ' ')}
+                        </span>
                     )}
                 </div>
-                <p className="text-lg font-semibold text-text-primary mt-1">{date}</p>
-                <p className="text-text-secondary mb-1">{location}</p>
-                <p className="text-text-secondary text-sm mb-6">{tActions('going', { count: attendees })}</p>
+                <p className="text-sm font-semibold text-text-primary">{date}</p>
+                <p className="text-xs text-text-secondary truncate">{location}</p>
+                <p className="text-xs text-text-secondary mb-3">{tActions('going', { count: attendees })}</p>
 
                 {/* Action Buttons */}
-                <div className="flex mt-1 space-x-2">
+                <div className="flex space-x-2">
                     <ButtonType1
                         onClick={onSaveClick}
                         className={`flex items-center justify-center overflow-hidden ${isSaved ? "bg-text-brand text-text-white border-text-brand" : ""}`}
-                        size="lg"
                     >
-                        <Bookmark className={`w-6 h-6 ${isSaved ? "fill-current" : ""}`} />
+                        <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
                         <span className="sr-only">{isSaved ? tActions('saved') : tActions('save')}</span>
                     </ButtonType1>
-                    <ButtonType2 size="lg"
+                    <ButtonType2
                         onClick={onAttendClick}
                         disabled={isRegistered || isSoldOut}
-                        className="flex w-full text-center justify-center">
+                        className="flex w-full text-center justify-center text-sm">
                         {isRegistered ? tActions('attending') : isSoldOut ? tActions('soldOut') : tActions('attend')}
                     </ButtonType2>
                     {isRegistered && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <ButtonType1 className="flex items-center justify-center overflow-hidden" size="lg">
-                                    <EllipsisVertical className="w-5 h-5" />
+                                <ButtonType1 className="flex items-center justify-center overflow-hidden">
+                                    <EllipsisVertical className="w-4 h-4" />
                                 </ButtonType1>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
