@@ -15,6 +15,7 @@ import LocaleSwitcher from "@/components/LocalSwitcher";
 import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
+import type { DisplayCurrency } from "@/store/useCurrencyStore";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
