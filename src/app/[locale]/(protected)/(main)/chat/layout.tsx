@@ -20,16 +20,16 @@ export default function ChatLayout({
     }, []);
 
     return (
-        <div className="flex w-full lg:w-[80vw] h-app-inner mx-auto "> 
+        <div className="flex w-full lg:w-[80vw] h-app-inner mx-auto overflow-hidden">
             {/* Sidebar - hidden on mobile when chat is active */}
-            <div className={`w-full md:w-[350px] lg:w-[30vw] px-2 ${
+            <div className={`flex-shrink-0 w-full md:w-[350px] lg:w-[30vw] min-w-0 ${
                 isMobile && activeChat ? 'hidden' : 'block'
             }`}>
                 <ChatSideBar />
             </div>
-            
+
             {/* Chat area - hidden on mobile when no chat is active */}
-            <div className={`flex-1 scrollbar-hide w-full lg:w-[50vw] h-app-inner px-2 rounded-md  overflow-hidden ${
+            <div className={`flex-1 min-w-0 h-app-inner overflow-hidden ${
                 isMobile && !activeChat ? 'hidden' : 'block'
             }`}>
                 {children}

@@ -41,7 +41,7 @@ export default function ChatSideBar() {
     const searchParams = useSearchParams();
 
     const [searchQuery, setSearchQuery] = useState('');
-    const { activeChat, setActiveChat, setRealConversation } = useChatStore();
+    const { activeChat, setActiveChat, setRealConversation, setTotalChatUnreadCount } = useChatStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'direct' | 'group'>('direct');
     const [directChats, setDirectChats] = useState<ChatItem[]>([]);
@@ -258,6 +258,15 @@ export default function ChatSideBar() {
 
     const directUnreadCount = directChats.reduce((sum, chat) => sum + chat.unread, 0);
 
+    const groupsUnreadCount = (conversationsData?.getConversations ?? [])
+        .filter((conv: any) => conv.type === 'GROUP' || conv.type === 'group')
+        .reduce((sum: number, conv: any) => sum + (conv.unreadCount ?? 0), 0);
+
+    // Keep global store in sync so the navbar badge reflects real-time totals
+    useEffect(() => {
+        setTotalChatUnreadCount(directUnreadCount + groupsUnreadCount);
+    }, [directUnreadCount, groupsUnreadCount, setTotalChatUnreadCount]);
+
     // Filter based on search query
     const filteredDirectMessages = directChats.filter(chat =>
         chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -343,7 +352,7 @@ export default function ChatSideBar() {
                             active={activeTab === 'groups'}
                             onClick={() => handleTabChange('groups')}
                             label={t('groups')}
-                            notificationCount={0}
+                            notificationCount={groupsUnreadCount}
                         />
                     </div>
                 </div>

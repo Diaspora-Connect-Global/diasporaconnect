@@ -29,6 +29,7 @@ import { LogoutConfirmModal } from '../auth/LogoutConfirmModal';
 import { clearStorage } from '@/lib/logout';
 import { useUserStore } from '@/store/useUserStore';
 import { useNotificationBadge } from '@/hooks/useNotificationBadge';
+import { useChatStore } from '@/store/ChatStore';
 
 export default function Header({
   children,
@@ -41,6 +42,7 @@ export default function Header({
   const t = useTranslations('home.header');
   const tCommon = useTranslations('common');
   const { count: unreadNotificationCount } = useNotificationBadge(true);
+  const totalChatUnreadCount = useChatStore((s) => s.totalChatUnreadCount);
 
   const handleSearch = () => {
     console.log('Searching for:', searchQuery);
@@ -77,7 +79,9 @@ export default function Header({
         {navigation.map((item) => {
           const active = isActive(item.href);
           const isNotification = item.href.includes('/notification');
-          const showBadge = isNotification && unreadNotificationCount > 0;
+          const isChat = item.href.includes('/chat');
+          const showNotificationBadge = isNotification && unreadNotificationCount > 0;
+          const showChatBadge = isChat && totalChatUnreadCount > 0;
           return (
             <Link
               key={item.name}
@@ -98,12 +102,20 @@ export default function Header({
                   alt={`${item.name} Icon`}
                   className="w-6 h-6 object-contain"
                 />
-                {showBadge && (
+                {showNotificationBadge && (
                   <span
                     className="absolute -top-1 -right-1 min-w-[1rem] h-4 px-1 flex items-center justify-center rounded-full bg-text-danger text-white text-[10px] font-medium"
                     aria-label={`${unreadNotificationCount} unread notifications`}
                   >
                     {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                  </span>
+                )}
+                {showChatBadge && (
+                  <span
+                    className="absolute -top-1 -right-1 min-w-[1rem] h-4 px-1 flex items-center justify-center rounded-full bg-text-danger text-white text-[10px] font-medium"
+                    aria-label={`${totalChatUnreadCount} unread messages`}
+                  >
+                    {totalChatUnreadCount > 99 ? '99+' : totalChatUnreadCount}
                   </span>
                 )}
               </div>

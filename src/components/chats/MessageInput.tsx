@@ -110,7 +110,8 @@ export function MessageInput({
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey && !disabled) {
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        if (e.key === 'Enter' && !e.shiftKey && !disabled && !isMobile) {
             e.preventDefault();
             handleSendMessage();
         }

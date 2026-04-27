@@ -38,12 +38,14 @@ interface ChatStore {
   groups: Group[];
   groupMembers: GroupMember[];
   activeChat: { id: string; type: 'direct' | 'group' } | null;
+  totalChatUnreadCount: number;
 
   // Real conversation IDs (from API) - maps chatId -> conversation data
   realConversations: Map<string, { conversationId: string; type: 'DIRECT' | 'GROUP'; participantIds: string[] }>;
 
   // Actions
   setActiveChat: (chat: { id: string; type: 'direct' | 'group' } | null) => void;
+  setTotalChatUnreadCount: (count: number) => void;
   addMessage: (message: Message) => void;
   addApiMessage: (message: ApiMessage) => void;
   removeApiMessage: (messageId: string) => void;
@@ -83,12 +85,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   groups: [],
   groupMembers: [],
   activeChat: null,
+  totalChatUnreadCount: 0,
   realConversations: new Map(),
 
   // Basic setters
   setUsers: (users: User[]) => set({ users }),
   setGroups: (groups: Group[]) => set({ groups }),
   setActiveChat: (activeChat) => set({ activeChat }),
+  setTotalChatUnreadCount: (count) => set({ totalChatUnreadCount: count }),
 
   // Initialize with mock data
   initializeFromMockData: () => {
