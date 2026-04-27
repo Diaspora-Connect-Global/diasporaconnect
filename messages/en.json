@@ -375,6 +375,12 @@
             "chat": "Chat",
             "notification": "Notification",
             "searchLabel": "Search Diasplug ...",
+            "recentSearches": "Recent",
+            "clearAll": "Clear all",
+            "startTyping": "Start typing to search",
+            "searching": "Searching...",
+            "noResults": "No results found",
+            "viewAllResults": "View all results for",
             "profile": "Profile",
             "becomeVendor": "Become a vendor",
             "wallet": "Wallet",
@@ -1370,5 +1376,17 @@
                 "savePayoutMethod": "Save payout method"
             }
         }
+    },
+    "search": {
+        "filterBy": "Filter by",
+        "seeAll": "See all",
+        "loadMore": "Load more",
+        "people": "People",
+        "opportunities": "Opportunities",
+        "groups": "Groups",
+        "events": "Events",
+        "marketplace": "Marketplace",
+        "communities": "Communities",
+        "associations": "Associations"
     }
 }

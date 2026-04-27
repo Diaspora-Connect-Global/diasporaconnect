@@ -375,6 +375,12 @@
             "chat": "Chat",
             "notification": "Melding",
             "searchLabel": "Diasplug doorzoeken ...",
+            "recentSearches": "Recent",
+            "clearAll": "Alles wissen",
+            "startTyping": "Begin te typen om te zoeken",
+            "searching": "Zoeken...",
+            "noResults": "Geen resultaten gevonden",
+            "viewAllResults": "Bekijk alle resultaten voor",
             "profile": "Profiel",
             "becomeVendor": "Verkoper worden",
             "wallet": "Portemonnee",
@@ -1370,5 +1376,17 @@
                 "savePayoutMethod": "Uitbetalingsmethode opslaan"
             }
         }
+    },
+    "search": {
+        "filterBy": "Filteren op",
+        "seeAll": "Alles zien",
+        "loadMore": "Meer laden",
+        "people": "Mensen",
+        "opportunities": "Kansen",
+        "groups": "Groepen",
+        "events": "Evenementen",
+        "marketplace": "Marktplaats",
+        "communities": "Gemeenschappen",
+        "associations": "Verenigingen"
     }
 }

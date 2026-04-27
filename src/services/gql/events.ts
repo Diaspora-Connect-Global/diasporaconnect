@@ -143,6 +143,32 @@ export interface ValidatePromoCodeResult {
   reason?: string | null;
 }
 
+export interface SearchEventsInput {
+  query: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchEventsResponse {
+  searchEvents: {
+    success: boolean;
+    message?: string;
+    total: number;
+    events: Array<{
+      id: string;
+      title: string;
+      description?: string;
+      startAt: string;
+      endAt: string;
+      eventCategory?: string;
+      status: string;
+      visibility: string;
+      ownerType: string;
+      ownerId: string;
+    }>;
+  };
+}
+
 export interface CreateEventInput {
   ownerType: 'user' | 'community' | 'association';
   ownerId?: string;
@@ -854,3 +880,25 @@ export function getEventCoverImage(event: Pick<Event, 'coverImageUrl'>): string 
 export function formatPrice(cents: number, currency = 'GHS'): string {
   return `${currency} ${(cents / 100).toFixed(2)}`;
 }
+
+export const SEARCH_EVENTS = gql`
+  query SearchEvents($query: String!, $limit: Int, $offset: Int) {
+    searchEvents(query: $query, limit: $limit, offset: $offset) {
+      success
+      message
+      total
+      events {
+        id
+        title
+        description
+        startAt
+        endAt
+        eventCategory
+        status
+        visibility
+        ownerType
+        ownerId
+      }
+    }
+  }
+`;

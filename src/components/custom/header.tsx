@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cloneElement, isValidElement, ReactNode, useState } from 'react';
 import Image from 'next/image';
-import { SearchInput } from './input';
+import GlobalSearchBar from './GlobalSearchBar';
 import { ThemeToggle } from '@/app/[locale]/theme-toggle';
 import { useTranslations } from 'next-intl';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -38,16 +38,10 @@ export default function Header({
 }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const t = useTranslations('home.header');
   const tCommon = useTranslations('common');
   const { count: unreadNotificationCount } = useNotificationBadge(true);
   const totalChatUnreadCount = useChatStore((s) => s.totalChatUnreadCount);
-
-  const handleSearch = () => {
-    console.log('Searching for:', searchQuery);
-    // Add your search logic here
-  };
 
   const segments = pathname.split('/').filter(segment => segment);
   const currentLocale = segments[0] || 'en';
@@ -180,16 +174,8 @@ export default function Header({
 
               {/* Right Section - Search, Language, Profile */}
               <div className="flex items-center space-x-1"> {/* Standard spacing */}
-                {/* Search Box - Hidden on mobile */}
-                <div className="lg:w-50 w-[80%] ">
-                  <SearchInput
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    onSearch={handleSearch}
-                    placeholder={t('searchLabel')}
-                    id="main-search"
-                  />
-                </div>
+                {/* Search */}
+                <GlobalSearchBar />
 
                 {/* Language Selector and Theme Toggle */}
                 <div className="hidden  items-center space-x-2">

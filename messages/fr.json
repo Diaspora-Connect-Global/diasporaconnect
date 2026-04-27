@@ -374,6 +374,12 @@
             "chat": "Chat",
             "notification": "Notifications",
             "searchLabel": "Rechercher sur Diasplug ...",
+            "recentSearches": "Récent",
+            "clearAll": "Tout effacer",
+            "startTyping": "Commencez à taper pour rechercher",
+            "searching": "Recherche...",
+            "noResults": "Aucun résultat trouvé",
+            "viewAllResults": "Voir tous les résultats pour",
             "profile": "Profil",
             "becomeVendor": "Devenir vendeur",
             "wallet": "Portefeuille",
@@ -1370,5 +1376,17 @@
         "save": "Enregistrer",
         "cancel": "Annuler",
         "saving": "Enregistrement..."
+    },
+    "search": {
+        "filterBy": "Filtrer par",
+        "seeAll": "Voir tout",
+        "loadMore": "Charger plus",
+        "people": "Personnes",
+        "opportunities": "Opportunités",
+        "groups": "Groupes",
+        "events": "Événements",
+        "marketplace": "Marché",
+        "communities": "Communautés",
+        "associations": "Associations"
     }
 }

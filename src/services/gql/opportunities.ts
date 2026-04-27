@@ -351,3 +351,47 @@ export const UNSAVE_OPPORTUNITY = gql`
     unsaveOpportunity(id: $id)
   }
 `;
+
+export interface SearchOpportunitiesResponse {
+  searchOpportunities: {
+    total: number;
+    opportunities: Array<{
+      id: string;
+      title: string;
+      description?: string;
+      category?: string;
+      type?: string;
+      location?: string;
+      deadline?: string;
+      compensationType?: string;
+      compensationMin?: number;
+      compensationMax?: number;
+      compensationCurrency?: string;
+      status: string;
+      owner?: { id: string; name: string; avatarUrl?: string; type: string };
+    }>;
+  };
+}
+
+export const SEARCH_OPPORTUNITIES = gql`
+  query SearchOpportunities($query: String!, $limit: Int, $offset: Int) {
+    searchOpportunities(query: $query, limit: $limit, offset: $offset) {
+      total
+      opportunities {
+        id
+        title
+        description
+        category
+        type
+        location
+        deadline
+        compensationType
+        compensationMin
+        compensationMax
+        compensationCurrency
+        status
+        owner { id name avatarUrl type }
+      }
+    }
+  }
+`;
