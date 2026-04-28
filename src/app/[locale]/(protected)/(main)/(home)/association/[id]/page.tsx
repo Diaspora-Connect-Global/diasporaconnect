@@ -50,6 +50,7 @@ interface FeedPost {
     authorType: string;
     createdAt: string;
     visibility?: string;
+    mentions?: { handle: string; entityId: string }[];
     engagementCounts: {
         likes: number;
         comments: number;
