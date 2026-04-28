@@ -373,6 +373,11 @@ export interface AddEngagementInput {
   engagementType: EngagementType;
 }
 
+export interface RemoveEngagementInput {
+  postId: string;
+  engagementType: EngagementType;
+}
+
 /**
  * Input for creating a comment.
  *

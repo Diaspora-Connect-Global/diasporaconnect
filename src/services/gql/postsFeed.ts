@@ -16,6 +16,7 @@ export type {
   CreatePostInput,
   EditPostInput,
   AddEngagementInput,
+  RemoveEngagementInput,
   CreateCommentInput,
   LikeCommentInput,
   DeleteCommentInput,
@@ -276,7 +277,7 @@ export const ADD_ENGAGEMENT = gql`
 `;
 
 export const REMOVE_ENGAGEMENT = gql`
-  mutation RemoveEngagement($input: AddEngagementInput!) {
+  mutation RemoveEngagement($input: RemoveEngagementInput!) {
     removeEngagement(input: $input) {
       success
     }

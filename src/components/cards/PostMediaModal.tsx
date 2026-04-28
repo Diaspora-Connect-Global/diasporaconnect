@@ -303,6 +303,8 @@ export default function PostMediaModal({
                     setLoadedComments(prev => prev.map(c =>
                         c.id === commentId ? { ...c, hasLiked: false, likes: data.removeCommentLike.likeCount } : c
                     ));
+                } else {
+                    throw new Error('no data');
                 }
             } else {
                 const { data } = await likeCommentMutation({ variables: { input: { commentId } } });
@@ -310,10 +312,12 @@ export default function PostMediaModal({
                     setLoadedComments(prev => prev.map(c =>
                         c.id === commentId ? { ...c, hasLiked: true, likes: data.likeComment.likeCount } : c
                     ));
+                } else {
+                    throw new Error('no data');
                 }
             }
         } catch {
-            // Revert optimistic update on failure
+            // Revert optimistic update on failure or missing response
             setLoadedComments(prev => prev.map(c =>
                 c.id === commentId ? { ...c, hasLiked: wasLiked, likes: c.likes + (wasLiked ? 1 : -1) } : c
             ));
