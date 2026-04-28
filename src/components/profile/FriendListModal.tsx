@@ -69,6 +69,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [shouldShowStaleResults, setShouldShowStaleResults] = useState(false);
+  const [dismissedSuggestedIds, setDismissedSuggestedIds] = useState<Set<string>>(new Set());
   
   // Ref to track the latest search term to prevent stale updates
   const searchTermRef = useRef(searchTerm);
@@ -304,6 +305,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     setDebouncedSearchTerm("");
     setIsSearching(false);
     setShouldShowStaleResults(true);
+    setDismissedSuggestedIds(new Set());
   }, [activeTab]);
 
   /* --------------------- Handle name click --------------------- */
@@ -319,6 +321,8 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
     return allFriends.filter((f) => {
       if (f.tabType !== activeTab) return false;
 
+      if (activeTab === "suggested" && dismissedSuggestedIds.has(f.userId)) return false;
+
       if (activeTab !== "suggested" && searchTerm) {
         if (!f.name.toLowerCase().includes(searchTerm.toLowerCase())) {
           return false;
@@ -327,7 +331,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
       return true;
     });
-  }, [activeTab, searchTerm, allFriends]);
+  }, [activeTab, searchTerm, allFriends, dismissedSuggestedIds]);
 
   /* --------------------- Dynamic counts --------------------- */
   const counts = useMemo(() => {
@@ -400,6 +404,9 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
   /* --------------------- Card renderer --------------------- */
   const renderCard = (friend: Friend) => {
     const key = `${friend.tabType}-${friend.userId}`;
+    const onConnectionAction = friend.tabType === "suggested"
+      ? () => setDismissedSuggestedIds(prev => new Set([...prev, friend.userId]))
+      : undefined;
 
     return (
       <FriendsCard
@@ -409,9 +416,10 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         imageSrc={friend.imageSrc}
         mutualConnections={friend.mutualConnections}
         tier={friend.tier}
-        status={friend.connectionStatus} 
+        status={friend.connectionStatus}
         connectionId={friend.connectionId}
         onNameClick={handleNameClick}
+        onConnectionAction={onConnectionAction}
         searchQuery={friend.searchQuery}
         isSearching={friend.isSearching}
       />

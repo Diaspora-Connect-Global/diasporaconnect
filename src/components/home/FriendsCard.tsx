@@ -28,6 +28,9 @@ interface FriendsCardProps {
     /** New prop for handling name click */
     onNameClick?: (userId: string) => void;
 
+    /** Callback fired after any connection action (add, accept, cancel, etc.) */
+    onConnectionAction?: () => void;
+
     /** Search context for refetching */
     searchQuery?: string;
     isSearching?: boolean;
@@ -85,6 +88,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
     customDropdownOptions,
     connectionId,
     onNameClick,
+    onConnectionAction,
     searchQuery = "",
     isSearching = false,
 }) => {
@@ -179,6 +183,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
                 connectionId={connectionId}
                 searchQuery={searchQuery}
                 isSearching={isSearching}
+                onConnectionAction={onConnectionAction}
             />
         </div>
     );
