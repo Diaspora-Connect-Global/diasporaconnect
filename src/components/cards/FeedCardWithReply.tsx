@@ -305,7 +305,7 @@ export default function FeedCardWithReply({
             try {
                 if (wasLiked) {
                     const { data } = await removeCommentLikeMutation({ variables: { input: { commentId } } });
-                    if (data?.removeCommentLike != null) {
+                    if (data?.removeCommentLike?.success) {
                         setLoadedComments((prev) =>
                             prev.map((c) =>
                                 c.id === commentId
@@ -314,11 +314,11 @@ export default function FeedCardWithReply({
                             )
                         );
                     } else {
-                        throw new Error('no data');
+                        throw new Error('unlike failed');
                     }
                 } else {
                     const { data } = await likeCommentMutation({ variables: { input: { commentId } } });
-                    if (data?.likeComment != null) {
+                    if (data?.likeComment?.success) {
                         setLoadedComments((prev) =>
                             prev.map((c) =>
                                 c.id === commentId
@@ -327,7 +327,7 @@ export default function FeedCardWithReply({
                             )
                         );
                     } else {
-                        throw new Error('no data');
+                        throw new Error('like failed');
                     }
                 }
             } catch {
