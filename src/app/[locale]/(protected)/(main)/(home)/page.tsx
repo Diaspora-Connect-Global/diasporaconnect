@@ -346,6 +346,11 @@ export default function Home() {
       .filter(m => m.src),
   ];
 
+  const getPostMentionMap = (post: ApiPost) => {
+    if (!post.mentions?.length) return undefined;
+    return Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId]));
+  };
+
   const handleNavigatePost = (dir: 'next' | 'prev') => {
     if (modalState === null) return;
     let i = dir === 'next' ? modalState.postIndex + 1 : modalState.postIndex - 1;
@@ -521,6 +526,7 @@ export default function Home() {
                   createdAt={post.createdAt}
                   visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                   content={post.text}
+                  mentionMap={getPostMentionMap(post)}
                   images={post.attachments
                     ?.filter(
                       (a) =>
@@ -592,6 +598,7 @@ export default function Home() {
           postDate={formatDateProximity(modalPost.createdAt)}
           visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={modalPost.text}
+          mentionMap={getPostMentionMap(modalPost)}
           allMedia={getPostMedia(modalPost)}
           initialMediaIndex={modalState!.mediaIndex}
           isLiked={modalPost.userEngagement.hasLiked}

@@ -216,6 +216,7 @@ export default function FeedPage() {
                     createdAt={post.createdAt}
                     visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                     content={post.text}
+                    mentionMap={post.mentions?.length ? Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId])) : undefined}
                     images={
                       post.attachments
                         ?.filter(
@@ -273,6 +274,7 @@ export default function FeedPage() {
           postDate={formatDateProximity(modalPost.createdAt)}
           visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={modalPost.text}
+          mentionMap={modalPost.mentions?.length ? Object.fromEntries(modalPost.mentions.map(m => [m.handle, m.entityId])) : undefined}
           allMedia={getPostMedia(modalPost)}
           initialMediaIndex={modalState!.mediaIndex}
           isLiked={modalPost.userEngagement.hasLiked}

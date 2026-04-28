@@ -82,6 +82,7 @@ interface FeedCardProps {
     createdAt?: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
+    mentionMap?: MentionMap;
     images?: string[];
     /** Video attachment URLs (e.g. from mimeType video/*). Loaded with preload="metadata" and viewport-aware. */
     videos?: string[];
@@ -153,6 +154,7 @@ export default function FeedCardWithReply({
     createdAt,
     visibility,
     content,
+    mentionMap,
     images,
     videos = [],
     likes,
@@ -636,7 +638,7 @@ export default function FeedCardWithReply({
         return (
             <>
                 <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
-                    {renderRichText(displayText)}
+                    {renderRichText(displayText, mentionMap)}
                     {truncated && (
                         <span
                             onClick={toggleExpand}
@@ -769,10 +771,15 @@ export default function FeedCardWithReply({
 
         const postInfoEl = (
             <div className="flex items-center gap-3 mb-3">
-                <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0" />
+                <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async"
+                    className={`w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0 ${authorUserId ? 'cursor-pointer' : ''}`}
+                    onClick={authorUserId ? () => goToProfile(authorUserId, 'USER') : undefined} />
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-text-primary text-sm truncate">{profileName}</span>
+                        <span
+                            className={`font-semibold text-text-primary text-sm truncate ${authorUserId ? 'cursor-pointer hover:text-text-brand' : ''}`}
+                            onClick={authorUserId ? () => goToProfile(authorUserId, 'USER') : undefined}
+                        >{profileName}</span>
                         {profileTier && <UserBadge tier={profileTier} size="xs" />}
                     </div>
                     <p className="text-text-secondary text-xs flex items-center gap-1">
@@ -900,7 +907,7 @@ export default function FeedCardWithReply({
                     <div className="w-[360px] xl:w-[400px] flex-shrink-0 bg-surface-default flex flex-col h-full border-l border-border-subtle">
                         <div className="p-4 border-b border-border-subtle">
                             {postInfoEl}
-                            <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{content}</p>
+                            <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{renderRichText(postContent, mentionMap)}</p>
                         </div>
                         {/* Action bar */}
                         <div className="px-4 py-3 border-b border-border-subtle flex items-center gap-4">
@@ -962,7 +969,7 @@ export default function FeedCardWithReply({
                     {/* Bottom bar */}
                     <div className="bg-surface-default px-4 pt-3 pb-2 border-t border-border-subtle">
                         {postInfoEl}
-                        <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{content}</p>
+                        <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{renderRichText(postContent, mentionMap)}</p>
                         <div className="flex items-center gap-4">
                             <button onClick={handleLike} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
                                 <GoHeartFill className={`w-5 h-5 ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`} />

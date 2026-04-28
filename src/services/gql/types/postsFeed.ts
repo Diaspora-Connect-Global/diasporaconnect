@@ -174,6 +174,7 @@ export interface Post {
   createdAt: string;
   visibility?: PostVisibility;
   attachments?: Attachment[];
+  mentions?: MentionInfo[];
   engagementCounts: EngagementCounts;
   userEngagement: UserEngagement;
 }
@@ -221,6 +222,7 @@ export interface FeedPostFragment {
     url?: string | null;
   }> | null;
   visibility?: string | null;
+  mentions?: MentionInfo[];
   engagementCounts?: Partial<EngagementCounts> | null;
   userEngagement?: Partial<UserEngagement> | null;
   createdAt: string;

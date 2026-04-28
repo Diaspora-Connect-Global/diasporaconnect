@@ -88,6 +88,7 @@ export interface FeedCardFilteredProps {
     postDate: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
+    mentionMap?: MentionMap;
     images?: string[];
     videos?: string[];
     likes: number;
@@ -149,6 +150,7 @@ export default function FeedCardFiltered({
     postDate,
     visibility,
     content,
+    mentionMap,
     images,
     videos,
     likes: initialLikes,
@@ -508,7 +510,7 @@ export default function FeedCardFiltered({
         const displayText = truncated ? `${content.slice(0, max)}...` : content;
         return (
             <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
-                {renderRichText(displayText)}
+                {renderRichText(displayText, mentionMap)}
                 {truncated && (
                     <span onClick={toggleExpand} className="text-text-brand text-xs cursor-pointer">
                         {isExpanded ? t('showLess') : t('showMore')}

@@ -257,6 +257,7 @@ export default function PostPage() {
           onDelete={() => router.push('/')}
           visibility={normalizedPostResolved.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={normalizedPostResolved.text}
+          mentionMap={normalizedPostResolved.mentions?.length ? Object.fromEntries(normalizedPostResolved.mentions.map(m => [m.handle, m.entityId])) : undefined}
           images={
             normalizedPostResolved.attachments
               ?.filter(

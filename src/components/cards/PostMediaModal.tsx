@@ -31,6 +31,7 @@ import { formatDateProximity } from '@/macros/time';
 import { renderRichText, type MentionMap } from '@/components/custom/richTextRenderer';
 import { resolveUserTier } from '@/lib/userTier';
 import { useUserStore } from '@/store/useUserStore';
+import { useRouter } from '@/i18n/navigation';
 import MessageInputGlobal, { type MentionUser } from '@/components/custom/messageInputGlobal';
 import SharePostModal from '@/components/share/SharePostModal';
 
@@ -48,6 +49,7 @@ export interface PostMediaModalProps {
     createdAt?: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
     content: string;
+    mentionMap?: MentionMap;
     allMedia: ModalMediaItem[];
     initialMediaIndex: number;
     isLiked: boolean;
@@ -120,6 +122,7 @@ export default function PostMediaModal({
     createdAt,
     visibility,
     content,
+    mentionMap,
     allMedia,
     initialMediaIndex,
     isLiked: initialIsLiked,
@@ -136,6 +139,7 @@ export default function PostMediaModal({
     onDelete,
 }: PostMediaModalProps) {
     const t = useTranslations('actions');
+    const router = useRouter();
     const currentUserAvatar = useUserStore(s => s.user?.avatarUrl) || '/PROFILE.png';
 
     const [mediaIndex, setMediaIndex] = useState(initialMediaIndex);
@@ -188,6 +192,15 @@ export default function PostMediaModal({
     const [editPostText, setEditPostText] = useState('');
     const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
     const currentUserId = useUserStore((s) => s.user?.userId);
+
+    const goToProfile = useCallback(() => {
+        if (!authorUserId) return;
+        if (currentUserId && authorUserId === currentUserId) {
+            router.push('/profile');
+        } else {
+            router.push(`/${authorUserId}`);
+        }
+    }, [router, authorUserId, currentUserId]);
 
     const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
     const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
@@ -481,10 +494,14 @@ export default function PostMediaModal({
     const postInfoEl = (
         <div className="flex items-center gap-3 mb-3">
             <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async"
-                className="w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0" />
+                className={`w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0 ${authorUserId ? 'cursor-pointer' : ''}`}
+                onClick={authorUserId ? goToProfile : undefined} />
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                    <span className="font-semibold text-text-primary text-sm truncate">{profileName}</span>
+                    <span
+                        className={`font-semibold text-text-primary text-sm truncate ${authorUserId ? 'cursor-pointer hover:text-text-brand' : ''}`}
+                        onClick={authorUserId ? goToProfile : undefined}
+                    >{profileName}</span>
                     {profileTier && <UserBadge tier={profileTier} size="xs" />}
                 </div>
                 <p className="text-text-secondary text-xs flex items-center gap-1">
@@ -537,7 +554,7 @@ export default function PostMediaModal({
         </div>
     ) : (
         <p className="body-small text-text-primary whitespace-pre-wrap break-words">
-            {isTruncated ? `${content.slice(0, CONTENT_LIMIT)}…` : content}
+            {renderRichText(isTruncated ? `${content.slice(0, CONTENT_LIMIT)}…` : content, mentionMap)}
             {content.length > CONTENT_LIMIT && (
                 <button
                     onClick={() => setContentExpanded(v => !v)}

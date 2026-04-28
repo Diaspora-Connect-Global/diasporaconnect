@@ -89,6 +89,7 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     createdAt: p.createdAt,
     visibility: (p.visibility ?? 'PUBLIC') as PostVisibility,
     attachments: mapAttachments(p.attachments),
+    mentions: p.mentions,
     engagementCounts,
     userEngagement,
   };

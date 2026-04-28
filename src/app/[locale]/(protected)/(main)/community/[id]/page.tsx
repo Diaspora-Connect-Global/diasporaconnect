@@ -347,6 +347,7 @@ export default function CommunityDetailPage() {
                 postDate={formatDateProximity(post.createdAt)}
                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                 content={post.text}
+                mentionMap={post.mentions?.length ? Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId])) : undefined}
                 shares={post.engagementCounts.shares}
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
