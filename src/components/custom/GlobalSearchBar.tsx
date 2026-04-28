@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Search, X, Clock, TrendingUp, Users, Briefcase, CalendarDays } from 'lucide-react';
 import Fuse from 'fuse.js';
 
-import { useSearchStore } from '@/store/useSearchStore';
+import { useSearchStore, CachedResult } from '@/store/useSearchStore';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import { SEARCH_OPPORTUNITIES } from '@/services/gql/opportunities';
 import { SEARCH_EVENTS } from '@/services/gql/events';
@@ -69,6 +69,13 @@ function buildRows(uData: any, oData: any, eData: any, locale: string, isFallbac
   });
 
   return rows;
+}
+
+function rowToCachedResult(r: ResultRow): CachedResult {
+  let type: CachedResult['type'] = 'event';
+  if (r.id.startsWith('user-')) type = 'people';
+  else if (r.id.startsWith('opp-')) type = 'opportunity';
+  return { id: r.id, label: r.label, subtext: r.subtext, type, href: r.href };
 }
 
 // ─── Shared results list ──────────────────────────────────────────────────────
@@ -171,7 +178,7 @@ export default function GlobalSearchBar() {
   const params = useParams();
   const locale = (Array.isArray(params?.locale) ? params.locale[0] : params?.locale) ?? 'en';
 
-  const { recentSearches, addRecentSearch, clearRecentSearches } = useSearchStore();
+  const { recentSearches, addRecentSearch, addRecentEntry, clearRecentSearches } = useSearchStore();
 
   const [inputValue, setInputValue] = useState('');
   const [open, setOpen] = useState(false);
@@ -183,6 +190,7 @@ export default function GlobalSearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const urlDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Primary queries
   const [searchUsers,  { loading: uLoading, data: uData }] = useLazyQuery(SEARCH_USERS);
@@ -222,11 +230,19 @@ export default function GlobalSearchBar() {
       });
       // Ensure exact-match primaries aren't dropped by fuse threshold
       primary.forEach((r) => { if (!seen.has(r.id)) { seen.add(r.id); merged.unshift(r); } });
-      setResultRows(merged.slice(0, 8));
+      const final = merged.slice(0, 8);
+      setResultRows(final);
+      if (inputValue.trim().length >= 2 && final.length > 0) {
+        addRecentEntry(inputValue.trim(), final.slice(0, 5).map(rowToCachedResult));
+      }
     } else {
-      setResultRows(combined.slice(0, 6));
+      const final = combined.slice(0, 6);
+      setResultRows(final);
+      if (inputValue.trim().length >= 2 && final.length > 0) {
+        addRecentEntry(inputValue.trim(), final.slice(0, 5).map(rowToCachedResult));
+      }
     }
-  }, [uData, oData, eData, uFallback, oFallback, eFallback, locale, inputValue]);
+  }, [uData, oData, eData, uFallback, oFallback, eFallback, locale, inputValue, addRecentEntry]);
 
   useEffect(() => { setActiveIndex(-1); }, [resultRows, inputValue]);
 
@@ -246,6 +262,7 @@ export default function GlobalSearchBar() {
     if (mobileOpen) {
       setTimeout(() => mobileInputRef.current?.focus(), 50);
     } else {
+      if (urlDebounceRef.current) clearTimeout(urlDebounceRef.current);
       setInputValue('');
       setResultRows([]);
     }
@@ -271,8 +288,19 @@ export default function GlobalSearchBar() {
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
+
+    // Typeahead debounce (300ms)
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => runTypeahead(value), 300);
+
+    // URL debounce — update ?q= as user types so back button works
+    if (urlDebounceRef.current) clearTimeout(urlDebounceRef.current);
+    urlDebounceRef.current = setTimeout(() => {
+      const trimmed = value.trim();
+      if (trimmed.length >= 2) {
+        router.replace(`/${locale}/search?q=${encodeURIComponent(trimmed)}`, { scroll: false });
+      }
+    }, 400);
   };
 
   const close = () => { setOpen(false); setMobileOpen(false); };

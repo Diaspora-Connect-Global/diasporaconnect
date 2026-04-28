@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { useLazyQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
@@ -10,7 +10,7 @@ import { SEARCH_USERS } from '@/services/gql/connection';
 import { SEARCH_GROUPS } from '@/services/gql/groups';
 import { SEARCH_COMMUNITIES } from '@/services/gql/community';
 import { SEARCH_ASSOCIATIONS } from '@/services/gql/associations';
-import { SEARCH_PRODUCTS } from '@/services/gql/marketplace';
+import { SEARCH_PRODUCTS, SEARCH_MARKETPLACE_SERVICES } from '@/services/gql/marketplace';
 import { SEARCH_EVENTS } from '@/services/gql/events';
 import { SEARCH_OPPORTUNITIES } from '@/services/gql/opportunities';
 import {
@@ -59,6 +59,13 @@ interface Opportunity {
   deadline?: string; compensationMin?: number; compensationMax?: number;
   compensationCurrency?: string; type?: string;
 }
+interface Service {
+  id: string;
+  title: string;
+  base_price?: number;
+  currency?: string;
+  vendor_id?: string;
+}
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 
@@ -105,13 +112,33 @@ function Badge({ label, variant = 'default' }: { label: string; variant?: 'defau
   return <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${cls}`}>{label}</span>;
 }
 
-function PeopleCard({ profile }: { profile: UserProfile }) {
+function HighlightText({ text, query }: { text: string; query: string }) {
+  if (!query.trim() || !text) return <>{text}</>;
+  const tokens = query.trim().split(/\s+/).filter((t) => t.length >= 2);
+  if (!tokens.length) return <>{text}</>;
+  const pattern = tokens.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  const regex = new RegExp(`(${pattern})`, 'gi');
+  const parts = text.split(regex);
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-transparent text-text-brand font-semibold not-italic">{part}</mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
+function PeopleCard({ profile, query }: { profile: UserProfile; query: string }) {
   const name = `${profile.firstName} ${profile.lastName}`;
   return (
     <Link href={`/profile/${profile.userId}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <Avatar src={profile.avatarUrl} name={name} />
       <div className="flex-1 min-w-0">
-        <p className="text-text-primary text-sm font-medium truncate">{name}</p>
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={name} query={query} /></p>
         <p className="text-text-secondary text-xs truncate">{profile.headline || profile.sector}</p>
         {profile.residenceCountry && (
           <p className="text-text-secondary text-xs truncate">{profile.residenceCountry}</p>
@@ -124,14 +151,14 @@ function PeopleCard({ profile }: { profile: UserProfile }) {
   );
 }
 
-function GroupCard({ group }: { group: Group }) {
+function GroupCard({ group, query }: { group: Group; query: string }) {
   return (
     <Link href={`/groups/${group.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <div className="w-10 h-10 rounded-lg bg-surface-hover flex items-center justify-center shrink-0">
         <UsersRound className="w-5 h-5 text-text-secondary" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-text-primary text-sm font-medium truncate">{group.name}</p>
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={group.name} query={query} /></p>
         {group.memberCount !== undefined && (
           <p className="text-text-secondary text-xs">{group.memberCount.toLocaleString()} members</p>
         )}
@@ -141,12 +168,12 @@ function GroupCard({ group }: { group: Group }) {
   );
 }
 
-function CommunityCard({ community }: { community: Community }) {
+function CommunityCard({ community, query }: { community: Community; query: string }) {
   return (
     <Link href={`/community/${community.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <Avatar src={community.avatarUrl} name={community.name} />
       <div className="flex-1 min-w-0">
-        <p className="text-text-primary text-sm font-medium truncate">{community.name}</p>
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={community.name} query={query} /></p>
         {community.memberCount !== undefined && (
           <p className="text-text-secondary text-xs">{community.memberCount.toLocaleString()} members</p>
         )}
@@ -156,12 +183,12 @@ function CommunityCard({ community }: { community: Community }) {
   );
 }
 
-function AssociationCard({ association }: { association: Association }) {
+function AssociationCard({ association, query }: { association: Association; query: string }) {
   return (
     <Link href={`/association/${association.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <Avatar src={association.avatarUrl} name={association.name} />
       <div className="flex-1 min-w-0">
-        <p className="text-text-primary text-sm font-medium truncate">{association.name}</p>
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={association.name} query={query} /></p>
         <p className="text-text-secondary text-xs">
           {association.memberCount !== undefined && `${association.memberCount.toLocaleString()} members`}
           {association.associationType && ` · ${association.associationType.name}`}
@@ -171,7 +198,7 @@ function AssociationCard({ association }: { association: Association }) {
   );
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, query }: { product: Product; query: string }) {
   const img = product.images?.[0];
   return (
     <Link href={`/marketplace/${product.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
@@ -184,7 +211,7 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-text-primary text-sm font-medium truncate">{product.title}</p>
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={product.title} query={query} /></p>
         {product.price !== undefined && (
           <p className="text-text-brand text-xs font-semibold">
             {product.currency} {product.price.toLocaleString()}
@@ -195,7 +222,7 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-function EventCard({ event }: { event: Event }) {
+function EventCard({ event, query }: { event: Event; query: string }) {
   const date = event.startAt ? new Date(event.startAt).toLocaleDateString() : null;
   return (
     <Link href={`/events/${event.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
@@ -203,7 +230,7 @@ function EventCard({ event }: { event: Event }) {
         <CalendarDays className="w-5 h-5 text-text-secondary" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-text-primary text-sm font-medium truncate">{event.title}</p>
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={event.title} query={query} /></p>
         <p className="text-text-secondary text-xs">
           {date && `${date}`}{event.eventCategory && ` · ${event.eventCategory}`}
         </p>
@@ -213,7 +240,7 @@ function EventCard({ event }: { event: Event }) {
   );
 }
 
-function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
+function OpportunityCard({ opportunity, query }: { opportunity: Opportunity; query: string }) {
   const comp = opportunity.compensationMin && opportunity.compensationMax
     ? `${opportunity.compensationCurrency ?? ''} ${opportunity.compensationMin.toLocaleString()}–${opportunity.compensationMax.toLocaleString()}`
     : null;
@@ -223,7 +250,7 @@ function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
         <Briefcase className="w-5 h-5 text-text-secondary" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-text-primary text-sm font-medium truncate">{opportunity.title}</p>
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={opportunity.title} query={query} /></p>
         <p className="text-text-secondary text-xs truncate">
           {[opportunity.category, opportunity.location].filter(Boolean).join(' · ')}
         </p>
@@ -234,6 +261,23 @@ function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           {new Date(opportunity.deadline).toLocaleDateString()}
         </span>
       )}
+    </Link>
+  );
+}
+
+function ServiceCard({ service, query }: { service: Service; query: string }) {
+  return (
+    <Link href={`/marketplace/services/${service.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
+      <div className="w-10 h-10 rounded bg-surface-hover flex items-center justify-center shrink-0">
+        <Briefcase className="w-5 h-5 text-text-secondary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={service.title} query={query} /></p>
+        {service.base_price !== undefined && (
+          <p className="text-text-brand text-xs font-semibold">{service.currency} {service.base_price.toLocaleString()}</p>
+        )}
+      </div>
+      <Badge label="Service" />
     </Link>
   );
 }
@@ -355,6 +399,7 @@ export default function SearchPage() {
   const [searchCommunities,   commsResult]    = useLazyQuery(SEARCH_COMMUNITIES);
   const [searchAssociations,  assocsResult]   = useLazyQuery(SEARCH_ASSOCIATIONS);
   const [searchProducts,      productsResult] = useLazyQuery(SEARCH_PRODUCTS);
+  const [searchServices,      servicesResult] = useLazyQuery(SEARCH_MARKETPLACE_SERVICES);
   const [searchEvents,        eventsResult]   = useLazyQuery(SEARCH_EVENTS);
   const [searchOpportunities, oppsResult]     = useLazyQuery(SEARCH_OPPORTUNITIES);
 
@@ -364,6 +409,7 @@ export default function SearchPage() {
   const [searchCommsFb,        commsFbResult]    = useLazyQuery(SEARCH_COMMUNITIES);
   const [searchAssocsFb,       assocsFbResult]   = useLazyQuery(SEARCH_ASSOCIATIONS);
   const [searchProductsFb,     productsFbResult] = useLazyQuery(SEARCH_PRODUCTS);
+  const [searchServicesFb,     servicesFbResult] = useLazyQuery(SEARCH_MARKETPLACE_SERVICES);
   const [searchEventsFb,       eventsFbResult]   = useLazyQuery(SEARCH_EVENTS);
   const [searchOppsFb,         oppsFbResult]     = useLazyQuery(SEARCH_OPPORTUNITIES);
 
@@ -388,6 +434,7 @@ export default function SearchPage() {
     }
     if (isAll || tab === 'marketplace') {
       searchProducts({ variables: { input: { query: q, page, limit } } });
+      searchServices({ variables: { input: { query: q, page, limit } } });
     }
     if (isAll || tab === 'events') {
       searchEvents({ variables: { query: q, limit, offset } });
@@ -409,14 +456,23 @@ export default function SearchPage() {
     if (tab === 'all' || tab === 'groups')        searchGroupsFb({ variables: { query: fbQ, searchLimit: limit, searchOffset: offset } });
     if (tab === 'all' || tab === 'communities')   searchCommsFb({ variables: { input: { query: fbQ, page, limit } } });
     if (tab === 'all' || tab === 'associations')  searchAssocsFb({ variables: { input: { query: fbQ, page, limit } } });
-    if (tab === 'all' || tab === 'marketplace')   searchProductsFb({ variables: { input: { query: fbQ, page, limit } } });
+    if (tab === 'all' || tab === 'marketplace') {
+      searchProductsFb({ variables: { input: { query: fbQ, page, limit } } });
+      searchServicesFb({ variables: { input: { query: fbQ, page, limit } } });
+    }
     if (tab === 'all' || tab === 'events')        searchEventsFb({ variables: { query: fbQ, limit, offset } });
     if (tab === 'all' || tab === 'opportunities') searchOppsFb({ variables: { query: fbQ, limit, offset } });
   };
 
+  const runDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
-    runAll(query, activeTab, pages);
-    setFallbackQuery(null);
+    if (runDebounceRef.current) clearTimeout(runDebounceRef.current);
+    runDebounceRef.current = setTimeout(() => {
+      runAll(query, activeTab, pages);
+      setFallbackQuery(null);
+    }, 300);
+    return () => { if (runDebounceRef.current) clearTimeout(runDebounceRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, activeTab]);
 
@@ -437,7 +493,10 @@ export default function SearchPage() {
       case 'groups':        searchGroups({ variables: { query: q, searchLimit: limit, searchOffset: offset } }); break;
       case 'communities':   searchCommunities({ variables: { input: { query: q, page, limit } } }); break;
       case 'associations':  searchAssociations({ variables: { input: { query: q, page, limit } } }); break;
-      case 'marketplace':   searchProducts({ variables: { input: { query: q, page, limit } } }); break;
+      case 'marketplace':
+        searchProducts({ variables: { input: { query: q, page, limit } } });
+        searchServices({ variables: { input: { query: q, page, limit } } });
+        break;
       case 'events':        searchEvents({ variables: { query: q, limit, offset } }); break;
       case 'opportunities': searchOpportunities({ variables: { query: q, limit, offset } }); break;
     }
@@ -450,8 +509,9 @@ export default function SearchPage() {
   const groups:   Group[]       = d(groupsResult)?.searchGroups?.groups ?? [];
   const comms:    Community[]   = d(commsResult)?.searchCommunities?.communities ?? [];
   const assocs:   Association[] = d(assocsResult)?.searchAssociations?.associations ?? [];
-  const products: Product[]     = d(productsResult)?.searchProducts?.products ?? [];
-  const events:   Event[]       = d(eventsResult)?.searchEvents?.events ?? [];
+  const products:  Product[]     = d(productsResult)?.searchProducts?.products ?? [];
+  const services:  Service[]    = d(servicesResult)?.searchMarketplaceServices?.services ?? [];
+  const events:    Event[]       = d(eventsResult)?.searchEvents?.events ?? [];
   const opps:     Opportunity[] = d(oppsResult)?.searchOpportunities?.opportunities ?? [];
 
   // Fallback data
@@ -459,8 +519,9 @@ export default function SearchPage() {
   const fbGroups:   Group[]       = d(groupsFbResult)?.searchGroups?.groups ?? [];
   const fbComms:    Community[]   = d(commsFbResult)?.searchCommunities?.communities ?? [];
   const fbAssocs:   Association[] = d(assocsFbResult)?.searchAssociations?.associations ?? [];
-  const fbProducts: Product[]     = d(productsFbResult)?.searchProducts?.products ?? [];
-  const fbEvents:   Event[]       = d(eventsFbResult)?.searchEvents?.events ?? [];
+  const fbProducts:  Product[]     = d(productsFbResult)?.searchProducts?.products ?? [];
+  const fbServices:  Service[]    = d(servicesFbResult)?.searchMarketplaceServices?.services ?? [];
+  const fbEvents:    Event[]       = d(eventsFbResult)?.searchEvents?.events ?? [];
   const fbOpps:     Opportunity[] = d(oppsFbResult)?.searchOpportunities?.opportunities ?? [];
 
   const totals: Record<SearchTab, number> = {
@@ -479,7 +540,7 @@ export default function SearchPage() {
     if (tab === 'all' || tab === 'groups')        if (groupsResult.loading)   return true;
     if (tab === 'all' || tab === 'communities')   if (commsResult.loading)    return true;
     if (tab === 'all' || tab === 'associations')  if (assocsResult.loading)   return true;
-    if (tab === 'all' || tab === 'marketplace')   if (productsResult.loading) return true;
+    if (tab === 'all' || tab === 'marketplace')   if (productsResult.loading || servicesResult.loading) return true;
     if (tab === 'all' || tab === 'events')        if (eventsResult.loading)   return true;
     if (tab === 'all' || tab === 'opportunities') if (oppsResult.loading)     return true;
     return false;
@@ -490,12 +551,12 @@ export default function SearchPage() {
     if (!query.trim()) return;
     if (isLoading(activeTab)) return;
     const exactEmpty =
-      (activeTab === 'all' && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !events.length && !opps.length) ||
+      (activeTab === 'all' && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !services.length && !events.length && !opps.length) ||
       (activeTab === 'people' && !users.length) ||
       (activeTab === 'groups' && !groups.length) ||
       (activeTab === 'communities' && !comms.length) ||
       (activeTab === 'associations' && !assocs.length) ||
-      (activeTab === 'marketplace' && !products.length) ||
+      (activeTab === 'marketplace' && !products.length && !services.length) ||
       (activeTab === 'events' && !events.length) ||
       (activeTab === 'opportunities' && !opps.length);
     if (exactEmpty && !fallbackQuery) {
@@ -504,7 +565,7 @@ export default function SearchPage() {
       setFallbackQuery(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usersResult.loading, groupsResult.loading, commsResult.loading, assocsResult.loading, productsResult.loading, eventsResult.loading, oppsResult.loading, activeTab, query]);
+  }, [usersResult.loading, groupsResult.loading, commsResult.loading, assocsResult.loading, productsResult.loading, servicesResult.loading, eventsResult.loading, oppsResult.loading, activeTab, query]);
 
   const hasMore = (): boolean => {
     const total = totals[activeTab];
@@ -597,10 +658,11 @@ export default function SearchPage() {
                 const dComms    = comms.length    ? comms    : fbComms;
                 const dAssocs   = assocs.length   ? assocs   : fbAssocs;
                 const dProducts = products.length ? products : fbProducts;
+                const dServices = services.length ? services : fbServices;
                 const dEvents   = events.length   ? events   : fbEvents;
                 const dOpps     = opps.length     ? opps     : fbOpps;
-                const usingFallback = fallbackQuery && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !events.length && !opps.length;
-                const hasAny = dUsers.length || dGroups.length || dComms.length || dAssocs.length || dProducts.length || dEvents.length || dOpps.length;
+                const usingFallback = fallbackQuery && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !services.length && !events.length && !opps.length;
+                const hasAny = dUsers.length || dGroups.length || dComms.length || dAssocs.length || dProducts.length || dServices.length || dEvents.length || dOpps.length;
                 return (
                   <div>
                     {usingFallback && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
@@ -612,13 +674,14 @@ export default function SearchPage() {
                       />
                     ) : (
                       <>
-                        <AllSection tab="people"        title={t('people')}        items={dUsers}    loading={usersResult.loading}    renderItem={(u) => <PeopleCard      key={u.userId} profile={u} />} />
-                        <AllSection tab="opportunities" title={t('opportunities')} items={dOpps}     loading={oppsResult.loading}     renderItem={(o) => <OpportunityCard key={o.id}      opportunity={o} />} />
-                        <AllSection tab="groups"        title={t('groups')}        items={dGroups}   loading={groupsResult.loading}   renderItem={(g) => <GroupCard       key={g.id}      group={g} />} />
-                        <AllSection tab="events"        title={t('events')}        items={dEvents}   loading={eventsResult.loading}   renderItem={(e) => <EventCard       key={e.id}      event={e} />} />
-                        <AllSection tab="marketplace"   title={t('marketplace')}   items={dProducts} loading={productsResult.loading} renderItem={(p) => <ProductCard     key={p.id}      product={p} />} />
-                        <AllSection tab="communities"   title={t('communities')}   items={dComms}    loading={commsResult.loading}    renderItem={(c) => <CommunityCard   key={c.id}      community={c} />} />
-                        <AllSection tab="associations"  title={t('associations')}  items={dAssocs}   loading={assocsResult.loading}   renderItem={(a) => <AssociationCard key={a.id}      association={a} />} />
+                        <AllSection tab="people"        title={t('people')}        items={dUsers}    loading={usersResult.loading}    renderItem={(u) => <PeopleCard      key={u.userId} profile={u}      query={query} />} />
+                        <AllSection tab="opportunities" title={t('opportunities')} items={dOpps}     loading={oppsResult.loading}     renderItem={(o) => <OpportunityCard key={o.id}      opportunity={o} query={query} />} />
+                        <AllSection tab="groups"        title={t('groups')}        items={dGroups}   loading={groupsResult.loading}   renderItem={(g) => <GroupCard       key={g.id}      group={g}       query={query} />} />
+                        <AllSection tab="events"        title={t('events')}        items={dEvents}   loading={eventsResult.loading}   renderItem={(e) => <EventCard       key={e.id}      event={e}       query={query} />} />
+                        <AllSection tab="marketplace"   title={t('marketplace')}   items={dProducts} loading={productsResult.loading} renderItem={(p) => <ProductCard     key={p.id}      product={p}     query={query} />} />
+                        <AllSection tab="marketplace"   title="Services"           items={dServices} loading={servicesResult.loading} renderItem={(s) => <ServiceCard     key={s.id}      service={s}     query={query} />} />
+                        <AllSection tab="communities"   title={t('communities')}   items={dComms}    loading={commsResult.loading}    renderItem={(c) => <CommunityCard   key={c.id}      community={c}   query={query} />} />
+                        <AllSection tab="associations"  title={t('associations')}  items={dAssocs}   loading={assocsResult.loading}   renderItem={(a) => <AssociationCard key={a.id}      association={a} query={query} />} />
                       </>
                     )}
                   </div>
@@ -634,7 +697,7 @@ export default function SearchPage() {
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
-                    {show.map((u) => <PeopleCard key={u.userId} profile={u} />)}
+                    {show.map((u) => <PeopleCard key={u.userId} profile={u} query={query} />)}
                   </div>
                 );
               })()}
@@ -646,7 +709,7 @@ export default function SearchPage() {
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
-                    {show.map((g) => <GroupCard key={g.id} group={g} />)}
+                    {show.map((g) => <GroupCard key={g.id} group={g} query={query} />)}
                   </div>
                 );
               })()}
@@ -658,7 +721,7 @@ export default function SearchPage() {
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
-                    {show.map((c) => <CommunityCard key={c.id} community={c} />)}
+                    {show.map((c) => <CommunityCard key={c.id} community={c} query={query} />)}
                   </div>
                 );
               })()}
@@ -670,19 +733,21 @@ export default function SearchPage() {
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
-                    {show.map((a) => <AssociationCard key={a.id} association={a} />)}
+                    {show.map((a) => <AssociationCard key={a.id} association={a} query={query} />)}
                   </div>
                 );
               })()}
               {activeTab === 'marketplace' && (() => {
-                const show = products.length ? products : fbProducts;
-                const useFb = !products.length && !!fbProducts.length && !!fallbackQuery;
+                const showP = products.length ? products : fbProducts;
+                const showS = services.length ? services : fbServices;
+                const useFb = !products.length && !services.length && (!!fbProducts.length || !!fbServices.length) && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
-                    {show.map((p) => <ProductCard key={p.id} product={p} />)}
+                    {!loading && !showP.length && !showS.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {showP.map((p) => <ProductCard key={p.id} product={p} query={query} />)}
+                    {showS.map((s) => <ServiceCard key={s.id} service={s} query={query} />)}
                   </div>
                 );
               })()}
@@ -694,7 +759,7 @@ export default function SearchPage() {
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
-                    {show.map((e) => <EventCard key={e.id} event={e} />)}
+                    {show.map((e) => <EventCard key={e.id} event={e} query={query} />)}
                   </div>
                 );
               })()}
@@ -706,7 +771,7 @@ export default function SearchPage() {
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
-                    {show.map((o) => <OpportunityCard key={o.id} opportunity={o} />)}
+                    {show.map((o) => <OpportunityCard key={o.id} opportunity={o} query={query} />)}
                   </div>
                 );
               })()}
