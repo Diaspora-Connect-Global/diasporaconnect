@@ -4,7 +4,7 @@ import { NotificationCard } from '@/components/cards/notification/NotificationCa
 import { Check, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NetworkStatus } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import {
@@ -334,6 +334,7 @@ export default function NotificationPage() {
     {
       variables: { limit: PAGE_SIZE, offset: 0 },
       notifyOnNetworkStatusChange: true,
+      pollInterval: 30_000,
     }
   );
 
@@ -353,6 +354,22 @@ export default function NotificationPage() {
 
   const isInitialLoading = networkStatus === NetworkStatus.loading && !list;
   const isFetchingMore = networkStatus === NetworkStatus.fetchMore;
+
+  const unreadByFilter = useMemo(() => {
+    const counts: Record<NotificationFilter, number> = {
+      all: 0, opportunities: 0, events: 0, associations: 0, communities: 0,
+    };
+    for (const n of notifications) {
+      if ((n.isRead ?? n.read ?? false) || readIds.has(n.id)) continue;
+      counts.all++;
+      for (const f of ['opportunities', 'events', 'associations', 'communities'] as const) {
+        if (matchesFilter(n, f)) counts[f]++;
+      }
+    }
+    return counts;
+  }, [notifications, readIds]);
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const filtered =
     filter === 'all' ? notifications : notifications.filter((n) => matchesFilter(n, filter));
@@ -389,6 +406,17 @@ export default function NotificationPage() {
       },
     });
   }, [fetchMore, hasMore, isFetchingMore, notifications.length]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   const handleNotificationClick = useCallback(
     async (notification: Notification, actorUserId?: string) => {
@@ -445,8 +473,8 @@ export default function NotificationPage() {
   }, [locale, router]);
 
   return (
-    <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4">
-      <div className="h-[30%] lg:h-[20%]">
+    <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4 flex flex-col">
+      <div className="flex-shrink-0">
         <div className="lg:flex justify-between items-center mb-4">
           <p className="text-2xl heading-large">{t('notifications')}</p>
           <div className="flex items-center gap-4">
@@ -485,13 +513,22 @@ export default function NotificationPage() {
               key={key}
               type="button"
               onClick={() => setFilter(key)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 filter === key
                   ? 'bg-surface-brand text-text-inverse'
                   : 'bg-surface-subtle text-text-secondary hover:bg-surface-hover hover:text-text-primary'
               }`}
             >
               {label}
+              {unreadByFilter[key] > 0 && (
+                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full leading-none ${
+                  filter === key
+                    ? 'bg-white/20 text-text-inverse'
+                    : 'bg-surface-brand text-text-inverse'
+                }`}>
+                  {unreadByFilter[key]}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -506,7 +543,7 @@ export default function NotificationPage() {
       ) : filtered.length === 0 ? (
         <div className="text-text-secondary font-medium">{t(emptyMessageKey)}</div>
       ) : (
-        <div className="bg-surface-default rounded-md lg:p-6 h-[70%] lg:h-[80%] overflow-y-auto scrollbar-hide">
+        <div className="bg-surface-default rounded-md lg:p-6 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
           {filtered.map((not) => (
             <NotificationRow
               key={not.id}
@@ -519,18 +556,11 @@ export default function NotificationPage() {
               isReadOptimistic={readIds.has(not.id)}
             />
           ))}
-          {hasMore && (
-            <div className="flex justify-center py-4">
-              <button
-                type="button"
-                className="text-text-brand text-sm hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={loadMore}
-                disabled={isFetchingMore}
-              >
-                {isFetchingMore ? t('loadMoreLoading') : t('loadMore')}
-              </button>
-            </div>
-          )}
+          <div ref={sentinelRef} className="py-2 flex justify-center">
+            {isFetchingMore && (
+              <span className="text-text-secondary text-sm">{t('loadMoreLoading')}</span>
+            )}
+          </div>
         </div>
       )}
     </div>
