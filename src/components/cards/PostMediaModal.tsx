@@ -308,6 +308,52 @@ export default function PostMediaModal({
         } catch { /* leave unchanged */ }
     }, [loadedComments, likeCommentMutation, removeCommentLikeMutation]);
 
+    /* post-to-post slide transition */
+    type SlideState = 'center' | 'exit-up' | 'exit-down' | 'enter-from-below' | 'enter-from-above';
+    const [slideState, setSlideState] = useState<SlideState>('center');
+    const isAnimatingRef = useRef(false);
+    const pendingDirRef = useRef<'next' | 'prev' | null>(null);
+
+    const getSlideStyle = (): React.CSSProperties => {
+        switch (slideState) {
+            case 'exit-up':
+                return { transform: 'translateY(-100%)', transition: 'transform 300ms cubic-bezier(0.55,0,1,0.45)' };
+            case 'exit-down':
+                return { transform: 'translateY(100%)', transition: 'transform 300ms cubic-bezier(0.55,0,1,0.45)' };
+            case 'enter-from-below':
+                return { transform: 'translateY(100%)', transition: 'none' };
+            case 'enter-from-above':
+                return { transform: 'translateY(-100%)', transition: 'none' };
+            default:
+                return { transform: 'translateY(0)', transition: 'transform 350ms cubic-bezier(0.25,0.46,0.45,0.94)' };
+        }
+    };
+
+    const navigateWithTransition = useCallback((dir: 'next' | 'prev') => {
+        if (isAnimatingRef.current) return;
+        isAnimatingRef.current = true;
+        pendingDirRef.current = dir;
+        setSlideState(dir === 'next' ? 'exit-up' : 'exit-down');
+        setTimeout(() => { onNavigatePost(dir); }, 300);
+    }, [onNavigatePost]);
+
+    // Enter animation when postId changes (after parent updates state)
+    useEffect(() => {
+        const dir = pendingDirRef.current;
+        if (!dir) return;
+        setSlideState(dir === 'next' ? 'enter-from-below' : 'enter-from-above');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setSlideState('center');
+                setTimeout(() => {
+                    isAnimatingRef.current = false;
+                    pendingDirRef.current = null;
+                }, 350);
+            });
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [postId]);
+
     /* swipe + wheel */
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
@@ -327,7 +373,7 @@ export default function PostMediaModal({
         if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
             if (dx < 0) nextMedia(); else prevMedia();
         } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 50) {
-            if (dy < 0) onNavigatePost('next'); else onNavigatePost('prev');
+            if (dy < 0) navigateWithTransition('next'); else navigateWithTransition('prev');
         }
     };
 
@@ -335,8 +381,8 @@ export default function PostMediaModal({
         if (wheelCooldown.current) return;
         wheelCooldown.current = true;
         setTimeout(() => { wheelCooldown.current = false; }, 600);
-        if (e.deltaY > 0) onNavigatePost('next');
-        else onNavigatePost('prev');
+        if (e.deltaY > 0) navigateWithTransition('next');
+        else navigateWithTransition('prev');
     };
 
     /* action handlers */
@@ -677,7 +723,8 @@ export default function PostMediaModal({
     /* ── render ── */
     return (
         <>
-            <div className="fixed inset-0 z-50 flex bg-surface-default animate-in fade-in duration-200" onClick={onClose}>
+            <div className="fixed inset-0 z-50 flex overflow-hidden bg-surface-default animate-in fade-in duration-200" onClick={onClose}>
+                <div className="w-full h-full" style={getSlideStyle()}>
 
                 {/* DESKTOP */}
                 <div className="hidden md:flex w-full h-full" onClick={e => e.stopPropagation()}>
@@ -775,6 +822,7 @@ export default function PostMediaModal({
                         <div className="fixed inset-0 z-[59] bg-black/40" onClick={() => setShowCommentSheet(false)} />
                     )}
                 </div>
+                </div>{/* end slide wrapper */}
             </div>
 
             <SharePostModal open={showShareModal} onClose={() => setShowShareModal(false)} postId={postId} onShared={onShare} />
