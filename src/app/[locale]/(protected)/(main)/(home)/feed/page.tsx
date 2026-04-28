@@ -4,7 +4,7 @@ import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { formatDateProximity } from '@/macros/time';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { Link } from '@/i18n/navigation';
-import { ADD_ENGAGEMENT, CREATE_COMMENT, AddEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
+import { ADD_ENGAGEMENT, REMOVE_ENGAGEMENT, CREATE_COMMENT, AddEngagementData, RemoveEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
 import type { Post } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
 import { useMutation } from '@apollo/client/react';
@@ -59,16 +59,21 @@ export default function FeedPage() {
   } = useFeed({ hashtag });
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
+  const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
-  const handleLike = async (postId: string) => {
-    updatePostCounts(postId, { likes: 1 });
+  const handleLike = async (postId: string, liked: boolean) => {
+    updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
     try {
-      await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      if (liked) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      }
     } catch (err) {
-      updatePostCounts(postId, { likes: -1 });
-      console.error('Failed to like post:', err);
-      toast.error('Failed to like post');
+      updatePostCounts(postId, { likes: liked ? -1 : 1, hasLiked: !liked });
+      console.error(`Failed to ${liked ? 'like' : 'unlike'} post:`, err);
+      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
     }
   };
 
@@ -234,7 +239,7 @@ export default function FeedPage() {
                     likes={post.engagementCounts.likes}
                     comments={post.engagementCounts.comments}
                     shares={post.engagementCounts.shares}
-                    onLike={() => handleLike(post.id)}
+                    onLike={(liked) => handleLike(post.id, liked)}
                     onComment={() => {}}
                     onShare={() => handleShare(post.id)}
                     onSave={() => handleSave(post.id)}
@@ -275,7 +280,7 @@ export default function FeedPage() {
           likeCount={modalPost.engagementCounts.likes}
           commentCount={modalPost.engagementCounts.comments}
           shareCount={modalPost.engagementCounts.shares}
-          onLike={() => handleLike(modalPost.id)}
+          onLike={(liked) => handleLike(modalPost.id, liked)}
           onSave={() => handleSave(modalPost.id)}
           onShare={() => handleShare(modalPost.id)}
           onSendComment={(text, parentId) => handleSendComment(modalPost.id, text, parentId)}

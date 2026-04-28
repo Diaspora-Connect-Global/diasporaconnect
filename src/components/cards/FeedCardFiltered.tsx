@@ -96,7 +96,7 @@ export interface FeedCardFilteredProps {
     isLiked?: boolean;
     isSaved?: boolean;
     currentUser?: { name: string; avatar: string };
-    onLike?: () => void;
+    onLike?: (liked: boolean) => void;
     onComment?: () => void;
     onShare?: () => void;
     onSave?: () => void;
@@ -373,7 +373,7 @@ export default function FeedCardFiltered({
         const next = !isLiked;
         setIsLiked(next);
         setLikeCount((c) => (next ? c + 1 : c - 1));
-        onLike?.();
+        onLike?.(next);
     };
 
     const handleSave = () => {

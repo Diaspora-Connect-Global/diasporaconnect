@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from '@apollo/client/react';
 import { formatDateProximity } from '@/macros/time';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { GET_POST, ADD_ENGAGEMENT, CREATE_COMMENT, GetPostData, AddEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
+import { GET_POST, ADD_ENGAGEMENT, REMOVE_ENGAGEMENT, CREATE_COMMENT, GetPostData, AddEngagementData, RemoveEngagementData, CreateCommentData } from '@/services/gql/postsFeed';
 import type { FeedPostFragment, Post } from '@/services/gql/types/postsFeed';
 import { GET_USER_PROFILE } from '@/services/gql/profile';
 import type { GetProfileResponse } from '@/services/gql/types/profile';
@@ -71,15 +71,18 @@ export default function PostPage() {
   );
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
+  const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
-  const handleLike = async () => {
+  const handleLike = async (liked: boolean) => {
     try {
-      await addEngagement({
-        variables: { input: { postId, engagementType: 'LIKE' } },
-      });
+      if (liked) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      }
     } catch {
-      toast.error('Failed to like post');
+      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
     }
   };
 
@@ -275,7 +278,7 @@ export default function PostPage() {
           likes={normalizedPostResolved.engagementCounts?.likes ?? 0}
           comments={normalizedPostResolved.engagementCounts?.comments ?? 0}
           shares={normalizedPostResolved.engagementCounts?.shares ?? 0}
-          onLike={handleLike}
+          onLike={(liked) => handleLike(liked)}
           onComment={() => {}}
           onShare={handleShare}
           onSave={handleSave}

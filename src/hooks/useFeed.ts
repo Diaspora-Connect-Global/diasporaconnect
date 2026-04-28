@@ -60,7 +60,7 @@ export interface UseFeedResult {
   loadMore: () => void;
   feedContainerRef: React.RefObject<HTMLDivElement | null>;
   feedMeta: FeedStateMeta;
-  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number }>) => void;
+  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean }>) => void;
   removePost: (postId: string) => void;
 }
 
@@ -287,11 +287,11 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const updatePostCounts = useCallback((
     postId: string,
-    delta: Partial<{ likes: number; comments: number; shares: number; saves: number }>,
+    delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean }>,
   ) => {
     setMergedPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
-      return {
+      const updated = {
         ...p,
         engagementCounts: {
           likes: (p.engagementCounts?.likes ?? 0) + (delta.likes ?? 0),
@@ -300,6 +300,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
           saves: (p.engagementCounts?.saves ?? 0) + (delta.saves ?? 0),
         },
       };
+      if (delta.hasLiked !== undefined) {
+        updated.userEngagement = { ...p.userEngagement, hasLiked: delta.hasLiked };
+      }
+      return updated;
     }));
   }, []);
 

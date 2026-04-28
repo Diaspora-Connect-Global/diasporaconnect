@@ -7,11 +7,13 @@ import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMedi
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
 import { DISCOVER_COMMUNITIES, REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
-import { 
-  ADD_ENGAGEMENT, 
+import {
+  ADD_ENGAGEMENT,
+  REMOVE_ENGAGEMENT,
   CREATE_COMMENT,
   AddEngagementData,
-  CreateCommentData 
+  RemoveEngagementData,
+  CreateCommentData
 } from '@/services/gql/postsFeed';
 import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
@@ -143,6 +145,7 @@ export default function Home() {
 
   // Mutations
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
+  const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
   const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
@@ -187,15 +190,18 @@ export default function Home() {
     setJoinModal({ open: false, id: '', name: '' });
   };
 
-  // Handle like
-  const handleLike = async (postId: string) => {
-    updatePostCounts(postId, { likes: 1 });
+  const handleLike = async (postId: string, liked: boolean) => {
+    updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
     try {
-      await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      if (liked) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      }
     } catch (err) {
-      updatePostCounts(postId, { likes: -1 });
-      console.error('Failed to like post:', err);
-      toast.error('Failed to like post');
+      updatePostCounts(postId, { likes: liked ? -1 : 1, hasLiked: !liked });
+      console.error(`Failed to ${liked ? 'like' : 'unlike'} post:`, err);
+      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
     }
   };
 
@@ -534,7 +540,7 @@ export default function Home() {
                   likes={post.engagementCounts.likes}
                   comments={post.engagementCounts.comments}
                   shares={post.engagementCounts.shares}
-                  onLike={() => handleLike(post.id)}
+                  onLike={(liked) => handleLike(post.id, liked)}
                   onComment={() => console.log('Open comment input for', post.id)}
                   onShare={() => handleShare(post.id)}
                   onSave={() => handleSave(post.id)}
@@ -593,7 +599,7 @@ export default function Home() {
           likeCount={modalPost.engagementCounts.likes}
           commentCount={modalPost.engagementCounts.comments}
           shareCount={modalPost.engagementCounts.shares}
-          onLike={() => handleLike(modalPost.id)}
+          onLike={(liked) => handleLike(modalPost.id, liked)}
           onSave={() => handleSave(modalPost.id)}
           onShare={() => handleShare(modalPost.id)}
           onSendComment={(text, parentId) => handleSendComment(modalPost.id, text, parentId)}

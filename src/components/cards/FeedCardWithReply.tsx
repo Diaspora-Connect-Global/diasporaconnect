@@ -89,7 +89,7 @@ interface FeedCardProps {
     comments: number;
     shares: number;
     commentsData?: Comment[];
-    onLike?: () => void;
+    onLike?: (liked: boolean) => void;
     onComment?: () => void;
     onShare?: () => void;
     onSave?: () => void;
@@ -292,9 +292,18 @@ export default function FeedCardWithReply({
         async (commentId: string) => {
             const comment = loadedComments.find((c) => c.id === commentId);
             if (!comment) return;
-            const isLiked = comment.hasLiked ?? false;
+            const wasLiked = comment.hasLiked ?? false;
+            const newLiked = !wasLiked;
+            // Optimistic update — instant color change
+            setLoadedComments((prev) =>
+                prev.map((c) =>
+                    c.id === commentId
+                        ? { ...c, hasLiked: newLiked, likes: c.likes + (newLiked ? 1 : -1) }
+                        : c
+                )
+            );
             try {
-                if (isLiked) {
+                if (wasLiked) {
                     const { data } = await removeCommentLikeMutation({ variables: { input: { commentId } } });
                     if (data?.removeCommentLike != null) {
                         setLoadedComments((prev) =>
@@ -318,7 +327,14 @@ export default function FeedCardWithReply({
                     }
                 }
             } catch {
-                // Mutation failed; leave UI unchanged
+                // Revert optimistic update on failure
+                setLoadedComments((prev) =>
+                    prev.map((c) =>
+                        c.id === commentId
+                            ? { ...c, hasLiked: wasLiked, likes: c.likes + (wasLiked ? 1 : -1) }
+                            : c
+                    )
+                );
             }
         },
         [loadedComments, likeCommentMutation, removeCommentLikeMutation]
@@ -431,13 +447,10 @@ export default function FeedCardWithReply({
 
     /* ------------------- Interaction Handlers ------------------- */
     const handleLike = () => {
-        // Optimistic update
         const newLikedState = !isLiked;
         setIsLiked(newLikedState);
         setLikeCount((c) => newLikedState ? c + 1 : c - 1);
-        
-        // Call parent handler (which will trigger API call)
-        onLike?.();
+        onLike?.(newLikedState);
     };
 
     const handleSave = () => {

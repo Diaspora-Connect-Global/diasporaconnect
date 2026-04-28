@@ -29,6 +29,7 @@ export type {
   CreatePostData,
   EditPostData,
   AddEngagementData,
+  RemoveEngagementData,
   CreateCommentData,
   LikeCommentData,
   RemoveCommentLikeData,
@@ -269,6 +270,14 @@ export const EDIT_POST = gql`
 export const ADD_ENGAGEMENT = gql`
   mutation AddEngagement($input: AddEngagementInput!) {
     addEngagement(input: $input) {
+      success
+    }
+  }
+`;
+
+export const REMOVE_ENGAGEMENT = gql`
+  mutation RemoveEngagement($input: AddEngagementInput!) {
+    removeEngagement(input: $input) {
       success
     }
   }

@@ -528,6 +528,12 @@ export interface AddEngagementData {
   };
 }
 
+export interface RemoveEngagementData {
+  removeEngagement: {
+    success: boolean;
+  };
+}
+
 /**
  * Response from creating a comment (enriched so it can be inserted into the list without refetch).
  */

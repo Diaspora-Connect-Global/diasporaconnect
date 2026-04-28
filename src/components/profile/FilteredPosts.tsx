@@ -11,12 +11,14 @@ import {
   GET_LIKED_POSTS,
   GET_COMMENTED_POSTS,
   ADD_ENGAGEMENT,
+  REMOVE_ENGAGEMENT,
   CREATE_COMMENT,
   GetUserPostsData,
   GetSavedPostsData,
   GetLikedPostsData,
   GetCommentedPostsData,
   AddEngagementData,
+  RemoveEngagementData,
   CreateCommentData,
   Post,
 } from '@/services/gql/postsFeed';
@@ -123,6 +125,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
 
   // ---- Mutations ----
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
+  const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
   // ---- Derived data ----
@@ -141,13 +144,15 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
     activeTab === 'liked' ? likedLoading : commentedLoading;
 
   // ---- Handlers ----
-  const handleLike = async (postId: string) => {
+  const handleLike = async (postId: string, liked: boolean) => {
     try {
-      await addEngagement({
-        variables: { input: { postId, engagementType: 'LIKE' } },
-      });
+      if (liked) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      }
     } catch {
-      toast.error('Failed to like post');
+      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
     }
   };
 
@@ -314,7 +319,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
                 shares={post.engagementCounts.shares}
-                onLike={() => handleLike(post.id)}
+                onLike={(liked) => handleLike(post.id, liked)}
                 onComment={() => {}}
                 onShare={() => handleShare(post.id)}
                 onSave={() => handleSave(post.id)}

@@ -55,7 +55,7 @@ export interface PostMediaModalProps {
     likeCount: number;
     commentCount: number;
     shareCount: number;
-    onLike: () => void;
+    onLike: (liked: boolean) => void;
     onSave: () => void;
     onShare: () => void;
     onSendComment: (text: string, parentId?: string) => void;
@@ -153,7 +153,7 @@ export default function PostMediaModal({
     const [commentCount, setCommentCount] = useState(initialCommentCount);
     const [shareCount] = useState(initialShareCount);
 
-    /* sync when post changes (page-level navigation) */
+    /* sync when navigating to a different post */
     useEffect(() => {
         setMediaIndex(initialMediaIndex);
         setIsLiked(initialIsLiked);
@@ -164,7 +164,8 @@ export default function PostMediaModal({
         setShowCommentSheet(false);
         setContentExpanded(false);
         setIsEditingPost(false);
-    }, [postId, initialMediaIndex, initialIsLiked, initialIsSaved, initialLikeCount, initialCommentCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [postId, initialMediaIndex]);
 
     /* comments */
     const [loadedComments, setLoadedComments] = useState<Comment[]>([]);
@@ -289,8 +290,14 @@ export default function PostMediaModal({
     const handleLikeComment = useCallback(async (commentId: string) => {
         const comment = loadedComments.find(c => c.id === commentId);
         if (!comment) return;
+        const wasLiked = comment.hasLiked ?? false;
+        const newLiked = !wasLiked;
+        // Optimistic update — instant color change
+        setLoadedComments(prev => prev.map(c =>
+            c.id === commentId ? { ...c, hasLiked: newLiked, likes: c.likes + (newLiked ? 1 : -1) } : c
+        ));
         try {
-            if (comment.hasLiked) {
+            if (wasLiked) {
                 const { data } = await removeCommentLikeMutation({ variables: { input: { commentId } } });
                 if (data?.removeCommentLike != null) {
                     setLoadedComments(prev => prev.map(c =>
@@ -305,7 +312,12 @@ export default function PostMediaModal({
                     ));
                 }
             }
-        } catch { /* leave unchanged */ }
+        } catch {
+            // Revert optimistic update on failure
+            setLoadedComments(prev => prev.map(c =>
+                c.id === commentId ? { ...c, hasLiked: wasLiked, likes: c.likes + (wasLiked ? 1 : -1) } : c
+            ));
+        }
     }, [loadedComments, likeCommentMutation, removeCommentLikeMutation]);
 
     /* post-to-post slide transition */
@@ -387,9 +399,10 @@ export default function PostMediaModal({
 
     /* action handlers */
     const handleLike = () => {
-        setIsLiked(v => !v);
-        setLikeCount(c => isLiked ? c - 1 : c + 1);
-        onLike();
+        const newLikedState = !isLiked;
+        setIsLiked(newLikedState);
+        setLikeCount(c => newLikedState ? c + 1 : c - 1);
+        onLike(newLikedState);
     };
 
     const handleSave = () => {
