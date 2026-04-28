@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, Loader2, X, ChevronLeft, ChevronRight, MessageCircle, Globe, Users, Lock } from 'lucide-react';
+import { Bookmark, Loader2, X, ChevronLeft, ChevronRight, MessageCircle, Globe, Users, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ButtonType1, ButtonType3 } from '@/components/custom/button';
@@ -11,7 +11,15 @@ import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData } from '@/services/gql/postsFeed';
+import {
+    GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE,
+    EDIT_COMMENT, DELETE_COMMENT, EDIT_POST, DELETE_POST,
+    GetPostCommentsData, LikeCommentData, RemoveCommentLikeData,
+    EditCommentData, DeleteCommentData,
+} from '@/services/gql/postsFeed';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import { toast } from 'sonner';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import type { SearchUsersResponse } from '@/services/gql/types/connection';
 import type { MentionUser } from '@/components/custom/messageInputGlobal';
@@ -57,6 +65,7 @@ interface Comment {
     author: string;
     authorImage: string;
     authorHandle?: string;
+    authorId?: string;
     content: string;
     createdAt: string;
     likes: number;
@@ -73,6 +82,8 @@ export interface FeedCardFilteredProps {
     profileImage: string;
     profileName: string;
     profileTier?: Tier;
+    authorUserId?: string;
+    createdAt?: string;
     category: string;
     postDate: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
@@ -90,6 +101,7 @@ export interface FeedCardFilteredProps {
     onShare?: () => void;
     onSave?: () => void;
     onSendComment?: (content: string, parentId?: string) => void;
+    onDelete?: (postId: string) => void;
     joinButton?: boolean;
     forceShowComments?: boolean;
     onNavigatePost?: (direction: 'next' | 'prev') => void;
@@ -108,6 +120,7 @@ function mapApiComment(c: ApiComment): Comment {
         author: authorName,
         authorImage: authorAvatar,
         authorHandle: c.authorHandle ?? selfMention?.handle,
+        authorId: c.authorId,
         content: c.text,
         createdAt: c.createdAt,
         likes: c.likeCount ?? 0,
@@ -130,6 +143,8 @@ export default function FeedCardFiltered({
     profileImage,
     profileName,
     profileTier,
+    authorUserId,
+    createdAt,
     category,
     postDate,
     visibility,
@@ -147,6 +162,7 @@ export default function FeedCardFiltered({
     onShare,
     onSave,
     onSendComment,
+    onDelete,
     joinButton = true,
     forceShowComments = false,
     onNavigatePost,
@@ -167,6 +183,13 @@ export default function FeedCardFiltered({
     const [showCommentInput, setShowCommentInput] = useState(false);
     const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [isEditingPost, setIsEditingPost] = useState(false);
+    const [editPostText, setEditPostText] = useState('');
+    const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+    const [editCommentText, setEditCommentText] = useState('');
+    const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
+    const [deletePostModalOpen, setDeletePostModalOpen] = useState(false);
+    const currentUserId = useUserStore(s => s.user?.userId);
 
     // Swipe tracking
     const touchStartX = useRef(0);
@@ -215,6 +238,10 @@ export default function FeedCardFiltered({
     );
     const [likeCommentMutation] = useMutation<LikeCommentData>(LIKE_COMMENT);
     const [removeCommentLikeMutation] = useMutation<RemoveCommentLikeData>(REMOVE_COMMENT_LIKE);
+    const [editCommentMutation, { loading: editCommentLoading }] = useMutation<EditCommentData>(EDIT_COMMENT);
+    const [deleteCommentMutation, { loading: deleteCommentLoading }] = useMutation<DeleteCommentData>(DELETE_COMMENT);
+    const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
+    const [deletePostMutation, { loading: deletePostLoading }] = useMutation(DELETE_POST);
     const [searchUsers] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, { fetchPolicy: 'network-only' });
     const fetchMentions = useCallback(async (query: string): Promise<MentionUser[]> => {
         if (!query) return [];
@@ -225,6 +252,67 @@ export default function FeedCardFiltered({
             avatarUrl: p.avatarUrl,
         }));
     }, [searchUsers]);
+
+    const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
+    const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
+    const isOwnComment = (c: Comment) => !!currentUserId && c.authorId === currentUserId;
+    const canEditComment = (c: Comment) =>
+        isOwnComment(c) && (Date.now() - new Date(c.createdAt).getTime()) < 24 * 60 * 60 * 1000;
+
+    const handleEditPostConfirm = async () => {
+        const newText = editPostText.trim();
+        if (!newText) return;
+        try {
+            await editPostMutation({ variables: { input: { id: resolvedPostId, text: newText } } });
+            setIsEditingPost(false);
+            toast.success('Post updated');
+        } catch {
+            toast.error('Failed to update post');
+        }
+    };
+
+    const handleDeletePostConfirm = async () => {
+        try {
+            await deletePostMutation({ variables: { id: resolvedPostId } });
+            setDeletePostModalOpen(false);
+            toast.success('Post deleted');
+            onDelete?.(resolvedPostId);
+        } catch {
+            toast.error('Failed to delete post');
+        }
+    };
+
+    const handleEditCommentSubmit = async (commentId: string) => {
+        const newText = editCommentText.trim();
+        if (!newText) return;
+        const previous = loadedComments.find(c => c.id === commentId);
+        setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: newText } : c));
+        setEditingCommentId(null);
+        try {
+            await editCommentMutation({ variables: { input: { commentId, text: newText } } });
+            toast.success('Comment updated');
+        } catch {
+            if (previous) setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: previous.content } : c));
+            setEditingCommentId(commentId);
+            toast.error('Failed to update comment');
+        }
+    };
+
+    const handleDeleteCommentConfirm = async () => {
+        const commentId = deleteCommentId!;
+        const snapshot = [...loadedComments];
+        setLoadedComments(prev => prev.filter(c => c.id !== commentId));
+        setCommentCount(n => Math.max(0, n - 1));
+        setDeleteCommentId(null);
+        try {
+            await deleteCommentMutation({ variables: { input: { commentId } } });
+            toast.success('Comment deleted');
+        } catch {
+            setLoadedComments(snapshot);
+            setCommentCount(n => n + 1);
+            toast.error('Failed to delete comment');
+        }
+    };
 
     const handleLikeComment = useCallback(async (commentId: string) => {
         const comment = loadedComments.find((c) => c.id === commentId);
@@ -393,6 +481,28 @@ export default function FeedCardFiltered({
 
     /* ------------------- Render helpers ------------------- */
     const renderContent = () => {
+        if (isEditingPost) {
+            return (
+                <div className="mb-[1rem]">
+                    <textarea
+                        className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                        rows={5}
+                        value={editPostText}
+                        onChange={e => setEditPostText(e.target.value)}
+                        autoFocus
+                    />
+                    <div className="flex gap-2 justify-end mt-1">
+                        <button className="px-2 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
+                            onClick={() => setIsEditingPost(false)}>Cancel</button>
+                        <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
+                            onClick={handleEditPostConfirm}
+                            disabled={editPostLoading || !editPostText.trim()}>
+                            {editPostLoading ? 'Saving…' : 'Save'}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
         const max = 200;
         const truncated = content.length > max && !isExpanded;
         const displayText = truncated ? `${content.slice(0, max)}...` : content;
@@ -503,10 +613,49 @@ export default function FeedCardFiltered({
                                     {c.authorTier ? <UserBadge tier={c.authorTier} size="xs" /> : null}
                                     <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
                                     <span className="text-text-tertiary text-xs flex-shrink-0">{formatDateProximity(c.createdAt)}</span>
+                                    {isOwnComment(c) && !stubParentIds.has(c.id) && (
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <button className="ml-auto p-0.5 rounded-full hover:bg-surface-alt text-text-tertiary flex-shrink-0">
+                                                    <MoreHorizontal className="w-4 h-4" />
+                                                </button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-32">
+                                                {canEditComment(c) && (
+                                                    <DropdownMenuItem onSelect={() => { setEditCommentText(c.content); setEditingCommentId(c.id); }}>
+                                                        <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                                                    </DropdownMenuItem>
+                                                )}
+                                                {canEditComment(c) && <DropdownMenuSeparator />}
+                                                <DropdownMenuItem variant="destructive" onSelect={() => setDeleteCommentId(c.id)}>
+                                                    <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    )}
                                 </div>
                                 <div className="ml-10">
                                     {stubParentIds.has(c.id) ? (
                                         <p className="body-small text-text-tertiary italic mb-[0.5rem]">Reply to this comment</p>
+                                    ) : editingCommentId === c.id ? (
+                                        <div className="mb-2">
+                                            <textarea
+                                                className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                                                rows={3}
+                                                value={editCommentText}
+                                                onChange={e => setEditCommentText(e.target.value)}
+                                                autoFocus
+                                            />
+                                            <div className="flex gap-2 justify-end mt-1">
+                                                <button className="px-2 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
+                                                    onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                                <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
+                                                    onClick={() => handleEditCommentSubmit(c.id)}
+                                                    disabled={editCommentLoading || !editCommentText.trim()}>
+                                                    {editCommentLoading ? 'Saving…' : 'Save'}
+                                                </button>
+                                            </div>
+                                        </div>
                                     ) : (
                                         <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderRichText(c.content, c.mentionMap)}</p>
                                     )}
@@ -526,7 +675,10 @@ export default function FeedCardFiltered({
                             )}
                             {(repliesByParentId.get(c.id)?.length ?? 0) > 0 && (
                                 <div className="ml-8 mt-3 space-y-3 pl-6">
-                                    {repliesByParentId.get(c.id)!.map((reply) => (
+                                    {repliesByParentId.get(c.id)!.map((reply) => {
+                                        const rOwn = isOwnComment(reply);
+                                        const rEditable = rOwn && canEditComment(reply);
+                                        return (
                                         <div key={reply.id} className="flex gap-[0.75rem]">
                                             <img src={reply.authorImage || '/PROFILE.png'} alt={reply.author} width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                                             <div className="flex-1 min-w-0">
@@ -535,15 +687,57 @@ export default function FeedCardFiltered({
                                                     {reply.authorTier ? <UserBadge tier={reply.authorTier} size="xs" /> : null}
                                                     <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
                                                     <span className="text-text-tertiary text-xs flex-shrink-0">{formatDateProximity(reply.createdAt)}</span>
+                                                    {rOwn && (
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <button className="ml-auto p-0.5 rounded-full hover:bg-surface-alt text-text-tertiary flex-shrink-0">
+                                                                    <MoreHorizontal className="w-4 h-4" />
+                                                                </button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end" className="w-32">
+                                                                {rEditable && (
+                                                                    <DropdownMenuItem onSelect={() => { setEditCommentText(reply.content); setEditingCommentId(reply.id); }}>
+                                                                        <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                {rEditable && <DropdownMenuSeparator />}
+                                                                <DropdownMenuItem variant="destructive" onSelect={() => setDeleteCommentId(reply.id)}>
+                                                                    <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    )}
                                                 </div>
-                                                <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                                {editingCommentId === reply.id ? (
+                                                    <div className="mb-2">
+                                                        <textarea
+                                                            className="w-full border border-border-subtle rounded-lg p-2 body-small text-text-primary bg-surface-default resize-none focus:outline-none focus:ring-1 focus:ring-brand"
+                                                            rows={2}
+                                                            value={editCommentText}
+                                                            onChange={e => setEditCommentText(e.target.value)}
+                                                            autoFocus
+                                                        />
+                                                        <div className="flex gap-2 justify-end mt-1">
+                                                            <button className="px-2 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
+                                                                onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                                            <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
+                                                                onClick={() => handleEditCommentSubmit(reply.id)}
+                                                                disabled={editCommentLoading || !editCommentText.trim()}>
+                                                                {editCommentLoading ? 'Saving…' : 'Save'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                                )}
                                                 <div className="flex items-center gap-[0.75rem]">
                                                     <ButtonType3 type="button" onClick={() => handleLikeComment(reply.id)} className={`text-xs font-semibold p-0 min-w-0 border-0 bg-transparent ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>{t('like')}</ButtonType3>
                                                     <span className="text-text-tertiary text-xs">{formatCount(reply.likes)} {t('likes')}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -629,11 +823,11 @@ export default function FeedCardFiltered({
         );
 
         return (
-            <div className="fixed inset-0 z-50 flex bg-black animate-in fade-in duration-200" onClick={closeMediaModal}>
+            <div className="fixed inset-0 z-50 flex bg-surface-default animate-in fade-in duration-200" onClick={closeMediaModal}>
                 {/* ---- DESKTOP LAYOUT ---- */}
                 <div className="hidden md:flex w-full h-full" onClick={(e) => e.stopPropagation()}>
                     {/* Left: media */}
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-w-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                    <div className="relative flex-1 flex items-center justify-center bg-neutral-900 dark:bg-black min-w-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                         {/* Close */}
                         <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
@@ -714,7 +908,7 @@ export default function FeedCardFiltered({
                 {/* ---- MOBILE LAYOUT ---- */}
                 <div className="flex md:hidden flex-col w-full h-full" onClick={(e) => e.stopPropagation()}>
                     {/* Media area */}
-                    <div className="relative flex-1 flex items-center justify-center bg-black min-h-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+                    <div className="relative flex-1 flex items-center justify-center bg-neutral-900 dark:bg-black min-h-0" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                         <button onClick={closeMediaModal} className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
                         </button>
@@ -800,6 +994,26 @@ export default function FeedCardFiltered({
                         </p>
                     </div>
                 </div>
+                {isOwnPost && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="p-1 rounded-full hover:bg-surface-alt text-text-secondary flex-shrink-0">
+                                <MoreHorizontal className="w-5 h-5" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            {canEditPost && (
+                                <DropdownMenuItem onSelect={() => { setEditPostText(content); setIsEditingPost(true); }}>
+                                    <Pencil className="w-4 h-4 mr-2" /> Edit
+                                </DropdownMenuItem>
+                            )}
+                            {canEditPost && <DropdownMenuSeparator />}
+                            <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
 
             {renderContent()}
@@ -855,6 +1069,28 @@ export default function FeedCardFiltered({
             <SharePostModal open={showShareModal} onClose={() => setShowShareModal(false)} postId={resolvedPostId} onShared={onShare} />
 
             {renderMediaModal()}
+
+            <ConfirmationModal
+                open={!!deleteCommentId}
+                onCancel={() => setDeleteCommentId(null)}
+                onConfirm={handleDeleteCommentConfirm}
+                title="Delete comment?"
+                description="This will permanently delete the comment. This action cannot be undone."
+                confirmText="Delete"
+                confirmVariant="destructive"
+                isLoading={deleteCommentLoading}
+            />
+
+            <ConfirmationModal
+                open={deletePostModalOpen}
+                onCancel={() => setDeletePostModalOpen(false)}
+                onConfirm={handleDeletePostConfirm}
+                title="Delete post?"
+                description="This will permanently delete the post. This action cannot be undone."
+                confirmText="Delete"
+                confirmVariant="destructive"
+                isLoading={deletePostLoading}
+            />
         </div>
     );
 }
