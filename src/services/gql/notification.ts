@@ -145,6 +145,8 @@ export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
 export type GetNotificationPathOptions = {
   /** Current user's id — used to pick the *other* user for connection notifications. */
   currentUserId?: string;
+  /** Resolved actor user id from enriched notification data — fallback for connection routing. */
+  actorUserId?: string;
 };
 
 /**
@@ -173,7 +175,7 @@ export function getNotificationPath(
 
   // Connections → peer profile
   if (t.startsWith('connection.')) {
-    const peer = resolveConnectionPeerUserId(d, options?.currentUserId);
+    const peer = resolveConnectionPeerUserId(d, options?.currentUserId) ?? options?.actorUserId;
     if (peer) return `/${peer}`;
     return '/feed';
   }

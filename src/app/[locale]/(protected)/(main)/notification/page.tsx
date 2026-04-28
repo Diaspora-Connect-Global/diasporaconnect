@@ -279,7 +279,7 @@ function NotificationRow({
   locale: string;
   currentUserId?: string;
   onMarkAsRead: () => void;
-  onClick: () => void;
+  onClick: (actorUserId?: string) => void;
   isReadOptimistic: boolean;
 }) {
   const enriched = useEnrichedNotification(not, currentUserId);
@@ -295,7 +295,7 @@ function NotificationRow({
       time={not.createdAt}
       read={(not.isRead ?? not.read ?? false) || isReadOptimistic}
       onMarkAsRead={onMarkAsRead}
-      onClick={onClick}
+      onClick={() => onClick(enriched.actorUserId ?? undefined)}
     />
   );
 }
@@ -391,9 +391,9 @@ export default function NotificationPage() {
   }, [fetchMore, hasMore, isFetchingMore, notifications.length]);
 
   const handleNotificationClick = useCallback(
-    async (notification: Notification) => {
+    async (notification: Notification, actorUserId?: string) => {
       const id = notification.id;
-      const path = getNotificationPath(notification, { currentUserId });
+      const path = getNotificationPath(notification, { currentUserId, actorUserId });
       const target = `/${locale}${path}`;
 
       setReadIds((prev) => new Set(prev).add(id));
@@ -515,7 +515,7 @@ export default function NotificationPage() {
               locale={locale}
               currentUserId={currentUserId}
               onMarkAsRead={() => markSingleAsRead(not.id)}
-              onClick={() => handleNotificationClick(not)}
+              onClick={(actorUserId) => handleNotificationClick(not, actorUserId)}
               isReadOptimistic={readIds.has(not.id)}
             />
           ))}
