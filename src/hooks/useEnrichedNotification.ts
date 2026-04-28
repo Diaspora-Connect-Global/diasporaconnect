@@ -502,6 +502,7 @@ export function useEnrichedNotification(
     variables: { id: postId ?? '' },
     skip: !needsPost,
     fetchPolicy: 'cache-first',
+    errorPolicy: 'ignore',
   });
 
   const opportunityQuery = useQuery<{

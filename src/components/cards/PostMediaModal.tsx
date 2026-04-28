@@ -723,7 +723,7 @@ export default function PostMediaModal({
     /* ── render ── */
     return (
         <>
-            <div className="fixed inset-0 z-50 flex overflow-hidden bg-surface-default animate-in fade-in duration-200" onClick={onClose}>
+            <div className="fixed inset-0 z-50 flex overflow-hidden bg-black animate-in fade-in duration-200" onClick={onClose}>
                 <div className="w-full h-full" style={getSlideStyle()}>
 
                 {/* DESKTOP */}
