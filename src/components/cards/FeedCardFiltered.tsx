@@ -730,7 +730,13 @@ export default function FeedCardFiltered({
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                                    <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                        {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
+                                                            const spaceIdx = reply.content.indexOf(' ');
+                                                            const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
+                                                            return rest ? renderRichText(rest, reply.mentionMap) : null;
+                                                        })() : renderRichText(reply.content, reply.mentionMap)}
+                                                    </p>
                                                 )}
                                                 <div className="flex items-center gap-[0.75rem]">
                                                     <ButtonType3 type="button" onClick={() => handleLikeComment(reply.id)} className={`text-xs font-semibold p-0 min-w-0 border-0 bg-transparent ${reply.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>{t('like')}</ButtonType3>

@@ -846,7 +846,13 @@ export default function FeedCardWithReply({
                                                 {reply.authorTier && <UserBadge tier={reply.authorTier} size="xs" />}
                                                 <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(reply.createdAt)}</span>
                                             </div>
-                                            <p className="body-small text-text-primary break-words whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                            <p className="body-small text-text-primary break-words whitespace-pre-wrap">
+                                                {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
+                                                    const spaceIdx = reply.content.indexOf(' ');
+                                                    const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
+                                                    return rest ? renderRichText(rest, reply.mentionMap) : null;
+                                                })() : renderRichText(reply.content, reply.mentionMap)}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}
@@ -1119,7 +1125,11 @@ export default function FeedCardWithReply({
             </div>
         ) : (
             <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
-                {renderRichText(c.content, c.mentionMap)}
+                {c.parentId && /^@\S+/.test(c.content) ? (() => {
+                    const spaceIdx = c.content.indexOf(' ');
+                    const rest = spaceIdx === -1 ? '' : c.content.slice(spaceIdx + 1);
+                    return rest ? renderRichText(rest, c.mentionMap) : null;
+                })() : renderRichText(c.content, c.mentionMap)}
             </p>
         );
 

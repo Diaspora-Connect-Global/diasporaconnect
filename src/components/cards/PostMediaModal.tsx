@@ -728,7 +728,13 @@ export default function PostMediaModal({
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="body-small text-text-primary break-words whitespace-pre-wrap">{renderRichText(reply.content, reply.mentionMap)}</p>
+                                            <p className="body-small text-text-primary break-words whitespace-pre-wrap">
+                                                {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
+                                                    const spaceIdx = reply.content.indexOf(' ');
+                                                    const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
+                                                    return rest ? renderRichText(rest, reply.mentionMap) : null;
+                                                })() : renderRichText(reply.content, reply.mentionMap)}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
