@@ -28,7 +28,7 @@ import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { formatCount } from '@/macros/formatCount';
 import { formatDateProximity } from '@/macros/time';
-import { renderRichText, type MentionMap, buildMentionMap } from '@/components/custom/richTextRenderer';
+import { renderRichText, type MentionMap, buildMentionMap, buildMentionInputsFromText, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { resolveUserTier } from '@/lib/userTier';
 import { useUserStore } from '@/store/useUserStore';
 import { useRouter } from '@/i18n/navigation';
@@ -60,7 +60,7 @@ export interface PostMediaModalProps {
     onLike: (liked: boolean) => void;
     onSave: () => void;
     onShare: () => void;
-    onSendComment: (text: string, parentId?: string) => void;
+    onSendComment: (text: string, parentId?: string, mentions?: MentionInputItem[]) => void;
     onClose: () => void;
     onNavigatePost: (dir: 'next' | 'prev') => void;
     onDelete?: (postId: string) => void;
@@ -451,7 +451,8 @@ export default function PostMediaModal({
         };
         setLoadedComments(prev => [...prev, optimistic]);
         try {
-            await onSendComment(prepared, parentId);
+            const mentions = buildMentionInputsFromText(prepared, mentionMap);
+            await onSendComment(prepared, parentId, mentions.length ? mentions : undefined);
             setTimeout(() => fetchComments({ variables: { postId, limit: 20, offset: 0 } }), 500);
         } catch {
             setCommentCount(c => c - 1);

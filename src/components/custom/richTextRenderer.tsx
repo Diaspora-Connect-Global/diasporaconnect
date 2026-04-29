@@ -81,6 +81,35 @@ export function buildMentionMap(
   return map;
 }
 
+export interface MentionInputItem {
+  entityId: string;
+  entityType?: string;
+  displayName: string;
+  startPosition: number;
+  endPosition: number;
+}
+
+/**
+ * Build structured mention inputs (with positions) from text and a MentionMap.
+ * Used when sending comments/posts to pass resolved mention data to the backend.
+ */
+export function buildMentionInputsFromText(
+  text: string,
+  mentionMap: MentionMap | undefined,
+): MentionInputItem[] {
+  if (!mentionMap || !text) return [];
+  const inputs: MentionInputItem[] = [];
+  for (const [displayName, entityId] of Object.entries(mentionMap)) {
+    const pattern = `@${displayName}`;
+    let idx = text.indexOf(pattern);
+    while (idx !== -1) {
+      inputs.push({ entityId, entityType: 'USER', displayName, startPosition: idx, endPosition: idx + pattern.length });
+      idx = text.indexOf(pattern, idx + 1);
+    }
+  }
+  return inputs;
+}
+
 /**
  * Parses post text and renders:
  * - http(s):// and www. URLs as external links (opens new tab)

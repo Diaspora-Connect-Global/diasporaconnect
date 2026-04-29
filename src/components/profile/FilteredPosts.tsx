@@ -25,7 +25,7 @@ import {
 import FeedCardWithReply from '../cards/FeedCardWithReply';
 import { toast } from 'sonner';
 import { Bookmark, Heart, MessageCircle, FileText } from 'lucide-react';
-import { buildMentionMap } from '@/components/custom/richTextRenderer';
+import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 
 type TabId = 'myPosts' | 'saved' | 'liked' | 'commented';
 
@@ -177,7 +177,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
     }
   };
 
-  const handleSendComment = async (postId: string, content: string, parentId?: string) => {
+  const handleSendComment = async (postId: string, content: string, parentId?: string, mentions?: MentionInputItem[]) => {
     try {
       await createComment({
         variables: {
@@ -186,6 +186,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
             text: content,
             idempotencyKey: crypto.randomUUID(),
             ...(parentId ? { parentId } : {}),
+            ...(mentions?.length ? { mentions } : {}),
           },
         },
       });
@@ -325,7 +326,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 onComment={() => {}}
                 onShare={() => handleShare(post.id)}
                 onSave={() => handleSave(post.id)}
-                onSendComment={(content) => handleSendComment(post.id, content)}
+                onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
                 joinButton={false}
                 isLiked={post.userEngagement.hasLiked}
                 isSaved={post.userEngagement.hasSaved}

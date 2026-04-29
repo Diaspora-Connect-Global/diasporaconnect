@@ -8,7 +8,7 @@ import type { FeedModeType, FeedViewMode, GetFeedInput, Post } from '@/services/
 
 const INITIAL_LIMIT = 12;
 const PAGE_SIZE = 12;
-const SCROLL_THRESHOLD_PX = 200;
+const SCROLL_THRESHOLD_PX = 800;
 
 function mapPosts(raw: GetFeedData['feed']['posts']): Post[] {
   return raw.map((p) => normalizeFeedPost(p));

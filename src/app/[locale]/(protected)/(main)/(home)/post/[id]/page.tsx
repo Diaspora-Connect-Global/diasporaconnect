@@ -107,7 +107,7 @@ export default function PostPage() {
     }
   };
 
-  const handleSendComment = async (content: string, parentId?: string) => {
+  const handleSendComment = async (content: string, parentId?: string, mentions?: import('@/components/custom/richTextRenderer').MentionInputItem[]) => {
     try {
       await createComment({
         variables: {
@@ -116,6 +116,7 @@ export default function PostPage() {
             text: content,
             idempotencyKey: crypto.randomUUID(),
             ...(parentId ? { parentId } : {}),
+            ...(mentions?.length ? { mentions } : {}),
           },
         },
       });

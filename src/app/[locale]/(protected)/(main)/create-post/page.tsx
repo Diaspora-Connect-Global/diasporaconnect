@@ -33,6 +33,7 @@ import { useRouter } from 'next/navigation';
 import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
 import { AttachmentInput } from '@/services/gql/types/postsFeed';
 import { usePostDraft } from '@/hooks/usePostDraft';
+import { buildMentionInputsFromText } from '@/components/custom/richTextRenderer';
 
 // Types
 type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
@@ -492,6 +493,14 @@ export default function CreatePostPage() {
             ...(mentionedUsers.length > 0 && {
               mentionedUserIds: mentionedUsers.map((m) => m.userId),
             }),
+            ...(mentionedUsers.length > 0 && (() => {
+              const mentionMap = Object.fromEntries(mentionedUsers.map((m) => [m.name, m.userId]));
+              const mentions = buildMentionInputsFromText(postContent, mentionMap).map((mi) => ({
+                ...mi,
+                displayName: mentionedUsers.find((u) => u.userId === mi.entityId)?.displayName ?? mi.displayName,
+              }));
+              return mentions.length > 0 ? { mentions } : {};
+            })()),
           }
         }
       });

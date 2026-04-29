@@ -229,7 +229,7 @@ export default function Home() {
   };
 
   // Handle new comment (or reply when parentId is set)
-  const handleSendComment = async (postId: string, content: string, parentId?: string) => {
+  const handleSendComment = async (postId: string, content: string, parentId?: string, mentions?: import('@/components/custom/richTextRenderer').MentionInputItem[]) => {
     if (!content.trim()) return;
 
     updatePostCounts(postId, { comments: 1 });
@@ -241,6 +241,7 @@ export default function Home() {
             text: content,
             idempotencyKey: crypto.randomUUID(),
             ...(parentId ? { parentId } : {}),
+            ...(mentions?.length ? { mentions } : {}),
           }
         }
       });
@@ -548,7 +549,7 @@ export default function Home() {
                   onComment={() => console.log('Open comment input for', post.id)}
                   onShare={() => handleShare(post.id)}
                   onSave={() => handleSave(post.id)}
-                  onSendComment={(content, parentId) => handleSendComment(post.id, content, parentId)}
+                  onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
                   onDelete={removePost}
                   joinButton={false}
                   isLiked={post.userEngagement.hasLiked}
@@ -607,7 +608,7 @@ export default function Home() {
           onLike={(liked) => handleLike(modalPost.id, liked)}
           onSave={() => handleSave(modalPost.id)}
           onShare={() => handleShare(modalPost.id)}
-          onSendComment={(text, parentId) => handleSendComment(modalPost.id, text, parentId)}
+          onSendComment={(text, parentId, mentions) => handleSendComment(modalPost.id, text, parentId, mentions)}
           onClose={() => setModalState(null)}
           onNavigatePost={handleNavigatePost}
           onDelete={removePost}

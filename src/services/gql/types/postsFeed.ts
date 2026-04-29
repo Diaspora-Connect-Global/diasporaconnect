@@ -336,12 +336,21 @@ export interface GetFeedInput {
  * @property {string} [communityId] - Optional community to post in
  * @property {PostVisibility} [visibility] - Post visibility setting
  */
+export interface MentionInputItem {
+  entityId: string;
+  entityType?: string;
+  displayName: string;
+  startPosition: number;
+  endPosition: number;
+}
+
 export interface CreatePostInput {
   text: string;
   communityId?: string;
   visibility?: PostVisibility;
   publishImmediately?: boolean;
   attachments?: AttachmentInput[];
+  mentions?: MentionInputItem[];
 }
 
 /**
@@ -394,6 +403,7 @@ export interface CreateCommentInput {
   text: string;
   parentId?: string;
   attachments?: AttachmentInput[];
+  mentions?: MentionInputItem[];
 }
 
 /** Input for likeComment and removeCommentLike. */

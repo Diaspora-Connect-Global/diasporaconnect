@@ -8,7 +8,7 @@ import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
-import { renderRichText, MentionMap, buildMentionMap } from '@/components/custom/richTextRenderer';
+import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import {
@@ -101,7 +101,7 @@ export interface FeedCardFilteredProps {
     onComment?: () => void;
     onShare?: () => void;
     onSave?: () => void;
-    onSendComment?: (content: string, parentId?: string) => void;
+    onSendComment?: (content: string, parentId?: string, mentions?: MentionInputItem[]) => void;
     onDelete?: (postId: string) => void;
     joinButton?: boolean;
     forceShowComments?: boolean;
@@ -425,7 +425,8 @@ export default function FeedCardFiltered({
             }
         }
         try {
-            const result = onSendComment(preparedText, parentId);
+            const mentions = buildMentionInputsFromText(preparedText, mentionMap);
+            const result = onSendComment(preparedText, parentId, mentions.length ? mentions : undefined);
             if (result != null && typeof (result as Promise<unknown>).then === 'function') await result;
             setCommentCount((c) => c + 1);
             setShowComments(true);
