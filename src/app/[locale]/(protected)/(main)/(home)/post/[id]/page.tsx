@@ -17,6 +17,7 @@ import { FEED_COLUMN_POST_PAGE_CLASS } from '@/lib/feedColumnLayout';
 import { cn } from '@/lib/utils';
 import { useUserStore } from '@/store/useUserStore';
 import type { Profile } from '@/services/gql/types/profile';
+import { buildMentionMap } from '@/components/custom/richTextRenderer';
 
 function formatFullNameFromProfile(p: Profile | null): string {
   if (!p) return '';
@@ -257,7 +258,7 @@ export default function PostPage() {
           onDelete={() => router.push('/')}
           visibility={normalizedPostResolved.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={normalizedPostResolved.text}
-          mentionMap={normalizedPostResolved.mentions?.length ? Object.fromEntries(normalizedPostResolved.mentions.map(m => [m.handle, m.entityId])) : undefined}
+          mentionMap={buildMentionMap(normalizedPostResolved.mentions ?? [])}
           images={
             normalizedPostResolved.attachments
               ?.filter(

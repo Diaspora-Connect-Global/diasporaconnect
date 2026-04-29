@@ -25,6 +25,7 @@ import {
 import FeedCardWithReply from '../cards/FeedCardWithReply';
 import { toast } from 'sonner';
 import { Bookmark, Heart, MessageCircle, FileText } from 'lucide-react';
+import { buildMentionMap } from '@/components/custom/richTextRenderer';
 
 type TabId = 'myPosts' | 'saved' | 'liked' | 'commented';
 
@@ -304,7 +305,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 createdAt={post.createdAt}
                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                 content={post.text}
-                mentionMap={post.mentions?.length ? Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId])) : undefined}
+                mentionMap={buildMentionMap(post.mentions ?? [])}
                 images={
                   post.attachments
                     ?.filter((a) => a.mimeType?.startsWith('image/') || a.type?.toUpperCase() === 'IMAGE')

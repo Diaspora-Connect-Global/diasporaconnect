@@ -28,7 +28,7 @@ import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { formatCount } from '@/macros/formatCount';
 import { formatDateProximity } from '@/macros/time';
-import { renderRichText, type MentionMap } from '@/components/custom/richTextRenderer';
+import { renderRichText, type MentionMap, buildMentionMap } from '@/components/custom/richTextRenderer';
 import { resolveUserTier } from '@/lib/userTier';
 import { useUserStore } from '@/store/useUserStore';
 import { useRouter } from '@/i18n/navigation';
@@ -85,8 +85,7 @@ interface Comment {
 }
 
 function mapApiComment(c: ApiComment): Comment {
-    const mentionMap: MentionMap = {};
-    c.mentions?.forEach(m => { mentionMap[m.handle] = m.entityId; });
+    const mentionMap = buildMentionMap(c.mentions ?? []);
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
     return {
         id: c.id,
@@ -101,7 +100,7 @@ function mapApiComment(c: ApiComment): Comment {
         hasLiked: c.hasLiked ?? false,
         replies: c.replyCount,
         parentId: c.parentId ?? undefined,
-        mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
+        mentionMap,
         authorTier: resolveUserTier({
             tier: (c as { authorTier?: string }).authorTier,
             verificationTier: (c as { authorVerificationTier?: string }).authorVerificationTier,

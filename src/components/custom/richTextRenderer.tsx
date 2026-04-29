@@ -64,6 +64,24 @@ function linkifyPlainSegment(segment: string, keyBase: string): React.ReactNode[
 export type MentionMap = Record<string, string>;
 
 /**
+ * Build a MentionMap from API mention objects, indexing by both handle AND
+ * displayName so the lookup succeeds regardless of which form appears in text.
+ */
+export function buildMentionMap(
+  mentions: { handle: string; displayName?: string | null; entityId: string }[],
+): MentionMap | undefined {
+  if (!mentions.length) return undefined;
+  const map: MentionMap = {};
+  for (const m of mentions) {
+    map[m.handle] = m.entityId;
+    if (m.displayName && m.displayName !== m.handle) {
+      map[m.displayName] = m.entityId;
+    }
+  }
+  return map;
+}
+
+/**
  * Parses post text and renders:
  * - http(s):// and www. URLs as external links (opens new tab)
  * - @mentions as brand-styled links (with profile navigation when mentionMap is provided)
@@ -92,8 +110,8 @@ export function renderRichText(
     ? 'text-text-brand font-semibold cursor-default'
     : 'text-text-brand font-semibold bg-surface-brand-subtle px-1 py-0.5 rounded cursor-default';
   const linkClass = compactLayout
-    ? 'inline text-text-brand font-semibold no-underline'
-    : 'inline text-text-brand font-semibold bg-surface-brand-subtle px-1 py-0.5 rounded hover:bg-surface-brand-subtle/80 transition-colors no-underline';
+    ? 'inline text-text-brand font-semibold no-underline cursor-pointer'
+    : 'inline text-text-brand font-semibold bg-surface-brand-subtle px-1 py-0.5 rounded hover:bg-surface-brand-subtle/80 transition-colors no-underline cursor-pointer';
 
   while ((match = pattern.exec(text)) !== null) {
     // Add text before the match (with URL autolink)

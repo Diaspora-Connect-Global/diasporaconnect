@@ -16,6 +16,7 @@ import { ButtonType3 } from '@/components/custom/button';
 import { ChevronLeft } from 'lucide-react';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { buildMentionMap } from '@/components/custom/richTextRenderer';
 
 function getProfileData(post: Post) {
   if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
@@ -216,7 +217,7 @@ export default function FeedPage() {
                     createdAt={post.createdAt}
                     visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                     content={post.text}
-                    mentionMap={post.mentions?.length ? Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId])) : undefined}
+                    mentionMap={buildMentionMap(post.mentions ?? [])}
                     images={
                       post.attachments
                         ?.filter(

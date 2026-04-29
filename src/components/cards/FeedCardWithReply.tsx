@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge, type Tier } from "@/components/custom/userBadge";
 import { formatCount } from '@/macros/formatCount';
-import { renderRichText, MentionMap } from '@/components/custom/richTextRenderer';
+import { renderRichText, MentionMap, buildMentionMap } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, DELETE_POST, EDIT_POST, EDIT_COMMENT, DELETE_COMMENT, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData, EditCommentData, DeleteCommentData } from '@/services/gql/postsFeed';
@@ -112,10 +112,7 @@ interface FeedCardProps {
 /* --------------------------------------------------------------- */
 /** Map an API Comment to the local Comment shape. Use authorDisplayName/authorAvatarUrl from API when present. */
 function mapApiComment(c: ApiComment): Comment {
-    const mentionMap: MentionMap = {};
-    c.mentions?.forEach((m) => {
-        mentionMap[m.handle] = m.entityId;
-    });
+    const mentionMap = buildMentionMap(c.mentions ?? []);
 
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
     const authorName = c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId;
@@ -134,7 +131,7 @@ function mapApiComment(c: ApiComment): Comment {
         hasLiked: c.hasLiked ?? false,
         replies: c.replyCount,
         parentId: c.parentId ?? undefined,
-        mentionMap: Object.keys(mentionMap).length > 0 ? mentionMap : undefined,
+        mentionMap,
         authorTier: resolveUserTier({
             tier: (c as { authorTier?: string })?.authorTier,
             verificationTier: (c as { authorVerificationTier?: string })?.authorVerificationTier,

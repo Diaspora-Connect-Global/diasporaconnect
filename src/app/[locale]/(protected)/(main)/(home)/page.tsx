@@ -27,6 +27,7 @@ import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import PrivacyPolicyModal from '@/components/custom/PrivacyPolicyModal';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { buildMentionMap } from '@/components/custom/richTextRenderer';
 
 // Type definitions for better type safety
 interface DiscoverCommunitiesData {
@@ -346,10 +347,7 @@ export default function Home() {
       .filter(m => m.src),
   ];
 
-  const getPostMentionMap = (post: ApiPost) => {
-    if (!post.mentions?.length) return undefined;
-    return Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId]));
-  };
+  const getPostMentionMap = (post: ApiPost) => buildMentionMap(post.mentions ?? []);
 
   const handleNavigatePost = (dir: 'next' | 'prev') => {
     if (modalState === null) return;

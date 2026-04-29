@@ -22,6 +22,7 @@ import {
     type AssociationJoinPolicy,
 } from '@/services/gql/associations';
 import { GET_FEED } from '@/services/gql/postsFeed';
+import { buildMentionMap } from '@/components/custom/richTextRenderer';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -50,7 +51,7 @@ interface FeedPost {
     authorType: string;
     createdAt: string;
     visibility?: string;
-    mentions?: { handle: string; entityId: string }[];
+    mentions?: { handle: string; displayName?: string; entityId: string }[];
     engagementCounts: {
         likes: number;
         comments: number;
@@ -359,7 +360,7 @@ export default function AssociationPage() {
                                 postDate={formatDateProximity(post.createdAt)}
                                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                                 content={post.text}
-                                mentionMap={post.mentions?.length ? Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId])) : undefined}
+                                mentionMap={buildMentionMap(post.mentions ?? [])}
                                 shares={post.engagementCounts.shares}
                                 likes={post.engagementCounts.likes}
                                 comments={post.engagementCounts.comments}
