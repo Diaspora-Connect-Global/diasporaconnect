@@ -452,6 +452,15 @@ export const GET_USER_POSTS = gql`
         type
         mimeType
       }
+      mentions {
+        entityId
+        entityType
+        handle
+        displayName
+        avatarUrl
+        startPosition
+        endPosition
+      }
       engagementCounts {
         likes
         comments
@@ -496,6 +505,15 @@ export const GET_SAVED_POSTS = gql`
           url
           type
           mimeType
+        }
+        mentions {
+          entityId
+          entityType
+          handle
+          displayName
+          avatarUrl
+          startPosition
+          endPosition
         }
         engagementCounts {
           likes
@@ -543,6 +561,15 @@ export const GET_LIKED_POSTS = gql`
           type
           mimeType
         }
+        mentions {
+          entityId
+          entityType
+          handle
+          displayName
+          avatarUrl
+          startPosition
+          endPosition
+        }
         engagementCounts {
           likes
           comments
@@ -588,6 +615,15 @@ export const GET_COMMENTED_POSTS = gql`
           url
           type
           mimeType
+        }
+        mentions {
+          entityId
+          entityType
+          handle
+          displayName
+          avatarUrl
+          startPosition
+          endPosition
         }
         engagementCounts {
           likes

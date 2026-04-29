@@ -304,6 +304,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 createdAt={post.createdAt}
                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                 content={post.text}
+                mentionMap={post.mentions?.length ? Object.fromEntries(post.mentions.map(m => [m.handle, m.entityId])) : undefined}
                 images={
                   post.attachments
                     ?.filter((a) => a.mimeType?.startsWith('image/') || a.type?.toUpperCase() === 'IMAGE')
