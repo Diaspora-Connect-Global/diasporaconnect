@@ -125,6 +125,7 @@ export function renderRichText(
   text: string,
   mentionMap?: MentionMap,
   compactLayout?: boolean,
+  onMentionClick?: (name: string) => void,
 ): React.ReactNode[] {
   // Match @MentionName followed by zero-width space or space/end
   // The zero-width space (\u200B) marks the end of a completed mention
@@ -163,6 +164,20 @@ export function renderRichText(
           >
             {token}
           </Link>,
+        );
+      } else if (onMentionClick) {
+        // Click-time resolution — no userId in map yet, resolve on click
+        parts.push(
+          <span
+            key={match.index}
+            className={linkClass}
+            onClick={(e) => { e.stopPropagation(); onMentionClick(tag); }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onMentionClick(tag); } }}
+          >
+            {token}
+          </span>,
         );
       } else {
         // Unlinked mention — styled pill without navigation

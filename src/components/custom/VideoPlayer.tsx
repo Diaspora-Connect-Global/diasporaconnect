@@ -36,13 +36,13 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
   const [shouldLoad, setShouldLoad] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [slowConnection, setSlowConnection] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -51,6 +51,16 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
   const [showControls, setShowControls] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [watermarkKey, setWatermarkKey] = useState<number | null>(null);
+
+  const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearConnectionTimers = useCallback(() => {
+    if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+    if (deadTimerRef.current) clearTimeout(deadTimerRef.current);
+    slowTimerRef.current = null;
+    deadTimerRef.current = null;
+  }, []);
 
   // Lazy-load: only attach src once the player is near the viewport
   useEffect(() => {
@@ -99,43 +109,65 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
     if (v) setBufferedRanges(getBufferedRanges(v));
   }, []);
 
+  const startConnectionTimers = useCallback(() => {
+    clearConnectionTimers();
+    // 8s → show "Loading slowly…" under the spinner
+    slowTimerRef.current = setTimeout(() => {
+      if (videoRef.current && videoRef.current.readyState < 4) {
+        setSlowConnection(true);
+      }
+    }, 8000);
+    // 20s → escalate to error state with retry
+    deadTimerRef.current = setTimeout(() => {
+      if (videoRef.current && videoRef.current.readyState < 4) {
+        setIsBuffering(false);
+        setSlowConnection(false);
+        setIsPlaying(false);
+        setHasError(true);
+      }
+    }, 20000);
+  }, [clearConnectionTimers]);
+
   const handleWaiting = useCallback(() => {
     setIsBuffering(true);
-    // If still waiting after 8s on a poor connection, mark as stalled
-    stallTimerRef.current = setTimeout(() => {
-      if (videoRef.current?.readyState !== 4) setIsBuffering(true);
-    }, 8000);
-  }, []);
+    startConnectionTimers();
+  }, [startConnectionTimers]);
 
   const handleCanPlay = useCallback(() => {
     setIsBuffering(false);
+    setSlowConnection(false);
     setHasError(false);
-    if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
+    clearConnectionTimers();
     updateBuffered();
-  }, [updateBuffered]);
+  }, [clearConnectionTimers, updateBuffered]);
 
   const handleError = useCallback(() => {
     setIsBuffering(false);
+    setSlowConnection(false);
     setIsPlaying(false);
     setHasError(true);
-    if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
-  }, []);
+    clearConnectionTimers();
+  }, [clearConnectionTimers]);
 
-  // On poor connections the browser fires `stalled` when it stops receiving data
   const handleStalled = useCallback(() => {
     setIsBuffering(true);
-  }, []);
+    startConnectionTimers();
+  }, [startConnectionTimers]);
 
   const retry = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const v = videoRef.current;
     if (!v) return;
     setHasError(false);
+    setSlowConnection(false);
     setIsBuffering(true);
     setRetryCount((c) => c + 1);
     v.load();
-    v.play().catch(() => setIsBuffering(false));
+    v.play().catch(() => { setIsBuffering(false); });
   }, []);
+
+  // Clear timers on unmount
+  useEffect(() => clearConnectionTimers, [clearConnectionTimers]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -231,8 +263,11 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
 
       {/* Buffering spinner */}
       {isBuffering && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
           <Loader2 className="w-10 h-10 text-white animate-spin opacity-75" />
+          {slowConnection && (
+            <p className="text-white/60 text-xs">Loading slowly…</p>
+          )}
         </div>
       )}
 

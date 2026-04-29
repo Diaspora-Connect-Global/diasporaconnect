@@ -275,6 +275,17 @@ export default function PostMediaModal({
         }));
     }, [searchUsers]);
 
+    const handleMentionClick = useCallback(async (name: string) => {
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query: name, limit: 1 } } });
+        const profile = data?.searchUsers?.profiles?.[0];
+        if (profile?.userId) router.push(`/${profile.userId}`);
+    }, [searchUsers, router]);
+
+    const renderText = useCallback((text: string, map?: MentionMap) =>
+        renderRichText(text, map, undefined, handleMentionClick),
+        [handleMentionClick],
+    );
+
     useEffect(() => {
         setLoadedComments([]);
         setCommentsLoaded(false);
@@ -555,7 +566,7 @@ export default function PostMediaModal({
         </div>
     ) : (
         <p className="body-small text-text-primary whitespace-pre-wrap break-words">
-            {renderRichText(isTruncated ? `${content.slice(0, CONTENT_LIMIT)}…` : content, mentionMap)}
+            {renderText(isTruncated ? `${content.slice(0, CONTENT_LIMIT)}…` : content, mentionMap)}
             {content.length > CONTENT_LIMIT && (
                 <button
                     onClick={() => setContentExpanded(v => !v)}
@@ -649,7 +660,7 @@ export default function PostMediaModal({
                                     </div>
                                 </div>
                             ) : (
-                                <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderRichText(c.content, c.mentionMap)}</p>
+                                <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderText(c.content, c.mentionMap)}</p>
                             )}
                             <div className="flex items-center gap-3">
                                 <button type="button" onClick={() => handleLikeComment(c.id)}
@@ -733,8 +744,8 @@ export default function PostMediaModal({
                                                 {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
                                                     const spaceIdx = reply.content.indexOf(' ');
                                                     const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
-                                                    return rest ? renderRichText(rest, reply.mentionMap) : null;
-                                                })() : renderRichText(reply.content, reply.mentionMap)}
+                                                    return rest ? renderText(rest, reply.mentionMap) : null;
+                                                })() : renderText(reply.content, reply.mentionMap)}
                                             </p>
                                         )}
                                     </div>

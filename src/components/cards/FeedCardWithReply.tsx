@@ -260,6 +260,17 @@ export default function FeedCardWithReply({
         }));
     }, [searchUsers]);
 
+    const handleMentionClick = useCallback(async (name: string) => {
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query: name, limit: 1 } } });
+        const profile = data?.searchUsers?.profiles?.[0];
+        if (profile?.userId) router.push(`/${profile.userId}`);
+    }, [searchUsers, router]);
+
+    const renderText = useCallback((text: string, map?: MentionMap) =>
+        renderRichText(text, map, undefined, handleMentionClick),
+        [handleMentionClick],
+    );
+
     const handleLikeComment = useCallback(
         async (commentId: string) => {
             const comment = loadedComments.find((c) => c.id === commentId);
@@ -609,7 +620,7 @@ export default function FeedCardWithReply({
         return (
             <>
                 <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
-                    {renderRichText(displayText, mentionMap)}
+                    {renderText(displayText, mentionMap)}
                     {truncated && (
                         <span
                             onClick={toggleExpand}
@@ -787,7 +798,7 @@ export default function FeedCardWithReply({
                                     {c.authorTier && <UserBadge tier={c.authorTier} size="xs" />}
                                     <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(c.createdAt)}</span>
                                 </div>
-                                <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderRichText(c.content, c.mentionMap)}</p>
+                                <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderText(c.content, c.mentionMap)}</p>
                                 <div className="flex items-center gap-3">
                                     <button type="button" onClick={() => handleLikeComment(c.id)} className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>{t('like')}</button>
                                     <button onClick={() => setModalReplyToId(cur => cur === c.id ? null : c.id)} className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">{t('reply')}</button>
@@ -818,8 +829,8 @@ export default function FeedCardWithReply({
                                                 {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
                                                     const spaceIdx = reply.content.indexOf(' ');
                                                     const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
-                                                    return rest ? renderRichText(rest, reply.mentionMap) : null;
-                                                })() : renderRichText(reply.content, reply.mentionMap)}
+                                                    return rest ? renderText(rest, reply.mentionMap) : null;
+                                                })() : renderText(reply.content, reply.mentionMap)}
                                             </p>
                                         </div>
                                     </div>
@@ -881,7 +892,7 @@ export default function FeedCardWithReply({
                     <div className="w-[360px] xl:w-[400px] flex-shrink-0 bg-surface-default flex flex-col h-full border-l border-border-subtle">
                         <div className="p-4 border-b border-border-subtle">
                             {postInfoEl}
-                            <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{renderRichText(postContent, mentionMap)}</p>
+                            <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{renderText(postContent, mentionMap)}</p>
                         </div>
                         {/* Action bar */}
                         <div className="px-4 py-3 border-b border-border-subtle flex items-center gap-4">
@@ -943,7 +954,7 @@ export default function FeedCardWithReply({
                     {/* Bottom bar */}
                     <div className="bg-surface-default px-4 pt-3 pb-2 border-t border-border-subtle">
                         {postInfoEl}
-                        <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{renderRichText(postContent, mentionMap)}</p>
+                        <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{renderText(postContent, mentionMap)}</p>
                         <div className="flex items-center gap-4">
                             <button onClick={handleLike} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
                                 <GoHeartFill className={`w-5 h-5 ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`} />
@@ -1096,8 +1107,8 @@ export default function FeedCardWithReply({
                 {c.parentId && /^@\S+/.test(c.content) ? (() => {
                     const spaceIdx = c.content.indexOf(' ');
                     const rest = spaceIdx === -1 ? '' : c.content.slice(spaceIdx + 1);
-                    return rest ? renderRichText(rest, c.mentionMap) : null;
-                })() : renderRichText(c.content, c.mentionMap)}
+                    return rest ? renderText(rest, c.mentionMap) : null;
+                })() : renderText(c.content, c.mentionMap)}
             </p>
         );
 

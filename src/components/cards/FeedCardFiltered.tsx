@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, type MentionInputItem } from '@/components/custom/richTextRenderer';
+import { useRouter } from '@/i18n/navigation';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import {
@@ -28,36 +29,10 @@ import type { Comment as ApiComment } from '@/services/gql/types/postsFeed';
 import { formatDateProximity } from '@/macros/time';
 import { formatCount } from '@/macros/formatCount';
 import { resolveUserTier } from '@/lib/userTier';
+import { VideoPlayer } from '@/components/custom/VideoPlayer';
 
 /* --------------------------------------------------------------- */
 type MediaItem = { type: 'image'; src: string } | { type: 'video'; src: string };
-
-function LazyVideo({ src, className }: { src: string; className?: string }) {
-    const ref = useRef<HTMLVideoElement>(null);
-    const [shouldLoad, setShouldLoad] = useState(false);
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-        const obs = new IntersectionObserver(
-            ([entry]) => { if (entry?.isIntersecting) setShouldLoad(true); },
-            { rootMargin: '100px', threshold: 0.1 }
-        );
-        obs.observe(el);
-        return () => obs.disconnect();
-    }, []);
-
-    return (
-        <video
-            ref={ref}
-            src={shouldLoad ? src : undefined}
-            preload="metadata"
-            controls
-            playsInline
-            className={className}
-        />
-    );
-}
 
 /* --------------------------------------------------------------- */
 interface Comment {
@@ -169,6 +144,7 @@ export default function FeedCardFiltered({
     onNavigatePost,
 }: FeedCardFilteredProps) {
     const resolvedPostId = postId ?? id;
+    const router = useRouter();
     const storeAvatar = useUserStore((s) => s.user?.avatarUrl);
     const resolvedAvatar = currentUser.avatar || storeAvatar || '/PROFILE.png';
     const [isLiked, setIsLiked] = useState(externalIsLiked);
@@ -253,6 +229,17 @@ export default function FeedCardFiltered({
             avatarUrl: p.avatarUrl,
         }));
     }, [searchUsers]);
+
+    const handleMentionClick = useCallback(async (name: string) => {
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query: name, limit: 1 } } });
+        const profile = data?.searchUsers?.profiles?.[0];
+        if (profile?.userId) router.push(`/${profile.userId}`);
+    }, [searchUsers, router]);
+
+    const renderText = useCallback((text: string, map?: MentionMap) =>
+        renderRichText(text, map, undefined, handleMentionClick),
+        [handleMentionClick],
+    );
 
     const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
     const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
@@ -510,7 +497,7 @@ export default function FeedCardFiltered({
         const displayText = truncated ? `${content.slice(0, max)}...` : content;
         return (
             <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
-                {renderRichText(displayText, mentionMap)}
+                {renderText(displayText, mentionMap)}
                 {truncated && (
                     <span onClick={toggleExpand} className="text-text-brand text-xs cursor-pointer">
                         {isExpanded ? t('showLess') : t('showMore')}
@@ -574,13 +561,10 @@ export default function FeedCardFiltered({
 
     const renderVideos = () => {
         if (!videos?.length) return null;
-        const offset = images?.length ?? 0;
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {videos.map((src, i) => (
-                    <div key={i} className="relative w-full rounded-lg overflow-hidden bg-black/5 cursor-pointer" onClick={() => openMediaModal(offset + i)}>
-                        <LazyVideo src={src} className="w-full max-h-[24rem] object-contain pointer-events-none" />
-                    </div>
+                    <VideoPlayer key={i} src={src} className="w-full max-h-[24rem]" />
                 ))}
             </div>
         );
@@ -659,7 +643,7 @@ export default function FeedCardFiltered({
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderRichText(c.content, c.mentionMap)}</p>
+                                        <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderText(c.content, c.mentionMap)}</p>
                                     )}
                                     <div className="flex items-center gap-[0.75rem]">
                                         <ButtonType3 type="button" onClick={() => handleLikeComment(c.id)} className={`text-xs font-semibold p-0 min-w-0 border-0 bg-transparent ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>{t('like')}</ButtonType3>
@@ -734,8 +718,8 @@ export default function FeedCardFiltered({
                                                         {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
                                                             const spaceIdx = reply.content.indexOf(' ');
                                                             const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
-                                                            return rest ? renderRichText(rest, reply.mentionMap) : null;
-                                                        })() : renderRichText(reply.content, reply.mentionMap)}
+                                                            return rest ? renderText(rest, reply.mentionMap) : null;
+                                                        })() : renderText(reply.content, reply.mentionMap)}
                                                     </p>
                                                 )}
                                                 <div className="flex items-center gap-[0.75rem]">
@@ -827,7 +811,7 @@ export default function FeedCardFiltered({
         const mediaEl = current.type === 'image' ? (
             <img src={current.src} alt={`Media ${currentMediaIndex + 1}`} className="object-contain w-full h-full" decoding="async" />
         ) : (
-            <video src={current.src} controls playsInline autoPlay className="object-contain w-full h-full max-h-full" />
+            <VideoPlayer src={current.src} autoPlay className="w-full h-full max-h-full" pauseOnLeave={false} />
         );
 
         return (
