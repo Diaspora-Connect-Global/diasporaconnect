@@ -430,7 +430,7 @@ export default function SearchPage() {
       searchCommunities({ variables: { input: { query: q, page, limit } } });
     }
     if (isAll || tab === 'associations') {
-      searchAssociations({ variables: { input: { query: q, page, limit } } });
+      searchAssociations({ variables: { input: { page, limit } } });
     }
     if (isAll || tab === 'marketplace') {
       searchProducts({ variables: { input: { query: q, page, limit } } });
@@ -455,7 +455,7 @@ export default function SearchPage() {
     if (tab === 'all' || tab === 'people')        searchUsersFb({ variables: { searchUsersInput: { query: fbQ, limit, offset } } });
     if (tab === 'all' || tab === 'groups')        searchGroupsFb({ variables: { query: fbQ, searchLimit: limit, searchOffset: offset } });
     if (tab === 'all' || tab === 'communities')   searchCommsFb({ variables: { input: { query: fbQ, page, limit } } });
-    if (tab === 'all' || tab === 'associations')  searchAssocsFb({ variables: { input: { query: fbQ, page, limit } } });
+    if (tab === 'all' || tab === 'associations')  searchAssocsFb({ variables: { input: { page, limit } } });
     if (tab === 'all' || tab === 'marketplace') {
       searchProductsFb({ variables: { input: { query: fbQ, page, limit } } });
       searchServicesFb({ variables: { input: { query: fbQ, page, limit } } });
@@ -492,7 +492,7 @@ export default function SearchPage() {
       case 'people':        searchUsers({ variables: { searchUsersInput: { query: q, limit, offset } } }); break;
       case 'groups':        searchGroups({ variables: { query: q, searchLimit: limit, searchOffset: offset } }); break;
       case 'communities':   searchCommunities({ variables: { input: { query: q, page, limit } } }); break;
-      case 'associations':  searchAssociations({ variables: { input: { query: q, page, limit } } }); break;
+      case 'associations':  searchAssociations({ variables: { input: { page, limit } } }); break;
       case 'marketplace':
         searchProducts({ variables: { input: { query: q, page, limit } } });
         searchServices({ variables: { input: { query: q, page, limit } } });

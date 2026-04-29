@@ -57,8 +57,6 @@ export const SEARCH_COMMUNITIES = gql`
         visibility
       }
       total
-      page
-      limit
     }
   }
 `;
