@@ -261,7 +261,8 @@ export default function FeedCardWithReply({
     }, [searchUsers]);
 
     const handleMentionClick = useCallback(async (name: string) => {
-        const { data } = await searchUsers({ variables: { searchUsersInput: { query: name, limit: 1 } } });
+        const query = name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2').trim();
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 1 } } });
         const profile = data?.searchUsers?.profiles?.[0];
         if (profile?.userId) router.push(`/${profile.userId}`);
     }, [searchUsers, router]);

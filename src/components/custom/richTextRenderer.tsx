@@ -154,19 +154,18 @@ export function renderRichText(
       const tag = token.slice(1).trim(); // strip @ and trim
       const userId = mentionMap?.[tag];
 
+      const displayName = token.slice(1); // strip leading @
       if (userId) {
-        // Linked mention — navigates to the user's profile
         parts.push(
           <Link
             key={match.index}
             href={`/${userId}`}
             className={linkClass}
           >
-            {token}
+            {displayName}
           </Link>,
         );
       } else if (onMentionClick) {
-        // Click-time resolution — no userId in map yet, resolve on click
         parts.push(
           <span
             key={match.index}
@@ -176,17 +175,16 @@ export function renderRichText(
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onMentionClick(tag); } }}
           >
-            {token}
+            {displayName}
           </span>,
         );
       } else {
-        // Unlinked mention — styled pill without navigation
         parts.push(
           <span
             key={match.index}
             className={mentionClass}
           >
-            {token}
+            {displayName}
           </span>,
         );
       }
