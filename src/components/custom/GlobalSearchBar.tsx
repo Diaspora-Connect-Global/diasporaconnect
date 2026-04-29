@@ -331,16 +331,16 @@ export default function GlobalSearchBar() {
     if (trimmed.length < 2) { setResultRows([]); return; }
 
     searchUsers({ variables: { searchUsersInput: { query: trimmed, limit: 5, offset: 0 } } });
-    searchOpps({ variables: { input: { query: trimmed, limit: 5, offset: 0 } } });
-    searchEvents({ variables: { input: { query: trimmed, limit: 5, offset: 0 } } });
+    searchOpps({ variables: { input: { searchTerm: trimmed, limit: 5, offset: 0 } } });
+    searchEvents({ variables: { input: { searchTerm: trimmed, limit: 5, offset: 0 } } });
 
     // Fire fallback with first individual token for multi-word or possible-typo queries
     const variants = generateVariants(trimmed);
     if (variants.length > 1) {
       const fbQ = variants[1];
       searchUsersFb({ variables: { searchUsersInput: { query: fbQ, limit: 3, offset: 0 } } });
-      searchOppsFb({ variables: { input: { query: fbQ, limit: 3, offset: 0 } } });
-      searchEventsFb({ variables: { input: { query: fbQ, limit: 3, offset: 0 } } });
+      searchOppsFb({ variables: { input: { searchTerm: fbQ, limit: 3, offset: 0 } } });
+      searchEventsFb({ variables: { input: { searchTerm: fbQ, limit: 3, offset: 0 } } });
     }
   }, [searchUsers, searchOpps, searchEvents, searchUsersFb, searchOppsFb, searchEventsFb]);
 

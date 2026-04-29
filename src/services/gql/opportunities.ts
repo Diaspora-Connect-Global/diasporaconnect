@@ -374,7 +374,7 @@ export interface SearchOpportunitiesResponse {
 }
 
 export const SEARCH_OPPORTUNITIES = gql`
-  query SearchOpportunities($input: SearchOpportunitiesInput!) {
+  query SearchOpportunities($input: ListOpportunitiesInput!) {
     searchOpportunities(input: $input) {
       total
       opportunities {

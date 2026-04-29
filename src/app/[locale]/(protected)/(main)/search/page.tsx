@@ -220,7 +220,7 @@ function GroupCard({ group, query }: { group: Group; query: string }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={group.name} query={query} /></p>
-        {group.memberCount !== undefined && (
+        {group.memberCount != null && (
           <p className="text-text-secondary text-xs">{group.memberCount.toLocaleString()} members</p>
         )}
       </div>
@@ -235,7 +235,7 @@ function CommunityCard({ community, query }: { community: Community; query: stri
       <Avatar src={community.avatarUrl} name={community.name} />
       <div className="flex-1 min-w-0">
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={community.name} query={query} /></p>
-        {community.memberCount !== undefined && (
+        {community.memberCount != null && (
           <p className="text-text-secondary text-xs">{community.memberCount.toLocaleString()} members</p>
         )}
       </div>
@@ -251,7 +251,7 @@ function AssociationCard({ association, query }: { association: Association; que
       <div className="flex-1 min-w-0">
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={association.name} query={query} /></p>
         <p className="text-text-secondary text-xs">
-          {association.memberCount !== undefined && `${association.memberCount.toLocaleString()} members`}
+          {association.memberCount != null && `${association.memberCount.toLocaleString()} members`}
           {association.associationType && ` · ${association.associationType.name}`}
         </p>
       </div>
@@ -273,7 +273,7 @@ function ProductCard({ product, query }: { product: Product; query: string }) {
       )}
       <div className="flex-1 min-w-0">
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={product.title} query={query} /></p>
-        {product.price !== undefined && (
+        {product.price != null && (
           <p className="text-text-brand text-xs font-semibold">
             {product.currency} {product.price.toLocaleString()}
           </p>
@@ -302,8 +302,8 @@ function EventCard({ event, query }: { event: Event; query: string }) {
 }
 
 function OpportunityCard({ opportunity, query }: { opportunity: Opportunity; query: string }) {
-  const comp = opportunity.compensationMin && opportunity.compensationMax
-    ? `${opportunity.compensationCurrency ?? ''} ${opportunity.compensationMin.toLocaleString()}–${opportunity.compensationMax.toLocaleString()}`
+  const comp = (opportunity.compensationMin != null) && (opportunity.compensationMax != null)
+    ? `${opportunity.compensationCurrency ?? ''} ${Number(opportunity.compensationMin).toLocaleString()}–${Number(opportunity.compensationMax).toLocaleString()}`
     : null;
   return (
     <Link href={`/opportunities/${opportunity.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
@@ -334,7 +334,7 @@ function ServiceCard({ service, query }: { service: Service; query: string }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={service.title} query={query} /></p>
-        {service.base_price !== undefined && (
+        {service.base_price != null && (
           <p className="text-text-brand text-xs font-semibold">{service.currency} {service.base_price.toLocaleString()}</p>
         )}
       </div>
@@ -488,7 +488,7 @@ export default function SearchPage() {
       searchGroups({ variables: { query: q, searchLimit: limit, searchOffset: offset } });
     }
     if (isAll || tab === 'communities') {
-      searchCommunities({ variables: { input: { query: q, page, limit } } });
+      searchCommunities({ variables: { input: { searchTerm: q, page, limit } } });
     }
     if (isAll || tab === 'associations') {
       searchAssociations({ variables: { input: { page, limit } } });
@@ -498,10 +498,10 @@ export default function SearchPage() {
       searchServices({ variables: { input: { query: q, page, limit } } });
     }
     if (isAll || tab === 'events') {
-      searchEvents({ variables: { input: { query: q, limit, offset } } });
+      searchEvents({ variables: { input: { searchTerm: q, limit, offset } } });
     }
     if (isAll || tab === 'opportunities') {
-      searchOpportunities({ variables: { input: { query: q, limit, offset } } });
+      searchOpportunities({ variables: { input: { searchTerm: q, limit, offset } } });
     }
   };
 
@@ -509,14 +509,14 @@ export default function SearchPage() {
     const limit = PAGE_SIZE; const offset = 0; const page = 1;
     if (tab === 'all' || tab === 'people')        searchUsersFb({ variables: { searchUsersInput: { query: fbQ, limit, offset } } });
     if (tab === 'all' || tab === 'groups')        searchGroupsFb({ variables: { query: fbQ, searchLimit: limit, searchOffset: offset } });
-    if (tab === 'all' || tab === 'communities')   searchCommsFb({ variables: { input: { query: fbQ, page, limit } } });
+    if (tab === 'all' || tab === 'communities')   searchCommsFb({ variables: { input: { searchTerm: fbQ, page, limit } } });
     if (tab === 'all' || tab === 'associations')  searchAssocsFb({ variables: { input: { page, limit } } });
     if (tab === 'all' || tab === 'marketplace') {
       searchProductsFb({ variables: { input: { query: fbQ, page, limit } } });
       searchServicesFb({ variables: { input: { query: fbQ, page, limit } } });
     }
-    if (tab === 'all' || tab === 'events')        searchEventsFb({ variables: { input: { query: fbQ, limit, offset } } });
-    if (tab === 'all' || tab === 'opportunities') searchOppsFb({ variables: { input: { query: fbQ, limit, offset } } });
+    if (tab === 'all' || tab === 'events')        searchEventsFb({ variables: { input: { searchTerm: fbQ, limit, offset } } });
+    if (tab === 'all' || tab === 'opportunities') searchOppsFb({ variables: { input: { searchTerm: fbQ, limit, offset } } });
   };
 
   const runFallback = (q: string, tab: SearchTab) => {
@@ -559,14 +559,14 @@ export default function SearchPage() {
     switch (activeTab) {
       case 'people':        searchUsers({ variables: { searchUsersInput: { query: q, limit, offset } } }); break;
       case 'groups':        searchGroups({ variables: { query: q, searchLimit: limit, searchOffset: offset } }); break;
-      case 'communities':   searchCommunities({ variables: { input: { query: q, page, limit } } }); break;
+      case 'communities':   searchCommunities({ variables: { input: { searchTerm: q, page, limit } } }); break;
       case 'associations':  searchAssociations({ variables: { input: { page, limit } } }); break;
       case 'marketplace':
         searchProducts({ variables: { input: { query: q, page, limit } } });
         searchServices({ variables: { input: { query: q, page, limit } } });
         break;
-      case 'events':        searchEvents({ variables: { input: { query: q, limit, offset } } }); break;
-      case 'opportunities': searchOpportunities({ variables: { input: { query: q, limit, offset } } }); break;
+      case 'events':        searchEvents({ variables: { input: { searchTerm: q, limit, offset } } }); break;
+      case 'opportunities': searchOpportunities({ variables: { input: { searchTerm: q, limit, offset } } }); break;
     }
   };
 

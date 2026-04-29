@@ -882,7 +882,7 @@ export function formatPrice(cents: number, currency = 'GHS'): string {
 }
 
 export const SEARCH_EVENTS = gql`
-  query SearchEvents($input: SearchEventsInput!) {
+  query SearchEvents($input: ListEventsInput!) {
     searchEvents(input: $input) {
       total
       events {
