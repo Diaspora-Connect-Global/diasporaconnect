@@ -59,11 +59,11 @@ export const Step6: React.FC<Step6Props> = ({ data, updateData, nextStep, prevSt
                         key={topic.key}
                         type="button"
                         onClick={() => toggleTopic(topic.key)}
-                        className={`px-1 py-1 rounded-md border text-text-primary transition-all cursor-pointer text-sm sm:text-base
+                        className={`h-10 px-2 flex items-center justify-center rounded-md border text-text-primary transition-all cursor-pointer text-sm sm:text-base text-center
                             ${
                                 data.topics?.includes(topic.key)
                                     ? 'border-border-brand text-text-primary'
-                                    : 'bg-surface-subtle  text-text-primary'
+                                    : 'bg-surface-subtle text-text-primary'
                             }`}
                     >
                         {topic.value}
