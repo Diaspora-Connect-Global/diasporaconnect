@@ -135,7 +135,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 function PeopleCard({ profile, query }: { profile: UserProfile; query: string }) {
   const name = `${profile.firstName} ${profile.lastName}`;
   return (
-    <Link href={`/profile/${profile.userId}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
+    <Link href={`/${profile.userId}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <Avatar src={profile.avatarUrl} name={name} />
       <div className="flex-1 min-w-0">
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={name} query={query} /></p>
