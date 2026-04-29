@@ -549,8 +549,9 @@ export default function FeedCardWithReply({
         if (parentId) {
             const parent = commentsData.find((c) => c.id === parentId);
             if (parent) {
-                const mention = parent.authorHandle ?? parent.author;
-                preparedText = `@${mention} ${preparedText}`;
+                if (parent.authorHandle) {
+                    preparedText = `@${parent.authorHandle} ${preparedText}`;
+                }
             }
         }
         try {
@@ -828,8 +829,7 @@ export default function FeedCardWithReply({
                                             </div>
                                             <p className="body-small text-text-primary break-words whitespace-pre-wrap">
                                                 {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
-                                                    const spaceIdx = reply.content.indexOf(' ');
-                                                    const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
+                                                    const rest = reply.content.replace(/^@\S+(?:\s+[A-Z][a-z]+)*\s/, '');
                                                     return rest ? renderText(rest, reply.mentionMap) : null;
                                                 })() : renderText(reply.content, reply.mentionMap)}
                                             </p>
@@ -1106,8 +1106,7 @@ export default function FeedCardWithReply({
         ) : (
             <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                 {c.parentId && /^@\S+/.test(c.content) ? (() => {
-                    const spaceIdx = c.content.indexOf(' ');
-                    const rest = spaceIdx === -1 ? '' : c.content.slice(spaceIdx + 1);
+                    const rest = c.content.replace(/^@\S+(?:\s+[A-Z][a-z]+)*\s/, '');
                     return rest ? renderText(rest, c.mentionMap) : null;
                 })() : renderText(c.content, c.mentionMap)}
             </p>

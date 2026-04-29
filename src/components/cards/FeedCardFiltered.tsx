@@ -408,8 +408,9 @@ export default function FeedCardFiltered({
         if (parentId) {
             const parent = commentsData.find((c) => c.id === parentId);
             if (parent) {
-                const mention = parent.authorHandle ?? parent.author;
-                preparedText = `@${mention} ${preparedText}`;
+                if (parent.authorHandle) {
+                    preparedText = `@${parent.authorHandle} ${preparedText}`;
+                }
             }
         }
         try {
@@ -717,8 +718,7 @@ export default function FeedCardFiltered({
                                                 ) : (
                                                     <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                                                         {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
-                                                            const spaceIdx = reply.content.indexOf(' ');
-                                                            const rest = spaceIdx === -1 ? '' : reply.content.slice(spaceIdx + 1);
+                                                            const rest = reply.content.replace(/^@\S+(?:\s+[A-Z][a-z]+)*\s/, '');
                                                             return rest ? renderText(rest, reply.mentionMap) : null;
                                                         })() : renderText(reply.content, reply.mentionMap)}
                                                     </p>
