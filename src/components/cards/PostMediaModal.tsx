@@ -32,6 +32,7 @@ import { renderRichText, type MentionMap, buildMentionMap, buildMentionInputsFro
 import { resolveUserTier } from '@/lib/userTier';
 import { useUserStore } from '@/store/useUserStore';
 import { useRouter } from '@/i18n/navigation';
+import { VideoPlayer } from '@/components/custom/VideoPlayer';
 import MessageInputGlobal, { type MentionUser } from '@/components/custom/messageInputGlobal';
 import SharePostModal from '@/components/share/SharePostModal';
 
@@ -476,7 +477,7 @@ export default function PostMediaModal({
 
     const mediaEl = current.type === 'image'
         ? <img src={current.src} alt={`Media ${mediaIndex + 1}`} className="object-contain w-full h-full" decoding="async" />
-        : <video key={current.src} src={current.src} controls autoPlay playsInline className="object-contain w-full h-full max-h-full" />;
+        : <VideoPlayer key={current.src} src={current.src} autoPlay className="w-full h-full max-h-full" pauseOnLeave={false} />;
 
     const thumbnailStrip = allMedia.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 rounded-xl p-2 max-w-[80%] overflow-x-auto">

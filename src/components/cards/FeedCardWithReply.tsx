@@ -21,34 +21,7 @@ import { useRouter } from '@/i18n/navigation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { toast } from 'sonner';
-
-/** Video that only loads src when in viewport to save bandwidth. */
-function LazyVideo({ src, className }: { src: string; className?: string }) {
-    const ref = useRef<HTMLVideoElement>(null);
-    const [shouldLoad, setShouldLoad] = useState(false);
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-        const obs = new IntersectionObserver(
-            ([entry]) => { if (entry?.isIntersecting) setShouldLoad(true); },
-            { rootMargin: '100px', threshold: 0.1 }
-        );
-        obs.observe(el);
-        return () => obs.disconnect();
-    }, []);
-
-    return (
-        <video
-            ref={ref}
-            src={shouldLoad ? src : undefined}
-            preload="metadata"
-            controls
-            playsInline
-            className={className}
-        />
-    );
-}
+import { VideoPlayer } from '@/components/custom/VideoPlayer';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -725,17 +698,14 @@ export default function FeedCardWithReply({
 
     const renderVideos = () => {
         if (!videos?.length) return null;
-        const offset = images?.length ?? 0;
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {videos.map((src, i) => (
-                    <div
+                    <VideoPlayer
                         key={i}
-                        className="relative w-full rounded-lg overflow-hidden bg-black/5 cursor-pointer"
-                        onClick={() => openMediaModal(offset + i)}
-                    >
-                        <LazyVideo src={src} className="w-full max-h-[24rem] object-contain pointer-events-none" />
-                    </div>
+                        src={src}
+                        className="w-full max-h-[24rem]"
+                    />
                 ))}
             </div>
         );
@@ -748,7 +718,7 @@ export default function FeedCardWithReply({
         const mediaEl = current.type === 'image' ? (
             <img src={current.src} alt={`Media ${currentMediaIndex + 1}`} className="object-contain w-full h-full" decoding="async" />
         ) : (
-            <video src={current.src} controls autoPlay playsInline className="object-contain w-full h-full max-h-full" />
+            <VideoPlayer src={current.src} autoPlay className="w-full h-full max-h-full" pauseOnLeave={false} />
         );
 
         const thumbnailStrip = allMedia.length > 1 && (

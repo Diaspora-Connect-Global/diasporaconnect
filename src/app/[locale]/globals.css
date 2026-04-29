@@ -3,6 +3,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes watermark-rise {
+  0%   { top: calc(100% - 3.5rem); opacity: 0.85; }
+  15%  { opacity: 0.85; }
+  85%  { opacity: 0.85; }
+  100% { top: 1rem; opacity: 0; }
+}
+.watermark-rise {
+  animation: watermark-rise 3.5s ease-in-out forwards;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
