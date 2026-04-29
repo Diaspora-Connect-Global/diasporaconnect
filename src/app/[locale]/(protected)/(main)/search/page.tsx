@@ -616,7 +616,7 @@ export default function SearchPage() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-full overflow-hidden bg-surface-default">
+    <div className="flex h-app-inner overflow-hidden bg-surface-default">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col gap-1 w-52 shrink-0 border-r border-border-subtle p-3 overflow-y-auto">
         <p className="text-text-secondary text-xs font-semibold uppercase tracking-wide px-1 mb-1">{t('filterBy')}</p>
@@ -642,7 +642,7 @@ export default function SearchPage() {
           })}
         </div>
 
-        <div className="px-4 py-4 max-w-2xl">
+        <div className="px-4 py-4 w-full max-w-4xl">
           {/* Empty query */}
           {!query.trim() && (
             <EmptyQuery recentSearches={recentSearches} onSearch={(q) => { setQuery(q); addRecentSearch(q); }} />
