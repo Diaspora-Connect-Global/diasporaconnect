@@ -882,10 +882,8 @@ export function formatPrice(cents: number, currency = 'GHS'): string {
 }
 
 export const SEARCH_EVENTS = gql`
-  query SearchEvents($query: String!, $limit: Int, $offset: Int) {
-    searchEvents(query: $query, limit: $limit, offset: $offset) {
-      success
-      message
+  query SearchEvents($input: SearchEventsInput!) {
+    searchEvents(input: $input) {
       total
       events {
         id

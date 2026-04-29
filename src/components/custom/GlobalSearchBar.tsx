@@ -27,9 +27,67 @@ interface ResultRow {
 
 function generateVariants(query: string): string[] {
   const trimmed = query.trim();
-  const tokens = trimmed.split(/\s+/).filter((t) => t.length >= 3);
-  const variants = [trimmed, ...tokens];
-  return [...new Set(variants)].slice(0, 3);
+  const seen = new Set<string>([trimmed]);
+  const out: string[] = [trimmed];
+  const push = (s: string) => {
+    const clean = s.trim();
+    if (clean.length >= 2 && !seen.has(clean)) { seen.add(clean); out.push(clean); }
+  };
+
+  const VOWELS = 'aeiou';
+  const isVowel = (c: string) => VOWELS.includes(c.toLowerCase());
+
+  const tokens = trimmed.split(/\s+/).filter(t => t.length >= 2);
+  if (tokens.length > 1) tokens.forEach(t => push(t));
+
+  const words = tokens.length >= 1 ? tokens : [trimmed];
+  for (const word of words) {
+    if (word.length < 3) continue;
+    const lower = word.toLowerCase();
+
+    const vcSwaps: string[] = [];
+    const otherSwaps: string[] = [];
+    for (let i = 0; i < word.length - 1; i++) {
+      const chars = [...word];
+      [chars[i], chars[i + 1]] = [chars[i + 1], chars[i]];
+      const v = chars.join('');
+      if (v === word) continue;
+      if (isVowel(word[i]) !== isVowel(word[i + 1])) vcSwaps.push(v);
+      else otherSwaps.push(v);
+    }
+
+    const vowelSubs: string[] = [];
+    for (let i = 0; i < lower.length; i++) {
+      if (!isVowel(lower[i])) continue;
+      for (const v of VOWELS) {
+        if (v === lower[i]) continue;
+        const chars = [...lower];
+        chars[i] = v;
+        vowelSubs.push(chars.join(''));
+      }
+    }
+
+    const deletions: string[] = [];
+    for (let i = 0; i < word.length; i++) {
+      deletions.push(word.slice(0, i) + word.slice(i + 1));
+    }
+
+    if (word.length <= 5) {
+      vcSwaps.forEach(v => push(v));
+      vowelSubs.forEach(v => push(v));
+      push(lower.slice(0, -1));
+      otherSwaps.forEach(v => push(v));
+      deletions.forEach(v => push(v));
+    } else {
+      push(lower.slice(0, -1));
+      vcSwaps.forEach(v => push(v));
+      if (word.length >= 6) push(lower.slice(0, -2));
+      vowelSubs.forEach(v => push(v));
+      deletions.forEach(v => push(v));
+      otherSwaps.forEach(v => push(v));
+    }
+  }
+  return out.slice(0, 10);
 }
 
 function buildRows(uData: any, oData: any, eData: any, locale: string, isFallback = false): ResultRow[] {
@@ -273,16 +331,16 @@ export default function GlobalSearchBar() {
     if (trimmed.length < 2) { setResultRows([]); return; }
 
     searchUsers({ variables: { searchUsersInput: { query: trimmed, limit: 5, offset: 0 } } });
-    searchOpps({ variables: { query: trimmed, limit: 5, offset: 0 } });
-    searchEvents({ variables: { query: trimmed, limit: 5, offset: 0 } });
+    searchOpps({ variables: { input: { query: trimmed, limit: 5, offset: 0 } } });
+    searchEvents({ variables: { input: { query: trimmed, limit: 5, offset: 0 } } });
 
     // Fire fallback with first individual token for multi-word or possible-typo queries
     const variants = generateVariants(trimmed);
     if (variants.length > 1) {
       const fbQ = variants[1];
       searchUsersFb({ variables: { searchUsersInput: { query: fbQ, limit: 3, offset: 0 } } });
-      searchOppsFb({ variables: { query: fbQ, limit: 3, offset: 0 } });
-      searchEventsFb({ variables: { query: fbQ, limit: 3, offset: 0 } });
+      searchOppsFb({ variables: { input: { query: fbQ, limit: 3, offset: 0 } } });
+      searchEventsFb({ variables: { input: { query: fbQ, limit: 3, offset: 0 } } });
     }
   }, [searchUsers, searchOpps, searchEvents, searchUsersFb, searchOppsFb, searchEventsFb]);
 

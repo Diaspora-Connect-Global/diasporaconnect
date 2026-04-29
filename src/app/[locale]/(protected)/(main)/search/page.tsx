@@ -22,9 +22,70 @@ import {
 
 function generateVariants(query: string): string[] {
   const trimmed = query.trim();
-  const tokens = trimmed.split(/\s+/).filter((t) => t.length >= 3);
-  const variants = [trimmed, ...tokens];
-  return [...new Set(variants)].slice(0, 3);
+  const seen = new Set<string>([trimmed]);
+  const out: string[] = [trimmed];
+  const push = (s: string) => {
+    const clean = s.trim();
+    if (clean.length >= 2 && !seen.has(clean)) { seen.add(clean); out.push(clean); }
+  };
+
+  const VOWELS = 'aeiou';
+  const isVowel = (c: string) => VOWELS.includes(c.toLowerCase());
+
+  const tokens = trimmed.split(/\s+/).filter(t => t.length >= 2);
+  if (tokens.length > 1) tokens.forEach(t => push(t));
+
+  const words = tokens.length >= 1 ? tokens : [trimmed];
+  for (const word of words) {
+    if (word.length < 3) continue;
+    const lower = word.toLowerCase();
+
+    // Adjacent transpositions — vowel↔consonant swaps first ("Fram" → "Farm")
+    const vcSwaps: string[] = [];
+    const otherSwaps: string[] = [];
+    for (let i = 0; i < word.length - 1; i++) {
+      const chars = [...word];
+      [chars[i], chars[i + 1]] = [chars[i + 1], chars[i]];
+      const v = chars.join('');
+      if (v === word) continue;
+      if (isVowel(word[i]) !== isVowel(word[i + 1])) vcSwaps.push(v);
+      else otherSwaps.push(v);
+    }
+
+    // Vowel substitutions — replace each vowel with the 4 other vowels ("Ferm" → "Farm")
+    const vowelSubs: string[] = [];
+    for (let i = 0; i < lower.length; i++) {
+      if (!isVowel(lower[i])) continue;
+      for (const v of VOWELS) {
+        if (v === lower[i]) continue;
+        const chars = [...lower];
+        chars[i] = v;
+        vowelSubs.push(chars.join(''));
+      }
+    }
+
+    // Single-char deletions — removes duplicate/extra keystrokes ("Faarm" → "Farm")
+    const deletions: string[] = [];
+    for (let i = 0; i < word.length; i++) {
+      deletions.push(word.slice(0, i) + word.slice(i + 1));
+    }
+
+    if (word.length <= 5) {
+      vcSwaps.forEach(v => push(v));
+      vowelSubs.forEach(v => push(v));
+      push(lower.slice(0, -1));
+      otherSwaps.forEach(v => push(v));
+      deletions.forEach(v => push(v));
+    } else {
+      push(lower.slice(0, -1));
+      vcSwaps.forEach(v => push(v));
+      if (word.length >= 6) push(lower.slice(0, -2));
+      vowelSubs.forEach(v => push(v));
+      deletions.forEach(v => push(v));
+      otherSwaps.forEach(v => push(v));
+    }
+  }
+  return out.slice(0, 10);
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -437,21 +498,15 @@ export default function SearchPage() {
       searchServices({ variables: { input: { query: q, page, limit } } });
     }
     if (isAll || tab === 'events') {
-      searchEvents({ variables: { query: q, limit, offset } });
+      searchEvents({ variables: { input: { query: q, limit, offset } } });
     }
     if (isAll || tab === 'opportunities') {
-      searchOpportunities({ variables: { query: q, limit, offset } });
+      searchOpportunities({ variables: { input: { query: q, limit, offset } } });
     }
   };
 
-  const runFallback = (q: string, tab: SearchTab) => {
-    const variants = generateVariants(q);
-    if (variants.length <= 1) return;
-    const fbQ = variants[1];
-    setFallbackQuery(fbQ);
-    const limit = PAGE_SIZE;
-    const offset = 0;
-    const page = 1;
+  const runFallbackWith = (fbQ: string, tab: SearchTab) => {
+    const limit = PAGE_SIZE; const offset = 0; const page = 1;
     if (tab === 'all' || tab === 'people')        searchUsersFb({ variables: { searchUsersInput: { query: fbQ, limit, offset } } });
     if (tab === 'all' || tab === 'groups')        searchGroupsFb({ variables: { query: fbQ, searchLimit: limit, searchOffset: offset } });
     if (tab === 'all' || tab === 'communities')   searchCommsFb({ variables: { input: { query: fbQ, page, limit } } });
@@ -460,17 +515,30 @@ export default function SearchPage() {
       searchProductsFb({ variables: { input: { query: fbQ, page, limit } } });
       searchServicesFb({ variables: { input: { query: fbQ, page, limit } } });
     }
-    if (tab === 'all' || tab === 'events')        searchEventsFb({ variables: { query: fbQ, limit, offset } });
-    if (tab === 'all' || tab === 'opportunities') searchOppsFb({ variables: { query: fbQ, limit, offset } });
+    if (tab === 'all' || tab === 'events')        searchEventsFb({ variables: { input: { query: fbQ, limit, offset } } });
+    if (tab === 'all' || tab === 'opportunities') searchOppsFb({ variables: { input: { query: fbQ, limit, offset } } });
+  };
+
+  const runFallback = (q: string, tab: SearchTab) => {
+    const candidates = generateVariants(q).slice(1);
+    if (candidates.length === 0) return;
+    fallbackVariantsRef.current = candidates;
+    fallbackAttemptRef.current = 0;
+    setFallbackQuery(candidates[0]);
+    runFallbackWith(candidates[0], tab);
   };
 
   const runDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fallbackVariantsRef = useRef<string[]>([]);
+  const fallbackAttemptRef = useRef(0);
 
   useEffect(() => {
     if (runDebounceRef.current) clearTimeout(runDebounceRef.current);
     runDebounceRef.current = setTimeout(() => {
       runAll(query, activeTab, pages);
       setFallbackQuery(null);
+      fallbackVariantsRef.current = [];
+      fallbackAttemptRef.current = 0;
     }, 300);
     return () => { if (runDebounceRef.current) clearTimeout(runDebounceRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -497,8 +565,8 @@ export default function SearchPage() {
         searchProducts({ variables: { input: { query: q, page, limit } } });
         searchServices({ variables: { input: { query: q, page, limit } } });
         break;
-      case 'events':        searchEvents({ variables: { query: q, limit, offset } }); break;
-      case 'opportunities': searchOpportunities({ variables: { query: q, limit, offset } }); break;
+      case 'events':        searchEvents({ variables: { input: { query: q, limit, offset } } }); break;
+      case 'opportunities': searchOpportunities({ variables: { input: { query: q, limit, offset } } }); break;
     }
   };
 
@@ -546,10 +614,23 @@ export default function SearchPage() {
     return false;
   };
 
-  // Trigger fallback queries when exact results are empty after loading finishes
+  const isFbLoading = (tab: SearchTab): boolean => {
+    if (tab === 'all' || tab === 'people')        if (usersFbResult.loading)    return true;
+    if (tab === 'all' || tab === 'groups')        if (groupsFbResult.loading)   return true;
+    if (tab === 'all' || tab === 'communities')   if (commsFbResult.loading)    return true;
+    if (tab === 'all' || tab === 'associations')  if (assocsFbResult.loading)   return true;
+    if (tab === 'all' || tab === 'marketplace')   if (productsFbResult.loading || servicesFbResult.loading) return true;
+    if (tab === 'all' || tab === 'events')        if (eventsFbResult.loading)   return true;
+    if (tab === 'all' || tab === 'opportunities') if (oppsFbResult.loading)     return true;
+    return false;
+  };
+
+  // Trigger fallback queries when exact results are empty after loading finishes.
+  // Cycles through all generated variants until one returns results.
   useEffect(() => {
     if (!query.trim()) return;
     if (isLoading(activeTab)) return;
+
     const exactEmpty =
       (activeTab === 'all' && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !services.length && !events.length && !opps.length) ||
       (activeTab === 'people' && !users.length) ||
@@ -559,13 +640,49 @@ export default function SearchPage() {
       (activeTab === 'marketplace' && !products.length && !services.length) ||
       (activeTab === 'events' && !events.length) ||
       (activeTab === 'opportunities' && !opps.length);
-    if (exactEmpty && !fallbackQuery) {
-      runFallback(query, activeTab);
-    } else if (!exactEmpty) {
+
+    if (!exactEmpty) {
       setFallbackQuery(null);
+      fallbackVariantsRef.current = [];
+      fallbackAttemptRef.current = 0;
+      return;
+    }
+
+    if (!fallbackQuery) {
+      runFallback(query, activeTab);
+      return;
+    }
+
+    // Primary empty + fallback already running/ran — check if fallback also empty
+    if (isFbLoading(activeTab)) return;
+
+    const fbEmpty =
+      (activeTab === 'all' && !fbUsers.length && !fbGroups.length && !fbComms.length && !fbAssocs.length && !fbProducts.length && !fbServices.length && !fbEvents.length && !fbOpps.length) ||
+      (activeTab === 'people' && !fbUsers.length) ||
+      (activeTab === 'groups' && !fbGroups.length) ||
+      (activeTab === 'communities' && !fbComms.length) ||
+      (activeTab === 'associations' && !fbAssocs.length) ||
+      (activeTab === 'marketplace' && !fbProducts.length && !fbServices.length) ||
+      (activeTab === 'events' && !fbEvents.length) ||
+      (activeTab === 'opportunities' && !fbOpps.length);
+
+    if (fbEmpty) {
+      const next = fallbackAttemptRef.current + 1;
+      if (next < fallbackVariantsRef.current.length) {
+        fallbackAttemptRef.current = next;
+        const nextQ = fallbackVariantsRef.current[next];
+        setFallbackQuery(nextQ);
+        runFallbackWith(nextQ, activeTab);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usersResult.loading, groupsResult.loading, commsResult.loading, assocsResult.loading, productsResult.loading, servicesResult.loading, eventsResult.loading, oppsResult.loading, activeTab, query]);
+  }, [
+    usersResult.loading, groupsResult.loading, commsResult.loading, assocsResult.loading,
+    productsResult.loading, servicesResult.loading, eventsResult.loading, oppsResult.loading,
+    usersFbResult.loading, groupsFbResult.loading, commsFbResult.loading, assocsFbResult.loading,
+    productsFbResult.loading, servicesFbResult.loading, eventsFbResult.loading, oppsFbResult.loading,
+    activeTab, query, fallbackQuery,
+  ]);
 
   const hasMore = (): boolean => {
     const total = totals[activeTab];
