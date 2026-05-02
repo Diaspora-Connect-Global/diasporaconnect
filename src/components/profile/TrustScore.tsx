@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { UserBadge } from "../custom/userBadge";
+import { UserBadge, Tier } from "../custom/userBadge";
 import { InfoIcon } from "@phosphor-icons/react";
 import { LevelGauge } from "../custom/levelGauge";
 import { useTranslations } from 'next-intl';
@@ -10,11 +10,31 @@ interface TrustScoreProps {
 
 }
 
+const ALL_TIERS: Tier[] = ["starter", "trusted", "reliable", "elite"];
+
+const TIER_THRESHOLDS: Record<Tier, number> = {
+  starter: 25,
+  trusted: 50,
+  reliable: 75,
+  elite: 100,
+};
+
+function getTierFromScore(score: number): Tier {
+  for (const tier of ALL_TIERS) {
+    if (score <= TIER_THRESHOLDS[tier]) return tier;
+  }
+  return "elite";
+}
+
 export function TrustScore({ trustScore }: TrustScoreProps) {
   const t = useTranslations('profile.trustScore');
   const parsedTrustScore = trustScore == null ? 0 : Number(trustScore);
   const normalizedTrustScore = Number.isFinite(parsedTrustScore) ? parsedTrustScore : 0;
-  const showTrustBadges = normalizedTrustScore >= 10;
+
+  // TODO: derive current tier and earned tiers from the normalized score
+  const currentTier = getTierFromScore(normalizedTrustScore);
+  const currentTierIndex = ALL_TIERS.indexOf(currentTier);
+  const earnedTiers = ALL_TIERS.slice(0, currentTierIndex + 1);
 
   return (
     <Card className="h-full p-0">
@@ -25,18 +45,26 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
 
 
             <div className="p-1">
-              
+
               <LevelGauge score={normalizedTrustScore} />
 
 
             </div>
 
-            {showTrustBadges && (
+            {earnedTiers.length > 0 && (
               <div className="grid grid-cols-2 gap-4">
-                <UserBadge tier="starter" showLabel />
-                <UserBadge tier="trusted" showLabel />
-                <UserBadge tier="reliable" showLabel />
-                <UserBadge tier="elite" showLabel />
+                {earnedTiers.map((tier) => (
+                  <div
+                    key={tier}
+                    className={tier === currentTier ? "ring-2 ring-offset-1 ring-current rounded-md p-0.5" : undefined}
+                  >
+                    <UserBadge
+                      tier={tier}
+                      size={tier === currentTier ? "md" : "sm"}
+                      showLabel
+                    />
+                  </div>
+                ))}
               </div>
             )}
             <div className="bg-surface-info text-text-info flex p-2 space-x-2 rounded-md">

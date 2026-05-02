@@ -647,42 +647,82 @@ export default function FeedCardWithReply({
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {imageCount === 1 ? (
                     <div
-                        className="relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer"
+                        className="group relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                         onClick={() => openMediaModal(0)}
                     >
                         <img src={images[0]} alt="post" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+                            <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                                <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+                            </button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                                <img width={28} height={28} src="/COMMENT.svg" alt="comment" className="w-7 h-7 object-contain drop-shadow brightness-0 invert" />
+                            </button>
+                        </div>
                     </div>
                 ) : imageCount === 2 ? (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
                         {images.map((src, i) => (
                             <div
                                 key={i}
-                                className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
+                                className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openMediaModal(i)}
                             >
                                 <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+                                    <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                                        <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+                                    </button>
+                                    <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                                        <img width={28} height={28} src="/COMMENT.svg" alt="comment" className="w-7 h-7 object-contain drop-shadow brightness-0 invert" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 ) : imageCount === 3 ? (
                     <div className="grid grid-cols-2 grid-rows-2 gap-2">
                         <div
-                            className="relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]"
+                            className="group relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]"
                             onClick={() => openMediaModal(0)}
                         >
                             <img src={images[0]} alt="post 1" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+                                <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                                    <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+                                </button>
+                                <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                                    <img width={28} height={28} src="/COMMENT.svg" alt="comment" className="w-7 h-7 object-contain drop-shadow brightness-0 invert" />
+                                </button>
+                            </div>
                         </div>
                         <div
-                            className="relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
+                            className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => openMediaModal(1)}
                         >
                             <img src={images[1]} alt="post 2" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+                                <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                                    <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+                                </button>
+                                <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                                    <img width={28} height={28} src="/COMMENT.svg" alt="comment" className="w-7 h-7 object-contain drop-shadow brightness-0 invert" />
+                                </button>
+                            </div>
                         </div>
                         <div
-                            className="relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
+                            className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => openMediaModal(2)}
                         >
                             <img src={images[2]} alt="post 3" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+                                <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                                    <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+                                </button>
+                                <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                                    <img width={28} height={28} src="/COMMENT.svg" alt="comment" className="w-7 h-7 object-contain drop-shadow brightness-0 invert" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ) : (
@@ -690,15 +730,24 @@ export default function FeedCardWithReply({
                         {images.slice(0, maxDisplay).map((src, i) => (
                             <div
                                 key={i}
-                                className="relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
+                                className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openMediaModal(i === maxDisplay - 1 && excessCount > 0 ? 0 : i)}
                             >
                                 <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                                {i === maxDisplay - 1 && excessCount > 0 && (
+                                {i === maxDisplay - 1 && excessCount > 0 ? (
                                     <div className="absolute inset-0 bg-black/40 bg-opacity-60 flex items-center justify-center">
                                         <span className="text-white text-3xl font-semibold">
                                             +{excessCount}
                                         </span>
+                                    </div>
+                                ) : (
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+                                        <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                                            <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+                                        </button>
+                                        <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                                            <img width={28} height={28} src="/COMMENT.svg" alt="comment" className="w-7 h-7 object-contain drop-shadow brightness-0 invert" />
+                                        </button>
                                     </div>
                                 )}
                             </div>

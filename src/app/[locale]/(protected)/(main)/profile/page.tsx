@@ -7,6 +7,7 @@ import { PersonalDetails } from '@/components/profile/PersonalDetails';
 import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { KYCVerification } from '@/components/profile/KYCVerification';
 import { TrustScore } from '@/components/profile/TrustScore';
+import { ProfileLoadingSkeleton } from "@/components/skeleton/ProfileLoadingSkeleton";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import { gql } from "@apollo/client";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useUserStore } from "@/store/useUserStore";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
@@ -47,6 +49,7 @@ interface UpdateProfileResponse {
 
 export default function ProfilePage() {
     const tCommon = useTranslations("common");
+    const router = useRouter();
     const setUser = useUserStore(state => state.setUser);
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
     const avatarDialogContentRef = useRef<HTMLDivElement | null>(null);
@@ -55,7 +58,24 @@ export default function ProfilePage() {
     const { data, loading, error, refetch } = useQuery<GetProfileResponse>(GET_MY_PROFILE);
     const profile: Profile | undefined = data?.getProfile.profile;
 
-    // Use the image upload hook
+    // Update profile mutation — must be declared before any conditional return
+    const [updateProfile, { loading: updating }] = useMutation<UpdateProfileResponse>(UPDATE_PROFILE, {
+        onCompleted: (res) => {
+            if (res.updateProfile.success) {
+                toast.success(res.updateProfile.message || "Profile picture updated");
+                setEditAvatarOpen(false);
+                reset(); // Reset the image upload state
+                refetch(); // Refetch profile to get updated data
+            } else {
+                toast.error(res.updateProfile.message || "Update failed");
+            }
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        },
+    });
+
+    // Use the image upload hook — must be declared before any conditional return
     const {
         uploading,
         rawImage,
@@ -98,23 +118,6 @@ export default function ProfilePage() {
         return () => clearTimeout(t);
     }, [croppedImage, showCropper]);
 
-    // Update profile mutation
-    const [updateProfile, { loading: updating }] = useMutation<UpdateProfileResponse>(UPDATE_PROFILE, {
-        onCompleted: (res) => {
-            if (res.updateProfile.success) {
-                toast.success(res.updateProfile.message || "Profile picture updated");
-                setEditAvatarOpen(false);
-                reset(); // Reset the image upload state
-                refetch(); // Refetch profile to get updated data
-            } else {
-                toast.error(res.updateProfile.message || "Update failed");
-            }
-        },
-        onError: (err) => {
-            toast.error(err.message);
-        },
-    });
-
     useEffect(() => {
         if (!profile) return;
         // Only update the store when meaningful fields actually change.
@@ -134,11 +137,11 @@ export default function ProfilePage() {
     }, [profile?.userId, profile?.firstName, profile?.lastName, profile?.email, profile?.avatarUrl, profile?.version, setUser]);
 
     function handleVerifyKYC(): void {
-        throw new Error('Function not implemented.');
+        router.push('/verifykyc');
     }
 
     function handleCompleteProfile(): void {
-        throw new Error('Function not implemented.');
+        router.push('/settings');
     }
 
     const handleAvatarUpload = async () => {
@@ -151,6 +154,26 @@ export default function ProfilePage() {
         await uploadImage();
         // The onSuccess callback will handle updating the profile
     };
+
+    if (loading) {
+        return <ProfileLoadingSkeleton />;
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-app-inner mx-2 gap-4">
+                <p className="text-text-error text-sm">
+                    {error.message || "Failed to load profile. Please try again."}
+                </p>
+                <button
+                    className="text-sm text-text-brand underline cursor-pointer"
+                    onClick={() => refetch()}
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col lg:flex-row lg:space-x-5 my-2 space-y-2 lg:space-y-0 h-app-inner mx-2">
