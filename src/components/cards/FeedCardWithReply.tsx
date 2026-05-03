@@ -767,6 +767,7 @@ export default function FeedCardWithReply({
                         key={i}
                         src={src}
                         className="w-full max-h-[24rem]"
+                        onOpenModal={() => openMediaModal((images?.length ?? 0) + i)}
                     />
                 ))}
             </div>

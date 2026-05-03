@@ -33,7 +33,7 @@ export default function NotificationWebSocketProvider({
     // Strip "Bearer " prefix if present, matching MessageWebSocketProvider pattern
     const rawToken = token.replace(/^Bearer\s+/i, "");
 
-    const socket = io(WS_URL, {
+    const socket = io(`${WS_URL}/notifications`, {
       auth: { token: rawToken },
       transports: ["websocket"],
       reconnectionAttempts: 5,
@@ -50,7 +50,8 @@ export default function NotificationWebSocketProvider({
       console.warn("[NotificationWS] connection error:", err.message);
     });
 
-    socket.on("notification:new", (notification: Notification) => {
+    socket.on("notification", (payload: { data: Notification }) => {
+      const notification = payload.data;
       addLiveNotification(notification);
       incrementUnreadCount();
       toast(notification.title, {
@@ -58,15 +59,15 @@ export default function NotificationWebSocketProvider({
       });
     });
 
-    socket.on("notification:read", (data: { unreadCount?: number }) => {
-      if (typeof data.unreadCount === "number") {
-        setUnreadCount(data.unreadCount);
+    socket.on("notification:unread-count", (payload: { data: { count: number } }) => {
+      if (typeof payload.data?.count === "number") {
+        setUnreadCount(payload.data.count);
       }
     });
 
     return () => {
-      socket.off("notification:new");
-      socket.off("notification:read");
+      socket.off("notification");
+      socket.off("notification:unread-count");
       socket.off("connect");
       socket.off("connect_error");
       // Do not disconnect on cleanup — avoids thrash on React strict-mode double-invoke.

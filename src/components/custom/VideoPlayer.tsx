@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader2, RefreshCw, WifiOff } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import Image from 'next/image';
 import { useVideoStore } from '@/store/useVideoStore';
 
@@ -16,9 +16,11 @@ interface VideoPlayerProps {
   pauseOnLeave?: boolean;
   /** First-frame thumbnail shown while the video loads */
   poster?: string;
+  /** Called when the user taps the video to open the full post modal. When provided, click navigates to modal instead of toggling play. */
+  onOpenModal?: () => void;
 }
 
-export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = true, poster }: VideoPlayerProps) {
+export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = true, poster, onOpenModal }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -32,7 +34,6 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
   const [isBuffering, setIsBuffering] = useState(false);
   const [slowConnection, setSlowConnection] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [autoRetryCount, setAutoRetryCount] = useState(0);
@@ -81,13 +82,6 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     obs.observe(el);
     return () => obs.disconnect();
   }, [pauseOnLeave]);
-
-  // Track fullscreen state
-  useEffect(() => {
-    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
 
   // Sync global mute state to the video element
   useEffect(() => {
@@ -199,13 +193,6 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     setGlobalMuted(!globalMuted);
   }, [globalMuted, setGlobalMuted]);
 
-  const toggleFullscreen = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    const el = containerRef.current;
-    if (!el) return;
-    document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen();
-  }, []);
-
   const controlsVisible = showControls || !isPlaying;
 
   return (
@@ -214,7 +201,7 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
       className={`relative bg-black rounded-lg overflow-hidden cursor-pointer select-none ${className ?? ''}`}
       onMouseMove={revealControls}
       onMouseLeave={() => isPlaying && scheduleHide()}
-      onClick={togglePlay}
+      onClick={onOpenModal ?? togglePlay}
       onContextMenu={handleContextMenu}
     >
       <video
@@ -283,7 +270,7 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
           {/* Button row */}
           <div className="flex items-center gap-2">
             <button
-              onClick={togglePlay}
+              onClick={onOpenModal ?? togglePlay}
               className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0"
             >
               {isPlaying
@@ -299,13 +286,6 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
               className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0"
             >
               {globalMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-
-            <button
-              onClick={toggleFullscreen}
-              className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0"
-            >
-              {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
             </button>
           </div>
         </div>

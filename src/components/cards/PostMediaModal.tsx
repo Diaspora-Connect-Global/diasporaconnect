@@ -355,8 +355,8 @@ export default function PostMediaModal({
 
     const getSlideStyle = (): React.CSSProperties =>
         isEntering
-            ? { opacity: 0, transition: 'none' }
-            : { opacity: 1, transition: 'opacity 220ms ease' };
+            ? { opacity: 0, transform: 'translateY(28px)', transition: 'none' }
+            : { opacity: 1, transform: 'translateY(0)', transition: 'opacity 260ms ease, transform 260ms cubic-bezier(0.25,0.46,0.45,0.94)' };
 
     const navigateWithTransition = useCallback((dir: 'next' | 'prev') => {
         if (isAnimatingRef.current) return;
@@ -371,7 +371,7 @@ export default function PostMediaModal({
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 setIsEntering(false);
-                setTimeout(() => { isAnimatingRef.current = false; }, 220);
+                setTimeout(() => { isAnimatingRef.current = false; }, 260);
             });
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -757,7 +757,7 @@ export default function PostMediaModal({
     /* ── render ── */
     return (
         <>
-            <div className="fixed inset-0 z-50 flex overflow-hidden bg-black animate-in fade-in duration-200" onClick={onClose}>
+            <div className="fixed inset-0 z-50 flex overflow-hidden bg-black animate-in fade-in slide-in-from-bottom-6 duration-300" onClick={onClose}>
                 <div className="w-full h-full" style={getSlideStyle()}>
 
                 {/* DESKTOP */}
