@@ -64,13 +64,14 @@ function buildNotificationView(
   not: Notification,
   enriched: EnrichedNotification,
   t: Translator,
-  locale: string
+  locale: string,
+  isLoading?: boolean
 ): NotificationView {
   const type = (not.type || '').toLowerCase();
   const data = (not.data as Record<string, unknown> | undefined) || {};
   const entityType = String(data.entityType || '').toLowerCase();
 
-  const actorName = enriched.actorName || t('messages.actorFallback');
+  const actorName = enriched.actorName || (isLoading ? null : t('messages.actorFallback'));
   // Whenever a user actor is involved in the notification (comment, like,
   // connection, message, invite, …) we want to show either their real avatar
   // or the default user silhouette — never the system/globe icon. We detect
@@ -106,6 +107,7 @@ function buildNotificationView(
     type === 'connection_accepted';
 
   if (isConnectionRequestType) {
+    if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
     return {
       title: t('messages.connectionRequest', { actorName }),
       imageUrl: actorAvatar,
@@ -113,6 +115,7 @@ function buildNotificationView(
     };
   }
   if (isConnectionAcceptedType) {
+    if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
     return {
       title: t('messages.connectionAccepted', { actorName }),
       imageUrl: actorAvatar,
@@ -122,6 +125,7 @@ function buildNotificationView(
 
   // Posts — attach the post snippet when we have one
   if (type === 'post.like' || type === 'post.comment' || type === 'post.commented' || type === 'post.mention') {
+    if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
     const hasTitle = Boolean(enriched.targetTitle);
     const key =
       type === 'post.like'
@@ -139,6 +143,7 @@ function buildNotificationView(
 
   // Direct / group messages
   if (type === 'message.received') {
+    if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
     return {
       title: t('messages.messageReceived', { actorName }),
       imageUrl: actorAvatar,
@@ -146,6 +151,7 @@ function buildNotificationView(
     };
   }
   if (type === 'group.message') {
+    if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
     const groupName = enriched.entityName || '';
     return {
       title: groupName
@@ -169,6 +175,7 @@ function buildNotificationView(
     };
   }
   if (type === 'event.invite') {
+    if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
     const eventName = enriched.targetTitle || not.title || t('messages.eventFallback');
     return {
       title: t('messages.eventInvite', { actorName, eventName }),
@@ -231,10 +238,16 @@ function buildNotificationView(
   }
   if (isAssociation && (type.includes('request') || type === 'membership.request')) {
     const associationName = enriched.entityName || t('messages.associationFallback');
+    if (enriched.actorName) {
+      if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
+      return {
+        title: t('messages.associationRequestFromActor', { actorName, associationName }),
+        imageUrl: actorAvatar,
+        actorHref,
+      };
+    }
     return {
-      title: enriched.actorName
-        ? t('messages.associationRequestFromActor', { actorName, associationName })
-        : t('messages.associationRequest', { associationName }),
+      title: t('messages.associationRequest', { associationName }),
       imageUrl: actorAvatar,
       actorHref,
     };
@@ -245,10 +258,16 @@ function buildNotificationView(
   }
   if (type === 'membership.request') {
     const communityName = enriched.entityName || t('messages.communityFallback');
+    if (enriched.actorName) {
+      if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
+      return {
+        title: t('messages.membershipRequestFromActor', { actorName, communityName }),
+        imageUrl: actorAvatar,
+        actorHref,
+      };
+    }
     return {
-      title: enriched.actorName
-        ? t('messages.membershipRequestFromActor', { actorName, communityName })
-        : t('messages.membershipRequest', { communityName }),
+      title: t('messages.membershipRequest', { communityName }),
       imageUrl: actorAvatar,
       actorHref,
     };
@@ -284,7 +303,7 @@ function NotificationRow({
   isReadOptimistic: boolean;
 }) {
   const enriched = useEnrichedNotification(not, currentUserId);
-  const view = buildNotificationView(not, enriched, t, locale);
+  const view = buildNotificationView(not, enriched, t, locale, enriched.isLoading);
 
   return (
     <NotificationCard

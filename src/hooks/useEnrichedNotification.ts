@@ -137,7 +137,10 @@ const GENERIC_ACTOR_WORDS = new Set([
 function isGenericActorLabel(value: string | null | undefined): boolean {
   const v = (value || '').trim().toLowerCase();
   if (!v) return true;
-  return GENERIC_ACTOR_WORDS.has(v);
+  if (GENERIC_ACTOR_WORDS.has(v)) return true;
+  // Reject names where any individual word is a known generic placeholder
+  // e.g. "Bernice Someone" → rejected because "someone" is in the set
+  return v.split(/\s+/).some((word) => GENERIC_ACTOR_WORDS.has(word));
 }
 
 /**
