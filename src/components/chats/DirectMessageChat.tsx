@@ -34,6 +34,43 @@ import { toast } from "sonner";
 
 // ---- Helpers ----
 
+// Alpha-3 → Alpha-2 for the subset that Intl.DisplayNames doesn't accept directly
+const ALPHA3_TO_ALPHA2: Record<string, string> = {
+    AFG:'AF',AGO:'AO',ALB:'AL',AND:'AD',ARE:'AE',ARG:'AR',ARM:'AM',AUS:'AU',AUT:'AT',AZE:'AZ',
+    BDI:'BI',BEL:'BE',BEN:'BJ',BFA:'BF',BGD:'BD',BGR:'BG',BHR:'BH',BHS:'BS',BIH:'BA',BLR:'BY',
+    BLZ:'BZ',BOL:'BO',BRA:'BR',BRB:'BB',BRN:'BN',BTN:'BT',BWA:'BW',CAF:'CF',CAN:'CA',CHE:'CH',
+    CHL:'CL',CHN:'CN',CIV:'CI',CMR:'CM',COD:'CD',COG:'CG',COL:'CO',COM:'KM',CPV:'CV',CRI:'CR',
+    CUB:'CU',CYP:'CY',CZE:'CZ',DEU:'DE',DJI:'DJ',DNK:'DK',DOM:'DO',DZA:'DZ',ECU:'EC',EGY:'EG',
+    ERI:'ER',ESP:'ES',EST:'EE',ETH:'ET',FIN:'FI',FJI:'FJ',FRA:'FR',FSM:'FM',GAB:'GA',GBR:'GB',
+    GEO:'GE',GHA:'GH',GIN:'GN',GMB:'GM',GNB:'GW',GNQ:'GQ',GRC:'GR',GTM:'GT',GUY:'GY',HND:'HN',
+    HRV:'HR',HTI:'HT',HUN:'HU',IDN:'ID',IND:'IN',IRL:'IE',IRN:'IR',IRQ:'IQ',ISL:'IS',ISR:'IL',
+    ITA:'IT',JAM:'JM',JOR:'JO',JPN:'JP',KAZ:'KZ',KEN:'KE',KGZ:'KG',KHM:'KH',KIR:'KI',KOR:'KR',
+    KWT:'KW',LAO:'LA',LBN:'LB',LBR:'LR',LBY:'LY',LCA:'LC',LIE:'LI',LKA:'LK',LSO:'LS',LTU:'LT',
+    LUX:'LU',LVA:'LV',MAR:'MA',MDA:'MD',MDG:'MG',MDV:'MV',MEX:'MX',MKD:'MK',MLI:'ML',MLT:'MT',
+    MMR:'MM',MNE:'ME',MNG:'MN',MOZ:'MZ',MRT:'MR',MUS:'MU',MWI:'MW',MYS:'MY',NAM:'NA',NER:'NE',
+    NGA:'NG',NIC:'NI',NLD:'NL',NOR:'NO',NPL:'NP',NRU:'NR',NZL:'NZ',OMN:'OM',PAK:'PK',PAN:'PA',
+    PER:'PE',PHL:'PH',PLW:'PW',PNG:'PG',POL:'PL',PRT:'PT',PRY:'PY',PSE:'PS',QAT:'QA',ROU:'RO',
+    RUS:'RU',RWA:'RW',SAU:'SA',SDN:'SD',SEN:'SN',SGP:'SG',SLB:'SB',SLE:'SL',SLV:'SV',SMR:'SM',
+    SOM:'SO',SRB:'RS',SSD:'SS',STP:'ST',SUR:'SR',SVK:'SK',SVN:'SI',SWE:'SE',SWZ:'SZ',SYC:'SC',
+    SYR:'SY',TCD:'TD',TGO:'TG',THA:'TH',TJK:'TJ',TKM:'TM',TLS:'TL',TON:'TO',TTO:'TT',TUN:'TN',
+    TUR:'TR',TUV:'TV',TZA:'TZ',UGA:'UG',UKR:'UA',URY:'UY',USA:'US',UZB:'UZ',VCT:'VC',VEN:'VE',
+    VNM:'VN',VUT:'VU',WSM:'WS',YEM:'YE',ZAF:'ZA',ZMB:'ZM',ZWE:'ZW',
+};
+
+function resolveCountryName(code: string): string {
+    if (!code) return '';
+    const upper = code.trim().toUpperCase();
+    // Convert alpha-3 to alpha-2 if needed
+    const alpha2 = upper.length === 3 ? (ALPHA3_TO_ALPHA2[upper] ?? upper) : upper;
+    try {
+        const names = new Intl.DisplayNames(['en'], { type: 'region' });
+        const name = names.of(alpha2);
+        return name && name !== alpha2 ? name : code;
+    } catch {
+        return code;
+    }
+}
+
 function getMessageDateKey(dateStr: string, timeZone: string): string {
     return new Date(dateStr).toLocaleDateString('en-US', { timeZone });
 }
@@ -151,10 +188,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         );
     const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
 
-    // Location: prefer `location` string, then residenceCountry, then countryOfOrigin
+    // Location: prefer free-text `location`, then resolve country codes to full names
     const otherLocation = profileFallback?.location ||
-        profileFallback?.residenceCountry ||
-        profileFallback?.countryOfOrigin ||
+        (profileFallback?.residenceCountry ? resolveCountryName(profileFallback.residenceCountry) : '') ||
+        (profileFallback?.countryOfOrigin ? resolveCountryName(profileFallback.countryOfOrigin) : '') ||
         '';
 
     // Initialize or retrieve conversation
