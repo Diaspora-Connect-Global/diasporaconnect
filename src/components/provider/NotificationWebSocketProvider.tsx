@@ -1,59 +1,31 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { io, type Socket } from "socket.io-client";
+import { useEffect } from "react";
 import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuthStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import type { Notification } from "@/services/gql/types/notification";
-
-// Notifications are pushed through the API gateway WebSocket (same host as messaging).
-const WS_URL =
-  process.env.NEXT_PUBLIC_NOTIFICATION_WS_URL ??
-  process.env.NEXT_PUBLIC_MESSAGE_WS_URL ??
-  "http://localhost:3000";
+// Reuse the shared message-service socket (already connected to the API
+// gateway by MessageWebSocketProvider). The gateway emits notification events
+// to the user's personal room (user:<id>) on the SAME connection, so we never
+// need a second socket — opening one causes a duplicate-connection conflict.
+import { messageService } from "@/services/websocket/messageService";
 
 export default function NotificationWebSocketProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const tokens = useAuthStore((s) => s.tokens);
-  const token = tokens?.sessionToken ?? tokens?.accessToken;
-  const socketRef = useRef<Socket | null>(null);
-
   const addLiveNotification = useNotificationStore((s) => s.addLiveNotification);
   const incrementUnreadCount = useNotificationStore((s) => s.incrementUnreadCount);
   const setUnreadCount = useNotificationStore((s) => s.setUnreadCount);
 
   useEffect(() => {
-    if (!token?.trim()) {
-      socketRef.current?.disconnect();
-      socketRef.current = null;
-      return;
-    }
-
-    const rawToken = token.replace(/^Bearer\s+/i, "");
-
-    const socket = io(WS_URL, {
-      auth: { token: rawToken },
-      transports: ["websocket"],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
-    });
-
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      console.log("[NotificationWS] connected");
-    });
-
-    socket.on("connect_error", (err) => {
-      console.warn("[NotificationWS] connection error:", err.message);
-    });
-
-    // API gateway emits the notification object directly (no wrapper)
-    socket.on("notification", (notification: Notification) => {
+    // Attach to the shared socket. If the socket is not yet connected (e.g.
+    // this provider mounts before MessageWebSocketProvider connects), the
+    // callbacks are buffered in messageService and will fire once the socket
+    // receives the events — no race condition.
+    const unsubNotification = messageService.onNotification((raw) => {
+      const notification = raw as Notification;
       addLiveNotification(notification);
       incrementUnreadCount();
       toast(notification.title, {
@@ -61,21 +33,17 @@ export default function NotificationWebSocketProvider({
       });
     });
 
-    socket.on("notification:unread-count", ({ count }: { count: number }) => {
+    const unsubUnreadCount = messageService.onUnreadCount(({ count }) => {
       if (typeof count === "number") {
         setUnreadCount(count);
       }
     });
 
     return () => {
-      socket.off("notification");
-      socket.off("notification:unread-count");
-      socket.off("connect");
-      socket.off("connect_error");
-      // Do not disconnect on cleanup — avoids thrash on React strict-mode double-invoke.
-      // Connection is torn down only when token is gone (see top of effect).
+      unsubNotification();
+      unsubUnreadCount();
     };
-  }, [token, addLiveNotification, incrementUnreadCount, setUnreadCount]);
+  }, [addLiveNotification, incrementUnreadCount, setUnreadCount]);
 
   return <>{children}</>;
 }

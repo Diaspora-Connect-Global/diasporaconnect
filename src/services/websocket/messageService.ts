@@ -77,6 +77,9 @@ class MessageService {
   private connectCallbacks: (() => void)[] = [];
   private disconnectCallbacks: (() => void)[] = [];
   private uploadUrlCallbacks: ((data: MediaUploadResponse) => void)[] = [];
+  // Notification events pushed by the API gateway to the user's personal room
+  private notificationCallbacks: ((notification: unknown) => void)[] = [];
+  private unreadCountCallbacks: ((data: { count: number }) => void)[] = [];
 
   get isConnected(): boolean {
     return this.socket?.connected ?? false;
@@ -196,6 +199,16 @@ class MessageService {
 
     this.socket.on('pong', (data: { timestamp: number }) => {
       this.pongCallbacks.forEach(cb => cb(data));
+    });
+
+    // Notification events — the gateway pushes these to the user's personal
+    // socket room (user:<id>) so they arrive on the same connection.
+    this.socket.on('notification', (notification: unknown) => {
+      this.notificationCallbacks.forEach(cb => cb(notification));
+    });
+
+    this.socket.on('notification:unread-count', (data: { count: number }) => {
+      this.unreadCountCallbacks.forEach(cb => cb(data));
     });
   }
 
@@ -367,6 +380,28 @@ class MessageService {
     this.uploadUrlCallbacks.push(callback);
     return () => {
       this.uploadUrlCallbacks = this.uploadUrlCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  /**
+   * Subscribe to incoming notification objects pushed by the API gateway.
+   * Returns an unsubscribe function.
+   */
+  onNotification(callback: (notification: unknown) => void) {
+    this.notificationCallbacks.push(callback);
+    return () => {
+      this.notificationCallbacks = this.notificationCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  /**
+   * Subscribe to unread-count updates pushed by the API gateway.
+   * Returns an unsubscribe function.
+   */
+  onUnreadCount(callback: (data: { count: number }) => void) {
+    this.unreadCountCallbacks.push(callback);
+    return () => {
+      this.unreadCountCallbacks = this.unreadCountCallbacks.filter(cb => cb !== callback);
     };
   }
 }
