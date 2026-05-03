@@ -5,15 +5,20 @@ import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader2, RefreshCw, 
 import Image from 'next/image';
 import { useVideoStore } from '@/store/useVideoStore';
 
+const MAX_AUTO_RETRIES = 3;
+const AUTO_RETRY_DELAYS = [2000, 5000, 10000] as const;
+
 interface VideoPlayerProps {
   src: string;
   className?: string;
   autoPlay?: boolean;
   /** Pause automatically when the player scrolls out of the viewport */
   pauseOnLeave?: boolean;
+  /** First-frame thumbnail shown while the video loads */
+  poster?: string;
 }
 
-export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = true }: VideoPlayerProps) {
+export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = true, poster }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -21,6 +26,8 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
   const { globalMuted, setGlobalMuted } = useVideoStore();
 
   const [shouldLoad, setShouldLoad] = useState(autoPlay);
+  // preload="metadata" until in-viewport, then upgrade to "auto"
+  const [preloadMode, setPreloadMode] = useState<'metadata' | 'auto'>(autoPlay ? 'auto' : 'metadata');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [slowConnection, setSlowConnection] = useState(false);
@@ -28,6 +35,8 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [autoRetryCount, setAutoRetryCount] = useState(0);
+  const autoRetryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watermarkKey, setWatermarkKey] = useState<number | null>(null);
 
   const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -42,15 +51,21 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
 
   // Lazy-load: only attach src once the player is near the viewport.
   // Skipped when autoPlay is true because shouldLoad starts as true already.
+  // Also upgrades preload from "metadata" → "auto" on viewport entry so the
+  // browser starts buffering just before the user is likely to play.
   useEffect(() => {
-    if (autoPlay) return;
     const el = containerRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([entry]) => { if (entry?.isIntersecting) setShouldLoad(true); },
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setShouldLoad(true);
+          setPreloadMode('auto');
+        }
+      },
       { rootMargin: '150px', threshold: 0 }
     );
-    obs.observe(el);
+    if (!autoPlay) obs.observe(el);
     return () => obs.disconnect();
   }, [autoPlay]);
 
@@ -90,24 +105,42 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     scheduleHide();
   }, [scheduleHide]);
 
+  // Shared auto-retry logic used by both the video error event and the dead-connection timer.
+  const triggerAutoRetry = useCallback(() => {
+    setIsBuffering(false);
+    setSlowConnection(false);
+    setIsPlaying(false);
+    clearConnectionTimers();
+    setAutoRetryCount((count) => {
+      if (count < MAX_AUTO_RETRIES) {
+        const delay = AUTO_RETRY_DELAYS[count] ?? 10000;
+        autoRetryTimerRef.current = setTimeout(() => {
+          const v = videoRef.current;
+          if (!v) return;
+          setIsBuffering(true);
+          setHasError(false);
+          setRetryCount((c) => c + 1);
+          v.load();
+          v.play().catch(() => setIsBuffering(false));
+        }, delay);
+        return count + 1;
+      }
+      setHasError(true);
+      return count;
+    });
+  }, [clearConnectionTimers]);
+
   const startConnectionTimers = useCallback(() => {
     clearConnectionTimers();
     // 8s → show "Loading slowly…" under the spinner
     slowTimerRef.current = setTimeout(() => {
-      if (videoRef.current && videoRef.current.readyState < 4) {
-        setSlowConnection(true);
-      }
+      if (videoRef.current && videoRef.current.readyState < 4) setSlowConnection(true);
     }, 8000);
-    // 20s → escalate to error state with retry
+    // 12s → escalate to auto-retry / error state
     deadTimerRef.current = setTimeout(() => {
-      if (videoRef.current && videoRef.current.readyState < 4) {
-        setIsBuffering(false);
-        setSlowConnection(false);
-        setIsPlaying(false);
-        setHasError(true);
-      }
-    }, 20000);
-  }, [clearConnectionTimers]);
+      if (videoRef.current && videoRef.current.readyState < 4) triggerAutoRetry();
+    }, 12000);
+  }, [clearConnectionTimers, triggerAutoRetry]);
 
   const handleWaiting = useCallback(() => {
     setIsBuffering(true);
@@ -121,13 +154,7 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     clearConnectionTimers();
   }, [clearConnectionTimers]);
 
-  const handleError = useCallback(() => {
-    setIsBuffering(false);
-    setSlowConnection(false);
-    setIsPlaying(false);
-    setHasError(true);
-    clearConnectionTimers();
-  }, [clearConnectionTimers]);
+  const handleError = triggerAutoRetry;
 
   const handleStalled = useCallback(() => {
     setIsBuffering(true);
@@ -141,13 +168,18 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     setHasError(false);
     setSlowConnection(false);
     setIsBuffering(true);
+    setAutoRetryCount(0);
+    if (autoRetryTimerRef.current) clearTimeout(autoRetryTimerRef.current);
     setRetryCount((c) => c + 1);
     v.load();
     v.play().catch(() => { setIsBuffering(false); });
   }, []);
 
   // Clear timers on unmount
-  useEffect(() => clearConnectionTimers, [clearConnectionTimers]);
+  useEffect(() => () => {
+    clearConnectionTimers();
+    if (autoRetryTimerRef.current) clearTimeout(autoRetryTimerRef.current);
+  }, [clearConnectionTimers]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -189,7 +221,8 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
         ref={videoRef}
         key={retryCount}
         src={shouldLoad ? src : undefined}
-        preload="auto"
+        preload={preloadMode}
+        poster={poster}
         playsInline
         autoPlay={autoPlay}
         muted={globalMuted}
