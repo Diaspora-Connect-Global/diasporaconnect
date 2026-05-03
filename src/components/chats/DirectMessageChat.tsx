@@ -1,10 +1,9 @@
 // ============================================
-// DIRECT MESSAGE CHAT - REAL API INTEGRATION
+// DIRECT MESSAGE CHAT - REDESIGNED UI
 // ============================================
 // File: components/chats/DirectMessageChat.tsx
 
-import { formatChatTimestamp } from "@/macros/time";
-import { Check, ChevronRight, InfoIcon, Loader2, X } from "lucide-react";
+import { Check, ChevronRight, Loader2, MoreVertical, Sun, X } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { MessageInput } from "./MessageInput";
@@ -32,6 +31,57 @@ import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
+
+// ---- Helpers ----
+
+function getMessageDateKey(dateStr: string, timeZone: string): string {
+    return new Date(dateStr).toLocaleDateString('en-US', { timeZone });
+}
+
+function getDateLabel(dateStr: string, timeZone: string): string {
+    const date = new Date(dateStr);
+    const todayKey = new Date().toLocaleDateString('en-US', { timeZone });
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayKey = yesterdayDate.toLocaleDateString('en-US', { timeZone });
+    const msgKey = getMessageDateKey(dateStr, timeZone);
+    if (msgKey === todayKey) return 'Today';
+    if (msgKey === yesterdayKey) return 'Yesterday';
+    return date.toLocaleDateString('en-US', { timeZone, year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatTimeOnly(dateStr: string, timeZone: string): string {
+    return new Date(dateStr).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone,
+    });
+}
+
+function formatCurrentTime(timeZone: string): string {
+    return new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone,
+        timeZoneName: 'short',
+    }).format(new Date());
+}
+
+// ---- Date Separator ----
+
+function DateSeparator({ label }: { label: string }) {
+    return (
+        <div className="flex items-center justify-center my-3">
+            <span className="text-xs text-text-secondary bg-surface-hover px-3 py-1 rounded-full">
+                {label}
+            </span>
+        </div>
+    );
+}
+
+// ---- Main Component ----
 
 export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; onBack?: () => void }) {
     const router = useRouter();
@@ -68,16 +118,15 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
 
-    // Fetch existing conversations to find one with this participant (variables must match refetchQueries in markConversationAsRead)
     const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
         variables: { limit: 100, offset: 0 },
     });
 
-    // Resolve other user's display name and avatar from connections (so header/info show name, not userId)
     const { data: connectionsData } = useQuery<{ getConnections?: { connections?: Array<{
         requester: { userId: string; firstName?: string; lastName?: string; avatarUrl?: string };
         receiver: { userId: string; firstName?: string; lastName?: string; avatarUrl?: string };
     }> } }>(GET_MY_CONNECTIONS, { variables: { limit: 200, offset: 0 }, skip: !chat.id });
+
     const otherUser = connectionsData?.getConnections?.connections?.find(
         (c: { requester: { userId: string }; receiver: { userId: string } }) =>
             c.requester.userId === chat.id || c.receiver.userId === chat.id
@@ -87,10 +136,12 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         skip: !chat.id,
         fetchPolicy: 'cache-first',
     });
+
     const otherProfile = otherUser
         ? (otherUser.requester.userId === chat.id ? otherUser.requester : otherUser.receiver)
         : null;
     const profileFallback = otherUserProfileData?.getProfile?.profile;
+
     const displayName = otherProfile
         ? [otherProfile.firstName, otherProfile.lastName].filter(Boolean).join(' ').trim() || chat.name || t('unknownUser')
         : (
@@ -99,18 +150,21 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         );
     const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
 
+    // Location from profile: prefer `location` field, fallback to city + country
+    const otherLocation = profileFallback?.location ||
+        [profileFallback?.city, profileFallback?.residenceCountry].filter(Boolean).join(', ') ||
+        '';
+
     // Initialize or retrieve conversation
     useEffect(() => {
         if (!chat.id || !currentUserId) return;
 
-        // Check in-memory store first
         const existing = getRealConversation(chat.id);
         if (existing) {
             setConversationId(existing.conversationId);
             return;
         }
 
-        // Check if conversation already exists from GraphQL query
         if (conversationsData?.getConversations) {
             const isDirectConv = (conv: { type?: string; groupId?: string | null; participantIds?: string[] }) =>
                 (conv.type === 'DIRECT' || conv.type === 'direct') ||
@@ -129,16 +183,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             }
         }
 
-        // Only create if no existing conversation found
         const initConversation = async () => {
             try {
                 const { data } = await createConversation({
-                    variables: {
-                        type: 'DIRECT',
-                        participantIds: [chat.id],
-                    },
+                    variables: { type: 'DIRECT', participantIds: [chat.id] },
                 });
-
                 if (data?.createConversation) {
                     const convId = data.createConversation;
                     setConversationId(convId);
@@ -149,16 +198,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     });
                 }
             } catch (error: unknown) {
-                // Handle duplicate key - conversation already exists
                 const err = error as { graphQLErrors?: Array<{ message?: string }> };
                 const isDuplicate = err?.graphQLErrors?.some(
                     (e: { message?: string }) => e.message?.includes('duplicate key')
                 );
-                if (isDuplicate) {
-                    console.log('Conversation already exists, fetching...');
-                    // Conversation exists but we don't have the ID - refetch conversations
-                    // The useQuery above will re-run and find it
-                } else {
+                if (!isDuplicate) {
                     console.error('Failed to create conversation:', error);
                 }
             }
@@ -167,14 +211,12 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         initConversation();
     }, [chat.id, currentUserId, conversationsData, getRealConversation, setRealConversation, createConversation]);
 
-    // Fetch message history for this conversation
     const { data: messagesData, refetch: refetchMessages } = useQuery<GetMessagesData>(GET_MESSAGES, {
         variables: { conversationId: conversationId || '', limit: 50, offset: 0 },
         skip: !conversationId,
         fetchPolicy: 'network-only',
     });
 
-    // Sync GraphQL messages to store whenever we have data for the current conversation (initial load + refetch after new message)
     useEffect(() => {
         const messages = messagesData?.getMessages?.messages;
         if (!messages?.length || !conversationId) return;
@@ -196,7 +238,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         setApiMessages(conversationId, history);
     }, [messagesData, conversationId, setApiMessages]);
 
-    // Mark conversation as read when user opens it (resets badge count)
     useEffect(() => {
         if (conversationId) {
             markConversationAsRead({ variables: { conversationId } }).catch((err) => {
@@ -205,24 +246,16 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         }
     }, [conversationId, markConversationAsRead]);
 
-    // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
     useEffect(() => {
         if (!conversationId) return;
-
         const unsubMessage = messageService.onMessage((wsMessage) => {
             if (wsMessage.conversationId === conversationId) {
-                // New messages are already added globally by MessageWebSocketProvider.
-                // Here we only refresh this conversation's plaintext payload.
                 refetchMessages();
             }
         });
-
-        return () => {
-            unsubMessage();
-        };
+        return () => { unsubMessage(); };
     }, [conversationId, refetchMessages]);
 
-    // Typing indicator: subscribe to typing:start / typing:stop for the other participant
     useEffect(() => {
         if (!conversationId || !chat.id) return;
         const otherUserId = chat.id;
@@ -425,9 +458,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     };
 
     const handleDeleteConversationConfirm = () => {
-        if (conversationId) {
-            clearApiMessages(conversationId);
-        }
+        if (conversationId) clearApiMessages(conversationId);
         toast.success(t('conversationCleared') || 'Conversation cleared from this device.');
         setDeleteConversationModalOpen(false);
         onBack?.();
@@ -439,173 +470,266 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         setSidebarOpen(false);
     };
 
-    return (
-        <div className="flex flex-row h-full w-full space-x-0 md:space-x-2">
-            {/* Main Chat Area */}
-            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full ${isMobile && sidebarOpen ? 'hidden' : 'flex'
-                }`}>
-                {/* Chat Header - Desktop */}
-                <div className="hidden md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between items-center">
-                    <div className="flex items-center space-x-3">
-                        <div className="relative">
-                            <Avatar className="w-12 h-12">
-                                <AvatarImage src={otherAvatar || undefined} alt="" />
-                                <AvatarFallback>{displayName.slice(0, 1).toUpperCase() || 'U'}</AvatarFallback>
-                            </Avatar>
-                            {chat.online && (
-                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-text-success border-2 border-white rounded-full" />
-                            )}
-                        </div>
-                        <div>
-                            <h2 className="font-semibold text-text-primary">{displayName}</h2>
-                            {chat.online && (
-                                <p className="text-sm text-text-secondary">{t('online')}</p>
-                            )}
-                        </div>
+    // ---- Message bubble renderer ----
+    const renderMessage = (message: ApiMessage) => {
+        const isMe = message.senderId === currentUserId;
+        const timeLabel = formatTimeOnly(message.createdAt, userTimeZone);
+
+        const statusIcon = isMe && message.status !== 'sending' && (
+            <span className={message.status === 'read' ? 'text-[#34B7F1]' : 'text-gray-400'}>
+                {message.status === 'read' || message.status === 'delivered' ? (
+                    <span className="inline-flex">
+                        <Check className="w-3 h-3 -ml-0.5" />
+                        <Check className="w-3 h-3 -ml-1" />
+                    </span>
+                ) : (
+                    <Check className="w-3 h-3" />
+                )}
+            </span>
+        );
+
+        const myTimestampRow = (
+            <div className="flex items-center justify-end gap-1 mt-1.5">
+                <span className="text-[10px] text-gray-400 leading-none">{timeLabel}</span>
+                {statusIcon}
+            </div>
+        );
+
+        const theirTimestampRow = (
+            <p className="text-[10px] text-text-tertiary mt-1 ml-1 leading-none">{timeLabel}</p>
+        );
+
+        // Sending state
+        if (message.status === 'sending') {
+            if (message.sendingPreviews?.length) {
+                return (
+                    <>
+                        <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
+                        {message.content && (
+                            <div className="mt-2 bg-[#EEEEFF] dark:bg-indigo-950/40 rounded-2xl px-4 py-2.5">
+                                <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
+                                <div className="flex items-center justify-end gap-1 mt-1.5">
+                                    <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                                    <span className="text-[10px] text-gray-400">Sending…</span>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                );
+            }
+            return (
+                <div className="bg-[#EEEEFF]/80 dark:bg-indigo-950/30 rounded-2xl px-4 py-2.5">
+                    <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
+                    <div className="flex items-center justify-end gap-1 mt-1.5">
+                        <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+                        <span className="text-[10px] text-gray-400">Sending…</span>
                     </div>
-
-                    <button onClick={() => setSidebarOpen(!sidebarOpen)}>
-                        <InfoIcon className={`w-6 h-6 cursor-pointer transition-colors ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full p-1" : "text-text-brand"
-                            }`} />
-                    </button>
                 </div>
+            );
+        }
 
-                {/* Mobile: back button, avatar, display name, and info button */}
-                <div className="md:hidden flex flex-shrink-0 border-b border-border-subtle p-3 justify-between items-center bg-surface-default">
-                    <div className="flex items-center space-x-3 min-w-0">
+        // Attachments
+        if (message.attachments?.length) {
+            const attachmentUrls = (message.attachments ?? []).map((a) => a.gcsPath).filter(Boolean) as string[];
+            const contentUrl = message.content?.trim();
+            const firstUrl = getFirstUrlInText(message.content);
+            const contentIsAttachmentUrl = contentUrl && attachmentUrls.some((u) => u === contentUrl);
+            const firstUrlIsAttachmentUrl = firstUrl && attachmentUrls.some((u) => u === firstUrl);
+
+            return (
+                <div>
+                    <MessageAttachments attachments={message.attachments} />
+                    {isLinkOnlyContent(message.content) && !contentIsAttachmentUrl && (
+                        <div className="mt-2"><LinkPreviewCard url={message.content!.trim()} /></div>
+                    )}
+                    {message.content && !isLinkOnlyContent(message.content) && (
+                        <div className={`mt-2 rounded-2xl px-4 py-2.5 ${isMe ? 'bg-[#EEEEFF] dark:bg-indigo-950/40' : 'bg-[#EDFBF0] dark:bg-green-950/30'}`}>
+                            <p className={`text-sm break-words ${isMe ? 'text-[#2d2d8e] dark:text-indigo-100' : 'text-text-primary'}`}>
+                                {message.content}
+                            </p>
+                            {firstUrl && !firstUrlIsAttachmentUrl && (
+                                <div className="mt-2"><LinkPreviewCard url={firstUrl} /></div>
+                            )}
+                            {isMe ? myTimestampRow : null}
+                        </div>
+                    )}
+                    {isMe ? (
+                        !message.content && (
+                            <div className="flex justify-end gap-1 mt-1">
+                                <span className="text-[10px] text-gray-400">{timeLabel}</span>
+                                {statusIcon}
+                            </div>
+                        )
+                    ) : theirTimestampRow}
+                </div>
+            );
+        }
+
+        // Link-only content
+        if (isLinkOnlyContent(message.content)) {
+            return (
+                <div>
+                    <LinkPreviewCard url={message.content.trim()} />
+                    {isMe ? myTimestampRow : theirTimestampRow}
+                </div>
+            );
+        }
+
+        // Plain text message
+        if (isMe) {
+            return (
+                <div className="bg-[#EEEEFF] dark:bg-indigo-950/40 rounded-2xl px-4 py-2.5">
+                    <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
+                    {getFirstUrlInText(message.content) && (
+                        <div className="mt-2"><LinkPreviewCard url={getFirstUrlInText(message.content)!} /></div>
+                    )}
+                    {myTimestampRow}
+                </div>
+            );
+        }
+
+        return (
+            <div>
+                <div className="bg-[#EDFBF0] dark:bg-green-950/30 rounded-2xl px-4 py-2.5">
+                    <p className="text-sm text-text-primary dark:text-green-50 break-words">{message.content}</p>
+                    {getFirstUrlInText(message.content) && (
+                        <div className="mt-2"><LinkPreviewCard url={getFirstUrlInText(message.content)!} /></div>
+                    )}
+                </div>
+                {theirTimestampRow}
+            </div>
+        );
+    };
+
+    return (
+        <div className="flex flex-row h-full w-full">
+            {/* ---- Main Chat Area ---- */}
+            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full ${isMobile && sidebarOpen ? 'hidden' : 'flex'}`}>
+
+                {/* ---- Header ---- */}
+                <div className="flex-shrink-0 border-b border-border-subtle px-3 md:px-4 py-3">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        {/* Back button */}
                         {onBack && (
                             <button
                                 onClick={onBack}
-                                className="p-2 hover:bg-surface-hover rounded-lg transition-colors flex-shrink-0"
+                                className="p-1.5 hover:bg-surface-hover rounded-lg transition-colors flex-shrink-0"
                                 aria-label={tCommon('backToChats')}
                             >
-                                <ArrowLeft className="w-5 h-5" />
+                                <ArrowLeft className="w-5 h-5 text-text-primary" />
                             </button>
                         )}
-                        <Avatar className="w-10 h-10 flex-shrink-0">
-                            <AvatarImage src={otherAvatar || undefined} alt="" />
-                            <AvatarFallback>{displayName.slice(0, 1).toUpperCase() || 'U'}</AvatarFallback>
-                        </Avatar>
-                        <h2 className="font-semibold text-text-primary truncate">{displayName}</h2>
+
+                        {/* Avatar with online dot */}
+                        <div className="relative flex-shrink-0">
+                            <Avatar className="w-12 h-12 md:w-14 md:h-14">
+                                <AvatarImage src={otherAvatar || undefined} alt="" />
+                                <AvatarFallback className="text-base font-semibold">
+                                    {displayName.slice(0, 1).toUpperCase() || 'U'}
+                                </AvatarFallback>
+                            </Avatar>
+                            {chat.online && (
+                                <div className="absolute bottom-0.5 right-0.5 w-3 h-3 md:w-3.5 md:h-3.5 bg-green-500 rounded-full border-2 border-white" />
+                            )}
+                        </div>
+
+                        {/* Name + location + badge */}
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                                <h2 className="font-bold text-text-primary text-sm md:text-base leading-tight truncate">
+                                    {displayName}
+                                </h2>
+                                {chat.online && (
+                                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
+                                )}
+                            </div>
+                            {otherLocation && (
+                                <p className="text-xs text-text-secondary truncate mt-0.5">{otherLocation}</p>
+                            )}
+                            {chat.online && (
+                                <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 text-[11px] font-medium">
+                                    <Sun className="w-3 h-3" />
+                                    Good time to message
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Three-dot menu */}
+                        <button
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            className="p-2 hover:bg-surface-hover rounded-full transition-colors flex-shrink-0"
+                            aria-label="More options"
+                        >
+                            <MoreVertical className="w-5 h-5 text-text-secondary" />
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="flex-shrink-0 p-2 rounded-full hover:bg-surface-subtle transition-colors"
-                        aria-label={t('viewProfile')}
-                    >
-                        <InfoIcon className="w-6 h-6 text-text-brand" />
-                    </button>
                 </div>
 
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-4">
-                    {apiMessages.length === 0 && !conversationId && (
-                        <div className="flex items-center justify-center h-full text-text-secondary">
-                            <p className="text-sm">{t('typeMessage')}</p>
+                {/* ---- Messages Area ---- */}
+                <div className="flex-1 overflow-y-auto px-3 md:px-4 py-4">
+                    {/* Empty state */}
+                    {apiMessages.length === 0 && (
+                        <div className="flex flex-col items-center justify-center h-full gap-3 text-text-secondary">
+                            <Avatar className="w-20 h-20">
+                                <AvatarImage src={otherAvatar || undefined} alt="" />
+                                <AvatarFallback className="text-2xl font-semibold">
+                                    {displayName.slice(0, 1).toUpperCase() || 'U'}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="text-center">
+                                <p className="font-semibold text-text-primary">{displayName}</p>
+                                <p className="text-sm mt-1">{t('typeMessage')}</p>
+                            </div>
                         </div>
                     )}
-                    {apiMessages.map((message) => {
-                        const isMe = message.senderId === currentUserId;
-                        return (
-                            <div
-                                key={message.id}
-                                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
-                                    {message.status === 'sending' ? (
-                                        message.sendingPreviews?.length ? (
-                                            <>
-                                                <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
-                                                {message.content && (
-                                                    <div className={`mt-2 px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
-                                                        {message.content}
-                                                    </div>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <div className={`flex items-center gap-2 px-4 py-3 rounded-2xl ${isMe ? 'bg-text-brand/80 text-text-white' : 'bg-surface-success/50 text-text-primary'}`}>
-                                                <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                                                <span className="text-sm">Sending...</span>
-                                            </div>
-                                        )
-                                    ) : message.attachments?.length ? (
-                                        (() => {
-                                            const attachmentUrls = (message.attachments ?? []).map((a) => a.gcsPath).filter(Boolean) as string[];
-                                            const contentUrl = message.content?.trim();
-                                            const firstUrl = getFirstUrlInText(message.content);
-                                            const contentIsAttachmentUrl = contentUrl && attachmentUrls.some((u) => u === contentUrl);
-                                            const firstUrlIsAttachmentUrl = firstUrl && attachmentUrls.some((u) => u === firstUrl);
-                                            return (
-                                                <>
-                                                    <MessageAttachments attachments={message.attachments} />
-                                                    {isLinkOnlyContent(message.content) && !contentIsAttachmentUrl && (
-                                                        <div className="mt-2">
-                                                            <LinkPreviewCard url={message.content!.trim()} />
-                                                        </div>
-                                                    )}
-                                                    {message.content && !isLinkOnlyContent(message.content) && (
-                                                        <>
-                                                            <div className={`mt-2 px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
-                                                                {message.content}
-                                                            </div>
-                                                            {firstUrl && !firstUrlIsAttachmentUrl && (
-                                                                <div className="mt-2">
-                                                                    <LinkPreviewCard url={firstUrl} />
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                </>
-                                            );
-                                        })()
-                                    ) : isLinkOnlyContent(message.content) ? (
-                                        <div className={isMe ? 'flex justify-end' : ''}>
-                                            <LinkPreviewCard url={message.content.trim()} />
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div
-                                                className={`px-4 py-2.5 rounded-2xl sm:rounded-full text-sm ${isMe
-                                                    ? 'bg-text-brand text-text-white'
-                                                    : 'bg-surface-success/50 text-text-primary dark:text-text-white'
-                                                    }`}
-                                            >
-                                                {message.content}
-                                            </div>
-                                            {getFirstUrlInText(message.content) && (
-                                                <div className="mt-2">
-                                                    <LinkPreviewCard url={getFirstUrlInText(message.content)!} />
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                    <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 justify-end ${isMe ? "text-text-tertiary" : ""}`}>
-                                        {formatChatTimestamp(message.createdAt, { timeZone: userTimeZone })}
-                                        {isMe && message.status !== 'sending' && (
-                                            <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
-                                                {message.status === "read" || message.status === "delivered" ? (
-                                                    <span className="inline-flex"><Check className="w-3 h-3 -ml-0.5" /><Check className="w-3 h-3 -ml-1" /></span>
-                                                ) : (
-                                                    <Check className="w-3 h-3" />
-                                                )}
-                                            </span>
-                                        )}
-                                    </p>
+
+                    {/* Messages with date separators */}
+                    {(() => {
+                        const nodes: React.ReactNode[] = [];
+                        let lastDateKey = '';
+
+                        apiMessages.forEach((message) => {
+                            const isMe = message.senderId === currentUserId;
+                            const dateKey = getMessageDateKey(message.createdAt, userTimeZone);
+
+                            if (dateKey !== lastDateKey) {
+                                lastDateKey = dateKey;
+                                nodes.push(
+                                    <DateSeparator key={`sep-${dateKey}`} label={getDateLabel(message.createdAt, userTimeZone)} />
+                                );
+                            }
+
+                            nodes.push(
+                                <div
+                                    key={message.id}
+                                    className={`flex mb-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div className="max-w-[75%] sm:max-w-sm lg:max-w-md">
+                                        {renderMessage(message)}
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        });
+
+                        return nodes;
+                    })()}
+
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* Typing indicator */}
+                {/* ---- Typing Indicator ---- */}
                 {otherUserTyping && (
-                    <div className="flex-shrink-0 px-3 md:px-4 py-1 text-sm text-text-secondary italic">
-                        {displayName} {t('typing')}
+                    <div className="flex-shrink-0 px-4 py-2 flex items-center gap-2">
+                        <div className="flex items-center gap-1 bg-[#EDFBF0] dark:bg-green-950/30 px-3 py-2.5 rounded-2xl">
+                            <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce [animation-delay:0ms]" />
+                            <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce [animation-delay:150ms]" />
+                            <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce [animation-delay:300ms]" />
+                        </div>
+                        <span className="text-xs text-text-secondary">{displayName} {t('typing')}</span>
                     </div>
                 )}
 
-                {/* Message Input */}
+                {/* ---- Message Input ---- */}
                 <div className="flex-shrink-0">
                     <MessageInput
                         onSendMessage={handleSendMessage}
@@ -616,53 +740,61 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                         onTyping={handleTyping}
                     />
                 </div>
+
+                {/* ---- Timezone Bar ---- */}
+                <div className="flex-shrink-0 bg-surface-subtle border-t border-border-subtle px-4 py-2 text-center">
+                    <p className="text-[11px] text-text-secondary leading-tight">
+                        Your time: {formatCurrentTime(userTimeZone)}
+                        {otherLocation && (
+                            <> &bull; <span className="font-medium">{displayName}</span> is in {otherLocation}</>
+                        )}
+                    </p>
+                </div>
             </div>
 
-            {/* Sidebar - Mobile Overlay */}
+            {/* ---- Sidebar Panel ---- */}
             {sidebarOpen && (
                 <>
-                    {/* Mobile Backdrop */}
                     {isMobile && (
                         <div
                             className="fixed inset-0 bg-black/50 z-40 md:hidden animate-in fade-in duration-200"
                             onClick={() => setSidebarOpen(false)}
                         />
                     )}
-
-                    {/* Sidebar Content */}
                     <div className={`
-                        ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm animate-in slide-in-from-right duration-300' : 'w-80'} 
+                        ${isMobile ? 'fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm animate-in slide-in-from-right duration-300' : 'w-80'}
                         bg-surface-default border-l border-border-subtle flex flex-col h-full
                         ${isMobile ? 'rounded-l-2xl shadow-2xl' : 'rounded-lg'}
                     `}>
-                        {/* Mobile Close Button */}
-                        {isMobile && (
-                            <div className="flex justify-between items-center p-4 border-b border-border-subtle md:hidden">
-                                <h3 className="font-semibold text-text-primary text-base">{t('viewProfile')}</h3>
-                                <button
-                                    onClick={() => setSidebarOpen(false)}
-                                    className="p-2 hover:bg-surface-hover rounded-lg transition-colors"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                        )}
+                        {/* Sidebar header */}
+                        <div className="flex justify-between items-center p-4 border-b border-border-subtle">
+                            <h3 className="font-semibold text-text-primary text-base">{t('viewProfile')}</h3>
+                            <button
+                                onClick={() => setSidebarOpen(false)}
+                                className="p-2 hover:bg-surface-hover rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
 
                         <div className="flex-1 overflow-y-auto">
                             <div className="p-4">
-                                {/* User Info */}
                                 <div className="flex flex-col items-center mb-6">
                                     <Avatar className="w-20 h-20 mb-3">
                                         <AvatarImage src={otherAvatar || undefined} alt="avatar" />
-                                        <AvatarFallback className="text-2xl">U</AvatarFallback>
+                                        <AvatarFallback className="text-2xl font-semibold">
+                                            {displayName.slice(0, 1).toUpperCase() || 'U'}
+                                        </AvatarFallback>
                                     </Avatar>
                                     <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>
-                                    {chat.online ? (
-                                        <p className="text-sm text-text-success font-medium">{t('online')}</p>
-                                    ) : null}
+                                    {chat.online && (
+                                        <p className="text-sm text-green-600 font-medium mt-0.5">{t('online')}</p>
+                                    )}
+                                    {otherLocation && (
+                                        <p className="text-sm text-text-secondary mt-1">{otherLocation}</p>
+                                    )}
                                 </div>
 
-                                {/* View Profile Button */}
                                 <div className="flex items-center justify-center mb-6">
                                     <ButtonType3 size="lg" onClick={handleViewProfile}>
                                         {t('viewProfile')}
@@ -671,14 +803,12 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                             </div>
                         </div>
 
-                        {/* Quick Actions */}
                         <div className="flex-shrink-0 border-t border-border-subtle p-4 bg-surface-default">
                             <div className="space-y-1">
                                 <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
                                     <p className="text-sm font-medium">{t('report')}</p>
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
-
                                 <div
                                     className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors"
                                     onClick={() => setBlockModalOpen(true)}
@@ -686,7 +816,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     <p className="text-sm font-medium">{t('block')}</p>
                                     <ChevronRight className="w-4 h-4" />
                                 </div>
-
                                 <div
                                     className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors"
                                     onClick={() => setDeleteConversationModalOpen(true)}
@@ -700,6 +829,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 </>
             )}
 
+            {/* ---- Confirmation Modals ---- */}
             <ConfirmationModal
                 open={blockModalOpen}
                 onCancel={() => setBlockModalOpen(false)}
