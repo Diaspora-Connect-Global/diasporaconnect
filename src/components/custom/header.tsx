@@ -30,6 +30,7 @@ import { clearStorage } from '@/lib/logout';
 import { useUserStore } from '@/store/useUserStore';
 import { useNotificationBadge } from '@/hooks/useNotificationBadge';
 import { useChatStore } from '@/store/ChatStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
 
 export default function Header({
   children,
@@ -40,7 +41,9 @@ export default function Header({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const t = useTranslations('home.header');
   const tCommon = useTranslations('common');
-  const { count: unreadNotificationCount } = useNotificationBadge(true);
+  const { count: polledCount } = useNotificationBadge(true);
+  const liveCount = useNotificationStore((s) => s.unreadCount);
+  const unreadNotificationCount = Math.max(polledCount ?? 0, liveCount);
   const totalChatUnreadCount = useChatStore((s) => s.totalChatUnreadCount);
 
   const segments = pathname.split('/').filter(segment => segment);

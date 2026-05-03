@@ -6,6 +6,13 @@ import Header from "@/components/custom/header";
 import LoadingScreen from "@/components/custom/LoadingScreen";
 import { useAuthStore } from "@/store/useAuthStore";
 import MessageWebSocketProvider from "@/components/provider/MessageWebSocketProvider";
+import NotificationWebSocketProvider from "@/components/provider/NotificationWebSocketProvider";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+
+function PushNotificationRegistrar() {
+  usePushNotifications();
+  return null;
+}
 
 export default function MainLayout({
   children,
@@ -48,9 +55,12 @@ export default function MainLayout({
 
   return (
     <MessageWebSocketProvider>
-      <div>
-        <Header>{children}</Header>
-      </div>
+      <NotificationWebSocketProvider>
+        <PushNotificationRegistrar />
+        <div>
+          <Header>{children}</Header>
+        </div>
+      </NotificationWebSocketProvider>
     </MessageWebSocketProvider>
   );
 }

@@ -19,6 +19,7 @@ import {
   type MarkAllNotificationsAsReadResponse,
 } from '@/services/gql/notification';
 import { useUserStore } from '@/store/useUserStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
 import {
   useEnrichedNotification,
   type EnrichedNotification,
@@ -329,6 +330,17 @@ export default function NotificationPage() {
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
+  const liveNotifications = useNotificationStore((s) => s.liveNotifications);
+  const clearLiveNotifications = useNotificationStore((s) => s.clearLiveNotifications);
+  const setStoreUnreadCount = useNotificationStore((s) => s.setUnreadCount);
+  const storeUnreadCount = useNotificationStore((s) => s.unreadCount);
+
+  // Reset badge and live buffer when the user opens the notification page
+  useEffect(() => {
+    clearLiveNotifications();
+    setStoreUnreadCount(0);
+  }, [clearLiveNotifications, setStoreUnreadCount]);
+
   const { data, error, fetchMore, networkStatus, refetch } = useQuery<GetNotificationsWithMetaResponse>(
     GET_NOTIFICATIONS_WITH_META,
     {
@@ -445,15 +457,17 @@ export default function NotificationPage() {
     try {
       await markAllAsReadMutation();
       setReadIds(new Set(notifications.map((n) => n.id)));
+      setStoreUnreadCount(0);
       await refetch({ limit: PAGE_SIZE, offset: 0 });
     } catch (err) {
       console.error('Error marking all as read:', err);
     }
-  }, [markAllAsReadMutation, notifications, refetch]);
+  }, [markAllAsReadMutation, notifications, refetch, setStoreUnreadCount]);
 
   const markSingleAsRead = useCallback(
     async (id: string) => {
       setReadIds((prev) => new Set(prev).add(id));
+      setStoreUnreadCount(Math.max(0, storeUnreadCount - 1));
       try {
         await markAsReadMutation({ variables: { notificationId: id } });
       } catch (err) {
@@ -463,9 +477,10 @@ export default function NotificationPage() {
           next.delete(id);
           return next;
         });
+        setStoreUnreadCount(storeUnreadCount); // restore on failure
       }
     },
-    [markAsReadMutation]
+    [markAsReadMutation, setStoreUnreadCount, storeUnreadCount]
   );
 
   const openNotificationSettings = useCallback(() => {
@@ -533,6 +548,19 @@ export default function NotificationPage() {
           ))}
         </div>
       </div>
+
+      {liveNotifications.length > 0 && (
+        <button
+          type="button"
+          onClick={() => { void refetch(); clearLiveNotifications(); }}
+          className="w-full mb-3 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-surface-brand/10 border border-surface-brand text-text-brand text-sm font-medium hover:bg-surface-brand/20 transition-colors"
+        >
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-text-danger text-white text-[10px] font-bold">
+            {liveNotifications.length}
+          </span>
+          New notification{liveNotifications.length > 1 ? 's' : ''} — tap to refresh
+        </button>
+      )}
 
       {isInitialLoading ? (
         <div className="text-text-secondary font-medium">{t('loading')}</div>
