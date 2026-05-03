@@ -106,6 +106,80 @@ function formatCurrentTime(timeZone: string): string {
     }).format(new Date());
 }
 
+// Country alpha-2 → representative IANA timezone
+const COUNTRY_TIMEZONE: Record<string, string> = {
+    // Africa
+    GH:'Africa/Accra', NG:'Africa/Lagos', SN:'Africa/Dakar', CI:'Africa/Abidjan',
+    CM:'Africa/Douala', BJ:'Africa/Porto-Novo', BF:'Africa/Ouagadougou', GN:'Africa/Conakry',
+    TG:'Africa/Lome', ML:'Africa/Bamako', NE:'Africa/Niamey', MR:'Africa/Nouakchott',
+    GM:'Africa/Banjul', SL:'Africa/Freetown', LR:'Africa/Monrovia', GW:'Africa/Bissau',
+    CV:'Atlantic/Cape_Verde', ST:'Africa/Sao_Tome', GQ:'Africa/Malabo', GA:'Africa/Libreville',
+    CG:'Africa/Brazzaville', CD:'Africa/Kinshasa', AO:'Africa/Luanda', ZM:'Africa/Lusaka',
+    ZW:'Africa/Harare', BW:'Africa/Gaborone', NA:'Africa/Windhoek', MZ:'Africa/Maputo',
+    TZ:'Africa/Dar_es_Salaam', KE:'Africa/Nairobi', UG:'Africa/Kampala', RW:'Africa/Kigali',
+    BI:'Africa/Bujumbura', ET:'Africa/Addis_Ababa', ER:'Africa/Asmara', SO:'Africa/Mogadishu',
+    DJ:'Africa/Djibouti', SD:'Africa/Khartoum', SS:'Africa/Juba', MW:'Africa/Blantyre',
+    ZA:'Africa/Johannesburg', LS:'Africa/Maseru', SZ:'Africa/Mbabane', MG:'Indian/Antananarivo',
+    MU:'Indian/Mauritius', SC:'Indian/Mahe', KM:'Indian/Comoro', EG:'Africa/Cairo',
+    LY:'Africa/Tripoli', TN:'Africa/Tunis', DZ:'Africa/Algiers', MA:'Africa/Casablanca',
+    // Europe
+    GB:'Europe/London', IE:'Europe/Dublin', FR:'Europe/Paris', DE:'Europe/Berlin',
+    IT:'Europe/Rome', ES:'Europe/Madrid', PT:'Europe/Lisbon', NL:'Europe/Amsterdam',
+    BE:'Europe/Brussels', LU:'Europe/Luxembourg', CH:'Europe/Zurich', AT:'Europe/Vienna',
+    PL:'Europe/Warsaw', CZ:'Europe/Prague', SK:'Europe/Bratislava', HU:'Europe/Budapest',
+    RO:'Europe/Bucharest', BG:'Europe/Sofia', GR:'Europe/Athens', HR:'Europe/Zagreb',
+    RS:'Europe/Belgrade', SI:'Europe/Ljubljana', BA:'Europe/Sarajevo', MK:'Europe/Skopje',
+    AL:'Europe/Tirane', ME:'Europe/Podgorica', SE:'Europe/Stockholm', NO:'Europe/Oslo',
+    DK:'Europe/Copenhagen', FI:'Europe/Helsinki', IS:'Atlantic/Reykjavik',
+    EE:'Europe/Tallinn', LV:'Europe/Riga', LT:'Europe/Vilnius', BY:'Europe/Minsk',
+    UA:'Europe/Kiev', MD:'Europe/Chisinau', RU:'Europe/Moscow', TR:'Europe/Istanbul',
+    CY:'Asia/Nicosia', MT:'Europe/Malta',
+    // Americas
+    US:'America/New_York', CA:'America/Toronto', MX:'America/Mexico_City',
+    BR:'America/Sao_Paulo', AR:'America/Argentina/Buenos_Aires', CL:'America/Santiago',
+    CO:'America/Bogota', VE:'America/Caracas', PE:'America/Lima', EC:'America/Guayaquil',
+    BO:'America/La_Paz', PY:'America/Asuncion', UY:'America/Montevideo', GY:'America/Guyana',
+    SR:'America/Paramaribo', HT:'America/Port-au-Prince', DO:'America/Santo_Domingo',
+    JM:'America/Jamaica', TT:'America/Port_of_Spain', BB:'America/Barbados',
+    CU:'America/Havana', GT:'America/Guatemala', SV:'America/El_Salvador',
+    HN:'America/Tegucigalpa', NI:'America/Managua', CR:'America/Costa_Rica',
+    PA:'America/Panama',
+    // Middle East
+    AE:'Asia/Dubai', SA:'Asia/Riyadh', QA:'Asia/Qatar', KW:'Asia/Kuwait',
+    BH:'Asia/Bahrain', OM:'Asia/Muscat', YE:'Asia/Aden', IQ:'Asia/Baghdad',
+    IR:'Asia/Tehran', IL:'Asia/Jerusalem', JO:'Asia/Amman', LB:'Asia/Beirut',
+    SY:'Asia/Damascus', PS:'Asia/Gaza',
+    // Asia
+    IN:'Asia/Kolkata', PK:'Asia/Karachi', BD:'Asia/Dhaka', LK:'Asia/Colombo',
+    NP:'Asia/Kathmandu', BT:'Asia/Thimphu', MM:'Asia/Rangoon', TH:'Asia/Bangkok',
+    VN:'Asia/Ho_Chi_Minh', KH:'Asia/Phnom_Penh', LA:'Asia/Vientiane', MY:'Asia/Kuala_Lumpur',
+    SG:'Asia/Singapore', ID:'Asia/Jakarta', PH:'Asia/Manila', CN:'Asia/Shanghai',
+    JP:'Asia/Tokyo', KR:'Asia/Seoul', MN:'Asia/Ulaanbaatar', KZ:'Asia/Almaty',
+    UZ:'Asia/Tashkent', TM:'Asia/Ashgabat', TJ:'Asia/Dushanbe', KG:'Asia/Bishkek',
+    AF:'Asia/Kabul', // Oceania
+    AU:'Australia/Sydney', NZ:'Pacific/Auckland', PG:'Pacific/Port_Moresby',
+    FJ:'Pacific/Fiji', WS:'Pacific/Apia',
+};
+
+function getCountryTimezone(countryCode: string): string | null {
+    if (!countryCode) return null;
+    const upper = countryCode.trim().toUpperCase();
+    const alpha2 = upper.length === 3 ? (ALPHA3_TO_ALPHA2[upper] ?? upper) : upper;
+    return COUNTRY_TIMEZONE[alpha2] ?? null;
+}
+
+function isGoodTimeToMessage(timezone: string): boolean {
+    try {
+        const hourStr = new Intl.DateTimeFormat('en-US', {
+            hour: 'numeric', hour12: false, timeZone: timezone,
+        }).format(new Date());
+        const hour = parseInt(hourStr, 10);
+        return hour >= 8 && hour < 21;
+    } catch {
+        return false;
+    }
+}
+
 // ---- Date Separator ----
 
 function DateSeparator({ label }: { label: string }) {
@@ -193,6 +267,12 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         (profileFallback?.residenceCountry ? resolveCountryName(profileFallback.residenceCountry) : '') ||
         (profileFallback?.countryOfOrigin ? resolveCountryName(profileFallback.countryOfOrigin) : '') ||
         '';
+
+    // Derive timezone from their residence or origin country
+    const otherCountryCode = profileFallback?.residenceCountry || profileFallback?.countryOfOrigin || '';
+    const otherTimezone = getCountryTimezone(otherCountryCode);
+    const goodTimeToMessage = otherTimezone ? isGoodTimeToMessage(otherTimezone) : false;
+    const otherLocalTime = otherTimezone ? formatCurrentTime(otherTimezone) : null;
 
     // Initialize or retrieve conversation
     useEffect(() => {
@@ -695,14 +775,24 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
                                 )}
                             </div>
-                            {otherLocation && (
-                                <p className="text-xs text-text-secondary truncate mt-0.5">{otherLocation}</p>
+                            {(otherLocation || otherLocalTime) && (
+                                <p className="text-xs text-text-secondary truncate mt-0.5">
+                                    {otherLocation}
+                                    {otherLocation && otherLocalTime && <span className="mx-1">&bull;</span>}
+                                    {otherLocalTime && <span className="text-text-brand font-medium">{otherLocalTime}</span>}
+                                </p>
                             )}
-                            {isOnline && (
-                                <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 text-[11px] font-medium">
-                                    <Sun className="w-3 h-3" />
-                                    Good time to message
-                                </div>
+                            {otherTimezone && (
+                                goodTimeToMessage ? (
+                                    <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 text-[11px] font-medium">
+                                        <Sun className="w-3 h-3" />
+                                        Good time to message
+                                    </div>
+                                ) : (
+                                    <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-surface-hover dark:bg-surface-hover text-text-secondary text-[11px] font-medium">
+                                        🌙 Not a good time
+                                    </div>
+                                )
                             )}
                         </div>
 
@@ -797,8 +887,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 <div className="flex-shrink-0 bg-[#EEF2FF] dark:bg-indigo-950/30 px-4 py-2 text-center border-t border-indigo-100 dark:border-indigo-900">
                     <p className="text-[11px] text-text-secondary leading-tight">
                         Your time: <span className="font-medium text-text-primary">{formatCurrentTime(userTimeZone)}</span>
-                        {otherLocation && (
-                            <> &bull; <span className="font-medium text-text-primary">{displayName}</span>&apos;s location: {otherLocation}</>
+                        {otherLocalTime && (
+                            <> &bull; <span className="font-medium text-text-primary">{displayName}</span>&apos;s time: {otherLocalTime}</>
                         )}
                     </p>
                 </div>
