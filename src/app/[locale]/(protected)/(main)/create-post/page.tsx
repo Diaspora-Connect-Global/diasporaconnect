@@ -483,11 +483,17 @@ export default function CreatePostPage() {
         attachmentInputs = uploadResults.filter(Boolean) as AttachmentInput[];
       }
 
+      const visibilityMap: Record<Visibility, string> = {
+        PUBLIC: 'EVERYONE',
+        CONNECTIONS: 'FRIENDS',
+        PRIVATE: 'ONLY_ME',
+      };
+
       const { data } = await createPost({
         variables: {
           input: {
             text: postContent,
-            visibility: visibility,
+            visibility: visibilityMap[visibility],
             idempotencyKey: crypto.randomUUID(),
             ...(attachmentInputs.length > 0 && { attachments: attachmentInputs }),
             ...(mentionedUsers.length > 0 && {

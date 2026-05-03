@@ -7,8 +7,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import type { Notification } from "@/services/gql/types/notification";
 
+// Notifications are pushed through the API gateway WebSocket (same host as messaging).
 const WS_URL =
-  process.env.NEXT_PUBLIC_NOTIFICATION_WS_URL ?? "http://localhost:5004";
+  process.env.NEXT_PUBLIC_NOTIFICATION_WS_URL ??
+  process.env.NEXT_PUBLIC_MESSAGE_WS_URL ??
+  "http://localhost:3000";
 
 export default function NotificationWebSocketProvider({
   children,
@@ -30,10 +33,9 @@ export default function NotificationWebSocketProvider({
       return;
     }
 
-    // Strip "Bearer " prefix if present, matching MessageWebSocketProvider pattern
     const rawToken = token.replace(/^Bearer\s+/i, "");
 
-    const socket = io(`${WS_URL}/notifications`, {
+    const socket = io(WS_URL, {
       auth: { token: rawToken },
       transports: ["websocket"],
       reconnectionAttempts: 5,
@@ -50,8 +52,8 @@ export default function NotificationWebSocketProvider({
       console.warn("[NotificationWS] connection error:", err.message);
     });
 
-    socket.on("notification", (payload: { data: Notification }) => {
-      const notification = payload.data;
+    // API gateway emits the notification object directly (no wrapper)
+    socket.on("notification", (notification: Notification) => {
       addLiveNotification(notification);
       incrementUnreadCount();
       toast(notification.title, {
@@ -59,9 +61,9 @@ export default function NotificationWebSocketProvider({
       });
     });
 
-    socket.on("notification:unread-count", (payload: { data: { count: number } }) => {
-      if (typeof payload.data?.count === "number") {
-        setUnreadCount(payload.data.count);
+    socket.on("notification:unread-count", ({ count }: { count: number }) => {
+      if (typeof count === "number") {
+        setUnreadCount(count);
       }
     });
 
