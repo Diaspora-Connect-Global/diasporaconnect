@@ -97,6 +97,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const [blockModalOpen, setBlockModalOpen] = useState(false);
     const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
     const [isBlocking, setIsBlocking] = useState(false);
+    const [isOnline, setIsOnline] = useState(isOnline ?? false);
 
     const { addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages, clearApiMessages } = useChatStore();
 
@@ -150,9 +151,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         );
     const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
 
-    // Location from profile: prefer `location` field, fallback to city + country
+    // Location: prefer `location` string, then residenceCountry, then countryOfOrigin
     const otherLocation = profileFallback?.location ||
-        [profileFallback?.city, profileFallback?.residenceCountry].filter(Boolean).join(', ') ||
+        profileFallback?.residenceCountry ||
+        profileFallback?.countryOfOrigin ||
         '';
 
     // Initialize or retrieve conversation
@@ -280,6 +282,19 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             unsubStop();
         };
     }, [conversationId, chat.id]);
+
+    // Track real-time presence for the other user
+    useEffect(() => {
+        if (!chat.id) return;
+        const unsubPresence = messageService.onPresenceUpdate((data) => {
+            if (data.userId === chat.id) setIsOnline(data.isOnline);
+        });
+        const unsubConnect = messageService.onConnect(() => {
+            messageService.queryOnlineUsers([chat.id]);
+        });
+        if (messageService.isConnected) messageService.queryOnlineUsers([chat.id]);
+        return () => { unsubPresence(); unsubConnect(); };
+    }, [chat.id]);
 
     const handleTyping = useCallback((isTyping: boolean) => {
         if (!conversationId) return;
@@ -628,7 +643,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     {displayName.slice(0, 1).toUpperCase() || 'U'}
                                 </AvatarFallback>
                             </Avatar>
-                            {chat.online && (
+                            {isOnline && (
                                 <div className="absolute bottom-0.5 right-0.5 w-3 h-3 md:w-3.5 md:h-3.5 bg-green-500 rounded-full border-2 border-white" />
                             )}
                         </div>
@@ -639,14 +654,14 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 <h2 className="font-bold text-text-primary text-sm md:text-base leading-tight truncate">
                                     {displayName}
                                 </h2>
-                                {chat.online && (
+                                {isOnline && (
                                     <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
                                 )}
                             </div>
                             {otherLocation && (
                                 <p className="text-xs text-text-secondary truncate mt-0.5">{otherLocation}</p>
                             )}
-                            {chat.online && (
+                            {isOnline && (
                                 <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 text-[11px] font-medium">
                                     <Sun className="w-3 h-3" />
                                     Good time to message
@@ -742,11 +757,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 </div>
 
                 {/* ---- Timezone Bar ---- */}
-                <div className="flex-shrink-0 bg-surface-subtle border-t border-border-subtle px-4 py-2 text-center">
+                <div className="flex-shrink-0 bg-[#EEF2FF] dark:bg-indigo-950/30 px-4 py-2 text-center border-t border-indigo-100 dark:border-indigo-900">
                     <p className="text-[11px] text-text-secondary leading-tight">
-                        Your time: {formatCurrentTime(userTimeZone)}
+                        Your time: <span className="font-medium text-text-primary">{formatCurrentTime(userTimeZone)}</span>
                         {otherLocation && (
-                            <> &bull; <span className="font-medium">{displayName}</span> is in {otherLocation}</>
+                            <> &bull; <span className="font-medium text-text-primary">{displayName}</span>&apos;s location: {otherLocation}</>
                         )}
                     </p>
                 </div>
@@ -787,7 +802,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                         </AvatarFallback>
                                     </Avatar>
                                     <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>
-                                    {chat.online && (
+                                    {isOnline && (
                                         <p className="text-sm text-green-600 font-medium mt-0.5">{t('online')}</p>
                                     )}
                                     {otherLocation && (

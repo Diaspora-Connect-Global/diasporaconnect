@@ -120,10 +120,8 @@ export default function Chat() {
 
     return (
         <div className="rounded-md h-app-inner overflow-hidden flex flex-col">
-
-            
             {/* Chat content */}
-            <div className="overflow-hidden h-[96%] my-auto">
+            <div className="flex-1 min-h-0">
                 {activeChat.type === 'direct' ? (
                     <DirectMessageChat chat={chatInfo} onBack={handleBack} />
                 ) : (
