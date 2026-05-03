@@ -3,26 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import Image from 'next/image';
-
-function formatTime(seconds: number): string {
-  if (!seconds || isNaN(seconds)) return '0:00';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-/** Returns buffered ranges as an array of [start%, end%] pairs relative to duration. */
-function getBufferedRanges(video: HTMLVideoElement): Array<[number, number]> {
-  if (!video.duration) return [];
-  const ranges: Array<[number, number]> = [];
-  for (let i = 0; i < video.buffered.length; i++) {
-    ranges.push([
-      (video.buffered.start(i) / video.duration) * 100,
-      (video.buffered.end(i) / video.duration) * 100,
-    ]);
-  }
-  return ranges;
-}
+import { useVideoStore } from '@/store/useVideoStore';
 
 interface VideoPlayerProps {
   src: string;
@@ -32,22 +13,19 @@ interface VideoPlayerProps {
   pauseOnLeave?: boolean;
 }
 
-export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = true }: VideoPlayerProps) {
+export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = true }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
 
-  const [shouldLoad, setShouldLoad] = useState(false);
+  const { globalMuted, setGlobalMuted } = useVideoStore();
+
+  const [shouldLoad, setShouldLoad] = useState(autoPlay);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [slowConnection, setSlowConnection] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [bufferedRanges, setBufferedRanges] = useState<Array<[number, number]>>([]);
   const [showControls, setShowControls] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [watermarkKey, setWatermarkKey] = useState<number | null>(null);
@@ -62,8 +40,10 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
     deadTimerRef.current = null;
   }, []);
 
-  // Lazy-load: only attach src once the player is near the viewport
+  // Lazy-load: only attach src once the player is near the viewport.
+  // Skipped when autoPlay is true because shouldLoad starts as true already.
   useEffect(() => {
+    if (autoPlay) return;
     const el = containerRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
@@ -72,7 +52,7 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [autoPlay]);
 
   // Auto-pause when mostly out of view
   useEffect(() => {
@@ -94,6 +74,12 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
+  // Sync global mute state to the video element
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v) v.muted = globalMuted;
+  }, [globalMuted]);
+
   const scheduleHide = useCallback(() => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => setShowControls(false), 3000);
@@ -103,11 +89,6 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
     setShowControls(true);
     scheduleHide();
   }, [scheduleHide]);
-
-  const updateBuffered = useCallback(() => {
-    const v = videoRef.current;
-    if (v) setBufferedRanges(getBufferedRanges(v));
-  }, []);
 
   const startConnectionTimers = useCallback(() => {
     clearConnectionTimers();
@@ -138,8 +119,7 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
     setSlowConnection(false);
     setHasError(false);
     clearConnectionTimers();
-    updateBuffered();
-  }, [clearConnectionTimers, updateBuffered]);
+  }, [clearConnectionTimers]);
 
   const handleError = useCallback(() => {
     setIsBuffering(false);
@@ -184,11 +164,8 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
 
   const toggleMute = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setIsMuted(v.muted);
-  }, []);
+    setGlobalMuted(!globalMuted);
+  }, [globalMuted, setGlobalMuted]);
 
   const toggleFullscreen = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -197,17 +174,6 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
     document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen();
   }, []);
 
-  const seekTo = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    const v = videoRef.current;
-    const bar = progressBarRef.current;
-    if (!v || !bar || !duration) return;
-    const rect = bar.getBoundingClientRect();
-    const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-    v.currentTime = ratio * duration;
-  }, [duration]);
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
   const controlsVisible = showControls || !isPlaying;
 
   return (
@@ -226,6 +192,7 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
         preload="auto"
         playsInline
         autoPlay={autoPlay}
+        muted={globalMuted}
         className="w-full h-full object-contain"
         onPlay={() => { setIsPlaying(true); setHasError(false); scheduleHide(); }}
         onPause={() => {
@@ -233,17 +200,11 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
           setShowControls(true);
           if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
         }}
-        onTimeUpdate={() => {
-          setCurrentTime(videoRef.current?.currentTime ?? 0);
-          updateBuffered();
-        }}
-        onDurationChange={() => setDuration(videoRef.current?.duration ?? 0)}
         onWaiting={handleWaiting}
         onCanPlay={handleCanPlay}
-        onProgress={updateBuffered}
         onStalled={handleStalled}
         onError={handleError}
-        onEnded={() => { setIsPlaying(false); setShowControls(true); setCurrentTime(0); }}
+        onEnded={() => { setIsPlaying(false); setShowControls(true); }}
       />
 
       {/* Error state */}
@@ -286,32 +247,6 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
           className={`absolute bottom-0 left-0 right-0 px-3 pb-3 pt-8 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-200 ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Progress bar */}
-          <div
-            ref={progressBarRef}
-            className="w-full h-1 rounded-full bg-white/20 cursor-pointer mb-2.5 relative group/bar"
-            onClick={seekTo}
-          >
-            {/* Buffered ranges */}
-            {bufferedRanges.map(([start, end], i) => (
-              <div
-                key={i}
-                className="absolute h-full rounded-full bg-white/30"
-                style={{ left: `${start}%`, width: `${end - start}%` }}
-              />
-            ))}
-            {/* Playback progress */}
-            <div
-              className="absolute h-full rounded-full bg-text-brand transition-[width] duration-100"
-              style={{ width: `${progress}%` }}
-            />
-            {/* Scrubber dot */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white shadow opacity-0 group-hover/bar:opacity-100 transition-opacity"
-              style={{ left: `${progress}%` }}
-            />
-          </div>
-
           {/* Button row */}
           <div className="flex items-center gap-2">
             <button
@@ -324,15 +259,13 @@ export function VideoPlayer({ src, className, autoPlay = false, pauseOnLeave = t
               }
             </button>
 
-            <span className="text-white/75 text-xs tabular-nums flex-1">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
+            <div className="flex-1" />
 
             <button
               onClick={toggleMute}
               className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0"
             >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              {globalMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
 
             <button

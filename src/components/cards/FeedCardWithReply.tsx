@@ -647,10 +647,10 @@ export default function FeedCardWithReply({
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {imageCount === 1 ? (
                     <div
-                        className="group relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer"
+                        className="group relative w-full rounded-lg overflow-hidden cursor-pointer bg-surface-alt"
                         onClick={() => openMediaModal(0)}
                     >
-                        <img src={images[0]} alt="post" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                        <img src={images[0]} alt="post" className="w-full max-h-[32rem] object-contain" loading="lazy" decoding="async" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
                             <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
                                 <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />

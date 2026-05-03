@@ -349,47 +349,29 @@ export default function PostMediaModal({
         }
     }, [loadedComments, likeCommentMutation, removeCommentLikeMutation]);
 
-    /* post-to-post slide transition */
-    type SlideState = 'center' | 'exit-up' | 'exit-down' | 'enter-from-below' | 'enter-from-above';
-    const [slideState, setSlideState] = useState<SlideState>('center');
+    /* post-to-post fade transition */
+    const [isEntering, setIsEntering] = useState(false);
     const isAnimatingRef = useRef(false);
-    const pendingDirRef = useRef<'next' | 'prev' | null>(null);
 
-    const getSlideStyle = (): React.CSSProperties => {
-        switch (slideState) {
-            case 'exit-up':
-                return { transform: 'translateY(-100%)', transition: 'transform 300ms cubic-bezier(0.55,0,1,0.45)' };
-            case 'exit-down':
-                return { transform: 'translateY(100%)', transition: 'transform 300ms cubic-bezier(0.55,0,1,0.45)' };
-            case 'enter-from-below':
-                return { transform: 'translateY(100%)', transition: 'none' };
-            case 'enter-from-above':
-                return { transform: 'translateY(-100%)', transition: 'none' };
-            default:
-                return { transform: 'translateY(0)', transition: 'transform 350ms cubic-bezier(0.25,0.46,0.45,0.94)' };
-        }
-    };
+    const getSlideStyle = (): React.CSSProperties =>
+        isEntering
+            ? { opacity: 0, transition: 'none' }
+            : { opacity: 1, transition: 'opacity 220ms ease' };
 
     const navigateWithTransition = useCallback((dir: 'next' | 'prev') => {
         if (isAnimatingRef.current) return;
         isAnimatingRef.current = true;
-        pendingDirRef.current = dir;
-        setSlideState(dir === 'next' ? 'exit-up' : 'exit-down');
-        setTimeout(() => { onNavigatePost(dir); }, 300);
+        onNavigatePost(dir);
     }, [onNavigatePost]);
 
-    // Enter animation when postId changes (after parent updates state)
+    // Fade-in when postId changes
     useEffect(() => {
-        const dir = pendingDirRef.current;
-        if (!dir) return;
-        setSlideState(dir === 'next' ? 'enter-from-below' : 'enter-from-above');
+        if (!isAnimatingRef.current) return;
+        setIsEntering(true);
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                setSlideState('center');
-                setTimeout(() => {
-                    isAnimatingRef.current = false;
-                    pendingDirRef.current = null;
-                }, 350);
+                setIsEntering(false);
+                setTimeout(() => { isAnimatingRef.current = false; }, 220);
             });
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
