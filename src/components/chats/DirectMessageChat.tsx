@@ -262,10 +262,14 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         );
     const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
 
-    // Location: prefer free-text `location`, then resolve country codes to full names
+    // Build "City, Country" — prefer free-text `location`, else combine city + resolved country
+    const resolvedCountry = profileFallback?.residenceCountry
+        ? resolveCountryName(profileFallback.residenceCountry)
+        : profileFallback?.countryOfOrigin
+            ? resolveCountryName(profileFallback.countryOfOrigin)
+            : '';
     const otherLocation = profileFallback?.location ||
-        (profileFallback?.residenceCountry ? resolveCountryName(profileFallback.residenceCountry) : '') ||
-        (profileFallback?.countryOfOrigin ? resolveCountryName(profileFallback.countryOfOrigin) : '') ||
+        [profileFallback?.city, resolvedCountry].filter(Boolean).join(', ') ||
         '';
 
     // Derive timezone from their residence or origin country

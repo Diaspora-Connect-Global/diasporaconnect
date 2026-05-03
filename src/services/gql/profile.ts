@@ -89,6 +89,7 @@ export const GET_USER_PROFILE = gql`
         lastName
         countryOfOrigin
         residenceCountry
+        city
         location
         bio
         avatarUrl
