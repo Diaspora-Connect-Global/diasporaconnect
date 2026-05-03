@@ -134,7 +134,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const [blockModalOpen, setBlockModalOpen] = useState(false);
     const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
     const [isBlocking, setIsBlocking] = useState(false);
-    const [isOnline, setIsOnline] = useState(isOnline ?? false);
+    const [isOnline, setIsOnline] = useState(chat.online ?? false);
 
     const { addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages, clearApiMessages } = useChatStore();
 
