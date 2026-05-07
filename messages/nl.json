@@ -954,7 +954,10 @@
             "conversationCleared": "Gesprek van dit apparaat gewist.",
             "typeMessage": "Typ een bericht...",
             "cannotSend": "Kan geen berichten verzenden...",
-            "typing": "is aan het typen..."
+            "typing": "is aan het typen...",
+            "sending": "Verzenden…",
+            "goodTimeToMessage": "Goed moment om te schrijven",
+            "notGoodTimeToMessage": "Niet het juiste moment"
         },
         "group": {
             "message": "Bericht aan {name}",

@@ -54,7 +54,8 @@ export default function Chat() {
                 const chatchosenParsed = JSON.parse(chatchosen);
 
                 // Only update if URL param matches sessionStorage type
-                if (chatchosenParsed.type === chatTypeFromUrl) {
+                const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+                if (chatchosenParsed.type === chatTypeFromUrl && uuidV4.test(chatchosenParsed.id ?? '')) {
                     if (!activeChat || activeChat.id !== chatchosenParsed.id) {
                         setActiveChat(chatchosenParsed);
                     }

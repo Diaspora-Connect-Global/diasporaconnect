@@ -1304,7 +1304,10 @@
             "conversationCleared": "Conversazione rimossa da questo dispositivo.",
             "typeMessage": "Scrivi un messaggio...",
             "cannotSend": "Impossibile inviare messaggi...",
-            "typing": "sta scrivendo..."
+            "typing": "sta scrivendo...",
+            "sending": "Invio…",
+            "goodTimeToMessage": "Buon momento per scrivere",
+            "notGoodTimeToMessage": "Non è il momento giusto"
         },
         "group": {
             "message": "Messaggio a {name}",

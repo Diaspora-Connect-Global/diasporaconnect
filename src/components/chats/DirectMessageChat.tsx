@@ -3,9 +3,9 @@
 // ============================================
 // File: components/chats/DirectMessageChat.tsx
 
-import { Check, ChevronRight, Loader2, MoreVertical, Sun, X } from "lucide-react";
+import { Check, ChevronRight, Loader2, Moon, MoreVertical, Sun, X } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
 import { LinkPreviewCard, isLinkOnlyContent } from "./LinkPreviewCard";
@@ -31,45 +31,10 @@ import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
+import { resolveCountryName, getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
 
 // ---- Helpers ----
 
-// Alpha-3 → Alpha-2 for the subset that Intl.DisplayNames doesn't accept directly
-const ALPHA3_TO_ALPHA2: Record<string, string> = {
-    AFG:'AF',AGO:'AO',ALB:'AL',AND:'AD',ARE:'AE',ARG:'AR',ARM:'AM',AUS:'AU',AUT:'AT',AZE:'AZ',
-    BDI:'BI',BEL:'BE',BEN:'BJ',BFA:'BF',BGD:'BD',BGR:'BG',BHR:'BH',BHS:'BS',BIH:'BA',BLR:'BY',
-    BLZ:'BZ',BOL:'BO',BRA:'BR',BRB:'BB',BRN:'BN',BTN:'BT',BWA:'BW',CAF:'CF',CAN:'CA',CHE:'CH',
-    CHL:'CL',CHN:'CN',CIV:'CI',CMR:'CM',COD:'CD',COG:'CG',COL:'CO',COM:'KM',CPV:'CV',CRI:'CR',
-    CUB:'CU',CYP:'CY',CZE:'CZ',DEU:'DE',DJI:'DJ',DNK:'DK',DOM:'DO',DZA:'DZ',ECU:'EC',EGY:'EG',
-    ERI:'ER',ESP:'ES',EST:'EE',ETH:'ET',FIN:'FI',FJI:'FJ',FRA:'FR',FSM:'FM',GAB:'GA',GBR:'GB',
-    GEO:'GE',GHA:'GH',GIN:'GN',GMB:'GM',GNB:'GW',GNQ:'GQ',GRC:'GR',GTM:'GT',GUY:'GY',HND:'HN',
-    HRV:'HR',HTI:'HT',HUN:'HU',IDN:'ID',IND:'IN',IRL:'IE',IRN:'IR',IRQ:'IQ',ISL:'IS',ISR:'IL',
-    ITA:'IT',JAM:'JM',JOR:'JO',JPN:'JP',KAZ:'KZ',KEN:'KE',KGZ:'KG',KHM:'KH',KIR:'KI',KOR:'KR',
-    KWT:'KW',LAO:'LA',LBN:'LB',LBR:'LR',LBY:'LY',LCA:'LC',LIE:'LI',LKA:'LK',LSO:'LS',LTU:'LT',
-    LUX:'LU',LVA:'LV',MAR:'MA',MDA:'MD',MDG:'MG',MDV:'MV',MEX:'MX',MKD:'MK',MLI:'ML',MLT:'MT',
-    MMR:'MM',MNE:'ME',MNG:'MN',MOZ:'MZ',MRT:'MR',MUS:'MU',MWI:'MW',MYS:'MY',NAM:'NA',NER:'NE',
-    NGA:'NG',NIC:'NI',NLD:'NL',NOR:'NO',NPL:'NP',NRU:'NR',NZL:'NZ',OMN:'OM',PAK:'PK',PAN:'PA',
-    PER:'PE',PHL:'PH',PLW:'PW',PNG:'PG',POL:'PL',PRT:'PT',PRY:'PY',PSE:'PS',QAT:'QA',ROU:'RO',
-    RUS:'RU',RWA:'RW',SAU:'SA',SDN:'SD',SEN:'SN',SGP:'SG',SLB:'SB',SLE:'SL',SLV:'SV',SMR:'SM',
-    SOM:'SO',SRB:'RS',SSD:'SS',STP:'ST',SUR:'SR',SVK:'SK',SVN:'SI',SWE:'SE',SWZ:'SZ',SYC:'SC',
-    SYR:'SY',TCD:'TD',TGO:'TG',THA:'TH',TJK:'TJ',TKM:'TM',TLS:'TL',TON:'TO',TTO:'TT',TUN:'TN',
-    TUR:'TR',TUV:'TV',TZA:'TZ',UGA:'UG',UKR:'UA',URY:'UY',USA:'US',UZB:'UZ',VCT:'VC',VEN:'VE',
-    VNM:'VN',VUT:'VU',WSM:'WS',YEM:'YE',ZAF:'ZA',ZMB:'ZM',ZWE:'ZW',
-};
-
-function resolveCountryName(code: string): string {
-    if (!code) return '';
-    const upper = code.trim().toUpperCase();
-    // Convert alpha-3 to alpha-2 if needed
-    const alpha2 = upper.length === 3 ? (ALPHA3_TO_ALPHA2[upper] ?? upper) : upper;
-    try {
-        const names = new Intl.DisplayNames(['en'], { type: 'region' });
-        const name = names.of(alpha2);
-        return name && name !== alpha2 ? name : code;
-    } catch {
-        return code;
-    }
-}
 
 function getMessageDateKey(dateStr: string, timeZone: string): string {
     return new Date(dateStr).toLocaleDateString('en-US', { timeZone });
@@ -78,9 +43,7 @@ function getMessageDateKey(dateStr: string, timeZone: string): string {
 function getDateLabel(dateStr: string, timeZone: string): string {
     const date = new Date(dateStr);
     const todayKey = new Date().toLocaleDateString('en-US', { timeZone });
-    const yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    const yesterdayKey = yesterdayDate.toLocaleDateString('en-US', { timeZone });
+    const yesterdayKey = new Date(Date.now() - 864e5).toLocaleDateString('en-US', { timeZone });
     const msgKey = getMessageDateKey(dateStr, timeZone);
     if (msgKey === todayKey) return 'Today';
     if (msgKey === yesterdayKey) return 'Yesterday';
@@ -94,90 +57,6 @@ function formatTimeOnly(dateStr: string, timeZone: string): string {
         hour12: true,
         timeZone,
     });
-}
-
-function formatCurrentTime(timeZone: string): string {
-    return new Intl.DateTimeFormat('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZone,
-        timeZoneName: 'short',
-    }).format(new Date());
-}
-
-// Country alpha-2 → representative IANA timezone
-const COUNTRY_TIMEZONE: Record<string, string> = {
-    // Africa
-    GH:'Africa/Accra', NG:'Africa/Lagos', SN:'Africa/Dakar', CI:'Africa/Abidjan',
-    CM:'Africa/Douala', BJ:'Africa/Porto-Novo', BF:'Africa/Ouagadougou', GN:'Africa/Conakry',
-    TG:'Africa/Lome', ML:'Africa/Bamako', NE:'Africa/Niamey', MR:'Africa/Nouakchott',
-    GM:'Africa/Banjul', SL:'Africa/Freetown', LR:'Africa/Monrovia', GW:'Africa/Bissau',
-    CV:'Atlantic/Cape_Verde', ST:'Africa/Sao_Tome', GQ:'Africa/Malabo', GA:'Africa/Libreville',
-    CG:'Africa/Brazzaville', CD:'Africa/Kinshasa', AO:'Africa/Luanda', ZM:'Africa/Lusaka',
-    ZW:'Africa/Harare', BW:'Africa/Gaborone', NA:'Africa/Windhoek', MZ:'Africa/Maputo',
-    TZ:'Africa/Dar_es_Salaam', KE:'Africa/Nairobi', UG:'Africa/Kampala', RW:'Africa/Kigali',
-    BI:'Africa/Bujumbura', ET:'Africa/Addis_Ababa', ER:'Africa/Asmara', SO:'Africa/Mogadishu',
-    DJ:'Africa/Djibouti', SD:'Africa/Khartoum', SS:'Africa/Juba', MW:'Africa/Blantyre',
-    ZA:'Africa/Johannesburg', LS:'Africa/Maseru', SZ:'Africa/Mbabane', MG:'Indian/Antananarivo',
-    MU:'Indian/Mauritius', SC:'Indian/Mahe', KM:'Indian/Comoro', EG:'Africa/Cairo',
-    LY:'Africa/Tripoli', TN:'Africa/Tunis', DZ:'Africa/Algiers', MA:'Africa/Casablanca',
-    // Europe
-    GB:'Europe/London', IE:'Europe/Dublin', FR:'Europe/Paris', DE:'Europe/Berlin',
-    IT:'Europe/Rome', ES:'Europe/Madrid', PT:'Europe/Lisbon', NL:'Europe/Amsterdam',
-    BE:'Europe/Brussels', LU:'Europe/Luxembourg', CH:'Europe/Zurich', AT:'Europe/Vienna',
-    PL:'Europe/Warsaw', CZ:'Europe/Prague', SK:'Europe/Bratislava', HU:'Europe/Budapest',
-    RO:'Europe/Bucharest', BG:'Europe/Sofia', GR:'Europe/Athens', HR:'Europe/Zagreb',
-    RS:'Europe/Belgrade', SI:'Europe/Ljubljana', BA:'Europe/Sarajevo', MK:'Europe/Skopje',
-    AL:'Europe/Tirane', ME:'Europe/Podgorica', SE:'Europe/Stockholm', NO:'Europe/Oslo',
-    DK:'Europe/Copenhagen', FI:'Europe/Helsinki', IS:'Atlantic/Reykjavik',
-    EE:'Europe/Tallinn', LV:'Europe/Riga', LT:'Europe/Vilnius', BY:'Europe/Minsk',
-    UA:'Europe/Kiev', MD:'Europe/Chisinau', RU:'Europe/Moscow', TR:'Europe/Istanbul',
-    CY:'Asia/Nicosia', MT:'Europe/Malta',
-    // Americas
-    US:'America/New_York', CA:'America/Toronto', MX:'America/Mexico_City',
-    BR:'America/Sao_Paulo', AR:'America/Argentina/Buenos_Aires', CL:'America/Santiago',
-    CO:'America/Bogota', VE:'America/Caracas', PE:'America/Lima', EC:'America/Guayaquil',
-    BO:'America/La_Paz', PY:'America/Asuncion', UY:'America/Montevideo', GY:'America/Guyana',
-    SR:'America/Paramaribo', HT:'America/Port-au-Prince', DO:'America/Santo_Domingo',
-    JM:'America/Jamaica', TT:'America/Port_of_Spain', BB:'America/Barbados',
-    CU:'America/Havana', GT:'America/Guatemala', SV:'America/El_Salvador',
-    HN:'America/Tegucigalpa', NI:'America/Managua', CR:'America/Costa_Rica',
-    PA:'America/Panama',
-    // Middle East
-    AE:'Asia/Dubai', SA:'Asia/Riyadh', QA:'Asia/Qatar', KW:'Asia/Kuwait',
-    BH:'Asia/Bahrain', OM:'Asia/Muscat', YE:'Asia/Aden', IQ:'Asia/Baghdad',
-    IR:'Asia/Tehran', IL:'Asia/Jerusalem', JO:'Asia/Amman', LB:'Asia/Beirut',
-    SY:'Asia/Damascus', PS:'Asia/Gaza',
-    // Asia
-    IN:'Asia/Kolkata', PK:'Asia/Karachi', BD:'Asia/Dhaka', LK:'Asia/Colombo',
-    NP:'Asia/Kathmandu', BT:'Asia/Thimphu', MM:'Asia/Rangoon', TH:'Asia/Bangkok',
-    VN:'Asia/Ho_Chi_Minh', KH:'Asia/Phnom_Penh', LA:'Asia/Vientiane', MY:'Asia/Kuala_Lumpur',
-    SG:'Asia/Singapore', ID:'Asia/Jakarta', PH:'Asia/Manila', CN:'Asia/Shanghai',
-    JP:'Asia/Tokyo', KR:'Asia/Seoul', MN:'Asia/Ulaanbaatar', KZ:'Asia/Almaty',
-    UZ:'Asia/Tashkent', TM:'Asia/Ashgabat', TJ:'Asia/Dushanbe', KG:'Asia/Bishkek',
-    AF:'Asia/Kabul', // Oceania
-    AU:'Australia/Sydney', NZ:'Pacific/Auckland', PG:'Pacific/Port_Moresby',
-    FJ:'Pacific/Fiji', WS:'Pacific/Apia',
-};
-
-function getCountryTimezone(countryCode: string): string | null {
-    if (!countryCode) return null;
-    const upper = countryCode.trim().toUpperCase();
-    const alpha2 = upper.length === 3 ? (ALPHA3_TO_ALPHA2[upper] ?? upper) : upper;
-    return COUNTRY_TIMEZONE[alpha2] ?? null;
-}
-
-function isGoodTimeToMessage(timezone: string): boolean {
-    try {
-        const hourStr = new Intl.DateTimeFormat('en-US', {
-            hour: 'numeric', hour12: false, timeZone: timezone,
-        }).format(new Date());
-        const hour = parseInt(hourStr, 10);
-        return hour >= 8 && hour < 21;
-    } catch {
-        return false;
-    }
 }
 
 // ---- Date Separator ----
@@ -200,6 +79,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const tCommon = useTranslations('common');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const pendingRevokeRef = useRef<Record<string, string[]>>({});
+    const initInFlightRef = useRef(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [conversationId, setConversationId] = useState<string | null>(null);
@@ -263,20 +143,32 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
 
     // Build "City, Country" — prefer free-text `location`, else combine city + resolved country
-    const resolvedCountry = profileFallback?.residenceCountry
-        ? resolveCountryName(profileFallback.residenceCountry)
-        : profileFallback?.countryOfOrigin
-            ? resolveCountryName(profileFallback.countryOfOrigin)
+    // Wrapped in useMemo: resolveCountryName/isGoodTimeToMessage construct Intl objects internally
+    const { otherLocation, otherTimezone, showTimeBadge, goodTimeToMessage, otherLocalTime } = useMemo(() => {
+        // Only derive location/timezone for confirmed connections to prevent exposing
+        // residenceCountry data to non-connected users who open a chat by userId
+        const isConnected = !!otherUser;
+        const resolvedCountry = isConnected && profileFallback?.residenceCountry
+            ? resolveCountryName(profileFallback.residenceCountry)
             : '';
-    const otherLocation = profileFallback?.location ||
-        [profileFallback?.city, resolvedCountry].filter(Boolean).join(', ') ||
-        '';
-
-    // Derive timezone from their residence or origin country
-    const otherCountryCode = profileFallback?.residenceCountry || profileFallback?.countryOfOrigin || '';
-    const otherTimezone = getCountryTimezone(otherCountryCode);
-    const goodTimeToMessage = otherTimezone ? isGoodTimeToMessage(otherTimezone) : false;
-    const otherLocalTime = otherTimezone ? formatCurrentTime(otherTimezone) : null;
+        const location = isConnected
+            ? (profileFallback?.location ||
+                [profileFallback?.city, resolvedCountry].filter(Boolean).join(', ') ||
+                '')
+            : '';
+        const timezone = isConnected && profileFallback?.residenceCountry
+            ? getCountryTimezone(profileFallback.residenceCountry)
+            : null;
+        const badge = timezone && !isMultiTimezoneCountry(profileFallback?.residenceCountry ?? '');
+        return {
+            otherLocation: location,
+            otherTimezone: timezone,
+            showTimeBadge: badge,
+            goodTimeToMessage: badge ? isGoodTimeToMessage(timezone!) : false,
+            otherLocalTime: timezone ? formatCurrentTime(timezone) : null,
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [otherUser, profileFallback?.residenceCountry, profileFallback?.city, profileFallback?.location]);
 
     // Initialize or retrieve conversation
     useEffect(() => {
@@ -331,7 +223,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             }
         };
 
-        initConversation();
+        if (initInFlightRef.current) return;
+        initInFlightRef.current = true;
+        initConversation().finally(() => { initInFlightRef.current = false; });
     }, [chat.id, currentUserId, conversationsData, getRealConversation, setRealConversation, createConversation]);
 
     const { data: messagesData, refetch: refetchMessages } = useQuery<GetMessagesData>(GET_MESSAGES, {
@@ -407,15 +301,18 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     // Track real-time presence for the other user
     useEffect(() => {
         if (!chat.id) return;
+        // Reset to prop value when switching chats
+        setIsOnline(chat.online ?? false);
         const unsubPresence = messageService.onPresenceUpdate((data) => {
             if (data.userId === chat.id) setIsOnline(data.isOnline);
         });
         const unsubConnect = messageService.onConnect(() => {
             messageService.queryOnlineUsers([chat.id]);
         });
-        if (messageService.isConnected) messageService.queryOnlineUsers([chat.id]);
+        // Always query unconditionally — service no-ops if disconnected; onConnect handles reconnect
+        messageService.queryOnlineUsers([chat.id]);
         return () => { unsubPresence(); unsubConnect(); };
-    }, [chat.id]);
+    }, [chat.id, chat.online]);
 
     const handleTyping = useCallback((isTyping: boolean) => {
         if (!conversationId) return;
@@ -428,6 +325,13 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Refresh time-derived values (goodTimeToMessage, otherLocalTime) every minute
+    const [, setTimeTick] = useState(0);
+    useEffect(() => {
+        const id = setInterval(() => setTimeTick(n => n + 1), 60_000);
+        return () => clearInterval(id);
     }, []);
 
     useEffect(() => {
@@ -646,7 +550,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
                                 <div className="flex items-center justify-end gap-1 mt-1.5">
                                     <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
-                                    <span className="text-[10px] text-gray-400">Sending…</span>
+                                    <span className="text-[10px] text-gray-400">{t('sending')}</span>
                                 </div>
                             </div>
                         )}
@@ -658,7 +562,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
                     <div className="flex items-center justify-end gap-1 mt-1.5">
                         <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
-                        <span className="text-[10px] text-gray-400">Sending…</span>
+                        <span className="text-[10px] text-gray-400">{t('sending')}</span>
                     </div>
                 </div>
             );
@@ -713,23 +617,25 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
         // Plain text message
         if (isMe) {
+            const firstUrl = getFirstUrlInText(message.content);
             return (
                 <div className="bg-[#EEEEFF] dark:bg-indigo-950/40 rounded-2xl px-4 py-2.5">
                     <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
-                    {getFirstUrlInText(message.content) && (
-                        <div className="mt-2"><LinkPreviewCard url={getFirstUrlInText(message.content)!} /></div>
+                    {firstUrl && (
+                        <div className="mt-2"><LinkPreviewCard url={firstUrl} /></div>
                     )}
                     {myTimestampRow}
                 </div>
             );
         }
 
+        const firstUrl = getFirstUrlInText(message.content);
         return (
             <div>
                 <div className="bg-[#EDFBF0] dark:bg-green-950/30 rounded-2xl px-4 py-2.5">
                     <p className="text-sm text-text-primary dark:text-green-50 break-words">{message.content}</p>
-                    {getFirstUrlInText(message.content) && (
-                        <div className="mt-2"><LinkPreviewCard url={getFirstUrlInText(message.content)!} /></div>
+                    {firstUrl && (
+                        <div className="mt-2"><LinkPreviewCard url={firstUrl} /></div>
                     )}
                 </div>
                 {theirTimestampRow}
@@ -770,14 +676,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                         </div>
 
                         {/* Name + location + badge */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 min-h-[72px]">
                             <div className="flex items-center gap-1.5">
                                 <h2 className="font-bold text-text-primary text-sm md:text-base leading-tight truncate">
                                     {displayName}
                                 </h2>
-                                {isOnline && (
-                                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
-                                )}
                             </div>
                             {(otherLocation || otherLocalTime) && (
                                 <p className="text-xs text-text-secondary truncate mt-0.5">
@@ -786,15 +689,19 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     {otherLocalTime && <span className="text-text-brand font-medium">{otherLocalTime}</span>}
                                 </p>
                             )}
-                            {otherTimezone && (
+                            {showTimeBadge && (
                                 goodTimeToMessage ? (
                                     <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 text-[11px] font-medium">
-                                        <Sun className="w-3 h-3" />
-                                        Good time to message
+                                        <Sun className="w-3 h-3" aria-hidden="true" />
+                                        {t('goodTimeToMessage')}
                                     </div>
                                 ) : (
-                                    <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-surface-hover dark:bg-surface-hover text-text-secondary text-[11px] font-medium">
-                                        🌙 Not a good time
+                                    <div
+                                        className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-surface-hover dark:bg-surface-hover text-text-secondary text-[11px] font-medium"
+                                        title="It may be outside typical waking hours in their timezone"
+                                    >
+                                        <Moon className="w-3 h-3" aria-hidden="true" />
+                                        {t('notGoodTimeToMessage')}
                                     </div>
                                 )
                             )}
@@ -951,10 +858,13 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
                         <div className="flex-shrink-0 border-t border-border-subtle p-4 bg-surface-default">
                             <div className="space-y-1">
-                                <div className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors">
-                                    <p className="text-sm font-medium">{t('report')}</p>
-                                    <ChevronRight className="w-4 h-4" />
-                                </div>
+                                <button
+                                    className="w-full text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg transition-colors"
+                                    onClick={() => toast.info('Reporting is coming soon.')}
+                                >
+                                    <span className="text-sm font-medium">{t('report')}</span>
+                                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                                </button>
                                 <div
                                     className="text-text-danger flex justify-between items-center p-3 hover:bg-surface-hover rounded-lg cursor-pointer transition-colors"
                                     onClick={() => setBlockModalOpen(true)}

@@ -1304,7 +1304,10 @@
             "conversationCleared": "Unterhaltung auf diesem Gerät geleert.",
             "typeMessage": "Nachricht eingeben...",
             "cannotSend": "Nachrichten können nicht gesendet werden...",
-            "typing": "schreibt..."
+            "typing": "schreibt...",
+            "sending": "Senden…",
+            "goodTimeToMessage": "Guter Zeitpunkt zum Schreiben",
+            "notGoodTimeToMessage": "Kein guter Zeitpunkt"
         },
         "group": {
             "message": "Nachricht an {name}",

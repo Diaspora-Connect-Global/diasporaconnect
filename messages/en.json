@@ -954,7 +954,10 @@
             "conversationCleared": "Conversation cleared from this device.",
             "typeMessage": "Type a message...",
             "cannotSend": "Cannot send messages...",
-            "typing": "is typing..."
+            "typing": "is typing...",
+            "sending": "Sending…",
+            "goodTimeToMessage": "Good time to message",
+            "notGoodTimeToMessage": "Not a good time"
         },
         "group": {
             "message": "Message {name}",

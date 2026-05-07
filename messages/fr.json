@@ -1304,7 +1304,10 @@
             "conversationCleared": "Conversation effacée de cet appareil.",
             "typeMessage": "Tapez un message...",
             "cannotSend": "Impossible d'envoyer des messages...",
-            "typing": "est en train d'écrire..."
+            "typing": "est en train d'écrire...",
+            "sending": "Envoi…",
+            "goodTimeToMessage": "Bon moment pour écrire",
+            "notGoodTimeToMessage": "Pas le bon moment"
         },
         "group": {
             "message": "Message à {name}",
