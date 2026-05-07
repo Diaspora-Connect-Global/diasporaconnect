@@ -38,10 +38,12 @@ export interface DiscoverCommunitiesData {
     };
 }
 
+const JOINED_STATUSES = new Set(['ACTIVE', 'MEMBER', 'JOINED', 'APPROVED']);
+
 export default function Community() {
     const t = useTranslations('community');
     const tActions = useTranslations('actions');
-    
+
     const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
     const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string }>({
         open: false,
@@ -78,13 +80,15 @@ export default function Community() {
             });
 
             if (data?.requestMembership?.status === 'ACTIVE') {
-                toast.success(data.requestMembership.message);
+                toast.success(data.requestMembership.message ?? 'You have joined the community.');
                 setJoinedCommunities(prev => new Set(prev).add(communityId));
-                // Refetch in background
                 setTimeout(() => {
                     refetchCommunities();
                     refetchMyCommunities();
                 }, 100);
+            } else if (data?.requestMembership?.status === 'PENDING') {
+                toast.success(data.requestMembership.message ?? 'Your request to join has been submitted for review.');
+                void refetchCommunities();
             } else {
                 toast.error('Failed to join community');
             }
@@ -137,21 +141,27 @@ export default function Community() {
                         Loading communities...
                     </div>
                 ) : discoverData?.discoverCommunities?.communities?.length ? (
-                    discoverData.discoverCommunities.communities.map((community) => (
+                    discoverData.discoverCommunities.communities.map((community) => {
+                        const isAlreadyJoined = JOINED_STATUSES.has(community.membershipStatus?.toUpperCase() ?? '') || joinedCommunities.has(community.id);
+                        const isPendingStatus = community.membershipStatus === 'PENDING';
+                        return (
                         <JoinCommunityCard
                             key={community.id}
                             title={community.name}
-                            members={0}
+                            members={community.memberCount}
                             onButtonClick={() => handleJoinClick(community.id, community.name)}
                             buttonText={
-                                community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
+                                isAlreadyJoined
                                     ? 'Joined'
+                                    : isPendingStatus
+                                    ? 'Pending'
                                     : tActions('join')
                             }
                             description={community.description || ''}
-                            isDisabled={community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)}
+                            isDisabled={isAlreadyJoined || isPendingStatus}
                         />
-                    ))
+                        );
+                    })
                 ) : (
                     <div className="col-span-full text-center py-8 text-gray-500">
                         No communities available to discover.

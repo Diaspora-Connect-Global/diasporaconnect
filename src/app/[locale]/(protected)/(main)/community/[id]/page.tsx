@@ -154,7 +154,7 @@ export default function CommunityDetailPage() {
   const joinPolicy = community?.joinPolicy ?? 'OPEN';
   const isMemberFromCheck = membershipData?.checkCommunityMembership?.isMember === true;
   const isActive = isMemberStatus(status) || isMemberFromCheck;
-  const isPending = status === PENDING;
+  const isPending = status === PENDING || status === 'PENDING_PAYMENT';
   const isSuspended = status === SUSPENDED;
   const isInviteOnly = joinPolicy === 'INVITE_ONLY';
   const canShowJoin = !isActive && !isPending && !isSuspended && joinPolicy === 'OPEN';
@@ -249,9 +249,7 @@ export default function CommunityDetailPage() {
   }
 
   const actionLoading = joinLoading || leaveLoading || cancelLoading;
-  const displayMemberCount = isActive && (community.memberCount == null || community.memberCount === 0)
-    ? 1
-    : (community.memberCount ?? 0);
+  const displayMemberCount = community.memberCount ?? 0;
 
   return (
     <div className="lg:flex overflow-y-auto h-app-inner">
