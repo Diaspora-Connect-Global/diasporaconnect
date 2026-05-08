@@ -95,7 +95,7 @@ export default function CommunityCardVariant1({
 
         {/* Members */}
         <div className="w-full text-center lg:h-[1rem]">
-          {members !== undefined && (
+          {members != null && (
             <p className="caption-medium text-text-primary">
               {members.toLocaleString()} {t('members')}
             </p>

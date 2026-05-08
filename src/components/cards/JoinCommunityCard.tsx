@@ -98,7 +98,7 @@ export default function JoinCommunityCard({
           )}
 
           {/* Members */}
-          {members !== undefined && (
+          {members != null && (
             <p className="caption-medium text-text-primary">
               {members.toLocaleString()} {t('members')}
             </p>
