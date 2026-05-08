@@ -267,12 +267,14 @@ export default function PostMediaModal({
     const [searchUsers] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, { fetchPolicy: 'network-only' });
     const fetchMentions = useCallback(async (query: string): Promise<MentionUser[]> => {
         if (!query) return [];
-        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 6 } } });
-        return (data?.searchUsers.profiles ?? []).map(p => ({
-            id: p.userId,
-            name: `${p.firstName} ${p.lastName}`.trim(),
-            avatarUrl: p.avatarUrl,
-        }));
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 10 } } });
+        return (data?.searchUsers.profiles ?? [])
+            .filter(p => p.connectionStatus === 'connected')
+            .map(p => ({
+                id: p.userId,
+                name: `${p.firstName} ${p.lastName}`.trim(),
+                avatarUrl: p.avatarUrl,
+            }));
     }, [searchUsers]);
 
     const handleMentionClick = useCallback(async (name: string) => {
@@ -540,7 +542,7 @@ export default function PostMediaModal({
             <div className="flex gap-2 justify-end mt-1">
                 <button className="px-2 py-1 label-medium text-text-secondary border border-border-subtle rounded-md hover:bg-surface-alt text-xs"
                     onClick={() => setIsEditingPost(false)}>Cancel</button>
-                <button className="px-2 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark text-xs disabled:opacity-50"
+                <button className="px-2 py-1 label-medium text-text-white bg-surface-brand rounded-md hover:bg-border-brand text-xs disabled:opacity-50"
                     onClick={handleEditPostConfirm}
                     disabled={editPostLoading || !editPostText.trim()}>
                     {editPostLoading ? 'Saving…' : 'Save'}

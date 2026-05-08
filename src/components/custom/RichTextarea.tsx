@@ -200,13 +200,15 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
 
           if (data?.searchUsers?.profiles) {
             setMentionResults(
-              data.searchUsers.profiles.map((p) => ({
-                userId: p.userId,
-                firstName: p.firstName,
-                lastName: p.lastName,
-                headline: p.headline,
-                avatarUrl: p.avatarUrl,
-              })),
+              data.searchUsers.profiles
+                .filter((p) => p.connectionStatus === 'connected')
+                .map((p) => ({
+                  userId: p.userId,
+                  firstName: p.firstName,
+                  lastName: p.lastName,
+                  headline: p.headline,
+                  avatarUrl: p.avatarUrl,
+                })),
             );
           }
         } catch {

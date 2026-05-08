@@ -252,12 +252,14 @@ export default function FeedCardWithReply({
     const [searchUsers] = useLazyQuery<SearchUsersResponse>(SEARCH_USERS, { fetchPolicy: 'network-only' });
     const fetchMentions = useCallback(async (query: string): Promise<MentionUser[]> => {
         if (!query) return [];
-        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 6 } } });
-        return (data?.searchUsers.profiles ?? []).map(p => ({
-            id: p.userId,
-            name: `${p.firstName} ${p.lastName}`.trim(),
-            avatarUrl: p.avatarUrl,
-        }));
+        const { data } = await searchUsers({ variables: { searchUsersInput: { query, limit: 10 } } });
+        return (data?.searchUsers.profiles ?? [])
+            .filter(p => p.connectionStatus === 'connected')
+            .map(p => ({
+                id: p.userId,
+                name: `${p.firstName} ${p.lastName}`.trim(),
+                avatarUrl: p.avatarUrl,
+            }));
     }, [searchUsers]);
 
     const handleMentionClick = useCallback(async (name: string) => {
@@ -605,7 +607,7 @@ export default function FeedCardWithReply({
                             Cancel
                         </button>
                         <button
-                            className="px-3 py-1 label-medium text-white bg-brand rounded-md hover:bg-brand-dark disabled:opacity-50"
+                            className="px-3 py-1 label-medium text-text-white bg-surface-brand rounded-md hover:bg-border-brand disabled:opacity-50"
                             onClick={handleEditPostSubmit}
                             disabled={editPostLoading || !editPostText.trim()}
                         >
