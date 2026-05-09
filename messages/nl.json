@@ -605,6 +605,15 @@
             "requestToJoin": "Verzoek om deel te nemen",
             "cancelRequest": "Verzoek annuleren",
             "leave": "Verlaten"
+        },
+        "payment": {
+            "title": "Complete your membership payment",
+            "descriptionWithName": "Pay to join {name}.",
+            "description": "Pay to complete your join request.",
+            "preparing": "Preparing payment…",
+            "errorGeneric": "Payment failed. Please try again.",
+            "errorIncomplete": "Payment was not completed. Please try again.",
+            "pay": "Pay"
         }
     },
     "notification": {

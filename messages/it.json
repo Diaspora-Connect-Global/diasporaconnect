@@ -605,7 +605,16 @@
         },
         "joined": "Iscritto",
         "noCommunitiesJoined": "Nessuna comunità ancora iscritta.",
-        "noCommunitiesFound": "Nessuna comunità trovata. Prova ad aggiornare la pagina o a modificare la ricerca."
+        "noCommunitiesFound": "Nessuna comunità trovata. Prova ad aggiornare la pagina o a modificare la ricerca.",
+        "payment": {
+            "title": "Complete your membership payment",
+            "descriptionWithName": "Pay to join {name}.",
+            "description": "Pay to complete your join request.",
+            "preparing": "Preparing payment…",
+            "errorGeneric": "Payment failed. Please try again.",
+            "errorIncomplete": "Payment was not completed. Please try again.",
+            "pay": "Pay"
+        }
     },
     "notification": {
         "notifications": "Notifiche",

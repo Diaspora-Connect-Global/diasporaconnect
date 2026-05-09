@@ -16,11 +16,9 @@ import {
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { getStripe } from '@/lib/stripe';
 
-// next-intl logs an error for missing keys, so we only call t() for keys we
-// know exist (cancel/processing live under common.*). User-facing copy that
-// is new for this flow is kept inline in English, matching the convention of
-// the surrounding community/onboarding flows that already use literal
-// fallbacks for strings without translations.
+// User-facing copy lives under the `community.payment` namespace in the
+// locale messages. Cancel/processing remain under common.* since they are
+// shared across the app.
 
 interface MembershipPaymentModalProps {
   /** Controls modal visibility. */
@@ -52,6 +50,8 @@ export function MembershipPaymentModal({
   onSuccess,
   onClose,
 }: MembershipPaymentModalProps) {
+  const t = useTranslations('community.payment');
+
   const options: StripeElementsOptions | undefined = clientSecret
     ? { clientSecret, appearance: { theme: 'stripe' } }
     : undefined;
@@ -60,11 +60,11 @@ export function MembershipPaymentModal({
     <Dialog open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Complete your membership payment</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
             {communityName
-              ? `Pay to join ${communityName}.`
-              : 'Pay to complete your join request.'}
+              ? t('descriptionWithName', { name: communityName })
+              : t('description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -79,7 +79,7 @@ export function MembershipPaymentModal({
         ) : (
           <div className="flex items-center justify-center py-8 text-text-secondary">
             <Loader2 className="w-5 h-5 animate-spin mr-2" />
-            <span>Preparing payment…</span>
+            <span>{t('preparing')}</span>
           </div>
         )}
       </DialogContent>
@@ -101,6 +101,7 @@ function MembershipPaymentForm({
   const stripe = useStripe();
   const elements = useElements();
   const tCommon = useTranslations('common');
+  const t = useTranslations('community.payment');
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -126,7 +127,7 @@ function MembershipPaymentForm({
     });
 
     if (error) {
-      setErrorMessage(error.message ?? 'Payment failed. Please try again.');
+      setErrorMessage(error.message ?? t('errorGeneric'));
       setSubmitting(false);
       return;
     }
@@ -144,7 +145,7 @@ function MembershipPaymentForm({
       return;
     }
 
-    setErrorMessage('Payment was not completed. Please try again.');
+    setErrorMessage(t('errorIncomplete'));
     setSubmitting(false);
   };
 
@@ -181,7 +182,7 @@ function MembershipPaymentForm({
               {tCommon('processing')}
             </span>
           ) : (
-            'Pay'
+            t('pay')
           )}
         </ButtonType2>
       </div>

@@ -128,6 +128,7 @@ const authLink = new SetContextLink((prevContext) => {
         ? `Bearer ${tokens.sessionToken}`
         : '',
       'x-device-fingerprint': deviceMetadata?.fingerprint ?? '',
+      'apollo-require-preflight': 'true',
     },
   };
 });
