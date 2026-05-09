@@ -110,6 +110,8 @@ export const REQUEST_MEMBERSHIP_COMMUNITY = gql`
     requestMembership(input: $input) {
       status
       message
+      requiresPayment
+      clientSecret
     }
   }
 `;
@@ -124,6 +126,8 @@ export const REQUEST_JOIN_COMMUNITY = gql`
     ) {
       status
       message
+      requiresPayment
+      clientSecret
     }
   }
 `;

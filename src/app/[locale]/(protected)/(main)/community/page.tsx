@@ -8,6 +8,18 @@ import { useTranslations } from 'next-intl';
 import { DISCOVER_COMMUNITIES, LIST_MY_JOINED_COMMUNITIES, REQUEST_JOIN_COMMUNITY } from '@/services/gql/community';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { MembershipPaymentModal } from './_components/MembershipPaymentModal';
+
+interface RequestMembershipPayload {
+    status: string;
+    message: string;
+    requiresPayment?: boolean | null;
+    clientSecret?: string | null;
+}
+
+interface RequestJoinCommunityResponse {
+    requestMembership: RequestMembershipPayload;
+}
 
 // Type definitions for GraphQL responses
 interface Community {
@@ -50,6 +62,12 @@ export default function Community() {
         id: '',
         name: '',
     });
+    const [paymentModal, setPaymentModal] = useState<{
+        open: boolean;
+        clientSecret: string | null;
+        communityId: string;
+        communityName: string;
+    }>({ open: false, clientSecret: null, communityId: '', communityName: '' });
     
     // Fetch user's joined communities
     const { data: myCommunitiesData, loading: myCommunitiesLoading, refetch: refetchMyCommunities } = useQuery<ListUserCommunitiesData>(
@@ -68,26 +86,43 @@ export default function Community() {
         }
     );
 
-    const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
+    const [requestJoinCommunity, { loading: joinLoading }] = useMutation<RequestJoinCommunityResponse>(REQUEST_JOIN_COMMUNITY, {
         refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
         awaitRefetchQueries: false,
     });
 
-    const handleJoinCommunity = async (communityId: string) => {
+    const handleJoinCommunity = async (communityId: string, communityName: string) => {
         try {
             const { data } = await requestJoinCommunity({
                 variables: { communityId }
             });
 
-            if (data?.requestMembership?.status === 'ACTIVE') {
-                toast.success(data.requestMembership.message ?? 'You have joined the community.');
+            const payload = data?.requestMembership;
+            if (!payload) {
+                toast.error('Failed to join community');
+                return;
+            }
+
+            // Paid community: open Stripe modal to collect payment.
+            if (payload.requiresPayment && payload.clientSecret) {
+                setPaymentModal({
+                    open: true,
+                    clientSecret: payload.clientSecret,
+                    communityId,
+                    communityName,
+                });
+                return;
+            }
+
+            if (payload.status === 'ACTIVE') {
+                toast.success(payload.message ?? 'You have joined the community.');
                 setJoinedCommunities(prev => new Set(prev).add(communityId));
                 setTimeout(() => {
                     refetchCommunities();
                     refetchMyCommunities();
                 }, 100);
-            } else if (data?.requestMembership?.status === 'PENDING') {
-                toast.success(data.requestMembership.message ?? 'Your request to join has been submitted for review.');
+            } else if (payload.status === 'PENDING') {
+                toast.success(payload.message ?? 'Your request to join has been submitted for review.');
                 void refetchCommunities();
             } else {
                 toast.error('Failed to join community');
@@ -98,14 +133,32 @@ export default function Community() {
         }
     };
 
+    const handlePaymentSuccess = () => {
+        const { communityId } = paymentModal;
+        setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
+        if (communityId) {
+            setJoinedCommunities(prev => new Set(prev).add(communityId));
+        }
+        toast.success('Payment successful. Welcome to the community!');
+        void refetchCommunities();
+        void refetchMyCommunities();
+    };
+
+    const handlePaymentClose = () => {
+        // Backend leaves the membership in PENDING_PAYMENT; the user can retry
+        // by clicking Join again. We do not auto-cancel here.
+        setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
+    };
+
     const handleJoinClick = (communityId: string, communityName: string) => {
         setJoinModal({ open: true, id: communityId, name: communityName });
     };
 
     const handleJoinConfirm = async () => {
         if (!joinModal.id) return;
-        await handleJoinCommunity(joinModal.id);
+        const { id, name } = joinModal;
         setJoinModal({ open: false, id: '', name: '' });
+        await handleJoinCommunity(id, name);
     };
 
     return (
@@ -177,6 +230,15 @@ export default function Community() {
                 description={joinModal.name ? `You are about to join ${joinModal.name}.` : 'You are about to join this community.'}
                 confirmText={tActions('join')}
                 isLoading={joinLoading}
+            />
+
+            <MembershipPaymentModal
+                open={paymentModal.open}
+                clientSecret={paymentModal.clientSecret}
+                communityId={paymentModal.communityId}
+                communityName={paymentModal.communityName}
+                onSuccess={handlePaymentSuccess}
+                onClose={handlePaymentClose}
             />
         </div>
     );

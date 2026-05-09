@@ -10,11 +10,19 @@ import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
 import JoinCommunityCard from '@/components/cards/JoinCommunityCard';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import { MembershipPaymentModal } from '@/app/[locale]/(protected)/(main)/community/_components/MembershipPaymentModal';
 import {
   DISCOVER_COMMUNITIES,
   REQUEST_JOIN_COMMUNITY,
   LIST_MY_JOINED_COMMUNITIES,
 } from '@/services/gql/community';
+
+interface RequestMembershipPayload {
+  status: string;
+  message: string;
+  requiresPayment?: boolean | null;
+  clientSecret?: string | null;
+}
 
 interface DiscoverCommunity {
   id: string;
@@ -52,6 +60,12 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
     id: '',
     name: '',
   });
+  const [paymentModal, setPaymentModal] = useState<{
+    open: boolean;
+    clientSecret: string | null;
+    communityId: string;
+    communityName: string;
+  }>({ open: false, clientSecret: null, communityId: '', communityName: '' });
 
   const { data: discoverData, loading: discoverLoading } =
     useQuery<DiscoverCommunitiesData>(DISCOVER_COMMUNITIES, {
@@ -64,7 +78,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
     });
 
   const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{
-    requestMembership: { status: string; message: string };
+    requestMembership: RequestMembershipPayload;
   }>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
   });
@@ -74,15 +88,47 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
       const { data: res } = await requestJoinCommunity({
         variables: { communityId },
       });
-      if (res?.requestMembership?.status === 'ACTIVE') {
-        toast.success(res.requestMembership.message ?? tC('joined'));
+      const payload = res?.requestMembership;
+      if (!payload) {
+        toast.error(tC('joinFailed') ?? 'Failed to join community');
+        return;
+      }
+
+      // Paid community: open Stripe modal to collect payment.
+      if (payload.requiresPayment && payload.clientSecret) {
+        setPaymentModal({
+          open: true,
+          clientSecret: payload.clientSecret,
+          communityId,
+          communityName,
+        });
+        return;
+      }
+
+      if (payload.status === 'ACTIVE') {
+        toast.success(payload.message ?? tC('joined'));
         setJoinedIds((prev) => new Set(prev).add(communityId));
+      } else if (payload.status === 'PENDING') {
+        toast.success(payload.message ?? 'Your request to join has been submitted for review.');
       } else {
         toast.error(tC('joinFailed') ?? 'Failed to join community');
       }
     } catch {
       toast.error(tC('joinFailed') ?? 'Failed to join community');
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    const { communityId } = paymentModal;
+    setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
+    if (communityId) {
+      setJoinedIds((prev) => new Set(prev).add(communityId));
+    }
+    toast.success('Payment successful. Welcome to the community!');
+  };
+
+  const handlePaymentClose = () => {
+    setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
   };
 
   const handleJoinClick = (communityId: string, communityName: string) => {
@@ -182,6 +228,15 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
           description={joinModal.name ? `You are about to join ${joinModal.name}.` : 'You are about to join this community.'}
           confirmText={tActions('join')}
           isLoading={joinLoading}
+        />
+
+        <MembershipPaymentModal
+          open={paymentModal.open}
+          clientSecret={paymentModal.clientSecret}
+          communityId={paymentModal.communityId}
+          communityName={paymentModal.communityName}
+          onSuccess={handlePaymentSuccess}
+          onClose={handlePaymentClose}
         />
       </div>
     </MultiStep>
