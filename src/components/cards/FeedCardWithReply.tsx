@@ -393,6 +393,10 @@ export default function FeedCardWithReply({
 
     /** Derived commentsData — prefer loaded from API, fall back to prop */
     const commentsData = commentsLoaded ? loadedComments : commentsDataProp;
+    /** Displayed count — backend's `engagementCounts.comments` is authoritative when > 0,
+     * but falls back to the actually-loaded list length so the chip is never hidden while
+     * comments are visible. */
+    const displayedCommentCount = Math.max(commentCount, commentsData.length);
     const [showMediaModal, setShowMediaModal] = useState(false);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [showCommentSheet, setShowCommentSheet] = useState(false);
@@ -961,7 +965,7 @@ export default function FeedCardWithReply({
                             </button>
                             <button className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
                                 <img width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-5 h-5 object-contain" />
-                                <span>{formatCount(commentCount)}</span>
+                                <span>{formatCount(displayedCommentCount)}</span>
                             </button>
                             <button onClick={handleShare} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
                                 <img width={20} height={20} src="/SHARE.svg" alt="share" className="w-5 h-5 object-contain" />
@@ -1021,7 +1025,7 @@ export default function FeedCardWithReply({
                             </button>
                             <button onClick={() => setShowCommentSheet(true)} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
                                 <img width={20} height={20} src="/COMMENT.svg" alt="comment" className="w-5 h-5 object-contain" />
-                                <span>{formatCount(commentCount)}</span>
+                                <span>{formatCount(displayedCommentCount)}</span>
                             </button>
                             <button onClick={handleShare} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
                                 <img width={20} height={20} src="/SHARE.svg" alt="share" className="w-5 h-5 object-contain" />
@@ -1375,7 +1379,7 @@ export default function FeedCardWithReply({
                 {renderVideos()}
 
                 {/* Reaction Bar - only visible when at least one count > 0 */}
-                {(likeCount > 0 || commentCount > 0 || shareCount > 0) && (
+                {(likeCount > 0 || displayedCommentCount > 0 || shareCount > 0) && (
                     <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
                         {likeCount > 0 && (
                             <button
@@ -1389,14 +1393,14 @@ export default function FeedCardWithReply({
                                 <span>{formatCount(likeCount)}</span>
                             </button>
                         )}
-                        {commentCount > 0 && (
+                        {displayedCommentCount > 0 && (
                             <button
                                 className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
                                 onClick={toggleComments}
-                                title={`${commentCount.toLocaleString()} comments`}
+                                title={`${displayedCommentCount.toLocaleString()} comments`}
                             >
                                 <img width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[1.25rem] h-[1.25rem] object-contain" />
-                                <span>{formatCount(commentCount)}</span>
+                                <span>{formatCount(displayedCommentCount)}</span>
                             </button>
                         )}
                         {shareCount > 0 && (
