@@ -371,7 +371,7 @@ export default function MessageInputGlobal({
                         </div>
                     )}
 
-                    <div className="relative gap-2 items-center">
+                    <div className="relative flex gap-2 items-center">
                         {mentionSuggestions.length > 0 && typeof document !== 'undefined' && createPortal(
                             <div
                                 style={{ position: 'fixed', top: mentionPosition.top, left: mentionPosition.left, width: mentionPosition.width, zIndex: 9999 }}

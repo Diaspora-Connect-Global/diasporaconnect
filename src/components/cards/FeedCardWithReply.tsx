@@ -485,7 +485,14 @@ export default function FeedCardWithReply({
     }, [router, currentUserId]);
 
     const toggleCommentInput = () => {
-        setShowCommentInput((v) => !v);
+        setShowCommentInput((v) => {
+            const willShow = !v;
+            if (willShow) {
+                setShowComments(true);
+                loadComments();
+            }
+            return willShow;
+        });
         onComment?.();
     };
 
@@ -562,7 +569,6 @@ export default function FeedCardWithReply({
             if (result != null && typeof (result as Promise<unknown>).then === 'function') {
                 await result;
             }
-            setCommentCount((c) => c + 1);
             setShowComments(true);
             setShowCommentInput(false);
             setReplyToCommentId(null);
