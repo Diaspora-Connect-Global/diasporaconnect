@@ -19,10 +19,27 @@ import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
 
 function getProfileData(post: Post) {
-  if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
+  const orgProfile = post.authorProfile?.organizationProfile;
+  if (post.authorType === 'COMMUNITY' && orgProfile) {
     return {
-      name: post.authorProfile.organizationProfile.name,
-      avatar: post.authorProfile.organizationProfile.logo || '/default-avatar.png',
+      name: orgProfile.name,
+      avatar: orgProfile.logo || '/GLOBE.png',
+      tier: undefined,
+      type: 'Community' as const,
+    };
+  }
+  if (post.authorType === 'ASSOCIATION' && orgProfile) {
+    return {
+      name: orgProfile.name,
+      avatar: orgProfile.logo || '/ADANSI.PNG',
+      tier: undefined,
+      type: 'Association' as const,
+    };
+  }
+  if (post.authorType === 'ORG' && orgProfile) {
+    return {
+      name: orgProfile.name,
+      avatar: orgProfile.logo || '/default-avatar.png',
       tier: undefined,
       type: 'Organization' as const,
     };
@@ -211,6 +228,8 @@ export default function FeedPage() {
                     profileImage={profileData.avatar}
                     profileName={profileData.name}
                     {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
+                    authorEntityId={post.authorId}
+                    authorEntityType={post.authorType}
                     profileTier={profileData.tier}
                     category={profileData.type}
                     postDate={formatDateProximity(post.createdAt)}

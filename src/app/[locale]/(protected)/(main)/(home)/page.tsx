@@ -298,17 +298,38 @@ export default function Home() {
   // Helper function to get profile data based on author type
   // Updated to handle uppercase author types from API
   const getProfileData = (post: ApiPost) => {
-    // Handle organization posts (authorType === 'ORG')
-    if (post.authorType === 'ORG' && post.authorProfile?.organizationProfile) {
+    const orgProfile = post.authorProfile?.organizationProfile;
+    if (post.authorType === 'COMMUNITY' && orgProfile) {
       return {
-        name: post.authorProfile.organizationProfile.name,
-        avatar: post.authorProfile.organizationProfile.logo || '/default-avatar.png',
+        name: orgProfile.name,
+        avatar: orgProfile.logo || '/GLOBE.png',
         tier: undefined,
-        isVerified: post.authorProfile.organizationProfile.isVerified,
+        isVerified: orgProfile.isVerified,
+        isVip: false,
+        type: 'Community' as const,
+      };
+    }
+    if (post.authorType === 'ASSOCIATION' && orgProfile) {
+      return {
+        name: orgProfile.name,
+        avatar: orgProfile.logo || '/ADANSI.PNG',
+        tier: undefined,
+        isVerified: orgProfile.isVerified,
+        isVip: false,
+        type: 'Association' as const,
+      };
+    }
+    // Handle organization posts (authorType === 'ORG')
+    if (post.authorType === 'ORG' && orgProfile) {
+      return {
+        name: orgProfile.name,
+        avatar: orgProfile.logo || '/default-avatar.png',
+        tier: undefined,
+        isVerified: orgProfile.isVerified,
         isVip: false,
         type: 'Organization' as const
       };
-    } 
+    }
     // Handle user posts (authorType === 'USER')
     else if (post.authorType === 'USER' && post.authorProfile?.userProfile) {
       return {
@@ -519,6 +540,8 @@ export default function Home() {
                   profileImage={profileData.avatar}
                   profileName={profileData.name}
                     authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
+                    authorEntityId={post.authorId}
+                    authorEntityType={post.authorType}
                     profileTier={profileData.tier}
                   category={profileData.type}
                   postDate={formatDateProximity(post.createdAt)}

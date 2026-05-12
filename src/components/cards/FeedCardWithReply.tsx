@@ -49,6 +49,8 @@ interface FeedCardProps {
     profileImage: string;
     profileName: string;
     authorUserId?: string;
+    authorEntityId?: string;
+    authorEntityType?: 'COMMUNITY' | 'ASSOCIATION' | 'USER' | 'ORG' | string;
     profileTier?: Tier;
     category: string;
     postDate: string;
@@ -118,6 +120,8 @@ export default function FeedCardWithReply({
     profileImage,
     profileName,
     authorUserId,
+    authorEntityId,
+    authorEntityType,
     profileTier,
     category,
     postDate,
@@ -478,14 +482,23 @@ export default function FeedCardWithReply({
     const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
     const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
 
-    const goToProfile = useCallback((userId?: string, authorType?: string) => {
-        if (!userId) return;
-        if (authorType && authorType.toUpperCase() !== 'USER') return;
-        if (currentUserId && userId === currentUserId) {
+    const goToProfile = useCallback((id?: string, authorType?: string) => {
+        if (!id) return;
+        const upper = authorType?.toUpperCase();
+        if (upper === 'COMMUNITY') {
+            router.push(`/community/${id}`);
+            return;
+        }
+        if (upper === 'ASSOCIATION') {
+            router.push(`/association/${id}`);
+            return;
+        }
+        if (upper && upper !== 'USER') return;
+        if (currentUserId && id === currentUserId) {
             router.push('/profile');
             return;
         }
-        router.push(`/${userId}`);
+        router.push(`/${id}`);
     }, [router, currentUserId]);
 
     const toggleCommentInput = () => {
@@ -1324,13 +1337,13 @@ export default function FeedCardWithReply({
                             loading="lazy"
                             decoding="async"
                             className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle flex-shrink-0 cursor-pointer"
-                            onClick={() => goToProfile(authorUserId, 'USER')}
+                            onClick={() => goToProfile(authorEntityId ?? authorUserId, authorEntityType ?? 'USER')}
                         />
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center">
                                 <h3
                                     className="label-large text-text-primary truncate cursor-pointer hover:text-text-brand"
-                                    onClick={() => goToProfile(authorUserId, 'USER')}
+                                    onClick={() => goToProfile(authorEntityId ?? authorUserId, authorEntityType ?? 'USER')}
                                 >
                                     {profileName}
                                 </h3>

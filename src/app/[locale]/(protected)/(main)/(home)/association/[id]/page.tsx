@@ -461,6 +461,8 @@ export default function AssociationPage() {
                                 profileImage={association.avatarUrl || '/ADANSI.PNG'}
                                 profileName={association.name}
                                 {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
+                                authorEntityId={post.authorId}
+                                authorEntityType={post.authorType}
                                 createdAt={post.createdAt}
                                 category={association.name}
                                 postDate={formatDateProximity(post.createdAt)}

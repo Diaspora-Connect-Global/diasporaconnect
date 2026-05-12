@@ -448,6 +448,8 @@ export default function CommunityDetailPage() {
                 profileImage={community.avatarUrl || '/GLOBE.png'}
                 profileName={community.name}
                 {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
+                authorEntityId={post.authorId}
+                authorEntityType={post.authorType}
                 createdAt={post.createdAt}
                 category={community.name}
                 postDate={formatDateProximity(post.createdAt)}

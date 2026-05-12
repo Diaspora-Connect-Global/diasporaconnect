@@ -301,6 +301,8 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 profileImage={profileData.avatar}
                 profileName={profileData.name}
                 authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
+                authorEntityId={post.authorId}
+                authorEntityType={post.authorType}
                 category={profileData.type}
                 postDate={formatDateProximity(post.createdAt)}
                 createdAt={post.createdAt}

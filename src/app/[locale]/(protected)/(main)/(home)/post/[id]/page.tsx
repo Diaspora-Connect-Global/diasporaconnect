@@ -187,13 +187,27 @@ export default function PostPage() {
     name: string;
     avatar: string;
     tier: ReturnType<typeof resolveUserTier> | undefined;
-    type: 'User' | 'Organization';
+    type: 'User' | 'Organization' | 'Community' | 'Association';
   };
-  if (normalizedPostResolved.authorType === 'ORG' && normalizedPostResolved.authorProfile?.organizationProfile) {
-    const org = normalizedPostResolved.authorProfile.organizationProfile;
+  const orgProfile = normalizedPostResolved.authorProfile?.organizationProfile;
+  if (normalizedPostResolved.authorType === 'COMMUNITY' && orgProfile) {
     profileData = {
-      name: org.name?.trim() || 'Organization',
-      avatar: org.logo?.trim() || '/default-avatar.png',
+      name: orgProfile.name?.trim() || 'Community',
+      avatar: orgProfile.logo?.trim() || '/GLOBE.png',
+      tier: undefined,
+      type: 'Community',
+    };
+  } else if (normalizedPostResolved.authorType === 'ASSOCIATION' && orgProfile) {
+    profileData = {
+      name: orgProfile.name?.trim() || 'Association',
+      avatar: orgProfile.logo?.trim() || '/ADANSI.PNG',
+      tier: undefined,
+      type: 'Association',
+    };
+  } else if (normalizedPostResolved.authorType === 'ORG' && orgProfile) {
+    profileData = {
+      name: orgProfile.name?.trim() || 'Organization',
+      avatar: orgProfile.logo?.trim() || '/default-avatar.png',
       tier: undefined,
       type: 'Organization',
     };
@@ -252,6 +266,8 @@ export default function PostPage() {
           profileImage={profileData.avatar}
           profileName={profileData.name}
           {...(normalizedPostResolved.authorType === 'USER' ? { authorUserId: normalizedPostResolved.authorId } : {})}
+          authorEntityId={normalizedPostResolved.authorId}
+          authorEntityType={normalizedPostResolved.authorType}
           profileTier={profileData.tier}
           category={profileData.type}
           postDate={formatDateProximity(normalizedPostResolved.createdAt)}
