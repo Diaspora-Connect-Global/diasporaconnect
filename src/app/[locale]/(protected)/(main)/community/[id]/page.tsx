@@ -20,9 +20,17 @@ import {
   CANCEL_JOIN_REQUEST_COMMUNITY,
   type CommunityJoinPolicy,
 } from '@/services/gql/community';
-import { GET_FEED } from '@/services/gql/postsFeed';
+import {
+  GET_FEED,
+  ADD_ENGAGEMENT,
+  REMOVE_ENGAGEMENT,
+  CREATE_COMMENT,
+  type AddEngagementData,
+  type RemoveEngagementData,
+  type CreateCommentData,
+} from '@/services/gql/postsFeed';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
-import { buildMentionMap } from '@/components/custom/richTextRenderer';
+import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 
 interface CommunityDetails {
   id: string;
@@ -59,6 +67,7 @@ interface FeedPost {
   userEngagement: {
     hasLiked: boolean;
     hasSaved: boolean;
+    hasShared?: boolean;
   };
 }
 
@@ -139,6 +148,10 @@ export default function CommunityDetailPage() {
     ],
   });
 
+  const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
+  const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
+  const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
+
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [localPosts, setLocalPosts] = useState<FeedPost[]>([]);
@@ -146,6 +159,99 @@ export default function CommunityDetailPage() {
   useEffect(() => {
     if (feedData?.feed?.posts) setLocalPosts(feedData.feed.posts);
   }, [feedData]);
+
+  const updatePostCounts = (
+    postId: string,
+    delta: { likes?: number; comments?: number; shares?: number; saves?: number; hasLiked?: boolean; hasSaved?: boolean; hasShared?: boolean }
+  ) => {
+    setLocalPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              engagementCounts: {
+                likes: p.engagementCounts.likes + (delta.likes ?? 0),
+                comments: p.engagementCounts.comments + (delta.comments ?? 0),
+                shares: p.engagementCounts.shares + (delta.shares ?? 0),
+                saves: p.engagementCounts.saves + (delta.saves ?? 0),
+              },
+              userEngagement: {
+                ...p.userEngagement,
+                ...(delta.hasLiked !== undefined ? { hasLiked: delta.hasLiked } : {}),
+                ...(delta.hasSaved !== undefined ? { hasSaved: delta.hasSaved } : {}),
+                ...(delta.hasShared !== undefined ? { hasShared: delta.hasShared } : {}),
+              },
+            }
+          : p
+      )
+    );
+  };
+
+  const handleLike = async (postId: string, liked: boolean) => {
+    updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
+    try {
+      if (liked) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      }
+    } catch (err) {
+      updatePostCounts(postId, { likes: liked ? -1 : 1, hasLiked: !liked });
+      console.error(`Failed to ${liked ? 'like' : 'unlike'} post:`, err);
+      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
+    }
+  };
+
+  const handleSave = async (postId: string) => {
+    updatePostCounts(postId, { saves: 1, hasSaved: true });
+    try {
+      await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+    } catch (err) {
+      updatePostCounts(postId, { saves: -1, hasSaved: false });
+      console.error('Failed to save post:', err);
+      toast.error('Failed to save post');
+    }
+  };
+
+  const handleShare = async (postId: string) => {
+    updatePostCounts(postId, { shares: 1, hasShared: true });
+    try {
+      await addEngagement({ variables: { input: { postId, engagementType: 'SHARE' } } });
+    } catch (err) {
+      updatePostCounts(postId, { shares: -1, hasShared: false });
+      console.error('Failed to share post:', err);
+      toast.error('Failed to share post');
+    }
+  };
+
+  const handleSendComment = async (
+    postId: string,
+    content: string,
+    parentId?: string,
+    mentions?: MentionInputItem[]
+  ) => {
+    if (!content.trim()) return;
+    updatePostCounts(postId, { comments: 1 });
+    try {
+      await createComment({
+        variables: {
+          input: {
+            postId,
+            text: content,
+            idempotencyKey: crypto.randomUUID(),
+            ...(parentId ? { parentId } : {}),
+            ...(mentions?.length ? { mentions } : {}),
+          },
+        },
+      });
+      toast.success('Comment posted!');
+    } catch (err) {
+      updatePostCounts(postId, { comments: -1 });
+      console.error('Failed to post comment:', err);
+      toast.error('Failed to post comment');
+      throw err;
+    }
+  };
 
   const community = detailsData?.getCommunity;
   const posts = localPosts;
@@ -351,11 +457,15 @@ export default function CommunityDetailPage() {
                 shares={post.engagementCounts.shares}
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
-                onLike={() => {}}
+                onLike={(liked) => handleLike(post.id, liked)}
                 onComment={() => {}}
-                onShare={() => {}}
-                onSave={() => {}}
+                onShare={() => handleShare(post.id)}
+                onSave={() => handleSave(post.id)}
+                onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
                 onDelete={(id) => setLocalPosts(prev => prev.filter(p => p.id !== id))}
+                isLiked={post.userEngagement.hasLiked}
+                isSaved={post.userEngagement.hasSaved}
+                isShared={post.userEngagement.hasShared}
                 joinButton={!isActive}
               />
             ))
