@@ -11,7 +11,7 @@ import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "../custom/button";
 import { useTranslations } from 'next-intl';
-import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import {
     GET_GROUP,
     GET_GROUP_MEMBERS,
@@ -36,20 +36,24 @@ import {
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { EditGroupModal } from "./modals/EditGroupModal";
 import { ManageMemberModal } from "./modals/ManageMemberModal";
+import { MessageStatusIcon } from "./MessageStatusIcon";
+import { TypingDots } from "./TypingDots";
 import { ConfirmationModal } from "../custom/confirmationModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AddMembersModal } from "./modals/AddMembersModal";
-import { Check, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE, GET_MESSAGES, GET_CONVERSATIONS, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
-import type { CreateConversationData, SendMessageData, GetMessagesData, GetConversationsData, MarkConversationAsReadData, Message, MessageMention } from "@/services/gql/types/messaging";
-import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
+import { SEND_MESSAGE, GET_CONVERSATIONS } from "@/services/gql/messaging";
+import type { SendMessageData } from "@/services/gql/types/messaging";
+import { useChatConversation } from "@/hooks/useChatConversation";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useTypingIndicator } from "@/hooks/useTypingIndicator";
+import { useMediaUpload } from "@/hooks/useMediaUpload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { CircularImageCropper } from "@/lib/imagecropper";
-import type { GetUploadUrlResponse } from "@/services/gql/upload";
 import { ApiMessage } from "@/store/ChatStore";
 import { toast } from "sonner";
 
@@ -69,7 +73,6 @@ export default function GroupChat() {
     const tCommon = useTranslations('common');
     const router = useRouter();
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const pendingRevokeRef = useRef<Record<string, string[]>>({});
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [repliesSidebarOpen, setRepliesSidebarOpen] = useState(false);
     const [selectedMessage, setSelectedMessage] = useState<ApiMessage | null>(null);
@@ -90,22 +93,15 @@ export default function GroupChat() {
     const [isDeletingGroup, setIsDeletingGroup] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
-    const [typingUserIds, setTypingUserIds] = useState<Set<string>>(new Set());
 
-    const { activeChat, users, setActiveChat, addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages } = useChatStore();
-
-    const [conversationId, setConversationId] = useState<string | null>(null);
+    const { activeChat, users, setActiveChat, addApiMessage, getApiMessagesByConversation } = useChatStore();
+    const { uploadFiles, finalizeUpload } = useMediaUpload();
 
     /** Lock conversationId + replyToId when reply panel opens so refetches don't change them mid-reply */
     const replyContextRef = useRef<{ conversationId: string; replyToId: string } | null>(null);
     const isSendingReplyRef = useRef(false);
 
-    const [createConversationMutation] = useGqlMutation<CreateConversationData>(CREATE_CONVERSATION);
     const [sendMessageMutation] = useGqlMutation<SendMessageData>(SEND_MESSAGE, {
-        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
-    });
-    const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
-    const [markConversationAsRead] = useGqlMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
 
@@ -122,24 +118,6 @@ export default function GroupChat() {
         variables: { groupId: chat?.id || '', membersLimit: 100, membersOffset: 0 },
         skip: !chat?.id,
     });
-
-    const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
-        variables: { limit: 100, offset: 0 },
-        skip: !chat?.id,
-    });
-
-    // Stable id for this group's conversation from API (avoids effect re-running on every GET_CONVERSATIONS refetch)
-    const resolvedGroupConvId = useMemo(() => {
-        const list = conversationsData?.getConversations;
-        if (!list?.length || !chat?.id) return null;
-        const c = list.find((x: { type?: string; groupId?: string | null }) =>
-            (x.type === 'GROUP' || x.type === 'group') && x.groupId === chat.id
-        );
-        return c?.id ?? null;
-    }, [conversationsData?.getConversations, chat?.id]);
-
-    const creationInFlightRef = useRef<string | null>(null);
-    const creationMemberIdsKeyRef = useRef<string | null>(null);
 
     const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
         refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
@@ -180,6 +158,14 @@ export default function GroupChat() {
     const currentUserMember = groupMembers.find(m => m.userId === currentUserId);
     const isOwner = group?.ownerId === currentUserId;
     const isAdmin = currentUserMember?.role === MemberRole.ADMIN || isOwner;
+
+    const { conversationId } = useChatConversation({
+        chatId: chat?.id ?? null,
+        type: 'group',
+        currentUserId,
+        participantIds: groupMembers.map(m => m.userId),
+        enabled: groupMembers.length > 0,
+    });
 
     // Group avatar upload (info sidebar)
     const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -234,124 +220,7 @@ export default function GroupChat() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [mainThreadMessages]);
 
-    // Create or retrieve group conversation (resolve from store, then GET_CONVERSATIONS, then create)
-    useEffect(() => {
-        if (!chat?.id || !currentUserId || !groupMembers.length) return;
-
-        const existing = getRealConversation(chat.id);
-        if (existing) {
-            setConversationId(existing.conversationId);
-            return;
-        }
-
-        // Resolve from existing conversations (same as DM) so we get messages on first load / after refresh
-        if (resolvedGroupConvId) {
-            const list = conversationsData?.getConversations;
-            const groupConv = list?.find(
-                (c: { type?: string; groupId?: string | null; id?: string }) =>
-                    (c.type === 'GROUP' || c.type === 'group') && c.groupId === chat.id && c.id === resolvedGroupConvId
-            );
-            if (groupConv) {
-                setConversationId(groupConv.id);
-                const participantIds = (groupConv as { participantIds?: string[] }).participantIds ?? [];
-                setRealConversation(chat.id, {
-                    conversationId: groupConv.id,
-                    type: 'GROUP',
-                    participantIds,
-                });
-                return;
-            }
-            // ID was resolved earlier but not in current list (e.g. refetched list is stale/incomplete).
-            // Use the known id and set store to avoid creating a duplicate conversation.
-            const fallbackParticipantIds = groupMembers.map(m => m.userId);
-            setConversationId(resolvedGroupConvId);
-            setRealConversation(chat.id, {
-                conversationId: resolvedGroupConvId,
-                type: 'GROUP',
-                participantIds: fallbackParticipantIds,
-            });
-            return;
-        }
-
-        const memberIds = groupMembers.map(m => m.userId).filter(id => id !== currentUserId);
-        const memberIdsKey = memberIds.slice().sort().join(',');
-
-        // Prevent duplicate create for the same chat+members; if members changed during in-flight create, allow new create
-        if (creationInFlightRef.current === chat.id && creationMemberIdsKeyRef.current === memberIdsKey) return;
-        creationInFlightRef.current = chat.id;
-        creationMemberIdsKeyRef.current = memberIdsKey;
-
-        const initGroupConversation = async () => {
-            try {
-                const { data } = await createConversationMutation({
-                    variables: {
-                        type: 'GROUP',
-                        participantIds: memberIds,
-                        groupId: chat?.id,
-                    },
-                });
-
-                if (data?.createConversation) {
-                    const convId = data.createConversation;
-                    setConversationId(convId);
-                    setRealConversation(chat?.id, {
-                        conversationId: convId,
-                        type: 'GROUP',
-                        participantIds: [currentUserId, ...memberIds],
-                    });
-                }
-            } catch (error) {
-                console.error('Failed to create group conversation:', error);
-            } finally {
-                creationInFlightRef.current = null;
-                creationMemberIdsKeyRef.current = null;
-            }
-        };
-
-        initGroupConversation();
-    }, [chat?.id, currentUserId, groupMembers, resolvedGroupConvId, conversationsData?.getConversations, getRealConversation, setRealConversation, createConversationMutation]);
-
-    // Fetch message history for this group conversation
-    const { data: messagesData, refetch: refetchMessages } = useQuery<GetMessagesData>(GET_MESSAGES, {
-        variables: { conversationId: conversationId || '', limit: 50, offset: 0 },
-        skip: !conversationId,
-        fetchPolicy: 'network-only',
-    });
-
-    // Sync GraphQL messages to store whenever we have data for the current conversation (initial load, refetch, or refresh)
-    useEffect(() => {
-        if (!conversationId) return;
-        const getMessagesResult = messagesData?.getMessages;
-        if (getMessagesResult === undefined) return;
-
-        const messages = getMessagesResult.messages ?? [];
-        const firstConvId = messages[0]?.conversationId;
-        if (messages.length > 0 && firstConvId && firstConvId !== conversationId) return;
-
-        const history = messages.map((m: Message): ApiMessage => ({
-            id: m.id,
-            conversationId: m.conversationId,
-            senderId: m.senderId,
-            type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
-            content: m.content || '',
-            createdAt: m.createdAt,
-            mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
-            replyToId: m.replyToId,
-            status: m.status ? (m.status.toLowerCase() as ApiMessage['status']) : 'sent',
-            attachments: m.attachments ?? [],
-        }));
-
-        setApiMessages(conversationId, history);
-    }, [messagesData, conversationId, setApiMessages]);
-
-    // Mark conversation as read when user opens it (resets badge count)
-    useEffect(() => {
-        if (conversationId) {
-            markConversationAsRead({ variables: { conversationId } }).catch((err) => {
-                console.warn('markConversationAsRead failed:', err);
-            });
-        }
-    }, [conversationId, markConversationAsRead]);
+    const { refetch: refetchMessages } = useChatMessages({ conversationId });
 
     // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
     useEffect(() => {
@@ -391,55 +260,10 @@ export default function GroupChat() {
         };
     }, [conversationId, refetchMessages]);
 
-    // Typing indicator: subscribe to typing:start / typing:stop (exclude current user)
-    useEffect(() => {
-        if (!conversationId || !currentUserId) return;
-        const timeoutsByUser = new Map<string, ReturnType<typeof setTimeout>>();
-
-        const unsubStart = messageService.onTypingStart((data) => {
-            if (data.conversationId !== conversationId || data.userId === currentUserId) return;
-            const uid = data.userId;
-            if (timeoutsByUser.has(uid)) {
-                clearTimeout(timeoutsByUser.get(uid)!);
-                timeoutsByUser.delete(uid);
-            }
-            setTypingUserIds((prev) => new Set(prev).add(uid));
-            const t = setTimeout(() => {
-                timeoutsByUser.delete(uid);
-                setTypingUserIds((prev) => {
-                    const next = new Set(prev);
-                    next.delete(uid);
-                    return next;
-                });
-            }, 5000);
-            timeoutsByUser.set(uid, t);
-        });
-        const unsubStop = messageService.onTypingStop((data) => {
-            if (data.conversationId !== conversationId || data.userId === currentUserId) return;
-            const uid = data.userId;
-            if (timeoutsByUser.has(uid)) {
-                clearTimeout(timeoutsByUser.get(uid)!);
-                timeoutsByUser.delete(uid);
-            }
-            setTypingUserIds((prev) => {
-                const next = new Set(prev);
-                next.delete(uid);
-                return next;
-            });
-        });
-
-        return () => {
-            timeoutsByUser.forEach((t) => clearTimeout(t));
-            unsubStart();
-            unsubStop();
-        };
-    }, [conversationId, currentUserId]);
-
-    const handleTyping = useCallback((isTyping: boolean) => {
-        if (!conversationId) return;
-        if (isTyping) messageService.emitTypingStart(conversationId);
-        else messageService.emitTypingStop(conversationId);
-    }, [conversationId]);
+    const { typingUserIds, emit: handleTyping } = useTypingIndicator({
+        conversationId,
+        excludeUserId: currentUserId,
+    });
 
     const handleMBack = () => {
         setActiveChat(null);
@@ -471,96 +295,28 @@ export default function GroupChat() {
         }
 
         const idempotencyKey = crypto.randomUUID();
-        const placeholderId = `pending-${Date.now()}-${idempotencyKey.slice(0, 8)}`;
-        let content: string;
-        let messageType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' = 'TEXT';
-        let attachments: Array<{ publicUrl: string; mimeType: string }> = [];
 
+        let upload: Awaited<ReturnType<typeof uploadFiles>> = null;
         if (hasFiles && files) {
-            const sendingPreviews: Array<{ url?: string; mimeType: string }> = [];
-            const urlsToRevoke: string[] = [];
-            const firstFileMime = files[0]?.type || '';
-            const placeholderType: ApiMessage['type'] = firstFileMime.startsWith('video/')
-                ? 'VIDEO'
-                : firstFileMime.startsWith('audio/')
-                    ? 'AUDIO'
-                    : firstFileMime.startsWith('image/')
-                        ? 'IMAGE'
-                        : 'FILE';
-            for (const file of files) {
-                const mime = file.type || 'application/octet-stream';
-                if (mime.startsWith('image/') || mime.startsWith('video/')) {
-                    const url = URL.createObjectURL(file);
-                    sendingPreviews.push({ url, mimeType: mime });
-                    urlsToRevoke.push(url);
-                } else {
-                    sendingPreviews.push({ mimeType: mime });
-                }
-            }
-            pendingRevokeRef.current[placeholderId] = urlsToRevoke;
-            addApiMessage({
-                id: placeholderId,
+            upload = await uploadFiles({
+                files,
                 conversationId,
                 senderId: currentUserId,
-                type: placeholderType,
-                content: messageText.trim(),
-                createdAt: new Date().toISOString(),
-                status: 'sending',
-                attachments: [],
-                sendingPreviews,
+                messageText,
             });
-
-            try {
-                for (const file of files) {
-                    const contentType = chatMediaContentType(file.type || 'application/octet-stream');
-                    const { data: uploadData } = await getUploadUrl({
-                        variables: { contentType, category: 'chat' },
-                    });
-                    if (!uploadData?.getUploadUrl?.uploadUrl) {
-                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                        delete pendingRevokeRef.current[placeholderId];
-                        removeApiMessage(placeholderId);
-                        toast.error('Could not get upload URL. Please try again.');
-                        return;
-                    }
-                    const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
-                    const uploadRes = await fetch(uploadUrl, {
-                        method: 'PUT',
-                        body: file,
-                        headers: { 'Content-Type': contentType },
-                    });
-                    if (!uploadRes.ok) {
-                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                        delete pendingRevokeRef.current[placeholderId];
-                        removeApiMessage(placeholderId);
-                        toast.error(`Upload failed for ${file.name}. Please try again.`);
-                        return;
-                    }
-                    attachments.push({ publicUrl, mimeType: contentType });
-                }
-            } catch (err) {
-                console.error('Upload failed:', err);
-                (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                delete pendingRevokeRef.current[placeholderId];
-                removeApiMessage(placeholderId);
-                toast.error('Upload failed. Please try again.');
-                return;
-            }
-
-            const firstMime = attachments[0]?.mimeType ?? '';
-            if (firstMime.startsWith('image/')) messageType = 'IMAGE';
-            else if (firstMime.startsWith('video/')) messageType = 'VIDEO';
-            else if (firstMime.startsWith('audio/')) messageType = 'AUDIO';
-            else messageType = 'FILE';
-            content = hasText ? messageText.trim() : (attachments[0]?.publicUrl ?? '');
-        } else {
-            content = messageText.trim();
+            if (!upload) return;
         }
+
+        const attachments = upload?.attachments ?? [];
+        const messageType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' = upload?.messageType ?? 'TEXT';
+        const content = attachments[0]
+            ? (hasText ? messageText.trim() : attachments[0].publicUrl)
+            : messageText.trim();
 
         const attachmentInput = attachments.length
             ? attachments.map((a) => ({ publicUrl: a.publicUrl, mimeType: a.mimeType }))
             : undefined;
-        const sendContent = attachments.length ? (hasText ? messageText.trim() : content) : content;
+        const sendContent = content;
 
         if (replyingTo) {
             if (isSendingReplyRef.current) {
@@ -592,11 +348,7 @@ export default function GroupChat() {
                 });
 
                 if (data?.sendMessage) {
-                    if (hasFiles && files) {
-                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                        delete pendingRevokeRef.current[placeholderId];
-                        removeApiMessage(placeholderId);
-                    }
+                    if (upload) finalizeUpload(upload.placeholderId);
                     const sentMsg: ApiMessage = {
                         id: data.sendMessage,
                         conversationId: replyConvId,
@@ -619,11 +371,7 @@ export default function GroupChat() {
                 }
             } catch (error) {
                 console.error('Failed to send reply:', error);
-                if (hasFiles && files) {
-                    (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                    delete pendingRevokeRef.current[placeholderId];
-                    removeApiMessage(placeholderId);
-                }
+                if (upload) finalizeUpload(upload.placeholderId);
                 toast.error('Failed to send reply. Please try again.');
             } finally {
                 isSendingReplyRef.current = false;
@@ -642,11 +390,7 @@ export default function GroupChat() {
                 });
 
                 if (data?.sendMessage) {
-                    if (hasFiles && files) {
-                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                        delete pendingRevokeRef.current[placeholderId];
-                        removeApiMessage(placeholderId);
-                    }
+                    if (upload) finalizeUpload(upload.placeholderId);
                     const sentMsg: ApiMessage = {
                         id: data.sendMessage,
                         conversationId,
@@ -668,11 +412,7 @@ export default function GroupChat() {
                 }
             } catch (error) {
                 console.error('Failed to send message:', error);
-                if (hasFiles && files) {
-                    (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                    delete pendingRevokeRef.current[placeholderId];
-                    removeApiMessage(placeholderId);
-                }
+                if (upload) finalizeUpload(upload.placeholderId);
                 toast.error('Failed to send message. Please try again.');
             }
         }
@@ -842,7 +582,7 @@ export default function GroupChat() {
             <div className="flex flex-row h-full space-x-0 md:space-x-2">
 
                 {/* Main Chat Area */}
-                <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'}`}>
+                <div className={`flex-1 min-w-0 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 overflow-hidden ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'}`}>
                     {/* Group Header */}
                     <div className="md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                         <div className="flex items-center space-x-3">
@@ -886,7 +626,10 @@ export default function GroupChat() {
                     </ButtonType3>
 
                     {/* Messages Area - only top-level messages; replies show in Reply section */}
-                    <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
+                    <div
+                        className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-3 md:p-4 space-y-3 md:space-y-4"
+                        style={{ scrollbarGutter: 'stable' }}
+                    >
                         {mainThreadMessages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-text-secondary">
                                 <MessageCircle className="w-12 h-12 mb-4 opacity-50" />
@@ -898,9 +641,9 @@ export default function GroupChat() {
                                 return (
                                     <div
                                         key={message.id}
-                                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                                        className={`flex min-w-0 ${isMe ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? 'ml-auto' : ''}`}>
+                                        <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md min-w-0 ${isMe ? 'ml-auto' : ''}`}>
                                             {message.status === 'sending' ? (
                                                 message.sendingPreviews?.length ? (
                                                     <>
@@ -995,15 +738,7 @@ export default function GroupChat() {
                                                 )}
                                                 <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center gap-1">
                                                     {formatChatTimestamp(message.createdAt, { timeZone: userTimeZone })}
-                                                    {isMe && message.status !== 'sending' && (
-                                                        <span className={message.status === "read" ? "text-[#34B7F1]" : "text-text-tertiary"}>
-                                                            {message.status === "read" || message.status === "delivered" ? (
-                                                                <span className="inline-flex"><Check className="w-3 h-3 -ml-0.5" /><Check className="w-3 h-3 -ml-1" /></span>
-                                                            ) : (
-                                                                <Check className="w-3 h-3" />
-                                                            )}
-                                                        </span>
-                                                    )}
+                                                    {isMe && <MessageStatusIcon status={message.status} unreadClassName="text-text-tertiary" />}
                                                 </p>
                                                 <ButtonType3
                                                     onClick={() => handleViewReplies(message)}
@@ -1020,11 +755,7 @@ export default function GroupChat() {
                         <div ref={messagesEndRef} />
                         {typingUserIds.size > 0 && (
                             <div className="flex-shrink-0 px-3 py-1.5 flex items-center gap-2 text-text-tertiary text-xs sm:text-sm">
-                                <span className="inline-flex gap-0.5">
-                                    {[0, 1, 2].map((i) => (
-                                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-text-tertiary animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
-                                    ))}
-                                </span>
+                                <TypingDots dotClassName="bg-text-tertiary" />
                                 {typingUserIds.size === 1
                                     ? `${getSenderName([...typingUserIds][0])} is typing...`
                                     : `${typingUserIds.size} people are typing...`}

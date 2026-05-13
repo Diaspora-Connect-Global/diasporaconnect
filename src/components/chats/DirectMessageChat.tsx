@@ -3,7 +3,7 @@
 // ============================================
 // File: components/chats/DirectMessageChat.tsx
 
-import { Check, ChevronRight, Loader2, Moon, MoreVertical, Sun, X } from "lucide-react";
+import { ChevronRight, Loader2, Moon, MoreVertical, Sun, X } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { MessageInput } from "./MessageInput";
@@ -11,53 +11,32 @@ import { MessageAttachments } from "./MessageAttachments";
 import { LinkPreviewCard, isLinkOnlyContent } from "./LinkPreviewCard";
 import { getFirstUrlInText } from "@/lib/urlPreview";
 import { SendingFilesBubble } from "./SendingFilesBubble";
+import { MessageStatusIcon } from "./MessageStatusIcon";
+import { TypingDots } from "./TypingDots";
 import { useChatStore, ApiMessage } from "@/store/ChatStore";
 import { useTranslations } from 'next-intl';
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useRouter } from "@/i18n/navigation";
-import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
-import { CREATE_CONVERSATION, SEND_MESSAGE, GET_CONVERSATIONS, GET_MESSAGES, MARK_CONVERSATION_AS_READ } from "@/services/gql/messaging";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { SEND_MESSAGE, GET_CONVERSATIONS } from "@/services/gql/messaging";
+import { useChatConversation } from "@/hooks/useChatConversation";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useTypingIndicator } from "@/hooks/useTypingIndicator";
+import { useMediaUpload } from "@/hooks/useMediaUpload";
 import { BLOCK_USER } from "@/services/gql/users";
 import type { BlockUserResponse } from "@/services/gql/types/users";
 import { GET_USER_PROFILE } from "@/services/gql/profile";
 import type { GetProfileResponse } from "@/services/gql/profile";
-import { GET_UPLOAD_URL, chatMediaContentType } from "@/services/gql/upload";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
-import type { GetUploadUrlResponse } from "@/services/gql/upload";
-import type { Message, MessageMention, CreateConversationData, SendMessageData, GetConversationsData, GetMessagesData, MarkConversationAsReadData } from "@/services/gql/types/messaging";
+import type { SendMessageData } from "@/services/gql/types/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
 import { resolveCountryName, getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
-
-// ---- Helpers ----
-
-
-function getMessageDateKey(dateStr: string, timeZone: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', { timeZone });
-}
-
-function getDateLabel(dateStr: string, timeZone: string): string {
-    const date = new Date(dateStr);
-    const todayKey = new Date().toLocaleDateString('en-US', { timeZone });
-    const yesterdayKey = new Date(Date.now() - 864e5).toLocaleDateString('en-US', { timeZone });
-    const msgKey = getMessageDateKey(dateStr, timeZone);
-    if (msgKey === todayKey) return 'Today';
-    if (msgKey === yesterdayKey) return 'Yesterday';
-    return date.toLocaleDateString('en-US', { timeZone, year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function formatTimeOnly(dateStr: string, timeZone: string): string {
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZone,
-    });
-}
+import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime";
 
 // ---- Date Separator ----
 
@@ -78,40 +57,37 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const t = useTranslations('chat.direct');
     const tCommon = useTranslations('common');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const pendingRevokeRef = useRef<Record<string, string[]>>({});
-    const initInFlightRef = useRef(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [conversationId, setConversationId] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
-    const [otherUserTyping, setOtherUserTyping] = useState(false);
     const [blockModalOpen, setBlockModalOpen] = useState(false);
     const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
     const [isBlocking, setIsBlocking] = useState(false);
     const [isOnline, setIsOnline] = useState(chat.online ?? false);
 
-    const { addApiMessage, removeApiMessage, getApiMessagesByConversation, getRealConversation, setRealConversation, setApiMessages, clearApiMessages } = useChatStore();
+    const { addApiMessage, getApiMessagesByConversation, clearApiMessages } = useChatStore();
+    const { uploadFiles, finalizeUpload } = useMediaUpload();
 
     const user = useUserStore((state) => state.user);
     const currentUserId = user?.userId;
     const userTimeZone = user?.timezone || user?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+    const { conversationId } = useChatConversation({
+        chatId: chat.id,
+        type: 'direct',
+        currentUserId,
+        participantIds: currentUserId ? [currentUserId, chat.id] : [],
+    });
+
     const apiMessages = getApiMessagesByConversation(conversationId || '');
 
-    const [createConversation] = useMutation<CreateConversationData>(CREATE_CONVERSATION);
+    const { refetch: refetchMessages } = useChatMessages({ conversationId });
+
     const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE, {
-        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
-    });
-    const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
-    const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
     });
     const [blockUserMutation] = useMutation<BlockUserResponse>(BLOCK_USER, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
-    });
-
-    const { data: conversationsData } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
-        variables: { limit: 100, offset: 0 },
     });
 
     const { data: connectionsData } = useQuery<{ getConnections?: { connections?: Array<{
@@ -170,99 +146,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [otherUser, profileFallback?.residenceCountry, profileFallback?.city, profileFallback?.location]);
 
-    // Initialize or retrieve conversation
-    useEffect(() => {
-        if (!chat.id || !currentUserId) return;
-
-        const existing = getRealConversation(chat.id);
-        if (existing) {
-            setConversationId(existing.conversationId);
-            return;
-        }
-
-        if (conversationsData?.getConversations) {
-            const isDirectConv = (conv: { type?: string; groupId?: string | null; participantIds?: string[] }) =>
-                (conv.type === 'DIRECT' || conv.type === 'direct') ||
-                ((conv.type === 'GROUP' || conv.type === 'group') && (conv.groupId == null || conv.groupId === '') && (conv.participantIds?.length === 2));
-            const existingConv = conversationsData.getConversations.find(
-                (conv) => isDirectConv(conv) && conv.participantIds?.includes(chat.id)
-            );
-            if (existingConv) {
-                setConversationId(existingConv.id);
-                setRealConversation(chat.id, {
-                    conversationId: existingConv.id,
-                    type: 'DIRECT',
-                    participantIds: existingConv.participantIds || [currentUserId, chat.id],
-                });
-                return;
-            }
-        }
-
-        const initConversation = async () => {
-            try {
-                const { data } = await createConversation({
-                    variables: { type: 'DIRECT', participantIds: [chat.id] },
-                });
-                if (data?.createConversation) {
-                    const convId = data.createConversation;
-                    setConversationId(convId);
-                    setRealConversation(chat.id, {
-                        conversationId: convId,
-                        type: 'DIRECT',
-                        participantIds: [currentUserId, chat.id],
-                    });
-                }
-            } catch (error: unknown) {
-                const err = error as { graphQLErrors?: Array<{ message?: string }> };
-                const isDuplicate = err?.graphQLErrors?.some(
-                    (e: { message?: string }) => e.message?.includes('duplicate key')
-                );
-                if (!isDuplicate) {
-                    console.error('Failed to create conversation:', error);
-                }
-            }
-        };
-
-        if (initInFlightRef.current) return;
-        initInFlightRef.current = true;
-        initConversation().finally(() => { initInFlightRef.current = false; });
-    }, [chat.id, currentUserId, conversationsData, getRealConversation, setRealConversation, createConversation]);
-
-    const { data: messagesData, refetch: refetchMessages } = useQuery<GetMessagesData>(GET_MESSAGES, {
-        variables: { conversationId: conversationId || '', limit: 50, offset: 0 },
-        skip: !conversationId,
-        fetchPolicy: 'network-only',
-    });
-
-    useEffect(() => {
-        const messages = messagesData?.getMessages?.messages;
-        if (!messages?.length || !conversationId) return;
-        const firstConvId = messages[0]?.conversationId;
-        if (firstConvId && firstConvId !== conversationId) return;
-
-        const history = messages.map((m: Message): ApiMessage => ({
-            id: m.id,
-            conversationId: m.conversationId,
-            senderId: m.senderId,
-            type: (m.type || 'TEXT').toUpperCase() as ApiMessage['type'],
-            content: m.content || '',
-            createdAt: m.createdAt,
-            mentions: m.mentions?.map((mn: MessageMention) => mn.userId) || [],
-            replyToId: m.replyToId,
-            status: m.status ? (m.status.toLowerCase() as ApiMessage['status']) : 'sent',
-            attachments: m.attachments ?? [],
-        }));
-        setApiMessages(conversationId, history);
-    }, [messagesData, conversationId, setApiMessages]);
-
-    useEffect(() => {
-        if (conversationId) {
-            markConversationAsRead({ variables: { conversationId } }).catch((err) => {
-                console.warn('markConversationAsRead failed:', err);
-            });
-        }
-    }, [conversationId, markConversationAsRead]);
-
     useEffect(() => {
         if (!conversationId) return;
         const unsubMessage = messageService.onMessage((wsMessage) => {
@@ -273,30 +156,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         return () => { unsubMessage(); };
     }, [conversationId, refetchMessages]);
 
-    useEffect(() => {
-        if (!conversationId || !chat.id) return;
-        const otherUserId = chat.id;
-        let typingTimeout: ReturnType<typeof setTimeout> | null = null;
-
-        const unsubStart = messageService.onTypingStart((data) => {
-            if (data.conversationId !== conversationId || data.userId !== otherUserId) return;
-            if (typingTimeout) clearTimeout(typingTimeout);
-            setOtherUserTyping(true);
-            typingTimeout = setTimeout(() => setOtherUserTyping(false), 5000);
-        });
-        const unsubStop = messageService.onTypingStop((data) => {
-            if (data.conversationId !== conversationId || data.userId !== otherUserId) return;
-            if (typingTimeout) clearTimeout(typingTimeout);
-            typingTimeout = null;
-            setOtherUserTyping(false);
-        });
-
-        return () => {
-            if (typingTimeout) clearTimeout(typingTimeout);
-            unsubStart();
-            unsubStop();
-        };
-    }, [conversationId, chat.id]);
+    const { typingUserIds, emit: handleTyping } = useTypingIndicator({
+        conversationId,
+        excludeUserId: currentUserId,
+    });
+    const otherUserTyping = typingUserIds.has(chat.id);
 
     // Track real-time presence for the other user
     useEffect(() => {
@@ -313,12 +177,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         messageService.queryOnlineUsers([chat.id]);
         return () => { unsubPresence(); unsubConnect(); };
     }, [chat.id, chat.online]);
-
-    const handleTyping = useCallback((isTyping: boolean) => {
-        if (!conversationId) return;
-        if (isTyping) messageService.emitTypingStart(conversationId);
-        else messageService.emitTypingStop(conversationId);
-    }, [conversationId]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -345,105 +203,41 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
         const idempotencyKey = crypto.randomUUID();
         setIsSending(true);
-        const placeholderId = `pending-${Date.now()}-${idempotencyKey.slice(0, 8)}`;
 
+        let upload: Awaited<ReturnType<typeof uploadFiles>> = null;
         try {
-            let content: string;
-            let messageType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' = 'TEXT';
-            let attachments: Array<{ publicUrl: string; mimeType: string }> = [];
-
             if (hasFiles && files) {
-                const sendingPreviews: Array<{ url?: string; mimeType: string }> = [];
-                const urlsToRevoke: string[] = [];
-                const firstFileMime = files[0]?.type || '';
-                const placeholderType: ApiMessage['type'] = firstFileMime.startsWith('video/')
-                    ? 'VIDEO'
-                    : firstFileMime.startsWith('audio/')
-                        ? 'AUDIO'
-                        : firstFileMime.startsWith('image/')
-                            ? 'IMAGE'
-                            : 'FILE';
-                for (const file of files) {
-                    const mime = file.type || 'application/octet-stream';
-                    if (mime.startsWith('image/') || mime.startsWith('video/')) {
-                        const url = URL.createObjectURL(file);
-                        sendingPreviews.push({ url, mimeType: mime });
-                        urlsToRevoke.push(url);
-                    } else {
-                        sendingPreviews.push({ mimeType: mime });
-                    }
-                }
-                pendingRevokeRef.current[placeholderId] = urlsToRevoke;
-                addApiMessage({
-                    id: placeholderId,
+                upload = await uploadFiles({
+                    files,
                     conversationId,
                     senderId: currentUserId,
-                    type: placeholderType,
-                    content: messageText.trim(),
-                    createdAt: new Date().toISOString(),
-                    status: 'sending',
-                    attachments: [],
-                    sendingPreviews,
+                    messageText,
                 });
-
-                for (const file of files) {
-                    const contentType = chatMediaContentType(file.type || 'application/octet-stream');
-                    const { data: uploadData } = await getUploadUrl({
-                        variables: { contentType, category: 'chat' },
-                    });
-                    if (!uploadData?.getUploadUrl?.uploadUrl) {
-                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                        delete pendingRevokeRef.current[placeholderId];
-                        removeApiMessage(placeholderId);
-                        toast.error('Could not get upload URL. Please try again.');
-                        setIsSending(false);
-                        return;
-                    }
-                    const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
-                    const uploadRes = await fetch(uploadUrl, {
-                        method: 'PUT',
-                        body: file,
-                        headers: { 'Content-Type': contentType },
-                    });
-                    if (!uploadRes.ok) {
-                        (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                        delete pendingRevokeRef.current[placeholderId];
-                        removeApiMessage(placeholderId);
-                        toast.error(`Upload failed for ${file.name}. Please try again.`);
-                        setIsSending(false);
-                        return;
-                    }
-                    attachments.push({ publicUrl, mimeType: contentType });
+                if (!upload) {
+                    setIsSending(false);
+                    return;
                 }
-
-                const firstMime = attachments[0]?.mimeType ?? '';
-                if (firstMime.startsWith('image/')) messageType = 'IMAGE';
-                else if (firstMime.startsWith('video/')) messageType = 'VIDEO';
-                else if (firstMime.startsWith('audio/')) messageType = 'AUDIO';
-                else messageType = 'FILE';
-                content = messageText.trim() || (attachments[0]?.publicUrl ?? '');
-            } else {
-                content = messageText.trim();
             }
+
+            const messageType: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' = upload?.messageType ?? 'TEXT';
+            const content = upload?.attachments[0]
+                ? (messageText.trim() || upload.attachments[0].publicUrl)
+                : messageText.trim();
 
             const { data } = await sendMessageMutation({
                 variables: {
                     conversationId,
                     messageType,
                     content,
-                    ...(attachments.length && {
-                        attachments: attachments.map((a) => ({ publicUrl: a.publicUrl, mimeType: a.mimeType })),
+                    ...(upload?.attachments.length && {
+                        attachments: upload.attachments.map((a) => ({ publicUrl: a.publicUrl, mimeType: a.mimeType })),
                     }),
                     idempotencyKey,
                 },
             });
 
             if (data?.sendMessage) {
-                if (hasFiles && files) {
-                    (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                    delete pendingRevokeRef.current[placeholderId];
-                    removeApiMessage(placeholderId);
-                }
+                if (upload) finalizeUpload(upload.placeholderId);
                 const sentMsg: ApiMessage = {
                     id: data.sendMessage,
                     conversationId,
@@ -452,8 +246,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     content,
                     createdAt: new Date().toISOString(),
                     status: 'sent',
-                    ...(attachments.length && {
-                        attachments: attachments.map((a, i) => ({
+                    ...(upload?.attachments.length && {
+                        attachments: upload.attachments.map((a, i) => ({
                             gcsPath: a.publicUrl,
                             mimeType: a.mimeType,
                             fileName: files?.[i]?.name,
@@ -464,17 +258,13 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 addApiMessage(sentMsg);
             }
         } catch (error) {
-            if (hasFiles && files) {
-                (pendingRevokeRef.current[placeholderId] ?? []).forEach(URL.revokeObjectURL);
-                delete pendingRevokeRef.current[placeholderId];
-                removeApiMessage(placeholderId);
-            }
+            if (upload) finalizeUpload(upload.placeholderId);
             console.error('❌ Failed to send message:', error);
             toast.error('Failed to send message. Please try again.');
         } finally {
             setIsSending(false);
         }
-    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, removeApiMessage, getUploadUrl]);
+    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, uploadFiles, finalizeUpload]);
 
     const handleBlockConfirm = async () => {
         setIsBlocking(true);
@@ -515,18 +305,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         const isMe = message.senderId === currentUserId;
         const timeLabel = formatTimeOnly(message.createdAt, userTimeZone);
 
-        const statusIcon = isMe && message.status !== 'sending' && (
-            <span className={message.status === 'read' ? 'text-[#34B7F1]' : 'text-gray-400'}>
-                {message.status === 'read' || message.status === 'delivered' ? (
-                    <span className="inline-flex">
-                        <Check className="w-3 h-3 -ml-0.5" />
-                        <Check className="w-3 h-3 -ml-1" />
-                    </span>
-                ) : (
-                    <Check className="w-3 h-3" />
-                )}
-            </span>
-        );
+        const statusIcon = isMe && <MessageStatusIcon status={message.status} />;
 
         const myTimestampRow = (
             <div className="flex items-center justify-end gap-1 mt-1.5">
@@ -646,7 +425,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     return (
         <div className="flex flex-row h-full w-full">
             {/* ---- Main Chat Area ---- */}
-            <div className={`flex-1 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full ${isMobile && sidebarOpen ? 'hidden' : 'flex'}`}>
+            <div className={`flex-1 min-w-0 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 overflow-hidden ${isMobile && sidebarOpen ? 'hidden' : 'flex'}`}>
 
                 {/* ---- Header ---- */}
                 <div className="flex-shrink-0 border-b border-border-subtle px-3 md:px-4 py-3">
@@ -719,7 +498,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 </div>
 
                 {/* ---- Messages Area ---- */}
-                <div className="flex-1 overflow-y-auto px-3 md:px-4 py-4">
+                <div
+                    className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 md:px-4 py-4"
+                    style={{ scrollbarGutter: 'stable' }}
+                >
                     {/* Empty state */}
                     {apiMessages.length === 0 && (
                         <div className="flex flex-col items-center justify-center h-full gap-3 text-text-secondary">
@@ -755,9 +537,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                             nodes.push(
                                 <div
                                     key={message.id}
-                                    className={`flex mb-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+                                    className={`flex mb-2 min-w-0 ${isMe ? 'justify-end' : 'justify-start'}`}
                                 >
-                                    <div className="max-w-[75%] sm:max-w-sm lg:max-w-md">
+                                    <div className="max-w-[75%] sm:max-w-sm lg:max-w-md min-w-0">
                                         {renderMessage(message)}
                                     </div>
                                 </div>
@@ -767,20 +549,16 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                         return nodes;
                     })()}
 
+                    {otherUserTyping && (
+                        <div className="px-1 py-2 flex items-center gap-2">
+                            <div className="flex items-center gap-1 bg-[#EDFBF0] dark:bg-green-950/30 px-3 py-2.5 rounded-2xl">
+                                <TypingDots />
+                            </div>
+                            <span className="text-xs text-text-secondary">{displayName} {t('typing')}</span>
+                        </div>
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
-
-                {/* ---- Typing Indicator ---- */}
-                {otherUserTyping && (
-                    <div className="flex-shrink-0 px-4 py-2 flex items-center gap-2">
-                        <div className="flex items-center gap-1 bg-[#EDFBF0] dark:bg-green-950/30 px-3 py-2.5 rounded-2xl">
-                            <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce [animation-delay:0ms]" />
-                            <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce [animation-delay:150ms]" />
-                            <span className="w-1.5 h-1.5 bg-text-secondary rounded-full animate-bounce [animation-delay:300ms]" />
-                        </div>
-                        <span className="text-xs text-text-secondary">{displayName} {t('typing')}</span>
-                    </div>
-                )}
 
                 {/* ---- Message Input ---- */}
                 <div className="flex-shrink-0">

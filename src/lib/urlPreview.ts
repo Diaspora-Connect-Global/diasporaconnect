@@ -40,7 +40,21 @@ export function extractYouTubeVideoId(url: string): string | null {
 /** Extract post ID from a post URL path (e.g. /en/post/abc-123 or https://domain.com/en/post/abc-123). */
 export function extractPostIdFromUrl(url: string): string | null {
   try {
-    const path = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
+    let path: string;
+    if (url.startsWith('http')) {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./, '');
+      const appHost = (process.env.NEXT_PUBLIC_APP_URL || 'https://diaspoplug.com')
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .replace(/\/.*$/, '');
+      const sameOrigin =
+        typeof window !== 'undefined' && parsed.host === window.location.host;
+      if (host !== appHost && !sameOrigin) return null;
+      path = parsed.pathname;
+    } else {
+      path = url.split('?')[0];
+    }
     const match = path.match(/\/(?:post|posts)\/([a-zA-Z0-9-]+)/);
     return match ? match[1] : null;
   } catch {
