@@ -1316,7 +1316,19 @@
             "typing": "sta scrivendo...",
             "sending": "Invio…",
             "goodTimeToMessage": "Buon momento per scrivere",
-            "notGoodTimeToMessage": "Non è il momento giusto"
+            "notGoodTimeToMessage": "Non è il momento giusto",
+            "timeDetails": {
+                "title": "Dettagli orario",
+                "openLabel": "Apri dettagli orario",
+                "yourLocalTime": "La tua ora locale",
+                "theirLocalTime": "Ora locale di {name}",
+                "goodTimeBanner": "Buon momento per scrivere a {name}",
+                "goodTimeReason": "È giorno a {city}. È probabile che ti rispondano.",
+                "goodTimeReasonGeneric": "È giorno nel loro fuso orario. È probabile che ti rispondano.",
+                "nightBanner": "Probabilmente non è il momento giusto",
+                "nightReason": "È tardi a {city}. La risposta potrebbe tardare.",
+                "nightReasonGeneric": "È tardi nel loro fuso orario. La risposta potrebbe tardare."
+            }
         },
         "group": {
             "message": "Messaggio a {name}",

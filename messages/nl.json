@@ -966,7 +966,19 @@
             "typing": "is aan het typen...",
             "sending": "Verzenden…",
             "goodTimeToMessage": "Goed moment om te schrijven",
-            "notGoodTimeToMessage": "Niet het juiste moment"
+            "notGoodTimeToMessage": "Niet het juiste moment",
+            "timeDetails": {
+                "title": "Tijddetails",
+                "openLabel": "Tijddetails openen",
+                "yourLocalTime": "Jouw lokale tijd",
+                "theirLocalTime": "Lokale tijd van {name}",
+                "goodTimeBanner": "Goed moment om {name} te schrijven",
+                "goodTimeReason": "Het is overdag in {city}. Er wordt waarschijnlijk geantwoord.",
+                "goodTimeReasonGeneric": "Het is overdag in hun tijdzone. Er wordt waarschijnlijk geantwoord.",
+                "nightBanner": "Waarschijnlijk niet het juiste moment",
+                "nightReason": "Het is laat in {city}. Een reactie kan even duren.",
+                "nightReasonGeneric": "Het is laat in hun tijdzone. Een reactie kan even duren."
+            }
         },
         "group": {
             "message": "Bericht aan {name}",

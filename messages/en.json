@@ -966,7 +966,19 @@
             "typing": "is typing...",
             "sending": "Sending…",
             "goodTimeToMessage": "Good time to message",
-            "notGoodTimeToMessage": "Not a good time"
+            "notGoodTimeToMessage": "Not a good time",
+            "timeDetails": {
+                "title": "Time details",
+                "openLabel": "Open time details",
+                "yourLocalTime": "Your local time",
+                "theirLocalTime": "{name}'s local time",
+                "goodTimeBanner": "Good time to message {name}",
+                "goodTimeReason": "It's daytime in {city}. They are likely to reply.",
+                "goodTimeReasonGeneric": "It's daytime in their timezone. They are likely to reply.",
+                "nightBanner": "Probably not a good time",
+                "nightReason": "It's late in {city}. They may not reply right away.",
+                "nightReasonGeneric": "It's late in their timezone. They may not reply right away."
+            }
         },
         "group": {
             "message": "Message {name}",

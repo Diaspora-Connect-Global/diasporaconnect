@@ -3,7 +3,7 @@
 // ============================================
 // File: components/chats/DirectMessageChat.tsx
 
-import { ChevronRight, Loader2, Moon, MoreVertical, Sun, X } from "lucide-react";
+import { ChevronRight, Info, Loader2, Moon, MoreVertical, Sun, X } from "lucide-react";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { MessageInput } from "./MessageInput";
@@ -30,6 +30,7 @@ import type { BlockUserResponse } from "@/services/gql/types/users";
 import { GET_USER_PROFILE } from "@/services/gql/profile";
 import type { GetProfileResponse } from "@/services/gql/profile";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
+import { TimeDetailsModal } from "@/components/chats/modals/TimeDetailsModal";
 import type { SendMessageData } from "@/services/gql/types/messaging";
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
@@ -57,6 +58,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const t = useTranslations('chat.direct');
     const tCommon = useTranslations('common');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const chatAreaRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -64,6 +66,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
     const [isBlocking, setIsBlocking] = useState(false);
     const [isOnline, setIsOnline] = useState(chat.online ?? false);
+    const [timeDetailsOpen, setTimeDetailsOpen] = useState(false);
 
     const { addApiMessage, getApiMessagesByConversation, clearApiMessages } = useChatStore();
     const { uploadFiles, finalizeUpload } = useMediaUpload();
@@ -118,6 +121,14 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         );
     const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
 
+    // Tick every minute to keep time-derived values (goodTimeToMessage, otherLocalTime,
+    // and the footer "Your time" / "Their time") fresh without a page refresh.
+    const [timeTick, setTimeTick] = useState(0);
+    useEffect(() => {
+        const id = setInterval(() => setTimeTick(n => n + 1), 60_000);
+        return () => clearInterval(id);
+    }, []);
+
     // Build "City, Country" — prefer free-text `location`, else combine city + resolved country
     // Wrapped in useMemo: resolveCountryName/isGoodTimeToMessage construct Intl objects internally
     const { otherLocation, otherTimezone, showTimeBadge, goodTimeToMessage, otherLocalTime } = useMemo(() => {
@@ -143,8 +154,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             goodTimeToMessage: badge ? isGoodTimeToMessage(timezone!) : false,
             otherLocalTime: timezone ? formatCurrentTime(timezone) : null,
         };
+    // `timeTick` is included so the memo re-derives goodTimeToMessage / otherLocalTime
+    // every minute — formatCurrentTime / isGoodTimeToMessage call new Date() internally.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [otherUser, profileFallback?.residenceCountry, profileFallback?.city, profileFallback?.location]);
+    }, [otherUser, profileFallback?.residenceCountry, profileFallback?.city, profileFallback?.location, timeTick]);
 
     useEffect(() => {
         if (!conversationId) return;
@@ -185,12 +198,6 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Refresh time-derived values (goodTimeToMessage, otherLocalTime) every minute
-    const [, setTimeTick] = useState(0);
-    useEffect(() => {
-        const id = setInterval(() => setTimeTick(n => n + 1), 60_000);
-        return () => clearInterval(id);
-    }, []);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -425,7 +432,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     return (
         <div className="flex flex-row h-full w-full">
             {/* ---- Main Chat Area ---- */}
-            <div className={`flex-1 min-w-0 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 overflow-hidden ${isMobile && sidebarOpen ? 'hidden' : 'flex'}`}>
+            <div ref={chatAreaRef} className={`relative flex-1 min-w-0 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 overflow-hidden ${isMobile && sidebarOpen ? 'hidden' : 'flex'}`}>
 
                 {/* ---- Header ---- */}
                 <div className="flex-shrink-0 border-b border-border-subtle px-3 md:px-4 py-3">
@@ -469,20 +476,22 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 </p>
                             )}
                             {showTimeBadge && (
-                                goodTimeToMessage ? (
-                                    <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 text-[11px] font-medium">
+                                <button
+                                    type="button"
+                                    onClick={() => setTimeDetailsOpen(true)}
+                                    aria-label={t('timeDetails.openLabel')}
+                                    className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${goodTimeToMessage
+                                        ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-950/60'
+                                        : 'bg-surface-hover dark:bg-surface-hover text-text-secondary hover:bg-surface-hover/80'
+                                        }`}
+                                >
+                                    {goodTimeToMessage ? (
                                         <Sun className="w-3 h-3" aria-hidden="true" />
-                                        {t('goodTimeToMessage')}
-                                    </div>
-                                ) : (
-                                    <div
-                                        className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-surface-hover dark:bg-surface-hover text-text-secondary text-[11px] font-medium"
-                                        title="It may be outside typical waking hours in their timezone"
-                                    >
+                                    ) : (
                                         <Moon className="w-3 h-3" aria-hidden="true" />
-                                        {t('notGoodTimeToMessage')}
-                                    </div>
-                                )
+                                    )}
+                                    {goodTimeToMessage ? t('goodTimeToMessage') : t('notGoodTimeToMessage')}
+                                </button>
                             )}
                         </div>
 
@@ -573,13 +582,23 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 </div>
 
                 {/* ---- Timezone Bar ---- */}
-                <div className="flex-shrink-0 bg-[#EEF2FF] dark:bg-indigo-950/30 px-4 py-2 text-center border-t border-indigo-100 dark:border-indigo-900">
-                    <p className="text-[11px] text-text-secondary leading-tight">
+                <div className="flex-shrink-0 bg-[#EEF2FF] dark:bg-indigo-950/30 px-4 py-2 border-t border-indigo-100 dark:border-indigo-900 flex items-center justify-center gap-2">
+                    <p className="text-[11px] text-text-secondary leading-tight text-center">
                         Your time: <span className="font-medium text-text-primary">{formatCurrentTime(userTimeZone)}</span>
                         {otherLocalTime && (
                             <> &bull; <span className="font-medium text-text-primary">{displayName}</span>&apos;s time: {otherLocalTime}</>
                         )}
                     </p>
+                    {otherLocalTime && (
+                        <button
+                            type="button"
+                            onClick={() => setTimeDetailsOpen(true)}
+                            aria-label={t('timeDetails.openLabel')}
+                            className="flex-shrink-0 rounded-full p-0.5 text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors cursor-pointer"
+                        >
+                            <Info className="w-3.5 h-3.5" aria-hidden="true" />
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -682,6 +701,13 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 description={t('clearConversationConfirmDescription') || 'This only clears messages locally. It does not delete the server conversation.'}
                 confirmText={t('clearConversation') || 'Clear'}
                 confirmVariant="destructive"
+            />
+            <TimeDetailsModal
+                open={timeDetailsOpen}
+                onOpenChange={setTimeDetailsOpen}
+                other={profileFallback ?? otherProfile ?? null}
+                otherDisplayName={displayName}
+                containerRef={chatAreaRef}
             />
         </div>
     );
