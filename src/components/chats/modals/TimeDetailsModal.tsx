@@ -178,37 +178,37 @@ export function TimeDetailsModal({ open, onOpenChange, other, otherDisplayName, 
 
                 <div className="flex flex-col gap-3">
                     <TimeRow
-                        iconBgClass="bg-[#EEEEFF] dark:bg-indigo-950/50"
-                        iconColorClass="text-[#2d2d8e] dark:text-indigo-200"
+                        iconBgClass="bg-chat-bubble-me-bg"
+                        iconColorClass="text-chat-bubble-me-text"
                         label={t("yourLocalTime")}
                         sublabel={detail.mySubLabel}
                         time={detail.myTime}
                         date={detail.myDate}
-                        timeColorClass="text-[#2d2d8e] dark:text-indigo-200"
+                        timeColorClass="text-chat-bubble-me-text"
                     />
 
                     <TimeRow
-                        iconBgClass="bg-[#EDFBF0] dark:bg-green-950/50"
-                        iconColorClass="text-green-600 dark:text-green-400"
+                        iconBgClass="bg-chat-bubble-them-bg"
+                        iconColorClass="text-chat-good-time-text"
                         label={t("theirLocalTime", { name: otherDisplayName })}
                         sublabel={detail.theirSubLabel}
                         time={detail.theirTime}
                         date={detail.theirDate}
-                        timeColorClass="text-green-600 dark:text-green-400"
+                        timeColorClass="text-chat-good-time-text"
                     />
 
                     {detail.theirTz && (
                         <div
                             className={`flex items-start gap-3 rounded-2xl p-3 ${
                                 detail.isGoodTime
-                                    ? "bg-green-50 dark:bg-green-950/40"
+                                    ? "bg-chat-good-time-bg"
                                     : "bg-surface-hover/60 dark:bg-surface-hover/40"
                             }`}
                         >
                             <div
                                 className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full ${
                                     detail.isGoodTime
-                                        ? "bg-green-500 text-white"
+                                        ? "bg-chat-online-dot text-white"
                                         : "bg-text-tertiary/40 text-text-secondary"
                                 }`}
                             >

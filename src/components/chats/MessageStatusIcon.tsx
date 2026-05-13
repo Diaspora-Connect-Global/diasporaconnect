@@ -23,7 +23,7 @@ interface MessageStatusIconProps {
  */
 export function MessageStatusIcon({
     status,
-    readClassName = "text-[#34B7F1]",
+    readClassName = "text-chat-read-receipt",
     unreadClassName = "text-gray-400",
 }: MessageStatusIconProps) {
     if (!status || status === "sending") return null;

@@ -86,6 +86,23 @@
   --color-border-success: var(--border-success);
   --color-border-info: var(--border-info);
 
+  /* Color Tokens - Chat (DirectMessageChat surface) */
+  --color-chat-bubble-me-bg: var(--chat-bubble-me-bg);
+  --color-chat-bubble-me-bg-sending: var(--chat-bubble-me-bg-sending);
+  --color-chat-bubble-me-text: var(--chat-bubble-me-text);
+  --color-chat-bubble-them-bg: var(--chat-bubble-them-bg);
+  --color-chat-bubble-them-text: var(--chat-bubble-them-text);
+  --color-chat-bar-bg: var(--chat-bar-bg);
+  --color-chat-bar-border: var(--chat-bar-border);
+  --color-chat-good-time-bg: var(--chat-good-time-bg);
+  --color-chat-good-time-bg-hover: var(--chat-good-time-bg-hover);
+  --color-chat-good-time-text: var(--chat-good-time-text);
+  --color-chat-read-receipt: var(--chat-read-receipt);
+  --color-chat-online-dot: var(--chat-online-dot);
+  --color-chat-online-text: var(--chat-online-text);
+  --color-chat-parent-bg: var(--chat-parent-bg);
+  --color-chat-parent-text: var(--chat-parent-text);
+
 
 
   /* Typography - Display */
@@ -283,6 +300,23 @@
   --border-warning: #e7000c;
   --border-success: #e7000c;
   --border-info: #e7000c;
+
+  /* Chat (light) */
+  --chat-bubble-me-bg: #eeeeff;
+  --chat-bubble-me-bg-sending: rgb(238 238 255 / 0.8);
+  --chat-bubble-me-text: #2d2d8e;
+  --chat-bubble-them-bg: #edfbf0;
+  --chat-bubble-them-text: #191919;
+  --chat-bar-bg: #eef2ff;
+  --chat-bar-border: #e0e7ff;
+  --chat-good-time-bg: #f0fdf4;
+  --chat-good-time-bg-hover: #dcfce7;
+  --chat-good-time-text: #16a34a;
+  --chat-read-receipt: #34b7f1;
+  --chat-online-dot: #22c55e;
+  --chat-online-text: #16a34a;
+  --chat-parent-bg: #004c9c;
+  --chat-parent-text: #ffffff;
 }
 
 .dark {
@@ -350,6 +384,23 @@
   --border-warning: #e7000c;
   --border-success: #e7000c;
   --border-info: #e7000c;
+
+  /* Chat (dark) */
+  --chat-bubble-me-bg: rgb(30 27 75 / 0.4);
+  --chat-bubble-me-bg-sending: rgb(30 27 75 / 0.3);
+  --chat-bubble-me-text: #e0e7ff;
+  --chat-bubble-them-bg: rgb(5 46 22 / 0.3);
+  --chat-bubble-them-text: #f0fdf4;
+  --chat-bar-bg: rgb(30 27 75 / 0.3);
+  --chat-bar-border: #312e81;
+  --chat-good-time-bg: rgb(5 46 22 / 0.4);
+  --chat-good-time-bg-hover: rgb(5 46 22 / 0.6);
+  --chat-good-time-text: #4ade80;
+  --chat-read-receipt: #34b7f1;
+  --chat-online-dot: #22c55e;
+  --chat-online-text: #4ade80;
+  --chat-parent-bg: #004c9c;
+  --chat-parent-text: #ffffff;
 }
 
 @layer base {

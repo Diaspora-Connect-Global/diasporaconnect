@@ -332,8 +332,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     <>
                         <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
                         {message.content && (
-                            <div className="mt-2 bg-[#EEEEFF] dark:bg-indigo-950/40 rounded-2xl px-4 py-2.5">
-                                <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
+                            <div className="mt-2 bg-chat-bubble-me-bg rounded-2xl px-4 py-2.5">
+                                <p className="text-sm text-chat-bubble-me-text break-words">{message.content}</p>
                                 <div className="flex items-center justify-end gap-1 mt-1.5">
                                     <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
                                     <span className="text-[10px] text-gray-400">{t('sending')}</span>
@@ -344,8 +344,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 );
             }
             return (
-                <div className="bg-[#EEEEFF]/80 dark:bg-indigo-950/30 rounded-2xl px-4 py-2.5">
-                    <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
+                <div className="bg-chat-bubble-me-bg-sending rounded-2xl px-4 py-2.5">
+                    <p className="text-sm text-chat-bubble-me-text break-words">{message.content}</p>
                     <div className="flex items-center justify-end gap-1 mt-1.5">
                         <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
                         <span className="text-[10px] text-gray-400">{t('sending')}</span>
@@ -369,8 +369,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                         <div className="mt-2"><LinkPreviewCard url={message.content!.trim()} /></div>
                     )}
                     {message.content && !isLinkOnlyContent(message.content) && (
-                        <div className={`mt-2 rounded-2xl px-4 py-2.5 ${isMe ? 'bg-[#EEEEFF] dark:bg-indigo-950/40' : 'bg-[#EDFBF0] dark:bg-green-950/30'}`}>
-                            <p className={`text-sm break-words ${isMe ? 'text-[#2d2d8e] dark:text-indigo-100' : 'text-text-primary'}`}>
+                        <div className={`mt-2 rounded-2xl px-4 py-2.5 ${isMe ? 'bg-chat-bubble-me-bg' : 'bg-chat-bubble-them-bg'}`}>
+                            <p className={`text-sm break-words ${isMe ? 'text-chat-bubble-me-text' : 'text-text-primary'}`}>
                                 {message.content}
                             </p>
                             {firstUrl && !firstUrlIsAttachmentUrl && (
@@ -405,8 +405,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         if (isMe) {
             const firstUrl = getFirstUrlInText(message.content);
             return (
-                <div className="bg-[#EEEEFF] dark:bg-indigo-950/40 rounded-2xl px-4 py-2.5">
-                    <p className="text-sm text-[#2d2d8e] dark:text-indigo-100 break-words">{message.content}</p>
+                <div className="bg-chat-bubble-me-bg rounded-2xl px-4 py-2.5">
+                    <p className="text-sm text-chat-bubble-me-text break-words">{message.content}</p>
                     {firstUrl && (
                         <div className="mt-2"><LinkPreviewCard url={firstUrl} /></div>
                     )}
@@ -418,8 +418,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         const firstUrl = getFirstUrlInText(message.content);
         return (
             <div>
-                <div className="bg-[#EDFBF0] dark:bg-green-950/30 rounded-2xl px-4 py-2.5">
-                    <p className="text-sm text-text-primary dark:text-green-50 break-words">{message.content}</p>
+                <div className="bg-chat-bubble-them-bg rounded-2xl px-4 py-2.5">
+                    <p className="text-sm text-chat-bubble-them-text break-words">{message.content}</p>
                     {firstUrl && (
                         <div className="mt-2"><LinkPreviewCard url={firstUrl} /></div>
                     )}
@@ -457,7 +457,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 </AvatarFallback>
                             </Avatar>
                             {isOnline && (
-                                <div className="absolute bottom-0.5 right-0.5 w-3 h-3 md:w-3.5 md:h-3.5 bg-green-500 rounded-full border-2 border-white" />
+                                <div className="absolute bottom-0.5 right-0.5 w-3 h-3 md:w-3.5 md:h-3.5 bg-chat-online-dot rounded-full border-2 border-white" />
                             )}
                         </div>
 
@@ -481,7 +481,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     onClick={() => setTimeDetailsOpen(true)}
                                     aria-label={t('timeDetails.openLabel')}
                                     className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${goodTimeToMessage
-                                        ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-950/60'
+                                        ? 'bg-chat-good-time-bg text-chat-good-time-text hover:bg-chat-good-time-bg-hover'
                                         : 'bg-surface-hover dark:bg-surface-hover text-text-secondary hover:bg-surface-hover/80'
                                         }`}
                                 >
@@ -560,7 +560,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
                     {otherUserTyping && (
                         <div className="px-1 py-2 flex items-center gap-2">
-                            <div className="flex items-center gap-1 bg-[#EDFBF0] dark:bg-green-950/30 px-3 py-2.5 rounded-2xl">
+                            <div className="flex items-center gap-1 bg-chat-bubble-them-bg px-3 py-2.5 rounded-2xl">
                                 <TypingDots />
                             </div>
                             <span className="text-xs text-text-secondary">{displayName} {t('typing')}</span>
@@ -582,7 +582,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 </div>
 
                 {/* ---- Timezone Bar ---- */}
-                <div className="flex-shrink-0 bg-[#EEF2FF] dark:bg-indigo-950/30 px-4 py-2 border-t border-indigo-100 dark:border-indigo-900 flex items-center justify-center gap-2">
+                <div className="flex-shrink-0 bg-chat-bar-bg px-4 py-2 border-t border-chat-bar-border flex items-center justify-center gap-2">
                     <p className="text-[11px] text-text-secondary leading-tight text-center">
                         Your time: <span className="font-medium text-text-primary">{formatCurrentTime(userTimeZone)}</span>
                         {otherLocalTime && (
@@ -638,7 +638,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                     </Avatar>
                                     <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>
                                     {isOnline && (
-                                        <p className="text-sm text-green-600 font-medium mt-0.5">{t('online')}</p>
+                                        <p className="text-sm text-chat-online-text font-medium mt-0.5">{t('online')}</p>
                                     )}
                                     {otherLocation && (
                                         <p className="text-sm text-text-secondary mt-1">{otherLocation}</p>

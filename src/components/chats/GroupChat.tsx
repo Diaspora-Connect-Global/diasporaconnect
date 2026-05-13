@@ -605,8 +605,8 @@ export default function GroupChat() {
                                     <p className="text-sm text-text-secondary">{t('memberCount', { count: group.memberCount })}</p>
                                     {isConnected && (
                                         <div className="flex items-center space-x-1">
-                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                            <span className="text-xs text-green-600">Online</span>
+                                            <div className="w-2 h-2 bg-chat-online-dot rounded-full"></div>
+                                            <span className="text-xs text-chat-online-text">Online</span>
                                         </div>
                                     )}
                                 </div>
@@ -649,13 +649,13 @@ export default function GroupChat() {
                                                     <>
                                                         <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
                                                         {message.content && (
-                                                            <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                            <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text' : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'}`}>
                                                                 {message.content}
                                                             </div>
                                                         )}
                                                     </>
                                                 ) : (
-                                                    <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl ${isMe ? 'bg-text-brand/80 text-text-white' : 'bg-surface-success/50 text-text-primary'}`}>
+                                                    <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl ${isMe ? 'bg-chat-bubble-me-bg-sending text-chat-bubble-me-text' : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'}`}>
                                                         <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                                                         <span className="text-sm sm:text-base">Sending...</span>
                                                     </div>
@@ -682,7 +682,7 @@ export default function GroupChat() {
                                                             )}
                                                             {message.content && !isLinkOnlyContent(message.content) && (
                                                                 <>
-                                                                    <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-text-brand text-text-white' : 'bg-surface-success/50 text-text-primary dark:text-text-white'}`}>
+                                                                    <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text' : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'}`}>
                                                                         {message.content}
                                                                     </div>
                                                                     {firstUrl && !firstUrlIsAttachmentUrl && (
@@ -710,8 +710,8 @@ export default function GroupChat() {
                                                 <>
                                                     <div
                                                         className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe
-                                                            ? 'bg-text-brand text-text-white'
-                                                            : 'bg-surface-success/50 text-text-primary dark:text-text-white'
+                                                            ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text'
+                                                            : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'
                                                             }`}
                                                     >
                                                         {!isMe && (
@@ -966,11 +966,11 @@ export default function GroupChat() {
 
                             {selectedMessage && (
                                 <div className="flex-shrink-0 p-3 sm:p-4 border-b border-border-subtle bg-surface-hover">
-                                    <div className="bg-surface-brand text-text-white px-3 py-3 sm:px-4 sm:py-4 rounded-2xl sm:rounded-4xl mb-2">
-                                        <span className="text-xs sm:text-sm font-medium text-text-white">
+                                    <div className="bg-chat-parent-bg text-chat-parent-text px-3 py-3 sm:px-4 sm:py-4 rounded-2xl sm:rounded-4xl mb-2">
+                                        <span className="text-xs sm:text-sm font-medium text-chat-parent-text">
                                             {getSenderName(selectedMessage.senderId)}
                                         </span>
-                                        <p className="text-xs sm:text-sm text-text-white">{selectedMessage.content}</p>
+                                        <p className="text-xs sm:text-sm text-chat-parent-text">{selectedMessage.content}</p>
                                     </div>
                                     <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center space-x-2">
                                         <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
@@ -986,17 +986,17 @@ export default function GroupChat() {
                                 {repliesForSidebar.length > 0 ? (
                                     repliesForSidebar.map((reply) => (
                                         <div key={reply.id}>
-                                            <div className="bg-surface-success/50 rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
-                                                <span className="text-xs sm:text-sm font-medium text-text-primary dark:text-text-white">
+                                            <div className="bg-chat-bubble-them-bg rounded-2xl sm:rounded-4xl px-3 py-3 sm:px-4 sm:py-4">
+                                                <span className="text-xs sm:text-sm font-medium text-chat-bubble-them-text">
                                                     {getSenderName(reply.senderId)}
                                                 </span>
                                                 {reply.attachments?.length ? (
                                                     <>
                                                         <MessageAttachments attachments={reply.attachments} />
-                                                        {reply.content && <p className="text-xs sm:text-sm text-text-primary dark:text-text-white mt-1">{reply.content}</p>}
+                                                        {reply.content && <p className="text-xs sm:text-sm text-chat-bubble-them-text mt-1">{reply.content}</p>}
                                                     </>
                                                 ) : (
-                                                    <p className="text-xs sm:text-sm text-text-primary dark:text-text-white">{reply.content}</p>
+                                                    <p className="text-xs sm:text-sm text-chat-bubble-them-text">{reply.content}</p>
                                                 )}
                                             </div>
                                             <div className="flex space-x-2 items-center mt-1">
