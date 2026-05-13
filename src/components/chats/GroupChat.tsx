@@ -1,4 +1,4 @@
-import { ChevronRight, InfoIcon, MessageCircle, X, Menu, Camera } from "lucide-react";
+import { ChevronRight, MessageCircle, MoreVertical, X, Camera } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
@@ -52,6 +52,7 @@ import { useChatConversation } from "@/hooks/useChatConversation";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useMediaUpload } from "@/hooks/useMediaUpload";
+import { formatCurrentTime, getCountryTimezone } from "@/lib/countryTimezone";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { CircularImageCropper } from "@/lib/imagecropper";
 import { ApiMessage } from "@/store/ChatStore";
@@ -93,6 +94,13 @@ export default function GroupChat() {
     const [isDeletingGroup, setIsDeletingGroup] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+
+    // Tick every minute so per-member local times stay fresh without a page refresh.
+    const [, setTimeTick] = useState(0);
+    useEffect(() => {
+        const id = setInterval(() => setTimeTick(n => n + 1), 60_000);
+        return () => clearInterval(id);
+    }, []);
 
     const { activeChat, users, setActiveChat, addApiMessage, getApiMessagesByConversation } = useChatStore();
     const { uploadFiles, finalizeUpload } = useMediaUpload();
@@ -612,18 +620,27 @@ export default function GroupChat() {
                                 </div>
                             </div>
                         </div>
-                        <ButtonType3 onClick={handleSideBarToggle} className="p-0 min-w-0 border-0 bg-transparent">
-                            <InfoIcon className={`hidden md:block w-6 h-6 cursor-pointer ${sidebarOpen ? "text-text-white bg-surface-brand rounded-full" : "text-text-brand"}`} />
-                        </ButtonType3>
+                        <button
+                            type="button"
+                            onClick={handleSideBarToggle}
+                            aria-label={t('groupInfo')}
+                            aria-expanded={sidebarOpen}
+                            className="hidden md:flex items-center justify-center p-2 rounded-full hover:bg-surface-hover transition-colors flex-shrink-0"
+                        >
+                            <MoreVertical className="w-5 h-5 text-text-secondary" aria-hidden="true" />
+                        </button>
                     </div>
 
                     {/* Mobile Info Button */}
-                    <ButtonType3
+                    <button
+                        type="button"
                         onClick={handleSideBarToggle}
-                        className="md:hidden fixed top-20 right-4 z-10 p-2 bg-surface-brand rounded-full shadow-lg border-0"
+                        aria-label={t('groupInfo')}
+                        aria-expanded={sidebarOpen}
+                        className="md:hidden fixed top-20 right-4 z-10 flex items-center justify-center p-2 rounded-full hover:bg-surface-hover transition-colors"
                     >
-                        <Menu className="w-5 h-5 text-text-white" />
-                    </ButtonType3>
+                        <MoreVertical className="w-5 h-5 text-text-secondary" aria-hidden="true" />
+                    </button>
 
                     {/* Messages Area - only top-level messages; replies show in Reply section */}
                     <div
@@ -879,29 +896,43 @@ export default function GroupChat() {
                                         )}
                                     </div>
                                     <div className="space-y-2 overflow-y-auto">
-                                        {groupMembers.map((member) => (
-                                            <div
-                                                key={member.id}
-                                                className={`flex items-center space-x-3 p-2 rounded-lg ${isAdmin && member.userId !== currentUserId
-                                                    ? 'hover:bg-surface-hover cursor-pointer'
-                                                    : ''
-                                                    }`}
-                                                onClick={() => handleMemberClick(member)}
-                                            >
-                                                <Avatar className="w-10 h-10">
-                                                    <AvatarImage src={member?.profile?.avatarUrl || undefined} alt="avatar" />
-                                                    <AvatarFallback>U</AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-text-primary truncate">
-                                                        {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
-                                                    </p>
-                                                    <p className="text-xs text-text-secondary capitalize">
-                                                        {member.role?.toLowerCase() ?? 'member'}
-                                                    </p>
+                                        {groupMembers.map((member) => {
+                                            const memberTz = member?.profile?.residenceCountry
+                                                ? getCountryTimezone(member.profile.residenceCountry)
+                                                : null;
+                                            const memberTime = memberTz ? formatCurrentTime(memberTz) : null;
+                                            return (
+                                                <div
+                                                    key={member.id}
+                                                    className={`flex items-center space-x-3 p-2 rounded-lg ${isAdmin && member.userId !== currentUserId
+                                                        ? 'hover:bg-surface-hover cursor-pointer'
+                                                        : ''
+                                                        }`}
+                                                    onClick={() => handleMemberClick(member)}
+                                                >
+                                                    <Avatar className="w-10 h-10">
+                                                        <AvatarImage src={member?.profile?.avatarUrl || undefined} alt="avatar" />
+                                                        <AvatarFallback>U</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium text-text-primary truncate">
+                                                            {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
+                                                        </p>
+                                                        <p className="text-xs text-text-secondary capitalize">
+                                                            {member.role?.toLowerCase() ?? 'member'}
+                                                        </p>
+                                                    </div>
+                                                    {memberTime && (
+                                                        <div className="flex-shrink-0 text-right">
+                                                            <p className="text-xs font-medium text-text-primary whitespace-nowrap">{memberTime}</p>
+                                                            {member.profile?.city && (
+                                                                <p className="text-[10px] text-text-tertiary truncate max-w-[80px]">{member.profile.city}</p>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>

@@ -157,6 +157,8 @@ export const GET_GROUP_MEMBERS = gql`
           avatarUrl
           firstName
           lastName
+          residenceCountry
+          city
         }
       }
     }
