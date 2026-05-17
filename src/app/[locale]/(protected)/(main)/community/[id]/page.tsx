@@ -202,14 +202,18 @@ export default function CommunityDetailPage() {
     }
   };
 
-  const handleSave = async (postId: string) => {
-    updatePostCounts(postId, { saves: 1, hasSaved: true });
+  const handleSave = async (postId: string, saved: boolean) => {
+    updatePostCounts(postId, { saves: saved ? 1 : -1, hasSaved: saved });
     try {
-      await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      if (saved) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      }
     } catch (err) {
-      updatePostCounts(postId, { saves: -1, hasSaved: false });
-      console.error('Failed to save post:', err);
-      toast.error('Failed to save post');
+      updatePostCounts(postId, { saves: saved ? -1 : 1, hasSaved: !saved });
+      console.error(`Failed to ${saved ? 'save' : 'unsave'} post:`, err);
+      toast.error(`Failed to ${saved ? 'save' : 'unsave'} post`);
     }
   };
 
@@ -462,7 +466,7 @@ export default function CommunityDetailPage() {
                 onLike={(liked) => handleLike(post.id, liked)}
                 onComment={() => {}}
                 onShare={() => handleShare(post.id)}
-                onSave={() => handleSave(post.id)}
+                onSave={(saved) => handleSave(post.id, saved)}
                 onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
                 onDelete={(id) => setLocalPosts(prev => prev.filter(p => p.id !== id))}
                 isLiked={post.userEngagement.hasLiked}

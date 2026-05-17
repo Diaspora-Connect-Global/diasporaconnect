@@ -206,14 +206,18 @@ export default function Home() {
     }
   };
 
-  const handleSave = async (postId: string) => {
-    updatePostCounts(postId, { saves: 1 });
+  const handleSave = async (postId: string, saved: boolean) => {
+    updatePostCounts(postId, { saves: saved ? 1 : -1, hasSaved: saved });
     try {
-      await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      if (saved) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      }
     } catch (err) {
-      updatePostCounts(postId, { saves: -1 });
-      console.error('Failed to save post:', err);
-      toast.error('Failed to save post');
+      updatePostCounts(postId, { saves: saved ? -1 : 1, hasSaved: !saved });
+      console.error(`Failed to ${saved ? 'save' : 'unsave'} post:`, err);
+      toast.error(`Failed to ${saved ? 'save' : 'unsave'} post`);
     }
   };
 
@@ -571,7 +575,7 @@ export default function Home() {
                   onLike={(liked) => handleLike(post.id, liked)}
                   onComment={() => console.log('Open comment input for', post.id)}
                   onShare={() => handleShare(post.id)}
-                  onSave={() => handleSave(post.id)}
+                  onSave={(saved) => handleSave(post.id, saved)}
                   onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
                   onDelete={removePost}
                   joinButton={false}
@@ -629,7 +633,7 @@ export default function Home() {
           commentCount={modalPost.engagementCounts.comments}
           shareCount={modalPost.engagementCounts.shares}
           onLike={(liked) => handleLike(modalPost.id, liked)}
-          onSave={() => handleSave(modalPost.id)}
+          onSave={(saved) => handleSave(modalPost.id, saved)}
           onShare={() => handleShare(modalPost.id)}
           onSendComment={(text, parentId, mentions) => handleSendComment(modalPost.id, text, parentId, mentions)}
           onClose={() => setModalState(null)}

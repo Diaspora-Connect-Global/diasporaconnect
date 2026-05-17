@@ -68,7 +68,7 @@ interface FeedCardProps {
     onLike?: (liked: boolean) => void;
     onComment?: () => void;
     onShare?: () => void;
-    onSave?: () => void;
+    onSave?: (saved: boolean) => void;
     onSendComment?: (content: string, parentId?: string, mentions?: MentionInputItem[]) => void;
     onDelete?: (postId: string) => void;
     joinButton?: boolean;
@@ -452,11 +452,9 @@ export default function FeedCardWithReply({
     };
 
     const handleSave = () => {
-        // Optimistic update
-        setIsSaved((v) => !v);
-        
-        // Call parent handler (which will trigger API call)
-        onSave?.();
+        const next = !isSaved;
+        setIsSaved(next);
+        onSave?.(next);
     };
 
     const handleShare = () => {

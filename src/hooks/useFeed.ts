@@ -60,7 +60,7 @@ export interface UseFeedResult {
   loadMore: () => void;
   feedContainerRef: React.RefObject<HTMLDivElement | null>;
   feedMeta: FeedStateMeta;
-  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean }>) => void;
+  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean }>) => void;
   removePost: (postId: string) => void;
 }
 
@@ -287,7 +287,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const updatePostCounts = useCallback((
     postId: string,
-    delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean }>,
+    delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean }>,
   ) => {
     setMergedPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
@@ -300,8 +300,12 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
           saves: (p.engagementCounts?.saves ?? 0) + (delta.saves ?? 0),
         },
       };
-      if (delta.hasLiked !== undefined) {
-        updated.userEngagement = { ...p.userEngagement, hasLiked: delta.hasLiked };
+      if (delta.hasLiked !== undefined || delta.hasSaved !== undefined) {
+        updated.userEngagement = {
+          ...p.userEngagement,
+          ...(delta.hasLiked !== undefined ? { hasLiked: delta.hasLiked } : {}),
+          ...(delta.hasSaved !== undefined ? { hasSaved: delta.hasSaved } : {}),
+        };
       }
       return updated;
     }));

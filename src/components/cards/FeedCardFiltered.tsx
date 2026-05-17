@@ -75,7 +75,7 @@ export interface FeedCardFilteredProps {
     onLike?: (liked: boolean) => void;
     onComment?: () => void;
     onShare?: () => void;
-    onSave?: () => void;
+    onSave?: (saved: boolean) => void;
     onSendComment?: (content: string, parentId?: string, mentions?: MentionInputItem[]) => void;
     onDelete?: (postId: string) => void;
     joinButton?: boolean;
@@ -368,8 +368,9 @@ export default function FeedCardFiltered({
     };
 
     const handleSave = () => {
-        setIsSaved((v) => !v);
-        onSave?.();
+        const next = !isSaved;
+        setIsSaved(next);
+        onSave?.(next);
     };
 
     const toggleExpand = () => setIsExpanded((v) => !v);

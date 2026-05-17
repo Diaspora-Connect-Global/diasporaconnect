@@ -157,13 +157,15 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
     }
   };
 
-  const handleSave = async (postId: string) => {
+  const handleSave = async (postId: string, saved: boolean) => {
     try {
-      await addEngagement({
-        variables: { input: { postId, engagementType: 'SAVE' } },
-      });
+      if (saved) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      }
     } catch {
-      toast.error('Failed to save post');
+      toast.error(`Failed to ${saved ? 'save' : 'unsave'} post`);
     }
   };
 
@@ -327,7 +329,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 onLike={(liked) => handleLike(post.id, liked)}
                 onComment={() => {}}
                 onShare={() => handleShare(post.id)}
-                onSave={() => handleSave(post.id)}
+                onSave={(saved) => handleSave(post.id, saved)}
                 onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
                 joinButton={false}
                 isLiked={post.userEngagement.hasLiked}

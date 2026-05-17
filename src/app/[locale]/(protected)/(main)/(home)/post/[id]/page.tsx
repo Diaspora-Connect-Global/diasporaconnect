@@ -87,13 +87,15 @@ export default function PostPage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (saved: boolean) => {
     try {
-      await addEngagement({
-        variables: { input: { postId, engagementType: 'SAVE' } },
-      });
+      if (saved) {
+        await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      } else {
+        await removeEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
+      }
     } catch {
-      toast.error('Failed to save post');
+      toast.error(`Failed to ${saved ? 'save' : 'unsave'} post`);
     }
   };
 

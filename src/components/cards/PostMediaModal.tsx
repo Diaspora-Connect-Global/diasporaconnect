@@ -59,7 +59,7 @@ export interface PostMediaModalProps {
     commentCount: number;
     shareCount: number;
     onLike: (liked: boolean) => void;
-    onSave: () => void;
+    onSave: (saved: boolean) => void;
     onShare: () => void;
     onSendComment: (text: string, parentId?: string, mentions?: MentionInputItem[]) => void;
     onClose: () => void;
@@ -419,8 +419,9 @@ export default function PostMediaModal({
     };
 
     const handleSave = () => {
-        setIsSaved(v => !v);
-        onSave();
+        const next = !isSaved;
+        setIsSaved(next);
+        onSave(next);
     };
 
     const currentUserFirstName = useUserStore(s => s.user?.firstName);
