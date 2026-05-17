@@ -4,8 +4,14 @@ import { gql } from '@apollo/client';
    SHARED TYPES (align with Association Management — User App Integration Guide)
    ============================================================================ */
 
-export type AssociationJoinPolicy = 'OPEN' | 'REQUEST' | 'INVITE_ONLY';
+/**
+ * Backend join policy values. 'REQUEST' is the legacy alias for 'APPROVAL'
+ * and may still be emitted by the gateway — consumers should normalize via
+ * `toJoinPolicy` from `@/types/membership`.
+ */
+export type AssociationJoinPolicy = 'OPEN' | 'APPROVAL' | 'INVITE_ONLY' | 'PAID' | 'REQUEST';
 export type AssociationVisibility = 'PUBLIC' | 'PRIVATE';
+export type AssociationPaymentType = 'NONE' | 'ONE_TIME' | 'SUBSCRIPTION';
 export type MembershipStatus = 'ACTIVE' | 'PENDING' | 'SUSPENDED';
 export type MembershipRole = 'MEMBER' | 'MODERATOR' | 'ADMIN';
 
@@ -17,6 +23,9 @@ export interface AssociationSummary {
   joinPolicy?: AssociationJoinPolicy;
   avatarUrl?: string | null;
   visibility?: AssociationVisibility;
+  paymentType?: AssociationPaymentType | null;
+  priceAmount?: number | null;
+  priceCurrency?: string | null;
   defaultGroupId?: string | null;
   associationType?: { id: string; name: string } | null;
   /** Current user's membership status when available (ACTIVE | PENDING | SUSPENDED). Backend may also return "MEMBER" for ACTIVE. */
@@ -61,6 +70,9 @@ export const SEARCH_ASSOCIATIONS = gql`
         joinPolicy
         avatarUrl
         visibility
+        paymentType
+        priceAmount
+        priceCurrency
         defaultGroupId
         associationType {
           id
@@ -86,6 +98,9 @@ export const GET_ASSOCIATION = gql`
       description
       joinPolicy
       visibility
+      paymentType
+      priceAmount
+      priceCurrency
       memberCount
       avatarUrl
       defaultGroupId
@@ -108,6 +123,9 @@ export const GET_ASSOCIATION_DETAILS = gql`
       description
       joinPolicy
       visibility
+      paymentType
+      priceAmount
+      priceCurrency
       memberCount
       avatarUrl
       defaultGroupId
@@ -138,14 +156,25 @@ export const LIST_ASSOCIATION_TYPES = gql`
    4. JOIN — requestMembership (OPEN → ACTIVE, REQUEST → PENDING, INVITE_ONLY → error)
    ============================================================================ */
 
+// NOTE: BE RequestMembership is entity-generic and returns
+// { status, message, requiresPayment, clientSecret, id } per the parity audit
+// (/tmp/backend-association-parity.md). `provider`, `paymentIntentId`, and
+// `subscriptionId` are a v1.1 BE-TODO.
+// `REQUEST_MEMBERSHIP_ASSOCIATION` is exported as a symmetric alias to mirror
+// the community export name.
 export const REQUEST_MEMBERSHIP = gql`
   mutation RequestMembership($input: RequestMembershipInput!) {
     requestMembership(input: $input) {
+      id
       status
       message
+      requiresPayment
+      clientSecret
     }
   }
 `;
+
+export const REQUEST_MEMBERSHIP_ASSOCIATION = REQUEST_MEMBERSHIP;
 
 /** @deprecated Use REQUEST_MEMBERSHIP with input { entityId, entityType: "ASSOCIATION" }. */
 export const REQUEST_JOIN_ASSOCIATION = gql`
@@ -156,8 +185,11 @@ export const REQUEST_JOIN_ASSOCIATION = gql`
         entityType: "ASSOCIATION"
       }
     ) {
+      id
       status
       message
+      requiresPayment
+      clientSecret
     }
   }
 `;
@@ -279,6 +311,32 @@ export const REPORT_MEMBER = gql`
     reportMember(input: $input) {
       success
       message
+    }
+  }
+`;
+
+/* ============================================================================
+   12. OWNER/ADMIN — update association profile + access settings
+   ============================================================================ */
+
+// NOTE: Association does not currently expose a dedicated
+// updateAssociationJoinPolicy mutation parallel to community's. The
+// `updateAssociation` mutation accepts visibility + joinPolicy, but the
+// paymentType / priceAmount / priceCurrency knobs for paid-membership
+// configuration are a BE-TODO on the association side. Until that mutation
+// lands, the owner form will only persist visibility + joinPolicy on
+// associations and surface a notice that pricing edits are coming.
+
+export const UPDATE_ASSOCIATION = gql`
+  mutation UpdateAssociation($input: UpdateAssociationInput!) {
+    updateAssociation(input: $input) {
+      id
+      name
+      visibility
+      joinPolicy
+      paymentType
+      priceAmount
+      priceCurrency
     }
   }
 `;

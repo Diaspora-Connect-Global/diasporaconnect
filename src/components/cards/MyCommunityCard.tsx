@@ -18,6 +18,8 @@ import { useMutation } from '@apollo/client/react';
 import { LEAVE_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, LIST_AVAILABLE_COMMUNITIES } from '@/services/gql/community';
 import { toast } from 'sonner';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import { AccessBadges } from './AccessBadges';
+import type { AccessProfile } from '@/types/membership';
 
 
 
@@ -27,13 +29,15 @@ interface GhanaConnectHeaderProps {
     description?: string;
     logoIcon?: React.ReactNode;
     onMenuClick?: () => void;
+    access?: AccessProfile;
 }
 
 export function MyCommunityCard({
     title = "",
      description = "",
     logoIcon,
-    id
+    id,
+    access,
 }: GhanaConnectHeaderProps) {
     
     const router = useRouter();
@@ -107,6 +111,11 @@ export function MyCommunityCard({
                             <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-1"> {/* Smaller font, clamp description on small screens */}
                                 {description}
                             </p>
+                            {access && (
+                                <div className="mt-1">
+                                    <AccessBadges access={access} size="card" />
+                                </div>
+                            )}
                         </div>
                     </div>
                     <DropdownMenu>

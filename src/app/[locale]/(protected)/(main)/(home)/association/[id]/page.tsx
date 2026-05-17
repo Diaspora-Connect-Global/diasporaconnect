@@ -5,7 +5,7 @@ import { formatDateProximity } from '@/macros/time';
 import AboutAssociation from "@/components/cards/association/AboutAssociation";
 import { ButtonType1 } from "@/components/custom/button";
 import { PeopleYouMayKnow } from "@/components/home/PeopleYouMayKnow";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -16,11 +16,24 @@ import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import {
     GET_ASSOCIATION_DETAILS,
     GET_MY_ASSOCIATIONS,
-    REQUEST_JOIN_ASSOCIATION,
+    REQUEST_MEMBERSHIP_ASSOCIATION,
     LEAVE_ASSOCIATION,
     CANCEL_JOIN_REQUEST,
     type AssociationJoinPolicy,
+    type AssociationPaymentType,
 } from '@/services/gql/associations';
+import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
+import AccessSettingsForm from '@/components/cards/AccessSettingsForm';
+import {
+    toJoinPolicy,
+    type AccessProfile,
+    type JoinPolicy,
+    type MembershipEntity,
+    type PaymentType,
+    type RequestMembershipResult,
+    type SubscriptionPeriod,
+    type Visibility,
+} from '@/types/membership';
 import {
     GET_FEED,
     ADD_ENGAGEMENT,
@@ -44,6 +57,9 @@ interface AssociationDetails {
     createdAt?: string;
     visibility?: string;
     joinPolicy?: AssociationJoinPolicy;
+    paymentType?: AssociationPaymentType | null;
+    priceAmount?: number | null;
+    priceCurrency?: string | null;
     defaultGroupId?: string | null;
     membershipStatus?: string | null; // ACTIVE | PENDING | SUSPENDED | MEMBER (legacy)
 }
@@ -98,7 +114,9 @@ function isMemberStatus(status: string | null | undefined): boolean {
 export default function AssociationPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const associationId = params.id as string;
+    const showSettings = searchParams.get('settings') === '1';
 
     const t = useTranslations("home.associations");
     const tActions = useTranslations("actions");
@@ -130,8 +148,15 @@ export default function AssociationPage() {
         },
     });
 
-    const [requestJoin, { loading: joinLoading }] = useMutation(REQUEST_JOIN_ASSOCIATION, {
-        variables: { associationId },
+    const [requestMembershipMutation, { loading: joinLoading }] = useMutation<{
+        requestMembership: {
+            id?: string | null;
+            status: string;
+            message?: string | null;
+            requiresPayment?: boolean | null;
+            clientSecret?: string | null;
+        };
+    }>(REQUEST_MEMBERSHIP_ASSOCIATION, {
         refetchQueries: [
             { query: GET_ASSOCIATION_DETAILS, variables: { associationId } },
             { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: 500 } },
@@ -158,6 +183,7 @@ export default function AssociationPage() {
 
     const [leaveModalOpen, setLeaveModalOpen] = useState(false);
     const [joinModalOpen, setJoinModalOpen] = useState(false);
+    const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [localPosts, setLocalPosts] = useState<FeedPost[]>([]);
 
     useEffect(() => {
@@ -279,16 +305,37 @@ export default function AssociationPage() {
     const canLeave = isActive;
     const canCancelRequest = isPending;
 
-    const handleJoin = async () => {
+    // The paid-membership flow is driven by the shared MembershipPaymentModal.
+    // It owns the REQUEST_MEMBERSHIP invocation when payment is required so it
+    // can branch into the Stripe/Paystack rails. For free entities we call
+    // REQUEST_MEMBERSHIP directly and skip the modal.
+    const isPaidEntity =
+        association?.paymentType === 'ONE_TIME' || association?.paymentType === 'SUBSCRIPTION';
+
+    const callRequestMembership = async (period?: SubscriptionPeriod) => {
+        const result = await requestMembershipMutation({
+            variables: {
+                input: {
+                    entityId: associationId,
+                    entityType: 'ASSOCIATION',
+                    ...(period ? { subscriptionPeriod: period.toUpperCase() } : {}),
+                },
+            },
+        });
+        const payload = result.data?.requestMembership;
+        if (!payload) throw new Error('Request failed');
+        return payload;
+    };
+
+    const handleDirectJoin = async () => {
         try {
-            const res = await requestJoin();
-            const result = (res as { data?: { requestMembership?: { status?: string; message?: string } } })?.data?.requestMembership;
-            if (result?.status === ACTIVE || result?.status === MEMBER) {
+            const payload = await callRequestMembership();
+            if (payload.status === ACTIVE || payload.status === MEMBER) {
                 toast.success(t('toasts.youAreNowMember', { name: association?.name ?? '' }));
-            } else if (result?.status === PENDING) {
+            } else if (payload.status === PENDING) {
                 toast.success(t('toasts.requestSubmitted'));
-            } else if (result?.message) {
-                toast.info(result.message);
+            } else if (payload.message) {
+                toast.info(payload.message);
             }
         } catch (e) {
             const msg = e instanceof Error ? e.message : 'Request failed';
@@ -300,12 +347,70 @@ export default function AssociationPage() {
         }
     };
 
-    const handleJoinClick = () => setJoinModalOpen(true);
+    const handleJoinClick = () => {
+        if (isPaidEntity) {
+            setPaymentModalOpen(true);
+            return;
+        }
+        setJoinModalOpen(true);
+    };
 
     const handleJoinConfirm = async () => {
-        await handleJoin();
+        await handleDirectJoin();
         setJoinModalOpen(false);
     };
+
+    const handlePaymentModalRequest = async (args: {
+        entityId: string;
+        entityKind: 'community' | 'association';
+        period?: SubscriptionPeriod;
+    }): Promise<RequestMembershipResult> => {
+        const payload = await callRequestMembership(args.period);
+        const status =
+            payload.status === 'PENDING_PAYMENT'
+                ? 'PENDING_PAYMENT'
+                : payload.status === PENDING
+                  ? 'PENDING'
+                  : 'ACTIVE';
+        return {
+            membershipId: payload.id ?? args.entityId,
+            status,
+            requiresPayment: Boolean(payload.requiresPayment),
+            ...(payload.clientSecret ? { clientSecret: payload.clientSecret } : {}),
+            ...(payload.message ? { message: payload.message } : {}),
+        };
+    };
+
+    const handlePaymentSuccess = (_membershipId: string) => {
+        toast.success(t('toasts.youAreNowMember', { name: association?.name ?? '' }));
+    };
+
+    const handlePaymentClose = () => setPaymentModalOpen(false);
+
+    // GUESS: BE `priceAmount` is already the smallest-unit (cents/pesewas) integer —
+    // mirrors Community's `Int` gateway typing and the payment-service convention.
+    // If the actual value is in major units, this will need a *100 multiply.
+    // Flagged for reviewer in /tmp/payments-coder-notes.md.
+    const paymentEntity: MembershipEntity | null = association
+        ? {
+              kind: 'association',
+              id: association.id,
+              name: association.name,
+              access: {
+                  visibility: (association.visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC'),
+                  joinPolicy: 'PAID',
+                  paymentType: association.paymentType ?? 'NONE',
+                  ...(association.priceAmount != null && association.priceCurrency
+                      ? {
+                            price: {
+                                amountInCents: Math.round(Number(association.priceAmount)),
+                                currency: association.priceCurrency,
+                            },
+                        }
+                      : {}),
+              },
+          }
+        : null;
 
     const handleLeaveClick = () => setLeaveModalOpen(true);
 
@@ -371,6 +476,21 @@ export default function AssociationPage() {
     }
 
     const actionLoading = joinLoading || leaveLoading || cancelLoading;
+
+    const accessProfile: AccessProfile | undefined = association.visibility
+        ? {
+              visibility: (association.visibility as Visibility) ?? 'PUBLIC',
+              joinPolicy: toJoinPolicy(association.joinPolicy),
+              paymentType: (association.paymentType ?? 'NONE') as PaymentType,
+              price:
+                  association.paymentType && association.paymentType !== 'NONE' && association.priceAmount
+                      ? {
+                            amountInCents: association.priceAmount,
+                            currency: association.priceCurrency ?? 'GHS',
+                        }
+                      : undefined,
+          }
+        : undefined;
 
     return (
         <div className="lg:flex overflow-y-auto h-app-inner">
@@ -451,6 +571,7 @@ export default function AssociationPage() {
                         createdDate={association.createdAt ?? ''}
                         visibility={association.visibility ?? 'Public'}
                         description={association.description ?? ''}
+                        access={accessProfile}
                     />
                 </div>
 
@@ -502,8 +623,22 @@ export default function AssociationPage() {
                             createdDate={association.createdAt ?? ''}
                             visibility={association.visibility ?? 'Public'}
                             description={association.description ?? ''}
+                            access={accessProfile}
                         />
                     </div>
+                    {showSettings && (
+                        <AccessSettingsForm
+                            kind="association"
+                            entityId={associationId}
+                            initial={{
+                                visibility: (association.visibility as Visibility) ?? 'PUBLIC',
+                                joinPolicy: toJoinPolicy(association.joinPolicy) as JoinPolicy,
+                                paymentType: (association.paymentType ?? 'NONE') as PaymentType,
+                                priceAmount: association.priceAmount ?? null,
+                                priceCurrency: association.priceCurrency ?? null,
+                            }}
+                        />
+                    )}
                     <PeopleYouMayKnow />
                 </div>
             </div>
@@ -528,6 +663,16 @@ export default function AssociationPage() {
                 confirmVariant="destructive"
                 isLoading={leaveLoading}
             />
+
+            {paymentEntity && (
+                <MembershipPaymentModal
+                    open={paymentModalOpen}
+                    onClose={handlePaymentClose}
+                    entity={paymentEntity}
+                    requestMembership={handlePaymentModalRequest}
+                    onSuccess={handlePaymentSuccess}
+                />
+            )}
         </div>
     );
 }

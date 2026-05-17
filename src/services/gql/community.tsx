@@ -4,8 +4,14 @@ import { gql } from '@apollo/client';
    SHARED TYPES (align with Community — User App Integration Guide)
    ============================================================================ */
 
-export type CommunityJoinPolicy = 'OPEN' | 'REQUEST' | 'INVITE_ONLY';
+/**
+ * Backend join policy values. 'REQUEST' is the legacy alias for 'APPROVAL'
+ * and may still be emitted by the gateway — consumers should normalize via
+ * `toJoinPolicy` from `@/types/membership`.
+ */
+export type CommunityJoinPolicy = 'OPEN' | 'APPROVAL' | 'INVITE_ONLY' | 'PAID' | 'REQUEST';
 export type CommunityVisibility = 'PUBLIC' | 'PRIVATE';
+export type CommunityPaymentType = 'NONE' | 'ONE_TIME' | 'SUBSCRIPTION';
 export type MembershipStatus = 'ACTIVE' | 'PENDING' | 'SUSPENDED';
 export type CommunityMemberRole = 'MEMBER' | 'MODERATOR';
 
@@ -18,6 +24,9 @@ export interface CommunitySummary {
   avatarUrl?: string | null;
   bannerUrl?: string | null;
   visibility?: CommunityVisibility;
+  paymentType?: CommunityPaymentType | null;
+  priceAmount?: number | null;
+  priceCurrency?: string | null;
   defaultGroupId?: string | null;
   membershipStatus?: MembershipStatus | 'MEMBER' | null;
 }
@@ -55,6 +64,9 @@ export const SEARCH_COMMUNITIES = gql`
         avatarUrl
         bannerUrl
         visibility
+        paymentType
+        priceAmount
+        priceCurrency
       }
       total
     }
@@ -73,6 +85,9 @@ export const GET_COMMUNITY = gql`
       description
       joinPolicy
       visibility
+      paymentType
+      priceAmount
+      priceCurrency
       memberCount
       avatarUrl
       bannerUrl
@@ -91,6 +106,9 @@ export const GET_COMMUNITY_DETAILS = gql`
       description
       joinPolicy
       visibility
+      paymentType
+      priceAmount
+      priceCurrency
       memberCount
       avatarUrl
       bannerUrl
@@ -105,9 +123,14 @@ export const GET_COMMUNITY_DETAILS = gql`
    3. JOIN — requestMembership (entityType: "COMMUNITY")
    ============================================================================ */
 
+// NOTE: BE currently returns { status, message, requiresPayment, clientSecret, id } only.
+// `provider`, `paymentIntentId`, and `subscriptionId` are filed as a v1.1 BE-TODO
+// (see /tmp/payments-coder-notes.md). The selection set requests `id` to give the FE
+// a stable membershipId handle returned in the envelope.
 export const REQUEST_MEMBERSHIP_COMMUNITY = gql`
   mutation RequestMembershipCommunity($input: RequestMembershipInput!) {
     requestMembership(input: $input) {
+      id
       status
       message
       requiresPayment
@@ -124,6 +147,7 @@ export const REQUEST_JOIN_COMMUNITY = gql`
         entityType: "COMMUNITY"
       }
     ) {
+      id
       status
       message
       requiresPayment
@@ -248,6 +272,47 @@ export const REPORT_MEMBER_COMMUNITY = gql`
     reportMember(input: $input) {
       success
       message
+    }
+  }
+`;
+
+/* ============================================================================
+   11. OWNER/ADMIN — update community profile + access settings
+   ============================================================================ */
+
+// Backend exposes both a coarse updateCommunity (visibility + joinPolicy among
+// other profile fields) and a focused updateCommunityJoinPolicy (joinPolicy +
+// paymentType + priceAmount + priceCurrency). The frontend uses the focused
+// mutation for paid-membership configuration since updateCommunity does not
+// carry the payment fields.
+
+export const UPDATE_COMMUNITY = gql`
+  mutation UpdateCommunity($id: ID!, $input: UpdateCommunityInput!) {
+    updateCommunity(id: $id, input: $input) {
+      success
+      errors
+      community {
+        id
+        name
+        visibility
+        joinPolicy
+        paymentType
+        priceAmount
+        priceCurrency
+      }
+    }
+  }
+`;
+
+export const UPDATE_COMMUNITY_JOIN_POLICY = gql`
+  mutation UpdateCommunityJoinPolicy($input: UpdateCommunityJoinPolicyInput!) {
+    updateCommunityJoinPolicy(input: $input) {
+      id
+      name
+      joinPolicy
+      paymentType
+      priceAmount
+      priceCurrency
     }
   }
 `;

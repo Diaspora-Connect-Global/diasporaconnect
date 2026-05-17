@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useTranslations } from 'next-intl';
 import Image from 'next/image'
+import { AccessBadges } from './AccessBadges';
+import type { AccessProfile } from '@/types/membership';
 
 
 interface JoinCommunityCardProps {
@@ -21,6 +23,7 @@ interface JoinCommunityCardProps {
   iconColor?: string;
   members?: number;
   isDisabled?: boolean;
+  access?: AccessProfile;
 }
 
 export default function JoinCommunityCard({
@@ -32,6 +35,7 @@ export default function JoinCommunityCard({
   onCardClick,
   icon,
   isDisabled = false,
+  access,
 }: JoinCommunityCardProps) {
   const t = useTranslations('community');
 
@@ -103,6 +107,8 @@ export default function JoinCommunityCard({
               {members.toLocaleString()} {t('members')}
             </p>
           )}
+
+          {access && <AccessBadges access={access} size="card" />}
 
           {/* Button */}
           <ButtonType1 onClick={onButtonClick} size="lg" disabled={isDisabled}>

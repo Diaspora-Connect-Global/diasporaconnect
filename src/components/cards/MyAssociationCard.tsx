@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ButtonType3 } from '@/components/custom/button';
 import { useTranslations } from 'next-intl';
+import { AccessBadges } from './AccessBadges';
+import type { AccessProfile } from '@/types/membership';
 
 interface MyAssociationCardProps {
   id: string;
@@ -28,6 +30,7 @@ interface MyAssociationCardProps {
   viewLabel?: string;
   leaveLabel?: string;
   cancelRequestLabel?: string;
+  access?: AccessProfile;
 }
 
 export function MyAssociationCard({
@@ -43,6 +46,7 @@ export function MyAssociationCard({
   viewLabel,
   leaveLabel,
   cancelRequestLabel,
+  access,
 }: MyAssociationCardProps) {
   const t = useTranslations('home.associations.actions');
   const tCommon = useTranslations('common');
@@ -75,6 +79,11 @@ export function MyAssociationCard({
               <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-1">
                 {description}
               </p>
+              {access && (
+                <div className="mt-1">
+                  <AccessBadges access={access} size="card" />
+                </div>
+              )}
             </div>
           </div>
 

@@ -5,7 +5,7 @@ import { formatDateProximity } from '@/macros/time';
 import AboutCommunity from '@/components/cards/community/AboutCommunity';
 import { ButtonType1 } from '@/components/custom/button';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
@@ -19,7 +19,11 @@ import {
   LEAVE_COMMUNITY,
   CANCEL_JOIN_REQUEST_COMMUNITY,
   type CommunityJoinPolicy,
+  type CommunityPaymentType,
+  type CommunityVisibility,
 } from '@/services/gql/community';
+import AccessSettingsForm from '@/components/cards/AccessSettingsForm';
+import { toJoinPolicy, type AccessProfile, type Visibility, type JoinPolicy, type PaymentType } from '@/types/membership';
 import {
   GET_FEED,
   ADD_ENGAGEMENT,
@@ -40,8 +44,11 @@ interface CommunityDetails {
   bannerUrl?: string | null;
   memberCount?: number;
   createdAt?: string;
-  visibility?: string;
+  visibility?: CommunityVisibility | string;
   joinPolicy?: CommunityJoinPolicy;
+  paymentType?: CommunityPaymentType | null;
+  priceAmount?: number | null;
+  priceCurrency?: string | null;
   defaultGroupId?: string | null;
   membershipStatus?: string | null;
 }
@@ -93,7 +100,9 @@ function isMemberStatus(status: string | null | undefined): boolean {
 export default function CommunityDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const communityId = params.id as string;
+  const showSettings = searchParams.get('settings') === '1';
 
   const t = useTranslations('community');
   const tActions = useTranslations('actions');
@@ -361,6 +370,22 @@ export default function CommunityDetailPage() {
   const actionLoading = joinLoading || leaveLoading || cancelLoading;
   const displayMemberCount = community.memberCount ?? 0;
 
+  const accessProfile: AccessProfile | undefined =
+    community.visibility
+      ? {
+          visibility: (community.visibility as Visibility) ?? 'PUBLIC',
+          joinPolicy: toJoinPolicy(community.joinPolicy),
+          paymentType: (community.paymentType ?? 'NONE') as PaymentType,
+          price:
+            community.paymentType && community.paymentType !== 'NONE' && community.priceAmount
+              ? {
+                  amountInCents: community.priceAmount,
+                  currency: community.priceCurrency ?? 'GHS',
+                }
+              : undefined,
+        }
+      : undefined;
+
   return (
     <div className="lg:flex overflow-y-auto h-app-inner">
       <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
@@ -438,6 +463,7 @@ export default function CommunityDetailPage() {
             createdDate={community.createdAt ?? ''}
             visibility={community.visibility ?? 'Public'}
             description={community.description ?? ''}
+            access={accessProfile}
           />
         </div>
 
@@ -489,8 +515,22 @@ export default function CommunityDetailPage() {
               createdDate={community.createdAt ?? ''}
               visibility={community.visibility ?? 'Public'}
               description={community.description ?? ''}
+              access={accessProfile}
             />
           </div>
+          {showSettings && (
+            <AccessSettingsForm
+              kind="community"
+              entityId={communityId}
+              initial={{
+                visibility: (community.visibility as Visibility) ?? 'PUBLIC',
+                joinPolicy: toJoinPolicy(community.joinPolicy) as JoinPolicy,
+                paymentType: (community.paymentType ?? 'NONE') as PaymentType,
+                priceAmount: community.priceAmount ?? null,
+                priceCurrency: community.priceCurrency ?? null,
+              }}
+            />
+          )}
           <PeopleYouMayKnow />
         </div>
       </div>

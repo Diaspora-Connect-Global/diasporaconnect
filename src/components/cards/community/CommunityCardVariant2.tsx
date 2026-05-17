@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { AccessBadges } from '@/components/cards/AccessBadges';
+import type { AccessProfile } from '@/types/membership';
 
 interface CommunityCardVariant2Props {
     title: string;
@@ -18,6 +20,7 @@ interface CommunityCardVariant2Props {
     members: number;
     buttonText: string;
     isDisabled?: boolean;
+    access?: AccessProfile;
 }
 
 export default function CommunityCardVariant2({
@@ -28,6 +31,7 @@ export default function CommunityCardVariant2({
     icon,
     buttonText,
     isDisabled = false,
+    access,
 }: CommunityCardVariant2Props) {
     const t = useTranslations('community');
 
@@ -77,6 +81,12 @@ export default function CommunityCardVariant2({
                         </p>
                     )}
                 </div>
+
+                {access && (
+                    <div className="w-full flex justify-center">
+                        <AccessBadges access={access} size="card" />
+                    </div>
+                )}
 
                 {/* Button */}
                 <div className="w-full flex justify-center h-[2.25rem] ">

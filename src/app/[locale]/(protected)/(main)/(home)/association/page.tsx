@@ -1,19 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import JoinAssociationCard from '@/components/cards/JoinAssociationCard';
 import { MyAssociationCard } from '@/components/cards/MyAssociationCard';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
   GET_MY_ASSOCIATIONS,
   SEARCH_ASSOCIATIONS,
   REQUEST_JOIN_ASSOCIATION,
   LEAVE_ASSOCIATION,
   CANCEL_JOIN_REQUEST,
+  type AssociationPaymentType,
+  type AssociationVisibility,
 } from '@/services/gql/associations';
+import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
+import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
 
@@ -24,6 +29,11 @@ interface MyAssociationItem {
   avatarUrl?: string | null;
   memberCount?: number;
   defaultGroupId?: string | null;
+  visibility?: AssociationVisibility | null;
+  joinPolicy?: string | null;
+  paymentType?: AssociationPaymentType | null;
+  priceAmount?: number | null;
+  priceCurrency?: string | null;
   myMembership?: {
     status: string;
     role: string;
@@ -38,6 +48,10 @@ interface SearchAssociationItem {
   memberCount?: number;
   joinPolicy?: string;
   avatarUrl?: string | null;
+  visibility?: AssociationVisibility | null;
+  paymentType?: AssociationPaymentType | null;
+  priceAmount?: number | null;
+  priceCurrency?: string | null;
   membershipStatus?: string | null;
 }
 
@@ -61,9 +75,66 @@ interface RequestJoinAssociationData {
   requestMembership: { status: string; message?: string };
 }
 
+type VisibilityFilter = 'ALL' | Visibility;
+type PricingFilter = 'ALL' | 'FREE' | 'PAID';
+
+const VISIBILITY_OPTIONS: VisibilityFilter[] = ['ALL', 'PUBLIC', 'PRIVATE'];
+const PRICING_OPTIONS: PricingFilter[] = ['ALL', 'FREE', 'PAID'];
+
+function readVisibility(param: string | null): VisibilityFilter {
+  const upper = (param ?? 'ALL').toUpperCase();
+  return upper === 'PUBLIC' || upper === 'PRIVATE' ? upper : 'ALL';
+}
+
+function readPricing(param: string | null): PricingFilter {
+  const upper = (param ?? 'ALL').toUpperCase();
+  return upper === 'FREE' || upper === 'PAID' ? upper : 'ALL';
+}
+
+function searchAssociationToAccess(
+  a: SearchAssociationItem | MyAssociationItem,
+): AccessProfile | null {
+  if (!a.visibility) return null;
+  const paymentType = a.paymentType ?? 'NONE';
+  return {
+    visibility: a.visibility,
+    joinPolicy: toJoinPolicy(a.joinPolicy),
+    paymentType,
+    price:
+      paymentType !== 'NONE' && a.priceAmount
+        ? {
+            amountInCents: a.priceAmount,
+            currency: a.priceCurrency ?? 'GHS',
+          }
+        : undefined,
+  };
+}
+
 export default function AssociationsPage() {
   const tActions = useTranslations('actions');
   const t = useTranslations('home.associations');
+  const tDiscovery = useTranslations('association.discovery');
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const visibilityFilter = readVisibility(searchParams.get('visibility'));
+  const pricingFilter = readPricing(searchParams.get('pricing'));
+
+  const updateFilter = useCallback(
+    (key: 'visibility' | 'pricing', value: string) => {
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      if (value === 'ALL') {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
 
   const { data: myData, loading: myLoading, refetch: refetchMy } = useQuery<GetMyAssociationsData>(
     GET_MY_ASSOCIATIONS,
@@ -120,6 +191,22 @@ export default function AssociationsPage() {
   const myIds = new Set(myAssociations.map((a) => a.id));
   const discoverAssociations = allDiscover.filter((assn) => !myIds.has(assn.id));
 
+  const visibleDiscover = useMemo(
+    () =>
+      discoverAssociations
+        .filter((assn) =>
+          visibilityFilter === 'ALL'
+            ? true
+            : assn.visibility === visibilityFilter,
+        )
+        .filter((assn) => {
+          if (pricingFilter === 'ALL') return true;
+          const isPaid = !!assn.paymentType && assn.paymentType !== 'NONE';
+          return pricingFilter === 'PAID' ? isPaid : !isPaid;
+        }),
+    [discoverAssociations, visibilityFilter, pricingFilter],
+  );
+
   const handleJoin = async (associationId: string, name: string, joinPolicy?: string) => {
     if (joinPolicy === 'INVITE_ONLY') {
       toast.error(t('toasts.inviteOnly'));
@@ -151,7 +238,7 @@ export default function AssociationsPage() {
       open: true,
       id: associationId,
       name,
-      isRequest: joinPolicy === 'REQUEST',
+      isRequest: joinPolicy === 'REQUEST' || joinPolicy === 'APPROVAL',
     });
   };
 
@@ -216,6 +303,7 @@ export default function AssociationsPage() {
                   ? () => handleCancelRequest(assn.id)
                   : undefined
               }
+              access={searchAssociationToAccess(assn) ?? undefined}
             />
           ))
         ) : (
@@ -225,13 +313,65 @@ export default function AssociationsPage() {
 
       <p className="heading-small my-5">{t('discoverTitle')}</p>
 
+      <div
+        className="flex flex-wrap items-center gap-2 mb-4"
+        role="group"
+        aria-label={tDiscovery('filtersLabel')}
+      >
+        <span className="text-sm text-text-secondary mr-1">
+          {tDiscovery('visibilityLabel')}
+        </span>
+        {VISIBILITY_OPTIONS.map((v) => {
+          const active = visibilityFilter === v;
+          return (
+            <button
+              key={`visibility-${v}`}
+              type="button"
+              onClick={() => updateFilter('visibility', v)}
+              aria-pressed={active}
+              className={cn(
+                'rounded-full border px-3 py-1 text-xs transition-colors',
+                active
+                  ? 'bg-surface-brand text-text-on-brand border-transparent'
+                  : 'bg-surface-default text-text-secondary border-border-subtle hover:bg-surface-hover',
+              )}
+            >
+              {tDiscovery(`visibility.${v.toLowerCase()}`)}
+            </button>
+          );
+        })}
+        <span className="text-sm text-text-secondary mx-1">
+          {tDiscovery('pricingLabel')}
+        </span>
+        {PRICING_OPTIONS.map((p) => {
+          const active = pricingFilter === p;
+          return (
+            <button
+              key={`pricing-${p}`}
+              type="button"
+              onClick={() => updateFilter('pricing', p)}
+              aria-pressed={active}
+              className={cn(
+                'rounded-full border px-3 py-1 text-xs transition-colors',
+                active
+                  ? 'bg-surface-brand text-text-on-brand border-transparent'
+                  : 'bg-surface-default text-text-secondary border-border-subtle hover:bg-surface-hover',
+              )}
+            >
+              {tDiscovery(`pricing.${p.toLowerCase()}`)}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
         {searchLoading ? (
           <div className="col-span-full text-center py-8 text-text-secondary">{t('loading')}</div>
-        ) : discoverAssociations.length > 0 ? (
-          discoverAssociations.map((assn) => {
+        ) : visibleDiscover.length > 0 ? (
+          visibleDiscover.map((assn) => {
             const isInviteOnly = assn.joinPolicy === 'INVITE_ONLY';
             const buttonText = isInviteOnly ? t('badges.inviteOnly') : tActions('join');
+            const access = searchAssociationToAccess(assn);
             return (
               <JoinAssociationCard
                 key={assn.id}
@@ -242,12 +382,13 @@ export default function AssociationsPage() {
                 profileName={assn.name}
                 buttonText={buttonText}
                 onButtonClick={() => handleJoinClick(assn.id, assn.name, assn.joinPolicy)}
+                access={access ?? undefined}
               />
             );
           })
         ) : (
           <div className="col-span-full text-center py-8 text-text-secondary">
-            {t('noDiscoverAssociations')}
+            {tDiscovery('emptyFiltered')}
           </div>
         )}
       </div>

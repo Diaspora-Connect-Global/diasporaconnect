@@ -15,11 +15,22 @@ import { useCommunityStore } from '@/store/useCommunityStore';
 import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
+import { AccessBadges } from './AccessBadges';
+import { toJoinPolicy } from '@/types/membership';
+import type {
+    CommunityPaymentType,
+    CommunityVisibility,
+} from '@/services/gql/community';
 
 interface Community {
     id: string;
     name: string;
     avatarUrl?: string;
+    visibility?: CommunityVisibility;
+    joinPolicy?: string;
+    paymentType?: CommunityPaymentType | null;
+    priceAmount?: number | null;
+    priceCurrency?: string | null;
 }
 
 interface ListMyJoinedCommunitiesResponse {
@@ -156,23 +167,40 @@ export function MyCommunityCard2() {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
 
-                        {communities.map((community) => (
-                            <DropdownMenuItem
-                                key={community.id}
-                                onSelect={() => handleCommunitySelect(community)}
-                                className='body-large text-text-primary flex items-center justify-between'
-                            >
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    {community.avatarUrl && (
-                                        <Image width={20} height={20} src={community.avatarUrl} alt={community.name} className="rounded-full object-cover flex-shrink-0" />
+                        {communities.map((community) => {
+                            const access = community.visibility
+                                ? {
+                                      visibility: community.visibility,
+                                      joinPolicy: toJoinPolicy(community.joinPolicy),
+                                      paymentType: community.paymentType ?? 'NONE',
+                                      price:
+                                          community.priceAmount && community.paymentType && community.paymentType !== 'NONE'
+                                              ? {
+                                                    amountInCents: community.priceAmount,
+                                                    currency: community.priceCurrency ?? 'GHS',
+                                                }
+                                              : undefined,
+                                  }
+                                : null;
+                            return (
+                                <DropdownMenuItem
+                                    key={community.id}
+                                    onSelect={() => handleCommunitySelect(community)}
+                                    className='body-large text-text-primary flex items-center justify-between'
+                                >
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        {community.avatarUrl && (
+                                            <Image width={20} height={20} src={community.avatarUrl} alt={community.name} className="rounded-full object-cover flex-shrink-0" />
+                                        )}
+                                        <span className="truncate flex-1">{community.name}</span>
+                                        {access && <AccessBadges access={access} size="card" />}
+                                    </div>
+                                    {selectedCommunityId === community.id && (
+                                        <Check className='w-4 h-4 text-text-brand flex-shrink-0 ml-2' />
                                     )}
-                                    <span className="truncate flex-1">{community.name}</span>
-                                </div>
-                                {selectedCommunityId === community.id && (
-                                    <Check className='w-4 h-4 text-text-brand flex-shrink-0 ml-2' />
-                                )}
-                            </DropdownMenuItem>
-                        ))}
+                                </DropdownMenuItem>
+                            );
+                        })}
 
                         <DropdownMenuSeparator />
                     </DropdownMenuContent>

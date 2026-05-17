@@ -1,7 +1,9 @@
 'use client';
-import {  ButtonType2 } from '../custom/button'; 
+import {  ButtonType2 } from '../custom/button';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { AccessBadges } from './AccessBadges';
+import type { AccessProfile } from '@/types/membership';
 
 interface JoinAssociationCardProps {
   title: string;
@@ -15,6 +17,7 @@ interface JoinAssociationCardProps {
   iconColor?: string;
   profileImage: string;
   profileName: string;
+  access?: AccessProfile;
 }
 
 export default function JoinAssociationCard({
@@ -25,6 +28,7 @@ export default function JoinAssociationCard({
   onButtonClick,
   profileImage,
   profileName,
+  access,
 }: JoinAssociationCardProps) {
   const t = useTranslations('community');
 
@@ -49,6 +53,11 @@ export default function JoinAssociationCard({
             <p className="body-small text-text-secondary text-xs sm:text-sm flex flex-start">
               {members ? `${members.toLocaleString()} ${t('members')}` : t('noMembers')}
             </p>
+            {access && (
+              <div className="mt-1">
+                <AccessBadges access={access} size="card" />
+              </div>
+            )}
           </div>
         </div>
         <ButtonType2 size="lg"

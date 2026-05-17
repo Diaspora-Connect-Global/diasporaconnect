@@ -614,6 +614,107 @@
             "errorGeneric": "Payment failed. Please try again.",
             "errorIncomplete": "Payment was not completed. Please try again.",
             "pay": "Pay"
+        },
+        "discovery": {
+            "filtersLabel": "Filter communities",
+            "visibilityLabel": "Visibility:",
+            "pricingLabel": "Pricing:",
+            "visibility": {
+                "all": "All",
+                "public": "Public",
+                "private": "Private"
+            },
+            "pricing": {
+                "all": "All",
+                "free": "Free",
+                "paid": "Paid"
+            },
+            "emptyFiltered": "No communities match these filters."
+        },
+        "settings": {
+            "title": "Access & membership",
+            "visibility": {
+                "legend": "Who can find this community?",
+                "public": "Public — anyone can find it",
+                "private": "Private — hidden from search"
+            },
+            "joinPolicy": {
+                "legend": "How can members join?",
+                "open": "Open — instant join",
+                "approval": "Approval — admin approves each request",
+                "invite_only": "Invite only — admins invite members",
+                "paid": "Paid — members pay to join"
+            },
+            "paymentType": {
+                "legend": "Payment type",
+                "one_time": "One-time payment",
+                "subscription": "Subscription"
+            },
+            "price": {
+                "amount": "Price",
+                "currency": "Currency",
+                "helper": "Enter the price in the major unit (e.g. 12.50)."
+            },
+            "association": {
+                "pricingComingSoon": "Pricing edits for associations land in the next backend update; visibility and join policy will save now."
+            },
+            "validation": {
+                "paidRequiresPaymentType": "Choose a payment type (one-time or subscription) for paid memberships.",
+                "priceMustBePositive": "Price must be greater than zero.",
+                "currencyRequired": "Pick a currency."
+            },
+            "actions": {
+                "save": "Save changes",
+                "saving": "Saving…"
+            },
+            "toasts": {
+                "saved": "Access settings updated.",
+                "saveFailed": "Could not update access settings."
+            }
+        }
+    },
+    "association": {
+        "discovery": {
+            "filtersLabel": "Filter associations",
+            "visibilityLabel": "Visibility:",
+            "pricingLabel": "Pricing:",
+            "visibility": {
+                "all": "All",
+                "public": "Public",
+                "private": "Private"
+            },
+            "pricing": {
+                "all": "All",
+                "free": "Free",
+                "paid": "Paid"
+            },
+            "emptyFiltered": "No associations match these filters."
+        },
+        "settings": {
+            "title": "Access & membership"
+        }
+    },
+    "accessBadges": {
+        "groupLabel": "Access summary",
+        "visibility": {
+            "public": "Public",
+            "private": "Private",
+            "publicAria": "Public community",
+            "privateAria": "Private community"
+        },
+        "payment": {
+            "free": "Free",
+            "paid": "Paid",
+            "paidOneTime": "Paid · {price}",
+            "paidOneTimeAria": "Paid membership, {price}",
+            "paidSubscription": "Paid · {price}/{period}",
+            "paidSubscriptionAria": "Paid subscription, {price} per {period}",
+            "from": "from {price}",
+            "fromAria": "Paid subscription starting from {price}"
+        },
+        "period": {
+            "monthly": "month",
+            "yearly": "year"
         }
     },
     "notification": {
