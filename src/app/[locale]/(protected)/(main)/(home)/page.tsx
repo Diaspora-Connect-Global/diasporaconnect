@@ -17,7 +17,6 @@ import {
 } from '@/services/gql/postsFeed';
 import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
-import { useRecordInteraction } from '@/hooks/useRecordInteraction';
 import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
@@ -150,17 +149,11 @@ export default function Home() {
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
-  // Best-effort recommendation signal. Failures must never block the UI.
-  const recordInteraction = useRecordInteraction();
+  // Engagement signals are recorded via the post-feed Kafka pipeline (LIKE /
+  // UNLIKE / SAVE / UNSAVE / SHARE / COMMENT). VIEW + DWELL still go through
+  // the direct recordInteraction gRPC path via <ImpressionTracker>, which
+  // owns its own hook instance — so this page no longer needs one directly.
   const isRecommendedArm = viewMode === 'you';
-  // Surface must match the server's FeedSurface enum:
-  //   home_feed | discover | similar_to_item | community_feed
-  // `__source` (retriever name) is intentionally NOT folded in here — the
-  // server's RecordInteractionHandler rejects anything outside the enum
-  // with a 400. The retriever source stays on the Post as `__source` for
-  // any client-side analytics that wants it.
-  const surfaceFor = (_post: ApiPost): string =>
-    isRecommendedArm ? 'home_feed' : 'community_feed';
   const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
     awaitRefetchQueries: false,
@@ -204,24 +197,19 @@ export default function Home() {
     setJoinModal({ open: false, id: '', name: '' });
   };
 
-  // Best-effort: fire a recommendation signal in parallel with the canonical
-  // post-feed-service write. The recommendation call never blocks or throws.
-  const sendRecSignal = (
-    postId: string,
-    kind: 'LIKE' | 'UNLIKE' | 'SAVE' | 'UNSAVE' | 'SHARE' | 'COMMENT' | 'CLICK_THROUGH'
-  ) => {
-    const post = posts.find((p) => p.id === postId);
-    recordInteraction({
-      itemId: postId,
-      itemType: 'POST',
-      kind,
-      sourceSurface: post ? surfaceFor(post) : (isRecommendedArm ? 'home_feed' : 'community_feed'),
-    });
-  };
+  // Engagement signals (LIKE/UNLIKE/SAVE/UNSAVE/SHARE/COMMENT) flow to the
+  // recommendation index via Kafka — post-feed-service publishes the canonical
+  // event from its addEngagement / removeEngagement / createComment handlers,
+  // and recommendation-service consumes it. We previously dual-fired
+  // `recordInteraction` from the client too, which produced duplicate rows
+  // in interaction_log. Removed.
+  //
+  // The direct `recordInteraction` gRPC call is still used by
+  // ImpressionTracker (VIEW + DWELL) and by future CLICK_THROUGH wiring —
+  // those signals don't have a post-feed source.
 
   const handleLike = async (postId: string, liked: boolean) => {
     updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
-    sendRecSignal(postId, liked ? 'LIKE' : 'UNLIKE');
     try {
       if (liked) {
         await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
@@ -237,7 +225,6 @@ export default function Home() {
 
   const handleSave = async (postId: string, saved: boolean) => {
     updatePostCounts(postId, { saves: saved ? 1 : -1, hasSaved: saved });
-    sendRecSignal(postId, saved ? 'SAVE' : 'UNSAVE');
     try {
       if (saved) {
         await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
@@ -253,7 +240,6 @@ export default function Home() {
 
   const handleShare = async (postId: string) => {
     updatePostCounts(postId, { shares: 1 });
-    sendRecSignal(postId, 'SHARE');
     try {
       await addEngagement({ variables: { input: { postId, engagementType: 'SHARE' } } });
     } catch (err) {
@@ -280,8 +266,9 @@ export default function Home() {
           }
         }
       });
-      // Fire after success so we don't credit a failed comment.
-      sendRecSignal(postId, 'COMMENT');
+      // The post.comment.created Kafka event published by the
+      // CreateCommentHandler is the canonical signal — no client-side
+      // dual-fire needed (removed to avoid double-counting).
 
       toast.success('Comment posted!');
     } catch (err) {
