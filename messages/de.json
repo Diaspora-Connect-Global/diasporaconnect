@@ -903,7 +903,9 @@
             "skillPlaceholder": "z.B. TypeScript",
             "saving": "Wird gespeichert...",
             "cancel": "Abbrechen",
-            "save": "Speichern"
+            "save": "Speichern",
+            "removeSkillTitle": "Fähigkeit entfernen",
+            "removeSkillConfirm": "Sind Sie sicher, dass Sie diese Fähigkeit entfernen möchten?"
         },
         "education": {
             "title": "Bildungsverlauf",
@@ -922,7 +924,9 @@
             "endYearPlaceholder": "2026",
             "currentlyStudyHere": "Ich studiere derzeit hier",
             "activities": "Aktivitäten & Erfolge",
-            "activitiesPlaceholder": "Vereine, GPA, Projekte, Auszeichnungen..."
+            "activitiesPlaceholder": "Vereine, GPA, Projekte, Auszeichnungen...",
+            "confirmDeleteTitle": "Ausbildung löschen",
+            "confirmDelete": "Sind Sie sicher, dass Sie diese Ausbildung löschen möchten?"
         },
         "personalDetails": {
             "bio": "Biografie",

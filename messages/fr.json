@@ -903,7 +903,9 @@
             "skillPlaceholder": "ex. TypeScript",
             "saving": "Enregistrement...",
             "cancel": "Annuler",
-            "save": "Enregistrer"
+            "save": "Enregistrer",
+            "removeSkillTitle": "Supprimer la compétence",
+            "removeSkillConfirm": "Êtes-vous sûr de vouloir supprimer cette compétence ?"
         },
         "education": {
             "title": "Historique de formation",
@@ -922,7 +924,9 @@
             "endYearPlaceholder": "2026",
             "currentlyStudyHere": "J'étudie actuellement ici",
             "activities": "Activités et réalisations",
-            "activitiesPlaceholder": "Clubs, GPA, projets, distinctions..."
+            "activitiesPlaceholder": "Clubs, GPA, projets, distinctions...",
+            "confirmDeleteTitle": "Supprimer la formation",
+            "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette formation ?"
         },
         "personalDetails": {
             "bio": "Biographie",

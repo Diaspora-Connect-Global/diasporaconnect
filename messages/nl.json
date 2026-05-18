@@ -903,7 +903,9 @@
             "skillPlaceholder": "bijv. TypeScript",
             "saving": "Opslaan...",
             "cancel": "Annuleren",
-            "save": "Opslaan"
+            "save": "Opslaan",
+            "removeSkillTitle": "Vaardigheid verwijderen",
+            "removeSkillConfirm": "Weet u zeker dat u deze vaardigheid wilt verwijderen?"
         },
         "education": {
             "title": "Opleidingsgeschiedenis",
@@ -922,7 +924,9 @@
             "endYearPlaceholder": "2026",
             "currentlyStudyHere": "Ik studeer hier momenteel",
             "activities": "Activiteiten & Prestaties",
-            "activitiesPlaceholder": "Clubs, GPA, projecten, onderscheidingen..."
+            "activitiesPlaceholder": "Clubs, GPA, projecten, onderscheidingen...",
+            "confirmDeleteTitle": "Opleiding verwijderen",
+            "confirmDelete": "Weet u zeker dat u deze opleiding wilt verwijderen?"
         },
         "personalDetails": {
             "bio": "Bio",
