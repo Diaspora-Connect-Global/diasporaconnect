@@ -1513,5 +1513,32 @@
         "marketplace": "Marktplaats",
         "communities": "Gemeenschappen",
         "associations": "Verenigingen"
+    },
+    "membership": {
+        "payment": {
+            "step1": {
+                "title": "Kies je abonnement",
+                "subscriptionDisclosure": "Je wordt {price} in rekening gebracht totdat je opzegt.",
+                "continueCta": "Doorgaan",
+                "cancelCta": "Annuleren"
+            },
+            "step2": {
+                "title": "Hoe wil je betalen?",
+                "methodCard": "Kaart",
+                "methodMobile": "Mobile Money",
+                "payCta": "Betalen"
+            },
+            "step3": {
+                "success": "Je bent erbij. Welkom!",
+                "pendingApproval": "Verzoek ingediend, in afwachting van goedkeuring door beheerder.",
+                "goToEntityCta": "Ga naar {kind}"
+            },
+            "errors": {
+                "network": "Netwerkfout. Probeer het opnieuw.",
+                "cardDeclined": "Kaart geweigerd. Probeer een andere kaart.",
+                "paystackCancelled": "Betaling geannuleerd. Je kunt het altijd opnieuw proberen.",
+                "confirmFailed": "We konden je betaling niet bevestigen. Probeer het opnieuw."
+            }
+        }
     }
 }

@@ -18,6 +18,7 @@ import {
 } from '@/services/gql/community';
 
 interface RequestMembershipPayload {
+  id?: string | null;
   status: string;
   message: string;
   requiresPayment?: boolean | null;
@@ -65,7 +66,8 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
     clientSecret: string | null;
     communityId: string;
     communityName: string;
-  }>({ open: false, clientSecret: null, communityId: '', communityName: '' });
+    membershipId: string;
+  }>({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
 
   const { data: discoverData, loading: discoverLoading } =
     useQuery<DiscoverCommunitiesData>(DISCOVER_COMMUNITIES, {
@@ -101,6 +103,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
           clientSecret: payload.clientSecret,
           communityId,
           communityName,
+          membershipId: payload.id ?? communityId,
         });
         return;
       }
@@ -120,7 +123,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
 
   const handlePaymentSuccess = () => {
     const { communityId } = paymentModal;
-    setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
+    setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
     if (communityId) {
       setJoinedIds((prev) => new Set(prev).add(communityId));
     }
@@ -128,7 +131,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
   };
 
   const handlePaymentClose = () => {
-    setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
+    setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
   };
 
   const handleJoinClick = (communityId: string, communityName: string) => {
@@ -235,6 +238,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
           clientSecret={paymentModal.clientSecret}
           communityId={paymentModal.communityId}
           communityName={paymentModal.communityName}
+          membershipId={paymentModal.membershipId}
           onSuccess={handlePaymentSuccess}
           onClose={handlePaymentClose}
         />

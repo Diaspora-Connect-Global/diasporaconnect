@@ -21,6 +21,7 @@ import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membe
 import { cn } from '@/lib/utils';
 
 interface RequestMembershipPayload {
+    id?: string | null;
     status: string;
     message: string;
     requiresPayment?: boolean | null;
@@ -153,7 +154,8 @@ export default function Community() {
         clientSecret: string | null;
         communityId: string;
         communityName: string;
-    }>({ open: false, clientSecret: null, communityId: '', communityName: '' });
+        membershipId: string;
+    }>({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
 
     const { data: myCommunitiesData, loading: myCommunitiesLoading, refetch: refetchMyCommunities } = useQuery<ListUserCommunitiesData>(
         LIST_MY_JOINED_COMMUNITIES
@@ -205,6 +207,7 @@ export default function Community() {
                     clientSecret: payload.clientSecret,
                     communityId,
                     communityName,
+                    membershipId: payload.id ?? communityId,
                 });
                 return;
             }
@@ -232,7 +235,7 @@ export default function Community() {
 
     const handlePaymentSuccess = () => {
         const { communityId } = paymentModal;
-        setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
+        setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
         if (communityId) {
             setJoinedCommunities(prev => new Set(prev).add(communityId));
         }
@@ -243,7 +246,7 @@ export default function Community() {
     };
 
     const handlePaymentClose = () => {
-        setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '' });
+        setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
     };
 
     const handleJoinClick = (communityId: string, communityName: string) => {
@@ -434,6 +437,7 @@ export default function Community() {
                 clientSecret={paymentModal.clientSecret}
                 communityId={paymentModal.communityId}
                 communityName={paymentModal.communityName}
+                membershipId={paymentModal.membershipId}
                 onSuccess={handlePaymentSuccess}
                 onClose={handlePaymentClose}
             />

@@ -13,7 +13,13 @@ interface MembershipPaymentModalProps {
   clientSecret: string | null;
   communityId: string;
   communityName?: string;
-  onSuccess: () => void;
+  /**
+   * Real membership id returned by REQUEST_MEMBERSHIP (envelope `.id`). Required
+   * so the shared modal's onSuccess(membershipId) callback hands back a true
+   * membership id rather than the community id.
+   */
+  membershipId: string;
+  onSuccess: (membershipId: string) => void;
   onClose: () => void;
 }
 
@@ -39,6 +45,7 @@ export function MembershipPaymentModal({
   clientSecret,
   communityId,
   communityName,
+  membershipId,
   onSuccess,
   onClose,
 }: MembershipPaymentModalProps) {
@@ -61,12 +68,12 @@ export function MembershipPaymentModal({
       throw new Error('Missing clientSecret for paid community membership.');
     }
     return {
-      membershipId: communityId,
+      membershipId,
       status: 'PENDING_PAYMENT',
       requiresPayment: true,
       clientSecret,
     };
-  }, [clientSecret, communityId]);
+  }, [clientSecret, membershipId]);
 
   if (!clientSecret) return null;
 
@@ -76,7 +83,7 @@ export function MembershipPaymentModal({
       onClose={onClose}
       entity={entity}
       requestMembership={requestMembership}
-      onSuccess={() => onSuccess()}
+      onSuccess={onSuccess}
     />
   );
 }
