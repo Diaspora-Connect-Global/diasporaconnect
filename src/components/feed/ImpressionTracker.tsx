@@ -33,18 +33,29 @@ export interface ImpressionTrackerProps {
   className?: string;
 }
 
-function buildSourceSurface(
-  surface: string,
-  source?: string,
-  score?: number | null
-): string {
-  const parts: string[] = [surface];
-  if (source) parts.push(source);
-  // Score is included as a coarse context tag (rounded to 2 decimals to keep cardinality low).
-  if (typeof score === 'number' && Number.isFinite(score)) {
-    parts.push(`score:${score.toFixed(2)}`);
-  }
-  return parts.join(':');
+/**
+ * Normalise the calling surface to one of the canonical `FeedSurface`
+ * enum values the server validates against: `home_feed | discover |
+ * similar_to_item | community_feed`.
+ *
+ * We accept richer labels at the props level (e.g. "home:for_you",
+ * "home:following") for caller readability, but flatten before the
+ * mutation — anything else hits a 400 in
+ * `RecordInteractionHandler.assertSurfaceValid()`.
+ *
+ * The retriever `source` and `score` props are NOT stuffed into this
+ * field — they're carried as Apollo cache hints on the rendered post
+ * (`__source`/`__score`) and only needed for client-side analytics.
+ * Phase 2 may add dedicated `recorderSource` / `score` fields to the
+ * mutation if we want them server-side too.
+ */
+function normaliseSurface(surface: string): string {
+  const lower = String(surface ?? '').toLowerCase();
+  if (lower.startsWith('home')) return 'home_feed';
+  if (lower.startsWith('community')) return 'community_feed';
+  if (lower.startsWith('discover')) return 'discover';
+  if (lower.startsWith('similar')) return 'similar_to_item';
+  return 'home_feed';
 }
 
 /**
@@ -86,7 +97,11 @@ export function ImpressionTracker({
     const el = containerRef.current;
     if (!el) return;
 
-    const sourceSurface = buildSourceSurface(surface, source, score ?? null);
+    const sourceSurface = normaliseSurface(surface);
+    // `source` / `score` are intentionally not forwarded — server enum is strict.
+    // They remain attached to the Post via __source / __score for client analytics.
+    void source;
+    void score;
 
     const clearDwellTimer = () => {
       if (dwellTimerRef.current !== null) {

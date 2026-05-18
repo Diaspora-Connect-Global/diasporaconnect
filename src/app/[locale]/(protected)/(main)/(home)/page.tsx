@@ -153,11 +153,14 @@ export default function Home() {
   // Best-effort recommendation signal. Failures must never block the UI.
   const recordInteraction = useRecordInteraction();
   const isRecommendedArm = viewMode === 'you';
-  const surfaceFor = (post: ApiPost): string => {
-    const base = isRecommendedArm ? 'home:for_you' : 'home:following';
-    const src = post.__source;
-    return src ? `${base}:${src}` : base;
-  };
+  // Surface must match the server's FeedSurface enum:
+  //   home_feed | discover | similar_to_item | community_feed
+  // `__source` (retriever name) is intentionally NOT folded in here — the
+  // server's RecordInteractionHandler rejects anything outside the enum
+  // with a 400. The retriever source stays on the Post as `__source` for
+  // any client-side analytics that wants it.
+  const surfaceFor = (_post: ApiPost): string =>
+    isRecommendedArm ? 'home_feed' : 'community_feed';
   const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
     awaitRefetchQueries: false,
@@ -212,7 +215,7 @@ export default function Home() {
       itemId: postId,
       itemType: 'POST',
       kind,
-      sourceSurface: post ? surfaceFor(post) : (isRecommendedArm ? 'home:for_you' : 'home:following'),
+      sourceSurface: post ? surfaceFor(post) : (isRecommendedArm ? 'home_feed' : 'community_feed'),
     });
   };
 
@@ -574,7 +577,7 @@ export default function Home() {
                 itemType="POST"
                 source={post.__source}
                 score={post.__score}
-                surface={isRecommendedArm ? 'home:for_you' : 'home:following'}
+                surface={isRecommendedArm ? 'home_feed' : 'community_feed'}
                 className="mb-2"
               >
               <div id={`feed-post-${post.id}`}>

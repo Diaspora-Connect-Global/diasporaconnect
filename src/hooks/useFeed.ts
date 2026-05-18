@@ -180,6 +180,54 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     [apolloClient]
   );
 
+  /**
+   * If the create-post page redirected to home after a successful create,
+   * it stashed the new post id in sessionStorage. Hydrate it and stage it
+   * to prepend at the top of the feed (ahead of whatever the recommender
+   * returns). The Kafka projection into `content_item` usually lands within
+   * seconds, so the next natural refresh will dedupe this prepend out of
+   * the user's view.
+   *
+   * Reads + clears the sentinel exactly once per mount.
+   */
+  const [pendingPrepend, setPendingPrepend] = useState<Post | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let cancelled = false;
+    let justCreatedId: string | null = null;
+    try {
+      justCreatedId = sessionStorage.getItem('justCreatedPostId');
+      if (justCreatedId) sessionStorage.removeItem('justCreatedPostId');
+    } catch {
+      /* sessionStorage may be unavailable — silent skip */
+    }
+    if (!justCreatedId) return;
+
+    void apolloClient
+      .query<GetPostData>({
+        query: GET_POST,
+        variables: { id: justCreatedId },
+        fetchPolicy: 'network-only',
+        errorPolicy: 'ignore',
+      })
+      .then((res) => {
+        if (cancelled) return;
+        const raw = res.data?.post;
+        if (!raw) return;
+        const post = normalizeFeedPost(raw);
+        // Tag so we can identify this as the "just-created" prepend, in case
+        // we want to flag it in the UI later.
+        post.__source = 'just_created';
+        setPendingPrepend(post);
+      })
+      .catch(() => {
+        /* Non-fatal: post will still appear on the next normal refresh. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [apolloClient]);
+
   useEffect(() => {
     if (!isRankedFeed) return;
     let cancelled = false;
@@ -221,8 +269,14 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         const rankedItems = page?.items ?? [];
         const hydrated = await hydrateRankedItems(rankedItems);
         if (cancelled) return;
-        setMergedPosts(dedupePostsById(hydrated));
-        setTotal(hydrated.length);
+        // If a just-created post is staged, prepend it (deduping against
+        // anything the recommender already happened to return).
+        const merged = pendingPrepend
+          ? dedupePostsById([pendingPrepend, ...hydrated])
+          : dedupePostsById(hydrated);
+        setMergedPosts(merged);
+        if (pendingPrepend) setPendingPrepend(null);
+        setTotal(merged.length);
         setNextCursor(page?.nextCursor ?? null);
         setFeedMeta({
           hasMore: Boolean(page?.nextCursor),
@@ -310,7 +364,15 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     if (!useLegacyFeed) return;
     if (!feedData?.feed) return;
     const f = feedData.feed;
-    setMergedPosts(dedupePostsById(mapPosts(f.posts)));
+    // Prepend just-created post for the legacy feed branch too, so a
+    // user who lands on TRENDING immediately after creating still sees
+    // their post at the top.
+    const posts = mapPosts(f.posts);
+    const merged = pendingPrepend
+      ? dedupePostsById([pendingPrepend, ...posts])
+      : dedupePostsById(posts);
+    setMergedPosts(merged);
+    if (pendingPrepend) setPendingPrepend(null);
     setTotal(f.total ?? 0);
     setNextCursor(f.nextCursor ?? null);
     setFeedMeta({
@@ -320,7 +382,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       hasSeenFallbackOption: f.hasSeenFallbackOption,
       nextCursor: f.nextCursor ?? null,
     });
-  }, [feedData?.feed, useLegacyFeed]);
+  }, [feedData?.feed, useLegacyFeed, pendingPrepend]);
 
   useEffect(() => {
     if (!isHashtagFeed) return;

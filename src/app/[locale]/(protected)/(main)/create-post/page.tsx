@@ -514,6 +514,21 @@ export default function CreatePostPage() {
       if (data?.createPost) {
         toast.success(t('successMessage'));
 
+        // Hand the just-created post id to the home feed via sessionStorage.
+        // useFeed reads + clears this on mount, fetches the post, and
+        // prepends it so the user sees their post at the top immediately —
+        // before the Kafka projection has had time to land in the
+        // recommendation index. Best-effort; failures are harmless (the
+        // post will still appear in the feed naturally on the next refresh
+        // once recommendation-service catches up, usually within seconds).
+        try {
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('justCreatedPostId', data.createPost.id);
+          }
+        } catch {
+          /* sessionStorage can throw in privacy modes — ignore */
+        }
+
         // Clear draft and reset form
         await clearDraft();
         setPostContent('');
