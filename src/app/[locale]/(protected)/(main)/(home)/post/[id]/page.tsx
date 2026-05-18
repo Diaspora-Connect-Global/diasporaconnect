@@ -10,6 +10,7 @@ import type { GetProfileResponse } from '@/services/gql/types/profile';
 import { normalizeFeedPost } from '@/lib/normalizeFeedPost';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
+import SimilarPosts from '@/components/post/SimilarPosts';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { resolveUserTier } from '@/lib/userTier';
@@ -311,6 +312,8 @@ export default function PostPage() {
           initialFocusCommentId={focusCommentId ?? undefined}
             />
           </div>
+          {/* Similar posts — recommendation-service `similarPosts(postId, limit)`. Best-effort: renders nothing on error. */}
+          <SimilarPosts postId={normalizedPostResolved.id} />
         </div>
       </div>
       {/* Takes remaining width so the post column stays a fixed `40vw` */}

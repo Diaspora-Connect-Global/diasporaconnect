@@ -16,6 +16,7 @@ import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import type { DisplayCurrency } from "@/store/useCurrencyStore";
+import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -319,6 +320,9 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
+
+          {/* Privacy & Data — Danger Zone */}
+          <DeleteAccountSection />
         </div>
       </div>
     </div>

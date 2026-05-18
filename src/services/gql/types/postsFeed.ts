@@ -177,6 +177,17 @@ export interface Post {
   mentions?: MentionInfo[];
   engagementCounts: EngagementCounts;
   userEngagement: UserEngagement;
+  /**
+   * Recommendation provenance (carried from RankedFeedPage.items[].source).
+   * Internal-only — never rendered in the UI; used by ImpressionTracker to attribute
+   * downstream VIEW/DWELL signals to the originating retriever.
+   */
+  __source?: string;
+  /**
+   * Recommendation score (carried from RankedFeedPage.items[].score).
+   * Internal-only — never rendered in the UI; used for instrumentation.
+   */
+  __score?: number;
 }
 
 /**

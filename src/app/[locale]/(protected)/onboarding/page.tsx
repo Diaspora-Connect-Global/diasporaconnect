@@ -24,6 +24,11 @@ import {
   ResendRegistrationOtpResponse,
   VerifyOtpResponse,
 } from '@/services/gql/authentication';
+import { SET_ONBOARDING_INTERESTS } from '@/services/gql/postsFeed';
+import type {
+  SetOnboardingInterestsData,
+  SetOnboardingInterestsVars,
+} from '@/services/gql/types/recommendation';
 
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
@@ -85,6 +90,11 @@ export default function CompleteAccount() {
 
   const [verifyOtp] =
     useMutation<VerifyOtpResponse>(VERIFY_OTP);
+
+  const [setOnboardingInterests] = useMutation<
+    SetOnboardingInterestsData,
+    SetOnboardingInterestsVars
+  >(SET_ONBOARDING_INTERESTS);
 
   /* ------------------------------------------------------------------ */
   /* Detect OAuth FIRST */
@@ -218,11 +228,44 @@ export default function CompleteAccount() {
   };
 
   /* ------------------------------------------------------------------ */
+  /* Persist cold-start interest topics into recommendation-service.    */
+  /* Best-effort: failures must NOT block onboarding completion.        */
+  /* ------------------------------------------------------------------ */
+  const persistOnboardingInterests = async () => {
+    // Normalize: lowercase + trim, drop empty entries, dedupe.
+    // Step6 stores topic keys like `technology` / `artsCulture`; recommendation-
+    // service stores topics as lowercase slugs, so we lowercase here.
+    const normalized = Array.from(
+      new Set(
+        (formData.topics ?? [])
+          .map((t) => (typeof t === 'string' ? t.trim().toLowerCase() : ''))
+          .filter((t): t is string => t.length > 0)
+      )
+    );
+
+    // Empty topics? Skip the call entirely — don't send an empty array.
+    if (normalized.length === 0) return;
+
+    try {
+      await setOnboardingInterests({ variables: { topics: normalized } });
+    } catch (err) {
+      // Recommender will fall back to popular/cold-start content; non-fatal.
+      console.warn('[Onboarding] setOnboardingInterests failed; continuing.', err);
+    }
+  };
+
+  /* ------------------------------------------------------------------ */
   /* Complete Onboarding */
   /* ------------------------------------------------------------------ */
-  const completeOnboarding = () => {
+  const completeOnboarding = async () => {
     // Mark onboarding as completed to prevent cleanup on unmount
     onboardingCompletedRef.current = true;
+
+    // Persist interest topics to recommendation-service. User already exists
+    // (created in submitFormA) and is authenticated (JWT set in submitFormB),
+    // so the recommendation-service can key the profile on the JWT userId.
+    // Best-effort — never blocks the finish flow.
+    await persistOnboardingInterests();
 
     // Clear all onboarding-related sessionStorage items
     sessionStorage.removeItem('signupEmail');

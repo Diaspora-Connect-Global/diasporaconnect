@@ -1,10 +1,28 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLazyQuery, useQuery } from '@apollo/client/react';
-import { GET_FEED, GET_POSTS_BY_HASHTAG, type GetFeedData, type GetPostsByHashtagData } from '@/services/gql/postsFeed';
+import { useApolloClient, useLazyQuery, useQuery } from '@apollo/client/react';
+import {
+  GET_FEED,
+  GET_POST,
+  GET_POSTS_BY_HASHTAG,
+  RECOMMENDED_POSTS,
+  type GetFeedData,
+  type GetPostsByHashtagData,
+} from '@/services/gql/postsFeed';
 import { normalizeFeedPost } from '@/lib/normalizeFeedPost';
-import type { FeedModeType, FeedViewMode, GetFeedInput, Post } from '@/services/gql/types/postsFeed';
+import type {
+  FeedModeType,
+  FeedViewMode,
+  GetFeedInput,
+  GetPostData,
+  Post,
+} from '@/services/gql/types/postsFeed';
+import type {
+  RankedItemGQL,
+  RecommendedPostsData,
+  RecommendedPostsInput,
+} from '@/services/gql/types/recommendation';
 
 const INITIAL_LIMIT = 12;
 const PAGE_SIZE = 12;
@@ -85,10 +103,139 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   const resolvedFeedType: FeedModeType =
     feedTypeOverride ?? (mode === 'following' ? 'FOLLOWING' : 'FOR_YOU');
 
+  /**
+   * FOR_YOU is now served by the recommendation-service via `recommendedPosts`.
+   * All other modes (FOLLOWING, TRENDING, ...) keep the legacy `feed` query.
+   */
+  const isRecommendedFeed = !isHashtagFeed && resolvedFeedType === 'FOR_YOU';
+
+  // ============================================================================
+  // RECOMMENDED (FOR_YOU) BRANCH — recommendation-service + post-feed hydration
+  // ============================================================================
+
+  const apolloClient = useApolloClient();
+  // Tracks ranked-feed loading state independent of Apollo's internal flags.
+  const [recommendedLoading, setRecommendedLoading] = useState(false);
+  const [recommendedLoadingMore, setRecommendedLoadingMore] = useState(false);
+  const [recommendedError, setRecommendedError] = useState<Error | undefined>(undefined);
+  // Bumping `refreshTick` forces a re-fetch of the ranked feed (pull-to-refresh).
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  /**
+   * Hydrate ranked items into full UI posts via parallel `GET_POST` queries,
+   * preserving the recommendation order, and carrying source/score into the
+   * resulting Post objects as `__source` / `__score`.
+   *
+   * TODO(perf): replace per-id parallel fan-out with a single batch `getPostsByIds([ID!])`
+   * query when api-gateway exposes one. With INITIAL_LIMIT=12 the fan-out is
+   * acceptable (Apollo dedupes in-flight, results are cached), but at higher
+   * page sizes this becomes the bottleneck.
+   */
+  const hydrateRankedItems = useCallback(
+    async (items: RankedItemGQL[]): Promise<Post[]> => {
+      if (!items.length) return [];
+      const settled = await Promise.allSettled(
+        items.map((item) =>
+          apolloClient.query<GetPostData>({
+            query: GET_POST,
+            variables: { id: item.itemId },
+            // Use the Apollo cache; multiple ImpressionTracker/feed renders share it.
+            fetchPolicy: 'cache-first',
+            errorPolicy: 'ignore',
+          })
+        )
+      );
+
+      const byId = new Map<string, Post>();
+      settled.forEach((res, idx) => {
+        if (res.status !== 'fulfilled') return;
+        const raw = res.value.data?.post;
+        if (!raw) return;
+        const normalized = normalizeFeedPost(raw);
+        const ranked = items[idx];
+        if (ranked) {
+          normalized.__source = ranked.source;
+          if (typeof ranked.score === 'number') normalized.__score = ranked.score;
+        }
+        byId.set(normalized.id, normalized);
+      });
+
+      // Preserve the recommender's order. Any items that failed to hydrate are dropped.
+      const ordered: Post[] = [];
+      for (const item of items) {
+        const p = byId.get(item.itemId);
+        if (p) ordered.push(p);
+      }
+      return ordered;
+    },
+    [apolloClient]
+  );
+
+  useEffect(() => {
+    if (!isRecommendedFeed) return;
+    let cancelled = false;
+
+    const run = async () => {
+      setRecommendedLoading(true);
+      setRecommendedError(undefined);
+      try {
+        const input: RecommendedPostsInput = { limit: initialLimit };
+        const { data, error } = await apolloClient.query<RecommendedPostsData>({
+          query: RECOMMENDED_POSTS,
+          variables: { input },
+          fetchPolicy: 'network-only',
+          errorPolicy: 'all',
+        });
+        if (cancelled) return;
+        if (error) {
+          setRecommendedError(error);
+          setMergedPosts([]);
+          setTotal(0);
+          setNextCursor(null);
+          setFeedMeta({ hasMore: false });
+          return;
+        }
+        const page = data?.recommendedPosts;
+        const rankedItems = page?.items ?? [];
+        const hydrated = await hydrateRankedItems(rankedItems);
+        if (cancelled) return;
+        setMergedPosts(dedupePostsById(hydrated));
+        setTotal(hydrated.length);
+        setNextCursor(page?.nextCursor ?? null);
+        setFeedMeta({
+          hasMore: Boolean(page?.nextCursor),
+          isExhausted: !page?.nextCursor && hydrated.length === 0,
+          nextCursor: page?.nextCursor ?? null,
+        });
+      } catch (e) {
+        if (cancelled) return;
+        setRecommendedError(e instanceof Error ? e : new Error(String(e)));
+        setMergedPosts([]);
+        setTotal(0);
+        setNextCursor(null);
+        setFeedMeta({ hasMore: false });
+      } finally {
+        if (!cancelled) setRecommendedLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [isRecommendedFeed, initialLimit, apolloClient, hydrateRankedItems, refreshTick]);
+
+  // ============================================================================
+  // LEGACY BRANCH — FOLLOWING / TRENDING / ... served by `feed` query
+  // ============================================================================
+
+  const useLegacyFeed = !isHashtagFeed && !isRecommendedFeed;
+
   const feedInputBase = useMemo((): Omit<GetFeedInput, 'limit' | 'offset' | 'cursor' | 'refreshSeed'> => {
     const input: GetFeedInput = { type: resolvedFeedType };
     // For You: personalized feed plus trending and discovery surfacing (backend GetFeedInput).
-    if (resolvedFeedType === 'FOR_YOU' || resolvedFeedType === 'TRENDING') {
+    // (Now handled by the recommendation branch — kept here only for TRENDING.)
+    if (resolvedFeedType === 'TRENDING') {
       input.includeDiscovery = true;
     }
     return input;
@@ -113,7 +260,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     refetch: refetchFeedQuery,
   } = useQuery<GetFeedData>(GET_FEED, {
     variables: initialFeedVariables,
-    skip: isHashtagFeed,
+    skip: !useLegacyFeed,
     notifyOnNetworkStatusChange: true,
   });
 
@@ -138,7 +285,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   );
 
   useEffect(() => {
-    if (isHashtagFeed) return;
+    if (!useLegacyFeed) return;
     if (!feedData?.feed) return;
     const f = feedData.feed;
     setMergedPosts(dedupePostsById(mapPosts(f.posts)));
@@ -151,7 +298,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       hasSeenFallbackOption: f.hasSeenFallbackOption,
       nextCursor: f.nextCursor ?? null,
     });
-  }, [feedData?.feed, isHashtagFeed]);
+  }, [feedData?.feed, useLegacyFeed]);
 
   useEffect(() => {
     if (!isHashtagFeed) return;
@@ -169,11 +316,14 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       if (feedMeta.hasMore === true) return true;
       return mergedPosts.length < total;
     }
+    if (isRecommendedFeed) {
+      return Boolean(nextCursor);
+    }
     if (feedMeta.hasMore === false) return false;
     if (feedMeta.hasMore === true) return true;
     if (nextCursor) return true;
     return mergedPosts.length < total;
-  }, [feedMeta.hasMore, isHashtagFeed, mergedPosts.length, nextCursor, total]);
+  }, [feedMeta.hasMore, isHashtagFeed, isRecommendedFeed, mergedPosts.length, nextCursor, total]);
 
   const loadMore = useCallback(() => {
     if (isHashtagFeed) {
@@ -191,6 +341,37 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         setTotal(h.total ?? 0);
         setFeedMeta({ hasMore: h.hasMore });
       });
+      return;
+    }
+
+    if (isRecommendedFeed) {
+      if (recommendedLoadingMore || !hasMore || !nextCursor) return;
+      setRecommendedLoadingMore(true);
+      const input: RecommendedPostsInput = { limit: pageSize, cursor: nextCursor };
+      apolloClient
+        .query<RecommendedPostsData>({
+          query: RECOMMENDED_POSTS,
+          variables: { input },
+          fetchPolicy: 'network-only',
+          errorPolicy: 'all',
+        })
+        .then(async (res) => {
+          const page = res.data?.recommendedPosts;
+          const rankedItems = page?.items ?? [];
+          const hydrated = await hydrateRankedItems(rankedItems);
+          if (hydrated.length) {
+            setMergedPosts((prev) => appendPostsUnique(prev, hydrated));
+          }
+          setNextCursor(page?.nextCursor ?? null);
+          setFeedMeta({
+            hasMore: Boolean(page?.nextCursor),
+            nextCursor: page?.nextCursor ?? null,
+          });
+        })
+        .catch(() => {
+          // Non-fatal — keep existing posts visible.
+        })
+        .finally(() => setRecommendedLoadingMore(false));
       return;
     }
 
@@ -218,26 +399,47 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       });
     });
   }, [
+    apolloClient,
     fetchMoreFeed,
     fetchMoreHashtag,
     feedInputBase,
     hasMore,
+    hydrateRankedItems,
     isHashtagFeed,
+    isRecommendedFeed,
     loadingMoreFeed,
     loadingMoreHashtag,
     mergedPosts.length,
     nextCursor,
     pageSize,
+    recommendedLoadingMore,
     trimmedHashtag,
   ]);
 
-  const loading = isHashtagFeed ? hashtagLoading : feedLoading;
-  const error = isHashtagFeed ? hashtagError : feedError;
-  const loadingMore = isHashtagFeed ? loadingMoreHashtag : loadingMoreFeed;
+  const loading = isHashtagFeed
+    ? hashtagLoading
+    : isRecommendedFeed
+      ? recommendedLoading
+      : feedLoading;
+  const error = isHashtagFeed
+    ? hashtagError
+    : isRecommendedFeed
+      ? recommendedError
+      : feedError;
+  const loadingMore = isHashtagFeed
+    ? loadingMoreHashtag
+    : isRecommendedFeed
+      ? recommendedLoadingMore
+      : loadingMoreFeed;
 
   const refetch = useCallback(() => {
     if (isHashtagFeed) {
       refetchHashtagQuery();
+      return;
+    }
+    if (isRecommendedFeed) {
+      // Pull-to-refresh: bump tick so the recommended-feed effect re-runs.
+      setRefreshTick((t) => t + 1);
       return;
     }
     // Pull-to-refresh: client-generated seed only; no cursor; reshuffles tier ordering on the server.
@@ -263,7 +465,14 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         nextCursor: f.nextCursor ?? null,
       });
     });
-  }, [feedInputBase, initialLimit, isHashtagFeed, refetchFeedQuery, refetchHashtagQuery]);
+  }, [
+    feedInputBase,
+    initialLimit,
+    isHashtagFeed,
+    isRecommendedFeed,
+    refetchFeedQuery,
+    refetchHashtagQuery,
+  ]);
 
   useEffect(() => {
     const el = feedContainerRef.current;

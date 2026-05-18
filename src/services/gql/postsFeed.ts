@@ -640,3 +640,125 @@ export const GET_COMMENTED_POSTS = gql`
     }
   }
 `;
+
+// ============================================================================
+// RECOMMENDATION MUTATIONS
+// ============================================================================
+
+/**
+ * Best-effort interaction signal sent to recommendation-service.
+ * Caller should fire-and-forget — the canonical engagement source of truth
+ * remains post-feed-service (`addEngagement` / `removeEngagement`).
+ */
+export const RECORD_INTERACTION = gql`
+  mutation RecordInteraction($input: RecordInteractionInput!) {
+    recordInteraction(input: $input) {
+      success
+      message
+    }
+  }
+`;
+
+/**
+ * Persists the user's onboarding interest topics into the recommendation
+ * service so cold-start ranking has a non-empty interest profile.
+ *
+ * Server-side guard: rejects calls once a warm profile has been established,
+ * so this is safe to call only during the first-time onboarding flow.
+ */
+export const SET_ONBOARDING_INTERESTS = gql`
+  mutation SetOnboardingInterests($topics: [String!]!) {
+    setOnboardingInterests(topics: $topics) {
+      success
+      message
+    }
+  }
+`;
+
+// ============================================================================
+// RECOMMENDATION QUERIES
+// ============================================================================
+
+/**
+ * Personalized ranked feed produced by recommendation-service.
+ *
+ * Returns IDs only — clients hydrate full posts via post-feed-service (`GET_POST`)
+ * and preserve the recommender's order. The `source` / `score` fields are carried
+ * through to instrumentation (impression tracker `sourceSurface`) but never shown
+ * in the UI.
+ */
+export const RECOMMENDED_POSTS = gql`
+  query RecommendedPosts($input: RecommendedPostsInput) {
+    recommendedPosts(input: $input) {
+      items {
+        itemId
+        itemType
+        score
+        authorId
+        topics
+        source
+        createdAt
+      }
+      nextCursor
+      rankingStrategy
+      explorationRatio
+    }
+  }
+`;
+
+/**
+ * Posts similar to the given post (vector kNN over content embeddings).
+ *
+ * Returns IDs + ranking metadata only — clients hydrate full posts via `GET_POST`.
+ * Backed by recommendation-service `GetSimilarItems`. Callable anonymously; safe to
+ * fail silently (best-effort) — the post detail page must still work if this errors.
+ */
+export const SIMILAR_POSTS = gql`
+  query SimilarPosts($postId: String!, $limit: Int) {
+    similarPosts(postId: $postId, limit: $limit) {
+      items {
+        itemId
+        itemType
+        score
+        authorId
+        topics
+        source
+        createdAt
+      }
+      nextCursor
+      rankingStrategy
+      explorationRatio
+    }
+  }
+`;
+
+// ============================================================================
+// GDPR — RIGHT-TO-ERASE MUTATION
+// ============================================================================
+
+/**
+ * Wipes the caller's recommendation-service footprint (interest profile,
+ * interaction log, feed impressions, blocks, memberships).
+ *
+ * Idempotent — re-running on an already-erased user returns
+ * `success: true` with every count in `rowsDeleted` equal to 0.
+ *
+ * NOTE: this does NOT delete the user's account itself (auth-service /
+ * user-service deletion is a separate, not-yet-built flow). The user must
+ * sign out separately to complete account removal.
+ */
+export const ERASE_MY_ACCOUNT_DATA = gql`
+  mutation EraseMyAccountData {
+    eraseMyAccountData {
+      success
+      message
+      rowsDeleted {
+        interest_profile
+        interaction_log
+        feed_impression
+        user_block
+        user_membership
+      }
+    }
+  }
+`;

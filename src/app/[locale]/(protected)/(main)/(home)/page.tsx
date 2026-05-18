@@ -17,6 +17,8 @@ import {
 } from '@/services/gql/postsFeed';
 import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
+import { useRecordInteraction } from '@/hooks/useRecordInteraction';
+import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -148,6 +150,14 @@ export default function Home() {
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
+  // Best-effort recommendation signal. Failures must never block the UI.
+  const recordInteraction = useRecordInteraction();
+  const isRecommendedArm = viewMode === 'you';
+  const surfaceFor = (post: ApiPost): string => {
+    const base = isRecommendedArm ? 'home:for_you' : 'home:following';
+    const src = post.__source;
+    return src ? `${base}:${src}` : base;
+  };
   const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
     awaitRefetchQueries: false,
@@ -191,8 +201,24 @@ export default function Home() {
     setJoinModal({ open: false, id: '', name: '' });
   };
 
+  // Best-effort: fire a recommendation signal in parallel with the canonical
+  // post-feed-service write. The recommendation call never blocks or throws.
+  const sendRecSignal = (
+    postId: string,
+    kind: 'LIKE' | 'UNLIKE' | 'SAVE' | 'UNSAVE' | 'SHARE' | 'COMMENT' | 'CLICK_THROUGH'
+  ) => {
+    const post = posts.find((p) => p.id === postId);
+    recordInteraction({
+      itemId: postId,
+      itemType: 'POST',
+      kind,
+      sourceSurface: post ? surfaceFor(post) : (isRecommendedArm ? 'home:for_you' : 'home:following'),
+    });
+  };
+
   const handleLike = async (postId: string, liked: boolean) => {
     updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
+    sendRecSignal(postId, liked ? 'LIKE' : 'UNLIKE');
     try {
       if (liked) {
         await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
@@ -208,6 +234,7 @@ export default function Home() {
 
   const handleSave = async (postId: string, saved: boolean) => {
     updatePostCounts(postId, { saves: saved ? 1 : -1, hasSaved: saved });
+    sendRecSignal(postId, saved ? 'SAVE' : 'UNSAVE');
     try {
       if (saved) {
         await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
@@ -223,6 +250,7 @@ export default function Home() {
 
   const handleShare = async (postId: string) => {
     updatePostCounts(postId, { shares: 1 });
+    sendRecSignal(postId, 'SHARE');
     try {
       await addEngagement({ variables: { input: { postId, engagementType: 'SHARE' } } });
     } catch (err) {
@@ -249,6 +277,8 @@ export default function Home() {
           }
         }
       });
+      // Fire after success so we don't credit a failed comment.
+      sendRecSignal(postId, 'COMMENT');
 
       toast.success('Comment posted!');
     } catch (err) {
@@ -538,7 +568,16 @@ export default function Home() {
           {hasPosts && posts.map((post, postIndex) => {
             const profileData = getProfileData(post);
             return (
-              <div key={post.id} id={`feed-post-${post.id}`} className="mb-2">
+              <ImpressionTracker
+                key={post.id}
+                itemId={post.id}
+                itemType="POST"
+                source={post.__source}
+                score={post.__score}
+                surface={isRecommendedArm ? 'home:for_you' : 'home:following'}
+                className="mb-2"
+              >
+              <div id={`feed-post-${post.id}`}>
                 <FeedCardWithReply
                   postId={post.id}
                   profileImage={profileData.avatar}
@@ -585,6 +624,7 @@ export default function Home() {
                   onOpenMedia={(mediaIndex) => setModalState({ postIndex, mediaIndex })}
                 />
               </div>
+              </ImpressionTracker>
             );
           })}
 

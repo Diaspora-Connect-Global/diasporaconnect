@@ -50,3 +50,6 @@ export * from './vendor';
 
 // Marketplace service types (buyer/user)
 export * from './marketplace';
+
+// Recommendation service types (feed ranking, interactions)
+export * from './recommendation';
