@@ -7,6 +7,7 @@ import {
   GET_POST,
   GET_POSTS_BY_HASHTAG,
   RECOMMENDED_POSTS,
+  JOINED_COMMUNITY_FEED,
   type GetFeedData,
   type GetPostsByHashtagData,
 } from '@/services/gql/postsFeed';
@@ -20,7 +21,9 @@ import type {
 } from '@/services/gql/types/postsFeed';
 import type {
   RankedItemGQL,
+  RankedFeedPage,
   RecommendedPostsData,
+  JoinedCommunityFeedData,
 } from '@/services/gql/types/recommendation';
 
 const INITIAL_LIMIT = 12;
@@ -103,10 +106,17 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     feedTypeOverride ?? (mode === 'following' ? 'FOLLOWING' : 'FOR_YOU');
 
   /**
-   * FOR_YOU is now served by the recommendation-service via `recommendedPosts`.
-   * All other modes (FOLLOWING, TRENDING, ...) keep the legacy `feed` query.
+   * Both FOR_YOU and FOLLOWING are now served by the recommendation-service:
+   *   - FOR_YOU         → `recommendedPosts`         (ranked, personalised)
+   *   - FOLLOWING       → `joinedCommunityFeed`      (recency, membership-scoped)
+   * TRENDING and other legacy modes stay on the post-feed-service `feed` query.
+   *
+   * Both ranked queries return IDs only; full posts are hydrated client-side
+   * via `GET_POST` (same `hydrateRankedItems` helper).
    */
   const isRecommendedFeed = !isHashtagFeed && resolvedFeedType === 'FOR_YOU';
+  const isJoinedCommunityFeed = !isHashtagFeed && resolvedFeedType === 'FOLLOWING';
+  const isRankedFeed = isRecommendedFeed || isJoinedCommunityFeed;
 
   // ============================================================================
   // RECOMMENDED (FOR_YOU) BRANCH — recommendation-service + post-feed hydration
@@ -171,15 +181,23 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   );
 
   useEffect(() => {
-    if (!isRecommendedFeed) return;
+    if (!isRankedFeed) return;
     let cancelled = false;
+
+    // Pick the right ranked-feed query based on the current tab. Both queries
+    // return the same `RankedFeedPage` shape — the typed response field
+    // differs (`recommendedPosts` vs `joinedCommunityFeed`), which we
+    // narrow with an `in` check after the call.
+    const query = isRecommendedFeed ? RECOMMENDED_POSTS : JOINED_COMMUNITY_FEED;
 
     const run = async () => {
       setRecommendedLoading(true);
       setRecommendedError(undefined);
       try {
-        const { data, error } = await apolloClient.query<RecommendedPostsData>({
-          query: RECOMMENDED_POSTS,
+        const { data, error } = await apolloClient.query<
+          RecommendedPostsData | JoinedCommunityFeedData
+        >({
+          query,
           variables: { limit: initialLimit },
           fetchPolicy: 'network-only',
           errorPolicy: 'all',
@@ -193,7 +211,13 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
           setFeedMeta({ hasMore: false });
           return;
         }
-        const page = data?.recommendedPosts;
+        const page: RankedFeedPage | undefined = data
+          ? 'recommendedPosts' in data
+            ? data.recommendedPosts
+            : 'joinedCommunityFeed' in data
+              ? data.joinedCommunityFeed
+              : undefined
+          : undefined;
         const rankedItems = page?.items ?? [];
         const hydrated = await hydrateRankedItems(rankedItems);
         if (cancelled) return;
@@ -221,13 +245,13 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     return () => {
       cancelled = true;
     };
-  }, [isRecommendedFeed, initialLimit, apolloClient, hydrateRankedItems, refreshTick]);
+  }, [isRankedFeed, isRecommendedFeed, initialLimit, apolloClient, hydrateRankedItems, refreshTick]);
 
   // ============================================================================
   // LEGACY BRANCH — FOLLOWING / TRENDING / ... served by `feed` query
   // ============================================================================
 
-  const useLegacyFeed = !isHashtagFeed && !isRecommendedFeed;
+  const useLegacyFeed = !isHashtagFeed && !isRankedFeed;
 
   const feedInputBase = useMemo((): Omit<GetFeedInput, 'limit' | 'offset' | 'cursor' | 'refreshSeed'> => {
     const input: GetFeedInput = { type: resolvedFeedType };
@@ -314,14 +338,14 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       if (feedMeta.hasMore === true) return true;
       return mergedPosts.length < total;
     }
-    if (isRecommendedFeed) {
+    if (isRankedFeed) {
       return Boolean(nextCursor);
     }
     if (feedMeta.hasMore === false) return false;
     if (feedMeta.hasMore === true) return true;
     if (nextCursor) return true;
     return mergedPosts.length < total;
-  }, [feedMeta.hasMore, isHashtagFeed, isRecommendedFeed, mergedPosts.length, nextCursor, total]);
+  }, [feedMeta.hasMore, isHashtagFeed, isRankedFeed, mergedPosts.length, nextCursor, total]);
 
   const loadMore = useCallback(() => {
     if (isHashtagFeed) {
@@ -342,18 +366,25 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       return;
     }
 
-    if (isRecommendedFeed) {
+    if (isRankedFeed) {
       if (recommendedLoadingMore || !hasMore || !nextCursor) return;
       setRecommendedLoadingMore(true);
+      const query = isRecommendedFeed ? RECOMMENDED_POSTS : JOINED_COMMUNITY_FEED;
       apolloClient
-        .query<RecommendedPostsData>({
-          query: RECOMMENDED_POSTS,
+        .query<RecommendedPostsData | JoinedCommunityFeedData>({
+          query,
           variables: { limit: pageSize, cursor: nextCursor },
           fetchPolicy: 'network-only',
           errorPolicy: 'all',
         })
         .then(async (res) => {
-          const page = res.data?.recommendedPosts;
+          const page: RankedFeedPage | undefined = res.data
+            ? 'recommendedPosts' in res.data
+              ? res.data.recommendedPosts
+              : 'joinedCommunityFeed' in res.data
+                ? res.data.joinedCommunityFeed
+                : undefined
+            : undefined;
           const rankedItems = page?.items ?? [];
           const hydrated = await hydrateRankedItems(rankedItems);
           if (hydrated.length) {
@@ -404,6 +435,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     hydrateRankedItems,
     isHashtagFeed,
     isRecommendedFeed,
+    isRankedFeed,
     loadingMoreFeed,
     loadingMoreHashtag,
     mergedPosts.length,
@@ -415,17 +447,17 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const loading = isHashtagFeed
     ? hashtagLoading
-    : isRecommendedFeed
+    : isRankedFeed
       ? recommendedLoading
       : feedLoading;
   const error = isHashtagFeed
     ? hashtagError
-    : isRecommendedFeed
+    : isRankedFeed
       ? recommendedError
       : feedError;
   const loadingMore = isHashtagFeed
     ? loadingMoreHashtag
-    : isRecommendedFeed
+    : isRankedFeed
       ? recommendedLoadingMore
       : loadingMoreFeed;
 
@@ -434,8 +466,9 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       refetchHashtagQuery();
       return;
     }
-    if (isRecommendedFeed) {
-      // Pull-to-refresh: bump tick so the recommended-feed effect re-runs.
+    if (isRankedFeed) {
+      // Pull-to-refresh: bump tick so the ranked-feed effect re-runs
+      // (covers both FOR_YOU and FOLLOWING).
       setRefreshTick((t) => t + 1);
       return;
     }
@@ -466,7 +499,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     feedInputBase,
     initialLimit,
     isHashtagFeed,
-    isRecommendedFeed,
+    isRankedFeed,
     refetchFeedQuery,
     refetchHashtagQuery,
   ]);

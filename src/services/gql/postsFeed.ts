@@ -707,6 +707,38 @@ export const RECOMMENDED_POSTS = gql`
 `;
 
 /**
+ * Joined-community feed — backs the "Following" tab.
+ *
+ * Returns posts scoped to communities + associations the viewer has joined,
+ * ordered by `published_at DESC`. Returns IDs only (same shape as
+ * `recommendedPosts`); the client hydrates full posts via `GET_POST`.
+ *
+ * Server-side guarantees:
+ *   - Empty memberships → empty page (never falls back to "all communities").
+ *   - Privacy WHERE clause enforces visibility (everyone OR
+ *     community/association ∧ membership match).
+ *   - Author exclusion: the viewer never sees their own posts here.
+ */
+export const JOINED_COMMUNITY_FEED = gql`
+  query JoinedCommunityFeed($limit: Int, $cursor: String) {
+    joinedCommunityFeed(limit: $limit, cursor: $cursor) {
+      items {
+        itemId
+        itemType
+        score
+        authorId
+        topics
+        source
+        createdAt
+      }
+      nextCursor
+      rankingStrategy
+      explorationRatio
+    }
+  }
+`;
+
+/**
  * Posts similar to the given post (vector kNN over content embeddings).
  *
  * Returns IDs + ranking metadata only — clients hydrate full posts via `GET_POST`.

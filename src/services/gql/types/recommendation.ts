@@ -88,6 +88,23 @@ export interface RecommendedPostsData {
 }
 
 // ============================================================================
+// QUERY: joinedCommunityFeed (drives the "Following" tab)
+// ============================================================================
+
+/**
+ * Response from `joinedCommunityFeed(limit, cursor)`. Returns posts scoped
+ * to communities and associations the viewer has joined, ordered by
+ * `published_at DESC`. Hydration to full `Post` shape is done client-side
+ * via `GET_POST` (same pattern as `recommendedPosts`).
+ *
+ * Returns an empty page when the viewer hasn't joined anything yet
+ * (server enforces this server-side; no fallback to "all communities").
+ */
+export interface JoinedCommunityFeedData {
+  joinedCommunityFeed: RankedFeedPage;
+}
+
+// ============================================================================
 // QUERY: similarPosts
 // ============================================================================
 
