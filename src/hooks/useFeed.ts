@@ -21,7 +21,6 @@ import type {
 import type {
   RankedItemGQL,
   RecommendedPostsData,
-  RecommendedPostsInput,
 } from '@/services/gql/types/recommendation';
 
 const INITIAL_LIMIT = 12;
@@ -179,10 +178,9 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       setRecommendedLoading(true);
       setRecommendedError(undefined);
       try {
-        const input: RecommendedPostsInput = { limit: initialLimit };
         const { data, error } = await apolloClient.query<RecommendedPostsData>({
           query: RECOMMENDED_POSTS,
-          variables: { input },
+          variables: { limit: initialLimit },
           fetchPolicy: 'network-only',
           errorPolicy: 'all',
         });
@@ -347,11 +345,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     if (isRecommendedFeed) {
       if (recommendedLoadingMore || !hasMore || !nextCursor) return;
       setRecommendedLoadingMore(true);
-      const input: RecommendedPostsInput = { limit: pageSize, cursor: nextCursor };
       apolloClient
         .query<RecommendedPostsData>({
           query: RECOMMENDED_POSTS,
-          variables: { input },
+          variables: { limit: pageSize, cursor: nextCursor },
           fetchPolicy: 'network-only',
           errorPolicy: 'all',
         })

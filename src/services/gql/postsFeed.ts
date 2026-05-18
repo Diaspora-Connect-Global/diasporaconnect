@@ -688,8 +688,8 @@ export const SET_ONBOARDING_INTERESTS = gql`
  * in the UI.
  */
 export const RECOMMENDED_POSTS = gql`
-  query RecommendedPosts($input: RecommendedPostsInput) {
-    recommendedPosts(input: $input) {
+  query RecommendedPosts($limit: Int, $cursor: String) {
+    recommendedPosts(limit: $limit, cursor: $cursor) {
       items {
         itemId
         itemType
