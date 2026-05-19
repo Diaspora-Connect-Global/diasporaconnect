@@ -118,44 +118,12 @@ const errorLink = new ErrorLink(({ error, operation }) => {
 /* ------------------------------------------------------------------ */
 /* Auth + Device Fingerprint Link */
 /* ------------------------------------------------------------------ */
-const authLink = new SetContextLink((prevContext, operation) => {
+const authLink = new SetContextLink((prevContext) => {
   const { tokens, deviceMetadata } = useAuthStore.getState();
 
-  // TEMP DEBUG: dump the outgoing auth header so we can verify which
-  // user-id the gateway sees. Remove once like/save reliability is
-  // confirmed. Decoded payload is logged separately so it's easy to
-  // copy without the b64 noise.
-  if (typeof window !== 'undefined') {
-    const token = tokens?.sessionToken;
-    if (token) {
-      let payload: unknown = null;
-      try {
-        const body = token.split('.')[1];
-        payload = JSON.parse(
-          decodeURIComponent(
-            atob(body.replace(/-/g, '+').replace(/_/g, '/'))
-              .split('')
-              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-              .join(''),
-          ),
-        );
-      } catch {
-        payload = '<undecodable>';
-      }
-      // eslint-disable-next-line no-console
-      console.log(
-        `[JWT][${operation?.operationName ?? 'unknown'}]`,
-        '\n  token:', token,
-        '\n  payload:', payload,
-      );
-    } else {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[JWT][${operation?.operationName ?? 'unknown'}] NO TOKEN — request will be sent unauthenticated`,
-      );
-    }
-  }
-
+  // Backend uses opaque session tokens (server-side lookup), not JWTs —
+  // `sessionToken` is the correct field to send. `accessToken` is also
+  // an opaque token on this codebase; both validate against auth-service.
   return {
     headers: {
       ...prevContext.headers,
