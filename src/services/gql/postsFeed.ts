@@ -193,10 +193,15 @@ export const GET_POST = gql`
   ${FULL_POST_FRAGMENT}
 `;
 
-/** When parentId is not sent, backend returns a flat list of all comments + replies; build tree client-side. */
+/** When parentId is not sent, backend returns a flat list of all comments + replies; build tree client-side.
+ *
+ * `sortBy` is 'TOP' (default — most-liked first) | 'NEWEST' | 'OLDEST'. Only
+ * affects top-level comments — replies under a parent always come back
+ * oldest-first to preserve conversation flow.
+ */
 export const GET_POST_COMMENTS = gql`
-  query GetPostComments($postId: String!, $limit: Int, $offset: Int, $parentId: String) {
-    postComments(postId: $postId, limit: $limit, offset: $offset, parentId: $parentId) {
+  query GetPostComments($postId: String!, $limit: Int, $offset: Int, $parentId: String, $sortBy: String) {
+    postComments(postId: $postId, limit: $limit, offset: $offset, parentId: $parentId, sortBy: $sortBy) {
       id
       text
       authorId

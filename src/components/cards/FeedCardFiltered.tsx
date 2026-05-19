@@ -202,6 +202,9 @@ export default function FeedCardFiltered({
 
     const [loadedComments, setLoadedComments] = useState<Comment[]>(commentsDataProp);
     const [commentsLoaded, setCommentsLoaded] = useState(false);
+    // Top-level comment sort. Replies always render oldest-first regardless.
+    // `TOP` is the default and matches the backend fallback for unknown values.
+    const [commentSort, setCommentSort] = useState<'TOP' | 'NEWEST' | 'OLDEST'>('TOP');
 
     const allMedia: MediaItem[] = [
         ...(images ?? []).map(src => ({ type: 'image' as const, src })),
@@ -348,9 +351,25 @@ export default function FeedCardFiltered({
 
     const loadComments = useCallback(() => {
         if (!commentsLoaded && resolvedPostId) {
-            fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0 } });
+            fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0, sortBy: commentSort } });
         }
-    }, [commentsLoaded, resolvedPostId, fetchComments]);
+    }, [commentsLoaded, resolvedPostId, fetchComments, commentSort]);
+
+    // When the user changes the sort, drop the cached page and refetch.
+    // Replies are owned by their parent comment and aren't reordered here —
+    // backend keeps them oldest-first regardless.
+    const handleCommentSortChange = useCallback(
+        (next: 'TOP' | 'NEWEST' | 'OLDEST') => {
+            if (next === commentSort) return;
+            setCommentSort(next);
+            if (resolvedPostId) {
+                setCommentsLoaded(false);
+                setLoadedComments([]);
+                fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0, sortBy: next } });
+            }
+        },
+        [commentSort, resolvedPostId, fetchComments],
+    );
 
     const commentsData = commentsLoaded ? loadedComments : commentsDataProp;
 
@@ -438,7 +457,7 @@ export default function FeedCardFiltered({
             };
             setLoadedComments((prev) => [...prev, optimistic]);
             setTimeout(() => {
-                fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0 } });
+                fetchComments({ variables: { postId: resolvedPostId, limit: 20, offset: 0, sortBy: commentSort } });
             }, 500);
         } catch { /* parent shows toast */ }
     };
@@ -624,12 +643,44 @@ export default function FeedCardFiltered({
         );
     };
 
+    const sortOptions: Array<{ key: 'TOP' | 'NEWEST' | 'OLDEST'; label: string }> = [
+        { key: 'TOP', label: 'Top' },
+        { key: 'NEWEST', label: 'Newest' },
+        { key: 'OLDEST', label: 'Oldest' },
+    ];
+
     const renderCommentList = (
         replyToId: string | null,
         onReply: (id: string) => void,
         onSendReply: (text: string, parentId?: string) => void
     ) => (
         <div className="space-y-[1.5rem]">
+            {/* Top-level sort selector — only meaningful when there's more than
+                one comment. Hide when empty so we don't show a dead control. */}
+            {topLevel.length > 1 && (
+                <div className="flex items-center gap-[0.5rem] text-xs">
+                    <span className="text-text-tertiary">Sort by</span>
+                    <div className="inline-flex rounded-full bg-surface-subtle p-[0.125rem]">
+                        {sortOptions.map((opt) => {
+                            const active = commentSort === opt.key;
+                            return (
+                                <button
+                                    key={opt.key}
+                                    type="button"
+                                    onClick={() => handleCommentSortChange(opt.key)}
+                                    className={`px-[0.75rem] py-[0.25rem] rounded-full font-medium transition-colors ${
+                                        active
+                                            ? 'bg-surface-elevated text-text-primary shadow-sm'
+                                            : 'text-text-secondary hover:text-text-primary'
+                                    }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
             {commentsLoading ? (
                 <div className="flex items-center justify-center py-[2rem]">
                     <Loader2 className="w-5 h-5 animate-spin text-text-brand" />
