@@ -10,6 +10,7 @@ import type { RecommendedPeopleData } from "@/services/gql/types/recommendation"
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
 import { useState, useMemo } from "react";
+import { pymkMatchReason } from "@/lib/pymkMatchReason";
 
 // Loading skeleton for friend suggestions
 function FriendSuggestionSkeleton() {
@@ -98,14 +99,18 @@ export function PeopleYouMayKnow() {
                         </p>
                     ) : (
                         suggestions.map((suggestion) => {
-                            // Match reason: shared community names, joined with ", ".
-                            // Falls back to a generic copy if the candidate carries
-                            // none (rare — usually means the recommender picked them
-                            // from topic-affinity, not co-membership).
-                            const sharedNames = suggestion.sharedCommunityNames ?? [];
-                            const matchReason = sharedNames.length
-                                ? `Also in ${sharedNames.join(', ')}`
-                                : (t('suggestedForYou') || 'Suggested for you');
+                            // Phase 3 match-reason ladder (shared with
+                            // `FriendListModal` Suggested tab) — picks the most
+                            // informative signal in order: mutual connections →
+                            // shared communities → diaspora pair → same city →
+                            // engagement. Falls back to a generic copy when the
+                            // recommender supplies none.
+                            const reasonCopy = pymkMatchReason({
+                                mutualConnectionNames: suggestion.mutualConnectionNames,
+                                mutualConnectionCount: suggestion.mutualConnectionCount,
+                                sharedCommunityNames: suggestion.sharedCommunityNames,
+                                matchReason: suggestion.matchReason,
+                            }) || (t('suggestedForYou') || 'Suggested for you');
                             const displayName = `${suggestion.profile.firstName ?? ''} ${suggestion.profile.lastName ?? ''}`.trim() || 'Member';
                             return (
                                 <PeopleYouMayKnowCard
@@ -113,7 +118,7 @@ export function PeopleYouMayKnow() {
                                     userId={suggestion.profile.userId}
                                     profileImage={suggestion.profile.avatarUrl ?? ''}
                                     name={displayName}
-                                    matchReason={matchReason}
+                                    matchReason={reasonCopy}
                                     onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
                                     isLoading={loadingUserId === suggestion.profile.userId}
                                 />

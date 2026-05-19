@@ -10,8 +10,6 @@ import { useQuery, useLazyQuery } from "@apollo/client/react";
 import {
   GET_MY_CONNECTIONS,
   GetConnectionsResponse,
-  GetFriendSuggestionsResponse,
-  GET_FRIEND_SUGGESTIONS,
   SEARCH_USERS,
   SearchUsersResponse,
 } from "@/services/gql/connection";
@@ -19,6 +17,9 @@ import {
   GET_ALL_PENDING_CONNECTIONS,
   GetPendingRequestsResponse
 } from "@/services/gql/connection";
+import { RECOMMENDED_PEOPLE } from "@/services/gql/postsFeed";
+import type { RecommendedPeopleData } from "@/services/gql/types/recommendation";
+import { pymkMatchReason } from "@/lib/pymkMatchReason";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { resolveUserTier } from "@/lib/userTier";
@@ -30,6 +31,7 @@ interface Friend {
   name: string;
   imageSrc: string;
   mutualConnections?: number;
+  matchReasonCopy?: string;
   tier?: Tier;
   connectionStatus: "connected" | "none" | "pending_received" | "pending_sent" | "blocked";
   tabType: FriendType;
@@ -101,12 +103,17 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       activeTab !== "request-sent" && activeTab !== "request-received",
   });
 
+  // Phase 3 PYMK unification — the "Suggested" tab now reads from
+  // `recommendedPeople` (recommendation-service) instead of the retired
+  // user-service `getFriendSuggestions` heuristic. Same data shape needs
+  // (profile + connection status); richer match-reason copy via the
+  // shared `pymkMatchReason` ladder below.
   const {
     data: suggestions,
     loading: suggestionsLoading,
     refetch: refetchSuggestions
-  } = useQuery<GetFriendSuggestionsResponse>(
-    GET_FRIEND_SUGGESTIONS,
+  } = useQuery<RecommendedPeopleData>(
+    RECOMMENDED_PEOPLE,
     {
       variables: { limit: 10 },
       skip: activeTab !== "suggested" || debouncedSearchTerm.length > 0,
@@ -268,16 +275,23 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             isSearching: true,
           });
         });
-      } else if (!isSearchingOnSuggestedTab && suggestions?.getFriendSuggestions.suggestions) {
-        suggestions.getFriendSuggestions.suggestions.forEach((suggestion) => {
+      } else if (!isSearchingOnSuggestedTab && suggestions?.recommendedPeople?.items) {
+        suggestions.recommendedPeople.items.forEach((suggestion) => {
           const profile = suggestion.profile;
           const connectionStatus = profile.connectionStatus ?? "none";
+          const fullName = `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim();
           friends.push({
             userId: profile.userId,
             connectionId: profile.connectionId ?? "",
-            name: `${profile.firstName} ${profile.lastName}`,
-            imageSrc: profile.avatarUrl,
-            mutualConnections: suggestion.mutualConnectionsCount,
+            name: fullName || "Member",
+            imageSrc: profile.avatarUrl ?? "",
+            mutualConnections: suggestion.mutualConnectionCount,
+            matchReasonCopy: pymkMatchReason({
+              mutualConnectionNames: suggestion.mutualConnectionNames,
+              mutualConnectionCount: suggestion.mutualConnectionCount,
+              sharedCommunityNames: suggestion.sharedCommunityNames,
+              matchReason: suggestion.matchReason,
+            }),
             tier: getTierFromUser(profile),
             connectionStatus: connectionStatus as Friend["connectionStatus"],
             tabType: "suggested",
@@ -349,7 +363,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
       suggested:
         debouncedSearchTerm.length > 0
           ? searchResults?.searchUsers.total || 0
-          : suggestions?.getFriendSuggestions.total || 0,
+          : suggestions?.recommendedPeople?.items?.length || 0,
       "request-received": receivedCount,
       "request-sent": sentCount,
       blocked: 0,
@@ -415,6 +429,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
         name={friend.name}
         imageSrc={friend.imageSrc}
         mutualConnections={friend.mutualConnections}
+        matchReasonCopy={friend.matchReasonCopy}
         tier={friend.tier}
         status={friend.connectionStatus}
         connectionId={friend.connectionId}

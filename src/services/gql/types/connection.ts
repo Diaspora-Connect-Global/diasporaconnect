@@ -282,75 +282,13 @@ export interface GetMutualFriendsResponse {
 }
 
 // ============================================================================
-// FRIEND SUGGESTION TYPES
+// FRIEND SUGGESTION TYPES — REMOVED (Phase 3 PYMK unification)
 // ============================================================================
-
-/**
- * Profile information for a friend suggestion.
- *
- * @interface FriendSuggestionProfile
- * @property {string} userId - User's unique identifier
- * @property {string} firstName - User's first name
- * @property {string} lastName - User's last name
- * @property {string} connectionId - Connection ID if exists
- * @property {string} [sector] - User's professional sector
- * @property {string} [countryOfOrigin] - User's country of origin
- * @property {string} [residenceCountry] - User's country of residence
- * @property {string} [bio] - User's biography
- * @property {number} connectionCount - Number of connections the user has
- * @property {string} profilePicture - URL to profile picture
- * @property {string} avatarUrl - URL to avatar image
- * @property {ConnectionStatus} connectionStatus - Current connection status
- */
-export interface FriendSuggestionProfile {
-  userId: string;
-  firstName: string;
-  lastName: string;
-  connectionId: string;
-  sector?: string;
-  countryOfOrigin?: string;
-  residenceCountry?: string;
-  bio?: string;
-  connectionCount: number;
-  profilePicture: string;
-  avatarUrl: string;
-  connectionStatus: ConnectionStatus;
-}
-
-/**
- * A friend suggestion with scoring information.
- *
- * @interface FriendSuggestion
- * @property {FriendSuggestionProfile} profile - Suggested user's profile
- * @property {number} score - Relevance score for the suggestion
- * @property {string[]} matchReasons - Reasons for the suggestion
- * @property {number} mutualConnectionsCount - Number of mutual connections
- */
-export interface FriendSuggestion {
-  profile: FriendSuggestionProfile;
-  score: number;
-  matchReasons: string[];
-  mutualConnectionsCount: number;
-}
-
-/**
- * Response from getting friend suggestions.
- *
- * @interface GetFriendSuggestionsResponse
- * @property {Object} getFriendSuggestions - Query result
- * @property {boolean} getFriendSuggestions.success - Whether query was successful
- * @property {string} [getFriendSuggestions.message] - Optional message
- * @property {number} getFriendSuggestions.total - Total suggestions available
- * @property {FriendSuggestion[]} getFriendSuggestions.suggestions - Array of suggestions
- */
-export interface GetFriendSuggestionsResponse {
-  getFriendSuggestions: {
-    success: boolean;
-    message?: string;
-    total: number;
-    suggestions: FriendSuggestion[];
-  };
-}
+// `FriendSuggestionProfile`, `FriendSuggestion`, and
+// `GetFriendSuggestionsResponse` were the Apollo response shape for the
+// retired `getFriendSuggestions` query. PYMK is now served by
+// `PersonRecommendation` / `RecommendedPeopleData` in
+// `./recommendation.ts` — import from there.
 
 /**
  * Response type for pending requests (sent or received).

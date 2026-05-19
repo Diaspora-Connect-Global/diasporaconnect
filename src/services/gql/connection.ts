@@ -1,6 +1,9 @@
 import { gql } from '@apollo/client';
 
 // Re-export types from the types folder for backward compatibility
+// NOTE: `FriendSuggestionProfile` / `FriendSuggestion` /
+// `GetFriendSuggestionsResponse` were removed in Phase 3 — PYMK is now
+// served by `recommendedPeople` (see `services/gql/postsFeed.ts`).
 export type {
   UserBasic,
   Connection,
@@ -18,9 +21,6 @@ export type {
   RemoveFriendResponse,
   GetPendingConnectionsResponse,
   GetMutualFriendsResponse,
-  FriendSuggestionProfile,
-  FriendSuggestion,
-  GetFriendSuggestionsResponse,
   GetPendingRequestsResponse,
   SearchUsersInput,
   UserProfile,
@@ -325,45 +325,9 @@ export const REMOVE_FRIEND = gql`
   }
 `;
 
-/**
- * Get suggested friends for the current user.
- *
- * @example
- * ```ts
- * const { data } = useQuery<GetFriendSuggestionsResponse>(
- *   GET_FRIEND_SUGGESTIONS,
- *   { variables: { limit: 10 } }
- * );
- * ```
- */
-export const GET_FRIEND_SUGGESTIONS = gql`
-  query GetFriendSuggestions($limit: Int) {
-    getFriendSuggestions(limit: $limit) {
-      success
-      message
-      total
-      suggestions {
-        profile {
-          userId
-          firstName
-          lastName
-          sector
-          countryOfOrigin
-          residenceCountry
-          bio
-          connectionCount
-          avatarUrl
-          connectionStatus
-          connectionId
-        }
-        score
-        matchReasons
-        mutualConnectionsCount
-      }
-    }
-  }
-`;
-
+// `GET_FRIEND_SUGGESTIONS` was removed in Phase 3 (PYMK unification).
+// The recommendation service now powers Suggested-friends across every
+// surface — see `RECOMMENDED_PEOPLE` in `./postsFeed.ts`.
 
 /**
  * All pending connections for the current user (outbound + inbound).

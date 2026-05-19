@@ -10,7 +10,6 @@ import {
     REJECT_CONNECTION,
     GET_MY_CONNECTIONS,
     GET_ALL_PENDING_CONNECTIONS,
-    GET_FRIEND_SUGGESTIONS,
     SEARCH_USERS,
     SendConnectionRequestResponse,
     AcceptConnectionResponse,
@@ -20,6 +19,7 @@ import {
     REMOVE_FRIEND,
     RemoveFriendResponse,
 } from '@/services/gql/connection';
+import { RECOMMENDED_PEOPLE } from '@/services/gql/postsFeed';
 import {
     BLOCK_USER,
     GET_BLOCKED_USERS,
@@ -58,7 +58,10 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
             queries.push({ query: GET_MY_CONNECTIONS });
         }
         
-        queries.push({ query: GET_FRIEND_SUGGESTIONS, variables: { limit: 20 } });
+        // Phase 3 PYMK unification — refresh the recommendation-service
+        // feed (was `GET_FRIEND_SUGGESTIONS` against the retired
+        // user-service heuristic). Same surface, same trigger points.
+        queries.push({ query: RECOMMENDED_PEOPLE, variables: { limit: 20 } });
         
         // If actively searching, also refetch search results
         if (currentIsSearching && currentSearchQuery.length > 0) {

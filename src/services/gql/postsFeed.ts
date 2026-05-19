@@ -820,6 +820,9 @@ export const RECOMMENDED_PEOPLE = gql`
         score
         sharedCommunityCount
         sharedCommunityNames
+        mutualConnectionCount
+        mutualConnectionNames
+        matchReason
       }
       rankingStrategy
     }

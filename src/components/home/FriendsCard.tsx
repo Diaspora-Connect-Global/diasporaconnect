@@ -15,6 +15,14 @@ interface FriendsCardProps {
     name: string;
     imageSrc: string;
     mutualConnections?: number;
+    /**
+     * Phase 3 PYMK match-reason copy. When set, this string is rendered
+     * under the user name instead of the legacy "{N} mutual connections"
+     * fallback. Built by `pymkMatchReason()` from the recommender
+     * response — e.g. "You both know Aisha, Kwame + 3 more" or
+     * "Lives in your city".
+     */
+    matchReasonCopy?: string;
     tier?: Tier;
     connectionId: string;
 
@@ -82,6 +90,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
     name,
     imageSrc ,
     mutualConnections,
+    matchReasonCopy,
     tier,
     status,
     customButtons,
@@ -164,14 +173,18 @@ const FriendsCard: FC<FriendsCardProps> = ({
                         </div>
                     </div>
 
-                    {mutualConnections !== undefined && (
+                    {matchReasonCopy ? (
+                        <span className="text-sm text-text-secondary">
+                            {matchReasonCopy}
+                        </span>
+                    ) : mutualConnections !== undefined ? (
                         <span className="text-sm text-text-secondary">
                             {mutualConnections === 1
                                 ? t('mutualConnection', { count: mutualConnections })
                                 : t('mutualConnections', { count: mutualConnections })
                             }
                         </span>
-                    )}
+                    ) : null}
                 </div>
             </div>
 

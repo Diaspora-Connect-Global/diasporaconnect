@@ -243,6 +243,24 @@ export interface PersonRecommendation {
   score: number;
   sharedCommunityCount: number;
   sharedCommunityNames: string[];
+  /**
+   * Phase 3 PYMK enrichment — total mutual-connection peers between
+   * the viewer and this candidate (full count, even though the names
+   * array is capped at the first 2-3 for compact rendering).
+   */
+  mutualConnectionCount: number;
+  /**
+   * First 2-3 display names of the mutual connections, LinkedIn-style.
+   * The gateway hydrates these from user-service in the same batch that
+   * loads the candidate profile, so no extra round-trip is needed.
+   */
+  mutualConnectionNames: string[];
+  /**
+   * Top retriever-source tag for this candidate — drives the match-reason
+   * copy ladder (see `pymkMatchReason()` in `lib/pymkMatchReason.ts`).
+   * Empty string when the recommender doesn't supply one.
+   */
+  matchReason: string;
 }
 
 export interface PeopleRecommendationPage {
