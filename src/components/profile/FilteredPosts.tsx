@@ -326,11 +326,10 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
                 shares={post.engagementCounts.shares}
-                onLike={(liked) => handleLike(post.id, liked)}
-                onComment={() => {}}
-                onShare={() => handleShare(post.id)}
-                onSave={(saved) => handleSave(post.id, saved)}
-                onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
+                onLike={handleLike}
+                onShare={handleShare}
+                onSave={handleSave}
+                onSendComment={handleSendComment}
                 joinButton={false}
                 isLiked={post.userEngagement.hasLiked}
                 isSaved={post.userEngagement.hasSaved}

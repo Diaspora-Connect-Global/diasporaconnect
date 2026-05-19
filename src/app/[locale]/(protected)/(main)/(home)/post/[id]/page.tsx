@@ -76,7 +76,10 @@ export default function PostPage() {
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
-  const handleLike = async (liked: boolean) => {
+  // Card handlers now receive the post id as the first arg (see
+  // FeedCardWithReply prop signature). On this single-post page we just
+  // ignore it — the route param `postId` is the canonical source.
+  const handleLike = async (_postId: string, liked: boolean) => {
     try {
       if (liked) {
         await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
@@ -88,7 +91,7 @@ export default function PostPage() {
     }
   };
 
-  const handleSave = async (saved: boolean) => {
+  const handleSave = async (_postId: string, saved: boolean) => {
     try {
       if (saved) {
         await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
@@ -100,7 +103,7 @@ export default function PostPage() {
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (_postId: string) => {
     try {
       await addEngagement({
         variables: { input: { postId, engagementType: 'SHARE' } },
@@ -110,7 +113,7 @@ export default function PostPage() {
     }
   };
 
-  const handleSendComment = async (content: string, parentId?: string, mentions?: import('@/components/custom/richTextRenderer').MentionInputItem[]) => {
+  const handleSendComment = async (_postId: string, content: string, parentId?: string, mentions?: import('@/components/custom/richTextRenderer').MentionInputItem[]) => {
     try {
       await createComment({
         variables: {
@@ -300,8 +303,7 @@ export default function PostPage() {
           likes={normalizedPostResolved.engagementCounts?.likes ?? 0}
           comments={normalizedPostResolved.engagementCounts?.comments ?? 0}
           shares={normalizedPostResolved.engagementCounts?.shares ?? 0}
-          onLike={(liked) => handleLike(liked)}
-          onComment={() => {}}
+          onLike={handleLike}
           onShare={handleShare}
           onSave={handleSave}
           onSendComment={handleSendComment}

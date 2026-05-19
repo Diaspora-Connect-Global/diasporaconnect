@@ -576,11 +576,10 @@ export default function CommunityDetailPage() {
                 shares={post.engagementCounts.shares}
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
-                onLike={(liked) => handleLike(post.id, liked)}
-                onComment={() => {}}
-                onShare={() => handleShare(post.id)}
-                onSave={(saved) => handleSave(post.id, saved)}
-                onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
+                onLike={handleLike}
+                onShare={handleShare}
+                onSave={handleSave}
+                onSendComment={handleSendComment}
                 onDelete={(id) => setLocalPosts(prev => prev.filter(p => p.id !== id))}
                 isLiked={post.userEngagement.hasLiked}
                 isSaved={post.userEngagement.hasSaved}

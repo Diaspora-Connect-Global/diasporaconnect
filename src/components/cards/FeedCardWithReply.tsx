@@ -1,6 +1,6 @@
 'use client';
 import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Globe, Users, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
@@ -65,11 +65,20 @@ interface FeedCardProps {
     comments: number;
     shares: number;
     commentsData?: Comment[];
-    onLike?: (liked: boolean) => void;
+    // Handlers receive the post id as the first argument so the parent can
+    // wire them as stable `useCallback` references without an inline arrow
+    // per card per render — that arrow recreation was the dominant cause of
+    // every visible card re-rendering on every `loadMore`.
+    onLike?: (postId: string, liked: boolean) => void;
     onComment?: () => void;
-    onShare?: () => void;
-    onSave?: (saved: boolean) => void;
-    onSendComment?: (content: string, parentId?: string, mentions?: MentionInputItem[]) => void;
+    onShare?: (postId: string) => void;
+    onSave?: (postId: string, saved: boolean) => void;
+    onSendComment?: (
+        postId: string,
+        content: string,
+        parentId?: string,
+        mentions?: MentionInputItem[],
+    ) => void;
     onDelete?: (postId: string) => void;
     joinButton?: boolean;
     isLiked?: boolean;
@@ -79,7 +88,9 @@ interface FeedCardProps {
     initialFocusCommentId?: string;
     onNavigatePost?: (direction: 'next' | 'prev') => void;
     /** When provided the card skips its internal modal and delegates to the page-level one. */
-    onOpenMedia?: (mediaIndex: number) => void;
+    // Receives `postId` so the parent can wire a single stable
+    // `useCallback` reference. See note on `onLike` above.
+    onOpenMedia?: (postId: string, mediaIndex: number) => void;
 }
 
 /* --------------------------------------------------------------- */
@@ -115,7 +126,7 @@ function mapApiComment(c: ApiComment): Comment {
     };
 }
 
-export default function FeedCardWithReply({
+function FeedCardWithReplyInner({
     postId,
     profileImage,
     profileName,
@@ -448,13 +459,13 @@ export default function FeedCardWithReply({
         const newLikedState = !isLiked;
         setIsLiked(newLikedState);
         setLikeCount((c) => newLikedState ? c + 1 : c - 1);
-        onLike?.(newLikedState);
+        onLike?.(postId, newLikedState);
     };
 
     const handleSave = () => {
         const next = !isSaved;
         setIsSaved(next);
-        onSave?.(next);
+        onSave?.(postId, next);
     };
 
     const handleShare = () => {
@@ -465,7 +476,7 @@ export default function FeedCardWithReply({
         const newSharedState = true;
         setIsShared(newSharedState);
         setShareCount((c) => c + 1);
-        onShare?.();
+        onShare?.(postId);
     };
 
     const toggleExpand = () => setIsExpanded((v) => !v);
@@ -500,14 +511,16 @@ export default function FeedCardWithReply({
     }, [router, currentUserId]);
 
     const toggleCommentInput = () => {
-        setShowCommentInput((v) => {
-            const willShow = !v;
-            if (willShow) {
-                setShowComments(true);
-                loadComments();
-            }
-            return willShow;
-        });
+        // Keep the functional updater pure — Apollo v4 forbids `useLazyQuery`
+        // execute() calls from inside setState updaters (and from render),
+        // because updaters may run multiple times under StrictMode. Compute
+        // the next value, set state directly, then run the side effects.
+        const willShow = !showCommentInput;
+        setShowCommentInput(willShow);
+        if (willShow) {
+            setShowComments(true);
+            loadComments();
+        }
         onComment?.();
     };
 
@@ -542,7 +555,7 @@ export default function FeedCardWithReply({
     };
 
     const openMediaModal = (index: number) => {
-        if (onOpenMedia) { onOpenMedia(index); return; }
+        if (onOpenMedia) { onOpenMedia(postId, index); return; }
         setCurrentMediaIndex(index);
         setShowMediaModal(true);
         loadComments();
@@ -580,7 +593,7 @@ export default function FeedCardWithReply({
         }
         try {
             const mentions = buildMentionInputsFromText(preparedText, mentionMap);
-            const result = onSendComment(preparedText, parentId, mentions.length ? mentions : undefined);
+            const result = onSendComment(postId, preparedText, parentId, mentions.length ? mentions : undefined);
             if (result != null && typeof (result as Promise<unknown>).then === 'function') {
                 await result;
             }
@@ -669,8 +682,12 @@ export default function FeedCardWithReply({
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {imageCount === 1 ? (
+                    // `min-h-[20rem]` reserves layout space so the card height
+                    // doesn't jump from 0 → intrinsic-image-height as the bitmap
+                    // decodes (the multi-image grid below already has `h-[15rem]`
+                    // / `aspect-square` floors for the same reason).
                     <div
-                        className="group relative w-full rounded-lg overflow-hidden cursor-pointer bg-surface-alt"
+                        className="group relative w-full min-h-[20rem] max-h-[32rem] rounded-lg overflow-hidden cursor-pointer bg-surface-alt"
                         onClick={() => openMediaModal(0)}
                     >
                         <img src={images[0]} alt="post" className="w-full max-h-[32rem] object-contain" loading="lazy" decoding="async" />
@@ -1504,3 +1521,11 @@ export default function FeedCardWithReply({
         </>
     );
 }
+
+// Memoize so cards that haven't changed don't re-render when the parent
+// re-renders (e.g. when `loadMore` appends a new page). Relies on the
+// home-page handlers being stable `useCallback` references — without that,
+// memo provides no benefit because props change every render.
+const FeedCardWithReply = memo(FeedCardWithReplyInner);
+FeedCardWithReply.displayName = 'FeedCardWithReply';
+export default FeedCardWithReply;

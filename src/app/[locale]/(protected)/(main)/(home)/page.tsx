@@ -3,6 +3,8 @@
 import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVariant2';
 import { formatDateProximity } from '@/macros/time';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
+import { Virtuoso } from 'react-virtuoso';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
@@ -21,7 +23,7 @@ import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
@@ -100,7 +102,11 @@ export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
   const [viewMode, setViewMode] = useState<FeedViewMode>('you');
-  const [modalState, setModalState] = useState<{ postIndex: number; mediaIndex: number } | null>(null);
+  // Track the open media modal by postId rather than postIndex so the
+  // open-media handler can be wired as a stable `useCallback`. With
+  // virtualised feed rendering the underlying `posts` array is what we
+  // resolve against; prev/next just step through it on click.
+  const [modalState, setModalState] = useState<{ postId: string; mediaIndex: number } | null>(null);
 
   // Fetch communities
   const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<DiscoverCommunitiesData>(
@@ -122,9 +128,34 @@ export default function Home() {
     refetch: refetchFeed,
     loadingMore: feedLoadingMore,
     feedContainerRef,
+    loadMore: feedLoadMore,
+    hasMore: feedHasMore,
     updatePostCounts,
     removePost,
   } = useFeed({ mode: viewMode });
+
+  // Scroll container element captured via callback ref so Virtuoso can
+  // virtualize against it instead of the window. The same node is exposed
+  // through `feedContainerRef` for backwards compatibility (some legacy
+  // code paths may still rely on it).
+  const [feedScrollEl, setFeedScrollEl] = useState<HTMLDivElement | null>(null);
+  const setFeedScrollRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setFeedScrollEl(el);
+      if (feedContainerRef) {
+        (feedContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+      }
+    },
+    [feedContainerRef],
+  );
+
+  // Virtuoso fires `endReached` near the bottom; gate the call behind the
+  // same `hasMore` + already-loading checks the old scroll-listener used.
+  const handleEndReached = useCallback(() => {
+    if (feedHasMore && !feedLoadingMore && !feedLoading) {
+      feedLoadMore();
+    }
+  }, [feedHasMore, feedLoadingMore, feedLoading, feedLoadMore]);
 
   useEffect(() => {
     const savedView = sessionStorage.getItem('viewFilter');
@@ -208,7 +239,11 @@ export default function Home() {
   // ImpressionTracker (VIEW + DWELL) and by future CLICK_THROUGH wiring —
   // those signals don't have a post-feed source.
 
-  const handleLike = async (postId: string, liked: boolean) => {
+  // Wrapped in useCallback so the references stay stable across home-page
+  // re-renders. The cards are memoised — if these handlers churned on every
+  // render every visible card would re-render too, which was the main cause
+  // of stutter at the `loadMore` boundary.
+  const handleLike = useCallback(async (postId: string, liked: boolean) => {
     updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
     try {
       if (liked) {
@@ -221,9 +256,9 @@ export default function Home() {
       console.error(`Failed to ${liked ? 'like' : 'unlike'} post:`, err);
       toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
     }
-  };
+  }, [addEngagement, removeEngagement, updatePostCounts]);
 
-  const handleSave = async (postId: string, saved: boolean) => {
+  const handleSave = useCallback(async (postId: string, saved: boolean) => {
     updatePostCounts(postId, { saves: saved ? 1 : -1, hasSaved: saved });
     try {
       if (saved) {
@@ -236,9 +271,9 @@ export default function Home() {
       console.error(`Failed to ${saved ? 'save' : 'unsave'} post:`, err);
       toast.error(`Failed to ${saved ? 'save' : 'unsave'} post`);
     }
-  };
+  }, [addEngagement, removeEngagement, updatePostCounts]);
 
-  const handleShare = async (postId: string) => {
+  const handleShare = useCallback(async (postId: string) => {
     updatePostCounts(postId, { shares: 1 });
     try {
       await addEngagement({ variables: { input: { postId, engagementType: 'SHARE' } } });
@@ -247,10 +282,10 @@ export default function Home() {
       console.error('Failed to share post:', err);
       toast.error('Failed to share post');
     }
-  };
+  }, [addEngagement, updatePostCounts]);
 
   // Handle new comment (or reply when parentId is set)
-  const handleSendComment = async (postId: string, content: string, parentId?: string, mentions?: import('@/components/custom/richTextRenderer').MentionInputItem[]) => {
+  const handleSendComment = useCallback(async (postId: string, content: string, parentId?: string, mentions?: import('@/components/custom/richTextRenderer').MentionInputItem[]) => {
     if (!content.trim()) return;
 
     updatePostCounts(postId, { comments: 1 });
@@ -277,7 +312,7 @@ export default function Home() {
       toast.error('Failed to post comment');
       throw err;
     }
-  };
+  }, [createComment, updatePostCounts]);
 
   // --- Horizontal Scroll with Smart Buttons ---
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -397,25 +432,35 @@ export default function Home() {
 
   const handleNavigatePost = (dir: 'next' | 'prev') => {
     if (modalState === null) return;
-    let i = dir === 'next' ? modalState.postIndex + 1 : modalState.postIndex - 1;
+    const currentIndex = posts.findIndex((p) => p.id === modalState.postId);
+    if (currentIndex < 0) return;
+    let i = dir === 'next' ? currentIndex + 1 : currentIndex - 1;
     while (i >= 0 && i < posts.length) {
-      if (getPostMedia(posts[i]!).length > 0) {
-        setModalState({ postIndex: i, mediaIndex: 0 });
+      const next = posts[i];
+      if (next && getPostMedia(next).length > 0) {
+        setModalState({ postId: next.id, mediaIndex: 0 });
         return;
       }
       i = dir === 'next' ? i + 1 : i - 1;
     }
   };
 
-  const modalPost = modalState !== null ? posts[modalState.postIndex] ?? null : null;
+  const modalPost = modalState !== null ? posts.find((p) => p.id === modalState.postId) ?? null : null;
   const modalProfileData = modalPost ? getProfileData(modalPost) : null;
+
+  // Stable handlers so memoised FeedCardWithReply instances don't see a
+  // fresh prop on every parent render. handleOpenMedia takes the post id
+  // from the card (we changed the card prop signature to forward it).
+  const handleOpenMedia = useCallback((postId: string, mediaIndex: number) => {
+    setModalState({ postId, mediaIndex });
+  }, []);
 
   return (
     <div className="h-app-inner flex overflow-hidden">
       <PrivacyPolicyModal />
       {/* Main Feed - Independent Scroll */}
       <div
-        ref={feedContainerRef}
+        ref={setFeedScrollRef}
         className={FEED_COLUMN_CLASS}
       >
         {/* Discover Section */}
@@ -554,75 +599,89 @@ export default function Home() {
             </div>
           )}
 
-          {/* Feed Posts */}
-          {hasPosts && posts.map((post, postIndex) => {
-            const profileData = getProfileData(post);
-            return (
-              <ImpressionTracker
-                key={post.id}
-                itemId={post.id}
-                itemType="POST"
-                source={post.__source}
-                score={post.__score}
-                surface={isRecommendedArm ? 'home_feed' : 'community_feed'}
-                className="mb-2"
-              >
-              <div id={`feed-post-${post.id}`}>
-                <FeedCardWithReply
-                  postId={post.id}
-                  profileImage={profileData.avatar}
-                  profileName={profileData.name}
-                    authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
-                    authorEntityId={post.authorId}
-                    authorEntityType={post.authorType}
-                    profileTier={profileData.tier}
-                  category={profileData.type}
-                  postDate={formatDateProximity(post.createdAt)}
-                  createdAt={post.createdAt}
-                  visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
-                  content={post.text}
-                  mentionMap={getPostMentionMap(post)}
-                  images={post.attachments
-                    ?.filter(
-                      (a) =>
-                        a.mimeType?.startsWith('image/') ||
-                        String(a.type ?? '').toUpperCase() === 'IMAGE'
+          {/* Feed Posts — virtualised. Off-screen cards are unmounted so
+              the DOM size stays bounded as the user scrolls deeper, and
+              the surrounding chrome (top toggle, sidebar, modals) keeps
+              its layout because we pass the existing scroll column as
+              the custom scroll parent. */}
+          {hasPosts && (
+            <Virtuoso
+              data={posts}
+              customScrollParent={feedScrollEl ?? undefined}
+              endReached={handleEndReached}
+              increaseViewportBy={{ top: 0, bottom: 600 }}
+              computeItemKey={(_, post) => post.id}
+              components={{
+                Footer: feedLoadingMore
+                  ? () => (
+                      <>
+                        <FeedCardSkeleton />
+                        <FeedCardSkeleton />
+                      </>
                     )
-                    .map((a) => a.url || '')
-                    .filter(Boolean) || []}
-                  videos={post.attachments
-                    ?.filter(
-                      (a) =>
-                        a.mimeType?.startsWith('video/') ||
-                        String(a.type ?? '').toUpperCase() === 'VIDEO'
-                    )
-                    .map((a) => a.url || '')
-                    .filter(Boolean) || []}
-                  likes={post.engagementCounts.likes}
-                  comments={post.engagementCounts.comments}
-                  shares={post.engagementCounts.shares}
-                  onLike={(liked) => handleLike(post.id, liked)}
-                  onComment={() => console.log('Open comment input for', post.id)}
-                  onShare={() => handleShare(post.id)}
-                  onSave={(saved) => handleSave(post.id, saved)}
-                  onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
-                  onDelete={removePost}
-                  joinButton={false}
-                  isLiked={post.userEngagement.hasLiked}
-                  isSaved={post.userEngagement.hasSaved}
-                  isShared={post.userEngagement.hasShared}
-                  onOpenMedia={(mediaIndex) => setModalState({ postIndex, mediaIndex })}
-                />
-              </div>
-              </ImpressionTracker>
-            );
-          })}
-
-          {/* Load more indicator */}
-          {feedLoadingMore && (
-            <div className="flex justify-center py-4">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-text-brand border-t-transparent" />
-            </div>
+                  : undefined,
+              }}
+              itemContent={(_postIndex, post) => {
+                const profileData = getProfileData(post);
+                return (
+                  <ImpressionTracker
+                    itemId={post.id}
+                    itemType="POST"
+                    source={post.__source}
+                    score={post.__score}
+                    surface={isRecommendedArm ? 'home_feed' : 'community_feed'}
+                    className="mb-2"
+                  >
+                    <div id={`feed-post-${post.id}`}>
+                      <FeedCardWithReply
+                        postId={post.id}
+                        profileImage={profileData.avatar}
+                        profileName={profileData.name}
+                        authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
+                        authorEntityId={post.authorId}
+                        authorEntityType={post.authorType}
+                        profileTier={profileData.tier}
+                        category={profileData.type}
+                        postDate={formatDateProximity(post.createdAt)}
+                        createdAt={post.createdAt}
+                        visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
+                        content={post.text}
+                        mentionMap={getPostMentionMap(post)}
+                        images={post.attachments
+                          ?.filter(
+                            (a) =>
+                              a.mimeType?.startsWith('image/') ||
+                              String(a.type ?? '').toUpperCase() === 'IMAGE'
+                          )
+                          .map((a) => a.url || '')
+                          .filter(Boolean) || []}
+                        videos={post.attachments
+                          ?.filter(
+                            (a) =>
+                              a.mimeType?.startsWith('video/') ||
+                              String(a.type ?? '').toUpperCase() === 'VIDEO'
+                          )
+                          .map((a) => a.url || '')
+                          .filter(Boolean) || []}
+                        likes={post.engagementCounts.likes}
+                        comments={post.engagementCounts.comments}
+                        shares={post.engagementCounts.shares}
+                        onLike={handleLike}
+                        onShare={handleShare}
+                        onSave={handleSave}
+                        onSendComment={handleSendComment}
+                        onDelete={removePost}
+                        joinButton={false}
+                        isLiked={post.userEngagement.hasLiked}
+                        isSaved={post.userEngagement.hasSaved}
+                        isShared={post.userEngagement.hasShared}
+                        onOpenMedia={handleOpenMedia}
+                      />
+                    </div>
+                  </ImpressionTracker>
+                );
+              }}
+            />
           )}
         </div>
       </div>

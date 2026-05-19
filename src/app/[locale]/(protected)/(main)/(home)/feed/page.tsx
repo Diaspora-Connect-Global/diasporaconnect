@@ -264,17 +264,16 @@ export default function FeedPage() {
                     likes={post.engagementCounts.likes}
                     comments={post.engagementCounts.comments}
                     shares={post.engagementCounts.shares}
-                    onLike={(liked) => handleLike(post.id, liked)}
-                    onComment={() => {}}
-                    onShare={() => handleShare(post.id)}
-                    onSave={(saved) => handleSave(post.id, saved)}
-                    onSendComment={(content, parentId, mentions) => handleSendComment(post.id, content, parentId, mentions)}
+                    onLike={handleLike}
+                    onShare={handleShare}
+                    onSave={handleSave}
+                    onSendComment={handleSendComment}
                     onDelete={removePost}
                     joinButton={false}
                     isLiked={post.userEngagement.hasLiked}
                     isSaved={post.userEngagement.hasSaved}
                     isShared={post.userEngagement.hasShared}
-                    onOpenMedia={(mediaIndex) => setModalState({ postIndex, mediaIndex })}
+                    onOpenMedia={(_postId, mediaIndex) => setModalState({ postIndex, mediaIndex })}
                   />
                 </div>
               );

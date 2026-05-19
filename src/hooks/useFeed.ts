@@ -28,7 +28,6 @@ import type {
 
 const INITIAL_LIMIT = 12;
 const PAGE_SIZE = 12;
-const SCROLL_THRESHOLD_PX = 800;
 
 function mapPosts(raw: GetFeedData['feed']['posts']): Post[] {
   return raw.map((p) => normalizeFeedPost(p));
@@ -566,21 +565,12 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     refetchHashtagQuery,
   ]);
 
-  useEffect(() => {
-    const el = feedContainerRef.current;
-    if (!el) return;
-
-    const checkScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-      if (distanceFromBottom <= SCROLL_THRESHOLD_PX && hasMore && !loading && !loadingMore) {
-        loadMore();
-      }
-    };
-
-    el.addEventListener('scroll', checkScroll, { passive: true });
-    return () => el.removeEventListener('scroll', checkScroll);
-  }, [hasMore, loadMore, loading, loadingMore]);
+  // Infinite scroll is now driven by Virtuoso's `endReached` callback from
+  // the home page. The manual scroll-listener that used to live here would
+  // double-fire `loadMore` alongside Virtuoso's signal — the guard in
+  // `loadMore` made it safe but wasteful. The `feedContainerRef` is kept
+  // in the return shape for back-compat with any caller that may still
+  // attach to it.
 
   const removePost = useCallback((postId: string) => {
     setMergedPosts(prev => prev.filter(p => p.id !== postId));
