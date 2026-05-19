@@ -9,7 +9,15 @@ interface PeopleYouMayKnowCardProps {
   userId: string;
   profileImage: string;
   name: string;
-  mutualConnections: number;
+  /**
+   * Phase 2: arbitrary match-reason string (e.g. "Also in Ghana Embassy,
+   * Diaspora Tech"). Replaces the legacy `mutualConnections` integer +
+   * `matchReasons` array — the recommendation-service backed PYMK uses
+   * shared communities exclusively.
+   */
+  matchReason?: string;
+  /** @deprecated kept for any leftover callers; prefer `matchReason`. */
+  mutualConnections?: number;
   onAddFriend?: () => void;
   buttonText?: string;
   buttonVariant?: 'primary' | 'secondary' | 'success';
@@ -20,6 +28,7 @@ export default function PeopleYouMayKnowCard({
   userId,
   profileImage,
   name,
+  matchReason,
   mutualConnections,
   onAddFriend,
   buttonText,
@@ -102,7 +111,9 @@ export default function PeopleYouMayKnowCard({
         <div className="min-w-0 flex-1">
           <h3 className="caption-medium text-text-primary truncate">{name}</h3>
           <p className="body-small text-text-secondary truncate">
-            {mutualConnections} {t('mutualConnections', { count: mutualConnections })}
+            {matchReason
+              ? matchReason
+              : `${mutualConnections ?? 0} ${t('mutualConnections', { count: mutualConnections ?? 0 })}`}
           </p>
         </div>
       </Link>

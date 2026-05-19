@@ -200,3 +200,56 @@ export interface EraseUserDataResult {
 export interface EraseMyAccountDataData {
   eraseMyAccountData: EraseUserDataResult;
 }
+
+// ============================================================================
+// QUERY: recommendedCommunities / recommendedAssociations (Phase 2)
+// ============================================================================
+
+export interface RecommendedCommunitiesData {
+  recommendedCommunities: RankedFeedPage;
+}
+
+export interface RecommendedAssociationsData {
+  recommendedAssociations: RankedFeedPage;
+}
+
+// ============================================================================
+// QUERY: recommendedPeople (Phase 2 — server-hydrated)
+// ============================================================================
+
+/**
+ * Person profile shape returned inside a `PersonRecommendation`. Mirrors the
+ * gateway's `Profile` GraphQL object — fields are nullable to match the
+ * server-side `{ nullable: true }` annotations.
+ */
+export interface RecommendedPersonProfile {
+  userId: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  avatarUrl?: string | null;
+  headline?: string | null;
+  bio?: string | null;
+  sector?: string | null;
+  countryOfOrigin?: string | null;
+  residenceCountry?: string | null;
+  connectionStatus?: string | null;
+  connectionId?: string | null;
+  isVerified?: boolean | null;
+  verificationBadge?: string | null;
+}
+
+export interface PersonRecommendation {
+  profile: RecommendedPersonProfile;
+  score: number;
+  sharedCommunityCount: number;
+  sharedCommunityNames: string[];
+}
+
+export interface PeopleRecommendationPage {
+  items: PersonRecommendation[];
+  rankingStrategy: string;
+}
+
+export interface RecommendedPeopleData {
+  recommendedPeople: PeopleRecommendationPage;
+}

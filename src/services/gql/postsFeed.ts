@@ -744,6 +744,89 @@ export const JOINED_COMMUNITY_FEED = gql`
 `;
 
 /**
+ * Recommended communities for the home discover rail — Phase 2.
+ *
+ * Returns ranked community ids; the consumer can either reuse the existing
+ * community card with the id (hydrating individually) or pre-batch via
+ * `getCommunityDetails`. Same shape as `recommendedPosts`.
+ */
+export const RECOMMENDED_COMMUNITIES = gql`
+  query RecommendedCommunities($limit: Int, $cursor: String) {
+    recommendedCommunities(limit: $limit, cursor: $cursor) {
+      items {
+        itemId
+        itemType
+        score
+        authorId
+        topics
+        source
+        createdAt
+      }
+      nextCursor
+      rankingStrategy
+      explorationRatio
+    }
+  }
+`;
+
+/**
+ * Recommended associations — Phase 2 sibling of `recommendedCommunities`.
+ */
+export const RECOMMENDED_ASSOCIATIONS = gql`
+  query RecommendedAssociations($limit: Int, $cursor: String) {
+    recommendedAssociations(limit: $limit, cursor: $cursor) {
+      items {
+        itemId
+        itemType
+        score
+        authorId
+        topics
+        source
+        createdAt
+      }
+      nextCursor
+      rankingStrategy
+      explorationRatio
+    }
+  }
+`;
+
+/**
+ * People-you-may-know — Phase 2.
+ *
+ * Server pre-hydrates the `Profile` and resolves `sharedCommunityNames`
+ * so the home sidebar can render "Also in Ghana Embassy, Diaspora Tech"
+ * in a single round-trip.
+ */
+export const RECOMMENDED_PEOPLE = gql`
+  query RecommendedPeople($limit: Int) {
+    recommendedPeople(limit: $limit) {
+      items {
+        profile {
+          userId
+          firstName
+          lastName
+          avatarUrl
+          headline
+          bio
+          sector
+          countryOfOrigin
+          residenceCountry
+          connectionStatus
+          connectionId
+          isVerified
+          verificationBadge
+        }
+        score
+        sharedCommunityCount
+        sharedCommunityNames
+      }
+      rankingStrategy
+    }
+  }
+`;
+
+/**
  * Posts similar to the given post (vector kNN over content embeddings).
  *
  * Returns IDs + ranking metadata only — clients hydrate full posts via `GET_POST`.

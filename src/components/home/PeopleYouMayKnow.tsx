@@ -5,7 +5,8 @@ import PeopleYouMayKnowCard from "../cards/PeopleYouMayKnowCard";
 import { useTranslations } from 'next-intl';
 import { Link } from "@/i18n/navigation";
 import { useQuery } from "@apollo/client/react";
-import { GET_FRIEND_SUGGESTIONS, GetFriendSuggestionsResponse } from "@/services/gql/connection";
+import { RECOMMENDED_PEOPLE } from "@/services/gql/postsFeed";
+import type { RecommendedPeopleData } from "@/services/gql/types/recommendation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
 import { useState, useMemo } from "react";
@@ -30,13 +31,17 @@ export function PeopleYouMayKnow() {
     const t = useTranslations('home');
     const tActions = useTranslations('actions');
     const { addFriend } = useFriendActions();
-    
+
     // Track which user is currently being added
     const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
-    // Query friend suggestions - limit to 3 for homepage
-    const { data, loading, refetch } = useQuery<GetFriendSuggestionsResponse>(
-        GET_FRIEND_SUGGESTIONS,
+    // Phase 2: PYMK is now sourced from recommendation-service via
+    // `recommendedPeople`. The gateway server-hydrates the user `Profile`
+    // and resolves community names for `sharedCommunityIds`, so a single
+    // round-trip carries everything the card needs. The old
+    // `GET_FRIEND_SUGGESTIONS` path (user-service heuristic) is gone.
+    const { data, loading, refetch } = useQuery<RecommendedPeopleData>(
+        RECOMMENDED_PEOPLE,
         {
             variables: { limit: 3 },
             fetchPolicy: 'network-only',
@@ -44,7 +49,11 @@ export function PeopleYouMayKnow() {
     );
 
     const suggestions = useMemo(() => {
-        const list = data?.getFriendSuggestions.suggestions ?? [];
+        const list = data?.recommendedPeople?.items ?? [];
+        // Hide anyone the viewer already has an active relationship with.
+        // The gateway resolver also passes excludeUserIds so already-
+        // accepted connections shouldn't surface in the first place, but
+        // pending_sent / blocked can still arrive from the rec service.
         return list.filter((s) => {
             const st = s.profile.connectionStatus ?? "none";
             return (
@@ -56,21 +65,17 @@ export function PeopleYouMayKnow() {
     }, [data]);
 
     const handleAddFriend = async (userId: string) => {
-        setLoadingUserId(userId); // Set loading state for this specific user
-        
+        setLoadingUserId(userId);
         try {
             await addFriend(userId);
-            // Success toast is handled in the hook
-            
-            // Refetch suggestions after adding a friend to update the list
+            // Success toast handled in the hook.
             setTimeout(() => {
                 refetch();
-            }, 500); // Small delay to allow backend to update
+            }, 500);
         } catch (error) {
             console.error('Error adding friend:', error);
-            // Error toast is handled in the hook
         } finally {
-            setLoadingUserId(null); // Clear loading state
+            setLoadingUserId(null);
         }
     };
 
@@ -80,7 +85,6 @@ export function PeopleYouMayKnow() {
                 <p className="caption-large">{t('peopleYouMayKnow')}</p>
                 <div className="space-y-[1.6rem]"> {/* 16px equivalent */}
                     {loading ? (
-                        // Show 5 skeleton loaders while loading
                         <>
                             <FriendSuggestionSkeleton />
                             <FriendSuggestionSkeleton />
@@ -89,23 +93,32 @@ export function PeopleYouMayKnow() {
                             <FriendSuggestionSkeleton />
                         </>
                     ) : suggestions.length === 0 ? (
-                        // Show empty state
                         <p className="text-text-secondary text-sm text-center py-4">
                             {t('noSuggestions') || 'No friend suggestions available'}
                         </p>
                     ) : (
-                        // Show actual suggestions
-                        suggestions.map((suggestion) => (
-                            <PeopleYouMayKnowCard
-                                key={suggestion.profile.userId}
-                                userId={suggestion.profile.userId}
-                                profileImage={suggestion.profile.avatarUrl }
-                                name={`${suggestion.profile.firstName} ${suggestion.profile.lastName}`}
-                                mutualConnections={suggestion.mutualConnectionsCount}
-                                onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
-                                isLoading={loadingUserId === suggestion.profile.userId}
-                            />
-                        ))
+                        suggestions.map((suggestion) => {
+                            // Match reason: shared community names, joined with ", ".
+                            // Falls back to a generic copy if the candidate carries
+                            // none (rare — usually means the recommender picked them
+                            // from topic-affinity, not co-membership).
+                            const sharedNames = suggestion.sharedCommunityNames ?? [];
+                            const matchReason = sharedNames.length
+                                ? `Also in ${sharedNames.join(', ')}`
+                                : (t('suggestedForYou') || 'Suggested for you');
+                            const displayName = `${suggestion.profile.firstName ?? ''} ${suggestion.profile.lastName ?? ''}`.trim() || 'Member';
+                            return (
+                                <PeopleYouMayKnowCard
+                                    key={suggestion.profile.userId}
+                                    userId={suggestion.profile.userId}
+                                    profileImage={suggestion.profile.avatarUrl ?? ''}
+                                    name={displayName}
+                                    matchReason={matchReason}
+                                    onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
+                                    isLoading={loadingUserId === suggestion.profile.userId}
+                                />
+                            );
+                        })
                     )}
                 </div>
             </div>

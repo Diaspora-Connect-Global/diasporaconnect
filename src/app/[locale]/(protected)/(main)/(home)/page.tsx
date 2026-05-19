@@ -8,15 +8,23 @@ import { Virtuoso } from 'react-virtuoso';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
-import { DISCOVER_COMMUNITIES, REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
+import { REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, GET_COMMUNITY } from '@/services/gql/community';
+import { GET_ASSOCIATION } from '@/services/gql/associations';
 import {
   ADD_ENGAGEMENT,
   REMOVE_ENGAGEMENT,
   CREATE_COMMENT,
+  RECOMMENDED_COMMUNITIES,
+  RECOMMENDED_ASSOCIATIONS,
   AddEngagementData,
   RemoveEngagementData,
   CreateCommentData
 } from '@/services/gql/postsFeed';
+import type {
+  RecommendedCommunitiesData,
+  RecommendedAssociationsData,
+} from '@/services/gql/types/recommendation';
+import { useApolloClient } from '@apollo/client/react';
 import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
 import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
@@ -32,24 +40,47 @@ import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
 
-// Type definitions for better type safety
-interface DiscoverCommunitiesData {
-  discoverCommunities: {
-    communities: Array<{
-      id: string;
-      name: string;
-      description?: string;
-      visibility: string;
-      avatarUrl?: string;
-      memberCount?: number;
-      membershipStatus?: string;
-      communityType?: {
-        name: string;
-        isEmbassy: boolean;
-      };
-    }>;
-    total: number;
-  };
+// Type definitions for better type safety.
+//
+// Phase 2: the home discover rails are now sourced from the
+// recommendation-service via `recommendedCommunities` / `recommendedAssociations`,
+// which return ranked ids only. We hydrate each id with `getCommunity` /
+// `getAssociation` for the card shape below. (Mirrors the post-feed
+// hydration pattern in `useFeed.hydrateRankedItems`.)
+interface HydratedCommunityCard {
+  id: string;
+  name: string;
+  description?: string;
+  visibility: string;
+  avatarUrl?: string;
+  memberCount?: number;
+  membershipStatus?: string;
+  communityType?: {
+    name: string;
+    isEmbassy: boolean;
+  } | null;
+}
+
+interface HydratedAssociationCard {
+  id: string;
+  name: string;
+  description?: string;
+  visibility: string;
+  avatarUrl?: string;
+  memberCount?: number;
+  membershipStatus?: string;
+  associationType?: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+interface GetCommunityQueryData {
+  getCommunity: HydratedCommunityCard | null;
+}
+
+interface GetAssociationQueryData {
+  getAssociation: HydratedAssociationCard | null;
 }
 
 interface UserProfile {
@@ -108,17 +139,120 @@ export default function Home() {
   // resolve against; prev/next just step through it on click.
   const [modalState, setModalState] = useState<{ postId: string; mediaIndex: number } | null>(null);
 
-  // Fetch communities
-  const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<DiscoverCommunitiesData>(
-    DISCOVER_COMMUNITIES,
-    {
-      variables: {
-        includeRecommended: true,
-        limit: 20,
-        offset: 0
-      }
+  // ─── Discover rails (Phase 2: rec-service-backed) ──────────────────────────
+  //
+  // Both rails are a two-step hydration: fetch ranked ids from the
+  // recommendation gateway query, then resolve each id to a full card via
+  // `getCommunity` / `getAssociation`. Same pattern as the post-feed
+  // hydration in `useFeed`. The previous `discoverCommunities` query is
+  // replaced entirely.
+  const apolloClient = useApolloClient();
+
+  const [communities, setCommunities] = useState<HydratedCommunityCard[]>([]);
+  const [associations, setAssociations] = useState<HydratedAssociationCard[]>([]);
+  const [discoverLoading, setDiscoverLoading] = useState(true);
+  const [associationsLoading, setAssociationsLoading] = useState(true);
+
+  const { data: recCommunitiesData, refetch: refetchCommunitiesRanked } =
+    useQuery<RecommendedCommunitiesData>(RECOMMENDED_COMMUNITIES, {
+      variables: { limit: 20 },
+      fetchPolicy: 'cache-and-network',
+    });
+
+  const { data: recAssociationsData, refetch: refetchAssociationsRanked } =
+    useQuery<RecommendedAssociationsData>(RECOMMENDED_ASSOCIATIONS, {
+      variables: { limit: 20 },
+      fetchPolicy: 'cache-and-network',
+    });
+
+  // Hydrate communities by id, preserving the recommender's order.
+  useEffect(() => {
+    const items = recCommunitiesData?.recommendedCommunities?.items;
+    if (!items) return;
+    if (items.length === 0) {
+      setCommunities([]);
+      setDiscoverLoading(false);
+      return;
     }
-  );
+    let cancelled = false;
+    setDiscoverLoading(true);
+    void Promise.allSettled(
+      items.map((it) =>
+        apolloClient.query<GetCommunityQueryData>({
+          query: GET_COMMUNITY,
+          variables: { id: it.itemId },
+          fetchPolicy: 'cache-first',
+          errorPolicy: 'ignore',
+        })
+      )
+    ).then((settled) => {
+      if (cancelled) return;
+      const byId = new Map<string, HydratedCommunityCard>();
+      settled.forEach((res) => {
+        if (res.status !== 'fulfilled') return;
+        const raw = res.value.data?.getCommunity;
+        if (raw?.id) byId.set(raw.id, raw);
+      });
+      // Preserve recommender order; drop any ids that failed to resolve.
+      const ordered: HydratedCommunityCard[] = [];
+      for (const it of items) {
+        const card = byId.get(it.itemId);
+        if (card) ordered.push(card);
+      }
+      setCommunities(ordered);
+      setDiscoverLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [recCommunitiesData, apolloClient]);
+
+  // Hydrate associations by id, preserving the recommender's order.
+  useEffect(() => {
+    const items = recAssociationsData?.recommendedAssociations?.items;
+    if (!items) return;
+    if (items.length === 0) {
+      setAssociations([]);
+      setAssociationsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setAssociationsLoading(true);
+    void Promise.allSettled(
+      items.map((it) =>
+        apolloClient.query<GetAssociationQueryData>({
+          query: GET_ASSOCIATION,
+          variables: { id: it.itemId },
+          fetchPolicy: 'cache-first',
+          errorPolicy: 'ignore',
+        })
+      )
+    ).then((settled) => {
+      if (cancelled) return;
+      const byId = new Map<string, HydratedAssociationCard>();
+      settled.forEach((res) => {
+        if (res.status !== 'fulfilled') return;
+        const raw = res.value.data?.getAssociation;
+        if (raw?.id) byId.set(raw.id, raw);
+      });
+      const ordered: HydratedAssociationCard[] = [];
+      for (const it of items) {
+        const card = byId.get(it.itemId);
+        if (card) ordered.push(card);
+      }
+      setAssociations(ordered);
+      setAssociationsLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [recAssociationsData, apolloClient]);
+
+  // Helper: re-fetch both ranked queries after a membership state change.
+  const refetchCommunities = useCallback(() => {
+    void refetchCommunitiesRanked();
+    void refetchAssociationsRanked();
+  }, [refetchCommunitiesRanked, refetchAssociationsRanked]);
 
   // Feed with infinite scroll
   const {
@@ -347,10 +481,10 @@ export default function Home() {
       el.removeEventListener('scroll', checkScroll);
       window.removeEventListener('resize', checkScroll);
     };
-  }, [discoverData]);
+  }, [communities, associations]);
 
-  const communities = discoverData?.discoverCommunities?.communities || [];
   const hasCommunities = communities.length > 0;
+  const hasAssociations = associations.length > 0;
 
   const hasPosts = posts.length > 0;
 
@@ -551,6 +685,67 @@ export default function Home() {
             </>
           )}
         </div>
+
+        {/* Associations you may like — Phase 2 rail.
+            Same card pattern as the communities rail; data sourced from
+            `recommendedAssociations` and hydrated via `getAssociation`.
+            Hidden when the recommender returns no associations (no
+            useless empty rail on a brand-new account). */}
+        {(associationsLoading || hasAssociations) && (
+          <>
+            <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
+              <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">
+                {t('associationsYouMayLike') || 'Associations you may like'}
+              </h2>
+              <Link href="/association" prefetch={false} className="flex-shrink-0">
+                <p className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium text-text-brand whitespace-nowrap">
+                  {t('seeall')}
+                </p>
+              </Link>
+            </div>
+
+            <div className="relative mb-6">
+              {associationsLoading && (
+                <div className="flex gap-2 overflow-hidden pb-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="flex-none w-[280px]">
+                      <div className="h-32 bg-surface-subtle rounded-lg animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!associationsLoading && hasAssociations && (
+                <div
+                  className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 shrink-0
+                             snap-x snap-mandatory"
+                  style={{ scrollBehavior: 'smooth' }}
+                >
+                  {associations.map((association) => (
+                    <div key={association.id} className="flex-none snap-start">
+                      <CommunityCardVariant2
+                        icon={association.avatarUrl}
+                        title={association.name}
+                        members={association?.memberCount || 0}
+                        onButtonClick={() => handleJoinClick(association.id, association.name)}
+                        buttonText={
+                          association.membershipStatus === 'MEMBER' ||
+                          joinedCommunities.has(association.id)
+                            ? 'Joined'
+                            : t('joincommunity')
+                        }
+                        isDisabled={
+                          association.membershipStatus === 'MEMBER' ||
+                          joinedCommunities.has(association.id)
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Feed Posts - Takes remaining space */}
         <div className="space-y-2">
