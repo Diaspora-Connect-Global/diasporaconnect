@@ -276,6 +276,9 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
           });
         });
       } else if (!isSearchingOnSuggestedTab && suggestions?.recommendedPeople?.items) {
+        // Backend (`recommendedPeople` gateway resolver) is responsible
+        // for excluding already-related users via `excludeUserIds`. We
+        // don't second-guess that here.
         suggestions.recommendedPeople.items.forEach((suggestion) => {
           const profile = suggestion.profile;
           const connectionStatus = profile.connectionStatus ?? "none";

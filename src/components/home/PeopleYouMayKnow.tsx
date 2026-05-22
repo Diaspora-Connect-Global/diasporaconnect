@@ -9,7 +9,7 @@ import { RECOMMENDED_PEOPLE } from "@/services/gql/postsFeed";
 import type { RecommendedPeopleData } from "@/services/gql/types/recommendation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { pymkMatchReason } from "@/lib/pymkMatchReason";
 
 // Loading skeleton for friend suggestions
@@ -49,21 +49,12 @@ export function PeopleYouMayKnow() {
         }
     );
 
-    const suggestions = useMemo(() => {
-        const list = data?.recommendedPeople?.items ?? [];
-        // Hide anyone the viewer already has an active relationship with.
-        // The gateway resolver also passes excludeUserIds so already-
-        // accepted connections shouldn't surface in the first place, but
-        // pending_sent / blocked can still arrive from the rec service.
-        return list.filter((s) => {
-            const st = s.profile.connectionStatus ?? "none";
-            return (
-                st !== "pending_sent" &&
-                st !== "connected" &&
-                st !== "blocked"
-            );
-        });
-    }, [data]);
+    // Connection-status filtering is the gateway's responsibility — its
+    // `recommendedPeople` resolver passes `excludeUserIds` (accepted +
+    // pending) to the rec-service so already-related users never enter
+    // the candidate pool. We deliberately don't double-filter on the
+    // client here: doing so would hide a backend bug rather than fix it.
+    const suggestions = data?.recommendedPeople?.items ?? [];
 
     const handleAddFriend = async (userId: string) => {
         setLoadingUserId(userId);

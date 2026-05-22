@@ -61,7 +61,16 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         // Phase 3 PYMK unification — refresh the recommendation-service
         // feed (was `GET_FRIEND_SUGGESTIONS` against the retired
         // user-service heuristic). Same surface, same trigger points.
-        queries.push({ query: RECOMMENDED_PEOPLE, variables: { limit: 20 } });
+        //
+        // Refetch BY OPERATION NAME (string), not by `{query, variables}`,
+        // so EVERY active `RecommendedPeople` observer is refreshed —
+        // the home widget uses `limit: 3`, FriendListModal uses
+        // `limit: 10`, and the legacy refetch path used `limit: 20`.
+        // Each combination is a separate Apollo cache entry; passing only
+        // `{query, variables: {limit: 20}}` would invalidate just one of
+        // the three. The operation-name form covers all of them in a
+        // single entry.
+        queries.push('RecommendedPeople' as unknown as { query: typeof RECOMMENDED_PEOPLE; variables: { limit: number } });
         
         // If actively searching, also refetch search results
         if (currentIsSearching && currentSearchQuery.length > 0) {
