@@ -16,7 +16,7 @@ interface CommunityCardVariant2Props {
     description?: string;
     onButtonClick?: () => void;
     onCardClick?: () => void;
-    icon: React.ReactNode;
+    icon?: string;
     members: number;
     buttonText: string;
     isDisabled?: boolean;
@@ -49,7 +49,7 @@ export default function CommunityCardVariant2({
                         <Image
                             width={64}
                             height={64}
-                            src={`${icon ?? "/GLOBE.png" }`}
+                            src={icon || "/GLOBE.png"}
                             alt="Profile"
                             className="rounded-full object-contain w-full h-full"
                         />

@@ -31,7 +31,7 @@ import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
@@ -128,6 +128,16 @@ interface Post {
     hasShared: boolean;
   };
 }
+
+// Discriminated union the feed's Virtuoso instance iterates. Posts and the
+// recommended-associations rail are virtualised side-by-side so a single
+// scroll viewport drives both — `computeItemKey` and `itemContent` branch on
+// `kind` to keep React happy across re-orders.
+type FeedItem =
+  | { kind: 'post'; post: ApiPost }
+  | { kind: 'associationsRail' };
+
+const ASSOCIATIONS_RAIL_INDEX = 3;
 
 export default function Home() {
   const t = useTranslations('community');
@@ -488,6 +498,19 @@ export default function Home() {
 
   const hasPosts = posts.length > 0;
 
+  // Splice the associations rail into the virtualised feed at a fixed depth so
+  // recs surface mid-scroll without dominating the column. Only injected when
+  // the recommender actually returned associations — no skeleton-only row on
+  // a brand-new account where the rail would just be empty noise.
+  const feedItems = useMemo<FeedItem[]>(() => {
+    const items: FeedItem[] = posts.map((post) => ({ kind: 'post', post }));
+    if (hasAssociations && items.length > 0) {
+      const insertAt = Math.min(ASSOCIATIONS_RAIL_INDEX, items.length);
+      items.splice(insertAt, 0, { kind: 'associationsRail' });
+    }
+    return items;
+  }, [posts, hasAssociations]);
+
   // Helper function to get profile data based on author type
   // Updated to handle uppercase author types from API
   const getProfileData = (post: ApiPost) => {
@@ -597,7 +620,9 @@ export default function Home() {
         ref={setFeedScrollRef}
         className={FEED_COLUMN_CLASS}
       >
-        {/* Discover Section */}
+        {/* Discover Section — collapses entirely when the recommender has nothing to show. */}
+        {(discoverLoading || hasCommunities) && (
+        <>
         <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
           <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">{t('discover')}</h2>
           <Link href="/community" prefetch={false} className="flex-shrink-0">
@@ -615,15 +640,6 @@ export default function Home() {
                   <div className="h-32 bg-surface-subtle rounded-lg animate-pulse" />
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!discoverLoading && !hasCommunities && (
-            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-              <p className="body-medium text-text-secondary mb-2">
-                {t('noCommunitiesFound')}
-              </p>
             </div>
           )}
 
@@ -685,66 +701,7 @@ export default function Home() {
             </>
           )}
         </div>
-
-        {/* Associations you may like — Phase 2 rail.
-            Same card pattern as the communities rail; data sourced from
-            `recommendedAssociations` and hydrated via `getAssociation`.
-            Hidden when the recommender returns no associations (no
-            useless empty rail on a brand-new account). */}
-        {(associationsLoading || hasAssociations) && (
-          <>
-            <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
-              <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">
-                {t('associationsYouMayLike') || 'Associations you may like'}
-              </h2>
-              <Link href="/association" prefetch={false} className="flex-shrink-0">
-                <p className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium text-text-brand whitespace-nowrap">
-                  {t('seeall')}
-                </p>
-              </Link>
-            </div>
-
-            <div className="relative mb-6">
-              {associationsLoading && (
-                <div className="flex gap-2 overflow-hidden pb-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex-none w-[280px]">
-                      <div className="h-32 bg-surface-subtle rounded-lg animate-pulse" />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {!associationsLoading && hasAssociations && (
-                <div
-                  className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 shrink-0
-                             snap-x snap-mandatory"
-                  style={{ scrollBehavior: 'smooth' }}
-                >
-                  {associations.map((association) => (
-                    <div key={association.id} className="flex-none snap-start">
-                      <CommunityCardVariant2
-                        icon={association.avatarUrl}
-                        title={association.name}
-                        members={association?.memberCount || 0}
-                        onButtonClick={() => handleJoinClick(association.id, association.name)}
-                        buttonText={
-                          association.membershipStatus === 'MEMBER' ||
-                          joinedCommunities.has(association.id)
-                            ? 'Joined'
-                            : t('joincommunity')
-                        }
-                        isDisabled={
-                          association.membershipStatus === 'MEMBER' ||
-                          joinedCommunities.has(association.id)
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
+        </>
         )}
 
         {/* Feed Posts - Takes remaining space */}
@@ -801,11 +758,13 @@ export default function Home() {
               the custom scroll parent. */}
           {hasPosts && (
             <Virtuoso
-              data={posts}
+              data={feedItems}
               customScrollParent={feedScrollEl ?? undefined}
               endReached={handleEndReached}
               increaseViewportBy={{ top: 0, bottom: 600 }}
-              computeItemKey={(_, post) => post.id}
+              computeItemKey={(_, item) =>
+                item.kind === 'post' ? item.post.id : 'associations-rail'
+              }
               components={{
                 Footer: feedLoadingMore
                   ? () => (
@@ -816,7 +775,53 @@ export default function Home() {
                     )
                   : undefined,
               }}
-              itemContent={(_postIndex, post) => {
+              itemContent={(_index, item) => {
+                if (item.kind === 'associationsRail') {
+                  return (
+                    <div className="mb-2">
+                      <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
+                        <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">
+                          {t('associationsYouMayLike') || 'Associations you may like'}
+                        </h2>
+                        <Link href="/association" prefetch={false} className="flex-shrink-0">
+                          <p className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium text-text-brand whitespace-nowrap">
+                            {t('seeall')}
+                          </p>
+                        </Link>
+                      </div>
+                      <div
+                        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2
+                                   snap-x snap-mandatory"
+                        style={{ scrollBehavior: 'smooth' }}
+                      >
+                        {associations.map((association) => (
+                          <div key={association.id} className="flex-none snap-start">
+                            <CommunityCardVariant2
+                              icon={association.avatarUrl}
+                              title={association.name}
+                              members={association?.memberCount || 0}
+                              onButtonClick={() =>
+                                handleJoinClick(association.id, association.name)
+                              }
+                              buttonText={
+                                association.membershipStatus === 'MEMBER' ||
+                                joinedCommunities.has(association.id)
+                                  ? 'Joined'
+                                  : t('joincommunity')
+                              }
+                              isDisabled={
+                                association.membershipStatus === 'MEMBER' ||
+                                joinedCommunities.has(association.id)
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                const post = item.post;
                 const profileData = getProfileData(post);
                 return (
                   <ImpressionTracker
