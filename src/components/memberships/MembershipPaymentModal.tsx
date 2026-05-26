@@ -174,6 +174,30 @@ export function MembershipPaymentModal({
       });
       setRequestResult(envelope);
 
+      // BE returns a stale PENDING row when the user already has a
+      // pending request for this entity — short-circuits the create
+      // path with `requiresPayment: false` and a message explaining
+      // it. Without this branch we'd silently jump to the "done"
+      // success state for a paid entity that the user never paid for.
+      // Detect the stuck state by paid-entity + PENDING + !clientSecret
+      // and surface the BE message so the user can act on it.
+      const isPaidEntity =
+        entity.access.paymentType === 'ONE_TIME' ||
+        entity.access.paymentType === 'SUBSCRIPTION';
+      if (
+        isPaidEntity &&
+        !envelope.requiresPayment &&
+        envelope.status === 'PENDING' &&
+        !envelope.clientSecret
+      ) {
+        const stuckMessage =
+          envelope.message ||
+          t('errors.alreadyPending');
+        toast.error(stuckMessage);
+        setPlanError(stuckMessage);
+        return;
+      }
+
       if (!envelope.requiresPayment) {
         onSuccess(envelope.membershipId);
         setStep('done');

@@ -1554,7 +1554,8 @@
                 "cardDeclined": "Kaart geweigerd. Probeer een andere kaart.",
                 "paystackCancelled": "Betaling geannuleerd. Je kunt het altijd opnieuw proberen.",
                 "confirmFailed": "We konden je betaling niet bevestigen. Probeer het opnieuw.",
-                "noSavedCard": "Geen opgeslagen kaart gevonden. Voeg er een toe in je wallet om met kaart te betalen, of gebruik mobile money."
+                "noSavedCard": "Geen opgeslagen kaart gevonden. Voeg er een toe in je wallet om met kaart te betalen, of gebruik mobile money.",
+                "alreadyPending": "Je hebt al een openstaande aanvraag hiervoor. Annuleer de bestaande aanvraag voordat je het opnieuw probeert."
             }
         }
     },

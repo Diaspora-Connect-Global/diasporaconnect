@@ -1554,7 +1554,8 @@
                 "cardDeclined": "Card was declined. Please try another card.",
                 "paystackCancelled": "Payment cancelled. You can retry anytime.",
                 "confirmFailed": "We couldn't confirm your payment. Please try again.",
-                "noSavedCard": "Keine gespeicherte Karte gefunden. Fügen Sie eine im Wallet hinzu, um per Karte zu zahlen, oder nutzen Sie Mobile Money."
+                "noSavedCard": "Keine gespeicherte Karte gefunden. Fügen Sie eine im Wallet hinzu, um per Karte zu zahlen, oder nutzen Sie Mobile Money.",
+                "alreadyPending": "Sie haben bereits eine offene Anfrage hierfür. Brechen Sie die bestehende Anfrage ab, bevor Sie es erneut versuchen."
             }
         }
     },
