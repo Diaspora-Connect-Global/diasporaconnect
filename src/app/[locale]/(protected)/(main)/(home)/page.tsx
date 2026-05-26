@@ -469,10 +469,18 @@ export default function Home() {
   }, [createComment, updatePostCounts]);
 
   // --- Horizontal Scroll with Smart Buttons ---
+  // One ref-set per rail (communities + associations) so each rail has
+  // its own scroll state. Same shape as before for the communities rail;
+  // the second triplet drives the associations rail's chevron buttons.
+  const SCROLL_STEP = 300;
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const SCROLL_STEP = 300;
+
+  const associationsScrollRef = useRef<HTMLDivElement>(null);
+  const [assocCanScrollLeft, setAssocCanScrollLeft] = useState(false);
+  const [assocCanScrollRight, setAssocCanScrollRight] = useState(true);
 
   const scrollLeft = () => {
     scrollRef.current?.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
@@ -482,24 +490,53 @@ export default function Home() {
     scrollRef.current?.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+  const scrollAssocLeft = () => {
+    associationsScrollRef.current?.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
+  };
 
+  const scrollAssocRight = () => {
+    associationsScrollRef.current?.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
+  };
+
+  // Wires the smart-button state to a scroll container — fires on scroll
+  // and on window resize. Encapsulates the "atLeft/atRight" math so both
+  // rails consume it identically without duplicating the listener logic.
+  const wireScrollState = (
+    ref: React.RefObject<HTMLDivElement | null>,
+    setLeft: (v: boolean) => void,
+    setRight: (v: boolean) => void,
+  ) => {
+    const el = ref.current;
+    if (!el) return () => {};
     const checkScroll = () => {
       const atLeft = el.scrollLeft <= 2;
       const atRight = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
-      setCanScrollLeft(!atLeft);
-      setCanScrollRight(!atRight);
+      setLeft(!atLeft);
+      setRight(!atRight);
     };
-
     checkScroll();
     el.addEventListener('scroll', checkScroll);
     window.addEventListener('resize', checkScroll);
-
     return () => {
       el.removeEventListener('scroll', checkScroll);
       window.removeEventListener('resize', checkScroll);
+    };
+  };
+
+  useEffect(() => {
+    const cleanupCommunities = wireScrollState(
+      scrollRef,
+      setCanScrollLeft,
+      setCanScrollRight,
+    );
+    const cleanupAssociations = wireScrollState(
+      associationsScrollRef,
+      setAssocCanScrollLeft,
+      setAssocCanScrollRight,
+    );
+    return () => {
+      cleanupCommunities();
+      cleanupAssociations();
     };
   }, [communities, associations]);
 
@@ -801,7 +838,7 @@ export default function Home() {
               itemContent={(_index, item) => {
                 if (item.kind === 'associationsRail') {
                   return (
-                    <div className="mb-2">
+                    <div className="mb-2 relative">
                       <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
                         <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">
                           {t('associationsYouMayLike') || 'Associations you may like'}
@@ -812,12 +849,40 @@ export default function Home() {
                           </p>
                         </Link>
                       </div>
+                      {/* Chevron buttons — only render when the rail can scroll
+                          in the corresponding direction. Same look + behavior as
+                          the communities rail above. */}
+                      {assocCanScrollLeft && (
+                        <ButtonType3
+                          onClick={scrollAssocLeft}
+                          className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+                                     flex h-10 w-10 items-center justify-center
+                                     rounded-full bg-surface-default/80 shadow-md
+                                     transition-colors hover:bg-surface-subtle border-0 min-w-0"
+                          aria-label={tCommon('scrollLeft')}
+                        >
+                          <ChevronLeftIcon className="h-6 w-6 text-primary" />
+                        </ButtonType3>
+                      )}
+                      {assocCanScrollRight && (
+                        <ButtonType3
+                          onClick={scrollAssocRight}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+                                     flex h-10 w-10 items-center justify-center
+                                     rounded-full bg-surface-default/80 shadow-md
+                                     transition-colors hover:bg-surface-subtle border-0 min-w-0"
+                          aria-label={tCommon('scrollRight')}
+                        >
+                          <ChevronRightIcon className="h-6 w-6 text-primary" />
+                        </ButtonType3>
+                      )}
                       {/* Outer container handles horizontal scroll. Inner
                           track is `w-fit mx-auto` so it centers when the
                           cards fit in the column AND falls back to the
                           left edge (with native overflow-scroll) when the
                           card set is wider — best of both worlds. */}
                       <div
+                        ref={associationsScrollRef}
                         className="overflow-x-auto scrollbar-hide pb-2"
                         style={{ scrollBehavior: 'smooth' }}
                       >
