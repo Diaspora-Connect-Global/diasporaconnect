@@ -813,7 +813,7 @@ export default function Home() {
                         </Link>
                       </div>
                       <div
-                        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2
+                        className="flex gap-2 justify-center overflow-x-auto scrollbar-hide pb-2
                                    snap-x snap-mandatory"
                         style={{ scrollBehavior: 'smooth' }}
                       >
