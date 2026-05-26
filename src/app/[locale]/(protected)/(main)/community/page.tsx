@@ -261,35 +261,62 @@ export default function Community() {
         await handleJoinCommunity(id, name);
     };
 
-    // Filtered discovery list (uses SEARCH_COMMUNITIES so payment fields are available).
-    // Falls back to legacy DISCOVER_COMMUNITIES when search is empty so we don't regress
-    // existing recommendations behavior.
+    // "Discover more communities" prefers the PERSONALISED list from
+    // DISCOVER_COMMUNITIES (community-service.discoverCommunities — does
+    // viewer-aware scoring: country / friends-in-community / interests /
+    // trending / freshness). SEARCH_COMMUNITIES is used only when the
+    // personalised result is empty so we never render an empty section —
+    // and as a source for the richer payment fields (paymentType /
+    // priceAmount / priceCurrency) which DISCOVER doesn't currently carry.
     const searchedCommunities = useMemo(
         () => searchData?.searchCommunities?.communities ?? [],
         [searchData],
     );
-    const legacyCommunities = useMemo(
+    const personalisedCommunities = useMemo(
         () => discoverData?.discoverCommunities?.communities ?? [],
         [discoverData],
     );
 
     const renderList: SearchCommunityItem[] = useMemo(() => {
-        if (searchedCommunities.length === 0 && legacyCommunities.length > 0) {
-            return legacyCommunities.map((c) => ({
-                id: c.id,
-                name: c.name,
-                description: c.description,
-                memberCount: c.memberCount,
-                avatarUrl: c.avatarUrl,
-                visibility: (c.visibility as CommunityVisibility) ?? null,
-                paymentType: null,
-                priceAmount: null,
-                priceCurrency: null,
-                membershipStatus: c.membershipStatus,
-            }));
+        if (personalisedCommunities.length > 0) {
+            // Stitch in payment fields from the SEARCH result when we have
+            // them — the personalised list doesn't expose paymentType /
+            // priceAmount yet, but the access badges + paid join flow rely
+            // on those values to render correctly.
+            const paymentById = new Map(
+                searchedCommunities.map((c) => [
+                    c.id,
+                    {
+                        paymentType: c.paymentType ?? null,
+                        priceAmount: c.priceAmount ?? null,
+                        priceCurrency: c.priceCurrency ?? null,
+                    },
+                ]),
+            );
+            return personalisedCommunities.map((c) => {
+                const pay = paymentById.get(c.id) ?? {
+                    paymentType: null,
+                    priceAmount: null,
+                    priceCurrency: null,
+                };
+                return {
+                    id: c.id,
+                    name: c.name,
+                    description: c.description,
+                    memberCount: c.memberCount,
+                    avatarUrl: c.avatarUrl,
+                    visibility: (c.visibility as CommunityVisibility) ?? null,
+                    paymentType: pay.paymentType,
+                    priceAmount: pay.priceAmount,
+                    priceCurrency: pay.priceCurrency,
+                    membershipStatus: c.membershipStatus,
+                };
+            });
         }
+        // Fallback: personalised was empty (e.g. recommender warming up) —
+        // show the search catalog rather than an empty state.
         return searchedCommunities;
-    }, [searchedCommunities, legacyCommunities]);
+    }, [personalisedCommunities, searchedCommunities]);
 
     const visibleCommunities = useMemo(
         () =>
