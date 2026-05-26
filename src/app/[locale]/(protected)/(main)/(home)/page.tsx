@@ -8,7 +8,6 @@ import { Virtuoso } from 'react-virtuoso';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { NewPostsBanner } from '@/components/home/NewPostsBanner';
-import { CategoryBadge } from '@/components/home/CategoryBadge';
 import { useUnseenFeedCount } from '@/hooks/useUnseenFeedCount';
 import { Link } from '@/i18n/navigation';
 import { REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, GET_COMMUNITY } from '@/services/gql/community';
@@ -856,13 +855,9 @@ export default function Home() {
                     className="mb-2"
                   >
                     <div id={`feed-post-${post.id}`}>
-                      {post.categories && post.categories.length > 0 && (
-                        <div className="pl-3 pt-2">
-                          <CategoryBadge category={post.categories[0]} />
-                        </div>
-                      )}
                       <FeedCardWithReply
                         postId={post.id}
+                        aiCategory={post.categories?.[0]}
                         profileImage={profileData.avatar}
                         profileName={profileData.name}
                         authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}

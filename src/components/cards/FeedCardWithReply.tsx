@@ -5,6 +5,7 @@ import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge, type Tier } from "@/components/custom/userBadge";
+import { CategoryBadge } from "@/components/home/CategoryBadge";
 import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
@@ -53,6 +54,14 @@ interface FeedCardProps {
     authorEntityType?: 'COMMUNITY' | 'ASSOCIATION' | 'USER' | 'ORG' | string;
     profileTier?: Tier;
     category: string;
+    /**
+     * AI-classified category (from ai-service). Shown as a colored
+     * pill at the top of the card via `<CategoryBadge>`. Hidden when
+     * undefined / empty — legacy or in-flight posts never show a
+     * placeholder. Distinct from `category` above, which is the
+     * legacy author-type meta text rendered next to the date.
+     */
+    aiCategory?: string;
     postDate: string;
     createdAt?: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
@@ -135,6 +144,7 @@ function FeedCardWithReplyInner({
     authorEntityType,
     profileTier,
     category,
+    aiCategory,
     postDate,
     createdAt,
     visibility,
@@ -1341,6 +1351,14 @@ function FeedCardWithReplyInner({
     return (
         <>
             <div className="w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
+                {/* AI category pill — only rendered when the post has been
+                    classified. Sits at the top-left of the card, inside the
+                    surface so it scrolls with the card content. */}
+                {aiCategory && (
+                    <div className="mb-3">
+                        <CategoryBadge category={aiCategory} />
+                    </div>
+                )}
                 {/* Header */}
                 <div className="flex items-center justify-between mb-[1rem] gap-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
