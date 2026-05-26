@@ -812,11 +812,16 @@ export default function Home() {
                           </p>
                         </Link>
                       </div>
+                      {/* Outer container handles horizontal scroll. Inner
+                          track is `w-fit mx-auto` so it centers when the
+                          cards fit in the column AND falls back to the
+                          left edge (with native overflow-scroll) when the
+                          card set is wider — best of both worlds. */}
                       <div
-                        className="flex gap-2 justify-center overflow-x-auto scrollbar-hide pb-2
-                                   snap-x snap-mandatory"
+                        className="overflow-x-auto scrollbar-hide pb-2"
                         style={{ scrollBehavior: 'smooth' }}
                       >
+                        <div className="flex gap-2 w-fit mx-auto snap-x snap-mandatory">
                         {associations.map((association) => (
                           <div key={association.id} className="flex-none snap-start">
                             <CommunityCardVariant2
@@ -840,6 +845,7 @@ export default function Home() {
                             />
                           </div>
                         ))}
+                        </div>
                       </div>
                     </div>
                   );
