@@ -195,6 +195,23 @@ export function MembershipPaymentModal({
     }
   };
 
+  // Auto-advance Step 1 for one-time payments — there's nothing to pick
+  // (no subscription period), so the "Choose your plan" intermediate step
+  // is pure noise. Matches paid-events, which has no equivalent step at
+  // all. For SUBSCRIPTION entities we still show Step 1 so the user can
+  // pick monthly/yearly.
+  useEffect(() => {
+    if (!open) return;
+    if (step !== 'plan') return;
+    if (isSubscription) return;
+    if (planSubmitting) return;
+    if (requestResult) return; // already fired (e.g. coming back from pay step)
+    void handleContinue();
+    // handleContinue is stable per render; deps intentionally minimal to
+    // avoid re-firing once it transitions step → 'pay'.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, step, isSubscription, planSubmitting, requestResult]);
+
   const handlePaidSuccess = (membershipId: string) => {
     onSuccess(membershipId);
     setStep('done');
