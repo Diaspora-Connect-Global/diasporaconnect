@@ -14,6 +14,16 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Next.js inlines NEXT_PUBLIC_* env vars into the client JS bundle at
+# BUILD time — they have to be present here, not at Cloud Run runtime.
+# Each var: declare an ARG (passed via --build-arg from cloudbuild.yaml),
+# then promote it to ENV so `npm run build` picks it up.
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+ARG NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=""
+ENV NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=$NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+
 RUN npm run build
 
 # Production image, copy all the files and run next

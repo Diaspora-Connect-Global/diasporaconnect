@@ -1,8 +1,14 @@
 steps:
-  # Build the Docker image
+  # Build the Docker image. NEXT_PUBLIC_* env vars MUST be passed as
+  # --build-arg here (not as Cloud Run runtime env) because Next.js inlines
+  # them into the client JS bundle at build time. The actual values are
+  # supplied via Cloud Build substitutions (set on the trigger / Secret
+  # Manager — never commit live keys here).
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
+      - '--build-arg=NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}'
+      - '--build-arg=NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${_NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}'
       - '-t'
       - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
       - '.'
@@ -39,6 +45,12 @@ substitutions:
   _DEPLOY_REGION: europe-west1
   _SERVICE_NAME: diaspoplug-frontend
   _TRIGGER_ID: 996823a0-861f-4f6a-b1f5-c98495bf7065
+  # Override these on the Cloud Build trigger (Console → Cloud Build →
+  # Triggers → Edit → Substitution variables). Default empty so a
+  # local / manual build still succeeds — Stripe simply falls back to
+  # the "Card payments unavailable" UX implemented in lib/stripe.ts.
+  _NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ""
+  _NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ""
 
 options:
   logging: CLOUD_LOGGING_ONLY
