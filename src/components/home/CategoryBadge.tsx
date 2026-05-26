@@ -18,12 +18,13 @@ interface CategoryStyle {
 }
 
 const CATEGORY_STYLES: Record<string, CategoryStyle> = {
+  // Original 19 — keep the existing 600-level palette
   Politics: { label: 'Politics', className: 'bg-red-600' },
   Tech: { label: 'Tech', className: 'bg-blue-600' },
   Business: { label: 'Business', className: 'bg-amber-700' },
   Culture: { label: 'Culture', className: 'bg-purple-600' },
   Sports: { label: 'Sports', className: 'bg-orange-600' },
-  Education: { label: 'Edu', className: 'bg-indigo-600' },
+  Education: { label: 'Education', className: 'bg-indigo-600' },
   Health: { label: 'Health', className: 'bg-emerald-600' },
   Entertainment: { label: 'Fun', className: 'bg-pink-600' },
   News: { label: 'News', className: 'bg-slate-700' },
@@ -37,6 +38,24 @@ const CATEGORY_STYLES: Record<string, CategoryStyle> = {
   Finance: { label: 'Finance', className: 'bg-yellow-600' },
   Lifestyle: { label: 'Lifestyle', className: 'bg-lime-600' },
   Personal: { label: 'Personal', className: 'bg-zinc-600' },
+
+  // New 14 (v17 taxonomy) — distinct deeper shades that don't collide
+  // with the 600-tier palette above. Picked semantically where possible:
+  // money-greens for Remittance, mourning-neutral for Funeral, etc.
+  Remittance: { label: 'Remittance', className: 'bg-teal-700' },
+  Housing: { label: 'Housing', className: 'bg-stone-600' },
+  Language: { label: 'Language', className: 'bg-blue-800' },
+  Immigration: { label: 'Immigration', className: 'bg-indigo-800' },
+  Announcement: { label: 'Announcement', className: 'bg-cyan-800' },
+  Event: { label: 'Event', className: 'bg-orange-700' },
+  Question: { label: 'Question', className: 'bg-yellow-700' },
+  Grant: { label: 'Grant', className: 'bg-amber-800' },
+  Agriculture: { label: 'Agriculture', className: 'bg-green-800' },
+  War: { label: 'War', className: 'bg-red-900' },
+  Fundraising: { label: 'Fundraising', className: 'bg-rose-700' },
+  Wedding: { label: 'Wedding', className: 'bg-pink-800' },
+  Funeral: { label: 'Funeral', className: 'bg-neutral-700' },
+  Volunteer: { label: 'Volunteer', className: 'bg-fuchsia-800' },
 };
 
 const UNKNOWN_STYLE: CategoryStyle = { label: '', className: 'bg-gray-500' };
@@ -52,8 +71,10 @@ export interface CategoryBadgeProps {
  *   - `category` is falsy (legacy / in-flight post not yet classified)
  *   - `category === 'Other'` (catch-all class — no useful UX signal)
  *
- * The pill is short by design (≤10 chars) so it can sit on the card
- * without competing with the author name or body text.
+ * The pill is kept compact so it can sit on the card without competing
+ * with the author name. Most labels are ≤12 chars; longer ones (e.g.
+ * "Announcement", "Immigration") stretch the pill — `inline-flex` keeps
+ * the layout responsive and the label is intentionally not truncated.
  */
 export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
   if (!category) return null;
