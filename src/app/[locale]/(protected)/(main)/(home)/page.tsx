@@ -46,7 +46,14 @@ import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
 import AccessBadges from '@/components/cards/AccessBadges';
-import { toJoinPolicy, type AccessProfile } from '@/types/membership';
+import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
+import {
+  toJoinPolicy,
+  type AccessProfile,
+  type MembershipEntity,
+  type RequestMembershipResult,
+  type SubscriptionPeriod,
+} from '@/types/membership';
 
 // Type definitions for better type safety.
 //
@@ -382,22 +389,40 @@ export default function Home() {
   // `entityType: "COMMUNITY"` to the backend; using it for an association
   // id triggers `Entity not found` because the lookup runs against the
   // wrong table. Always dispatch the mutation matching the modal's kind.
-  const handleJoin = async (
+  // Returns the raw response so callers (free path = handleJoinConfirm,
+  // paid path = MembershipPaymentModal) can branch on requiresPayment.
+  type RequestMembershipPayload = {
+    id?: string;
+    status?: string;
+    message?: string;
+    requiresPayment?: boolean;
+    clientSecret?: string | null;
+  };
+
+  const callRequestMembership = async (
+    kind: 'community' | 'association',
+    entityId: string,
+  ): Promise<RequestMembershipPayload | null> => {
+    const { data } =
+      kind === 'association'
+        ? await requestJoinAssociation({ variables: { associationId: entityId } })
+        : await requestJoinCommunity({ variables: { communityId: entityId } });
+    return (data?.requestMembership as RequestMembershipPayload | undefined) ?? null;
+  };
+
+  // Free-path join — fired when the entity is NOT a paid community / association.
+  const handleFreeJoin = async (
     kind: 'community' | 'association',
     entityId: string,
   ) => {
     const failMessage =
       kind === 'association' ? 'Failed to join association' : 'Failed to join community';
     try {
-      const { data } =
-        kind === 'association'
-          ? await requestJoinAssociation({ variables: { associationId: entityId } })
-          : await requestJoinCommunity({ variables: { communityId: entityId } });
-
-      const status = data?.requestMembership?.status;
+      const payload = await callRequestMembership(kind, entityId);
+      const status = payload?.status;
       if (status === 'ACTIVE' || status === 'PENDING' || status === 'PENDING_PAYMENT') {
         toast.success(
-          data?.requestMembership?.message ||
+          payload?.message ||
             (status === 'ACTIVE'
               ? 'Joined successfully'
               : 'Your request is pending approval'),
@@ -422,9 +447,95 @@ export default function Home() {
     setJoinModal({ open: true, kind, entity });
   };
 
+  // --- Paid-membership flow ---
+  // When the entity has paymentType ONE_TIME / SUBSCRIPTION, the join
+  // confirmation diverts to MembershipPaymentModal which owns the
+  // request invocation AND the Stripe / Paystack rails. Mirrors the
+  // pattern in association/[id]/page.tsx + community/[id]/page.tsx.
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentEntity, setPaymentEntity] = useState<MembershipEntity | null>(null);
+
+  const isPaidEntity = (e: HydratedCommunityCard | HydratedAssociationCard) =>
+    e.paymentType === 'ONE_TIME' || e.paymentType === 'SUBSCRIPTION';
+
+  const buildPaymentEntity = (
+    kind: 'community' | 'association',
+    e: HydratedCommunityCard | HydratedAssociationCard,
+  ): MembershipEntity => ({
+    kind,
+    id: e.id,
+    name: e.name,
+    access: {
+      visibility: e.visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC',
+      joinPolicy: toJoinPolicy(e.joinPolicy),
+      paymentType:
+        e.paymentType === 'ONE_TIME' || e.paymentType === 'SUBSCRIPTION'
+          ? (e.paymentType as 'ONE_TIME' | 'SUBSCRIPTION')
+          : 'NONE',
+      price:
+        typeof e.priceAmount === 'number' && e.priceCurrency
+          ? { amountInCents: e.priceAmount, currency: e.priceCurrency }
+          : undefined,
+    },
+  });
+
+  const handlePaymentModalRequest = async (args: {
+    entityId: string;
+    entityKind: 'community' | 'association';
+    period?: SubscriptionPeriod;
+  }): Promise<RequestMembershipResult> => {
+    // `period` is currently unused on the home-page flow — the BE picks
+    // it up via the entity itself when applicable. Kept in the signature
+    // for parity with the detail-page implementation.
+    void args.period;
+    const payload = await callRequestMembership(args.entityKind, args.entityId);
+    if (!payload) {
+      throw new Error('Empty response from requestMembership');
+    }
+    const status =
+      payload.status === 'PENDING_PAYMENT'
+        ? 'PENDING_PAYMENT'
+        : payload.status === 'PENDING'
+          ? 'PENDING'
+          : 'ACTIVE';
+    return {
+      membershipId: payload.id ?? args.entityId,
+      status,
+      requiresPayment: Boolean(payload.requiresPayment),
+      ...(payload.clientSecret ? { clientSecret: payload.clientSecret } : {}),
+      ...(payload.message ? { message: payload.message } : {}),
+    };
+  };
+
+  const handlePaymentSuccess = (_membershipId: string) => {
+    if (paymentEntity) {
+      toast.success(`You are now a member of ${paymentEntity.name}`);
+      setJoinedCommunities((prev) => new Set(prev).add(paymentEntity.id));
+      setTimeout(() => refetchCommunities(), 100);
+    }
+    setPaymentModalOpen(false);
+    setPaymentEntity(null);
+  };
+
+  const handlePaymentClose = () => {
+    setPaymentModalOpen(false);
+    setPaymentEntity(null);
+  };
+
   const handleJoinConfirm = async () => {
     if (!joinModal.open) return;
-    await handleJoin(joinModal.kind, joinModal.entity.id);
+    const { kind, entity } = joinModal;
+
+    if (isPaidEntity(entity)) {
+      // Divert to the payment modal — it'll fire the request mutation
+      // itself once the user picks a payment rail.
+      setPaymentEntity(buildPaymentEntity(kind, entity));
+      setPaymentModalOpen(true);
+      setJoinModal({ open: false });
+      return;
+    }
+
+    await handleFreeJoin(kind, entity.id);
     setJoinModal({ open: false });
   };
 
@@ -1130,6 +1241,21 @@ export default function Home() {
       >
         {renderJoinModalContent()}
       </ConfirmationModal>
+
+      {/* Paid-membership flow — fired from handleJoinConfirm when the
+          selected entity has paymentType ONE_TIME / SUBSCRIPTION. The
+          modal owns the request invocation and the Stripe/Paystack
+          rails; we just supply the entity, the request callback, and a
+          success handler. */}
+      {paymentEntity && (
+        <MembershipPaymentModal
+          open={paymentModalOpen}
+          onClose={handlePaymentClose}
+          entity={paymentEntity}
+          requestMembership={handlePaymentModalRequest}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
 
       {modalPost && modalProfileData && (
         <PostMediaModal
