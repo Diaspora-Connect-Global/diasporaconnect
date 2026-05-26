@@ -1539,7 +1539,10 @@
                 "title": "Hoe wil je betalen?",
                 "methodCard": "Kaart",
                 "methodMobile": "Mobile Money",
-                "payCta": "Betalen"
+                "payCta": "Betalen",
+                "checkingCard": "Opgeslagen kaarten controleren…",
+                "savedCardReady": "We belasten je opgeslagen kaart.",
+                "addCardCta": "Kaart toevoegen in je wallet"
             },
             "step3": {
                 "success": "Je bent erbij. Welkom!",
@@ -1550,7 +1553,8 @@
                 "network": "Netwerkfout. Probeer het opnieuw.",
                 "cardDeclined": "Kaart geweigerd. Probeer een andere kaart.",
                 "paystackCancelled": "Betaling geannuleerd. Je kunt het altijd opnieuw proberen.",
-                "confirmFailed": "We konden je betaling niet bevestigen. Probeer het opnieuw."
+                "confirmFailed": "We konden je betaling niet bevestigen. Probeer het opnieuw.",
+                "noSavedCard": "Geen opgeslagen kaart gevonden. Voeg er een toe in je wallet om met kaart te betalen, of gebruik mobile money."
             }
         }
     },

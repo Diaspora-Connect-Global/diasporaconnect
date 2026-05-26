@@ -1539,7 +1539,10 @@
                 "title": "How would you like to pay?",
                 "methodCard": "Card",
                 "methodMobile": "Mobile Money",
-                "payCta": "Pay"
+                "payCta": "Pay",
+                "checkingCard": "Gespeicherte Karten werden geprüft…",
+                "savedCardReady": "Wir belasten Ihre gespeicherte Karte.",
+                "addCardCta": "Karte im Wallet hinzufügen"
             },
             "step3": {
                 "success": "You're in. Welcome!",
@@ -1550,7 +1553,8 @@
                 "network": "Network error. Please try again.",
                 "cardDeclined": "Card was declined. Please try another card.",
                 "paystackCancelled": "Payment cancelled. You can retry anytime.",
-                "confirmFailed": "We couldn't confirm your payment. Please try again."
+                "confirmFailed": "We couldn't confirm your payment. Please try again.",
+                "noSavedCard": "Keine gespeicherte Karte gefunden. Fügen Sie eine im Wallet hinzu, um per Karte zu zahlen, oder nutzen Sie Mobile Money."
             }
         }
     },

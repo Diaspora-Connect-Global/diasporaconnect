@@ -1,9 +1,7 @@
 'use client';
 
-import { useState, useMemo, type FormEvent } from 'react';
-import { useMutation } from '@apollo/client/react';
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import type { StripeElementsOptions } from '@stripe/stripe-js';
+import { useState, useMemo, useEffect } from 'react';
+import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -17,12 +15,15 @@ import {
 } from '@/components/ui/dialog';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { Link } from '@/i18n/navigation';
-import { getStripe } from '@/lib/stripe';
 import { openPaystackMobileMoney } from '@/lib/paystack';
-import { CONFIRM_PAYMENT_INTENT } from '@/services/gql/payments';
+import {
+  CONFIRM_PAYMENT_INTENT,
+  MY_PAYMENT_METHODS,
+} from '@/services/gql/payments';
 import type {
   ConfirmPaymentIntentResponse,
   ConfirmPaymentIntentInput,
+  MyPaymentMethodsResponse,
 } from '@/services/gql/payments';
 import { useUserStore } from '@/store/useUserStore';
 import type {
@@ -103,10 +104,23 @@ export function MembershipPaymentModal({
     { input: ConfirmPaymentIntentInput }
   >(CONFIRM_PAYMENT_INTENT);
 
-  const stripeOptions: StripeElementsOptions | undefined =
-    requestResult?.clientSecret
-      ? { clientSecret: requestResult.clientSecret, appearance: { theme: 'stripe' } }
-      : undefined;
+  // Mirror the paid-events flow: look up the user's saved Stripe card via
+  // MY_PAYMENT_METHODS instead of collecting it inline. Lazy so we don't
+  // hit the BE until the user actually reaches the pay step.
+  const [fetchMyPaymentMethods] = useLazyQuery<MyPaymentMethodsResponse>(
+    MY_PAYMENT_METHODS,
+    { fetchPolicy: 'network-only' },
+  );
+
+  const getPrimaryStripeCardPaymentMethodId = async (): Promise<string | null> => {
+    const { data } = await fetchMyPaymentMethods();
+    const methods = data?.myPaymentMethods?.payment_methods ?? [];
+    const stripeCards = methods.filter(
+      (m) => m.provider === 'STRIPE' && m.type === 'card',
+    );
+    const primary = stripeCards.find((m) => Boolean(m.is_primary));
+    return (primary ?? stripeCards[0])?.id ?? null;
+  };
 
   const formatAmount = (value: number, currency: string): string => {
     try {
@@ -229,26 +243,24 @@ export function MembershipPaymentModal({
           />
         )}
 
-        {step === 'pay' && requestResult?.clientSecret && stripeOptions && (
-          <Elements stripe={getStripe()} options={stripeOptions}>
-            <PayStep
-              entity={entity}
-              clientSecret={requestResult.clientSecret}
-              membershipId={requestResult.membershipId}
-              paymentIntentIdHint={
-                requestResult.paymentIntentId ??
-                parsePaymentIntentIdFromClientSecret(requestResult.clientSecret)
-              }
-              paymentMethod={paymentMethod}
-              onPaymentMethodChange={setPaymentMethod}
-              userEmail={userEmail ?? null}
-              confirmPaymentIntent={async (input) => {
-                await confirmPaymentIntent({ variables: { input } });
-              }}
-              onBackToPlan={() => setStep('plan')}
-              onPaid={handlePaidSuccess}
-            />
-          </Elements>
+        {step === 'pay' && requestResult?.clientSecret && (
+          <PayStep
+            entity={entity}
+            membershipId={requestResult.membershipId}
+            paymentIntentIdHint={
+              requestResult.paymentIntentId ??
+              parsePaymentIntentIdFromClientSecret(requestResult.clientSecret)
+            }
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={setPaymentMethod}
+            userEmail={userEmail ?? null}
+            getPrimaryStripeCardPaymentMethodId={getPrimaryStripeCardPaymentMethodId}
+            confirmPaymentIntent={async (input) => {
+              await confirmPaymentIntent({ variables: { input } });
+            }}
+            onBackToPlan={() => setStep('plan')}
+            onPaid={handlePaidSuccess}
+          />
         )}
 
         {step === 'done' && (
@@ -369,12 +381,12 @@ function PlanStep({
 
 interface PayStepProps {
   entity: MembershipEntity;
-  clientSecret: string;
   membershipId: string;
   paymentIntentIdHint: string | null;
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
   userEmail: string | null;
+  getPrimaryStripeCardPaymentMethodId: () => Promise<string | null>;
   confirmPaymentIntent: (input: ConfirmPaymentIntentInput) => Promise<void>;
   onBackToPlan: () => void;
   onPaid: (membershipId: string) => void;
@@ -382,71 +394,74 @@ interface PayStepProps {
 
 function PayStep({
   entity,
-  clientSecret,
   membershipId,
   paymentIntentIdHint,
   paymentMethod,
   onPaymentMethodChange,
   userEmail,
+  getPrimaryStripeCardPaymentMethodId,
   confirmPaymentIntent,
   onBackToPlan,
   onPaid,
 }: PayStepProps) {
   const t = useTranslations('membership.payment');
-  const stripe = useStripe();
-  const elements = useElements();
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Saved-card lookup state. `null` means "haven't checked yet"; `''` means
+  // checked and none found; otherwise the saved Stripe card's id. Matches
+  // paid-events pattern — user must add a card in the wallet first.
+  const [savedCardId, setSavedCardId] = useState<string | null>(null);
+  const [cardCheckLoading, setCardCheckLoading] = useState(true);
+
+  // Pre-flight the saved-card lookup when the step mounts so the UI can show
+  // either the "Pay with saved card" button or the "Add card in wallet"
+  // fallback immediately, without making the user click first to find out.
+  useEffect(() => {
+    let cancelled = false;
+    setCardCheckLoading(true);
+    getPrimaryStripeCardPaymentMethodId()
+      .then((id) => {
+        if (!cancelled) setSavedCardId(id ?? '');
+      })
+      .catch(() => {
+        if (!cancelled) setSavedCardId('');
+      })
+      .finally(() => {
+        if (!cancelled) setCardCheckLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [getPrimaryStripeCardPaymentMethodId]);
 
   const price = entity.access.price;
 
-  const handleStripeSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!stripe || !elements) return;
+  const handleStripeSubmit = async () => {
+    if (submitting) return;
+    if (!paymentIntentIdHint) {
+      setErrorMessage(t('errors.confirmFailed'));
+      return;
+    }
+    if (!savedCardId) {
+      setErrorMessage(t('errors.noSavedCard'));
+      return;
+    }
     setSubmitting(true);
     setErrorMessage(null);
-
-    const returnUrl =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/${entity.kind}/${entity.id}`
-        : '/';
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: returnUrl },
-      redirect: 'if_required',
-    });
-
-    if (error) {
-      setErrorMessage(error.message ?? t('errors.cardDeclined'));
+    try {
+      await confirmPaymentIntent({
+        payment_intent_id: paymentIntentIdHint,
+        payment_method_id: savedCardId,
+        provider: 'STRIPE',
+      });
+      onPaid(membershipId);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('errors.confirmFailed');
+      setErrorMessage(message);
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    const status = paymentIntent?.status;
-    if (status === 'succeeded' || status === 'processing') {
-      // Inform BE the intent is confirmed (matches paid-events flow).
-      try {
-        const intentId = paymentIntent?.id ?? paymentIntentIdHint;
-        if (intentId) {
-          await confirmPaymentIntent({
-            payment_intent_id: intentId,
-            payment_method_id: intentId,
-            provider: 'STRIPE',
-          });
-        }
-        onPaid(membershipId);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : t('errors.confirmFailed');
-        setErrorMessage(message);
-        setSubmitting(false);
-      }
-      return;
-    }
-
-    setErrorMessage(t('errors.confirmFailed'));
-    setSubmitting(false);
   };
 
   const handlePaystack = async () => {
@@ -529,8 +544,25 @@ function PayStep({
       </fieldset>
 
       {paymentMethod === 'card' ? (
-        <form onSubmit={handleStripeSubmit} className="space-y-4">
-          <PaymentElement />
+        <div className="space-y-4">
+          {cardCheckLoading ? (
+            <p className="inline-flex items-center gap-2 text-sm text-text-secondary">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t('step2.checkingCard')}
+            </p>
+          ) : savedCardId ? (
+            <p className="text-sm text-text-secondary">{t('step2.savedCardReady')}</p>
+          ) : (
+            <div className="space-y-2 rounded-md border border-border-subtle bg-surface-default p-3">
+              <p className="text-sm text-text-primary">{t('errors.noSavedCard')}</p>
+              <Link
+                href="/wallet"
+                className="text-sm text-text-brand underline underline-offset-2"
+              >
+                {t('step2.addCardCta')}
+              </Link>
+            </div>
+          )}
           {errorMessage && (
             <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {errorMessage}
@@ -546,9 +578,10 @@ function PayStep({
               {t('step1.cancelCta')}
             </ButtonType3>
             <ButtonType2
-              type="submit"
+              type="button"
               className="py-2 px-3"
-              disabled={!stripe || !elements || submitting}
+              onClick={handleStripeSubmit}
+              disabled={submitting || cardCheckLoading || !savedCardId}
             >
               {submitting ? (
                 <span className="inline-flex items-center gap-2">
@@ -560,7 +593,7 @@ function PayStep({
               )}
             </ButtonType2>
           </div>
-        </form>
+        </div>
       ) : (
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">{t('step2.methodMobile')}</p>
