@@ -1540,7 +1540,9 @@
                 "methodCard": "Card",
                 "methodMobile": "Mobile Money",
                 "payCta": "Pay",
-                "mobileHint": "Vous saisirez votre numéro et votre opérateur Mobile Money à l'étape suivante."
+                "mobileHint": "Vous saisirez votre numéro et votre opérateur Mobile Money à l'étape suivante.",
+                "cardSubtitle": "Propulsé par Stripe · Saisissez vos coordonnées bancaires ci-dessous",
+                "mobileSubtitle": "Propulsé par Paystack · Saisissez votre numéro et votre opérateur dans la popup"
             },
             "step3": {
                 "success": "You're in. Welcome!",

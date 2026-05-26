@@ -5,7 +5,7 @@ import { useMutation } from '@apollo/client/react';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import type { StripeElementsOptions } from '@stripe/stripe-js';
 import { useLocale, useTranslations } from 'next-intl';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CreditCard, Smartphone, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import {
@@ -538,45 +538,67 @@ function PayStep({
 
   return (
     <div className="space-y-4">
-      <fieldset className="space-y-2">
-        <legend className="text-sm text-text-primary">{t('step2.title')}</legend>
-        <div className="grid grid-cols-2 gap-2">
-          <label
-            className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-sm ${
+      {/* Method picker — visually mirrors the paid-events modal at
+          (home)/events/[id]/Step2.tsx so the two surfaces feel like the
+          same app. Big icon buttons with descriptions instead of radio
+          chips; selected state shows a checkmark. */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-text-primary">{t('step2.title')}</h3>
+
+        <button
+          type="button"
+          onClick={() => onPaymentMethodChange('card')}
+          className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+            paymentMethod === 'card'
+              ? 'border-border-brand bg-surface-brand/5'
+              : 'border-border-subtle bg-surface-subtle hover:bg-surface-hover'
+          }`}
+        >
+          <div
+            className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
               paymentMethod === 'card'
-                ? 'border-border-brand bg-surface-brand-subtle text-text-brand'
-                : 'border-border-subtle bg-surface-default text-text-primary'
+                ? 'bg-surface-brand text-text-white'
+                : 'bg-surface-default text-text-primary'
             }`}
           >
-            <input
-              type="radio"
-              name="membership-method"
-              value="card"
-              checked={paymentMethod === 'card'}
-              onChange={() => onPaymentMethodChange('card')}
-              className="sr-only"
-            />
-            {t('step2.methodCard')}
-          </label>
-          <label
-            className={`flex cursor-pointer items-center justify-center rounded-md border px-3 py-2 text-sm ${
+            <CreditCard className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-text-primary text-sm">{t('step2.methodCard')}</p>
+            <p className="text-xs text-text-secondary mt-0.5">{t('step2.cardSubtitle')}</p>
+          </div>
+          {paymentMethod === 'card' && (
+            <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onPaymentMethodChange('mobile')}
+          className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+            paymentMethod === 'mobile'
+              ? 'border-border-brand bg-surface-brand/5'
+              : 'border-border-subtle bg-surface-subtle hover:bg-surface-hover'
+          }`}
+        >
+          <div
+            className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
               paymentMethod === 'mobile'
-                ? 'border-border-brand bg-surface-brand-subtle text-text-brand'
-                : 'border-border-subtle bg-surface-default text-text-primary'
+                ? 'bg-surface-brand text-text-white'
+                : 'bg-surface-default text-text-primary'
             }`}
           >
-            <input
-              type="radio"
-              name="membership-method"
-              value="mobile"
-              checked={paymentMethod === 'mobile'}
-              onChange={() => onPaymentMethodChange('mobile')}
-              className="sr-only"
-            />
-            {t('step2.methodMobile')}
-          </label>
-        </div>
-      </fieldset>
+            <Smartphone className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-text-primary text-sm">{t('step2.methodMobile')}</p>
+            <p className="text-xs text-text-secondary mt-0.5">{t('step2.mobileSubtitle')}</p>
+          </div>
+          {paymentMethod === 'mobile' && (
+            <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />
+          )}
+        </button>
+      </div>
 
       {paymentMethod === 'card' ? (
         <form onSubmit={handleStripeSubmit} className="space-y-4">

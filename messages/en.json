@@ -1540,7 +1540,9 @@
                 "methodCard": "Card",
                 "methodMobile": "Mobile Money",
                 "payCta": "Pay",
-                "mobileHint": "You'll enter your mobile-money number and provider next."
+                "mobileHint": "You'll enter your mobile-money number and provider next.",
+                "cardSubtitle": "Powered by Stripe · Enter your card details below",
+                "mobileSubtitle": "Powered by Paystack · Enter your number and provider in the popup"
             },
             "step3": {
                 "success": "You're in. Welcome!",

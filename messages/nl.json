@@ -1540,7 +1540,9 @@
                 "methodCard": "Kaart",
                 "methodMobile": "Mobile Money",
                 "payCta": "Betalen",
-                "mobileHint": "Je voert je mobile-money-nummer en provider in de volgende stap in."
+                "mobileHint": "Je voert je mobile-money-nummer en provider in de volgende stap in.",
+                "cardSubtitle": "Aangedreven door Stripe · Voer je kaartgegevens hieronder in",
+                "mobileSubtitle": "Aangedreven door Paystack · Voer nummer en provider in de popup in"
             },
             "step3": {
                 "success": "Je bent erbij. Welkom!",
