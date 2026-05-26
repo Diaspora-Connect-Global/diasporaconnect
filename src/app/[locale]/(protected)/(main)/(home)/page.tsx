@@ -11,7 +11,11 @@ import { NewPostsBanner } from '@/components/home/NewPostsBanner';
 import { useUnseenFeedCount } from '@/hooks/useUnseenFeedCount';
 import { Link } from '@/i18n/navigation';
 import { REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, GET_COMMUNITY } from '@/services/gql/community';
-import { GET_ASSOCIATION, REQUEST_JOIN_ASSOCIATION } from '@/services/gql/associations';
+import {
+  GET_ASSOCIATION,
+  GET_USER_ASSOCIATIONS,
+  REQUEST_JOIN_ASSOCIATION,
+} from '@/services/gql/associations';
 import {
   ADD_ENGAGEMENT,
   REMOVE_ENGAGEMENT,
@@ -355,7 +359,11 @@ export default function Home() {
     awaitRefetchQueries: false,
   });
   const [requestJoinAssociation, { loading: joinAssociationLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_ASSOCIATION, {
-    refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
+    // GET_USER_ASSOCIATIONS drives the home sidebar's "Discover associations"
+    // section (HomeSidebar.tsx). Refetching it on a successful join means
+    // the joined association appears in the sidebar list immediately,
+    // without a page refresh.
+    refetchQueries: [{ query: GET_USER_ASSOCIATIONS }],
     awaitRefetchQueries: false,
   });
   const joinLoading = joinCommunityLoading || joinAssociationLoading;
