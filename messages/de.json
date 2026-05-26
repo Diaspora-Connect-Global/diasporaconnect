@@ -767,12 +767,16 @@
             },
             "membership": {
                 "approved": "Mitgliedschaft genehmigt",
-                "request": "Mitgliedschaftsanfrage"
+                "request": "Mitgliedschaftsanfrage",
+                "removed": "Aus der Community entfernt",
+                "left": "Community verlassen"
             },
             "association": {
                 "membership": {
                     "approved": "Vereinsmitgliedschaft genehmigt",
-                    "request": "Vereinsmitgliedschaftsanfrage"
+                    "request": "Vereinsmitgliedschaftsanfrage",
+                    "removed": "Aus dem Verein entfernt",
+                    "left": "Verein verlassen"
                 }
             },
             "opportunity": {

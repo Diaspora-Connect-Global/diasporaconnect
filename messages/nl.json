@@ -767,12 +767,16 @@
             },
             "membership": {
                 "approved": "Lidmaatschap goedgekeurd",
-                "request": "Lidmaatschapsverzoek"
+                "request": "Lidmaatschapsverzoek",
+                "removed": "Verwijderd uit de community",
+                "left": "Community verlaten"
             },
             "association": {
                 "membership": {
                     "approved": "Verenigingslidmaatschap goedgekeurd",
-                    "request": "Verenigingslidmaatschapsverzoek"
+                    "request": "Verenigingslidmaatschapsverzoek",
+                    "removed": "Verwijderd uit de vereniging",
+                    "left": "Vereniging verlaten"
                 }
             },
             "opportunity": {

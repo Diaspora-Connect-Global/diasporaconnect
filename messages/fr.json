@@ -767,12 +767,16 @@
             },
             "membership": {
                 "approved": "Adhésion approuvée",
-                "request": "Demande d'adhésion"
+                "request": "Demande d'adhésion",
+                "removed": "Retiré de la communauté",
+                "left": "Communauté quittée"
             },
             "association": {
                 "membership": {
                     "approved": "Adhésion à l'association approuvée",
-                    "request": "Demande d'adhésion à l'association"
+                    "request": "Demande d'adhésion à l'association",
+                    "removed": "Retiré de l'association",
+                    "left": "Association quittée"
                 }
             },
             "opportunity": {

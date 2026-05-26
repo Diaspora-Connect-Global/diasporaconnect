@@ -767,12 +767,16 @@
             },
             "membership": {
                 "approved": "Membership approved",
-                "request": "Membership request"
+                "request": "Membership request",
+                "removed": "Removed from community",
+                "left": "Left the community"
             },
             "association": {
                 "membership": {
                     "approved": "Association membership approved",
-                    "request": "Association membership request"
+                    "request": "Association membership request",
+                    "removed": "Removed from association",
+                    "left": "Left the association"
                 }
             },
             "opportunity": {
