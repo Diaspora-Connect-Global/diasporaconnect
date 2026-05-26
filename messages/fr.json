@@ -1555,7 +1555,9 @@
                 "paystackCancelled": "Payment cancelled. You can retry anytime.",
                 "confirmFailed": "We couldn't confirm your payment. Please try again.",
                 "noSavedCard": "Aucune carte enregistrée. Ajoutez-en une dans votre portefeuille pour payer par carte, ou utilisez le paiement mobile.",
-                "alreadyPending": "Vous avez déjà une demande en attente pour cela. Annulez la demande existante avant de réessayer."
+                "alreadyPending": "Vous avez déjà une demande en attente pour cela. Annulez la demande existante avant de réessayer.",
+                "stripeNotConfiguredTitle": "Les paiements par carte sont indisponibles",
+                "stripeNotConfiguredBody": "La clé publique Stripe n'est pas configurée pour ce déploiement. Veuillez utiliser le Mobile Money ou contacter le support."
             }
         }
     },

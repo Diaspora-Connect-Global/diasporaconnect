@@ -1555,7 +1555,9 @@
                 "paystackCancelled": "Payment cancelled. You can retry anytime.",
                 "confirmFailed": "We couldn't confirm your payment. Please try again.",
                 "noSavedCard": "Keine gespeicherte Karte gefunden. Fügen Sie eine im Wallet hinzu, um per Karte zu zahlen, oder nutzen Sie Mobile Money.",
-                "alreadyPending": "Sie haben bereits eine offene Anfrage hierfür. Brechen Sie die bestehende Anfrage ab, bevor Sie es erneut versuchen."
+                "alreadyPending": "Sie haben bereits eine offene Anfrage hierfür. Brechen Sie die bestehende Anfrage ab, bevor Sie es erneut versuchen.",
+                "stripeNotConfiguredTitle": "Kartenzahlungen sind derzeit nicht verfügbar",
+                "stripeNotConfiguredBody": "Der Stripe-Veröffentlichungsschlüssel ist für dieses Deployment nicht konfiguriert. Bitte nutzen Sie Mobile Money oder kontaktieren Sie den Support."
             }
         }
     },

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { Link } from '@/i18n/navigation';
-import { getStripe } from '@/lib/stripe';
+import { getStripe, isStripeConfigured } from '@/lib/stripe';
 import { openPaystackMobileMoney } from '@/lib/paystack';
 import { CONFIRM_PAYMENT_INTENT } from '@/services/gql/payments';
 import type {
@@ -270,7 +270,7 @@ export function MembershipPaymentModal({
           />
         )}
 
-        {step === 'pay' && requestResult?.clientSecret && stripeOptions && (
+        {step === 'pay' && requestResult?.clientSecret && stripeOptions && isStripeConfigured() && (
           <Elements stripe={getStripe()} options={stripeOptions}>
             <PayStep
               entity={entity}
@@ -290,6 +290,27 @@ export function MembershipPaymentModal({
               onPaid={handlePaidSuccess}
             />
           </Elements>
+        )}
+
+        {/* Stripe publishable key not configured in this deployment.
+            Fail loudly and clearly instead of letting Stripe.js throw an
+            IntegrationError("empty string") into the console. */}
+        {step === 'pay' && requestResult?.clientSecret && !isStripeConfigured() && (
+          <div className="space-y-4">
+            <div className="rounded-md border border-border-subtle bg-surface-warning/10 p-3">
+              <p className="text-sm text-text-primary font-medium">{t('errors.stripeNotConfiguredTitle')}</p>
+              <p className="text-sm text-text-secondary mt-1">{t('errors.stripeNotConfiguredBody')}</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <ButtonType3
+                type="button"
+                className="py-2 px-3"
+                onClick={() => setStep('plan')}
+              >
+                {t('step1.cancelCta')}
+              </ButtonType3>
+            </div>
+          </div>
         )}
 
         {step === 'done' && (
