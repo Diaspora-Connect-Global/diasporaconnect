@@ -431,6 +431,13 @@
                 "description": "U moet opnieuw een verzoek indienen om content te bekijken."
             }
         },
+        "joinModal": {
+            "communityTitle": "Community joinen?",
+            "associationTitle": "Vereniging joinen?",
+            "membersOne": "1 lid",
+            "membersOther": "{count} leden",
+            "approvalRequired": "Goedkeuring vereist"
+        },
         "groupchats": {
             "groupchats": "Groepsgesprekken",
             "create": "Groepsgesprek aanmaken",
@@ -569,6 +576,7 @@
         "associationsYouMayLike": "Verenigingen die u misschien leuk vindt",
         "join": "Sluit u aan bij een gemeenschap om te zien wat er gebeurt",
         "joincommunity": "Gemeenschap deelnemen",
+        "joinassociation": "Word lid van vereniging",
         "joined": "Deelgenomen",
         "members": "leden",
         "noMembers": "Geen leden",

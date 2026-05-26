@@ -41,6 +41,8 @@ import PrivacyPolicyModal from '@/components/custom/PrivacyPolicyModal';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
+import AccessBadges from '@/components/cards/AccessBadges';
+import { toJoinPolicy, type AccessProfile } from '@/types/membership';
 
 // Type definitions for better type safety.
 //
@@ -61,6 +63,10 @@ interface HydratedCommunityCard {
     name: string;
     isEmbassy: boolean;
   } | null;
+  joinPolicy?: string;       // 'OPEN' | 'APPROVAL' | 'INVITE_ONLY' | 'PAID' | 'REQUEST' (legacy)
+  paymentType?: string;      // 'NONE' | 'ONE_TIME' | 'SUBSCRIPTION'
+  priceAmount?: number;      // smallest unit (cents)
+  priceCurrency?: string;    // ISO 4217 uppercase
 }
 
 interface HydratedAssociationCard {
@@ -75,6 +81,10 @@ interface HydratedAssociationCard {
     id: string;
     name: string;
   } | null;
+  joinPolicy?: string;       // 'OPEN' | 'APPROVAL' | 'INVITE_ONLY' | 'PAID' | 'REQUEST' (legacy)
+  paymentType?: string;      // 'NONE' | 'ONE_TIME' | 'SUBSCRIPTION'
+  priceAmount?: number;      // smallest unit (cents)
+  priceCurrency?: string;    // ISO 4217 uppercase
 }
 
 interface GetCommunityQueryData {
@@ -144,6 +154,7 @@ const ASSOCIATIONS_RAIL_INDEX = 3;
 export default function Home() {
   const t = useTranslations('community');
   const tCommon = useTranslations('common');
+  const tJoinModal = useTranslations('home.joinModal');
   const [viewMode, setViewMode] = useState<FeedViewMode>('you');
   // Track the open media modal by postId rather than postIndex so the
   // open-media handler can be wired as a stable `useCallback`. With
@@ -345,11 +356,14 @@ export default function Home() {
   });
   const [joiningCommunities, setJoiningCommunities] = useState<Set<string>>(new Set());
   const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
-  const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string }>({
-    open: false,
-    id: '',
-    name: '',
-  });
+  type JoinModalState =
+    | { open: false }
+    | {
+        open: true;
+        kind: 'community' | 'association';
+        entity: HydratedCommunityCard | HydratedAssociationCard;
+      };
+  const [joinModal, setJoinModal] = useState<JoinModalState>({ open: false });
 
   // Handle join community
   const handleJoinCommunity = async (communityId: string) => {
@@ -372,14 +386,17 @@ export default function Home() {
     }
   };
 
-  const handleJoinClick = (communityId: string, communityName: string) => {
-    setJoinModal({ open: true, id: communityId, name: communityName });
+  const handleJoinClick = (
+    kind: 'community' | 'association',
+    entity: HydratedCommunityCard | HydratedAssociationCard,
+  ) => {
+    setJoinModal({ open: true, kind, entity });
   };
 
   const handleJoinConfirm = async () => {
-    if (!joinModal.id) return;
-    await handleJoinCommunity(joinModal.id);
-    setJoinModal({ open: false, id: '', name: '' });
+    if (!joinModal.open) return;
+    await handleJoinCommunity(joinModal.entity.id);
+    setJoinModal({ open: false });
   };
 
   // Engagement signals (LIKE/UNLIKE/SAVE/UNSAVE/SHARE/COMMENT) flow to the
@@ -478,7 +495,14 @@ export default function Home() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const associationsScrollRef = useRef<HTMLDivElement>(null);
+  // Callback-ref pattern — the associations rail lives inside Virtuoso's
+  // itemContent, so it can unmount/remount as the user scrolls vertically.
+  // A plain useRef would attach the scroll listener to the first DOM node
+  // and never re-attach after a remount → left chevron permanently stuck
+  // on `false` because the event never fires from the new node. Using a
+  // state setter as the ref re-runs the effect every time React commits a
+  // new node, keeping the listener bound to whatever's mounted now.
+  const [associationsScrollEl, setAssociationsScrollEl] = useState<HTMLDivElement | null>(null);
   const [assocCanScrollLeft, setAssocCanScrollLeft] = useState(false);
   const [assocCanScrollRight, setAssocCanScrollRight] = useState(true);
 
@@ -491,22 +515,21 @@ export default function Home() {
   };
 
   const scrollAssocLeft = () => {
-    associationsScrollRef.current?.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
+    associationsScrollEl?.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
   };
 
   const scrollAssocRight = () => {
-    associationsScrollRef.current?.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
+    associationsScrollEl?.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
   };
 
   // Wires the smart-button state to a scroll container — fires on scroll
   // and on window resize. Encapsulates the "atLeft/atRight" math so both
   // rails consume it identically without duplicating the listener logic.
-  const wireScrollState = (
-    ref: React.RefObject<HTMLDivElement | null>,
+  const wireScrollListeners = (
+    el: HTMLDivElement | null,
     setLeft: (v: boolean) => void,
     setRight: (v: boolean) => void,
   ) => {
-    const el = ref.current;
     if (!el) return () => {};
     const checkScroll = () => {
       const atLeft = el.scrollLeft <= 2;
@@ -524,21 +547,26 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const cleanupCommunities = wireScrollState(
-      scrollRef,
+    const cleanupCommunities = wireScrollListeners(
+      scrollRef.current,
       setCanScrollLeft,
       setCanScrollRight,
     );
-    const cleanupAssociations = wireScrollState(
-      associationsScrollRef,
+    return cleanupCommunities;
+  }, [communities]);
+
+  // Separate effect for the associations rail — keyed on the actual DOM
+  // node so Virtuoso remount → callback ref runs → state changes → effect
+  // re-fires → listener attaches to the new node. The communities rail
+  // doesn't need this because it lives outside Virtuoso.
+  useEffect(() => {
+    const cleanupAssociations = wireScrollListeners(
+      associationsScrollEl,
       setAssocCanScrollLeft,
       setAssocCanScrollRight,
     );
-    return () => {
-      cleanupCommunities();
-      cleanupAssociations();
-    };
-  }, [communities, associations]);
+    return cleanupAssociations;
+  }, [associationsScrollEl, associations]);
 
   const hasCommunities = communities.length > 0;
   const hasAssociations = associations.length > 0;
@@ -659,6 +687,73 @@ export default function Home() {
     setModalState({ postId, mediaIndex });
   }, []);
 
+  // Renders the rich body of the join confirmation modal: avatar, name,
+  // type/member count, access badges, and a truncated description. Only
+  // produces output while the modal is open so the discriminated union
+  // narrows cleanly. Hooks are kept out of this helper (tJoinModal is
+  // declared at the top of the component) to avoid hook-in-callback issues.
+  const renderJoinModalContent = () => {
+    if (!joinModal.open) return null;
+    const e = joinModal.entity;
+    const typeName =
+      joinModal.kind === 'community'
+        ? (e as HydratedCommunityCard).communityType?.name
+        : (e as HydratedAssociationCard).associationType?.name;
+
+    const access: AccessProfile = {
+      visibility: e.visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC',
+      joinPolicy: toJoinPolicy(e.joinPolicy),
+      paymentType:
+        e.paymentType === 'ONE_TIME' || e.paymentType === 'SUBSCRIPTION'
+          ? (e.paymentType as 'ONE_TIME' | 'SUBSCRIPTION')
+          : 'NONE',
+      price:
+        typeof e.priceAmount === 'number' && e.priceCurrency
+          ? { amountInCents: e.priceAmount, currency: e.priceCurrency }
+          : undefined,
+    };
+
+    return (
+      <div className="flex flex-col gap-3">
+        {/* Avatar + name + type/members row */}
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={e.avatarUrl || '/GLOBE.png'}
+            alt={e.name}
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-full object-cover border border-border-subtle flex-shrink-0"
+          />
+          <div className="min-w-0">
+            <p className="font-semibold text-text-primary truncate">{e.name}</p>
+            <p className="text-xs text-text-secondary truncate">
+              {typeName ? `${typeName} · ` : ''}
+              {(e.memberCount ?? 0) === 1
+                ? tJoinModal('membersOne')
+                : tJoinModal('membersOther', { count: e.memberCount ?? 0 })}
+            </p>
+          </div>
+        </div>
+
+        {/* Badges row */}
+        <div className="flex flex-wrap items-center gap-1">
+          <AccessBadges access={access} size="card" />
+          {access.joinPolicy === 'APPROVAL' && (
+            <span className="inline-flex items-center text-[0.6875rem] px-2 py-0.5 rounded-full bg-surface-warning text-text-on-warning border border-transparent">
+              {tJoinModal('approvalRequired')}
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        {e.description && (
+          <p className="text-sm text-text-secondary line-clamp-2">{e.description}</p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="h-app-inner flex overflow-hidden">
       <PrivacyPolicyModal />
@@ -735,7 +830,7 @@ export default function Home() {
                       title={community.name}
                       description={community.description}
                       members={community?.memberCount || 0}
-                      onButtonClick={() => handleJoinClick(community.id, community.name)}
+                      onButtonClick={() => handleJoinClick('community', community)}
                       buttonText={
                         community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
                           ? 'Joined'
@@ -876,17 +971,17 @@ export default function Home() {
                           <ChevronRightIcon className="h-6 w-6 text-primary" />
                         </ButtonType3>
                       )}
-                      {/* Outer container handles horizontal scroll. Inner
-                          track is `w-fit mx-auto` so it centers when the
-                          cards fit in the column AND falls back to the
-                          left edge (with native overflow-scroll) when the
-                          card set is wider — best of both worlds. */}
+                      {/* Single flat scroll container — same structure as the
+                          community rail so the chevron-button math (scrollLeft,
+                          scrollWidth, clientWidth) reads identical metrics.
+                          Callback ref re-attaches the scroll listener whenever
+                          Virtuoso remounts this item. */}
                       <div
-                        ref={associationsScrollRef}
-                        className="overflow-x-auto scrollbar-hide pb-2"
+                        ref={setAssociationsScrollEl}
+                        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
                         style={{ scrollBehavior: 'smooth' }}
                       >
-                        <div className="flex gap-2 w-fit mx-auto snap-x snap-mandatory">
+                        <div className="contents">
                         {associations.map((association) => (
                           <div key={association.id} className="flex-none snap-start">
                             <CommunityCardVariant2
@@ -895,13 +990,13 @@ export default function Home() {
                               description={association.description}
                               members={association?.memberCount || 0}
                               onButtonClick={() =>
-                                handleJoinClick(association.id, association.name)
+                                handleJoinClick('association', association)
                               }
                               buttonText={
                                 association.membershipStatus === 'MEMBER' ||
                                 joinedCommunities.has(association.id)
                                   ? 'Joined'
-                                  : t('joincommunity')
+                                  : t('joinassociation')
                               }
                               isDisabled={
                                 association.membershipStatus === 'MEMBER' ||
@@ -989,13 +1084,23 @@ export default function Home() {
 
       <ConfirmationModal
         open={joinModal.open}
-        onCancel={() => setJoinModal({ open: false, id: '', name: '' })}
+        onCancel={() => setJoinModal({ open: false })}
         onConfirm={handleJoinConfirm}
-        title="Join community?"
-        description={joinModal.name ? `You are about to join ${joinModal.name}.` : 'You are about to join this community.'}
-        confirmText={t('joincommunity')}
+        title={
+          joinModal.open && joinModal.kind === 'association'
+            ? tJoinModal('associationTitle')
+            : tJoinModal('communityTitle')
+        }
+        description=""
+        confirmText={
+          joinModal.open && joinModal.kind === 'association'
+            ? t('joinassociation')
+            : t('joincommunity')
+        }
         isLoading={joinLoading}
-      />
+      >
+        {renderJoinModalContent()}
+      </ConfirmationModal>
 
       {modalPost && modalProfileData && (
         <PostMediaModal

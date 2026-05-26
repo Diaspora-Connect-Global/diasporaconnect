@@ -24,6 +24,7 @@ import {
 } from '@/services/gql/associations';
 import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
 import AccessSettingsForm from '@/components/cards/AccessSettingsForm';
+import AccessBadges from '@/components/cards/AccessBadges';
 import {
     toJoinPolicy,
     type AccessProfile,
@@ -62,6 +63,7 @@ interface AssociationDetails {
     priceCurrency?: string | null;
     defaultGroupId?: string | null;
     membershipStatus?: string | null; // ACTIVE | PENDING | SUSPENDED | MEMBER (legacy)
+    associationType?: { id: string; name: string } | null;
 }
 
 interface GetAssociationDetailsResponse {
@@ -120,6 +122,7 @@ export default function AssociationPage() {
 
     const t = useTranslations("home.associations");
     const tActions = useTranslations("actions");
+    const tJoinModal = useTranslations('home.joinModal');
 
     const { data: detailsData, loading: detailsLoading } = useQuery<GetAssociationDetailsResponse>(
         GET_ASSOCIATION_DETAILS,
@@ -492,6 +495,69 @@ export default function AssociationPage() {
           }
         : undefined;
 
+    // Rich body for the join confirmation modal — avatar, name, type +
+    // member count, access badges, optional approval-required chip, and a
+    // truncated description. Mirrors the home-page pattern. Returns null
+    // when association hasn't loaded yet so the modal renders nothing
+    // weird if it ever opens too early.
+    const renderJoinModalContent = () => {
+        if (!association) return null;
+        const access: AccessProfile = {
+            visibility: association.visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC',
+            joinPolicy: toJoinPolicy(association.joinPolicy),
+            paymentType:
+                association.paymentType === 'ONE_TIME' || association.paymentType === 'SUBSCRIPTION'
+                    ? (association.paymentType as 'ONE_TIME' | 'SUBSCRIPTION')
+                    : 'NONE',
+            price:
+                typeof association.priceAmount === 'number' && association.priceCurrency
+                    ? { amountInCents: association.priceAmount, currency: association.priceCurrency }
+                    : undefined,
+        };
+        const typeName = association.associationType?.name;
+        const memberCount = association.memberCount ?? 0;
+
+        return (
+            <div className="flex flex-col gap-3">
+                {/* Avatar + name + type/members row */}
+                <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={association.avatarUrl || '/GLOBE.png'}
+                        alt={association.name}
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 rounded-full object-cover border border-border-subtle flex-shrink-0"
+                    />
+                    <div className="min-w-0">
+                        <p className="font-semibold text-text-primary truncate">{association.name}</p>
+                        <p className="text-xs text-text-secondary truncate">
+                            {typeName ? `${typeName} · ` : ''}
+                            {memberCount === 1
+                                ? tJoinModal('membersOne')
+                                : tJoinModal('membersOther', { count: memberCount })}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Badges row */}
+                <div className="flex flex-wrap items-center gap-1">
+                    <AccessBadges access={access} size="card" />
+                    {access.joinPolicy === 'APPROVAL' && (
+                        <span className="inline-flex items-center text-[0.6875rem] px-2 py-0.5 rounded-full bg-surface-warning text-text-on-warning border border-transparent">
+                            {tJoinModal('approvalRequired')}
+                        </span>
+                    )}
+                </div>
+
+                {/* Description */}
+                {association.description && (
+                    <p className="text-sm text-text-secondary line-clamp-2">{association.description}</p>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="lg:flex overflow-y-auto h-app-inner">
             <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
@@ -646,11 +712,13 @@ export default function AssociationPage() {
                 open={joinModalOpen}
                 onCancel={() => setJoinModalOpen(false)}
                 onConfirm={handleJoinConfirm}
-                title={canShowRequestToJoin ? 'Request to join association?' : 'Join association?'}
-                description={association?.name ? `You are about to ${canShowRequestToJoin ? 'request to join' : 'join'} ${association.name}.` : `You are about to ${canShowRequestToJoin ? 'request to join this association' : 'join this association'}.`}
+                title={canShowRequestToJoin ? 'Request to join association?' : tJoinModal('associationTitle')}
+                description=""
                 confirmText={canShowRequestToJoin ? t('actions.requestToJoin') : tActions('join')}
                 isLoading={joinLoading}
-            />
+            >
+                {renderJoinModalContent()}
+            </ConfirmationModal>
 
             <ConfirmationModal
                 open={leaveModalOpen}

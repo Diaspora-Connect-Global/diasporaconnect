@@ -430,6 +430,13 @@
                 "description": "Vous devrez demander à rejoindre à nouveau pour voir le contenu."
             }
         },
+        "joinModal": {
+            "communityTitle": "Rejoindre la communauté ?",
+            "associationTitle": "Rejoindre l'association ?",
+            "membersOne": "1 membre",
+            "membersOther": "{count} membres",
+            "approvalRequired": "Approbation requise"
+        },
         "groupchats": {
             "groupchats": "Chats de groupe",
             "create": "Créer un chat de groupe",
@@ -569,6 +576,7 @@
         "associationsYouMayLike": "Associations qui pourraient vous plaire",
         "join": "Rejoignez une communauté pour voir ce qui se passe",
         "joincommunity": "Rejoindre la communauté",
+        "joinassociation": "Rejoindre l'association",
         "members": "membres",
         "noMembers": "Aucun membre",
         "myCommunity": "Ma Communauté",

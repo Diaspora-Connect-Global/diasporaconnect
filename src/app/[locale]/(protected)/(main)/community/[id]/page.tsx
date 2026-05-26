@@ -23,6 +23,7 @@ import {
   type CommunityVisibility,
 } from '@/services/gql/community';
 import AccessSettingsForm from '@/components/cards/AccessSettingsForm';
+import AccessBadges from '@/components/cards/AccessBadges';
 import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
 import {
   toJoinPolicy,
@@ -116,6 +117,7 @@ export default function CommunityDetailPage() {
 
   const t = useTranslations('community');
   const tActions = useTranslations('actions');
+  const tJoinModal = useTranslations('home.joinModal');
 
   const { data: detailsData, loading: detailsLoading } = useQuery<GetCommunityDetailsResponse>(
     GET_COMMUNITY_DETAILS,
@@ -473,6 +475,51 @@ export default function CommunityDetailPage() {
       }
     : null;
 
+  const renderJoinModalContent = () => {
+    if (!community) return null;
+    const memberCount = community.memberCount ?? 0;
+    return (
+      <div className="flex flex-col gap-3">
+        {/* Avatar + name + members row */}
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={community.avatarUrl || '/GLOBE.png'}
+            alt={community.name}
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-full object-cover border border-border-subtle flex-shrink-0"
+          />
+          <div className="min-w-0">
+            <p className="font-semibold text-text-primary truncate">{community.name}</p>
+            <p className="text-xs text-text-secondary truncate">
+              {memberCount === 1
+                ? tJoinModal('membersOne')
+                : tJoinModal('membersOther', { count: memberCount })}
+            </p>
+          </div>
+        </div>
+
+        {/* Badges row */}
+        {accessProfile && (
+          <div className="flex flex-wrap items-center gap-1">
+            <AccessBadges access={accessProfile} size="card" />
+            {canShowRequestToJoin && (
+              <span className="inline-flex items-center text-[0.6875rem] px-2 py-0.5 rounded-full bg-surface-warning text-text-on-warning border border-transparent">
+                {tJoinModal('approvalRequired')}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Description */}
+        {community.description && (
+          <p className="text-sm text-text-secondary line-clamp-2">{community.description}</p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="lg:flex overflow-y-auto h-app-inner">
       <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
@@ -625,11 +672,13 @@ export default function CommunityDetailPage() {
         open={joinModalOpen}
         onCancel={() => setJoinModalOpen(false)}
         onConfirm={handleJoinConfirm}
-        title={canShowRequestToJoin ? 'Request to join community?' : 'Join community?'}
-        description={community?.name ? `You are about to ${canShowRequestToJoin ? 'request to join' : 'join'} ${community.name}.` : `You are about to ${canShowRequestToJoin ? 'request to join this community' : 'join this community'}.`}
+        title={canShowRequestToJoin ? 'Request to join community?' : tJoinModal('communityTitle')}
+        description=""
         confirmText={canShowRequestToJoin ? t('actions.requestToJoin') : tActions('join')}
         isLoading={joinLoading}
-      />
+      >
+        {renderJoinModalContent()}
+      </ConfirmationModal>
 
       <ConfirmationModal
         open={leaveModalOpen}

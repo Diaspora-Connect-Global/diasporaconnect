@@ -19,6 +19,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { MembershipPaymentModal } from './_components/MembershipPaymentModal';
 import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
 import { cn } from '@/lib/utils';
+import AccessBadges from '@/components/cards/AccessBadges';
 
 interface RequestMembershipPayload {
     id?: string | null;
@@ -121,6 +122,7 @@ export default function Community() {
     const t = useTranslations('community');
     const tDiscovery = useTranslations('community.discovery');
     const tActions = useTranslations('actions');
+    const tJoinModal = useTranslations('home.joinModal');
 
     const router = useRouter();
     const pathname = usePathname();
@@ -144,11 +146,10 @@ export default function Community() {
     );
 
     const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
-    const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string }>({
-        open: false,
-        id: '',
-        name: '',
-    });
+    type JoinModalState =
+        | { open: false }
+        | { open: true; entity: SearchCommunityItem };
+    const [joinModal, setJoinModal] = useState<JoinModalState>({ open: false });
     const [paymentModal, setPaymentModal] = useState<{
         open: boolean;
         clientSecret: string | null;
@@ -249,14 +250,14 @@ export default function Community() {
         setPaymentModal({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
     };
 
-    const handleJoinClick = (communityId: string, communityName: string) => {
-        setJoinModal({ open: true, id: communityId, name: communityName });
+    const handleJoinClick = (entity: SearchCommunityItem) => {
+        setJoinModal({ open: true, entity });
     };
 
     const handleJoinConfirm = async () => {
-        if (!joinModal.id) return;
-        const { id, name } = joinModal;
-        setJoinModal({ open: false, id: '', name: '' });
+        if (!joinModal.open) return;
+        const { id, name } = joinModal.entity;
+        setJoinModal({ open: false });
         await handleJoinCommunity(id, name);
     };
 
@@ -307,6 +308,67 @@ export default function Community() {
     );
 
     const anyDiscoverLoading = discoverLoading || searchLoading;
+
+    // Renders the rich body of the join confirmation modal: avatar, name,
+    // type/member count, access badges, and a truncated description. Only
+    // produces output while the modal is open so the discriminated union
+    // narrows cleanly.
+    const renderJoinModalContent = () => {
+        if (!joinModal.open) return null;
+        const e = joinModal.entity;
+
+        const access: AccessProfile = {
+            visibility: e.visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC',
+            joinPolicy: toJoinPolicy(e.joinPolicy),
+            paymentType:
+                e.paymentType === 'ONE_TIME' || e.paymentType === 'SUBSCRIPTION'
+                    ? (e.paymentType as 'ONE_TIME' | 'SUBSCRIPTION')
+                    : 'NONE',
+            price:
+                typeof e.priceAmount === 'number' && e.priceCurrency
+                    ? { amountInCents: e.priceAmount, currency: e.priceCurrency }
+                    : undefined,
+        };
+
+        return (
+            <div className="flex flex-col gap-3">
+                {/* Avatar + name + members row */}
+                <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={e.avatarUrl || '/GLOBE.png'}
+                        alt={e.name}
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 rounded-full object-cover border border-border-subtle flex-shrink-0"
+                    />
+                    <div className="min-w-0">
+                        <p className="font-semibold text-text-primary truncate">{e.name}</p>
+                        <p className="text-xs text-text-secondary truncate">
+                            {(e.memberCount ?? 0) === 1
+                                ? tJoinModal('membersOne')
+                                : tJoinModal('membersOther', { count: e.memberCount ?? 0 })}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Badges row */}
+                <div className="flex flex-wrap items-center gap-1">
+                    <AccessBadges access={access} size="card" />
+                    {access.joinPolicy === 'APPROVAL' && (
+                        <span className="inline-flex items-center text-[0.6875rem] px-2 py-0.5 rounded-full bg-surface-warning text-text-on-warning border border-transparent">
+                            {tJoinModal('approvalRequired')}
+                        </span>
+                    )}
+                </div>
+
+                {/* Description */}
+                {e.description && (
+                    <p className="text-sm text-text-secondary line-clamp-2">{e.description}</p>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
@@ -401,7 +463,7 @@ export default function Community() {
                                 key={community.id}
                                 title={community.name}
                                 members={community.memberCount ?? 0}
-                                onButtonClick={() => handleJoinClick(community.id, community.name)}
+                                onButtonClick={() => handleJoinClick(community)}
                                 buttonText={
                                     isAlreadyJoined
                                         ? 'Joined'
@@ -424,13 +486,15 @@ export default function Community() {
 
             <ConfirmationModal
                 open={joinModal.open}
-                onCancel={() => setJoinModal({ open: false, id: '', name: '' })}
+                onCancel={() => setJoinModal({ open: false })}
                 onConfirm={handleJoinConfirm}
-                title="Join community?"
-                description={joinModal.name ? `You are about to join ${joinModal.name}.` : 'You are about to join this community.'}
+                title={tJoinModal('communityTitle')}
+                description=""
                 confirmText={tActions('join')}
                 isLoading={joinLoading}
-            />
+            >
+                {renderJoinModalContent()}
+            </ConfirmationModal>
 
             <MembershipPaymentModal
                 open={paymentModal.open}

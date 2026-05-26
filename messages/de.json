@@ -430,6 +430,13 @@
                 "description": "Sie müssen erneut einen Beitritt beantragen, um Inhalte zu sehen."
             }
         },
+        "joinModal": {
+            "communityTitle": "Community beitreten?",
+            "associationTitle": "Verein beitreten?",
+            "membersOne": "1 Mitglied",
+            "membersOther": "{count} Mitglieder",
+            "approvalRequired": "Genehmigung erforderlich"
+        },
         "groupchats": {
             "groupchats": "Gruppenchats",
             "create": "Gruppenchat erstellen",
@@ -569,6 +576,7 @@
         "associationsYouMayLike": "Vereine, die Ihnen gefallen könnten",
         "join": "Treten Sie einer Community bei, um zu sehen, was passiert",
         "joincommunity": "Community beitreten",
+        "joinassociation": "Verein beitreten",
         "members": "Mitglieder",
         "noMembers": "Keine Mitglieder",
         "myCommunity": "Meine Community",

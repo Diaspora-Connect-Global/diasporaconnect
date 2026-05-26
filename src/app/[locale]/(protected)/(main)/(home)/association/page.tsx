@@ -19,6 +19,7 @@ import {
 } from '@/services/gql/associations';
 import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
 import { cn } from '@/lib/utils';
+import AccessBadges from '@/components/cards/AccessBadges';
 
 const PAGE_SIZE = 20;
 
@@ -34,6 +35,7 @@ interface MyAssociationItem {
   paymentType?: AssociationPaymentType | null;
   priceAmount?: number | null;
   priceCurrency?: string | null;
+  associationType?: { id: string; name: string } | null;
   myMembership?: {
     status: string;
     role: string;
@@ -53,7 +55,13 @@ interface SearchAssociationItem {
   priceAmount?: number | null;
   priceCurrency?: string | null;
   membershipStatus?: string | null;
+  associationType?: { id: string; name: string } | null;
 }
+
+// Minimal shape the rich join-modal needs. Both the discover and "my
+// associations" rows satisfy it (memberCount/description/visibility/etc.
+// are all optional on the underlying queries).
+type AssociationRowLike = SearchAssociationItem | MyAssociationItem;
 
 interface GetMyAssociationsData {
   getMyAssociations: {
@@ -114,6 +122,8 @@ export default function AssociationsPage() {
   const tActions = useTranslations('actions');
   const t = useTranslations('home.associations');
   const tDiscovery = useTranslations('association.discovery');
+  const tCommunity = useTranslations('community');
+  const tJoinModal = useTranslations('home.joinModal');
 
   const router = useRouter();
   const pathname = usePathname();
@@ -179,12 +189,10 @@ export default function AssociationsPage() {
     id: '',
     name: '',
   });
-  const [joinModal, setJoinModal] = useState<{ open: boolean; id: string; name: string; isRequest: boolean }>({
-    open: false,
-    id: '',
-    name: '',
-    isRequest: false,
-  });
+  type JoinModalState =
+    | { open: false }
+    | { open: true; isRequest: boolean; entity: AssociationRowLike };
+  const [joinModal, setJoinModal] = useState<JoinModalState>({ open: false });
 
   const myAssociations = myData?.getMyAssociations?.associations ?? [];
   const allDiscover = searchData?.searchAssociations?.associations ?? [];
@@ -229,23 +237,87 @@ export default function AssociationsPage() {
     }
   };
 
-  const handleJoinClick = (associationId: string, name: string, joinPolicy?: string) => {
+  const handleJoinClick = (entity: AssociationRowLike) => {
+    const joinPolicy = entity.joinPolicy ?? undefined;
     if (joinPolicy === 'INVITE_ONLY') {
       toast.error(t('toasts.inviteOnly'));
       return;
     }
     setJoinModal({
       open: true,
-      id: associationId,
-      name,
       isRequest: joinPolicy === 'REQUEST' || joinPolicy === 'APPROVAL',
+      entity,
     });
   };
 
   const handleJoinConfirm = async () => {
-    if (!joinModal.id) return;
-    await handleJoin(joinModal.id, joinModal.name, joinModal.isRequest ? 'REQUEST' : 'OPEN');
-    setJoinModal({ open: false, id: '', name: '', isRequest: false });
+    if (!joinModal.open) return;
+    const { entity, isRequest } = joinModal;
+    await handleJoin(entity.id, entity.name, isRequest ? 'REQUEST' : 'OPEN');
+    setJoinModal({ open: false });
+  };
+
+  // Renders the rich body of the join confirmation modal: avatar, name,
+  // association type, member count, access badges, an "approval required"
+  // chip when applicable, and a truncated description. Only produces output
+  // while the modal is open so the discriminated union narrows cleanly.
+  const renderJoinModalContent = () => {
+    if (!joinModal.open) return null;
+    const e = joinModal.entity;
+    const typeName = e.associationType?.name;
+
+    const access: AccessProfile = {
+      visibility: e.visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC',
+      joinPolicy: toJoinPolicy(e.joinPolicy),
+      paymentType:
+        e.paymentType === 'ONE_TIME' || e.paymentType === 'SUBSCRIPTION'
+          ? (e.paymentType as 'ONE_TIME' | 'SUBSCRIPTION')
+          : 'NONE',
+      price:
+        typeof e.priceAmount === 'number' && e.priceCurrency
+          ? { amountInCents: e.priceAmount, currency: e.priceCurrency }
+          : undefined,
+    };
+
+    return (
+      <div className="flex flex-col gap-3">
+        {/* Avatar + name + type/members row */}
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={e.avatarUrl || '/ADANSI.png'}
+            alt={e.name}
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-full object-cover border border-border-subtle flex-shrink-0"
+          />
+          <div className="min-w-0">
+            <p className="font-semibold text-text-primary truncate">{e.name}</p>
+            <p className="text-xs text-text-secondary truncate">
+              {typeName ? `${typeName} · ` : ''}
+              {(e.memberCount ?? 0) === 1
+                ? tJoinModal('membersOne')
+                : tJoinModal('membersOther', { count: e.memberCount ?? 0 })}
+            </p>
+          </div>
+        </div>
+
+        {/* Badges row */}
+        <div className="flex flex-wrap items-center gap-1">
+          <AccessBadges access={access} size="card" />
+          {access.joinPolicy === 'APPROVAL' && (
+            <span className="inline-flex items-center text-[0.6875rem] px-2 py-0.5 rounded-full bg-surface-warning text-text-on-warning border border-transparent">
+              {tJoinModal('approvalRequired')}
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        {e.description && (
+          <p className="text-sm text-text-secondary line-clamp-2">{e.description}</p>
+        )}
+      </div>
+    );
   };
 
   const handleLeaveClick = (id: string, name: string) => {
@@ -381,7 +453,7 @@ export default function AssociationsPage() {
                 profileImage={assn.avatarUrl || '/ADANSI.png'}
                 profileName={assn.name}
                 buttonText={buttonText}
-                onButtonClick={() => handleJoinClick(assn.id, assn.name, assn.joinPolicy)}
+                onButtonClick={() => handleJoinClick(assn)}
                 access={access ?? undefined}
               />
             );
@@ -395,13 +467,23 @@ export default function AssociationsPage() {
 
       <ConfirmationModal
         open={joinModal.open}
-        onCancel={() => setJoinModal({ open: false, id: '', name: '', isRequest: false })}
+        onCancel={() => setJoinModal({ open: false })}
         onConfirm={handleJoinConfirm}
-        title={joinModal.isRequest ? 'Request to join association?' : 'Join association?'}
-        description={joinModal.name ? `You are about to ${joinModal.isRequest ? 'request to join' : 'join'} ${joinModal.name}.` : `You are about to ${joinModal.isRequest ? 'request to join this association' : 'join this association'}.`}
-        confirmText={joinModal.isRequest ? t('actions.requestToJoin') : tActions('join')}
+        title={
+          joinModal.open && joinModal.isRequest
+            ? `${t('actions.requestToJoin')}?`
+            : tJoinModal('associationTitle')
+        }
+        description=""
+        confirmText={
+          joinModal.open && joinModal.isRequest
+            ? t('actions.requestToJoin')
+            : tCommunity('joinassociation')
+        }
         isLoading={joinLoading}
-      />
+      >
+        {renderJoinModalContent()}
+      </ConfirmationModal>
 
       <ConfirmationModal
         open={leaveModal.open}

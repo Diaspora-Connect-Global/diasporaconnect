@@ -431,6 +431,13 @@
                 "description": "You will need to request to join again to see content."
             }
         },
+        "joinModal": {
+            "communityTitle": "Join community?",
+            "associationTitle": "Join association?",
+            "membersOne": "1 member",
+            "membersOther": "{count} members",
+            "approvalRequired": "Approval required"
+        },
         "groupchats": {
             "groupchats": "Group chats",
             "create": "Create group chat",
@@ -569,6 +576,7 @@
         "associationsYouMayLike": "Associations you may like",
         "join": "Join a community to see whats's happening",
         "joincommunity": "Join community",
+        "joinassociation": "Join association",
         "joined": "Joined",
         "members": "members",
         "noMembers": "No members",
