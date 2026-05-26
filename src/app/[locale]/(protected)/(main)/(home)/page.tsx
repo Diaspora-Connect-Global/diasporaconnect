@@ -511,7 +511,21 @@ export default function Home() {
     if (paymentEntity) {
       toast.success(`You are now a member of ${paymentEntity.name}`);
       setJoinedCommunities((prev) => new Set(prev).add(paymentEntity.id));
-      setTimeout(() => refetchCommunities(), 100);
+      // Webhook delay: Option B doesn't create the membership row until
+      // payment-service publishes `payment.membership.confirmed` and the
+      // community-service consumer processes it (~1-3 seconds end-to-end).
+      // Immediate refetch returns the pre-row state. Refetch after a short
+      // delay so the rail AND the sidebar lists pick up the freshly-
+      // activated row without forcing the user to reload the page.
+      const REFETCH_DELAY_MS = 3000;
+      setTimeout(() => {
+        void refetchCommunities();
+        // Sidebar's "Discover associations" my-list + the joined-communities
+        // sidebar both refetch via Apollo cache invalidation.
+        void apolloClient.refetchQueries({
+          include: [GET_USER_ASSOCIATIONS, LIST_MY_JOINED_COMMUNITIES],
+        });
+      }, REFETCH_DELAY_MS);
     }
     setPaymentModalOpen(false);
     setPaymentEntity(null);
