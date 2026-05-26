@@ -7,6 +7,9 @@ import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
 import { Virtuoso } from 'react-virtuoso';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
+import { NewPostsBanner } from '@/components/home/NewPostsBanner';
+import { CategoryBadge } from '@/components/home/CategoryBadge';
+import { useUnseenFeedCount } from '@/hooks/useUnseenFeedCount';
 import { Link } from '@/i18n/navigation';
 import { REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, GET_COMMUNITY } from '@/services/gql/community';
 import { GET_ASSOCIATION } from '@/services/gql/associations';
@@ -329,6 +332,14 @@ export default function Home() {
   // the direct recordInteraction gRPC path via <ImpressionTracker>, which
   // owns its own hook instance — so this page no longer needs one directly.
   const isRecommendedArm = viewMode === 'you';
+
+  // "X new posts available" pill — only polls while the For-You tab is
+  // active and the page is visible. Click → refetch (which fires with
+  // refresh=true via useFeed's refreshTick path) + scroll to top + reset.
+  const {
+    count: unseenCount,
+    reset: resetUnseenCount,
+  } = useUnseenFeedCount({ enabled: isRecommendedArm });
   const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
     awaitRefetchQueries: false,
@@ -756,6 +767,18 @@ export default function Home() {
               the surrounding chrome (top toggle, sidebar, modals) keeps
               its layout because we pass the existing scroll column as
               the custom scroll parent. */}
+          {isRecommendedArm && (
+            <NewPostsBanner
+              count={unseenCount}
+              onClick={() => {
+                void refetchFeed();
+                if (feedScrollEl) {
+                  feedScrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                resetUnseenCount();
+              }}
+            />
+          )}
           {hasPosts && (
             <Virtuoso
               data={feedItems}
@@ -833,6 +856,11 @@ export default function Home() {
                     className="mb-2"
                   >
                     <div id={`feed-post-${post.id}`}>
+                      {post.categories && post.categories.length > 0 && (
+                        <div className="pl-3 pt-2">
+                          <CategoryBadge category={post.categories[0]} />
+                        </div>
+                      )}
                       <FeedCardWithReply
                         postId={post.id}
                         profileImage={profileData.avatar}

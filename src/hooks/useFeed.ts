@@ -183,9 +183,15 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
    * If the create-post page redirected to home after a successful create,
    * it stashed the new post id in sessionStorage. Hydrate it and stage it
    * to prepend at the top of the feed (ahead of whatever the recommender
-   * returns). The Kafka projection into `content_item` usually lands within
-   * seconds, so the next natural refresh will dedupe this prepend out of
-   * the user's view.
+   * returns).
+   *
+   * This is the "first-mount-after-create" affordance: the Kafka projection
+   * into `content_item` takes ~1-2s, so until then the recommendation-service
+   * has no row to surface. Durability across subsequent refreshes is owed
+   * to the backend "own_recent" prelude inside `RankFeedHandler`, which
+   * pins the viewer's posts published in the last 30 minutes to the top of
+   * their feed regardless of the `author <> viewer` exclusion every
+   * retriever enforces. The dedupe in `run()` below collapses the overlap.
    *
    * Reads + clears the sentinel exactly once per mount.
    */
@@ -241,11 +247,18 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       setRecommendedLoading(true);
       setRecommendedError(undefined);
       try {
+        // `refreshTick > 0` ⇒ explicit pull-to-refresh. Pass refresh:true so
+        // the recommendation-service skips its 60s feed cache and recomputes
+        // with the impression filter applied — same items the user just
+        // dismissed don't come back.
+        const isRefresh = isRecommendedFeed && refreshTick > 0;
         const { data, error } = await apolloClient.query<
           RecommendedPostsData | JoinedCommunityFeedData
         >({
           query,
-          variables: { limit: initialLimit },
+          variables: isRecommendedFeed
+            ? { limit: initialLimit, refresh: isRefresh }
+            : { limit: initialLimit },
           fetchPolicy: 'network-only',
           errorPolicy: 'all',
         });

@@ -131,6 +131,13 @@ export const FULL_POST_FRAGMENT = gql`
     reason
     isSponsored
     postUrl
+    # AI categorization (Phase 1 of ai-service). categories is the
+    # canonical 1-3 item list from the taxonomy (Politics, Tech, Jobs, ...).
+    # aiTopics is the looser set-merged tag list. Empty arrays for posts
+    # that have not been classified yet (legacy + in-flight) — the badge
+    # component hides itself in that case.
+    categories
+    aiTopics
     createdAt
     updatedAt
   }
@@ -693,8 +700,8 @@ export const SET_ONBOARDING_INTERESTS = gql`
  * in the UI.
  */
 export const RECOMMENDED_POSTS = gql`
-  query RecommendedPosts($limit: Int, $cursor: String) {
-    recommendedPosts(limit: $limit, cursor: $cursor) {
+  query RecommendedPosts($limit: Int, $cursor: String, $refresh: Boolean) {
+    recommendedPosts(limit: $limit, cursor: $cursor, refresh: $refresh) {
       items {
         itemId
         itemType
@@ -707,6 +714,21 @@ export const RECOMMENDED_POSTS = gql`
       nextCursor
       rankingStrategy
       explorationRatio
+    }
+  }
+`;
+
+/**
+ * "X new posts available" pill — polled every 60s while the home tab
+ * is visible. Returns count (capped at 99) of items visible to the
+ * viewer that have been published since their last impression on the
+ * given surface. Fail-soft on the backend → 0 on any downstream error.
+ */
+export const UNSEEN_FEED_COUNT = gql`
+  query UnseenFeedCount($surface: String) {
+    unseenFeedCount(surface: $surface) {
+      count
+      lastSeenAt
     }
   }
 `;

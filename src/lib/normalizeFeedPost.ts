@@ -92,5 +92,7 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     mentions: p.mentions,
     engagementCounts,
     userEngagement,
+    categories: p.categories ?? undefined,
+    aiTopics: p.aiTopics ?? undefined,
   };
 }

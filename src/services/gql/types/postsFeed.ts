@@ -178,6 +178,14 @@ export interface Post {
   engagementCounts: EngagementCounts;
   userEngagement: UserEngagement;
   /**
+   * AI categorization from ai-service (Phase 1). `categories` is the
+   * canonical 1-3 item list (taxonomy: Politics, Tech, Business, …);
+   * `aiTopics` is the looser set-merged tag list. Empty arrays for
+   * legacy / in-flight posts — `<CategoryBadge>` hides itself when empty.
+   */
+  categories?: string[];
+  aiTopics?: string[];
+  /**
    * Recommendation provenance (carried from RankedFeedPage.items[].source).
    * Internal-only — never rendered in the UI; used by ImpressionTracker to attribute
    * downstream VIEW/DWELL signals to the originating retriever.
@@ -236,6 +244,8 @@ export interface FeedPostFragment {
   mentions?: MentionInfo[];
   engagementCounts?: Partial<EngagementCounts> | null;
   userEngagement?: Partial<UserEngagement> | null;
+  categories?: string[] | null;
+  aiTopics?: string[] | null;
   createdAt: string;
 }
 
