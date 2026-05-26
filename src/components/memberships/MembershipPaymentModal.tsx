@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useLazyQuery, useMutation } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -104,23 +104,13 @@ export function MembershipPaymentModal({
     { input: ConfirmPaymentIntentInput }
   >(CONFIRM_PAYMENT_INTENT);
 
-  // Mirror the paid-events flow: look up the user's saved Stripe card via
-  // MY_PAYMENT_METHODS instead of collecting it inline. Lazy so we don't
-  // hit the BE until the user actually reaches the pay step.
-  const [fetchMyPaymentMethods] = useLazyQuery<MyPaymentMethodsResponse>(
-    MY_PAYMENT_METHODS,
-    { fetchPolicy: 'network-only' },
-  );
-
-  const getPrimaryStripeCardPaymentMethodId = async (): Promise<string | null> => {
-    const { data } = await fetchMyPaymentMethods();
-    const methods = data?.myPaymentMethods?.payment_methods ?? [];
-    const stripeCards = methods.filter(
-      (m) => m.provider === 'STRIPE' && m.type === 'card',
-    );
-    const primary = stripeCards.find((m) => Boolean(m.is_primary));
-    return (primary ?? stripeCards[0])?.id ?? null;
-  };
+  // NOTE: the saved-card lookup used to live here as a useLazyQuery + helper
+  // function passed down to PayStep. That created a fresh function reference
+  // on every render — and because useLazyQuery re-renders the parent whenever
+  // its internal state changes, the PayStep effect that depended on the
+  // function ref kept aborting + re-firing the query in an infinite loop
+  // ("Checking your saved cards…" never resolved). The lookup is now owned
+  // by PayStep itself (see hook usage there) — no props means no ref churn.
 
   const formatAmount = (value: number, currency: string): string => {
     try {
@@ -295,7 +285,6 @@ export function MembershipPaymentModal({
             paymentMethod={paymentMethod}
             onPaymentMethodChange={setPaymentMethod}
             userEmail={userEmail ?? null}
-            getPrimaryStripeCardPaymentMethodId={getPrimaryStripeCardPaymentMethodId}
             confirmPaymentIntent={async (input) => {
               await confirmPaymentIntent({ variables: { input } });
             }}
@@ -427,7 +416,6 @@ interface PayStepProps {
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
   userEmail: string | null;
-  getPrimaryStripeCardPaymentMethodId: () => Promise<string | null>;
   confirmPaymentIntent: (input: ConfirmPaymentIntentInput) => Promise<void>;
   onBackToPlan: () => void;
   onPaid: (membershipId: string) => void;
@@ -440,7 +428,6 @@ function PayStep({
   paymentMethod,
   onPaymentMethodChange,
   userEmail,
-  getPrimaryStripeCardPaymentMethodId,
   confirmPaymentIntent,
   onBackToPlan,
   onPaid,
@@ -449,32 +436,25 @@ function PayStep({
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // Saved-card lookup state. `null` means "haven't checked yet"; `''` means
-  // checked and none found; otherwise the saved Stripe card's id. Matches
-  // paid-events pattern — user must add a card in the wallet first.
-  const [savedCardId, setSavedCardId] = useState<string | null>(null);
-  const [cardCheckLoading, setCardCheckLoading] = useState(true);
 
-  // Pre-flight the saved-card lookup when the step mounts so the UI can show
-  // either the "Pay with saved card" button or the "Add card in wallet"
-  // fallback immediately, without making the user click first to find out.
-  useEffect(() => {
-    let cancelled = false;
-    setCardCheckLoading(true);
-    getPrimaryStripeCardPaymentMethodId()
-      .then((id) => {
-        if (!cancelled) setSavedCardId(id ?? '');
-      })
-      .catch(() => {
-        if (!cancelled) setSavedCardId('');
-      })
-      .finally(() => {
-        if (!cancelled) setCardCheckLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [getPrimaryStripeCardPaymentMethodId]);
+  // Self-contained saved-card lookup — owned by PayStep, not threaded through
+  // props. The previous prop-function pattern caused an infinite effect loop:
+  // parent re-renders on useLazyQuery state changes → fresh fn ref → effect
+  // aborts and refires → query fires again → loop. Owning the hook here breaks
+  // the cycle entirely.
+  const { data: paymentMethodsData, loading: cardCheckLoading } = useQuery<MyPaymentMethodsResponse>(
+    MY_PAYMENT_METHODS,
+    { fetchPolicy: 'network-only' },
+  );
+  const savedCardId = useMemo<string | null>(() => {
+    if (cardCheckLoading) return null;
+    const methods = paymentMethodsData?.myPaymentMethods?.payment_methods ?? [];
+    const stripeCards = methods.filter(
+      (m) => m.provider === 'STRIPE' && m.type === 'card',
+    );
+    const primary = stripeCards.find((m) => Boolean(m.is_primary));
+    return (primary ?? stripeCards[0])?.id ?? '';
+  }, [paymentMethodsData, cardCheckLoading]);
 
   const price = entity.access.price;
 
