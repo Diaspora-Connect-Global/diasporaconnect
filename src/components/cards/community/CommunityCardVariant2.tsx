@@ -41,7 +41,7 @@ export default function CommunityCardVariant2({
     return (
         <TooltipProvider>
             <div
-                className="bg-surface-default rounded-2xl lg:min-w-[14.5rem] lg:max-w-[15.5rem] w-[14.5rem] p-4 border border-border-subtle flex flex-col items-center gap-2 overflow-hidden"
+                className="bg-surface-default rounded-2xl lg:min-w-[14.5rem] lg:max-w-[15.5rem] w-[14.5rem] h-[16rem] p-4 border border-border-subtle flex flex-col items-center gap-2 overflow-hidden"
                 onClick={onCardClick}
             >
                 {/* Icon */}
