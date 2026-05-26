@@ -696,6 +696,7 @@ export default function Home() {
                     <CommunityCardVariant2
                       icon={community.avatarUrl}
                       title={community.name}
+                      description={community.description}
                       members={community?.memberCount || 0}
                       onButtonClick={() => handleJoinClick(community.id, community.name)}
                       buttonText={
@@ -821,6 +822,7 @@ export default function Home() {
                             <CommunityCardVariant2
                               icon={association.avatarUrl}
                               title={association.name}
+                              description={association.description}
                               members={association?.memberCount || 0}
                               onButtonClick={() =>
                                 handleJoinClick(association.id, association.name)

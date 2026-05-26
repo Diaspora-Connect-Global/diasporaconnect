@@ -25,6 +25,7 @@ interface CommunityCardVariant2Props {
 
 export default function CommunityCardVariant2({
     title,
+    description,
     members,
     onButtonClick,
     onCardClick,
@@ -35,32 +36,31 @@ export default function CommunityCardVariant2({
 }: CommunityCardVariant2Props) {
     const t = useTranslations('community');
 
-    const isTitleTruncated = title.length > 40; 
+    const isTitleTruncated = title.length > 40;
 
     return (
         <TooltipProvider>
             <div
-                className="bg-surface-default rounded-2xl h-[12.25rem] lg:min-w-[14.5rem]  lg:max-w-[15.5rem]  p-[0.75rem] border border-border-subtle flex flex-col items-center justify-between overflow-hidden "
+                className="bg-surface-default rounded-2xl lg:min-w-[14.5rem] lg:max-w-[15.5rem] w-[14.5rem] p-4 border border-border-subtle flex flex-col items-center gap-2 overflow-hidden"
                 onClick={onCardClick}
             >
                 {/* Icon */}
-                <div className="flex items-center justify-center h-[4rem] w-[4rem]">
-                   
-                        <Image
-                            width={64}
-                            height={64}
-                            src={icon || "/GLOBE.png"}
-                            alt="Profile"
-                            className="rounded-full object-contain w-full h-full"
-                        />
+                <div className="flex items-center justify-center h-16 w-16 mt-1">
+                    <Image
+                        width={64}
+                        height={64}
+                        src={icon || "/GLOBE.png"}
+                        alt="Profile"
+                        className="rounded-full object-contain w-full h-full"
+                    />
                 </div>
 
-                {/* Title - max 2 lines with conditional tooltip */}
-                <div className="w-full text-center h-[1.5rem]">
+                {/* Title — max 2 lines, conditional tooltip when long */}
+                <div className="w-full text-center px-1">
                     {isTitleTruncated ? (
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <h2 className="caption-large truncate cursor-help">
+                                <h2 className="caption-large font-semibold line-clamp-2 cursor-help leading-snug">
                                     {title}
                                 </h2>
                             </TooltipTrigger>
@@ -69,18 +69,25 @@ export default function CommunityCardVariant2({
                             </TooltipContent>
                         </Tooltip>
                     ) : (
-                        <h2 className="caption-large truncate">{title}</h2>
+                        <h2 className="caption-large font-semibold line-clamp-2 leading-snug">
+                            {title}
+                        </h2>
                     )}
                 </div>
 
                 {/* Members */}
-                <div className="w-full text-center h-[1rem]">
-                    {members !== undefined && (
-                        <p className="caption-medium text-text-primary">
-                            {members ?? 0} {t('members')}
-                        </p>
-                    )}
-                </div>
+                {members !== undefined && (
+                    <p className="caption-medium text-text-secondary">
+                        {members ?? 0} {t('members')}
+                    </p>
+                )}
+
+                {/* Description — 2-line clamp, muted color, centered */}
+                {description && (
+                    <p className="text-xs text-text-secondary text-center line-clamp-2 leading-snug px-1">
+                        {description}
+                    </p>
+                )}
 
                 {access && (
                     <div className="w-full flex justify-center">
@@ -88,11 +95,11 @@ export default function CommunityCardVariant2({
                     </div>
                 )}
 
-                {/* Button */}
-                <div className="w-full flex justify-center h-[2.25rem] ">
+                {/* Button — full width to match the design mock */}
+                <div className="w-full mt-auto pt-2">
                     <ButtonType1
                         onClick={onButtonClick}
-                        className="w-[8.75rem] shrink"
+                        className="w-full"
                         disabled={isDisabled}
                     >
                         {buttonText}
