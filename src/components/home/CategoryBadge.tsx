@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 /**
  * Per-category UI metadata. The backend ai-service classifies posts into
@@ -77,6 +78,12 @@ export interface CategoryBadgeProps {
  * the layout responsive and the label is intentionally not truncated.
  */
 export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
+  // Hook called unconditionally per the rules of hooks; the `category ===
+  // null/Other` early-returns below happen AFTER hook setup. `t.has`
+  // gates the translation lookup so an unknown category doesn't throw —
+  // we fall back to the English label from CATEGORY_STYLES.
+  const t = useTranslations('categoryBadge');
+
   if (!category) return null;
   if (category === 'Other') return null;
 
@@ -86,12 +93,16 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
   };
   if (!style.label) return null;
 
+  // Prefer the locale-specific translation when one exists; fall back to
+  // the English label so an unmapped category still renders something.
+  const displayLabel = t.has(category) ? t(category) : style.label;
+
   return (
     <span
       className={`inline-flex items-center text-xs font-bold uppercase tracking-wide text-white ${style.className} rounded-md px-3 py-1`}
-      aria-label={`Category: ${style.label}`}
+      aria-label={`Category: ${displayLabel}`}
     >
-      {style.label}
+      {displayLabel}
     </span>
   );
 };

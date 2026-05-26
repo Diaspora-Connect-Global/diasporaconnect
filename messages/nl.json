@@ -1545,5 +1545,40 @@
                 "confirmFailed": "We konden je betaling niet bevestigen. Probeer het opnieuw."
             }
         }
+    },
+    "categoryBadge": {
+        "Politics": "Politiek",
+        "Tech": "Tech",
+        "Business": "Zaken",
+        "Culture": "Cultuur",
+        "Sports": "Sport",
+        "Education": "Onderwijs",
+        "Health": "Gezondheid",
+        "Entertainment": "Vermaak",
+        "News": "Nieuws",
+        "Jobs": "Kans",
+        "Community": "Gemeensch.",
+        "Religion": "Geloof",
+        "Diaspora": "Diaspora",
+        "Travel": "Reizen",
+        "Food": "Eten",
+        "Family": "Familie",
+        "Finance": "Financiën",
+        "Lifestyle": "Lifestyle",
+        "Personal": "Persoonlijk",
+        "Remittance": "Overmaking",
+        "Housing": "Wonen",
+        "Language": "Taal",
+        "Immigration": "Immigratie",
+        "Announcement": "Aankondig.",
+        "Event": "Evenement",
+        "Question": "Vraag",
+        "Grant": "Subsidie",
+        "Agriculture": "Landbouw",
+        "War": "Oorlog",
+        "Fundraising": "Inzameling",
+        "Wedding": "Bruiloft",
+        "Funeral": "Uitvaart",
+        "Volunteer": "Vrijwillig"
     }
 }

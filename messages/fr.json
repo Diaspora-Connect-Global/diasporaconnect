@@ -1545,5 +1545,40 @@
                 "confirmFailed": "We couldn't confirm your payment. Please try again."
             }
         }
+    },
+    "categoryBadge": {
+        "Politics": "Politique",
+        "Tech": "Tech",
+        "Business": "Affaires",
+        "Culture": "Culture",
+        "Sports": "Sport",
+        "Education": "Éducation",
+        "Health": "Santé",
+        "Entertainment": "Loisirs",
+        "News": "Actu",
+        "Jobs": "Opportunité",
+        "Community": "Communauté",
+        "Religion": "Foi",
+        "Diaspora": "Diaspora",
+        "Travel": "Voyage",
+        "Food": "Cuisine",
+        "Family": "Famille",
+        "Finance": "Finance",
+        "Lifestyle": "Style",
+        "Personal": "Personnel",
+        "Remittance": "Transfert",
+        "Housing": "Logement",
+        "Language": "Langue",
+        "Immigration": "Immigration",
+        "Announcement": "Annonce",
+        "Event": "Événement",
+        "Question": "Question",
+        "Grant": "Subvention",
+        "Agriculture": "Agriculture",
+        "War": "Guerre",
+        "Fundraising": "Collecte",
+        "Wedding": "Mariage",
+        "Funeral": "Obsèques",
+        "Volunteer": "Bénévole"
     }
 }
