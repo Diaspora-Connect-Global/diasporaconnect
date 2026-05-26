@@ -1540,9 +1540,7 @@
                 "methodCard": "Card",
                 "methodMobile": "Mobile Money",
                 "payCta": "Pay",
-                "checkingCard": "Gespeicherte Karten werden geprüft…",
-                "savedCardReady": "Wir belasten Ihre gespeicherte Karte.",
-                "addCardCta": "Karte im Wallet hinzufügen"
+                "mobileHint": "Sie geben Ihre Mobile-Money-Nummer und Ihren Anbieter im nächsten Schritt ein."
             },
             "step3": {
                 "success": "You're in. Welcome!",

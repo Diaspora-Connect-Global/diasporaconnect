@@ -1540,9 +1540,7 @@
                 "methodCard": "Card",
                 "methodMobile": "Mobile Money",
                 "payCta": "Pay",
-                "checkingCard": "Verifica delle carte salvate…",
-                "savedCardReady": "Addebiteremo la carta salvata in archivio.",
-                "addCardCta": "Aggiungi una carta nel tuo portafoglio"
+                "mobileHint": "Inserirai il numero e l'operatore Mobile Money nel passaggio successivo."
             },
             "step3": {
                 "success": "You're in. Welcome!",

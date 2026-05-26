@@ -1540,9 +1540,7 @@
                 "methodCard": "Kaart",
                 "methodMobile": "Mobile Money",
                 "payCta": "Betalen",
-                "checkingCard": "Opgeslagen kaarten controleren…",
-                "savedCardReady": "We belasten je opgeslagen kaart.",
-                "addCardCta": "Kaart toevoegen in je wallet"
+                "mobileHint": "Je voert je mobile-money-nummer en provider in de volgende stap in."
             },
             "step3": {
                 "success": "Je bent erbij. Welkom!",

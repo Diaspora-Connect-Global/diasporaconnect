@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useState, useMemo, useEffect, type FormEvent } from 'react';
+import { useMutation } from '@apollo/client/react';
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import type { StripeElementsOptions } from '@stripe/stripe-js';
 import { useLocale, useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -15,15 +17,12 @@ import {
 } from '@/components/ui/dialog';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { Link } from '@/i18n/navigation';
+import { getStripe } from '@/lib/stripe';
 import { openPaystackMobileMoney } from '@/lib/paystack';
-import {
-  CONFIRM_PAYMENT_INTENT,
-  MY_PAYMENT_METHODS,
-} from '@/services/gql/payments';
+import { CONFIRM_PAYMENT_INTENT } from '@/services/gql/payments';
 import type {
   ConfirmPaymentIntentResponse,
   ConfirmPaymentIntentInput,
-  MyPaymentMethodsResponse,
 } from '@/services/gql/payments';
 import { useUserStore } from '@/store/useUserStore';
 import type {
@@ -104,13 +103,10 @@ export function MembershipPaymentModal({
     { input: ConfirmPaymentIntentInput }
   >(CONFIRM_PAYMENT_INTENT);
 
-  // NOTE: the saved-card lookup used to live here as a useLazyQuery + helper
-  // function passed down to PayStep. That created a fresh function reference
-  // on every render — and because useLazyQuery re-renders the parent whenever
-  // its internal state changes, the PayStep effect that depended on the
-  // function ref kept aborting + re-firing the query in an infinite loop
-  // ("Checking your saved cards…" never resolved). The lookup is now owned
-  // by PayStep itself (see hook usage there) — no props means no ref churn.
+  const stripeOptions: StripeElementsOptions | undefined =
+    requestResult?.clientSecret
+      ? { clientSecret: requestResult.clientSecret, appearance: { theme: 'stripe' } }
+      : undefined;
 
   const formatAmount = (value: number, currency: string): string => {
     try {
@@ -274,23 +270,26 @@ export function MembershipPaymentModal({
           />
         )}
 
-        {step === 'pay' && requestResult?.clientSecret && (
-          <PayStep
-            entity={entity}
-            membershipId={requestResult.membershipId}
-            paymentIntentIdHint={
-              requestResult.paymentIntentId ??
-              parsePaymentIntentIdFromClientSecret(requestResult.clientSecret)
-            }
-            paymentMethod={paymentMethod}
-            onPaymentMethodChange={setPaymentMethod}
-            userEmail={userEmail ?? null}
-            confirmPaymentIntent={async (input) => {
-              await confirmPaymentIntent({ variables: { input } });
-            }}
-            onBackToPlan={() => setStep('plan')}
-            onPaid={handlePaidSuccess}
-          />
+        {step === 'pay' && requestResult?.clientSecret && stripeOptions && (
+          <Elements stripe={getStripe()} options={stripeOptions}>
+            <PayStep
+              entity={entity}
+              clientSecret={requestResult.clientSecret}
+              membershipId={requestResult.membershipId}
+              paymentIntentIdHint={
+                requestResult.paymentIntentId ??
+                parsePaymentIntentIdFromClientSecret(requestResult.clientSecret)
+              }
+              paymentMethod={paymentMethod}
+              onPaymentMethodChange={setPaymentMethod}
+              userEmail={userEmail ?? null}
+              confirmPaymentIntent={async (input) => {
+                await confirmPaymentIntent({ variables: { input } });
+              }}
+              onBackToPlan={() => setStep('plan')}
+              onPaid={handlePaidSuccess}
+            />
+          </Elements>
         )}
 
         {step === 'done' && (
@@ -411,6 +410,7 @@ function PlanStep({
 
 interface PayStepProps {
   entity: MembershipEntity;
+  clientSecret: string;
   membershipId: string;
   paymentIntentIdHint: string | null;
   paymentMethod: PaymentMethod;
@@ -423,6 +423,7 @@ interface PayStepProps {
 
 function PayStep({
   entity,
+  clientSecret,
   membershipId,
   paymentIntentIdHint,
   paymentMethod,
@@ -432,57 +433,70 @@ function PayStep({
   onBackToPlan,
   onPaid,
 }: PayStepProps) {
+  // clientSecret is consumed by the parent's <Elements> wrapper, not directly here.
+  // Keep it as a prop so the contract stays explicit.
+  void clientSecret;
   const t = useTranslations('membership.payment');
+  const stripe = useStripe();
+  const elements = useElements();
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Self-contained saved-card lookup — owned by PayStep, not threaded through
-  // props. The previous prop-function pattern caused an infinite effect loop:
-  // parent re-renders on useLazyQuery state changes → fresh fn ref → effect
-  // aborts and refires → query fires again → loop. Owning the hook here breaks
-  // the cycle entirely.
-  const { data: paymentMethodsData, loading: cardCheckLoading } = useQuery<MyPaymentMethodsResponse>(
-    MY_PAYMENT_METHODS,
-    { fetchPolicy: 'network-only' },
-  );
-  const savedCardId = useMemo<string | null>(() => {
-    if (cardCheckLoading) return null;
-    const methods = paymentMethodsData?.myPaymentMethods?.payment_methods ?? [];
-    const stripeCards = methods.filter(
-      (m) => m.provider === 'STRIPE' && m.type === 'card',
-    );
-    const primary = stripeCards.find((m) => Boolean(m.is_primary));
-    return (primary ?? stripeCards[0])?.id ?? '';
-  }, [paymentMethodsData, cardCheckLoading]);
-
   const price = entity.access.price;
 
-  const handleStripeSubmit = async () => {
-    if (submitting) return;
-    if (!paymentIntentIdHint) {
-      setErrorMessage(t('errors.confirmFailed'));
-      return;
-    }
-    if (!savedCardId) {
-      setErrorMessage(t('errors.noSavedCard'));
-      return;
-    }
+  // Inline Stripe submit. Cards are NOT saved — the PaymentIntent has no
+  // setup_future_usage on it (BE default), so this is a one-shot charge.
+  // `redirect: 'if_required'` keeps the flow inside the modal for 3DS-less
+  // cards; only flows that NEED 3DS will leave the page.
+  const handleStripeSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!stripe || !elements) return;
     setSubmitting(true);
     setErrorMessage(null);
-    try {
-      await confirmPaymentIntent({
-        payment_intent_id: paymentIntentIdHint,
-        payment_method_id: savedCardId,
-        provider: 'STRIPE',
-      });
-      onPaid(membershipId);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : t('errors.confirmFailed');
-      setErrorMessage(message);
-    } finally {
+
+    const returnUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/${entity.kind}/${entity.id}`
+        : '/';
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: { return_url: returnUrl },
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      setErrorMessage(error.message ?? t('errors.cardDeclined'));
       setSubmitting(false);
+      return;
     }
+
+    const status = paymentIntent?.status;
+    if (status === 'succeeded' || status === 'processing') {
+      // Inform BE so the payment-service can publish the confirmed event
+      // even if the webhook is slow / dropped. Matches the paid-events
+      // post-confirm pattern.
+      try {
+        const intentId = paymentIntent?.id ?? paymentIntentIdHint;
+        if (intentId) {
+          await confirmPaymentIntent({
+            payment_intent_id: intentId,
+            payment_method_id: intentId,
+            provider: 'STRIPE',
+          });
+        }
+        onPaid(membershipId);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : t('errors.confirmFailed');
+        setErrorMessage(message);
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    setErrorMessage(t('errors.confirmFailed'));
+    setSubmitting(false);
   };
 
   const handlePaystack = async () => {
@@ -565,25 +579,11 @@ function PayStep({
       </fieldset>
 
       {paymentMethod === 'card' ? (
-        <div className="space-y-4">
-          {cardCheckLoading ? (
-            <p className="inline-flex items-center gap-2 text-sm text-text-secondary">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {t('step2.checkingCard')}
-            </p>
-          ) : savedCardId ? (
-            <p className="text-sm text-text-secondary">{t('step2.savedCardReady')}</p>
-          ) : (
-            <div className="space-y-2 rounded-md border border-border-subtle bg-surface-default p-3">
-              <p className="text-sm text-text-primary">{t('errors.noSavedCard')}</p>
-              <Link
-                href="/wallet"
-                className="text-sm text-text-brand underline underline-offset-2"
-              >
-                {t('step2.addCardCta')}
-              </Link>
-            </div>
-          )}
+        <form onSubmit={handleStripeSubmit} className="space-y-4">
+          {/* Stripe Elements card form — collects card number / expiry / CVC
+              inline. Default behavior: one-shot charge, card is NOT saved
+              (PaymentIntent has no setup_future_usage). */}
+          <PaymentElement />
           {errorMessage && (
             <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {errorMessage}
@@ -599,10 +599,9 @@ function PayStep({
               {t('step1.cancelCta')}
             </ButtonType3>
             <ButtonType2
-              type="button"
+              type="submit"
               className="py-2 px-3"
-              onClick={handleStripeSubmit}
-              disabled={submitting || cardCheckLoading || !savedCardId}
+              disabled={!stripe || !elements || submitting}
             >
               {submitting ? (
                 <span className="inline-flex items-center gap-2">
@@ -614,10 +613,14 @@ function PayStep({
               )}
             </ButtonType2>
           </div>
-        </div>
+        </form>
       ) : (
         <div className="space-y-4">
-          <p className="text-sm text-text-secondary">{t('step2.methodMobile')}</p>
+          {/* Mobile money: the Paystack inline form (network + phone number)
+              opens when the user clicks Pay. Same hosted-form flow paid-events
+              uses. We don't reimplement the form because Paystack already
+              renders one — embedded in a popup that overlays this modal. */}
+          <p className="text-sm text-text-secondary">{t('step2.mobileHint')}</p>
           {errorMessage && (
             <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {errorMessage}
