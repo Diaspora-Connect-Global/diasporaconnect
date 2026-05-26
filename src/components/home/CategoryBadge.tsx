@@ -67,7 +67,7 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
 
   return (
     <span
-      className={`inline-flex items-center text-[10px] font-semibold uppercase tracking-wide text-white ${style.className} rounded-full px-2 py-0.5`}
+      className={`inline-flex items-center text-xs font-bold uppercase tracking-wide text-white ${style.className} rounded-md px-3 py-1`}
       aria-label={`Category: ${style.label}`}
     >
       {style.label}
