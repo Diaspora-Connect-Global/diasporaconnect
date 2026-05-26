@@ -11,7 +11,7 @@ import { NewPostsBanner } from '@/components/home/NewPostsBanner';
 import { useUnseenFeedCount } from '@/hooks/useUnseenFeedCount';
 import { Link } from '@/i18n/navigation';
 import { REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, GET_COMMUNITY } from '@/services/gql/community';
-import { GET_ASSOCIATION } from '@/services/gql/associations';
+import { GET_ASSOCIATION, REQUEST_JOIN_ASSOCIATION } from '@/services/gql/associations';
 import {
   ADD_ENGAGEMENT,
   REMOVE_ENGAGEMENT,
@@ -350,10 +350,15 @@ export default function Home() {
     count: unseenCount,
     reset: resetUnseenCount,
   } = useUnseenFeedCount({ enabled: isRecommendedArm });
-  const [requestJoinCommunity, { loading: joinLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
+  const [requestJoinCommunity, { loading: joinCommunityLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
     awaitRefetchQueries: false,
   });
+  const [requestJoinAssociation, { loading: joinAssociationLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_ASSOCIATION, {
+    refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
+    awaitRefetchQueries: false,
+  });
+  const joinLoading = joinCommunityLoading || joinAssociationLoading;
   const [joiningCommunities, setJoiningCommunities] = useState<Set<string>>(new Set());
   const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
   type JoinModalState =
@@ -365,24 +370,40 @@ export default function Home() {
       };
   const [joinModal, setJoinModal] = useState<JoinModalState>({ open: false });
 
-  // Handle join community
-  const handleJoinCommunity = async (communityId: string) => {
+  // Handle join — branches on entity kind. The COMMUNITY mutation sends
+  // `entityType: "COMMUNITY"` to the backend; using it for an association
+  // id triggers `Entity not found` because the lookup runs against the
+  // wrong table. Always dispatch the mutation matching the modal's kind.
+  const handleJoin = async (
+    kind: 'community' | 'association',
+    entityId: string,
+  ) => {
+    const failMessage =
+      kind === 'association' ? 'Failed to join association' : 'Failed to join community';
     try {
-      const { data } = await requestJoinCommunity({
-        variables: { communityId }
-      });
+      const { data } =
+        kind === 'association'
+          ? await requestJoinAssociation({ variables: { associationId: entityId } })
+          : await requestJoinCommunity({ variables: { communityId: entityId } });
 
-      if (data?.requestMembership?.status === 'ACTIVE') {
-        toast.success(data.requestMembership.message);
-        setJoinedCommunities(prev => new Set(prev).add(communityId));
-        // Refetch in background
-        setTimeout(() => refetchCommunities(), 100);
+      const status = data?.requestMembership?.status;
+      if (status === 'ACTIVE' || status === 'PENDING' || status === 'PENDING_PAYMENT') {
+        toast.success(
+          data?.requestMembership?.message ||
+            (status === 'ACTIVE'
+              ? 'Joined successfully'
+              : 'Your request is pending approval'),
+        );
+        if (status === 'ACTIVE') {
+          setJoinedCommunities((prev) => new Set(prev).add(entityId));
+          setTimeout(() => refetchCommunities(), 100);
+        }
       } else {
-        toast.error('Failed to join community');
+        toast.error(failMessage);
       }
     } catch (err) {
-      console.error('Failed to join community:', err);
-      toast.error('Failed to join community');
+      console.error(`${failMessage}:`, err);
+      toast.error(failMessage);
     }
   };
 
@@ -395,7 +416,7 @@ export default function Home() {
 
   const handleJoinConfirm = async () => {
     if (!joinModal.open) return;
-    await handleJoinCommunity(joinModal.entity.id);
+    await handleJoin(joinModal.kind, joinModal.entity.id);
     setJoinModal({ open: false });
   };
 
