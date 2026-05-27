@@ -462,6 +462,8 @@ export const GET_USER_ENGAGED_POSTS = gql`
           hasSaved
           hasShared
         }
+        categories
+        aiTopics
       }
     }
   }
@@ -513,6 +515,8 @@ export const GET_USER_POSTS = gql`
         hasSaved
         hasShared
       }
+      categories
+      aiTopics
     }
   }
 `;
@@ -567,6 +571,8 @@ export const GET_SAVED_POSTS = gql`
           hasSaved
           hasShared
         }
+        categories
+        aiTopics
       }
     }
   }
@@ -622,6 +628,8 @@ export const GET_LIKED_POSTS = gql`
           hasSaved
           hasShared
         }
+        categories
+        aiTopics
       }
     }
   }
@@ -677,6 +685,8 @@ export const GET_COMMENTED_POSTS = gql`
           hasSaved
           hasShared
         }
+        categories
+        aiTopics
       }
     }
   }
