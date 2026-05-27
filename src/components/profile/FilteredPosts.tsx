@@ -298,6 +298,11 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
               style={{ cursor: 'pointer' }}
               onClick={handlePostCardClick(post.id)}
               onKeyDown={(e) => {
+                // Only act when focus is on the wrapper itself — typing in
+                // a nested textarea/input (e.g. the inline edit-post editor)
+                // bubbles space/enter up here and would otherwise navigate
+                // away mid-edit.
+                if (e.target !== e.currentTarget) return;
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   router.push(`/post/${post.id}`);
