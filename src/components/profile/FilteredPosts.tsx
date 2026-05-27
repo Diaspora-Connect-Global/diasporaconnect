@@ -49,10 +49,16 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
     const target = e.target as HTMLElement | null;
     if (!target) return;
 
+    // Skip the navigation when the click originated inside an interactive
+    // child of the card. Radix renders DropdownMenuItem / DialogContent
+    // with `role="menuitem"` / `role="dialog"` (NOT role="button"), so we
+    // explicitly include them — without this, clicking the post's ⋯-menu
+    // Delete item opens the modal AND bubbles up to navigate to /post/{id},
+    // stealing the focus before the delete mutation can run.
     const interactive = target.closest(
-      'button, a, input, textarea, select, label, img, video, [role="button"], .cursor-pointer'
+      'button, a, input, textarea, select, label, img, video, [role="button"], [role="menuitem"], [role="menu"], [role="dialog"], [data-radix-popper-content-wrapper], .cursor-pointer'
     );
-    if (interactive && e.currentTarget.contains(interactive)) return;
+    if (interactive) return;
 
     router.push(`/post/${postId}`);
   };

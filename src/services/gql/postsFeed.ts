@@ -888,7 +888,7 @@ export const RECOMMENDED_PEOPLE = gql`
  * fail silently (best-effort) — the post detail page must still work if this errors.
  */
 export const SIMILAR_POSTS = gql`
-  query SimilarPosts($postId: String!, $limit: Int) {
+  query SimilarPosts($postId: ID!, $limit: Int) {
     similarPosts(postId: $postId, limit: $limit) {
       items {
         itemId
