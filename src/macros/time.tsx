@@ -58,8 +58,8 @@ export const formatDateProximity = (dateString: string, options: TimeFormatOptio
     }
 
     if (diffDayCount < 7) return `${diffDayCount}d`;
-    if (diffDayCount < 28) return `${Math.floor(diffDayCount / 7)}w`;
-    if (diffDayCount < 365) return `${Math.floor(diffDayCount / 30)}mo`;
+    if (diffDayCount < 30) return `${Math.floor(diffDayCount / 7)}w`;
+    if (diffDayCount < 365) return `${Math.max(1, Math.floor(diffDayCount / 30))}mo`;
 
     // older than a year — show actual date
     return date.toLocaleDateString(options.locale ?? 'en-US', {
