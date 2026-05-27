@@ -31,10 +31,7 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
   const parsedTrustScore = trustScore == null ? 0 : Number(trustScore);
   const normalizedTrustScore = Number.isFinite(parsedTrustScore) ? parsedTrustScore : 0;
 
-  // TODO: derive current tier and earned tiers from the normalized score
   const currentTier = getTierFromScore(normalizedTrustScore);
-  const currentTierIndex = ALL_TIERS.indexOf(currentTier);
-  const earnedTiers = ALL_TIERS.slice(0, currentTierIndex + 1);
 
   return (
     <Card className="h-full p-0">
@@ -51,22 +48,20 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
 
             </div>
 
-            {earnedTiers.length > 0 && (
-              <div className="grid grid-cols-2 gap-4">
-                {earnedTiers.map((tier) => (
-                  <div
-                    key={tier}
-                    className={tier === currentTier ? "ring-2 ring-offset-1 ring-current rounded-md p-0.5" : undefined}
-                  >
-                    <UserBadge
-                      tier={tier}
-                      size={tier === currentTier ? "md" : "sm"}
-                      showLabel
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="grid grid-cols-2 gap-4">
+              {ALL_TIERS.map((tier) => (
+                <div
+                  key={tier}
+                  className={tier === currentTier ? "ring-2 ring-offset-1 ring-current rounded-md p-0.5" : undefined}
+                >
+                  <UserBadge
+                    tier={tier}
+                    size={tier === currentTier ? "md" : "sm"}
+                    showLabel
+                  />
+                </div>
+              ))}
+            </div>
             <div className="bg-surface-info text-text-info flex p-2 space-x-2 rounded-md">
               <InfoIcon size={32} />
               <p>{t('description')}</p>
