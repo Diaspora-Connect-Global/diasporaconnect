@@ -61,8 +61,10 @@ function getProfileData(post: Post) {
 
 export default function FeedPage() {
   const t = useTranslations('community');
+  const tCategory = useTranslations('categoryBadge');
   const searchParams = useSearchParams();
   const hashtag = searchParams.get('hashtag') ?? null;
+  const category = searchParams.get('category') ?? null;
   const [modalState, setModalState] = useState<{ postIndex: number; mediaIndex: number } | null>(null);
 
   const {
@@ -74,7 +76,9 @@ export default function FeedPage() {
     feedContainerRef,
     updatePostCounts,
     removePost,
-  } = useFeed({ hashtag });
+  } = useFeed({ hashtag, category });
+
+  const categoryLabel = category && tCategory.has(category) ? tCategory(category) : category;
 
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
@@ -182,6 +186,11 @@ export default function FeedPage() {
               Posts with #{hashtag}
             </h1>
           )}
+          {!hashtag && category && (
+            <h1 className="label-large text-text-primary">
+              {categoryLabel}
+            </h1>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -217,7 +226,11 @@ export default function FeedPage() {
           {!feedLoading && !feedError && !hasPosts && (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
               <p className="body-medium text-text-secondary mb-2">
-                {hashtag ? `No posts with #${hashtag} yet.` : t('join')}
+                {hashtag
+                  ? `No posts with #${hashtag} yet.`
+                  : category
+                    ? `No posts in ${categoryLabel} yet.`
+                    : t('join')}
               </p>
             </div>
           )}

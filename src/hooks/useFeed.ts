@@ -6,10 +6,12 @@ import {
   GET_FEED,
   GET_POST,
   GET_POSTS_BY_HASHTAG,
+  GET_POSTS_BY_CATEGORY,
   RECOMMENDED_POSTS,
   JOINED_COMMUNITY_FEED,
   type GetFeedData,
   type GetPostsByHashtagData,
+  type GetPostsByCategoryData,
 } from '@/services/gql/postsFeed';
 import { normalizeFeedPost } from '@/lib/normalizeFeedPost';
 import type {
@@ -56,6 +58,8 @@ export interface UseFeedOptions {
   /** When set, overrides `mode` mapping (e.g. TRENDING). */
   feedType?: FeedModeType;
   hashtag?: string | null;
+  /** AI-classified category label (e.g. "Politics"). Mutually exclusive with `hashtag`. */
+  category?: string | null;
   initialLimit?: number;
   pageSize?: number;
 }
@@ -88,12 +92,15 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     mode = 'you',
     feedType: feedTypeOverride,
     hashtag = null,
+    category = null,
     initialLimit = INITIAL_LIMIT,
     pageSize = PAGE_SIZE,
   } = options;
 
   const isHashtagFeed = Boolean(hashtag && hashtag.trim());
   const trimmedHashtag = (hashtag ?? '').trim();
+  const isCategoryFeed = !isHashtagFeed && Boolean(category && category.trim());
+  const trimmedCategory = (category ?? '').trim();
 
   const [mergedPosts, setMergedPosts] = useState<Post[]>([]);
   const [total, setTotal] = useState(0);
@@ -113,8 +120,8 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
    * Both ranked queries return IDs only; full posts are hydrated client-side
    * via `GET_POST` (same `hydrateRankedItems` helper).
    */
-  const isRecommendedFeed = !isHashtagFeed && resolvedFeedType === 'FOR_YOU';
-  const isJoinedCommunityFeed = !isHashtagFeed && resolvedFeedType === 'FOLLOWING';
+  const isRecommendedFeed = !isHashtagFeed && !isCategoryFeed && resolvedFeedType === 'FOR_YOU';
+  const isJoinedCommunityFeed = !isHashtagFeed && !isCategoryFeed && resolvedFeedType === 'FOLLOWING';
   const isRankedFeed = isRecommendedFeed || isJoinedCommunityFeed;
 
   // ============================================================================
@@ -317,7 +324,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   // LEGACY BRANCH — FOLLOWING / TRENDING / ... served by `feed` query
   // ============================================================================
 
-  const useLegacyFeed = !isHashtagFeed && !isRankedFeed;
+  const useLegacyFeed = !isHashtagFeed && !isCategoryFeed && !isRankedFeed;
 
   const feedInputBase = useMemo((): Omit<GetFeedInput, 'limit' | 'offset' | 'cursor' | 'refreshSeed'> => {
     const input: GetFeedInput = { type: resolvedFeedType };
@@ -363,12 +370,28 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     notifyOnNetworkStatusChange: true,
   });
 
+  const {
+    data: categoryData,
+    loading: categoryLoading,
+    error: categoryError,
+    refetch: refetchCategoryQuery,
+  } = useQuery<GetPostsByCategoryData>(GET_POSTS_BY_CATEGORY, {
+    variables: { input: { category: trimmedCategory, limit: initialLimit, offset: 0 } },
+    skip: !isCategoryFeed,
+    notifyOnNetworkStatusChange: true,
+  });
+
   const [fetchMoreFeed, { loading: loadingMoreFeed }] = useLazyQuery<GetFeedData>(GET_FEED, {
     fetchPolicy: 'network-only',
   });
 
   const [fetchMoreHashtag, { loading: loadingMoreHashtag }] = useLazyQuery<GetPostsByHashtagData>(
     GET_POSTS_BY_HASHTAG,
+    { fetchPolicy: 'network-only' }
+  );
+
+  const [fetchMoreCategory, { loading: loadingMoreCategory }] = useLazyQuery<GetPostsByCategoryData>(
+    GET_POSTS_BY_CATEGORY,
     { fetchPolicy: 'network-only' }
   );
 
@@ -406,8 +429,18 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     setFeedMeta({ hasMore: h.hasMore });
   }, [hashtagData?.postsByHashtag, isHashtagFeed]);
 
+  useEffect(() => {
+    if (!isCategoryFeed) return;
+    if (!categoryData?.postsByCategory) return;
+    const c = categoryData.postsByCategory;
+    setMergedPosts(dedupePostsById(mapPosts(c.posts)));
+    setTotal(c.total ?? 0);
+    setNextCursor(null);
+    setFeedMeta({ hasMore: c.hasMore });
+  }, [categoryData?.postsByCategory, isCategoryFeed]);
+
   const hasMore = useMemo(() => {
-    if (isHashtagFeed) {
+    if (isHashtagFeed || isCategoryFeed) {
       if (feedMeta.hasMore === false) return false;
       if (feedMeta.hasMore === true) return true;
       return mergedPosts.length < total;
@@ -419,7 +452,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     if (feedMeta.hasMore === true) return true;
     if (nextCursor) return true;
     return mergedPosts.length < total;
-  }, [feedMeta.hasMore, isHashtagFeed, isRankedFeed, mergedPosts.length, nextCursor, total]);
+  }, [feedMeta.hasMore, isHashtagFeed, isCategoryFeed, isRankedFeed, mergedPosts.length, nextCursor, total]);
 
   const loadMore = useCallback(() => {
     if (isHashtagFeed) {
@@ -436,6 +469,24 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         if (more.length) setMergedPosts((prev) => appendPostsUnique(prev, more));
         setTotal(h.total ?? 0);
         setFeedMeta({ hasMore: h.hasMore });
+      });
+      return;
+    }
+
+    if (isCategoryFeed) {
+      if (loadingMoreCategory || !hasMore) return;
+      const nextOffset = mergedPosts.length;
+      fetchMoreCategory({
+        variables: {
+          input: { category: trimmedCategory, limit: pageSize, offset: nextOffset },
+        },
+      }).then((res) => {
+        const c = res.data?.postsByCategory;
+        if (!c) return;
+        const more = mapPosts(c.posts);
+        if (more.length) setMergedPosts((prev) => appendPostsUnique(prev, more));
+        setTotal(c.total ?? 0);
+        setFeedMeta({ hasMore: c.hasMore });
       });
       return;
     }
@@ -504,40 +555,54 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     apolloClient,
     fetchMoreFeed,
     fetchMoreHashtag,
+    fetchMoreCategory,
     feedInputBase,
     hasMore,
     hydrateRankedItems,
     isHashtagFeed,
+    isCategoryFeed,
     isRecommendedFeed,
     isRankedFeed,
     loadingMoreFeed,
     loadingMoreHashtag,
+    loadingMoreCategory,
     mergedPosts.length,
     nextCursor,
     pageSize,
     recommendedLoadingMore,
     trimmedHashtag,
+    trimmedCategory,
   ]);
 
   const loading = isHashtagFeed
     ? hashtagLoading
-    : isRankedFeed
-      ? recommendedLoading
-      : feedLoading;
+    : isCategoryFeed
+      ? categoryLoading
+      : isRankedFeed
+        ? recommendedLoading
+        : feedLoading;
   const error = isHashtagFeed
     ? hashtagError
-    : isRankedFeed
-      ? recommendedError
-      : feedError;
+    : isCategoryFeed
+      ? categoryError
+      : isRankedFeed
+        ? recommendedError
+        : feedError;
   const loadingMore = isHashtagFeed
     ? loadingMoreHashtag
-    : isRankedFeed
-      ? recommendedLoadingMore
-      : loadingMoreFeed;
+    : isCategoryFeed
+      ? loadingMoreCategory
+      : isRankedFeed
+        ? recommendedLoadingMore
+        : loadingMoreFeed;
 
   const refetch = useCallback(() => {
     if (isHashtagFeed) {
       refetchHashtagQuery();
+      return;
+    }
+    if (isCategoryFeed) {
+      refetchCategoryQuery();
       return;
     }
     if (isRankedFeed) {
@@ -573,9 +638,11 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     feedInputBase,
     initialLimit,
     isHashtagFeed,
+    isCategoryFeed,
     isRankedFeed,
     refetchFeedQuery,
     refetchHashtagQuery,
+    refetchCategoryQuery,
   ]);
 
   // Infinite scroll is now driven by Virtuoso's `endReached` callback from

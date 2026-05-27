@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Per-category UI metadata. The backend ai-service classifies posts into
@@ -97,12 +98,20 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
   // the English label so an unmapped category still renders something.
   const displayLabel = t.has(category) ? t(category) : style.label;
 
+  // Clicking the badge opens /feed?category=<canonical>, which the feed
+  // page reads to drive the postsByCategory query. The canonical English
+  // category key is preserved in the URL so deep links survive locale
+  // changes; the human-readable label is localised at render time.
+  // `stopPropagation` keeps the click from bubbling into any wrapping
+  // card-level click handler (e.g. post-detail navigation).
   return (
-    <span
-      className={`inline-flex items-center text-xs font-bold uppercase tracking-wide text-white ${style.className} rounded-md px-3 py-1`}
-      aria-label={`Category: ${displayLabel}`}
+    <Link
+      href={{ pathname: '/feed', query: { category } }}
+      onClick={(e) => e.stopPropagation()}
+      aria-label={`Show posts in category: ${displayLabel}`}
+      className={`inline-flex items-center text-xs font-bold uppercase tracking-wide text-white ${style.className} rounded-md px-3 py-1 transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-text-brand`}
     >
       {displayLabel}
-    </span>
+    </Link>
   );
 };

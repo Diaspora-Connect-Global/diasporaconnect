@@ -489,6 +489,21 @@ export interface GetPostsByHashtagData {
   };
 }
 
+/** Input for `postsByCategory` — AI-classified category label (e.g. "Politics"). */
+export interface GetPostsByCategoryInput {
+  category: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetPostsByCategoryData {
+  postsByCategory: {
+    posts: FeedPostFragment[];
+    total: number;
+    hasMore?: boolean | null;
+  };
+}
+
 /**
  * Response from getting a single post.
  *

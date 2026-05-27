@@ -23,6 +23,8 @@ export type {
   GetFeedData,
   GetPostsByHashtagData,
   GetPostsByHashtagInput,
+  GetPostsByCategoryData,
+  GetPostsByCategoryInput,
   FeedModeType,
   FeedViewMode,
   GetPostData,
@@ -181,6 +183,19 @@ export const GET_NETWORK_FEED = gql`
 export const GET_POSTS_BY_HASHTAG = gql`
   query GetPostsByHashtag($input: GetPostsByHashtagInput!) {
     postsByHashtag(input: $input) {
+      posts {
+        ...FullPost
+      }
+      total
+      hasMore
+    }
+  }
+  ${FULL_POST_FRAGMENT}
+`;
+
+export const GET_POSTS_BY_CATEGORY = gql`
+  query GetPostsByCategory($input: GetPostsByCategoryInput!) {
+    postsByCategory(input: $input) {
       posts {
         ...FullPost
       }
