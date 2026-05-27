@@ -89,6 +89,7 @@ interface FeedPost {
         hasSaved: boolean;
         hasShared?: boolean;
     };
+    categories?: string[];
 }
 
 interface GetFeedResponse {
@@ -656,6 +657,7 @@ export default function AssociationPage() {
                                 authorEntityType={post.authorType}
                                 createdAt={post.createdAt}
                                 category={association.name}
+                                aiCategory={post.categories?.[0]}
                                 postDate={formatDateProximity(post.createdAt)}
                                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                                 content={post.text}

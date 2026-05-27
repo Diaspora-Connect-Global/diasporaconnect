@@ -249,6 +249,7 @@ export default function FeedPage() {
                     authorEntityType={post.authorType}
                     profileTier={profileData.tier}
                     category={profileData.type}
+                    aiCategory={post.categories?.[0]}
                     postDate={formatDateProximity(post.createdAt)}
                     createdAt={post.createdAt}
                     visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}

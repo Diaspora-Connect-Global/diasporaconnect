@@ -276,6 +276,7 @@ export default function PostPage() {
           authorEntityType={normalizedPostResolved.authorType}
           profileTier={profileData.tier}
           category={profileData.type}
+          aiCategory={normalizedPostResolved.categories?.[0]}
           postDate={formatDateProximity(normalizedPostResolved.createdAt)}
           createdAt={normalizedPostResolved.createdAt}
           onDelete={() => router.push('/')}
