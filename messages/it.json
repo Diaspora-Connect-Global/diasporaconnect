@@ -990,7 +990,7 @@
         },
         "trustScore": {
             "title": "Punteggio di fiducia",
-            "description": "Descrizione del punteggio di fiducia"
+            "description": "Il tuo punteggio di fiducia aumenta quando verifichi la tua identità, completi il profilo, ricevi recensioni positive e rimani attivo. Indica agli altri quanto sei affidabile sulla piattaforma."
         },
         "kyc": {
             "title": "Verifica KYC",

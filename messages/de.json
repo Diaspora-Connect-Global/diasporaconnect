@@ -990,7 +990,7 @@
         },
         "trustScore": {
             "title": "Vertrauenswertung",
-            "description": "Beschreibung der Vertrauenswertung"
+            "description": "Deine Vertrauenswertung steigt, wenn du deine Identität verifizierst, dein Profil vervollständigst, gute Bewertungen erhältst und aktiv bleibst. Sie zeigt anderen, wie zuverlässig du auf der Plattform bist."
         },
         "kyc": {
             "title": "KYC-Verifizierung",

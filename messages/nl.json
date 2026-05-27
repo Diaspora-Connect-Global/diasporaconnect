@@ -990,7 +990,7 @@
         },
         "trustScore": {
             "title": "Vertrouwensscore",
-            "description": "Beschrijving van de vertrouwensscore"
+            "description": "Je vertrouwensscore stijgt wanneer je je identiteit verifieert, je profiel invult, goede beoordelingen krijgt en actief blijft. Hij laat anderen zien hoe betrouwbaar je bent op het platform."
         },
         "kyc": {
             "title": "KYC-verificatie",

@@ -990,7 +990,7 @@
         },
         "trustScore": {
             "title": "Trust score",
-            "description": "Description of the trust score"
+            "description": "Your trust score grows when you verify your identity, complete your profile, earn good reviews, and stay active. It signals how reliable you are to others on the platform."
         },
         "kyc": {
             "title": "KYC verification",
