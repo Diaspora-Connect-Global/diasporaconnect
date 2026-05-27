@@ -10,7 +10,7 @@ import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
-import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, DELETE_POST, EDIT_POST, EDIT_COMMENT, DELETE_COMMENT, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData, EditCommentData, DeleteCommentData } from '@/services/gql/postsFeed';
+import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, DELETE_POST, EDIT_POST, UPDATE_POST_VISIBILITY, EDIT_COMMENT, DELETE_COMMENT, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData, EditCommentData, DeleteCommentData } from '@/services/gql/postsFeed';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import type { SearchUsersResponse } from '@/services/gql/types/connection';
 import type { MentionUser } from '@/components/custom/messageInputGlobal';
@@ -21,6 +21,8 @@ import { resolveUserTier } from '@/lib/userTier';
 import { useRouter } from '@/i18n/navigation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { toast } from 'sonner';
 import { VideoPlayer } from '@/components/custom/VideoPlayer';
 
@@ -193,6 +195,31 @@ function FeedCardWithReplyInner({
     const [deletePost, { loading: deletePostLoading }] = useMutation(DELETE_POST);
     const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
 
+    const [visibilityModalOpen, setVisibilityModalOpen] = useState(false);
+    const [selectedVisibility, setSelectedVisibility] = useState<'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'>(
+        (visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE') ?? 'PUBLIC',
+    );
+    const [updateVisibilityMutation, { loading: visibilityLoading }] = useMutation(UPDATE_POST_VISIBILITY);
+
+    const handleVisibilitySubmit = async () => {
+        // Backend canonical values:
+        //   PUBLIC      → 'EVERYONE'
+        //   CONNECTIONS → 'FRIENDS'
+        //   PRIVATE     → 'ONLY_ME'
+        const beValue =
+            selectedVisibility === 'PUBLIC' ? 'EVERYONE'
+                : selectedVisibility === 'CONNECTIONS' ? 'FRIENDS'
+                    : 'ONLY_ME';
+        try {
+            await updateVisibilityMutation({ variables: { postId, visibility: beValue } });
+            setVisibilityModalOpen(false);
+            toast.success('Visibility updated');
+        } catch (err) {
+            toast.error('Failed to update visibility');
+            console.error(err);
+        }
+    };
+
     const handleDeletePostConfirm = async () => {
         try {
             await deletePost({ variables: { id: postId } });
@@ -204,8 +231,10 @@ function FeedCardWithReplyInner({
         }
     };
 
+    const hasAnyMedia = (images?.length ?? 0) + (videos?.length ?? 0) > 0;
+
     const handleEditPostSubmit = async () => {
-        if (!editPostText.trim()) return;
+        if (!editPostText.trim() && !hasAnyMedia) return;
         try {
             await editPostMutation({ variables: { input: { id: postId, text: editPostText } } });
             setPostContent(editPostText);
@@ -653,7 +682,7 @@ function FeedCardWithReplyInner({
                         <button
                             className="px-3 py-1 label-medium text-text-white bg-surface-brand rounded-md hover:bg-border-brand disabled:opacity-50"
                             onClick={handleEditPostSubmit}
-                            disabled={editPostLoading || !editPostText.trim()}
+                            disabled={editPostLoading || (!editPostText.trim() && !hasAnyMedia)}
                         >
                             {editPostLoading ? 'Saving…' : 'Save'}
                         </button>
@@ -1409,6 +1438,12 @@ function FeedCardWithReplyInner({
                                     </DropdownMenuItem>
                                 )}
                                 {canEditPost && <DropdownMenuSeparator />}
+                                {isOwnPost && (
+                                    <DropdownMenuItem onSelect={() => setVisibilityModalOpen(true)}>
+                                        <Globe className="w-4 h-4 mr-2" /> Change visibility
+                                    </DropdownMenuItem>
+                                )}
+                                {isOwnPost && <DropdownMenuSeparator />}
                                 <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
                                     <Trash2 className="w-4 h-4 mr-2" /> Delete
                                 </DropdownMenuItem>
@@ -1536,6 +1571,46 @@ function FeedCardWithReplyInner({
                 confirmVariant="destructive"
                 isLoading={deleteCommentLoading}
             />
+
+            <Dialog open={visibilityModalOpen} onOpenChange={setVisibilityModalOpen}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Change visibility</DialogTitle>
+                        <DialogDescription>Who can see this post?</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2">
+                        {(['PUBLIC', 'CONNECTIONS', 'PRIVATE'] as const).map((v) => {
+                            const Icon = v === 'PUBLIC' ? Globe : v === 'CONNECTIONS' ? Users : Lock;
+                            const label = v === 'PUBLIC' ? 'Anyone'
+                                : v === 'CONNECTIONS' ? 'Connections only'
+                                    : 'Only me';
+                            return (
+                                <button
+                                    key={v}
+                                    type="button"
+                                    onClick={() => setSelectedVisibility(v)}
+                                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                                        selectedVisibility === v
+                                            ? 'border-border-brand bg-surface-brand/5'
+                                            : 'border-border-subtle bg-surface-default hover:bg-surface-subtle'
+                                    }`}
+                                >
+                                    <Icon className="w-5 h-5 flex-shrink-0" />
+                                    <span className="font-medium text-text-primary text-sm">{label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="flex justify-end gap-2 mt-2">
+                        <ButtonType3 type="button" onClick={() => setVisibilityModalOpen(false)} disabled={visibilityLoading}>
+                            Cancel
+                        </ButtonType3>
+                        <ButtonType2 type="button" onClick={handleVisibilitySubmit} disabled={visibilityLoading}>
+                            {visibilityLoading ? 'Saving...' : 'Save'}
+                        </ButtonType2>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

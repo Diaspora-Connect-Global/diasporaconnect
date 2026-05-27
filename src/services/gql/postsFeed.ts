@@ -280,6 +280,20 @@ export const EDIT_POST = gql`
   }
 `;
 
+/**
+ * UPDATE_POST_VISIBILITY — author-only mutation, no time limit.
+ * Visibility values match the canonical PostVisibility union:
+ *   'EVERYONE' | 'FRIENDS' | 'ONLY_ME' | 'COMMUNITY' | 'ASSOCIATION'
+ */
+export const UPDATE_POST_VISIBILITY = gql`
+  mutation UpdatePostVisibility($postId: ID!, $visibility: String!) {
+    updatePostVisibility(postId: $postId, visibility: $visibility) {
+      id
+      visibility
+    }
+  }
+`;
+
 export const ADD_ENGAGEMENT = gql`
   mutation AddEngagement($input: AddEngagementInput!) {
     addEngagement(input: $input) {
