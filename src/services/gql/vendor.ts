@@ -50,6 +50,8 @@ export const GET_VENDOR = gql`
         enabled
       }
       createdAt
+      ownerTrustScore
+      ownerTrustTier
     }
   }
 `;
@@ -61,6 +63,8 @@ export const GET_VENDOR_BY_USER_ID = gql`
       id
       displayName
       status
+      ownerTrustScore
+      ownerTrustTier
     }
   }
 `;
@@ -90,6 +94,8 @@ export const GET_MY_VENDOR = gql`
       }
       createdAt
       updatedAt
+      ownerTrustScore
+      ownerTrustTier
     }
   }
 `;
@@ -107,6 +113,8 @@ export const GET_VENDOR_DASHBOARD = gql`
       totalRatings
       completedOrders
       status
+      ownerTrustScore
+      ownerTrustTier
     }
   }
 `;

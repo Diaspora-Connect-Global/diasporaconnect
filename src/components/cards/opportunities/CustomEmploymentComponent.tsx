@@ -33,6 +33,8 @@ import type { Opportunity } from "@/services/gql/types/opportunities";
 import { formatChatTimestamp } from "@/macros/time";
 import { useUserStore } from "@/store/useUserStore";
 import { toast } from "sonner";
+import { UserBadge } from "@/components/custom/userBadge";
+import { resolveUserTier } from "@/lib/userTier";
 
 const isUUID = (s?: string | null) =>
     !!s && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
@@ -374,6 +376,14 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
     };
 
     const posterName = getPosterName();
+
+    // Defensive cast — `trustScore`/`trustTier` land on the opportunity owner
+    // `Profile` via a parallel GQL sweep; types may not be updated yet.
+    const ownerWithTrust = item.owner as (typeof item.owner & { trustScore?: number; trustTier?: string }) | undefined;
+    const ownerTier = resolveUserTier({
+        tier: ownerWithTrust?.trustTier,
+        trustScore: ownerWithTrust?.trustScore,
+    });
 
     useEffect(() => {
         setSavedOverride(null);
@@ -1005,9 +1015,12 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                             <h3 className="text-[17px] font-semibold text-text-primary group-hover:text-text-brand transition-colors line-clamp-1 leading-tight">
                                 {item.title}
                             </h3>
-                            <p className="text-[14px] text-text-secondary mt-1 line-clamp-1">
-                                {t("posterBy", { user: posterName })}
-                            </p>
+                            <div className="inline-flex items-center gap-1 mt-1 max-w-full">
+                                <p className="text-[14px] text-text-secondary line-clamp-1">
+                                    {t("posterBy", { user: posterName })}
+                                </p>
+                                {ownerTier && <UserBadge tier={ownerTier} size="xs" />}
+                            </div>
                         </div>
                     </div>
                 </div>

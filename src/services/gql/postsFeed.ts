@@ -69,6 +69,7 @@ export const FULL_POST_FRAGMENT = gql`
       authorType
       displayName
       avatarUrl
+      trustScore
     }
     authorProfile {
       authorType
@@ -80,6 +81,7 @@ export const FULL_POST_FRAGMENT = gql`
         bio
         isVip
         verificationTier
+        trustScore
       }
       organizationProfile {
         id
@@ -231,6 +233,8 @@ export const GET_POST_COMMENTS = gql`
       authorDisplayName
       authorAvatarUrl
       authorHandle
+      authorTrustScore
+      authorTrustTier
       replyCount
       likeCount
       hasLiked
@@ -346,6 +350,8 @@ export const CREATE_COMMENT = gql`
       authorDisplayName
       authorAvatarUrl
       authorHandle
+      authorTrustScore
+      authorTrustTier
       replyCount
       likeCount
       hasLiked
@@ -400,6 +406,8 @@ export const EDIT_COMMENT = gql`
       authorDisplayName
       authorAvatarUrl
       authorHandle
+      authorTrustScore
+      authorTrustTier
       replyCount
       likeCount
       hasLiked
@@ -441,6 +449,7 @@ export const GET_USER_ENGAGED_POSTS = gql`
             avatar
             isVip
             verificationTier
+            trustScore
           }
         }
         createdAt
@@ -485,6 +494,7 @@ export const GET_USER_POSTS = gql`
           avatar
           isVip
           verificationTier
+          trustScore
         }
       }
       createdAt
@@ -541,6 +551,7 @@ export const GET_SAVED_POSTS = gql`
             avatar
             isVip
             verificationTier
+            trustScore
           }
         }
         createdAt
@@ -598,6 +609,7 @@ export const GET_LIKED_POSTS = gql`
             avatar
             isVip
             verificationTier
+            trustScore
           }
         }
         createdAt
@@ -655,6 +667,7 @@ export const GET_COMMENTED_POSTS = gql`
             avatar
             isVip
             verificationTier
+            trustScore
           }
         }
         createdAt
@@ -877,6 +890,8 @@ export const RECOMMENDED_PEOPLE = gql`
           connectionId
           isVerified
           verificationBadge
+          trustScore
+          trustTier
         }
         score
         sharedCommunityCount

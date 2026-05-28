@@ -159,6 +159,7 @@ export const GET_GROUP_MEMBERS = gql`
           lastName
           residenceCountry
           city
+          trustScore
         }
       }
     }

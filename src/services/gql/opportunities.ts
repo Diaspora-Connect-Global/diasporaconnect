@@ -44,7 +44,7 @@ export const GET_OPPORTUNITY = gql`
       updatedAt
       publishedAt
       closedAt
-      owner { id name avatarUrl type }
+      owner { id name avatarUrl type trustScore trustTier }
     }
   }
 `;
@@ -85,7 +85,7 @@ export const LIST_OPPORTUNITIES = gql`
         currentUserApplicationId
         createdAt
         publishedAt
-        owner { id name avatarUrl type }
+        owner { id name avatarUrl type trustScore trustTier }
       }
     }
   }
@@ -127,7 +127,7 @@ export const OPPORTUNITIES = gql`
         currentUserApplicationId
         createdAt
         publishedAt
-        owner { id name avatarUrl type }
+        owner { id name avatarUrl type trustScore trustTier }
       }
     }
   }
@@ -169,7 +169,7 @@ export const GET_OPPORTUNITY_FEED = gql`
         currentUserApplicationId
         createdAt
         publishedAt
-        owner { id name avatarUrl type }
+        owner { id name avatarUrl type trustScore trustTier }
       }
     }
   }
@@ -242,7 +242,7 @@ export const GET_USER_APPLICATIONS = gql`
           type
           deadline
           applicationMethod
-          owner { id name avatarUrl type }
+          owner { id name avatarUrl type trustScore trustTier }
         }
       }
     }
@@ -286,7 +286,7 @@ export const GET_APPLICATIONS = gql`
           ownerType
           applicationMethod
           deadline
-          owner { id name avatarUrl type }
+          owner { id name avatarUrl type trustScore trustTier }
         }
       }
     }
@@ -329,7 +329,7 @@ export const GET_SAVED_OPPORTUNITIES = gql`
           ownerType
           status
           deadline
-          owner { id name avatarUrl type }
+          owner { id name avatarUrl type trustScore trustTier }
         }
       }
     }
@@ -390,7 +390,7 @@ export const SEARCH_OPPORTUNITIES = gql`
         compensationMax
         compensationCurrency
         status
-        owner { id name avatarUrl type }
+        owner { id name avatarUrl type trustScore trustTier }
       }
     }
   }

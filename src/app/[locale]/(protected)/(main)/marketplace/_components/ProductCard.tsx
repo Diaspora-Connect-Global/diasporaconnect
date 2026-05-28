@@ -7,6 +7,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { ButtonType3 } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import type { CartItem, Product } from "./types";
+import { UserBadge } from "@/components/custom/userBadge";
+import { resolveUserTier } from "@/lib/userTier";
 
 export function ProductCard({
   product,
@@ -29,6 +31,11 @@ export function ProductCard({
     typeof product.image === "string" && product.image.startsWith("http")
       ? product.image
       : null;
+
+  const sellerTier = resolveUserTier({
+    tier: product.sellerTrustTier,
+    trustScore: product.sellerTrustScore,
+  });
 
   return (
     <div className="w-full max-w-[295px] flex flex-col">
@@ -88,13 +95,16 @@ export function ProductCard({
       </div>
 
       {/* Seller row: circle = poster's avatar image URL */}
-      <div className="flex items-center gap-2 mt-3">
+      <div className="flex items-center gap-2 mt-3 min-w-0">
         <div className="relative w-5 h-5 rounded-full flex-shrink-0 overflow-hidden bg-surface-brand-subtle dark:bg-surface-subtle">
           {product.sellerAvatar?.startsWith("http") ? (
             <Image src={product.sellerAvatar} alt="" fill className="object-cover" sizes="20px" />
           ) : null}
         </div>
-        <p className="text-sm text-text-secondary truncate">{product.seller}</p>
+        <div className="inline-flex items-center gap-1 min-w-0">
+          <p className="text-sm text-text-secondary truncate">{product.seller}</p>
+          {sellerTier && <UserBadge tier={sellerTier} size="xs" />}
+        </div>
       </div>
     </div>
   );

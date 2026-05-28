@@ -103,6 +103,13 @@ export function PeopleYouMayKnow() {
                                 matchReason: suggestion.matchReason,
                             }) || (t('suggestedForYou') || 'Suggested for you');
                             const displayName = `${suggestion.profile.firstName ?? ''} ${suggestion.profile.lastName ?? ''}`.trim() || 'Member';
+                            // Defensive cast — `trustScore`/`trustTier` are
+                            // landing on `ProfileSummary` in a parallel GQL
+                            // sweep; types may not be updated yet.
+                            const profileWithTrust = suggestion.profile as typeof suggestion.profile & {
+                                trustScore?: number;
+                                trustTier?: string;
+                            };
                             return (
                                 <PeopleYouMayKnowCard
                                     key={suggestion.profile.userId}
@@ -110,6 +117,7 @@ export function PeopleYouMayKnow() {
                                     profileImage={suggestion.profile.avatarUrl ?? ''}
                                     name={displayName}
                                     matchReason={reasonCopy}
+                                    trustScore={profileWithTrust.trustScore}
                                     onAddFriend={() => handleAddFriend(suggestion.profile.userId)}
                                     isLoading={loadingUserId === suggestion.profile.userId}
                                 />

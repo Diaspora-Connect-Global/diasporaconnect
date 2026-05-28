@@ -57,6 +57,8 @@ import { useImageUpload } from "@/hooks/useImageUpload";
 import { CircularImageCropper } from "@/lib/imagecropper";
 import { ApiMessage } from "@/store/ChatStore";
 import { toast } from "sonner";
+import { UserBadge } from "@/components/custom/userBadge";
+import { mapTrustScoreToTier } from "@/lib/userTier";
 
 type ManageableGroupMember = {
     id: string;
@@ -901,6 +903,10 @@ export default function GroupChat() {
                                                 ? getCountryTimezone(member.profile.residenceCountry)
                                                 : null;
                                             const memberTime = memberTz ? formatCurrentTime(memberTz) : null;
+                                            // Defensive cast — group-member profile gains `trustScore`
+                                            // in a parallel GQL sweep; types may not be updated yet.
+                                            const memberTrustScore = (member?.profile as { trustScore?: number } | undefined)?.trustScore;
+                                            const memberTier = mapTrustScoreToTier(memberTrustScore);
                                             return (
                                                 <div
                                                     key={member.id}
@@ -915,9 +921,12 @@ export default function GroupChat() {
                                                         <AvatarFallback>U</AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-text-primary truncate">
-                                                            {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
-                                                        </p>
+                                                        <div className="inline-flex items-center gap-1 max-w-full">
+                                                            <p className="text-sm font-medium text-text-primary truncate">
+                                                                {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
+                                                            </p>
+                                                            {memberTier && <UserBadge tier={memberTier} size="xs" />}
+                                                        </div>
                                                         <p className="text-xs text-text-secondary capitalize">
                                                             {member.role?.toLowerCase() ?? 'member'}
                                                         </p>
@@ -1096,7 +1105,10 @@ export default function GroupChat() {
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                         {groupMembers
                             .filter((m) => m.userId !== currentUserId)
-                            .map((member) => (
+                            .map((member) => {
+                                const memberTrustScore = (member?.profile as { trustScore?: number } | undefined)?.trustScore;
+                                const memberTier = mapTrustScoreToTier(memberTrustScore);
+                                return (
                                 <div
                                     key={member.userId}
                                     className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-hover"
@@ -1107,9 +1119,12 @@ export default function GroupChat() {
                                             <AvatarFallback>U</AvatarFallback>
                                         </Avatar>
                                         <div className="min-w-0">
-                                            <p className="text-sm font-medium text-text-primary truncate">
-                                                {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
-                                            </p>
+                                            <div className="inline-flex items-center gap-1 max-w-full">
+                                                <p className="text-sm font-medium text-text-primary truncate">
+                                                    {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
+                                                </p>
+                                                {memberTier && <UserBadge tier={memberTier} size="xs" />}
+                                            </div>
                                             <p className="text-xs text-text-secondary capitalize">{member.role?.toLowerCase() ?? 'member'}</p>
                                         </div>
                                     </div>
@@ -1135,7 +1150,8 @@ export default function GroupChat() {
                                         {t('transferOwnership')}
                                     </ButtonType2>
                                 </div>
-                            ))}
+                                );
+                            })}
                     </div>
                 </DialogContent>
             </Dialog>

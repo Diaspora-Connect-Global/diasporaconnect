@@ -22,6 +22,12 @@ export interface Product {
   seller: string;
   /** Avatar image URL of the person who posted the product */
   sellerAvatar?: string;
+  /** Numeric trust score of the seller (vendor owner). Mapped to a tier for
+   *  rendering. Sourced from the GQL Vendor's `ownerTrustScore`. */
+  sellerTrustScore?: number;
+  /** Pre-resolved trust tier of the seller. Wins over `sellerTrustScore`
+   *  when both are supplied. Sourced from GQL Vendor's `ownerTrustTier`. */
+  sellerTrustTier?: string;
   colors?: string[];
   category: string;
   isService?: boolean;

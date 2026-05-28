@@ -38,6 +38,8 @@ import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
 import { resolveCountryName, getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
 import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime";
+import { UserBadge } from "@/components/custom/userBadge";
+import { resolveUserTier } from "@/lib/userTier";
 
 // ---- Date Separator ----
 
@@ -120,6 +122,17 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             (chat.name && chat.name !== chat.id ? chat.name : t('unknownUser'))
         );
     const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
+
+    // Trust badge — sourced from either the connection summary or the full
+    // profile fallback. Defensive cast: `trustScore`/`trustTier` land on
+    // `ProfileSummary`/full `Profile` via a parallel GQL sweep; types may
+    // not be updated yet.
+    const otherProfileTrust = otherProfile as (typeof otherProfile & { trustScore?: number; trustTier?: string }) | null;
+    const profileFallbackTrust = profileFallback as (typeof profileFallback & { trustScore?: number; trustTier?: string }) | null | undefined;
+    const otherTier = resolveUserTier({
+        tier: otherProfileTrust?.trustTier ?? profileFallbackTrust?.trustTier,
+        trustScore: otherProfileTrust?.trustScore ?? profileFallbackTrust?.trustScore,
+    });
 
     // Tick every minute to keep time-derived values (goodTimeToMessage, otherLocalTime,
     // and the footer "Your time" / "Their time") fresh without a page refresh.
@@ -467,6 +480,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 <h2 className="font-bold text-text-primary text-sm md:text-base leading-tight truncate">
                                     {displayName}
                                 </h2>
+                                {otherTier && <UserBadge tier={otherTier} size="xs" />}
                             </div>
                             {(otherLocation || otherLocalTime) && (
                                 <p className="text-xs text-text-secondary truncate mt-0.5">
@@ -521,7 +535,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                 </AvatarFallback>
                             </Avatar>
                             <div className="text-center">
-                                <p className="font-semibold text-text-primary">{displayName}</p>
+                                <div className="inline-flex items-center gap-1 justify-center">
+                                    <p className="font-semibold text-text-primary">{displayName}</p>
+                                    {otherTier && <UserBadge tier={otherTier} size="xs" />}
+                                </div>
                                 <p className="text-sm mt-1">{t('typeMessage')}</p>
                             </div>
                         </div>
@@ -636,7 +653,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                                             {displayName.slice(0, 1).toUpperCase() || 'U'}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>
+                                    <div className="inline-flex items-center gap-1 justify-center">
+                                        <h4 className="font-semibold text-text-primary text-lg">{displayName}</h4>
+                                        {otherTier && <UserBadge tier={otherTier} size="xs" />}
+                                    </div>
                                     {isOnline && (
                                         <p className="text-sm text-chat-online-text font-medium mt-0.5">{t('online')}</p>
                                     )}

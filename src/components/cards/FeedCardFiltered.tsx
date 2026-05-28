@@ -83,12 +83,23 @@ export interface FeedCardFilteredProps {
     onNavigatePost?: (direction: 'next' | 'prev') => void;
 }
 
+// Transitional shape — `authorTier`/`authorVerificationTier`/`authorTrustScore`
+// are landing on the GQL `Comment` type in a parallel sweep. Once those land,
+// remove the intersection cast and read the fields directly off `ApiComment`.
+type CommentTrustFields = {
+    authorTier?: string;
+    authorVerificationTier?: string;
+    authorTrustScore?: number;
+};
+
 function mapApiComment(c: ApiComment): Comment {
     const mentionMap = buildMentionMap(c.mentions ?? []);
 
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
     const authorName = c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId;
     const authorAvatar = c.authorAvatarUrl ?? selfMention?.avatarUrl ?? '/PROFILE.png';
+
+    const trust = c as ApiComment & CommentTrustFields;
 
     return {
         id: c.id,
@@ -104,9 +115,9 @@ function mapApiComment(c: ApiComment): Comment {
         parentId: c.parentId ?? undefined,
         mentionMap,
         authorTier: resolveUserTier({
-            tier: (c as { authorTier?: string }).authorTier,
-            verificationTier: (c as { authorVerificationTier?: string }).authorVerificationTier,
-            trustScore: (c as { authorTrustScore?: number }).authorTrustScore,
+            tier: trust.authorTier,
+            verificationTier: trust.authorVerificationTier,
+            trustScore: trust.authorTrustScore,
         }),
     };
 }

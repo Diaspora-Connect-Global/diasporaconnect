@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button";
 import type { CartItem, Product } from "./types";
+import { UserBadge } from "@/components/custom/userBadge";
+import { resolveUserTier } from "@/lib/userTier";
 
 const DEFAULT_THUMBNAIL_COUNT = 4;
 
@@ -163,7 +165,16 @@ export function ProductDetail({
                   <Image src={product.sellerAvatar} alt="" fill className="object-cover" sizes="32px" />
                 ) : null}
               </div>
-              <p className="text-sm text-text-secondary">{t("bySeller", { seller: product.seller })}</p>
+              <div className="inline-flex items-center gap-1 min-w-0">
+                <p className="text-sm text-text-secondary truncate">{t("bySeller", { seller: product.seller })}</p>
+                {(() => {
+                  const sellerTier = resolveUserTier({
+                    tier: product.sellerTrustTier,
+                    trustScore: product.sellerTrustScore,
+                  });
+                  return sellerTier ? <UserBadge tier={sellerTier} size="xs" /> : null;
+                })()}
+              </div>
             </div>
 
             {/* Name + wishlist/share */}

@@ -60,6 +60,8 @@ export const GET_MY_CONNECTIONS = gql`
           email
           avatarUrl
           sector
+          trustScore
+          trustTier
         }
         receiver {
           userId
@@ -68,6 +70,8 @@ export const GET_MY_CONNECTIONS = gql`
           email
           avatarUrl
           sector
+          trustScore
+          trustTier
         }
       }
       total
@@ -108,6 +112,8 @@ export const GET_USER_CONNECTIONS = gql`
           email
           avatarUrl
           sector
+          trustScore
+          trustTier
         }
         receiver {
           userId
@@ -116,6 +122,8 @@ export const GET_USER_CONNECTIONS = gql`
           email
           avatarUrl
           sector
+          trustScore
+          trustTier
         }
       }
       total
@@ -153,6 +161,8 @@ export const GET_PENDING_CONNECTIONS = gql`
           avatarUrl
           sector
           occupation
+          trustScore
+          trustTier
         }
       }
       total
@@ -187,6 +197,8 @@ export const GET_MUTUAL_FRIENDS = gql`
         avatarUrl
         sector
         occupation
+        trustScore
+        trustTier
       }
       total
     }
@@ -232,6 +244,8 @@ export const SEND_CONNECTION_REQUEST = gql`
           lastName
           email
           avatarUrl
+          trustScore
+          trustTier
         }
         receiver {
           userId
@@ -239,6 +253,8 @@ export const SEND_CONNECTION_REQUEST = gql`
           lastName
           email
           avatarUrl
+          trustScore
+          trustTier
         }
       }
     }
@@ -274,11 +290,15 @@ export const ACCEPT_CONNECTION = gql`
           userId
           firstName
           lastName
+          trustScore
+          trustTier
         }
         receiver {
           userId
           firstName
           lastName
+          trustScore
+          trustTier
         }
       }
     }
@@ -358,6 +378,8 @@ export const GET_ALL_PENDING_CONNECTIONS = gql`
           sector
           location
           country
+          trustScore
+          trustTier
         }
         receiver {
           userId
@@ -370,6 +392,8 @@ export const GET_ALL_PENDING_CONNECTIONS = gql`
           sector
           location
           country
+          trustScore
+          trustTier
         }
       }
     }
@@ -423,6 +447,8 @@ export const SEARCH_USERS = gql`
         avatarUrl
         connectionStatus
         connectionId
+        trustScore
+        trustTier
       }
     }
   }

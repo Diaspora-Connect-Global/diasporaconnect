@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Spinner } from '@/components/ui/spinner';
 import { Link } from '@/i18n/navigation';
+import { UserBadge, type Tier } from '@/components/custom/userBadge';
+import { mapTrustScoreToTier } from '@/lib/userTier';
 
 interface PeopleYouMayKnowCardProps {
   userId: string;
@@ -18,6 +20,11 @@ interface PeopleYouMayKnowCardProps {
   matchReason?: string;
   /** @deprecated kept for any leftover callers; prefer `matchReason`. */
   mutualConnections?: number;
+  /** Pre-resolved trust tier. Wins over `trustScore` when both are supplied. */
+  tier?: Tier;
+  /** Raw numeric trust score from the GQL `ProfileSummary`. Mapped to a tier
+   * via `mapTrustScoreToTier` when `tier` is not provided. */
+  trustScore?: number;
   onAddFriend?: () => void;
   buttonText?: string;
   buttonVariant?: 'primary' | 'secondary' | 'success';
@@ -30,10 +37,13 @@ export default function PeopleYouMayKnowCard({
   name,
   matchReason,
   mutualConnections,
+  tier,
+  trustScore,
   onAddFriend,
   buttonText,
   isLoading = false,
 }: PeopleYouMayKnowCardProps) {
+  const resolvedTier: Tier | undefined = tier ?? mapTrustScoreToTier(trustScore);
   const [isAdded, setIsAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const t = useTranslations('home');
@@ -109,7 +119,10 @@ export default function PeopleYouMayKnowCard({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="caption-medium text-text-primary truncate">{name}</h3>
+          <div className="inline-flex items-center gap-1 max-w-full">
+            <h3 className="caption-medium text-text-primary truncate">{name}</h3>
+            {resolvedTier && <UserBadge tier={resolvedTier} size="xs" />}
+          </div>
           <p className="body-small text-text-secondary truncate">
             {matchReason
               ? matchReason
