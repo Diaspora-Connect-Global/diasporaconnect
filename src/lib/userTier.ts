@@ -10,10 +10,11 @@ function normalizeTier(input?: string | null): Tier | undefined {
 
 export function mapTrustScoreToTier(trustScore?: number | null): Tier | undefined {
   if (typeof trustScore !== "number" || Number.isNaN(trustScore)) return undefined;
-  if (trustScore < 0) return "starter";
-  if (trustScore <= 25) return "starter";
-  if (trustScore <= 50) return "trusted";
-  if (trustScore <= 75) return "reliable";
+  // Scores under 20 show no badge — must be earned via real activity (≥ 1 successful transaction).
+  if (trustScore < 20) return undefined;
+  if (trustScore < 40) return "starter";
+  if (trustScore < 65) return "trusted";
+  if (trustScore < 85) return "reliable";
   return "elite";
 }
 

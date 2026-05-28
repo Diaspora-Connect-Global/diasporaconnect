@@ -12,14 +12,19 @@ interface TrustScoreProps {
 
 const ALL_TIERS: Tier[] = ["starter", "trusted", "reliable", "elite"];
 
+// Upper bound (inclusive) of each tier; aligned with backend deriveTrustTier.
+// Scores below 20 don't get any badge — they have to be earned via real activity.
 const TIER_THRESHOLDS: Record<Tier, number> = {
-  starter: 25,
-  trusted: 50,
-  reliable: 75,
+  starter: 39,
+  trusted: 64,
+  reliable: 84,
   elite: 100,
 };
 
-function getTierFromScore(score: number): Tier {
+const BADGE_FLOOR_SCORE = 20;
+
+function getTierFromScore(score: number): Tier | undefined {
+  if (score < BADGE_FLOOR_SCORE) return undefined;
   for (const tier of ALL_TIERS) {
     if (score <= TIER_THRESHOLDS[tier]) return tier;
   }
