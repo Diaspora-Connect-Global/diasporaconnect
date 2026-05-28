@@ -990,7 +990,9 @@
         },
         "trustScore": {
             "title": "Score de confiance",
-            "description": "Votre score de confiance augmente lorsque vous vérifiez votre identité, complétez votre profil, recevez de bons avis et restez actif. Il indique aux autres utilisateurs à quel point vous êtes fiable sur la plateforme."
+            "description": "Votre score de confiance augmente lorsque vous vérifiez votre identité, complétez votre profil, recevez de bons avis et restez actif. Il indique aux autres utilisateurs à quel point vous êtes fiable sur la plateforme.",
+            "notEarned": "Pas encore obtenu",
+            "notEarnedHint": "Finalisez votre première transaction pour décrocher le badge starter."
         },
         "kyc": {
             "title": "Vérification KYC",

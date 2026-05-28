@@ -990,7 +990,9 @@
         },
         "trustScore": {
             "title": "Trust score",
-            "description": "Your trust score grows when you verify your identity, complete your profile, earn good reviews, and stay active. It signals how reliable you are to others on the platform."
+            "description": "Your trust score grows when you verify your identity, complete your profile, earn good reviews, and stay active. It signals how reliable you are to others on the platform.",
+            "notEarned": "Not yet earned",
+            "notEarnedHint": "Complete your first transaction to earn the starter badge."
         },
         "kyc": {
             "title": "KYC verification",

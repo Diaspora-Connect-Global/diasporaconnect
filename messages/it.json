@@ -990,7 +990,9 @@
         },
         "trustScore": {
             "title": "Punteggio di fiducia",
-            "description": "Il tuo punteggio di fiducia aumenta quando verifichi la tua identità, completi il profilo, ricevi recensioni positive e rimani attivo. Indica agli altri quanto sei affidabile sulla piattaforma."
+            "description": "Il tuo punteggio di fiducia aumenta quando verifichi la tua identità, completi il profilo, ricevi recensioni positive e rimani attivo. Indica agli altri quanto sei affidabile sulla piattaforma.",
+            "notEarned": "Non ancora ottenuto",
+            "notEarnedHint": "Completa la tua prima transazione per ottenere il badge starter."
         },
         "kyc": {
             "title": "Verifica KYC",

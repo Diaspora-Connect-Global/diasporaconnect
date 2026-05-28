@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { UserBadge, Tier } from "../custom/userBadge";
 import { InfoIcon } from "@phosphor-icons/react";
 import { LevelGauge } from "../custom/levelGauge";
+import { mapTrustScoreToTier } from "@/lib/userTier";
 import { useTranslations } from 'next-intl';
 
 interface TrustScoreProps {
@@ -12,31 +13,12 @@ interface TrustScoreProps {
 
 const ALL_TIERS: Tier[] = ["starter", "trusted", "reliable", "elite"];
 
-// Upper bound (inclusive) of each tier; aligned with backend deriveTrustTier.
-// Scores below 20 don't get any badge — they have to be earned via real activity.
-const TIER_THRESHOLDS: Record<Tier, number> = {
-  starter: 39,
-  trusted: 64,
-  reliable: 84,
-  elite: 100,
-};
-
-const BADGE_FLOOR_SCORE = 20;
-
-function getTierFromScore(score: number): Tier | undefined {
-  if (score < BADGE_FLOOR_SCORE) return undefined;
-  for (const tier of ALL_TIERS) {
-    if (score <= TIER_THRESHOLDS[tier]) return tier;
-  }
-  return "elite";
-}
-
 export function TrustScore({ trustScore }: TrustScoreProps) {
   const t = useTranslations('profile.trustScore');
   const parsedTrustScore = trustScore == null ? 0 : Number(trustScore);
   const normalizedTrustScore = Number.isFinite(parsedTrustScore) ? parsedTrustScore : 0;
 
-  const currentTier = getTierFromScore(normalizedTrustScore);
+  const currentTier = mapTrustScoreToTier(normalizedTrustScore);
 
   return (
     <Card className="h-full p-0">
@@ -48,7 +30,10 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
 
             <div className="p-1">
 
-              <LevelGauge score={normalizedTrustScore} />
+              <LevelGauge
+                score={normalizedTrustScore}
+                notEarnedLabel={t('notEarned')}
+              />
 
 
             </div>
@@ -67,6 +52,9 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
                 </div>
               ))}
             </div>
+            {!currentTier && (
+              <p className="text-sm text-text-secondary text-center">{t('notEarnedHint')}</p>
+            )}
             <div className="bg-surface-info text-text-info flex p-2 space-x-2 rounded-md">
               <InfoIcon size={32} />
               <p>{t('description')}</p>

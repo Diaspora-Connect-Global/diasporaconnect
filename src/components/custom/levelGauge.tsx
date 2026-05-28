@@ -1,12 +1,16 @@
 import { ReactNode } from 'react';
-
-type Tier = 'starter' | 'trusted' | 'reliable' | 'elite';
+import { mapTrustScoreToTier } from '@/lib/userTier';
+import type { Tier } from '@/components/custom/userBadge';
 
 interface LevelGaugeProps {
   score: number;
   label?: string;
+  /** Center label when score < 20 and no tier has been earned yet. Defaults to "Not yet earned". */
+  notEarnedLabel?: string;
   size?: number;
 }
+
+const NEUTRAL_COLOR = '#e5e7eb';
 
 const tierColors: Record<Tier, string> = {
   starter: '#C42020',
@@ -15,28 +19,37 @@ const tierColors: Record<Tier, string> = {
   elite: '#D79E0F',
 };
 
-const tierLimits: Record<Tier, number> = {
-  starter: 25,
-  trusted: 50,
-  reliable: 75,
-  elite: 100,
-};
+/**
+ * Score zones aligned with backend deriveTrustTier and lib/userTier.ts.
+ *   0–19 : no badge (neutral gray)
+ *   20–39: starter
+ *   40–64: trusted
+ *   65–84: reliable
+ *   85–100: elite
+ */
+const ZONES: Array<{ tier: Tier | undefined; until: number; color: string }> = [
+  { tier: undefined,  until: 20,  color: NEUTRAL_COLOR },
+  { tier: 'starter',  until: 40,  color: tierColors.starter },
+  { tier: 'trusted',  until: 65,  color: tierColors.trusted },
+  { tier: 'reliable', until: 85,  color: tierColors.reliable },
+  { tier: 'elite',    until: 100, color: tierColors.elite },
+];
 
 export function LevelGauge({
   score,
   label,
+  notEarnedLabel = 'Not yet earned',
   size = 200,
 }: LevelGaugeProps): ReactNode {
   const normalizedScore = Math.max(0, Math.min(score, 100));
-  const currentTier = (Object.entries(tierLimits).find(
-    ([, limit]) => normalizedScore <= limit
-  )?.[0] ?? 'elite') as Tier;
+  const currentTier = mapTrustScoreToTier(normalizedScore);
+  const activeColor = currentTier ? tierColors[currentTier] : NEUTRAL_COLOR;
 
-  // Geometry - adjusted stroke widths
+  // Geometry — adjusted stroke widths
   const outerRadius = size * 0.42;
   const innerRadius = size * 0.32;
-  const outerStroke = size * 0.12; // Increased from 0.08
-  const innerStroke = size * 0.03; // Decreased from 0.08
+  const outerStroke = size * 0.12;
+  const innerStroke = size * 0.03;
 
   const fullOuter = Math.PI * 2 * outerRadius;
   const fullInner = Math.PI * 2 * innerRadius;
@@ -48,35 +61,43 @@ export function LevelGauge({
   const filled = normalizedScore / 100;
   const dash = filled * innerCircumference;
 
-  const startAngle = -180 - (gapDegrees / 2); 
+  const startAngle = -180 - (gapDegrees / 2);
 
-  const outerSegments = Object.entries(tierLimits).map(
-    ([tier, limit], idx, arr) => {
-      const start = idx === 0 ? 0 : arr[idx - 1][1] / 100;
-      const end = limit / 100;
-      const length = (end - start) * circumference;
-      const offset = start * circumference;
+  // Outer ring segments — one per zone. The 0–20 "no badge" zone renders as a
+  // muted neutral stripe so users can see what they need to cross to earn the first badge.
+  const outerSegments = ZONES.map((zone, idx, arr) => {
+    const startFrac = idx === 0 ? 0 : arr[idx - 1].until / 100;
+    const endFrac = zone.until / 100;
+    const length = (endFrac - startFrac) * circumference;
+    const offset = startFrac * circumference;
+    const isNoBadgeZone = zone.tier === undefined;
 
-      return (
-        <circle
-          key={tier}
-          cx={size / 2}
-          cy={size / 2}
-          r={outerRadius}
-          fill="none"
-          stroke={tierColors[tier as Tier]}
-          strokeWidth={outerStroke}
-          strokeDasharray={`${length} ${fullOuter}`}
-          strokeDashoffset={-offset}
-          strokeLinecap="round"
-          style={{
-            transform: `rotate(${startAngle}deg)`,
-            transformOrigin: 'center',
-          }}
-        />
-      );
-    }
-  );
+    return (
+      <circle
+        key={zone.tier ?? 'no-badge'}
+        cx={size / 2}
+        cy={size / 2}
+        r={outerRadius}
+        fill="none"
+        stroke={zone.color}
+        strokeWidth={outerStroke}
+        strokeDasharray={`${length} ${fullOuter}`}
+        strokeDashoffset={-offset}
+        strokeLinecap="round"
+        opacity={isNoBadgeZone ? 0.5 : 1}
+        style={{
+          transform: `rotate(${startAngle}deg)`,
+          transformOrigin: 'center',
+        }}
+      />
+    );
+  });
+
+  const centerLabel =
+    label ??
+    (currentTier
+      ? `${currentTier.charAt(0).toUpperCase()}${currentTier.slice(1)} level`
+      : notEarnedLabel);
 
   return (
     <div className="flex flex-col items-center">
@@ -88,7 +109,7 @@ export function LevelGauge({
             cy={size / 2}
             r={innerRadius}
             fill="none"
-            stroke={tierColors[currentTier]}
+            stroke={activeColor}
             strokeWidth={innerStroke}
             strokeDasharray={`${dash} ${fullInner}`}
             strokeLinecap="round"
@@ -102,14 +123,11 @@ export function LevelGauge({
 
         {/* Score & label - positioned absolutely in center */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-5xl font-bold" style={{ color: tierColors[currentTier] }}>
+          <p className="text-5xl font-bold" style={{ color: activeColor }}>
             {Math.round(normalizedScore)}
             <span className="text-2xl text-text-secondary">/100</span>
           </p>
-          <p className="text-sm text-text-secondary mt-1">
-            {label ??
-              `${currentTier.charAt(0).toUpperCase() + currentTier.slice(1)} level`}
-          </p>
+          <p className="text-sm text-text-secondary mt-1">{centerLabel}</p>
         </div>
       </div>
     </div>

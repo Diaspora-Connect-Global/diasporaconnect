@@ -990,7 +990,9 @@
         },
         "trustScore": {
             "title": "Vertrauenswertung",
-            "description": "Deine Vertrauenswertung steigt, wenn du deine Identität verifizierst, dein Profil vervollständigst, gute Bewertungen erhältst und aktiv bleibst. Sie zeigt anderen, wie zuverlässig du auf der Plattform bist."
+            "description": "Deine Vertrauenswertung steigt, wenn du deine Identität verifizierst, dein Profil vervollständigst, gute Bewertungen erhältst und aktiv bleibst. Sie zeigt anderen, wie zuverlässig du auf der Plattform bist.",
+            "notEarned": "Noch nicht freigeschaltet",
+            "notEarnedHint": "Schließe deine erste Transaktion ab, um das Starter-Abzeichen zu erhalten."
         },
         "kyc": {
             "title": "KYC-Verifizierung",

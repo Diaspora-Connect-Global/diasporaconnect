@@ -990,7 +990,9 @@
         },
         "trustScore": {
             "title": "Vertrouwensscore",
-            "description": "Je vertrouwensscore stijgt wanneer je je identiteit verifieert, je profiel invult, goede beoordelingen krijgt en actief blijft. Hij laat anderen zien hoe betrouwbaar je bent op het platform."
+            "description": "Je vertrouwensscore stijgt wanneer je je identiteit verifieert, je profiel invult, goede beoordelingen krijgt en actief blijft. Hij laat anderen zien hoe betrouwbaar je bent op het platform.",
+            "notEarned": "Nog niet verdiend",
+            "notEarnedHint": "Rond je eerste transactie af om het starter-badge te verdienen."
         },
         "kyc": {
             "title": "KYC-verificatie",
