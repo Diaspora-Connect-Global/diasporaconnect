@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Download, Loader2, Maximize2, FileText } from 'lucide-react';
+import { Download, Loader2, Maximize2, FileText } from 'lucide-react';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 
 // Set once: serve the worker same-origin (copied to /public/pdfjs by prebuild).
@@ -32,7 +32,9 @@ export interface PdfCarouselProps {
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
-const GAP_PX = 8;
+const GAP_PX = 20;          // gutter between pages
+const MAX_DECK_H = 340;     // px — cap inline deck height so portrait PDFs aren't huge
+const SLIDE_PCT = 0.82;     // inline page width vs container (rest is the next-page peek)
 
 export default function PdfCarousel({
   url,
@@ -49,6 +51,7 @@ export default function PdfCarousel({
   const lastWidthRef = useRef(0);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
+  const didSwipe = useRef(false);
 
   const [shouldLoad, setShouldLoad] = useState(fullscreen);
   const [state, setState] = useState<LoadState>('idle');
@@ -57,9 +60,17 @@ export default function PdfCarousel({
   const [containerWidth, setContainerWidth] = useState(0);
   const [aspect, setAspect] = useState(1.414); // height/width; default A4 portrait
 
-  // LinkedIn-style peek inline; full width in the fullscreen modal.
-  const slidePct = fullscreen ? 1 : 0.9;
-  const slideW = containerWidth > 0 ? containerWidth * slidePct - (fullscreen ? 0 : GAP_PX) : 0;
+  // Inline: page width capped by both container (for the peek) and a max height
+  // (so portrait PDFs stay compact). Fullscreen: fill width, no peek.
+  let slideW = 0;
+  if (containerWidth > 0) {
+    if (fullscreen) {
+      slideW = containerWidth;
+    } else {
+      const widthForHeightCap = aspect > 0 ? MAX_DECK_H / aspect : containerWidth * SLIDE_PCT;
+      slideW = Math.min(containerWidth * SLIDE_PCT, widthForHeightCap);
+    }
+  }
   const deckHeight = slideW > 0 ? slideW * aspect : 0;
 
   // Lazy-load: only fetch/parse the PDF once the card nears the viewport.
@@ -164,22 +175,33 @@ export default function PdfCarousel({
     return () => { cancelled = true; };
   }, [state, page, numPages, slideW]);
 
-  const goPrev = useCallback(() => setPage((p) => Math.max(1, p - 1)), []);
   const goNext = useCallback(() => setPage((p) => Math.min(numPages, p + 1)), [numPages]);
+  const goPrev = useCallback(() => setPage((p) => Math.max(1, p - 1)), []);
+  /** Tap/click flips to the next page (wraps) — LinkedIn-style, no arrow buttons. */
+  const advance = useCallback(() => {
+    setPage((p) => (numPages > 1 ? (p >= numPages ? 1 : p + 1) : p));
+  }, [numPages]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0]!.clientX;
     touchStartY.current = e.touches[0]!.clientY;
+    didSwipe.current = false;
   };
   const onTouchEnd = (e: React.TouchEvent) => {
     const dx = e.changedTouches[0]!.clientX - touchStartX.current;
     const dy = e.changedTouches[0]!.clientY - touchStartY.current;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      didSwipe.current = true;
       if (dx < 0) goNext(); else goPrev();
     }
   };
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+  const onDeckClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (didSwipe.current) { didSwipe.current = false; return; } // ignore the click that follows a swipe
+    advance();
+  };
 
   // Graceful fallback when the PDF can't be loaded/parsed.
   if (state === 'error') {
@@ -204,9 +226,10 @@ export default function PdfCarousel({
     <div ref={containerRef} onClick={stop} className={`w-full select-none ${className}`}>
       {/* Deck viewport */}
       <div
-        className="relative w-full overflow-hidden rounded-xl border border-border-subtle bg-surface-subtle"
+        className={`relative w-full overflow-hidden rounded-xl bg-surface-subtle ${multi ? 'cursor-pointer' : ''}`}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
+        onClick={onDeckClick}
         style={{ height: deckHeight || undefined, minHeight: deckHeight ? undefined : '12rem' }}
       >
         {state !== 'ready' || slideW <= 0 ? (
@@ -223,7 +246,7 @@ export default function PdfCarousel({
               return (
                 <div
                   key={p}
-                  className="relative flex-shrink-0 h-full overflow-hidden rounded-lg bg-white shadow-sm"
+                  className="relative flex-shrink-0 h-full overflow-hidden rounded-lg bg-white border border-border-subtle shadow-sm"
                   style={{ width: slideW }}
                 >
                   <canvas
@@ -258,29 +281,6 @@ export default function PdfCarousel({
           </button>
         )}
 
-        {/* Prev / next arrows */}
-        {state === 'ready' && multi && (
-          <>
-            <button
-              type="button"
-              onClick={(e) => { stop(e); goPrev(); }}
-              disabled={page <= 1}
-              aria-label="Previous page"
-              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/45 text-white hover:bg-black/65 disabled:opacity-0 transition"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { stop(e); goNext(); }}
-              disabled={page >= numPages}
-              aria-label="Next page"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/45 text-white hover:bg-black/65 disabled:opacity-0 transition"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </>
-        )}
       </div>
 
       {/* Prominent centered Download */}
