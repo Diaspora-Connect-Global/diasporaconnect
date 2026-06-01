@@ -9,6 +9,7 @@ import {
   buildOfficeEmbedUrl,
 } from '@/lib/fileDisplay';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import PdfCarousel from '@/components/cards/PdfCarousel';
 
 export interface FileAttachmentCardProps {
   url: string;
@@ -18,14 +19,14 @@ export interface FileAttachmentCardProps {
   className?: string;
 }
 
-/** The actual embedded viewer (iframe) for a given document kind. */
+/** The embedded viewer (iframe) for office/text documents. */
 function DocViewerFrame({
   kind,
   url,
   fileName,
   className = '',
 }: {
-  kind: 'pdf' | 'office' | 'text';
+  kind: 'office' | 'text';
   url: string;
   fileName: string;
   className?: string;
@@ -39,9 +40,8 @@ function DocViewerFrame({
       />
     );
   }
-  // pdf / text — browser-native rendering, with a download fallback.
   return (
-    <object data={url} type={kind === 'pdf' ? 'application/pdf' : 'text/plain'} className={`w-full h-full ${className}`}>
+    <object data={url} type="text/plain" className={`w-full h-full ${className}`}>
       <iframe src={url} title={fileName} className="w-full h-full border-0" />
     </object>
   );
@@ -49,9 +49,9 @@ function DocViewerFrame({
 
 /**
  * Canonical file-card for a document/audio attachment on a post.
- * Icon (file-type colored) + filename + size. Viewable documents (PDF, Office,
- * text) expand into an inline viewer and can open fullscreen; other types open
- * in a new tab.
+ * - PDF: LinkedIn-style inline swipeable page deck (+ fullscreen).
+ * - Office (docx/xlsx/pptx) / text: expand into an embedded viewer (+ fullscreen).
+ * - Other types: open-in-new-tab row.
  */
 export default function FileAttachmentCard({
   url,
@@ -67,9 +67,36 @@ export default function FileAttachmentCard({
   const { Icon, color } = getFileTypeMeta(mimeType, fileName);
   const sizeLabel = formatFileSize(size);
   const viewerKind = getDocViewerKind(mimeType, fileName);
-  const canView = viewerKind !== 'unsupported';
-
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+
+  // ---- PDF: inline swipeable deck (LinkedIn-style) ----
+  if (viewerKind === 'pdf') {
+    return (
+      <div className={`max-w-full ${className}`} onClick={stop}>
+        {/* Caption */}
+        <div className="flex items-center gap-2 mb-1.5 px-0.5">
+          <Icon className={`w-4 h-4 flex-shrink-0 ${color}`} />
+          <span className="text-sm font-medium text-text-primary truncate">{fileName}</span>
+          {sizeLabel && <span className="text-xs text-text-tertiary flex-shrink-0">· {sizeLabel}</span>}
+        </div>
+        <PdfCarousel url={url} fileName={fileName} onFullscreen={() => setFullscreen(true)} />
+
+        <Dialog open={fullscreen} onOpenChange={setFullscreen}>
+          <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 overflow-hidden flex flex-col">
+            <DialogTitle className="px-4 py-3 border-b border-border-subtle text-base truncate pr-10">
+              {fileName}
+            </DialogTitle>
+            <div className="flex-1 min-h-0 overflow-auto p-3">
+              <PdfCarousel url={url} fileName={fileName} fullscreen />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  // ---- Office / text: expandable embedded viewer ----
+  const canView = viewerKind === 'office' || viewerKind === 'text';
 
   return (
     <div className={`max-w-full ${className}`} onClick={stop}>
@@ -98,7 +125,6 @@ export default function FileAttachmentCard({
           {sizeLabel && <span className="text-xs text-text-tertiary">{sizeLabel}</span>}
         </div>
 
-        {/* Open in new tab / download — always available */}
         <a
           href={url}
           target="_blank"
@@ -117,27 +143,22 @@ export default function FileAttachmentCard({
         )}
       </div>
 
-      {/* Inline viewer */}
       {canView && expanded && (
         <div className="relative border border-t-0 border-border-subtle rounded-b-xl overflow-hidden bg-surface-subtle">
           <button
             type="button"
-            onClick={(e) => {
-              stop(e);
-              setFullscreen(true);
-            }}
+            onClick={(e) => { stop(e); setFullscreen(true); }}
             aria-label="View fullscreen"
             className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-surface-default/90 border border-border-subtle text-text-secondary hover:text-text-primary shadow-sm"
           >
             <Maximize2 className="w-4 h-4" />
           </button>
           <div className="w-full h-[480px]">
-            <DocViewerFrame kind={viewerKind as 'pdf' | 'office' | 'text'} url={url} fileName={fileName} />
+            <DocViewerFrame kind={viewerKind} url={url} fileName={fileName} />
           </div>
         </div>
       )}
 
-      {/* Fullscreen modal */}
       {canView && (
         <Dialog open={fullscreen} onOpenChange={setFullscreen}>
           <DialogContent className="max-w-5xl w-[95vw] h-[85vh] p-0 overflow-hidden flex flex-col">
@@ -145,7 +166,7 @@ export default function FileAttachmentCard({
               {fileName}
             </DialogTitle>
             <div className="flex-1 min-h-0">
-              <DocViewerFrame kind={viewerKind as 'pdf' | 'office' | 'text'} url={url} fileName={fileName} />
+              <DocViewerFrame kind={viewerKind} url={url} fileName={fileName} />
             </div>
           </DialogContent>
         </Dialog>
