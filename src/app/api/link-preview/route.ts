@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import https from 'node:https';
+import http from 'node:http';
 
 const FETCH_TIMEOUT_MS = 9000;
 const MAX_BODY_BYTES = 512 * 1024; // 512 KB
@@ -89,6 +91,28 @@ function extractLinkImageSrc(html: string): string | null {
   return null;
 }
 
+/**
+ * Last-resort image: apple-touch-icon, else the largest `rel=icon` (≥120px).
+ * Lets sites with no og:image (but a decent icon) still show a card image.
+ */
+function extractIconHref(html: string): string | null {
+  const apple =
+    html.match(/<link[^>]+rel=["'][^"']*apple-touch-icon[^"']*["'][^>]+href=["']([^"']+)["']/i) ??
+    html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["'][^"']*apple-touch-icon[^"']*["']/i);
+  if (apple?.[1]) return apple[1].trim();
+
+  let best: string | null = null;
+  let bestSize = 0;
+  for (const m of html.matchAll(/<link\b[^>]*\brel=["'](?:shortcut\s+)?icon["'][^>]*>/gi)) {
+    const tag = m[0];
+    const href = tag.match(/href=["']([^"']+)["']/i)?.[1];
+    if (!href) continue;
+    const size = Number(tag.match(/sizes=["'](\d+)x\d+["']/i)?.[1] ?? '0');
+    if (size > bestSize) { best = href.trim(); bestSize = size; }
+  }
+  return bestSize >= 120 ? best : null;
+}
+
 function resolveImageUrl(imageUrl: string, baseUrl: string): string {
   const trimmed = imageUrl.trim();
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
@@ -128,7 +152,7 @@ function parseOgFromHtml(html: string, baseUrl: string): LinkPreviewResponse {
       { property: 'og:image:url' },
       { name: 'twitter:image' },
       { name: 'twitter:image:src' },
-    ]) ?? extractLinkImageSrc(html);
+    ]) ?? extractLinkImageSrc(html) ?? extractIconHref(html);
   if (imageUrl) result.imageUrl = resolveImageUrl(imageUrl, baseUrl);
 
   const siteName = extractMetaContent(html, [
@@ -138,6 +162,97 @@ function parseOgFromHtml(html: string, baseUrl: string): LinkPreviewResponse {
   if (siteName) result.siteName = siteName.length > 80 ? siteName.slice(0, 77) + '...' : siteName;
 
   return result;
+}
+
+/** TLS cert-chain errors that browsers tolerate (via AIA chasing) but Node's fetch does not. */
+function isCertChainError(err: unknown): boolean {
+  const e = err as { code?: string; cause?: { code?: string } } | null;
+  const code = e?.cause?.code ?? e?.code;
+  return typeof code === 'string' && (code.includes('CERT') || code.includes('SIGNATURE') || code.includes('SSL'));
+}
+
+const REQUEST_HEADERS = {
+  'User-Agent': BROWSER_UA,
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'en-US,en;q=0.9',
+};
+
+/**
+ * Fallback fetch for sites that serve an incomplete/invalid TLS chain
+ * (e.g. missing intermediate). Verification is relaxed for the preview fetch
+ * ONLY — SSRF host checks are still enforced by the caller. Follows redirects.
+ */
+function fetchHtmlInsecure(target: URL, depth = 0): Promise<string | null> {
+  return new Promise((resolve) => {
+    const mod = target.protocol === 'http:' ? http : https;
+    const req = mod.request(
+      target,
+      {
+        method: 'GET',
+        rejectUnauthorized: false,
+        headers: { ...REQUEST_HEADERS, 'Accept-Encoding': 'identity' },
+      },
+      (res) => {
+        const status = res.statusCode ?? 0;
+        const location = res.headers.location;
+        if ([301, 302, 303, 307, 308].includes(status) && location && depth < 3) {
+          res.resume();
+          try {
+            const next = new URL(location, target);
+            if ((next.protocol === 'http:' || next.protocol === 'https:') && isUrlSafeForFetch(next)) {
+              resolve(fetchHtmlInsecure(next, depth + 1));
+              return;
+            }
+          } catch { /* fall through */ }
+          resolve(null);
+          return;
+        }
+        const contentType = (res.headers['content-type'] || '').toString().toLowerCase();
+        if (status < 200 || status >= 300 || !contentType.includes('text/html')) {
+          res.resume();
+          resolve(null);
+          return;
+        }
+        const chunks: Buffer[] = [];
+        let len = 0;
+        res.on('data', (c: Buffer) => {
+          len += c.length;
+          if (len <= MAX_BODY_BYTES) chunks.push(c);
+          else res.destroy();
+        });
+        res.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+        res.on('error', () => resolve(null));
+      }
+    );
+    req.setTimeout(FETCH_TIMEOUT_MS, () => req.destroy());
+    req.on('error', () => resolve(null));
+    req.end();
+  });
+}
+
+/** Fetch HTML securely; on a TLS cert-chain failure, retry with verification relaxed. */
+async function loadHtml(parsed: URL): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(parsed.href, {
+      signal: controller.signal,
+      redirect: 'follow',
+      headers: REQUEST_HEADERS,
+      next: { revalidate: 3600 },
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    if (!(res.headers.get('content-type') || '').toLowerCase().includes('text/html')) return null;
+    const buffer = await res.arrayBuffer();
+    return new TextDecoder('utf-8', { fatal: false }).decode(
+      buffer.slice(0, Math.min(buffer.byteLength, MAX_BODY_BYTES))
+    );
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (isCertChainError(err)) return fetchHtmlInsecure(parsed);
+    return null;
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -162,53 +277,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Url not allowed' }, { status: 400 });
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const html = await loadHtml(parsed);
+  const data = html ? parseOgFromHtml(html, parsed.href) : {};
 
-  try {
-    const res = await fetch(parsed.href, {
-      signal: controller.signal,
-      redirect: 'follow',
-      headers: {
-        'User-Agent': BROWSER_UA,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-      next: { revalidate: 3600 },
-    });
-    clearTimeout(timeoutId);
-
-    if (!res.ok) {
-      return NextResponse.json(parseOgFromHtml('', parsed.href), {
-        status: 200,
-        headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
-      });
-    }
-
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.toLowerCase().includes('text/html')) {
-      return NextResponse.json(
-        {},
-        { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } }
-      );
-    }
-
-    const buffer = await res.arrayBuffer();
-    const bytes = buffer.byteLength;
-    const cap = Math.min(bytes, MAX_BODY_BYTES);
-    const decoder = new TextDecoder('utf-8', { fatal: false });
-    const html = decoder.decode(buffer.slice(0, cap));
-
-    const data = parseOgFromHtml(html, parsed.href);
-
-    return NextResponse.json(data, {
-      headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
-    });
-  } catch (err) {
-    clearTimeout(timeoutId);
-    return NextResponse.json(
-      {},
-      { status: 200, headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=86400' } }
-    );
-  }
+  return NextResponse.json(data, {
+    headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
+  });
 }
