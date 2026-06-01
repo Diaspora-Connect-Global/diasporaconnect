@@ -112,11 +112,12 @@ export default function PdfCarousel({
       }
     })();
     const tasks = renderTasksRef.current;
+    const rendered = renderedRef.current;
     return () => {
       cancelled = true;
       tasks.forEach((t) => t.cancel());
       tasks.clear();
-      renderedRef.current.clear();
+      rendered.clear();
       pdfRef.current?.destroy();
       pdfRef.current = null;
     };
