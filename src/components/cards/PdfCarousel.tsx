@@ -124,7 +124,7 @@ export default function PdfCarousel({
         canvas.style.width = '100%';
         canvas.style.height = 'auto';
         renderTaskRef.current?.cancel();
-        const task = pdfPage.render({ canvasContext: ctx, viewport });
+        const task = pdfPage.render({ canvas, canvasContext: ctx, viewport });
         renderTaskRef.current = task;
         await task.promise;
       } catch {
