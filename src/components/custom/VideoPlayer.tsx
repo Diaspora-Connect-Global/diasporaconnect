@@ -1,12 +1,25 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Loader2, RefreshCw, WifiOff } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Loader2, RefreshCw, WifiOff, Rewind, FastForward } from 'lucide-react';
 import Image from 'next/image';
 import { useVideoStore } from '@/store/useVideoStore';
 
 const MAX_AUTO_RETRIES = 3;
 const AUTO_RETRY_DELAYS = [2000, 5000, 10000] as const;
+const SKIP_SECONDS = 10;
+
+/** Seconds → m:ss (or h:mm:ss). Returns 0:00 for NaN/Infinity. */
+function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const ss = String(s).padStart(2, '0');
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${ss}`;
+  return `${m}:${ss}`;
+}
 
 interface VideoPlayerProps {
   src: string;
@@ -31,6 +44,10 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
   // preload="metadata" until in-viewport, then upgrade to "auto"
   const [preloadMode, setPreloadMode] = useState<'metadata' | 'auto'>(autoPlay ? 'auto' : 'metadata');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const isScrubbingRef = useRef(false);
+  const seekTrackRef = useRef<HTMLDivElement>(null);
   const [isBuffering, setIsBuffering] = useState(false);
   const [slowConnection, setSlowConnection] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -91,7 +108,9 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
 
   const scheduleHide = useCallback(() => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => setShowControls(false), 3000);
+    hideTimerRef.current = setTimeout(() => {
+      if (!isScrubbingRef.current) setShowControls(false);
+    }, 3000);
   }, []);
 
   const revealControls = useCallback(() => {
@@ -193,7 +212,56 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     setGlobalMuted(!globalMuted);
   }, [globalMuted, setGlobalMuted]);
 
+  const canSeek = Number.isFinite(duration) && duration > 0;
+
+  const skip = useCallback((delta: number) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const v = videoRef.current;
+    if (!v || !canSeek) return;
+    v.currentTime = Math.min(duration, Math.max(0, v.currentTime + delta));
+    setCurrentTime(v.currentTime);
+    revealControls();
+  }, [canSeek, duration, revealControls]);
+
+  /** Map a pointer x-position to a time and seek to it. */
+  const seekToClientX = useCallback((clientX: number) => {
+    const v = videoRef.current;
+    const track = seekTrackRef.current;
+    if (!v || !track || !canSeek) return;
+    const rect = track.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const fraction = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const time = fraction * duration;
+    v.currentTime = time;
+    setCurrentTime(time);
+  }, [canSeek, duration]);
+
+  const handleSeekPointerDown = useCallback((e: React.PointerEvent) => {
+    e.stopPropagation();
+    if (!canSeek) return;
+    isScrubbingRef.current = true;
+    setShowControls(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    e.currentTarget.setPointerCapture(e.pointerId);
+    seekToClientX(e.clientX);
+  }, [canSeek, seekToClientX]);
+
+  const handleSeekPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isScrubbingRef.current) return;
+    e.stopPropagation();
+    seekToClientX(e.clientX);
+  }, [seekToClientX]);
+
+  const handleSeekPointerUp = useCallback((e: React.PointerEvent) => {
+    if (!isScrubbingRef.current) return;
+    e.stopPropagation();
+    isScrubbingRef.current = false;
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* already released */ }
+    scheduleHide();
+  }, [scheduleHide]);
+
   const controlsVisible = showControls || !isPlaying;
+  const progressPct = canSeek ? (currentTime / duration) * 100 : 0;
 
   return (
     <div
@@ -224,6 +292,9 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
         onCanPlay={handleCanPlay}
         onStalled={handleStalled}
         onError={handleError}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onDurationChange={(e) => setDuration(e.currentTarget.duration)}
+        onTimeUpdate={(e) => { if (!isScrubbingRef.current) setCurrentTime(e.currentTarget.currentTime); }}
         onEnded={() => { setIsPlaying(false); setShowControls(true); }}
       />
 
@@ -267,6 +338,34 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
           className={`absolute bottom-0 left-0 right-0 px-3 pb-3 pt-8 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-200 ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Seek bar */}
+          <div
+            ref={seekTrackRef}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={handleSeekPointerDown}
+            onPointerMove={handleSeekPointerMove}
+            onPointerUp={handleSeekPointerUp}
+            onPointerCancel={handleSeekPointerUp}
+            className={`group/seek relative py-2 ${canSeek ? 'cursor-pointer' : 'cursor-default'}`}
+            role="slider"
+            aria-label="Seek"
+            aria-valuemin={0}
+            aria-valuemax={canSeek ? Math.floor(duration) : 0}
+            aria-valuenow={Math.floor(currentTime)}
+            tabIndex={canSeek ? 0 : -1}
+          >
+            <div className="relative h-1 rounded-full bg-white/30">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-text-brand"
+                style={{ width: `${progressPct}%` }}
+              />
+              <div
+                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-text-brand shadow opacity-0 group-hover/seek:opacity-100 transition-opacity"
+                style={{ left: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+
           {/* Button row */}
           <div className="flex items-center gap-2">
             <button
@@ -278,6 +377,28 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
                 : <Play className="w-4 h-4 fill-white translate-x-px" />
               }
             </button>
+
+            <button
+              onClick={skip(-SKIP_SECONDS)}
+              disabled={!canSeek}
+              aria-label={`Rewind ${SKIP_SECONDS} seconds`}
+              className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0 disabled:opacity-40"
+            >
+              <Rewind className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={skip(SKIP_SECONDS)}
+              disabled={!canSeek}
+              aria-label={`Forward ${SKIP_SECONDS} seconds`}
+              className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0 disabled:opacity-40"
+            >
+              <FastForward className="w-4 h-4" />
+            </button>
+
+            <span className="text-white text-xs tabular-nums ml-1 select-none">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
 
             <div className="flex-1" />
 
