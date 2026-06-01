@@ -3,19 +3,13 @@
 
 import type { ReactNode } from "react";
 import { FileIcon, Music } from "lucide-react";
+import { formatFileSize } from "@/lib/fileDisplay";
 
 export interface MessageAttachmentItem {
   gcsPath?: string;
   mimeType?: string;
   fileName?: string;
   fileSize?: number;
-}
-
-function formatFileSize(bytes?: number): string {
-  if (bytes == null || bytes === 0) return "";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function SingleAttachment({ att, inGrid }: { att: MessageAttachmentItem; inGrid?: boolean }) {

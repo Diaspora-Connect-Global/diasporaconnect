@@ -1,6 +1,7 @@
 'use client';
 
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { formatDateProximity } from '@/macros/time';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { Link } from '@/i18n/navigation';
@@ -275,6 +276,7 @@ export default function FeedPage() {
                         .map((a) => a.url || '')
                         .filter(Boolean) || []
                     }
+                    documents={splitPostAttachments(post.attachments).documents}
                     likes={post.engagementCounts.likes}
                     comments={post.engagementCounts.comments}
                     shares={post.engagementCounts.shares}

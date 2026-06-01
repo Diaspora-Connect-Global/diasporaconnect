@@ -3,6 +3,7 @@
 import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVariant2';
 import { formatDateProximity } from '@/macros/time';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
 import { Virtuoso } from 'react-virtuoso';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
@@ -1187,6 +1188,7 @@ export default function Home() {
                           )
                           .map((a) => a.url || '')
                           .filter(Boolean) || []}
+                        documents={splitPostAttachments(post.attachments).documents}
                         likes={post.engagementCounts.likes}
                         comments={post.engagementCounts.comments}
                         shares={post.engagementCounts.shares}

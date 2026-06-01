@@ -30,6 +30,10 @@ import { formatDateProximity } from '@/macros/time';
 import { formatCount } from '@/macros/formatCount';
 import { resolveUserTier } from '@/lib/userTier';
 import { VideoPlayer } from '@/components/custom/VideoPlayer';
+import FileAttachmentCard from '@/components/cards/FileAttachmentCard';
+import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
+import { getFirstUrlInText } from '@/lib/urlPreview';
+import type { PostDocument } from '@/lib/normalizeFeedPost';
 
 /* --------------------------------------------------------------- */
 type MediaItem = { type: 'image'; src: string } | { type: 'video'; src: string };
@@ -66,6 +70,8 @@ export interface FeedCardFilteredProps {
     mentionMap?: MentionMap;
     images?: string[];
     videos?: string[];
+    /** Document/audio attachments (everything that isn't image/video), rendered as file cards. */
+    documents?: PostDocument[];
     likes: number;
     comments: number;
     commentsData?: Comment[];
@@ -138,6 +144,7 @@ export default function FeedCardFiltered({
     mentionMap,
     images,
     videos,
+    documents = [],
     likes: initialLikes,
     comments: initialComments,
     commentsData: commentsDataProp = [],
@@ -654,6 +661,26 @@ export default function FeedCardFiltered({
         );
     };
 
+    const renderDocuments = () => {
+        if (!documents?.length) return null;
+        return (
+            <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
+                {documents.map((doc, i) => (
+                    <FileAttachmentCard
+                        key={`${doc.url}-${i}`}
+                        url={doc.url}
+                        fileName={doc.fileName}
+                        mimeType={doc.mimeType}
+                        size={doc.size}
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    /** First URL in the post text — rendered as an OG preview card below the content. */
+    const previewUrl = getFirstUrlInText(content);
+
     const sortOptions: Array<{ key: 'TOP' | 'NEWEST' | 'OLDEST'; label: string }> = [
         { key: 'TOP', label: 'Top' },
         { key: 'NEWEST', label: 'Newest' },
@@ -1126,6 +1153,14 @@ export default function FeedCardFiltered({
             {renderContent()}
             {renderImages()}
             {renderVideos()}
+            {renderDocuments()}
+
+            {/* Link preview for the first URL in the post text */}
+            {previewUrl && (
+                <div className="mb-[1rem]">
+                    <LinkPreviewCard url={previewUrl} />
+                </div>
+            )}
 
             {/* Reaction Bar */}
             {(likeCount > 0 || commentCount > 0) && (

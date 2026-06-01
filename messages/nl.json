@@ -236,7 +236,8 @@
             "documentsAdded": "{count} document(en) toegevoegd",
             "filesAddedFromGallery": "{count} bestand(en) toegevoegd uit galerij",
             "photoCaptured": "Foto gemaakt",
-            "videoCaptured": "Video opgenomen"
+            "videoCaptured": "Video opgenomen",
+            "removePreview": "Linkvoorbeeld verwijderen"
         },
         "mobile": {
             "camera": "Camera",

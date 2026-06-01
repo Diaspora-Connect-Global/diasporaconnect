@@ -7,6 +7,46 @@ import type {
   PostVisibility,
   UserEngagement,
 } from '@/services/gql/types/postsFeed';
+import { getFileNameFromUrl } from '@/lib/urlPreview';
+
+export interface PostDocument {
+  url: string;
+  fileName: string;
+  mimeType: string;
+  size?: number;
+}
+
+function isImage(a: Attachment): boolean {
+  return a.mimeType?.startsWith('image/') || String(a.type ?? '').toUpperCase() === 'IMAGE';
+}
+
+function isVideo(a: Attachment): boolean {
+  return a.mimeType?.startsWith('video/') || String(a.type ?? '').toUpperCase() === 'VIDEO';
+}
+
+/**
+ * Splits a post's attachments into the shapes the feed cards consume:
+ * - images / videos: URL string arrays (existing card props)
+ * - documents: everything else (DOCUMENT / AUDIO) as file-card descriptors
+ */
+export function splitPostAttachments(attachments?: Attachment[]): {
+  images: string[];
+  videos: string[];
+  documents: PostDocument[];
+} {
+  const list = attachments ?? [];
+  const images = list.filter(isImage).map((a) => a.url || '').filter(Boolean);
+  const videos = list.filter(isVideo).map((a) => a.url || '').filter(Boolean);
+  const documents = list
+    .filter((a) => !isImage(a) && !isVideo(a) && a.url)
+    .map((a) => ({
+      url: a.url!,
+      fileName: getFileNameFromUrl(a.url || a.objectKey || ''),
+      mimeType: a.mimeType ?? 'application/octet-stream',
+      size: a.size || undefined,
+    }));
+  return { images, videos, documents };
+}
 
 function mapAttachments(raw: FeedPostFragment['attachments']): Attachment[] | undefined {
   if (!raw?.length) return undefined;

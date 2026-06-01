@@ -25,6 +25,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { toast } from 'sonner';
 import { VideoPlayer } from '@/components/custom/VideoPlayer';
+import FileAttachmentCard from '@/components/cards/FileAttachmentCard';
+import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
+import { getFirstUrlInText } from '@/lib/urlPreview';
+import type { PostDocument } from '@/lib/normalizeFeedPost';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -72,6 +76,8 @@ interface FeedCardProps {
     images?: string[];
     /** Video attachment URLs (e.g. from mimeType video/*). Loaded with preload="metadata" and viewport-aware. */
     videos?: string[];
+    /** Document/audio attachments (everything that isn't image/video), rendered as file cards. */
+    documents?: PostDocument[];
     likes: number;
     comments: number;
     shares: number;
@@ -165,6 +171,7 @@ function FeedCardWithReplyInner({
     mentionMap,
     images,
     videos = [],
+    documents = [],
     likes,
     comments,
     shares,
@@ -864,6 +871,26 @@ function FeedCardWithReplyInner({
         );
     };
 
+    const renderDocuments = () => {
+        if (!documents?.length) return null;
+        return (
+            <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
+                {documents.map((doc, i) => (
+                    <FileAttachmentCard
+                        key={`${doc.url}-${i}`}
+                        url={doc.url}
+                        fileName={doc.fileName}
+                        mimeType={doc.mimeType}
+                        size={doc.size}
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    /** First URL in the post text — rendered as an OG preview card below the content. */
+    const previewUrl = getFirstUrlInText(postContent);
+
     const renderMediaModal = () => {
         if (onOpenMedia || !showMediaModal || allMedia.length === 0) return null;
         const current = allMedia[currentMediaIndex]!;
@@ -1469,6 +1496,14 @@ function FeedCardWithReplyInner({
                 {/* Images */}
                 {renderImages()}
                 {renderVideos()}
+                {renderDocuments()}
+
+                {/* Link preview for the first URL in the post text */}
+                {previewUrl && (
+                    <div className="mb-[1rem]">
+                        <LinkPreviewCard url={previewUrl} />
+                    </div>
+                )}
 
                 {/* Reaction Bar - only visible when at least one count > 0 */}
                 {(likeCount > 0 || displayedCommentCount > 0 || shareCount > 0) && (

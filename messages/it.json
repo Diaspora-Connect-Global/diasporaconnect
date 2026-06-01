@@ -236,7 +236,8 @@
             "documentsAdded": "{count} documento/i aggiunto/i",
             "filesAddedFromGallery": "{count} file aggiunto/i dalla galleria",
             "photoCaptured": "Foto catturata",
-            "videoCaptured": "Video catturato"
+            "videoCaptured": "Video catturato",
+            "removePreview": "Rimuovi anteprima del link"
         },
         "mobile": {
             "camera": "Fotocamera",

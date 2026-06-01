@@ -34,6 +34,8 @@ import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/com
 import { AttachmentInput } from '@/services/gql/types/postsFeed';
 import { usePostDraft } from '@/hooks/usePostDraft';
 import { buildMentionInputsFromText } from '@/components/custom/richTextRenderer';
+import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
+import { getFirstUrlInText } from '@/lib/urlPreview';
 
 // Types
 type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
@@ -141,6 +143,7 @@ export default function CreatePostPage() {
   const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
   const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
   const [draftRestored, setDraftRestored] = useState(false);
+  const [dismissedPreviewUrl, setDismissedPreviewUrl] = useState<string | null>(null);
   const textareaRef = React.useRef<RichTextareaHandle>(null);
   const submittingRef = React.useRef(false);
   const saveTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -640,6 +643,27 @@ export default function CreatePostPage() {
               minHeight="200px"
             />
           </div>
+
+          {/* Live link preview for the first URL in the post text (dismissible) */}
+          {(() => {
+            const previewUrl = getFirstUrlInText(postContent);
+            if (!previewUrl || previewUrl === dismissedPreviewUrl) return null;
+            return (
+              <div className="px-6 pb-4">
+                <div className="relative inline-block max-w-full">
+                  <LinkPreviewCard url={previewUrl} />
+                  <button
+                    type="button"
+                    onClick={() => setDismissedPreviewUrl(previewUrl)}
+                    aria-label={t('attachments.removePreview')}
+                    className="absolute top-1.5 right-1.5 p-1 rounded-full bg-surface-default/90 border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-surface-default shadow-sm"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Attachments Preview */}
           {attachments.length > 0 && (

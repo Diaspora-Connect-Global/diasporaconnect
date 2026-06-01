@@ -7,7 +7,7 @@ import { GET_POST, ADD_ENGAGEMENT, REMOVE_ENGAGEMENT, CREATE_COMMENT, GetPostDat
 import type { FeedPostFragment, Post } from '@/services/gql/types/postsFeed';
 import { GET_USER_PROFILE } from '@/services/gql/profile';
 import type { GetProfileResponse } from '@/services/gql/types/profile';
-import { normalizeFeedPost } from '@/lib/normalizeFeedPost';
+import { normalizeFeedPost, splitPostAttachments } from '@/lib/normalizeFeedPost';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import SimilarPosts from '@/components/post/SimilarPosts';
@@ -301,6 +301,7 @@ export default function PostPage() {
               .map((a) => a.url || '')
               .filter(Boolean) || []
           }
+          documents={splitPostAttachments(normalizedPostResolved.attachments).documents}
           likes={normalizedPostResolved.engagementCounts?.likes ?? 0}
           comments={normalizedPostResolved.engagementCounts?.comments ?? 0}
           shares={normalizedPostResolved.engagementCounts?.shares ?? 0}

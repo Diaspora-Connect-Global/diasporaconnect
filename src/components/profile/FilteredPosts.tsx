@@ -23,6 +23,7 @@ import {
   Post,
 } from '@/services/gql/postsFeed';
 import FeedCardWithReply from '../cards/FeedCardWithReply';
+import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { toast } from 'sonner';
 import { Bookmark, Heart, MessageCircle, FileText } from 'lucide-react';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
@@ -335,6 +336,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                     .map((a) => a.url || '')
                     .filter(Boolean) || []
                 }
+                documents={splitPostAttachments(post.attachments).documents}
                 likes={post.engagementCounts.likes}
                 comments={post.engagementCounts.comments}
                 shares={post.engagementCounts.shares}
