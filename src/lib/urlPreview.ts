@@ -100,16 +100,21 @@ export function classifyUrl(url: string): UrlClassification {
 }
 
 /**
- * Returns the first valid HTTP/HTTPS URL found in the text, or null.
+ * Returns the first URL found in the text (normalized to an absolute https URL),
+ * or null. Matches both `http(s)://…` and bare `www.…` links — mirroring the
+ * linkifier in richTextRenderer so any link rendered in the text can be previewed.
  */
 export function getFirstUrlInText(text: string | undefined): string | null {
   if (!text?.trim()) return null;
-  const urlRegex = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
+  const urlRegex = /https?:\/\/[^\s<>'"()[\]{}]+|www\.[^\s<>'"()[\]{}]+/gi;
   const match = text.match(urlRegex);
   if (!match?.[0]) return null;
+  // Strip trailing punctuation (e.g. "see https://x.com." → drop the dot).
+  const cleaned = match[0].replace(/[.,;:!?)]+$/g, '');
+  const normalized = cleaned.startsWith('http') ? cleaned : `https://${cleaned}`;
   try {
-    new URL(match[0]);
-    return match[0];
+    new URL(normalized);
+    return normalized;
   } catch {
     return null;
   }

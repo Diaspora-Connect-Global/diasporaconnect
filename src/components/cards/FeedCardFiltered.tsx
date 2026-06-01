@@ -678,8 +678,10 @@ export default function FeedCardFiltered({
         );
     };
 
-    /** First URL in the post text — rendered as an OG preview card below the content. */
-    const previewUrl = getFirstUrlInText(content);
+    /** First URL in the post text — rendered as an OG preview card below the content.
+     *  Suppressed when the post already has media/document attachments. */
+    const hasAttachments = (images?.length ?? 0) > 0 || (videos?.length ?? 0) > 0 || documents.length > 0;
+    const previewUrl = hasAttachments ? null : getFirstUrlInText(content);
 
     const sortOptions: Array<{ key: 'TOP' | 'NEWEST' | 'OLDEST'; label: string }> = [
         { key: 'TOP', label: 'Top' },

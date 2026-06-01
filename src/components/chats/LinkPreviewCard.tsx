@@ -79,24 +79,33 @@ function getPostPreviewUrl(post: GetPostData['post']): string | null {
 }
 
 export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
-  const trimmed = url?.trim();
-  if (!trimmed) return null;
+  const trimmed = url?.trim() ?? '';
+
+  // Validate up-front WITHOUT early-returning, so the hooks below always run
+  // in a stable order (Rules of Hooks).
+  let isValid = false;
   try {
-    new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`);
+    if (trimmed) {
+      new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`);
+      isValid = true;
+    }
   } catch {
-    return null;
+    isValid = false;
   }
 
-  const kind = classifyUrl(trimmed);
-  const domain = getDomain(trimmed);
-  const postId = extractPostIdFromUrl(trimmed);
-  const og = useLinkPreviewOg(trimmed, kind === 'website');
+  const kind = isValid ? classifyUrl(trimmed) : 'website';
+  const domain = isValid ? getDomain(trimmed) : null;
+  const postId = isValid ? extractPostIdFromUrl(trimmed) : null;
+
+  const og = useLinkPreviewOg(trimmed, isValid && kind === 'website');
 
   const { data: postData } = useQuery<GetPostData>(GET_POST, {
-    variables: { id: postId! },
-    skip: kind !== 'post' || !postId,
+    variables: { id: postId ?? '' },
+    skip: !isValid || kind !== 'post' || !postId,
     errorPolicy: 'ignore',
   });
+
+  if (!isValid) return null;
   const previewUrl = postData?.post ? getPostPreviewUrl(postData.post) : null;
   const postText = postData?.post?.text?.trim() ?? null;
   const textSnippet = postText ? (postText.length > 120 ? postText.slice(0, 120) + '...' : postText) : null;

@@ -646,6 +646,7 @@ export default function CreatePostPage() {
 
           {/* Live link preview for the first URL in the post text (dismissible) */}
           {(() => {
+            if (attachments.length > 0) return null;
             const previewUrl = getFirstUrlInText(postContent);
             if (!previewUrl || previewUrl === dismissedPreviewUrl) return null;
             return (

@@ -65,3 +65,42 @@ export function getFileTypeMeta(mimeType?: string, fileName?: string): FileTypeM
 
   return { Icon: FileIcon, color: 'text-text-tertiary' };
 }
+
+export type DocViewerKind = 'pdf' | 'office' | 'text' | 'unsupported';
+
+/**
+ * Determines how a document can be previewed inline:
+ * - 'pdf'  → browser-native embed
+ * - 'office' → Microsoft Office Online viewer (Word/Excel/PowerPoint)
+ * - 'text' → browser-native embed (plain text / csv)
+ * - 'unsupported' → download/open in new tab only
+ */
+export function getDocViewerKind(mimeType?: string, fileName?: string): DocViewerKind {
+  const mime = (mimeType ?? '').toLowerCase();
+  const ext = getExtension(fileName);
+
+  if (mime === 'application/pdf' || ext === 'pdf') return 'pdf';
+
+  const officeExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+  if (
+    mime.includes('word') ||
+    mime.includes('excel') ||
+    mime.includes('spreadsheet') ||
+    mime.includes('powerpoint') ||
+    mime.includes('presentation') ||
+    officeExts.includes(ext)
+  ) {
+    return 'office';
+  }
+
+  if (mime === 'text/plain' || mime === 'text/csv' || ext === 'txt' || ext === 'csv') {
+    return 'text';
+  }
+
+  return 'unsupported';
+}
+
+/** Microsoft Office Online embed URL for a publicly reachable document URL. */
+export function buildOfficeEmbedUrl(url: string): string {
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+}

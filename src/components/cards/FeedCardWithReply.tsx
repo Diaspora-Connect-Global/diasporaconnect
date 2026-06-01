@@ -888,8 +888,10 @@ function FeedCardWithReplyInner({
         );
     };
 
-    /** First URL in the post text — rendered as an OG preview card below the content. */
-    const previewUrl = getFirstUrlInText(postContent);
+    /** First URL in the post text — rendered as an OG preview card below the content.
+     *  Suppressed when the post already has media/document attachments. */
+    const hasAttachments = (images?.length ?? 0) > 0 || videos.length > 0 || documents.length > 0;
+    const previewUrl = hasAttachments ? null : getFirstUrlInText(postContent);
 
     const renderMediaModal = () => {
         if (onOpenMedia || !showMediaModal || allMedia.length === 0) return null;

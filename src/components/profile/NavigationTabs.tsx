@@ -63,13 +63,13 @@ userData
   const tActions = useTranslations('actions');
   
   // State for main tabs and sub-tabs
-  const [activeTab, setActiveTab] = useState("about");
+  const [activeTab, setActiveTab] = useState("posts");
 
   // Main horizontal tabs
   const mainTabs = [
-    { id: 'about', label: t('about') },
     { id: 'posts', label: t('posts') },
     { id: 'communities', label: t('communities') },
+    { id: 'about', label: t('about') },
   ];
 
 
