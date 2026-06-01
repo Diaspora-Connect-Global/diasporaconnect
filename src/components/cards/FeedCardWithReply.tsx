@@ -1503,7 +1503,7 @@ function FeedCardWithReplyInner({
                 {/* Link preview for the first URL in the post text */}
                 {previewUrl && (
                     <div className="mb-[1rem]">
-                        <LinkPreviewCard url={previewUrl} />
+                        <LinkPreviewCard url={previewUrl} variant="feed" />
                     </div>
                 )}
 

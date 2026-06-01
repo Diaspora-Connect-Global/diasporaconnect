@@ -7,7 +7,7 @@ import { useQuery } from '@apollo/client/react';
 import { GET_POST, type GetPostData } from '@/services/gql/postsFeed';
 import { classifyUrl, extractPostIdFromUrl, extractYouTubeVideoId, getFileNameFromUrl } from '@/lib/urlPreview';
 
-type OgData = { title?: string; description?: string; imageUrl?: string; loading: boolean };
+type OgData = { title?: string; description?: string; imageUrl?: string; siteName?: string; loading: boolean };
 
 function useLinkPreviewOg(url: string, enabled: boolean): OgData {
   const [state, setState] = useState<OgData>(() => ({ loading: enabled }));
@@ -20,12 +20,13 @@ function useLinkPreviewOg(url: string, enabled: boolean): OgData {
     const encoded = encodeURIComponent(url.trim());
     fetch(`/api/link-preview?url=${encoded}`)
       .then((r) => (r.ok ? r.json() : {}))
-      .then((data: { title?: string; description?: string; imageUrl?: string }) => {
+      .then((data: { title?: string; description?: string; imageUrl?: string; siteName?: string }) => {
         if (cancelled) return;
         setState({
           title: data.title,
           description: data.description,
           imageUrl: data.imageUrl,
+          siteName: data.siteName,
           loading: false,
         });
       })
@@ -42,6 +43,8 @@ function useLinkPreviewOg(url: string, enabled: boolean): OgData {
 export interface LinkPreviewCardProps {
   url: string;
   className?: string;
+  /** 'compact' (default, chat) caps card width; 'feed' renders a full-width Facebook-style card. */
+  variant?: 'compact' | 'feed';
 }
 
 function getDomain(url: string): string | null {
@@ -78,8 +81,9 @@ function getPostPreviewUrl(post: GetPostData['post']): string | null {
   return (firstImage?.url ?? firstVideo?.url) ?? null;
 }
 
-export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
+export function LinkPreviewCard({ url, className = '', variant = 'compact' }: LinkPreviewCardProps) {
   const trimmed = url?.trim() ?? '';
+  const isFeed = variant === 'feed';
 
   // Validate up-front WITHOUT early-returning, so the hooks below always run
   // in a stable order (Rules of Hooks).
@@ -104,6 +108,8 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
     skip: !isValid || kind !== 'post' || !postId,
     errorPolicy: 'ignore',
   });
+
+  const [ogImgFailed, setOgImgFailed] = useState(false);
 
   if (!isValid) return null;
   const previewUrl = postData?.post ? getPostPreviewUrl(postData.post) : null;
@@ -153,7 +159,9 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
         href={trimmed}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block rounded-xl border border-border-subtle bg-surface-subtle/50 hover:bg-surface-subtle transition-colors overflow-hidden max-w-[min(100%,18rem)] ${className}`}
+        className={`block rounded-xl border border-border-subtle bg-surface-subtle/50 hover:bg-surface-subtle transition-colors overflow-hidden ${
+          isFeed ? 'w-full max-w-full' : 'max-w-[min(100%,18rem)]'
+        } ${className}`}
       >
         <div className="relative aspect-video w-full overflow-hidden bg-surface-default">
           <img
@@ -200,7 +208,9 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
           href={trimmed}
           target="_blank"
           rel="noopener noreferrer"
-          className={`block rounded-xl border border-border-subtle bg-surface-subtle/50 hover:bg-surface-subtle transition-colors overflow-hidden max-w-[min(100%,16rem)] ${className}`}
+          className={`block rounded-xl border border-border-subtle bg-surface-subtle/50 hover:bg-surface-subtle transition-colors overflow-hidden ${
+            isFeed ? 'w-full max-w-full' : 'max-w-[min(100%,16rem)]'
+          } ${className}`}
         >
           <div className="relative aspect-square w-full overflow-hidden bg-surface-default flex items-center justify-center">
             {previewUrl ? (
@@ -248,25 +258,34 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
   const hasOg = !og.loading && (og.title || og.description || og.imageUrl);
 
   if (hasOg) {
+    const showImg = !!og.imageUrl && !ogImgFailed;
+    const footer = (og.siteName ?? domain) ?? '';
     return (
       <a
         href={trimmed}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block rounded-xl border border-border-subtle bg-surface-subtle/50 hover:bg-surface-subtle transition-colors overflow-hidden max-w-[min(100%,18rem)] ${className}`}
+        className={`block rounded-xl border border-border-subtle bg-surface-subtle/50 hover:bg-surface-subtle transition-colors overflow-hidden ${
+          isFeed ? 'w-full max-w-full' : 'max-w-[min(100%,18rem)]'
+        } ${className}`}
       >
-        {og.imageUrl && (
+        {showImg && (
           <div className="relative aspect-video w-full overflow-hidden bg-surface-default">
             <img
               src={og.imageUrl || undefined}
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
+              onError={() => setOgImgFailed(true)}
             />
           </div>
         )}
-        <div className="p-2.5 min-w-0">
+        <div className={isFeed ? 'p-3 min-w-0' : 'p-2.5 min-w-0'}>
+          <p className="text-[0.7rem] font-medium uppercase tracking-wide text-text-tertiary truncate">{footer}</p>
           {og.title && (
-            <p className="text-sm font-medium text-text-primary truncate" title={og.title}>
+            <p
+              className={`font-semibold text-text-primary mt-0.5 ${isFeed ? 'text-sm line-clamp-2' : 'text-sm truncate'}`}
+              title={og.title}
+            >
               {og.title}
             </p>
           )}
@@ -275,10 +294,6 @@ export function LinkPreviewCard({ url, className = '' }: LinkPreviewCardProps) {
               {og.description}
             </p>
           )}
-          <p className="text-xs font-medium text-text-tertiary truncate mt-1">{domain}</p>
-          <p className="text-sm text-text-primary truncate" title={trimmed}>
-            {displayUrl}
-          </p>
         </div>
       </a>
     );

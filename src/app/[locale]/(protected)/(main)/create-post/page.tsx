@@ -651,8 +651,8 @@ export default function CreatePostPage() {
             if (!previewUrl || previewUrl === dismissedPreviewUrl) return null;
             return (
               <div className="px-6 pb-4">
-                <div className="relative inline-block max-w-full">
-                  <LinkPreviewCard url={previewUrl} />
+                <div className="relative w-full max-w-full">
+                  <LinkPreviewCard url={previewUrl} variant="feed" />
                   <button
                     type="button"
                     onClick={() => setDismissedPreviewUrl(previewUrl)}

@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const FETCH_TIMEOUT_MS = 5000;
-const MAX_BODY_BYTES = 256 * 1024; // 256 KB
+const FETCH_TIMEOUT_MS = 9000;
+const MAX_BODY_BYTES = 512 * 1024; // 512 KB
+// A real browser UA — institutional/WAF-protected sites block non-browser agents.
+const BROWSER_UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 export type LinkPreviewResponse = {
   title?: string;
   description?: string;
   imageUrl?: string;
+  siteName?: string;
 };
 
 /** Reject private/localhost URLs to avoid SSRF. */
@@ -47,14 +51,42 @@ function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“',
+  mdash: '—', ndash: '–', hellip: '…',
+};
+
 function decodeHtmlEntities(s: string): string {
   return s
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'");
+    // Decimal (&#039;) and hex (&#x27;) numeric entities.
+    .replace(/&#(\d+);/g, (_, n) => {
+      try { return String.fromCodePoint(parseInt(n, 10)); } catch { return _; }
+    })
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => {
+      try { return String.fromCodePoint(parseInt(n, 16)); } catch { return _; }
+    })
+    // Common named entities.
+    .replace(/&([a-z]+);/gi, (m, name) => NAMED_ENTITIES[name.toLowerCase()] ?? m);
+}
+
+/** Extract the inner text of the <title> tag, or null. */
+function extractTitleTag(html: string): string | null {
+  const m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  return m?.[1] ? decodeHtmlEntities(m[1].trim()) : null;
+}
+
+/** Extract href from <link rel="image_src" href="..."> (either attribute order). */
+function extractLinkImageSrc(html: string): string | null {
+  const patterns = [
+    /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i,
+    /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']image_src["']/i,
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m?.[1]) return m[1].trim();
+  }
+  return null;
 }
 
 function resolveImageUrl(imageUrl: string, baseUrl: string): string {
@@ -69,23 +101,41 @@ function resolveImageUrl(imageUrl: string, baseUrl: string): string {
 
 function parseOgFromHtml(html: string, baseUrl: string): LinkPreviewResponse {
   const result: LinkPreviewResponse = {};
-  const title = extractMetaContent(html, [
-    { property: 'og:title' },
-    { name: 'twitter:title' },
-  ]);
+
+  // title: og:title (property or name) → twitter:title → <title>
+  const title =
+    extractMetaContent(html, [
+      { property: 'og:title' },
+      { name: 'og:title' },
+      { name: 'twitter:title' },
+    ]) ?? extractTitleTag(html);
   if (title) result.title = title.length > 200 ? title.slice(0, 197) + '...' : title;
 
+  // description: og:description → twitter:description → meta name=description
   const description = extractMetaContent(html, [
     { property: 'og:description' },
+    { name: 'og:description' },
     { name: 'twitter:description' },
+    { name: 'description' },
   ]);
   if (description) result.description = description.length > 300 ? description.slice(0, 297) + '...' : description;
 
-  const imageUrl = extractMetaContent(html, [
-    { property: 'og:image' },
-    { name: 'twitter:image' },
-  ]);
+  // image: og:image → og:image:url → twitter:image → <link rel=image_src>
+  const imageUrl =
+    extractMetaContent(html, [
+      { property: 'og:image' },
+      { name: 'og:image' },
+      { property: 'og:image:url' },
+      { name: 'twitter:image' },
+      { name: 'twitter:image:src' },
+    ]) ?? extractLinkImageSrc(html);
   if (imageUrl) result.imageUrl = resolveImageUrl(imageUrl, baseUrl);
+
+  const siteName = extractMetaContent(html, [
+    { property: 'og:site_name' },
+    { name: 'og:site_name' },
+  ]);
+  if (siteName) result.siteName = siteName.length > 80 ? siteName.slice(0, 77) + '...' : siteName;
 
   return result;
 }
@@ -118,8 +168,11 @@ export async function GET(request: NextRequest) {
   try {
     const res = await fetch(parsed.href, {
       signal: controller.signal,
+      redirect: 'follow',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; LinkPreview/1.0)',
+        'User-Agent': BROWSER_UA,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
       },
       next: { revalidate: 3600 },
     });
