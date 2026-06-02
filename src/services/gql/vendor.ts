@@ -131,6 +131,8 @@ export const GET_VENDOR_ELIGIBILITY = gql`
       payoutAccountCount
       verifiedPayoutAccounts
       activeSuspensionCount
+      kycStatus
+      kycLevel
     }
   }
 `;

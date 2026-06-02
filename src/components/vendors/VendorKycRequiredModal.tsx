@@ -20,19 +20,24 @@ export default function VendorKycRequiredModal({
   const router = useRouter();
   const locale = useLocale();
 
+  // Primary CTA always launches the verification flow.
+  const goToVerification = () => {
+    onClose();
+    router.push(`/${locale}/verifykyc`);
+  };
+
   const handleConfirm = () => {
     if (!mandatory && onContinueWithoutKyc) {
       onContinueWithoutKyc();
       return;
     }
-    onClose();
-    router.push(`/${locale}/profile`);
+    goToVerification();
   };
 
   const handleCancel = () => {
     if (!mandatory) {
-      onClose();
-      router.push(`/${locale}/profile`);
+      // Secondary action in the "recommended" case is "Complete KYC now".
+      goToVerification();
       return;
     }
     onClose();
@@ -49,7 +54,7 @@ export default function VendorKycRequiredModal({
           ? "This transaction amount requires identity verification before it can be processed."
           : "You can continue without KYC for smaller payouts, but verification is recommended and required for large transactions."
       }
-      confirmText={mandatory ? "Go to profile" : "Continue without KYC"}
+      confirmText={mandatory ? "Verify identity" : "Continue without KYC"}
       cancelText={mandatory ? "Not now" : "Complete KYC now"}
       maxWidth="md"
     />

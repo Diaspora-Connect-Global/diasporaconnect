@@ -998,7 +998,10 @@
         "kyc": {
             "title": "KYC-verificatie",
             "verified": "Geverifieerd",
-            "notVerified": "Niet geverifieerd"
+            "notVerified": "Niet geverifieerd",
+            "pending": "In behandeling",
+            "rejected": "Niet goedgekeurd",
+            "level": "Niveau {level}"
         }
     },
     "common": {

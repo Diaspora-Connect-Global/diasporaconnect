@@ -998,7 +998,10 @@
         "kyc": {
             "title": "KYC verification",
             "verified": "Verified",
-            "notVerified": "Not verified"
+            "notVerified": "Not verified",
+            "pending": "Under review",
+            "rejected": "Not approved",
+            "level": "Level {level}"
         }
     },
     "common": {
