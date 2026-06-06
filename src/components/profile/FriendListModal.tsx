@@ -24,6 +24,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 import { resolveUserTier } from "@/lib/userTier";
 import type { Tier } from "@/components/custom/userBadge";
+import { EmptyState, NoResults } from "@/components/feedback";
 
 interface Friend {
   userId: string;
@@ -60,6 +61,7 @@ const FRIEND_TYPE_TO_TAB: Record<FriendType, string> = {
 
 export default function FriendListModal({ onClose }: FriendListModalProps) {
   const t = useTranslations("friends");
+  const tFeedback = useTranslations("feedback");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -516,11 +518,17 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
 
           {/* Empty state */}
           {!isLoading && filteredFriends.length === 0 && (
-            <p className="text-center text-muted-foreground col-span-2">
-              {debouncedSearchTerm.length > 0 && activeTab === "suggested"
-                ? t("noSearchResults") || "No users found"
-                : t("empty")}
-            </p>
+            <div className="col-span-2">
+              {debouncedSearchTerm.length > 0 && activeTab === "suggested" ? (
+                <NoResults
+                  size="sm"
+                  query={debouncedSearchTerm}
+                  title={tFeedback("noResults.users")}
+                />
+              ) : (
+                <EmptyState size="sm" title={tFeedback("empty.people.title")} />
+              )}
+            </div>
           )}
         </div>
       </div>

@@ -34,7 +34,8 @@ import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFe
 import { useFeed } from '@/hooks/useFeed';
 import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, Newspaper } from 'lucide-react';
+import { EmptyState, ErrorState } from '@/components/feedback';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -163,6 +164,7 @@ const ASSOCIATIONS_RAIL_INDEX = 3;
 
 export default function Home() {
   const t = useTranslations('community');
+  const tFeedback = useTranslations('feedback');
   const tCommon = useTranslations('common');
   const tJoinModal = useTranslations('home.joinModal');
   const [viewMode, setViewMode] = useState<FeedViewMode>('you');
@@ -1018,26 +1020,21 @@ export default function Home() {
 
           {/* Feed Error State */}
           {feedError && (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <p className="body-medium text-text-secondary mb-4">
-                Failed to load feed. Please try again.
-              </p>
-              <ButtonType3
-                onClick={() => refetchFeed()}
-                className="px-4 py-2 bg-primary rounded-lg"
-              >
-                Retry
-              </ButtonType3>
-            </div>
+            <ErrorState
+              title={tFeedback('error.title')}
+              description={tFeedback('error.description')}
+              retryLabel={tFeedback('error.retry')}
+              onRetry={() => refetchFeed()}
+            />
           )}
 
           {/* Feed Empty State */}
           {!feedLoading && !feedError && !hasPosts && (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <p className="body-medium text-text-secondary mb-2">
-                {t('join')}
-              </p>
-            </div>
+            <EmptyState
+              icon={Newspaper}
+              title={tFeedback('empty.feed.title')}
+              description={tFeedback('empty.feed.description')}
+            />
           )}
 
           {/* Feed Posts — virtualised. Off-screen cards are unmounted so

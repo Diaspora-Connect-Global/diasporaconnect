@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { EmptyState } from "@/components/feedback";
 
 
 
@@ -44,6 +46,7 @@ export function FilterableList({
     const [filter, setFilter] = useState<string>('all');
     const CustomComponent = listConfig.customComponent;
     const router = useRouter();
+    const t = useTranslations('feedback');
 
     // Convert the config tabs to the format needed for the component
     const tabs = listConfig.tabs.map(tab => ({
@@ -137,9 +140,7 @@ export function FilterableList({
             </div>
 
             {emptyStateMessage ? (
-                <div className="text-text-secondary font-medium">
-                    {emptyStateMessage}
-                </div>
+                <EmptyState size="sm" title={emptyStateMessage || t('empty.generic.title')} />
             ) : (
                 <div className=" rounded-md mb-6 overflow-y-auto scrollbar-hide lg:max-h-[calc(100vh-12rem)]">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-6">

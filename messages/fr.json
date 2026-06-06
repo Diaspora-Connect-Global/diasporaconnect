@@ -1605,5 +1605,83 @@
         "Wedding": "Mariage",
         "Funeral": "Obsèques",
         "Volunteer": "Bénévole"
+    },
+    "feedback": {
+        "empty": {
+            "generic": {
+                "title": "Rien ici pour l'instant",
+                "description": "Il n'y a rien à afficher pour le moment."
+            },
+            "feed": {
+                "title": "Votre fil est vide",
+                "description": "Suivez des personnes et rejoignez des communautés pour voir des publications ici.",
+                "cta": "Trouver des personnes à suivre"
+            },
+            "similarPosts": {
+                "title": "Aucune publication similaire"
+            },
+            "notifications": {
+                "title": "Aucune notification",
+                "description": "Vous êtes à jour."
+            },
+            "messages": {
+                "title": "Aucune conversation",
+                "description": "Démarrez une conversation pour la voir ici."
+            },
+            "savedPosts": {
+                "title": "Aucune publication enregistrée"
+            },
+            "likedPosts": {
+                "title": "Aucune publication aimée"
+            },
+            "commentedPosts": {
+                "title": "Aucune publication commentée"
+            },
+            "myPosts": {
+                "title": "Aucune publication"
+            },
+            "marketplaceProducts": {
+                "title": "Aucun produit pour l'instant",
+                "description": "Revenez bientôt pour de nouvelles annonces."
+            },
+            "marketplaceServices": {
+                "title": "Aucun service pour l'instant",
+                "description": "Revenez bientôt pour de nouvelles annonces."
+            },
+            "transactions": {
+                "title": "Aucune transaction",
+                "description": "Votre historique de transactions apparaîtra ici."
+            },
+            "communities": {
+                "title": "Aucune communauté",
+                "cta": "Explorer les communautés"
+            },
+            "people": {
+                "title": "Aucune suggestion pour le moment",
+                "description": "Nous vous suggérerons des personnes au fil de vos connexions."
+            }
+        },
+        "noResults": {
+            "title": "Aucun résultat pour « {query} »",
+            "titleGeneric": "Aucun résultat trouvé",
+            "description": "Essayez d'autres mots-clés ou vérifiez l'orthographe.",
+            "trySuggestion": "Essayer « {suggestion} » à la place",
+            "users": "Aucun utilisateur trouvé",
+            "communities": "Aucune communauté ne correspond à ces filtres."
+        },
+        "error": {
+            "title": "Une erreur s'est produite",
+            "description": "Impossible de charger ce contenu. Veuillez réessayer.",
+            "retry": "Réessayer",
+            "retrying": "Nouvelle tentative…",
+            "boundaryTitle": "Le chargement de cette section a échoué"
+        },
+        "offline": {
+            "title": "Vous êtes hors ligne",
+            "description": "Vérifiez votre connexion — la reconnexion sera automatique."
+        },
+        "media": {
+            "imageUnavailable": "Image indisponible"
+        }
     }
 }

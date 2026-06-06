@@ -1605,5 +1605,83 @@
         "Wedding": "Hochzeit",
         "Funeral": "Trauer",
         "Volunteer": "Freiwillig"
+    },
+    "feedback": {
+        "empty": {
+            "generic": {
+                "title": "Hier ist noch nichts",
+                "description": "Im Moment gibt es nichts anzuzeigen."
+            },
+            "feed": {
+                "title": "Dein Feed ist leer",
+                "description": "Folge Personen und tritt Communitys bei, um hier Beiträge zu sehen.",
+                "cta": "Personen zum Folgen finden"
+            },
+            "similarPosts": {
+                "title": "Keine ähnlichen Beiträge"
+            },
+            "notifications": {
+                "title": "Keine Benachrichtigungen",
+                "description": "Du bist auf dem neuesten Stand."
+            },
+            "messages": {
+                "title": "Noch keine Unterhaltungen",
+                "description": "Starte eine Unterhaltung, um sie hier zu sehen."
+            },
+            "savedPosts": {
+                "title": "Keine gespeicherten Beiträge"
+            },
+            "likedPosts": {
+                "title": "Keine gelikten Beiträge"
+            },
+            "commentedPosts": {
+                "title": "Keine kommentierten Beiträge"
+            },
+            "myPosts": {
+                "title": "Noch keine Beiträge"
+            },
+            "marketplaceProducts": {
+                "title": "Noch keine Produkte",
+                "description": "Schau bald wieder vorbei für neue Angebote."
+            },
+            "marketplaceServices": {
+                "title": "Noch keine Dienstleistungen",
+                "description": "Schau bald wieder vorbei für neue Angebote."
+            },
+            "transactions": {
+                "title": "Noch keine Transaktionen",
+                "description": "Dein Transaktionsverlauf erscheint hier."
+            },
+            "communities": {
+                "title": "Noch keine Communitys",
+                "cta": "Communitys entdecken"
+            },
+            "people": {
+                "title": "Im Moment keine Vorschläge",
+                "description": "Wir schlagen dir Personen vor, während du dich vernetzt."
+            }
+        },
+        "noResults": {
+            "title": "Keine Ergebnisse für „{query}“",
+            "titleGeneric": "Keine Ergebnisse gefunden",
+            "description": "Versuche andere Suchbegriffe oder überprüfe die Schreibweise.",
+            "trySuggestion": "Stattdessen „{suggestion}“ versuchen",
+            "users": "Keine Nutzer gefunden",
+            "communities": "Keine Communitys entsprechen diesen Filtern."
+        },
+        "error": {
+            "title": "Etwas ist schiefgelaufen",
+            "description": "Wir konnten dies nicht laden. Bitte versuche es erneut.",
+            "retry": "Erneut versuchen",
+            "retrying": "Wird wiederholt…",
+            "boundaryTitle": "Dieser Bereich konnte nicht geladen werden"
+        },
+        "offline": {
+            "title": "Du bist offline",
+            "description": "Überprüfe deine Verbindung — wir verbinden automatisch neu."
+        },
+        "media": {
+            "imageUnavailable": "Bild nicht verfügbar"
+        }
     }
 }

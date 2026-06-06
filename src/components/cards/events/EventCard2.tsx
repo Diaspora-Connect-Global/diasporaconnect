@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical, Lock, Globe, Users, Shield } from "lucide-react";
@@ -37,25 +38,12 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
         <div className="w-full bg-surface-default border border-border-default rounded-2xl overflow-hidden shadow-sm">
             {/* Header Image */}
             <div className="relative h-64 rounded-t-2xl overflow-hidden bg-surface-subtle">
-                <Image
+                <ImageWithFallback
                     src={imageUrl}
+                    fallbackSrc={EVENT_PLACEHOLDER_IMAGE}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
-                    }}
+                    className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="hidden w-full h-full bg-surface-subtle items-center justify-center" style={{ display: "none" }}>
-                    <Image
-                        src={EVENT_PLACEHOLDER_IMAGE}
-                        alt={`Default image for event: ${title}`}
-                        width={200}
-                        height={200}
-                        className="object-contain"
-                    />
-                </div>
             </div>
 
             {/* Event Details */}

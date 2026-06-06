@@ -1,7 +1,8 @@
 'use client';
 
 import { NotificationCard } from '@/components/cards/notification/NotificationCard';
-import { Check, Settings } from 'lucide-react';
+import { EmptyState, ErrorState } from '@/components/feedback';
+import { Bell, Check, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -341,6 +342,7 @@ function matchesFilter(not: Notification, filter: NotificationFilter): boolean {
 
 export default function NotificationPage() {
   const t = useTranslations('notification');
+  const tFeedback = useTranslations('feedback');
   const router = useRouter();
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
@@ -584,11 +586,20 @@ export default function NotificationPage() {
       {isInitialLoading ? (
         <div className="text-text-secondary font-medium">{t('loading')}</div>
       ) : error ? (
-        <div className="text-text-danger font-medium">{t('errorLoad')}</div>
+        <ErrorState
+          title={tFeedback('error.title')}
+          description={tFeedback('error.description')}
+          retryLabel={tFeedback('error.retry')}
+          onRetry={() => void refetch()}
+        />
       ) : notifications.length === 0 ? (
-        <div className="text-text-secondary font-medium">{t('none.all')}</div>
+        <EmptyState
+          icon={Bell}
+          title={tFeedback('empty.notifications.title')}
+          description={tFeedback('empty.notifications.description')}
+        />
       ) : filtered.length === 0 ? (
-        <div className="text-text-secondary font-medium">{t(emptyMessageKey)}</div>
+        <EmptyState size="sm" title={t(emptyMessageKey)} />
       ) : (
         <div className="bg-surface-default rounded-md lg:p-6 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
           {filtered.map((not) => (

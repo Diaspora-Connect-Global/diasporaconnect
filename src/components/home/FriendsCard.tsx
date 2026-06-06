@@ -1,8 +1,9 @@
 import { Tier, UserBadge } from "../custom/userBadge";
 import Image from "next/image";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { useTranslations } from 'next-intl';
 import { FriendActionButtons, FriendButtonType } from "@/components/friends/FriendActionButtons";
+import { useImageFallback } from "@/components/ui/ImageWithFallback";
 
 interface DropdownOption {
     type: "removeFriend" | "blockFriend";
@@ -102,7 +103,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
     isSearching = false,
 }) => {
     const t = useTranslations('friends');
-    const [imageError, setImageError] = useState(false);
+    const { onError: onImageError, failed: imageError } = useImageFallback(imageSrc);
 
     // Use custom buttons if provided, otherwise use defaults based on status
     const defaultConfig = getDefaultButtonConfig(status);
@@ -151,7 +152,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
                         width={40}
                         height={40}
                         className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                        onError={() => setImageError(true)}
+                        onError={onImageError}
                     />
                 ) : (
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 ${getAvatarColor(name)} text-white font-semibold text-lg`}>

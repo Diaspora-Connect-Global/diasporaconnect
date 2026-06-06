@@ -1605,5 +1605,83 @@
         "Wedding": "Bruiloft",
         "Funeral": "Uitvaart",
         "Volunteer": "Vrijwillig"
+    },
+    "feedback": {
+        "empty": {
+            "generic": {
+                "title": "Hier is nog niets",
+                "description": "Er is op dit moment niets om te tonen."
+            },
+            "feed": {
+                "title": "Je feed is leeg",
+                "description": "Volg mensen en word lid van communities om hier berichten te zien.",
+                "cta": "Mensen om te volgen vinden"
+            },
+            "similarPosts": {
+                "title": "Geen vergelijkbare berichten"
+            },
+            "notifications": {
+                "title": "Geen meldingen",
+                "description": "Je bent helemaal bij."
+            },
+            "messages": {
+                "title": "Nog geen gesprekken",
+                "description": "Start een gesprek om het hier te zien."
+            },
+            "savedPosts": {
+                "title": "Geen opgeslagen berichten"
+            },
+            "likedPosts": {
+                "title": "Geen leuk gevonden berichten"
+            },
+            "commentedPosts": {
+                "title": "Geen berichten met reacties"
+            },
+            "myPosts": {
+                "title": "Nog geen berichten"
+            },
+            "marketplaceProducts": {
+                "title": "Nog geen producten",
+                "description": "Kom binnenkort terug voor nieuwe aanbiedingen."
+            },
+            "marketplaceServices": {
+                "title": "Nog geen diensten",
+                "description": "Kom binnenkort terug voor nieuwe aanbiedingen."
+            },
+            "transactions": {
+                "title": "Nog geen transacties",
+                "description": "Je transactiegeschiedenis verschijnt hier."
+            },
+            "communities": {
+                "title": "Nog geen communities",
+                "cta": "Communities verkennen"
+            },
+            "people": {
+                "title": "Op dit moment geen suggesties",
+                "description": "We stellen mensen voor naarmate je connecties maakt."
+            }
+        },
+        "noResults": {
+            "title": "Geen resultaten voor \"{query}\"",
+            "titleGeneric": "Geen resultaten gevonden",
+            "description": "Probeer andere zoekwoorden of controleer de spelling.",
+            "trySuggestion": "Probeer in plaats daarvan \"{suggestion}\"",
+            "users": "Geen gebruikers gevonden",
+            "communities": "Geen communities komen overeen met deze filters."
+        },
+        "error": {
+            "title": "Er is iets misgegaan",
+            "description": "We konden dit niet laden. Probeer het opnieuw.",
+            "retry": "Opnieuw proberen",
+            "retrying": "Opnieuw proberen…",
+            "boundaryTitle": "Dit gedeelte kon niet worden geladen"
+        },
+        "offline": {
+            "title": "Je bent offline",
+            "description": "Controleer je verbinding — we maken automatisch opnieuw verbinding."
+        },
+        "media": {
+            "imageUnavailable": "Afbeelding niet beschikbaar"
+        }
     }
 }

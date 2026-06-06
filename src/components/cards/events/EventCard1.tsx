@@ -1,7 +1,7 @@
 import { Bookmark } from "lucide-react";
 import { EllipsisVertical } from "lucide-react";
-import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -31,26 +31,13 @@ export default function EventCard1({ title, date, location, attendees, imageUrl,
         <div className="w-full bg-surface-default rounded-2xl overflow-hidden shadow-sm border border-border-subtle">
             {/* Header Image */}
             <div className="relative h-40 rounded-t-2xl overflow-hidden">
-                <Image
+                <ImageWithFallback
                     src={imageUrl}
+                    fallbackSrc={EVENT_PLACEHOLDER_IMAGE}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
-                    fill
                     sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
-                    }}
+                    className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="hidden w-full h-full bg-surface-subtle" style={{ display: "none" }}>
-                    <Image
-                        src={EVENT_PLACEHOLDER_IMAGE}
-                        alt={`Default image for event: ${title}`}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 33vw"
-                        className="w-full h-full object-cover"
-                    />
-                </div>
                 {priceLabel && (
                     <span className="absolute top-2 right-2 bg-surface-default/90 backdrop-blur-sm text-text-primary text-xs font-semibold px-2 py-1 rounded-full border border-border-subtle">
                         {priceLabel}

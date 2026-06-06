@@ -32,6 +32,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { useChatStore } from '@/store/ChatStore';
+import { NoResults } from '@/components/feedback';
 
 interface StartConversationModalProps {
     isOpen: boolean;
@@ -316,9 +317,7 @@ export function StartConversationModal({
                                     })}
 
                                     {filteredUsers.length === 0 && !isLoadingUsers && (
-                                        <div className="p-4 text-center text-muted-foreground">
-                                            {t('noUsersFound')}
-                                        </div>
+                                        <NoResults size="sm" title={t('noUsersFound')} />
                                     )}
                                 </>
                             )}

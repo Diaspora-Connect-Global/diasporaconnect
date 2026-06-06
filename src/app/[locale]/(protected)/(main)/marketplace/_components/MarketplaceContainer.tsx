@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Briefcase, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useLazyQuery, useQuery } from "@apollo/client/react";
+import { EmptyState, ErrorState, NoResults } from "@/components/feedback";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import { ButtonType3 } from "@/components/custom/button";
 import {
@@ -75,6 +76,7 @@ function toUiProductFromServiceApi(item: {
 export default function MarketplaceContainer() {
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
+  const tFeedback = useTranslations("feedback");
   const { pay, isPaying } = useMarketplacePayment();
 
   const [currentView, setCurrentView] = useState<MarketplaceView>("home");
@@ -89,6 +91,7 @@ export default function MarketplaceContainer() {
   const {
     data: productsData,
     loading: productsLoading,
+    error: productsError,
     refetch: refetchProducts,
   } = useQuery<SearchProductsResponse>(SEARCH_PRODUCTS, {
     variables: { input: { query: searchValue || undefined, page: 1, limit: 20 } },
@@ -99,6 +102,7 @@ export default function MarketplaceContainer() {
   const {
     data: servicesData,
     loading: servicesLoading,
+    error: servicesError,
     refetch: refetchServices,
   } = useQuery<SearchMarketplaceServicesResponse>(SEARCH_MARKETPLACE_SERVICES, {
     variables: { input: { query: searchValue || undefined, page: 1, limit: 20 } },
@@ -117,6 +121,13 @@ export default function MarketplaceContainer() {
       toUiProductFromServiceApi
     );
   }, [activeTab, productsData, servicesData]);
+
+  const isLoading =
+    (activeTab === "products" && productsLoading) ||
+    (activeTab === "services" && servicesLoading);
+  const listingError = activeTab === "products" ? productsError : servicesError;
+  const refetch = activeTab === "products" ? refetchProducts : refetchServices;
+  const hasActiveQuery = searchValue.trim().length > 0;
 
   const handleProductClick = (product: Product) => {
     const openWith = (item: Product) => {
@@ -281,18 +292,53 @@ export default function MarketplaceContainer() {
                     </ButtonType3>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                  {listingItems.map((item) => (
-                    <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
-                      <ProductCard product={item} onAddToCart={handleAddToCart} />
-                    </div>
-                  ))}
-                </div>
-                {((activeTab === "products" && productsLoading) ||
-                  (activeTab === "services" && servicesLoading)) && (
+                {listingItems.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                    {listingItems.map((item) => (
+                      <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
+                        <ProductCard product={item} onAddToCart={handleAddToCart} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {isLoading && (
                   <p className="mt-3 text-sm text-text-secondary">
                     {t("loading")}
                   </p>
+                )}
+                {!isLoading && listingItems.length === 0 && (
+                  <>
+                    {listingError ? (
+                      <ErrorState
+                        title={tFeedback("error.title")}
+                        description={tFeedback("error.description")}
+                        retryLabel={tFeedback("error.retry")}
+                        onRetry={() => {
+                          void refetch();
+                        }}
+                      />
+                    ) : hasActiveQuery ? (
+                      <NoResults
+                        query={searchValue}
+                        title={tFeedback("noResults.title", { query: searchValue })}
+                        description={tFeedback("noResults.description")}
+                      />
+                    ) : (
+                      <EmptyState
+                        icon={activeTab === "products" ? ShoppingBag : Briefcase}
+                        title={tFeedback(
+                          activeTab === "products"
+                            ? "empty.marketplaceProducts.title"
+                            : "empty.marketplaceServices.title"
+                        )}
+                        description={tFeedback(
+                          activeTab === "products"
+                            ? "empty.marketplaceProducts.description"
+                            : "empty.marketplaceServices.description"
+                        )}
+                      />
+                    )}
+                  </>
                 )}
               </div>
             </div>

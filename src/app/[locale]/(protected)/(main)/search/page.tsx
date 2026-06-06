@@ -15,8 +15,9 @@ import { SEARCH_EVENTS } from '@/services/gql/events';
 import { SEARCH_OPPORTUNITIES } from '@/services/gql/opportunities';
 import {
   Users, Briefcase, UsersRound, CalendarDays, ShoppingBag,
-  Building2, Network, SearchX, Clock, ChevronRight,
+  Building2, Network, Clock, ChevronRight,
 } from 'lucide-react';
+import { NoResults } from '@/components/feedback';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -356,28 +357,6 @@ function FallbackBanner({ originalQuery, fallbackQuery }: { originalQuery: strin
   );
 }
 
-function EmptyState({ query, suggestion, onTrySuggestion }: {
-  query: string;
-  suggestion?: string;
-  onTrySuggestion?: (q: string) => void;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <SearchX className="w-12 h-12 text-text-secondary mb-3" />
-      <p className="text-text-primary font-medium">No results for &ldquo;{query}&rdquo;</p>
-      <p className="text-text-secondary text-sm mt-1">Try different keywords or check spelling</p>
-      {suggestion && onTrySuggestion && (
-        <button
-          onClick={() => onTrySuggestion(suggestion)}
-          className="mt-3 px-4 py-1.5 rounded-full bg-text-brand/10 text-text-brand text-sm font-medium hover:bg-text-brand/20 transition-colors"
-        >
-          Try &ldquo;{suggestion}&rdquo; instead
-        </button>
-      )}
-    </div>
-  );
-}
-
 const SUGGESTED_CATEGORIES = ['Networking', 'Jobs', 'Events near me', 'Diaspora groups', 'Marketplace'];
 
 function EmptyQuery({ recentSearches, onSearch }: { recentSearches: string[]; onSearch: (q: string) => void }) {
@@ -429,6 +408,7 @@ const TABS: { id: SearchTab; label: string; icon: React.ReactNode }[] = [
 
 export default function SearchPage() {
   const t = useTranslations('search');
+  const tf = useTranslations('feedback');
   const searchParams = useSearchParams();
   useParams(); // locale available via useParams if needed
   const urlQuery = searchParams.get('q') ?? '';
@@ -712,6 +692,21 @@ export default function SearchPage() {
     );
   }
 
+  // Shared no-results renderer — wraps the feedback primitive with i18n strings.
+  const renderNoResults = (q: string) => {
+    const suggestion = generateVariants(q)[1];
+    return (
+      <NoResults
+        query={q}
+        title={tf('noResults.title', { query: q })}
+        description={tf('noResults.description')}
+        suggestion={suggestion}
+        onTrySuggestion={(s) => { setQuery(s); addRecentSearch(s); }}
+        suggestionLabel={suggestion ? tf('noResults.trySuggestion', { suggestion }) : undefined}
+      />
+    );
+  };
+
   const loading = isLoading(activeTab);
 
   // ── Tab sidebar / pill ──────────────────────────────────────────────────────
@@ -784,11 +779,7 @@ export default function SearchPage() {
                   <div>
                     {usingFallback && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !hasAny ? (
-                      <EmptyState
-                        query={query}
-                        suggestion={generateVariants(query)[1]}
-                        onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }}
-                      />
+                      renderNoResults(query)
                     ) : (
                       <>
                         <AllSection tab="people"        title={t('people')}        items={dUsers}    loading={usersResult.loading}    renderItem={(u) => <PeopleCard      key={u.userId} profile={u}      query={query} />} />
@@ -813,7 +804,7 @@ export default function SearchPage() {
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {!loading && !show.length && renderNoResults(query)}
                     {show.map((u) => <PeopleCard key={u.userId} profile={u} query={query} />)}
                   </div>
                 );
@@ -825,7 +816,7 @@ export default function SearchPage() {
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {!loading && !show.length && renderNoResults(query)}
                     {show.map((g) => <GroupCard key={g.id} group={g} query={query} />)}
                   </div>
                 );
@@ -837,7 +828,7 @@ export default function SearchPage() {
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {!loading && !show.length && renderNoResults(query)}
                     {show.map((c) => <CommunityCard key={c.id} community={c} query={query} />)}
                   </div>
                 );
@@ -849,7 +840,7 @@ export default function SearchPage() {
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {!loading && !show.length && renderNoResults(query)}
                     {show.map((a) => <AssociationCard key={a.id} association={a} query={query} />)}
                   </div>
                 );
@@ -862,7 +853,7 @@ export default function SearchPage() {
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !showP.length && !showS.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {!loading && !showP.length && !showS.length && renderNoResults(query)}
                     {showP.map((p) => <ProductCard key={p.id} product={p} query={query} />)}
                     {showS.map((s) => <ServiceCard key={s.id} service={s} query={query} />)}
                   </div>
@@ -875,7 +866,7 @@ export default function SearchPage() {
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {!loading && !show.length && renderNoResults(query)}
                     {show.map((e) => <EventCard key={e.id} event={e} query={query} />)}
                   </div>
                 );
@@ -887,7 +878,7 @@ export default function SearchPage() {
                   <div className="space-y-1">
                     {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
-                    {!loading && !show.length && <EmptyState query={query} suggestion={generateVariants(query)[1]} onTrySuggestion={(q) => { setQuery(q); addRecentSearch(q); }} />}
+                    {!loading && !show.length && renderNoResults(query)}
                     {show.map((o) => <OpportunityCard key={o.id} opportunity={o} query={query} />)}
                   </div>
                 );

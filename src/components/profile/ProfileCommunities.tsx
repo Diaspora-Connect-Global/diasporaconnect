@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Users, Globe } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { EmptyState } from '@/components/feedback';
 
 interface Community {
   id: string;
@@ -34,6 +35,7 @@ export default function ProfileCommunities({
 }: ProfileCommunitiesProps) {
   const t = useTranslations('profile.navigation');
   const tCommunity = useTranslations('community');
+  const tFeedback = useTranslations('feedback');
 
   // Use the appropriate query based on whether it's the user's own profile
   const { data, loading } = useQuery<ListUserCommunitiesData>(
@@ -68,25 +70,22 @@ export default function ProfileCommunities({
 
   if (communities.length === 0) {
     return (
-      <div className="p-6 text-center">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-subtle flex items-center justify-center">
-          <Users className="w-8 h-8 text-text-secondary" />
-        </div>
-        <h3 className="text-lg font-semibold mb-1">{t('communities')}</h3>
-        <p className="text-sm text-text-secondary mb-4">
-          {t('noCommunities')}
-        </p>
-        {isOwnProfile && (
-          <Link
-            href="/community"
-            prefetch={false}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-brand text-white text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <Globe className="w-4 h-4" />
-            {tCommunity('discoverMore')}
-          </Link>
-        )}
-      </div>
+      <EmptyState
+        icon={Users}
+        title={tFeedback('empty.communities.title')}
+        action={
+          isOwnProfile ? (
+            <Link
+              href="/community"
+              prefetch={false}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-brand text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <Globe className="w-4 h-4" />
+              {tFeedback('empty.communities.cta')}
+            </Link>
+          ) : undefined
+        }
+      />
     );
   }
 

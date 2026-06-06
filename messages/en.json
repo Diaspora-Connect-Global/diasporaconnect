@@ -1605,5 +1605,83 @@
         "Wedding": "Wedding",
         "Funeral": "Funeral",
         "Volunteer": "Volunteer"
+    },
+    "feedback": {
+        "empty": {
+            "generic": {
+                "title": "Nothing here yet",
+                "description": "There's nothing to show right now."
+            },
+            "feed": {
+                "title": "Your feed is empty",
+                "description": "Follow people and join communities to see posts here.",
+                "cta": "Find people to follow"
+            },
+            "similarPosts": {
+                "title": "No similar posts"
+            },
+            "notifications": {
+                "title": "No notifications",
+                "description": "You're all caught up."
+            },
+            "messages": {
+                "title": "No conversations yet",
+                "description": "Start a conversation to see it here."
+            },
+            "savedPosts": {
+                "title": "No saved posts"
+            },
+            "likedPosts": {
+                "title": "No liked posts"
+            },
+            "commentedPosts": {
+                "title": "No commented posts"
+            },
+            "myPosts": {
+                "title": "No posts yet"
+            },
+            "marketplaceProducts": {
+                "title": "No products yet",
+                "description": "Check back soon for new listings."
+            },
+            "marketplaceServices": {
+                "title": "No services yet",
+                "description": "Check back soon for new listings."
+            },
+            "transactions": {
+                "title": "No transactions yet",
+                "description": "Your transaction history will appear here."
+            },
+            "communities": {
+                "title": "No communities yet",
+                "cta": "Explore communities"
+            },
+            "people": {
+                "title": "No suggestions right now",
+                "description": "We'll suggest people as you connect."
+            }
+        },
+        "noResults": {
+            "title": "No results for \"{query}\"",
+            "titleGeneric": "No results found",
+            "description": "Try different keywords or check your spelling.",
+            "trySuggestion": "Try \"{suggestion}\" instead",
+            "users": "No users found",
+            "communities": "No communities match these filters."
+        },
+        "error": {
+            "title": "Something went wrong",
+            "description": "We couldn't load this. Please try again.",
+            "retry": "Try again",
+            "retrying": "Retrying…",
+            "boundaryTitle": "This section failed to load"
+        },
+        "offline": {
+            "title": "You're offline",
+            "description": "Check your connection — we'll reconnect automatically."
+        },
+        "media": {
+            "imageUnavailable": "Image unavailable"
+        }
     }
 }

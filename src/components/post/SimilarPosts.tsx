@@ -20,8 +20,10 @@ import { useRouter } from 'next/navigation';
 import { GET_POST, SIMILAR_POSTS } from '@/services/gql/postsFeed';
 import type { GetPostData, FeedPostFragment, Post } from '@/services/gql/types/postsFeed';
 import type { SimilarPostsData, RankedItemGQL } from '@/services/gql/types/recommendation';
+import { useTranslations } from 'next-intl';
 import { normalizeFeedPost } from '@/lib/normalizeFeedPost';
 import { formatDateProximity } from '@/macros/time';
+import { EmptyState } from '@/components/feedback';
 
 interface SimilarPostsProps {
   postId: string;
@@ -58,6 +60,7 @@ function makeExcerpt(text: string, max = 140): string {
 export default function SimilarPosts({ postId, limit = 10 }: SimilarPostsProps) {
   const router = useRouter();
   const client = useApolloClient();
+  const tFeedback = useTranslations('feedback');
 
   const { data, loading, error } = useQuery<SimilarPostsData>(SIMILAR_POSTS, {
     variables: { postId, limit },
@@ -161,7 +164,7 @@ export default function SimilarPosts({ postId, limit = 10 }: SimilarPostsProps) 
     return (
       <section aria-label="Similar posts" className="mt-4 w-full min-w-0">
         <h2 className="label-large text-text-primary mb-2">Similar posts</h2>
-        <p className="body-small text-text-secondary">No similar posts yet</p>
+        <EmptyState size="sm" title={tFeedback('empty.similarPosts.title')} />
       </section>
     );
   }

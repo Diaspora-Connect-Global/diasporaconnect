@@ -25,10 +25,25 @@ import {
 import FeedCardWithReply from '../cards/FeedCardWithReply';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { toast } from 'sonner';
-import { Bookmark, Heart, MessageCircle, FileText } from 'lucide-react';
+import { Bookmark, Heart, MessageCircle, FileText, type LucideIcon } from 'lucide-react';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
+import { EmptyState } from '@/components/feedback';
 
 type TabId = 'myPosts' | 'saved' | 'liked' | 'commented';
+
+const EMPTY_ICON_BY_TAB: Record<TabId, LucideIcon> = {
+  myPosts: FileText,
+  saved: Bookmark,
+  liked: Heart,
+  commented: MessageCircle,
+};
+
+const EMPTY_TITLE_KEY_BY_TAB: Record<TabId, string> = {
+  myPosts: 'empty.myPosts.title',
+  saved: 'empty.savedPosts.title',
+  liked: 'empty.likedPosts.title',
+  commented: 'empty.commentedPosts.title',
+};
 
 interface FilteredPostsProps {
   /** The userId whose posts to show */
@@ -39,6 +54,7 @@ interface FilteredPostsProps {
 
 export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsProps) {
   const t = useTranslations('profile.navigation');
+  const tFeedback = useTranslations('feedback');
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<TabId>('myPosts');
@@ -272,19 +288,11 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
 
         {/* Empty state */}
         {!loading && posts.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-subtle flex items-center justify-center">
-              {activeTab === 'saved' && <Bookmark className="w-8 h-8 text-text-secondary" />}
-              {activeTab === 'liked' && <Heart className="w-8 h-8 text-text-secondary" />}
-              {activeTab === 'commented' && <MessageCircle className="w-8 h-8 text-text-secondary" />}
-              {activeTab === 'myPosts' && <FileText className="w-8 h-8 text-text-secondary" />}
-            </div>
-            <p className="text-text-secondary text-sm">
-              {t('noPosts', {
-                type: activeTab === 'myPosts' ? '' : t(activeTab as 'saved' | 'liked' | 'commented'),
-              })}
-            </p>
-          </div>
+          <EmptyState
+            size="md"
+            icon={EMPTY_ICON_BY_TAB[activeTab]}
+            title={tFeedback(EMPTY_TITLE_KEY_BY_TAB[activeTab])}
+          />
         )}
 
         {/* Posts */}

@@ -1605,5 +1605,83 @@
         "Wedding": "Matrimonio",
         "Funeral": "Funerale",
         "Volunteer": "Volontario"
+    },
+    "feedback": {
+        "empty": {
+            "generic": {
+                "title": "Ancora niente qui",
+                "description": "Non c'è nulla da mostrare al momento."
+            },
+            "feed": {
+                "title": "Il tuo feed è vuoto",
+                "description": "Segui le persone e unisciti alle community per vedere i post qui.",
+                "cta": "Trova persone da seguire"
+            },
+            "similarPosts": {
+                "title": "Nessun post simile"
+            },
+            "notifications": {
+                "title": "Nessuna notifica",
+                "description": "Sei in pari con tutto."
+            },
+            "messages": {
+                "title": "Ancora nessuna conversazione",
+                "description": "Avvia una conversazione per vederla qui."
+            },
+            "savedPosts": {
+                "title": "Nessun post salvato"
+            },
+            "likedPosts": {
+                "title": "Nessun post con \"mi piace\""
+            },
+            "commentedPosts": {
+                "title": "Nessun post commentato"
+            },
+            "myPosts": {
+                "title": "Ancora nessun post"
+            },
+            "marketplaceProducts": {
+                "title": "Ancora nessun prodotto",
+                "description": "Torna presto per nuovi annunci."
+            },
+            "marketplaceServices": {
+                "title": "Ancora nessun servizio",
+                "description": "Torna presto per nuovi annunci."
+            },
+            "transactions": {
+                "title": "Ancora nessuna transazione",
+                "description": "La cronologia delle transazioni apparirà qui."
+            },
+            "communities": {
+                "title": "Ancora nessuna community",
+                "cta": "Esplora le community"
+            },
+            "people": {
+                "title": "Nessun suggerimento al momento",
+                "description": "Ti suggeriremo persone man mano che ti connetti."
+            }
+        },
+        "noResults": {
+            "title": "Nessun risultato per \"{query}\"",
+            "titleGeneric": "Nessun risultato trovato",
+            "description": "Prova parole chiave diverse o controlla l'ortografia.",
+            "trySuggestion": "Prova invece \"{suggestion}\"",
+            "users": "Nessun utente trovato",
+            "communities": "Nessuna community corrisponde a questi filtri."
+        },
+        "error": {
+            "title": "Qualcosa è andato storto",
+            "description": "Non siamo riusciti a caricare. Riprova.",
+            "retry": "Riprova",
+            "retrying": "Nuovo tentativo…",
+            "boundaryTitle": "Caricamento di questa sezione non riuscito"
+        },
+        "offline": {
+            "title": "Sei offline",
+            "description": "Controlla la connessione — ci riconnetteremo automaticamente."
+        },
+        "media": {
+            "imageUnavailable": "Immagine non disponibile"
+        }
     }
 }

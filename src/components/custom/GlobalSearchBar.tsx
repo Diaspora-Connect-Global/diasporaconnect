@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Search, X, Clock, TrendingUp, Users, Briefcase, CalendarDays } from 'lucide-react';
 import Fuse from 'fuse.js';
 
+import { NoResults } from '@/components/feedback';
 import { useSearchStore, CachedResult } from '@/store/useSearchStore';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import { SEARCH_OPPORTUNITIES } from '@/services/gql/opportunities';
@@ -199,7 +200,7 @@ function ResultsList({
         <div className={`${px} ${py} text-sm text-text-secondary`}>{t('searching')}</div>
       )}
       {!loading && resultRows.length === 0 && (
-        <div className={`${px} ${py} text-sm text-text-secondary`}>{t('noResults')}</div>
+        <NoResults size="sm" title={t('noResults')} />
       )}
       {resultRows.map((row, i) => (
         <button

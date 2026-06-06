@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
-import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { useTranslations } from "next-intl";
 
 interface EventCardProps {
@@ -21,28 +21,13 @@ export default function EventCardSmall({ title, date, location, attendees, image
             
             {/* Image container */}
             <div className="relative w-[5rem] min-h-full lg:w-[4.6875rem]">
-                <Image
+                <ImageWithFallback
                     src={imageUrl}
+                    fallbackSrc={EVENT_PLACEHOLDER_IMAGE}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
-                    fill
                     sizes="80px"
-                    className="object-fill"
-                    onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
-                    }}
+                    className="absolute inset-0 w-full h-full object-fill"
                 />
-
-                {/* Fallback image when URL fails */}
-                <div className="hidden absolute inset-0 bg-surface-subtle">
-                    <Image
-                        src={EVENT_PLACEHOLDER_IMAGE}
-                        alt={`Default image for event: ${title}`}
-                        fill
-                        sizes="80px"
-                        className="object-cover"
-                    />
-                </div>
             </div>
 
             {/* Content */}

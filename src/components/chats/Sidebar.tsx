@@ -18,6 +18,7 @@ import Image from "next/image";
 import { messageService } from "@/services/websocket/messageService";
 import { GET_USER_PROFILE } from "@/services/gql/profile";
 import type { GetProfileResponse } from "@/services/gql/profile";
+import { EmptyState, NoResults } from "@/components/feedback";
 
 type TabType = 'direct' | 'groups';
 
@@ -390,6 +391,7 @@ export default function ChatSideBar() {
                                 activeChat={activeChat}
                                 onChatClick={handleChatClick}
                                 userTimeZone={userTimeZone}
+                                searchQuery={searchQuery}
                             />
                         )
                     ) : (
@@ -598,17 +600,29 @@ interface DirectMessagesListProps {
     activeChat: { id: string; type: 'direct' | 'group' } | null;
     onChatClick: (chat: { id: string; type: 'direct' | 'group' }) => void;
     userTimeZone?: string;
+    searchQuery?: string;
 }
 
-function DirectMessagesList({ chats, activeChat, onChatClick, userTimeZone }: DirectMessagesListProps) {
+function DirectMessagesList({ chats, activeChat, onChatClick, userTimeZone, searchQuery }: DirectMessagesListProps) {
     const t = useTranslations('chat');
+    const tFeedback = useTranslations('feedback');
 
     if (chats.length === 0) {
+        if (searchQuery) {
+            return (
+                <NoResults
+                    size="sm"
+                    query={searchQuery}
+                    title={tFeedback('noResults.titleGeneric')}
+                />
+            );
+        }
         return (
-            <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
-                <p className="text-center">{t('noDirectMessages')}</p>
-                <p className="text-sm text-text-tertiary mt-2">{t('tryAdjustingSearch')}</p>
-            </div>
+            <EmptyState
+                size="sm"
+                title={t('noDirectMessages')}
+                description={t('tryAdjustingSearch')}
+            />
         );
     }
 
@@ -660,6 +674,7 @@ interface GroupsListProps {
 
 function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], limit = 50, offset = 0, userTimeZone }: GroupsListProps) {
     const t = useTranslations('chat');
+    const tFeedback = useTranslations('feedback');
     const setRealConversation = useChatStore((s) => s.setRealConversation);
 
     const { data, loading, error } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
@@ -721,13 +736,21 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
     });
 
     if (sortedGroups.length === 0) {
+        if (searchQuery) {
+            return (
+                <NoResults
+                    size="sm"
+                    query={searchQuery}
+                    title={tFeedback('noResults.titleGeneric')}
+                />
+            );
+        }
         return (
-            <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
-                <p className="text-center">{searchQuery ? t('noGroupsFound') : t('noGroups')}</p>
-                <p className="text-sm text-text-tertiary justify-center text-center mt-2">
-                    {searchQuery ? t('tryAdjustingSearch') : t('createFirstGroup')}
-                </p>
-            </div>
+            <EmptyState
+                size="sm"
+                title={t('noGroups')}
+                description={t('createFirstGroup')}
+            />
         );
     }
 

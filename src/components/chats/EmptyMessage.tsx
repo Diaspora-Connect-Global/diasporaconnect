@@ -6,6 +6,7 @@ import { StartConversationModal } from '@/components/chats/modals/StartConversat
 import { SquarePen } from 'lucide-react';
 import { ButtonType2 } from '../custom/button';
 import { useTranslations } from 'next-intl';
+import { EmptyState } from '@/components/feedback';
 
 
 
@@ -16,18 +17,19 @@ export function EmptyMessage() {
   return (
     <>
       <div className="flex flex-col items-center justify-center w-full h-full p-6">
-        <p className="body-medium my-5 text-center text-text-primary">
-          {t('empty.title')}
-        </p>
-        
-        <ButtonType2 
-          className="px-4 py-3 flex items-center"
-          onClick={() => setIsModalOpen(true)}
-       
-        >
-          <SquarePen className="mr-2 h-4 w-4" />
-          {t('newMessage')}
-        </ButtonType2>
+        <EmptyState
+          icon={SquarePen}
+          title={t('empty.title')}
+          action={
+            <ButtonType2
+              className="px-4 py-3 flex items-center"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <SquarePen className="mr-2 h-4 w-4" />
+              {t('newMessage')}
+            </ButtonType2>
+          }
+        />
       </div>
 
       <StartConversationModal

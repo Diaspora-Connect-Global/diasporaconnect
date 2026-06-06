@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDownIcon, FilterIcon, ArrowDownIcon, ArrowUpIcon, RefreshCwIcon } from 'lucide-react';
+import { ChevronDownIcon, FilterIcon, ArrowDownIcon, ArrowUpIcon, RefreshCwIcon, Receipt } from 'lucide-react';
+import { EmptyState } from '@/components/feedback';
 import {
   Select,
   SelectContent,
@@ -43,6 +44,7 @@ export default function TransactionHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 20;
   const t = useTranslations('wallet.transactions');
+  const tFeedback = useTranslations('feedback');
 
   const { data, loading } = useQuery<MyPaymentIntentsResponse>(MY_PAYMENT_INTENTS, {
     variables: { page: currentPage, limit },
@@ -167,12 +169,16 @@ export default function TransactionHistory() {
             </div>
           ))
         ) : !loading ? (
-          <div className="text-center py-12 px-6">
-            <p className="text-base text-gray-500">
-              {filter !== 'all'
-                ? t('noFilteredTransactions', { filter: getStatusLabel(filter) })
-                : t('noTransactions')}
-            </p>
+          <div className="px-6 py-12">
+            <EmptyState
+              icon={Receipt}
+              title={
+                filter !== 'all'
+                  ? t('noFilteredTransactions', { filter: getStatusLabel(filter) })
+                  : tFeedback('empty.transactions.title')
+              }
+              description={filter === 'all' ? tFeedback('empty.transactions.description') : undefined}
+            />
           </div>
         ) : null}
       </div>

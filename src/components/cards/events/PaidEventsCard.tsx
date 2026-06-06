@@ -1,8 +1,8 @@
 import { ButtonType1, ButtonType2 } from "@/components/custom/button";
 import { Bookmark, EllipsisVertical } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTranslations } from "next-intl";
 
@@ -30,26 +30,13 @@ export default function PaidEventCard({ title, date, location, attendees, imageU
         <div className="w-full max-w-lg bg-surface-default rounded-2xl overflow-hidden shadow-sm border border-border-subtle">
             {/* Header Image */}
             <div className="relative h-32 rounded-t-2xl overflow-hidden">
-                <Image
+                <ImageWithFallback
                     src={imageUrl}
+                    fallbackSrc={EVENT_PLACEHOLDER_IMAGE}
                     alt={imageUrl === EVENT_PLACEHOLDER_IMAGE ? `Default image for event: ${title}` : `${title} cover`}
-                    fill
                     sizes="(max-width: 1024px) 100vw, 33vw"
-                    className="w-full h-full object-fill"
-                    onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.nextElementSibling?.setAttribute("style", "display: block");
-                    }}
+                    className="absolute inset-0 w-full h-full object-fill"
                 />
-                <div className="hidden w-full h-full bg-surface-subtle" style={{ display: "none" }}>
-                    <Image
-                        src={EVENT_PLACEHOLDER_IMAGE}
-                        alt={`Default image for event: ${title}`}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 33vw"
-                        className="w-full h-full object-fill"
-                    />
-                </div>
             </div>
 
             {/* Event Details */}

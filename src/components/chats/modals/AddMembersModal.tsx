@@ -16,6 +16,7 @@ import { ADD_MEMBER, AddMemberResponse, GET_GROUP_MEMBERS, MemberRole } from "@/
 import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, Loader2 } from "lucide-react";
+import { NoResults } from "@/components/feedback";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
 
@@ -189,13 +190,9 @@ export function AddMembersModal({
                 <Loader2 className="w-6 h-6 animate-spin text-text-secondary" />
               </div>
             ) : allUsers.length === 0 ? (
-              <p className="text-center text-text-secondary py-8">
-                {t("noUsersFound")}
-              </p>
+              <NoResults size="sm" title={t("noUsersFound")} />
             ) : filteredUsers.length === 0 ? (
-              <p className="text-center text-text-secondary py-8">
-                {t("noUsersFound")}
-              </p>
+              <NoResults size="sm" title={t("noUsersFound")} />
             ) : (
               filteredUsers.map((user) => {
                 const isSelected = selectedUsers.includes(user.userId);

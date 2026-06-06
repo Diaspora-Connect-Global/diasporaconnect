@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Spinner } from '@/components/ui/spinner';
 import { Link } from '@/i18n/navigation';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
+import { useImageFallback } from '@/components/ui/ImageWithFallback';
 import { mapTrustScoreToTier } from '@/lib/userTier';
 
 interface PeopleYouMayKnowCardProps {
@@ -45,7 +46,7 @@ export default function PeopleYouMayKnowCard({
 }: PeopleYouMayKnowCardProps) {
   const resolvedTier: Tier | undefined = tier ?? mapTrustScoreToTier(trustScore);
   const [isAdded, setIsAdded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const { onError: onImageError, failed: imageError } = useImageFallback(profileImage);
   const t = useTranslations('home');
   const tActions = useTranslations('actions');
 
@@ -114,7 +115,7 @@ export default function PeopleYouMayKnowCard({
               src={profileImage}
               alt={`${name}'s profile`}
               className="w-full h-full rounded-full object-cover"
-              onError={() => setImageError(true)}
+              onError={onImageError}
             />
           )}
         </div>

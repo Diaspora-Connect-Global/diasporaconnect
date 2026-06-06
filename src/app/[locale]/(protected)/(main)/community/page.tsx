@@ -4,6 +4,8 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import JoinCommunityCard from "@/components/cards/JoinCommunityCard";
 import { MyCommunityCard } from "@/components/cards/MyCommunityCard";
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import { EmptyState } from '@/components/feedback';
+import { Globe } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
     DISCOVER_COMMUNITIES,
@@ -505,8 +507,12 @@ export default function Community() {
                         );
                     })
                 ) : (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                        {tDiscovery('emptyFiltered')}
+                    <div className="col-span-full">
+                        <EmptyState
+                            size="md"
+                            icon={Globe}
+                            title={tDiscovery('emptyFiltered')}
+                        />
                     </div>
                 )}
             </div>

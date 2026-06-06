@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import MessageWebSocketProvider from "@/components/provider/MessageWebSocketProvider";
 import NotificationWebSocketProvider from "@/components/provider/NotificationWebSocketProvider";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { OfflineBanner } from "@/components/feedback";
 
 function PushNotificationRegistrar() {
   usePushNotifications();
@@ -56,6 +57,7 @@ export default function MainLayout({
   return (
     <MessageWebSocketProvider>
       <NotificationWebSocketProvider>
+        <OfflineBanner />
         <PushNotificationRegistrar />
         <div>
           <Header>{children}</Header>

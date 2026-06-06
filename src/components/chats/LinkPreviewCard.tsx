@@ -6,6 +6,7 @@ import { FileIcon, Link2, Music } from 'lucide-react';
 import { useQuery } from '@apollo/client/react';
 import { GET_POST, type GetPostData } from '@/services/gql/postsFeed';
 import { classifyUrl, extractPostIdFromUrl, extractYouTubeVideoId, getFileNameFromUrl } from '@/lib/urlPreview';
+import { useImageFallback } from '@/components/ui/ImageWithFallback';
 
 type OgData = { title?: string; description?: string; imageUrl?: string; siteName?: string; loading: boolean };
 
@@ -109,7 +110,7 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
     errorPolicy: 'ignore',
   });
 
-  const [ogImgFailed, setOgImgFailed] = useState(false);
+  const { onError: onOgImgError, failed: ogImgFailed } = useImageFallback(og.imageUrl);
 
   if (!isValid) return null;
   const previewUrl = postData?.post ? getPostPreviewUrl(postData.post) : null;
@@ -258,7 +259,7 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
   const hasOg = !og.loading && (og.title || og.description || og.imageUrl);
 
   if (hasOg) {
-    const showImg = !!og.imageUrl && !ogImgFailed;
+    const showImg = !ogImgFailed && !!og.imageUrl;
     const footer = (og.siteName ?? domain) ?? '';
     return (
       <a
@@ -275,7 +276,7 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
               src={og.imageUrl || undefined}
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
-              onError={() => setOgImgFailed(true)}
+              onError={onOgImgError}
             />
           </div>
         )}

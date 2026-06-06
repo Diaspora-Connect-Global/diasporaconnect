@@ -31,6 +31,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { useNotificationBadge } from '@/hooks/useNotificationBadge';
 import { useChatStore } from '@/store/ChatStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { useImageFallback } from '@/components/ui/ImageWithFallback';
 
 export default function Header({
   children,
@@ -266,6 +267,7 @@ export default function Header({
 
 export function MyAvatar() {
   const url = useUserStore((s) => s.user?.avatarUrl);
+  const { src: avatarSrc, onError: onAvatarError } = useImageFallback(url, '/PROFILE.png');
 
   return (
     <Avatar>
@@ -273,13 +275,12 @@ export function MyAvatar() {
         // Plain <img> so the browser can serve cached images instantly without
         // Radix's JS-managed loading state, which briefly shows the fallback
         // every time this component mounts (e.g. when the dropdown opens).
+        // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={url}
+          src={avatarSrc}
           alt="Profile"
           className="aspect-square size-full rounded-full object-cover"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/PROFILE.png';
-          }}
+          onError={onAvatarError}
         />
       ) : (
         <AvatarFallback>

@@ -13,8 +13,8 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { ButtonType3 } from '@/components/custom/button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Newspaper } from 'lucide-react';
+import { EmptyState, ErrorState } from '@/components/feedback';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
@@ -62,6 +62,7 @@ function getProfileData(post: Post) {
 
 export default function FeedPage() {
   const t = useTranslations('community');
+  const tFeedback = useTranslations('feedback');
   const tCategory = useTranslations('categoryBadge');
   const searchParams = useSearchParams();
   const hashtag = searchParams.get('hashtag') ?? null;
@@ -216,24 +217,26 @@ export default function FeedPage() {
           )}
 
           {feedError && (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <p className="body-medium text-text-secondary mb-4">Failed to load feed. Please try again.</p>
-              <ButtonType3 onClick={() => refetchFeed()} className="bg-primary rounded-lg">
-                Retry
-              </ButtonType3>
-            </div>
+            <ErrorState
+              title={tFeedback('error.title')}
+              description={tFeedback('error.description')}
+              retryLabel={tFeedback('error.retry')}
+              onRetry={() => refetchFeed()}
+            />
           )}
 
           {!feedLoading && !feedError && !hasPosts && (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <p className="body-medium text-text-secondary mb-2">
-                {hashtag
+            <EmptyState
+              icon={Newspaper}
+              title={
+                hashtag
                   ? `No posts with #${hashtag} yet.`
                   : category
                     ? `No posts in ${categoryLabel} yet.`
-                    : t('join')}
-              </p>
-            </div>
+                    : tFeedback('empty.feed.title')
+              }
+              description={hashtag || category ? undefined : tFeedback('empty.feed.description')}
+            />
           )}
 
           {hasPosts &&

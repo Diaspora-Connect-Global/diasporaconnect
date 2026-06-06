@@ -1,7 +1,8 @@
 'use client';
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, UserPlus } from "lucide-react";
 import PeopleYouMayKnowCard from "../cards/PeopleYouMayKnowCard";
+import { EmptyState } from "@/components/feedback";
 import { useTranslations } from 'next-intl';
 import { Link } from "@/i18n/navigation";
 import { useQuery } from "@apollo/client/react";
@@ -31,6 +32,7 @@ function FriendSuggestionSkeleton() {
 export function PeopleYouMayKnow() {
     const t = useTranslations('home');
     const tActions = useTranslations('actions');
+    const tFeedback = useTranslations('feedback');
     const { addFriend } = useFriendActions();
 
     // Track which user is currently being added
@@ -85,9 +87,12 @@ export function PeopleYouMayKnow() {
                             <FriendSuggestionSkeleton />
                         </>
                     ) : suggestions.length === 0 ? (
-                        <p className="text-text-secondary text-sm text-center py-4">
-                            {t('noSuggestions') || 'No friend suggestions available'}
-                        </p>
+                        <EmptyState
+                            size="sm"
+                            icon={UserPlus}
+                            title={tFeedback('empty.people.title')}
+                            description={tFeedback('empty.people.description')}
+                        />
                     ) : (
                         suggestions.map((suggestion) => {
                             // Phase 3 match-reason ladder (shared with
