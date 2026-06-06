@@ -22,11 +22,43 @@ export type {
   MediaMetadata,
   MediaMetadataInput,
   AttachmentInput,
+  GroupChatSummary,
+  GroupChatDailySummaryData,
+  GroupChatDailySummaryVariables,
 } from './types/messaging';
 
 // ============================================================================
 // QUERIES
 // ============================================================================
+
+// AI daily digest of a group chat ("What went on today"). Member-gated on the
+// server (caller must belong to groupId). `date` is optional (YYYY-MM-DD) —
+// omit for the latest digest. Returns null when no digest exists; render
+// nothing in that case (non-blocking).
+export const GROUP_CHAT_DAILY_SUMMARY = gql`
+  query GroupChatDailySummary(
+    $groupId: ID!
+    $conversationId: ID!
+    $date: String
+  ) {
+    groupChatDailySummary(
+      groupId: $groupId
+      conversationId: $conversationId
+      date: $date
+    ) {
+      conversationId
+      groupId
+      digestDate
+      summary
+      keyPoints
+      decisions
+      actionItems
+      confidence
+      messageCount
+      generatedAt
+    }
+  }
+`;
 
 export const GET_CONVERSATIONS = gql`
   query GetConversations($limit: Int, $offset: Int) {

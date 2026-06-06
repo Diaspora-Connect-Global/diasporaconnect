@@ -1,4 +1,4 @@
-import { ChevronRight, MessageCircle, MoreVertical, X, Camera } from "lucide-react";
+import { ChevronRight, ChevronDown, MessageCircle, MoreVertical, X, Camera, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
@@ -46,8 +46,8 @@ import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
-import { SEND_MESSAGE, GET_CONVERSATIONS } from "@/services/gql/messaging";
-import type { SendMessageData } from "@/services/gql/types/messaging";
+import { SEND_MESSAGE, GET_CONVERSATIONS, GROUP_CHAT_DAILY_SUMMARY } from "@/services/gql/messaging";
+import type { SendMessageData, GroupChatDailySummaryData, GroupChatDailySummaryVariables } from "@/services/gql/types/messaging";
 import { useChatConversation } from "@/hooks/useChatConversation";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
@@ -176,6 +176,21 @@ export default function GroupChat() {
         participantIds: groupMembers.map(m => m.userId),
         enabled: groupMembers.length > 0,
     });
+
+    // AI "Daily summary" digest of the group chat. Non-blocking: absence (or a
+    // backend/ai-service hiccup) simply renders no card. Latest digest only
+    // (no `date` arg). Skipped until we have both the group + conversation id.
+    const [showDailySummary, setShowDailySummary] = useState(false);
+    const { data: dailySummaryData } = useQuery<
+        GroupChatDailySummaryData,
+        GroupChatDailySummaryVariables
+    >(GROUP_CHAT_DAILY_SUMMARY, {
+        variables: { groupId: chat?.id || '', conversationId: conversationId || '' },
+        skip: !chat?.id || !conversationId,
+        fetchPolicy: 'cache-and-network',
+        errorPolicy: 'all',
+    });
+    const dailySummary = dailySummaryData?.groupChatDailySummary ?? null;
 
     // Group avatar upload (info sidebar)
     const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -649,6 +664,71 @@ export default function GroupChat() {
                         className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-3 md:p-4 space-y-3 md:space-y-4"
                         style={{ scrollbarGutter: 'stable' }}
                     >
+                        {/* AI Daily summary card — collapsible, non-blocking. Renders
+                            only when a digest exists for this group. */}
+                        {dailySummary && (
+                            <div className="rounded-2xl border border-border bg-bg-secondary/60 overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDailySummary((v) => !v)}
+                                    className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left"
+                                    aria-expanded={showDailySummary}
+                                >
+                                    <span className="flex items-center gap-2 min-w-0">
+                                        <Sparkles className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                                        <span className="flex flex-col min-w-0">
+                                            <span className="text-sm font-medium text-text-primary truncate">
+                                                Daily summary
+                                            </span>
+                                            <span className="text-xs text-text-secondary truncate">
+                                                {dailySummary.digestDate}
+                                                {dailySummary.messageCount > 0
+                                                    ? ` · ${dailySummary.messageCount} messages`
+                                                    : ''}
+                                            </span>
+                                        </span>
+                                    </span>
+                                    {showDailySummary ? (
+                                        <ChevronDown className="w-4 h-4 text-text-secondary shrink-0" aria-hidden="true" />
+                                    ) : (
+                                        <ChevronRight className="w-4 h-4 text-text-secondary shrink-0" aria-hidden="true" />
+                                    )}
+                                </button>
+                                {showDailySummary && (
+                                    <div className="px-3 pb-3 pt-1 space-y-3 text-sm text-text-primary">
+                                        {dailySummary.summary && (
+                                            <p className="leading-relaxed whitespace-pre-line">
+                                                {dailySummary.summary}
+                                            </p>
+                                        )}
+                                        {dailySummary.keyPoints.length > 0 && (
+                                            <div>
+                                                <p className="text-xs font-semibold text-text-secondary mb-1">
+                                                    Key points
+                                                </p>
+                                                <ul className="list-disc pl-5 space-y-0.5">
+                                                    {dailySummary.keyPoints.map((kp, i) => (
+                                                        <li key={`kp-${i}`}>{kp}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {dailySummary.actionItems.length > 0 && (
+                                            <div>
+                                                <p className="text-xs font-semibold text-text-secondary mb-1">
+                                                    Action items
+                                                </p>
+                                                <ul className="list-disc pl-5 space-y-0.5">
+                                                    {dailySummary.actionItems.map((ai, i) => (
+                                                        <li key={`ai-${i}`}>{ai}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         {mainThreadMessages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-text-secondary">
                                 <MessageCircle className="w-12 h-12 mb-4 opacity-50" />

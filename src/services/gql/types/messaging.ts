@@ -192,3 +192,41 @@ export interface PresenceUpdate {
   isOnline: boolean;
   lastSeen?: string;
 }
+
+// ============================================================================
+// GROUP CHAT DAILY DIGEST ("What went on today")
+// ============================================================================
+
+/**
+ * AI-generated daily digest of a group chat. Produced once per group per day
+ * by the backend ai-service; surfaced as a collapsible "Daily summary" card.
+ * Non-blocking — `groupChatDailySummary` resolves to `null` when no digest
+ * exists, and the UI simply renders nothing.
+ */
+export interface GroupChatSummary {
+  conversationId: string;
+  groupId: string;
+  /** YYYY-MM-DD (UTC digest day) */
+  digestDate: string;
+  /** TL;DR prose */
+  summary: string;
+  keyPoints: string[];
+  decisions: string[];
+  actionItems: string[];
+  confidence: number;
+  messageCount: number;
+  /** ISO-8601 timestamp */
+  generatedAt: string;
+}
+
+/** Result shape for the GROUP_CHAT_DAILY_SUMMARY query. */
+export interface GroupChatDailySummaryData {
+  groupChatDailySummary: GroupChatSummary | null;
+}
+
+/** Variables for the GROUP_CHAT_DAILY_SUMMARY query. */
+export interface GroupChatDailySummaryVariables {
+  groupId: string;
+  conversationId: string;
+  date?: string | null;
+}
