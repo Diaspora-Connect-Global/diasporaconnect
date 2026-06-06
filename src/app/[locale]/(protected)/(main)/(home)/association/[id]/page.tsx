@@ -567,7 +567,7 @@ export default function AssociationPage() {
                         <Image
                             width={90}
                             height={90}
-                            src={association.avatarUrl || '/ADANSI.PNG'}
+                            src={association.avatarUrl || '/GLOBE.png'}
                             alt={association.name}
                             className="h-full w-full rounded-full object-cover"
                         />
@@ -650,7 +650,7 @@ export default function AssociationPage() {
                             <FeedCardWithReply
                                 key={post.id}
                                 postId={post.id}
-                                profileImage={association.avatarUrl || '/ADANSI.PNG'}
+                                profileImage={association.avatarUrl || '/GLOBE.png'}
                                 profileName={association.name}
                                 {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
                                 authorEntityId={post.authorId}

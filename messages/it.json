@@ -1666,6 +1666,7 @@
             "titleGeneric": "Nessun risultato trovato",
             "description": "Prova parole chiave diverse o controlla l'ortografia.",
             "trySuggestion": "Prova invece \"{suggestion}\"",
+            "tryInstead": "Prova a cercare:",
             "users": "Nessun utente trovato",
             "communities": "Nessuna community corrisponde a questi filtri."
         },

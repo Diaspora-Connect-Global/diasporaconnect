@@ -1666,6 +1666,7 @@
             "titleGeneric": "Keine Ergebnisse gefunden",
             "description": "Versuche andere Suchbegriffe oder überprüfe die Schreibweise.",
             "trySuggestion": "Stattdessen „{suggestion}“ versuchen",
+            "tryInstead": "Versuche stattdessen zu suchen:",
             "users": "Keine Nutzer gefunden",
             "communities": "Keine Communitys entsprechen diesen Filtern."
         },

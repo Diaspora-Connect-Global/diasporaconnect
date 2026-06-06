@@ -1666,6 +1666,7 @@
             "titleGeneric": "No results found",
             "description": "Try different keywords or check your spelling.",
             "trySuggestion": "Try \"{suggestion}\" instead",
+            "tryInstead": "Try searching for:",
             "users": "No users found",
             "communities": "No communities match these filters."
         },

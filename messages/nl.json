@@ -1666,6 +1666,7 @@
             "titleGeneric": "Geen resultaten gevonden",
             "description": "Probeer andere zoekwoorden of controleer de spelling.",
             "trySuggestion": "Probeer in plaats daarvan \"{suggestion}\"",
+            "tryInstead": "Probeer te zoeken naar:",
             "users": "Geen gebruikers gevonden",
             "communities": "Geen communities komen overeen met deze filters."
         },

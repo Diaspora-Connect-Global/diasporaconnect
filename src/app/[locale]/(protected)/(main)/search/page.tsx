@@ -693,16 +693,26 @@ export default function SearchPage() {
   }
 
   // Shared no-results renderer — wraps the feedback primitive with i18n strings.
+  // Offer REAL, searchable terms (the user's recent searches + curated categories)
+  // rather than a fabricated string mutation of a query that matched nothing.
   const renderNoResults = (q: string) => {
-    const suggestion = generateVariants(q)[1];
+    const seen = new Set<string>([q.trim().toLowerCase()]);
+    const suggestions: string[] = [];
+    for (const term of [...recentSearches, ...SUGGESTED_CATEGORIES]) {
+      const key = term.trim().toLowerCase();
+      if (!term.trim() || seen.has(key)) continue;
+      seen.add(key);
+      suggestions.push(term);
+      if (suggestions.length >= 5) break;
+    }
     return (
       <NoResults
         query={q}
         title={tf('noResults.title', { query: q })}
         description={tf('noResults.description')}
-        suggestion={suggestion}
+        suggestions={suggestions}
+        suggestionsLabel={tf('noResults.tryInstead')}
         onTrySuggestion={(s) => { setQuery(s); addRecentSearch(s); }}
-        suggestionLabel={suggestion ? tf('noResults.trySuggestion', { suggestion }) : undefined}
       />
     );
   };
