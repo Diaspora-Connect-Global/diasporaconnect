@@ -45,6 +45,8 @@ export interface PostMediaModalProps {
     profileName: string;
     profileTier?: Tier;
     authorUserId?: string;
+    authorEntityId?: string;
+    authorEntityType?: 'COMMUNITY' | 'ASSOCIATION' | 'USER' | 'ORG' | string;
     category: string;
     postDate: string;
     createdAt?: string;
@@ -85,13 +87,22 @@ interface Comment {
     authorTier?: Tier;
 }
 
+/** Default avatar for an author with no image — entity authors (community/
+ *  association/org) fall back to the globe, individual users to the person icon. */
+function entityFallbackAvatar(authorType?: string): string {
+    const upper = authorType?.toUpperCase();
+    return upper === 'COMMUNITY' || upper === 'ASSOCIATION' || upper === 'ORG'
+        ? '/GLOBE.png'
+        : '/PROFILE.png';
+}
+
 function mapApiComment(c: ApiComment): Comment {
     const mentionMap = buildMentionMap(c.mentions ?? []);
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
     return {
         id: c.id,
         author: c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId,
-        authorImage: c.authorAvatarUrl ?? selfMention?.avatarUrl ?? '/PROFILE.png',
+        authorImage: c.authorAvatarUrl ?? selfMention?.avatarUrl ?? entityFallbackAvatar(c.authorType),
         authorHandle: c.authorHandle ?? selfMention?.handle,
         authorId: c.authorId,
         authorType: c.authorType,
@@ -117,6 +128,8 @@ export default function PostMediaModal({
     profileName,
     profileTier,
     authorUserId,
+    authorEntityId,
+    authorEntityType,
     category,
     postDate,
     createdAt,
@@ -193,14 +206,24 @@ export default function PostMediaModal({
     const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
     const currentUserId = useUserStore((s) => s.user?.userId);
 
-    const goToProfile = useCallback(() => {
-        if (!authorUserId) return;
-        if (currentUserId && authorUserId === currentUserId) {
-            router.push('/profile');
-        } else {
-            router.push(`/${authorUserId}`);
+    const goToProfile = useCallback((id?: string, authorType?: string) => {
+        if (!id) return;
+        const upper = authorType?.toUpperCase();
+        if (upper === 'COMMUNITY') {
+            router.push(`/community/${id}`);
+            return;
         }
-    }, [router, authorUserId, currentUserId]);
+        if (upper === 'ASSOCIATION') {
+            router.push(`/association/${id}`);
+            return;
+        }
+        if (upper && upper !== 'USER') return;
+        if (currentUserId && id === currentUserId) {
+            router.push('/profile');
+            return;
+        }
+        router.push(`/${id}`);
+    }, [router, currentUserId]);
 
     const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
     const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
@@ -489,16 +512,17 @@ export default function PostMediaModal({
         </div>
     );
 
+    const headerAuthorId = authorEntityId ?? authorUserId;
     const postInfoEl = (
         <div className="flex items-center gap-3 mb-3">
             <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async"
-                className={`w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0 ${authorUserId ? 'cursor-pointer' : ''}`}
-                onClick={authorUserId ? goToProfile : undefined} />
+                className={`w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0 ${headerAuthorId ? 'cursor-pointer' : ''}`}
+                onClick={headerAuthorId ? () => goToProfile(headerAuthorId, authorEntityType ?? 'USER') : undefined} />
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                     <span
-                        className={`font-semibold text-text-primary text-sm truncate ${authorUserId ? 'cursor-pointer hover:text-text-brand' : ''}`}
-                        onClick={authorUserId ? goToProfile : undefined}
+                        className={`font-semibold text-text-primary text-sm truncate ${headerAuthorId ? 'cursor-pointer hover:text-text-brand' : ''}`}
+                        onClick={headerAuthorId ? () => goToProfile(headerAuthorId, authorEntityType ?? 'USER') : undefined}
                     >{profileName}</span>
                     {profileTier && <UserBadge tier={profileTier} size="xs" />}
                 </div>
@@ -598,11 +622,12 @@ export default function PostMediaModal({
                 return (
                 <div key={c.id}>
                     <div className="flex gap-3">
-                        <img src={c.authorImage || '/PROFILE.png'} alt={c.author} width={32} height={32}
-                            loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                        <img src={c.authorImage || entityFallbackAvatar(c.authorType)} alt={c.author} width={32} height={32}
+                            loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer"
+                            onClick={() => goToProfile(c.authorId, c.authorType)} />
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
+                                <span className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand" onClick={() => goToProfile(c.authorId, c.authorType)}>{c.author}</span>
                                 {c.authorTier && <UserBadge tier={c.authorTier} size="xs" />}
                                 <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(c.createdAt)}</span>
                                 {cOwn && (
@@ -678,11 +703,12 @@ export default function PostMediaModal({
                                 const rEditable = rOwn && canEditComment(reply);
                                 return (
                                 <div key={reply.id} className="flex gap-3">
-                                    <img src={reply.authorImage || '/PROFILE.png'} alt={reply.author} width={28} height={28}
-                                        loading="lazy" decoding="async" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                                    <img src={reply.authorImage || entityFallbackAvatar(reply.authorType)} alt={reply.author} width={28} height={28}
+                                        loading="lazy" decoding="async" className="w-7 h-7 rounded-full object-cover flex-shrink-0 cursor-pointer"
+                                        onClick={() => goToProfile(reply.authorId, reply.authorType)} />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                            <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
+                                            <span className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand" onClick={() => goToProfile(reply.authorId, reply.authorType)}>{reply.author}</span>
                                             {reply.authorTier && <UserBadge tier={reply.authorTier} size="xs" />}
                                             <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(reply.createdAt)}</span>
                                             {rOwn && (

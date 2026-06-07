@@ -32,7 +32,7 @@ function getProfileData(post: Post) {
   if (post.authorType === 'ASSOCIATION' && orgProfile) {
     return {
       name: orgProfile.name,
-      avatar: orgProfile.logo || '/ADANSI.PNG',
+      avatar: orgProfile.logo || '/GLOBE.png',
       tier: undefined,
       type: 'Association' as const,
     };
@@ -40,7 +40,7 @@ function getProfileData(post: Post) {
   if (post.authorType === 'ORG' && orgProfile) {
     return {
       name: orgProfile.name,
-      avatar: orgProfile.logo || '/default-avatar.png',
+      avatar: orgProfile.logo || '/GLOBE.png',
       tier: undefined,
       type: 'Organization' as const,
     };
@@ -312,6 +312,9 @@ export default function FeedPage() {
           profileImage={modalProfileData.avatar}
           profileName={modalProfileData.name}
           profileTier={modalProfileData.tier}
+          authorUserId={modalPost.authorType?.toUpperCase() === 'USER' ? modalPost.authorId : undefined}
+          authorEntityId={modalPost.authorId}
+          authorEntityType={modalPost.authorType}
           category={modalProfileData.type}
           postDate={formatDateProximity(modalPost.createdAt)}
           visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}

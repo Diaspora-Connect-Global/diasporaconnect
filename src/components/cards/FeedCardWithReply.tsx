@@ -122,13 +122,22 @@ type CommentTrustFields = {
     authorTrustScore?: number;
 };
 
+/** Default avatar for an author with no image — entity authors (community/
+ *  association/org) fall back to the globe, individual users to the person icon. */
+function entityFallbackAvatar(authorType?: string): string {
+    const upper = authorType?.toUpperCase();
+    return upper === 'COMMUNITY' || upper === 'ASSOCIATION' || upper === 'ORG'
+        ? '/GLOBE.png'
+        : '/PROFILE.png';
+}
+
 /** Map an API Comment to the local Comment shape. Use authorDisplayName/authorAvatarUrl from API when present. */
 function mapApiComment(c: ApiComment): Comment {
     const mentionMap = buildMentionMap(c.mentions ?? []);
 
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
     const authorName = c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId;
-    const authorAvatar = c.authorAvatarUrl ?? selfMention?.avatarUrl ?? '/PROFILE.png';
+    const authorAvatar = c.authorAvatarUrl ?? selfMention?.avatarUrl ?? entityFallbackAvatar(c.authorType);
 
     const trust = c as ApiComment & CommentTrustFields;
 
@@ -922,13 +931,13 @@ function FeedCardWithReplyInner({
         const postInfoEl = (
             <div className="flex items-center gap-3 mb-3">
                 <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async"
-                    className={`w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0 ${authorUserId ? 'cursor-pointer' : ''}`}
-                    onClick={authorUserId ? () => goToProfile(authorUserId, 'USER') : undefined} />
+                    className={`w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0 ${(authorEntityId ?? authorUserId) ? 'cursor-pointer' : ''}`}
+                    onClick={(authorEntityId ?? authorUserId) ? () => goToProfile(authorEntityId ?? authorUserId, authorEntityType ?? 'USER') : undefined} />
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         <span
-                            className={`font-semibold text-text-primary text-sm truncate ${authorUserId ? 'cursor-pointer hover:text-text-brand' : ''}`}
-                            onClick={authorUserId ? () => goToProfile(authorUserId, 'USER') : undefined}
+                            className={`font-semibold text-text-primary text-sm truncate ${(authorEntityId ?? authorUserId) ? 'cursor-pointer hover:text-text-brand' : ''}`}
+                            onClick={(authorEntityId ?? authorUserId) ? () => goToProfile(authorEntityId ?? authorUserId, authorEntityType ?? 'USER') : undefined}
                         >{profileName}</span>
                         {profileTier && <UserBadge tier={profileTier} size="xs" />}
                     </div>
@@ -962,7 +971,7 @@ function FeedCardWithReplyInner({
                 {topLevelM.map(c => (
                     <div key={c.id}>
                         <div className="flex gap-3">
-                            <img src={c.authorImage || '/PROFILE.png'} alt={c.author} width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(c.authorId, c.authorType)} />
+                            <img src={c.authorImage || entityFallbackAvatar(c.authorType)} alt={c.author} width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(c.authorId, c.authorType)} />
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                                     <span className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand" onClick={() => goToProfile(c.authorId, c.authorType)}>{c.author}</span>
@@ -989,10 +998,10 @@ function FeedCardWithReplyInner({
                             <div className="ml-11 mt-3 space-y-3">
                                 {repliesByParentM.get(c.id)!.map(reply => (
                                     <div key={reply.id} className="flex gap-3">
-                                        <img src={reply.authorImage || '/PROFILE.png'} alt={reply.author} width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                                        <img src={reply.authorImage || entityFallbackAvatar(reply.authorType)} alt={reply.author} width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(reply.authorId, reply.authorType)} />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
+                                                <span className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand" onClick={() => goToProfile(reply.authorId, reply.authorType)}>{reply.author}</span>
                                                 {reply.authorTier && <UserBadge tier={reply.authorTier} size="xs" />}
                                                 <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(reply.createdAt)}</span>
                                             </div>
@@ -1310,7 +1319,7 @@ function FeedCardWithReplyInner({
                             <div key={c.id} id={`post-comment-${c.id}`}>
                                 <div className="flex gap-[0.75rem]">
                                     <img
-                                        src={c.authorImage || '/PROFILE.png'}
+                                        src={c.authorImage || entityFallbackAvatar(c.authorType)}
                                         alt={c.author}
                                         width={32}
                                         height={32}
@@ -1364,7 +1373,7 @@ function FeedCardWithReplyInner({
                                         {repliesByParentId.get(c.id)!.map((reply) => (
                                             <div key={reply.id} id={`post-comment-${reply.id}`} className="flex gap-[0.75rem]">
                                                 <img
-                                                    src={reply.authorImage || '/PROFILE.png'}
+                                                    src={reply.authorImage || entityFallbackAvatar(reply.authorType)}
                                                     alt={reply.author}
                                                     width={32}
                                                     height={32}

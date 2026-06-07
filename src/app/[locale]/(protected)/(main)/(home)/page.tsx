@@ -751,7 +751,7 @@ export default function Home() {
     if (post.authorType === 'ASSOCIATION' && orgProfile) {
       return {
         name: orgProfile.name,
-        avatar: orgProfile.logo || '/ADANSI.PNG',
+        avatar: orgProfile.logo || '/GLOBE.png',
         tier: undefined,
         isVerified: orgProfile.isVerified,
         isVip: false,
@@ -762,7 +762,7 @@ export default function Home() {
     if (post.authorType === 'ORG' && orgProfile) {
       return {
         name: orgProfile.name,
-        avatar: orgProfile.logo || '/default-avatar.png',
+        avatar: orgProfile.logo || '/GLOBE.png',
         tier: undefined,
         isVerified: orgProfile.isVerified,
         isVip: false,
@@ -1256,6 +1256,8 @@ export default function Home() {
           profileName={modalProfileData.name}
           profileTier={modalProfileData.tier}
           authorUserId={modalPost.authorType?.toUpperCase() === 'USER' ? modalPost.authorId : undefined}
+          authorEntityId={modalPost.authorId}
+          authorEntityType={modalPost.authorType}
           createdAt={modalPost.createdAt}
           category={modalProfileData.type}
           postDate={formatDateProximity(modalPost.createdAt)}
