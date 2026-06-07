@@ -172,6 +172,38 @@ export interface SetOnboardingInterestsData {
 }
 
 // ============================================================================
+// QUERY: myInterestProfile
+// ============================================================================
+
+/**
+ * A single weighted topic in the viewer's interest profile.
+ */
+export interface InterestTopicWeight {
+  topic: string;
+  weight: number;
+}
+
+/**
+ * The viewer's recommendation interest profile.
+ *
+ * `coldStart === true` means the recommendation-service hasn't collected
+ * enough meaningful interaction signal to personalise ranking yet — the home
+ * surface uses this to decide whether to nudge the user to set interests.
+ * The gateway is fail-soft and returns `{ coldStart: true }` on any error.
+ */
+export interface InterestProfile {
+  userId: string;
+  topics: InterestTopicWeight[];
+  lastUpdatedAt?: string | null;
+  interactionCount: number;
+  coldStart: boolean;
+}
+
+export interface MyInterestProfileData {
+  myInterestProfile: InterestProfile;
+}
+
+// ============================================================================
 // MUTATION: eraseMyAccountData (GDPR right-to-erase, recommendation footprint)
 // ============================================================================
 

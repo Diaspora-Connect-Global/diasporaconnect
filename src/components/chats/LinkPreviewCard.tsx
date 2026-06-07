@@ -62,6 +62,27 @@ function truncateUrl(url: string, maxLen: number = 48): string {
   return url.slice(0, maxLen - 3) + '...';
 }
 
+/** Google's favicon service — a 32px icon for the link's domain (LinkedIn/Slack-style chip). */
+function faviconUrl(domain: string | null): string | null {
+  return domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32` : null;
+}
+
+/** Small favicon image; hidden if it fails to load so the footer text stays clean. */
+function Favicon({ domain, className = '' }: { domain: string | null; className?: string }) {
+  const src = faviconUrl(domain);
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      width={14}
+      height={14}
+      className={`w-3.5 h-3.5 rounded-sm flex-shrink-0 ${className}`}
+      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+    />
+  );
+}
+
 /** Returns true when content is a single valid URL (for showing as link card). */
 export function isLinkOnlyContent(content: string | undefined): boolean {
   const t = content?.trim();
@@ -227,7 +248,10 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
             )}
           </div>
           <div className="p-2.5 min-w-0">
-            <p className="text-xs font-medium text-text-tertiary truncate">{domain}</p>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Favicon domain={domain} />
+              <p className="text-xs font-medium text-text-tertiary truncate">{domain}</p>
+            </div>
             <p className="text-sm text-text-primary truncate" title={trimmed}>
               {displayUrl}
             </p>
@@ -245,7 +269,10 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
       >
         <Link2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-text-tertiary" />
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-text-tertiary truncate">{domain}</p>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Favicon domain={domain} />
+            <p className="text-xs font-medium text-text-tertiary truncate">{domain}</p>
+          </div>
           <p className="text-sm text-text-primary truncate" title={trimmed}>
             {displayUrl}
           </p>
@@ -281,7 +308,10 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
           </div>
         )}
         <div className={isFeed ? 'p-3 min-w-0' : 'p-2.5 min-w-0'}>
-          <p className="text-[0.7rem] font-medium uppercase tracking-wide text-text-tertiary truncate">{footer}</p>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Favicon domain={domain} />
+            <p className="text-[0.7rem] font-medium uppercase tracking-wide text-text-tertiary truncate">{footer}</p>
+          </div>
           {og.title && (
             <p
               className={`font-semibold text-text-primary mt-0.5 ${isFeed ? 'text-sm line-clamp-2' : 'text-sm truncate'}`}
@@ -309,7 +339,10 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
     >
       <Link2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-text-tertiary" />
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-text-tertiary truncate">{domain}</p>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Favicon domain={domain} />
+          <p className="text-xs font-medium text-text-tertiary truncate">{domain}</p>
+        </div>
         <p className="text-sm text-text-primary truncate" title={trimmed}>
           {displayUrl}
         </p>

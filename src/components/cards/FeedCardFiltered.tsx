@@ -33,6 +33,8 @@ import { VideoPlayer } from '@/components/custom/VideoPlayer';
 import FileAttachmentCard from '@/components/cards/FileAttachmentCard';
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
 import { getFirstUrlInText } from '@/lib/urlPreview';
+import { truncateAtWord } from '@/lib/truncateText';
+import PostImage from '@/components/cards/media/PostImage';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
 
 /* --------------------------------------------------------------- */
@@ -535,10 +537,11 @@ export default function FeedCardFiltered({
             );
         }
         const max = 200;
-        const truncated = content.length > max && !isExpanded;
-        const displayText = truncated ? `${content.slice(0, max)}...` : content;
+        const { text: collapsed, truncated: willTruncate } = truncateAtWord(content, max);
+        const truncated = willTruncate && !isExpanded;
+        const displayText = truncated ? `${collapsed}…` : content;
         return (
-            <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
+            <p dir="auto" className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
                 {renderText(displayText, mentionMap)}
                 {truncated && (
                     <span onClick={toggleExpand} className="text-text-brand text-xs cursor-pointer">
@@ -554,94 +557,64 @@ export default function FeedCardFiltered({
         const imageCount = images.length;
         const maxDisplay = 4;
         const excessCount = imageCount > maxDisplay ? imageCount - maxDisplay : 0;
+        // Descriptive alt: author + a snippet of the post text (vs. generic "post").
+        const altBase = profileName ? `${profileName}'s post` : 'Post image';
+        const altSnippet = content ? `: ${truncateAtWord(content, 80).text}` : '';
+        const imgAlt = (i: number) =>
+            imageCount > 1 ? `${altBase} (image ${i + 1} of ${imageCount})${altSnippet}` : `${altBase}${altSnippet}`;
+        const hoverOverlay = (
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+                <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                    <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+                </button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                    <MessageCircle className="w-7 h-7 drop-shadow" />
+                </button>
+            </div>
+        );
 
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {imageCount === 1 ? (
                     <div className="group relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(0)}>
-                        <img src={images[0]} alt="post" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
-                            <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
-                                <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
-                            </button>
-                            <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
-                                <MessageCircle className="w-7 h-7 drop-shadow" />
-                            </button>
-                        </div>
+                        <PostImage src={images[0]} alt={imgAlt(0)} fit="cover" />
+                        {hoverOverlay}
                     </div>
                 ) : imageCount === 2 ? (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
                         {images.map((src, i) => (
                             <div key={i} className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(i)}>
-                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
-                                        <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
-                                    </button>
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
-                                        <MessageCircle className="w-7 h-7 drop-shadow" />
-                                    </button>
-                                </div>
+                                <PostImage src={src} alt={imgAlt(i)} fit="cover" />
+                                {hoverOverlay}
                             </div>
                         ))}
                     </div>
                 ) : imageCount === 3 ? (
-                    <div className="grid grid-cols-2 gap-[0.5rem]">
-                        <div className="group relative h-[30.5rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(0)}>
-                            <img src={images[0]} alt="post 1" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
-                                <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
-                                    <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
-                                </button>
-                                <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
-                                    <MessageCircle className="w-7 h-7 drop-shadow" />
-                                </button>
-                            </div>
+                    // 1 tall + 2 stacked (FB 3-photo collage) — matches FeedCardWithReply.
+                    <div className="grid grid-cols-2 grid-rows-2 gap-2">
+                        <div className="group relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]" onClick={() => openMediaModal(0)}>
+                            <PostImage src={images[0]} alt={imgAlt(0)} fit="cover" />
+                            {hoverOverlay}
                         </div>
-                        <div className="flex flex-col gap-[0.5rem]">
-                            <div className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(1)}>
-                                <img src={images[1]} alt="post 2" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
-                                        <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
-                                    </button>
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
-                                        <MessageCircle className="w-7 h-7 drop-shadow" />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(2)}>
-                                <img src={images[2]} alt="post 3" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
-                                        <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
-                                    </button>
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
-                                        <MessageCircle className="w-7 h-7 drop-shadow" />
-                                    </button>
-                                </div>
-                            </div>
+                        <div className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(1)}>
+                            <PostImage src={images[1]} alt={imgAlt(1)} fit="cover" />
+                            {hoverOverlay}
+                        </div>
+                        <div className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(2)}>
+                            <PostImage src={images[2]} alt={imgAlt(2)} fit="cover" />
+                            {hoverOverlay}
                         </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 gap-[0.5rem]">
                         {images.slice(0, maxDisplay).map((src, i) => (
-                            <div key={i} className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(i)}>
-                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" />
+                            <div key={i} className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(i === maxDisplay - 1 && excessCount > 0 ? 0 : i)}>
+                                <PostImage src={src} alt={imgAlt(i)} fit="cover" />
                                 {i === maxDisplay - 1 && excessCount > 0 ? (
                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                         <span className="text-white text-3xl font-semibold">+{excessCount}</span>
                                     </div>
-                                ) : (
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
-                                        <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
-                                            <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
-                                        </button>
-                                        <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
-                                            <MessageCircle className="w-7 h-7 drop-shadow" />
-                                        </button>
-                                    </div>
-                                )}
+                                ) : hoverOverlay}
                             </div>
                         ))}
                     </div>
@@ -788,7 +761,7 @@ export default function FeedCardFiltered({
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderText(c.content, c.mentionMap)}</p>
+                                        <p dir="auto" className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">{renderText(c.content, c.mentionMap)}</p>
                                     )}
                                     <div className="flex items-center gap-[0.75rem]">
                                         <ButtonType3 type="button" onClick={() => handleLikeComment(c.id)} className={`text-xs font-semibold p-0 min-w-0 border-0 bg-transparent ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>{t('like')}</ButtonType3>
@@ -859,7 +832,7 @@ export default function FeedCardFiltered({
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+                                                    <p dir="auto" className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                                                         {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
                                                             const rest = reply.content.replace(/^@\S+(?:\s+[A-Z][a-z]+)*\s/, '');
                                                             return rest ? renderText(rest, reply.mentionMap) : null;

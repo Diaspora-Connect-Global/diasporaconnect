@@ -12,6 +12,21 @@ function stripTrailingUrlPunctuation(href: string): string {
 }
 
 /**
+ * Shorten a URL for display while the link still points at the full target.
+ * `https://www.example.com/very/long/path?x=1` → `example.com/very/long/…`
+ * Mirrors the link chips Facebook/LinkedIn show instead of raw URLs that can
+ * dominate a post's layout.
+ */
+const URL_DISPLAY_MAX = 42;
+function shortenUrlForDisplay(url: string): string {
+  let label = url.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, '');
+  if (label.length > URL_DISPLAY_MAX) {
+    label = `${label.slice(0, URL_DISPLAY_MAX - 1)}…`;
+  }
+  return label;
+}
+
+/**
  * Split a plain-text segment into strings and external `<a>` nodes for URLs.
  */
 function linkifyPlainSegment(segment: string, keyBase: string): React.ReactNode[] {
@@ -37,9 +52,10 @@ function linkifyPlainSegment(segment: string, keyBase: string): React.ReactNode[
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-text-brand underline decoration-text-brand/50 underline-offset-2 break-all hover:opacity-90"
+          title={trimmed}
+          className="text-text-brand underline decoration-text-brand/50 underline-offset-2 break-words hover:opacity-90"
         >
-          {trimmed}
+          {shortenUrlForDisplay(trimmed)}
         </a>,
       );
     }

@@ -31,6 +31,13 @@ import type {
 const INITIAL_LIMIT = 12;
 const PAGE_SIZE = 12;
 
+/**
+ * Chronological fallback feed types tried (in order) when the FOR_YOU ("You")
+ * ranked feed is exhausted with zero personalised items. NETWORK is the
+ * social-graph chronological feed; ALL is the platform-wide chronological feed.
+ */
+const FALLBACK_TYPES: FeedModeType[] = ['NETWORK', 'ALL'];
+
 function mapPosts(raw: GetFeedData['feed']['posts']): Post[] {
   return raw.map((p) => normalizeFeedPost(p));
 }
@@ -70,6 +77,13 @@ export interface FeedStateMeta {
   isSeenFallback?: boolean | null;
   hasSeenFallbackOption?: boolean | null;
   nextCursor?: string | null;
+  /**
+   * True when the FOR_YOU ("You") tab returned no personalised items and we
+   * degraded to the chronological `feed` query (NETWORK → ALL). The home page
+   * uses this to surface a "Set your interests" CTA above the fallback list
+   * instead of a hard empty state.
+   */
+  isChronoFallback?: boolean | null;
 }
 
 export interface UseFeedResult {
@@ -135,6 +149,58 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   const [recommendedError, setRecommendedError] = useState<Error | undefined>(undefined);
   // Bumping `refreshTick` forces a re-fetch of the ranked feed (pull-to-refresh).
   const [refreshTick, setRefreshTick] = useState(0);
+
+  // ── Chronological fallback (C1) ─────────────────────────────────────────────
+  // When the FOR_YOU ("You") ranked feed is exhausted with zero items (a
+  // brand-new / cold-start account the recommender can't personalise yet), we
+  // degrade to the chronological `feed` query (type NETWORK, falling back to
+  // ALL) so the user sees populated content instead of an empty box. The
+  // fallback carries its own cursor for infinite scroll and is flagged via
+  // `feedMeta.isChronoFallback` so the page can show a "Set your interests"
+  // CTA above the list.
+  const [fallbackActive, setFallbackActive] = useState(false);
+  const fallbackTypeRef = useRef<FeedModeType | null>(null);
+
+  /**
+   * Fetch the chronological fallback feed. Tries NETWORK first; if that returns
+   * no posts, falls back to ALL. Returns the populated posts + paging metadata,
+   * or null if both arms were empty.
+   */
+  const fetchChronoFallback = useCallback(
+    async (
+      limit: number,
+    ): Promise<
+      | { posts: Post[]; nextCursor: string | null; hasMore: boolean; type: FeedModeType }
+      | null
+    > => {
+      for (const type of FALLBACK_TYPES) {
+        try {
+          const { data } = await apolloClient.query<GetFeedData>({
+            query: GET_FEED,
+            variables: {
+              input: { type, limit, offset: 0, clearHistory: true } as GetFeedInput,
+            },
+            fetchPolicy: 'network-only',
+            errorPolicy: 'all',
+          });
+          const f = data?.feed;
+          const posts = f ? dedupePostsById(mapPosts(f.posts)) : [];
+          if (posts.length > 0) {
+            return {
+              posts,
+              nextCursor: f?.nextCursor ?? null,
+              hasMore: Boolean(f?.hasMore ?? f?.nextCursor),
+              type,
+            };
+          }
+        } catch {
+          // Non-fatal — try the next arm.
+        }
+      }
+      return null;
+    },
+    [apolloClient],
+  );
 
   /**
    * Hydrate ranked items into full UI posts via parallel `GET_POST` queries,
@@ -293,6 +359,39 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         const merged = pendingPrepend
           ? dedupePostsById([pendingPrepend, ...hydrated])
           : dedupePostsById(hydrated);
+
+        // C1: FOR_YOU exhausted with nothing to show (cold start). Degrade to
+        // the chronological feed (NETWORK → ALL) instead of an empty box.
+        if (
+          isRecommendedFeed &&
+          merged.length === 0 &&
+          !page?.nextCursor
+        ) {
+          const fallback = await fetchChronoFallback(initialLimit);
+          if (cancelled) return;
+          if (fallback) {
+            fallbackTypeRef.current = fallback.type;
+            setFallbackActive(true);
+            setMergedPosts(fallback.posts);
+            if (pendingPrepend) setPendingPrepend(null);
+            setTotal(fallback.posts.length);
+            setNextCursor(fallback.nextCursor);
+            setFeedMeta({
+              hasMore: fallback.hasMore,
+              isExhausted: false,
+              isChronoFallback: true,
+              nextCursor: fallback.nextCursor,
+            });
+            return;
+          }
+          // Both fallback arms empty → absolute last resort empty state.
+          fallbackTypeRef.current = null;
+          setFallbackActive(false);
+        } else {
+          fallbackTypeRef.current = null;
+          setFallbackActive(false);
+        }
+
         setMergedPosts(merged);
         if (pendingPrepend) setPendingPrepend(null);
         setTotal(merged.length);
@@ -300,6 +399,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         setFeedMeta({
           hasMore: Boolean(page?.nextCursor),
           isExhausted: !page?.nextCursor && hydrated.length === 0,
+          isChronoFallback: false,
           nextCursor: page?.nextCursor ?? null,
         });
       } catch (e) {
@@ -318,7 +418,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     return () => {
       cancelled = true;
     };
-  }, [isRankedFeed, isRecommendedFeed, initialLimit, apolloClient, hydrateRankedItems, refreshTick]);
+  }, [isRankedFeed, isRecommendedFeed, initialLimit, apolloClient, hydrateRankedItems, fetchChronoFallback, refreshTick]);
 
   // ============================================================================
   // LEGACY BRANCH — FOLLOWING / TRENDING / ... served by `feed` query
@@ -493,6 +593,44 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
     if (isRankedFeed) {
       if (recommendedLoadingMore || !hasMore || !nextCursor) return;
+
+      // C1: when the FOR_YOU tab degraded to the chronological fallback, page
+      // it via the `feed` query (carrying the active fallback type + cursor)
+      // rather than the ranked query, which has nothing left to return.
+      if (fallbackActive && fallbackTypeRef.current) {
+        setRecommendedLoadingMore(true);
+        apolloClient
+          .query<GetFeedData>({
+            query: GET_FEED,
+            variables: {
+              input: {
+                type: fallbackTypeRef.current,
+                limit: pageSize,
+                cursor: nextCursor,
+              } as GetFeedInput,
+            },
+            fetchPolicy: 'network-only',
+            errorPolicy: 'all',
+          })
+          .then((res) => {
+            const f = res.data?.feed;
+            if (!f) return;
+            const more = mapPosts(f.posts);
+            if (more.length) setMergedPosts((prev) => appendPostsUnique(prev, more));
+            setNextCursor(f.nextCursor ?? null);
+            setFeedMeta({
+              hasMore: Boolean(f.hasMore ?? f.nextCursor),
+              isChronoFallback: true,
+              nextCursor: f.nextCursor ?? null,
+            });
+          })
+          .catch(() => {
+            // Non-fatal — keep existing posts visible.
+          })
+          .finally(() => setRecommendedLoadingMore(false));
+        return;
+      }
+
       setRecommendedLoadingMore(true);
       const query = isRecommendedFeed ? RECOMMENDED_POSTS : JOINED_COMMUNITY_FEED;
       apolloClient
@@ -557,6 +695,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     fetchMoreHashtag,
     fetchMoreCategory,
     feedInputBase,
+    fallbackActive,
     hasMore,
     hydrateRankedItems,
     isHashtagFeed,

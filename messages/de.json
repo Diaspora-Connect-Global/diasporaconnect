@@ -367,6 +367,26 @@
     "home": {
         "mutualConnections": "gemeinsame Verbindungen",
         "peopleYouMayKnow": "Personen, die Sie kennen könnten",
+        "interestsPrompt": {
+            "title": "Set your interests",
+            "description": "Pick a few topics so we can fill your feed with things you care about.",
+            "save": "Save interests",
+            "saving": "Saving…",
+            "notNow": "Not now",
+            "dismiss": "Dismiss",
+            "saved": "Thanks! We'll personalize your feed."
+        },
+        "chronoFallback": {
+            "title": "Here's what's happening",
+            "description": "We're still learning what you like — showing you the latest posts for now.",
+            "cta": "Set your interests"
+        },
+        "followingEmpty": {
+            "title": "Nothing from your communities yet",
+            "description": "Join communities and associations to see their posts here.",
+            "discover": "Discover communities",
+            "switchToYou": "Browse the You feed"
+        },
         "header": {
             "home": "Startseite",
             "community": "Community",

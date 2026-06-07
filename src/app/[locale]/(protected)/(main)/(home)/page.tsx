@@ -21,6 +21,7 @@ import {
   CREATE_COMMENT,
   RECOMMENDED_COMMUNITIES,
   RECOMMENDED_ASSOCIATIONS,
+  MY_INTEREST_PROFILE,
   AddEngagementData,
   RemoveEngagementData,
   CreateCommentData
@@ -28,13 +29,18 @@ import {
 import type {
   RecommendedCommunitiesData,
   RecommendedAssociationsData,
+  MyInterestProfileData,
 } from '@/services/gql/types/recommendation';
+import {
+  InterestsPromptCard,
+  INTERESTS_PROMPT_DISMISSED_KEY,
+} from '@/components/home/InterestsPromptCard';
 import { useApolloClient } from '@apollo/client/react';
 import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
 import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { ChevronLeftIcon, ChevronRightIcon, Newspaper } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, Newspaper, Compass, Users } from 'lucide-react';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -167,6 +173,7 @@ export default function Home() {
   const tFeedback = useTranslations('feedback');
   const tCommon = useTranslations('common');
   const tJoinModal = useTranslations('home.joinModal');
+  const tHome = useTranslations('home');
   const [viewMode, setViewMode] = useState<FeedViewMode>('you');
   // Track the open media modal by postId rather than postIndex so the
   // open-media handler can be wired as a stable `useCallback`. With
@@ -299,6 +306,7 @@ export default function Home() {
     feedContainerRef,
     loadMore: feedLoadMore,
     hasMore: feedHasMore,
+    feedMeta,
     updatePostCounts,
     removePost,
   } = useFeed({ mode: viewMode });
@@ -325,6 +333,47 @@ export default function Home() {
       feedLoadMore();
     }
   }, [feedHasMore, feedLoadingMore, feedLoading, feedLoadMore]);
+
+  // ─── Cold-start interests prompt (C4) ──────────────────────────────────────
+  // Gate the "Set your interests" card on:
+  //   1. myInterestProfile.coldStart === true (recommender has no warm signal)
+  //   2. a thin feed (few/no personalised posts — including the chrono fallback)
+  //   3. the user hasn't dismissed/completed it before (localStorage)
+  // The card is only ever rendered at the top of the "You" feed.
+  const { data: interestProfileData } = useQuery<MyInterestProfileData>(
+    MY_INTEREST_PROFILE,
+    {
+      fetchPolicy: 'cache-and-network',
+      // Only relevant for the personalised arm.
+      skip: viewMode !== 'you',
+    },
+  );
+
+  const [interestsPromptDismissed, setInterestsPromptDismissed] = useState(true);
+  useEffect(() => {
+    try {
+      setInterestsPromptDismissed(
+        localStorage.getItem(INTERESTS_PROMPT_DISMISSED_KEY) === '1',
+      );
+    } catch {
+      // localStorage unavailable — default to dismissed (never nag).
+      setInterestsPromptDismissed(true);
+    }
+  }, []);
+
+  const isColdStart = interestProfileData?.myInterestProfile?.coldStart === true;
+  // "Thin" feed: the recommender returned a sparse/fallback feed. The
+  // chronological fallback flag (set by useFeed) is the strongest signal; we
+  // also treat a small post count as thin so a near-empty personalised feed
+  // still gets the nudge.
+  const THIN_FEED_THRESHOLD = 5;
+  const isThinFeed =
+    feedMeta.isChronoFallback === true || posts.length < THIN_FEED_THRESHOLD;
+  const showInterestsPrompt =
+    viewMode === 'you' &&
+    isColdStart &&
+    isThinFeed &&
+    !interestsPromptDismissed;
 
   useEffect(() => {
     const savedView = sessionStorage.getItem('viewFilter');
@@ -1028,8 +1077,77 @@ export default function Home() {
             />
           )}
 
-          {/* Feed Empty State */}
-          {!feedLoading && !feedError && !hasPosts && (
+          {/* Cold-start interests prompt (C4) — rendered above the feed on the
+              "You" tab when the recommender is cold and the feed is thin. */}
+          {!feedLoading && !feedError && showInterestsPrompt && (
+            <InterestsPromptCard
+              onDismiss={() => setInterestsPromptDismissed(true)}
+            />
+          )}
+
+          {/* Chronological-fallback CTA (C1) — when the "You" tab degraded to
+              the chronological feed (NETWORK → ALL) we show a lighter "Set your
+              interests" nudge above the fallback list, unless the full prompt
+              card is already showing. */}
+          {!feedLoading &&
+            !feedError &&
+            viewMode === 'you' &&
+            feedMeta.isChronoFallback === true &&
+            !showInterestsPrompt && (
+              <div className="mb-3 flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-subtle p-3">
+                <Compass className="mt-0.5 h-5 w-5 shrink-0 text-text-brand" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-text-primary">
+                    {tHome('chronoFallback.title')}
+                  </p>
+                  <p className="mt-0.5 text-sm text-text-secondary">
+                    {tHome('chronoFallback.description')}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setInterestsPromptDismissed(false)}
+                    className="mt-2 text-sm font-medium text-text-brand hover:underline"
+                  >
+                    {tHome('chronoFallback.cta')}
+                  </button>
+                </div>
+              </div>
+            )}
+
+          {/* Following-tab empty CTA (C2) — instead of a blank pane, point the
+              user at community discovery or the personalised "You" tab. */}
+          {!feedLoading && !feedError && !hasPosts && viewMode === 'following' && (
+            <EmptyState
+              icon={Users}
+              title={tHome('followingEmpty.title')}
+              description={tHome('followingEmpty.description')}
+              action={
+                <div className="flex flex-col items-center gap-2 sm:flex-row">
+                  <Link href="/community" prefetch={false}>
+                    <ButtonType3 className="border border-text-brand px-4 py-2 text-sm">
+                      {tHome('followingEmpty.discover')}
+                    </ButtonType3>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sessionStorage.setItem('viewFilter', 'you');
+                      window.dispatchEvent(
+                        new CustomEvent('viewFilterChange', { detail: 'you' }),
+                      );
+                    }}
+                    className="text-sm font-medium text-text-brand hover:underline"
+                  >
+                    {tHome('followingEmpty.switchToYou')}
+                  </button>
+                </div>
+              }
+            />
+          )}
+
+          {/* Feed Empty State — absolute last resort ("You" tab with no posts
+              and no chronological fallback available). */}
+          {!feedLoading && !feedError && !hasPosts && viewMode === 'you' && (
             <EmptyState
               icon={Newspaper}
               title={tFeedback('empty.feed.title')}

@@ -323,6 +323,13 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
         </div>
       )}
 
+      {/* Duration badge (top-right) — shown while the video is idle, like FB/IG. */}
+      {canSeek && !isPlaying && !isBuffering && !hasError && (
+        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 text-white text-xs tabular-nums pointer-events-none select-none">
+          {formatTime(currentTime > 0 ? duration - currentTime : duration)}
+        </div>
+      )}
+
       {/* Centre play button when paused and not buffering */}
       {!isPlaying && !isBuffering && !hasError && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

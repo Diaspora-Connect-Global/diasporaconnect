@@ -28,6 +28,8 @@ import { VideoPlayer } from '@/components/custom/VideoPlayer';
 import FileAttachmentCard from '@/components/cards/FileAttachmentCard';
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
 import { getFirstUrlInText } from '@/lib/urlPreview';
+import { truncateAtWord } from '@/lib/truncateText';
+import PostImage from '@/components/cards/media/PostImage';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
 
 /* --------------------------------------------------------------- */
@@ -718,12 +720,13 @@ function FeedCardWithReplyInner({
             );
         }
         const max = 200;
-        const truncated = postContent.length > max && !isExpanded;
-        const displayText = truncated ? `${postContent.slice(0, max)}...` : postContent;
+        const { text: collapsed, truncated: willTruncate } = truncateAtWord(postContent, max);
+        const truncated = willTruncate && !isExpanded;
+        const displayText = truncated ? `${collapsed}…` : postContent;
 
         return (
             <>
-                <p className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
+                <p dir="auto" className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
                     {renderText(displayText, mentionMap)}
                     {truncated && (
                         <span
@@ -744,6 +747,12 @@ function FeedCardWithReplyInner({
         const imageCount = images.length;
         const maxDisplay = 4;
         const excessCount = imageCount > maxDisplay ? imageCount - maxDisplay : 0;
+        // Descriptive alt: author + a snippet of the post text, so screen
+        // readers and image-failed states convey context (vs. generic "post").
+        const altBase = profileName ? `${profileName}'s post` : 'Post image';
+        const altSnippet = postContent ? `: ${truncateAtWord(postContent, 80).text}` : '';
+        const imgAlt = (i: number) =>
+            imageCount > 1 ? `${altBase} (image ${i + 1} of ${imageCount})${altSnippet}` : `${altBase}${altSnippet}`;
 
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
@@ -756,7 +765,7 @@ function FeedCardWithReplyInner({
                         className="group relative w-full min-h-[20rem] max-h-[32rem] rounded-lg overflow-hidden cursor-pointer bg-surface-alt"
                         onClick={() => openMediaModal(0)}
                     >
-                        <img src={images[0]} alt="post" className="w-full max-h-[32rem] object-contain" loading="lazy" decoding="async" />
+                        <PostImage src={images[0]} alt={imgAlt(0)} fit="contain" className="max-h-[32rem]" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
                             <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
                                 <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
@@ -774,7 +783,7 @@ function FeedCardWithReplyInner({
                                 className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openMediaModal(i)}
                             >
-                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                <PostImage src={src} alt={imgAlt(i)} fit="cover" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
                                     <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
                                         <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
@@ -792,7 +801,7 @@ function FeedCardWithReplyInner({
                             className="group relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]"
                             onClick={() => openMediaModal(0)}
                         >
-                            <img src={images[0]} alt="post 1" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <PostImage src={images[0]} alt={imgAlt(0)} fit="cover" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
                                 <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
                                     <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
@@ -806,7 +815,7 @@ function FeedCardWithReplyInner({
                             className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => openMediaModal(1)}
                         >
-                            <img src={images[1]} alt="post 2" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <PostImage src={images[1]} alt={imgAlt(1)} fit="cover" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
                                 <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
                                     <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
@@ -820,7 +829,7 @@ function FeedCardWithReplyInner({
                             className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer"
                             onClick={() => openMediaModal(2)}
                         >
-                            <img src={images[2]} alt="post 3" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <PostImage src={images[2]} alt={imgAlt(2)} fit="cover" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
                                 <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
                                     <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
@@ -839,7 +848,7 @@ function FeedCardWithReplyInner({
                                 className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
                                 onClick={() => openMediaModal(i === maxDisplay - 1 && excessCount > 0 ? 0 : i)}
                             >
-                                <img src={src} alt={`post ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                <PostImage src={src} alt={imgAlt(i)} fit="cover" />
                                 {i === maxDisplay - 1 && excessCount > 0 ? (
                                     <div className="absolute inset-0 bg-black/40 bg-opacity-60 flex items-center justify-center">
                                         <span className="text-white text-3xl font-semibold">
@@ -978,7 +987,7 @@ function FeedCardWithReplyInner({
                                     {c.authorTier && <UserBadge tier={c.authorTier} size="xs" />}
                                     <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(c.createdAt)}</span>
                                 </div>
-                                <p className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderText(c.content, c.mentionMap)}</p>
+                                <p dir="auto" className="body-small text-text-primary break-words mb-2 whitespace-pre-wrap">{renderText(c.content, c.mentionMap)}</p>
                                 <div className="flex items-center gap-3">
                                     <button type="button" onClick={() => handleLikeComment(c.id)} className={`text-xs font-semibold transition-colors ${c.hasLiked ? 'text-border-danger' : 'text-text-secondary hover:text-text-brand'}`}>{t('like')}</button>
                                     <button onClick={() => setModalReplyToId(cur => cur === c.id ? null : c.id)} className="text-xs font-semibold text-text-secondary hover:text-text-brand transition-colors">{t('reply')}</button>
@@ -1005,7 +1014,7 @@ function FeedCardWithReplyInner({
                                                 {reply.authorTier && <UserBadge tier={reply.authorTier} size="xs" />}
                                                 <span className="text-text-tertiary text-xs flex-shrink-0">· {formatDateProximity(reply.createdAt)}</span>
                                             </div>
-                                            <p className="body-small text-text-primary break-words whitespace-pre-wrap">
+                                            <p dir="auto" className="body-small text-text-primary break-words whitespace-pre-wrap">
                                                 {reply.parentId && /^@\S+/.test(reply.content) ? (() => {
                                                     const rest = reply.content.replace(/^@\S+(?:\s+[A-Z][a-z]+)*\s/, '');
                                                     return rest ? renderText(rest, reply.mentionMap) : null;
@@ -1071,7 +1080,7 @@ function FeedCardWithReplyInner({
                     <div className="w-[360px] xl:w-[400px] flex-shrink-0 bg-surface-default flex flex-col h-full border-l border-border-subtle">
                         <div className="p-4 border-b border-border-subtle">
                             {postInfoEl}
-                            <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{renderText(postContent, mentionMap)}</p>
+                            <p dir="auto" className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-4">{renderText(postContent, mentionMap)}</p>
                         </div>
                         {/* Action bar */}
                         <div className="px-4 py-3 border-b border-border-subtle flex items-center gap-4">
@@ -1133,7 +1142,7 @@ function FeedCardWithReplyInner({
                     {/* Bottom bar */}
                     <div className="bg-surface-default px-4 pt-3 pb-2 border-t border-border-subtle">
                         {postInfoEl}
-                        <p className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{renderText(postContent, mentionMap)}</p>
+                        <p dir="auto" className="body-small text-text-primary whitespace-pre-wrap break-words line-clamp-2 mb-3">{renderText(postContent, mentionMap)}</p>
                         <div className="flex items-center gap-4">
                             <button onClick={handleLike} className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary">
                                 <GoHeartFill className={`w-5 h-5 ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`} />
@@ -1282,7 +1291,7 @@ function FeedCardWithReplyInner({
                 </div>
             </div>
         ) : (
-            <p className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
+            <p dir="auto" className="body-small text-text-primary break-words mb-[0.5rem] whitespace-pre-wrap">
                 {c.parentId && /^@\S+/.test(c.content) ? (() => {
                     const rest = c.content.replace(/^@\S+(?:\s+[A-Z][a-z]+)*\s/, '');
                     return rest ? renderText(rest, c.mentionMap) : null;

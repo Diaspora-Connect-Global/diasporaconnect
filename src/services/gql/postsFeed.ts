@@ -771,6 +771,28 @@ export const RECOMMENDED_POSTS = gql`
 `;
 
 /**
+ * The viewer's interest profile (recommendation-service). Used to gate the
+ * cold-start "Set your interests" prompt card: `coldStart === true` means the
+ * recommender hasn't yet collected enough meaningful signal to personalise the
+ * feed, so an interests prompt is worth showing. Fail-soft on the backend →
+ * `{ coldStart: true }` on any downstream error.
+ */
+export const MY_INTEREST_PROFILE = gql`
+  query MyInterestProfile {
+    myInterestProfile {
+      userId
+      topics {
+        topic
+        weight
+      }
+      lastUpdatedAt
+      interactionCount
+      coldStart
+    }
+  }
+`;
+
+/**
  * "X new posts available" pill — polled every 60s while the home tab
  * is visible. Returns count (capped at 99) of items visible to the
  * viewer that have been published since their last impression on the
