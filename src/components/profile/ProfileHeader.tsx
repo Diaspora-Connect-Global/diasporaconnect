@@ -113,11 +113,11 @@ export function ProfileHeader({
 
           {/* User Info */}
           <div className="mt-auto">
-            <div className="flex lg:items-center space-x-2">
-              <h1 className="text-text-primary heading-small line-clamp-2 break-words max-w-full">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-text-primary text-xl sm:text-2xl lg:text-[28px] font-semibold leading-tight line-clamp-2 break-words max-w-full">
                 {userData?.firstName} {userData?.middleName} {userData?.lastName}
               </h1>
-              {userTier ? <UserBadge tier={userTier} size="sm" /> : null}
+              {userTier ? <UserBadge tier={userTier} size="md" className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" /> : null}
             </div>
             <div
               onClick={() => !showFriendActions && openFriendList()}
