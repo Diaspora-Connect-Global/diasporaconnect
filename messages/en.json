@@ -367,6 +367,7 @@
     "home": {
         "mutualConnections": "mutual connections",
         "peopleYouMayKnow": "People you may know",
+        "suggestedForYou": "Suggested for you",
         "noSuggestions": "No friend suggestions available",
         "interestsPrompt": {
             "title": "Set your interests",

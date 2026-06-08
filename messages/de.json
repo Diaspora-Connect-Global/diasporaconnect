@@ -367,6 +367,7 @@
     "home": {
         "mutualConnections": "gemeinsame Verbindungen",
         "peopleYouMayKnow": "Personen, die Sie kennen könnten",
+        "suggestedForYou": "Für Sie vorgeschlagen",
         "interestsPrompt": {
             "title": "Lege deine Interessen fest",
             "description": "Wähle ein paar Themen aus, damit wir deinen Feed mit Inhalten füllen können, die dich interessieren.",

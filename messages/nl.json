@@ -367,6 +367,7 @@
     "home": {
         "mutualConnections": "gemeenschappelijke connecties",
         "peopleYouMayKnow": "Mensen die u misschien kent",
+        "suggestedForYou": "Voorgesteld voor jou",
         "noSuggestions": "Geen vriendschapssuggesties beschikbaar",
         "interestsPrompt": {
             "title": "Stel je interesses in",

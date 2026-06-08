@@ -367,6 +367,7 @@
     "home": {
         "mutualConnections": "connexions mutuelles",
         "peopleYouMayKnow": "Personnes que vous pourriez connaître",
+        "suggestedForYou": "Suggéré pour vous",
         "interestsPrompt": {
             "title": "Définissez vos centres d'intérêt",
             "description": "Choisissez quelques thèmes pour que nous puissions remplir votre fil avec ce qui vous intéresse.",
