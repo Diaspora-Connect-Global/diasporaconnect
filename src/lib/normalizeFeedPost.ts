@@ -57,6 +57,11 @@ function mapAttachments(raw: FeedPostFragment['attachments']): Attachment[] | un
     type: a.type ?? 'IMAGE',
     mimeType: a.mimeType ?? 'application/octet-stream',
     size: 0,
+    // Populated once the backend emits these (see Attachment LQIP follow-up);
+    // until then they are undefined and PostImage falls back to a shimmer.
+    width: a.width ?? undefined,
+    height: a.height ?? undefined,
+    blurDataUrl: a.blurDataUrl ?? undefined,
   }));
 }
 

@@ -149,6 +149,11 @@ export interface Attachment {
   mimeType: string;
   size: number;
   duration?: number;
+  /** Intrinsic pixel dimensions (images/videos) — used for aspect-ratio + CLS prevention. */
+  width?: number;
+  height?: number;
+  /** Tiny base64 LQIP for blur-up while the full image loads. */
+  blurDataUrl?: string;
 }
 
 /**
@@ -239,6 +244,9 @@ export interface FeedPostFragment {
     objectKey?: string | null;
     mimeType?: string | null;
     url?: string | null;
+    width?: number | null;
+    height?: number | null;
+    blurDataUrl?: string | null;
   }> | null;
   visibility?: string | null;
   mentions?: MentionInfo[];

@@ -8,7 +8,7 @@ import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
-import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, type MentionInputItem } from '@/components/custom/richTextRenderer';
+import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, isShortEmojiOnly, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { useRouter } from '@/i18n/navigation';
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
@@ -34,7 +34,7 @@ import FileAttachmentCard from '@/components/cards/FileAttachmentCard';
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
 import { getFirstUrlInText } from '@/lib/urlPreview';
 import { truncateAtWord } from '@/lib/truncateText';
-import PostImage from '@/components/cards/media/PostImage';
+import ImageGrid from '@/components/cards/media/ImageGrid';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
 
 /* --------------------------------------------------------------- */
@@ -540,8 +540,9 @@ export default function FeedCardFiltered({
         const { text: collapsed, truncated: willTruncate } = truncateAtWord(content, max);
         const truncated = willTruncate && !isExpanded;
         const displayText = truncated ? `${collapsed}…` : content;
+        const emojiOnly = isShortEmojiOnly(content);
         return (
-            <p dir="auto" className="body-medium text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words">
+            <p dir="auto" className={`text-text-primary leading-relaxed mb-[1rem] whitespace-pre-wrap break-words ${emojiOnly ? 'text-3xl leading-snug' : 'body-medium'}`}>
                 {renderText(displayText, mentionMap)}
                 {truncated && (
                     <span onClick={toggleExpand} className="text-text-brand text-xs cursor-pointer">
@@ -552,74 +553,35 @@ export default function FeedCardFiltered({
         );
     };
 
+    /** Hover overlay (like + comment) shared across every image tile. */
+    const imageHoverOverlay = (
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
+            <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
+                <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
+            </button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
+                <MessageCircle className="w-7 h-7 drop-shadow" />
+            </button>
+        </div>
+    );
+
     const renderImages = () => {
         if (!images?.length) return null;
         const imageCount = images.length;
-        const maxDisplay = 4;
-        const excessCount = imageCount > maxDisplay ? imageCount - maxDisplay : 0;
         // Descriptive alt: author + a snippet of the post text (vs. generic "post").
         const altBase = profileName ? `${profileName}'s post` : 'Post image';
         const altSnippet = content ? `: ${truncateAtWord(content, 80).text}` : '';
         const imgAlt = (i: number) =>
             imageCount > 1 ? `${altBase} (image ${i + 1} of ${imageCount})${altSnippet}` : `${altBase}${altSnippet}`;
-        const hoverOverlay = (
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-[1.5rem]">
-                <button type="button" onClick={(e) => { e.stopPropagation(); handleLike(); }} className="flex flex-col items-center gap-1 text-white">
-                    <GoHeartFill className={`w-7 h-7 drop-shadow ${isLiked ? 'text-red-400' : 'text-white'}`} />
-                </button>
-                <button type="button" onClick={(e) => { e.stopPropagation(); toggleCommentInput(); }} className="flex flex-col items-center gap-1 text-white">
-                    <MessageCircle className="w-7 h-7 drop-shadow" />
-                </button>
-            </div>
-        );
 
         return (
-            <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
-                {imageCount === 1 ? (
-                    <div className="group relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(0)}>
-                        <PostImage src={images[0]} alt={imgAlt(0)} fit="cover" />
-                        {hoverOverlay}
-                    </div>
-                ) : imageCount === 2 ? (
-                    <div className="grid grid-cols-2 gap-[0.5rem]">
-                        {images.map((src, i) => (
-                            <div key={i} className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(i)}>
-                                <PostImage src={src} alt={imgAlt(i)} fit="cover" />
-                                {hoverOverlay}
-                            </div>
-                        ))}
-                    </div>
-                ) : imageCount === 3 ? (
-                    // 1 tall + 2 stacked (FB 3-photo collage) — matches FeedCardWithReply.
-                    <div className="grid grid-cols-2 grid-rows-2 gap-2">
-                        <div className="group relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]" onClick={() => openMediaModal(0)}>
-                            <PostImage src={images[0]} alt={imgAlt(0)} fit="cover" />
-                            {hoverOverlay}
-                        </div>
-                        <div className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(1)}>
-                            <PostImage src={images[1]} alt={imgAlt(1)} fit="cover" />
-                            {hoverOverlay}
-                        </div>
-                        <div className="group relative aspect-square min-h-0 rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(2)}>
-                            <PostImage src={images[2]} alt={imgAlt(2)} fit="cover" />
-                            {hoverOverlay}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 gap-[0.5rem]">
-                        {images.slice(0, maxDisplay).map((src, i) => (
-                            <div key={i} className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer" onClick={() => openMediaModal(i === maxDisplay - 1 && excessCount > 0 ? 0 : i)}>
-                                <PostImage src={src} alt={imgAlt(i)} fit="cover" />
-                                {i === maxDisplay - 1 && excessCount > 0 ? (
-                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                        <span className="text-white text-3xl font-semibold">+{excessCount}</span>
-                                    </div>
-                                ) : hoverOverlay}
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            <ImageGrid
+                images={images}
+                alt={imgAlt}
+                onOpen={openMediaModal}
+                overlay={imageHoverOverlay}
+                singleVariant="cover"
+            />
         );
     };
 
@@ -628,7 +590,7 @@ export default function FeedCardFiltered({
         return (
             <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
                 {videos.map((src, i) => (
-                    <VideoPlayer key={i} src={src} className="w-full max-h-[24rem]" />
+                    <VideoPlayer key={i} src={src} className="w-full max-h-[24rem]" autoplayInView />
                 ))}
             </div>
         );

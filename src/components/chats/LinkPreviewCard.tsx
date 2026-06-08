@@ -2,11 +2,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FileIcon, Link2, Music } from 'lucide-react';
+import { FileIcon, Link2 } from 'lucide-react';
 import { useQuery } from '@apollo/client/react';
 import { GET_POST, type GetPostData } from '@/services/gql/postsFeed';
 import { classifyUrl, extractPostIdFromUrl, extractYouTubeVideoId, getFileNameFromUrl } from '@/lib/urlPreview';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
+import AudioPlayer from '@/components/cards/media/AudioPlayer';
 
 type OgData = { title?: string; description?: string; imageUrl?: string; siteName?: string; loading: boolean };
 
@@ -202,10 +203,15 @@ export function LinkPreviewCard({ url, className = '', variant = 'compact' }: Li
     );
   }
 
-  // Document or audio: file card with icon + link
-  if (kind === 'document' || kind === 'audio') {
+  // Audio: native inline player
+  if (kind === 'audio') {
+    return <AudioPlayer src={trimmed} fileName={getFileNameFromUrl(trimmed)} className={className} />;
+  }
+
+  // Document: file card with icon + link
+  if (kind === 'document') {
     const fileName = getFileNameFromUrl(trimmed);
-    const Icon = kind === 'audio' ? Music : FileIcon;
+    const Icon = FileIcon;
     return (
       <a
         href={trimmed}

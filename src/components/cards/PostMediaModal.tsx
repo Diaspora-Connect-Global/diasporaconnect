@@ -410,6 +410,21 @@ export default function PostMediaModal({
     const nextMedia = () => setMediaIndex(p => (p + 1) % allMedia.length);
     const prevMedia = () => setMediaIndex(p => (p - 1 + allMedia.length) % allMedia.length);
 
+    // Keyboard navigation: ←/→ change media, Esc closes. Ignored while the
+    // comment box (or any input) is focused so typing isn't hijacked.
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            const el = document.activeElement as HTMLElement | null;
+            const typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+            if (e.key === 'Escape') { onClose(); return; }
+            if (typing || allMedia.length <= 1) return;
+            if (e.key === 'ArrowRight') { e.preventDefault(); setMediaIndex(p => (p + 1) % allMedia.length); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); setMediaIndex(p => (p - 1 + allMedia.length) % allMedia.length); }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [allMedia.length, onClose]);
+
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStartX.current = e.touches[0]!.clientX;
         touchStartY.current = e.touches[0]!.clientY;
@@ -786,7 +801,7 @@ export default function PostMediaModal({
     /* ── render ── */
     return (
         <>
-            <div className="fixed inset-0 z-50 flex overflow-hidden bg-black animate-in fade-in slide-in-from-bottom-6 duration-300" onClick={onClose}>
+            <div role="dialog" aria-modal="true" aria-label="Post media viewer" className="fixed inset-0 z-50 flex overflow-hidden bg-black animate-in fade-in slide-in-from-bottom-6 duration-300" onClick={onClose}>
                 <div className="w-full h-full" style={getSlideStyle()}>
 
                 {/* DESKTOP */}
@@ -794,7 +809,7 @@ export default function PostMediaModal({
                     {/* Left: media */}
                     <div className="relative flex-1 flex items-center justify-center bg-neutral-900 dark:bg-black min-w-0"
                         onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
-                        <button onClick={onClose}
+                        <button aria-label="Close" onClick={onClose}
                             className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
                         </button>
@@ -805,11 +820,11 @@ export default function PostMediaModal({
                         )}
                         {allMedia.length > 1 && (
                             <>
-                                <button onClick={e => { e.stopPropagation(); prevMedia(); }}
+                                <button aria-label="Previous media" onClick={e => { e.stopPropagation(); prevMedia(); }}
                                     className="absolute left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-3 transition-colors cursor-pointer">
                                     <ChevronLeft className="w-6 h-6 text-white" />
                                 </button>
-                                <button onClick={e => { e.stopPropagation(); nextMedia(); }}
+                                <button aria-label="Next media" onClick={e => { e.stopPropagation(); nextMedia(); }}
                                     className="absolute right-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-3 transition-colors cursor-pointer">
                                     <ChevronRight className="w-6 h-6 text-white" />
                                 </button>
@@ -836,7 +851,7 @@ export default function PostMediaModal({
                 <div className="flex md:hidden flex-col w-full h-full" onClick={e => e.stopPropagation()}>
                     <div className="relative flex-1 flex items-center justify-center bg-neutral-900 dark:bg-black min-h-0"
                         onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onWheel={handleWheel}>
-                        <button onClick={onClose}
+                        <button aria-label="Close" onClick={onClose}
                             className="absolute top-4 left-4 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 transition-colors cursor-pointer">
                             <X className="w-5 h-5 text-white" />
                         </button>
@@ -847,11 +862,11 @@ export default function PostMediaModal({
                         )}
                         {allMedia.length > 1 && (
                             <>
-                                <button onClick={e => { e.stopPropagation(); prevMedia(); }}
+                                <button aria-label="Previous media" onClick={e => { e.stopPropagation(); prevMedia(); }}
                                     className="absolute left-3 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 cursor-pointer">
                                     <ChevronLeft className="w-5 h-5 text-white" />
                                 </button>
-                                <button onClick={e => { e.stopPropagation(); nextMedia(); }}
+                                <button aria-label="Next media" onClick={e => { e.stopPropagation(); nextMedia(); }}
                                     className="absolute right-3 z-10 bg-black/40 hover:bg-black/60 rounded-full p-2 cursor-pointer">
                                     <ChevronRight className="w-5 h-5 text-white" />
                                 </button>

@@ -97,6 +97,24 @@ export function buildMentionMap(
   return map;
 }
 
+/**
+ * True when `text` is only emoji (plus variation selectors / ZWJ / skin-tone
+ * modifiers / whitespace) and short (≤ ~3 emoji). Cards use this to render the
+ * post body at a larger size — the "jumbo emoji" treatment Facebook/iMessage
+ * apply to emoji-only messages.
+ */
+const EMOJI_ONLY_RE =
+  /^[\p{Extended_Pictographic}️‍\u{1F3FB}-\u{1F3FF}\s]+$/u;
+export function isShortEmojiOnly(text: string): boolean {
+  const t = (text ?? '').trim();
+  if (!t) return false;
+  if (!EMOJI_ONLY_RE.test(t)) return false;
+  // Count code points (excluding whitespace); ~8 covers up to 3 emoji with
+  // modifiers/ZWJ sequences without enlarging long emoji walls.
+  const codepoints = [...t.replace(/\s/g, '')];
+  return codepoints.length > 0 && codepoints.length <= 8;
+}
+
 export interface MentionInputItem {
   entityId: string;
   entityType?: string;

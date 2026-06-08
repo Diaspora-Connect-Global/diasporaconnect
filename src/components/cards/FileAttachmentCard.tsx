@@ -10,6 +10,7 @@ import {
 } from '@/lib/fileDisplay';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import PdfCarousel from '@/components/cards/PdfCarousel';
+import AudioPlayer from '@/components/cards/media/AudioPlayer';
 
 export interface FileAttachmentCardProps {
   url: string;
@@ -68,6 +69,16 @@ export default function FileAttachmentCard({
   const sizeLabel = formatFileSize(size);
   const viewerKind = getDocViewerKind(mimeType, fileName);
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+
+  // ---- Audio: native inline player (previously a download-only row) ----
+  const isAudio = mimeType?.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(fileName);
+  if (isAudio) {
+    return (
+      <div className={`max-w-full ${className}`} onClick={stop}>
+        <AudioPlayer src={url} fileName={fileName} />
+      </div>
+    );
+  }
 
   // ---- PDF: inline swipeable deck (LinkedIn-style) ----
   if (viewerKind === 'pdf') {

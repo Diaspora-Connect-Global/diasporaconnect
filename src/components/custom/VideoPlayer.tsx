@@ -27,22 +27,33 @@ interface VideoPlayerProps {
   autoPlay?: boolean;
   /** Pause automatically when the player scrolls out of the viewport */
   pauseOnLeave?: boolean;
+  /**
+   * Facebook/LinkedIn-style feed behaviour: don't play on mount; start muted
+   * playback only once the player is ≥60% in view, and pause when it scrolls
+   * away (resuming again on re-entry). Overrides `autoPlay` for the initial
+   * mount. Use in feed cards; leave off in the lightbox (which uses `autoPlay`).
+   */
+  autoplayInView?: boolean;
   /** First-frame thumbnail shown while the video loads */
   poster?: string;
   /** Called when the user taps the video to open the full post modal. When provided, click navigates to modal instead of toggling play. */
   onOpenModal?: () => void;
 }
 
-export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = true, poster, onOpenModal }: VideoPlayerProps) {
+export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = true, autoplayInView = false, poster, onOpenModal }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { globalMuted, setGlobalMuted } = useVideoStore();
 
-  const [shouldLoad, setShouldLoad] = useState(autoPlay);
+  // When `autoplayInView` is set we never play on mount — the in-view observer
+  // drives playback instead — so the <video> element's own autoPlay stays off.
+  const elementAutoPlay = autoPlay && !autoplayInView;
+
+  const [shouldLoad, setShouldLoad] = useState(elementAutoPlay);
   // preload="metadata" until in-viewport, then upgrade to "auto"
-  const [preloadMode, setPreloadMode] = useState<'metadata' | 'auto'>(autoPlay ? 'auto' : 'metadata');
+  const [preloadMode, setPreloadMode] = useState<'metadata' | 'auto'>(elementAutoPlay ? 'auto' : 'metadata');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -83,9 +94,9 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
       },
       { rootMargin: '150px', threshold: 0 }
     );
-    if (!autoPlay) obs.observe(el);
+    if (!elementAutoPlay) obs.observe(el);
     return () => obs.disconnect();
-  }, [autoPlay]);
+  }, [elementAutoPlay]);
 
   // Auto-pause when mostly out of view
   useEffect(() => {
@@ -99,6 +110,31 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     obs.observe(el);
     return () => obs.disconnect();
   }, [pauseOnLeave]);
+
+  // Feed autoplay: play (muted) once ≥60% in view, pause when it leaves —
+  // resuming again on re-entry. Only auto-plays while globally muted so we
+  // never force sound; a browser-blocked play() is swallowed harmlessly.
+  useEffect(() => {
+    if (!autoplayInView) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        const v = videoRef.current;
+        if (!entry) return;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          setShouldLoad(true);
+          setPreloadMode('auto');
+          if (globalMuted && v) v.play().catch(() => { /* autoplay blocked */ });
+        } else {
+          v?.pause();
+        }
+      },
+      { threshold: [0, 0.6] }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [autoplayInView, globalMuted]);
 
   // Sync global mute state to the video element
   useEffect(() => {
@@ -279,7 +315,7 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
         preload={preloadMode}
         poster={poster}
         playsInline
-        autoPlay={autoPlay}
+        autoPlay={elementAutoPlay}
         muted={globalMuted}
         className="w-full h-full object-contain"
         onPlay={() => { setIsPlaying(true); setHasError(false); scheduleHide(); }}
