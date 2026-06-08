@@ -94,8 +94,9 @@ export const FriendActionButtons = ({
             </ButtonType2>
         ),
         accept: (
-            <ButtonType2 
-                key="accept" 
+            <ButtonType2
+                key="accept"
+                className="flex-1 text-sm"
                 onClick={() => acceptRequest(connectionId)}
                 disabled={isAcceptLoading}
             >
@@ -107,8 +108,9 @@ export const FriendActionButtons = ({
             </ButtonType2>
         ),
         ignore: (
-            <ButtonType1 
-                key="ignore" 
+            <ButtonType1
+                key="ignore"
+                className="flex-1 text-sm"
                 onClick={() => ignoreRequest(connectionId)}
                 disabled={isIgnoreLoading}
             >
