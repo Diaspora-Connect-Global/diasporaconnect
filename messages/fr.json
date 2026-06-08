@@ -368,24 +368,24 @@
         "mutualConnections": "connexions mutuelles",
         "peopleYouMayKnow": "Personnes que vous pourriez connaître",
         "interestsPrompt": {
-            "title": "Set your interests",
-            "description": "Pick a few topics so we can fill your feed with things you care about.",
-            "save": "Save interests",
-            "saving": "Saving…",
-            "notNow": "Not now",
-            "dismiss": "Dismiss",
-            "saved": "Thanks! We'll personalize your feed."
+            "title": "Définissez vos centres d'intérêt",
+            "description": "Choisissez quelques thèmes pour que nous puissions remplir votre fil avec ce qui vous intéresse.",
+            "save": "Enregistrer les centres d'intérêt",
+            "saving": "Enregistrement…",
+            "notNow": "Pas maintenant",
+            "dismiss": "Fermer",
+            "saved": "Merci ! Nous personnalisons votre fil."
         },
         "chronoFallback": {
-            "title": "Here's what's happening",
-            "description": "We're still learning what you like — showing you the latest posts for now.",
-            "cta": "Set your interests"
+            "title": "Voici ce qui se passe",
+            "description": "Nous apprenons encore ce que vous aimez — voici les derniers posts pour l'instant.",
+            "cta": "Définir vos centres d'intérêt"
         },
         "followingEmpty": {
-            "title": "Nothing from your communities yet",
-            "description": "Join communities and associations to see their posts here.",
-            "discover": "Discover communities",
-            "switchToYou": "Browse the You feed"
+            "title": "Rien de vos communautés pour l'instant",
+            "description": "Rejoignez des communautés et des associations pour voir leurs posts ici.",
+            "discover": "Découvrir des communautés",
+            "switchToYou": "Voir le fil « Pour vous »"
         },
         "header": {
             "home": "Accueil",

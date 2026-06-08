@@ -369,24 +369,24 @@
         "peopleYouMayKnow": "Mensen die u misschien kent",
         "noSuggestions": "Geen vriendschapssuggesties beschikbaar",
         "interestsPrompt": {
-            "title": "Set your interests",
-            "description": "Pick a few topics so we can fill your feed with things you care about.",
-            "save": "Save interests",
-            "saving": "Saving…",
-            "notNow": "Not now",
-            "dismiss": "Dismiss",
-            "saved": "Thanks! We'll personalize your feed."
+            "title": "Stel je interesses in",
+            "description": "Kies een paar onderwerpen, zodat we je feed kunnen vullen met dingen die je belangrijk vindt.",
+            "save": "Interesses opslaan",
+            "saving": "Opslaan…",
+            "notNow": "Niet nu",
+            "dismiss": "Sluiten",
+            "saved": "Bedankt! We personaliseren je feed."
         },
         "chronoFallback": {
-            "title": "Here's what's happening",
-            "description": "We're still learning what you like — showing you the latest posts for now.",
-            "cta": "Set your interests"
+            "title": "Dit is er aan de hand",
+            "description": "We leren nog wat je leuk vindt — voor nu tonen we je de nieuwste berichten.",
+            "cta": "Interesses instellen"
         },
         "followingEmpty": {
-            "title": "Nothing from your communities yet",
-            "description": "Join communities and associations to see their posts here.",
-            "discover": "Discover communities",
-            "switchToYou": "Browse the You feed"
+            "title": "Nog niets van je communities",
+            "description": "Word lid van communities en verenigingen om hun berichten hier te zien.",
+            "discover": "Communities ontdekken",
+            "switchToYou": "Bekijk de Voor jou-feed"
         },
         "header": {
             "home": "Startpagina",

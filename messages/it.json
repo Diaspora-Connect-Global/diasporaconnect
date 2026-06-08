@@ -368,24 +368,24 @@
         "mutualConnections": "connessioni in comune",
         "peopleYouMayKnow": "Persone che potresti conoscere",
         "interestsPrompt": {
-            "title": "Set your interests",
-            "description": "Pick a few topics so we can fill your feed with things you care about.",
-            "save": "Save interests",
-            "saving": "Saving…",
-            "notNow": "Not now",
-            "dismiss": "Dismiss",
-            "saved": "Thanks! We'll personalize your feed."
+            "title": "Imposta i tuoi interessi",
+            "description": "Scegli alcuni argomenti così possiamo riempire il tuo feed con ciò che ti interessa.",
+            "save": "Salva interessi",
+            "saving": "Salvataggio…",
+            "notNow": "Non ora",
+            "dismiss": "Chiudi",
+            "saved": "Grazie! Personalizzeremo il tuo feed."
         },
         "chronoFallback": {
-            "title": "Here's what's happening",
-            "description": "We're still learning what you like — showing you the latest posts for now.",
-            "cta": "Set your interests"
+            "title": "Ecco cosa sta succedendo",
+            "description": "Stiamo ancora imparando cosa ti piace — per ora ti mostriamo i post più recenti.",
+            "cta": "Imposta i tuoi interessi"
         },
         "followingEmpty": {
-            "title": "Nothing from your communities yet",
-            "description": "Join communities and associations to see their posts here.",
-            "discover": "Discover communities",
-            "switchToYou": "Browse the You feed"
+            "title": "Ancora niente dalle tue community",
+            "description": "Unisciti a community e associazioni per vedere qui i loro post.",
+            "discover": "Scopri le community",
+            "switchToYou": "Vai al feed « Per te »"
         },
         "header": {
             "home": "Home",
