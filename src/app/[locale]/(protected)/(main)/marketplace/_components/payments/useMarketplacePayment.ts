@@ -21,8 +21,8 @@ import type {
   CreateServiceOrderInput,
 } from "@/services/gql/types/marketplace";
 import { handleMarketplaceError } from "@/lib/marketplace-error-mapper";
-import { toMinorUnits } from "@/types/money";
-import { openPaystackMobileMoney } from "@/lib/paystack";
+import { toMinorUnits, isMobileMoneySupported, usesPaystackCard } from "@/types/money";
+import { openPaystackMobileMoney, openPaystackCard } from "@/lib/paystack";
 import { useUserStore } from "@/store/useUserStore";
 import type { PaymentContext, PaymentResult, PaymentMethod } from "../types";
 
@@ -95,21 +95,57 @@ export function useMarketplacePayment() {
     ): Promise<PaymentResult> => {
       setIsPaying(true);
       try {
-        const stripePaymentMethodId =
-          method === "credit"
-            ? await resolvePrimaryStripeCardPaymentMethodId()
-            : null;
-
-        if (method === "credit" && !stripePaymentMethodId) {
-          return { success: false };
-        }
-
         if (method === "mobile" && !userEmail) {
           return { success: false };
         }
 
+        // Card payments route to the provider that settles the listing currency:
+        // Stripe (saved card) for USD/EUR/GBP/GHS, Paystack (popup) for NGN/KES.
+        const payByCard = async (
+          paymentIntentId: string,
+          amountInMinorUnits: number,
+          currency: string,
+        ): Promise<boolean> => {
+          if (usesPaystackCard(currency)) {
+            if (!userEmail) return false;
+            const { reference } = await openPaystackCard({
+              email: userEmail,
+              amountInPesewas: amountInMinorUnits,
+              currency,
+            });
+            await confirmPaymentIntent({
+              variables: {
+                input: {
+                  payment_intent_id: paymentIntentId,
+                  payment_method_id: reference,
+                  provider: "PAYSTACK",
+                },
+              },
+            });
+            return true;
+          }
+          const stripePaymentMethodId = await resolvePrimaryStripeCardPaymentMethodId();
+          if (!stripePaymentMethodId) return false;
+          await confirmPaymentIntent({
+            variables: {
+              input: {
+                payment_intent_id: paymentIntentId,
+                payment_method_id: stripePaymentMethodId,
+                provider: "STRIPE",
+              },
+            },
+          });
+          return true;
+        };
+
         if (ctx.kind === "service") {
           const amountInPesewas = toMinorUnits(ctx.item.price * ctx.item.quantity);
+          // Settlement currency comes from the listing; the platform settles in
+          // it (no FX). Mobile money (Paystack/Hubtel) is GHS-only.
+          const orderCurrency = (ctx.item.currency ?? "GHS").toUpperCase();
+          if (method === "mobile" && !isMobileMoneySupported(orderCurrency)) {
+            return { success: false };
+          }
           const input: CreateServiceOrderInput = {
             vendor_id: ctx.item.seller || "",
             service_id: ctx.item.id,
@@ -130,7 +166,7 @@ export function useMarketplacePayment() {
             const { reference } = await openPaystackMobileMoney({
               email: userEmail,
               amountInPesewas,
-              currency: "GHS",
+              currency: orderCurrency,
             });
 
             await confirmPaymentIntent({
@@ -144,16 +180,9 @@ export function useMarketplacePayment() {
             });
           }
 
-          if (method === "credit" && stripePaymentMethodId) {
-            await confirmPaymentIntent({
-              variables: {
-                input: {
-                  payment_intent_id: paymentIntentId,
-                  payment_method_id: stripePaymentMethodId,
-                  provider: "STRIPE",
-                },
-              },
-            });
+          if (method === "credit") {
+            const ok = await payByCard(paymentIntentId, amountInPesewas, orderCurrency);
+            if (!ok) return { success: false, reference: order?.id };
           }
 
           const result: PaymentResult = {
@@ -162,6 +191,23 @@ export function useMarketplacePayment() {
           };
           setLastResult(result);
           return result;
+        }
+
+        // Derive the order settlement currency from the cart items. The backend
+        // rejects mixed-currency carts; assert uniformity here and fall back to
+        // GHS when no item carries a currency.
+        const cartCurrencies = Array.from(
+          new Set(
+            ctx.cart.map((item) => (item.currency ?? "GHS").toUpperCase())
+          )
+        );
+        if (cartCurrencies.length > 1) {
+          // Mixed-currency cart — the platform settles single-currency only.
+          return { success: false };
+        }
+        const orderCurrency = cartCurrencies[0] ?? "GHS";
+        if (method === "mobile" && !isMobileMoneySupported(orderCurrency)) {
+          return { success: false };
         }
 
         const groupedByVendor = ctx.cart.reduce<Record<string, typeof ctx.cart>>(
@@ -190,7 +236,7 @@ export function useMarketplacePayment() {
               // item.price is a major-unit decimal in the UI; the marketplace
               // API expects integer minor units. Convert major→minor once here.
               price: toMinorUnits(item.price),
-              currency: "GHS",
+              currency: orderCurrency,
             })),
             shipping_address: shippingAddress,
             notes: `payment_method:${method}`,
@@ -208,7 +254,7 @@ export function useMarketplacePayment() {
             const { reference } = await openPaystackMobileMoney({
               email: userEmail,
               amountInPesewas,
-              currency: "GHS",
+              currency: orderCurrency,
             });
 
             await confirmPaymentIntent({
@@ -222,16 +268,9 @@ export function useMarketplacePayment() {
             });
           }
 
-          if (method === "credit" && stripePaymentMethodId) {
-            await confirmPaymentIntent({
-              variables: {
-                input: {
-                  payment_intent_id: paymentIntentId,
-                  payment_method_id: stripePaymentMethodId,
-                  provider: "STRIPE",
-                },
-              },
-            });
+          if (method === "credit") {
+            const ok = await payByCard(paymentIntentId, amountInPesewas, orderCurrency);
+            if (!ok) return { success: false };
           }
 
           if (!firstOrderId) {

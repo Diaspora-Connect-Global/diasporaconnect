@@ -35,6 +35,7 @@ function toUiProductFromProductApi(item: {
   vendor_id: string;
   title: string;
   price: number;
+  currency?: string;
   images?: string[];
   tags?: string[];
 }): Product {
@@ -44,6 +45,9 @@ function toUiProductFromProductApi(item: {
     // API sends integer minor units; convert minor→major once here so the rest
     // of the marketplace UI works in major units.
     price: toMajorUnits(item.price),
+    // Per-listing settlement currency (the platform settles in this currency,
+    // no FX). Default GHS when the API omits it.
+    currency: item.currency ?? "GHS",
     rating: 5,
     reviews: 0,
     image: item.images?.[0] ?? "🛍️",
@@ -59,6 +63,7 @@ function toUiProductFromServiceApi(item: {
   vendor_id: string;
   title: string;
   base_price: number;
+  currency?: string;
   tags?: string[];
 }): Product {
   return {
@@ -66,6 +71,7 @@ function toUiProductFromServiceApi(item: {
     name: item.title,
     // API sends integer minor units; convert minor→major once here.
     price: toMajorUnits(item.base_price),
+    currency: item.currency ?? "GHS",
     rating: 5,
     reviews: 0,
     image: "🧑‍💼",

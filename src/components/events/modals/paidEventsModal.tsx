@@ -11,6 +11,7 @@ import {
 } from "@/services/gql/events";
 import { useLazyQuery } from "@apollo/client/react";
 import { Tag, X } from "lucide-react";
+import { isMobileMoneySupported } from "@/types/money";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useImperativeHandle, useState, forwardRef } from "react";
 import { toast } from "sonner";
@@ -241,6 +242,7 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const serviceFee = selectedEvent?.isPaid ? discountedSubtotal * 0.1 : 0;
 
     const currencyCode = selectedEvent?.currency ?? 'GHS';
+    const mobileMoneyAvailable = isMobileMoneySupported(currencyCode);
     const formatAmount = (value: number) => {
         try {
             return new Intl.NumberFormat(locale, {
@@ -285,6 +287,8 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                         <Step2
                             openMethod={openMethod}
                             onOpenMethodChange={setOpenMethod}
+                            mobileMoneyAvailable={mobileMoneyAvailable}
+                            currency={currencyCode}
                         />
                     )}
                     {currentStep === 3 && (

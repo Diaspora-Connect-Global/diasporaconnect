@@ -19,6 +19,53 @@
 export const DEFAULT_CURRENCY = 'GHS';
 
 /**
+ * Platform-supported SETTLEMENT currencies (the listing/charge currency the
+ * platform actually settles in — no FX). Shared across every settlement-currency
+ * picker (events create, product create, service create, community/association
+ * access settings). Labels are plain strings, mirroring the non-i18n events
+ * `create/page.tsx` pattern intentionally (no new i18n keys).
+ */
+export const CURRENCIES = [
+  { value: 'GHS', label: 'GHS — Ghana Cedi' },
+  { value: 'USD', label: 'USD — US Dollar' },
+  { value: 'GBP', label: 'GBP — British Pound' },
+  { value: 'EUR', label: 'EUR — Euro' },
+  { value: 'NGN', label: 'NGN — Nigerian Naira' },
+  { value: 'KES', label: 'KES — Kenyan Shilling' },
+] as const;
+
+/** The set of supported settlement currency codes, derived from `CURRENCIES`. */
+export const SUPPORTED_SETTLEMENT_CURRENCIES = CURRENCIES.map((c) => c.value);
+
+/**
+ * Mobile money (Paystack/Hubtel) is GHS-only. Any non-GHS listing must NOT
+ * offer the mobile-money rail — the backend now REJECTS a non-GHS charge on a
+ * GHS-only rail, so the UI must hide/disable it. Card/Stripe handles every
+ * supported currency.
+ */
+export function isMobileMoneySupported(currency?: string | null): boolean {
+  return (currency ?? DEFAULT_CURRENCY).toUpperCase() === 'GHS';
+}
+
+/**
+ * Which provider settles CARD payments for a given currency. Must mirror the
+ * payment-service `PROVIDER_CURRENCIES_*` guard (which rejects mismatches):
+ *   - USD / EUR / GBP → Stripe (and PayPal)
+ *   - GHS            → Stripe (the existing GHS-card flow)
+ *   - NGN / KES      → Paystack (Stripe cannot settle these; Paystack can)
+ * This is the routing that makes the platform work for currencies beyond USD/GHS.
+ */
+export function cardProviderForCurrency(currency?: string | null): 'STRIPE' | 'PAYSTACK' {
+  const code = (currency ?? DEFAULT_CURRENCY).toUpperCase();
+  return code === 'NGN' || code === 'KES' ? 'PAYSTACK' : 'STRIPE';
+}
+
+/** True when the card rail for this currency is the Paystack inline popup (vs Stripe saved-card). */
+export function usesPaystackCard(currency?: string | null): boolean {
+  return cardProviderForCurrency(currency) === 'PAYSTACK';
+}
+
+/**
  * Convert a major-unit value (what a user types, e.g. 19.99) into integer minor
  * units (e.g. 1999). Use this EXACTLY ONCE, at the UI input boundary, before
  * placing the value into a GraphQL variable.

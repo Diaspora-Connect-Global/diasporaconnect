@@ -19,6 +19,7 @@ import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { Link } from '@/i18n/navigation';
 import { getStripe, isStripeConfigured } from '@/lib/stripe';
 import { openPaystackMobileMoney } from '@/lib/paystack';
+import { isMobileMoneySupported } from '@/types/money';
 import { CONFIRM_PAYMENT_INTENT } from '@/services/gql/payments';
 import type {
   ConfirmPaymentIntentResponse,
@@ -466,6 +467,17 @@ function PayStep({
 
   const price = entity.access.price;
 
+  // Mobile money (Paystack) settles GHS only. Hide it for non-GHS-priced
+  // entities; the backend rejects a non-GHS charge on the mobile-money rail.
+  const listingCurrency = (price?.currency ?? 'GHS').toUpperCase();
+  const mobileMoneyAvailable = isMobileMoneySupported(listingCurrency);
+
+  useEffect(() => {
+    if (!mobileMoneyAvailable && paymentMethod === 'mobile') {
+      onPaymentMethodChange('card');
+    }
+  }, [mobileMoneyAvailable, paymentMethod, onPaymentMethodChange]);
+
   // Inline Stripe submit. Cards are NOT saved — the PaymentIntent has no
   // setup_future_usage on it (BE default), so this is a one-shot charge.
   // `redirect: 'if_required'` keeps the flow inside the modal for 3DS-less
@@ -593,32 +605,34 @@ function PayStep({
           )}
         </button>
 
-        <button
-          type="button"
-          onClick={() => onPaymentMethodChange('mobile')}
-          className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
-            paymentMethod === 'mobile'
-              ? 'border-border-brand bg-surface-brand/5'
-              : 'border-border-subtle bg-surface-subtle hover:bg-surface-hover'
-          }`}
-        >
-          <div
-            className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
+        {mobileMoneyAvailable && (
+          <button
+            type="button"
+            onClick={() => onPaymentMethodChange('mobile')}
+            className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${
               paymentMethod === 'mobile'
-                ? 'bg-surface-brand text-text-white'
-                : 'bg-surface-default text-text-primary'
+                ? 'border-border-brand bg-surface-brand/5'
+                : 'border-border-subtle bg-surface-subtle hover:bg-surface-hover'
             }`}
           >
-            <Smartphone className="w-5 h-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-text-primary text-sm">{t('step2.methodMobile')}</p>
-            <p className="text-xs text-text-secondary mt-0.5">{t('step2.mobileSubtitle')}</p>
-          </div>
-          {paymentMethod === 'mobile' && (
-            <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />
-          )}
-        </button>
+            <div
+              className={`flex items-center justify-center w-10 h-10 rounded-full flex-shrink-0 ${
+                paymentMethod === 'mobile'
+                  ? 'bg-surface-brand text-text-white'
+                  : 'bg-surface-default text-text-primary'
+              }`}
+            >
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-text-primary text-sm">{t('step2.methodMobile')}</p>
+              <p className="text-xs text-text-secondary mt-0.5">{t('step2.mobileSubtitle')}</p>
+            </div>
+            {paymentMethod === 'mobile' && (
+              <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />
+            )}
+          </button>
+        )}
       </div>
 
       {paymentMethod === 'card' ? (

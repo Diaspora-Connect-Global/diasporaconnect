@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Share2, Star } from "luc
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { formatAmountWithCurrency } from "@/lib/displayCurrency";
+import { useConvertedDisplayPrice } from "@/hooks/useConvertedDisplayPrice";
 import type { CartItem, Product } from "./types";
 import { UserBadge } from "@/components/custom/userBadge";
 import { resolveUserTier } from "@/lib/userTier";
@@ -25,11 +27,12 @@ export function ProductDetail({
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  // The platform SETTLES in the listing currency (no FX).
+  const listingCurrency = (product.currency ?? "GHS").toUpperCase();
   const formatAmount = (value: number) =>
-    new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+    formatAmountWithCurrency(value, listingCurrency, locale);
+  // Non-blocking display conversion; the charge stays in the listing currency.
+  const convertedPrice = useConvertedDisplayPrice(product.price, listingCurrency);
   const galleryImages =
     product.images && product.images.length > 0
       ? product.images
@@ -206,9 +209,16 @@ export function ProductDetail({
             </div>
 
             {/* Price */}
-            <p className="text-2xl md:text-3xl font-bold text-text-primary mb-6">
-              GH₵{formatAmount(product.price)}
-            </p>
+            <div className="mb-6">
+              <p className="text-2xl md:text-3xl font-bold text-text-primary">
+                {formatAmount(product.price)}
+              </p>
+              {convertedPrice && (
+                <p className="text-sm text-text-secondary mt-1">
+                  ≈ {convertedPrice} · charged in {listingCurrency}
+                </p>
+              )}
+            </div>
 
             {/* Size */}
             <div className="mb-6">

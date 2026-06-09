@@ -14,6 +14,7 @@ import { uploadFileToVendorSignedUrl } from "@/lib/vendor-upload";
 import type { GetMyVendorResponse, RequestVendorUploadUrlResponse } from "@/services/gql/types/vendor";
 import { handleVendorError } from "@/lib/vendor-error-mapper";
 import VendorKycRequiredModal from "@/components/vendors/VendorKycRequiredModal";
+import { CURRENCIES } from "@/types/money";
 
 type FormDataType = {
   name: string;
@@ -21,6 +22,7 @@ type FormDataType = {
   quantity: string;
   category: string;
   price: string;
+  currency: string;
   discount: string;
   applyDiscount: boolean;
 };
@@ -43,6 +45,7 @@ export default function AddProductForm() {
     quantity: "",
     category: "Men fashion",
     price: "",
+    currency: "GHS",
     discount: "",
     applyDiscount: false,
   });
@@ -161,7 +164,7 @@ export default function AddProductForm() {
         title: formData.name.trim(),
         description: formData.description.trim(),
         price: Math.round(Number(formData.price) * 100),
-        currency: "GHS",
+        currency: formData.currency,
         inventoryCount: Number(formData.quantity),
         productType: "PHYSICAL",
         images: imageUrls,
@@ -179,6 +182,7 @@ export default function AddProductForm() {
       quantity: "",
       category: "Men fashion",
       price: "",
+      currency: "GHS",
       discount: "",
       applyDiscount: false,
     });
@@ -350,8 +354,8 @@ export default function AddProductForm() {
           </select>
         </div>
 
-        {/* Price / Discount */}
-        <div className="grid grid-cols-2 gap-6">
+        {/* Price / Currency / Discount */}
+        <div className="grid grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium mb-2">{t('price')}</label>
             <input
@@ -360,6 +364,21 @@ export default function AddProductForm() {
               onChange={(e) => handleInputChange("price", e.target.value)}
               className="w-full px-4 py-2 border border-border-subtle rounded-lg"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Currency</label>
+            <select
+              value={formData.currency}
+              onChange={(e) => handleInputChange("currency", e.target.value)}
+              className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default"
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

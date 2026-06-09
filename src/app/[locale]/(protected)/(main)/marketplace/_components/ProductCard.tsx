@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType3 } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
+import { useConvertedDisplayPrice } from "@/hooks/useConvertedDisplayPrice";
 import type { CartItem, Product } from "./types";
 import { UserBadge } from "@/components/custom/userBadge";
 import { resolveUserTier } from "@/lib/userTier";
@@ -21,6 +22,8 @@ export function ProductCard({
   const locale = useLocale();
   const formatAmount = (value: number) =>
     formatAmountWithCurrency(value, product.currency || "GHS", locale);
+  // Non-blocking display conversion; charge always stays in the listing currency.
+  const convertedPrice = useConvertedDisplayPrice(product.price, product.currency);
 
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,8 +84,13 @@ export function ProductCard({
 
       {/* Price (left) + add button (right) */}
       <div className="flex items-center justify-between mt-2">
-        <span className="text-base font-bold text-text-primary">
-          {formatAmount(product.price)}
+        <span className="flex flex-col">
+          <span className="text-base font-bold text-text-primary">
+            {formatAmount(product.price)}
+          </span>
+          {convertedPrice && (
+            <span className="text-xs text-text-secondary">≈ {convertedPrice}</span>
+          )}
         </span>
         <button
           type="button"

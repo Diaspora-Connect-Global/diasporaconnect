@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Search, Star, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import type { CartItem, Product } from "./types";
 
 export function ServiceDetail({
@@ -19,11 +20,10 @@ export function ServiceDetail({
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  // The platform SETTLES in the listing currency (no FX).
+  const listingCurrency = (service.currency ?? "GHS").toUpperCase();
   const formatAmount = (value: number) =>
-    new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+    formatAmountWithCurrency(value, listingCurrency, locale);
   const DEFAULT_THUMBNAIL_COUNT = 4;
   const galleryImages =
     service.images && service.images.length > 0
@@ -274,7 +274,7 @@ export function ServiceDetail({
                 >
                   <div className="mb-2">
                     <p className="font-semibold capitalize text-text-primary">{key}</p>
-                    <p className="font-bold text-text-primary mt-0.5">GH₵{formatAmount(pkg.price)}</p>
+                    <p className="font-bold text-text-primary mt-0.5">{formatAmount(pkg.price)}</p>
                   </div>
                   <ul className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-text-secondary">
                     {pkg.features.map((feature, idx) => (
@@ -347,7 +347,7 @@ export function ServiceDetail({
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mb-1">
                           <span className="font-semibold text-text-primary break-words">{extra.name}</span>
-                          <span className="font-bold text-text-primary flex-shrink-0">GH₵{formatAmount(extra.price)}</span>
+                          <span className="font-bold text-text-primary flex-shrink-0">{formatAmount(extra.price)}</span>
                         </div>
                         <p className="text-sm text-text-secondary break-words">{extra.description}</p>
                       </div>

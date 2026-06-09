@@ -15,6 +15,7 @@ import {
 import type { GetMyVendorResponse } from '@/services/gql/types/vendor';
 import { handleVendorError } from '@/lib/vendor-error-mapper';
 import VendorKycRequiredModal from '@/components/vendors/VendorKycRequiredModal';
+import { CURRENCIES } from '@/types/money';
 
 type Step = 1 | 2;
 type PricingMode = 'single' | 'multiple';
@@ -37,6 +38,7 @@ const AddServiceFlow = () => {
 
   // Step 2 - Single pricing state
   const [singlePrice, setSinglePrice] = useState('0.00');
+  const [currency, setCurrency] = useState('GHS');
   const [billingType, setBillingType] = useState('');
   const [addExtras, setAddExtras] = useState(false);
 
@@ -110,7 +112,7 @@ const AddServiceFlow = () => {
         title: serviceTitle.trim(),
         description: description.trim(),
         basePrice: Math.round(basePrice * 100),
-        currency: 'GHS',
+        currency,
         estimatedDuration: parseEstimatedDuration(),
         benefits:
           pricingMode === 'multiple'
@@ -303,6 +305,25 @@ const AddServiceFlow = () => {
               <span className="text-sm text-text-secondary">{tForm('step', { current: 2, total: 2 })}</span>
             </div>
 
+            {/* Settlement currency (applies to all packages) */}
+            <div className="mb-6 max-w-xs">
+              <label className="block text-sm font-medium text-text-primary mb-2">Currency</label>
+              <div className="relative">
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default appearance-none cursor-pointer"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-tertiary pointer-events-none" aria-hidden="true" />
+              </div>
+            </div>
+
             {/* Single Pricing Option */}
             <div
               onClick={() => setPricingMode('single')}
@@ -327,8 +348,7 @@ const AddServiceFlow = () => {
                       <label className="block text-sm font-medium text-text-primary mb-2">{tForm('price')}</label>
                       <div className="flex items-center gap-2">
                         <span className="px-3 py-2 bg-surface-subtle border border-border-subtle rounded-lg text-sm flex items-center gap-1">
-                          <span className="text-lg">🇬🇭</span>
-                          <span className="font-medium">GH₵</span>
+                          <span className="font-medium">{currency}</span>
                         </span>
                         <input
                           type="text"
@@ -404,8 +424,7 @@ const AddServiceFlow = () => {
                           <label className="block text-xs text-text-secondary mb-1">{tForm('price')}</label>
                           <div className="flex items-center gap-2">
                             <span className="px-2 py-1 bg-surface-subtle border border-border-subtle rounded text-xs flex items-center gap-1">
-                              <span>🇬🇭</span>
-                              <span className="font-medium">GH₵</span>
+                              <span className="font-medium">{currency}</span>
                             </span>
                             <input
                               type="text"
@@ -506,6 +525,7 @@ const AddServiceFlow = () => {
                       setServiceCategory('');
                       setDescription('');
                       setSinglePrice('0.00');
+                      setCurrency('GHS');
                       setBillingType('');
                     } catch (error) {
                     handleVendorError({

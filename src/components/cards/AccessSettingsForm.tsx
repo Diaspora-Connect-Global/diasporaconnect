@@ -29,8 +29,7 @@ import type {
   PaymentType,
   Visibility,
 } from '@/types/membership';
-
-const SUPPORTED_CURRENCIES = ['GHS', 'USD', 'EUR', 'GBP', 'NGN'] as const;
+import { CURRENCIES } from '@/types/money';
 
 export interface AccessSettingsFormProps {
   kind: MembershipKind;
@@ -274,9 +273,9 @@ export function AccessSettingsForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {SUPPORTED_CURRENCIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
+                {CURRENCIES.map((c) => (
+                  <SelectItem key={c.value} value={c.value}>
+                    {c.label}
                   </SelectItem>
                 ))}
               </SelectContent>
