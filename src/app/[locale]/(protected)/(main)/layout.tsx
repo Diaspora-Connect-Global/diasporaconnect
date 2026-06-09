@@ -8,7 +8,9 @@ import { useAuthStore } from "@/store/useAuthStore";
 import MessageWebSocketProvider from "@/components/provider/MessageWebSocketProvider";
 import NotificationWebSocketProvider from "@/components/provider/NotificationWebSocketProvider";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useProfileGuard } from "@/hooks/useProfileGuard";
 import { OfflineBanner } from "@/components/feedback";
+import { useTranslations } from "next-intl";
 
 function PushNotificationRegistrar() {
   usePushNotifications();
@@ -25,7 +27,11 @@ export default function MainLayout({
   const hasRedirectedRef = useRef(false);
   const [hydrated, setHydrated] = useState(false);
 
+  const t = useTranslations("common");
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+
+  // Only check for a profile once auth is confirmed and the store is hydrated.
+  const guardStatus = useProfileGuard(hydrated && isAuthenticated);
 
   // Wait for Zustand to rehydrate from localStorage before checking auth
   useEffect(() => {
@@ -52,6 +58,12 @@ export default function MainLayout({
   // Show loading until hydrated and authenticated
   if (!hydrated || !isAuthenticated) {
     return <LoadingScreen />;
+  }
+
+  // Block the app while we verify a profile exists. If it's missing, the guard
+  // signs the user out and redirects to /signin — keep showing loading until then.
+  if (guardStatus !== "ok") {
+    return <LoadingScreen text={t("checkingProfile")} />;
   }
 
   return (

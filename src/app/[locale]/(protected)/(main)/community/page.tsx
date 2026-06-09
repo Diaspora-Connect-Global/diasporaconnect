@@ -292,6 +292,10 @@ export default function Community() {
                         paymentType: c.paymentType ?? null,
                         priceAmount: c.priceAmount ?? null,
                         priceCurrency: c.priceCurrency ?? null,
+                        // memberCount is stitched from SEARCH too: the rec-backed
+                        // DISCOVER list reports an unreliable count (often 0), so we
+                        // fall back to the SEARCH count when DISCOVER's is missing/0.
+                        memberCount: c.memberCount ?? null,
                     },
                 ]),
             );
@@ -300,12 +304,15 @@ export default function Community() {
                     paymentType: null,
                     priceAmount: null,
                     priceCurrency: null,
+                    memberCount: null,
                 };
                 return {
                     id: c.id,
                     name: c.name,
                     description: c.description,
-                    memberCount: c.memberCount,
+                    // Prefer the first non-zero count: `||` treats 0/null as "missing"
+                    // so a real positive SEARCH count wins when DISCOVER reports 0.
+                    memberCount: c.memberCount || pay.memberCount || 0,
                     avatarUrl: c.avatarUrl,
                     visibility: (c.visibility as CommunityVisibility) ?? null,
                     paymentType: pay.paymentType,

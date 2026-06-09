@@ -159,6 +159,12 @@ export default function ProfilePage() {
         return <ProfileLoadingSkeleton />;
     }
 
+    // Missing profile (getProfile.success === false). The layout guard owns the
+    // sign-out + redirect; here we just avoid rendering a broken ProfileHeader.
+    if (data?.getProfile && !profile) {
+        return <ProfileLoadingSkeleton />;
+    }
+
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-app-inner mx-2 gap-4">

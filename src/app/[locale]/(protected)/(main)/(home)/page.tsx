@@ -223,7 +223,13 @@ export default function Home() {
         apolloClient.query<GetCommunityQueryData>({
           query: GET_COMMUNITY,
           variables: { id: it.itemId },
-          fetchPolicy: 'cache-first',
+          // network-only (not cache-first): the Apollo client is a module-level
+          // singleton whose normalized cache survives SPA navigation. cache-first
+          // served a stale `Community:<id>` entity (memberCount 0) on navigation
+          // while a full refresh — which empties the cache — fetched the correct
+          // count. Revalidate on every hydration so counts are always fresh.
+          // (one-shot client.query() rejects 'cache-and-network', so network-only.)
+          fetchPolicy: 'network-only',
           errorPolicy: 'ignore',
         })
       )
@@ -265,7 +271,9 @@ export default function Home() {
         apolloClient.query<GetAssociationQueryData>({
           query: GET_ASSOCIATION,
           variables: { id: it.itemId },
-          fetchPolicy: 'cache-first',
+          // network-only (not cache-first): see the community rail above — a warm
+          // singleton cache served a stale memberCount 0 on SPA navigation.
+          fetchPolicy: 'network-only',
           errorPolicy: 'ignore',
         })
       )
