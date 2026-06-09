@@ -161,7 +161,7 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
                     <td className="px-4 py-2 font-mono text-xs text-text-secondary truncate max-w-[120px]">{r.userId}</td>
                     <td className="px-4 py-2">{r.quantity}</td>
                     <td className="px-4 py-2">{statusBadge(r.status)}</td>
-                    <td className="px-4 py-2 text-text-secondary">{r.totalAmount ? `${r.currency} ${r.totalAmount}` : '—'}</td>
+                    <td className="px-4 py-2 text-text-secondary">{r.totalAmount ? `${r.currency} ${(Number(r.totalAmount) / 100).toFixed(2)}` : '—'}</td>
                     <td className="px-4 py-2 text-text-secondary text-xs">
                       {r.registeredAt ? new Date(r.registeredAt).toLocaleDateString() : '—'}
                     </td>

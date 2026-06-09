@@ -164,7 +164,8 @@ export default function EventDetailPage() {
         const { data } = await apolloClient.query<ConvertCurrencyData>({
           query: CONVERT_CURRENCY,
           variables: {
-            amount: cents / 100,
+            // convertCurrency now speaks integer minor units in AND out.
+            amount: cents,
             from_currency: fromCurrency,
             to_currency: preferredDisplayCurrency,
           },
@@ -179,7 +180,7 @@ export default function EventDetailPage() {
 
         if (!cancelled) {
           setConvertedPriceLabel(
-            `${formatAmountWithCurrency(result.converted_amount, preferredDisplayCurrency, locale)}/ticket`
+            `${formatAmountWithCurrency(result.converted_amount / 100, preferredDisplayCurrency, locale)}/ticket`
           );
         }
       } catch {

@@ -19,6 +19,7 @@ import type {
   SearchMarketplaceServicesResponse,
   SearchProductsResponse,
 } from "@/services/gql/types/marketplace";
+import { toMajorUnits } from "@/types/money";
 import type { CartItem, MarketplaceTab, MarketplaceView, Product } from "./types";
 import { MarketplaceHeader } from "./MarketplaceHeader";
 import { ProductCard } from "./ProductCard";
@@ -40,7 +41,9 @@ function toUiProductFromProductApi(item: {
   return {
     id: item.id,
     name: item.title,
-    price: item.price,
+    // API sends integer minor units; convert minor→major once here so the rest
+    // of the marketplace UI works in major units.
+    price: toMajorUnits(item.price),
     rating: 5,
     reviews: 0,
     image: item.images?.[0] ?? "🛍️",
@@ -61,7 +64,8 @@ function toUiProductFromServiceApi(item: {
   return {
     id: item.id,
     name: item.title,
-    price: item.base_price,
+    // API sends integer minor units; convert minor→major once here.
+    price: toMajorUnits(item.base_price),
     rating: 5,
     reviews: 0,
     image: "🧑‍💼",

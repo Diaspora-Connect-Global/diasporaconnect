@@ -21,6 +21,7 @@ import type {
   CreateServiceOrderInput,
 } from "@/services/gql/types/marketplace";
 import { handleMarketplaceError } from "@/lib/marketplace-error-mapper";
+import { toMinorUnits } from "@/types/money";
 import { openPaystackMobileMoney } from "@/lib/paystack";
 import { useUserStore } from "@/store/useUserStore";
 import type { PaymentContext, PaymentResult, PaymentMethod } from "../types";
@@ -108,7 +109,7 @@ export function useMarketplacePayment() {
         }
 
         if (ctx.kind === "service") {
-          const amountInPesewas = Math.round(ctx.item.price * ctx.item.quantity * 100);
+          const amountInPesewas = toMinorUnits(ctx.item.price * ctx.item.quantity);
           const input: CreateServiceOrderInput = {
             vendor_id: ctx.item.seller || "",
             service_id: ctx.item.id,
@@ -178,15 +179,17 @@ export function useMarketplacePayment() {
         let firstOrderId: string | undefined;
 
         for (const [vendorId, items] of Object.entries(groupedByVendor)) {
-          const amountInPesewas = Math.round(
-            items.reduce((sum, item) => sum + item.price * item.quantity, 0) * 100
+          const amountInPesewas = toMinorUnits(
+            items.reduce((sum, item) => sum + item.price * item.quantity, 0)
           );
           const input: CreateProductOrderInput = {
             vendor_id: vendorId,
             items: items.map((item) => ({
               product_id: item.id,
               quantity: item.quantity,
-              price: item.price,
+              // item.price is a major-unit decimal in the UI; the marketplace
+              // API expects integer minor units. Convert major→minor once here.
+              price: toMinorUnits(item.price),
               currency: "GHS",
             })),
             shipping_address: shippingAddress,
