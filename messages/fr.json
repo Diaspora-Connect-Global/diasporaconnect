@@ -1538,6 +1538,10 @@
             "removeMemberConfirmation": "Êtes-vous sûr de vouloir retirer {name} de ce groupe ?",
             "remove": "Retirer",
             "close": "Fermer"
+        },
+        "dateLabels": {
+            "today": "Aujourd’hui",
+            "yesterday": "Hier"
         }
     },
     "dialog": {

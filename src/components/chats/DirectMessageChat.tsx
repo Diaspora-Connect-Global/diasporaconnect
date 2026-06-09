@@ -14,7 +14,7 @@ import { SendingFilesBubble } from "./SendingFilesBubble";
 import { MessageStatusIcon } from "./MessageStatusIcon";
 import { TypingDots } from "./TypingDots";
 import { useChatStore, ApiMessage } from "@/store/ChatStore";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { ButtonType3 } from "../custom/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
@@ -38,20 +38,9 @@ import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
 import { resolveCountryName, getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
 import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime";
+import { DateSeparator } from "./DateSeparator";
 import { UserBadge } from "@/components/custom/userBadge";
 import { resolveUserTier } from "@/lib/userTier";
-
-// ---- Date Separator ----
-
-function DateSeparator({ label }: { label: string }) {
-    return (
-        <div className="flex items-center justify-center my-3">
-            <span className="text-xs text-text-secondary bg-surface-hover px-3 py-1 rounded-full">
-                {label}
-            </span>
-        </div>
-    );
-}
 
 // ---- Main Component ----
 
@@ -59,6 +48,8 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const router = useRouter();
     const t = useTranslations('chat.direct');
     const tCommon = useTranslations('common');
+    const tDates = useTranslations('chat.dateLabels');
+    const locale = useLocale();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatAreaRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -556,7 +547,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                             if (dateKey !== lastDateKey) {
                                 lastDateKey = dateKey;
                                 nodes.push(
-                                    <DateSeparator key={`sep-${dateKey}`} label={getDateLabel(message.createdAt, userTimeZone)} />
+                                    <DateSeparator key={`sep-${dateKey}`} label={getDateLabel(message.createdAt, userTimeZone, { today: tDates('today'), yesterday: tDates('yesterday') }, locale)} />
                                 );
                             }
 

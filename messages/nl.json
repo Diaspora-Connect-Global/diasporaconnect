@@ -1188,6 +1188,10 @@
             "removeMemberConfirmation": "Weet u zeker dat u {name} uit deze groep wilt verwijderen?",
             "remove": "Verwijderen",
             "close": "Sluiten"
+        },
+        "dateLabels": {
+            "today": "Vandaag",
+            "yesterday": "Gisteren"
         }
     },
     "dialog": {

@@ -1538,6 +1538,10 @@
             "changeGroupPhoto": "Gruppenfoto ändern",
             "useThisPhoto": "Dieses Foto verwenden",
             "groupPhotoUpdated": "Gruppenfoto aktualisiert"
+        },
+        "dateLabels": {
+            "today": "Heute",
+            "yesterday": "Gestern"
         }
     },
     "dialog": {

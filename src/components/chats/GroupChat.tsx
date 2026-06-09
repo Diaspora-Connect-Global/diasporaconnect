@@ -10,7 +10,9 @@ import { ChatInfo } from "@/app/[locale]/(protected)/(main)/chat/page";
 import { useChatStore } from "@/store/ChatStore";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "../custom/button";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { getDateLabel, getMessageDateKey } from "@/lib/chatTime";
+import { DateSeparator } from "./DateSeparator";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
     GET_GROUP,
@@ -74,6 +76,8 @@ type ManageableGroupMember = {
 export default function GroupChat() {
     const t = useTranslations('chat.group');
     const tCommon = useTranslations('common');
+    const tDates = useTranslations('chat.dateLabels');
+    const locale = useLocale();
     const router = useRouter();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -735,9 +739,19 @@ export default function GroupChat() {
                                 <p>{t('noMessages')}</p>
                             </div>
                         ) : (
-                            mainThreadMessages.map((message) => {
+                            (() => {
+                                const nodes: React.ReactNode[] = [];
+                                let lastDateKey = '';
+                                mainThreadMessages.forEach((message) => {
                                 const isMe = message.senderId === currentUserId;
-                                return (
+                                const dateKey = getMessageDateKey(message.createdAt, userTimeZone);
+                                if (dateKey !== lastDateKey) {
+                                    lastDateKey = dateKey;
+                                    nodes.push(
+                                        <DateSeparator key={`sep-${dateKey}`} label={getDateLabel(message.createdAt, userTimeZone, { today: tDates('today'), yesterday: tDates('yesterday') }, locale)} />
+                                    );
+                                }
+                                nodes.push(
                                     <div
                                         key={message.id}
                                         className={`flex min-w-0 ${isMe ? 'justify-end' : 'justify-start'}`}
@@ -849,7 +863,9 @@ export default function GroupChat() {
                                         </div>
                                     </div>
                                 );
-                            })
+                                });
+                                return nodes;
+                            })()
                         )}
                         <div ref={messagesEndRef} />
                         {typingUserIds.size > 0 && (

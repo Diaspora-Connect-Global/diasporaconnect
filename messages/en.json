@@ -1188,6 +1188,10 @@
             "removeMemberConfirmation": "Are you sure you want to remove {name} from this group?",
             "remove": "Remove",
             "close": "Close"
+        },
+        "dateLabels": {
+            "today": "Today",
+            "yesterday": "Yesterday"
         }
     },
     "dialog": {
