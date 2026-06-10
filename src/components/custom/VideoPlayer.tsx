@@ -1,13 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Loader2, RefreshCw, WifiOff, Rewind, FastForward } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Loader2, RefreshCw, WifiOff, Rewind, FastForward, Gauge, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useVideoStore } from '@/store/useVideoStore';
 
 const MAX_AUTO_RETRIES = 3;
 const AUTO_RETRY_DELAYS = [2000, 5000, 10000] as const;
 const SKIP_SECONDS = 10;
+/** Top→bottom order matches the native iOS playback-speed menu. */
+const PLAYBACK_RATES = [2, 1.5, 1.25, 1, 0.5] as const;
 
 /** Seconds → m:ss (or h:mm:ss). Returns 0:00 for NaN/Infinity. */
 function formatTime(seconds: number): string {
@@ -65,6 +67,9 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
   const [showControls, setShowControls] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [autoRetryCount, setAutoRetryCount] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const menuOpenRef = useRef(false);
   const autoRetryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [watermarkKey, setWatermarkKey] = useState<number | null>(null);
 
@@ -142,10 +147,17 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     if (v) v.muted = globalMuted;
   }, [globalMuted]);
 
+  // Apply playback rate to the element. Keyed on retryCount too because a retry
+  // recreates the <video> (its key changes), resetting the rate to 1.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v) v.playbackRate = playbackRate;
+  }, [playbackRate, retryCount]);
+
   const scheduleHide = useCallback(() => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {
-      if (!isScrubbingRef.current) setShowControls(false);
+      if (!isScrubbingRef.current && !menuOpenRef.current) setShowControls(false);
     }, 3000);
   }, []);
 
@@ -237,6 +249,8 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
 
   const togglePlay = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    setShowSpeedMenu(false);
+    menuOpenRef.current = false;
     if (hasError) return;
     const v = videoRef.current;
     if (!v) return;
@@ -247,6 +261,24 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
     e.stopPropagation();
     setGlobalMuted(!globalMuted);
   }, [globalMuted, setGlobalMuted]);
+
+  const toggleSpeedMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowSpeedMenu((open) => {
+      const next = !open;
+      menuOpenRef.current = next;
+      return next;
+    });
+    revealControls();
+  }, [revealControls]);
+
+  const selectSpeed = useCallback((rate: number) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPlaybackRate(rate);
+    setShowSpeedMenu(false);
+    menuOpenRef.current = false;
+    revealControls();
+  }, [revealControls]);
 
   const canSeek = Number.isFinite(duration) && duration > 0;
 
@@ -366,12 +398,37 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
         </div>
       )}
 
-      {/* Centre play button when paused and not buffering */}
-      {!isPlaying && !isBuffering && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm">
-            <Play className="w-7 h-7 text-white fill-white translate-x-0.5" />
-          </div>
+      {/* Centre controls: −10s / play-pause / +10s (iOS-style) */}
+      {controlsVisible && !isBuffering && !hasError && (
+        <div className="absolute inset-0 flex items-center justify-center gap-8 pointer-events-none">
+          <button
+            onClick={skip(-SKIP_SECONDS)}
+            disabled={!canSeek}
+            aria-label={`Rewind ${SKIP_SECONDS} seconds`}
+            className="pointer-events-auto w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-transform active:scale-90 disabled:opacity-40"
+          >
+            <Rewind className="w-6 h-6" />
+          </button>
+
+          <button
+            onClick={togglePlay}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+            className="pointer-events-auto w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-transform active:scale-90"
+          >
+            {isPlaying
+              ? <Pause className="w-8 h-8 fill-white" />
+              : <Play className="w-8 h-8 fill-white translate-x-0.5" />
+            }
+          </button>
+
+          <button
+            onClick={skip(SKIP_SECONDS)}
+            disabled={!canSeek}
+            aria-label={`Forward ${SKIP_SECONDS} seconds`}
+            className="pointer-events-auto w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-transform active:scale-90 disabled:opacity-40"
+          >
+            <FastForward className="w-6 h-6" />
+          </button>
         </div>
       )}
 
@@ -412,7 +469,8 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
           {/* Button row */}
           <div className="flex items-center gap-2">
             <button
-              onClick={onOpenModal ?? togglePlay}
+              onClick={togglePlay}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
               className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0"
             >
               {isPlaying
@@ -421,29 +479,41 @@ export function VideoPlayer({ src, className, autoPlay = true, pauseOnLeave = tr
               }
             </button>
 
-            <button
-              onClick={skip(-SKIP_SECONDS)}
-              disabled={!canSeek}
-              aria-label={`Rewind ${SKIP_SECONDS} seconds`}
-              className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0 disabled:opacity-40"
-            >
-              <Rewind className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={skip(SKIP_SECONDS)}
-              disabled={!canSeek}
-              aria-label={`Forward ${SKIP_SECONDS} seconds`}
-              className="text-white hover:text-text-brand transition-colors p-0.5 shrink-0 disabled:opacity-40"
-            >
-              <FastForward className="w-4 h-4" />
-            </button>
-
             <span className="text-white text-xs tabular-nums ml-1 select-none">
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
 
             <div className="flex-1" />
+
+            {/* Playback speed */}
+            <div className="relative shrink-0">
+              {showSpeedMenu && (
+                <div className="absolute bottom-full right-0 mb-2 min-w-[5rem] rounded-lg bg-black/80 backdrop-blur-sm py-1 shadow-lg">
+                  {PLAYBACK_RATES.map((rate) => (
+                    <button
+                      key={rate}
+                      onClick={selectSpeed(rate)}
+                      className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-white text-xs hover:bg-white/10 transition-colors"
+                    >
+                      <Check className={`w-3.5 h-3.5 shrink-0 ${rate === playbackRate ? 'opacity-100' : 'opacity-0'}`} />
+                      <span className="tabular-nums">{rate}×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={toggleSpeedMenu}
+                aria-label="Playback speed"
+                aria-haspopup="menu"
+                aria-expanded={showSpeedMenu}
+                className={`flex items-center gap-0.5 p-0.5 transition-colors ${showSpeedMenu ? 'text-text-brand' : 'text-white hover:text-text-brand'}`}
+              >
+                <Gauge className="w-4 h-4" />
+                {playbackRate !== 1 && (
+                  <span className="text-[10px] tabular-nums leading-none">{playbackRate}×</span>
+                )}
+              </button>
+            </div>
 
             <button
               onClick={toggleMute}
