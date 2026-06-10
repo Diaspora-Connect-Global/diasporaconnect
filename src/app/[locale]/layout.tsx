@@ -8,8 +8,34 @@ import { getTranslations, getMessages } from 'next-intl/server';
 import GraphQLProvider from "@/components/provider/apollo-provider";
 import { Toaster } from 'sonner';
 import { BASE, SITE_NAME, LOCALES, publicRobots } from '@/lib/seo';
+import { seoGraphQL } from '@/lib/seoFetch';
 
 const metadataBase = new URL(BASE);
+
+/**
+ * Search-engine site-verification tokens are managed in the admin hub
+ * (System Settings → keys `seo_google_site_verification` / `seo_bing_site_verification`)
+ * and read via the PUBLIC `getPublicSeoSettings` gateway query. Falls back to env
+ * vars, and degrades to no tag if neither is set. Cached for 1h (revalidate).
+ */
+async function fetchVerificationTokens(): Promise<{ google?: string; bing?: string }> {
+  const data = await seoGraphQL<{ getPublicSeoSettings: Array<{ key: string; value: string }> }>(
+    'query GetPublicSeo { getPublicSeoSettings { key value } }',
+    {},
+    3600,
+  );
+  const map = Object.fromEntries((data?.getPublicSeoSettings ?? []).map((s) => [s.key, s.value]));
+  return {
+    google:
+      map['seo_google_site_verification'] ||
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      undefined,
+    bing:
+      map['seo_bing_site_verification'] ||
+      process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ||
+      undefined,
+  };
+}
 
 export async function generateMetadata({
   params,
@@ -18,6 +44,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'metadata' });
+  const verificationTokens = await fetchVerificationTokens();
 
   const description = t('description');
   const ogImage = '/og-default.png';
@@ -79,8 +106,10 @@ export async function generateMetadata({
       languages: hreflangLanguages,
     },
     verification: {
-      // Add Google / Bing verification tokens here when available
-      // google: 'GOOGLE_SITE_VERIFICATION_TOKEN',
+      // Tokens are managed in the admin hub (System Settings) and read via the
+      // public getPublicSeoSettings query; see fetchVerificationTokens above.
+      ...(verificationTokens.google ? { google: verificationTokens.google } : {}),
+      ...(verificationTokens.bing ? { other: { 'msvalidate.01': verificationTokens.bing } } : {}),
     },
     category: 'social network',
   };
