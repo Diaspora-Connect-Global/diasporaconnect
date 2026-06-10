@@ -100,7 +100,7 @@ export default function OAuthCallbackPage() {
       setUser(user);
       setDeviceMetadata(deviceMetadata);
 
-      router.replace('/');
+      router.replace('/home');
       return;
     }
 

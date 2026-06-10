@@ -161,7 +161,7 @@ export default function SignInForm() {
                 setRememberMeStore(rememberMe);
 
                 toast.success(t('login.welcomeBack', { name: data.login.user.firstName }));
-                router.push('/');
+                router.push('/home');
             } else {
                 const errorMessage = data?.login.error || data?.login.message || t('login.failed');
                 const errorText = errorMessage.toLowerCase();

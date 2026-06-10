@@ -2,19 +2,25 @@ import { Metadata } from 'next';
 
 export const BASE = (process.env.NEXT_PUBLIC_APP_URL || 'https://diaspoplug.com').replace(/\/$/, '');
 export const SITE_NAME = 'DiaspoPlug';
-export const LOCALES = ['en', 'fr', 'de', 'it'] as const;
+export const LOCALES = ['en', 'fr', 'de', 'it', 'nl'] as const;
 
 export type SupportedLocale = (typeof LOCALES)[number];
 
-/** Build hreflang alternates for a given path (e.g. "/about") */
-export function buildAlternates(path: string) {
+/**
+ * Build hreflang alternates for a given path (e.g. "/about").
+ * The canonical is SELF-REFERENTIAL per locale — each localized page declares
+ * itself canonical, with `languages` cross-linking every locale and `x-default`
+ * pointing at English. Passing the wrong (or no) locale makes Google treat the
+ * other locales as duplicates of English, so callers should always pass their locale.
+ */
+export function buildAlternates(path: string, locale: string = 'en') {
   const languages: Record<string, string> = {};
-  for (const locale of LOCALES) {
-    languages[locale] = `${BASE}/${locale}${path}`;
+  for (const l of LOCALES) {
+    languages[l] = `${BASE}/${l}${path}`;
   }
   languages['x-default'] = `${BASE}/en${path}`;
   return {
-    canonical: `${BASE}/en${path}`,
+    canonical: `${BASE}/${locale}${path}`,
     languages,
   };
 }
@@ -69,7 +75,7 @@ export const organisationSchema = {
       '@type': 'ContactPoint',
       contactType: 'customer support',
       email: 'support@diaspoplug.com',
-      availableLanguage: ['English', 'French', 'German', 'Italian'],
+      availableLanguage: ['English', 'French', 'German', 'Italian', 'Dutch'],
     },
     {
       '@type': 'ContactPoint',
@@ -93,7 +99,7 @@ export const websiteSchema = {
   url: BASE,
   name: SITE_NAME,
   description: 'Connecting diaspora communities worldwide.',
-  inLanguage: ['en', 'fr', 'de', 'it'],
+  inLanguage: ['en', 'fr', 'de', 'it', 'nl'],
   publisher: { '@id': `${BASE}/#organization` },
   potentialAction: {
     '@type': 'SearchAction',

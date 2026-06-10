@@ -278,7 +278,7 @@ export default function CompleteAccount() {
     sessionStorage.removeItem('otp_expires_at');
 
     // Navigate to home
-    router.push('/');
+    router.push('/home');
   };
 
   /* ------------------------------------------------------------------ */

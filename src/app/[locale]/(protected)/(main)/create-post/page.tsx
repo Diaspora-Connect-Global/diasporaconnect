@@ -542,7 +542,7 @@ export default function CreatePostPage() {
 
         // Redirect to home after short delay
         setTimeout(() => {
-          router.push('/');
+          router.push('/home');
         }, 1000);
       }
     } catch (error: any) {

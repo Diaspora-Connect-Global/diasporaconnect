@@ -51,7 +51,7 @@ export default function Header({
   const currentLocale = segments[0] || 'en';
 
   const navigation = [
-    { name: t('home'), href: `/${currentLocale}`, icon: "/HOME", prefetch: false },
+    { name: t('home'), href: `/${currentLocale}/home`, icon: "/HOME", prefetch: false },
     // prefetch: false avoids "preloaded but not used" console warning for this route's CSS
     { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY", prefetch: false },
     { name: t('post'), href: `/${currentLocale}/create-post`, icon: "/POST", disabled: true },
@@ -158,7 +158,7 @@ export default function Header({
 
                 {/* Logo */}
                 <div className=" flex justify-start items-center">
-                  <Link href={`/${currentLocale}`} prefetch={false}>
+                  <Link href={`/${currentLocale}/home`} prefetch={false}>
                     <Image
                       src="/LOGO.svg"
                       alt="Logo"
@@ -213,7 +213,7 @@ export default function Header({
                 <div className="fixed top-0 left-0 h-full w-[85%] max-w-sm bg-surface-default z-50 lg:hidden overflow-y-auto shadow-2xl">
                   {/* Sidebar Header */}
                   <div className="flex justify-between items-center p-4 border-b border-border-subtle sticky top-0 bg-surface-default z-10">
-                    <Link href={`/${currentLocale}`} prefetch={false} onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link href={`/${currentLocale}/home`} prefetch={false} onClick={() => setIsMobileMenuOpen(false)}>
                       <Image
                         src="/LOGO.svg"
                         alt="Logo"

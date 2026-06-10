@@ -146,7 +146,7 @@ export const Step7: React.FC<Step7Props> = ({ data, updateData, nextStep, prevSt
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    router.push('/');
+    router.push('/home');
   };
 
   const communities = discoverData?.discoverCommunities?.communities ?? [];

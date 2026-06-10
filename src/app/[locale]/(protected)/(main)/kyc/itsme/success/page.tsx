@@ -50,7 +50,7 @@ export default function ItsmeSuccessPage() {
         >
           Go to profile
         </ButtonType2>
-        <Link href="/" className="w-full">
+        <Link href="/home" className="w-full">
           <ButtonType3 size="lg" className="rounded-xl w-full">
             Back home
           </ButtonType3>

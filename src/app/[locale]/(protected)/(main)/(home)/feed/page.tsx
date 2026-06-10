@@ -177,7 +177,7 @@ export default function FeedPage() {
         {/* Header: back + hashtag title */}
         <div className="flex items-center gap-3 mb-4 shrink-0">
           <Link
-            href="/"
+            href="/home"
             className="inline-flex items-center gap-1 text-text-secondary hover:text-text-primary transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />

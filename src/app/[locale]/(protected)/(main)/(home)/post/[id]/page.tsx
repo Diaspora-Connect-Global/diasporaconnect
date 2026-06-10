@@ -160,7 +160,7 @@ export default function PostPage() {
             <h1 className="text-xl font-bold text-text-primary mb-2">This post has been deleted</h1>
             <p className="text-text-secondary text-sm mb-6">The post you&apos;re looking for no longer exists.</p>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/home')}
               className="px-5 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors label-medium"
             >
               Go to Home
@@ -279,7 +279,7 @@ export default function PostPage() {
           aiCategory={normalizedPostResolved.categories?.[0]}
           postDate={formatDateProximity(normalizedPostResolved.createdAt)}
           createdAt={normalizedPostResolved.createdAt}
-          onDelete={() => router.push('/')}
+          onDelete={() => router.push('/home')}
           visibility={normalizedPostResolved.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
           content={normalizedPostResolved.text}
           mentionMap={buildMentionMap(normalizedPostResolved.mentions ?? [])}
