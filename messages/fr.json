@@ -59,7 +59,15 @@
             },
             "password": {
                 "required": "Le mot de passe est requis",
-                "minLength": "Le mot de passe doit contenir au moins 8 caractères"
+                "minLength": "Le mot de passe doit contenir au moins 8 caractères",
+                "requirements": {
+                    "title": "Your password must include:",
+                    "minLength": "At least 8 characters",
+                    "uppercase": "One uppercase letter",
+                    "lowercase": "One lowercase letter",
+                    "number": "One number",
+                    "special": "One special character"
+                }
             },
             "twoFactor": {
                 "required": "Le code à deux facteurs est requis",
@@ -83,6 +91,9 @@
         "twoFactor": {
             "required": "Authentification à deux facteurs requise",
             "enterCode": "Veuillez entrer votre code de vérification à 6 chiffres"
+        },
+        "formBanner": {
+            "generic": "Something went wrong. Please try again."
         }
     },
     "onboarding": {
@@ -347,7 +358,8 @@
             "passwordMismatch": "Les mots de passe ne correspondent pas",
             "invalidOrExpiredCode": "Le code de réinitialisation est invalide ou expiré",
             "weakPassword": "Le mot de passe ne répond pas aux exigences de sécurité",
-            "resetFailed": "Échec de la réinitialisation. Veuillez réessayer."
+            "resetFailed": "Échec de la réinitialisation. Veuillez réessayer.",
+            "emailNotFound": "We couldn't find an account with that email"
         },
         "success": {
             "passwordReset": "Mot de passe réinitialisé ! Redirection vers la connexion..."

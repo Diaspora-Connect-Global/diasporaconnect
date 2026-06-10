@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { RESET_PASSWORD } from '@/services/gql/authentication';
 import { useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
+import { isNetworkError } from '@/lib/authErrorMessages';
 
 interface Step3Props {
     data: ResetFormData;
@@ -31,6 +32,8 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [confirmError, setConfirmError] = useState('');
 
     // Add the type to useMutation
     const [resetPasswordMutation, { loading }] = useMutation<ResetPasswordResponse>(RESET_PASSWORD);
@@ -41,6 +44,11 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
     };
 
     const handleSubmit = async () => {
+        setError('');
+        if (password !== confirmPassword) {
+            setConfirmError(t('errors.passwordMismatch'));
+            return;
+        }
         try {
             const { data: responseData } = await resetPasswordMutation({
                 variables: {
@@ -51,23 +59,29 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
             });
 
             const result = responseData?.resetPassword;
+            const resultText = (result || '').toLowerCase();
 
-            // Check if the result contains an error message
-            if (result?.toLowerCase().includes('failed') || 
-                result?.toLowerCase().includes('invalid') || 
-                result?.toLowerCase().includes('expired') ||
-                result?.toLowerCase().includes('error')) {
-                toast.error(result);
+            // Backend returns the outcome as a string; detect error markers.
+            if (resultText.includes('failed') ||
+                resultText.includes('invalid') ||
+                resultText.includes('expired') ||
+                resultText.includes('error')) {
+                // Invalid/expired reset code is the common case → banner.
+                setError(t('errors.invalidOrExpiredCode'));
             } else {
                 // Success case
-                toast.success(result || t('success') || 'Password reset successfully!');
+                toast.success(result || t('success.passwordReset') || 'Password reset successfully!');
                 setTimeout(() => {
                     router.push('/signin');
                 }, 1000);
             }
         } catch (err: any) {
             console.error('Password reset failed:', err);
-            toast.error(err?.message || t('error') || 'An error occurred');
+            if (isNetworkError(err)) {
+                toast.error(t('errors.resetFailed'));
+            } else {
+                setError(t('errors.invalidOrExpiredCode'));
+            }
         }
     };
 
@@ -86,12 +100,13 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
             onBack={prevStep}
             showStepLabel={false}
             isLoading={loading}
+            errorMessage={error}
         >
             <div className="w-full space-y-3">
                 <PasswordInput
                     id='password'
                     password={password}
-                    setPassword={handlePasswordChange}
+                    setPassword={(v) => { handlePasswordChange(v); setError(''); }}
                     showPassword={showPassword}
                     setShowPassword={setShowPassword}
                     placeholder={t("newPassword.createPassword.placeholder")}
@@ -100,11 +115,12 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
                 <PasswordInput
                     id='confirmPassword'
                     password={confirmPassword}
-                    setPassword={setConfirmPassword}
+                    setPassword={(v) => { setConfirmPassword(v); setConfirmError(''); setError(''); }}
                     showPassword={showConfirmPassword}
                     setShowPassword={setShowConfirmPassword}
                     placeholder={t("newPassword.confirmPassword.placeholder")}
                     label={t("newPassword.confirmPassword.label")}
+                    errorMessage={confirmError}
                 />
             </div>
         </MultiStep>

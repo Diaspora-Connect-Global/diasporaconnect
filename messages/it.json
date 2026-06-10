@@ -59,7 +59,15 @@
             },
             "password": {
                 "required": "La password è obbligatoria",
-                "minLength": "La password deve contenere almeno 8 caratteri"
+                "minLength": "La password deve contenere almeno 8 caratteri",
+                "requirements": {
+                    "title": "Your password must include:",
+                    "minLength": "At least 8 characters",
+                    "uppercase": "One uppercase letter",
+                    "lowercase": "One lowercase letter",
+                    "number": "One number",
+                    "special": "One special character"
+                }
             },
             "twoFactor": {
                 "required": "Il codice a due fattori è obbligatorio",
@@ -83,6 +91,9 @@
         "twoFactor": {
             "required": "Autenticazione a due fattori richiesta",
             "enterCode": "Inserisci il tuo codice di verifica a 6 cifre"
+        },
+        "formBanner": {
+            "generic": "Something went wrong. Please try again."
         }
     },
     "onboarding": {
@@ -347,7 +358,8 @@
             "passwordMismatch": "Le password non corrispondono",
             "invalidOrExpiredCode": "Il codice di reimpostazione non è valido o è scaduto",
             "weakPassword": "La password non soddisfa i requisiti di sicurezza",
-            "resetFailed": "Impossibile reimpostare la password. Riprova."
+            "resetFailed": "Impossibile reimpostare la password. Riprova.",
+            "emailNotFound": "We couldn't find an account with that email"
         },
         "success": {
             "passwordReset": "Password reimpostata con successo! Reindirizzamento all'accesso..."

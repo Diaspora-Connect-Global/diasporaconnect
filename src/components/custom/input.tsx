@@ -25,6 +25,10 @@ interface PasswordInputProps {
     label?: string;
     id: string;
     required?: boolean;
+    /** Shown below the field; also sets danger border and aria-invalid when set. */
+    errorMessage?: string;
+    /** Green border when true and no errorMessage. */
+    success?: boolean;
 }
 
 export const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -35,9 +39,18 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
     placeholder = "Your new password",
     label = "Create password",
     id = "password",
-    required = false
+    required = false,
+    errorMessage,
+    success = false,
 
 }) => {
+    const errorId = errorMessage ? `${id}-error` : undefined;
+    const borderClass = errorMessage
+        ? 'border-danger border-2'
+        : success
+          ? 'border-emerald-600/70 dark:border-emerald-500/70 border-2'
+          : 'border-border-subtle border-2';
+
     return (
         <div className="space-y-2">
             <label htmlFor={id} className="text-sm font-normal">
@@ -48,7 +61,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
             </label>
             <div className="relative">
                 <div className="bg-surface-subtle rounded-md">
-                    <div className="border-border-subtle border-2  rounded-md">
+                    <div className={`${borderClass} rounded-md`}>
                         <input
                             id={id}
                             type={showPassword ? 'text' : 'password'}
@@ -57,6 +70,8 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
                             onChange={(e) => setPassword(e.target.value)}
                             className="h-12 pr-10  placeholder:text-text-secondary w-full bg-transparent px-3 focus:outline-none"
                             required={required}
+                            aria-invalid={Boolean(errorMessage)}
+                            aria-describedby={errorId ?? undefined}
                         />
                         <button
                             type="button"
@@ -68,6 +83,11 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
                     </div>
                 </div>
             </div>
+            {errorMessage ? (
+                <p id={errorId} role="alert" className="text-sm text-danger">
+                    {errorMessage}
+                </p>
+            ) : null}
         </div>
     );
 };
@@ -103,7 +123,7 @@ export const TextInput: React.FC<TextInputProps> = ({
 }) => {
     const errorId = errorMessage ? `${id}-error` : undefined;
     const borderClass = errorMessage
-        ? 'border-amber-600/80 dark:border-amber-500/80 border-2'
+        ? 'border-danger border-2'
         : success
           ? 'border-emerald-600/70 dark:border-emerald-500/70 border-2'
           : 'border-border-subtle border-2';
@@ -150,7 +170,7 @@ export const TextInput: React.FC<TextInputProps> = ({
                 <p
                     id={errorId}
                     role="alert"
-                    className="text-sm text-amber-800 dark:text-amber-200/90"
+                    className="text-sm text-danger"
                 >
                     {errorMessage}
                 </p>

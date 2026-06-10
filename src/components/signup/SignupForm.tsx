@@ -4,7 +4,9 @@ import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { Check, X } from 'lucide-react';
 import { PasswordInput, TextInput } from '../custom/input';
+import { FormBanner } from '../custom/FormBanner';
 import SignInProvider from '../home/SignInProvider';
 import { BodyMedium, HeadingMedium, LabelLarge } from '../utils';
 
@@ -23,6 +25,20 @@ import {
   isValidEmailFormat,
   shouldShowEmailFormatError,
 } from '@/lib/emailValidation';
+import { isNetworkError } from '@/lib/authErrorMessages';
+
+interface SignupFieldErrors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+const PasswordRequirement: React.FC<{ met: boolean; label: string }> = ({ met, label }) => (
+  <li className={`flex items-center gap-2 text-sm ${met ? 'text-success' : 'text-text-secondary'}`}>
+    {met ? <Check size={14} className="shrink-0" /> : <X size={14} className="shrink-0" />}
+    <span>{label}</span>
+  </li>
+);
 
 export default function SignUpForm() {
   const tCommon = useTranslations("common");
@@ -32,6 +48,8 @@ export default function SignUpForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<SignupFieldErrors>({});
+  const [formError, setFormError] = useState('');
 
   const t = useTranslations('authentication');
   const a = useTranslations('actions');
@@ -54,23 +72,35 @@ export default function SignUpForm() {
         }
       },
       onError: (error) => {
-        toast.error(error.message || t('form.signup.failed'));
+        if (isNetworkError(error)) {
+          toast.error(t('login.networkError'));
+        } else {
+          setFormError(error.message || t('form.signup.failed'));
+        }
       }
     }
   );
 
   /**
-   * Validates password strength
-   * Requirements: min 8 chars, uppercase, lowercase, number, special char
+   * Per-criterion password strength checks. Used both for the live checklist
+   * under the field and to gate submission.
    */
-  const isValidPassword = (password: string): boolean => {
-    const minLength = password.length >= 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
-    return minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+  const passwordChecks = {
+    minLength: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
+
+  const isValidPassword = (pwd: string): boolean => {
+    return (
+      pwd.length >= 8 &&
+      /[A-Z]/.test(pwd) &&
+      /[a-z]/.test(pwd) &&
+      /[0-9]/.test(pwd) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(pwd)
+    );
   };
 
   /**
@@ -80,32 +110,30 @@ export default function SignUpForm() {
     e.preventDefault();
     if (isChecking || registerLoading) return;
 
-    // Validate email
+    setFormError('');
+
+    // Validate all fields up front and surface errors inline.
     const trimmedEmail = email.trim();
+    const errors: SignupFieldErrors = {};
+
     if (!trimmedEmail) {
-      toast.error(t('form.email.label') + ' is required');
-      return;
-    }
-    if (!isValidEmailFormat(trimmedEmail)) {
-      toast.error(t('form.email.label') + ' is invalid');
-      return;
+      errors.email = t('validation.email.required');
+    } else if (!isValidEmailFormat(trimmedEmail)) {
+      errors.email = t('validation.email.invalid');
     }
 
-    // Validate password
     if (!password) {
-      toast.error(t('form.createPassword.label') + ' is required');
-      return;
-    }
-    if (!isValidPassword(password)) {
-      toast.error('Password must be at least 8 characters with uppercase, lowercase, number, and special character');
-      return;
+      errors.password = t('validation.password.required');
+    } else if (!isValidPassword(password)) {
+      errors.password = t('validation.password.requirements.title');
     }
 
-    // Check password confirmation
     if (password !== confirmPassword) {
-      toast.error(t('form.confirmPassword.mismatch'));
-      return;
+      errors.confirmPassword = t('form.confirmPassword.mismatch');
     }
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     setIsChecking(true);
 
@@ -118,7 +146,7 @@ export default function SignUpForm() {
       });
 
       if (data?.isEmailAvailable === false) {
-        toast.error(t('form.email.exists'));
+        setFieldErrors({ email: t('form.email.exists') });
         setIsChecking(false);
         return;
       }
@@ -154,7 +182,11 @@ export default function SignUpForm() {
 
     } catch (err: any) {
       console.error('[SignUp] Error:', err);
-      toast.error(err.message || t('form.email.checkFailed'));
+      if (isNetworkError(err)) {
+        toast.error(t('login.networkError'));
+      } else {
+        setFormError(err.message || t('form.email.checkFailed'));
+      }
     } finally {
       setIsChecking(false);
     }
@@ -180,35 +212,50 @@ export default function SignUpForm() {
         <div className="space-y-4">
           <TextInput
             value={email}
-            onChange={setEmail}
+            onChange={(v) => { setEmail(v); setFormError(''); setFieldErrors((p) => ({ ...p, email: undefined })); }}
             type="email"
             placeholder={t("form.email.placeholder")}
             label={t('form.email.label')}
             id="email"
             errorMessage={
-              showEmailError ? t('validation.email.invalid') : undefined
+              fieldErrors.email || (showEmailError ? t('validation.email.invalid') : undefined)
             }
-            success={emailOk && emailTrimmed.length > 0}
+            success={!fieldErrors.email && emailOk && emailTrimmed.length > 0}
           />
 
-          <PasswordInput
-            id="password"
-            password={password}
-            setPassword={setPassword}
-            showPassword={showPassword}
-            setShowPassword={setShowPassword}
-            placeholder={t("form.createPassword.placeholder")}
-            label={t("form.createPassword.label")}
-          />
+          <div className="space-y-2">
+            <PasswordInput
+              id="password"
+              password={password}
+              setPassword={(v) => { setPassword(v); setFormError(''); setFieldErrors((p) => ({ ...p, password: undefined })); }}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              placeholder={t("form.createPassword.placeholder")}
+              label={t("form.createPassword.label")}
+              errorMessage={fieldErrors.password}
+              success={passwordOk}
+            />
+            {password.length > 0 && !passwordOk && (
+              <ul className="space-y-1 pt-1">
+                <PasswordRequirement met={passwordChecks.minLength} label={t('validation.password.requirements.minLength')} />
+                <PasswordRequirement met={passwordChecks.uppercase} label={t('validation.password.requirements.uppercase')} />
+                <PasswordRequirement met={passwordChecks.lowercase} label={t('validation.password.requirements.lowercase')} />
+                <PasswordRequirement met={passwordChecks.number} label={t('validation.password.requirements.number')} />
+                <PasswordRequirement met={passwordChecks.special} label={t('validation.password.requirements.special')} />
+              </ul>
+            )}
+          </div>
 
           <PasswordInput
             id="confirmPassword"
             password={confirmPassword}
-            setPassword={setConfirmPassword}
+            setPassword={(v) => { setConfirmPassword(v); setFormError(''); setFieldErrors((p) => ({ ...p, confirmPassword: undefined })); }}
             showPassword={showConfirmPassword}
             setShowPassword={setShowConfirmPassword}
             placeholder={t("form.confirmPassword.placeholder")}
             label={t("form.confirmPassword.label")}
+            errorMessage={fieldErrors.confirmPassword}
+            success={confirmOk}
           />
         </div>
 
@@ -222,6 +269,8 @@ export default function SignUpForm() {
             {t("policies.termsOfService")}
           </a>
         </p>
+
+        <FormBanner message={formError} />
 
         <div className="flex justify-end">
           <ButtonType2

@@ -40,7 +40,15 @@
             },
             "password": {
                 "required": "Wachtwoord is verplicht",
-                "minLength": "Wachtwoord moet minimaal 8 tekens bevatten"
+                "minLength": "Wachtwoord moet minimaal 8 tekens bevatten",
+                "requirements": {
+                    "title": "Your password must include:",
+                    "minLength": "At least 8 characters",
+                    "uppercase": "One uppercase letter",
+                    "lowercase": "One lowercase letter",
+                    "number": "One number",
+                    "special": "One special character"
+                }
             },
             "twoFactor": {
                 "required": "Tweefactorauthenticatiecode is verplicht",
@@ -83,6 +91,9 @@
         "twoFactor": {
             "required": "Tweefactorauthenticatie vereist",
             "enterCode": "Voer uw 6-cijferige verificatiecode in"
+        },
+        "formBanner": {
+            "generic": "Something went wrong. Please try again."
         }
     },
     "onboarding": {
@@ -323,7 +334,8 @@
             "passwordMismatch": "Wachtwoorden komen niet overeen",
             "invalidOrExpiredCode": "Resetcode is ongeldig of verlopen",
             "weakPassword": "Wachtwoord voldoet niet aan beveiligingseisen",
-            "resetFailed": "Wachtwoord opnieuw instellen mislukt. Probeer het opnieuw."
+            "resetFailed": "Wachtwoord opnieuw instellen mislukt. Probeer het opnieuw.",
+            "emailNotFound": "We couldn't find an account with that email"
         },
         "success": {
             "passwordReset": "Wachtwoord succesvol opnieuw ingesteld! Doorsturen naar inloggen..."

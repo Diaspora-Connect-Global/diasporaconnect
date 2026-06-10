@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { HeadingMedium } from '@/components/utils';
 import { Button } from '@/components/ui/button';
 import { ButtonType2, ButtonType3 } from './button';
+import { FormBanner } from './FormBanner';
 
 interface StepProps {
   stepNumber?: number;
@@ -16,6 +17,9 @@ interface StepProps {
   isNextDisabled?: boolean;
   isLoading?: boolean;
   nextButtonText?: string;
+
+  /** Persistent form-level error rendered as a banner above the form content. */
+  errorMessage?: string;
 
   /** Show/hide components */
   showBackButton?: boolean;
@@ -37,6 +41,7 @@ export const MultiStep: React.FC<StepProps> = ({
   isNextDisabled = false,
   isLoading = false,
   nextButtonText = "Continue",
+  errorMessage,
   showBackButton = true,
   showStepLabel = true,
   showSkipButton = true,
@@ -96,6 +101,11 @@ export const MultiStep: React.FC<StepProps> = ({
           </div>
         )}
       </div>
+
+      {/* Form-level error banner */}
+      {errorMessage && (
+        <FormBanner message={errorMessage} variant="error" />
+      )}
 
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="flex flex-col items-start">

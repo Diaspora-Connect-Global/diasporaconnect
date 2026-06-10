@@ -40,7 +40,15 @@
             },
             "password": {
                 "required": "Password is required",
-                "minLength": "Password must be at least 8 characters"
+                "minLength": "Password must be at least 8 characters",
+                "requirements": {
+                    "title": "Your password must include:",
+                    "minLength": "At least 8 characters",
+                    "uppercase": "One uppercase letter",
+                    "lowercase": "One lowercase letter",
+                    "number": "One number",
+                    "special": "One special character"
+                }
             },
             "twoFactor": {
                 "required": "Two-factor code is required",
@@ -83,6 +91,9 @@
         "twoFactor": {
             "required": "Two-Factor Authentication Required",
             "enterCode": "Please enter your 6-digit verification code"
+        },
+        "formBanner": {
+            "generic": "Something went wrong. Please try again."
         }
     },
     "onboarding": {
@@ -323,7 +334,8 @@
             "passwordMismatch": "Passwords do not match",
             "invalidOrExpiredCode": "Reset code is invalid or expired",
             "weakPassword": "Password does not meet security requirements",
-            "resetFailed": "Failed to reset password. Please try again."
+            "resetFailed": "Failed to reset password. Please try again.",
+            "emailNotFound": "We couldn't find an account with that email"
         },
         "success": {
             "passwordReset": "Password reset successfully! Redirecting to sign in..."

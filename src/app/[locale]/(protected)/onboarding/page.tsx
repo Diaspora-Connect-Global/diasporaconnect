@@ -32,6 +32,7 @@ import type {
 
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
+import { isNetworkError } from '@/lib/authErrorMessages';
 
 export interface FormData {
   firstName: string;
@@ -70,6 +71,8 @@ export default function CompleteAccount() {
     useState(false);
   const [verifyOTPLoading, setVerifyOTPLoading] =
     useState(false);
+  // Persistent form-level error for the phone (Step 4) and OTP (Step 5) steps.
+  const [formError, setFormError] = useState('');
 
   const [isOAuth, setIsOAuth] =
     useState<boolean | null>(null);
@@ -187,13 +190,19 @@ export default function CompleteAccount() {
   /* ------------------------------------------------------------------ */
   /* Helpers */
   /* ------------------------------------------------------------------ */
-  const updateData = (data: Partial<FormData>) =>
+  const updateData = (data: Partial<FormData>) => {
+    setFormError('');
     setFormData(prev => ({ ...prev, ...data }));
+  };
 
-  const nextStep = () =>
+  const nextStep = () => {
+    setFormError('');
     setCurrentStep(s => Math.min(s + 1, 7));
-  const prevStep = () =>
+  };
+  const prevStep = () => {
+    setFormError('');
     setCurrentStep(s => Math.max(s - 1, 1));
+  };
 
   const formatPhone = (phone: string, countryCode: string) => {
     const raw = (phone || '').trim();
@@ -289,6 +298,7 @@ export default function CompleteAccount() {
   const submitFormA = async (continueToNext: boolean = false) => {
     try {
       setSendCodeLoading(true);
+      setFormError('');
 
       if (!formData.countryCode) {
         throw new Error('Please select your country code.');
@@ -360,7 +370,12 @@ export default function CompleteAccount() {
         nextStep();
       }
     } catch (e: any) {
-      toast.error(e.message);
+      // Network failure → toast; validation/business errors → persistent banner.
+      if (isNetworkError(e)) {
+        toast.error(e.message);
+      } else {
+        setFormError(e.message);
+      }
     } finally {
       setSendCodeLoading(false);
     }
@@ -424,6 +439,7 @@ export default function CompleteAccount() {
   const submitFormB = async () => {
     try {
       setVerifyOTPLoading(true);
+      setFormError('');
       const token =
         sessionStorage.getItem('registrationToken');
 
@@ -491,8 +507,11 @@ export default function CompleteAccount() {
       ) {
         toast.error('Your verification code has expired. Please register again.');
         redirectToRegistration();
-      } else {
+      } else if (isNetworkError(e)) {
         toast.error(message);
+      } else {
+        // Wrong code → persistent banner on the OTP step.
+        setFormError(message);
       }
     } finally {
       setVerifyOTPLoading(false);
@@ -534,6 +553,7 @@ export default function CompleteAccount() {
           nextStep={() => submitFormA(true)}
           loading={sendCodeLoading}
           prevStep={prevStep}
+          errorMessage={formError}
         />
       )}
       {currentStep === 5 && (
@@ -545,7 +565,7 @@ export default function CompleteAccount() {
           prevStep={prevStep}
           resendCode={resendCode}
           resendLoading={sendCodeLoading}
-
+          errorMessage={formError}
         />
       )}
       {currentStep === 6 && (

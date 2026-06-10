@@ -14,6 +14,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { TextInput, PasswordInput } from '../custom/input';
 import SignInProvider from '../home/SignInProvider';
 import { ButtonType2 } from '../custom/button';
+import { FormBanner } from '../custom/FormBanner';
 import { Link } from '@/i18n/navigation';
 import { HeadingMedium, BodyMedium, LabelLarge } from '../utils';
 import { useUserStore } from '@/store/useUserStore';
@@ -21,6 +22,7 @@ import {
   isValidEmailFormat,
   shouldShowEmailFormatError,
 } from '@/lib/emailValidation';
+import { mapAuthError, isNetworkError } from '@/lib/authErrorMessages';
 
 interface ValidationErrors {
     email?: string;
@@ -35,6 +37,8 @@ export default function SignInForm() {
     const [rememberMe, setRememberMe] = useState(false);
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [showTwoFactor, setShowTwoFactor] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({});
+    const [formError, setFormError] = useState('');
 
     const t = useTranslations('authentication');
     const a = useTranslations('actions');
@@ -47,7 +51,7 @@ export default function SignInForm() {
     useEffect(() => {
         const error = searchParams.get('error');
         if (error) {
-            toast.error(decodeURIComponent(error));
+            setFormError(decodeURIComponent(error));
             router.replace('/signin');
         }
     }, [searchParams, router]);
@@ -95,17 +99,25 @@ export default function SignInForm() {
         return { isValid: Object.keys(errors).length === 0, errors };
     };
 
+    /* ============ Field error helpers ============ */
+    const clearFieldError = (field: keyof ValidationErrors) => {
+        setFormError('');
+        setFieldErrors((prev) => {
+            if (!prev[field]) return prev;
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
+    };
+
     /* ============ Submit ============ */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setFormError('');
 
         const { isValid, errors } = validateForm();
-        if (!isValid) {
-            if (errors.email) return toast.error(errors.email);
-            if (errors.password) return toast.error(errors.password);
-            if (errors.twoFactorCode) return toast.error(errors.twoFactorCode);
-            return toast.error(t('validation.formError'));
-        }
+        setFieldErrors(errors);
+        if (!isValid) return;
 
         try {
             // Get existing fingerprint from store (already initialized by DeviceFingerprintInitializer)
@@ -130,7 +142,7 @@ export default function SignInForm() {
 
             if (data?.login.success) {
                 if (!isAllowedUserRole(data.login.user?.role)) {
-                    toast.error('Access denied. Only local or diaspora users can sign in here.');
+                    setFormError('Access denied. Only local or diaspora users can sign in here.');
                     setShowTwoFactor(false);
                     setTwoFactorCode('');
                     return;
@@ -164,28 +176,16 @@ export default function SignInForm() {
                 router.push('/home');
             } else {
                 const errorMessage = data?.login.error || data?.login.message || t('login.failed');
-                const errorText = errorMessage.toLowerCase();
-
-                if (errorText.includes('invalid email') || errorText.includes('invalid password') || errorText.includes('invalid credentials')) {
-                    toast.error(t('login.invalidCredentials'));
-                } else if (errorText.includes('account locked') || errorText.includes('locked')) {
-                    toast.error(t('login.accountLocked'));
-                } else if (errorText.includes('too many') || errorText.includes('rate limit')) {
-                    toast.error(t('login.tooManyAttempts'));
-                } else {
-                    toast.error(errorMessage);
-                }
+                // Credential/server errors → persistent banner above the button.
+                setFormError(mapAuthError(errorMessage, t));
             }
         } catch (error: any) {
             console.error('Login error:', error);
-            const errorMessage = error.message?.toLowerCase() || '';
-
-            if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('failed to fetch')) {
+            // Network/system failures → toast; everything else → banner.
+            if (isNetworkError(error)) {
                 toast.error(t('login.networkError'));
-            } else if (errorMessage.includes('graphql')) {
-                toast.error(t('login.genericError'));
             } else {
-                toast.error(error.message || t('login.genericError'));
+                setFormError(mapAuthError(error?.message, t));
             }
         }
     };
@@ -207,29 +207,31 @@ export default function SignInForm() {
                 <div className="space-y-4">
                     <TextInput
                         value={email}
-                        onChange={setEmail}
+                        onChange={(v) => { setEmail(v); clearFieldError('email'); }}
                         type="email"
                         placeholder={t("form.email.placeholder")}
                         label={t("form.email.label")}
                         id="email"
                         errorMessage={
-                            showEmailFormatError
+                            fieldErrors.email ||
+                            (showEmailFormatError
                                 ? t('validation.email.invalid')
-                                : undefined
+                                : undefined)
                         }
                         success={
-                            emailFormatOk && emailTrimmed.length > 0
+                            !fieldErrors.email && emailFormatOk && emailTrimmed.length > 0
                         }
                     />
 
                     <PasswordInput
                         id='password'
                         password={password}
-                        setPassword={setPassword}
+                        setPassword={(v) => { setPassword(v); clearFieldError('password'); }}
                         showPassword={showPassword}
                         setShowPassword={setShowPassword}
                         placeholder={t("form.password.placeholder")}
                         label={t("form.password.label")}
+                        errorMessage={fieldErrors.password}
                     />
                 </div>
 
@@ -240,7 +242,9 @@ export default function SignInForm() {
                         </p>
                     </Link>
 
-                    <ButtonType2 
+                    <FormBanner message={formError} />
+
+                    <ButtonType2
                         onClick={handleSubmit} 
                         disabled={loading} 
                         className="px-8 py-3 bg-surface-brand rounded-full w-full cursor-pointer"

@@ -14,6 +14,7 @@ interface Step5Props {
     resendCode: () => Promise<void>;
     loading: boolean;
     resendLoading: boolean;
+    errorMessage?: string;
 }
 
 export const Step5: React.FC<Step5Props> = ({
@@ -23,7 +24,8 @@ export const Step5: React.FC<Step5Props> = ({
     prevStep,
     updateData,
     resendCode,
-    resendLoading
+    resendLoading,
+    errorMessage
 }) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
@@ -161,6 +163,7 @@ export const Step5: React.FC<Step5Props> = ({
             showSkipButton={false}
             onNext={() => nextStep()}
             onBack={prevStep}
+            errorMessage={errorMessage}
         >
             <div className="w-full space-y-6">
                 <InputOTP

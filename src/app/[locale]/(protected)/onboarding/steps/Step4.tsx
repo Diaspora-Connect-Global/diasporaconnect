@@ -20,9 +20,10 @@ interface Step4Props {
     nextStep: () => void;
     prevStep: () => void;
     loading: boolean;
+    errorMessage?: string;
 }
 
-export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextStep, prevStep }) => {
+export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextStep, prevStep, errorMessage }) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
@@ -109,6 +110,7 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
             showSkipButton={false}
             onNext={() => nextStep()}
             onBack={prevStep}
+            errorMessage={errorMessage}
         >
             <div className="w-full">
                 <label
