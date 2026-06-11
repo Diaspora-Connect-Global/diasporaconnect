@@ -232,9 +232,17 @@ export function getNotificationPath(
     return `/${section}/${String(d.entityId)}`;
   }
 
-  // Messages → chat, with a tab hint so the right panel opens
+  // Daily group-chat digest → open that specific group's conversation
+  if (t.startsWith('group.chat.digest')) {
+    const gid = pickString(d, ['groupId']);
+    return gid ? `/chat?ct=group&gid=${encodeURIComponent(gid)}` : '/chat?ct=group';
+  }
+
+  // Messages → chat, with a tab hint so the right panel opens. Deep-link to the
+  // specific group when we know its id.
   if (t.startsWith('group.message') || t === 'group.message.received') {
-    return '/chat?ct=group';
+    const gid = pickString(d, ['groupId']);
+    return gid ? `/chat?ct=group&gid=${encodeURIComponent(gid)}` : '/chat?ct=group';
   }
   if (t.startsWith('message.')) {
     return '/chat?ct=direct';

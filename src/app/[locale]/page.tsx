@@ -12,7 +12,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import JsonLd from '@/components/seo/JsonLd';
-import AuthedRedirect from '@/components/landing/AuthedRedirect';
+import AuthedHome from '@/components/landing/AuthedHome';
 import {
   BASE,
   SITE_NAME,
@@ -113,8 +113,8 @@ const websiteHomeSchema = {
 export default function LandingPage() {
   return (
     <>
-      <AuthedRedirect />
       <JsonLd schema={[organisationSchema, websiteSchema, websiteHomeSchema]} />
+      <AuthedHome>
       <main className="min-h-screen bg-surface-default">
         {/* Hero */}
         <section className="border-b border-border-subtle">
@@ -245,6 +245,7 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
+      </AuthedHome>
     </>
   );
 }

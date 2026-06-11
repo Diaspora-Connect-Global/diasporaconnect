@@ -1,4 +1,4 @@
-import { ChevronRight, ChevronDown, MessageCircle, MoreVertical, X, Camera, Sparkles } from "lucide-react";
+import { ChevronRight, MessageCircle, MoreVertical, X, Camera, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
@@ -182,9 +182,8 @@ export default function GroupChat() {
     });
 
     // AI "Daily summary" digest of the group chat. Non-blocking: absence (or a
-    // backend/ai-service hiccup) simply renders no card. Latest digest only
+    // backend/ai-service hiccup) simply renders nothing. Latest digest only
     // (no `date` arg). Skipped until we have both the group + conversation id.
-    const [showDailySummary, setShowDailySummary] = useState(false);
     const { data: dailySummaryData } = useQuery<
         GroupChatDailySummaryData,
         GroupChatDailySummaryVariables
@@ -195,6 +194,64 @@ export default function GroupChat() {
         errorPolicy: 'all',
     });
     const dailySummary = dailySummaryData?.groupChatDailySummary ?? null;
+
+    // Absolute instant used to place the digest chronologically in the timeline
+    // (it summarizes `digestDate` and is generated shortly after that day ends).
+    const dailySummaryInsertTime = (() => {
+        if (!dailySummary) return Number.NaN;
+        const t = Date.parse(dailySummary.generatedAt);
+        return Number.isNaN(t) ? Date.parse(dailySummary.digestDate) : t;
+    })();
+
+    // The digest rendered as a distinct, centered "system" entry — visually
+    // unlike the left/right chat bubbles, with the date carried in its header.
+    const dailySummaryEntry = dailySummary ? (
+        <div key="daily-summary" className="flex justify-center px-2 py-1">
+            <div className="w-full max-w-md rounded-2xl border border-primary/30 bg-bg-secondary/60 px-3 py-3 space-y-2">
+                <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                    <span className="text-sm font-semibold text-text-primary">
+                        Daily summary
+                    </span>
+                    <span className="text-xs text-text-secondary ml-auto shrink-0">
+                        {dailySummary.digestDate}
+                        {dailySummary.messageCount > 0
+                            ? ` · ${dailySummary.messageCount} messages`
+                            : ''}
+                    </span>
+                </div>
+                {dailySummary.summary && (
+                    <p className="text-sm leading-relaxed whitespace-pre-line text-text-primary">
+                        {dailySummary.summary}
+                    </p>
+                )}
+                {dailySummary.keyPoints.length > 0 && (
+                    <div>
+                        <p className="text-xs font-semibold text-text-secondary mb-1">
+                            Key points
+                        </p>
+                        <ul className="list-disc pl-5 space-y-0.5 text-sm text-text-primary">
+                            {dailySummary.keyPoints.map((kp, i) => (
+                                <li key={`kp-${i}`}>{kp}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+                {dailySummary.actionItems.length > 0 && (
+                    <div>
+                        <p className="text-xs font-semibold text-text-secondary mb-1">
+                            Action items
+                        </p>
+                        <ul className="list-disc pl-5 space-y-0.5 text-sm text-text-primary">
+                            {dailySummary.actionItems.map((ai, i) => (
+                                <li key={`ai-${i}`}>{ai}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+        </div>
+    ) : null;
 
     // Group avatar upload (info sidebar)
     const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -668,82 +725,35 @@ export default function GroupChat() {
                         className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-3 md:p-4 space-y-3 md:space-y-4"
                         style={{ scrollbarGutter: 'stable' }}
                     >
-                        {/* AI Daily summary card — collapsible, non-blocking. Renders
-                            only when a digest exists for this group. */}
-                        {dailySummary && (
-                            <div className="rounded-2xl border border-border bg-bg-secondary/60 overflow-hidden">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowDailySummary((v) => !v)}
-                                    className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left"
-                                    aria-expanded={showDailySummary}
-                                >
-                                    <span className="flex items-center gap-2 min-w-0">
-                                        <Sparkles className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
-                                        <span className="flex flex-col min-w-0">
-                                            <span className="text-sm font-medium text-text-primary truncate">
-                                                Daily summary
-                                            </span>
-                                            <span className="text-xs text-text-secondary truncate">
-                                                {dailySummary.digestDate}
-                                                {dailySummary.messageCount > 0
-                                                    ? ` · ${dailySummary.messageCount} messages`
-                                                    : ''}
-                                            </span>
-                                        </span>
-                                    </span>
-                                    {showDailySummary ? (
-                                        <ChevronDown className="w-4 h-4 text-text-secondary shrink-0" aria-hidden="true" />
-                                    ) : (
-                                        <ChevronRight className="w-4 h-4 text-text-secondary shrink-0" aria-hidden="true" />
-                                    )}
-                                </button>
-                                {showDailySummary && (
-                                    <div className="px-3 pb-3 pt-1 space-y-3 text-sm text-text-primary">
-                                        {dailySummary.summary && (
-                                            <p className="leading-relaxed whitespace-pre-line">
-                                                {dailySummary.summary}
-                                            </p>
-                                        )}
-                                        {dailySummary.keyPoints.length > 0 && (
-                                            <div>
-                                                <p className="text-xs font-semibold text-text-secondary mb-1">
-                                                    Key points
-                                                </p>
-                                                <ul className="list-disc pl-5 space-y-0.5">
-                                                    {dailySummary.keyPoints.map((kp, i) => (
-                                                        <li key={`kp-${i}`}>{kp}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                        {dailySummary.actionItems.length > 0 && (
-                                            <div>
-                                                <p className="text-xs font-semibold text-text-secondary mb-1">
-                                                    Action items
-                                                </p>
-                                                <ul className="list-disc pl-5 space-y-0.5">
-                                                    {dailySummary.actionItems.map((ai, i) => (
-                                                        <li key={`ai-${i}`}>{ai}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
                         {mainThreadMessages.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full text-text-secondary">
-                                <MessageCircle className="w-12 h-12 mb-4 opacity-50" />
-                                <p>{t('noMessages')}</p>
-                            </div>
+                            <>
+                                {/* AI daily digest still surfaces when the thread is
+                                    empty (e.g. older messages paged out). */}
+                                {dailySummaryEntry}
+                                <div className="flex flex-col items-center justify-center h-full text-text-secondary">
+                                    <MessageCircle className="w-12 h-12 mb-4 opacity-50" />
+                                    <p>{t('noMessages')}</p>
+                                </div>
+                            </>
                         ) : (
                             (() => {
                                 const nodes: React.ReactNode[] = [];
                                 let lastDateKey = '';
+                                // The digest renders inline as a distinct entry, spliced
+                                // in just before the first message newer than it (or at
+                                // the end if it's the most recent thing in the thread).
+                                let summaryInserted = false;
                                 mainThreadMessages.forEach((message) => {
                                 const isMe = message.senderId === currentUserId;
+                                if (
+                                    dailySummaryEntry &&
+                                    !summaryInserted &&
+                                    !Number.isNaN(dailySummaryInsertTime) &&
+                                    dailySummaryInsertTime <= Date.parse(message.createdAt)
+                                ) {
+                                    nodes.push(dailySummaryEntry);
+                                    summaryInserted = true;
+                                }
                                 const dateKey = getMessageDateKey(message.createdAt, userTimeZone);
                                 if (dateKey !== lastDateKey) {
                                     lastDateKey = dateKey;
@@ -864,6 +874,11 @@ export default function GroupChat() {
                                     </div>
                                 );
                                 });
+                                // Digest is newer than every loaded message (or its
+                                // timestamp was unparseable) → pin it at the bottom.
+                                if (dailySummaryEntry && !summaryInserted) {
+                                    nodes.push(dailySummaryEntry);
+                                }
                                 return nodes;
                             })()
                         )}

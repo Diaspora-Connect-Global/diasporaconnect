@@ -37,6 +37,9 @@ export default function Chat() {
 
     // Get chat type from URL parameter
     const chatTypeFromUrl = searchParams.get('ct') as 'direct' | 'group' | null;
+    // Optional deep-link target (e.g. from a daily-summary notification):
+    // `/chat?ct=group&gid=<groupId>` opens that specific group directly.
+    const groupIdFromUrl = searchParams.get('gid');
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -47,6 +50,21 @@ export default function Chat() {
 
     // Sync activeChat with URL parameters and sessionStorage
     useEffect(() => {
+        const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+        // Deep-link: `?ct=group&gid=<groupId>` (e.g. tapping a daily-summary
+        // notification) opens that group directly, even on a cold load with
+        // nothing pre-selected in sessionStorage. Takes precedence and persists
+        // so the rest of the app stays consistent.
+        if (chatTypeFromUrl === 'group' && groupIdFromUrl && uuidV4.test(groupIdFromUrl)) {
+            if (!activeChat || activeChat.id !== groupIdFromUrl) {
+                const target = { id: groupIdFromUrl, type: 'group' as const };
+                sessionStorage.setItem('activeChat', JSON.stringify(target));
+                setActiveChat(target);
+            }
+            return;
+        }
+
         const chatchosen = sessionStorage.getItem('activeChat');
 
         if (chatTypeFromUrl && chatchosen) {
@@ -54,7 +72,6 @@ export default function Chat() {
                 const chatchosenParsed = JSON.parse(chatchosen);
 
                 // Only update if URL param matches sessionStorage type
-                const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
                 if (chatchosenParsed.type === chatTypeFromUrl && uuidV4.test(chatchosenParsed.id ?? '')) {
                     if (!activeChat || activeChat.id !== chatchosenParsed.id) {
                         setActiveChat(chatchosenParsed);
@@ -71,7 +88,7 @@ export default function Chat() {
                 setActiveChat(null);
             }
         }
-    }, [chatTypeFromUrl, activeChat, setActiveChat]);
+    }, [chatTypeFromUrl, groupIdFromUrl, activeChat, setActiveChat]);
 
     useEffect(() => {
         if (activeChat) {
