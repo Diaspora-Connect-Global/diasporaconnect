@@ -5,6 +5,8 @@ import { formatDateProximity } from '@/macros/time';
 import AboutCommunity from '@/components/cards/community/AboutCommunity';
 import { ButtonType1 } from '@/components/custom/button';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
+import HomeSidebar from '@/components/home/HomeSidebar';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -172,6 +174,15 @@ export default function CommunityDetailPage() {
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
+
+  const [hydrated, setHydrated] = useState(false);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  useEffect(() => {
+    const unsubscribe = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
+    return unsubscribe;
+  }, []);
+  const showSidebar = hydrated && isAuthenticated;
 
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
@@ -523,6 +534,11 @@ export default function CommunityDetailPage() {
 
   return (
     <div className="lg:flex overflow-y-auto h-app-inner">
+      {showSidebar && (
+        <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-full scrollbar-hide">
+          <HomeSidebar />
+        </div>
+      )}
       <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
         <div className="min-h-[6rem] flex space-x-4 my-4 py-3 border-b">
           <div className="h-[6rem] w-[6rem] flex-shrink-0">
