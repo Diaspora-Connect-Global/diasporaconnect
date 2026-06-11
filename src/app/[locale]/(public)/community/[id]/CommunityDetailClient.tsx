@@ -46,6 +46,8 @@ import {
   type RemoveEngagementData,
   type CreateCommentData,
 } from '@/services/gql/postsFeed';
+import type { Attachment } from '@/services/gql/types/postsFeed';
+import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 
@@ -90,6 +92,7 @@ interface FeedPost {
     hasShared?: boolean;
   };
   categories?: string[];
+  attachments?: Attachment[];
 }
 
 interface GetFeedResponse {
@@ -622,7 +625,9 @@ export default function CommunityDetailPage() {
           {feedLoading ? (
             <p className="text-text-secondary text-sm py-4 px-2">{t('loadingPosts')}</p>
           ) : posts.length > 0 ? (
-            posts.map((post) => (
+            posts.map((post) => {
+              const media = splitPostAttachments(post.attachments);
+              return (
               <FeedCardWithReply
                 key={post.id}
                 postId={post.id}
@@ -637,6 +642,9 @@ export default function CommunityDetailPage() {
                 postDate={formatDateProximity(post.createdAt)}
                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                 content={post.text}
+                images={media.images}
+                videos={media.videos}
+                documents={media.documents}
                 mentionMap={buildMentionMap(post.mentions ?? [])}
                 shares={post.engagementCounts.shares}
                 likes={post.engagementCounts.likes}
@@ -651,7 +659,8 @@ export default function CommunityDetailPage() {
                 isShared={post.userEngagement.hasShared}
                 joinButton={!isActive}
               />
-            ))
+              );
+            })
           ) : (
             <p className="text-text-secondary text-sm py-4 px-2">{t('noPosts')}</p>
           )}

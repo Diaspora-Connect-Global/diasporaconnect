@@ -5,6 +5,8 @@ import { formatDateProximity } from '@/macros/time';
 import AboutAssociation from "@/components/cards/association/AboutAssociation";
 import { ButtonType1 } from "@/components/custom/button";
 import { PeopleYouMayKnow } from "@/components/home/PeopleYouMayKnow";
+import HomeSidebar from "@/components/home/HomeSidebar";
+import { useAuthStore } from "@/store/useAuthStore";
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -44,6 +46,8 @@ import {
     type RemoveEngagementData,
     type CreateCommentData,
 } from '@/services/gql/postsFeed';
+import type { Attachment } from '@/services/gql/types/postsFeed';
+import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 
 /* ------------------------------------------------------------------ */
@@ -90,6 +94,7 @@ interface FeedPost {
         hasShared?: boolean;
     };
     categories?: string[];
+    attachments?: Attachment[];
 }
 
 interface GetFeedResponse {
@@ -184,6 +189,15 @@ export default function AssociationPage() {
     const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
     const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
     const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
+
+    const [hydrated, setHydrated] = useState(false);
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+    useEffect(() => {
+        const unsubscribe = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+        if (useAuthStore.persist.hasHydrated()) setHydrated(true);
+        return unsubscribe;
+    }, []);
+    const showSidebar = hydrated && isAuthenticated;
 
     const [leaveModalOpen, setLeaveModalOpen] = useState(false);
     const [joinModalOpen, setJoinModalOpen] = useState(false);
@@ -561,6 +575,11 @@ export default function AssociationPage() {
 
     return (
         <div className="lg:flex overflow-y-auto h-app-inner">
+            {showSidebar && (
+                <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-full scrollbar-hide">
+                    <HomeSidebar />
+                </div>
+            )}
             <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
                 <div className="min-h-[6rem] flex space-x-4 my-4 py-3 border-b">
                     <div className="h-[6rem] w-[6rem] flex-shrink-0">
@@ -646,7 +665,9 @@ export default function AssociationPage() {
                     {feedLoading ? (
                         <p className="text-text-secondary text-sm py-4 px-2">{t("loadingPosts")}</p>
                     ) : posts.length > 0 ? (
-                        posts.map((post) => (
+                        posts.map((post) => {
+                            const media = splitPostAttachments(post.attachments);
+                            return (
                             <FeedCardWithReply
                                 key={post.id}
                                 postId={post.id}
@@ -661,6 +682,9 @@ export default function AssociationPage() {
                                 postDate={formatDateProximity(post.createdAt)}
                                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
                                 content={post.text}
+                                images={media.images}
+                                videos={media.videos}
+                                documents={media.documents}
                                 mentionMap={buildMentionMap(post.mentions ?? [])}
                                 shares={post.engagementCounts.shares}
                                 likes={post.engagementCounts.likes}
@@ -675,7 +699,8 @@ export default function AssociationPage() {
                                 isShared={post.userEngagement.hasShared}
                                 joinButton={!isActive}
                             />
-                        ))
+                            );
+                        })
                     ) : (
                         <p className="text-text-secondary text-sm py-4 px-2">{t("noPosts")}</p>
                     )}
