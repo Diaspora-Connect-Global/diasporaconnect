@@ -536,12 +536,14 @@ export default function CommunityDetailPage() {
   };
 
   return (
-    <div className="lg:flex overflow-y-auto h-app-inner">
+    <div className="mx-auto lg:flex items-center justify-center min-h-full">
       {showSidebar && (
         <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-full scrollbar-hide">
           <HomeSidebar />
         </div>
       )}
+      <div className="min-w-0">
+        <div className="lg:flex overflow-y-auto h-app-inner">
       <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
         <div className="min-h-[6rem] flex space-x-4 my-4 py-3 border-b">
           <div className="h-[6rem] w-[6rem] flex-shrink-0">
@@ -692,6 +694,8 @@ export default function CommunityDetailPage() {
             />
           )}
           <PeopleYouMayKnow />
+        </div>
+      </div>
         </div>
       </div>
 
