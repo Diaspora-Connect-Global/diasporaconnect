@@ -1038,6 +1038,8 @@
         }
     },
     "common": {
+        "checkingProfile": "Profiel wordt gecontroleerd...",
+        "sessionProfileMissing": "Je profiel kon niet worden gevonden. Log opnieuw in.",
         "scrollLeft": "Naar links scrollen",
         "scrollRight": "Naar rechts scrollen",
         "almostThere": "Bijna klaar...",

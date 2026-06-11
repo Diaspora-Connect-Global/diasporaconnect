@@ -1388,6 +1388,8 @@
         }
     },
     "common": {
+        "checkingProfile": "Profil wird überprüft...",
+        "sessionProfileMissing": "Ihr Profil konnte nicht gefunden werden. Bitte melden Sie sich erneut an.",
         "scrollLeft": "Nach links scrollen",
         "scrollRight": "Nach rechts scrollen",
         "almostThere": "Fast geschafft...",

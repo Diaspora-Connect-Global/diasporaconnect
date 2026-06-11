@@ -1388,6 +1388,8 @@
         }
     },
     "common": {
+        "checkingProfile": "Verifica del profilo in corso...",
+        "sessionProfileMissing": "Impossibile trovare il tuo profilo. Effettua nuovamente l'accesso.",
         "scrollLeft": "Scorri a sinistra",
         "scrollRight": "Scorri a destra",
         "almostThere": "Quasi finito...",

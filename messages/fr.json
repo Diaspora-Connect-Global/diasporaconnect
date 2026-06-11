@@ -1388,6 +1388,8 @@
         }
     },
     "common": {
+        "checkingProfile": "Vérification de votre profil...",
+        "sessionProfileMissing": "Votre profil est introuvable. Veuillez vous reconnecter.",
         "scrollLeft": "Défiler vers la gauche",
         "scrollRight": "Défiler vers la droite",
         "almostThere": "Presque terminé...",
