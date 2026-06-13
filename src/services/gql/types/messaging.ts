@@ -9,8 +9,18 @@
 // ============================================================================
 
 export type ConversationType = 'DIRECT' | 'GROUP';
-export type MessageType = 'TEXT' | 'IMAGE' | 'FILE' | 'VIDEO' | 'AUDIO';
+// 'SYSTEM' = automated, server-generated entry (the AI daily group-chat
+// digest, posted into the group as a message). Rendered as a distinct card,
+// never as a normal authored bubble.
+export type MessageType = 'TEXT' | 'IMAGE' | 'FILE' | 'VIDEO' | 'AUDIO' | 'SYSTEM';
 export type MessageStatus = 'SENT' | 'DELIVERED' | 'READ';
+
+/**
+ * Synthetic sender id used by message-service for SYSTEM messages. Lets the
+ * client recognise system authorship without a user lookup. Must match
+ * `SYSTEM_SENDER_ID` in message-service.
+ */
+export const SYSTEM_SENDER_ID = '00000000-0000-0000-0000-000000000000';
 
 // ============================================================================
 // MESSAGE TYPES

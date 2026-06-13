@@ -50,6 +50,7 @@ import { messageService } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
 import { SEND_MESSAGE, GET_CONVERSATIONS, GROUP_CHAT_DAILY_SUMMARY } from "@/services/gql/messaging";
 import type { SendMessageData, GroupChatDailySummaryData, GroupChatDailySummaryVariables } from "@/services/gql/types/messaging";
+import { SYSTEM_SENDER_ID } from "@/services/gql/types/messaging";
 import { useChatConversation } from "@/hooks/useChatConversation";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
@@ -72,6 +73,14 @@ type ManageableGroupMember = {
         avatarUrl?: string;
     };
 };
+
+/**
+ * True for the AI daily-digest SYSTEM message: matched by type or by the
+ * reserved system sender id (tolerant of either reaching the client).
+ */
+function isSystemMessage(m: { type?: string; senderId?: string }): boolean {
+    return m?.type === 'SYSTEM' || m?.senderId === SYSTEM_SENDER_ID;
+}
 
 export default function GroupChat() {
     const t = useTranslations('chat.group');
@@ -282,6 +291,13 @@ export default function GroupChat() {
     const mainThreadMessages = useMemo(
         () => apiMessages.filter((m) => !m.replyToId),
         [apiMessages]
+    );
+    // The AI daily digest now arrives as a real SYSTEM message in the thread.
+    // When one is present we suppress the legacy `dailySummaryEntry` (the
+    // separate query-driven card) so the digest never renders twice.
+    const hasSystemMessage = useMemo(
+        () => mainThreadMessages.some(isSystemMessage),
+        [mainThreadMessages]
     );
     const repliesForSidebar = useMemo(() => {
         if (!selectedMessage?.id) return [];
@@ -745,7 +761,33 @@ export default function GroupChat() {
                                 let summaryInserted = false;
                                 mainThreadMessages.forEach((message) => {
                                 const isMe = message.senderId === currentUserId;
+                                // AI daily digest: render as a distinct, centered
+                                // "Daily summary" card rather than a chat bubble.
+                                if (isSystemMessage(message)) {
+                                    nodes.push(
+                                        <div key={message.id} className="flex justify-center px-2 py-1">
+                                            <div className="w-full max-w-md rounded-2xl border border-primary/30 bg-bg-secondary/60 px-3 py-3 space-y-2">
+                                                <div className="flex items-center gap-2">
+                                                    <Sparkles className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                                                    <span className="text-sm font-semibold text-text-primary">
+                                                        Daily summary
+                                                    </span>
+                                                    <span className="text-xs text-text-secondary ml-auto shrink-0">
+                                                        {formatChatTimestamp(message.createdAt, { timeZone: userTimeZone })}
+                                                    </span>
+                                                </div>
+                                                {message.content && (
+                                                    <p className="text-sm leading-relaxed whitespace-pre-line text-text-primary">
+                                                        {message.content}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                    return;
+                                }
                                 if (
+                                    !hasSystemMessage &&
                                     dailySummaryEntry &&
                                     !summaryInserted &&
                                     !Number.isNaN(dailySummaryInsertTime) &&
@@ -876,7 +918,8 @@ export default function GroupChat() {
                                 });
                                 // Digest is newer than every loaded message (or its
                                 // timestamp was unparseable) → pin it at the bottom.
-                                if (dailySummaryEntry && !summaryInserted) {
+                                // Suppressed when a real SYSTEM digest message exists.
+                                if (!hasSystemMessage && dailySummaryEntry && !summaryInserted) {
                                     nodes.push(dailySummaryEntry);
                                 }
                                 return nodes;
