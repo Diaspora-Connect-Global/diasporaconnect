@@ -793,7 +793,10 @@
                 "received": "Nuovo messaggio"
             },
             "group": {
-                "message": "Messaggio di gruppo"
+                "message": "Messaggio di gruppo",
+                "chat": {
+                    "digest": "Riepilogo giornaliero della chat di gruppo"
+                }
             },
             "event": {
                 "reminder": "Promemoria evento",

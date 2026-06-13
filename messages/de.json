@@ -793,7 +793,10 @@
                 "received": "Neue Nachricht"
             },
             "group": {
-                "message": "Gruppennachricht"
+                "message": "Gruppennachricht",
+                "chat": {
+                    "digest": "Tägliche Gruppenchat-Zusammenfassung"
+                }
             },
             "event": {
                 "reminder": "Terminerinnerung",

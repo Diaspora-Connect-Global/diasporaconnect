@@ -793,7 +793,10 @@
                 "received": "Nieuw bericht"
             },
             "group": {
-                "message": "Groepsbericht"
+                "message": "Groepsbericht",
+                "chat": {
+                    "digest": "Dagelijkse groepschat-samenvatting"
+                }
             },
             "event": {
                 "reminder": "Evenementherinnering",
