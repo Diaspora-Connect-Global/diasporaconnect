@@ -9,6 +9,7 @@ import {
 import { useTranslations } from 'next-intl';
 import Image from 'next/image'
 import { AccessBadges } from './AccessBadges';
+import { CommunityTypeBadge } from './CommunityTypeBadge';
 import type { AccessProfile } from '@/types/membership';
 
 
@@ -24,6 +25,7 @@ interface JoinCommunityCardProps {
   members?: number;
   isDisabled?: boolean;
   access?: AccessProfile;
+  communityType?: { name: string; isEmbassy: boolean } | null;
 }
 
 export default function JoinCommunityCard({
@@ -36,6 +38,7 @@ export default function JoinCommunityCard({
   icon,
   isDisabled = false,
   access,
+  communityType,
 }: JoinCommunityCardProps) {
   const t = useTranslations('community');
 
@@ -46,9 +49,17 @@ export default function JoinCommunityCard({
   return (
     <TooltipProvider>
       <div
-        className="bg-surface-default rounded-2xl w-full min-w-[200px] p-6 border border-border-subtle"
+        className="relative bg-surface-default rounded-2xl w-full min-w-[200px] p-6 border border-border-subtle"
         onClick={onCardClick}
       >
+        {/* Community type — top-right icon pill (hover shows the name) */}
+        {communityType && (
+          <CommunityTypeBadge
+            communityType={communityType}
+            className="absolute top-3 right-3 z-10"
+          />
+        )}
+
         <div className="flex flex-col items-center text-center gap-2">
           {/* Icon */}
           <div className={`rounded-full p-2`}>

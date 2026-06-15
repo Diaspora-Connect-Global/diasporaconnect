@@ -80,6 +80,7 @@ interface SearchCommunityItem {
     priceAmount?: number | null;
     priceCurrency?: string | null;
     membershipStatus?: string | null;
+    communityType?: { name: string; isEmbassy: boolean } | null;
 }
 
 interface SearchCommunitiesData {
@@ -323,6 +324,7 @@ export default function Community() {
                     priceAmount: pay.priceAmount,
                     priceCurrency: pay.priceCurrency,
                     membershipStatus: c.membershipStatus,
+                    communityType: c.communityType,
                 };
             });
         }
@@ -515,6 +517,7 @@ export default function Community() {
                                 description={community.description || ''}
                                 isDisabled={isAlreadyJoined || isPendingStatus}
                                 access={access ?? undefined}
+                                communityType={community.communityType}
                             />
                         );
                     })

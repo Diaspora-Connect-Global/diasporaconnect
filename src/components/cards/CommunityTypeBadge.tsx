@@ -154,15 +154,15 @@ export function CommunityTypeBadge({
   return (
     <Badge
       variant="outline"
+      title={communityType.name}
+      aria-label={communityType.name}
       className={cn(
         sizeClass,
-        'rounded-full bg-surface-subtle text-text-secondary border-transparent',
+        'rounded-full bg-surface-subtle text-text-secondary border-transparent cursor-help',
         className,
       )}
     >
-      <Icon role="img" aria-label={communityType.name} className="cursor-help">
-        <title>{communityType.name}</title>
-      </Icon>
+      <Icon aria-hidden="true" />
     </Badge>
   );
 }
