@@ -44,9 +44,17 @@ export default function CommunityCardVariant2({
     return (
         <TooltipProvider>
             <div
-                className="bg-surface-default rounded-2xl lg:min-w-[14.5rem] lg:max-w-[15.5rem] w-[14.5rem] h-[16rem] p-4 border border-border-subtle flex flex-col items-center gap-2 overflow-hidden"
+                className="relative bg-surface-default rounded-2xl lg:min-w-[14.5rem] lg:max-w-[15.5rem] w-[14.5rem] h-[16rem] p-4 border border-border-subtle flex flex-col items-center gap-2 overflow-hidden"
                 onClick={onCardClick}
             >
+                {/* Community type — top-right pill, matches design */}
+                {communityType && (
+                    <CommunityTypeBadge
+                        communityType={communityType}
+                        className="absolute top-3 right-3 z-10"
+                    />
+                )}
+
                 {/* Icon */}
                 <div className="flex items-center justify-center h-16 w-16 mt-1">
                     <Image
@@ -83,11 +91,6 @@ export default function CommunityCardVariant2({
                     <p className="caption-medium text-text-secondary">
                         {members ?? 0} {t('members')}
                     </p>
-                )}
-
-                {/* Community type */}
-                {communityType && (
-                    <CommunityTypeBadge communityType={communityType} />
                 )}
 
                 {/* Description — 2-line clamp, muted color, centered */}

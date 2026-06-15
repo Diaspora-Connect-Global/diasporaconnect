@@ -148,18 +148,20 @@ export function CommunityTypeBadge({
 
   const detail = size === 'detail';
   const sizeClass = detail
-    ? 'text-xs px-2.5 py-1'
-    : 'text-[0.6875rem] px-2 py-0.5';
+    ? 'text-sm px-3 py-1 gap-1.5 [&>svg]:size-4'
+    : 'text-xs px-2.5 py-1 gap-1 [&>svg]:size-4';
 
-  const isEmbassy = communityType.isEmbassy;
-  const variantClass = isEmbassy
-    ? 'bg-surface-info text-text-on-info border-transparent'
-    : 'bg-surface-default text-text-secondary border-border-subtle';
-
-  const Icon = iconFor(communityType.name, isEmbassy);
+  const Icon = iconFor(communityType.name, communityType.isEmbassy);
 
   return (
-    <Badge variant="outline" className={cn(sizeClass, variantClass, className)}>
+    <Badge
+      variant="outline"
+      className={cn(
+        sizeClass,
+        'bg-surface-subtle text-text-secondary border-transparent font-medium',
+        className,
+      )}
+    >
       <Icon role="img" aria-label={communityType.name} className="cursor-help">
         <title>{communityType.name}</title>
       </Icon>
