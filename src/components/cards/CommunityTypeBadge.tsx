@@ -12,9 +12,9 @@ import {
   TrendingUp,
   Palette,
   Users,
+  UsersRound,
   Trophy,
   Megaphone,
-  Sparkles,
   Tag,
   type LucideIcon,
 } from 'lucide-react';
@@ -63,7 +63,7 @@ const EXACT_ICONS: Readonly<Record<string, LucideIcon>> = {
   'youth & student community': Users,
   'sports community': Trophy,
   'advocacy & support community': Megaphone,
-  'general community': Sparkles,
+  'general community': UsersRound,
 };
 
 /** Keyword fallback for custom / admin-created types not in EXACT_ICONS.
@@ -119,7 +119,7 @@ const ICON_KEYWORDS: ReadonlyArray<readonly [string, LucideIcon]> = [
   ['rights', Megaphone],
   ['politic', Megaphone],
   ['union', Megaphone],
-  ['general', Sparkles],
+  ['general', UsersRound],
 ];
 
 function iconFor(name: string, isEmbassy: boolean): LucideIcon {
@@ -135,9 +135,9 @@ function iconFor(name: string, isEmbassy: boolean): LucideIcon {
 
 /**
  * Renders a community's type (e.g. "Embassy & Consulate", "Sports Community")
- * as a pill with a type-specific icon. The icon carries a native `title` so
- * hovering it surfaces the type name. Type names are free text from the
- * backend, so they are not translated.
+ * as an icon-only round chip. The type name is hidden — the icon carries a
+ * native `title` so hovering it surfaces the name. Type names are free text
+ * from the backend, so they are not translated.
  */
 export function CommunityTypeBadge({
   communityType,
@@ -147,9 +147,7 @@ export function CommunityTypeBadge({
   if (!communityType?.name) return null;
 
   const detail = size === 'detail';
-  const sizeClass = detail
-    ? 'text-sm px-3 py-1 gap-1.5 [&>svg]:size-4'
-    : 'text-xs px-2.5 py-1 gap-1 [&>svg]:size-4';
+  const sizeClass = detail ? 'p-1.5 [&>svg]:size-5' : 'p-1 [&>svg]:size-4';
 
   const Icon = iconFor(communityType.name, communityType.isEmbassy);
 
@@ -158,14 +156,13 @@ export function CommunityTypeBadge({
       variant="outline"
       className={cn(
         sizeClass,
-        'bg-surface-subtle text-text-secondary border-transparent font-medium',
+        'rounded-full bg-surface-subtle text-text-secondary border-transparent',
         className,
       )}
     >
       <Icon role="img" aria-label={communityType.name} className="cursor-help">
         <title>{communityType.name}</title>
       </Icon>
-      {communityType.name}
     </Badge>
   );
 }
