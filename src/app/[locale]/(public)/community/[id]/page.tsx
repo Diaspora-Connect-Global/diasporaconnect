@@ -18,6 +18,10 @@ const COMMUNITY_SEO_QUERY = `
       avatarUrl
       bannerUrl
       createdAt
+      communityType {
+        name
+        isEmbassy
+      }
     }
   }
 `;

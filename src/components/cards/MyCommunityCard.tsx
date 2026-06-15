@@ -19,6 +19,7 @@ import { LEAVE_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, LIST_AVAILABLE_COMMUNITIES
 import { toast } from 'sonner';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { AccessBadges } from './AccessBadges';
+import { CommunityTypeBadge } from './CommunityTypeBadge';
 import type { AccessProfile } from '@/types/membership';
 
 
@@ -30,6 +31,7 @@ interface GhanaConnectHeaderProps {
     logoIcon?: React.ReactNode;
     onMenuClick?: () => void;
     access?: AccessProfile;
+    communityType?: { name: string; isEmbassy: boolean } | null;
 }
 
 export function MyCommunityCard({
@@ -38,6 +40,7 @@ export function MyCommunityCard({
     logoIcon,
     id,
     access,
+    communityType,
 }: GhanaConnectHeaderProps) {
     
     const router = useRouter();
@@ -111,9 +114,12 @@ export function MyCommunityCard({
                             <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-1"> {/* Smaller font, clamp description on small screens */}
                                 {description}
                             </p>
-                            {access && (
-                                <div className="mt-1">
-                                    <AccessBadges access={access} size="card" />
+                            {(access || communityType) && (
+                                <div className="mt-1 flex flex-wrap items-center gap-1">
+                                    {communityType && (
+                                        <CommunityTypeBadge communityType={communityType} />
+                                    )}
+                                    {access && <AccessBadges access={access} size="card" />}
                                 </div>
                             )}
                         </div>

@@ -16,6 +16,7 @@ import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import { AccessBadges } from './AccessBadges';
+import { CommunityTypeBadge } from './CommunityTypeBadge';
 import { toJoinPolicy } from '@/types/membership';
 import type {
     CommunityPaymentType,
@@ -31,6 +32,7 @@ interface Community {
     paymentType?: CommunityPaymentType | null;
     priceAmount?: number | null;
     priceCurrency?: string | null;
+    communityType?: { name: string; isEmbassy: boolean } | null;
 }
 
 interface ListMyJoinedCommunitiesResponse {
@@ -193,6 +195,9 @@ export function MyCommunityCard2() {
                                             <Image width={20} height={20} src={community.avatarUrl} alt={community.name} className="rounded-full object-cover flex-shrink-0" />
                                         )}
                                         <span className="truncate flex-1">{community.name}</span>
+                                        {community.communityType && (
+                                            <CommunityTypeBadge communityType={community.communityType} />
+                                        )}
                                         {access && <AccessBadges access={access} size="card" />}
                                     </div>
                                     {selectedCommunityId === community.id && (

@@ -1035,6 +1035,7 @@ export default function Home() {
                       title={community.name}
                       description={community.description}
                       members={community?.memberCount || 0}
+                      communityType={community.communityType}
                       onButtonClick={() => handleJoinClick('community', community)}
                       buttonText={
                         community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)

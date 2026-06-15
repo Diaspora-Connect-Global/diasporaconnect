@@ -40,6 +40,10 @@ interface Community {
     name: string;
     description?: string;
     avatarUrl?: string;
+    communityType?: {
+        name: string;
+        isEmbassy: boolean;
+    } | null;
 }
 
 interface DiscoverCommunity extends Community {
@@ -422,6 +426,7 @@ export default function Community() {
                             key={community.id}
                             title={community.name}
                             description={community.description || ''}
+                            communityType={community.communityType}
                         />
                     ))
                 ) : (

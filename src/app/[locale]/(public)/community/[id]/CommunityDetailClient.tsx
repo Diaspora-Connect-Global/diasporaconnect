@@ -26,6 +26,7 @@ import {
 } from '@/services/gql/community';
 import AccessSettingsForm from '@/components/cards/AccessSettingsForm';
 import AccessBadges from '@/components/cards/AccessBadges';
+import { CommunityTypeBadge } from '@/components/cards/CommunityTypeBadge';
 import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
 import {
   toJoinPolicy,
@@ -66,6 +67,7 @@ interface CommunityDetails {
   priceCurrency?: string | null;
   defaultGroupId?: string | null;
   membershipStatus?: string | null;
+  communityType?: { name: string; isEmbassy: boolean } | null;
 }
 
 interface GetCommunityDetailsResponse {
@@ -559,6 +561,13 @@ export default function CommunityDetailPage() {
             <div></div>
             <div className="justify-between items-center w-full">
               <p className="heading-xsmall">{community.name}</p>
+              {community.communityType && (
+                <CommunityTypeBadge
+                  communityType={community.communityType}
+                  size="detail"
+                  className="mt-1"
+                />
+              )}
               <div className="flex flex-wrap items-center justify-end gap-2">
                 {isSuspended && (
                   <span className="label-medium text-text-secondary">{t('badges.suspended')}</span>

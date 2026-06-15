@@ -9,6 +9,7 @@ import {
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { AccessBadges } from '@/components/cards/AccessBadges';
+import { CommunityTypeBadge } from '@/components/cards/CommunityTypeBadge';
 import type { AccessProfile } from '@/types/membership';
 
 interface CommunityCardVariant2Props {
@@ -21,6 +22,7 @@ interface CommunityCardVariant2Props {
     buttonText: string;
     isDisabled?: boolean;
     access?: AccessProfile;
+    communityType?: { name: string; isEmbassy: boolean } | null;
 }
 
 export default function CommunityCardVariant2({
@@ -33,6 +35,7 @@ export default function CommunityCardVariant2({
     buttonText,
     isDisabled = false,
     access,
+    communityType,
 }: CommunityCardVariant2Props) {
     const t = useTranslations('community');
 
@@ -80,6 +83,11 @@ export default function CommunityCardVariant2({
                     <p className="caption-medium text-text-secondary">
                         {members ?? 0} {t('members')}
                     </p>
+                )}
+
+                {/* Community type */}
+                {communityType && (
+                    <CommunityTypeBadge communityType={communityType} />
                 )}
 
                 {/* Description — 2-line clamp, muted color, centered */}

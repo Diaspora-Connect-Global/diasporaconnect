@@ -67,6 +67,10 @@ export const SEARCH_COMMUNITIES = gql`
         paymentType
         priceAmount
         priceCurrency
+        communityType {
+          name
+          isEmbassy
+        }
       }
       total
     }
@@ -94,6 +98,10 @@ export const GET_COMMUNITY = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      communityType {
+        name
+        isEmbassy
+      }
     }
   }
 `;
@@ -115,6 +123,10 @@ export const GET_COMMUNITY_DETAILS = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      communityType {
+        name
+        isEmbassy
+      }
     }
   }
 `;
@@ -397,6 +409,10 @@ export const LIST_MY_JOINED_COMMUNITIES = gql`
       id
       name
       avatarUrl
+      communityType {
+        name
+        isEmbassy
+      }
     }
   }
 `;
