@@ -166,7 +166,8 @@ export default function Community() {
     }>({ open: false, clientSecret: null, communityId: '', communityName: '', membershipId: '' });
 
     const { data: myCommunitiesData, loading: myCommunitiesLoading, refetch: refetchMyCommunities } = useQuery<ListUserCommunitiesData>(
-        LIST_MY_JOINED_COMMUNITIES
+        LIST_MY_JOINED_COMMUNITIES,
+        { fetchPolicy: 'cache-and-network' }
     );
 
     const { data: discoverData, loading: discoverLoading, refetch: refetchCommunities } = useQuery<DiscoverCommunitiesData>(
@@ -176,7 +177,8 @@ export default function Community() {
                 includeRecommended: true,
                 limit: 20,
                 offset: 0
-            }
+            },
+            fetchPolicy: 'cache-and-network',
         }
     );
 
@@ -189,6 +191,7 @@ export default function Community() {
                     limit: 20,
                 },
             },
+            fetchPolicy: 'cache-and-network',
         }
     );
 
