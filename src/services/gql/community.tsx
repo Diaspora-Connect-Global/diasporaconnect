@@ -123,6 +123,10 @@ export const GET_COMMUNITY_DETAILS = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      contactEmail
+      contactPhone
+      address
+      locationCountry
       communityType {
         name
         isEmbassy
@@ -262,13 +266,15 @@ export const GET_MY_COMMUNITIES = gql`
    ============================================================================ */
 
 export const GET_COMMUNITY_MEMBERS = gql`
-  query GetCommunityMembers($communityId: ID!, $page: Int, $limit: Int) {
-    getCommunityMembers(communityId: $communityId, page: $page, limit: $limit) {
+  query GetCommunityMembers($communityId: ID!, $limit: Int, $offset: Int) {
+    listCommunityMembers(communityId: $communityId, limit: $limit, offset: $offset) {
       members {
         userId
         role
         status
         joinedAt
+        displayName
+        avatarUrl
       }
       total
     }

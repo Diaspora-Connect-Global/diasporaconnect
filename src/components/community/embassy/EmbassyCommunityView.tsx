@@ -56,7 +56,7 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
       case 'events':
         return <EmbassyEventsTab props={props} />;
       case 'support':
-        return <EmbassySupportTab profile={profile} communityId={community.id} />;
+        return <EmbassySupportTab profile={profile} community={community} communityId={community.id} />;
       case 'community':
         return <EmbassyCommunityTab props={props} profile={profile} />;
       default: {

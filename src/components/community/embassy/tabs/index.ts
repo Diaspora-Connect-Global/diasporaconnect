@@ -6,7 +6,6 @@ export const EMBASSY_TAB_KEYS = [
   'services',
   'track-requests',
   'events',
-  'verified-services',
   'support',
   'community',
 ] as const;
@@ -29,7 +28,6 @@ export const EMBASSY_TABS: ReadonlyArray<EmbassyTabDef> = [
   { key: 'services', icon: 'LayoutGrid', labelKey: 'services' },
   { key: 'track-requests', icon: 'ClipboardList', labelKey: 'trackRequests' },
   { key: 'events', icon: 'CalendarDays', labelKey: 'events' },
-  { key: 'verified-services', icon: 'ShieldCheck', labelKey: 'verifiedServices' },
   { key: 'support', icon: 'LifeBuoy', labelKey: 'support' },
   { key: 'community', icon: 'Users', labelKey: 'community' },
 ];

@@ -26,6 +26,10 @@ export interface EmbassyCommunity {
   memberCount?: number;
   createdAt?: string;
   membershipStatus?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  address?: string | null;
+  locationCountry?: string | null;
   communityType?: { name: string; isEmbassy: boolean } | null;
 }
 

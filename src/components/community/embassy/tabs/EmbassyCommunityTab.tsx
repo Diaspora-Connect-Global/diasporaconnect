@@ -35,8 +35,15 @@ import type { EmbassyViewProps } from '../types';
 
 /* ── Right-rail backend response shapes ─────────────────────────────────── */
 interface CommunityMembersData {
-  getCommunityMembers: {
-    members: Array<{ userId: string; role: string; status: string; joinedAt?: string | null }>;
+  listCommunityMembers: {
+    members: Array<{
+      userId: string;
+      role: string;
+      status: string;
+      joinedAt?: string | null;
+      displayName?: string | null;
+      avatarUrl?: string | null;
+    }>;
     total: number;
   };
 }
@@ -67,16 +74,15 @@ export function EmbassyCommunityTab({ props }: EmbassyCommunityTabProps) {
   const avatar = community.avatarUrl || FALLBACK_AVATAR;
 
   /* ── Recently Active Members → real community members ──────────────────
-   * getCommunityMembers returns userId only (no name/avatar) and there is no
-   * batch profile-by-id query in the gateway, so we render neutral avatar
-   * placeholders for the fetched rows but use the real `total` for the "+N"
-   * overflow badge. Graceful when empty. */
+   * listCommunityMembers exposes name/avatar but they may be null, so we still
+   * render neutral avatar placeholders for the fetched rows and use the real
+   * `total` for the "+N" overflow badge. Graceful when empty. */
   const { data: membersData } = useQuery<CommunityMembersData>(GET_COMMUNITY_MEMBERS, {
-    variables: { communityId: community.id, page: 1, limit: 6 },
+    variables: { communityId: community.id, limit: 6, offset: 0 },
     fetchPolicy: 'cache-and-network',
   });
-  const memberRows = membersData?.getCommunityMembers?.members ?? [];
-  const memberTotal = membersData?.getCommunityMembers?.total ?? 0;
+  const memberRows = membersData?.listCommunityMembers?.members ?? [];
+  const memberTotal = membersData?.listCommunityMembers?.total ?? 0;
   const shownMembers = memberRows.slice(0, 5);
   const extraMembers = Math.max(memberTotal - shownMembers.length, 0);
 

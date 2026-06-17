@@ -73,7 +73,6 @@ export const EMBASSY_QUICK_ACTIONS: ReadonlyArray<EmbassyQuickAction> = [
   { key: 'track', icon: 'ClipboardList', label: 'Track Request', tab: 'track-requests' },
   { key: 'emergency', icon: 'BellRing', label: 'Emergency Help', tab: 'support' },
   { key: 'events', icon: 'CalendarDays', label: 'Embassy Events', tab: 'events' },
-  { key: 'verified', icon: 'ShieldCheck', label: 'Verified Services', tab: 'verified-services' },
 ];
 
 export const EMBASSY_UPCOMING_EVENTS: ReadonlyArray<EmbassyUpcomingEvent> = [

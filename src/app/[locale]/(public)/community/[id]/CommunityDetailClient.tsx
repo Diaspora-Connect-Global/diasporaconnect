@@ -68,6 +68,10 @@ interface CommunityDetails {
   priceCurrency?: string | null;
   defaultGroupId?: string | null;
   membershipStatus?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  address?: string | null;
+  locationCountry?: string | null;
   communityType?: { name: string; isEmbassy: boolean } | null;
 }
 

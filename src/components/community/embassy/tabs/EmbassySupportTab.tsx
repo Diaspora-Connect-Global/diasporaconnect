@@ -10,20 +10,27 @@ import {
   type SupportCaseTypesResponse,
 } from '@/services/gql/embassyServices';
 import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyViewProps } from '../types';
 
 interface EmbassySupportTabProps {
   profile: EmbassyProfile;
+  community: EmbassyViewProps['community'];
   communityId: string;
 }
 
 /** Support = support-service case-type topics + the embassy's contact / emergency info. */
-export function EmbassySupportTab({ profile, communityId }: EmbassySupportTabProps) {
+export function EmbassySupportTab({ profile, community, communityId }: EmbassySupportTabProps) {
   const t = useTranslations('community.embassy');
 
   const { data, loading } = useQuery<SupportCaseTypesResponse>(SUPPORT_CASE_TYPES, {
     variables: { ownerType: 'COMMUNITY', ownerEntityId: communityId },
     fetchPolicy: 'cache-and-network',
   });
+
+  // Backend contact fields fall back to the mock profile when null/empty.
+  const phone = community.contactPhone || profile.phone;
+  const email = community.contactEmail || profile.email;
+  const address = community.address || profile.addressLine;
 
   const topics = (data?.caseTypes ?? []).filter((c) => c.isActive !== false);
 
@@ -84,15 +91,15 @@ export function EmbassySupportTab({ profile, communityId }: EmbassySupportTabPro
             <h3 className="label-large text-text-primary">{t('support.contactTitle')}</h3>
             <p className="caption-medium flex items-center gap-2 text-text-secondary">
               <Phone className="size-4 flex-shrink-0" aria-hidden />
-              {profile.phone}
+              {phone}
             </p>
             <p className="caption-medium flex items-center gap-2 break-all text-text-secondary">
               <Mail className="size-4 flex-shrink-0" aria-hidden />
-              {profile.email}
+              {email}
             </p>
             <p className="caption-medium flex items-start gap-2 text-text-secondary">
               <MapPin className="size-4 flex-shrink-0" aria-hidden />
-              {profile.addressLine}
+              {address}
             </p>
           </CardContent>
         </Card>

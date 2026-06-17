@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { BadgeCheck, MapPin, Phone, Clock } from 'lucide-react';
+import { BadgeCheck, MapPin, Phone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ButtonType1, ButtonType2 } from '@/components/custom/button';
 import type { EmbassyProfile } from './embassyMock';
@@ -27,6 +27,21 @@ interface EmbassyHeaderProps {
   >;
 }
 
+/** Convert an ISO-3166 alpha-2 code (e.g. "FR") to a country name ("France").
+ *  Non-code values (already a full name) are returned unchanged. */
+function countryLabel(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  if (/^[A-Za-z]{2}$/.test(v)) {
+    try {
+      return new Intl.DisplayNames(['en'], { type: 'region' }).of(v.toUpperCase()) ?? v;
+    } catch {
+      return v;
+    }
+  }
+  return v;
+}
+
 /**
  * Embassy banner: a flag/landmark cover image with an overlapping white identity
  * card (avatar, official-verified name, tagline, contact meta row, membership CTA).
@@ -39,10 +54,14 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
   const bannerSrc = community.bannerUrl || '/og-default.png';
   const avatarSrc = community.avatarUrl || profile.flagUrl || '/GLOBE.png';
 
+  // Backend contact fields fall back to the mock profile when null/empty.
+  const phone = community.contactPhone || profile.phone;
+  const location = countryLabel(community.locationCountry) || community.address || profile.city;
+
   return (
     <div className="relative">
-      {/* Cover */}
-      <div className="relative h-40 w-full overflow-hidden sm:h-52 lg:h-56">
+      {/* Cover banner — the backdrop, sitting behind everything */}
+      <div className="relative -z-10 h-40 w-full overflow-hidden sm:h-52 lg:h-56">
         <Image
           src={bannerSrc}
           alt={community.name}
@@ -54,8 +73,8 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" aria-hidden />
       </div>
 
-      {/* Identity card overlapping the cover — always white to match the design */}
-      <div className="px-3 lg:px-6">
+      {/* Identity card overlapping the cover — always opaque white, on top of the banner */}
+      <div className="relative z-10 px-3 lg:px-6">
         <div className="-mt-14 rounded-xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 items-start gap-4">
@@ -86,15 +105,11 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 caption-medium text-gray-500">
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="size-4" aria-hidden />
-                    {profile.city}
+                    {location}
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <Phone className="size-4" aria-hidden />
-                    {profile.phone}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="size-4" aria-hidden />
-                    {profile.officeHours}
+                    {phone}
                   </span>
                 </div>
               </div>
