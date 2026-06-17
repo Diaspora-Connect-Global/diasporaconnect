@@ -167,6 +167,19 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
     return { pathname, query };
   }, [pathname, searchParams]);
 
+  /** Href to the apply wizard for this service (`service=<id>&apply=1`). */
+  const applyHref = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', 'services');
+    params.set('service', serviceId);
+    params.set('apply', '1');
+    const query: Record<string, string> = {};
+    params.forEach((value, name) => {
+      query[name] = value;
+    });
+    return { pathname, query };
+  }, [pathname, searchParams, serviceId]);
+
   /** Href to another service's detail view. */
   function serviceHref(id: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -288,12 +301,13 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
 
             {/* Actions */}
             <div className="flex w-full flex-shrink-0 flex-col gap-2 lg:w-56">
-              <button
-                type="button"
-                className="label-medium w-full rounded-lg bg-surface-brand px-4 py-2.5 text-text-white transition-colors hover:opacity-90"
+              <Link
+                href={applyHref}
+                scroll={false}
+                className="label-medium w-full rounded-lg bg-surface-brand px-4 py-2.5 text-center text-text-white transition-colors hover:opacity-90"
               >
                 Apply for this Service
-              </button>
+              </Link>
               <div className="flex gap-2">
                 <button
                   type="button"

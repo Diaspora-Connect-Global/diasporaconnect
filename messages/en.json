@@ -703,7 +703,136 @@
                 "serviceHoursAvail": "We are available during office hours",
                 "closedDays": "Closed on Weekends & Public Holidays",
                 "secureTitle": "Secure. Official. Trusted.",
-                "secureBody": "All services are provided directly by {name}. Your data is secure with us."
+                "secureBody": "All services are provided directly by {name}. Your data is secure with us.",
+                "apply": {
+                    "breadcrumb": "Apply",
+                    "back": "Back",
+                    "continue": "Continue",
+                    "loading": "Loading service…",
+                    "notFound": "This service could not be found. It may have been removed.",
+                    "title": "Apply for {name}",
+                    "processingTime": "Est. 10–15 working days",
+                    "stepOf": "Step {current} of {total}",
+                    "steps": {
+                        "eligibility": "Eligibility",
+                        "documents": "Documents",
+                        "application": "Application",
+                        "review": "Review",
+                        "payment": "Payment",
+                        "submit": "Submit"
+                    },
+                    "eligibility": {
+                        "title": "Check your eligibility",
+                        "subtitle": "Answer a few quick questions to confirm you can apply for this service.",
+                        "yes": "Yes",
+                        "no": "No",
+                        "questions": {
+                            "validPassport": "Do you hold a valid passport?",
+                            "residingAbroad": "Are you currently residing abroad?",
+                            "overEighteen": "Are you 18 years or older?"
+                        }
+                    },
+                    "documents": {
+                        "title": "Upload your documents",
+                        "subtitle": "Attach the documents required for this application.",
+                        "accepted": "Accepted formats: PDF, JPG, PNG · Max size 10 MB per file.",
+                        "choose": "Choose file",
+                        "replace": "Replace",
+                        "notUploaded": "No file selected",
+                        "fallback": {
+                            "passportCopy": "Passport copy",
+                            "passportPhoto": "Passport photo",
+                            "proofOfResidence": "Proof of residence"
+                        }
+                    },
+                    "application": {
+                        "title": "Application details",
+                        "subtitle": "Fill in the information required to process your request.",
+                        "selectPlaceholder": "Select an option",
+                        "personalInfo": "Personal Information",
+                        "travelDetails": "Travel Details",
+                        "fallback": {
+                            "fullName": "Full name",
+                            "email": "Email",
+                            "phone": "Phone",
+                            "dateOfBirth": "Date of birth",
+                            "purpose": "Purpose of travel",
+                            "intendedDate": "Intended date"
+                        },
+                        "purposes": {
+                            "tourism": "Tourism",
+                            "business": "Business",
+                            "study": "Study",
+                            "family": "Family"
+                        }
+                    },
+                    "review": {
+                        "title": "Review your application",
+                        "subtitle": "Check everything is correct before proceeding to payment.",
+                        "edit": "Edit",
+                        "missing": "Not uploaded",
+                        "proceed": "Proceed to Payment"
+                    },
+                    "payment": {
+                        "title": "Payment",
+                        "subtitle": "Review the fee breakdown and choose how you would like to pay.",
+                        "serviceFee": "Service fee",
+                        "processingFee": "Processing fee",
+                        "total": "Total",
+                        "free": "Free",
+                        "freeNote": "This service is free of charge. No payment is required — submit your application to continue.",
+                        "chooseMethod": "Choose a payment method",
+                        "comingSoon": "Coming soon",
+                        "payCta": "Pay & Submit",
+                        "submitCta": "Submit Application",
+                        "methods": {
+                            "card": "Card",
+                            "cardSub": "Visa, Mastercard, American Express",
+                            "mobile": "Mobile Money",
+                            "mobileSub": "Pay with your mobile wallet",
+                            "bank": "Bank Transfer",
+                            "wallet": "Wallet",
+                            "usdt": "USDT"
+                        }
+                    },
+                    "success": {
+                        "title": "Application Submitted Successfully",
+                        "subtitle": "Your request has been received. Keep your reference number for tracking.",
+                        "requestNumber": "Request number",
+                        "status": "Status",
+                        "paymentStatus": "Payment status",
+                        "whatsNext": "What's Next",
+                        "next": {
+                            "review": "Our team will review your application and documents.",
+                            "notify": "You'll be notified by email once there's an update.",
+                            "track": "Track the progress anytime from Track Requests."
+                        },
+                        "trackCta": "Track Request",
+                        "returnCta": "Return to Services"
+                    },
+                    "summary": {
+                        "title": "Service Summary",
+                        "service": "Service",
+                        "fee": "Fee",
+                        "processing": "Processing",
+                        "providedBy": "Provided by",
+                        "providedByValue": "{name}"
+                    },
+                    "help": {
+                        "title": "Need Help?",
+                        "sendMessage": "Send a Message"
+                    },
+                    "resources": {
+                        "title": "Resources",
+                        "applicationGuide": "Application Guide",
+                        "requiredDocuments": "Required Documents",
+                        "faq": "FAQ",
+                        "travelAdvisory": "Travel Advisory"
+                    },
+                    "errors": {
+                        "submitFailed": "We couldn't submit your application. Please try again."
+                    }
+                }
             },
             "track": {
                 "title": "Track My Requests",

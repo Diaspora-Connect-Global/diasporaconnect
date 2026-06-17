@@ -33,6 +33,7 @@ import {
 import { EMBASSY_POPULAR_SERVICES, type EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
 import { EmbassyServiceDetail } from './EmbassyServiceDetail';
+import { EmbassyServiceApply } from './EmbassyServiceApply';
 
 interface Tone {
   ring: string;
@@ -93,6 +94,7 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedServiceId = searchParams.get('service');
+  const applyMode = searchParams.get('apply') === '1';
 
   const { data, loading } = useQuery<ServiceRequestTypesResponse>(SERVICE_REQUEST_TYPES, {
     variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
@@ -121,6 +123,18 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
         (s.description ?? '').toLowerCase().includes(q),
     );
   }, [data, search]);
+
+  // Apply wizard — `?service=<id>&apply=1` replaces the grid with the 6-step
+  // application flow. Checked before the detail view so apply mode wins.
+  if (selectedServiceId && applyMode) {
+    return (
+      <EmbassyServiceApply
+        serviceId={selectedServiceId}
+        community={community}
+        profile={profile}
+      />
+    );
+  }
 
   // Detail view — when `?service=<id>` is present, replace the grid entirely.
   if (selectedServiceId) {

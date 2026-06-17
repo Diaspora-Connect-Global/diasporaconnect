@@ -118,6 +118,120 @@ export interface MyServiceRequestsResponse {
   myServiceRequests: ServiceRequestSummary[];
 }
 
+/* ----------------------------------------------------------------------------
+   APPLY-FOR-SERVICE mutations (verified live against api.diaspoplug.net with a
+   real test submit as stephenbedz1 — see field shapes below).
+
+   Submit ordering: `submitServiceRequest` CREATES the request (and, when fee>0,
+   the backend creates the payment intent internally, returned as
+   `paymentIntentId`). For a €0 service the request returns status SUBMITTED with
+   a null paymentIntentId immediately. Documents are uploaded AFTER submit
+   because the upload/add mutations require the new `requestId`.
+   ---------------------------------------------------------------------------- */
+
+/**
+ * Creates a service request. `input` is `SubmitServiceRequestInput!` (NOTE: the
+ * live GraphQL type is `SubmitServiceRequestInput`, NOT `SubmitRequestInput`).
+ * `formResponsesJson` is a JSON-stringified `{ [formFieldKey]: value }` map.
+ * `ownerType` is the enum `ServiceRequestOwnerType` (COMMUNITY for embassies).
+ */
+export const SUBMIT_SERVICE_REQUEST = gql`
+  mutation SubmitServiceRequest($input: SubmitServiceRequestInput!) {
+    submitServiceRequest(input: $input) {
+      id
+      requestNumber
+      status
+      feeAmountMinor
+      feeCurrency
+      paymentIntentId
+      paymentStatus
+      escrowId
+    }
+  }
+`;
+
+/**
+ * Step 1 of the document upload: get a signed PUT url for one file. `requestId`
+ * is `ID!`, `contentType`/`fileName` are `String!`, `formFieldKey` is optional
+ * `String` (ties the doc to a specific FILE_UPLOAD form field). Returns
+ * `{ documentId, uploadUrl, storageKey, expiresAt }`. PUT the raw file bytes to
+ * `uploadUrl`, then call ADD_SERVICE_REQUEST_DOCUMENT with the `documentId`.
+ */
+export const REQUEST_SERVICE_REQUEST_DOC_UPLOAD_URL = gql`
+  mutation RequestServiceRequestDocumentUploadUrl(
+    $requestId: ID!
+    $contentType: String!
+    $fileName: String!
+    $formFieldKey: String
+  ) {
+    requestServiceRequestDocumentUploadUrl(
+      requestId: $requestId
+      contentType: $contentType
+      fileName: $fileName
+      formFieldKey: $formFieldKey
+    ) {
+      documentId
+      uploadUrl
+      storageKey
+      expiresAt
+    }
+  }
+`;
+
+/**
+ * Step 2 of the document upload: register the uploaded blob against the request.
+ * `requestId`/`documentId` are `ID!`. The live `ServiceRequestDocument` type
+ * exposes ONLY `{ id, fileName, sizeBytes, storageKey, formFieldKey }` — it has
+ * NO `status`, `contentType`, or `createdAt` field (verified).
+ */
+export const ADD_SERVICE_REQUEST_DOCUMENT = gql`
+  mutation AddServiceRequestDocument($requestId: ID!, $documentId: ID!) {
+    addServiceRequestDocument(requestId: $requestId, documentId: $documentId) {
+      id
+      fileName
+      sizeBytes
+      storageKey
+      formFieldKey
+    }
+  }
+`;
+
+export interface SubmitServiceRequestResult {
+  id: string;
+  requestNumber: string;
+  status: string;
+  feeAmountMinor?: number | null;
+  feeCurrency?: string | null;
+  paymentIntentId?: string | null;
+  paymentStatus?: string | null;
+  escrowId?: string | null;
+}
+
+export interface SubmitServiceRequestResponse {
+  submitServiceRequest: SubmitServiceRequestResult;
+}
+
+export interface ServiceRequestDocUploadUrl {
+  documentId: string;
+  uploadUrl: string;
+  storageKey: string;
+  expiresAt?: string | null;
+}
+
+export interface RequestDocUploadUrlResponse {
+  requestServiceRequestDocumentUploadUrl: ServiceRequestDocUploadUrl;
+}
+
+export interface AddServiceRequestDocumentResponse {
+  addServiceRequestDocument: {
+    id: string;
+    fileName: string;
+    sizeBytes?: number | null;
+    storageKey: string;
+    formFieldKey?: string | null;
+  };
+}
+
 /* ============================================================================
    SUPPORT-SERVICE (via api-gateway GraphQL)
    Case types are likewise scoped per owner. Live schema fields: id, code,
