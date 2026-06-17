@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import {
   Search,
   Info,
@@ -30,6 +32,7 @@ import {
 } from '@/services/gql/embassyServices';
 import { EMBASSY_POPULAR_SERVICES, type EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { EmbassyServiceDetail } from './EmbassyServiceDetail';
 
 interface Tone {
   ring: string;
@@ -87,11 +90,26 @@ interface EmbassyServicesTabProps {
 export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabProps) {
   const t = useTranslations('community.embassy.services');
   const [search, setSearch] = useState('');
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedServiceId = searchParams.get('service');
 
   const { data, loading } = useQuery<ServiceRequestTypesResponse>(SERVICE_REQUEST_TYPES, {
     variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
     fetchPolicy: 'cache-and-network',
   });
+
+  /** `?tab=services&service=<id>` link for a service card's "View Details". */
+  function detailHref(id: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', 'services');
+    params.set('service', id);
+    const query: Record<string, string> = {};
+    params.forEach((value, name) => {
+      query[name] = value;
+    });
+    return { pathname, query };
+  }
 
   const services = useMemo(() => {
     const all = (data?.serviceRequestTypes ?? []).filter((s) => s.isActive !== false);
@@ -103,6 +121,17 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
         (s.description ?? '').toLowerCase().includes(q),
     );
   }, [data, search]);
+
+  // Detail view — when `?service=<id>` is present, replace the grid entirely.
+  if (selectedServiceId) {
+    return (
+      <EmbassyServiceDetail
+        serviceId={selectedServiceId}
+        community={community}
+        profile={profile}
+      />
+    );
+  }
 
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-3 py-6 lg:grid-cols-[1fr_20rem] lg:px-6">
@@ -155,12 +184,13 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
                           {svc.description}
                         </p>
                       )}
-                      <button
-                        type="button"
-                        className="label-medium mt-3 w-full rounded-lg border border-border-subtle py-1.5 text-text-brand transition-colors hover:bg-surface-subtle"
+                      <Link
+                        href={detailHref(svc.id)}
+                        scroll={false}
+                        className="label-medium mt-3 block w-full rounded-lg border border-border-subtle py-1.5 text-center text-text-brand transition-colors hover:bg-surface-subtle"
                       >
                         {t('viewDetails')}
-                      </button>
+                      </Link>
                     </div>
                   );
                 })}
