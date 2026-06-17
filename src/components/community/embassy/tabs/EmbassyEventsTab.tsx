@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useQuery } from '@apollo/client/react';
 import {
   Search,
-  Plus,
   CalendarDays,
   MapPin,
   ChevronLeft,
@@ -419,13 +418,6 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                       className="w-full rounded-lg border border-border-subtle bg-surface-default py-2 pl-9 pr-3 body-small text-text-primary outline-none focus:border-border-brand"
                     />
                   </div>
-                  <button
-                    type="button"
-                    className="label-medium inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-white transition-colors hover:bg-blue-700"
-                  >
-                    <Plus className="size-4" aria-hidden />
-                    Create Event
-                  </button>
                 </div>
               </div>
 

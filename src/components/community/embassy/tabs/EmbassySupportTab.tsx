@@ -18,8 +18,22 @@ interface EmbassySupportTabProps {
   communityId: string;
 }
 
+/** ISO alpha-2 code ("FR") → country name ("France"); full names pass through. */
+function countryLabel(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  if (/^[A-Za-z]{2}$/.test(v)) {
+    try {
+      return new Intl.DisplayNames(['en'], { type: 'region' }).of(v.toUpperCase()) ?? v;
+    } catch {
+      return v;
+    }
+  }
+  return v;
+}
+
 /** Support = support-service case-type topics + the embassy's contact / emergency info. */
-export function EmbassySupportTab({ profile, community, communityId }: EmbassySupportTabProps) {
+export function EmbassySupportTab({ community, communityId }: EmbassySupportTabProps) {
   const t = useTranslations('community.embassy');
 
   const { data, loading } = useQuery<SupportCaseTypesResponse>(SUPPORT_CASE_TYPES, {
@@ -27,10 +41,16 @@ export function EmbassySupportTab({ profile, community, communityId }: EmbassySu
     fetchPolicy: 'cache-and-network',
   });
 
-  // Backend contact fields fall back to the mock profile when null/empty.
-  const phone = community.contactPhone || profile.phone;
-  const email = community.contactEmail || profile.email;
-  const address = community.address || profile.addressLine;
+  // Backend contact fields only — no mock fallback (blank when the backend is empty).
+  const phone = community.contactPhone ?? '';
+  const email = community.contactEmail ?? '';
+  // Full address = street + country (city is part of the address string).
+  const street = community.address ?? '';
+  const countryName = countryLabel(community.locationCountry);
+  const fullAddress =
+    countryName && street && !street.toLowerCase().includes(countryName.toLowerCase())
+      ? `${street}, ${countryName}`
+      : street || countryName || '';
 
   const topics = (data?.caseTypes ?? []).filter((c) => c.isActive !== false);
 
@@ -81,8 +101,8 @@ export function EmbassySupportTab({ profile, community, communityId }: EmbassySu
             {t('support.emergencyTitle')}
           </p>
           <p className="body-small mt-1 text-text-secondary">{t('support.emergencyBody')}</p>
-          <a href={`tel:${profile.emergencyLine}`} className="mt-3 block">
-            <ButtonType2 className="w-full justify-center py-2">{profile.emergencyLine}</ButtonType2>
+          <a href={`tel:${phone}`} className="mt-3 block">
+            <ButtonType2 className="w-full justify-center py-2">{phone}</ButtonType2>
           </a>
         </div>
 
@@ -99,7 +119,7 @@ export function EmbassySupportTab({ profile, community, communityId }: EmbassySu
             </p>
             <p className="caption-medium flex items-start gap-2 text-text-secondary">
               <MapPin className="size-4 flex-shrink-0" aria-hidden />
-              {address}
+              {fullAddress}
             </p>
           </CardContent>
         </Card>
