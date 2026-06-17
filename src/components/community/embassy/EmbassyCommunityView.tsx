@@ -75,15 +75,15 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
   return (
     <div className="mx-auto min-h-full">
       <div className="min-w-0 flex-1">
-        {/* Fixed header + tab bar; only the tab content scrolls (works on mobile).
-            `min-h-0` lets the flex-1 child actually overflow-scroll inside the
-            fixed-height column. */}
-        <div className="flex h-app-inner flex-col">
-          <EmbassyHeader community={community} profile={profile} membership={membership} />
-          <EmbassyTabBar active={activeTab} />
-          <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide">
-            {renderActiveTab()}
+        {/* One scroll area: everything scrolls together, but the header + tab bar
+            are sticky so they pin to the top and the scroll only moves the tab
+            content past them. Single container = reliable on mobile. */}
+        <div className="h-app-inner overflow-y-auto scrollbar-hide">
+          <div className="sticky top-0 z-20 bg-surface-default">
+            <EmbassyHeader community={community} profile={profile} membership={membership} />
+            <EmbassyTabBar active={activeTab} />
           </div>
+          {renderActiveTab()}
         </div>
       </div>
     </div>

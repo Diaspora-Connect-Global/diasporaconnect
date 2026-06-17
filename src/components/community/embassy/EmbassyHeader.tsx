@@ -59,9 +59,9 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
   const location = countryLabel(community.locationCountry) || community.address || profile.city;
 
   return (
-    <div className="relative">
-      {/* Cover banner — the backdrop, sitting behind everything */}
-      <div className="relative -z-10 h-40 w-full overflow-hidden sm:h-52 lg:h-56">
+    <div className="relative overflow-hidden">
+      {/* Banner backdrop — fills the whole header, down to the tab bar */}
+      <div className="absolute inset-0 -z-10">
         <Image
           src={bannerSrc}
           alt={community.name}
@@ -73,9 +73,10 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" aria-hidden />
       </div>
 
-      {/* Identity card overlapping the cover — always opaque white, on top of the banner */}
-      <div className="relative z-10 px-3 lg:px-6">
-        <div className="-mt-14 rounded-xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
+      {/* Identity card floating on the banner — banner shows above it and below it
+          (the bottom padding leaves banner touching the tab bar). */}
+      <div className="relative z-10 px-3 pt-20 pb-8 lg:px-6">
+        <div className="rounded-xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 items-start gap-4">
               <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border border-border-subtle bg-surface-default sm:h-24 sm:w-24">

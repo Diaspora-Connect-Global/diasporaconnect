@@ -630,9 +630,22 @@ export const GET_EVENTS_BY_OWNER = gql`
       events {
         id
         title
+        description
         status
+        visibility
         startAt
         endAt
+        eventCategory
+        locationType
+        locationDetails {
+          type
+          venueName
+          address
+          city
+          country
+          virtualLink
+          platform
+        }
         registrationCount
         availableSpots
         isPaid
