@@ -646,6 +646,82 @@
             "cancelRequest": "Annuler la demande",
             "leave": "Quitter"
         },
+        "embassy": {
+            "officialVerified": "Ambassade officielle vérifiée",
+            "comingSoon": "Cette section arrive bientôt.",
+            "tabs": {
+                "home": "Accueil",
+                "updates": "Actualités",
+                "services": "Services",
+                "trackRequests": "Suivi des demandes",
+                "events": "Événements",
+                "verifiedServices": "Services vérifiés",
+                "support": "Assistance",
+                "community": "Communauté"
+            },
+            "home": {
+                "quickActions": "Actions rapides",
+                "emergencyTitle": "Alerte d'urgence",
+                "emergencyBody": "Restez informé et suivez les mises à jour officielles de {name}.",
+                "viewAlert": "Voir l'alerte",
+                "latestUpdates": "Dernières actualités",
+                "seeAll": "Tout voir",
+                "loadingUpdates": "Chargement des actualités…",
+                "noUpdates": "Aucune actualité pour le moment.",
+                "upcomingEvents": "Événements à venir",
+                "viewAllEvents": "Voir tous les événements",
+                "importantResources": "Ressources importantes",
+                "needHelp": "Besoin d'aide ?",
+                "needHelpBody": "Notre équipe consulaire est là pour vous aider.",
+                "contactUs": "Nous contacter"
+            },
+            "events": {
+                "title": "Événements",
+                "subtitle": "Restez connecté et participez aux prochains événements.",
+                "loading": "Chargement des événements…",
+                "empty": "Aucun événement pour le moment.",
+                "going": "{count} participants",
+                "paid": "Payant"
+            },
+            "services": {
+                "title": "Services de l'ambassade",
+                "subtitle": "Accédez aux services consulaires et administratifs officiels.",
+                "loading": "Chargement des services…",
+                "empty": "Aucun service disponible pour le moment.",
+                "viewDetails": "Voir les détails"
+            },
+            "track": {
+                "title": "Suivre mes demandes",
+                "subtitle": "Consultez l'état et l'avancement de toutes vos demandes au même endroit.",
+                "loading": "Chargement des demandes…",
+                "empty": "Vous n'avez aucune demande pour le moment.",
+                "request": "Demande",
+                "submitted": "Soumise",
+                "steps": {
+                    "submitted": "Soumise",
+                    "review": "Examen",
+                    "approved": "Approuvée",
+                    "completed": "Terminée"
+                }
+            },
+            "support": {
+                "title": "Comment pouvons-nous vous aider ?",
+                "subtitle": "Choisissez un sujet ou contactez-nous directement.",
+                "loading": "Chargement des sujets…",
+                "empty": "Aucun sujet d'assistance pour le moment.",
+                "emergencyTitle": "Assistance d'urgence",
+                "emergencyBody": "Pour les situations urgentes nécessitant une assistance immédiate.",
+                "contactTitle": "Contacter l'ambassade"
+            },
+            "community": {
+                "overview": "Aperçu de la communauté",
+                "members": "Membres",
+                "discussions": "Discussions",
+                "pending": "En attente",
+                "discussionsTitle": "Discussions",
+                "noDiscussions": "Aucune discussion pour le moment."
+            }
+        },
         "joined": "Rejoint",
         "noCommunitiesJoined": "Aucune communauté rejointe pour l'instant.",
         "noCommunitiesFound": "Aucune communauté trouvée. Essayez d'actualiser la page ou d'ajuster votre recherche.",

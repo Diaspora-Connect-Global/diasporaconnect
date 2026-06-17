@@ -649,6 +649,82 @@
             "cancelRequest": "Cancel request",
             "leave": "Leave"
         },
+        "embassy": {
+            "officialVerified": "Official verified embassy",
+            "comingSoon": "This section is coming soon.",
+            "tabs": {
+                "home": "Home",
+                "updates": "Updates",
+                "services": "Services",
+                "trackRequests": "Track Requests",
+                "events": "Events",
+                "verifiedServices": "Verified Services",
+                "support": "Support",
+                "community": "Community"
+            },
+            "home": {
+                "quickActions": "Quick Actions",
+                "emergencyTitle": "Emergency Alert",
+                "emergencyBody": "Stay informed and follow official updates from {name}.",
+                "viewAlert": "View Alert",
+                "latestUpdates": "Latest Updates",
+                "seeAll": "See All",
+                "loadingUpdates": "Loading updates…",
+                "noUpdates": "No updates yet.",
+                "upcomingEvents": "Upcoming Events",
+                "viewAllEvents": "View All Events",
+                "importantResources": "Important Resources",
+                "needHelp": "Need Help?",
+                "needHelpBody": "Our consular team is here to assist you.",
+                "contactUs": "Contact Us"
+            },
+            "events": {
+                "title": "Events",
+                "subtitle": "Stay connected and participate in upcoming events.",
+                "loading": "Loading events…",
+                "empty": "No events yet.",
+                "going": "{count} going",
+                "paid": "Paid"
+            },
+            "services": {
+                "title": "Embassy Services",
+                "subtitle": "Access official consular and administrative services.",
+                "loading": "Loading services…",
+                "empty": "No services available yet.",
+                "viewDetails": "View Details"
+            },
+            "track": {
+                "title": "Track My Requests",
+                "subtitle": "View the status and progress of all your requests in one place.",
+                "loading": "Loading requests…",
+                "empty": "You have no requests yet.",
+                "request": "Request",
+                "submitted": "Submitted",
+                "steps": {
+                    "submitted": "Submitted",
+                    "review": "Review",
+                    "approved": "Approved",
+                    "completed": "Completed"
+                }
+            },
+            "support": {
+                "title": "How can we help you?",
+                "subtitle": "Choose a topic or contact us directly.",
+                "loading": "Loading topics…",
+                "empty": "No support topics yet.",
+                "emergencyTitle": "Emergency Assistance",
+                "emergencyBody": "For urgent situations requiring immediate assistance.",
+                "contactTitle": "Contact the Embassy"
+            },
+            "community": {
+                "overview": "Community Overview",
+                "members": "Members",
+                "discussions": "Discussions",
+                "pending": "Pending",
+                "discussionsTitle": "Discussions",
+                "noDiscussions": "No discussions yet."
+            }
+        },
         "payment": {
             "title": "Complete your membership payment",
             "descriptionWithName": "Pay to join {name}.",

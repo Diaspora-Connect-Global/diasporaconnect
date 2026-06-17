@@ -646,6 +646,82 @@
             "cancelRequest": "Annulla richiesta",
             "leave": "Esci"
         },
+        "embassy": {
+            "officialVerified": "Ambasciata ufficiale verificata",
+            "comingSoon": "Questa sezione sarà presto disponibile.",
+            "tabs": {
+                "home": "Home",
+                "updates": "Aggiornamenti",
+                "services": "Servizi",
+                "trackRequests": "Stato richieste",
+                "events": "Eventi",
+                "verifiedServices": "Servizi verificati",
+                "support": "Assistenza",
+                "community": "Comunità"
+            },
+            "home": {
+                "quickActions": "Azioni rapide",
+                "emergencyTitle": "Avviso di emergenza",
+                "emergencyBody": "Resta informato e segui gli aggiornamenti ufficiali di {name}.",
+                "viewAlert": "Vedi avviso",
+                "latestUpdates": "Ultimi aggiornamenti",
+                "seeAll": "Vedi tutto",
+                "loadingUpdates": "Caricamento aggiornamenti…",
+                "noUpdates": "Nessun aggiornamento.",
+                "upcomingEvents": "Prossimi eventi",
+                "viewAllEvents": "Vedi tutti gli eventi",
+                "importantResources": "Risorse importanti",
+                "needHelp": "Hai bisogno di aiuto?",
+                "needHelpBody": "Il nostro team consolare è qui per assisterti.",
+                "contactUs": "Contattaci"
+            },
+            "events": {
+                "title": "Eventi",
+                "subtitle": "Resta connesso e partecipa ai prossimi eventi.",
+                "loading": "Caricamento eventi…",
+                "empty": "Nessun evento per il momento.",
+                "going": "{count} partecipanti",
+                "paid": "A pagamento"
+            },
+            "services": {
+                "title": "Servizi dell'ambasciata",
+                "subtitle": "Accedi ai servizi consolari e amministrativi ufficiali.",
+                "loading": "Caricamento servizi…",
+                "empty": "Nessun servizio disponibile per il momento.",
+                "viewDetails": "Vedi dettagli"
+            },
+            "track": {
+                "title": "Monitora le mie richieste",
+                "subtitle": "Visualizza lo stato e l'avanzamento di tutte le tue richieste in un unico posto.",
+                "loading": "Caricamento richieste…",
+                "empty": "Non hai ancora richieste.",
+                "request": "Richiesta",
+                "submitted": "Inviata",
+                "steps": {
+                    "submitted": "Inviata",
+                    "review": "In esame",
+                    "approved": "Approvata",
+                    "completed": "Completata"
+                }
+            },
+            "support": {
+                "title": "Come possiamo aiutarti?",
+                "subtitle": "Scegli un argomento o contattaci direttamente.",
+                "loading": "Caricamento argomenti…",
+                "empty": "Nessun argomento di assistenza per il momento.",
+                "emergencyTitle": "Assistenza di emergenza",
+                "emergencyBody": "Per situazioni urgenti che richiedono assistenza immediata.",
+                "contactTitle": "Contatta l'ambasciata"
+            },
+            "community": {
+                "overview": "Panoramica della comunità",
+                "members": "Membri",
+                "discussions": "Discussioni",
+                "pending": "In attesa",
+                "discussionsTitle": "Discussioni",
+                "noDiscussions": "Nessuna discussione per il momento."
+            }
+        },
         "joined": "Iscritto",
         "noCommunitiesJoined": "Nessuna comunità ancora iscritta.",
         "noCommunitiesFound": "Nessuna comunità trovata. Prova ad aggiornare la pagina o a modificare la ricerca.",

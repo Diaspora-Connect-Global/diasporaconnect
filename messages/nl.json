@@ -649,6 +649,82 @@
             "cancelRequest": "Verzoek annuleren",
             "leave": "Verlaten"
         },
+        "embassy": {
+            "officialVerified": "Officieel geverifieerde ambassade",
+            "comingSoon": "Dit gedeelte komt binnenkort.",
+            "tabs": {
+                "home": "Home",
+                "updates": "Updates",
+                "services": "Diensten",
+                "trackRequests": "Verzoeken volgen",
+                "events": "Evenementen",
+                "verifiedServices": "Geverifieerde diensten",
+                "support": "Ondersteuning",
+                "community": "Community"
+            },
+            "home": {
+                "quickActions": "Snelle acties",
+                "emergencyTitle": "Noodmelding",
+                "emergencyBody": "Blijf op de hoogte en volg officiële updates van {name}.",
+                "viewAlert": "Bekijk melding",
+                "latestUpdates": "Laatste updates",
+                "seeAll": "Alles bekijken",
+                "loadingUpdates": "Updates laden…",
+                "noUpdates": "Nog geen updates.",
+                "upcomingEvents": "Aankomende evenementen",
+                "viewAllEvents": "Alle evenementen bekijken",
+                "importantResources": "Belangrijke bronnen",
+                "needHelp": "Hulp nodig?",
+                "needHelpBody": "Ons consulaire team staat voor u klaar.",
+                "contactUs": "Contact"
+            },
+            "events": {
+                "title": "Evenementen",
+                "subtitle": "Blijf verbonden en neem deel aan komende evenementen.",
+                "loading": "Evenementen laden…",
+                "empty": "Nog geen evenementen.",
+                "going": "{count} aanwezig",
+                "paid": "Betaald"
+            },
+            "services": {
+                "title": "Ambassadediensten",
+                "subtitle": "Toegang tot officiële consulaire en administratieve diensten.",
+                "loading": "Diensten laden…",
+                "empty": "Nog geen diensten beschikbaar.",
+                "viewDetails": "Details bekijken"
+            },
+            "track": {
+                "title": "Mijn verzoeken volgen",
+                "subtitle": "Bekijk de status en voortgang van al uw verzoeken op één plek.",
+                "loading": "Verzoeken laden…",
+                "empty": "U heeft nog geen verzoeken.",
+                "request": "Verzoek",
+                "submitted": "Ingediend",
+                "steps": {
+                    "submitted": "Ingediend",
+                    "review": "Beoordeling",
+                    "approved": "Goedgekeurd",
+                    "completed": "Voltooid"
+                }
+            },
+            "support": {
+                "title": "Hoe kunnen we u helpen?",
+                "subtitle": "Kies een onderwerp of neem rechtstreeks contact met ons op.",
+                "loading": "Onderwerpen laden…",
+                "empty": "Nog geen ondersteuningsonderwerpen.",
+                "emergencyTitle": "Noodhulp",
+                "emergencyBody": "Voor dringende situaties die onmiddellijke hulp vereisen.",
+                "contactTitle": "Contact met de ambassade"
+            },
+            "community": {
+                "overview": "Community-overzicht",
+                "members": "Leden",
+                "discussions": "Discussies",
+                "pending": "In behandeling",
+                "discussionsTitle": "Discussies",
+                "noDiscussions": "Nog geen discussies."
+            }
+        },
         "payment": {
             "title": "Complete your membership payment",
             "descriptionWithName": "Pay to join {name}.",

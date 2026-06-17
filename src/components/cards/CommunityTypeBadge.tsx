@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { normalizeCommunityTypeName as normalize } from '@/lib/communityView';
 
 export interface CommunityTypeBadgeProps {
   /** Community type as returned by the backend; `null`/absent renders nothing. */
@@ -28,16 +29,6 @@ export interface CommunityTypeBadgeProps {
   size?: 'card' | 'detail';
   /** Allow consumer to add tracking / spacing classes. */
   className?: string;
-}
-
-/** Lowercase, trim, normalize apostrophes/whitespace so map keys match the
- *  backend's display name regardless of straight vs curly quotes. */
-function normalize(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/[‘’ʼ`]/g, "'")
-    .replace(/\s+/g, ' ');
 }
 
 /**

@@ -646,6 +646,82 @@
             "cancelRequest": "Anfrage stornieren",
             "leave": "Verlassen"
         },
+        "embassy": {
+            "officialVerified": "Offiziell verifizierte Botschaft",
+            "comingSoon": "Dieser Bereich ist bald verfügbar.",
+            "tabs": {
+                "home": "Start",
+                "updates": "Neuigkeiten",
+                "services": "Dienste",
+                "trackRequests": "Anfragen verfolgen",
+                "events": "Veranstaltungen",
+                "verifiedServices": "Verifizierte Dienste",
+                "support": "Support",
+                "community": "Community"
+            },
+            "home": {
+                "quickActions": "Schnellaktionen",
+                "emergencyTitle": "Notfallwarnung",
+                "emergencyBody": "Bleiben Sie informiert und folgen Sie den offiziellen Updates von {name}.",
+                "viewAlert": "Warnung ansehen",
+                "latestUpdates": "Neueste Updates",
+                "seeAll": "Alle anzeigen",
+                "loadingUpdates": "Updates werden geladen…",
+                "noUpdates": "Noch keine Updates.",
+                "upcomingEvents": "Kommende Veranstaltungen",
+                "viewAllEvents": "Alle Veranstaltungen ansehen",
+                "importantResources": "Wichtige Ressourcen",
+                "needHelp": "Brauchen Sie Hilfe?",
+                "needHelpBody": "Unser Konsularteam steht Ihnen zur Verfügung.",
+                "contactUs": "Kontakt"
+            },
+            "events": {
+                "title": "Veranstaltungen",
+                "subtitle": "Bleiben Sie in Verbindung und nehmen Sie an kommenden Veranstaltungen teil.",
+                "loading": "Veranstaltungen werden geladen…",
+                "empty": "Noch keine Veranstaltungen.",
+                "going": "{count} Teilnehmer",
+                "paid": "Kostenpflichtig"
+            },
+            "services": {
+                "title": "Botschaftsdienste",
+                "subtitle": "Zugang zu offiziellen konsularischen und administrativen Diensten.",
+                "loading": "Dienste werden geladen…",
+                "empty": "Noch keine Dienste verfügbar.",
+                "viewDetails": "Details ansehen"
+            },
+            "track": {
+                "title": "Meine Anfragen verfolgen",
+                "subtitle": "Sehen Sie den Status und Fortschritt all Ihrer Anfragen an einem Ort.",
+                "loading": "Anfragen werden geladen…",
+                "empty": "Sie haben noch keine Anfragen.",
+                "request": "Anfrage",
+                "submitted": "Eingereicht",
+                "steps": {
+                    "submitted": "Eingereicht",
+                    "review": "Prüfung",
+                    "approved": "Genehmigt",
+                    "completed": "Abgeschlossen"
+                }
+            },
+            "support": {
+                "title": "Wie können wir Ihnen helfen?",
+                "subtitle": "Wählen Sie ein Thema oder kontaktieren Sie uns direkt.",
+                "loading": "Themen werden geladen…",
+                "empty": "Noch keine Support-Themen.",
+                "emergencyTitle": "Nothilfe",
+                "emergencyBody": "Für dringende Situationen, die sofortige Hilfe erfordern.",
+                "contactTitle": "Botschaft kontaktieren"
+            },
+            "community": {
+                "overview": "Community-Übersicht",
+                "members": "Mitglieder",
+                "discussions": "Diskussionen",
+                "pending": "Ausstehend",
+                "discussionsTitle": "Diskussionen",
+                "noDiscussions": "Noch keine Diskussionen."
+            }
+        },
         "joined": "Beigetreten",
         "noCommunitiesJoined": "Noch keiner Community beigetreten.",
         "noCommunitiesFound": "Keine Communities gefunden. Versuchen Sie, die Seite zu aktualisieren oder Ihre Suche anzupassen.",

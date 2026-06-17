@@ -27,6 +27,8 @@ import {
 import AccessSettingsForm from '@/components/cards/AccessSettingsForm';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { CommunityTypeBadge } from '@/components/cards/CommunityTypeBadge';
+import { resolveCommunityView } from '@/lib/communityView';
+import { EmbassyCommunityView } from '@/components/community/embassy/EmbassyCommunityView';
 import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
 import {
   toJoinPolicy,
@@ -537,6 +539,77 @@ export default function CommunityDetailPage() {
     );
   };
 
+  // Membership modals are identical for both the default and embassy views.
+  const membershipModals = (
+    <>
+      <ConfirmationModal
+        open={joinModalOpen}
+        onCancel={() => setJoinModalOpen(false)}
+        onConfirm={handleJoinConfirm}
+        title={canShowRequestToJoin ? 'Request to join community?' : tJoinModal('communityTitle')}
+        description=""
+        confirmText={canShowRequestToJoin ? t('actions.requestToJoin') : tActions('join')}
+        isLoading={joinLoading}
+      >
+        {renderJoinModalContent()}
+      </ConfirmationModal>
+
+      <ConfirmationModal
+        open={leaveModalOpen}
+        onCancel={() => setLeaveModalOpen(false)}
+        onConfirm={handleLeaveConfirm}
+        title={t('leaveCommunityTitle')}
+        description={t('leaveCommunityConfirm')}
+        confirmText={t('actions.leave')}
+        confirmVariant="destructive"
+        isLoading={leaveLoading}
+      />
+
+      {paymentEntity && (
+        <MembershipPaymentModal
+          open={paymentModalOpen}
+          onClose={handlePaymentClose}
+          entity={paymentEntity}
+          requestMembership={handlePaymentModalRequest}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+    </>
+  );
+
+  if (resolveCommunityView(community.communityType) === 'embassy') {
+    return (
+      <>
+        <EmbassyCommunityView
+          community={community}
+          posts={posts}
+          feedLoading={feedLoading}
+          displayMemberCount={displayMemberCount}
+          isActive={isActive}
+          isPending={isPending}
+          isSuspended={isSuspended}
+          isInviteOnly={isInviteOnly}
+          canShowJoin={canShowJoin}
+          canShowRequestToJoin={canShowRequestToJoin}
+          canLeave={canLeave}
+          canCancelRequest={canCancelRequest}
+          actionLoading={actionLoading}
+          joinLoading={joinLoading}
+          onJoinClick={handleJoinClick}
+          onLeaveClick={handleLeaveClick}
+          onCancelRequest={handleCancelRequest}
+          onLike={handleLike}
+          onSave={handleSave}
+          onShare={handleShare}
+          onSendComment={handleSendComment}
+          onDeletePost={(id) => setLocalPosts((prev) => prev.filter((p) => p.id !== id))}
+          showSidebar={showSidebar}
+        />
+        {membershipModals}
+      </>
+    );
+  }
+
   return (
     <div className="mx-auto lg:flex items-center justify-center min-h-full">
       {showSidebar && (
@@ -708,38 +781,7 @@ export default function CommunityDetailPage() {
         </div>
       </div>
 
-      <ConfirmationModal
-        open={joinModalOpen}
-        onCancel={() => setJoinModalOpen(false)}
-        onConfirm={handleJoinConfirm}
-        title={canShowRequestToJoin ? 'Request to join community?' : tJoinModal('communityTitle')}
-        description=""
-        confirmText={canShowRequestToJoin ? t('actions.requestToJoin') : tActions('join')}
-        isLoading={joinLoading}
-      >
-        {renderJoinModalContent()}
-      </ConfirmationModal>
-
-      <ConfirmationModal
-        open={leaveModalOpen}
-        onCancel={() => setLeaveModalOpen(false)}
-        onConfirm={handleLeaveConfirm}
-        title={t('leaveCommunityTitle')}
-        description={t('leaveCommunityConfirm')}
-        confirmText={t('actions.leave')}
-        confirmVariant="destructive"
-        isLoading={leaveLoading}
-      />
-
-      {paymentEntity && (
-        <MembershipPaymentModal
-          open={paymentModalOpen}
-          onClose={handlePaymentClose}
-          entity={paymentEntity}
-          requestMembership={handlePaymentModalRequest}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
+      {membershipModals}
     </div>
   );
 }
