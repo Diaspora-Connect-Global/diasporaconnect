@@ -182,6 +182,24 @@ export const GET_NETWORK_FEED = gql`
   ${FULL_POST_FRAGMENT}
 `;
 
+/**
+ * Trending hashtags (post-feed-service via gateway `trendingHashtags`).
+ *
+ * Backend type `TrendingHashtag` exposes `id`, `tag`, `usageCount`,
+ * `recentUsageCount`, `trend`. Input `GetTrendingHashtagsInput` carries
+ * `{ limit, timeRange }`. Returns `[]` (never null) and fails soft on the
+ * gateway, so consumers can fall back to placeholder copy if empty.
+ */
+export const GET_TRENDING_HASHTAGS = gql`
+  query GetTrendingHashtags($input: GetTrendingHashtagsInput) {
+    trendingHashtags(input: $input) {
+      id
+      tag
+      usageCount
+    }
+  }
+`;
+
 export const GET_POSTS_BY_HASHTAG = gql`
   query GetPostsByHashtag($input: GetPostsByHashtagInput!) {
     postsByHashtag(input: $input) {

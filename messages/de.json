@@ -688,7 +688,19 @@
                 "subtitle": "Zugang zu offiziellen konsularischen und administrativen Diensten.",
                 "loading": "Dienste werden geladen…",
                 "empty": "Noch keine Dienste verfügbar.",
-                "viewDetails": "Details ansehen"
+                "noResults": "Keine Dienste entsprechen Ihrer Suche.",
+                "viewDetails": "Details ansehen",
+                "searchPlaceholder": "Dienste suchen...",
+                "needHelpTitle": "Brauchen Sie Hilfe bei der Auswahl eines Dienstes?",
+                "needHelpBody": "Unser Team hilft Ihnen, den richtigen Dienst und die Anforderungen zu finden.",
+                "contactEmbassy": "Botschaft kontaktieren",
+                "popularServices": "Beliebte Dienste",
+                "viewAllServices": "Alle Dienste ansehen",
+                "serviceHours": "Servicezeiten",
+                "serviceHoursAvail": "Wir sind während der Bürozeiten erreichbar",
+                "closedDays": "An Wochenenden und Feiertagen geschlossen",
+                "secureTitle": "Sicher. Offiziell. Vertrauenswürdig.",
+                "secureBody": "Alle Dienste werden direkt von {name} bereitgestellt. Ihre Daten sind bei uns sicher."
             },
             "track": {
                 "title": "Meine Anfragen verfolgen",
@@ -718,6 +730,7 @@
                 "members": "Mitglieder",
                 "discussions": "Diskussionen",
                 "pending": "Ausstehend",
+                "featured": "Hervorgehobene Beiträge",
                 "discussionsTitle": "Diskussionen",
                 "noDiscussions": "Noch keine Diskussionen."
             }

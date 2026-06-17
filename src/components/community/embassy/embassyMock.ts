@@ -122,6 +122,72 @@ export const EMBASSY_RESOURCES: ReadonlyArray<EmbassyResource> = [
   },
 ];
 
+export interface EmbassyPopularService {
+  rank: string;
+  name: string;
+  subtitle: string;
+  /** lucide icon name resolved in the component */
+  icon: string;
+  /** colour tone key → maps to ring/fg classes in the Services tab */
+  tone: string;
+}
+
+/** Curated "Popular Services" rail on the Services tab (Phase 1 mock). */
+export const EMBASSY_POPULAR_SERVICES: ReadonlyArray<EmbassyPopularService> = [
+  { rank: '01', name: 'Passport Renewal', subtitle: 'Most requested', icon: 'BookUser', tone: 'green' },
+  { rank: '02', name: 'Visa Information', subtitle: 'Travel & Entry', icon: 'CreditCard', tone: 'blue' },
+  { rank: '03', name: 'Document Authentication', subtitle: 'Legalization & Attestation', icon: 'FileBadge', tone: 'orange' },
+  { rank: '04', name: 'Birth Certificate', subtitle: 'Civil Documents', icon: 'ScrollText', tone: 'purple' },
+  { rank: '05', name: 'Power of Attorney', subtitle: 'Authorize a Representative', icon: 'Briefcase', tone: 'blue' },
+];
+
+/* ── Community tab mock content ─────────────────────────────────────────── */
+
+export interface EmbassyStat {
+  key: string;
+  icon: string;
+  tone: string;
+  value: string;
+  label: string;
+  sub: string;
+}
+export const EMBASSY_COMMUNITY_STATS: ReadonlyArray<EmbassyStat> = [
+  { key: 'members', icon: 'Users', tone: 'blue', value: '2.4K', label: 'Members', sub: '+128 this month' },
+  { key: 'discussions', icon: 'MessageSquare', tone: 'green', value: '356', label: 'Discussions', sub: '+24 this week' },
+  { key: 'online', icon: 'UsersRound', tone: 'orange', value: '42', label: 'Online Now', sub: 'Active members' },
+  { key: 'featured', icon: 'Star', tone: 'purple', value: '18', label: 'Featured Posts', sub: 'Top this month' },
+];
+
+export const EMBASSY_GUIDELINES: ReadonlyArray<string> = [
+  'Be respectful and kind',
+  'No spam or self-promotion',
+  'Stay on topic',
+  'Protect privacy and confidentiality',
+];
+
+export interface EmbassyTrendingTopic {
+  tag: string;
+  posts: number;
+}
+export const EMBASSY_TRENDING_TOPICS: ReadonlyArray<EmbassyTrendingTopic> = [
+  { tag: 'PassportRenewal', posts: 24 },
+  { tag: 'VisaInformation', posts: 18 },
+  { tag: 'GhanaNationalDay', posts: 15 },
+  { tag: 'DiasporaSupport', posts: 12 },
+  { tag: 'JobsInFrance', posts: 9 },
+];
+
+export const EMBASSY_DISCUSSION_FILTERS: ReadonlyArray<string> = [
+  'All Discussions',
+  'Questions',
+  'General',
+  'Opportunities',
+  'Support',
+];
+
+/** Recently-active member count badge (avatars are stubbed). */
+export const EMBASSY_ACTIVE_MEMBERS = { shown: 5, extra: 32 };
+
 /**
  * Returns the embassy profile for a community. Phase 1: always the mock.
  * Phase 2+: read from `community.embassyProfile` and fall back to mock only in dev.

@@ -10,7 +10,7 @@ import { gql } from '@apollo/client';
    ============================================================================ */
 
 export const SERVICE_REQUEST_TYPES = gql`
-  query ServiceRequestTypes($ownerType: ServiceRequestOwnerType!, $ownerEntityId: ID) {
+  query ServiceRequestTypes($ownerType: ServiceRequestOwnerType!, $ownerEntityId: String) {
     serviceRequestTypes(ownerType: $ownerType, ownerEntityId: $ownerEntityId) {
       id
       code
@@ -68,7 +68,7 @@ export interface MyServiceRequestsResponse {
    ============================================================================ */
 
 export const SUPPORT_CASE_TYPES = gql`
-  query SupportCaseTypes($ownerType: SupportOwnerType!, $ownerEntityId: ID) {
+  query SupportCaseTypes($ownerType: SupportOwnerType!, $ownerEntityId: String) {
     caseTypes(ownerType: $ownerType, ownerEntityId: $ownerEntityId) {
       id
       code

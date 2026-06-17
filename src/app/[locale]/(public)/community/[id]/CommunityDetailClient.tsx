@@ -5,7 +5,6 @@ import { formatDateProximity } from '@/macros/time';
 import AboutCommunity from '@/components/cards/community/AboutCommunity';
 import { ButtonType1 } from '@/components/custom/button';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
-import HomeSidebar from '@/components/home/HomeSidebar';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -612,11 +611,6 @@ export default function CommunityDetailPage() {
 
   return (
     <div className="mx-auto lg:flex items-center justify-center min-h-full">
-      {showSidebar && (
-        <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-full scrollbar-hide">
-          <HomeSidebar />
-        </div>
-      )}
       <div className="min-w-0">
         <div className="lg:flex overflow-y-auto h-app-inner">
       <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">

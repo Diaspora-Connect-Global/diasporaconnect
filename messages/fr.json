@@ -688,7 +688,19 @@
                 "subtitle": "Accédez aux services consulaires et administratifs officiels.",
                 "loading": "Chargement des services…",
                 "empty": "Aucun service disponible pour le moment.",
-                "viewDetails": "Voir les détails"
+                "noResults": "Aucun service ne correspond à votre recherche.",
+                "viewDetails": "Voir les détails",
+                "searchPlaceholder": "Rechercher des services...",
+                "needHelpTitle": "Besoin d'aide pour choisir un service ?",
+                "needHelpBody": "Notre équipe est là pour vous orienter vers le bon service et les conditions requises.",
+                "contactEmbassy": "Contacter l'ambassade",
+                "popularServices": "Services populaires",
+                "viewAllServices": "Voir tous les services",
+                "serviceHours": "Heures de service",
+                "serviceHoursAvail": "Nous sommes disponibles pendant les heures de bureau",
+                "closedDays": "Fermé les week-ends et jours fériés",
+                "secureTitle": "Sécurisé. Officiel. Fiable.",
+                "secureBody": "Tous les services sont fournis directement par {name}. Vos données sont en sécurité."
             },
             "track": {
                 "title": "Suivre mes demandes",
@@ -718,6 +730,7 @@
                 "members": "Membres",
                 "discussions": "Discussions",
                 "pending": "En attente",
+                "featured": "Publications en vedette",
                 "discussionsTitle": "Discussions",
                 "noDiscussions": "Aucune discussion pour le moment."
             }

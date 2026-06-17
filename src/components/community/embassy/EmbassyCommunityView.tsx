@@ -1,7 +1,6 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import HomeSidebar from '@/components/home/HomeSidebar';
 import { EmbassyHeader } from './EmbassyHeader';
 import { EmbassyTabBar } from './EmbassyTabBar';
 import { EmbassyHomeTab } from './tabs/EmbassyHomeTab';
@@ -24,7 +23,7 @@ import type { EmbassyViewProps } from './types';
  * nothing itself (Home reuses the live community feed passed via props).
  */
 export function EmbassyCommunityView(props: EmbassyViewProps) {
-  const { community, showSidebar } = props;
+  const { community } = props;
   const searchParams = useSearchParams();
   const activeTab = parseEmbassyTab(searchParams.get('tab'));
   const profile = getEmbassyProfile(community.id);
@@ -51,7 +50,7 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
       case 'updates':
         return <EmbassyUpdatesTab props={props} profile={profile} />;
       case 'services':
-        return <EmbassyServicesTab communityId={community.id} />;
+        return <EmbassyServicesTab community={community} profile={profile} />;
       case 'track-requests':
         return <EmbassyTrackRequestsTab communityId={community.id} />;
       case 'events':
@@ -74,12 +73,7 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
   }
 
   return (
-    <div className="mx-auto lg:flex min-h-full">
-      {showSidebar && (
-        <div className="hidden lg:block lg:sticky lg:top-[4rem] lg:h-full lg:w-[20vw] scrollbar-hide">
-          <HomeSidebar />
-        </div>
-      )}
+    <div className="mx-auto min-h-full">
       <div className="min-w-0 flex-1">
         <div className="h-app-inner overflow-y-auto scrollbar-hide">
           <EmbassyHeader community={community} profile={profile} membership={membership} />

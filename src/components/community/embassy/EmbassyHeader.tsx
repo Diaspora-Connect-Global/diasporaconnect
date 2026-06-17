@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { BadgeCheck, MapPin, Phone, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { ButtonType1, ButtonType2, ButtonType4Pill } from '@/components/custom/button';
+import { ButtonType1, ButtonType2 } from '@/components/custom/button';
 import type { EmbassyProfile } from './embassyMock';
 import type { EmbassyViewProps } from './types';
 
@@ -54,7 +54,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" aria-hidden />
       </div>
 
-      {/* Identity card overlapping the cover */}
+      {/* Identity card overlapping the cover — always white to match the design */}
       <div className="px-3 lg:px-6">
         <div className="-mt-14 rounded-xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -70,20 +70,20 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
               </div>
               <div className="min-w-0 pt-1">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="heading-xsmall truncate text-text-primary">{community.name}</h1>
+                  <h1 className="heading-xsmall truncate text-gray-900">{community.name}</h1>
                   {profile.isOfficial && (
                     <BadgeCheck
-                      className="size-5 flex-shrink-0 text-text-info"
+                      className="size-5 flex-shrink-0 fill-blue-600 text-white"
                       aria-label={t('officialVerified')}
                     />
                   )}
                 </div>
-                <p className="body-small mt-0.5 text-text-secondary">
+                <p className="label-medium mt-0.5 text-gray-900">
                   {community.description || profile.tagline}
                 </p>
 
                 {/* Contact meta row */}
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 caption-medium text-text-secondary">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 caption-medium text-gray-500">
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="size-4" aria-hidden />
                     {profile.city}
@@ -107,17 +107,18 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
               )}
               {membership.isActive && (
                 <>
-                  <ButtonType1 className="px-4 py-1.5" disabled>
+                  <span className="whitespace-nowrap rounded-full border border-gray-300 bg-surface-default px-5 py-1.5 label-medium text-gray-900">
                     {tCommunity('badges.member')}
-                  </ButtonType1>
+                  </span>
                   {membership.canLeave && (
-                    <ButtonType4Pill
-                      className="px-4 py-1.5"
+                    <button
+                      type="button"
                       onClick={membership.onLeaveClick}
                       disabled={membership.actionLoading}
+                      className="whitespace-nowrap rounded-full border border-red-300 bg-surface-default px-5 py-1.5 label-medium text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {tCommunity('actions.leave')}
-                    </ButtonType4Pill>
+                    </button>
                   )}
                 </>
               )}

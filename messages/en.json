@@ -691,7 +691,19 @@
                 "subtitle": "Access official consular and administrative services.",
                 "loading": "Loading services…",
                 "empty": "No services available yet.",
-                "viewDetails": "View Details"
+                "noResults": "No services match your search.",
+                "viewDetails": "View Details",
+                "searchPlaceholder": "Search services...",
+                "needHelpTitle": "Need Help Choosing a Service?",
+                "needHelpBody": "Our team is here to guide you to the right service and requirements.",
+                "contactEmbassy": "Contact Embassy",
+                "popularServices": "Popular Services",
+                "viewAllServices": "View All Services",
+                "serviceHours": "Service Hours",
+                "serviceHoursAvail": "We are available during office hours",
+                "closedDays": "Closed on Weekends & Public Holidays",
+                "secureTitle": "Secure. Official. Trusted.",
+                "secureBody": "All services are provided directly by {name}. Your data is secure with us."
             },
             "track": {
                 "title": "Track My Requests",
@@ -721,6 +733,7 @@
                 "members": "Members",
                 "discussions": "Discussions",
                 "pending": "Pending",
+                "featured": "Featured Posts",
                 "discussionsTitle": "Discussions",
                 "noDiscussions": "No discussions yet."
             }

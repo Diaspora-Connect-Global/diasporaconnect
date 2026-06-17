@@ -691,7 +691,19 @@
                 "subtitle": "Toegang tot officiële consulaire en administratieve diensten.",
                 "loading": "Diensten laden…",
                 "empty": "Nog geen diensten beschikbaar.",
-                "viewDetails": "Details bekijken"
+                "noResults": "Geen diensten komen overeen met uw zoekopdracht.",
+                "viewDetails": "Details bekijken",
+                "searchPlaceholder": "Diensten zoeken...",
+                "needHelpTitle": "Hulp nodig bij het kiezen van een dienst?",
+                "needHelpBody": "Ons team helpt u graag de juiste dienst en vereisten te vinden.",
+                "contactEmbassy": "Contact met de ambassade",
+                "popularServices": "Populaire diensten",
+                "viewAllServices": "Alle diensten bekijken",
+                "serviceHours": "Servicetijden",
+                "serviceHoursAvail": "Wij zijn beschikbaar tijdens kantooruren",
+                "closedDays": "Gesloten in weekenden en op feestdagen",
+                "secureTitle": "Veilig. Officieel. Betrouwbaar.",
+                "secureBody": "Alle diensten worden rechtstreeks geleverd door {name}. Uw gegevens zijn bij ons veilig."
             },
             "track": {
                 "title": "Mijn verzoeken volgen",
@@ -721,6 +733,7 @@
                 "members": "Leden",
                 "discussions": "Discussies",
                 "pending": "In behandeling",
+                "featured": "Uitgelichte berichten",
                 "discussionsTitle": "Discussies",
                 "noDiscussions": "Nog geen discussies."
             }
