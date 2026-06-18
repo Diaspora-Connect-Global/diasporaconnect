@@ -39,6 +39,7 @@ import {
 } from '@/services/gql/embassyServices';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { ServiceFee } from '../ServiceFee';
 
 interface Tone {
   ring: string;
@@ -77,21 +78,6 @@ function visualFor(svc: ServiceRequestTypeDetail): { icon: LucideIcon; tone: str
   if (n.includes('attorney') || n.includes('power')) return { icon: Briefcase, tone: 'blue' };
   if (n.includes('travel') || n.includes('emergency')) return { icon: Plane, tone: 'green' };
   return { icon: FileText, tone: 'brand' };
-}
-
-/** Format an integer minor-unit fee (e.g. 9000 + EUR → "€90.00"). */
-function formatFee(minor?: number | null, currency?: string | null): string | null {
-  if (minor === undefined || minor === null) return null;
-  if (minor === 0) return 'Free';
-  const code = (currency || 'EUR').toUpperCase();
-  try {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: code,
-    }).format(minor / 100);
-  } catch {
-    return `${(minor / 100).toFixed(2)} ${code}`;
-  }
 }
 
 const SUB_TABS = ['Overview', 'Requirements', 'Process', 'Fees', 'FAQ', 'Contact'] as const;
@@ -221,7 +207,6 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
   const { icon: Icon, tone } = visualFor(service);
   const c = TONES[tone] ?? TONES.brand;
   const isActive = service.isActive !== false;
-  const feeLabel = formatFee(service.feeAmountMinor, service.feeCurrency) ?? '—';
   const providerName = community.name;
   const providerAvatar = community.avatarUrl || profile.flagUrl || '/GLOBE.png';
   const contactEmail = community.contactEmail || profile.email;
@@ -294,7 +279,17 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
                   label="Estimated Processing Time"
                   value="10–15 working days"
                 />
-                <Stat icon={CreditCard} tone="green" label="Service Fee" value={feeLabel} />
+                <Stat
+                  icon={CreditCard}
+                  tone="green"
+                  label="Service Fee"
+                  value={
+                    <ServiceFee
+                      minor={service.feeAmountMinor}
+                      currency={service.feeCurrency}
+                    />
+                  }
+                />
                 <Stat icon={Building2} tone="purple" label="Provided By" value={providerName} />
               </div>
             </div>
@@ -556,7 +551,7 @@ interface StatProps {
   icon: LucideIcon;
   tone: string;
   label: string;
-  value: string;
+  value: React.ReactNode;
 }
 function Stat({ icon: Icon, tone, label, value }: StatProps) {
   const c = TONES[tone] ?? TONES.brand;
@@ -567,7 +562,7 @@ function Stat({ icon: Icon, tone, label, value }: StatProps) {
       </span>
       <div className="min-w-0">
         <p className="caption-small text-text-secondary">{label}</p>
-        <p className="caption-large truncate font-medium text-text-primary">{value}</p>
+        <p className="caption-large min-w-0 font-medium text-text-primary">{value}</p>
       </div>
     </div>
   );

@@ -46,21 +46,7 @@ import {
 } from '@/services/gql/embassyServices';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
-
-/** Format an integer minor-unit fee (mirrors EmbassyServiceDetail). */
-function formatFee(minor?: number | null, currency?: string | null): string {
-  if (minor === undefined || minor === null) return 'Free';
-  if (minor === 0) return 'Free';
-  const code = (currency || 'EUR').toUpperCase();
-  try {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: code,
-    }).format(minor / 100);
-  } catch {
-    return `${(minor / 100).toFixed(2)} ${code}`;
-  }
-}
+import { ServiceFee } from '../ServiceFee';
 
 /** Zero-amount label in the service's currency (e.g. "€0.00"). */
 function formatZero(currency?: string | null): string {
@@ -198,7 +184,6 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
     );
   }
 
-  const feeLabel = formatFee(service.feeAmountMinor, service.feeCurrency);
   const totalMinor = service.feeAmountMinor ?? 0;
   const isFree = totalMinor <= 0;
 
@@ -317,7 +302,7 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
         <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 caption-medium text-text-secondary">
           <span className="inline-flex items-center gap-1.5">
             <CreditCard className="size-4 text-text-secondary" aria-hidden />
-            {feeLabel}
+            <ServiceFee minor={service.feeAmountMinor} currency={service.feeCurrency} />
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Clock className="size-4 text-text-secondary" aria-hidden />
@@ -405,7 +390,12 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
               <h3 className="label-large mb-3 text-text-primary">{t('summary.title')}</h3>
               <dl className="space-y-2.5">
                 <SummaryRow label={t('summary.service')} value={service.displayName} />
-                <SummaryRow label={t('summary.fee')} value={feeLabel} />
+                <SummaryRow
+                  label={t('summary.fee')}
+                  value={
+                    <ServiceFee minor={service.feeAmountMinor} currency={service.feeCurrency} />
+                  }
+                />
                 <SummaryRow label={t('summary.processing')} value={t('processingTime')} />
                 <SummaryRow
                   label={t('summary.providedBy')}
@@ -1161,10 +1151,10 @@ function StepPayment({
   onSubmit,
 }: StepPaymentProps) {
   const t = useTranslations('community.embassy.services.apply');
+  const tFee = useTranslations('community.embassy.services.fee');
 
-  const serviceFee = formatFee(service.feeAmountMinor, service.feeCurrency);
   const zero = formatZero(service.feeCurrency);
-  const total = isFree ? t('payment.free') : serviceFee;
+  const feeCurrency = (service.feeCurrency || 'EUR').toUpperCase();
 
   // Big icon method buttons mirroring MembershipPaymentModal's PayStep. Card +
   // Mobile Money are selectable; the rest are shown but disabled (coming soon).
@@ -1191,19 +1181,36 @@ function StepPayment({
         {/* Fee breakdown */}
         <div className="mt-5 rounded-lg border border-border-subtle bg-surface-subtle p-4">
           <dl className="space-y-2">
-            <div className="flex items-center justify-between caption-large">
+            <div className="flex items-start justify-between caption-large">
               <dt className="text-text-secondary">{t('payment.serviceFee')}</dt>
-              <dd className="text-text-primary">{serviceFee}</dd>
+              <dd className="text-right text-text-primary">
+                <ServiceFee minor={service.feeAmountMinor} currency={service.feeCurrency} />
+              </dd>
             </div>
             <div className="flex items-center justify-between caption-large">
               <dt className="text-text-secondary">{t('payment.processingFee')}</dt>
               <dd className="text-text-primary">{`${t('payment.free')} · ${zero}`}</dd>
             </div>
-            <div className="mt-1 flex items-center justify-between border-t border-border-subtle pt-2 label-medium">
+            <div className="mt-1 flex items-start justify-between border-t border-border-subtle pt-2 label-medium">
               <dt className="text-text-primary">{t('payment.total')}</dt>
-              <dd className="text-text-brand">{total}</dd>
+              <dd className="text-right text-text-brand">
+                {isFree ? (
+                  t('payment.free')
+                ) : (
+                  <ServiceFee
+                    minor={service.feeAmountMinor}
+                    currency={service.feeCurrency}
+                    size="lg"
+                  />
+                )}
+              </dd>
             </div>
           </dl>
+          {!isFree && (
+            <p className="caption-small mt-2 text-text-secondary">
+              {tFee('chargedIn', { currency: feeCurrency })}
+            </p>
+          )}
         </div>
 
         {/* Method selector */}
@@ -1406,13 +1413,13 @@ function StepNav({ onBack, onNext, nextDisabled, nextLabel }: StepNavProps) {
 
 interface SummaryRowProps {
   label: string;
-  value: string;
+  value: React.ReactNode;
 }
 function SummaryRow({ label, value }: SummaryRowProps) {
   return (
     <div className="flex items-start justify-between gap-3">
       <dt className="caption-medium text-text-secondary">{label}</dt>
-      <dd className="caption-large min-w-0 max-w-[60%] truncate text-right font-medium text-text-primary">
+      <dd className="caption-large min-w-0 max-w-[60%] text-right font-medium text-text-primary">
         {value}
       </dd>
     </div>

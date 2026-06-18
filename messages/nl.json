@@ -832,6 +832,10 @@
                     "errors": {
                         "submitFailed": "We couldn't submit your application. Please try again."
                     }
+                },
+                "fee": {
+                    "free": "Free",
+                    "chargedIn": "Charged in {currency}."
                 }
             },
             "track": {
