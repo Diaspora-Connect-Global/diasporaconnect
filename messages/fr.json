@@ -847,6 +847,56 @@
                     "review": "Examen",
                     "approved": "Approuvée",
                     "completed": "Terminée"
+                },
+                "searchPlaceholder": "Rechercher des demandes…",
+                "filter": "Filtrer",
+                "filters": {
+                    "all": "Toutes les demandes",
+                    "pending": "En attente",
+                    "review": "En cours d'examen",
+                    "approved": "Approuvée",
+                    "completed": "Terminée",
+                    "rejected": "Rejetée"
+                },
+                "requestId": "N° de demande",
+                "lastUpdate": "Dernière mise à jour",
+                "viewDetails": "Voir les détails",
+                "category": "Services consulaires",
+                "noResults": "Aucune demande ne correspond à vos filtres.",
+                "statusLabel": "Statut",
+                "messages": {
+                    "pending": "Votre demande a été reçue et est en attente de traitement.",
+                    "review": "Votre demande est en cours d'examen.",
+                    "approved": "Votre demande a été approuvée.",
+                    "completed": "Votre demande a été traitée.",
+                    "rejected": "Votre demande n'a pas été approuvée."
+                },
+                "summary": {
+                    "title": "Récapitulatif des demandes",
+                    "total": "Demandes totales",
+                    "pending": "En attente",
+                    "review": "En cours d'examen",
+                    "completed": "Terminées"
+                },
+                "help": {
+                    "title": "Besoin d'aide ?",
+                    "body": "Si vous avez des questions sur votre demande, notre équipe d'assistance est là pour vous aider.",
+                    "contact": "Contacter l'assistance"
+                },
+                "actions": {
+                    "title": "Actions rapides",
+                    "create": "Créer une demande",
+                    "createSub": "Demander un nouveau service à l'ambassade",
+                    "services": "Voir tous les services",
+                    "servicesSub": "Explorer tous les services disponibles de l'ambassade",
+                    "documents": "Télécharger des documents",
+                    "documentsSub": "Accéder aux documents que vous avez reçus",
+                    "profile": "Mettre à jour mon profil",
+                    "profileSub": "Gardez vos informations à jour"
+                },
+                "secure": {
+                    "title": "Vos informations sont sécurisées",
+                    "body": "Toutes les demandes sont chiffrées et vos données sont protégées."
                 }
             },
             "support": {

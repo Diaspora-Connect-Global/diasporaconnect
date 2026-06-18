@@ -850,6 +850,56 @@
                     "review": "Review",
                     "approved": "Approved",
                     "completed": "Completed"
+                },
+                "searchPlaceholder": "Search requests…",
+                "filter": "Filter",
+                "filters": {
+                    "all": "All Requests",
+                    "pending": "Pending",
+                    "review": "Under Review",
+                    "approved": "Approved",
+                    "completed": "Completed",
+                    "rejected": "Rejected"
+                },
+                "requestId": "Request ID",
+                "lastUpdate": "Last update",
+                "viewDetails": "View Details",
+                "category": "Consular Services",
+                "noResults": "No requests match your filters.",
+                "statusLabel": "Status",
+                "messages": {
+                    "pending": "Your request has been received and is awaiting processing.",
+                    "review": "Your application is being reviewed.",
+                    "approved": "Your request has been approved.",
+                    "completed": "Your request has been completed.",
+                    "rejected": "Your request was not approved."
+                },
+                "summary": {
+                    "title": "Request Summary",
+                    "total": "Total Requests",
+                    "pending": "Pending",
+                    "review": "Under Review",
+                    "completed": "Completed"
+                },
+                "help": {
+                    "title": "Need More Help?",
+                    "body": "If you have any questions about your request, our support team is here to help.",
+                    "contact": "Contact Support"
+                },
+                "actions": {
+                    "title": "Quick Actions",
+                    "create": "Create New Request",
+                    "createSub": "Request a new service from the embassy",
+                    "services": "View All Services",
+                    "servicesSub": "Explore all available embassy services",
+                    "documents": "Download Documents",
+                    "documentsSub": "Access documents you've received",
+                    "profile": "Update My Profile",
+                    "profileSub": "Keep your information up to date"
+                },
+                "secure": {
+                    "title": "Your information is secure",
+                    "body": "All requests are encrypted and your data is protected."
                 }
             },
             "support": {

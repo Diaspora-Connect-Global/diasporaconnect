@@ -847,6 +847,56 @@
                     "review": "Prüfung",
                     "approved": "Genehmigt",
                     "completed": "Abgeschlossen"
+                },
+                "searchPlaceholder": "Anträge suchen…",
+                "filter": "Filtern",
+                "filters": {
+                    "all": "Alle Anträge",
+                    "pending": "Ausstehend",
+                    "review": "In Prüfung",
+                    "approved": "Genehmigt",
+                    "completed": "Abgeschlossen",
+                    "rejected": "Abgelehnt"
+                },
+                "requestId": "Antragsnummer",
+                "lastUpdate": "Letzte Aktualisierung",
+                "viewDetails": "Details anzeigen",
+                "category": "Konsularische Dienste",
+                "noResults": "Keine Anträge entsprechen Ihren Filtern.",
+                "statusLabel": "Status",
+                "messages": {
+                    "pending": "Ihr Antrag ist eingegangen und wartet auf Bearbeitung.",
+                    "review": "Ihr Antrag wird geprüft.",
+                    "approved": "Ihr Antrag wurde genehmigt.",
+                    "completed": "Ihr Antrag wurde abgeschlossen.",
+                    "rejected": "Ihr Antrag wurde nicht genehmigt."
+                },
+                "summary": {
+                    "title": "Antragsübersicht",
+                    "total": "Anträge gesamt",
+                    "pending": "Ausstehend",
+                    "review": "In Prüfung",
+                    "completed": "Abgeschlossen"
+                },
+                "help": {
+                    "title": "Brauchen Sie weitere Hilfe?",
+                    "body": "Wenn Sie Fragen zu Ihrem Antrag haben, ist unser Support-Team für Sie da.",
+                    "contact": "Support kontaktieren"
+                },
+                "actions": {
+                    "title": "Schnellaktionen",
+                    "create": "Neuen Antrag erstellen",
+                    "createSub": "Einen neuen Dienst bei der Botschaft anfordern",
+                    "services": "Alle Dienste anzeigen",
+                    "servicesSub": "Alle verfügbaren Botschaftsdienste erkunden",
+                    "documents": "Dokumente herunterladen",
+                    "documentsSub": "Auf erhaltene Dokumente zugreifen",
+                    "profile": "Mein Profil aktualisieren",
+                    "profileSub": "Halten Sie Ihre Daten aktuell"
+                },
+                "secure": {
+                    "title": "Ihre Daten sind sicher",
+                    "body": "Alle Anträge sind verschlüsselt und Ihre Daten sind geschützt."
                 }
             },
             "support": {

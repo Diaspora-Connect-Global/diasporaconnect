@@ -847,6 +847,56 @@
                     "review": "In esame",
                     "approved": "Approvata",
                     "completed": "Completata"
+                },
+                "searchPlaceholder": "Cerca richieste…",
+                "filter": "Filtra",
+                "filters": {
+                    "all": "Tutte le richieste",
+                    "pending": "In attesa",
+                    "review": "In esame",
+                    "approved": "Approvata",
+                    "completed": "Completata",
+                    "rejected": "Rifiutata"
+                },
+                "requestId": "N. richiesta",
+                "lastUpdate": "Ultimo aggiornamento",
+                "viewDetails": "Vedi dettagli",
+                "category": "Servizi consolari",
+                "noResults": "Nessuna richiesta corrisponde ai filtri.",
+                "statusLabel": "Stato",
+                "messages": {
+                    "pending": "La tua richiesta è stata ricevuta ed è in attesa di elaborazione.",
+                    "review": "La tua richiesta è in fase di esame.",
+                    "approved": "La tua richiesta è stata approvata.",
+                    "completed": "La tua richiesta è stata completata.",
+                    "rejected": "La tua richiesta non è stata approvata."
+                },
+                "summary": {
+                    "title": "Riepilogo richieste",
+                    "total": "Richieste totali",
+                    "pending": "In attesa",
+                    "review": "In esame",
+                    "completed": "Completate"
+                },
+                "help": {
+                    "title": "Hai bisogno di aiuto?",
+                    "body": "Se hai domande sulla tua richiesta, il nostro team di assistenza è qui per aiutarti.",
+                    "contact": "Contatta l'assistenza"
+                },
+                "actions": {
+                    "title": "Azioni rapide",
+                    "create": "Crea nuova richiesta",
+                    "createSub": "Richiedi un nuovo servizio all'ambasciata",
+                    "services": "Vedi tutti i servizi",
+                    "servicesSub": "Esplora tutti i servizi disponibili dell'ambasciata",
+                    "documents": "Scarica documenti",
+                    "documentsSub": "Accedi ai documenti ricevuti",
+                    "profile": "Aggiorna il mio profilo",
+                    "profileSub": "Mantieni aggiornate le tue informazioni"
+                },
+                "secure": {
+                    "title": "I tuoi dati sono al sicuro",
+                    "body": "Tutte le richieste sono crittografate e i tuoi dati sono protetti."
                 }
             },
             "support": {

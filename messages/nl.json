@@ -850,6 +850,56 @@
                     "review": "Beoordeling",
                     "approved": "Goedgekeurd",
                     "completed": "Voltooid"
+                },
+                "searchPlaceholder": "Aanvragen zoeken…",
+                "filter": "Filteren",
+                "filters": {
+                    "all": "Alle aanvragen",
+                    "pending": "In behandeling",
+                    "review": "In beoordeling",
+                    "approved": "Goedgekeurd",
+                    "completed": "Voltooid",
+                    "rejected": "Afgewezen"
+                },
+                "requestId": "Aanvraagnummer",
+                "lastUpdate": "Laatste update",
+                "viewDetails": "Details bekijken",
+                "category": "Consulaire diensten",
+                "noResults": "Geen aanvragen komen overeen met je filters.",
+                "statusLabel": "Status",
+                "messages": {
+                    "pending": "Je aanvraag is ontvangen en wacht op verwerking.",
+                    "review": "Je aanvraag wordt beoordeeld.",
+                    "approved": "Je aanvraag is goedgekeurd.",
+                    "completed": "Je aanvraag is voltooid.",
+                    "rejected": "Je aanvraag is niet goedgekeurd."
+                },
+                "summary": {
+                    "title": "Aanvraagoverzicht",
+                    "total": "Totaal aanvragen",
+                    "pending": "In behandeling",
+                    "review": "In beoordeling",
+                    "completed": "Voltooid"
+                },
+                "help": {
+                    "title": "Meer hulp nodig?",
+                    "body": "Als je vragen hebt over je aanvraag, staat ons supportteam voor je klaar.",
+                    "contact": "Contact opnemen met support"
+                },
+                "actions": {
+                    "title": "Snelle acties",
+                    "create": "Nieuwe aanvraag maken",
+                    "createSub": "Vraag een nieuwe dienst aan bij de ambassade",
+                    "services": "Alle diensten bekijken",
+                    "servicesSub": "Ontdek alle beschikbare ambassadediensten",
+                    "documents": "Documenten downloaden",
+                    "documentsSub": "Toegang tot ontvangen documenten",
+                    "profile": "Mijn profiel bijwerken",
+                    "profileSub": "Houd je gegevens up-to-date"
+                },
+                "secure": {
+                    "title": "Je gegevens zijn veilig",
+                    "body": "Alle aanvragen zijn versleuteld en je gegevens zijn beschermd."
                 }
             },
             "support": {
