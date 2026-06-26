@@ -675,7 +675,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                       <span className="caption-large text-text-primary">All Events</span>
                     </span>
                     <span className="caption-small rounded-md bg-surface-subtle px-1.5 py-0.5 text-text-secondary">
-                      {allEvents.length}
+                      {visibleEvents.length}
                     </span>
                   </button>
                 </li>
@@ -738,7 +738,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
           <DialogHeader>
             <DialogTitle>Event Calendar</DialogTitle>
           </DialogHeader>
-          <EventCalendar events={allEvents} enlarged />
+          <EventCalendar events={visibleEvents} enlarged />
         </DialogContent>
       </Dialog>
     </div>
