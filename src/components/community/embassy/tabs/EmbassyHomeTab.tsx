@@ -144,11 +144,16 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
     fetchPolicy: 'cache-and-network',
   });
   const upcomingEvents = useMemo(() => {
+    const up = (s: string) => String(s).toUpperCase();
+    const allEvents = eventsData?.getEventsByOwner?.events ?? [];
+    // Match EmbassyEventsTab: prefer published events (cancelled always hidden),
+    // but fall back to non-cancelled (drafts included) when none are published.
+    const nonCancelled = allEvents.filter((e) => up(e.status) !== 'CANCELLED');
+    const published = nonCancelled.filter((e) => up(e.status) !== 'DRAFT');
+    const base = published.length > 0 ? published : nonCancelled;
     const now = Date.now();
-    return (eventsData?.getEventsByOwner?.events ?? [])
+    return base
       .filter((e) => {
-        const status = (e.status || '').toUpperCase();
-        if (status === 'DRAFT' || status === 'CANCELLED') return false;
         const t = new Date(e.startAt).getTime();
         return !Number.isNaN(t) && t >= now;
       })
