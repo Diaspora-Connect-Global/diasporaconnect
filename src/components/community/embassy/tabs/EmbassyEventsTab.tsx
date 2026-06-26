@@ -26,18 +26,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useSearchParams } from 'next/navigation';
 import { Link, usePathname } from '@/i18n/navigation';
 import { GET_EVENTS_BY_OWNER, type EventLocation } from '@/services/gql/events';
 import type { EmbassyViewProps } from '../types';
 import { getEmbassyProfile } from '../embassyMock';
 import { EmbassyEventDetail } from './EmbassyEventDetail';
+import { EmbassyEventsCalendar } from './EmbassyEventsCalendar';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -186,12 +181,10 @@ function initialCalendarView(events: OwnerEvent[]): { year: number; month: numbe
 
 function EventCalendar({
   events,
-  enlarged = false,
-  onViewFull,
+  calendarHref,
 }: {
   events: OwnerEvent[];
-  enlarged?: boolean;
-  onViewFull?: () => void;
+  calendarHref: { pathname: string; query: Record<string, string> };
 }) {
   const today = new Date();
   const [view, setView] = useState(() => initialCalendarView(events));
@@ -285,8 +278,7 @@ function EventCalendar({
               <span
                 key={`d-${day}`}
                 className={[
-                  'caption-medium relative flex items-center justify-center rounded-md',
-                  enlarged ? 'h-14' : 'h-8',
+                  'caption-medium relative flex h-8 items-center justify-center rounded-md',
                   todayCell
                     ? 'bg-blue-600 font-semibold text-white'
                     : eventCell
@@ -303,16 +295,14 @@ function EventCalendar({
           })}
         </div>
 
-        {!enlarged && (
-          <button
-            type="button"
-            onClick={onViewFull}
-            className="label-medium mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-subtle py-2 text-text-brand transition-colors hover:bg-surface-subtle"
-          >
-            <Maximize2 className="size-4" aria-hidden />
-            View Full Calendar
-          </button>
-        )}
+        <Link
+          href={calendarHref}
+          scroll={false}
+          className="label-medium mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-subtle py-2 text-text-brand transition-colors hover:bg-surface-subtle"
+        >
+          <Maximize2 className="size-4" aria-hidden />
+          View Full Calendar
+        </Link>
       </CardContent>
     </Card>
   );
@@ -410,6 +400,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedEventId = searchParams.get('event');
+  const calendarOpen = searchParams.get('calendar') === '1';
   const profile = getEmbassyProfile(community.id);
 
   /** `?tab=events&event=<id>` link for an event card's "View Details". */
@@ -424,13 +415,25 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
     return { pathname, query };
   }
 
+  /** `?tab=events&calendar=1` link for the full calendar sub-view. */
+  function calendarHref(): { pathname: string; query: Record<string, string> } {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', 'events');
+    params.set('calendar', '1');
+    params.delete('event');
+    const query: Record<string, string> = {};
+    params.forEach((value, name) => {
+      query[name] = value;
+    });
+    return { pathname, query };
+  }
+
   const [activeTab, setActiveTab] = useState<SubTab>('upcoming');
   const [search, setSearch] = useState('');
   const [limit, setLimit] = useState(20);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'soonest' | 'latest'>('soonest');
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const { data, loading } = useQuery<GetEventsByOwnerResponse>(GET_EVENTS_BY_OWNER, {
     variables: { ownerId: community.id, ownerType: 'community', limit, offset: 0 },
@@ -439,13 +442,16 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
 
   const total = data?.getEventsByOwner?.total ?? 0;
   const allEvents = data?.getEventsByOwner?.events ?? [];
-  // Consumers can only register for non-DRAFT events. Hide DRAFTs everywhere in
-  // this tab (list, calendar, category counts). Compared case-insensitively
-  // since the backend returns uppercase status while the TS type is lowercase.
-  const visibleEvents = useMemo(
-    () => allEvents.filter((e) => String(e.status).toUpperCase() !== 'DRAFT'),
-    [allEvents],
-  );
+  // Prefer published events (cancelled always hidden). If the community has no
+  // published events yet, fall back to showing the rest (drafts included) so the
+  // list isn't empty — registration stays gated on the detail view for drafts.
+  // Case-insensitive since the backend returns uppercase status.
+  const visibleEvents = useMemo(() => {
+    const up = (s: string) => String(s).toUpperCase();
+    const nonCancelled = allEvents.filter((e) => up(e.status) !== 'CANCELLED');
+    const published = nonCancelled.filter((e) => up(e.status) !== 'DRAFT');
+    return published.length > 0 ? published : nonCancelled;
+  }, [allEvents]);
   // "View More" stays keyed off the raw fetched page vs server total.
   const hasMore = allEvents.length < total;
   const loadingMore = loading && allEvents.length > 0;
@@ -508,6 +514,12 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
     return (
       <EmbassyEventDetail eventId={selectedEventId} community={community} profile={profile} />
     );
+  }
+
+  // Full calendar sub-view — `?tab=events&calendar=1` (no `?event=`). The event
+  // detail early-return above takes precedence.
+  if (calendarOpen) {
+    return <EmbassyEventsCalendar community={community} profile={profile} />;
   }
 
   return (
@@ -651,7 +663,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
 
         {/* Right rail */}
         <aside className="space-y-6">
-          <EventCalendar events={visibleEvents} onViewFull={() => setCalendarOpen(true)} />
+          <EventCalendar events={visibleEvents} calendarHref={calendarHref()} />
 
           {/* Categories */}
           <Card className="border-border-subtle">
@@ -731,16 +743,6 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
           </Card>
         </aside>
       </div>
-
-      {/* Full calendar dialog */}
-      <Dialog open={calendarOpen} onOpenChange={setCalendarOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Event Calendar</DialogTitle>
-          </DialogHeader>
-          <EventCalendar events={visibleEvents} enlarged />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
