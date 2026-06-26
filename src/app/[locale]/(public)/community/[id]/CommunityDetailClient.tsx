@@ -581,10 +581,15 @@ export default function CommunityDetailPage() {
     </>
   );
 
-  if (resolveCommunityView(community.communityType) === 'embassy') {
+  // Every community now renders the rich tabbed view. The variant ('embassy' |
+  // 'general') only swaps copy/branding; the OLD default UI below is unreachable
+  // but kept in place for reference.
+  const variant = resolveCommunityView(community.communityType);
+  {
     return (
       <>
         <EmbassyCommunityView
+          variant={variant}
           community={community}
           posts={posts}
           feedLoading={feedLoading}
@@ -614,173 +619,4 @@ export default function CommunityDetailPage() {
     );
   }
 
-  return (
-    <div className="mx-auto lg:flex items-center justify-center min-h-full">
-      <div className="min-w-0">
-        <div className="lg:flex overflow-y-auto h-app-inner">
-      <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
-        <div className="min-h-[6rem] flex space-x-4 my-4 py-3 border-b">
-          <div className="h-[6rem] w-[6rem] flex-shrink-0">
-            <Image
-              width={90}
-              height={90}
-              src={community.avatarUrl || '/GLOBE.png'}
-              alt={community.name}
-              className="h-full w-full rounded-full object-cover"
-            />
-          </div>
-          <div className="flex flex-col justify-between w-full">
-            <div></div>
-            <div className="justify-between items-center w-full">
-              <p className="heading-xsmall">{community.name}</p>
-              {community.communityType && (
-                <CommunityTypeBadge
-                  communityType={community.communityType}
-                  size="detail"
-                  className="mt-1"
-                />
-              )}
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {isSuspended && (
-                  <span className="label-medium text-text-secondary">{t('badges.suspended')}</span>
-                )}
-                {isInviteOnly && !isActive && !isPending && (
-                  <span className="label-medium text-text-secondary flex items-center gap-1">{t('badges.inviteOnly')}</span>
-                )}
-                {isActive && (
-                  <span className="label-medium text-text-brand">{t('badges.member')}</span>
-                )}
-                {isPending && (
-                  <span className="label-medium text-text-secondary">{t('badges.requestPending')}</span>
-                )}
-                {canShowJoin && (
-                  <ButtonType1
-                    className="py-1 px-3 label-medium"
-                    onClick={handleJoinClick}
-                    disabled={actionLoading}
-                  >
-                    {joinLoading ? tActions('joining') : tActions('join')}
-                  </ButtonType1>
-                )}
-                {canShowRequestToJoin && (
-                  <ButtonType1
-                    className="py-1 px-3 label-medium"
-                    onClick={handleJoinClick}
-                    disabled={actionLoading}
-                  >
-                    {joinLoading ? tActions('joining') : t('actions.requestToJoin')}
-                  </ButtonType1>
-                )}
-                {canCancelRequest && (
-                  <ButtonType1
-                    className="py-1 px-3 label-medium border-border-subtle text-text-secondary"
-                    onClick={handleCancelRequest}
-                    disabled={actionLoading}
-                  >
-                    {t('actions.cancelRequest')}
-                  </ButtonType1>
-                )}
-                {canLeave && (
-                  <ButtonType1
-                    className="py-1 px-3 label-medium border-border-subtle text-text-secondary"
-                    onClick={handleLeaveClick}
-                    disabled={actionLoading}
-                  >
-                    {t('actions.leave')}
-                  </ButtonType1>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:hidden">
-          <AboutCommunity
-            members={displayMemberCount}
-            createdDate={community.createdAt ?? ''}
-            visibility={community.visibility ?? 'Public'}
-            description={community.description ?? ''}
-            access={accessProfile}
-          />
-        </div>
-
-        <div className="overflow-auto lg:max-h-[calc(100vh-64px)] scrollbar-hide">
-          {feedLoading ? (
-            <p className="text-text-secondary text-sm py-4 px-2">{t('loadingPosts')}</p>
-          ) : posts.length > 0 ? (
-            posts.map((post) => {
-              const media = splitPostAttachments(post.attachments);
-              return (
-              <FeedCardWithReply
-                key={post.id}
-                postId={post.id}
-                profileImage={community.avatarUrl || '/GLOBE.png'}
-                profileName={community.name}
-                {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
-                authorEntityId={post.authorId}
-                authorEntityType={post.authorType}
-                createdAt={post.createdAt}
-                category={community.name}
-                aiCategory={post.categories?.[0]}
-                postDate={formatDateProximity(post.createdAt)}
-                visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
-                content={post.text}
-                images={media.images}
-                videos={media.videos}
-                documents={media.documents}
-                mentionMap={buildMentionMap(post.mentions ?? [])}
-                shares={post.engagementCounts.shares}
-                likes={post.engagementCounts.likes}
-                comments={post.engagementCounts.comments}
-                onLike={handleLike}
-                onShare={handleShare}
-                onSave={handleSave}
-                onSendComment={handleSendComment}
-                onDelete={(id) => setLocalPosts(prev => prev.filter(p => p.id !== id))}
-                isLiked={post.userEngagement.hasLiked}
-                isSaved={post.userEngagement.hasSaved}
-                isShared={post.userEngagement.hasShared}
-                joinButton={!isActive}
-              />
-              );
-            })
-          ) : (
-            <p className="text-text-secondary text-sm py-4 px-2">{t('noPosts')}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="lg:self-start h-app-inner lg:overflow-y-auto scrollbar-hide">
-        <div className="space-y-6 flex-1 mb-6 mx-3">
-          <div className="hidden lg:block">
-            <AboutCommunity
-              members={displayMemberCount}
-              createdDate={community.createdAt ?? ''}
-              visibility={community.visibility ?? 'Public'}
-              description={community.description ?? ''}
-              access={accessProfile}
-            />
-          </div>
-          {showSettings && (
-            <AccessSettingsForm
-              kind="community"
-              entityId={communityId}
-              initial={{
-                visibility: (community.visibility as Visibility) ?? 'PUBLIC',
-                joinPolicy: toJoinPolicy(community.joinPolicy) as JoinPolicy,
-                paymentType: (community.paymentType ?? 'NONE') as PaymentType,
-                priceAmount: community.priceAmount ?? null,
-                priceCurrency: community.priceCurrency ?? null,
-              }}
-            />
-          )}
-          <PeopleYouMayKnow />
-        </div>
-      </div>
-        </div>
-      </div>
-
-      {membershipModals}
-    </div>
-  );
 }

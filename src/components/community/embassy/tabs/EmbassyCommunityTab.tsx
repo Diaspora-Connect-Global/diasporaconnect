@@ -40,6 +40,7 @@ import {
   type EmbassyProfile,
 } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
 
 /** How many members to request per page in the "See All" dialog. */
 const MEMBERS_PAGE_SIZE = 20;
@@ -110,6 +111,7 @@ interface EmbassyCommunityTabProps {
 export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps) {
   const { community, posts, displayMemberCount } = props;
   const t = useTranslations('community.embassy.community');
+  const isEmbassy = useIsEmbassy();
 
   /* ── Right-rail member highlight → real community members ──────────────
    * listCommunityMembers exposes real names + avatar URLs; we render real
@@ -278,7 +280,7 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
               {profile.isOfficial && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 caption-small text-blue-600">
                   <BadgeCheck className="size-3.5" aria-hidden />
-                  {t('officialVerified')}
+                  {isEmbassy ? t('officialVerified') : t('verifiedCommunity')}
                 </span>
               )}
             </div>

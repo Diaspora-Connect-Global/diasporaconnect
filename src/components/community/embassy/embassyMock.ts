@@ -67,6 +67,34 @@ const MOCK_PROFILE: EmbassyProfile = {
   emergencyLine: '+33 7 53 11 23 45',
 };
 
+/**
+ * Neutral, non-embassy profile used when a "general community" renders the rich
+ * tabbed view. No flag, no embassy-specific tagline; contact/location fields are
+ * derived from the community where available and otherwise left blank.
+ */
+const NEUTRAL_PROFILE: EmbassyProfile = {
+  country: '',
+  countryCode: '',
+  flagUrl: '',
+  isOfficial: false,
+  tagline: '',
+  city: '',
+  addressLine: '',
+  phone: '',
+  email: '',
+  mapUrl: '#',
+  officeHours: '',
+  emergencyLine: '',
+};
+
+/** Minimal community shape used to derive neutral profile fields. */
+interface ProfileSourceCommunity {
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  address?: string | null;
+  locationCountry?: string | null;
+}
+
 export const EMBASSY_QUICK_ACTIONS: ReadonlyArray<EmbassyQuickAction> = [
   { key: 'visa', icon: 'FileText', label: 'Visa Information', tab: 'services' },
   { key: 'register', icon: 'Users', label: 'Diaspora Registration', tab: 'services' },
@@ -188,9 +216,28 @@ export const EMBASSY_DISCUSSION_FILTERS: ReadonlyArray<string> = [
 export const EMBASSY_ACTIVE_MEMBERS = { shown: 5, extra: 32 };
 
 /**
- * Returns the embassy profile for a community. Phase 1: always the mock.
+ * Returns the profile that backs the rich tabbed detail view.
+ *
+ * - Embassy communities (`variant === 'embassy'`, the default for back-compat)
+ *   get the embassy mock profile (flag, official tagline, contact details).
+ * - General communities (`variant === 'general'`) get a NEUTRAL profile: no flag,
+ *   no embassy tagline; city/phone/email/address are derived from the community
+ *   when available so the rich UI still shows real contact info.
+ *
  * Phase 2+: read from `community.embassyProfile` and fall back to mock only in dev.
  */
-export function getEmbassyProfile(_communityId: string): EmbassyProfile {
-  return MOCK_PROFILE;
+export function getEmbassyProfile(
+  _communityId: string,
+  variant: 'embassy' | 'general' = 'embassy',
+  community?: ProfileSourceCommunity,
+): EmbassyProfile {
+  if (variant === 'embassy') return MOCK_PROFILE;
+  return {
+    ...NEUTRAL_PROFILE,
+    country: community?.locationCountry ?? '',
+    city: community?.locationCountry ?? '',
+    addressLine: community?.address ?? '',
+    phone: community?.contactPhone ?? '',
+    email: community?.contactEmail ?? '',
+  };
 }

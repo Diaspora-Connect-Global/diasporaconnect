@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { EmbassyFeedList } from '../EmbassyFeedList';
 import { FeedListSkeleton } from '../EmbassySkeletons';
+import { useIsEmbassy } from '../communityVariant';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyFeedPost, EmbassyViewProps } from '../types';
 
@@ -80,6 +81,7 @@ type SortOrder = 'newest' | 'oldest';
 
 export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
   const t = useTranslations('community.embassy');
+  const isEmbassy = useIsEmbassy();
   const { community, posts, feedLoading } = props;
   const [active, setActive] = useState('all');
   const [sort, setSort] = useState<SortOrder>('newest');
@@ -237,7 +239,9 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
           <CardContent className="p-5">
             <h3 className="label-large text-text-primary">{t('updates.questionTitle')}</h3>
             <p className="body-small mt-1 text-text-secondary">
-              {t('updates.questionBody')}
+              {isEmbassy
+                ? t('updates.questionBody')
+                : 'Send your enquiry to the community and get a response.'}
             </p>
             {community.contactEmail ? (
               <a
@@ -245,12 +249,12 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
                 className={`${CONTACT_BUTTON_CLASS} mt-3`}
               >
                 <MessageSquare className="size-4" aria-hidden />
-                {t('updates.contactEmbassy')}
+                {isEmbassy ? t('updates.contactEmbassy') : 'Contact the Community'}
               </a>
             ) : (
               <Link href={supportHref} className={`${CONTACT_BUTTON_CLASS} mt-3`}>
                 <MessageSquare className="size-4" aria-hidden />
-                {t('updates.contactEmbassy')}
+                {isEmbassy ? t('updates.contactEmbassy') : 'Contact the Community'}
               </Link>
             )}
           </CardContent>

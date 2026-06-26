@@ -40,6 +40,7 @@ import {
 } from '@/services/gql/embassyServices';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { useIsEmbassy } from '../communityVariant';
 import { ServiceFee } from '../ServiceFee';
 
 interface Tone {
@@ -90,14 +91,21 @@ const MOCK_WHO_CAN_APPLY: ReadonlyArray<string> = [
   'Applicants over 18 (or with a legal guardian)',
 ];
 
-const MOCK_PROCESS_STEPS: ReadonlyArray<{ title: string; body: string }> = [
-  { title: 'Submit your application', body: 'Complete the online form and attach the required documents.' },
-  { title: 'Initial review', body: 'Our team verifies your submission and documents.' },
-  { title: 'Pay the service fee', body: 'Settle any applicable fee securely online.' },
-  { title: 'Processing', body: 'Your request is processed by the consular team.' },
-  { title: 'Notification', body: 'You are notified once a decision is made.' },
-  { title: 'Collection / delivery', body: 'Collect your document or receive it by post.' },
-];
+function buildProcessSteps(isEmbassy: boolean): ReadonlyArray<{ title: string; body: string }> {
+  return [
+    { title: 'Submit your application', body: 'Complete the online form and attach the required documents.' },
+    { title: 'Initial review', body: 'Our team verifies your submission and documents.' },
+    { title: 'Pay the service fee', body: 'Settle any applicable fee securely online.' },
+    {
+      title: 'Processing',
+      body: isEmbassy
+        ? 'Your request is processed by the consular team.'
+        : 'Your request is processed by the community team.',
+    },
+    { title: 'Notification', body: 'You are notified once a decision is made.' },
+    { title: 'Collection / delivery', body: 'Collect your document or receive it by post.' },
+  ];
+}
 
 const MOCK_IMPORTANT_NOTES: ReadonlyArray<string> = [
   'Ensure all documents are valid and up to date.',
@@ -125,6 +133,7 @@ interface EmbassyServiceDetailProps {
 export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyServiceDetailProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isEmbassy = useIsEmbassy();
   const [subTab, setSubTab] = useState<SubTab>('Overview');
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -269,6 +278,8 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
   const contactEmail = community.contactEmail || profile.email;
   const contactPhone = community.contactPhone || profile.phone;
   const officeHours = profile.officeHours;
+
+  const processSteps = buildProcessSteps(isEmbassy);
 
   const keyRequirements: string[] =
     service.formFields && service.formFields.length > 0
@@ -475,7 +486,7 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
                   <section>
                     <h3 className="label-medium text-text-primary">Process Overview</h3>
                     <ol className="mt-3 space-y-3">
-                      {MOCK_PROCESS_STEPS.map((step, i) => (
+                      {processSteps.map((step, i) => (
                         <li key={step.title} className="flex gap-3">
                           <span className="flex size-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-brand-subtle caption-small font-semibold text-text-brand">
                             {i + 1}

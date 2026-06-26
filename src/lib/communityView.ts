@@ -2,12 +2,17 @@
  * Community-type → UI-variant resolution.
  *
  * Communities come back from the backend with a `communityType { name, isEmbassy }`.
- * Most types share one default detail UI; specific types (starting with Embassy)
- * get a bespoke layout. This module is the single place that maps a type to its
- * view variant, so adding a new variant later is a one-line change here.
+ * EVERY community now renders the rich tabbed detail UI; this module only decides
+ * which *variant* of that rich UI applies — 'embassy' (embassy-specific copy) or
+ * 'general' (neutral copy for all other types). This is the single place that maps
+ * a type to its variant, so adding a new variant later is a one-line change here.
+ *
+ * The `CommunityVariant` type is re-exported from the shared `communityVariant`
+ * module so the resolver and the React context stay in lockstep.
  */
 
-export type CommunityVariant = 'embassy' | 'default';
+export type { CommunityVariant } from '@/components/community/embassy/communityVariant';
+import type { CommunityVariant } from '@/components/community/embassy/communityVariant';
 
 export interface CommunityTypeInfo {
   name: string;
@@ -34,17 +39,19 @@ const EMBASSY_TYPE_NAMES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Resolve which detail-page variant a community should render.
+ * Resolve which rich-detail-page variant a community should render.
+ * Every community renders the rich tabbed UI; this only picks the copy variant.
+ * Embassy types → 'embassy'; everything else (including a null type) → 'general'.
  * Primary signal is the type `name`; `isEmbassy` is a defensive fallback for
  * admin-created embassy types whose name doesn't exactly match the seed.
  */
 export function resolveCommunityView(
   communityType?: CommunityTypeInfo | null,
 ): CommunityVariant {
-  if (!communityType) return 'default';
+  if (!communityType) return 'general';
   if (EMBASSY_TYPE_NAMES.has(normalizeCommunityTypeName(communityType.name))) {
     return 'embassy';
   }
   if (communityType.isEmbassy === true) return 'embassy';
-  return 'default';
+  return 'general';
 }

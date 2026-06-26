@@ -52,6 +52,7 @@ import {
 } from '@/services/gql/embassyServices';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { useIsEmbassy } from '../communityVariant';
 import { EmbassyTrackRequestDetail } from './EmbassyTrackRequestDetail';
 import { CancelRequestDialog } from './CancelRequestDialog';
 import { type Bucket, STEP_KEYS, statusBucket, bucketStep, BUCKET_PILL } from './requestStatus';
@@ -116,6 +117,7 @@ interface EmbassyTrackRequestsTabProps {
 
 export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequestsTabProps) {
   const t = useTranslations('community.embassy.track');
+  const isEmbassy = useIsEmbassy();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedRequestId = searchParams.get('request');
@@ -394,14 +396,14 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
                 icon={FilePlus2}
                 tone="rose"
                 title={t('actions.create')}
-                subtitle={t('actions.createSub')}
+                subtitle={isEmbassy ? t('actions.createSub') : 'Request a new service from the community'}
                 href={tabHref('services')}
               />
               <QuickAction
                 icon={LayoutGrid}
                 tone="blue"
                 title={t('actions.services')}
-                subtitle={t('actions.servicesSub')}
+                subtitle={isEmbassy ? t('actions.servicesSub') : 'Explore all available community services'}
                 href={tabHref('services')}
               />
               <QuickAction
@@ -415,7 +417,7 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
                 icon={Share2}
                 tone="teal"
                 title={t('actions.invite')}
-                subtitle={t('actions.inviteSub')}
+                subtitle={isEmbassy ? t('actions.inviteSub') : 'Share this community with others'}
                 onClick={handleInvite}
               />
             </ul>

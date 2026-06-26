@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { BadgeCheck, MapPin, Phone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ButtonType1, ButtonType2 } from '@/components/custom/button';
+import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
 import type { EmbassyProfile } from './embassyMock';
 import type { EmbassyViewProps } from './types';
 
@@ -50,6 +51,11 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
   const t = useTranslations('community.embassy');
   const tActions = useTranslations('actions');
   const tCommunity = useTranslations('community');
+  const isEmbassy = useIsEmbassy();
+
+  // The verified badge means "official verified embassy" for embassies, but a
+  // neutral "verified community" for general communities.
+  const verifiedLabel = isEmbassy ? t('officialVerified') : t('verifiedCommunity');
 
   const bannerSrc = community.bannerUrl || '/og-default.png';
   const avatarSrc = community.avatarUrl || profile.flagUrl || '/GLOBE.png';
@@ -94,7 +100,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
                   {profile.isOfficial && (
                     <BadgeCheck
                       className="size-5 flex-shrink-0 fill-blue-600 text-white"
-                      aria-label={t('officialVerified')}
+                      aria-label={verifiedLabel}
                     />
                   )}
                 </div>

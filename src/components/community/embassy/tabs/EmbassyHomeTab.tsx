@@ -10,6 +10,7 @@ import { ButtonType2 } from '@/components/custom/button';
 import { EmbassyFeedList } from '../EmbassyFeedList';
 import { FeedListSkeleton } from '../EmbassySkeletons';
 import { embassyIcon } from '../icons';
+import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
 import {
   EMBASSY_QUICK_ACTIONS,
   EMBASSY_UPCOMING_EVENTS,
@@ -28,6 +29,7 @@ const MAX_HOME_POSTS = 3;
 
 export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
   const t = useTranslations('community.embassy');
+  const isEmbassy = useIsEmbassy();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { community, posts, feedLoading } = props;
@@ -212,7 +214,9 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
         <Card className="border-border-subtle">
           <CardContent className="p-5">
             <h3 className="label-large text-text-primary">{t('home.needHelp')}</h3>
-            <p className="body-small mt-1 text-text-secondary">{t('home.needHelpBody')}</p>
+            <p className="body-small mt-1 text-text-secondary">
+              {isEmbassy ? t('home.needHelpBody') : t('home.needHelpBodyGeneral')}
+            </p>
             <Link href={tabHref('support')} scroll={false} className="mt-3 block">
               <ButtonType2 className="flex w-full items-center justify-center gap-2 py-2">
                 <Headset className="size-4" aria-hidden />

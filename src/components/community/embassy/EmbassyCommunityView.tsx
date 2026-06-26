@@ -13,6 +13,7 @@ import { EmbassyCommunityTab } from './tabs/EmbassyCommunityTab';
 import { ComingSoonTab } from './tabs/ComingSoonTab';
 import { parseEmbassyTab, EMBASSY_TABS } from './tabs';
 import { getEmbassyProfile } from './embassyMock';
+import { CommunityVariantProvider } from './communityVariant';
 import type { EmbassyViewProps } from './types';
 
 /**
@@ -23,10 +24,10 @@ import type { EmbassyViewProps } from './types';
  * nothing itself (Home reuses the live community feed passed via props).
  */
 export function EmbassyCommunityView(props: EmbassyViewProps) {
-  const { community } = props;
+  const { community, variant } = props;
   const searchParams = useSearchParams();
   const activeTab = parseEmbassyTab(searchParams.get('tab'));
-  const profile = getEmbassyProfile(community.id);
+  const profile = getEmbassyProfile(community.id, variant, community);
 
   const membership = {
     isActive: props.isActive,
@@ -73,22 +74,24 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
   }
 
   return (
-    <div className="mx-auto min-h-full">
-      <div className="min-w-0 flex-1">
-        {/* One scroll area: everything scrolls together, but the header + tab bar
-            are sticky so they pin to the top and the scroll only moves the tab
-            content past them. Single container = reliable on mobile. */}
-        <div className="h-app-inner overflow-y-auto scrollbar-hide">
-          {/* Header + tabs pin only on desktop; on mobile they scroll away with
-              the content so the whole page scrolls as one. */}
-          <div className="z-20 bg-surface-default lg:sticky lg:top-0">
-            <EmbassyHeader community={community} profile={profile} membership={membership} />
-            <EmbassyTabBar active={activeTab} />
+    <CommunityVariantProvider variant={variant}>
+      <div className="mx-auto min-h-full">
+        <div className="min-w-0 flex-1">
+          {/* One scroll area: everything scrolls together, but the header + tab bar
+              are sticky so they pin to the top and the scroll only moves the tab
+              content past them. Single container = reliable on mobile. */}
+          <div className="h-app-inner overflow-y-auto scrollbar-hide">
+            {/* Header + tabs pin only on desktop; on mobile they scroll away with
+                the content so the whole page scrolls as one. */}
+            <div className="z-20 bg-surface-default lg:sticky lg:top-0">
+              <EmbassyHeader community={community} profile={profile} membership={membership} />
+              <EmbassyTabBar active={activeTab} />
+            </div>
+            {renderActiveTab()}
           </div>
-          {renderActiveTab()}
         </div>
       </div>
-    </div>
+    </CommunityVariantProvider>
   );
 }
 

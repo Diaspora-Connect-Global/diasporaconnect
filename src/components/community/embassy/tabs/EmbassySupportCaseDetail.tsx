@@ -47,6 +47,7 @@ import {
 import type { EmbassyViewProps } from '../types';
 import { supportStatusBucket, SUPPORT_PILL } from './requestStatus';
 import { formatDateProximity } from '@/macros/time';
+import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
 
 /** Statuses for which the reporter may still withdraw the case. */
 const CANCELLABLE = new Set(['SUBMITTED', 'ASSIGNED', 'INVESTIGATING', 'REOPENED']);
@@ -89,6 +90,7 @@ interface EmbassySupportCaseDetailProps {
  */
 export function EmbassySupportCaseDetail({ caseId }: EmbassySupportCaseDetailProps) {
   const t = useTranslations('community.embassy.support.detail');
+  const isEmbassy = useIsEmbassy();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -266,7 +268,9 @@ export function EmbassySupportCaseDetail({ caseId }: EmbassySupportCaseDetailPro
               <Info className="size-4 text-text-brand" aria-hidden />
               {t('help.title')}
             </p>
-            <p className="body-small mt-1 text-text-secondary">{t('help.body')}</p>
+            <p className="body-small mt-1 text-text-secondary">
+              {isEmbassy ? t('help.body') : t('help.bodyGeneral')}
+            </p>
           </div>
 
           {/* Secure note */}
@@ -274,7 +278,9 @@ export function EmbassySupportCaseDetail({ caseId }: EmbassySupportCaseDetailPro
             <ShieldCheck className="mt-0.5 size-5 flex-shrink-0 text-text-brand" aria-hidden />
             <div>
               <p className="label-medium text-text-brand">{t('secure.title')}</p>
-              <p className="caption-medium text-text-secondary">{t('secure.body')}</p>
+              <p className="caption-medium text-text-secondary">
+                {isEmbassy ? t('secure.body') : t('secure.bodyGeneral')}
+              </p>
             </div>
           </div>
         </aside>

@@ -72,6 +72,7 @@ import {
 } from '@/services/gql/events';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { useIsEmbassy } from '../communityVariant';
 
 // ─── Sub-tabs ─────────────────────────────────────────────────────────────────
 
@@ -249,6 +250,7 @@ interface EmbassyEventDetailProps {
  */
 export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEventDetailProps) {
   const t = useTranslations('community.embassy.events.detail');
+  const isEmbassyVariant = useIsEmbassy();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [subTab, setSubTab] = useState<SubTabKey>('about');
@@ -830,7 +832,9 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
                     {community.name}
                     {isEmbassy && <BadgeCheck className="size-4 flex-shrink-0 text-blue-600" aria-hidden />}
                   </p>
-                  <p className="caption-small text-text-secondary">{t('organizerType')}</p>
+                  <p className="caption-small text-text-secondary">
+                    {isEmbassyVariant ? t('organizerType') : 'Community Organizer'}
+                  </p>
                 </div>
               </div>
               <Link

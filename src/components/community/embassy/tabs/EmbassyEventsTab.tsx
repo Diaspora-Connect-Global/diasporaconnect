@@ -401,7 +401,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
   const searchParams = useSearchParams();
   const selectedEventId = searchParams.get('event');
   const calendarOpen = searchParams.get('calendar') === '1';
-  const profile = getEmbassyProfile(community.id);
+  const profile = getEmbassyProfile(community.id, props.variant, community);
 
   /** `?tab=events&event=<id>` link for an event card's "View Details". */
   function eventHref(id: string): { pathname: string; query: Record<string, string> } {

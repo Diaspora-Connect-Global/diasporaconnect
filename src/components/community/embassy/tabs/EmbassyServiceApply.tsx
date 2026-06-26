@@ -53,6 +53,7 @@ import {
 } from '@/services/gql/embassyServices';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { useIsEmbassy } from '../communityVariant';
 import { ServiceFee } from '../ServiceFee';
 
 /** Zero-amount label in the service's currency (e.g. "€0.00"). */
@@ -523,7 +524,16 @@ function ResourceDialog({
   contactEmail,
 }: ResourceDialogProps) {
   const t = useTranslations('community.embassy.services.apply');
+  const isEmbassy = useIsEmbassy();
   if (!resource) return null;
+
+  /** Embassy-specific FAQ answers that mention "the embassy" read generically elsewhere. */
+  function faqAnswer(key: FaqKey): string {
+    if (!isEmbassy && key === 'editAfter') {
+      return 'Once submitted, your application is locked for review. If you need to make changes, contact the community using the details in the Need Help section.';
+    }
+    return t(`resources.dialog.faq.items.${key}.a` as FaqAKey);
+  }
 
   // Documents the applicant must provide: declared FILE_UPLOAD fields, or the
   // static fallback list when the service declares none.
@@ -576,7 +586,7 @@ function ResourceDialog({
                   {t(`resources.dialog.faq.items.${k}.q` as FaqQKey)}
                 </dt>
                 <dd className="caption-medium mt-1 text-text-secondary">
-                  {t(`resources.dialog.faq.items.${k}.a` as FaqAKey)}
+                  {faqAnswer(k)}
                 </dd>
               </div>
             ))}
@@ -597,7 +607,9 @@ function ResourceDialog({
                 className="caption-large inline-flex items-center gap-1.5 text-text-brand hover:underline"
               >
                 <Mail className="size-4" aria-hidden />
-                {t('resources.dialog.travelAdvisory.contact')}
+                {isEmbassy
+                  ? t('resources.dialog.travelAdvisory.contact')
+                  : 'Contact the community for the latest advisory'}
               </a>
             )}
           </div>

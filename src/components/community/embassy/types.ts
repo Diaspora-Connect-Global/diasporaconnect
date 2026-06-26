@@ -1,5 +1,6 @@
 import type { Attachment } from '@/services/gql/types/postsFeed';
 import type { MentionInputItem } from '@/components/custom/richTextRenderer';
+import type { CommunityVariant } from './communityVariant';
 
 /** Mirrors the FeedPost shape produced by GET_FEED in CommunityDetailClient. */
 export interface EmbassyFeedPost {
@@ -40,6 +41,12 @@ export interface EmbassyCommunity {
  * embassy view fetches nothing itself for Phase 1 (Home uses the live feed).
  */
 export interface EmbassyViewProps {
+  /**
+   * Rich-view variant. 'embassy' uses embassy-specific copy/branding; 'general'
+   * uses neutral community copy. Exposed to all tabs/components via
+   * CommunityVariantProvider → useIsEmbassy()/useCommunityNoun().
+   */
+  variant: CommunityVariant;
   community: EmbassyCommunity;
   posts: EmbassyFeedPost[];
   feedLoading: boolean;

@@ -57,6 +57,7 @@ import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
 import { EmbassySupportCaseDetail } from './EmbassySupportCaseDetail';
 import { supportStatusBucket, SUPPORT_PILL } from './requestStatus';
+import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
 
 interface EmbassySupportTabProps {
   profile: EmbassyProfile;
@@ -113,6 +114,7 @@ type Section = 'topics' | 'cases';
  *  contact / emergency rail. */
 export function EmbassySupportTab({ community, communityId }: EmbassySupportTabProps) {
   const t = useTranslations('community.embassy.support');
+  const isEmbassy = useIsEmbassy();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedCaseId = searchParams.get('case');
@@ -325,7 +327,9 @@ export function EmbassySupportTab({ community, communityId }: EmbassySupportTabP
 
         <Card className="border-border-subtle">
           <CardContent className="space-y-3 p-5">
-            <h3 className="label-large text-text-primary">{t('contactTitle')}</h3>
+            <h3 className="label-large text-text-primary">
+              {isEmbassy ? t('contactTitle') : t('contactTitleGeneral')}
+            </h3>
             <p className="caption-medium flex items-center gap-2 text-text-secondary">
               <Phone className="size-4 flex-shrink-0" aria-hidden />
               {phone}

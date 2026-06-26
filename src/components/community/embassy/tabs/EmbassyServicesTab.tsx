@@ -31,6 +31,7 @@ import {
 } from '@/services/gql/embassyServices';
 import { EMBASSY_POPULAR_SERVICES, type EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { useIsEmbassy } from '../communityVariant';
 import { ServiceGridSkeleton } from '../EmbassySkeletons';
 import { EmbassyServiceDetail } from './EmbassyServiceDetail';
 import { EmbassyServiceApply } from './EmbassyServiceApply';
@@ -90,6 +91,7 @@ interface EmbassyServicesTabProps {
 /** Services = catalog of consular service/request types from service-request-service. */
 export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabProps) {
   const t = useTranslations('community.embassy.services');
+  const isEmbassy = useIsEmbassy();
   const [search, setSearch] = useState('');
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -156,8 +158,14 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
             {/* Header + search */}
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 className="heading-xsmall text-text-primary">{t('title')}</h2>
-                <p className="body-small text-text-secondary">{t('subtitle')}</p>
+                <h2 className="heading-xsmall text-text-primary">
+                  {isEmbassy ? t('title') : 'Services'}
+                </h2>
+                <p className="body-small text-text-secondary">
+                  {isEmbassy
+                    ? t('subtitle')
+                    : 'Browse the services offered by this community.'}
+                </p>
               </div>
               <div className="relative w-full sm:w-64">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
@@ -251,7 +259,7 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
           <p className="body-small mt-1 text-text-secondary">{t('needHelpBody')}</p>
           <a href={`tel:${community.contactPhone || profile.phone}`} className="mt-3 block">
             <span className="block w-full rounded-lg border border-border-brand bg-surface-default py-2 text-center label-medium text-text-brand">
-              {t('contactEmbassy')}
+              {isEmbassy ? t('contactEmbassy') : 'Contact the Community'}
             </span>
           </a>
         </div>

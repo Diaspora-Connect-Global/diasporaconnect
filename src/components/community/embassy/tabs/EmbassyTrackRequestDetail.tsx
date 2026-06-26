@@ -50,6 +50,7 @@ import {
 } from '@/services/gql/embassyServices';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { useIsEmbassy } from '../communityVariant';
 import { ServiceFee } from '../ServiceFee';
 import { CancelRequestDialog } from './CancelRequestDialog';
 import { statusBucket, BUCKET_PILL } from './requestStatus';
@@ -119,6 +120,7 @@ export function EmbassyTrackRequestDetail({
   profile,
 }: EmbassyTrackRequestDetailProps) {
   const t = useTranslations('community.embassy.track.detail');
+  const isEmbassy = useIsEmbassy();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -293,10 +295,14 @@ export function EmbassyTrackRequestDetail({
               <Info className="size-4 text-text-brand" aria-hidden />
               {t('help.title')}
             </p>
-            <p className="body-small mt-1 text-text-secondary">{t('help.body')}</p>
+            <p className="body-small mt-1 text-text-secondary">
+              {isEmbassy
+                ? t('help.body')
+                : 'If you have questions about this request, contact the community directly.'}
+            </p>
             <a href={`tel:${community.contactPhone || profile.phone}`} className="mt-3 block">
               <span className="block w-full rounded-lg border border-border-brand bg-surface-default py-2 text-center label-medium text-text-brand">
-                {t('help.contact')}
+                {isEmbassy ? t('help.contact') : 'Contact the Community'}
               </span>
             </a>
           </div>
@@ -641,6 +647,7 @@ interface SupplyInfoSectionProps {
 }
 function SupplyInfoSection({ request, formFields, onSupplied }: SupplyInfoSectionProps) {
   const t = useTranslations('community.embassy.track.detail');
+  const isEmbassy = useIsEmbassy();
   const [message, setMessage] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -720,7 +727,11 @@ function SupplyInfoSection({ request, formFields, onSupplied }: SupplyInfoSectio
           <AlertCircle className="mt-0.5 size-5 flex-shrink-0 text-amber-600" aria-hidden />
           <div className="min-w-0">
             <h2 className="label-large text-text-primary">{t('supply.title')}</h2>
-            <p className="body-small mt-0.5 text-text-secondary">{t('supply.subtitle')}</p>
+            <p className="body-small mt-0.5 text-text-secondary">
+              {isEmbassy
+                ? t('supply.subtitle')
+                : 'The community needs more details to continue processing your request.'}
+            </p>
           </div>
         </div>
 

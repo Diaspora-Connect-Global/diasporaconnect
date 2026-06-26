@@ -677,7 +677,8 @@
                 "needHelp": "Need Help?",
                 "needHelpBody": "Our consular team is here to assist you.",
                 "contactUs": "Contact Us",
-                "emergencyViewAlert": "View Alert"
+                "emergencyViewAlert": "View Alert",
+                "needHelpBodyGeneral": "Our community team is here to assist you."
             },
             "events": {
                 "title": "Events",
@@ -1287,11 +1288,13 @@
                     },
                     "help": {
                         "title": "Need to add something?",
-                        "body": "Reply to the embassy's email or call the contact line to add details to this case."
+                        "body": "Reply to the embassy's email or call the contact line to add details to this case.",
+                        "bodyGeneral": "Reply to the community's email or call the contact line to add details to this case."
                     },
                     "secure": {
                         "title": "Private & secure",
-                        "body": "Only you and the embassy support team can see this case."
+                        "body": "Only you and the embassy support team can see this case.",
+                        "bodyGeneral": "Only you and the community support team can see this case."
                     },
                     "cancelDialog": {
                         "title": "Withdraw this case?",
@@ -1305,7 +1308,8 @@
                         "success": "Case withdrawn",
                         "error": "We couldn't withdraw the case. Please try again."
                     }
-                }
+                },
+                "contactTitleGeneral": "Contact the Community"
             },
             "community": {
                 "overview": "Community Overview",
@@ -1337,7 +1341,8 @@
                 "seeAll": "See All",
                 "services": "Services",
                 "servicesSub": "Available to request",
-                "viewFullGuidelines": "View Full Guidelines"
+                "viewFullGuidelines": "View Full Guidelines",
+                "verifiedCommunity": "Verified community"
             },
             "updates": {
                 "sortNewest": "Newest first",
@@ -1345,7 +1350,8 @@
                 "questionTitle": "Have a Question?",
                 "questionBody": "Send your enquiry to the Embassy and get a response.",
                 "contactEmbassy": "Contact Embassy"
-            }
+            },
+            "verifiedCommunity": "Verified community"
         },
         "payment": {
             "title": "Complete your membership payment",
