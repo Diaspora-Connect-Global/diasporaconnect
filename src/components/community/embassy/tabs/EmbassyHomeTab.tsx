@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, ChevronRight, Headset, Newspaper } from 'lucide-react';
@@ -43,6 +44,20 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
 
   const homePosts = posts.slice(0, MAX_HOME_POSTS);
 
+  // Derive the active emergency alert: the most recent post classified as
+  // "emergency" or "advisory" (case-insensitive). Posts are feed-ordered
+  // (most recent first), so the first match is the latest alert.
+  const alertPost = useMemo(() => {
+    return posts.find((post) =>
+      post.categories?.some((category) => {
+        const normalized = category.trim().toLowerCase();
+        return normalized === 'emergency' || normalized === 'advisory';
+      }),
+    );
+  }, [posts]);
+
+  const alertExcerpt = alertPost?.text.split('\n', 1)[0]?.trim() ?? '';
+
   return (
     <div className="grid grid-cols-1 gap-6 px-3 py-6 lg:grid-cols-[1fr_20rem] lg:px-6">
       {/* Main column */}
@@ -70,25 +85,24 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
           </CardContent>
         </Card>
 
-        {/* Emergency Alert */}
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-border-danger bg-surface-danger p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="size-5 flex-shrink-0 text-text-danger" aria-hidden />
-            <div>
-              <p className="label-medium text-text-danger">{t('home.emergencyTitle')}</p>
-              <p className="body-small text-text-secondary">
-                {t('home.emergencyBody', { name: community.name })}
-              </p>
+        {/* Emergency Alert — shown only when an emergency/advisory post exists */}
+        {alertPost && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border-danger bg-surface-danger p-4">
+            <div className="flex min-w-0 items-start gap-3">
+              <AlertTriangle className="size-5 flex-shrink-0 text-text-danger" aria-hidden />
+              <div className="min-w-0">
+                <p className="label-medium text-text-danger">{t('home.emergencyTitle')}</p>
+                <p className="body-small line-clamp-2 text-text-secondary">{alertExcerpt}</p>
+              </div>
             </div>
+            <Link
+              href={`/post/${alertPost.id}`}
+              className="label-medium flex-shrink-0 whitespace-nowrap rounded-full border border-border-danger bg-surface-default px-4 py-1.5 text-text-danger"
+            >
+              {t('home.emergencyViewAlert')}
+            </Link>
           </div>
-          <Link
-            href={tabHref('support')}
-            scroll={false}
-            className="label-medium flex-shrink-0 whitespace-nowrap rounded-full border border-border-danger bg-surface-default px-4 py-1.5 text-text-danger"
-          >
-            {t('home.viewAlert')}
-          </Link>
-        </div>
+        )}
 
         {/* Latest Updates — live community feed */}
         <Card className="border-border-subtle">

@@ -31,8 +31,10 @@ import {
   LayoutGrid,
   UserCog,
   ShieldCheck,
+  Share2,
   type LucideIcon,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   DropdownMenu,
@@ -123,6 +125,25 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
   const [page, setPage] = useState(1);
   // The request the "…" menu is asking to cancel (null = dialog closed).
   const [cancelTarget, setCancelTarget] = useState<ServiceRequestSummary | null>(null);
+
+  /**
+   * Share the community: prefer the native share sheet, else copy the link to
+   * the clipboard. Guarded for SSR (no `window`/`navigator`).
+   */
+  async function handleInvite() {
+    if (typeof window === 'undefined') return;
+    const url = window.location.href || `/community/${community.id}`;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({ url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      toast.success(t('actions.inviteCopied'));
+    } catch {
+      // user cancelled the share sheet — no error needed
+    }
+  }
 
   const { data, loading } = useQuery<MyServiceRequestsResponse>(MY_SERVICE_REQUESTS, {
     fetchPolicy: 'cache-and-network',
@@ -390,6 +411,13 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
                 subtitle={t('actions.profileSub')}
                 href="/settings"
               />
+              <QuickAction
+                icon={Share2}
+                tone="teal"
+                title={t('actions.invite')}
+                subtitle={t('actions.inviteSub')}
+                onClick={handleInvite}
+              />
             </ul>
           </CardContent>
         </Card>
@@ -636,12 +664,14 @@ function QuickAction({
   title,
   subtitle,
   href,
+  onClick,
 }: {
   icon: LucideIcon;
   tone: string;
   title: string;
   subtitle: string;
   href?: string | { pathname: string; query: Record<string, string> };
+  onClick?: () => void;
 }) {
   const c = TONES[tone] ?? TONES.brand;
   const inner = (
@@ -664,7 +694,11 @@ function QuickAction({
           {inner}
         </Link>
       ) : (
-        <button type="button" className="block w-full transition-colors hover:opacity-80">
+        <button
+          type="button"
+          onClick={onClick}
+          className="block w-full transition-colors hover:opacity-80"
+        >
           {inner}
         </button>
       )}

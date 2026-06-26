@@ -1,6 +1,10 @@
 'use client';
 
-import { useQuery } from '@apollo/client/react';
+import { useCallback, useState } from 'react';
+import Image from 'next/image';
+import { useQuery, useLazyQuery } from '@apollo/client/react';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import {
   Users,
   UsersRound,
@@ -10,9 +14,17 @@ import {
   Check,
   ChevronRight,
   UserPlus,
+  Loader2,
   type LucideIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { GET_COMMUNITY_MEMBERS } from '@/services/gql/community';
 import {
   EMBASSY_GUIDELINES,
@@ -20,17 +32,22 @@ import {
 } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
 
+/** How many members to request per page in the "See All" dialog. */
+const MEMBERS_PAGE_SIZE = 20;
+
 /* ── Right-rail backend response shapes ─────────────────────────────────── */
+interface CommunityMember {
+  userId: string;
+  role: string;
+  status: string;
+  joinedAt?: string | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+}
+
 interface CommunityMembersData {
   listCommunityMembers: {
-    members: Array<{
-      userId: string;
-      role: string;
-      status: string;
-      joinedAt?: string | null;
-      displayName?: string | null;
-      avatarUrl?: string | null;
-    }>;
+    members: CommunityMember[];
     total: number;
   };
 }
@@ -52,6 +69,7 @@ interface EmbassyCommunityTabProps {
 
 export function EmbassyCommunityTab({ props }: EmbassyCommunityTabProps) {
   const { community, posts, displayMemberCount } = props;
+  const t = useTranslations('community.embassy.community');
 
   /* ── Recently Active Members → real community members ──────────────────
    * listCommunityMembers exposes name/avatar but they may be null, so we still
@@ -66,10 +84,81 @@ export function EmbassyCommunityTab({ props }: EmbassyCommunityTabProps) {
   const shownMembers = memberRows.slice(0, 5);
   const extraMembers = Math.max(memberTotal - shownMembers.length, 0);
 
-  /* ── Community Guidelines → no per-community backend source ─────────────
-   * getCommunity / GET_COMMUNITY_DETAILS does not expose a community_rules /
-   * communityRules field, so wiring real rules would require a backend change.
-   * We keep the generic platform guidelines (EMBASSY_GUIDELINES) here. */
+  /* ── Community Guidelines ──────────────────────────────────────────────
+   * The community may expose `communityRules` (a longer-form guidelines text);
+   * when it is missing we fall back to the generic platform guidelines that the
+   * card already lists (EMBASSY_GUIDELINES). The optional field is not part of
+   * the shared EmbassyCommunity type, so we read it defensively. */
+  const communityRules = (community as { communityRules?: string | null }).communityRules;
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+
+  /* ── "See All" members dialog → paginated listCommunityMembers ─────────
+   * Fetched lazily (only when the dialog opens) with a larger page size. Rows
+   * are accumulated in local state and "Load more" re-runs the loader with a
+   * growing offset — mirroring the lazy-query pagination used elsewhere
+   * (useFeed) rather than relying on fetchMore/updateQuery. */
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [allMemberRows, setAllMemberRows] = useState<CommunityMember[]>([]);
+  const [allMemberTotal, setAllMemberTotal] = useState(0);
+  const [loadAllMembers, { loading: allMembersLoading }] =
+    useLazyQuery<CommunityMembersData>(GET_COMMUNITY_MEMBERS, {
+      fetchPolicy: 'network-only',
+    });
+  const hasMoreMembers = allMemberRows.length < allMemberTotal;
+
+  const fetchMembersPage = useCallback(
+    async (offset: number) => {
+      const { data } = await loadAllMembers({
+        variables: { communityId: community.id, limit: MEMBERS_PAGE_SIZE, offset },
+      });
+      const page = data?.listCommunityMembers;
+      if (!page) return;
+      setAllMemberTotal(page.total ?? 0);
+      setAllMemberRows((prev) => {
+        if (offset === 0) return page.members;
+        const seen = new Set(prev.map((m) => m.userId));
+        return [...prev, ...page.members.filter((m) => !seen.has(m.userId))];
+      });
+    },
+    [loadAllMembers, community.id],
+  );
+
+  const openMembersDialog = useCallback(() => {
+    setMembersOpen(true);
+    setAllMemberRows([]);
+    setAllMemberTotal(0);
+    void fetchMembersPage(0);
+  }, [fetchMembersPage]);
+
+  const handleLoadMoreMembers = useCallback(() => {
+    if (allMembersLoading) return;
+    void fetchMembersPage(allMemberRows.length);
+  }, [allMembersLoading, fetchMembersPage, allMemberRows.length]);
+
+  /* ── Invite Friends → copy / native-share the community URL ────────────
+   * Mirrors the lightweight share logic from SharePostModal: prefer the native
+   * share sheet, fall back to the clipboard + a sonner toast. SSR-guarded. */
+  const handleInvite = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    const url =
+      typeof window.location !== 'undefined'
+        ? window.location.href
+        : `/community/${community.id}`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ url, title: community.name });
+        return;
+      } catch {
+        // user cancelled or share unavailable — fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t('inviteCopied'));
+    } catch {
+      toast.error(t('inviteCopyFailed'));
+    }
+  }, [community.id, community.name, t]);
 
   // Members + Discussions come from the backend (community memberCount + the
   // community feed). Online Now / Featured Posts have no backend endpoint yet — mock.
@@ -128,7 +217,11 @@ export function EmbassyCommunityTab({ props }: EmbassyCommunityTabProps) {
                 </li>
               ))}
             </ul>
-            <button type="button" className="label-medium mt-3 inline-flex items-center gap-1 text-text-brand">
+            <button
+              type="button"
+              onClick={() => setGuidelinesOpen(true)}
+              className="label-medium mt-3 inline-flex items-center gap-1 text-text-brand"
+            >
               View Full Guidelines
               <ChevronRight className="size-4" aria-hidden />
             </button>
@@ -140,7 +233,13 @@ export function EmbassyCommunityTab({ props }: EmbassyCommunityTabProps) {
           <CardContent className="p-5">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="label-large text-text-primary">Recently Active Members</h3>
-              <button type="button" className="caption-medium text-text-brand">See All</button>
+              <button
+                type="button"
+                onClick={openMembersDialog}
+                className="caption-medium text-text-brand"
+              >
+                See All
+              </button>
             </div>
             <div className="flex items-center">
               {shownMembers.map((m) => (
@@ -162,6 +261,7 @@ export function EmbassyCommunityTab({ props }: EmbassyCommunityTabProps) {
             </p>
             <button
               type="button"
+              onClick={handleInvite}
               className="label-medium mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border-brand py-2 text-text-brand"
             >
               <UserPlus className="size-4" aria-hidden />
@@ -170,6 +270,100 @@ export function EmbassyCommunityTab({ props }: EmbassyCommunityTabProps) {
           </CardContent>
         </Card>
       </aside>
+
+      {/* ── Full Guidelines dialog ─────────────────────────────────────── */}
+      <Dialog open={guidelinesOpen} onOpenChange={setGuidelinesOpen}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="heading-xsmall flex items-center gap-2 text-text-primary">
+              <ShieldCheck className="size-5 text-text-success" aria-hidden />
+              {t('guidelinesTitle')}
+            </DialogTitle>
+            <DialogDescription className="caption-medium text-text-secondary">
+              {t('guidelinesSubtitle')}
+            </DialogDescription>
+          </DialogHeader>
+          {communityRules ? (
+            <p className="caption-large whitespace-pre-line text-text-primary">
+              {communityRules}
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {EMBASSY_GUIDELINES.map((g) => (
+                <li
+                  key={g}
+                  className="caption-large flex items-start gap-2 text-text-primary"
+                >
+                  <Check className="mt-0.5 size-4 flex-shrink-0 text-text-success" aria-hidden />
+                  {g}
+                </li>
+              ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── All members dialog ─────────────────────────────────────────── */}
+      <Dialog open={membersOpen} onOpenChange={setMembersOpen}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="heading-xsmall text-text-primary">
+              {t('membersTitle')}
+            </DialogTitle>
+            <DialogDescription className="caption-medium text-text-secondary">
+              {t('membersCount', { count: allMemberTotal })}
+            </DialogDescription>
+          </DialogHeader>
+
+          {allMemberRows.length === 0 && allMembersLoading ? (
+            <div className="flex items-center justify-center py-8 text-text-secondary">
+              <Loader2 className="size-5 animate-spin" aria-hidden />
+            </div>
+          ) : allMemberRows.length === 0 ? (
+            <p className="caption-large py-6 text-center text-text-secondary">
+              {t('membersEmpty')}
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {allMemberRows.map((m) => (
+                <li key={m.userId} className="flex items-center gap-3 py-2">
+                  {m.avatarUrl ? (
+                    <Image
+                      src={m.avatarUrl}
+                      alt={m.displayName ?? ''}
+                      width={40}
+                      height={40}
+                      className="size-10 flex-shrink-0 rounded-full border border-border-subtle object-cover"
+                    />
+                  ) : (
+                    <span className="size-10 flex-shrink-0 rounded-full border border-border-subtle bg-surface-subtle" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="label-medium truncate text-text-primary">
+                      {m.displayName ?? t('memberFallbackName')}
+                    </p>
+                    <p className="caption-small capitalize text-text-secondary">
+                      {m.role.toLowerCase()}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {hasMoreMembers && (
+            <button
+              type="button"
+              onClick={handleLoadMoreMembers}
+              disabled={allMembersLoading}
+              className="label-medium mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border-brand py-2 text-text-brand disabled:opacity-50"
+            >
+              {allMembersLoading && <Loader2 className="size-4 animate-spin" aria-hidden />}
+              {t('loadMore')}
+            </button>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

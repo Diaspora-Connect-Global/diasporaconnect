@@ -12,7 +12,6 @@ import {
   CalendarDays,
   Lock,
   ShieldCheck,
-  ChevronRight,
   BookUser,
   CreditCard,
   FileBadge,
@@ -250,7 +249,7 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
             {t('needHelpTitle')}
           </p>
           <p className="body-small mt-1 text-text-secondary">{t('needHelpBody')}</p>
-          <a href={`tel:${profile.phone}`} className="mt-3 block">
+          <a href={`tel:${community.contactPhone || profile.phone}`} className="mt-3 block">
             <span className="block w-full rounded-lg border border-border-brand bg-surface-default py-2 text-center label-medium text-text-brand">
               {t('contactEmbassy')}
             </span>
@@ -283,13 +282,6 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
                 );
               })}
             </ul>
-            <button
-              type="button"
-              className="label-medium mt-4 inline-flex items-center gap-1 text-text-brand"
-            >
-              {t('viewAllServices')}
-              <ChevronRight className="size-4" aria-hidden />
-            </button>
           </CardContent>
         </Card>
 

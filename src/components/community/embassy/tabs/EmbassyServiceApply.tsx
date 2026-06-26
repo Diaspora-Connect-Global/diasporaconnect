@@ -32,6 +32,13 @@ import {
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   SERVICE_REQUEST_TYPES_DETAIL,
   SUBMIT_SERVICE_REQUEST,
   REQUEST_SERVICE_REQUEST_DOC_UPLOAD_URL,
@@ -101,6 +108,7 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitServiceRequestResult | null>(null);
+  const [openResource, setOpenResource] = useState<ResourceKey | null>(null);
 
   const { data, loading } = useQuery<ServiceRequestTypesDetailResponse>(
     SERVICE_REQUEST_TYPES_DETAIL,
@@ -429,13 +437,15 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
                 {profile.officeHours}
               </li>
             </ul>
-            <button
-              type="button"
-              className="label-medium mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-brand bg-surface-default py-2 text-text-brand"
+            <a
+              href={`mailto:${contactEmail}?subject=${encodeURIComponent(
+                t('help.messageSubject', { name: service.displayName }),
+              )}`}
+              className="label-medium mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-brand bg-surface-default py-2 text-text-brand transition-colors hover:bg-surface-subtle"
             >
               <MessageSquare className="size-4" aria-hidden />
               {t('help.sendMessage')}
-            </button>
+            </a>
           </div>
 
           {/* Resources */}
@@ -443,18 +453,164 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
             <CardContent className="p-5">
               <h3 className="label-large mb-3 text-text-primary">{t('resources.title')}</h3>
               <ul className="space-y-1">
-                <ResourceRow icon={FileText} label={t('resources.applicationGuide')} />
-                <ResourceRow icon={Files} label={t('resources.requiredDocuments')} />
-                <ResourceRow icon={HelpCircle} label={t('resources.faq')} />
-                <ResourceRow icon={Plane} label={t('resources.travelAdvisory')} />
+                <ResourceRow
+                  icon={FileText}
+                  label={t('resources.applicationGuide')}
+                  onClick={() => setOpenResource('applicationGuide')}
+                />
+                <ResourceRow
+                  icon={Files}
+                  label={t('resources.requiredDocuments')}
+                  onClick={() => setOpenResource('requiredDocuments')}
+                />
+                <ResourceRow
+                  icon={HelpCircle}
+                  label={t('resources.faq')}
+                  onClick={() => setOpenResource('faq')}
+                />
+                <ResourceRow
+                  icon={Plane}
+                  label={t('resources.travelAdvisory')}
+                  onClick={() => setOpenResource('travelAdvisory')}
+                />
               </ul>
             </CardContent>
           </Card>
         </aside>
       </div>
+
+      {/* Resource detail dialog (driven by which sidebar row was clicked) */}
+      <ResourceDialog
+        resource={openResource}
+        onOpenChange={(open) => setOpenResource(open ? openResource : null)}
+        service={service}
+        stepTitles={STEP_TITLES}
+        fileFields={fileFields}
+        usesFallbackDocs={usesFallbackDocs}
+        contactEmail={contactEmail}
+      />
     </div>
   );
 }
+
+/* ============================================================================
+ * Resources dialog (sidebar)
+ * ========================================================================== */
+
+const RESOURCE_KEYS = ['applicationGuide', 'requiredDocuments', 'faq', 'travelAdvisory'] as const;
+type ResourceKey = (typeof RESOURCE_KEYS)[number];
+
+/** Stable keys for the static FAQ entries shown in the FAQ dialog. */
+const FAQ_KEYS = ['processingTime', 'editAfter', 'paymentMethods', 'tracking'] as const;
+type FaqKey = (typeof FAQ_KEYS)[number];
+
+interface ResourceDialogProps {
+  resource: ResourceKey | null;
+  onOpenChange: (open: boolean) => void;
+  service: ServiceRequestTypeDetail;
+  stepTitles: string[];
+  fileFields: ServiceRequestFormField[];
+  usesFallbackDocs: boolean;
+  contactEmail?: string;
+}
+function ResourceDialog({
+  resource,
+  onOpenChange,
+  service,
+  stepTitles,
+  fileFields,
+  usesFallbackDocs,
+  contactEmail,
+}: ResourceDialogProps) {
+  const t = useTranslations('community.embassy.services.apply');
+  if (!resource) return null;
+
+  // Documents the applicant must provide: declared FILE_UPLOAD fields, or the
+  // static fallback list when the service declares none.
+  const docs: string[] = usesFallbackDocs
+    ? FALLBACK_DOC_KEYS.map((k) => t(`documents.fallback.${k}` as DocFallbackKey))
+    : fileFields.map((f) => f.label || f.key);
+
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="label-large text-text-primary">
+            {t(`resources.${resource}` as ResourceTitleKey)}
+          </DialogTitle>
+          <DialogDescription className="body-small text-text-secondary">
+            {t(`resources.dialog.${resource}.intro` as ResourceIntroKey)}
+          </DialogDescription>
+        </DialogHeader>
+
+        {resource === 'applicationGuide' && (
+          <ol className="space-y-3">
+            {stepTitles.map((title, i) => (
+              <li key={title} className="flex gap-3">
+                <span className="flex size-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-brand-subtle caption-small font-semibold text-text-brand">
+                  {i + 1}
+                </span>
+                <span className="caption-large text-text-primary">{title}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {resource === 'requiredDocuments' && (
+          <ul className="space-y-2">
+            {docs.map((doc) => (
+              <li key={doc} className="flex items-start gap-2 caption-large text-text-primary">
+                <Files className="mt-0.5 size-4 flex-shrink-0 text-text-brand" aria-hidden />
+                <span className="min-w-0">{doc}</span>
+              </li>
+            ))}
+            <li className="caption-small mt-1 text-text-secondary">{t('resources.dialog.requiredDocuments.note')}</li>
+          </ul>
+        )}
+
+        {resource === 'faq' && (
+          <dl className="space-y-4">
+            {FAQ_KEYS.map((k) => (
+              <div key={k}>
+                <dt className="caption-large font-medium text-text-primary">
+                  {t(`resources.dialog.faq.items.${k}.q` as FaqQKey)}
+                </dt>
+                <dd className="caption-medium mt-1 text-text-secondary">
+                  {t(`resources.dialog.faq.items.${k}.a` as FaqAKey)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {resource === 'travelAdvisory' && (
+          <div className="space-y-3">
+            <div className="flex items-start gap-2 rounded-lg border border-border-subtle bg-surface-brand-subtle p-3">
+              <ShieldCheck className="mt-0.5 size-4 flex-shrink-0 text-text-brand" aria-hidden />
+              <p className="caption-medium text-text-secondary">{t('resources.dialog.travelAdvisory.note')}</p>
+            </div>
+            {contactEmail && (
+              <a
+                href={`mailto:${contactEmail}?subject=${encodeURIComponent(
+                  t('resources.dialog.travelAdvisory.contactSubject', { name: service.displayName }),
+                )}`}
+                className="caption-large inline-flex items-center gap-1.5 text-text-brand hover:underline"
+              >
+                <Mail className="size-4" aria-hidden />
+                {t('resources.dialog.travelAdvisory.contact')}
+              </a>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type ResourceTitleKey = `resources.${ResourceKey}`;
+type ResourceIntroKey = `resources.dialog.${ResourceKey}.intro`;
+type FaqQKey = `resources.dialog.faq.items.${FaqKey}.q`;
+type FaqAKey = `resources.dialog.faq.items.${FaqKey}.a`;
 
 /* ============================================================================
  * Progress indicator
@@ -1429,12 +1585,14 @@ function SummaryRow({ label, value }: SummaryRowProps) {
 interface ResourceRowProps {
   icon: LucideIcon;
   label: string;
+  onClick: () => void;
 }
-function ResourceRow({ icon: Icon, label }: ResourceRowProps) {
+function ResourceRow({ icon: Icon, label, onClick }: ResourceRowProps) {
   return (
     <li>
       <button
         type="button"
+        onClick={onClick}
         className="flex w-full items-center gap-3 rounded-lg p-1.5 text-left transition-colors hover:bg-surface-subtle"
       >
         <span className="flex size-8 flex-shrink-0 items-center justify-center rounded-md bg-surface-subtle">

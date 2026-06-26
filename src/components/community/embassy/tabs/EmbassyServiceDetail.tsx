@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
+import { toast } from 'sonner';
 import { useSearchParams } from 'next/navigation';
 import { Link, usePathname } from '@/i18n/navigation';
 import Image from 'next/image';
@@ -125,6 +126,62 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [subTab, setSubTab] = useState<SubTab>('Overview');
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const FAVORITES_KEY = 'embassy:favoriteServices';
+
+  /** Read the persisted set of favorited service ids from localStorage. */
+  function readFavorites(): string[] {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = window.localStorage.getItem(FAVORITES_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /** Initialize the favorite toggle from localStorage on mount / when the service changes. */
+  useEffect(() => {
+    setIsFavorite(readFavorites().includes(serviceId));
+  }, [serviceId]);
+
+  /** Persisted favorite toggle (no backend mutation exists for services). */
+  function toggleFavorite() {
+    const current = readFavorites();
+    const next = current.includes(serviceId)
+      ? current.filter((id) => id !== serviceId)
+      : [...current, serviceId];
+    try {
+      window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+    } catch {
+      // storage unavailable (private mode / quota) — keep UI state in sync anyway
+    }
+    const added = next.includes(serviceId);
+    setIsFavorite(added);
+    toast.success(added ? 'Added to favorites' : 'Removed from favorites');
+  }
+
+  /** Share the current service URL via the native share sheet, falling back to clipboard. */
+  async function shareService() {
+    if (typeof window === 'undefined') return;
+    const url = window.location.href;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ url });
+      } catch {
+        // user cancelled — no error needed
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copied');
+    } catch {
+      toast.error('Could not copy the link');
+    }
+  }
 
   const { data, loading } = useQuery<ServiceRequestTypesDetailResponse>(
     SERVICE_REQUEST_TYPES_DETAIL,
@@ -306,13 +363,21 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
               <div className="flex gap-2">
                 <button
                   type="button"
-                  className="caption-large inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border-subtle py-2 text-text-secondary transition-colors hover:bg-surface-subtle"
+                  onClick={toggleFavorite}
+                  aria-pressed={isFavorite}
+                  className={`caption-large inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border-subtle py-2 transition-colors hover:bg-surface-subtle ${
+                    isFavorite ? 'text-rose-500' : 'text-text-secondary'
+                  }`}
                 >
-                  <Heart className="size-4" aria-hidden />
+                  <Heart
+                    className={`size-4 ${isFavorite ? 'fill-current' : ''}`}
+                    aria-hidden
+                  />
                   Favorite
                 </button>
                 <button
                   type="button"
+                  onClick={shareService}
                   className="caption-large inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border-subtle py-2 text-text-secondary transition-colors hover:bg-surface-subtle"
                 >
                   <Share2 className="size-4" aria-hidden />
@@ -489,13 +554,13 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
                     {officeHours}
                   </li>
                 </ul>
-                <button
-                  type="button"
-                  className="label-medium mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-brand bg-surface-default py-2 text-text-brand"
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="label-medium mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-brand bg-surface-default py-2 text-text-brand transition-colors hover:bg-surface-subtle"
                 >
                   <MessageSquare className="size-4" aria-hidden />
                   Send a Message
-                </button>
+                </a>
               </div>
 
               {/* Related services */}

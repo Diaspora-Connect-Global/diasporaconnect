@@ -673,7 +673,8 @@
                 "importantResources": "Ressources importantes",
                 "needHelp": "Besoin d'aide ?",
                 "needHelpBody": "Notre équipe consulaire est là pour vous aider.",
-                "contactUs": "Nous contacter"
+                "contactUs": "Nous contacter",
+                "emergencyViewAlert": "View Alert"
             },
             "events": {
                 "title": "Événements",
@@ -817,14 +818,51 @@
                     },
                     "help": {
                         "title": "Need Help?",
-                        "sendMessage": "Send a Message"
+                        "sendMessage": "Send a Message",
+                        "messageSubject": "Question about {name}"
                     },
                     "resources": {
                         "title": "Resources",
                         "applicationGuide": "Application Guide",
                         "requiredDocuments": "Required Documents",
                         "faq": "FAQ",
-                        "travelAdvisory": "Travel Advisory"
+                        "travelAdvisory": "Travel Advisory",
+                        "dialog": {
+                            "applicationGuide": {
+                                "intro": "Follow these steps to complete your application."
+                            },
+                            "requiredDocuments": {
+                                "intro": "Please prepare the following documents before you apply.",
+                                "note": "Accepted formats: PDF, JPG, or PNG. You can upload them in the Documents step."
+                            },
+                            "faq": {
+                                "intro": "Answers to common questions about applying.",
+                                "items": {
+                                    "processingTime": {
+                                        "q": "How long does processing take?",
+                                        "a": "Most applications are reviewed within the standard processing time shown at the top of this page. You'll be notified of any updates."
+                                    },
+                                    "editAfter": {
+                                        "q": "Can I edit my application after submitting?",
+                                        "a": "Once submitted, your application is locked for review. If you need to make changes, contact the embassy using the details in the Need Help section."
+                                    },
+                                    "paymentMethods": {
+                                        "q": "Which payment methods are accepted?",
+                                        "a": "Free services require no payment. For paid services you can pay by card or mobile money; other methods are coming soon."
+                                    },
+                                    "tracking": {
+                                        "q": "How do I track my request?",
+                                        "a": "After submitting, use the Track Requests tab to follow your application's status and reference number."
+                                    }
+                                }
+                            },
+                            "travelAdvisory": {
+                                "intro": "Important information to review before you travel.",
+                                "note": "Check the latest entry requirements, health guidance, and local conditions before travelling. Requirements can change at short notice.",
+                                "contact": "Contact the embassy for the latest advisory",
+                                "contactSubject": "Travel advisory question about {name}"
+                            }
+                        }
                     },
                     "errors": {
                         "submitFailed": "We couldn't submit your application. Please try again."
@@ -893,7 +931,10 @@
                     "documents": "Télécharger des documents",
                     "documentsSub": "Accéder aux documents que vous avez reçus",
                     "profile": "Mettre à jour mon profil",
-                    "profileSub": "Gardez vos informations à jour"
+                    "profileSub": "Gardez vos informations à jour",
+                    "invite": "Invite Friends",
+                    "inviteSub": "Share this embassy with others",
+                    "inviteCopied": "Invite link copied"
                 },
                 "secure": {
                     "title": "Vos informations sont sécurisées",
@@ -995,7 +1036,23 @@
                 "pending": "En attente",
                 "featured": "Publications en vedette",
                 "discussionsTitle": "Discussions",
-                "noDiscussions": "Aucune discussion pour le moment."
+                "noDiscussions": "Aucune discussion pour le moment.",
+                "guidelinesTitle": "Community Guidelines",
+                "guidelinesSubtitle": "Please be respectful, helpful and follow our community guidelines.",
+                "membersTitle": "Community Members",
+                "membersCount": "{count} members",
+                "membersEmpty": "No members to show yet.",
+                "memberFallbackName": "Community member",
+                "loadMore": "Load more",
+                "inviteCopied": "Invite link copied",
+                "inviteCopyFailed": "Could not copy invite link"
+            },
+            "updates": {
+                "sortNewest": "Newest first",
+                "sortOldest": "Oldest first",
+                "questionTitle": "Have a Question?",
+                "questionBody": "Send your enquiry to the Embassy and get a response.",
+                "contactEmbassy": "Contact Embassy"
             }
         },
         "joined": "Rejoint",

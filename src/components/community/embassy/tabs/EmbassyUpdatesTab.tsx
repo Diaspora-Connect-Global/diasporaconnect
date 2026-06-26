@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import {
   LayoutGrid,
   Bell,
@@ -9,13 +11,19 @@ import {
   Plane,
   Newspaper,
   CalendarDays,
-  Pin,
+  ArrowDownWideNarrow,
   ChevronDown,
   MessageSquare,
   type LucideIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ButtonType2 } from '@/components/custom/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { EmbassyFeedList } from '../EmbassyFeedList';
 import { FeedListSkeleton } from '../EmbassySkeletons';
 import type { EmbassyProfile } from '../embassyMock';
@@ -60,11 +68,35 @@ function postInBucket(post: EmbassyFeedPost, key: string): boolean {
   return (post.categories ?? []).some((c) => c.toLowerCase().includes(label));
 }
 
+// Shared styling for the "Contact Embassy" CTA. Mirrors ButtonType2 (brand
+// surface, white text, rounded-full) but lives on an <a>/<Link> so the action
+// is a real navigation (mailto / support tab) rather than a dead button.
+const CONTACT_BUTTON_CLASS =
+  'label-medium flex w-full items-center justify-center gap-2 rounded-full border ' +
+  'bg-surface-brand px-4 py-2 text-text-white transition-colors hover:bg-border-brand hover:text-text-white';
+
 /** Updates = the community's own post feed (announcements/news posts). */
+type SortOrder = 'newest' | 'oldest';
+
 export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
   const t = useTranslations('community.embassy');
   const { community, posts, feedLoading } = props;
   const [active, setActive] = useState('all');
+  const [sort, setSort] = useState<SortOrder>('newest');
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Fallback target when no contact email exists: the Support tab, built with the
+  // same `?tab=` Link pattern used across the other embassy tabs.
+  const supportHref = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', 'support');
+    const query: Record<string, string> = {};
+    params.forEach((value, name) => {
+      query[name] = value;
+    });
+    return { pathname, query };
+  }, [pathname, searchParams]);
 
   // Real, derived category counts (no mock fallback). "All Updates" = total
   // posts; each bucket = posts whose contentType maps to it (0 if none).
@@ -77,11 +109,16 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
   }, [posts]);
 
   // Feed shown in the list: "all" shows everything, otherwise only posts whose
-  // AI categories match the selected bucket.
+  // AI categories match the selected bucket — then ordered by `createdAt` per the
+  // chosen sort.
   const visiblePosts = useMemo<EmbassyFeedPost[]>(() => {
-    if (active === 'all') return posts;
-    return posts.filter((post) => postInBucket(post, active));
-  }, [posts, active]);
+    const filtered =
+      active === 'all' ? posts : posts.filter((post) => postInBucket(post, active));
+    return [...filtered].sort((a, b) => {
+      const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return sort === 'newest' ? -diff : diff;
+    });
+  }, [posts, active, sort]);
 
   return (
     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-3 py-6 lg:grid-cols-[1fr_20rem] lg:px-6">
@@ -105,11 +142,26 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
               </button>
             ))}
           </div>
-          <button type="button" className="caption-large inline-flex items-center gap-1 text-text-secondary">
-            <Pin className="size-4" aria-hidden />
-            Pinned
-            <ChevronDown className="size-4" aria-hidden />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="caption-large inline-flex items-center gap-1 text-text-secondary outline-none hover:text-text-primary">
+              <ArrowDownWideNarrow className="size-4" aria-hidden />
+              {sort === 'newest' ? t('updates.sortNewest') : t('updates.sortOldest')}
+              <ChevronDown className="size-4" aria-hidden />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuRadioGroup
+                value={sort}
+                onValueChange={(value) => setSort(value as SortOrder)}
+              >
+                <DropdownMenuRadioItem value="newest">
+                  {t('updates.sortNewest')}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="oldest">
+                  {t('updates.sortOldest')}
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Feed */}
@@ -180,31 +232,27 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
           </CardContent>
         </Card>
 
-        {/* Stay Informed */}
-        <Card className="border-border-subtle">
-          <CardContent className="p-5">
-            <h3 className="label-large text-text-primary">Stay Informed</h3>
-            <p className="body-small mt-1 text-text-secondary">
-              Turn on notifications to never miss important updates from the Embassy.
-            </p>
-            <ButtonType2 className="mt-3 flex w-full items-center justify-center gap-2 py-2">
-              <Bell className="size-4" aria-hidden />
-              Enable Notifications
-            </ButtonType2>
-          </CardContent>
-        </Card>
-
         {/* Have a Question? */}
         <Card className="border-border-subtle">
           <CardContent className="p-5">
-            <h3 className="label-large text-text-primary">Have a Question?</h3>
+            <h3 className="label-large text-text-primary">{t('updates.questionTitle')}</h3>
             <p className="body-small mt-1 text-text-secondary">
-              Send your enquiry to the Embassy and get a response.
+              {t('updates.questionBody')}
             </p>
-            <ButtonType2 className="mt-3 flex w-full items-center justify-center gap-2 py-2">
-              <MessageSquare className="size-4" aria-hidden />
-              Contact Embassy
-            </ButtonType2>
+            {community.contactEmail ? (
+              <a
+                href={`mailto:${community.contactEmail}`}
+                className={`${CONTACT_BUTTON_CLASS} mt-3`}
+              >
+                <MessageSquare className="size-4" aria-hidden />
+                {t('updates.contactEmbassy')}
+              </a>
+            ) : (
+              <Link href={supportHref} className={`${CONTACT_BUTTON_CLASS} mt-3`}>
+                <MessageSquare className="size-4" aria-hidden />
+                {t('updates.contactEmbassy')}
+              </Link>
+            )}
           </CardContent>
         </Card>
       </aside>

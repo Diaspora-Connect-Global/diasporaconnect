@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@apollo/client/react';
 import {
@@ -10,14 +10,29 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Bell,
   Sparkles,
   Users,
   GraduationCap,
   Video,
   Tag,
+  ArrowUpDown,
+  Loader2,
+  Maximize2,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Link } from '@/i18n/navigation';
 import { GET_EVENTS_BY_OWNER, type EventLocation } from '@/services/gql/events';
 import type { EmbassyViewProps } from '../types';
 
@@ -142,11 +157,49 @@ const CATEGORY_ROWS: CategoryRow[] = [
   { key: 'others', label: 'Others', icon: Tag, ring: 'bg-rose-50', fg: 'text-rose-500', mockCount: 2, match: [] },
 ];
 
+/** Resolve an event to one of the CATEGORY_ROWS keys ('others' if no match). */
+function eventCategoryKey(evt: OwnerEvent): string {
+  const cat = (evt.eventCategory ?? '').toLowerCase();
+  const hit = CATEGORY_ROWS.find(
+    (r) => r.match.length > 0 && r.match.some((m) => cat.includes(m)),
+  );
+  return hit ? hit.key : 'others';
+}
+
 // ─── Calendar ────────────────────────────────────────────────────────────────
 
-function EventCalendar({ events }: { events: OwnerEvent[] }) {
+/** Month/year of the nearest upcoming event, falling back to today. */
+function initialCalendarView(events: OwnerEvent[]): { year: number; month: number } {
+  const now = Date.now();
+  let nearest: Date | null = null;
+  for (const e of events) {
+    const d = parseDate(e.startAt);
+    if (!d || d.getTime() < now) continue;
+    if (!nearest || d.getTime() < nearest.getTime()) nearest = d;
+  }
+  const base = nearest ?? new Date();
+  return { year: base.getFullYear(), month: base.getMonth() };
+}
+
+function EventCalendar({
+  events,
+  enlarged = false,
+  onViewFull,
+}: {
+  events: OwnerEvent[];
+  enlarged?: boolean;
+  onViewFull?: () => void;
+}) {
   const today = new Date();
-  const [view, setView] = useState({ year: today.getFullYear(), month: today.getMonth() });
+  const [view, setView] = useState(() => initialCalendarView(events));
+  // Once events load (the calendar may mount empty), snap to the nearest
+  // upcoming event's month unless the user has already navigated.
+  const [userNavigated, setUserNavigated] = useState(false);
+  useEffect(() => {
+    if (userNavigated || events.length === 0) return;
+    setView(initialCalendarView(events));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events.length]);
 
   const eventDayKeys = useMemo(() => {
     const set = new Set<string>();
@@ -169,6 +222,7 @@ function EventCalendar({ events }: { events: OwnerEvent[] }) {
   while (cells.length % 7 !== 0) cells.push(null);
 
   const shift = (delta: number) => {
+    setUserNavigated(true);
     setView((v) => {
       const m = v.month + delta;
       return {
@@ -228,7 +282,8 @@ function EventCalendar({ events }: { events: OwnerEvent[] }) {
               <span
                 key={`d-${day}`}
                 className={[
-                  'caption-medium relative flex h-8 items-center justify-center rounded-md',
+                  'caption-medium relative flex items-center justify-center rounded-md',
+                  enlarged ? 'h-14' : 'h-8',
                   todayCell
                     ? 'bg-blue-600 font-semibold text-white'
                     : eventCell
@@ -245,12 +300,16 @@ function EventCalendar({ events }: { events: OwnerEvent[] }) {
           })}
         </div>
 
-        <button
-          type="button"
-          className="label-medium mt-4 w-full rounded-lg border border-border-subtle py-2 text-text-brand transition-colors hover:bg-surface-subtle"
-        >
-          View Full Calendar
-        </button>
+        {!enlarged && (
+          <button
+            type="button"
+            onClick={onViewFull}
+            className="label-medium mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-subtle py-2 text-text-brand transition-colors hover:bg-surface-subtle"
+          >
+            <Maximize2 className="size-4" aria-hidden />
+            View Full Calendar
+          </button>
+        )}
       </CardContent>
     </Card>
   );
@@ -321,12 +380,13 @@ function EventRow({ evt }: { evt: OwnerEvent }) {
               </div>
               <span className="caption-small text-text-secondary">{going} going</span>
             </div>
-            <button
-              type="button"
+            <Link
+              href={`/events/${evt.id}`}
+              scroll={false}
               className="label-medium rounded-lg bg-blue-600 px-4 py-1.5 text-white transition-colors hover:bg-blue-700"
             >
               View Details
-            </button>
+            </Link>
           </div>
         </div>
       </CardContent>
@@ -340,13 +400,21 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
   const { community } = props;
   const [activeTab, setActiveTab] = useState<SubTab>('upcoming');
   const [search, setSearch] = useState('');
+  const [limit, setLimit] = useState(20);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'soonest' | 'latest'>('soonest');
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const { data, loading } = useQuery<GetEventsByOwnerResponse>(GET_EVENTS_BY_OWNER, {
-    variables: { ownerId: community.id, ownerType: 'community', limit: 20, offset: 0 },
+    variables: { ownerId: community.id, ownerType: 'community', limit, offset: 0 },
     fetchPolicy: 'cache-and-network',
   });
 
+  const total = data?.getEventsByOwner?.total ?? 0;
   const allEvents = data?.getEventsByOwner?.events ?? [];
+  const hasMore = allEvents.length < total;
+  const loadingMore = loading && allEvents.length > 0;
 
   const now = Date.now();
   const upcoming = useMemo(
@@ -362,30 +430,37 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const row of CATEGORY_ROWS) counts[row.key] = 0;
-    let matchedOthers = 0;
     for (const e of allEvents) {
-      const cat = (e.eventCategory ?? '').toLowerCase();
-      const hit = CATEGORY_ROWS.find(
-        (r) => r.match.length > 0 && r.match.some((m) => cat.includes(m)),
-      );
-      if (hit) counts[hit.key] += 1;
-      else matchedOthers += 1;
+      const key = eventCategoryKey(e);
+      counts[key] = (counts[key] ?? 0) + 1;
     }
-    counts.others = matchedOthers;
     return counts;
   }, [allEvents]);
 
-  // Visible list = active sub-tab filtered by search.
+  // Visible list = active sub-tab filtered by search + category, then sorted.
   const visible = useMemo(() => {
     const base = activeTab === 'upcoming' ? upcoming : activeTab === 'past' ? past : [];
     const q = search.trim().toLowerCase();
-    if (!q) return base;
-    return base.filter(
-      (e) =>
-        e.title.toLowerCase().includes(q) ||
-        (e.description ?? '').toLowerCase().includes(q),
-    );
-  }, [activeTab, upcoming, past, search]);
+    let result = q
+      ? base.filter(
+          (e) =>
+            e.title.toLowerCase().includes(q) ||
+            (e.description ?? '').toLowerCase().includes(q),
+        )
+      : base.slice();
+
+    if (selectedCategory) {
+      result = result.filter((e) => eventCategoryKey(e) === selectedCategory);
+    }
+
+    result.sort((a, b) => {
+      const ta = parseDate(a.startAt)?.getTime() ?? 0;
+      const tb = parseDate(b.startAt)?.getTime() ?? 0;
+      return sortOrder === 'soonest' ? ta - tb : tb - ta;
+    });
+
+    return result;
+  }, [activeTab, upcoming, past, search, selectedCategory, sortOrder]);
 
   const subTabs: { key: SubTab; label: string }[] = [
     { key: 'upcoming', label: 'Upcoming Events' },
@@ -443,13 +518,26 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                     );
                   })}
                 </div>
-                <button
-                  type="button"
-                  className="label-medium inline-flex items-center gap-1 rounded-lg border border-border-subtle px-3 py-1.5 text-text-secondary hover:bg-surface-subtle"
-                >
-                  All Events
-                  <ChevronDown className="size-4" aria-hidden />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="label-medium inline-flex items-center gap-1 rounded-lg border border-border-subtle px-3 py-1.5 text-text-secondary hover:bg-surface-subtle"
+                    >
+                      <ArrowUpDown className="size-4" aria-hidden />
+                      {sortOrder === 'soonest' ? 'Soonest first' : 'Latest first'}
+                      <ChevronDown className="size-4" aria-hidden />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => setSortOrder('soonest')}>
+                      Soonest first
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setSortOrder('latest')}>
+                      Latest first
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Event list */}
@@ -498,12 +586,21 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
               )}
 
               {/* View more */}
-              {visible.length > 0 && (
+              {activeTab !== 'registrations' && hasMore && (
                 <button
                   type="button"
-                  className="label-medium mt-5 w-full rounded-lg border border-border-subtle py-2.5 text-text-brand transition-colors hover:bg-surface-subtle"
+                  onClick={() => setLimit((l) => l + 20)}
+                  disabled={loadingMore}
+                  className="label-medium mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border-subtle py-2.5 text-text-brand transition-colors hover:bg-surface-subtle disabled:opacity-60"
                 >
-                  View More Events
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                      Loading…
+                    </>
+                  ) : (
+                    'View More Events'
+                  )}
                 </button>
               )}
             </CardContent>
@@ -512,7 +609,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
 
         {/* Right rail */}
         <aside className="space-y-6">
-          <EventCalendar events={allEvents} />
+          <EventCalendar events={allEvents} onViewFull={() => setCalendarOpen(true)} />
 
           {/* Categories */}
           <Card className="border-border-subtle">
@@ -522,7 +619,12 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                 <li>
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left hover:bg-surface-subtle"
+                    onClick={() => setSelectedCategory(null)}
+                    aria-pressed={selectedCategory === null}
+                    className={[
+                      'flex w-full items-center justify-between rounded-lg px-2 py-2 text-left transition-colors',
+                      selectedCategory === null ? 'bg-surface-subtle' : 'hover:bg-surface-subtle',
+                    ].join(' ')}
                   >
                     <span className="flex items-center gap-3">
                       <span className="flex size-8 flex-shrink-0 items-center justify-center rounded-md bg-surface-subtle">
@@ -535,15 +637,23 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                     </span>
                   </button>
                 </li>
-                {CATEGORY_ROWS.map((row) => {
+                {(showAllCategories ? CATEGORY_ROWS : CATEGORY_ROWS.slice(0, 3)).map((row) => {
                   const real = categoryCounts[row.key] ?? 0;
                   const count = real > 0 ? real : row.mockCount;
                   const Icon = row.icon;
+                  const active = selectedCategory === row.key;
                   return (
                     <li key={row.key}>
                       <button
                         type="button"
-                        className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left hover:bg-surface-subtle"
+                        onClick={() =>
+                          setSelectedCategory((prev) => (prev === row.key ? null : row.key))
+                        }
+                        aria-pressed={active}
+                        className={[
+                          'flex w-full items-center justify-between rounded-lg px-2 py-2 text-left transition-colors',
+                          active ? 'bg-surface-subtle ring-1 ring-border-brand' : 'hover:bg-surface-subtle',
+                        ].join(' ')}
                       >
                         <span className="flex items-center gap-3">
                           <span className={`flex size-8 flex-shrink-0 items-center justify-center rounded-md ${row.ring}`}>
@@ -559,36 +669,36 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                   );
                 })}
               </ul>
-              <button
-                type="button"
-                className="label-medium mt-3 inline-flex items-center gap-1 text-text-brand"
-              >
-                View All Categories
-                <ChevronRight className="size-4" aria-hidden />
-              </button>
+              {CATEGORY_ROWS.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCategories((s) => !s)}
+                  className="label-medium mt-3 inline-flex items-center gap-1 text-text-brand"
+                >
+                  {showAllCategories ? 'Show Less' : 'View All Categories'}
+                  <ChevronRight
+                    className={[
+                      'size-4 transition-transform',
+                      showAllCategories ? 'rotate-90' : '',
+                    ].join(' ')}
+                    aria-hidden
+                  />
+                </button>
+              )}
             </CardContent>
           </Card>
         </aside>
       </div>
 
-      {/* Notifications banner */}
-      <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-xl border border-border-subtle bg-surface-brand-subtle p-4 sm:flex-row sm:items-center">
-        <div className="flex items-start gap-3">
-          <Bell className="size-5 flex-shrink-0 text-text-brand" aria-hidden />
-          <div>
-            <p className="label-medium text-text-primary">Never miss an event</p>
-            <p className="caption-medium text-text-secondary">
-              Enable notifications to get updates about new events and changes.
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          className="label-medium flex-shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
-        >
-          Enable Notifications
-        </button>
-      </div>
+      {/* Full calendar dialog */}
+      <Dialog open={calendarOpen} onOpenChange={setCalendarOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Event Calendar</DialogTitle>
+          </DialogHeader>
+          <EventCalendar events={allEvents} enlarged />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
