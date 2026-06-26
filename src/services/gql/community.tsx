@@ -112,6 +112,7 @@ export const GET_COMMUNITY_DETAILS = gql`
       id
       name
       description
+      communityRules
       joinPolicy
       visibility
       paymentType

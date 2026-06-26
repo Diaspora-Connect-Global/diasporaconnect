@@ -57,6 +57,7 @@ interface CommunityDetails {
   id: string;
   name: string;
   description?: string;
+  communityRules?: string | null;
   avatarUrl?: string;
   bannerUrl?: string | null;
   memberCount?: number;

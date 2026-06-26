@@ -1048,7 +1048,21 @@
                 "memberFallbackName": "Community member",
                 "loadMore": "Load more",
                 "inviteCopied": "Invite link copied",
-                "inviteCopyFailed": "Could not copy invite link"
+                "inviteCopyFailed": "Could not copy invite link",
+                "aboutTitle": "About",
+                "discussionsSub": "In this community",
+                "established": "Established {year}",
+                "events": "Events",
+                "eventsSub": "Hosted by this community",
+                "inviteFriends": "Invite Friends",
+                "membersHighlightTitle": "Members",
+                "membersMore": "+{count} more members",
+                "membersSub": "Total members",
+                "officialVerified": "Official verified",
+                "seeAll": "See All",
+                "services": "Services",
+                "servicesSub": "Available to request",
+                "viewFullGuidelines": "View Full Guidelines"
             },
             "updates": {
                 "sortNewest": "Newest first",
