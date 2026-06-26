@@ -66,6 +66,8 @@ export const MY_SERVICE_REQUESTS = gql`
       requestTypeId
       category
       status
+      ownerType
+      ownerEntityId
       submittedAt
       updatedAt
     }
@@ -106,6 +108,8 @@ export interface ServiceRequestSummary {
   requestTypeId: string;
   category?: string | null;
   status: string;
+  ownerType?: string | null;
+  ownerEntityId?: string | null;
   submittedAt?: string | null;
   updatedAt?: string | null;
 }

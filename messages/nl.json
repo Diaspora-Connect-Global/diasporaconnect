@@ -678,7 +678,9 @@
                 "needHelpBody": "Ons consulaire team staat voor u klaar.",
                 "contactUs": "Contact",
                 "emergencyViewAlert": "View Alert",
-                "needHelpBodyGeneral": "Our community team is here to assist you."
+                "needHelpBodyGeneral": "Our community team is here to assist you.",
+                "noUpcomingEvents": "Geen aankomende evenementen",
+                "noResources": "Nog geen bronnen"
             },
             "events": {
                 "title": "Evenementen",

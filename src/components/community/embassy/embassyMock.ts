@@ -36,22 +36,6 @@ export interface EmbassyQuickAction {
   tab: EmbassyTabKey;
 }
 
-export interface EmbassyUpcomingEvent {
-  id: string;
-  month: string; // "JUN"
-  day: string; // "15"
-  title: string;
-  dateLabel: string; // "15 Jun 2025 • 2:00 PM"
-  location: string;
-}
-
-export interface EmbassyResource {
-  id: string;
-  icon: string;
-  title: string;
-  description: string;
-}
-
 const MOCK_PROFILE: EmbassyProfile = {
   country: 'Ghana',
   countryCode: 'gh',
@@ -101,71 +85,6 @@ export const EMBASSY_QUICK_ACTIONS: ReadonlyArray<EmbassyQuickAction> = [
   { key: 'track', icon: 'ClipboardList', label: 'Track Request', tab: 'track-requests' },
   { key: 'emergency', icon: 'BellRing', label: 'Emergency Help', tab: 'support' },
   { key: 'events', icon: 'CalendarDays', label: 'Embassy Events', tab: 'events' },
-];
-
-export const EMBASSY_UPCOMING_EVENTS: ReadonlyArray<EmbassyUpcomingEvent> = [
-  {
-    id: 'evt-1',
-    month: 'JUN',
-    day: '15',
-    title: 'Ghana National Day Celebration 2025',
-    dateLabel: '15 Jun 2025 • 2:00 PM',
-    location: 'Paris, France',
-  },
-  {
-    id: 'evt-2',
-    month: 'JUL',
-    day: '05',
-    title: 'Diaspora Engagement Forum',
-    dateLabel: '5 Jul 2025 • 10:00 AM',
-    location: 'Online (Zoom)',
-  },
-];
-
-export const EMBASSY_RESOURCES: ReadonlyArray<EmbassyResource> = [
-  {
-    id: 'res-1',
-    icon: 'FileText',
-    title: 'Visa Information',
-    description: 'Requirements, types & application guide',
-  },
-  {
-    id: 'res-2',
-    icon: 'Plane',
-    title: 'Travel to Ghana',
-    description: 'Entry requirements & travel advisory',
-  },
-  {
-    id: 'res-3',
-    icon: 'Phone',
-    title: 'Embassy Contact',
-    description: 'Contact details and location',
-  },
-  {
-    id: 'res-4',
-    icon: 'FileDown',
-    title: 'Forms & Documents',
-    description: 'Download forms and documents',
-  },
-];
-
-export interface EmbassyPopularService {
-  rank: string;
-  name: string;
-  subtitle: string;
-  /** lucide icon name resolved in the component */
-  icon: string;
-  /** colour tone key → maps to ring/fg classes in the Services tab */
-  tone: string;
-}
-
-/** Curated "Popular Services" rail on the Services tab (Phase 1 mock). */
-export const EMBASSY_POPULAR_SERVICES: ReadonlyArray<EmbassyPopularService> = [
-  { rank: '01', name: 'Passport Renewal', subtitle: 'Most requested', icon: 'BookUser', tone: 'green' },
-  { rank: '02', name: 'Visa Information', subtitle: 'Travel & Entry', icon: 'CreditCard', tone: 'blue' },
-  { rank: '03', name: 'Document Authentication', subtitle: 'Legalization & Attestation', icon: 'FileBadge', tone: 'orange' },
-  { rank: '04', name: 'Birth Certificate', subtitle: 'Civil Documents', icon: 'ScrollText', tone: 'purple' },
-  { rank: '05', name: 'Power of Attorney', subtitle: 'Authorize a Representative', icon: 'Briefcase', tone: 'blue' },
 ];
 
 /* ── Community tab mock content ─────────────────────────────────────────── */

@@ -3,7 +3,22 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, ChevronRight, Headset, Newspaper } from 'lucide-react';
+import { useQuery, useMutation } from '@apollo/client/react';
+import {
+  AlertTriangle,
+  ChevronRight,
+  Headset,
+  Newspaper,
+  CalendarDays,
+  FileText,
+  FileSpreadsheet,
+  Presentation,
+  Image as ImageIcon,
+  Video,
+  Music,
+  File as FileIcon,
+  type LucideIcon,
+} from 'lucide-react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { ButtonType2 } from '@/components/custom/button';
@@ -11,14 +26,77 @@ import { EmbassyFeedList } from '../EmbassyFeedList';
 import { FeedListSkeleton } from '../EmbassySkeletons';
 import { embassyIcon } from '../icons';
 import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
+import { GET_EVENTS_BY_OWNER } from '@/services/gql/events';
+import {
+  PUBLISHED_RESOURCES,
+  RECORD_RESOURCE_DOWNLOAD,
+  type PublishedResourcesResponse,
+  type RecordResourceDownloadResponse,
+  type ResourceSummary,
+} from '@/services/gql/resources';
 import {
   EMBASSY_QUICK_ACTIONS,
-  EMBASSY_UPCOMING_EVENTS,
-  EMBASSY_RESOURCES,
   type EmbassyProfile,
 } from '../embassyMock';
 import type { EmbassyTabKey } from '../tabs';
 import type { EmbassyViewProps } from '../types';
+
+// Minimal upcoming-event shape (subset of GET_EVENTS_BY_OWNER selection).
+interface HomeEvent {
+  id: string;
+  title: string;
+  status: string;
+  startAt: string;
+}
+interface GetEventsByOwnerResponse {
+  getEventsByOwner: { total: number; events: HomeEvent[] };
+}
+
+const MAX_HOME_EVENTS = 3;
+
+/** Map a resource fileType to a lucide icon. */
+function resourceIcon(fileType: string): LucideIcon {
+  switch ((fileType || '').toUpperCase()) {
+    case 'PDF':
+    case 'DOC':
+      return FileText;
+    case 'XLS':
+      return FileSpreadsheet;
+    case 'PPT':
+      return Presentation;
+    case 'IMAGE':
+      return ImageIcon;
+    case 'VIDEO':
+      return Video;
+    case 'AUDIO':
+      return Music;
+    default:
+      return FileIcon;
+  }
+}
+
+/** Short month label + day for an event date chip (locale-aware). */
+function eventDateChip(iso: string): { month: string; day: string } {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { month: '', day: '' };
+  return {
+    month: d.toLocaleString(undefined, { month: 'short' }).toUpperCase(),
+    day: d.toLocaleString(undefined, { day: '2-digit' }),
+  };
+}
+
+/** Full date-time label for an event row. */
+function eventDateLabel(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString(undefined, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
 
 interface EmbassyHomeTabProps {
   props: EmbassyViewProps;
@@ -59,6 +137,45 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
   }, [posts]);
 
   const alertExcerpt = alertPost?.text.split('\n', 1)[0]?.trim() ?? '';
+
+  // Upcoming events for THIS community (next 2–3, non-DRAFT, non-CANCELLED).
+  const { data: eventsData } = useQuery<GetEventsByOwnerResponse>(GET_EVENTS_BY_OWNER, {
+    variables: { ownerId: community.id, ownerType: 'community', limit: 10, offset: 0 },
+    fetchPolicy: 'cache-and-network',
+  });
+  const upcomingEvents = useMemo(() => {
+    const now = Date.now();
+    return (eventsData?.getEventsByOwner?.events ?? [])
+      .filter((e) => {
+        const status = (e.status || '').toUpperCase();
+        if (status === 'DRAFT' || status === 'CANCELLED') return false;
+        const t = new Date(e.startAt).getTime();
+        return !Number.isNaN(t) && t >= now;
+      })
+      .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
+      .slice(0, MAX_HOME_EVENTS);
+  }, [eventsData]);
+
+  // Published resources for THIS community.
+  const { data: resourcesData } = useQuery<PublishedResourcesResponse>(PUBLISHED_RESOURCES, {
+    variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+    fetchPolicy: 'cache-and-network',
+  });
+  const resources: ResourceSummary[] = resourcesData?.publishedResources ?? [];
+
+  const [recordDownload] = useMutation<RecordResourceDownloadResponse>(RECORD_RESOURCE_DOWNLOAD);
+
+  async function handleResourceClick(resourceId: string) {
+    try {
+      const res = await recordDownload({ variables: { resourceId } });
+      const url = res.data?.recordResourceDownload;
+      if (url && typeof window !== 'undefined') {
+        window.open(url, '_blank');
+      }
+    } catch {
+      // download URL unavailable — fail silently
+    }
+  }
 
   return (
     <div className="grid grid-cols-1 gap-6 px-3 py-6 lg:grid-cols-[1fr_20rem] lg:px-6">
@@ -157,21 +274,32 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
                 {t('home.seeAll')}
               </Link>
             </div>
-            <ul className="space-y-4">
-              {EMBASSY_UPCOMING_EVENTS.map((evt) => (
-                <li key={evt.id} className="flex gap-3">
-                  <div className="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-md bg-surface-subtle">
-                    <span className="caption-small text-text-danger">{evt.month}</span>
-                    <span className="label-medium text-text-primary">{evt.day}</span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="caption-large truncate text-text-primary">{evt.title}</p>
-                    <p className="caption-small text-text-secondary">{evt.dateLabel}</p>
-                    <p className="caption-small text-text-secondary">{evt.location}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {upcomingEvents.length > 0 ? (
+              <ul className="space-y-4">
+                {upcomingEvents.map((evt) => {
+                  const { month, day } = eventDateChip(evt.startAt);
+                  return (
+                    <li key={evt.id} className="flex gap-3">
+                      <div className="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-md bg-surface-subtle">
+                        <span className="caption-small text-text-danger">{month}</span>
+                        <span className="label-medium text-text-primary">{day}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="caption-large truncate text-text-primary">{evt.title}</p>
+                        <p className="caption-small text-text-secondary">{eventDateLabel(evt.startAt)}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="flex flex-col items-center justify-center px-4 py-6 text-center">
+                <span className="mb-2 flex size-10 items-center justify-center rounded-full bg-surface-subtle">
+                  <CalendarDays className="size-5 text-text-secondary" aria-hidden />
+                </span>
+                <p className="caption-medium text-text-secondary">{t('home.noUpcomingEvents')}</p>
+              </div>
+            )}
             <Link href={tabHref('events')} scroll={false} className="mt-4 block">
               <ButtonType2 className="w-full justify-center py-2">{t('home.viewAllEvents')}</ButtonType2>
             </Link>
@@ -182,31 +310,40 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
         <Card className="border-border-subtle">
           <CardContent className="p-5">
             <h3 className="label-large mb-4 text-text-primary">{t('home.importantResources')}</h3>
-            <ul className="space-y-3">
-              {EMBASSY_RESOURCES.map((res) => {
-                const Icon = embassyIcon(res.icon);
-                return (
-                  <li key={res.id}>
-                    <Link
-                      href={tabHref('services')}
-                      scroll={false}
-                      className="flex items-center gap-3 rounded-md p-1 transition-colors hover:bg-surface-subtle"
-                    >
-                      <span className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-surface-subtle text-text-brand">
-                        <Icon className="size-4" aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="caption-large block truncate text-text-primary">{res.title}</span>
-                        <span className="caption-small block truncate text-text-secondary">
-                          {res.description}
+            {resources.length > 0 ? (
+              <ul className="space-y-3">
+                {resources.map((res) => {
+                  const Icon = resourceIcon(res.fileType);
+                  return (
+                    <li key={res.id}>
+                      <button
+                        type="button"
+                        onClick={() => handleResourceClick(res.id)}
+                        className="flex w-full items-center gap-3 rounded-md p-1 text-left transition-colors hover:bg-surface-subtle"
+                      >
+                        <span className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-surface-subtle text-text-brand">
+                          <Icon className="size-4" aria-hidden />
                         </span>
-                      </span>
-                      <ChevronRight className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                        <span className="min-w-0 flex-1">
+                          <span className="caption-large block truncate text-text-primary">{res.title}</span>
+                          <span className="caption-small block truncate text-text-secondary">
+                            {res.fileType}
+                          </span>
+                        </span>
+                        <ChevronRight className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="flex flex-col items-center justify-center px-4 py-6 text-center">
+                <span className="mb-2 flex size-10 items-center justify-center rounded-full bg-surface-subtle">
+                  <FileText className="size-5 text-text-secondary" aria-hidden />
+                </span>
+                <p className="caption-medium text-text-secondary">{t('home.noResources')}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

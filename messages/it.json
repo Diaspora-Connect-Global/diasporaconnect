@@ -675,7 +675,9 @@
                 "needHelpBody": "Il nostro team consolare è qui per assisterti.",
                 "contactUs": "Contattaci",
                 "emergencyViewAlert": "View Alert",
-                "needHelpBodyGeneral": "Our community team is here to assist you."
+                "needHelpBodyGeneral": "Our community team is here to assist you.",
+                "noUpcomingEvents": "Nessun evento in programma",
+                "noResources": "Nessuna risorsa al momento"
             },
             "events": {
                 "title": "Eventi",

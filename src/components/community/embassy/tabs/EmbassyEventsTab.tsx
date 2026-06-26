@@ -466,7 +466,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
     [visibleEvents, now],
   );
 
-  // Category counts derived from real events; fall back to mock for empties.
+  // Category counts derived solely from this community's real events (0 when empty).
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const row of CATEGORY_ROWS) counts[row.key] = 0;
@@ -692,8 +692,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                   </button>
                 </li>
                 {(showAllCategories ? CATEGORY_ROWS : CATEGORY_ROWS.slice(0, 3)).map((row) => {
-                  const real = categoryCounts[row.key] ?? 0;
-                  const count = real > 0 ? real : row.mockCount;
+                  const count = categoryCounts[row.key] ?? 0;
                   const Icon = row.icon;
                   const active = selectedCategory === row.key;
                   return (

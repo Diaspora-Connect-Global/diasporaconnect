@@ -675,7 +675,9 @@
                 "needHelpBody": "Unser Konsularteam steht Ihnen zur Verfügung.",
                 "contactUs": "Kontakt",
                 "emergencyViewAlert": "View Alert",
-                "needHelpBodyGeneral": "Our community team is here to assist you."
+                "needHelpBodyGeneral": "Our community team is here to assist you.",
+                "noUpcomingEvents": "Keine bevorstehenden Veranstaltungen",
+                "noResources": "Noch keine Ressourcen"
             },
             "events": {
                 "title": "Veranstaltungen",

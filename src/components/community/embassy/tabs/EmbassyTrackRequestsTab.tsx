@@ -160,8 +160,15 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
     [typesData],
   );
 
-  // Stable array reference so the count/filter memos don't recompute each render.
-  const requests = useMemo(() => data?.myServiceRequests ?? [], [data]);
+  // Scope to THIS community only: the backend returns the viewer's requests
+  // across all owners, so filter to COMMUNITY requests for this community id.
+  const requests = useMemo(
+    () =>
+      (data?.myServiceRequests ?? []).filter(
+        (r) => r.ownerType === 'COMMUNITY' && r.ownerEntityId === community.id,
+      ),
+    [data, community.id],
+  );
 
   /** Bucket counts for the filter chips + the right-rail summary tiles. */
   const counts = useMemo(() => {

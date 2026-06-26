@@ -29,7 +29,7 @@ import {
   type ServiceRequestType,
   type ServiceRequestTypesResponse,
 } from '@/services/gql/embassyServices';
-import { EMBASSY_POPULAR_SERVICES, type EmbassyProfile } from '../embassyMock';
+import { type EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
 import { useIsEmbassy } from '../communityVariant';
 import { ServiceGridSkeleton } from '../EmbassySkeletons';
@@ -61,14 +61,6 @@ const SERVICE_VISUALS: Record<string, { icon: LucideIcon; tone: string }> = {
   POWER_ATTORNEY: { icon: Briefcase, tone: 'blue' },
   EMERGENCY_TRAVEL: { icon: Plane, tone: 'green' },
 };
-const POPULAR_ICONS: Record<string, LucideIcon> = {
-  BookUser,
-  CreditCard,
-  FileBadge,
-  ScrollText,
-  Briefcase,
-};
-
 function visualFor(svc: ServiceRequestType): { icon: LucideIcon; tone: string } {
   if (svc.code && SERVICE_VISUALS[svc.code]) return SERVICE_VISUALS[svc.code];
   const n = svc.displayName.toLowerCase();
@@ -125,6 +117,13 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
         (s.description ?? '').toLowerCase().includes(q),
     );
   }, [data, search]);
+
+  // "Popular Services" rail: the community's first N active service types
+  // (unaffected by the search box, which only filters the main grid).
+  const popularServices = useMemo(
+    () => (data?.serviceRequestTypes ?? []).filter((s) => s.isActive !== false).slice(0, 5),
+    [data],
+  );
 
   // Apply wizard — `?service=<id>&apply=1` replaces the grid with the 6-step
   // application flow. Checked before the detail view so apply mode wins.
@@ -265,33 +264,46 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
         </div>
 
         {/* Popular services */}
-        <Card className="border-border-subtle">
-          <CardContent className="p-5">
-            <h3 className="label-large mb-3 text-text-primary">{t('popularServices')}</h3>
-            <ul className="space-y-3">
-              {EMBASSY_POPULAR_SERVICES.map((p) => {
-                const Icon = POPULAR_ICONS[p.icon] ?? FileText;
-                const c = TONES[p.tone] ?? TONES.brand;
-                return (
-                  <li key={p.rank} className="flex items-center gap-3">
-                    <span className={`flex size-8 flex-shrink-0 items-center justify-center rounded-md ${c.ring}`}>
-                      <Icon className={`size-4 ${c.fg}`} aria-hidden />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="caption-large block truncate text-text-primary">{p.name}</span>
-                      <span className="caption-small block truncate text-text-secondary">
-                        {p.subtitle}
-                      </span>
-                    </span>
-                    <span className={`caption-small rounded-md px-1.5 py-0.5 ${c.ring} ${c.fg}`}>
-                      {p.rank}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </CardContent>
-        </Card>
+        {popularServices.length > 0 && (
+          <Card className="border-border-subtle">
+            <CardContent className="p-5">
+              <h3 className="label-large mb-3 text-text-primary">{t('popularServices')}</h3>
+              <ul className="space-y-3">
+                {popularServices.map((svc, i) => {
+                  const { icon: Icon, tone } = visualFor(svc);
+                  const c = TONES[tone] ?? TONES.brand;
+                  const rank = String(i + 1).padStart(2, '0');
+                  return (
+                    <li key={svc.id}>
+                      <Link
+                        href={detailHref(svc.id)}
+                        scroll={false}
+                        className="flex items-center gap-3 rounded-md p-1 transition-colors hover:bg-surface-subtle"
+                      >
+                        <span className={`flex size-8 flex-shrink-0 items-center justify-center rounded-md ${c.ring}`}>
+                          <Icon className={`size-4 ${c.fg}`} aria-hidden />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="caption-large block truncate text-text-primary">
+                            {svc.displayName}
+                          </span>
+                          {svc.description && (
+                            <span className="caption-small block truncate text-text-secondary">
+                              {svc.description}
+                            </span>
+                          )}
+                        </span>
+                        <span className={`caption-small rounded-md px-1.5 py-0.5 ${c.ring} ${c.fg}`}>
+                          {rank}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Service hours */}
         <Card className="border-border-subtle">
