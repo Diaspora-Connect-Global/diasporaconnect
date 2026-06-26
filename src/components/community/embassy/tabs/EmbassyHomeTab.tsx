@@ -2,11 +2,12 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, ChevronRight, Headset } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Headset, Newspaper } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { ButtonType2 } from '@/components/custom/button';
 import { EmbassyFeedList } from '../EmbassyFeedList';
+import { FeedListSkeleton } from '../EmbassySkeletons';
 import { embassyIcon } from '../icons';
 import {
   EMBASSY_QUICK_ACTIONS,
@@ -104,7 +105,7 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
             </div>
 
             {feedLoading ? (
-              <p className="body-small py-4 text-text-secondary">{t('home.loadingUpdates')}</p>
+              <FeedListSkeleton count={MAX_HOME_POSTS} />
             ) : homePosts.length > 0 ? (
               <EmbassyFeedList
                 posts={homePosts}
@@ -118,7 +119,12 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
                 onDeletePost={props.onDeletePost}
               />
             ) : (
-              <p className="body-small py-4 text-text-secondary">{t('home.noUpdates')}</p>
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+                <span className="mb-3 flex size-12 items-center justify-center rounded-full bg-surface-subtle">
+                  <Newspaper className="size-6 text-text-secondary" aria-hidden />
+                </span>
+                <p className="body-small text-text-primary">{t('home.noUpdates')}</p>
+              </div>
             )}
           </CardContent>
         </Card>

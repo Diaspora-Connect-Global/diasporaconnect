@@ -52,7 +52,7 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
       case 'services':
         return <EmbassyServicesTab community={community} profile={profile} />;
       case 'track-requests':
-        return <EmbassyTrackRequestsTab communityId={community.id} />;
+        return <EmbassyTrackRequestsTab community={community} profile={profile} />;
       case 'events':
         return <EmbassyEventsTab props={props} />;
       case 'support':
@@ -79,7 +79,9 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
             are sticky so they pin to the top and the scroll only moves the tab
             content past them. Single container = reliable on mobile. */}
         <div className="h-app-inner overflow-y-auto scrollbar-hide">
-          <div className="sticky top-0 z-20 bg-surface-default">
+          {/* Header + tabs pin only on desktop; on mobile they scroll away with
+              the content so the whole page scrolls as one. */}
+          <div className="z-20 bg-surface-default lg:sticky lg:top-0">
             <EmbassyHeader community={community} profile={profile} membership={membership} />
             <EmbassyTabBar active={activeTab} />
           </div>

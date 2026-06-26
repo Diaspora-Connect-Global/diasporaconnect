@@ -261,3 +261,197 @@ export interface SupportCaseType {
 export interface SupportCaseTypesResponse {
   caseTypes: SupportCaseType[];
 }
+
+/* ============================================================================
+   TRACK-REQUESTS detail (via api-gateway GraphQL)
+
+   The "Track Requests" detail view is fed by three queries: the request itself
+   (`serviceRequest`), its confirmed documents (`serviceRequestDocuments`), and
+   the owner-scoped type list (SERVICE_REQUEST_TYPES_DETAIL above, to resolve the
+   type displayName + the formFields labels for the submitted-info section).
+
+   All shapes below were verified live against api.diaspoplug.net AS THE
+   REQUESTER. Notably `statusHistory` IS visible to the requester and is the
+   primary timeline source; `formResponsesJson` is a JSON STRING (may be "{}").
+   ============================================================================ */
+
+/**
+ * Single service request by id, scoped to the requester. `statusHistory` is the
+ * canonical timeline (visible to the requester — verified) and we fall back to
+ * the `*At` milestone timestamps only when it is empty. `formResponsesJson` is a
+ * JSON-stringified `{ [formFieldKey]: value }` map ("{}" when none). Status enum:
+ * SUBMITTED | UNDER_REVIEW | PENDING_INFO | APPROVED | REJECTED | COMPLETED |
+ * CANCELLED.
+ */
+export const SERVICE_REQUEST = gql`
+  query ServiceRequest($id: ID!) {
+    serviceRequest(id: $id) {
+      id
+      requestNumber
+      status
+      requestTypeId
+      category
+      formResponsesJson
+      feeAmountMinor
+      feeCurrency
+      paymentStatus
+      paymentIntentId
+      decisionReason
+      submittedAt
+      reviewStartedAt
+      decidedAt
+      completedAt
+      createdAt
+      updatedAt
+      statusHistory {
+        id
+        fromStatus
+        toStatus
+        actorUserId
+        reason
+        createdAt
+      }
+    }
+  }
+`;
+
+/**
+ * Confirmed documents attached to a request. The caller MUST filter to
+ * `confirmed === true` (unconfirmed rows are abandoned uploads). `readUrl` is a
+ * fresh signed download URL. `kind` ∈ PDF | IMAGE | CERTIFICATE | OTHER.
+ */
+export const SERVICE_REQUEST_DOCUMENTS = gql`
+  query ServiceRequestDocuments($requestId: ID!) {
+    serviceRequestDocuments(requestId: $requestId) {
+      id
+      fileName
+      sizeBytes
+      mimeType
+      kind
+      readUrl
+      uploadedAt
+      confirmed
+      formFieldKey
+    }
+  }
+`;
+
+/** Cancel a request (allowed while SUBMITTED / UNDER_REVIEW / PENDING_INFO). */
+export const CANCEL_SERVICE_REQUEST = gql`
+  mutation CancelServiceRequest($requestId: ID!, $reason: String!) {
+    cancelServiceRequest(requestId: $requestId, reason: $reason) {
+      id
+      status
+      updatedAt
+    }
+  }
+`;
+
+/**
+ * Supply additional information for a PENDING_INFO request. `formResponsesJson`
+ * is the (optional) JSON-stringified `{ [formFieldKey]: value }` map of the
+ * supplied answers. Any new documents are uploaded separately via the standard
+ * requestDocUploadUrl → PUT → addServiceRequestDocument flow.
+ */
+export const SUPPLY_SERVICE_REQUEST_INFO = gql`
+  mutation SupplyServiceRequestInfo($requestId: ID!, $formResponsesJson: String) {
+    supplyServiceRequestInfo(requestId: $requestId, formResponsesJson: $formResponsesJson) {
+      id
+      status
+      updatedAt
+    }
+  }
+`;
+
+/**
+ * Re-create the payment intent for an unpaid/failed request. Returns the new
+ * paymentIntentId + paymentStatus (seeded services are free, so this is kept
+ * defensive — see the detail view's payment section).
+ */
+export const RETRY_SERVICE_REQUEST_PAYMENT = gql`
+  mutation RetryServiceRequestPayment($requestId: ID!) {
+    retryServiceRequestPayment(requestId: $requestId) {
+      id
+      status
+      paymentStatus
+      paymentIntentId
+    }
+  }
+`;
+
+/** One entry of the request status timeline (visible to the requester). */
+export interface ServiceRequestStatusHistoryEntry {
+  id: string;
+  fromStatus?: string | null;
+  toStatus: string;
+  actorUserId?: string | null;
+  reason?: string | null;
+  createdAt: string;
+}
+
+/** Full single-request shape selected by SERVICE_REQUEST. */
+export interface ServiceRequestDetail {
+  id: string;
+  requestNumber: string;
+  status: string;
+  requestTypeId: string;
+  category?: string | null;
+  formResponsesJson?: string | null;
+  feeAmountMinor?: number | null;
+  feeCurrency?: string | null;
+  paymentStatus?: string | null;
+  paymentIntentId?: string | null;
+  decisionReason?: string | null;
+  submittedAt?: string | null;
+  reviewStartedAt?: string | null;
+  decidedAt?: string | null;
+  completedAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  statusHistory?: ServiceRequestStatusHistoryEntry[] | null;
+}
+
+export interface ServiceRequestResponse {
+  serviceRequest: ServiceRequestDetail | null;
+}
+
+/** A confirmed document row (live `ServiceRequestDocument` w/ readUrl). */
+export interface ServiceRequestDocument {
+  id: string;
+  fileName: string;
+  sizeBytes?: number | null;
+  mimeType?: string | null;
+  kind?: string | null;
+  readUrl?: string | null;
+  uploadedAt?: string | null;
+  confirmed?: boolean | null;
+  formFieldKey?: string | null;
+}
+
+export interface ServiceRequestDocumentsResponse {
+  serviceRequestDocuments: ServiceRequestDocument[];
+}
+
+/** Common `{ id, status, updatedAt }` mutation result (cancel / supply info). */
+export interface ServiceRequestStatusMutationResult {
+  id: string;
+  status: string;
+  updatedAt?: string | null;
+}
+
+export interface CancelServiceRequestResponse {
+  cancelServiceRequest: ServiceRequestStatusMutationResult;
+}
+
+export interface SupplyServiceRequestInfoResponse {
+  supplyServiceRequestInfo: ServiceRequestStatusMutationResult;
+}
+
+export interface RetryServiceRequestPaymentResponse {
+  retryServiceRequestPayment: {
+    id: string;
+    status: string;
+    paymentStatus?: string | null;
+    paymentIntentId?: string | null;
+  };
+}

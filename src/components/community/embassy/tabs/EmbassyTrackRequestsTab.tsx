@@ -7,7 +7,6 @@ import { useSearchParams } from 'next/navigation';
 import { Link, usePathname } from '@/i18n/navigation';
 import {
   Search,
-  SlidersHorizontal,
   Check,
   X,
   CalendarDays,
@@ -30,12 +29,17 @@ import {
   Headphones,
   FilePlus2,
   LayoutGrid,
-  Download,
   UserCog,
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import {
   MY_SERVICE_REQUESTS,
@@ -44,50 +48,17 @@ import {
   type ServiceRequestSummary,
   type ServiceRequestTypesResponse,
 } from '@/services/gql/embassyServices';
+import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyViewProps } from '../types';
+import { EmbassyTrackRequestDetail } from './EmbassyTrackRequestDetail';
+import { CancelRequestDialog } from './CancelRequestDialog';
+import { type Bucket, STEP_KEYS, statusBucket, bucketStep, BUCKET_PILL } from './requestStatus';
 
-/* ── status model ─────────────────────────────────────────────────────────
-   The backend returns a free-form status string; we normalize it into one of
-   five buckets that drive the filter chips, the status pill, and the 4-step
-   progress stepper (Submitted → Review → Approved → Completed). */
-type Bucket = 'pending' | 'review' | 'approved' | 'completed' | 'rejected';
-
-const STEP_KEYS = ['submitted', 'review', 'approved', 'completed'] as const;
-
-function statusBucket(status: string): Bucket {
-  const s = (status || '').toUpperCase();
-  if (s.includes('REJECT') || s.includes('CANCEL') || s.includes('DENIED') || s.includes('DECLINE'))
-    return 'rejected';
-  if (s.includes('COMPLETE') || s.includes('CLOSED') || s.includes('FULFILLED') || s.includes('DELIVERED'))
-    return 'completed';
-  if (s.includes('APPROVE') || s.includes('DECIDED') || s.includes('GRANTED')) return 'approved';
-  if (s.includes('REVIEW') || s.includes('PROCESS') || s.includes('PROGRESS') || s.includes('INFO'))
-    return 'review';
-  return 'pending'; // SUBMITTED / PENDING / DRAFT / AWAITING
+/** Statuses for which the requester may still cancel the request. */
+const CANCELLABLE = new Set(['SUBMITTED', 'UNDER_REVIEW', 'PENDING_INFO']);
+function canCancel(status: string): boolean {
+  return CANCELLABLE.has((status || '').toUpperCase());
 }
-
-/** Index of the current step (0-3) for the stepper. */
-function bucketStep(bucket: Bucket): number {
-  switch (bucket) {
-    case 'pending':
-      return 0;
-    case 'review':
-    case 'rejected':
-      return 1;
-    case 'approved':
-      return 2;
-    case 'completed':
-      return 3;
-  }
-}
-
-/** Pill colour per bucket (light surface + matching text). */
-const BUCKET_PILL: Record<Bucket, string> = {
-  pending: 'bg-amber-50 text-amber-600',
-  review: 'bg-blue-50 text-blue-600',
-  approved: 'bg-green-50 text-green-600',
-  completed: 'bg-green-50 text-green-600',
-  rejected: 'bg-red-50 text-red-600',
-};
 
 /* ── per-request visual (icon + tone), keyed by service name ─────────────── */
 interface Tone {
@@ -136,20 +107,28 @@ function formatDate(iso?: string | null): string {
 const PAGE_SIZE = 5;
 const CHIPS: Array<'all' | Bucket> = ['all', 'pending', 'review', 'approved', 'completed', 'rejected'];
 
-export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }) {
+interface EmbassyTrackRequestsTabProps {
+  community: EmbassyViewProps['community'];
+  profile: EmbassyProfile;
+}
+
+export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequestsTabProps) {
   const t = useTranslations('community.embassy.track');
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const selectedRequestId = searchParams.get('request');
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | Bucket>('all');
   const [page, setPage] = useState(1);
+  // The request the "…" menu is asking to cancel (null = dialog closed).
+  const [cancelTarget, setCancelTarget] = useState<ServiceRequestSummary | null>(null);
 
   const { data, loading } = useQuery<MyServiceRequestsResponse>(MY_SERVICE_REQUESTS, {
     fetchPolicy: 'cache-and-network',
   });
   const { data: typesData } = useQuery<ServiceRequestTypesResponse>(SERVICE_REQUEST_TYPES, {
-    variables: { ownerType: 'COMMUNITY', ownerEntityId: communityId },
+    variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -158,7 +137,8 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
     [typesData],
   );
 
-  const requests = data?.myServiceRequests ?? [];
+  // Stable array reference so the count/filter memos don't recompute each render.
+  const requests = useMemo(() => data?.myServiceRequests ?? [], [data]);
 
   /** Bucket counts for the filter chips + the right-rail summary tiles. */
   const counts = useMemo(() => {
@@ -195,17 +175,30 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
     return { pathname, query };
   }
 
-  /** "View Details" goes to the underlying service in the Services tab. */
-  function serviceHref(requestTypeId: string) {
+  /** "View Details" opens the request detail view (`?request=<id>`). */
+  function requestHref(requestId: string) {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('tab', 'services');
-    params.set('service', requestTypeId);
+    params.set('tab', 'track-requests');
+    params.set('request', requestId);
+    params.delete('service');
     params.delete('apply');
     const query: Record<string, string> = {};
     params.forEach((value, name) => {
       query[name] = value;
     });
     return { pathname, query };
+  }
+
+  // Detail view — when `?request=<id>` is present, replace the list entirely
+  // (mirrors the Services tab's `?service=` early-return).
+  if (selectedRequestId) {
+    return (
+      <EmbassyTrackRequestDetail
+        requestId={selectedRequestId}
+        community={community}
+        profile={profile}
+      />
+    );
   }
 
   return (
@@ -218,26 +211,17 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
             <h2 className="heading-xsmall text-text-primary">{t('title')}</h2>
             <p className="body-small text-text-secondary">{t('subtitle')}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative w-full sm:w-56">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
-              <input
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                placeholder={t('searchPlaceholder')}
-                className="w-full rounded-lg border border-border-subtle bg-surface-default py-2 pl-9 pr-3 body-small text-text-primary outline-none focus:border-border-brand"
-              />
-            </div>
-            <button
-              type="button"
-              className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-border-subtle px-3 py-2 label-medium text-text-secondary transition-colors hover:bg-surface-subtle"
-            >
-              <SlidersHorizontal className="size-4" aria-hidden />
-              {t('filter')}
-            </button>
+          <div className="relative w-full sm:w-56">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
+            <input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder={t('searchPlaceholder')}
+              className="w-full rounded-lg border border-border-subtle bg-surface-default py-2 pl-9 pr-3 body-small text-text-primary outline-none focus:border-border-brand"
+            />
           </div>
         </div>
 
@@ -277,7 +261,7 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
 
         {/* List */}
         {loading && requests.length === 0 ? (
-          <p className="body-small py-6 text-text-secondary">{t('loading')}</p>
+          <ListSkeleton />
         ) : requests.length === 0 ? (
           <Card className="border-border-subtle">
             <CardContent className="p-10 text-center">
@@ -295,7 +279,8 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
                   req={req}
                   name={typeName.get(req.requestTypeId) ?? req.category ?? t('request')}
                   category={humanizeCategory(req.category) ?? t('category')}
-                  detailHref={serviceHref(req.requestTypeId)}
+                  detailHref={requestHref(req.id)}
+                  onCancel={canCancel(req.status) ? () => setCancelTarget(req) : undefined}
                   t={t}
                 />
               </li>
@@ -344,8 +329,10 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
         )}
       </div>
 
-      {/* ── Right rail ── */}
-      <aside className="space-y-6">
+      {/* ── Right rail ──
+          On mobile the rail sits ABOVE the list (`order-first`) so the summary
+          tiles lead; on desktop it returns to the right column (`lg:order-none`). */}
+      <aside className="order-first space-y-6 lg:order-none">
         {/* Request summary */}
         <Card className="border-border-subtle">
           <CardContent className="p-5">
@@ -353,7 +340,7 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
               <ClipboardList className="size-4 text-text-brand" aria-hidden />
               {t('summary.title')}
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2">
               <SummaryTile icon={ClipboardList} tone="brand" value={counts.all} label={t('summary.total')} />
               <SummaryTile icon={Clock} tone="orange" value={counts.pending} label={t('summary.pending')} />
               <SummaryTile icon={Loader2} tone="blue" value={counts.review} label={t('summary.review')} />
@@ -397,16 +384,11 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
                 href={tabHref('services')}
               />
               <QuickAction
-                icon={Download}
-                tone="green"
-                title={t('actions.documents')}
-                subtitle={t('actions.documentsSub')}
-              />
-              <QuickAction
                 icon={UserCog}
                 tone="purple"
                 title={t('actions.profile')}
                 subtitle={t('actions.profileSub')}
+                href="/settings"
               />
             </ul>
           </CardContent>
@@ -421,7 +403,52 @@ export function EmbassyTrackRequestsTab({ communityId }: { communityId: string }
           </div>
         </div>
       </aside>
+
+      {/* Cancel confirm — driven by the row "…" menu. */}
+      <CancelRequestDialog
+        requestId={cancelTarget?.id ?? null}
+        requestNumber={cancelTarget?.requestNumber}
+        onOpenChange={(open) => {
+          if (!open) setCancelTarget(null);
+        }}
+      />
     </div>
+  );
+}
+
+/* ── inline list skeleton ────────────────────────────────────────────────── */
+function ListSkeleton() {
+  return (
+    <ul className="space-y-4" aria-hidden>
+      {[0, 1, 2].map((i) => (
+        <li key={i}>
+          <Card className="border-border-subtle">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-5">
+                <div className="flex items-start gap-3 lg:w-56 lg:flex-shrink-0">
+                  <span className="size-11 flex-shrink-0 animate-pulse rounded-lg bg-surface-subtle" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <span className="block h-3.5 w-3/4 animate-pulse rounded bg-surface-subtle" />
+                    <span className="block h-3 w-1/2 animate-pulse rounded bg-surface-subtle" />
+                    <span className="block h-3 w-2/3 animate-pulse rounded bg-surface-subtle" />
+                  </div>
+                </div>
+                <div className="space-y-2 lg:w-52 lg:flex-shrink-0">
+                  <span className="block h-5 w-24 animate-pulse rounded-full bg-surface-subtle" />
+                  <span className="block h-3 w-32 animate-pulse rounded bg-surface-subtle" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="block h-2 w-full animate-pulse rounded bg-surface-subtle" />
+                </div>
+                <div className="lg:w-28 lg:flex-shrink-0">
+                  <span className="block h-9 w-full animate-pulse rounded-lg bg-surface-subtle" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -431,10 +458,12 @@ interface RequestCardProps {
   name: string;
   category: string;
   detailHref: { pathname: string; query: Record<string, string> };
+  /** Present only when the request may still be cancelled. */
+  onCancel?: () => void;
   t: ReturnType<typeof useTranslations>;
 }
 
-function RequestCard({ req, name, category, detailHref, t }: RequestCardProps) {
+function RequestCard({ req, name, category, detailHref, onCancel, t }: RequestCardProps) {
   const bucket = statusBucket(req.status);
   const { icon: Icon, tone } = visualForName(name);
   const c = TONES[tone] ?? TONES.brand;
@@ -442,13 +471,30 @@ function RequestCard({ req, name, category, detailHref, t }: RequestCardProps) {
   return (
     <Card className="border-border-subtle transition-shadow hover:shadow-sm">
       <CardContent className="relative p-4 sm:p-5">
-        <button
-          type="button"
-          className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-subtle"
-          aria-label="More options"
-        >
-          <MoreHorizontal className="size-4" aria-hidden />
-        </button>
+        {/* "…" menu: View details + (when allowed) Cancel request. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-subtle"
+              aria-label={t('menu.label')}
+            >
+              <MoreHorizontal className="size-4" aria-hidden />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-surface-default">
+            <DropdownMenuItem asChild>
+              <Link href={detailHref} scroll={false}>
+                {t('viewDetails')}
+              </Link>
+            </DropdownMenuItem>
+            {onCancel && (
+              <DropdownMenuItem variant="destructive" onSelect={onCancel}>
+                {t('menu.cancel')}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-5">
           {/* Identity */}
@@ -595,7 +641,7 @@ function QuickAction({
   tone: string;
   title: string;
   subtitle: string;
-  href?: { pathname: string; query: Record<string, string> };
+  href?: string | { pathname: string; query: Record<string, string> };
 }) {
   const c = TONES[tone] ?? TONES.brand;
   const inner = (

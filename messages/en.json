@@ -836,7 +836,8 @@
                 "fee": {
                     "free": "Free",
                     "chargedIn": "Charged in {currency}."
-                }
+                },
+                "emptyHelp": "New consular services will appear here once they're available."
             },
             "track": {
                 "title": "Track My Requests",
@@ -900,6 +901,85 @@
                 "secure": {
                     "title": "Your information is secure",
                     "body": "All requests are encrypted and your data is protected."
+                },
+                "menu": {
+                    "label": "More options",
+                    "cancel": "Cancel request"
+                },
+                "detail": {
+                    "back": "Track Requests",
+                    "request": "Request",
+                    "requestNumber": "Request Number",
+                    "notFound": "This request could not be found. It may have been cancelled or removed.",
+                    "status": {
+                        "pending": "Pending",
+                        "review": "Under Review",
+                        "approved": "Approved",
+                        "completed": "Completed",
+                        "rejected": "Rejected",
+                        "cancelled": "Cancelled"
+                    },
+                    "actions": {
+                        "cancel": "Cancel request"
+                    },
+                    "timeline": {
+                        "title": "Status Timeline",
+                        "empty": "No status updates yet.",
+                        "infoRequested": "Information requested"
+                    },
+                    "info": {
+                        "title": "Submitted Information",
+                        "empty": "No information was submitted with this request.",
+                        "yes": "Yes",
+                        "no": "No"
+                    },
+                    "documents": {
+                        "title": "Documents",
+                        "empty": "No documents are attached to this request.",
+                        "download": "Download"
+                    },
+                    "payment": {
+                        "title": "Payment",
+                        "fee": "Service Fee",
+                        "status": "Payment Status",
+                        "complete": "Complete payment",
+                        "retried": "Payment restarted. Please follow the instructions to complete it.",
+                        "error": "We couldn't start the payment. Please try again."
+                    },
+                    "supply": {
+                        "title": "Additional information requested",
+                        "subtitle": "The embassy needs more details to continue processing your request.",
+                        "messageLabel": "Your response",
+                        "messagePlaceholder": "Provide the requested information…",
+                        "documentLabel": "Supporting document",
+                        "optional": "Optional",
+                        "choose": "Choose file",
+                        "replace": "Replace",
+                        "required": "Please add a message or a document before submitting.",
+                        "submit": "Submit information",
+                        "success": "Your information has been submitted.",
+                        "error": "We couldn't submit your information. Please try again."
+                    },
+                    "help": {
+                        "title": "Need More Help?",
+                        "body": "If you have questions about this request, contact the embassy directly.",
+                        "contact": "Contact the Embassy"
+                    },
+                    "secure": {
+                        "title": "Your information is secure",
+                        "body": "All requests are encrypted and your data is protected."
+                    },
+                    "cancel": {
+                        "title": "Cancel this request?",
+                        "body": "This will cancel your request. This action cannot be undone.",
+                        "bodyWithNumber": "This will cancel request {number}. This action cannot be undone.",
+                        "reasonLabel": "Reason for cancellation",
+                        "reasonPlaceholder": "Tell us why you're cancelling…",
+                        "keep": "Keep request",
+                        "confirm": "Cancel request",
+                        "success": "Your request has been cancelled.",
+                        "error": "We couldn't cancel your request. Please try again."
+                    }
                 }
             },
             "support": {

@@ -17,6 +17,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { ButtonType2 } from '@/components/custom/button';
 import { EmbassyFeedList } from '../EmbassyFeedList';
+import { FeedListSkeleton } from '../EmbassySkeletons';
 import type { EmbassyProfile } from '../embassyMock';
 import type { EmbassyFeedPost, EmbassyViewProps } from '../types';
 
@@ -116,7 +117,7 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
           <CardContent className="p-5">
             <h2 className="heading-xsmall mb-4 text-text-primary">{t('home.latestUpdates')}</h2>
             {feedLoading ? (
-              <p className="body-small py-4 text-text-secondary">{t('home.loadingUpdates')}</p>
+              <FeedListSkeleton />
             ) : visiblePosts.length > 0 ? (
               <EmbassyFeedList
                 posts={visiblePosts}
@@ -130,7 +131,12 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
                 onDeletePost={props.onDeletePost}
               />
             ) : (
-              <p className="body-small py-4 text-text-secondary">{t('home.noUpdates')}</p>
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+                <span className="mb-3 flex size-12 items-center justify-center rounded-full bg-surface-subtle">
+                  <Newspaper className="size-6 text-text-secondary" aria-hidden />
+                </span>
+                <p className="body-small text-text-primary">{t('home.noUpdates')}</p>
+              </div>
             )}
           </CardContent>
         </Card>

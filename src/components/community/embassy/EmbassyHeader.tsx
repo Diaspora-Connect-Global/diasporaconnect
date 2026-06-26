@@ -75,7 +75,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
 
       {/* Identity card floating on the banner — banner shows above it and below it
           (the bottom padding leaves banner touching the tab bar). */}
-      <div className="relative z-10 px-3 pt-20 pb-8 lg:px-6">
+      <div className="relative z-10 px-3 pt-16 pb-8 sm:pt-20 lg:px-6">
         <div className="rounded-xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 items-start gap-4">
@@ -90,7 +90,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
               </div>
               <div className="min-w-0 pt-1">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="heading-xsmall truncate text-gray-900">{community.name}</h1>
+                  <h1 className="heading-xsmall line-clamp-2 text-gray-900">{community.name}</h1>
                   {profile.isOfficial && (
                     <BadgeCheck
                       className="size-5 flex-shrink-0 fill-blue-600 text-white"
@@ -108,22 +108,27 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
                     <MapPin className="size-4" aria-hidden />
                     {location}
                   </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Phone className="size-4" aria-hidden />
-                    {phone}
-                  </span>
+                  {phone && (
+                    <a
+                      href={`tel:${phone}`}
+                      className="inline-flex items-center gap-1 transition-colors hover:text-gray-900"
+                    >
+                      <Phone className="size-4" aria-hidden />
+                      {phone}
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Membership CTA */}
-            <div className="flex flex-shrink-0 items-center gap-2 self-start">
+            <div className="flex flex-shrink-0 flex-col items-stretch gap-2 self-stretch sm:flex-row sm:items-center sm:self-start">
               {membership.isSuspended && (
                 <span className="label-medium text-text-secondary">{tCommunity('badges.suspended')}</span>
               )}
               {membership.isActive && (
                 <>
-                  <span className="whitespace-nowrap rounded-full border border-gray-300 bg-surface-default px-5 py-1.5 label-medium text-gray-900">
+                  <span className="w-full whitespace-nowrap rounded-full border border-gray-300 bg-surface-default px-5 py-1.5 text-center label-medium text-gray-900 sm:w-auto">
                     {tCommunity('badges.member')}
                   </span>
                   {membership.canLeave && (
@@ -131,7 +136,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
                       type="button"
                       onClick={membership.onLeaveClick}
                       disabled={membership.actionLoading}
-                      className="whitespace-nowrap rounded-full border border-red-300 bg-surface-default px-5 py-1.5 label-medium text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full whitespace-nowrap rounded-full border border-red-300 bg-surface-default px-5 py-1.5 text-center label-medium text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                     >
                       {tCommunity('actions.leave')}
                     </button>
@@ -140,7 +145,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
               )}
               {membership.canShowJoin && (
                 <ButtonType2
-                  className="px-5 py-1.5"
+                  className="!w-full px-5 py-1.5 text-center sm:!w-fit"
                   onClick={membership.onJoinClick}
                   disabled={membership.actionLoading}
                 >
@@ -149,7 +154,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
               )}
               {membership.canShowRequestToJoin && (
                 <ButtonType2
-                  className="px-5 py-1.5"
+                  className="!w-full px-5 py-1.5 text-center sm:!w-fit"
                   onClick={membership.onJoinClick}
                   disabled={membership.actionLoading}
                 >
@@ -158,7 +163,7 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
               )}
               {membership.canCancelRequest && (
                 <ButtonType1
-                  className="px-4 py-1.5"
+                  className="!w-full px-4 py-1.5 text-center sm:!w-fit"
                   onClick={membership.onCancelRequest}
                   disabled={membership.actionLoading}
                 >

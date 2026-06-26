@@ -32,6 +32,7 @@ import {
 } from '@/services/gql/embassyServices';
 import { EMBASSY_POPULAR_SERVICES, type EmbassyProfile } from '../embassyMock';
 import type { EmbassyViewProps } from '../types';
+import { ServiceGridSkeleton } from '../EmbassySkeletons';
 import { EmbassyServiceDetail } from './EmbassyServiceDetail';
 import { EmbassyServiceApply } from './EmbassyServiceApply';
 
@@ -148,7 +149,7 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-3 py-6 lg:grid-cols-[1fr_20rem] lg:px-6">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-3 py-6 lg:grid-cols-[1fr_20rem] lg:px-6">
       {/* Main column */}
       <div className="min-w-0 space-y-6">
         <Card className="border-border-subtle">
@@ -172,11 +173,23 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
 
             {/* Grid */}
             {loading && services.length === 0 ? (
-              <p className="body-small py-6 text-text-secondary">{t('loading')}</p>
+              <ServiceGridSkeleton />
             ) : services.length === 0 ? (
-              <p className="body-small py-6 text-text-secondary">
-                {search ? t('noResults') : t('empty')}
-              </p>
+              <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                <span className="mb-3 flex size-12 items-center justify-center rounded-full bg-surface-subtle">
+                  {search ? (
+                    <Search className="size-6 text-text-secondary" aria-hidden />
+                  ) : (
+                    <Briefcase className="size-6 text-text-secondary" aria-hidden />
+                  )}
+                </span>
+                <p className="body-small text-text-primary">
+                  {search ? t('noResults') : t('empty')}
+                </p>
+                {!search && (
+                  <p className="caption-medium mt-1 text-text-secondary">{t('emptyHelp')}</p>
+                )}
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
                 {services.map((svc) => {

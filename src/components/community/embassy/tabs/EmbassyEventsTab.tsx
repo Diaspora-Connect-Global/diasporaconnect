@@ -454,19 +454,41 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
 
               {/* Event list */}
               {activeTab === 'registrations' ? (
-                <p className="body-small py-8 text-center text-text-secondary">
-                  No registrations yet.
-                </p>
+                <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                  <span className="mb-3 flex size-12 items-center justify-center rounded-full bg-surface-subtle">
+                    <CalendarDays className="size-6 text-text-secondary" aria-hidden />
+                  </span>
+                  <p className="body-small text-text-primary">No registrations yet.</p>
+                  <p className="caption-medium mt-1 text-text-secondary">
+                    Events you register for will appear here.
+                  </p>
+                </div>
               ) : loading && allEvents.length === 0 ? (
                 <p className="body-small py-8 text-center text-text-secondary">Loading events…</p>
               ) : visible.length === 0 ? (
-                <p className="body-small py-8 text-center text-text-secondary">
-                  {search
-                    ? 'No events match your search.'
-                    : activeTab === 'upcoming'
-                      ? 'No upcoming events.'
-                      : 'No past events.'}
-                </p>
+                <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+                  <span className="mb-3 flex size-12 items-center justify-center rounded-full bg-surface-subtle">
+                    {search ? (
+                      <Search className="size-6 text-text-secondary" aria-hidden />
+                    ) : (
+                      <CalendarDays className="size-6 text-text-secondary" aria-hidden />
+                    )}
+                  </span>
+                  <p className="body-small text-text-primary">
+                    {search
+                      ? 'No events match your search.'
+                      : activeTab === 'upcoming'
+                        ? 'No upcoming events.'
+                        : 'No past events.'}
+                  </p>
+                  {!search && (
+                    <p className="caption-medium mt-1 text-text-secondary">
+                      {activeTab === 'upcoming'
+                        ? 'Check back soon for new events.'
+                        : 'There are no past events to show.'}
+                    </p>
+                  )}
+                </div>
               ) : (
                 <div className="space-y-4">
                   {visible.map((evt) => (
