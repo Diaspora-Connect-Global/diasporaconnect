@@ -44,3 +44,33 @@ export const BUCKET_PILL: Record<Bucket, string> = {
   completed: 'bg-green-50 text-green-600',
   rejected: 'bg-red-50 text-red-600',
 };
+
+/* ── support-case status model ─────────────────────────────────────────────
+   Support cases use their own status enum (SUBMITTED | ASSIGNED | INVESTIGATING
+   | RESOLVED | CLOSED | REOPENED | REJECTED | CANCELLED). We normalise them into
+   a smaller set of buckets that REUSE the BUCKET_PILL colours so support pills
+   match the Track Requests pills:
+     SUBMITTED                          → pending
+     ASSIGNED / INVESTIGATING / REOPENED → review
+     RESOLVED / CLOSED                  → completed
+     REJECTED / CANCELLED               → rejected
+
+   Shared by EmbassySupportTab (the My Cases list) and EmbassySupportCaseDetail
+   (the single-case view). */
+export type SupportBucket = 'pending' | 'review' | 'completed' | 'rejected';
+
+export function supportStatusBucket(status: string): SupportBucket {
+  const s = (status || '').toUpperCase();
+  if (s === 'REJECTED' || s === 'CANCELLED') return 'rejected';
+  if (s === 'RESOLVED' || s === 'CLOSED') return 'completed';
+  if (s === 'ASSIGNED' || s === 'INVESTIGATING' || s === 'REOPENED') return 'review';
+  return 'pending'; // SUBMITTED (and any unknown)
+}
+
+/** Pill colour per support bucket — reuses the Track Requests palette. */
+export const SUPPORT_PILL: Record<SupportBucket, string> = {
+  pending: BUCKET_PILL.pending,
+  review: BUCKET_PILL.review,
+  completed: BUCKET_PILL.completed,
+  rejected: BUCKET_PILL.rejected,
+};

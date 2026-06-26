@@ -32,9 +32,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Link } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { GET_EVENTS_BY_OWNER, type EventLocation } from '@/services/gql/events';
 import type { EmbassyViewProps } from '../types';
+import { getEmbassyProfile } from '../embassyMock';
+import { EmbassyEventDetail } from './EmbassyEventDetail';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -317,7 +320,13 @@ function EventCalendar({
 
 // ─── Event row ───────────────────────────────────────────────────────────────
 
-function EventRow({ evt }: { evt: OwnerEvent }) {
+function EventRow({
+  evt,
+  detailHref,
+}: {
+  evt: OwnerEvent;
+  detailHref: { pathname: string; query: Record<string, string> };
+}) {
   const { month, day } = dateParts(evt.startAt);
   const badge = statusBadge(evt);
   const going = typeof evt.registrationCount === 'number' ? evt.registrationCount : 0;
@@ -381,7 +390,7 @@ function EventRow({ evt }: { evt: OwnerEvent }) {
               <span className="caption-small text-text-secondary">{going} going</span>
             </div>
             <Link
-              href={`/events/${evt.id}`}
+              href={detailHref}
               scroll={false}
               className="label-medium rounded-lg bg-blue-600 px-4 py-1.5 text-white transition-colors hover:bg-blue-700"
             >
@@ -398,6 +407,23 @@ function EventRow({ evt }: { evt: OwnerEvent }) {
 
 export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
   const { community } = props;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedEventId = searchParams.get('event');
+  const profile = getEmbassyProfile(community.id);
+
+  /** `?tab=events&event=<id>` link for an event card's "View Details". */
+  function eventHref(id: string): { pathname: string; query: Record<string, string> } {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', 'events');
+    params.set('event', id);
+    const query: Record<string, string> = {};
+    params.forEach((value, name) => {
+      query[name] = value;
+    });
+    return { pathname, query };
+  }
+
   const [activeTab, setActiveTab] = useState<SubTab>('upcoming');
   const [search, setSearch] = useState('');
   const [limit, setLimit] = useState(20);
@@ -413,29 +439,37 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
 
   const total = data?.getEventsByOwner?.total ?? 0;
   const allEvents = data?.getEventsByOwner?.events ?? [];
+  // Consumers can only register for non-DRAFT events. Hide DRAFTs everywhere in
+  // this tab (list, calendar, category counts). Compared case-insensitively
+  // since the backend returns uppercase status while the TS type is lowercase.
+  const visibleEvents = useMemo(
+    () => allEvents.filter((e) => String(e.status).toUpperCase() !== 'DRAFT'),
+    [allEvents],
+  );
+  // "View More" stays keyed off the raw fetched page vs server total.
   const hasMore = allEvents.length < total;
   const loadingMore = loading && allEvents.length > 0;
 
   const now = Date.now();
   const upcoming = useMemo(
-    () => allEvents.filter((e) => (parseDate(e.startAt)?.getTime() ?? 0) >= now),
-    [allEvents, now],
+    () => visibleEvents.filter((e) => (parseDate(e.startAt)?.getTime() ?? 0) >= now),
+    [visibleEvents, now],
   );
   const past = useMemo(
-    () => allEvents.filter((e) => (parseDate(e.startAt)?.getTime() ?? 0) < now),
-    [allEvents, now],
+    () => visibleEvents.filter((e) => (parseDate(e.startAt)?.getTime() ?? 0) < now),
+    [visibleEvents, now],
   );
 
   // Category counts derived from real events; fall back to mock for empties.
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const row of CATEGORY_ROWS) counts[row.key] = 0;
-    for (const e of allEvents) {
+    for (const e of visibleEvents) {
       const key = eventCategoryKey(e);
       counts[key] = (counts[key] ?? 0) + 1;
     }
     return counts;
-  }, [allEvents]);
+  }, [visibleEvents]);
 
   // Visible list = active sub-tab filtered by search + category, then sorted.
   const visible = useMemo(() => {
@@ -467,6 +501,14 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
     { key: 'past', label: 'Past Events' },
     { key: 'registrations', label: 'My Registrations' },
   ];
+
+  // Detail view — when `?event=<id>` is present, replace the grid entirely
+  // (mirrors EmbassyServicesTab's `?service=<id>` early-return).
+  if (selectedEventId) {
+    return (
+      <EmbassyEventDetail eventId={selectedEventId} community={community} profile={profile} />
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 lg:px-6">
@@ -580,7 +622,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
               ) : (
                 <div className="space-y-4">
                   {visible.map((evt) => (
-                    <EventRow key={evt.id} evt={evt} />
+                    <EventRow key={evt.id} evt={evt} detailHref={eventHref(evt.id)} />
                   ))}
                 </div>
               )}
@@ -609,7 +651,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
 
         {/* Right rail */}
         <aside className="space-y-6">
-          <EventCalendar events={allEvents} onViewFull={() => setCalendarOpen(true)} />
+          <EventCalendar events={visibleEvents} onViewFull={() => setCalendarOpen(true)} />
 
           {/* Categories */}
           <Card className="border-border-subtle">

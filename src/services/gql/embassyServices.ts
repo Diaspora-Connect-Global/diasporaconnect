@@ -262,6 +262,280 @@ export interface SupportCaseTypesResponse {
   caseTypes: SupportCaseType[];
 }
 
+/* ----------------------------------------------------------------------------
+   SUPPORT CASES — reporter-facing case submit + tracking (verified live).
+
+   A user submits a case (`submitCase`), lists their own cases (`myCases`),
+   opens one (`supportCase` + `caseStatusHistory` for the timeline + `caseEvidence`
+   for attachments), can attach evidence (request URL → PUT → addCaseEvidence),
+   and may withdraw (`cancelCase`).
+
+   Enums (live):
+     SupportCaseStatus = SUBMITTED | ASSIGNED | INVESTIGATING | RESOLVED |
+                         CLOSED | REOPENED | REJECTED | CANCELLED
+     SupportPriority   = LOW | MEDIUM | HIGH | URGENT
+     SupportOwnerType  includes COMMUNITY
+
+   NOTE: `supportCase.statusHistory` is empty for reporters — ALWAYS use
+   `caseStatusHistory(caseId)` for the timeline.
+   ---------------------------------------------------------------------------- */
+
+/**
+ * Creates a support case. `input` is `SubmitCaseInput!`:
+ *   { ownerType: SupportOwnerType! (=COMMUNITY), ownerEntityId: String,
+ *     caseTypeId: String!, title: String!, description: String,
+ *     priority: SupportPriority }
+ * Evidence (optional) is uploaded AFTER submit via the new case id.
+ */
+export const SUBMIT_CASE = gql`
+  mutation SubmitCase($input: SubmitCaseInput!) {
+    submitCase(input: $input) {
+      id
+      caseNumber
+      status
+      priority
+      caseTypeId
+      title
+    }
+  }
+`;
+
+/** The current user's own cases (newest-first by the backend). `category` is a
+ *  machine code (e.g. "consular_assist") — humanize for display. */
+export const MY_CASES = gql`
+  query MyCases($status: SupportCaseStatus, $limit: Int, $offset: Int) {
+    myCases(status: $status, limit: $limit, offset: $offset) {
+      id
+      caseNumber
+      category
+      title
+      priority
+      status
+      submittedAt
+      updatedAt
+    }
+  }
+`;
+
+/** Single case by id (reporter-readable). `statusHistory` is empty for reporters
+ *  — use CASE_STATUS_HISTORY for the timeline. */
+export const SUPPORT_CASE = gql`
+  query SupportCase($id: ID!) {
+    supportCase(id: $id) {
+      id
+      caseNumber
+      title
+      description
+      status
+      priority
+      caseTypeId
+      resolutionSummary
+      submittedAt
+      updatedAt
+    }
+  }
+`;
+
+/** Reporter-readable status timeline for a case (the canonical timeline source). */
+export const CASE_STATUS_HISTORY = gql`
+  query CaseStatusHistory($caseId: ID!) {
+    caseStatusHistory(caseId: $caseId) {
+      id
+      fromStatus
+      toStatus
+      reason
+      createdAt
+    }
+  }
+`;
+
+/** Evidence attached to a case. `readUrl` is a fresh signed download URL; the
+ *  caller should prefer `confirmed === true` rows. `kind` ∈ PDF|IMAGE|OTHER. */
+export const CASE_EVIDENCE = gql`
+  query CaseEvidence($caseId: ID!) {
+    caseEvidence(caseId: $caseId) {
+      id
+      fileName
+      kind
+      readUrl
+      confirmed
+      uploadedAt
+    }
+  }
+`;
+
+/**
+ * Step 1 of the evidence upload: get a signed PUT url for one file. PUT the raw
+ * bytes to `uploadUrl`, then call ADD_CASE_EVIDENCE with the returned
+ * `evidenceId`.
+ */
+export const REQUEST_CASE_EVIDENCE_UPLOAD_URL = gql`
+  mutation RequestCaseEvidenceUploadUrl(
+    $caseId: ID!
+    $contentType: String!
+    $fileName: String!
+  ) {
+    requestCaseEvidenceUploadUrl(
+      caseId: $caseId
+      contentType: $contentType
+      fileName: $fileName
+    ) {
+      evidenceId
+      uploadUrl
+      readUrl
+      storageKey
+      expiresAt
+    }
+  }
+`;
+
+/** Step 2 of the evidence upload: register the uploaded blob against the case. */
+export const ADD_CASE_EVIDENCE = gql`
+  mutation AddCaseEvidence($caseId: ID!, $evidenceId: ID!, $sizeBytes: Int) {
+    addCaseEvidence(caseId: $caseId, evidenceId: $evidenceId, sizeBytes: $sizeBytes) {
+      id
+      fileName
+      kind
+      confirmed
+    }
+  }
+`;
+
+/** Withdraw a case (reporter). Allowed while not already terminal. */
+export const CANCEL_CASE = gql`
+  mutation CancelCase($caseId: ID!, $reason: String!) {
+    cancelCase(caseId: $caseId, reason: $reason) {
+      id
+      status
+    }
+  }
+`;
+
+export type SupportCaseStatus =
+  | 'SUBMITTED'
+  | 'ASSIGNED'
+  | 'INVESTIGATING'
+  | 'RESOLVED'
+  | 'CLOSED'
+  | 'REOPENED'
+  | 'REJECTED'
+  | 'CANCELLED';
+
+export type SupportPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+
+/** `SubmitCaseInput!` shape for SUBMIT_CASE. */
+export interface SubmitCaseInput {
+  ownerType: 'COMMUNITY';
+  ownerEntityId?: string | null;
+  caseTypeId: string;
+  title: string;
+  description?: string | null;
+  priority?: SupportPriority;
+}
+
+/** The new-case result returned by submitCase. */
+export interface SubmitCaseResult {
+  id: string;
+  caseNumber: string;
+  status: string;
+  priority?: string | null;
+  caseTypeId: string;
+  title: string;
+}
+
+export interface SubmitCaseResponse {
+  submitCase: SubmitCaseResult;
+}
+
+/** One row in the My Cases list. `category` is a machine code (humanize it). */
+export interface SupportCaseSummary {
+  id: string;
+  caseNumber: string;
+  category?: string | null;
+  title: string;
+  priority?: string | null;
+  status: string;
+  submittedAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface MyCasesResponse {
+  myCases: SupportCaseSummary[];
+}
+
+/** Single-case shape selected by SUPPORT_CASE (reporter-readable). */
+export interface SupportCaseDetail {
+  id: string;
+  caseNumber: string;
+  title: string;
+  description?: string | null;
+  status: string;
+  priority?: string | null;
+  caseTypeId?: string | null;
+  resolutionSummary?: string | null;
+  submittedAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface SupportCaseResponse {
+  supportCase: SupportCaseDetail | null;
+}
+
+/** One entry of the reporter-visible case status timeline. */
+export interface CaseStatusHistoryEntry {
+  id: string;
+  fromStatus?: string | null;
+  toStatus: string;
+  reason?: string | null;
+  createdAt: string;
+}
+
+export interface CaseStatusHistoryResponse {
+  caseStatusHistory: CaseStatusHistoryEntry[];
+}
+
+/** One evidence row attached to a case (with a fresh signed `readUrl`). */
+export interface CaseEvidenceItem {
+  id: string;
+  fileName: string;
+  kind?: string | null;
+  readUrl?: string | null;
+  confirmed?: boolean | null;
+  uploadedAt?: string | null;
+}
+
+export interface CaseEvidenceResponse {
+  caseEvidence: CaseEvidenceItem[];
+}
+
+export interface CaseEvidenceUploadUrl {
+  evidenceId: string;
+  uploadUrl: string;
+  readUrl?: string | null;
+  storageKey: string;
+  expiresAt?: string | null;
+}
+
+export interface RequestCaseEvidenceUploadUrlResponse {
+  requestCaseEvidenceUploadUrl: CaseEvidenceUploadUrl;
+}
+
+export interface AddCaseEvidenceResponse {
+  addCaseEvidence: {
+    id: string;
+    fileName: string;
+    kind?: string | null;
+    confirmed?: boolean | null;
+  };
+}
+
+export interface CancelCaseResponse {
+  cancelCase: {
+    id: string;
+    status: string;
+  };
+}
+
 /* ============================================================================
    TRACK-REQUESTS detail (via api-gateway GraphQL)
 
