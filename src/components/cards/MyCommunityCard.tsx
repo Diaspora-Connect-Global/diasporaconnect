@@ -108,7 +108,7 @@ export function MyCommunityCard({
                         </div>
 
                         <div className="flex flex-col min-w-0 flex-1"> {/* Allow text truncation */}
-                            <h1 className="text-text-primary label-large text-sm sm:text-base truncate cursor-pointer hover:text-text-brand" onClick={() => handleCommunitySelect(id)}> {/* Responsive font and truncate long titles */}
+                            <h1 className="text-text-primary label-large text-sm sm:text-base truncate cursor-pointer hover:text-text-brand" onClick={() => router.push(`/community/${id}`)}> {/* Responsive font and truncate long titles */}
                                 {title}
                             </h1>
                             <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-1"> {/* Smaller font, clamp description on small screens */}
