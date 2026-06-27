@@ -40,15 +40,16 @@
             },
             "password": {
                 "required": "Wachtwoord is verplicht",
-                "minLength": "Wachtwoord moet minimaal 8 tekens bevatten",
+                "minLength": "Het wachtwoord moet minstens 12 tekens bevatten",
                 "requirements": {
                     "title": "Your password must include:",
-                    "minLength": "At least 8 characters",
+                    "minLength": "Minstens 12 tekens",
                     "uppercase": "One uppercase letter",
                     "lowercase": "One lowercase letter",
                     "number": "One number",
                     "special": "One special character"
-                }
+                },
+                "breached": "Dit wachtwoord is voorgekomen in een bekend datalek. Kies een ander wachtwoord."
             },
             "twoFactor": {
                 "required": "Tweefactorauthenticatiecode is verplicht",
@@ -330,12 +331,13 @@
             "resetting": "Opnieuw instellen..."
         },
         "errors": {
-            "passwordTooShort": "Wachtwoord moet minimaal 8 tekens bevatten",
+            "passwordTooShort": "Het wachtwoord moet minstens 12 tekens bevatten",
             "passwordMismatch": "Wachtwoorden komen niet overeen",
             "invalidOrExpiredCode": "Resetcode is ongeldig of verlopen",
             "weakPassword": "Wachtwoord voldoet niet aan beveiligingseisen",
             "resetFailed": "Wachtwoord opnieuw instellen mislukt. Probeer het opnieuw.",
-            "emailNotFound": "We couldn't find an account with that email"
+            "emailNotFound": "We couldn't find an account with that email",
+            "breached": "Dit wachtwoord is voorgekomen in een bekend datalek. Kies een ander wachtwoord."
         },
         "success": {
             "passwordReset": "Wachtwoord succesvol opnieuw ingesteld! Doorsturen naar inloggen..."
@@ -369,7 +371,7 @@
         "errors": {
             "emailRequired": "E-mailadres is verplicht",
             "invalidEmail": "Voer een geldig e-mailadres in",
-            "passwordTooShort": "Wachtwoord moet minimaal 8 tekens bevatten"
+            "passwordTooShort": "Het wachtwoord moet minstens 12 tekens bevatten"
         },
         "success": {
             "attendingEvent": "U woont het evenement {event} bij",

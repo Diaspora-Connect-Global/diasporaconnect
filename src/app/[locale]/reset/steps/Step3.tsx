@@ -49,6 +49,10 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
             setConfirmError(t('errors.passwordMismatch'));
             return;
         }
+        if (password.length < 12) {
+            setError(t('errors.passwordTooShort'));
+            return;
+        }
         try {
             const { data: responseData } = await resetPasswordMutation({
                 variables: {
@@ -79,6 +83,13 @@ export const Step3: React.FC<Step3Props> = ({ data, updateData, prevStep }) => {
             console.error('Password reset failed:', err);
             if (isNetworkError(err)) {
                 toast.error(t('errors.resetFailed'));
+                return;
+            }
+            const msg = err?.message || '';
+            if (/data breach/i.test(msg)) {
+                setError(t('errors.breached'));
+            } else if (/at least \d+ characters/i.test(msg)) {
+                setError(t('errors.passwordTooShort'));
             } else {
                 setError(t('errors.invalidOrExpiredCode'));
             }

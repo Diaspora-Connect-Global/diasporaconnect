@@ -74,9 +74,19 @@ export default function SignUpForm() {
       onError: (error) => {
         if (isNetworkError(error)) {
           toast.error(t('login.networkError'));
-        } else {
-          setFormError(error.message || t('form.signup.failed'));
+          return;
         }
+        const msg = error.message || '';
+        // Map server-side password-policy rejections to localized field errors.
+        if (/data breach/i.test(msg)) {
+          setFieldErrors((p) => ({ ...p, password: t('validation.password.breached') }));
+          return;
+        }
+        if (/at least \d+ characters/i.test(msg)) {
+          setFieldErrors((p) => ({ ...p, password: t('validation.password.minLength') }));
+          return;
+        }
+        setFormError(msg || t('form.signup.failed'));
       }
     }
   );
@@ -86,7 +96,7 @@ export default function SignUpForm() {
    * under the field and to gate submission.
    */
   const passwordChecks = {
-    minLength: password.length >= 8,
+    minLength: password.length >= 12,
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
@@ -95,7 +105,7 @@ export default function SignUpForm() {
 
   const isValidPassword = (pwd: string): boolean => {
     return (
-      pwd.length >= 8 &&
+      pwd.length >= 12 &&
       /[A-Z]/.test(pwd) &&
       /[a-z]/.test(pwd) &&
       /[0-9]/.test(pwd) &&

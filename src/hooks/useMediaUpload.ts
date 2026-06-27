@@ -10,6 +10,8 @@ import {
     type GetUploadUrlResponse,
 } from "@/services/gql/upload";
 import { useChatStore, type ApiMessage } from "@/store/ChatStore";
+import { toCdnUrl } from "@/lib/cdn";
+import { generateBlurDataUrl } from "@/lib/lqip";
 
 interface UploadFilesParams {
     files: File[];
@@ -22,6 +24,8 @@ interface UploadFilesParams {
 export interface UploadedAttachment {
     publicUrl: string;
     mimeType: string;
+    /** Tiny base64 LQIP generated client-side for image attachments (undefined otherwise). */
+    blurDataUrl?: string;
 }
 
 export interface UploadFilesResult {
@@ -130,10 +134,21 @@ export function useMediaUpload(): UseMediaUploadResult {
                     }
 
                     const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
+
+                    // Generate an LQIP blur-up for image attachments (undefined otherwise).
+                    const blurDataUrl = (file.type || "").startsWith("image/")
+                        ? await generateBlurDataUrl(file)
+                        : undefined;
+
+                    // The immutable Cache-Control header is required by the signed URL
+                    // so the CDN can cache the object forever.
                     const uploadRes = await fetch(uploadUrl, {
                         method: "PUT",
                         body: file,
-                        headers: { "Content-Type": contentType },
+                        headers: {
+                            "Content-Type": contentType,
+                            "Cache-Control": "public, max-age=31536000, immutable",
+                        },
                     });
 
                     if (!uploadRes.ok) {
@@ -142,7 +157,9 @@ export function useMediaUpload(): UseMediaUploadResult {
                         return null;
                     }
 
-                    uploaded.push({ publicUrl, mimeType: contentType });
+                    // Render-time CDN rewrite so freshly-uploaded chat media is
+                    // served via the CDN (no-op when NEXT_PUBLIC_CDN_URL is unset).
+                    uploaded.push({ publicUrl: toCdnUrl(publicUrl), mimeType: contentType, blurDataUrl });
                 }
             } catch (err) {
                 console.error("Upload failed:", err);

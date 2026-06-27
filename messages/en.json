@@ -40,15 +40,16 @@
             },
             "password": {
                 "required": "Password is required",
-                "minLength": "Password must be at least 8 characters",
+                "minLength": "Password must be at least 12 characters",
                 "requirements": {
                     "title": "Your password must include:",
-                    "minLength": "At least 8 characters",
+                    "minLength": "At least 12 characters",
                     "uppercase": "One uppercase letter",
                     "lowercase": "One lowercase letter",
                     "number": "One number",
                     "special": "One special character"
-                }
+                },
+                "breached": "This password appeared in a known data breach. Please choose a different one."
             },
             "twoFactor": {
                 "required": "Two-factor code is required",
@@ -330,12 +331,13 @@
             "resetting": "Resetting..."
         },
         "errors": {
-            "passwordTooShort": "Password must be at least 8 characters",
+            "passwordTooShort": "Password must be at least 12 characters",
             "passwordMismatch": "Passwords do not match",
             "invalidOrExpiredCode": "Reset code is invalid or expired",
             "weakPassword": "Password does not meet security requirements",
             "resetFailed": "Failed to reset password. Please try again.",
-            "emailNotFound": "We couldn't find an account with that email"
+            "emailNotFound": "We couldn't find an account with that email",
+            "breached": "This password appeared in a known data breach. Please choose a different one."
         },
         "success": {
             "passwordReset": "Password reset successfully! Redirecting to sign in..."
@@ -369,7 +371,7 @@
         "errors": {
             "emailRequired": "Email is required",
             "invalidEmail": "Please enter a valid email address",
-            "passwordTooShort": "Password must be at least 8 characters"
+            "passwordTooShort": "Password must be at least 12 characters"
         },
         "success": {
             "attendingEvent": "You are attending {event} event",

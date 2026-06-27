@@ -76,6 +76,19 @@ interface FeedCardProps {
     content: string;
     mentionMap?: MentionMap;
     images?: string[];
+    /**
+     * LQIP blur-up lookup by image URL. Built from the post's attachments
+     * (`url` → `blurDataUrl`) so each grid tile can render a backend-provided
+     * blur placeholder while the full image decodes. Absent URLs fall back to
+     * the shimmer treatment in {@link PostImage}.
+     */
+    blurFor?: (url: string) => string | undefined;
+    /**
+     * Above-the-fold LCP hint. When true the FIRST image of this card is given
+     * Next/Image `priority` (+ fetchPriority="high"). Only set for the very
+     * first feed card; everything else stays lazy.
+     */
+    priorityFirstImage?: boolean;
     /** Video attachment URLs (e.g. from mimeType video/*). Loaded with preload="metadata" and viewport-aware. */
     videos?: string[];
     /** Document/audio attachments (everything that isn't image/video), rendered as file cards. */
@@ -181,6 +194,8 @@ function FeedCardWithReplyInner({
     content,
     mentionMap,
     images,
+    blurFor,
+    priorityFirstImage = false,
     videos = [],
     documents = [],
     likes,
@@ -771,6 +786,8 @@ function FeedCardWithReplyInner({
                 onOpen={openMediaModal}
                 overlay={imageHoverOverlay}
                 singleVariant="contain"
+                blurFor={blurFor}
+                priority={priorityFirstImage}
             />
         );
     };

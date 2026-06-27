@@ -71,6 +71,11 @@ export interface FeedCardFilteredProps {
     content: string;
     mentionMap?: MentionMap;
     images?: string[];
+    /**
+     * LQIP blur-up lookup by image URL (attachment `url` → `blurDataUrl`).
+     * Passed through to {@link ImageGrid}; absent URLs fall back to a shimmer.
+     */
+    blurFor?: (url: string) => string | undefined;
     videos?: string[];
     /** Document/audio attachments (everything that isn't image/video), rendered as file cards. */
     documents?: PostDocument[];
@@ -145,6 +150,7 @@ export default function FeedCardFiltered({
     content,
     mentionMap,
     images,
+    blurFor,
     videos,
     documents = [],
     likes: initialLikes,
@@ -581,6 +587,7 @@ export default function FeedCardFiltered({
                 onOpen={openMediaModal}
                 overlay={imageHoverOverlay}
                 singleVariant="cover"
+                blurFor={blurFor}
             />
         );
     };

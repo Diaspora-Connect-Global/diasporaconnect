@@ -27,6 +27,7 @@ import type {
   AttachmentInput,
 } from '@/services/gql/types/postsFeed';
 import { toast } from 'sonner';
+import { generateBlurDataUrl } from '@/lib/lqip';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
@@ -183,10 +184,19 @@ export default function CreatePostForm({
 
         const { uploadUrl } = data.requestUploadUrl;
 
-        // 2. PUT file to pre-signed URL
+        // Generate an LQIP blur-up for image files (no-op / undefined otherwise).
+        const blurDataUrl = fp.file.type.startsWith('image/')
+          ? await generateBlurDataUrl(fp.file)
+          : undefined;
+
+        // 2. PUT file to pre-signed URL. The immutable Cache-Control header is
+        // required by the signed URL so the CDN can cache the object forever.
         await fetch(uploadUrl, {
           method: 'PUT',
-          headers: { 'Content-Type': fp.file.type },
+          headers: {
+            'Content-Type': fp.file.type,
+            'Cache-Control': 'public, max-age=31536000, immutable',
+          },
           body: fp.file,
         });
 
@@ -201,6 +211,7 @@ export default function CreatePostForm({
           type: fp.file.type.startsWith('image/') ? 'IMAGE' : 'FILE',
           mimeType: fp.file.type,
           size: fp.file.size,
+          ...(blurDataUrl && { blurDataUrl }),
         };
       } catch (err) {
         console.error('Upload failed:', err);

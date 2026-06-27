@@ -17,6 +17,11 @@ interface PostImageProps {
   sizes?: string;
   /** Tiny base64 LQIP from the backend; enables Next/Image blur-up when present. */
   blurDataUrl?: string;
+  /**
+   * LCP hint for the first above-the-fold image: maps to Next/Image `priority`
+   * (eager-load + preload) and sets `fetchPriority="high"`. Defaults to lazy.
+   */
+  priority?: boolean;
 }
 
 /**
@@ -39,6 +44,7 @@ export default function PostImage({
   className = '',
   sizes,
   blurDataUrl,
+  priority = false,
 }: PostImageProps) {
   const [errored, setErrored] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -61,6 +67,11 @@ export default function PostImage({
     ? ({ placeholder: 'blur', blurDataURL: blurDataUrl } as const)
     : {};
 
+  // LCP hint: only the first above-the-fold image opts into eager preload.
+  const priorityProps = priority
+    ? ({ priority: true, fetchPriority: 'high' } as const)
+    : {};
+
   if (fit === 'contain') {
     return (
       <span className="relative block w-full">
@@ -75,6 +86,7 @@ export default function PostImage({
           onLoad={() => setLoaded(true)}
           onError={() => setErrored(true)}
           {...blurProps}
+          {...priorityProps}
         />
       </span>
     );
@@ -92,6 +104,7 @@ export default function PostImage({
         onLoad={() => setLoaded(true)}
         onError={() => setErrored(true)}
         {...blurProps}
+        {...priorityProps}
       />
     </>
   );

@@ -137,8 +137,18 @@ export default async function RootLayout({
     (await getMessages().catch(() => null)) ??
     (await import(`../../../messages/${locale}.json`)).default;
 
+  // Warm up the connection to the media CDN when one is configured. No-op when
+  // NEXT_PUBLIC_CDN_URL is unset, keeping behavior identical to today.
+  const cdnUrl = process.env.NEXT_PUBLIC_CDN_URL;
+
   return (
     <html lang={locale} suppressHydrationWarning>
+      {cdnUrl && (
+        <head>
+          <link rel="preconnect" href={cdnUrl} crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href={cdnUrl} />
+        </head>
+      )}
       <body className="antialiased">
         {/* Prevent flash of wrong theme. next/script (beforeInteractive) runs this
             before hydration without React's "script inside component" warning. */}

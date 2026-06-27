@@ -98,6 +98,7 @@ export const FULL_POST_FRAGMENT = gql`
       objectKey
       mimeType
       url
+      blurDataUrl
     }
     mentions {
       entityId

@@ -59,15 +59,16 @@
             },
             "password": {
                 "required": "Le mot de passe est requis",
-                "minLength": "Le mot de passe doit contenir au moins 8 caractères",
+                "minLength": "Le mot de passe doit contenir au moins 12 caractères",
                 "requirements": {
                     "title": "Your password must include:",
-                    "minLength": "At least 8 characters",
+                    "minLength": "Au moins 12 caractères",
                     "uppercase": "One uppercase letter",
                     "lowercase": "One lowercase letter",
                     "number": "One number",
                     "special": "One special character"
-                }
+                },
+                "breached": "Ce mot de passe est apparu dans une fuite de données connue. Veuillez en choisir un autre."
             },
             "twoFactor": {
                 "required": "Le code à deux facteurs est requis",
@@ -354,12 +355,13 @@
             "resetting": "Réinitialisation..."
         },
         "errors": {
-            "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+            "passwordTooShort": "Le mot de passe doit contenir au moins 12 caractères",
             "passwordMismatch": "Les mots de passe ne correspondent pas",
             "invalidOrExpiredCode": "Le code de réinitialisation est invalide ou expiré",
             "weakPassword": "Le mot de passe ne répond pas aux exigences de sécurité",
             "resetFailed": "Échec de la réinitialisation. Veuillez réessayer.",
-            "emailNotFound": "We couldn't find an account with that email"
+            "emailNotFound": "We couldn't find an account with that email",
+            "breached": "Ce mot de passe est apparu dans une fuite de données connue. Veuillez en choisir un autre."
         },
         "success": {
             "passwordReset": "Mot de passe réinitialisé ! Redirection vers la connexion..."
@@ -369,7 +371,7 @@
         "errors": {
             "emailRequired": "L'e-mail est requis",
             "invalidEmail": "Veuillez entrer une adresse e-mail valide",
-            "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères"
+            "passwordTooShort": "Le mot de passe doit contenir au moins 12 caractères"
         },
         "success": {
             "attendingEvent": "Vous participez à l'événement {event}",

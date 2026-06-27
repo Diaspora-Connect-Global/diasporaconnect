@@ -59,15 +59,16 @@
             },
             "password": {
                 "required": "La password è obbligatoria",
-                "minLength": "La password deve contenere almeno 8 caratteri",
+                "minLength": "La password deve contenere almeno 12 caratteri",
                 "requirements": {
                     "title": "Your password must include:",
-                    "minLength": "At least 8 characters",
+                    "minLength": "Almeno 12 caratteri",
                     "uppercase": "One uppercase letter",
                     "lowercase": "One lowercase letter",
                     "number": "One number",
                     "special": "One special character"
-                }
+                },
+                "breached": "Questa password è comparsa in una violazione di dati nota. Scegline un’altra."
             },
             "twoFactor": {
                 "required": "Il codice a due fattori è obbligatorio",
@@ -354,12 +355,13 @@
             "resetting": "Reimpostazione..."
         },
         "errors": {
-            "passwordTooShort": "La password deve contenere almeno 8 caratteri",
+            "passwordTooShort": "La password deve contenere almeno 12 caratteri",
             "passwordMismatch": "Le password non corrispondono",
             "invalidOrExpiredCode": "Il codice di reimpostazione non è valido o è scaduto",
             "weakPassword": "La password non soddisfa i requisiti di sicurezza",
             "resetFailed": "Impossibile reimpostare la password. Riprova.",
-            "emailNotFound": "We couldn't find an account with that email"
+            "emailNotFound": "We couldn't find an account with that email",
+            "breached": "Questa password è comparsa in una violazione di dati nota. Scegline un’altra."
         },
         "success": {
             "passwordReset": "Password reimpostata con successo! Reindirizzamento all'accesso..."
@@ -369,7 +371,7 @@
         "errors": {
             "emailRequired": "L'email è obbligatoria",
             "invalidEmail": "Inserisci un indirizzo email valido",
-            "passwordTooShort": "La password deve essere di almeno 8 caratteri"
+            "passwordTooShort": "La password deve contenere almeno 12 caratteri"
         },
         "success": {
             "attendingEvent": "Stai partecipando all'evento {event}",

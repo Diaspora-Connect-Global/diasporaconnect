@@ -22,6 +22,12 @@ interface ImageGridProps {
   singleVariant?: 'contain' | 'cover';
   /** Optional LQIP lookup by URL for blur-up; falls back to a shimmer. */
   blurFor?: (url: string) => string | undefined;
+  /**
+   * LCP hint: when true the FIRST image cell is rendered with Next/Image
+   * `priority` (+ fetchPriority="high"). Used only for the first above-the-fold
+   * feed image; all other cells stay lazy.
+   */
+  priority?: boolean;
 }
 
 /**
@@ -37,6 +43,7 @@ export default function ImageGrid({
   overlay,
   singleVariant = 'contain',
   blurFor,
+  priority = false,
 }: ImageGridProps) {
   if (!images?.length) return null;
 
@@ -44,6 +51,8 @@ export default function ImageGrid({
   const maxDisplay = 4;
   const excess = count > maxDisplay ? count - maxDisplay : 0;
   const blur = (url: string) => blurFor?.(url);
+  // Only the first tile of the first card gets the LCP priority hint.
+  const cellPriority = (i: number) => priority && i === 0;
 
   return (
     <div className="mb-[1rem] flex flex-col gap-[0.5rem]">
@@ -53,7 +62,7 @@ export default function ImageGrid({
             className="group relative w-full h-[15rem] rounded-lg overflow-hidden cursor-pointer"
             onClick={() => onOpen(0)}
           >
-            <PostImage src={images[0]} alt={alt(0)} fit="cover" blurDataUrl={blur(images[0])} />
+            <PostImage src={images[0]} alt={alt(0)} fit="cover" blurDataUrl={blur(images[0])} priority={cellPriority(0)} />
             {overlay}
           </div>
         ) : (
@@ -63,7 +72,7 @@ export default function ImageGrid({
             className="group relative w-full min-h-[20rem] max-h-[32rem] rounded-lg overflow-hidden cursor-pointer bg-surface-alt"
             onClick={() => onOpen(0)}
           >
-            <PostImage src={images[0]} alt={alt(0)} fit="contain" className="max-h-[32rem]" blurDataUrl={blur(images[0])} />
+            <PostImage src={images[0]} alt={alt(0)} fit="contain" className="max-h-[32rem]" blurDataUrl={blur(images[0])} priority={cellPriority(0)} />
             {overlay}
           </div>
         )
@@ -75,7 +84,7 @@ export default function ImageGrid({
               className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
               onClick={() => onOpen(i)}
             >
-              <PostImage src={src} alt={alt(i)} fit="cover" blurDataUrl={blur(src)} />
+              <PostImage src={src} alt={alt(i)} fit="cover" blurDataUrl={blur(src)} priority={cellPriority(i)} />
               {overlay}
             </div>
           ))}
@@ -87,7 +96,7 @@ export default function ImageGrid({
             className="group relative row-span-2 rounded-lg overflow-hidden cursor-pointer min-h-[10rem]"
             onClick={() => onOpen(0)}
           >
-            <PostImage src={images[0]} alt={alt(0)} fit="cover" blurDataUrl={blur(images[0])} />
+            <PostImage src={images[0]} alt={alt(0)} fit="cover" blurDataUrl={blur(images[0])} priority={cellPriority(0)} />
             {overlay}
           </div>
           <div
@@ -113,7 +122,7 @@ export default function ImageGrid({
               className="group relative h-[15rem] rounded-lg overflow-hidden cursor-pointer"
               onClick={() => onOpen(i === maxDisplay - 1 && excess > 0 ? 0 : i)}
             >
-              <PostImage src={src} alt={alt(i)} fit="cover" blurDataUrl={blur(src)} />
+              <PostImage src={src} alt={alt(i)} fit="cover" blurDataUrl={blur(src)} priority={cellPriority(i)} />
               {i === maxDisplay - 1 && excess > 0 ? (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                   <span className="text-white text-3xl font-semibold">+{excess}</span>

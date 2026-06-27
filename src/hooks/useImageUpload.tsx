@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { GET_UPLOAD_URL, type GetUploadUrlResponse } from '@/services/gql/upload';
+import { generateBlurDataUrl } from '@/lib/lqip';
 
 type ImageCategory = 'avatar' | 'group_avatar' | 'event_cover';
 
@@ -20,7 +21,14 @@ interface UseImageUploadReturn {
   rawImage: string | null;
   croppedImage: string | null;
   showCropper: boolean;
-  
+  /**
+   * Tiny base64 LQIP for the most recently uploaded image. Generated client-side
+   * at upload from the cropped image. The avatar/cover profile mutations don't
+   * currently accept a blur placeholder, so this is exposed here for later
+   * wiring (and is `undefined` until an upload succeeds / on failure).
+   */
+  blurDataUrl: string | undefined;
+
   // Actions
   handleFileSelect: (file: File) => void;
   handleCropConfirm: (croppedImageData: string) => void;
@@ -181,6 +189,7 @@ export const useImageUpload = ({
   const [rawImage, setRawImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
+  const [blurDataUrl, setBlurDataUrl] = useState<string | undefined>(undefined);
 
   const [getUploadUrl] = useLazyQuery<GetUploadUrlResponse>(GET_UPLOAD_URL);
 
@@ -278,12 +287,18 @@ export const useImageUpload = ({
       const response = await fetch(imageToUpload);
       const blob = await response.blob();
 
-      // Step 3: Upload to the signed URL
+      // Generate an LQIP blur-up from the cropped image (undefined on failure).
+      const blur = await generateBlurDataUrl(blob);
+      setBlurDataUrl(blur);
+
+      // Step 3: Upload to the signed URL. The immutable Cache-Control header is
+      // required by the signed URL so the CDN can cache the object forever.
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: blob,
         headers: {
           'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=31536000, immutable',
         },
       });
 
@@ -332,6 +347,7 @@ export const useImageUpload = ({
     setRawImage(null);
     setShowCropper(false);
     setUploading(false);
+    setBlurDataUrl(undefined);
   };
 
   return {
@@ -340,6 +356,7 @@ export const useImageUpload = ({
     rawImage,
     croppedImage,
     showCropper,
+    blurDataUrl,
     handleFileSelect,
     handleCropConfirm,
     handleCropCancel,

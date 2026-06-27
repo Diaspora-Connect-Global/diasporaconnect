@@ -59,15 +59,16 @@
             },
             "password": {
                 "required": "Passwort ist erforderlich",
-                "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein",
+                "minLength": "Das Passwort muss mindestens 12 Zeichen lang sein",
                 "requirements": {
                     "title": "Your password must include:",
-                    "minLength": "At least 8 characters",
+                    "minLength": "Mindestens 12 Zeichen",
                     "uppercase": "One uppercase letter",
                     "lowercase": "One lowercase letter",
                     "number": "One number",
                     "special": "One special character"
-                }
+                },
+                "breached": "Dieses Passwort ist in einem bekannten Datenleck aufgetaucht. Bitte wähle ein anderes."
             },
             "twoFactor": {
                 "required": "Zwei-Faktor-Code ist erforderlich",
@@ -354,12 +355,13 @@
             "resetting": "Zurücksetzen..."
         },
         "errors": {
-            "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein",
+            "passwordTooShort": "Das Passwort muss mindestens 12 Zeichen lang sein",
             "passwordMismatch": "Die Passwörter stimmen nicht überein",
             "invalidOrExpiredCode": "Der Zurücksetzungscode ist ungültig oder abgelaufen",
             "weakPassword": "Das Passwort erfüllt nicht die Sicherheitsanforderungen",
             "resetFailed": "Passwort konnte nicht zurückgesetzt werden. Bitte erneut versuchen.",
-            "emailNotFound": "We couldn't find an account with that email"
+            "emailNotFound": "We couldn't find an account with that email",
+            "breached": "Dieses Passwort ist in einem bekannten Datenleck aufgetaucht. Bitte wähle ein anderes."
         },
         "success": {
             "passwordReset": "Passwort erfolgreich zurückgesetzt! Weiterleitung zur Anmeldung..."
@@ -369,7 +371,7 @@
         "errors": {
             "emailRequired": "E-Mail ist erforderlich",
             "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-            "passwordTooShort": "Passwort muss mindestens 8 Zeichen lang sein"
+            "passwordTooShort": "Das Passwort muss mindestens 12 Zeichen lang sein"
         },
         "success": {
             "attendingEvent": "Sie nehmen am {event} Event teil",

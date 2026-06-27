@@ -167,6 +167,12 @@ export interface AttachmentInput {
   mimeType: string;
   size: number;
   duration?: number;
+  /**
+   * Tiny base64 LQIP generated client-side at upload (image attachments only).
+   * Sent in the create-post payload and read back as `Attachment.blurDataUrl`
+   * for blur-up. Nullable — omitted for non-image files / generation failures.
+   */
+  blurDataUrl?: string;
 }
 
 export interface Post {

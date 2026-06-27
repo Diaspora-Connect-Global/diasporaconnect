@@ -1271,6 +1271,13 @@ export default function Home() {
 
                 const post = item.post;
                 const profileData = getProfileData(post);
+                // LQIP blur-up lookup: attachment URL → backend blurDataUrl.
+                const blurByUrl = new Map(
+                  (post.attachments ?? [])
+                    .filter((a) => a.url && a.blurDataUrl)
+                    .map((a) => [a.url as string, a.blurDataUrl as string]),
+                );
+                const blurFor = (url: string) => blurByUrl.get(url);
                 return (
                   <ImpressionTracker
                     itemId={post.id}
@@ -1304,6 +1311,8 @@ export default function Home() {
                           )
                           .map((a) => a.url || '')
                           .filter(Boolean) || []}
+                        blurFor={blurFor}
+                        priorityFirstImage={_index === 0}
                         videos={post.attachments
                           ?.filter(
                             (a) =>

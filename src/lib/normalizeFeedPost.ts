@@ -8,6 +8,7 @@ import type {
   UserEngagement,
 } from '@/services/gql/types/postsFeed';
 import { getFileNameFromUrl } from '@/lib/urlPreview';
+import { toCdnUrl } from '@/lib/cdn';
 
 export interface PostDocument {
   url: string;
@@ -53,7 +54,9 @@ function mapAttachments(raw: FeedPostFragment['attachments']): Attachment[] | un
   return raw.map((a, i) => ({
     id: a.id ?? `att-${i}`,
     objectKey: a.objectKey ?? '',
-    url: a.url ?? undefined,
+    // Render-time CDN rewrite: stored GCS URLs are served via the CDN when
+    // NEXT_PUBLIC_CDN_URL is set (no-op otherwise).
+    url: a.url ? toCdnUrl(a.url) : undefined,
     type: a.type ?? 'IMAGE',
     mimeType: a.mimeType ?? 'application/octet-stream',
     size: 0,
@@ -98,14 +101,14 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     authorProfile = {
       organizationProfile: {
         name: o.name ?? p.author?.displayName ?? 'Organization',
-        logo: o.logoUrl ?? '',
+        logo: toCdnUrl(o.logoUrl ?? ''),
         isVerified: (o.verificationTier ?? '') !== '' && (o.verificationTier ?? 'NONE') !== 'NONE',
       },
     };
   } else if (p.authorProfile?.userProfile) {
     const u = p.authorProfile.userProfile;
     const display = u.displayName || u.name || p.author?.displayName || '';
-    const avatar = u.avatarUrl || '';
+    const avatar = toCdnUrl(u.avatarUrl || '');
     authorProfile = {
       userProfile: {
         name: display,
@@ -118,7 +121,7 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     authorProfile = {
       userProfile: {
         name: p.author.displayName ?? 'Unknown',
-        avatar: p.author.avatarUrl ?? '',
+        avatar: toCdnUrl(p.author.avatarUrl ?? ''),
         isVip: false,
         verificationTier: 'NONE',
       },
