@@ -35,6 +35,7 @@ import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
 import { getFirstUrlInText } from '@/lib/urlPreview';
 import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
+import Avatar from '@/components/cards/media/Avatar';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
 
 /* --------------------------------------------------------------- */
@@ -681,7 +682,7 @@ export default function FeedCardFiltered({
                             </div>
                             <div className="ml-14 pt-4">
                                 <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
-                                    <img src={c.authorImage || '/PROFILE.png'} alt={c.author} width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                    <Avatar src={c.authorImage || '/PROFILE.png'} alt={c.author} size={32} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                                     <span className="font-semibold text-text-primary text-sm truncate">{c.author}</span>
                                     {c.authorTier ? <UserBadge tier={c.authorTier} size="xs" /> : null}
                                     <span className="text-text-tertiary text-xs flex-shrink-0">·</span>
@@ -742,7 +743,7 @@ export default function FeedCardFiltered({
                             </div>
                             {replyToId === c.id && (
                                 <div className="mt-[1rem] ml-[3rem] flex items-center space-x-2">
-                                    <img src={resolvedAvatar} alt={currentUser.name} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                                    <Avatar src={resolvedAvatar} alt={currentUser.name} size={40} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                                     <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, c.id, mm)} placeholder={t('replyPlaceholder')} reversed={true} reversedText={t('reply')} onMentionSearch={fetchMentions} />
                                 </div>
                             )}
@@ -753,7 +754,7 @@ export default function FeedCardFiltered({
                                         const rEditable = rOwn && canEditComment(reply);
                                         return (
                                         <div key={reply.id} className="flex gap-[0.75rem]">
-                                            <img src={reply.authorImage || '/PROFILE.png'} alt={reply.author} width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                            <Avatar src={reply.authorImage || '/PROFILE.png'} alt={reply.author} size={32} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-[0.5rem] mb-[0.25rem]">
                                                     <span className="font-semibold text-text-primary text-sm truncate">{reply.author}</span>
@@ -829,7 +830,7 @@ export default function FeedCardFiltered({
         if (!showCommentInput) return null;
         return (
             <div className="my-[1rem] flex items-center space-x-2">
-                <img src={resolvedAvatar} alt={currentUser.name} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                <Avatar src={resolvedAvatar} alt={currentUser.name} size={40} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                 <div className="flex-1">
                     <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                 </div>
@@ -880,7 +881,7 @@ export default function FeedCardFiltered({
 
         const modalPostInfo = (
             <div className="flex items-center gap-[0.75rem] mb-3">
-                <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0" />
+                <Avatar src={profileImage} alt={profileName} size={40} className="w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         <span className="font-semibold text-text-primary text-sm truncate">{profileName}</span>
@@ -974,7 +975,7 @@ export default function FeedCardFiltered({
                         {/* Comment input */}
                         <div className="p-4 border-t border-border-subtle">
                             <div className="flex items-center space-x-2">
-                                <img src={resolvedAvatar} alt={currentUser.name} width={36} height={36} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                                <Avatar src={resolvedAvatar} alt={currentUser.name} size={36} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                                 <div className="flex-1">
                                     <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                                 </div>
@@ -1035,7 +1036,7 @@ export default function FeedCardFiltered({
                         </div>
                         <div className="p-4 border-t border-border-subtle">
                             <div className="flex items-center space-x-2">
-                                <img src={resolvedAvatar} alt={currentUser.name} width={36} height={36} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                                <Avatar src={resolvedAvatar} alt={currentUser.name} size={36} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                                 <div className="flex-1">
                                     <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                                 </div>
@@ -1054,7 +1055,7 @@ export default function FeedCardFiltered({
             {/* Header */}
             <div className="flex items-center justify-between mb-[1rem]">
                 <div className="flex items-center gap-[0.75rem] flex-1 min-w-0">
-                    <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async" className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle flex-shrink-0" />
+                    <Avatar src={profileImage} alt={profileName} size={40} className="w-[3rem] h-[3rem] rounded-full object-cover border border-border-subtle flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <h3 className="label-large text-text-primary truncate">{profileName}</h3>

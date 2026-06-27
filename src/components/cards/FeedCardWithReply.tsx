@@ -5,6 +5,7 @@ import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge, type Tier } from "@/components/custom/userBadge";
+import Avatar from '@/components/cards/media/Avatar';
 import { CategoryBadge } from "@/components/home/CategoryBadge";
 import { formatCount } from '@/macros/formatCount';
 import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, isShortEmojiOnly, type MentionInputItem } from '@/components/custom/richTextRenderer';
@@ -859,7 +860,7 @@ function FeedCardWithReplyInner({
 
         const postInfoEl = (
             <div className="flex items-center gap-3 mb-3">
-                <img src={profileImage} alt={profileName} width={40} height={40} loading="lazy" decoding="async"
+                <Avatar src={profileImage} alt={profileName} size={40}
                     className={`w-10 h-10 rounded-full object-cover border border-border-subtle flex-shrink-0 ${(authorEntityId ?? authorUserId) ? 'cursor-pointer' : ''}`}
                     onClick={(authorEntityId ?? authorUserId) ? () => goToProfile(authorEntityId ?? authorUserId, authorEntityType ?? 'USER') : undefined} />
                 <div className="flex-1 min-w-0">
@@ -900,7 +901,7 @@ function FeedCardWithReplyInner({
                 {topLevelM.map(c => (
                     <div key={c.id}>
                         <div className="flex gap-3">
-                            <img src={c.authorImage || entityFallbackAvatar(c.authorType)} alt={c.author} width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(c.authorId, c.authorType)} />
+                            <Avatar src={c.authorImage || entityFallbackAvatar(c.authorType)} alt={c.author} size={32} className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(c.authorId, c.authorType)} />
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                                     <span className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand" onClick={() => goToProfile(c.authorId, c.authorType)}>{c.author}</span>
@@ -917,7 +918,7 @@ function FeedCardWithReplyInner({
                         </div>
                         {modalReplyToId === c.id && (
                             <div className="mt-3 ml-11 flex items-center gap-2">
-                                <img src={currentUserAvatar} alt="You" width={32} height={32} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                <Avatar src={currentUserAvatar} alt="You" size={32} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                                 <div className="flex-1">
                                     <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, c.id, mm)} placeholder={t('replyPlaceholder')} reversed={true} reversedText={t('reply')} onMentionSearch={fetchMentions} />
                                 </div>
@@ -927,7 +928,7 @@ function FeedCardWithReplyInner({
                             <div className="ml-11 mt-3 space-y-3">
                                 {repliesByParentM.get(c.id)!.map(reply => (
                                     <div key={reply.id} className="flex gap-3">
-                                        <img src={reply.authorImage || entityFallbackAvatar(reply.authorType)} alt={reply.author} width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(reply.authorId, reply.authorType)} />
+                                        <Avatar src={reply.authorImage || entityFallbackAvatar(reply.authorType)} alt={reply.author} size={28} className="w-7 h-7 rounded-full object-cover flex-shrink-0 cursor-pointer" onClick={() => goToProfile(reply.authorId, reply.authorType)} />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span className="font-semibold text-text-primary text-sm truncate cursor-pointer hover:text-text-brand" onClick={() => goToProfile(reply.authorId, reply.authorType)}>{reply.author}</span>
@@ -952,7 +953,7 @@ function FeedCardWithReplyInner({
 
         const commentInputEl = (
             <div className="flex items-center gap-2">
-                <img src={currentUserAvatar} alt="You" width={36} height={36} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                <Avatar src={currentUserAvatar} alt="You" size={36} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                 <div className="flex-1">
                     <MessageInputGlobal onSendMessage={(txt, _img, mm) => handleSend(txt, undefined, mm)} placeholder={t('addComment')} reversed={true} reversedText={t('comment')} onMentionSearch={fetchMentions} />
                 </div>
@@ -1114,13 +1115,10 @@ function FeedCardWithReplyInner({
 
         return (
             <div className="my-[1rem] flex items-start gap-2">
-                <img
+                <Avatar
                     src={currentUserAvatar}
                     alt="You"
-                    width={40}
-                    height={40}
-                    loading="lazy"
-                    decoding="async"
+                    size={40}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
@@ -1141,13 +1139,10 @@ function FeedCardWithReplyInner({
 
         return (
             <div className="mt-[1rem] ml-[3rem] flex items-start gap-2">
-                <img
+                <Avatar
                     src={currentUserAvatar}
                     alt="You"
-                    width={40}
-                    height={40}
-                    loading="lazy"
-                    decoding="async"
+                    size={40}
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
@@ -1247,13 +1242,10 @@ function FeedCardWithReplyInner({
                         topLevel.map((c) => (
                             <div key={c.id} id={`post-comment-${c.id}`}>
                                 <div className="flex gap-[0.75rem]">
-                                    <img
+                                    <Avatar
                                         src={c.authorImage || entityFallbackAvatar(c.authorType)}
                                         alt={c.author}
-                                        width={32}
-                                        height={32}
-                                        loading="lazy"
-                                        decoding="async"
+                                        size={32}
                                         className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5 cursor-pointer"
                                         onClick={() => goToProfile(c.authorId, c.authorType)}
                                     />
