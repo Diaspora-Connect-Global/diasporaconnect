@@ -9,6 +9,7 @@ steps:
       - 'build'
       - '--build-arg=NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}'
       - '--build-arg=NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${_NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}'
+      - '--build-arg=NEXT_PUBLIC_CDN_URL=${_NEXT_PUBLIC_CDN_URL}'
       - '-t'
       - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
       - '.'
@@ -51,6 +52,9 @@ substitutions:
   # the "Card payments unavailable" UX implemented in lib/stripe.ts.
   _NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ""
   _NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ""
+  # Media CDN host (public, not a secret) — served via the Cloudflare Worker
+  # in front of the GCS bucket. Empty would disable the CDN.
+  _NEXT_PUBLIC_CDN_URL: "https://cdn.diaspoplug.net"
 
 options:
   logging: CLOUD_LOGGING_ONLY
