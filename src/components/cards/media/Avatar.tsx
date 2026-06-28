@@ -46,6 +46,7 @@ export default function Avatar({
       alt={alt}
       width={size}
       height={size}
+      sizes={`${size}px`}
       loading="lazy"
       onError={() => setErrored(true)}
       onClick={onClick}

@@ -197,6 +197,13 @@ export interface Post {
   categories?: string[];
   aiTopics?: string[];
   /**
+   * Precomputed LQIP blur-up lookup: attachment URL → backend blurDataUrl.
+   * Built once in `normalizeFeedPost` so the feed's `itemContent` doesn't
+   * allocate a fresh Map per card per render (kept the FeedCardWithReply
+   * React.memo from defeating itself + helps hold 60fps on scroll).
+   */
+  blurByUrl?: Record<string, string>;
+  /**
    * Recommendation provenance (carried from RankedFeedPage.items[].source).
    * Internal-only — never rendered in the UI; used by ImpressionTracker to attribute
    * downstream VIEW/DWELL signals to the originating retriever.

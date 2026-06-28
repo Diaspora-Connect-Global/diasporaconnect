@@ -457,6 +457,11 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     variables: initialFeedVariables,
     skip: !useLegacyFeed,
     notifyOnNetworkStatusChange: true,
+    // Initial mount still hits the network (unchanged default semantics), but
+    // subsequent reads (tab switches, back-nav, re-renders) serve from the
+    // normalized cache so returning to the feed is instant.
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
   });
 
   const {
@@ -468,6 +473,8 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     variables: { input: { hashtag: trimmedHashtag, limit: initialLimit, offset: 0 } },
     skip: !isHashtagFeed,
     notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
   });
 
   const {
@@ -479,6 +486,8 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     variables: { input: { category: trimmedCategory, limit: initialLimit, offset: 0 } },
     skip: !isCategoryFeed,
     notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
   });
 
   const [fetchMoreFeed, { loading: loadingMoreFeed }] = useLazyQuery<GetFeedData>(GET_FEED, {

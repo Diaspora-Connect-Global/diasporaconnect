@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { GET_UPLOAD_URL, type GetUploadUrlResponse } from '@/services/gql/upload';
-import { generateBlurDataUrl } from '@/lib/lqip';
+import { resizeImage } from '@/lib/resizeImage';
 
 type ImageCategory = 'avatar' | 'group_avatar' | 'event_cover';
 
@@ -269,10 +269,25 @@ export const useImageUpload = ({
     const toastId = toast.loading('Uploading image...');
 
     try {
-      // Step 1: Get upload URL
+      // Step 1: Convert the cropped data URL to a blob, then resize +
+      // recompress it to WebP (avatars are small — cap at 512px). This also
+      // yields the LQIP blur-up from the same decode.
+      const response = await fetch(imageToUpload);
+      const blob = await response.blob();
+
+      const { file: uploadBody, blurDataUrl: blur } = await resizeImage(blob, {
+        maxDimension: 512,
+      });
+      setBlurDataUrl(blur);
+
+      // Use the resized file's type (WebP for optimized images) for both the
+      // signed-URL request and the PUT.
+      const uploadContentType = uploadBody.type || contentType;
+
+      // Step 2: Get upload URL
       const { data: uploadData } = await getUploadUrl({
         variables: {
-          contentType,
+          contentType: uploadContentType,
           category,
         },
       });
@@ -283,21 +298,13 @@ export const useImageUpload = ({
 
       const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
 
-      // Step 2: Convert base64 to blob
-      const response = await fetch(imageToUpload);
-      const blob = await response.blob();
-
-      // Generate an LQIP blur-up from the cropped image (undefined on failure).
-      const blur = await generateBlurDataUrl(blob);
-      setBlurDataUrl(blur);
-
       // Step 3: Upload to the signed URL. The immutable Cache-Control header is
       // required by the signed URL so the CDN can cache the object forever.
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
-        body: blob,
+        body: uploadBody,
         headers: {
-          'Content-Type': contentType,
+          'Content-Type': uploadContentType,
           'Cache-Control': 'public, max-age=31536000, immutable',
         },
       });

@@ -15,6 +15,15 @@ interface PostImageProps {
   className?: string;
   /** Responsive `sizes` hint for srcset selection. */
   sizes?: string;
+  /**
+   * Intrinsic pixel dimensions from the backend. When both are present (>0) the
+   * `contain` wrapper reserves the real aspect ratio up front (via inline
+   * `aspect-ratio`) so the card holds its height before the bitmap decodes —
+   * eliminating layout shift. Absent → current responsive `width=0/height=0`
+   * behavior (no regression).
+   */
+  width?: number;
+  height?: number;
   /** Tiny base64 LQIP from the backend; enables Next/Image blur-up when present. */
   blurDataUrl?: string;
   /**
@@ -44,6 +53,8 @@ export default function PostImage({
   className = '',
   sizes,
   blurDataUrl,
+  width,
+  height,
   priority = false,
 }: PostImageProps) {
   const [errored, setErrored] = useState(false);
@@ -73,8 +84,16 @@ export default function PostImage({
     : {};
 
   if (fit === 'contain') {
+    // When the backend supplies real dimensions, reserve the box's aspect ratio
+    // up front so the card height doesn't jump as the bitmap decodes (the
+    // shimmer/blur already fills the reserved space). Capped by any `max-h-*`
+    // passed in `className`. Absent → fall back to the responsive auto-height.
+    const hasDims = !!width && !!height && width > 0 && height > 0;
+    const wrapperStyle = hasDims
+      ? ({ aspectRatio: `${width} / ${height}` } as const)
+      : undefined;
     return (
-      <span className="relative block w-full">
+      <span className="relative block w-full" style={wrapperStyle}>
         {shimmer}
         <Image
           src={src}

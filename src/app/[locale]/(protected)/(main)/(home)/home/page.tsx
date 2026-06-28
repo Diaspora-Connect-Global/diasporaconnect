@@ -168,6 +168,28 @@ type FeedItem =
 
 const ASSOCIATIONS_RAIL_INDEX = 3;
 
+// Per-post `blurFor` lookup cache. `post.blurByUrl` is precomputed once in
+// `normalizeFeedPost` and keeps a stable reference for the life of the post
+// object, so caching the bound lookup against it yields a reference-stable
+// `blurFor` function across home-page re-renders — which preserves the
+// FeedCardWithReply React.memo (a fresh closure per render would defeat it).
+const EMPTY_BLUR_MAP: Record<string, string> = {};
+const blurForCache = new WeakMap<
+  Record<string, string>,
+  (url: string) => string | undefined
+>();
+function getBlurFor(
+  blurByUrl: Record<string, string> | undefined,
+): (url: string) => string | undefined {
+  const map = blurByUrl ?? EMPTY_BLUR_MAP;
+  let fn = blurForCache.get(map);
+  if (!fn) {
+    fn = (url: string) => map[url];
+    blurForCache.set(map, fn);
+  }
+  return fn;
+}
+
 export default function Home() {
   const t = useTranslations('community');
   const tFeedback = useTranslations('feedback');
@@ -341,6 +363,21 @@ export default function Home() {
       feedLoadMore();
     }
   }, [feedHasMore, feedLoadingMore, feedLoading, feedLoadMore]);
+
+  // Minimum skeleton hold (W4): a very fast next-page fetch flips
+  // `feedLoadingMore` true→false within a frame or two, which makes the Footer
+  // skeleton flash. Keep `showLoadingFooter` true for a short tail after the
+  // load completes so the skeleton is visible long enough to read as a smooth
+  // hand-off rather than a flicker.
+  const [showLoadingFooter, setShowLoadingFooter] = useState(false);
+  useEffect(() => {
+    if (feedLoadingMore) {
+      setShowLoadingFooter(true);
+      return;
+    }
+    const id = setTimeout(() => setShowLoadingFooter(false), 250);
+    return () => clearTimeout(id);
+  }, [feedLoadingMore]);
 
   // ─── Cold-start interests prompt (C4) ──────────────────────────────────────
   // Gate the "Set your interests" card on:
@@ -1053,26 +1090,37 @@ export default function Home() {
         </>
         )}
 
-        {/* Feed Posts - Takes remaining space */}
-        <div className="space-y-2">
-          {/* Feed Loading State — only on initial load */}
-          {feedLoading && posts.length === 0 && (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-surface-subtle rounded-lg p-4 animate-pulse">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-surface-default rounded-full" />
-                    <div className="flex-1">
-                      <div className="h-4 bg-surface-default rounded w-1/3 mb-2" />
-                      <div className="h-3 bg-surface-default rounded w-1/4" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-surface-default rounded w-full" />
-                    <div className="h-4 bg-surface-default rounded w-5/6" />
-                  </div>
+        {/* Associations rail loading state (W3) — reserve a fixed-height box
+            matching the communities carousel so the associations rail (which
+            otherwise streams in mid-feed) fades in place rather than shoving
+            layout. Independently gated on associationsLoading. The header +
+            row dimensions mirror the communities skeleton above. */}
+        {associationsLoading && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
+              <div className="h-4 w-40 rounded bg-surface-subtle animate-pulse" />
+              <div className="h-4 w-12 rounded bg-surface-subtle animate-pulse" />
+            </div>
+            <div className="flex gap-2 overflow-hidden pb-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex-none w-[280px]">
+                  <div className="h-32 bg-surface-subtle rounded-lg animate-pulse" />
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Feed Posts - Takes remaining space */}
+        <div className="space-y-2">
+          {/* Feed Loading State — only on initial load. Uses FeedCardSkeleton
+              so the reserved height matches the real cards' dimensions and
+              posts fade in place instead of shoving layout. */}
+          {feedLoading && posts.length === 0 && (
+            <div>
+              <FeedCardSkeleton />
+              <FeedCardSkeleton />
+              <FeedCardSkeleton />
             </div>
           )}
 
@@ -1174,12 +1222,20 @@ export default function Home() {
               data={feedItems}
               customScrollParent={feedScrollEl ?? undefined}
               endReached={handleEndReached}
-              increaseViewportBy={{ top: 0, bottom: 600 }}
+              rangeChanged={(range) => {
+                // Prefetch the next page slightly before the bottom so the
+                // hand-off feels seamless (handleEndReached self-guards on
+                // hasMore/loadingMore/loading).
+                if (range.endIndex > feedItems.length - 4) {
+                  handleEndReached();
+                }
+              }}
+              increaseViewportBy={{ top: 800, bottom: 1200 }}
               computeItemKey={(_, item) =>
                 item.kind === 'post' ? item.post.id : 'associations-rail'
               }
               components={{
-                Footer: feedLoadingMore
+                Footer: showLoadingFooter
                   ? () => (
                       <>
                         <FeedCardSkeleton />
@@ -1271,13 +1327,10 @@ export default function Home() {
 
                 const post = item.post;
                 const profileData = getProfileData(post);
-                // LQIP blur-up lookup: attachment URL → backend blurDataUrl.
-                const blurByUrl = new Map(
-                  (post.attachments ?? [])
-                    .filter((a) => a.url && a.blurDataUrl)
-                    .map((a) => [a.url as string, a.blurDataUrl as string]),
-                );
-                const blurFor = (url: string) => blurByUrl.get(url);
+                // LQIP blur-up lookup: precomputed in normalizeFeedPost as
+                // `post.blurByUrl`; getBlurFor returns a reference-stable
+                // function per post so the card's React.memo isn't defeated.
+                const blurFor = getBlurFor(post.blurByUrl);
                 return (
                   <ImpressionTracker
                     itemId={post.id}
@@ -1287,7 +1340,7 @@ export default function Home() {
                     surface={isRecommendedArm ? 'home_feed' : 'community_feed'}
                     className="mb-2"
                   >
-                    <div id={`feed-post-${post.id}`}>
+                    <div id={`feed-post-${post.id}`} className="feed-card-cv">
                       <FeedCardWithReply
                         postId={post.id}
                         aiCategory={post.categories?.[0]}

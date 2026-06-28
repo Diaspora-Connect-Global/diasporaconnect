@@ -11,7 +11,7 @@ import {
 } from "@/services/gql/upload";
 import { useChatStore, type ApiMessage } from "@/store/ChatStore";
 import { toCdnUrl } from "@/lib/cdn";
-import { generateBlurDataUrl } from "@/lib/lqip";
+import { resizeImage } from "@/lib/resizeImage";
 
 interface UploadFilesParams {
     files: File[];
@@ -122,7 +122,19 @@ export function useMediaUpload(): UseMediaUploadResult {
 
             try {
                 for (const file of files) {
-                    const contentType = chatMediaContentType(file.type || "application/octet-stream");
+                    const isImage = (file.type || "").startsWith("image/");
+
+                    // For images, resize + recompress to WebP before uploading
+                    // (smaller payload, faster decode). The LQIP blur-up comes
+                    // from the same decode. Non-images pass through untouched.
+                    const { file: uploadBody, blurDataUrl } = isImage
+                        ? await resizeImage(file, { maxDimension: 1600 })
+                        : { file, blurDataUrl: undefined };
+
+                    const contentType = isImage
+                        ? uploadBody.type
+                        : chatMediaContentType(file.type || "application/octet-stream");
+
                     const { data: uploadData } = await getUploadUrl({
                         variables: { contentType, category: "chat" },
                     });
@@ -135,16 +147,11 @@ export function useMediaUpload(): UseMediaUploadResult {
 
                     const { uploadUrl, publicUrl } = uploadData.getUploadUrl;
 
-                    // Generate an LQIP blur-up for image attachments (undefined otherwise).
-                    const blurDataUrl = (file.type || "").startsWith("image/")
-                        ? await generateBlurDataUrl(file)
-                        : undefined;
-
                     // The immutable Cache-Control header is required by the signed URL
                     // so the CDN can cache the object forever.
                     const uploadRes = await fetch(uploadUrl, {
                         method: "PUT",
-                        body: file,
+                        body: uploadBody,
                         headers: {
                             "Content-Type": contentType,
                             "Cache-Control": "public, max-age=31536000, immutable",

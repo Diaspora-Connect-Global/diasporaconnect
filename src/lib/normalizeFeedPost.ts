@@ -128,6 +128,18 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     };
   }
 
+  const attachments = mapAttachments(p.attachments);
+
+  // Precompute the LQIP blur-up lookup once (url -> blurDataUrl) so the feed's
+  // virtualised `itemContent` reads `post.blurByUrl` instead of allocating a
+  // fresh Map on every card on every render.
+  const blurByUrl: Record<string, string> = {};
+  for (const a of attachments ?? []) {
+    if (a.url && a.blurDataUrl) {
+      blurByUrl[a.url] = a.blurDataUrl;
+    }
+  }
+
   return {
     id: p.id,
     text,
@@ -136,11 +148,12 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     authorProfile,
     createdAt: p.createdAt,
     visibility: (p.visibility ?? 'PUBLIC') as PostVisibility,
-    attachments: mapAttachments(p.attachments),
+    attachments,
     mentions: p.mentions,
     engagementCounts,
     userEngagement,
     categories: p.categories ?? undefined,
     aiTopics: p.aiTopics ?? undefined,
+    blurByUrl,
   };
 }

@@ -27,7 +27,7 @@ import type {
   AttachmentInput,
 } from '@/services/gql/types/postsFeed';
 import { toast } from 'sonner';
-import { generateBlurDataUrl } from '@/lib/lqip';
+import { resizeImage } from '@/lib/resizeImage';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
@@ -167,15 +167,26 @@ export default function CreatePostForm({
           return c;
         });
 
-        // Generate object key
-        const objectKey = `posts/${Date.now()}-${fp.file.name}`;
+        const isImage = fp.file.type.startsWith('image/');
+
+        // For images, resize + recompress to WebP before uploading (smaller
+        // payload, faster decode, no pop-in). Also yields the LQIP blur-up from
+        // the same decode. Non-images pass through untouched.
+        const { file: uploadFileBody, width, height, blurDataUrl } = isImage
+          ? await resizeImage(fp.file, { maxDimension: 1600 })
+          : { file: fp.file, width: 0, height: 0, blurDataUrl: undefined };
+
+        const uploadContentType = isImage ? uploadFileBody.type : fp.file.type;
+
+        // Generate object key (use the resized file's .webp name for images)
+        const objectKey = `posts/${Date.now()}-${uploadFileBody.name}`;
 
         // 1. Get pre-signed URL
         const { data } = await requestUploadUrl({
           variables: {
-            fileName: fp.file.name,
-            fileType: fp.file.type.startsWith('image/') ? 'IMAGE' : 'FILE',
-            contentType: fp.file.type,
+            fileName: uploadFileBody.name,
+            fileType: isImage ? 'IMAGE' : 'FILE',
+            contentType: uploadContentType,
             vendorId: user?.userId || 'anonymous',
           },
         });
@@ -184,20 +195,15 @@ export default function CreatePostForm({
 
         const { uploadUrl } = data.requestUploadUrl;
 
-        // Generate an LQIP blur-up for image files (no-op / undefined otherwise).
-        const blurDataUrl = fp.file.type.startsWith('image/')
-          ? await generateBlurDataUrl(fp.file)
-          : undefined;
-
         // 2. PUT file to pre-signed URL. The immutable Cache-Control header is
         // required by the signed URL so the CDN can cache the object forever.
         await fetch(uploadUrl, {
           method: 'PUT',
           headers: {
-            'Content-Type': fp.file.type,
+            'Content-Type': uploadContentType,
             'Cache-Control': 'public, max-age=31536000, immutable',
           },
-          body: fp.file,
+          body: uploadFileBody,
         });
 
         setFiles((prev) => {
@@ -208,9 +214,11 @@ export default function CreatePostForm({
 
         return {
           objectKey,
-          type: fp.file.type.startsWith('image/') ? 'IMAGE' : 'FILE',
-          mimeType: fp.file.type,
-          size: fp.file.size,
+          type: isImage ? 'IMAGE' : 'FILE',
+          mimeType: uploadContentType,
+          size: uploadFileBody.size,
+          ...(width && { width }),
+          ...(height && { height }),
           ...(blurDataUrl && { blurDataUrl }),
         };
       } catch (err) {

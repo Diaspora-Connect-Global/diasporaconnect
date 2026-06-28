@@ -23,6 +23,13 @@ interface ImageGridProps {
   /** Optional LQIP lookup by URL for blur-up; falls back to a shimmer. */
   blurFor?: (url: string) => string | undefined;
   /**
+   * Optional intrinsic-dimension lookup by URL (mirrors {@link blurFor}). When it
+   * returns a width/height for the SINGLE `contain` image, the cell reserves that
+   * aspect ratio up front so the card height doesn't shift as the bitmap decodes.
+   * Backward-compatible: when absent, the `min-h-[20rem]` placeholder is kept.
+   */
+  dimsFor?: (url: string) => { width?: number; height?: number } | undefined;
+  /**
    * LCP hint: when true the FIRST image cell is rendered with Next/Image
    * `priority` (+ fetchPriority="high"). Used only for the first above-the-fold
    * feed image; all other cells stay lazy.
@@ -43,6 +50,7 @@ export default function ImageGrid({
   overlay,
   singleVariant = 'contain',
   blurFor,
+  dimsFor,
   priority = false,
 }: ImageGridProps) {
   if (!images?.length) return null;
@@ -51,6 +59,7 @@ export default function ImageGrid({
   const maxDisplay = 4;
   const excess = count > maxDisplay ? count - maxDisplay : 0;
   const blur = (url: string) => blurFor?.(url);
+  const dims = (url: string) => dimsFor?.(url);
   // Only the first tile of the first card gets the LCP priority hint.
   const cellPriority = (i: number) => priority && i === 0;
 
@@ -66,15 +75,32 @@ export default function ImageGrid({
             {overlay}
           </div>
         ) : (
-          // `min-h-[20rem]` reserves layout space so the card height doesn't jump
-          // as the bitmap decodes.
-          <div
-            className="group relative w-full min-h-[20rem] max-h-[32rem] rounded-lg overflow-hidden cursor-pointer bg-surface-alt"
-            onClick={() => onOpen(0)}
-          >
-            <PostImage src={images[0]} alt={alt(0)} fit="contain" className="max-h-[32rem]" blurDataUrl={blur(images[0])} priority={cellPriority(0)} />
-            {overlay}
-          </div>
+          (() => {
+            const d = dims(images[0]);
+            const hasDims = !!d?.width && !!d?.height && d.width > 0 && d.height > 0;
+            // With real dimensions, PostImage reserves the true aspect ratio up
+            // front, so the `min-h-[20rem]` fallback is unnecessary (and would
+            // fight a short/wide image). Without dimensions, keep `min-h-[20rem]`
+            // to reserve layout space so the card height doesn't jump on decode.
+            return (
+              <div
+                className={`group relative w-full ${hasDims ? '' : 'min-h-[20rem] '}max-h-[32rem] rounded-lg overflow-hidden cursor-pointer bg-surface-alt`}
+                onClick={() => onOpen(0)}
+              >
+                <PostImage
+                  src={images[0]}
+                  alt={alt(0)}
+                  fit="contain"
+                  className="max-h-[32rem]"
+                  blurDataUrl={blur(images[0])}
+                  width={d?.width}
+                  height={d?.height}
+                  priority={cellPriority(0)}
+                />
+                {overlay}
+              </div>
+            );
+          })()
         )
       ) : count === 2 ? (
         <div className="grid grid-cols-2 gap-[0.5rem]">

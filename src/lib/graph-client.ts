@@ -10,6 +10,7 @@ import {
 import { SetContextLink } from '@apollo/client/link/context';
 import { ErrorLink } from '@apollo/client/link/error';
 import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
+import { persistCacheSync, LocalStorageWrapper } from 'apollo3-cache-persist';
 import { toast } from 'sonner';
 
 import { useAuthStore } from '@/store/useAuthStore';
@@ -154,11 +155,59 @@ const link = ApolloLink.from([
 ]);
 
 /* ------------------------------------------------------------------ */
+/* Normalized cache                                                    */
+/* ------------------------------------------------------------------ */
+/*
+ * Feed entities are normalized by `id` so the same Post/Attachment is shared
+ * across every query that references it (feed list, single-post hydration via
+ * GET_POST, etc.). This is the safe, high-value caching win: returning to the
+ * feed reads hydrated posts straight from the cache instead of re-fetching.
+ *
+ * NOTE: we deliberately do NOT add root Query `merge` policies for the feed
+ * list fields (`feed` / `recommendedPosts` / `joinedCommunityFeed`). Their
+ * cursor pagination + dedupe is managed manually in `useFeed`, and a cache
+ * merge here would conflict with that logic.
+ */
+const cache = new InMemoryCache({
+  typePolicies: {
+    Post: {
+      keyFields: ['id'],
+    },
+    Attachment: {
+      keyFields: ['id'],
+    },
+  },
+});
+
+/* ------------------------------------------------------------------ */
+/* Persist the cache across reloads / navigations (browser-only)       */
+/* ------------------------------------------------------------------ */
+/*
+ * Restores the cache synchronously from localStorage before the client issues
+ * any queries, so a returning user sees their last feed instantly. Guarded for
+ * SSR (no `window`) and wrapped in try/catch so a persistence failure (quota,
+ * private mode, disabled storage) never blocks app boot.
+ */
+if (typeof window !== 'undefined') {
+  try {
+    persistCacheSync({
+      cache,
+      storage: new LocalStorageWrapper(window.localStorage),
+      // Cap persisted payload (~2MB) so a large cache can't bloat localStorage.
+      maxSize: 2 * 1024 * 1024,
+      key: 'diaspoplug-apollo-cache',
+    });
+  } catch {
+    // Non-fatal: app boots fine with an empty in-memory cache.
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Apollo Client */
 /* ------------------------------------------------------------------ */
 const gqlClient = new ApolloClient({
   link,
-  cache: new InMemoryCache(),
+  cache,
   queryDeduplication: false,
   defaultOptions: {
     watchQuery: {

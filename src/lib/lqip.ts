@@ -31,7 +31,11 @@ export async function generateBlurDataUrl(file: File | Blob): Promise<string | u
     const img = await loadImage(file);
     if (!img) return undefined;
 
-    const { width, height } = scaleToFit(img.naturalWidth || img.width, img.naturalHeight || img.height);
+    const { width, height } = scaleToFit(
+      img.naturalWidth || img.width,
+      img.naturalHeight || img.height,
+      MAX_DIMENSION,
+    );
     if (!width || !height) return undefined;
 
     const canvas = document.createElement('canvas');
@@ -57,7 +61,7 @@ export async function generateBlurDataUrl(file: File | Blob): Promise<string | u
 }
 
 /** Decode an image File/Blob into an HTMLImageElement, revoking the blob URL after. */
-function loadImage(file: File | Blob): Promise<HTMLImageElement | null> {
+export function loadImage(file: File | Blob): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
@@ -73,14 +77,18 @@ function loadImage(file: File | Blob): Promise<HTMLImageElement | null> {
   });
 }
 
-/** Scale (w, h) so the longest side is at most MAX_DIMENSION, preserving ratio. */
-function scaleToFit(w: number, h: number): { width: number; height: number } {
+/** Scale (w, h) so the longest side is at most `maxDimension`, preserving ratio. */
+export function scaleToFit(
+  w: number,
+  h: number,
+  maxDimension: number,
+): { width: number; height: number } {
   if (!w || !h) return { width: 0, height: 0 };
   const longest = Math.max(w, h);
-  if (longest <= MAX_DIMENSION) {
+  if (longest <= maxDimension) {
     return { width: Math.round(w), height: Math.round(h) };
   }
-  const scale = MAX_DIMENSION / longest;
+  const scale = maxDimension / longest;
   return {
     width: Math.max(1, Math.round(w * scale)),
     height: Math.max(1, Math.round(h * scale)),

@@ -651,6 +651,16 @@
 
 @layer utilities {
 
+  /* Feed card content-visibility: lets the browser skip layout/paint for
+     off-screen feed cards while reserving an estimated height, so fast
+     vertical scrolling stays smooth. The subtle skeleton-tone background
+     means an un-painted frame flashes grey (not white). */
+  .feed-card-cv {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 600px;
+    background-color: var(--surface-subtle);
+  }
+
   /* Surface Utilities */
   .surface-default {
     background-color: var(--surface-default);
