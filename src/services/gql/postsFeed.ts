@@ -28,6 +28,7 @@ export type {
   FeedModeType,
   FeedViewMode,
   GetPostData,
+  GetPostsByIdsData,
   GetPostCommentsData,
   CreatePostData,
   EditPostData,
@@ -232,6 +233,21 @@ export const GET_POSTS_BY_CATEGORY = gql`
 export const GET_POST = gql`
   query GetPost($id: String!) {
     post(id: $id) {
+      ...FullPost
+    }
+  }
+  ${FULL_POST_FRAGMENT}
+`;
+
+/**
+ * Batch hydration for ranked feeds — resolves a list of post ids to full posts
+ * in a single round-trip (replaces the per-id `GET_POST` fan-out). Returns the
+ * same `FullPost` shape; the backend may omit ids it can't resolve, so callers
+ * must re-join by id rather than rely on positional order.
+ */
+export const GET_POSTS_BY_IDS = gql`
+  query GetPostsByIds($ids: [ID!]!) {
+    postsByIds(ids: $ids) {
       ...FullPost
     }
   }

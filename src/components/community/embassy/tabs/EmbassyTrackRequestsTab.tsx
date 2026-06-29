@@ -199,7 +199,7 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
     params.delete('service');
     params.delete('apply');
     const query: Record<string, string> = {};
-    params.forEach((value, name) => {
+ params.forEach((value, name) => {
       query[name] = value;
     });
     return { pathname, query };

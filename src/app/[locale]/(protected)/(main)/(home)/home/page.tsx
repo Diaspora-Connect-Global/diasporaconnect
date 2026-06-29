@@ -190,6 +190,29 @@ function getBlurFor(
   return fn;
 }
 
+// Per-post `dimsFor` lookup cache. Mirrors `getBlurFor` above: `post.dimsByUrl`
+// is precomputed once in `normalizeFeedPost` and keeps a stable reference for
+// the life of the post object, so caching the bound lookup against it yields a
+// reference-stable `dimsFor` function per post across home-page re-renders —
+// which preserves the FeedCardWithReply React.memo (a fresh closure per render
+// would defeat it).
+const EMPTY_DIMS_MAP: Record<string, { width?: number; height?: number }> = {};
+const dimsForCache = new WeakMap<
+  Record<string, { width?: number; height?: number }>,
+  (url: string) => { width?: number; height?: number } | undefined
+>();
+function getDimsFor(
+  dimsByUrl: Record<string, { width?: number; height?: number }> | undefined,
+): (url: string) => { width?: number; height?: number } | undefined {
+  const map = dimsByUrl ?? EMPTY_DIMS_MAP;
+  let fn = dimsForCache.get(map);
+  if (!fn) {
+    fn = (url: string) => map[url];
+    dimsForCache.set(map, fn);
+  }
+  return fn;
+}
+
 export default function Home() {
   const t = useTranslations('community');
   const tFeedback = useTranslations('feedback');
@@ -1331,6 +1354,7 @@ export default function Home() {
                 // `post.blurByUrl`; getBlurFor returns a reference-stable
                 // function per post so the card's React.memo isn't defeated.
                 const blurFor = getBlurFor(post.blurByUrl);
+                const dimsFor = getDimsFor(post.dimsByUrl);
                 return (
                   <ImpressionTracker
                     itemId={post.id}
@@ -1365,6 +1389,7 @@ export default function Home() {
                           .map((a) => a.url || '')
                           .filter(Boolean) || []}
                         blurFor={blurFor}
+                        dimsFor={dimsFor}
                         priorityFirstImage={_index === 0}
                         videos={post.attachments
                           ?.filter(

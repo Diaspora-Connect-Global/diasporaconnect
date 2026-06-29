@@ -27,23 +27,59 @@ import {
 } from '@/hooks/useEnrichedNotification';
 import { formatDateProximity } from '@/macros/time';
 
-type Translator = (key: string, values?: Record<string, string>) => string;
+type Translator = (key: string, values?: Record<string, string | number>) => string;
+
+const SOCIAL_TYPES = ['post.liked', 'post.commented', 'post.mentioned', 'post.shared', 'comment.liked'];
+
+/**
+ * Normalize a notification `type` for social-interaction matching. The backend's
+ * raw-SQL upsert path stores the enum NAME (e.g. `POST_LIKED`, `POST_COMMENTED`)
+ * while the `createAndSend` path stores the dotted value (`post.commented`).
+ * Lowercasing and mapping `_`→`.` reconciles both to the canonical dotted form.
+ * Scoped to social detection so it doesn't disturb underscore-style aliases used
+ * elsewhere (e.g. `new_connection_request`).
+ */
+function normalizeSocialType(rawType: string | undefined): string {
+  return (rawType || '').toLowerCase().replace(/_/g, '.');
+}
+
+interface NotificationGroup {
+  key: string;
+  primary: Notification;
+  members: Notification[];
+  count: number;
+  actorNames: string[];
+}
 
 function getNotificationTypeLabel(type: string | undefined, t: Translator): string {
   if (!type) return t('types.default');
   const key = `types.${type}`;
-  try {
-    return t(key);
-  } catch {
-    if (type.startsWith('opportunity.')) {
-      try {
-        return t('types.opportunity.default');
-      } catch {
-        return t('types.default');
-      }
-    }
+  const label = t(key);
+  // next-intl returns the (possibly namespace-prefixed) key string on a miss
+  // instead of throwing, so detect that and fall back gracefully.
+  const isMiss = !label || label === key || label.endsWith(key);
+  if (isMiss) {
+    if (type.startsWith('servicerequest')) return t('types.servicerequest.default');
+    if (type.startsWith('opportunity.')) return t('types.opportunity.default');
     return t('types.default');
   }
+  return label;
+}
+
+/**
+ * Turn a machine token like `visa_info` or `UNDER_REVIEW` into a human label
+ * such as `Visa info` / `Under review` — split on separators, lowercase, then
+ * capitalize the first word only.
+ */
+function humanize(s: string): string {
+  const words = s
+    .split(/[_\-.]+/)
+    .map((w) => w.trim())
+    .filter(Boolean)
+    .map((w) => w.toLowerCase());
+  if (words.length === 0) return '';
+  words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+  return words.join(' ');
 }
 
 interface NotificationView {
@@ -66,7 +102,8 @@ function buildNotificationView(
   enriched: EnrichedNotification,
   t: Translator,
   locale: string,
-  isLoading?: boolean
+  isLoading?: boolean,
+  group?: NotificationGroup
 ): NotificationView {
   const type = (not.type || '').toLowerCase();
   const data = (not.data as Record<string, unknown> | undefined) || {};
@@ -124,19 +161,91 @@ function buildNotificationView(
     };
   }
 
-  // Posts — attach the post snippet when we have one
-  if (type === 'post.like' || type === 'post.comment' || type === 'post.commented' || type === 'post.mention') {
-    if (!actorName) return { title: '', imageUrl: actorAvatar, actorHref };
+  // Social interactions on posts/comments — likes, comments, mentions, shares,
+  // comment-likes. These can be grouped client-side (one card per post/comment),
+  // so we vary the copy based on the group count. The backend's raw-SQL upserts
+  // store the enum NAME (e.g. POST_LIKED), while createAndSend rows use the dotted
+  // value (post.commented) — normalize underscores→dots so both forms match.
+  const stype = normalizeSocialType(not.type);
+  const isPostLike = stype === 'post.liked' || stype === 'post.like';
+  const isPostComment = stype === 'post.commented' || stype === 'post.comment';
+  const isPostMention = stype === 'post.mentioned' || stype === 'post.mention';
+  const isPostShare = stype === 'post.shared' || stype === 'post.share';
+  const isCommentLike = stype === 'comment.liked' || stype === 'comment.like';
+  if (isPostLike || isPostComment || isPostMention || isPostShare || isCommentLike) {
+    const count = group?.count ?? 1;
+    const groupActor = group?.actorNames?.[0];
+    // While still resolving the actor for a singleton, defer rendering so the
+    // card doesn't flash a generic fallback before the name loads.
+    if (count === 1 && !groupActor && !enriched.actorName && isLoading) {
+      return { title: '', imageUrl: actorAvatar, actorHref };
+    }
+    const resolvedActor = groupActor || enriched.actorName || t('messages.actorFallback');
     const hasTitle = Boolean(enriched.targetTitle);
-    const key =
-      type === 'post.like'
-        ? (hasTitle ? 'messages.postLikeWithTitle' : 'messages.postLike')
-        : type === 'post.mention'
-          ? (hasTitle ? 'messages.postMentionWithTitle' : 'messages.postMention')
-          : (hasTitle ? 'messages.postCommentWithTitle' : 'messages.postComment');
+    const description =
+      isPostLike || isPostComment ? enriched.targetSnippet || undefined : undefined;
+
+    if (count > 1) {
+      const others = count - 1;
+      const values = { actorName: resolvedActor, others, postTitle: enriched.targetTitle || '' };
+      const key = isPostLike
+        ? hasTitle
+          ? 'messages.groupedPostLikeWithTitle'
+          : 'messages.groupedPostLike'
+        : isPostComment
+          ? 'messages.groupedPostComment'
+          : isPostMention
+            ? 'messages.groupedPostMention'
+            : isPostShare
+              ? 'messages.groupedPostShare'
+              : 'messages.groupedCommentLike';
+      return {
+        title: t(key, values),
+        description,
+        imageUrl: actorAvatar,
+        actorHref,
+      };
+    }
+
+    // Singleton — use the existing singular keys where they exist. For shared /
+    // comment-liked there is no singular key, so fall back to the backend copy
+    // rather than emitting a raw key.
+    if (isPostLike) {
+      return {
+        title: t(hasTitle ? 'messages.postLikeWithTitle' : 'messages.postLike', {
+          actorName: resolvedActor,
+          postTitle: enriched.targetTitle || '',
+        }),
+        description,
+        imageUrl: actorAvatar,
+        actorHref,
+      };
+    }
+    if (isPostComment) {
+      return {
+        title: t(hasTitle ? 'messages.postCommentWithTitle' : 'messages.postComment', {
+          actorName: resolvedActor,
+          postTitle: enriched.targetTitle || '',
+        }),
+        description,
+        imageUrl: actorAvatar,
+        actorHref,
+      };
+    }
+    if (isPostMention) {
+      return {
+        title: t(hasTitle ? 'messages.postMentionWithTitle' : 'messages.postMention', {
+          actorName: resolvedActor,
+          postTitle: enriched.targetTitle || '',
+        }),
+        imageUrl: actorAvatar,
+        actorHref,
+      };
+    }
+    // post.shared / comment.liked singular — no dedicated singular key.
+    const fallbackTitle = not.title || not.message || resolvedActor;
     return {
-      title: t(key, { actorName, postTitle: enriched.targetTitle || '' }),
-      description: enriched.targetSnippet || undefined,
+      title: fallbackTitle,
       imageUrl: actorAvatar,
       actorHref,
     };
@@ -274,6 +383,74 @@ function buildNotificationView(
     };
   }
 
+  // Service requests — system-issued (no user actor). Build a descriptive
+  // title/body from the structured payload + enriched request status/service.
+  if (type.startsWith('servicerequest')) {
+    const requestNumber = String(data.requestNumber || '');
+    const status = enriched.requestStatus
+      ? humanize(enriched.requestStatus)
+      : (data.status ? humanize(String(data.status)) : '');
+    const service =
+      enriched.serviceName || (data.category ? humanize(String(data.category)) : '');
+    const values: Record<string, string> = { requestNumber, service, status };
+
+    let titleKey: string;
+    let bodyKey: string;
+    switch (type) {
+      case 'servicerequest.submitted':
+        titleKey = 'messages.serviceRequestSubmittedTitle';
+        bodyKey = service
+          ? 'messages.serviceRequestSubmittedWithService'
+          : 'messages.serviceRequestSubmitted';
+        break;
+      case 'servicerequest.assigned':
+        titleKey = 'messages.serviceRequestAssignedTitle';
+        bodyKey = 'messages.serviceRequestAssigned';
+        break;
+      case 'servicerequest.status.changed':
+        titleKey = 'messages.serviceRequestStatusChangedTitle';
+        bodyKey = 'messages.serviceRequestStatusChanged';
+        break;
+      case 'servicerequest.info.requested':
+        titleKey = 'messages.serviceRequestInfoRequestedTitle';
+        bodyKey = 'messages.serviceRequestInfoRequested';
+        break;
+      case 'servicerequest.approved':
+        titleKey = 'messages.serviceRequestApprovedTitle';
+        bodyKey = 'messages.serviceRequestApproved';
+        break;
+      case 'servicerequest.rejected':
+        titleKey = 'messages.serviceRequestRejectedTitle';
+        bodyKey = 'messages.serviceRequestRejected';
+        break;
+      case 'servicerequest.completed':
+        titleKey = 'messages.serviceRequestCompletedTitle';
+        bodyKey = 'messages.serviceRequestCompleted';
+        break;
+      case 'servicerequest.note.added':
+        titleKey = 'messages.serviceRequestNoteAddedTitle';
+        bodyKey = 'messages.serviceRequestNoteAdded';
+        break;
+      case 'servicerequest.document.added':
+        titleKey = 'messages.serviceRequestDocumentAddedTitle';
+        bodyKey = 'messages.serviceRequestDocumentAdded';
+        break;
+      default:
+        titleKey = 'messages.serviceRequestDefaultTitle';
+        bodyKey = 'messages.serviceRequestFallback';
+        break;
+    }
+
+    const title = t(titleKey, values);
+    const description = t(bodyKey, values);
+    return {
+      title: title || t('messages.serviceRequestDefaultTitle', values),
+      description: description || undefined,
+      imageUrl: undefined,
+      actorHref: undefined,
+    };
+  }
+
   // Default — fall back to whatever the backend provided.
   const fallback = not.message || (not as { body?: string }).body || not.title || '';
   return {
@@ -287,24 +464,29 @@ const PAGE_SIZE = 20;
 type NotificationFilter = 'all' | 'opportunities' | 'events' | 'associations' | 'communities';
 
 function NotificationRow({
-  not,
+  group,
   t,
   locale,
   currentUserId,
   onMarkAsRead,
   onClick,
-  isReadOptimistic,
+  readIds,
 }: {
-  not: Notification;
+  group: NotificationGroup;
   t: Translator;
   locale: string;
   currentUserId?: string;
   onMarkAsRead: () => void;
   onClick: (actorUserId?: string) => void;
-  isReadOptimistic: boolean;
+  readIds: Set<string>;
 }) {
+  const not = group.primary;
   const enriched = useEnrichedNotification(not, currentUserId);
-  const view = buildNotificationView(not, enriched, t, locale, enriched.isLoading);
+  const view = buildNotificationView(not, enriched, t, locale, enriched.isLoading, group);
+
+  const isRead = group.members.every(
+    (m) => (m.isRead ?? m.read ?? false) || readIds.has(m.id)
+  );
 
   return (
     <NotificationCard
@@ -314,7 +496,7 @@ function NotificationRow({
       imageUrl={view.imageUrl}
       actorHref={view.actorHref}
       time={not.createdAt}
-      read={(not.isRead ?? not.read ?? false) || isReadOptimistic}
+      read={isRead}
       onMarkAsRead={onMarkAsRead}
       onClick={() => onClick(enriched.actorUserId ?? undefined)}
     />
@@ -406,6 +588,68 @@ export default function NotificationPage() {
 
   const filtered =
     filter === 'all' ? notifications : notifications.filter((n) => matchesFilter(n, filter));
+
+  // Group social interactions (likes/comments/mentions/shares/comment-likes)
+  // per target post/comment so the list shows one card per target with an
+  // aggregated count. Everything else stays a singleton. `filtered` is already
+  // sorted newest-first, so the Map preserves that order (primary = newest).
+  const groups = useMemo<NotificationGroup[]>(() => {
+    const map = new Map<string, NotificationGroup>();
+    for (const n of filtered) {
+      const type = normalizeSocialType(n.type);
+      const d = (n.data as Record<string, unknown> | undefined) || {};
+      const rawTargetId = type === 'comment.liked' ? d.commentId : d.postId;
+      const targetId =
+        rawTargetId !== undefined && rawTargetId !== null && String(rawTargetId).trim()
+          ? String(rawTargetId)
+          : undefined;
+
+      const isSocial = SOCIAL_TYPES.includes(type) && Boolean(targetId);
+      const key = isSocial ? `${type}:${targetId}` : n.id;
+
+      const existing = map.get(key);
+      if (existing) {
+        existing.members.push(n);
+      } else {
+        map.set(key, { key, primary: n, members: [n], count: 1, actorNames: [] });
+      }
+    }
+
+    const result: NotificationGroup[] = [];
+    for (const group of map.values()) {
+      const primary = group.primary;
+      const type = normalizeSocialType(primary.type);
+      const pData = (primary.data as Record<string, unknown> | undefined) || {};
+      const isSocial = SOCIAL_TYPES.includes(type) && group.members.length >= 1 && group.key !== primary.id;
+
+      if (type === 'post.liked' && group.key !== primary.id) {
+        group.count = Number(pData.totalLikeCount) || group.members.length;
+        group.actorNames = [String(pData.topLikerName || '')].filter(Boolean);
+      } else if (isSocial) {
+        group.count = group.members.length;
+        const names: string[] = [];
+        for (const m of group.members) {
+          const md = (m.data as Record<string, unknown> | undefined) || {};
+          const name = String(
+            md.commentByDisplayName ||
+              md.actorName ||
+              md.topLikerName ||
+              md.commentByUserName ||
+              ''
+          ).trim();
+          if (name && !names.includes(name)) names.push(name);
+          if (names.length >= 3) break;
+        }
+        group.actorNames = names;
+      } else {
+        group.count = 1;
+        group.actorNames = [];
+      }
+      result.push(group);
+    }
+    return result;
+  }, [filtered]);
+
   const emptyMessageKey =
     filter === 'all'
       ? 'none.all'
@@ -602,16 +846,16 @@ export default function NotificationPage() {
         <EmptyState size="sm" title={t(emptyMessageKey)} />
       ) : (
         <div className="bg-surface-default rounded-md lg:p-6 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
-          {filtered.map((not) => (
+          {groups.map((group) => (
             <NotificationRow
-              key={not.id}
-              not={not}
+              key={group.key}
+              group={group}
               t={t}
               locale={locale}
               currentUserId={currentUserId}
-              onMarkAsRead={() => markSingleAsRead(not.id)}
-              onClick={(actorUserId) => handleNotificationClick(not, actorUserId)}
-              isReadOptimistic={readIds.has(not.id)}
+              onMarkAsRead={() => group.members.forEach((m) => markSingleAsRead(m.id))}
+              onClick={(actorUserId) => handleNotificationClick(group.primary, actorUserId)}
+              readIds={readIds}
             />
           ))}
           <div ref={sentinelRef} className="py-2 flex justify-center">

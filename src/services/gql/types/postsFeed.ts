@@ -204,6 +204,14 @@ export interface Post {
    */
   blurByUrl?: Record<string, string>;
   /**
+   * Precomputed intrinsic-dimensions lookup: attachment URL → {width,height}.
+   * Built once in `normalizeFeedPost` (alongside `blurByUrl`) so ImageGrid can
+   * reserve the real aspect ratio up-front, preventing layout shift. Entries
+   * are only present once the backend emits width/height on attachments — a
+   * no-op (empty record) until then.
+   */
+  dimsByUrl?: Record<string, { width?: number; height?: number }>;
+  /**
    * Recommendation provenance (carried from RankedFeedPage.items[].source).
    * Internal-only — never rendered in the UI; used by ImpressionTracker to attribute
    * downstream VIEW/DWELL signals to the originating retriever.
@@ -534,6 +542,16 @@ export interface GetPostsByCategoryData {
 export interface GetPostData {
   /** Raw `FullPost` from API; normalize with `normalizeFeedPost` for UI `Post`. */
   post: FeedPostFragment;
+}
+
+/**
+ * Response from batch-hydrating ranked items (`postsByIds`).
+ * Raw `FullPost[]`; the backend omits ids it can't resolve, so the array may
+ * be shorter than the requested id list and in arbitrary order — callers
+ * re-join by id. Normalize each with `normalizeFeedPost` for UI `Post`.
+ */
+export interface GetPostsByIdsData {
+  postsByIds: FeedPostFragment[];
 }
 
 /**

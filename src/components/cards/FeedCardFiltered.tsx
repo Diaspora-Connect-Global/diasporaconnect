@@ -77,6 +77,13 @@ export interface FeedCardFilteredProps {
      * Passed through to {@link ImageGrid}; absent URLs fall back to a shimmer.
      */
     blurFor?: (url: string) => string | undefined;
+    /**
+     * Intrinsic-dimensions lookup by image URL (attachment `url` → `{width,height}`),
+     * built from `post.dimsByUrl`. Passed through to {@link ImageGrid} so a single
+     * image reserves its real aspect ratio up-front (no layout shift). Mirrors
+     * {@link blurFor}; no-op until the backend emits width/height.
+     */
+    dimsFor?: (url: string) => { width?: number; height?: number } | undefined;
     videos?: string[];
     /** Document/audio attachments (everything that isn't image/video), rendered as file cards. */
     documents?: PostDocument[];
@@ -152,6 +159,7 @@ export default function FeedCardFiltered({
     mentionMap,
     images,
     blurFor,
+    dimsFor,
     videos,
     documents = [],
     likes: initialLikes,
@@ -589,6 +597,7 @@ export default function FeedCardFiltered({
                 overlay={imageHoverOverlay}
                 singleVariant="cover"
                 blurFor={blurFor}
+                dimsFor={dimsFor}
             />
         );
     };

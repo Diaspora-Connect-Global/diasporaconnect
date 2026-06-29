@@ -5,6 +5,7 @@ import { useApolloClient, useLazyQuery, useQuery } from '@apollo/client/react';
 import {
   GET_FEED,
   GET_POST,
+  GET_POSTS_BY_IDS,
   GET_POSTS_BY_HASHTAG,
   GET_POSTS_BY_CATEGORY,
   RECOMMENDED_POSTS,
@@ -19,6 +20,7 @@ import type {
   FeedViewMode,
   GetFeedInput,
   GetPostData,
+  GetPostsByIdsData,
   Post,
 } from '@/services/gql/types/postsFeed';
 import type {
@@ -203,49 +205,58 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   );
 
   /**
-   * Hydrate ranked items into full UI posts via parallel `GET_POST` queries,
-   * preserving the recommendation order, and carrying source/score into the
-   * resulting Post objects as `__source` / `__score`.
+   * Hydrate ranked items into full UI posts via a single batch `postsByIds`
+   * query, preserving the recommendation order, and carrying source/score into
+   * the resulting Post objects as `__source` / `__score`.
    *
-   * TODO(perf): replace per-id parallel fan-out with a single batch `getPostsByIds([ID!])`
-   * query when api-gateway exposes one. With INITIAL_LIMIT=12 the fan-out is
-   * acceptable (Apollo dedupes in-flight, results are cached), but at higher
-   * page sizes this becomes the bottleneck.
+   * One round-trip replaces the former per-id `GET_POST` fan-out. Each returned
+   * post is written into the Apollo cache keyed for `GET_POST` (variables
+   * `{ id }`, field `post`) so the post-detail page still resolves from cache
+   * without a network hit. The backend may omit ids it can't resolve, so we
+   * build a byId map and re-join against the original ranked order (dropping
+   * any omitted ids — same behaviour as before).
    */
   const hydrateRankedItems = useCallback(
     async (items: RankedItemGQL[]): Promise<Post[]> => {
       if (!items.length) return [];
-      const settled = await Promise.allSettled(
-        items.map((item) =>
-          apolloClient.query<GetPostData>({
-            query: GET_POST,
-            variables: { id: item.itemId },
-            // Use the Apollo cache; multiple ImpressionTracker/feed renders share it.
-            fetchPolicy: 'cache-first',
-            errorPolicy: 'ignore',
-          })
-        )
-      );
+
+      let returned: GetPostsByIdsData['postsByIds'] = [];
+      try {
+        const { data } = await apolloClient.query<GetPostsByIdsData>({
+          query: GET_POSTS_BY_IDS,
+          variables: { ids: items.map((i) => i.itemId) },
+          // Always pull fresh — the ranked order changes per request and we
+          // re-seed the per-post `GET_POST` cache below.
+          fetchPolicy: 'network-only',
+          errorPolicy: 'ignore',
+        });
+        returned = data?.postsByIds ?? [];
+      } catch {
+        // Non-fatal — treat as "nothing hydrated" so the caller can fall back.
+        return [];
+      }
 
       const byId = new Map<string, Post>();
-      settled.forEach((res, idx) => {
-        if (res.status !== 'fulfilled') return;
-        const raw = res.value.data?.post;
-        if (!raw) return;
-        const normalized = normalizeFeedPost(raw);
-        const ranked = items[idx];
-        if (ranked) {
-          normalized.__source = ranked.source;
-          if (typeof ranked.score === 'number') normalized.__score = ranked.score;
-        }
-        byId.set(normalized.id, normalized);
-      });
+      for (const raw of returned) {
+        if (!raw?.id) continue;
+        // Seed the post-detail cache so navigating to /post/[id] hits cache.
+        apolloClient.writeQuery<GetPostData>({
+          query: GET_POST,
+          variables: { id: raw.id },
+          data: { post: raw },
+        });
+        byId.set(raw.id, normalizeFeedPost(raw));
+      }
 
-      // Preserve the recommender's order. Any items that failed to hydrate are dropped.
+      // Re-join each post to its ranked item by id: attach __source/__score and
+      // preserve the recommender's order. Ids the backend omitted are dropped.
       const ordered: Post[] = [];
       for (const item of items) {
         const p = byId.get(item.itemId);
-        if (p) ordered.push(p);
+        if (!p) continue;
+        p.__source = item.source;
+        if (typeof item.score === 'number') p.__score = item.score;
+        ordered.push(p);
       }
       return ordered;
     },

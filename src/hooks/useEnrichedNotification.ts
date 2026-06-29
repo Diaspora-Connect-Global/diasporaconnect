@@ -12,6 +12,7 @@ import {
   GET_ALL_PENDING_CONNECTIONS,
 } from '@/services/gql/connection';
 import { GET_POST_COMMENTS } from '@/services/gql/postsFeed';
+import { SERVICE_REQUEST } from '@/services/gql/embassyServices';
 import type { Notification } from '@/services/gql/notification';
 
 /** Shape of a connection peer as returned by the connection queries. */
@@ -57,6 +58,10 @@ export interface EnrichedNotification {
   eventWhenISO: string | null;
   /** Opportunity owner display name (poster), when relevant. */
   opportunityPoster: string | null;
+  /** Current status of a service request (raw enum), or null. */
+  requestStatus: string | null;
+  /** Human-readable service/request name for a service request, or null. */
+  serviceName: string | null;
   /** True while any of the enrichment queries is in-flight. */
   isLoading: boolean;
 }
@@ -83,6 +88,21 @@ function normalizeData(raw: unknown): NotificationDataRecord {
   }
   if (typeof raw === 'object') return raw as Record<string, unknown>;
   return undefined;
+}
+
+/**
+ * Turn a machine token like `visa_info` or `UNDER_REVIEW` into a human label
+ * such as `Visa info` / `Under review`.
+ */
+function humanizeToken(s: string): string {
+  const words = s
+    .split(/[_\-.]+/)
+    .map((w) => w.trim())
+    .filter(Boolean)
+    .map((w) => w.toLowerCase());
+  if (words.length === 0) return '';
+  words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+  return words.join(' ');
 }
 
 function pickString(data: NotificationDataRecord, keys: string[]): string | undefined {
@@ -375,6 +395,8 @@ export function useEnrichedNotification(
         'initiatorId',
         'commenterId',
         'likerId',
+        'topLikerUserId',
+        'commentByUserId',
         'sourceUserId',
       ]) || nestedUserId(nestedActor);
   }
@@ -453,6 +475,7 @@ export function useEnrichedNotification(
     'applicationOpportunityId',
   ]);
   const eventId = pickString(data, ['eventId']);
+  const requestId = pickString(data, ['requestId']);
   const entityId = pickString(data, ['entityId']);
   const entityType = pickString(data, ['entityType'])?.toLowerCase();
   const connectionIdInPayload = pickString(data, [
@@ -482,6 +505,7 @@ export function useEnrichedNotification(
   const needsEvent = Boolean(eventId && type.startsWith('event.'));
   const needsAssociation = Boolean(entityId && entityType === 'association');
   const needsCommunity = Boolean(entityId && entityType === 'community');
+  const needsServiceRequest = Boolean(requestId && type.startsWith('servicerequest'));
 
   const actorQuery = useQuery<{
     getProfile: {
@@ -581,6 +605,17 @@ export function useEnrichedNotification(
       fetchPolicy: 'cache-first',
     }
   );
+
+  // Service request — resolve the live status and (humanized) category so the
+  // notification sentence reflects the current state of the request.
+  const serviceRequestQuery = useQuery<{
+    serviceRequest: { status?: string; category?: string | null } | null;
+  }>(SERVICE_REQUEST, {
+    variables: { id: requestId ?? '' },
+    skip: !needsServiceRequest,
+    fetchPolicy: 'cache-first',
+    errorPolicy: 'ignore',
+  });
 
   // Connection fallback: when the notification payload doesn't expose a peer
   // name (or even a user id), we resolve it by listing the current user's
@@ -950,7 +985,15 @@ export function useEnrichedNotification(
     cleanDisplayName(opp?.owner?.name) ||
     null;
 
+  // Service request status + service name. Prefer the live request status; for
+  // the service name we humanize the category when no display name is available.
+  const serviceRequestObj = serviceRequestQuery.data?.serviceRequest;
+  const requestStatus = serviceRequestObj?.status?.trim() || null;
+  const serviceCategory = serviceRequestObj?.category?.trim();
+  const serviceName = serviceCategory ? humanizeToken(serviceCategory) : null;
+
   const isLoading =
+    (needsServiceRequest && serviceRequestQuery.loading) ||
     (needsActor && actorQuery.loading) ||
     (needsPost && postQuery.loading) ||
     (needsOpportunity && opportunityQuery.loading) ||
@@ -973,6 +1016,8 @@ export function useEnrichedNotification(
     entityName,
     eventWhenISO,
     opportunityPoster,
+    requestStatus,
+    serviceName,
     isLoading,
   };
 }

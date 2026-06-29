@@ -85,6 +85,14 @@ interface FeedCardProps {
      */
     blurFor?: (url: string) => string | undefined;
     /**
+     * Intrinsic-dimensions lookup by image URL (attachment `url` → `{width,height}`),
+     * built from `post.dimsByUrl`. Passed through to {@link ImageGrid} so a single
+     * image can reserve its real aspect ratio up-front (no layout shift). Mirrors
+     * {@link blurFor}: the parent supplies a reference-stable function per post so the
+     * card's React.memo isn't defeated. No-op until the backend emits width/height.
+     */
+    dimsFor?: (url: string) => { width?: number; height?: number } | undefined;
+    /**
      * Above-the-fold LCP hint. When true the FIRST image of this card is given
      * Next/Image `priority` (+ fetchPriority="high"). Only set for the very
      * first feed card; everything else stays lazy.
@@ -196,6 +204,7 @@ function FeedCardWithReplyInner({
     mentionMap,
     images,
     blurFor,
+    dimsFor,
     priorityFirstImage = false,
     videos = [],
     documents = [],
@@ -788,6 +797,7 @@ function FeedCardWithReplyInner({
                 overlay={imageHoverOverlay}
                 singleVariant="contain"
                 blurFor={blurFor}
+                dimsFor={dimsFor}
                 priority={priorityFirstImage}
             />
         );

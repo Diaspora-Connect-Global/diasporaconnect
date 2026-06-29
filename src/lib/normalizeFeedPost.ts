@@ -134,9 +134,16 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
   // virtualised `itemContent` reads `post.blurByUrl` instead of allocating a
   // fresh Map on every card on every render.
   const blurByUrl: Record<string, string> = {};
+  // Precompute the intrinsic-dimensions lookup once (url -> {width,height}) so
+  // ImageGrid can reserve the real aspect ratio up-front (no CLS). No-op for
+  // attachments the backend hasn't sized yet (both undefined).
+  const dimsByUrl: Record<string, { width?: number; height?: number }> = {};
   for (const a of attachments ?? []) {
     if (a.url && a.blurDataUrl) {
       blurByUrl[a.url] = a.blurDataUrl;
+    }
+    if (a.url && (a.width != null || a.height != null)) {
+      dimsByUrl[a.url] = { width: a.width, height: a.height };
     }
   }
 
@@ -155,5 +162,6 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     categories: p.categories ?? undefined,
     aiTopics: p.aiTopics ?? undefined,
     blurByUrl,
+    dimsByUrl,
   };
 }

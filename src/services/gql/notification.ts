@@ -218,6 +218,17 @@ export function getNotificationPath(
     return `/opportunities/${opportunityId}`;
   }
 
+  // Service requests → the request's Track Requests detail in its embassy community
+  if (t.startsWith('servicerequest')) {
+    const communityId = pickString(d, ['ownerEntityId', 'communityId', 'entityId']);
+    const requestId = pickString(d, ['requestId', 'serviceRequestId', 'id']);
+    if (communityId && requestId) {
+      return `/community/${communityId}?tab=track-requests&request=${encodeURIComponent(requestId)}`;
+    }
+    if (communityId) return `/community/${communityId}?tab=track-requests`;
+    // else fall through to link/actionUrl / default below
+  }
+
   // Events → event detail when we have an id, else the events list
   if (t.startsWith('event.')) {
     if (d?.eventId) return `/events/${String(d.eventId)}`;
