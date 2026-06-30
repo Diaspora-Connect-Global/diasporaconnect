@@ -71,6 +71,7 @@ export interface Event {
   canRegister: boolean;
   tickets?: EventTicket[] | null;
   coverImageUrl?: string | null;
+  registrationLink?: string | null;
   tags?: string[] | null;
   timezone?: string | null;
   publishedAt?: string | null;
@@ -361,6 +362,7 @@ export const GET_EVENT = gql`
       isRegistered
       canRegister
       coverImageUrl
+      registrationLink
       tags
       timezone
       ownerType
@@ -876,6 +878,33 @@ export function getEventLocationDisplay(event: Pick<Event, 'locationType' | 'loc
     return loc.platform || loc.virtualLink || 'Virtual';
   }
   return 'Hybrid';
+}
+
+/**
+ * Structured venue/location lines for the event detail view.
+ * Returns a heading-friendly venue name plus the remaining address lines, and the
+ * online platform/link for virtual & hybrid events. Empty arrays when nothing is set.
+ */
+export function getEventVenueLines(
+  event: Pick<Event, 'locationType' | 'locationDetails'>,
+): { venueName?: string; addressLines: string[]; virtualLink?: string; platform?: string } {
+  const loc = event.locationDetails;
+  const isPhysical = event.locationType === 'physical' || event.locationType === 'hybrid';
+  const isVirtual = event.locationType === 'virtual' || event.locationType === 'hybrid';
+
+  const addressLines: string[] = [];
+  if (loc && isPhysical) {
+    if (loc.address) addressLines.push(loc.address);
+    const cityCountry = [loc.city, loc.country].filter(Boolean).join(', ');
+    if (cityCountry) addressLines.push(cityCountry);
+  }
+
+  return {
+    venueName: isPhysical ? loc?.venueName ?? undefined : undefined,
+    addressLines,
+    virtualLink: isVirtual ? loc?.virtualLink ?? undefined : undefined,
+    platform: isVirtual ? loc?.platform ?? undefined : undefined,
+  };
 }
 
 /** `availableSpots === 0` means sold out. `null` means unlimited. */
