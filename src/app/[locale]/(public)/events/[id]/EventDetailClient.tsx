@@ -21,6 +21,7 @@ import {
   type SaveEventData,
   type UnsaveEventData,
   getEventLocationDisplay,
+  getEventVenueLines,
   getEventCoverImage,
   isEventSoldOut,
 } from "@/services/gql/events";
@@ -48,6 +49,23 @@ function formatEventDate(iso: string, locale: string) {
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(iso));
+}
+
+/** Start → end. Single-day events show one date with a time range; multi-day shows both dates. */
+function formatEventDateRange(startIso: string, endIso: string | undefined, locale: string) {
+  const start = formatEventDate(startIso, locale);
+  if (!endIso) return start;
+  const startDate = new Date(startIso);
+  const endDate = new Date(endIso);
+  const sameDay = startDate.toDateString() === endDate.toDateString();
+  if (sameDay) {
+    const endTime = new Intl.DateTimeFormat(locale, {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(endDate);
+    return `${start} – ${endTime}`;
+  }
+  return `${start} – ${formatEventDate(endIso, locale)}`;
 }
 
 function formatPriceLabel(event: Event) {
@@ -374,8 +392,9 @@ export default function EventDetailPage() {
     );
   }
 
-  const dateStr = formatEventDate(event.startAt, locale);
+  const dateStr = formatEventDateRange(event.startAt, event.endAt, locale);
   const locationStr = getEventLocationDisplay(event);
+  const venue = getEventVenueLines(event);
   const priceStr = convertedPriceLabel ?? formatPriceLabel(event);
   const isRegistered = optimisticRegistered ?? event.isRegistered;
 
@@ -406,6 +425,11 @@ export default function EventDetailPage() {
             description={event.description}
             priceLabel={priceStr}
             visibility={event.visibility}
+            venueName={venue.venueName}
+            addressLines={venue.addressLines}
+            virtualLink={venue.virtualLink}
+            platform={venue.platform}
+            registrationLink={event.registrationLink}
             isSoldOut={isEventSoldOut(event)}
             isRegistered={isRegistered}
             isSaved={saved}

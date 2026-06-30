@@ -186,6 +186,7 @@
         "attending": "Attending",
         "saved": "Saved",
         "attend": "Attend",
+        "register": "Register",
         "login": "Login",
         "postedBy": "Posted by {user}",
         "added": "Added",
