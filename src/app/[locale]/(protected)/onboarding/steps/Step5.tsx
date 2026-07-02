@@ -30,20 +30,11 @@ export const Step5: React.FC<Step5Props> = ({
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
-    const registrationEmail = (() => {
-        if (typeof window === 'undefined') return '';
-        const oauthRaw = sessionStorage.getItem('oauthRegistration');
-        if (oauthRaw) {
-            try { return JSON.parse(oauthRaw).email || ''; } catch { return ''; }
-        }
-        return sessionStorage.getItem('signupEmail') || '';
-    })();
-
-    const isGhana = data.countryCode === '+233';
     const formattedPhone = `${data.countryCode}${data.phoneNumber.replace(/^0/, '')}`;
-    const otpDestination = (!isGhana && registrationEmail)
-        ? `${formattedPhone} or ${registrationEmail}`
-        : formattedPhone;
+    // Note: the OTP is also delivered by email in the background (so the code
+    // still reaches users when the SMS gateway is slow), but the UI intentionally
+    // only references the phone number.
+    const otpDestination = formattedPhone;
 
     const [value, setValue] = React.useState("");
     const [codeExpirySeconds, setCodeExpirySeconds] = useState<number | null>(null);
