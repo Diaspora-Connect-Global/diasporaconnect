@@ -357,8 +357,25 @@ export default function Events() {
         ),
         [eventsData]
     );
-    const paidEvents = useMemo(() => allEvents.filter(event => event.isPaid), [allEvents]);
-    const freeEvents = useMemo(() => allEvents.filter(event => !event.isPaid), [allEvents]);
+    const attendingEventIds = useMemo(() => {
+        const ids = new Set(attendingEvents.map((event) => event.id));
+        for (const [eventId, attending] of Object.entries(optimisticAttendingState)) {
+            if (attending) ids.add(eventId);
+            else ids.delete(eventId);
+        }
+        return ids;
+    }, [attendingEvents, optimisticAttendingState]);
+
+    // Exclude events the user has already registered for from the discovery
+    // sections (Paid events / More events) — they surface under "Attending".
+    const paidEvents = useMemo(
+        () => allEvents.filter((event) => event.isPaid && !attendingEventIds.has(event.id)),
+        [allEvents, attendingEventIds]
+    );
+    const freeEvents = useMemo(
+        () => allEvents.filter((event) => !event.isPaid && !attendingEventIds.has(event.id)),
+        [allEvents, attendingEventIds]
+    );
 
     const savedEventIds = useMemo(() => {
         const ids = new Set(savedEvents.map((event) => event.id));
@@ -378,15 +395,6 @@ export default function Events() {
         }
         return Array.from(eventsById.values());
     }, [savedEvents, allEvents, savedEventIds]);
-
-    const attendingEventIds = useMemo(() => {
-        const ids = new Set(attendingEvents.map((event) => event.id));
-        for (const [eventId, attending] of Object.entries(optimisticAttendingState)) {
-            if (attending) ids.add(eventId);
-            else ids.delete(eventId);
-        }
-        return ids;
-    }, [attendingEvents, optimisticAttendingState]);
 
     const attendingEventsToRender = useMemo(() => {
         const eventsById = new Map(attendingEvents.map((event) => [event.id, event]));
