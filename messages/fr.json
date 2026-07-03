@@ -1593,6 +1593,8 @@
             "serviceRequestSubmittedTitle": "Demande {requestNumber} reçue",
             "serviceRequestSubmitted": "Nous avons bien reçu votre demande {requestNumber}. Notre équipe va l'examiner et vous tiendra informé de son avancement.",
             "serviceRequestSubmittedWithService": "Nous avons bien reçu votre demande {service} {requestNumber}. Notre équipe va l'examiner et vous tiendra informé de son avancement.",
+            "serviceRequestSubmittedWithCommunity": "{community} a bien reçu votre demande {requestNumber} et va l'examiner et vous tiendra informé de son avancement.",
+            "serviceRequestSubmittedWithCommunityService": "{community} a bien reçu votre demande {service} {requestNumber} et va l'examiner et vous tiendra informé de son avancement.",
             "serviceRequestAssignedTitle": "La demande {requestNumber} est en cours de traitement",
             "serviceRequestAssigned": "Bonne nouvelle — votre demande {requestNumber} a été prise en charge par notre équipe et est maintenant en cours de traitement.",
             "serviceRequestStatusChangedTitle": "Demande {requestNumber} : {status}",

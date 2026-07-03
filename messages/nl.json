@@ -1593,6 +1593,8 @@
             "serviceRequestSubmittedTitle": "Verzoek {requestNumber} ontvangen",
             "serviceRequestSubmitted": "We hebben uw verzoek {requestNumber} ontvangen. Ons team beoordeelt het en houdt u op de hoogte van de voortgang.",
             "serviceRequestSubmittedWithService": "We hebben uw {service}-verzoek {requestNumber} ontvangen. Ons team beoordeelt het en houdt u op de hoogte van de voortgang.",
+            "serviceRequestSubmittedWithCommunity": "{community} heeft uw verzoek {requestNumber} ontvangen en beoordeelt het en houdt u op de hoogte van de voortgang.",
+            "serviceRequestSubmittedWithCommunityService": "{community} heeft uw {service}-verzoek {requestNumber} ontvangen en beoordeelt het en houdt u op de hoogte van de voortgang.",
             "serviceRequestAssignedTitle": "Verzoek {requestNumber} wordt behandeld",
             "serviceRequestAssigned": "Goed nieuws — uw verzoek {requestNumber} is opgepakt door ons team en wordt nu behandeld.",
             "serviceRequestStatusChangedTitle": "Verzoek {requestNumber}: {status}",

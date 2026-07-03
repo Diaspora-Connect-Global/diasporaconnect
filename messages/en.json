@@ -1593,6 +1593,8 @@
             "serviceRequestSubmittedTitle": "Request {requestNumber} received",
             "serviceRequestSubmitted": "We've received your request {requestNumber}. Our team will review it and keep you posted as it progresses.",
             "serviceRequestSubmittedWithService": "We've received your {service} request {requestNumber}. Our team will review it and keep you posted as it progresses.",
+            "serviceRequestSubmittedWithCommunity": "{community} received your request {requestNumber} and will review it and keep you posted as it progresses.",
+            "serviceRequestSubmittedWithCommunityService": "{community} received your {service} request {requestNumber} and will review it and keep you posted as it progresses.",
             "serviceRequestAssignedTitle": "Request {requestNumber} is being handled",
             "serviceRequestAssigned": "Good news — your request {requestNumber} has been picked up by our team and is now being handled.",
             "serviceRequestStatusChangedTitle": "Request {requestNumber}: {status}",

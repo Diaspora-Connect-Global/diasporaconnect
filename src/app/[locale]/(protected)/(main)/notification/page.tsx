@@ -92,6 +92,15 @@ interface NotificationView {
   actorHref?: string;
 }
 
+// Backend-provided titles/messages occasionally carry decorative emoji (e.g.
+// "Daily group chat summary 📝"). This project renders no emoji in copy, so we
+// strip them from any string sourced from the notification payload.
+const EMOJI_RE =
+  /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{1F1E6}-\u{1F1FF}]/gu;
+function stripEmoji(value: string | null | undefined): string {
+  return (value || '').replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim();
+}
+
 /**
  * Build the "who/what happened" sentence for a notification, using enriched
  * data pulled from the API (actor profile, post, opportunity, event, etc.).
@@ -275,6 +284,16 @@ function buildNotificationView(
     };
   }
 
+  // Daily group-chat digest — the section label already reads "Daily group chat
+  // summary", so surface the actual summary text as the body and drop the
+  // redundant (emoji-bearing) backend title.
+  if (type.startsWith('group.chat.digest')) {
+    const summary = stripEmoji(not.message || (not as { body?: string }).body);
+    return {
+      title: summary || t('types.group.chat.digest'),
+    };
+  }
+
   // Events
   const isEventRegistered = type.startsWith('event.') && /regist/.test(type);
   if (isEventRegistered) {
@@ -410,16 +429,21 @@ function buildNotificationView(
       : (data.status ? humanize(String(data.status)) : '');
     const service =
       enriched.serviceName || (data.category ? humanize(String(data.category)) : '');
-    const values: Record<string, string> = { requestNumber, service, status };
+    const community = enriched.serviceOwnerName || '';
+    const values: Record<string, string> = { requestNumber, service, status, community };
 
     let titleKey: string;
     let bodyKey: string;
     switch (type) {
       case 'servicerequest.submitted':
         titleKey = 'messages.serviceRequestSubmittedTitle';
-        bodyKey = service
-          ? 'messages.serviceRequestSubmittedWithService'
-          : 'messages.serviceRequestSubmitted';
+        bodyKey = community
+          ? service
+            ? 'messages.serviceRequestSubmittedWithCommunityService'
+            : 'messages.serviceRequestSubmittedWithCommunity'
+          : service
+            ? 'messages.serviceRequestSubmittedWithService'
+            : 'messages.serviceRequestSubmitted';
         break;
       case 'servicerequest.assigned':
         titleKey = 'messages.serviceRequestAssignedTitle';
@@ -469,11 +493,14 @@ function buildNotificationView(
     };
   }
 
-  // Default — fall back to whatever the backend provided.
-  const fallback = not.message || (not as { body?: string }).body || not.title || '';
+  // Default — fall back to whatever the backend provided (emoji stripped).
+  const fallbackTitle = stripEmoji(not.title);
+  const fallbackBody = stripEmoji(not.message || (not as { body?: string }).body);
+  const primary = fallbackTitle || fallbackBody || t('types.default');
   return {
-    title: not.title || fallback || t('types.default'),
-    description: not.title && fallback && fallback !== not.title ? fallback : undefined,
+    title: primary,
+    description:
+      fallbackTitle && fallbackBody && fallbackBody !== fallbackTitle ? fallbackBody : undefined,
   };
 }
 

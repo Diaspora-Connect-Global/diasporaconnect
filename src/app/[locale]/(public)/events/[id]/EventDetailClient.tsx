@@ -5,7 +5,7 @@ import HomeSidebar from "@/components/home/HomeSidebar";
 import SuggestedEvents from "@/components/events/SuggestedEvents";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useApolloClient, useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
 import {
   GET_EVENT,
@@ -18,6 +18,7 @@ import {
   type Event,
   type GetEventData,
   type IsEventSavedData,
+  type UserEventsData,
   type RegisterEventData,
   type CancelRegistrationData,
   type SaveEventData,
@@ -114,6 +115,18 @@ export default function EventDetailPage() {
     skip: !eventId || !shouldLoadUserEventState,
   });
   const saved = optimisticSaved ?? (savedData?.isEventSaved ?? false);
+
+  // The event query's `isRegistered` flag isn't always populated, so cross-check
+  // the user's attending list (the same source the events list page trusts) to
+  // reliably detect registration.
+  const { data: userEventsData } = useQuery<UserEventsData>(USER_EVENTS, {
+    skip: !shouldLoadUserEventState,
+    fetchPolicy: "cache-and-network",
+  });
+  const attendingEventIds = useMemo(
+    () => new Set((userEventsData?.userEvents?.attending ?? []).map((e) => e.id)),
+    [userEventsData]
+  );
 
   const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
     refetchQueries: [
@@ -402,7 +415,11 @@ export default function EventDetailPage() {
   const locationStr = getEventLocationDisplay(event);
   const venue = getEventVenueLines(event);
   const priceStr = convertedPriceLabel ?? formatPriceLabel(event);
-  const isRegistered = optimisticRegistered ?? event.isRegistered;
+  const isRegistered =
+    optimisticRegistered ??
+    (event.isRegistered ||
+      Boolean(event.myRegistrationId) ||
+      attendingEventIds.has(event.id));
 
   return (
     <>

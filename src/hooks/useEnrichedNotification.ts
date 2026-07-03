@@ -62,6 +62,8 @@ export interface EnrichedNotification {
   requestStatus: string | null;
   /** Human-readable service/request name for a service request, or null. */
   serviceName: string | null;
+  /** Owning community/embassy name for a service request, or null. */
+  serviceOwnerName: string | null;
   /** True while any of the enrichment queries is in-flight. */
   isLoading: boolean;
 }
@@ -617,6 +619,24 @@ export function useEnrichedNotification(
     errorPolicy: 'ignore',
   });
 
+  // Owning community/embassy for a service request — the entity that received
+  // the request. Resolve its name from the community service so notifications
+  // can read "<Community> received your <service> request". The id lives under
+  // ownerEntityId/communityId/entityId depending on the backend path.
+  const serviceCommunityId = type.startsWith('servicerequest')
+    ? pickString(data, ['ownerEntityId', 'communityId', 'entityId'])
+    : undefined;
+  const needsServiceCommunity = Boolean(serviceCommunityId);
+  const serviceCommunityQuery = useQuery<{ getCommunity: { name?: string } | null }>(
+    GET_COMMUNITY,
+    {
+      variables: { id: serviceCommunityId ?? '' },
+      skip: !needsServiceCommunity,
+      fetchPolicy: 'cache-first',
+      errorPolicy: 'ignore',
+    }
+  );
+
   // Connection fallback: when the notification payload doesn't expose a peer
   // name (or even a user id), we resolve it by listing the current user's
   // connections and picking the matching row. Apollo cache-first makes this a
@@ -992,8 +1012,18 @@ export function useEnrichedNotification(
   const serviceCategory = serviceRequestObj?.category?.trim();
   const serviceName = serviceCategory ? humanizeToken(serviceCategory) : null;
 
+  // Owning community/embassy display name — prefer an explicit name field in the
+  // payload, then the resolved community. Only for service-request notifications.
+  const serviceOwnerName = type.startsWith('servicerequest')
+    ? cleanDisplayName(
+        pickString(data, ['communityName', 'ownerEntityName', 'embassyName', 'entityName']) ||
+          serviceCommunityQuery.data?.getCommunity?.name
+      )
+    : null;
+
   const isLoading =
     (needsServiceRequest && serviceRequestQuery.loading) ||
+    (needsServiceCommunity && serviceCommunityQuery.loading) ||
     (needsActor && actorQuery.loading) ||
     (needsPost && postQuery.loading) ||
     (needsOpportunity && opportunityQuery.loading) ||
@@ -1018,6 +1048,7 @@ export function useEnrichedNotification(
     opportunityPoster,
     requestStatus,
     serviceName,
+    serviceOwnerName,
     isLoading,
   };
 }

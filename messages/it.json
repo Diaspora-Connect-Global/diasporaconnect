@@ -1593,6 +1593,8 @@
             "serviceRequestSubmittedTitle": "Richiesta {requestNumber} ricevuta",
             "serviceRequestSubmitted": "Abbiamo ricevuto la tua richiesta {requestNumber}. Il nostro team la esaminerà e ti terrà aggiornato sull'avanzamento.",
             "serviceRequestSubmittedWithService": "Abbiamo ricevuto la tua richiesta {service} {requestNumber}. Il nostro team la esaminerà e ti terrà aggiornato sull'avanzamento.",
+            "serviceRequestSubmittedWithCommunity": "{community} ha ricevuto la tua richiesta {requestNumber} e la esaminerà e ti terrà aggiornato sull'avanzamento.",
+            "serviceRequestSubmittedWithCommunityService": "{community} ha ricevuto la tua richiesta {service} {requestNumber} e la esaminerà e ti terrà aggiornato sull'avanzamento.",
             "serviceRequestAssignedTitle": "La richiesta {requestNumber} è in lavorazione",
             "serviceRequestAssigned": "Buone notizie — la tua richiesta {requestNumber} è stata presa in carico dal nostro team ed è ora in lavorazione.",
             "serviceRequestStatusChangedTitle": "Richiesta {requestNumber}: {status}",
