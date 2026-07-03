@@ -22,10 +22,14 @@ export async function uploadFileToVendorSignedUrl(
   file: File,
   contentType?: string
 ): Promise<void> {
+  // The signed URL is generated with an immutable Cache-Control header
+  // (SignedHeaders=cache-control;content-type;host), so the PUT must send the
+  // exact same value or GCS rejects it with 400 (signature mismatch).
   const res = await fetch(uploadUrl, {
     method: 'PUT',
     headers: {
       'Content-Type': contentType ?? file.type,
+      'Cache-Control': 'public, max-age=31536000, immutable',
     },
     body: file,
   });

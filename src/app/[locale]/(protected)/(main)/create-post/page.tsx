@@ -457,12 +457,15 @@ export default function CreatePostPage() {
             throw new Error('Failed to get upload URL');
           }
 
-          // Upload file to GCS via signed URL
+          // Upload file to GCS via signed URL. The signed URL is generated with
+          // an immutable Cache-Control header (SignedHeaders=cache-control;content-type;host),
+          // so the PUT must send the exact same value or GCS rejects it with 400.
           const uploadResponse = await fetch(uploadResult.uploadUrl, {
             method: 'PUT',
             body: attachment.file,
             headers: {
-              'Content-Type': attachment.file.type
+              'Content-Type': attachment.file.type,
+              'Cache-Control': 'public, max-age=31536000, immutable',
             }
           });
 
