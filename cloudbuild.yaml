@@ -32,6 +32,12 @@ steps:
       - '${_SERVICE_NAME}'
       - '--image=${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
       - '--update-labels=managed-by=gcp-cloud-build-deploy-cloud-run,gcb-trigger-id=${_TRIGGER_ID},commit-sha=${COMMIT_SHA},gcb-build-id=${BUILD_ID}'
+      # Keep one instance warm so a freshly-deployed revision is pre-started and
+      # health-checked before traffic flips to it — eliminates the post-deploy
+      # cold start users otherwise feel as a long load.
+      - '--min-instances=1'
+      # Extra CPU during container startup → faster Node/Next.js boot.
+      - '--cpu-boost'
       - '--region=${_DEPLOY_REGION}'
       - '--quiet'
     id: 'Deploy'
