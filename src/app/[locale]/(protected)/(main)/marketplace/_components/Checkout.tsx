@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, CreditCard, Smartphone, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, CreditCard, ShoppingBag, Smartphone, CheckCircle2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useApolloClient } from "@apollo/client/react";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
@@ -168,7 +168,7 @@ export function Checkout({
                       {typeof item.image === "string" && item.image.startsWith("http") ? (
                         <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
                       ) : (
-                        <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">{item.image}</span>
+                        <span className="absolute inset-0 flex items-center justify-center text-text-tertiary"><ShoppingBag className="w-6 h-6" /></span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

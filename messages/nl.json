@@ -219,7 +219,8 @@
         "soldOut": "Uitverkocht",
         "notAttendingAnymore": "Niet meer aanwezig",
         "going": "{count} gaan",
-        "registered": "Geregistreerd"
+        "registered": "Geregistreerd",
+        "downloadTicket": "Ticket downloaden"
     },
     "createPost": {
         "placeholder": "Wat denkt u, {name}?",
@@ -1509,7 +1510,8 @@
             },
             "event": {
                 "reminder": "Evenementherinnering",
-                "invite": "Evenementuitnodiging"
+                "invite": "Evenementuitnodiging",
+                "register": "Evenementinschrijving"
             },
             "membership": {
                 "approved": "Lidmaatschap goedgekeurd",
@@ -1575,6 +1577,7 @@
             "eventReminder": "{eventName} komt er binnenkort aan",
             "eventReminderWithDate": "{eventName} begint {when}",
             "eventInvite": "{actorName} heeft u uitgenodigd voor {eventName}",
+            "eventRegistered": "Je bent ingeschreven om {eventName} bij te wonen!",
             "eventFallback": "een evenement",
             "opportunityNew": "Nieuwe kans: {title}",
             "opportunityNewWithPoster": "{poster} heeft een nieuwe kans geplaatst: {title}",

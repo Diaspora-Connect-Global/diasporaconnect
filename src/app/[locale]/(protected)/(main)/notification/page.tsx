@@ -53,6 +53,9 @@ interface NotificationGroup {
 
 function getNotificationTypeLabel(type: string | undefined, t: Translator): string {
   if (!type) return t('types.default');
+  if (type.startsWith('event.') && /regist/.test(type)) {
+    return t('types.event.register');
+  }
   const key = `types.${type}`;
   const label = t(key);
   // next-intl returns the (possibly namespace-prefixed) key string on a miss
@@ -273,6 +276,21 @@ function buildNotificationView(
   }
 
   // Events
+  const isEventRegistered = type.startsWith('event.') && /regist/.test(type);
+  if (isEventRegistered) {
+    const eventName =
+      enriched.targetTitle ||
+      (typeof data.eventName === 'string' && data.eventName.trim() ? String(data.eventName).trim() : '') ||
+      (typeof data.eventTitle === 'string' && data.eventTitle.trim() ? String(data.eventTitle).trim() : '') ||
+      (typeof data.name === 'string' && data.name.trim() ? String(data.name).trim() : '') ||
+      (typeof data.title === 'string' && data.title.trim() ? String(data.title).trim() : '') ||
+      t('messages.eventFallback');
+    return {
+      title: t('messages.eventRegistered', { eventName }),
+      imageUrl: actorAvatar,
+      actorHref,
+    };
+  }
   if (type === 'event.reminder') {
     const eventName = enriched.targetTitle || not.title || t('messages.eventFallback');
     const when = enriched.eventWhenISO ? formatDateProximity(enriched.eventWhenISO) : '';

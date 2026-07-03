@@ -291,7 +291,7 @@ export const mockMessages: Message[] = [
   { id: '18', conversationId: '6', senderId: '4', text: 'I\'ll bring the snacks!', type: 'text', timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
 
   // Group Messages (9 - Family Group)
-  { id: '19', conversationId: '9', senderId: '8', text: 'Happy birthday! everyone 🎉', type: 'text', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString() },
+  { id: '19', conversationId: '9', senderId: '8', text: 'Happy birthday everyone!', type: 'text', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString() },
   { id: '20', conversationId: '9', senderId: 'current-user', text: 'Thank you everyone!', type: 'text', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString() },
 
   // Group Messages (10 - College Friends)

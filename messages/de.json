@@ -203,6 +203,7 @@
         "notAttendingAnymore": "Nicht mehr teilnehmen",
         "going": "{count} nehmen teil",
         "registered": "Angemeldet",
+        "downloadTicket": "Ticket herunterladen",
         "adding": "Hinzufügen...",
         "cancel": "Abbrechen",
         "post": "Posten",
@@ -1509,7 +1510,8 @@
             },
             "event": {
                 "reminder": "Terminerinnerung",
-                "invite": "Termineinladung"
+                "invite": "Termineinladung",
+                "register": "Event-Anmeldung"
             },
             "membership": {
                 "approved": "Mitgliedschaft genehmigt",
@@ -1575,6 +1577,7 @@
             "eventReminder": "{eventName} steht bald an",
             "eventReminderWithDate": "{eventName} beginnt {when}",
             "eventInvite": "{actorName} hat Sie zu {eventName} eingeladen",
+            "eventRegistered": "Du bist für die Teilnahme an {eventName} angemeldet!",
             "eventFallback": "eine Veranstaltung",
             "opportunityNew": "Neue Gelegenheit: {title}",
             "opportunityNewWithPoster": "{poster} hat eine neue Gelegenheit veröffentlicht: {title}",

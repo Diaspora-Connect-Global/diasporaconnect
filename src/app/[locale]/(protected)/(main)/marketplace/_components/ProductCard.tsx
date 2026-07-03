@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Heart, Plus, Star } from "lucide-react";
+import { Heart, Plus, ShoppingBag, Star } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType3 } from "@/components/custom/button";
@@ -53,8 +53,8 @@ export function ProductCard({
             sizes="295px"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-4xl text-text-tertiary">
-            {product.image}
+          <div className="absolute inset-0 flex items-center justify-center text-text-tertiary">
+            <ShoppingBag className="w-10 h-10" />
           </div>
         )}
         <ButtonType3

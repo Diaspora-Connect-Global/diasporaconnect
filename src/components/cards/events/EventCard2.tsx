@@ -3,7 +3,7 @@ import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { ButtonType1, ButtonType2 } from "../../custom/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical, Lock, Globe, Users, Shield, MapPin, Video, ExternalLink } from "lucide-react";
+import { EllipsisVertical, Lock, Globe, Users, Shield, MapPin, Video, ExternalLink, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface EventCardProps {
@@ -27,9 +27,10 @@ interface EventCardProps {
     isRegistered?: boolean;
     isSoldOut?: boolean;
     onCancelAttend?: () => void;
+    onDownloadTicket?: () => void;
 }
 
-export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, visibility = "public", venueName, addressLines, virtualLink, platform, registrationLink, onBuyClick, onSaveClick, isSaved, isRegistered, isSoldOut, onCancelAttend }: EventCardProps) {
+export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, visibility = "public", venueName, addressLines, virtualLink, platform, registrationLink, onBuyClick, onSaveClick, isSaved, isRegistered, isSoldOut, onCancelAttend, onDownloadTicket }: EventCardProps) {
     const tActions = useTranslations('actions');
 
     const hasVenue = Boolean(venueName) || (addressLines?.length ?? 0) > 0 || Boolean(virtualLink) || Boolean(platform);
@@ -77,9 +78,16 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                 {/* Action Buttons */}
                 <div className="flex gap-3 text-center items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <ButtonType2 onClick={onBuyClick} size="lg" disabled={isRegistered || isSoldOut}>
-                            {isRegistered ? tActions('attending') : isSoldOut ? tActions('soldOut') : tActions('attend')}
-                        </ButtonType2>
+                        {isRegistered && onDownloadTicket ? (
+                            <ButtonType2 onClick={onDownloadTicket} size="lg" className="flex items-center gap-2">
+                                <Download className="w-5 h-5" />
+                                {tActions('downloadTicket')}
+                            </ButtonType2>
+                        ) : (
+                            <ButtonType2 onClick={onBuyClick} size="lg" disabled={isRegistered || isSoldOut}>
+                                {isRegistered ? tActions('attending') : isSoldOut ? tActions('soldOut') : tActions('attend')}
+                            </ButtonType2>
+                        )}
                         {onSaveClick && (
                             <ButtonType1 onClick={onSaveClick} className="flex items-center justify-center overflow-hidden" size="lg">
                                 {isSaved ? tActions('saved') : tActions('save')}

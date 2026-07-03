@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import Image from "next/image";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ShoppingBag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2 } from "@/components/custom/button";
 import type { CartItem } from "./types";
@@ -53,7 +53,7 @@ export function OrderSuccess({
                   {typeof item.image === "string" && item.image.startsWith("http") ? (
                     <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
                   ) : (
-                    <span className="absolute inset-0 flex items-center justify-center text-2xl text-text-tertiary">{item.image}</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-text-tertiary"><ShoppingBag className="w-6 h-6" /></span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

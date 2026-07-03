@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutation, useQuery, useApolloClient } from "@apollo/client/react";
+import { Package } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import {
@@ -237,8 +238,8 @@ export default function OrderDetailsPage() {
             <div className="divide-y divide-border-subtle">
               {(order.items ?? []).map((item, idx) => (
                 <div key={`${item.product_id}-${idx}`} className="p-6 flex gap-4">
-                  <div className="w-16 h-16 rounded-lg bg-surface-subtle flex items-center justify-center text-2xl flex-shrink-0">
-                    📦
+                  <div className="w-16 h-16 rounded-lg bg-surface-subtle flex items-center justify-center text-text-tertiary flex-shrink-0">
+                    <Package className="w-6 h-6" />
                   </div>
                   <div className="flex-1">
                     <p className="text-base font-medium text-text-primary mb-1">

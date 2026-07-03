@@ -219,7 +219,8 @@
         "soldOut": "Sold Out",
         "notAttendingAnymore": "Not attending anymore",
         "going": "{count} going",
-        "registered": "Registered"
+        "registered": "Registered",
+        "downloadTicket": "Download ticket"
     },
     "createPost": {
         "placeholder": "What's on your mind, {name}?",
@@ -1509,7 +1510,8 @@
             },
             "event": {
                 "reminder": "Event reminder",
-                "invite": "Event invite"
+                "invite": "Event invite",
+                "register": "Event Register"
             },
             "membership": {
                 "approved": "Membership approved",
@@ -1575,6 +1577,7 @@
             "eventReminder": "{eventName} is coming up soon",
             "eventReminderWithDate": "{eventName} starts {when}",
             "eventInvite": "{actorName} invited you to {eventName}",
+            "eventRegistered": "You're registered to attend {eventName}!",
             "eventFallback": "an event",
             "opportunityNew": "New opportunity: {title}",
             "opportunityNewWithPoster": "{poster} posted a new opportunity: {title}",

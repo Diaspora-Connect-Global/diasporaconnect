@@ -203,6 +203,7 @@
         "notAttendingAnymore": "Ne plus participer",
         "going": "{count} participants",
         "registered": "Inscrit",
+        "downloadTicket": "Télécharger le billet",
         "adding": "Ajout...",
         "cancel": "Annuler",
         "post": "Publier",
@@ -1509,7 +1510,8 @@
             },
             "event": {
                 "reminder": "Rappel d'événement",
-                "invite": "Invitation à un événement"
+                "invite": "Invitation à un événement",
+                "register": "Inscription à l'événement"
             },
             "membership": {
                 "approved": "Adhésion approuvée",
@@ -1575,6 +1577,7 @@
             "eventReminder": "{eventName} approche",
             "eventReminderWithDate": "{eventName} commence {when}",
             "eventInvite": "{actorName} vous a invité à {eventName}",
+            "eventRegistered": "Vous êtes inscrit pour participer à {eventName} !",
             "eventFallback": "un événement",
             "opportunityNew": "Nouvelle opportunité : {title}",
             "opportunityNewWithPoster": "{poster} a publié une nouvelle opportunité : {title}",

@@ -262,7 +262,7 @@ export default function CreatePostPage() {
       'Tokyo, Japan'
     ];
     const location = sampleLocations[Math.floor(Math.random() * sampleLocations.length)];
-    insertAtCursor(`📍 ${location}`);
+    insertAtCursor(location);
     toast.success(t('actions.locationAdded'));
   };
 

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Smartphone } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -25,9 +25,9 @@ const AddMobileAccount = () => {
     useMutation<CreatePayoutAccountResponse>(CREATE_PAYOUT_ACCOUNT);
 
   const providers = [
-    { id: 'mtn', name: t('mtnMomo'), logo: '📱', bgColor: 'bg-yellow-500' },
-    { id: 'telecel', name: t('telecelCash'), logo: '📱', bgColor: 'bg-surface-danger' },
-    { id: 'at', name: t('atMoney'), logo: '📱', bgColor: 'bg-surface-default border border-border-subtle text-text-primary' },
+    { id: 'mtn', name: t('mtnMomo'), bgColor: 'bg-yellow-500 text-white' },
+    { id: 'telecel', name: t('telecelCash'), bgColor: 'bg-surface-danger text-white' },
+    { id: 'at', name: t('atMoney'), bgColor: 'bg-surface-default border border-border-subtle text-text-primary' },
   ];
 
   const handleSave = async () => {
@@ -97,8 +97,8 @@ const AddMobileAccount = () => {
                       : 'border-border-subtle hover:border-border-default bg-surface-default'
                   }`}
                 >
-                  <div className={`${provider.bgColor} w-14 h-14 rounded-lg flex items-center justify-center text-2xl mb-3 mx-auto`}>
-                    {provider.logo}
+                  <div className={`${provider.bgColor} w-14 h-14 rounded-lg flex items-center justify-center mb-3 mx-auto`}>
+                    <Smartphone className="w-6 h-6" />
                   </div>
                   <p className={`text-xs font-medium text-center ${
                     selectedProvider === provider.id ? 'text-text-brand' : 'text-text-primary'

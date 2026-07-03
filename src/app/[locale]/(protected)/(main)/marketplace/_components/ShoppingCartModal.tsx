@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import Image from "next/image";
-import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
+import { Minus, Plus, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
@@ -75,7 +75,7 @@ export function ShoppingCartModal({
                   {typeof item.image === "string" && item.image.startsWith("http") ? (
                     <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />
                   ) : (
-                    <span className="absolute inset-0 flex items-center justify-center text-3xl text-text-tertiary">{item.image}</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-text-tertiary"><ShoppingBag className="w-7 h-7" /></span>
                   )}
                 </div>
                 <div className="flex-1">

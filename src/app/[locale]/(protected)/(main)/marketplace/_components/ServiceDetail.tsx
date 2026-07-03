@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Search, Star, X } from "lucide-react";
+import { Briefcase, ChevronLeft, ChevronRight, Heart, Minus, Plus, Search, Star, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
@@ -170,7 +170,7 @@ export function ServiceDetail({
                     {isUrl ? (
                       <Image src={src} alt="" fill className="object-cover" sizes="136px" />
                     ) : (
-                      <span className="text-3xl text-text-tertiary">{src}</span>
+                      <Briefcase className="w-7 h-7 text-text-tertiary" />
                     )}
                   </button>
                 );
@@ -188,8 +188,8 @@ export function ServiceDetail({
                   sizes="420px"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-8xl text-text-tertiary">
-                  {mainImageSrc}
+                <div className="absolute inset-0 flex items-center justify-center text-text-tertiary">
+                  <Briefcase className="w-20 h-20" />
                 </div>
               )}
               <button

@@ -1,6 +1,8 @@
 "use client";
 
 import EventCard2 from "@/components/cards/events/EventCard2";
+import HomeSidebar from "@/components/home/HomeSidebar";
+import SuggestedEvents from "@/components/events/SuggestedEvents";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -370,6 +372,10 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleDownloadTicket = () => {
+    router.push(`/${locale}/events/${eventId}/ticket`);
+  };
+
   if (!eventId) {
     return (
       <div className="p-4 text-center text-text-secondary">Invalid event ID.</div>
@@ -400,43 +406,59 @@ export default function EventDetailPage() {
 
   return (
     <>
-      <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
-        <div className="lg:min-w-[40rem] mx-auto">
-          <button
-            onClick={() => {
-              if (typeof window !== "undefined" && window.history.length > 1) {
-                router.back();
-                return;
-              }
-              router.push(`/${locale}/events`);
-            }}
-            className="mb-4 inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
-            aria-label="Go back"
-          >
-            <ArrowLeft size={18} />
-            <span className="font-medium text-sm">Back</span>
-          </button>
-          <EventCard2
-            title={event.title}
-            date={dateStr}
-            location={locationStr}
-            attendees={event.registrationCount ?? 0}
-            imageUrl={getEventCoverImage(event)}
-            description={event.description}
-            priceLabel={priceStr}
-            visibility={event.visibility}
-            venueName={venue.venueName}
-            addressLines={venue.addressLines}
-            virtualLink={venue.virtualLink}
-            platform={venue.platform}
-            registrationLink={event.registrationLink}
-            isSoldOut={isEventSoldOut(event)}
-            isRegistered={isRegistered}
-            isSaved={saved}
-            onBuyClick={handleAttend}
-            onSaveClick={handleSave}
-            onCancelAttend={handleCancelAttend}
-          />
+      <div className="lg:flex justify-center min-h-full">
+        {/* LEFT: home sidebar (only when authenticated) */}
+        {sessionToken && (
+          <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
+            <HomeSidebar />
+          </div>
+        )}
+
+        {/* MIDDLE: back button + event card */}
+        <div className="h-[calc(100vh-4rem)] flex-1 min-w-0 lg:max-w-[45rem] overflow-y-auto scrollbar-hide p-4">
+          <div className="mx-auto">
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                  return;
+                }
+                router.push(`/${locale}/events`);
+              }}
+              className="mb-4 inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
+              aria-label="Go back"
+            >
+              <ArrowLeft size={18} />
+              <span className="font-medium text-sm">Back</span>
+            </button>
+            <EventCard2
+              title={event.title}
+              date={dateStr}
+              location={locationStr}
+              attendees={event.registrationCount ?? 0}
+              imageUrl={getEventCoverImage(event)}
+              description={event.description}
+              priceLabel={priceStr}
+              visibility={event.visibility}
+              venueName={venue.venueName}
+              addressLines={venue.addressLines}
+              virtualLink={venue.virtualLink}
+              platform={venue.platform}
+              registrationLink={event.registrationLink}
+              isSoldOut={isEventSoldOut(event)}
+              isRegistered={isRegistered}
+              isSaved={saved}
+              onBuyClick={handleAttend}
+              onSaveClick={handleSave}
+              onCancelAttend={handleCancelAttend}
+              onDownloadTicket={handleDownloadTicket}
+            />
+          </div>
+        </div>
+
+        {/* RIGHT: suggestions for other events */}
+        <div className="hidden lg:block lg:w-[22vw] h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hide p-4">
+          <SuggestedEvents currentEventId={eventId} />
         </div>
       </div>
       <PaidEventsModal ref={modalRef} />

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { Package } from "lucide-react";
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
@@ -189,11 +190,11 @@ export default function ProductsPage() {
                 <tr key={product.id} className="hover:bg-surface-subtle transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-surface-subtle rounded-lg flex items-center justify-center text-xl">
+                      <div className="w-10 h-10 bg-surface-subtle rounded-lg flex items-center justify-center text-text-tertiary">
                         {product.images?.[0] ? (
                           <img src={product.images[0]} alt={product.title} className="w-10 h-10 rounded-lg object-cover" />
                         ) : (
-                          "📦"
+                          <Package className="w-5 h-5" />
                         )}
                       </div>
                       <span className="text-sm text-text-primary">{product.title}</span>

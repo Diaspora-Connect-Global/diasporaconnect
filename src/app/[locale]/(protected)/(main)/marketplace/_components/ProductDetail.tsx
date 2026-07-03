@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Share2, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Minus, Plus, Share2, ShoppingBag, Star } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button";
@@ -112,7 +112,7 @@ export function ProductDetail({
                     {isUrl ? (
                       <Image src={src} alt="" fill className="object-cover" sizes="136px" />
                     ) : (
-                      <span className="text-3xl text-text-tertiary">{src}</span>
+                      <ShoppingBag className="w-7 h-7 text-text-tertiary" />
                     )}
                   </button>
                 );
@@ -130,8 +130,8 @@ export function ProductDetail({
                   sizes="420px"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-8xl text-text-tertiary">
-                  {mainImageSrc}
+                <div className="absolute inset-0 flex items-center justify-center text-text-tertiary">
+                  <ShoppingBag className="w-20 h-20" />
                 </div>
               )}
               <button
