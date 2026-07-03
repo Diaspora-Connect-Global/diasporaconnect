@@ -527,7 +527,9 @@
                     "viewTicket": "Kaartje bekijken",
                     "browseMore": "Meer evenementen bekijken"
                 }
-            }
+            },
+            "linkCopied": "Link gekopieerd naar klembord",
+            "shareFailed": "Kan dit evenement niet delen"
         },
         "opportunities": {
             "opportunities": "Kansen",

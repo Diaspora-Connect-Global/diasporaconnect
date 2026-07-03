@@ -28,9 +28,10 @@ interface EventCardProps {
     isSoldOut?: boolean;
     onCancelAttend?: () => void;
     onDownloadTicket?: () => void;
+    onShare?: () => void;
 }
 
-export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, visibility = "public", venueName, addressLines, virtualLink, platform, registrationLink, onBuyClick, onSaveClick, isSaved, isRegistered, isSoldOut, onCancelAttend, onDownloadTicket }: EventCardProps) {
+export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, visibility = "public", venueName, addressLines, virtualLink, platform, registrationLink, onBuyClick, onSaveClick, isSaved, isRegistered, isSoldOut, onCancelAttend, onDownloadTicket, onShare }: EventCardProps) {
     const tActions = useTranslations('actions');
 
     const hasVenue = Boolean(venueName) || (addressLines?.length ?? 0) > 0 || Boolean(virtualLink) || Boolean(platform);
@@ -108,7 +109,12 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                             </DropdownMenu>
                         )}
                     </div>
-                    <ButtonType1 className="flex items-center justify-center rounded-full overflow-hidden">
+                    <ButtonType1
+                        onClick={onShare}
+                        className="flex items-center justify-center rounded-full overflow-hidden"
+                        aria-label={tActions('share')}
+                        title={tActions('share')}
+                    >
                         <Image
                             src="/SHARE.svg"
                             alt="Share Icon"

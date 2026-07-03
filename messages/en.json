@@ -527,7 +527,9 @@
                     "viewTicket": "View ticket",
                     "browseMore": "Browse more events"
                 }
-            }
+            },
+            "linkCopied": "Link copied to clipboard",
+            "shareFailed": "Could not share this event"
         },
         "opportunities": {
             "opportunities": "Opportunities",

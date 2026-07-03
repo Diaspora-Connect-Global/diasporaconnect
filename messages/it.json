@@ -526,7 +526,9 @@
                     "viewTicket": "Visualizza biglietto",
                     "browseMore": "Sfoglia altri eventi"
                 }
-            }
+            },
+            "linkCopied": "Link copiato negli appunti",
+            "shareFailed": "Impossibile condividere questo evento"
         },
         "opportunities": {
             "opportunities": "Opportunità",

@@ -526,7 +526,9 @@
                     "viewTicket": "Voir le billet",
                     "browseMore": "Parcourir plus d'événements"
                 }
-            }
+            },
+            "linkCopied": "Lien copié dans le presse-papiers",
+            "shareFailed": "Impossible de partager cet événement"
         },
         "opportunities": {
             "opportunities": "Opportunités",

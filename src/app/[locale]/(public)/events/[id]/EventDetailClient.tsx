@@ -389,6 +389,34 @@ export default function EventDetailPage() {
     router.push(`/${locale}/events/${eventId}/ticket`);
   };
 
+  const handleShare = async () => {
+    if (typeof window === "undefined") return;
+    const url = `${window.location.origin}/${locale}/events/${eventId}`;
+    const title = event?.title ?? "Event";
+    const shareData = {
+      title,
+      text: event?.title ? `Check out "${event.title}" on Diaspoplug` : "Check out this event on Diaspoplug",
+      url,
+    };
+
+    // Native share sheet on mobile / supported browsers.
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // User cancelled or share failed — fall through to clipboard copy.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(tEvents("linkCopied"));
+    } catch {
+      toast.error(tEvents("shareFailed"));
+    }
+  };
+
   if (!eventId) {
     return (
       <div className="p-4 text-center text-text-secondary">Invalid event ID.</div>
@@ -469,6 +497,7 @@ export default function EventDetailPage() {
               onSaveClick={handleSave}
               onCancelAttend={handleCancelAttend}
               onDownloadTicket={handleDownloadTicket}
+              onShare={handleShare}
             />
           </div>
         </div>
