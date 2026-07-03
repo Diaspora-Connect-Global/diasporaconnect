@@ -49,6 +49,7 @@ import {
 import type { Attachment } from '@/services/gql/types/postsFeed';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
+import { toCdnUrl } from '@/lib/cdn';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -538,7 +539,7 @@ export default function AssociationPage() {
                 <div className="flex items-center gap-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={association.avatarUrl || '/GLOBE.png'}
+                        src={toCdnUrl(association.avatarUrl) || '/GLOBE.png'}
                         alt={association.name}
                         width={48}
                         height={48}
@@ -588,7 +589,7 @@ export default function AssociationPage() {
                         <Image
                             width={90}
                             height={90}
-                            src={association.avatarUrl || '/GLOBE.png'}
+                            src={toCdnUrl(association.avatarUrl) || '/GLOBE.png'}
                             alt={association.name}
                             className="h-full w-full rounded-full object-cover"
                         />
@@ -673,7 +674,7 @@ export default function AssociationPage() {
                             <FeedCardWithReply
                                 key={post.id}
                                 postId={post.id}
-                                profileImage={association.avatarUrl || '/GLOBE.png'}
+                                profileImage={toCdnUrl(association.avatarUrl) || '/GLOBE.png'}
                                 profileName={association.name}
                                 {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
                                 authorEntityId={post.authorId}

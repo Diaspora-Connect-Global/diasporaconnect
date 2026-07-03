@@ -41,6 +41,7 @@ import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime"
 import { DateSeparator } from "./DateSeparator";
 import { UserBadge } from "@/components/custom/userBadge";
 import { resolveUserTier } from "@/lib/userTier";
+import { toCdnUrl } from "@/lib/cdn";
 
 // ---- Main Component ----
 
@@ -112,7 +113,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             [profileFallback?.firstName, profileFallback?.lastName].filter(Boolean).join(' ').trim() ||
             (chat.name && chat.name !== chat.id ? chat.name : t('unknownUser'))
         );
-    const otherAvatar = otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '';
+    const otherAvatar = toCdnUrl(otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '');
 
     // Trust badge — sourced from either the connection summary or the full
     // profile fallback. Defensive cast: `trustScore`/`trustTier` land on

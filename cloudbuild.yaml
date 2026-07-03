@@ -10,6 +10,7 @@ steps:
       - '--build-arg=NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}'
       - '--build-arg=NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${_NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}'
       - '--build-arg=NEXT_PUBLIC_CDN_URL=${_NEXT_PUBLIC_CDN_URL}'
+      - '--build-arg=ASSET_PREFIX=${_ASSET_PREFIX}'
       - '-t'
       - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
       - '.'
@@ -61,6 +62,12 @@ substitutions:
   # Media CDN host (public, not a secret) — served via the Cloudflare Worker
   # in front of the GCS bucket. Empty would disable the CDN.
   _NEXT_PUBLIC_CDN_URL: "https://cdn.diaspoplug.net"
+  # App-asset CDN (assetPrefix) for _next/static JS/CSS. Leave EMPTY until a
+  # CDN host is configured to proxy this service's /_next/* and edge-cache
+  # /_next/static/* — setting it before that will 404 all assets. Point it at a
+  # Cloudflare-proxied subdomain (e.g. https://static.diaspoplug.net) whose
+  # origin is this Cloud Run service. Override on the Cloud Build trigger.
+  _ASSET_PREFIX: ""
 
 options:
   logging: CLOUD_LOGGING_ONLY

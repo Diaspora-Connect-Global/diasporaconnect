@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { toCdnUrl } from '@/lib/cdn';
 
 export interface EventLocation {
   type: 'physical' | 'virtual' | 'hybrid';
@@ -916,7 +917,7 @@ export const EVENT_PLACEHOLDER_IMAGE = '/EVENT.png';
 
 export function getEventCoverImage(event: Pick<Event, 'coverImageUrl'>): string {
   const url = event.coverImageUrl?.trim();
-  return url ? url : EVENT_PLACEHOLDER_IMAGE;
+  return url ? toCdnUrl(url) : EVENT_PLACEHOLDER_IMAGE;
 }
 
 export function formatPrice(cents: number, currency = 'GHS'): string {

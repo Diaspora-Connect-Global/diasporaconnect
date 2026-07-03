@@ -18,6 +18,7 @@ import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import { AccessBadges } from './AccessBadges';
 import { CommunityTypeBadge } from './CommunityTypeBadge';
 import { toJoinPolicy } from '@/types/membership';
+import { toCdnUrl } from '@/lib/cdn';
 import type {
     CommunityPaymentType,
     CommunityVisibility,
@@ -149,7 +150,7 @@ export function MyCommunityCard2() {
                             <div className="flex items-center gap-1 min-w-0 flex-1">
                                 <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
                                     {displayCommunity?.avatarUrl ? (
-                                        <Image width={24} height={24} src={displayCommunity.avatarUrl} alt={displayCommunity.name} className="w-6 h-6 rounded-full object-cover" />
+                                        <Image width={24} height={24} src={toCdnUrl(displayCommunity.avatarUrl)} alt={displayCommunity.name} className="w-6 h-6 rounded-full object-cover" />
                                     ) : (
                                         <Image width={24} height={24} src="/GLOBE.png" alt="Community" className="rounded-full object-cover" />
                                     )}
@@ -192,7 +193,7 @@ export function MyCommunityCard2() {
                                 >
                                     <div className="flex items-center gap-2 flex-1 min-w-0">
                                         {community.avatarUrl && (
-                                            <Image width={20} height={20} src={community.avatarUrl} alt={community.name} className="rounded-full object-cover flex-shrink-0" />
+                                            <Image width={20} height={20} src={toCdnUrl(community.avatarUrl)} alt={community.name} className="rounded-full object-cover flex-shrink-0" />
                                         )}
                                         <span className="truncate flex-1">{community.name}</span>
                                         {community.communityType && (

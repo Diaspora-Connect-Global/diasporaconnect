@@ -5,9 +5,14 @@ import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X, Loader2 } from "lucide-react";
 import { ButtonType2, ButtonType3 } from "../custom/button";
 import { mockConversations, mockMessages, mockUserConversationPreferences } from "@/data/chats";
-import EmojiPicker, { Theme } from "emoji-picker-react";
+import dynamic from "next/dynamic";
+import { type Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import type { MentionMap } from "@/components/custom/richTextRenderer";
+
+// Lazy-load the emoji picker so its large bundle + emoji data only download when
+// the user opens the picker, not on initial render.
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
 
 export interface MentionUser {
@@ -341,7 +346,7 @@ export default function MessageInputGlobal({
                                 >
                                     <EmojiPicker
                                         onEmojiClick={handleEmojiClick}
-                                        theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
+                                        theme={(resolvedTheme === "dark" ? "dark" : "light") as Theme}
                                         width={320}
                                         height={400}
                                     />

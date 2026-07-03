@@ -5,10 +5,15 @@ import { createPortal } from "react-dom";
 import { Smile, ImageIcon, Send, X, FileIcon, Video, Music } from "lucide-react";
 import { ButtonType2, ButtonType3 } from "../custom/button";
 import { useTranslations } from "next-intl";
-import EmojiPicker, { Theme } from "emoji-picker-react";
+import dynamic from "next/dynamic";
+import { type Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import { chatMediaContentType } from "@/services/gql/upload";
 import { toast } from "sonner";
+
+// Lazy-load the emoji picker so its large bundle + emoji data only download when
+// the user opens the picker, not on initial render.
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
 const TYPING_STOP_DEBOUNCE_MS = 2500;
 const MAX_FILES = 10;
@@ -319,7 +324,7 @@ export function MessageInput({
                                     >
                                         <EmojiPicker
                                             onEmojiClick={handleEmojiClick}
-                                            theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
+                                            theme={(resolvedTheme === "dark" ? "dark" : "light") as Theme}
                                             width={320}
                                             height={400}
                                         />

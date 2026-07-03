@@ -25,6 +25,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { resolveUserTier } from "@/lib/userTier";
 import type { Tier } from "@/components/custom/userBadge";
 import { EmptyState, NoResults } from "@/components/feedback";
+import { toCdnUrl } from "@/lib/cdn";
 
 interface Friend {
   userId: string;
@@ -209,7 +210,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
           userId: friend.userId,
           connectionId: connection.id,
           name: `${friend.firstName} ${friend.lastName}`,
-          imageSrc: `${friend.avatarUrl}`,
+          imageSrc: toCdnUrl(friend.avatarUrl),
           mutualConnections: undefined,
           tier: getTierFromUser(friend),
           connectionStatus: "connected",
@@ -230,7 +231,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             userId: connection.receiver.userId,
             connectionId: connection.id,
             name: `${connection.receiver.firstName} ${connection.receiver.lastName}`,
-            imageSrc: connection.receiver.avatarUrl || "",
+            imageSrc: toCdnUrl(connection.receiver.avatarUrl),
             mutualConnections: undefined,
             tier: getTierFromUser(connection.receiver),
             connectionStatus: "pending_sent",
@@ -247,7 +248,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             userId: connection.requester.userId,
             connectionId: connection.id,
             name: `${connection.requester.firstName} ${connection.requester.lastName}`,
-            imageSrc: connection.requester.avatarUrl || "",
+            imageSrc: toCdnUrl(connection.requester.avatarUrl),
             mutualConnections: undefined,
             tier: getTierFromUser(connection.requester),
             connectionStatus: "pending_received",
@@ -268,7 +269,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             userId: profile.userId,
             connectionId: profile.connectionId ?? "",
             name: `${profile.firstName} ${profile.lastName}`,
-            imageSrc: `${profile.avatarUrl}`,
+            imageSrc: toCdnUrl(profile.avatarUrl),
             mutualConnections: undefined,
             tier: getTierFromUser(profile),
             connectionStatus: connectionStatus as Friend["connectionStatus"],
@@ -289,7 +290,7 @@ export default function FriendListModal({ onClose }: FriendListModalProps) {
             userId: profile.userId,
             connectionId: profile.connectionId ?? "",
             name: fullName || "Member",
-            imageSrc: profile.avatarUrl ?? "",
+            imageSrc: toCdnUrl(profile.avatarUrl),
             mutualConnections: suggestion.mutualConnectionCount,
             matchReasonCopy: pymkMatchReason({
               mutualConnectionNames: suggestion.mutualConnectionNames,

@@ -20,6 +20,7 @@ import {
 import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
 import { cn } from '@/lib/utils';
 import AccessBadges from '@/components/cards/AccessBadges';
+import { toCdnUrl } from '@/lib/cdn';
 
 const PAGE_SIZE = 20;
 
@@ -285,7 +286,7 @@ export default function AssociationsPage() {
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={e.avatarUrl || '/GLOBE.png'}
+            src={toCdnUrl(e.avatarUrl) || '/GLOBE.png'}
             alt={e.name}
             width={48}
             height={48}
@@ -450,7 +451,7 @@ export default function AssociationsPage() {
                 title={assn.name}
                 description={assn.description ?? undefined}
                 members={assn.memberCount}
-                profileImage={assn.avatarUrl || '/GLOBE.png'}
+                profileImage={toCdnUrl(assn.avatarUrl) || '/GLOBE.png'}
                 profileName={assn.name}
                 buttonText={buttonText}
                 onButtonClick={() => handleJoinClick(assn)}

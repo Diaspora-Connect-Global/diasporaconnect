@@ -29,10 +29,15 @@ import type {
 import { toast } from 'sonner';
 import { resizeImage } from '@/lib/resizeImage';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
-import EmojiPicker, { Theme } from 'emoji-picker-react';
+import dynamic from 'next/dynamic';
+import { type Theme } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import { useUserStore } from '@/store/useUserStore';
+
+// Lazy-load the emoji picker so its large bundle + emoji data only download when
+// the user opens the picker, not on initial render.
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -434,7 +439,7 @@ export default function CreatePostForm({
               <div className="absolute bottom-full left-0 mb-2 z-50 shadow-xl rounded-lg overflow-hidden">
                 <EmojiPicker
                   onEmojiClick={handleEmojiClick}
-                  theme={resolvedTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                  theme={(resolvedTheme === 'dark' ? 'dark' : 'light') as Theme}
                   width={320}
                   height={400}
                 />

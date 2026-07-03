@@ -28,6 +28,12 @@ ENV NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=$NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
 ARG NEXT_PUBLIC_CDN_URL=""
 ENV NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL
 
+# App-asset CDN (assetPrefix): serves _next/static (JS/CSS/chunks) from a
+# CDN host. Must be set at BUILD time (Next inlines it into emitted asset URLs).
+# Empty → assets served from the app origin (safe default).
+ARG ASSET_PREFIX=""
+ENV ASSET_PREFIX=$ASSET_PREFIX
+
 RUN npm run build
 
 # Production image, copy all the files and run next

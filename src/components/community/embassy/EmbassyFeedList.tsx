@@ -4,6 +4,7 @@ import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
 import { formatDateProximity } from '@/macros/time';
+import { toCdnUrl } from '@/lib/cdn';
 import type { EmbassyViewProps, EmbassyFeedPost } from './types';
 
 interface EmbassyFeedListProps {
@@ -38,7 +39,7 @@ export function EmbassyFeedList({
           <FeedCardWithReply
             key={post.id}
             postId={post.id}
-            profileImage={community.avatarUrl || fallbackAvatar}
+            profileImage={toCdnUrl(community.avatarUrl) || toCdnUrl(fallbackAvatar)}
             profileName={community.name}
             {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
             authorEntityId={post.authorId}

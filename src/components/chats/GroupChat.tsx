@@ -62,6 +62,7 @@ import { ApiMessage } from "@/store/ChatStore";
 import { toast } from "sonner";
 import { UserBadge } from "@/components/custom/userBadge";
 import { mapTrustScoreToTier } from "@/lib/userTier";
+import { toCdnUrl } from "@/lib/cdn";
 
 type ManageableGroupMember = {
     id: string;
@@ -380,7 +381,7 @@ export default function GroupChat() {
         const member = groupMembers.find((m) => m.userId === userId);
         if (member?.profile) {
             const name = [member.profile.firstName, member.profile.lastName].filter(Boolean).join(' ').trim();
-            return { id: member.userId, name: name || 'Unknown User', avatar: member.profile.avatarUrl };
+            return { id: member.userId, name: name || 'Unknown User', avatar: toCdnUrl(member.profile.avatarUrl) };
         }
         return users?.find((u) => u.id === userId);
     };
@@ -697,7 +698,7 @@ export default function GroupChat() {
                             </ButtonType3>
                             <div className="relative">
                                 <Avatar className="w-12 h-12">
-                                    <AvatarImage src={group.avatarUrl || chat.avatar || undefined} alt="avatar" />
+                                    <AvatarImage src={toCdnUrl(group.avatarUrl) || toCdnUrl(chat.avatar) || undefined} alt="avatar" />
                                     <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                             </div>
@@ -982,7 +983,7 @@ export default function GroupChat() {
                                 <div className="flex-shrink-0 flex flex-col items-center mb-6">
                                     <div className="relative">
                                         <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
-                                            <AvatarImage src={group.avatarUrl || undefined} alt="avatar" />
+                                            <AvatarImage src={toCdnUrl(group.avatarUrl) || undefined} alt="avatar" />
                                             <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                         </Avatar>
                                         {avatarUploading && (
@@ -1071,7 +1072,7 @@ export default function GroupChat() {
                                                     onClick={() => handleMemberClick(member)}
                                                 >
                                                     <Avatar className="w-10 h-10">
-                                                        <AvatarImage src={member?.profile?.avatarUrl || undefined} alt="avatar" />
+                                                        <AvatarImage src={toCdnUrl(member?.profile?.avatarUrl) || undefined} alt="avatar" />
                                                         <AvatarFallback>U</AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex-1 min-w-0">
@@ -1269,7 +1270,7 @@ export default function GroupChat() {
                                 >
                                     <div className="flex items-center gap-3 min-w-0">
                                         <Avatar className="w-10 h-10 flex-shrink-0">
-                                            <AvatarImage src={member?.profile?.avatarUrl || undefined} alt="avatar" />
+                                            <AvatarImage src={toCdnUrl(member?.profile?.avatarUrl) || undefined} alt="avatar" />
                                             <AvatarFallback>U</AvatarFallback>
                                         </Avatar>
                                         <div className="min-w-0">

@@ -52,6 +52,7 @@ import type { Attachment } from '@/services/gql/types/postsFeed';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
+import { toCdnUrl } from '@/lib/cdn';
 
 interface CommunityDetails {
   id: string;
@@ -507,7 +508,7 @@ export default function CommunityDetailPage() {
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={community.avatarUrl || '/GLOBE.png'}
+            src={toCdnUrl(community.avatarUrl) || '/GLOBE.png'}
             alt={community.name}
             width={48}
             height={48}

@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 import { FriendType, TypeOfFriend } from "../friends/TypeOfFriend";
 import { Profile } from "@/services/gql/profile";
 import { mapTrustScoreToTier } from "@/lib/userTier";
+import { toCdnUrl } from "@/lib/cdn";
 
 interface UserData {
   name: string;
@@ -78,7 +79,7 @@ export function ProfileHeader({
           {/* Avatar with Edit Icon */}
           <div className="relative group">
             <Avatar className="h-25 w-25 ring-4 ring-background">
-              <AvatarImage src={userData?.avatarUrl || undefined} alt={userData?.avatarUrl || 'Profile'} />
+              <AvatarImage src={toCdnUrl(userData?.avatarUrl) || undefined} alt={userData?.avatarUrl || 'Profile'} />
               <AvatarFallback className="text-4xl">{initials}</AvatarFallback>
             </Avatar>
             {avatarUploading && (

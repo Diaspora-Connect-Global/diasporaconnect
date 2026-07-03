@@ -4,6 +4,7 @@
 import type { ReactNode } from "react";
 import { FileIcon, Music } from "lucide-react";
 import { formatFileSize } from "@/lib/fileDisplay";
+import { toCdnUrl } from "@/lib/cdn";
 
 export interface MessageAttachmentItem {
   gcsPath?: string;
@@ -13,7 +14,11 @@ export interface MessageAttachmentItem {
 }
 
 function SingleAttachment({ att, inGrid }: { att: MessageAttachmentItem; inGrid?: boolean }) {
-  const url = att.gcsPath;
+  // Render-time CDN rewrite: stored GCS media served via the CDN when
+  // NEXT_PUBLIC_CDN_URL is set (no-op otherwise). Wrapped here (render layer)
+  // rather than at the store mapping so the raw gcsPath is preserved for the
+  // content/attachment de-dup comparisons in Group/DirectMessageChat.
+  const url = toCdnUrl(att.gcsPath);
   const mime = (att.mimeType ?? "").toLowerCase();
   const name = att.fileName ?? "file";
   const wrap = (className: string, children: ReactNode) => (

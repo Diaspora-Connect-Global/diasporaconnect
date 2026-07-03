@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
 import { useState } from "react";
 import { pymkMatchReason } from "@/lib/pymkMatchReason";
+import { toCdnUrl } from "@/lib/cdn";
 
 // Loading skeleton for friend suggestions
 function FriendSuggestionSkeleton() {
@@ -119,7 +120,7 @@ export function PeopleYouMayKnow() {
                                 <PeopleYouMayKnowCard
                                     key={suggestion.profile.userId}
                                     userId={suggestion.profile.userId}
-                                    profileImage={suggestion.profile.avatarUrl ?? ''}
+                                    profileImage={toCdnUrl(suggestion.profile.avatarUrl)}
                                     name={displayName}
                                     matchReason={reasonCopy}
                                     trustScore={profileWithTrust.trustScore}

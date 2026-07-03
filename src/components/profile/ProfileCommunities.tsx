@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 import { Users, Globe } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { EmptyState } from '@/components/feedback';
+import { toCdnUrl } from '@/lib/cdn';
 
 interface Community {
   id: string;
@@ -107,7 +108,7 @@ export default function ProfileCommunities({
             {/* Community avatar */}
             <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden border border-border-subtle">
               <Image
-                src={community.avatarUrl || '/GLOBE.png'}
+                src={toCdnUrl(community.avatarUrl) || '/GLOBE.png'}
                 alt={community.name}
                 width={40}
                 height={40}

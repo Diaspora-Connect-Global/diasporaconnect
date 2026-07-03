@@ -4,6 +4,7 @@ import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots } from '@
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { organizationPageSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import CommunityDetailClient from './CommunityDetailClient';
+import { toCdnUrl } from '@/lib/cdn';
 
 const DEFAULT_IMAGE = '/og-default.png';
 
@@ -66,7 +67,7 @@ export async function generateMetadata({
   const description =
     truncate(plainText(c.description), 160) ||
     `Join the ${c.name} community on ${SITE_NAME}.`;
-  const image = c.bannerUrl || c.avatarUrl || DEFAULT_IMAGE;
+  const image = toCdnUrl(c.bannerUrl) || toCdnUrl(c.avatarUrl) || DEFAULT_IMAGE;
 
   return {
     title,

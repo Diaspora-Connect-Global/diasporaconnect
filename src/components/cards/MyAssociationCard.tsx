@@ -15,6 +15,7 @@ import { ButtonType3 } from '@/components/custom/button';
 import { useTranslations } from 'next-intl';
 import { AccessBadges } from './AccessBadges';
 import type { AccessProfile } from '@/types/membership';
+import { toCdnUrl } from '@/lib/cdn';
 
 interface MyAssociationCardProps {
   id: string;
@@ -64,7 +65,7 @@ export function MyAssociationCard({
                 <Image
                   width={32}
                   height={32}
-                  src={avatarUrl || '/GLOBE.png'}
+                  src={toCdnUrl(avatarUrl) || '/GLOBE.png'}
                   alt={title}
                   className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
                 />

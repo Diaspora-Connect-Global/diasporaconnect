@@ -22,6 +22,7 @@ import { MembershipPaymentModal } from './_components/MembershipPaymentModal';
 import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
 import { cn } from '@/lib/utils';
 import AccessBadges from '@/components/cards/AccessBadges';
+import { toCdnUrl } from '@/lib/cdn';
 
 interface RequestMembershipPayload {
     id?: string | null;
@@ -321,7 +322,7 @@ export default function Community() {
                     // Prefer the first non-zero count: `||` treats 0/null as "missing"
                     // so a real positive SEARCH count wins when DISCOVER reports 0.
                     memberCount: c.memberCount || pay.memberCount || 0,
-                    avatarUrl: c.avatarUrl,
+                    avatarUrl: toCdnUrl(c.avatarUrl),
                     visibility: (c.visibility as CommunityVisibility) ?? null,
                     paymentType: pay.paymentType,
                     priceAmount: pay.priceAmount,
@@ -333,7 +334,7 @@ export default function Community() {
         }
         // Fallback: personalised was empty (e.g. recommender warming up) —
         // show the search catalog rather than an empty state.
-        return searchedCommunities;
+        return searchedCommunities.map((c) => ({ ...c, avatarUrl: toCdnUrl(c.avatarUrl) }));
     }, [personalisedCommunities, searchedCommunities]);
 
     const visibleCommunities = useMemo(

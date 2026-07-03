@@ -19,6 +19,7 @@ import { messageService } from "@/services/websocket/messageService";
 import { GET_USER_PROFILE } from "@/services/gql/profile";
 import type { GetProfileResponse } from "@/services/gql/profile";
 import { EmptyState, NoResults } from "@/components/feedback";
+import { toCdnUrl } from "@/lib/cdn";
 
 type TabType = 'direct' | 'groups';
 
@@ -120,7 +121,7 @@ export default function ChatSideBar() {
                 const displayName = otherUserObj
                     ? [otherUserObj.firstName, otherUserObj.lastName].filter(Boolean).join(' ').trim() || t('unknownUser')
                     : (fallbackProfile?.name || t('unknownUser'));
-                const avatar = otherUserObj?.avatarUrl || fallbackProfile?.avatar || '';
+                const avatar = toCdnUrl(otherUserObj?.avatarUrl) || fallbackProfile?.avatar || '';
 
                 // Store the real conversation mapping so DirectMessageChat can look it up by chat.id
                 const chatId = otherParticipantId || conv.id;
@@ -193,7 +194,7 @@ export default function ChatSideBar() {
                     const profile = data?.getProfile?.profile;
                     if (!profile) return null;
                     const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
-                    return { userId, name, avatar: profile.avatarUrl };
+                    return { userId, name, avatar: toCdnUrl(profile.avatarUrl) };
                 } catch {
                     return null;
                 }
@@ -774,7 +775,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
                             id: group.id,
                             conversationId: correspondingConversation?.id,
                             name: group.name,
-                            avatar: group.avatarUrl || getInitials(group.name),
+                            avatar: toCdnUrl(group.avatarUrl) || getInitials(group.name),
                             lastMessage: previewText,
                             lastMessageTime: correspondingConversation?.lastMessageAt ?? group.createdAt,
                             unread: correspondingConversation?.unreadCount ?? 0,

@@ -4,6 +4,7 @@ import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots } from '@
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { organizationPageSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import AssociationDetailClient from './AssociationDetailClient';
+import { toCdnUrl } from '@/lib/cdn';
 
 const DEFAULT_IMAGE = '/og-default.png';
 
@@ -62,7 +63,7 @@ export async function generateMetadata({
   const description =
     truncate(plainText(a.description), 160) ||
     `${a.associationType?.name ? `${a.associationType.name} · ` : ''}Connect with ${a.name} on ${SITE_NAME}.`;
-  const image = a.avatarUrl || DEFAULT_IMAGE;
+  const image = toCdnUrl(a.avatarUrl) || DEFAULT_IMAGE;
 
   return {
     title,

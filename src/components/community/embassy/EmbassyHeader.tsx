@@ -7,6 +7,7 @@ import { ButtonType1, ButtonType2 } from '@/components/custom/button';
 import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
 import type { EmbassyProfile } from './embassyMock';
 import type { EmbassyViewProps } from './types';
+import { toCdnUrl } from '@/lib/cdn';
 
 interface EmbassyHeaderProps {
   community: EmbassyViewProps['community'];
@@ -57,8 +58,8 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
   // neutral "verified community" for general communities.
   const verifiedLabel = isEmbassy ? t('officialVerified') : t('verifiedCommunity');
 
-  const bannerSrc = community.bannerUrl || '/og-default.png';
-  const avatarSrc = community.avatarUrl || profile.flagUrl || '/GLOBE.png';
+  const bannerSrc = toCdnUrl(community.bannerUrl) || '/og-default.png';
+  const avatarSrc = toCdnUrl(community.avatarUrl) || toCdnUrl(profile.flagUrl) || '/GLOBE.png';
 
   // Backend contact fields fall back to the mock profile when null/empty.
   const phone = community.contactPhone || profile.phone;

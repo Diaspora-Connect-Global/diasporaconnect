@@ -29,6 +29,7 @@ import { ShoppingCartModal } from "./ShoppingCartModal";
 import { Checkout } from "./Checkout";
 import { OrderSuccess } from "./OrderSuccess";
 import { useMarketplacePayment } from "./payments/useMarketplacePayment";
+import { toCdnUrl } from "@/lib/cdn";
 
 function toUiProductFromProductApi(item: {
   id: string;
@@ -50,8 +51,10 @@ function toUiProductFromProductApi(item: {
     currency: item.currency ?? "GHS",
     rating: 5,
     reviews: 0,
-    image: item.images?.[0] ?? "",
-    images: item.images ?? [],
+    // Render-time CDN rewrite: stored GCS media served via the CDN when
+    // NEXT_PUBLIC_CDN_URL is set (no-op otherwise).
+    image: toCdnUrl(item.images?.[0] ?? ""),
+    images: (item.images ?? []).map(toCdnUrl),
     seller: item.vendor_id,
     category: item.tags?.[0] ?? "products",
     isService: false,
