@@ -29,13 +29,14 @@ import { useUserStore } from '@/store/useUserStore';
 import { MyAvatar } from '@/components/custom/header';
 import { useMutation } from '@apollo/client/react';
 import { CREATE_POST, CreatePostData, GET_FEED, REQUEST_UPLOAD_URL, RequestUploadUrlData } from '@/services/gql/postsFeed';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
 import { AttachmentInput } from '@/services/gql/types/postsFeed';
 import { usePostDraft } from '@/hooks/usePostDraft';
 import { buildMentionInputsFromText } from '@/components/custom/richTextRenderer';
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
 import { getFirstUrlInText } from '@/lib/urlPreview';
+import { resizeImage } from '@/lib/resizeImage';
 
 // Types
 type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
@@ -442,12 +443,26 @@ export default function CreatePostPage() {
         const uploadPromises = attachments.map(async (attachment) => {
           if (!attachment.file) return null;
 
+          const isImage = attachment.file.type.startsWith('image/');
+
+          // For images, resize + recompress to WebP before uploading (smaller
+          // payload, faster decode) and derive an LQIP blur-up from the same
+          // decode. Videos and documents pass through untouched.
+          const { file: uploadBody, width, height, blurDataUrl } = isImage
+            ? await resizeImage(attachment.file, { maxDimension: 1600 })
+            : { file: attachment.file, width: 0, height: 0, blurDataUrl: undefined };
+
+          // For images this is image/webp (the resized file's type); otherwise
+          // the original mime. It must be identical on the request-upload-url
+          // call and the PUT header so the GCS signature matches.
+          const uploadContentType = isImage ? uploadBody.type : attachment.file.type;
+
           // Request upload URL (backend returns uploadUrl + objectKey for the GCS path)
           const { data: uploadData } = await requestUploadUrl({
             variables: {
-              fileName: attachment.file.name,
-              fileType: attachment.file.type,
-              contentType: attachment.file.type,
+              fileName: uploadBody.name,
+              fileType: uploadContentType,
+              contentType: uploadContentType,
               vendorId: 'default'
             }
           });
@@ -462,9 +477,9 @@ export default function CreatePostPage() {
           // so the PUT must send the exact same value or GCS rejects it with 400.
           const uploadResponse = await fetch(uploadResult.uploadUrl, {
             method: 'PUT',
-            body: attachment.file,
+            body: uploadBody,
             headers: {
-              'Content-Type': attachment.file.type,
+              'Content-Type': uploadContentType,
               'Cache-Control': 'public, max-age=31536000, immutable',
             }
           });
@@ -474,14 +489,17 @@ export default function CreatePostPage() {
           }
 
           // Use backend's objectKey so it can store and return the correct GCS URL in the feed
-          const objectKey = uploadResult.objectKey ?? `uploads/${Date.now()}-${attachment.file.name}`;
+          const objectKey = uploadResult.objectKey ?? `uploads/${Date.now()}-${uploadBody.name}`;
 
           return {
             objectKey,
-            type: attachment.file.type.startsWith('image/') ? 'IMAGE' : 
+            type: isImage ? 'IMAGE' :
                   attachment.file.type.startsWith('video/') ? 'VIDEO' : 'DOCUMENT',
-            mimeType: attachment.file.type,
-            size: attachment.file.size
+            mimeType: uploadContentType,
+            size: uploadBody.size,
+            ...(width && { width }),
+            ...(height && { height }),
+            ...(blurDataUrl && { blurDataUrl }),
           };
         });
 

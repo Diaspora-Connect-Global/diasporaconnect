@@ -365,11 +365,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         const rankedItems = page?.items ?? [];
         const hydrated = await hydrateRankedItems(rankedItems);
         if (cancelled) return;
-        // If a just-created post is staged, prepend it (deduping against
-        // anything the recommender already happened to return).
-        const merged = pendingPrepend
-          ? dedupePostsById([pendingPrepend, ...hydrated])
-          : dedupePostsById(hydrated);
+        // The just-created post (if any) is prepended by the derived `posts`
+        // memo below — not merged here — so this branch only reflects what
+        // the recommender returned (keeps the cold-start fallback test honest).
+        const merged = dedupePostsById(hydrated);
 
         // C1: FOR_YOU exhausted with nothing to show (cold start). Degrade to
         // the chronological feed (NETWORK → ALL) instead of an empty box.
@@ -384,7 +383,6 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
             fallbackTypeRef.current = fallback.type;
             setFallbackActive(true);
             setMergedPosts(fallback.posts);
-            if (pendingPrepend) setPendingPrepend(null);
             setTotal(fallback.posts.length);
             setNextCursor(fallback.nextCursor);
             setFeedMeta({
@@ -404,7 +402,6 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         }
 
         setMergedPosts(merged);
-        if (pendingPrepend) setPendingPrepend(null);
         setTotal(merged.length);
         setNextCursor(page?.nextCursor ?? null);
         setFeedMeta({
@@ -519,15 +516,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     if (!useLegacyFeed) return;
     if (!feedData?.feed) return;
     const f = feedData.feed;
-    // Prepend just-created post for the legacy feed branch too, so a
-    // user who lands on TRENDING immediately after creating still sees
-    // their post at the top.
-    const posts = mapPosts(f.posts);
-    const merged = pendingPrepend
-      ? dedupePostsById([pendingPrepend, ...posts])
-      : dedupePostsById(posts);
+    // The just-created post (if any) is prepended by the derived `posts` memo
+    // below, so this branch just reflects the backend feed as-is.
+    const merged = dedupePostsById(mapPosts(f.posts));
     setMergedPosts(merged);
-    if (pendingPrepend) setPendingPrepend(null);
     setTotal(f.total ?? 0);
     setNextCursor(f.nextCursor ?? null);
     setFeedMeta({
@@ -537,7 +529,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       hasSeenFallbackOption: f.hasSeenFallbackOption,
       nextCursor: f.nextCursor ?? null,
     });
-  }, [feedData?.feed, useLegacyFeed, pendingPrepend]);
+  }, [feedData?.feed, useLegacyFeed]);
 
   useEffect(() => {
     if (!isHashtagFeed) return;
@@ -813,15 +805,17 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const removePost = useCallback((postId: string) => {
     setMergedPosts(prev => prev.filter(p => p.id !== postId));
+    // The just-created post may still live only in `pendingPrepend` (before the
+    // backend feed surfaces it), so remove it there too.
+    setPendingPrepend(prev => (prev && prev.id === postId ? null : prev));
   }, []);
 
   const updatePostCounts = useCallback((
     postId: string,
     delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean }>,
   ) => {
-    setMergedPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      const updated = {
+    const applyDelta = (p: Post): Post => {
+      const updated: Post = {
         ...p,
         engagementCounts: {
           likes: (p.engagementCounts?.likes ?? 0) + (delta.likes ?? 0),
@@ -838,11 +832,33 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         };
       }
       return updated;
-    }));
+    };
+    setMergedPosts(prev => prev.map(p => (p.id === postId ? applyDelta(p) : p)));
+    // Keep the pinned-only just-created post in sync too.
+    setPendingPrepend(prev => (prev && prev.id === postId ? applyDelta(prev) : prev));
   }, []);
 
+  // The just-created post is prepended here (not inside the fetch effects) so it
+  // works uniformly across all feed types and never races a stale effect closure.
+  // Gated off for hashtag/category feeds so a new post isn't force-pinned onto a
+  // filtered view. `dedupePostsById` keeps the first occurrence, so the pinned
+  // post stays strictly first even once the backend feed also includes it.
+  const posts = useMemo(() => {
+    if (!pendingPrepend || isHashtagFeed || isCategoryFeed) return mergedPosts;
+    return dedupePostsById([pendingPrepend, ...mergedPosts]);
+  }, [pendingPrepend, mergedPosts, isHashtagFeed, isCategoryFeed]);
+
+  // Clear the staged prepend only once the real feed already contains it (the
+  // backend `own_recent` pin surfaces it on a later refresh). Clearing early
+  // would drop the post; clearing here is flicker-free because the memo already
+  // shows it via `mergedPosts` at that point.
+  useEffect(() => {
+    if (!pendingPrepend) return;
+    if (mergedPosts.some(p => p.id === pendingPrepend.id)) setPendingPrepend(null);
+  }, [pendingPrepend, mergedPosts]);
+
   return {
-    posts: mergedPosts,
+    posts,
     total,
     loading,
     loadingMore,
