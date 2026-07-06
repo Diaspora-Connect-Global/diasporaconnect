@@ -50,9 +50,9 @@ import {
   type ServiceRequestSummary,
   type ServiceRequestTypesResponse,
 } from '@/services/gql/embassyServices';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
-import { useIsEmbassy } from '../communityVariant';
+import { useIsEmbassy, useOwnerEnum } from '../communityVariant';
 import { EmbassyTrackRequestDetail } from './EmbassyTrackRequestDetail';
 import { CancelRequestDialog } from './CancelRequestDialog';
 import { type Bucket, STEP_KEYS, statusBucket, bucketStep, BUCKET_PILL } from './requestStatus';
@@ -118,6 +118,7 @@ interface EmbassyTrackRequestsTabProps {
 export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequestsTabProps) {
   const t = useTranslations('community.embassy.track');
   const isEmbassy = useIsEmbassy();
+  const ownerEnum = useOwnerEnum();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedRequestId = searchParams.get('request');
@@ -151,7 +152,7 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
     fetchPolicy: 'cache-and-network',
   });
   const { data: typesData } = useQuery<ServiceRequestTypesResponse>(SERVICE_REQUEST_TYPES, {
-    variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+    variables: { ownerType: ownerEnum, ownerEntityId: community.id },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -165,9 +166,9 @@ export function EmbassyTrackRequestsTab({ community, profile }: EmbassyTrackRequ
   const requests = useMemo(
     () =>
       (data?.myServiceRequests ?? []).filter(
-        (r) => r.ownerType === 'COMMUNITY' && r.ownerEntityId === community.id,
+        (r) => r.ownerType === ownerEnum && r.ownerEntityId === community.id,
       ),
-    [data, community.id],
+    [data, community.id, ownerEnum],
   );
 
   /** Bucket counts for the filter chips + the right-rail summary tiles. */

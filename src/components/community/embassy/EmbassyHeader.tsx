@@ -5,7 +5,7 @@ import { BadgeCheck, MapPin, Phone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ButtonType1, ButtonType2 } from '@/components/custom/button';
 import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
-import type { EmbassyProfile } from './embassyMock';
+import type { EmbassyProfile } from './embassyData';
 import type { EmbassyViewProps } from './types';
 import { toCdnUrl } from '@/lib/cdn';
 

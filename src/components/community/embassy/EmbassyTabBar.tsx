@@ -7,9 +7,15 @@ import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { EMBASSY_TABS, type EmbassyTabKey } from './tabs';
 import { embassyIcon } from './icons';
+import { filterTabs } from '@/lib/communityServices';
 
 interface EmbassyTabBarProps {
   active: EmbassyTabKey;
+  /**
+   * Enabled member-facing service keys. `null`/undefined → all tabs shown
+   * (non-destructive default); `[]` → only the always-on 'home' tab.
+   */
+  enabledServices?: string[] | null;
 }
 
 /**
@@ -17,10 +23,12 @@ interface EmbassyTabBarProps {
  * shareable `?tab=<key>` link (locale-aware via next-intl Link) so refresh and
  * deep-linking work. Active tab gets a brand underline (mirrors NavigationTabs).
  */
-export function EmbassyTabBar({ active }: EmbassyTabBarProps) {
+export function EmbassyTabBar({ active, enabledServices }: EmbassyTabBarProps) {
   const t = useTranslations('community.embassy.tabs');
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const visibleTabs = filterTabs(EMBASSY_TABS, enabledServices);
 
   // Keep the active tab visible on mobile when it sits off-screen in the
   // horizontally-scrollable list (e.g. deep-linked to a trailing tab).
@@ -49,7 +57,7 @@ export function EmbassyTabBar({ active }: EmbassyTabBarProps) {
     >
       <div className="relative">
         <ul className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-          {EMBASSY_TABS.map((tab) => {
+          {visibleTabs.map((tab) => {
             const Icon = embassyIcon(tab.icon);
             const isActive = tab.key === active;
             return (

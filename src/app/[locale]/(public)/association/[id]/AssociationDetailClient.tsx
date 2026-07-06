@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { formatDateProximity } from '@/macros/time';
 import AboutAssociation from "@/components/cards/association/AboutAssociation";
 import { ButtonType1 } from "@/components/custom/button";
 import { PeopleYouMayKnow } from "@/components/home/PeopleYouMayKnow";
@@ -11,7 +10,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import FeedCardWithReply from "@/components/cards/FeedCardWithReply";
+import { ChevronLeft } from "lucide-react";
 import { useQuery, useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
@@ -47,9 +46,11 @@ import {
     type CreateCommentData,
 } from '@/services/gql/postsFeed';
 import type { Attachment } from '@/services/gql/types/postsFeed';
-import { splitPostAttachments } from '@/lib/normalizeFeedPost';
-import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
+import { type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { toCdnUrl } from '@/lib/cdn';
+import { EmbassyCommunityView } from '@/components/community/embassy/EmbassyCommunityView';
+import { associationToEmbassyCommunity } from '@/components/community/embassy/associationAdapter';
+import type { EmbassyFeedPost } from '@/components/community/embassy/types';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -68,6 +69,11 @@ interface AssociationDetails {
     priceCurrency?: string | null;
     defaultGroupId?: string | null;
     membershipStatus?: string | null; // ACTIVE | PENDING | SUSPENDED | MEMBER (legacy)
+    /**
+     * Enabled member-facing service module keys. `null`/absent → all enabled
+     * (legacy/non-loaded); `[]` → none enabled. Drives module gating.
+     */
+    enabledServices?: string[] | null;
     associationType?: { id: string; name: string } | null;
 }
 
@@ -574,172 +580,10 @@ export default function AssociationPage() {
         );
     };
 
-    return (
-        <div className="mx-auto lg:flex items-center justify-center min-h-full">
-            {showSidebar && (
-                <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-full scrollbar-hide">
-                    <HomeSidebar />
-                </div>
-            )}
-            <div className="min-w-0">
-                <div className="lg:flex overflow-y-auto h-app-inner">
-            <div className="overflow-y-auto scrollbar-hide lg:w-[40vw] px-3">
-                <div className="min-h-[6rem] flex space-x-4 my-4 py-3 border-b">
-                    <div className="h-[6rem] w-[6rem] flex-shrink-0">
-                        <Image
-                            width={90}
-                            height={90}
-                            src={toCdnUrl(association.avatarUrl) || '/GLOBE.png'}
-                            alt={association.name}
-                            className="h-full w-full rounded-full object-cover"
-                        />
-                    </div>
-                    <div className="flex flex-col justify-between w-full">
-                        <div></div>
-                        <div className="justify-between items-center w-full">
-                            <p className="heading-xsmall">{association.name}</p>
-                            <div className="flex flex-wrap items-center justify-end gap-2">
-                                {isSuspended && (
-                                    <span className="label-medium text-text-secondary">{t('badges.suspended')}</span>
-                                )}
-                                {isInviteOnly && !isActive && !isPending && (
-                                    <span className="label-medium text-text-secondary flex items-center gap-1">
-                                        {t('badges.inviteOnly')}
-                                    </span>
-                                )}
-                                {isActive && (
-                                    <span className="label-medium text-text-brand">{t('badges.member')}</span>
-                                )}
-                                {isPending && (
-                                    <span className="label-medium text-text-secondary">{t('badges.requestPending')}</span>
-                                )}
-                                {canShowJoin && (
-                                    <ButtonType1
-                                        className="py-1 px-3 label-medium"
-                                        onClick={handleJoinClick}
-                                        disabled={actionLoading}
-                                    >
-                                        {joinLoading ? tActions("joining") : tActions("join")}
-                                    </ButtonType1>
-                                )}
-                                {canShowRequestToJoin && (
-                                    <ButtonType1
-                                        className="py-1 px-3 label-medium"
-                                        onClick={handleJoinClick}
-                                        disabled={actionLoading}
-                                    >
-                                        {joinLoading ? tActions("joining") : t('actions.requestToJoin')}
-                                    </ButtonType1>
-                                )}
-                                {canCancelRequest && (
-                                    <ButtonType1
-                                        className="py-1 px-3 label-medium border-border-subtle text-text-secondary"
-                                        onClick={handleCancelRequest}
-                                        disabled={actionLoading}
-                                    >
-                                        {t('actions.cancelRequest')}
-                                    </ButtonType1>
-                                )}
-                                {canLeave && (
-                                    <ButtonType1
-                                        className="py-1 px-3 label-medium border-border-subtle text-text-secondary"
-                                        onClick={handleLeaveClick}
-                                        disabled={actionLoading}
-                                    >
-                                        {t('actions.leave')}
-                                    </ButtonType1>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="lg:hidden">
-                    <AboutAssociation
-                        members={association.memberCount ?? 0}
-                        createdDate={association.createdAt ?? ''}
-                        visibility={association.visibility ?? 'Public'}
-                        description={association.description ?? ''}
-                        access={accessProfile}
-                    />
-                </div>
-
-                <div className="overflow-auto lg:max-h-[calc(100vh-64px)] scrollbar-hide">
-                    {feedLoading ? (
-                        <p className="text-text-secondary text-sm py-4 px-2">{t("loadingPosts")}</p>
-                    ) : posts.length > 0 ? (
-                        posts.map((post) => {
-                            const media = splitPostAttachments(post.attachments);
-                            return (
-                            <FeedCardWithReply
-                                key={post.id}
-                                postId={post.id}
-                                profileImage={toCdnUrl(association.avatarUrl) || '/GLOBE.png'}
-                                profileName={association.name}
-                                {...(post.authorType?.toUpperCase() === 'USER' ? { authorUserId: post.authorId } : {})}
-                                authorEntityId={post.authorId}
-                                authorEntityType={post.authorType}
-                                createdAt={post.createdAt}
-                                category={association.name}
-                                aiCategory={post.categories?.[0]}
-                                postDate={formatDateProximity(post.createdAt)}
-                                visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
-                                content={post.text}
-                                images={media.images}
-                                videos={media.videos}
-                                documents={media.documents}
-                                mentionMap={buildMentionMap(post.mentions ?? [])}
-                                shares={post.engagementCounts.shares}
-                                likes={post.engagementCounts.likes}
-                                comments={post.engagementCounts.comments}
-                                onLike={handleLike}
-                                onShare={handleShare}
-                                onSave={handleSave}
-                                onSendComment={handleSendComment}
-                                onDelete={(id) => setLocalPosts(prev => prev.filter(p => p.id !== id))}
-                                isLiked={post.userEngagement.hasLiked}
-                                isSaved={post.userEngagement.hasSaved}
-                                isShared={post.userEngagement.hasShared}
-                                joinButton={!isActive}
-                            />
-                            );
-                        })
-                    ) : (
-                        <p className="text-text-secondary text-sm py-4 px-2">{t("noPosts")}</p>
-                    )}
-                </div>
-            </div>
-
-            <div className="lg:self-start h-app-inner lg:overflow-y-auto scrollbar-hide">
-                <div className="space-y-6 flex-1 mb-6 mx-3">
-                    <div className="hidden lg:block">
-                        <AboutAssociation
-                            members={association.memberCount ?? 0}
-                            createdDate={association.createdAt ?? ''}
-                            visibility={association.visibility ?? 'Public'}
-                            description={association.description ?? ''}
-                            access={accessProfile}
-                        />
-                    </div>
-                    {showSettings && (
-                        <AccessSettingsForm
-                            kind="association"
-                            entityId={associationId}
-                            initial={{
-                                visibility: (association.visibility as Visibility) ?? 'PUBLIC',
-                                joinPolicy: toJoinPolicy(association.joinPolicy) as JoinPolicy,
-                                paymentType: (association.paymentType ?? 'NONE') as PaymentType,
-                                priceAmount: association.priceAmount ?? null,
-                                priceCurrency: association.priceCurrency ?? null,
-                            }}
-                        />
-                    )}
-                    <PeopleYouMayKnow />
-                </div>
-            </div>
-                </div>
-            </div>
-
+    // The membership dialogs are identical for both the tabbed view and the
+    // owner "settings" surface — kept in one fragment so nothing regresses.
+    const membershipModals = (
+        <>
             <ConfirmationModal
                 open={joinModalOpen}
                 onCancel={() => setJoinModalOpen(false)}
@@ -772,6 +616,88 @@ export default function AssociationPage() {
                     onSuccess={handlePaymentSuccess}
                 />
             )}
-        </div>
+        </>
+    );
+
+    // Owner-only settings surface (`?settings=1`). Preserves the AccessSettingsForm
+    // control plus the AboutAssociation summary and PeopleYouMayKnow rail that the
+    // flat feed used to show, now reachable alongside the tabbed module.
+    if (showSettings) {
+        return (
+            <div className="mx-auto lg:flex min-h-full">
+                {showSidebar && (
+                    <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-full scrollbar-hide">
+                        <HomeSidebar />
+                    </div>
+                )}
+                <div className="min-w-0 flex-1 h-app-inner overflow-y-auto scrollbar-hide">
+                    <div className="mx-auto max-w-2xl space-y-6 px-3 py-6">
+                        <Link
+                            href={`/association/${associationId}`}
+                            className="label-medium inline-flex items-center gap-1 text-text-brand"
+                        >
+                            <ChevronLeft className="size-4" aria-hidden />
+                            {association.name}
+                        </Link>
+                        <AboutAssociation
+                            members={association.memberCount ?? 0}
+                            createdDate={association.createdAt ?? ''}
+                            visibility={association.visibility ?? 'Public'}
+                            description={association.description ?? ''}
+                            access={accessProfile}
+                        />
+                        <AccessSettingsForm
+                            kind="association"
+                            entityId={associationId}
+                            initial={{
+                                visibility: (association.visibility as Visibility) ?? 'PUBLIC',
+                                joinPolicy: toJoinPolicy(association.joinPolicy) as JoinPolicy,
+                                paymentType: (association.paymentType ?? 'NONE') as PaymentType,
+                                priceAmount: association.priceAmount ?? null,
+                                priceCurrency: association.priceCurrency ?? null,
+                            }}
+                        />
+                        <PeopleYouMayKnow />
+                    </div>
+                </div>
+                {membershipModals}
+            </div>
+        );
+    }
+
+    // Primary surface: the owner-type aware Embassy tabbed module, gated by
+    // association.enabledServices (applied inside EmbassyTabBar/View via the same
+    // isTabEnabled helper) and driving every tab with ownerType ASSOCIATION.
+    return (
+        <>
+            <EmbassyCommunityView
+                variant="general"
+                ownerKind="association"
+                community={associationToEmbassyCommunity(association)}
+                posts={posts as EmbassyFeedPost[]}
+                feedLoading={feedLoading}
+                displayMemberCount={association.memberCount ?? 0}
+                isActive={isActive}
+                isPending={isPending}
+                isSuspended={isSuspended}
+                isInviteOnly={isInviteOnly}
+                canShowJoin={canShowJoin}
+                canShowRequestToJoin={canShowRequestToJoin}
+                canLeave={canLeave}
+                canCancelRequest={canCancelRequest}
+                actionLoading={actionLoading}
+                joinLoading={joinLoading}
+                onJoinClick={handleJoinClick}
+                onLeaveClick={handleLeaveClick}
+                onCancelRequest={handleCancelRequest}
+                onLike={handleLike}
+                onSave={handleSave}
+                onShare={handleShare}
+                onSendComment={handleSendComment}
+                onDeletePost={(id) => setLocalPosts((prev) => prev.filter((p) => p.id !== id))}
+                showSidebar={showSidebar}
+            />
+            {membershipModals}
+        </>
     );
 }

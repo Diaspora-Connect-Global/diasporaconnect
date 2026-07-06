@@ -53,11 +53,11 @@ import {
   type RequestCaseEvidenceUploadUrlResponse,
   type AddCaseEvidenceResponse,
 } from '@/services/gql/embassyServices';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
 import { EmbassySupportCaseDetail } from './EmbassySupportCaseDetail';
 import { supportStatusBucket, SUPPORT_PILL } from './requestStatus';
-import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
+import { useIsEmbassy, useOwnerEnum } from '@/components/community/embassy/communityVariant';
 
 interface EmbassySupportTabProps {
   profile: EmbassyProfile;
@@ -115,6 +115,7 @@ type Section = 'topics' | 'cases';
 export function EmbassySupportTab({ community, communityId }: EmbassySupportTabProps) {
   const t = useTranslations('community.embassy.support');
   const isEmbassy = useIsEmbassy();
+  const ownerEnum = useOwnerEnum();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedCaseId = searchParams.get('case');
@@ -127,7 +128,7 @@ export function EmbassySupportTab({ community, communityId }: EmbassySupportTabP
   const { data: typesData, loading: typesLoading } = useQuery<SupportCaseTypesResponse>(
     SUPPORT_CASE_TYPES,
     {
-      variables: { ownerType: 'COMMUNITY', ownerEntityId: communityId },
+      variables: { ownerType: ownerEnum, ownerEntityId: communityId },
       fetchPolicy: 'cache-and-network',
     },
   );
@@ -455,6 +456,7 @@ function SubmitCaseDialog({
   onSubmitted,
 }: SubmitCaseDialogProps) {
   const t = useTranslations('community.embassy.support.submit');
+  const ownerEnum = useOwnerEnum();
 
   const [caseTypeId, setCaseTypeId] = useState('');
   const [title, setTitle] = useState('');
@@ -511,7 +513,7 @@ function SubmitCaseDialog({
       const res = await submitCase({
         variables: {
           input: {
-            ownerType: 'COMMUNITY',
+            ownerType: ownerEnum,
             ownerEntityId: communityId,
             caseTypeId,
             title: title.trim(),

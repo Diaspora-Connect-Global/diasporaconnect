@@ -30,17 +30,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { GET_COMMUNITY_MEMBERS } from '@/services/gql/community';
+import { GET_ASSOCIATION_MEMBERS } from '@/services/gql/associations';
 import { GET_EVENTS_BY_OWNER } from '@/services/gql/events';
 import {
   SERVICE_REQUEST_TYPES,
   type ServiceRequestTypesResponse,
 } from '@/services/gql/embassyServices';
-import {
-  EMBASSY_GUIDELINES,
-  type EmbassyProfile,
-} from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
-import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
+import {
+  useIsEmbassy,
+  useOwnerKind,
+  useOwnerEnum,
+} from '@/components/community/embassy/communityVariant';
 
 /** How many members to request per page in the "See All" dialog. */
 const MEMBERS_PAGE_SIZE = 20;
@@ -63,6 +65,33 @@ interface CommunityMembersData {
   listCommunityMembers: {
     members: CommunityMember[];
     total: number;
+  };
+}
+
+/* Association members expose ONLY { userId, role, status, joinedAt } — no
+ * displayName/avatarUrl (no batch public-profile query exists in this app). We
+ * normalize them into the CommunityMember shape with null name/avatar so the
+ * existing rows degrade gracefully (fallback label + neutral avatar). */
+interface AssociationMemberRow {
+  userId: string;
+  role: string;
+  status: string;
+  joinedAt?: string | null;
+}
+interface AssociationMembersData {
+  getAssociationMembers: {
+    members: AssociationMemberRow[];
+    total: number;
+  };
+}
+function normalizeAssociationMember(m: AssociationMemberRow): CommunityMember {
+  return {
+    userId: m.userId,
+    role: m.role,
+    status: m.status,
+    joinedAt: m.joinedAt ?? null,
+    displayName: null,
+    avatarUrl: null,
   };
 }
 
@@ -112,17 +141,32 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
   const { community, posts, displayMemberCount } = props;
   const t = useTranslations('community.embassy.community');
   const isEmbassy = useIsEmbassy();
+  const ownerKind = useOwnerKind();
+  const ownerEnum = useOwnerEnum();
+  const isAssociation = ownerKind === 'association';
 
-  /* ── Right-rail member highlight → real community members ──────────────
-   * listCommunityMembers exposes real names + avatar URLs; we render real
-   * avatars (with a neutral placeholder when avatarUrl is null) and use the
-   * real `total` for the "+N" overflow badge. Graceful when empty. */
+  /* ── Right-rail member highlight → real members ───────────────────────
+   * Communities use listCommunityMembers (real names + avatar URLs).
+   * Associations use getAssociationMembers, which returns only { userId, role,
+   * status, joinedAt } — normalized to null name/avatar so rows degrade to a
+   * fallback label + neutral avatar (no batch profile query exists to hydrate
+   * names). The real `total` still drives the "+N" overflow badge. */
   const { data: membersData } = useQuery<CommunityMembersData>(GET_COMMUNITY_MEMBERS, {
     variables: { communityId: community.id, limit: HIGHLIGHT_LIMIT, offset: 0 },
     fetchPolicy: 'cache-and-network',
+    skip: isAssociation,
   });
-  const memberRows = membersData?.listCommunityMembers?.members ?? [];
-  const memberTotal = membersData?.listCommunityMembers?.total ?? 0;
+  const { data: assocMembersData } = useQuery<AssociationMembersData>(GET_ASSOCIATION_MEMBERS, {
+    variables: { associationId: community.id, page: 1, limit: HIGHLIGHT_LIMIT },
+    fetchPolicy: 'cache-and-network',
+    skip: !isAssociation,
+  });
+  const memberRows: CommunityMember[] = isAssociation
+    ? (assocMembersData?.getAssociationMembers?.members ?? []).map(normalizeAssociationMember)
+    : (membersData?.listCommunityMembers?.members ?? []);
+  const memberTotal = isAssociation
+    ? assocMembersData?.getAssociationMembers?.total ?? 0
+    : membersData?.listCommunityMembers?.total ?? 0;
   const shownMembers = memberRows.slice(0, HIGHLIGHT_SHOWN);
   const extraMembers = Math.max(memberTotal - shownMembers.length, 0);
 
@@ -131,13 +175,13 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
    * serviceRequestTypes for this community. Members + Discussions come from the
    * already-supplied props (memberCount + the live community feed). */
   const { data: eventsData } = useQuery<EventsByOwnerData>(GET_EVENTS_BY_OWNER, {
-    variables: { ownerId: community.id, ownerType: 'community', limit: 1, offset: 0 },
+    variables: { ownerId: community.id, ownerType: ownerKind, limit: 1, offset: 0 },
     fetchPolicy: 'cache-and-network',
   });
   const eventsTotal = eventsData?.getEventsByOwner?.total ?? 0;
 
   const { data: servicesData } = useQuery<ServiceRequestTypesResponse>(SERVICE_REQUEST_TYPES, {
-    variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+    variables: { ownerType: ownerEnum, ownerEntityId: community.id },
     fetchPolicy: 'cache-and-network',
   });
   const servicesTotal = useMemo(
@@ -146,10 +190,16 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
   );
 
   /* ── Community Guidelines ──────────────────────────────────────────────
-   * The community may expose `communityRules` (longer-form guidelines text);
-   * when it is missing we fall back to the generic platform guidelines that the
-   * card already lists (EMBASSY_GUIDELINES). */
-  const communityRules = community.communityRules;
+   * Real `communityRules` (a single string) split into list items on newlines.
+   * When it is empty/absent we render an empty state — no fabricated defaults. */
+  const ruleItems = useMemo(
+    () =>
+      (community.communityRules ?? '')
+        .split(/\r?\n/)
+        .map((r) => r.trim())
+        .filter(Boolean),
+    [community.communityRules],
+  );
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   /* ── About card meta ───────────────────────────────────────────────────*/
@@ -164,27 +214,48 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
   const [membersOpen, setMembersOpen] = useState(false);
   const [allMemberRows, setAllMemberRows] = useState<CommunityMember[]>([]);
   const [allMemberTotal, setAllMemberTotal] = useState(0);
-  const [loadAllMembers, { loading: allMembersLoading }] =
+  const [loadAllMembers, { loading: commAllLoading }] =
     useLazyQuery<CommunityMembersData>(GET_COMMUNITY_MEMBERS, {
       fetchPolicy: 'network-only',
     });
+  const [loadAllAssocMembers, { loading: assocAllLoading }] =
+    useLazyQuery<AssociationMembersData>(GET_ASSOCIATION_MEMBERS, {
+      fetchPolicy: 'network-only',
+    });
+  const allMembersLoading = isAssociation ? assocAllLoading : commAllLoading;
   const hasMoreMembers = allMemberRows.length < allMemberTotal;
 
   const fetchMembersPage = useCallback(
     async (offset: number) => {
-      const { data } = await loadAllMembers({
-        variables: { communityId: community.id, limit: MEMBERS_PAGE_SIZE, offset },
-      });
-      const page = data?.listCommunityMembers;
-      if (!page) return;
-      setAllMemberTotal(page.total ?? 0);
+      // Associations page by (page, limit); communities by (limit, offset).
+      let members: CommunityMember[] = [];
+      let total = 0;
+      if (isAssociation) {
+        const pageNo = Math.floor(offset / MEMBERS_PAGE_SIZE) + 1;
+        const { data } = await loadAllAssocMembers({
+          variables: { associationId: community.id, page: pageNo, limit: MEMBERS_PAGE_SIZE },
+        });
+        const page = data?.getAssociationMembers;
+        if (!page) return;
+        members = page.members.map(normalizeAssociationMember);
+        total = page.total ?? 0;
+      } else {
+        const { data } = await loadAllMembers({
+          variables: { communityId: community.id, limit: MEMBERS_PAGE_SIZE, offset },
+        });
+        const page = data?.listCommunityMembers;
+        if (!page) return;
+        members = page.members;
+        total = page.total ?? 0;
+      }
+      setAllMemberTotal(total);
       setAllMemberRows((prev) => {
-        if (offset === 0) return page.members;
+        if (offset === 0) return members;
         const seen = new Set(prev.map((m) => m.userId));
-        return [...prev, ...page.members.filter((m) => !seen.has(m.userId))];
+        return [...prev, ...members.filter((m) => !seen.has(m.userId))];
       });
     },
-    [loadAllMembers, community.id],
+    [isAssociation, loadAllAssocMembers, loadAllMembers, community.id],
   );
 
   const openMembersDialog = useCallback(() => {
@@ -368,19 +439,17 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
             </h3>
             <p className="caption-medium mt-1 text-text-secondary">{t('guidelinesSubtitle')}</p>
 
-            {communityRules ? (
-              <p className="caption-large mt-3 line-clamp-6 whitespace-pre-line text-text-primary">
-                {communityRules}
-              </p>
-            ) : (
+            {ruleItems.length > 0 ? (
               <ul className="mt-3 space-y-2">
-                {EMBASSY_GUIDELINES.map((g) => (
+                {ruleItems.map((g) => (
                   <li key={g} className="caption-large flex items-center gap-2 text-text-primary">
                     <Check className="size-4 flex-shrink-0 text-text-success" aria-hidden />
                     {g}
                   </li>
                 ))}
               </ul>
+            ) : (
+              <p className="caption-large mt-3 text-text-secondary">{t('guidelinesEmpty')}</p>
             )}
 
             <button
@@ -467,13 +536,9 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
               {t('guidelinesSubtitle')}
             </DialogDescription>
           </DialogHeader>
-          {communityRules ? (
-            <p className="caption-large whitespace-pre-line text-text-primary">
-              {communityRules}
-            </p>
-          ) : (
+          {ruleItems.length > 0 ? (
             <ul className="space-y-2">
-              {EMBASSY_GUIDELINES.map((g) => (
+              {ruleItems.map((g) => (
                 <li
                   key={g}
                   className="caption-large flex items-start gap-2 text-text-primary"
@@ -483,6 +548,8 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
                 </li>
               ))}
             </ul>
+          ) : (
+            <p className="caption-large text-text-secondary">{t('guidelinesEmpty')}</p>
           )}
         </DialogContent>
       </Dialog>

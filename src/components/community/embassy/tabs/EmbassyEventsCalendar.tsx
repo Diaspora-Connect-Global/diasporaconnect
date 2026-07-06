@@ -42,7 +42,8 @@ import {
   type RegisterEventData,
 } from '@/services/gql/events';
 import type { EmbassyViewProps } from '../types';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
+import { useOwnerKind } from '../communityVariant';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -285,6 +286,7 @@ interface Props {
 
 export function EmbassyEventsCalendar({ community, profile }: Props) {
   const t = useTranslations('community.embassy.events.calendar');
+  const ownerKind = useOwnerKind();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -300,7 +302,7 @@ export function EmbassyEventsCalendar({ community, profile }: Props) {
   const [localStatus, setLocalStatus] = useState<Record<string, RsvpStatus>>({});
 
   const { data, loading } = useQuery<GetEventsByOwnerResponse>(GET_EVENTS_BY_OWNER, {
-    variables: { ownerId: community.id, ownerType: 'community', limit: 50, offset: 0 },
+    variables: { ownerId: community.id, ownerType: ownerKind, limit: 50, offset: 0 },
     fetchPolicy: 'cache-and-network',
   });
 

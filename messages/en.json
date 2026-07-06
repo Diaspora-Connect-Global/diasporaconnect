@@ -1329,6 +1329,7 @@
                 "noDiscussions": "No discussions yet.",
                 "guidelinesTitle": "Community Guidelines",
                 "guidelinesSubtitle": "Please be respectful, helpful and follow our community guidelines.",
+                "guidelinesEmpty": "No community guidelines have been set yet.",
                 "membersTitle": "Community Members",
                 "membersCount": "{count} members",
                 "membersEmpty": "No members to show yet.",

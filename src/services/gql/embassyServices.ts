@@ -427,9 +427,10 @@ export type SupportCaseStatus =
 
 export type SupportPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
-/** `SubmitCaseInput!` shape for SUBMIT_CASE. */
+/** `SubmitCaseInput!` shape for SUBMIT_CASE. `ownerType` is COMMUNITY for embassy
+ *  communities and ASSOCIATION for associations. */
 export interface SubmitCaseInput {
-  ownerType: 'COMMUNITY';
+  ownerType: 'COMMUNITY' | 'ASSOCIATION';
   ownerEntityId?: string | null;
   caseTypeId: string;
   title: string;

@@ -38,9 +38,9 @@ import {
   type ServiceRequestTypeDetail,
   type ServiceRequestTypesDetailResponse,
 } from '@/services/gql/embassyServices';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
-import { useIsEmbassy } from '../communityVariant';
+import { useIsEmbassy, useOwnerEnum } from '../communityVariant';
 import { ServiceFee } from '../ServiceFee';
 
 interface Tone {
@@ -134,6 +134,7 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isEmbassy = useIsEmbassy();
+  const ownerEnum = useOwnerEnum();
   const [subTab, setSubTab] = useState<SubTab>('Overview');
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -195,7 +196,7 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
   const { data, loading } = useQuery<ServiceRequestTypesDetailResponse>(
     SERVICE_REQUEST_TYPES_DETAIL,
     {
-      variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+      variables: { ownerType: ownerEnum, ownerEntityId: community.id },
       fetchPolicy: 'cache-and-network',
     },
   );
@@ -560,10 +561,12 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
                       {contactPhone}
                     </a>
                   </li>
-                  <li className="caption-medium flex items-center gap-2 text-text-secondary">
-                    <CalendarDays className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
-                    {officeHours}
-                  </li>
+                  {officeHours && (
+                    <li className="caption-medium flex items-center gap-2 text-text-secondary">
+                      <CalendarDays className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
+                      {officeHours}
+                    </li>
+                  )}
                 </ul>
                 <a
                   href={`mailto:${contactEmail}`}

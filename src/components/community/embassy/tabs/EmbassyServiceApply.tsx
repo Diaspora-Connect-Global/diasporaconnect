@@ -51,9 +51,9 @@ import {
   type RequestDocUploadUrlResponse,
   type AddServiceRequestDocumentResponse,
 } from '@/services/gql/embassyServices';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
-import { useIsEmbassy } from '../communityVariant';
+import { useIsEmbassy, useOwnerEnum } from '../communityVariant';
 import { ServiceFee } from '../ServiceFee';
 
 /** Zero-amount label in the service's currency (e.g. "€0.00"). */
@@ -98,6 +98,7 @@ interface EmbassyServiceApplyProps {
  */
 export function EmbassyServiceApply({ serviceId, community, profile }: EmbassyServiceApplyProps) {
   const t = useTranslations('community.embassy.services.apply');
+  const ownerEnum = useOwnerEnum();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -114,7 +115,7 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
   const { data, loading } = useQuery<ServiceRequestTypesDetailResponse>(
     SERVICE_REQUEST_TYPES_DETAIL,
     {
-      variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+      variables: { ownerType: ownerEnum, ownerEntityId: community.id },
       fetchPolicy: 'cache-and-network',
     },
   );
@@ -234,7 +235,7 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
         variables: {
           input: {
             requestTypeId: service.id,
-            ownerType: 'COMMUNITY',
+            ownerType: ownerEnum,
             ownerEntityId: community.id,
             formResponsesJson: JSON.stringify(answers),
           },
@@ -433,10 +434,12 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
                   {contactPhone}
                 </a>
               </li>
-              <li className="caption-medium flex items-center gap-2 text-text-secondary">
-                <CalendarDays className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
-                {profile.officeHours}
-              </li>
+              {profile.officeHours && (
+                <li className="caption-medium flex items-center gap-2 text-text-secondary">
+                  <CalendarDays className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
+                  {profile.officeHours}
+                </li>
+              )}
             </ul>
             <a
               href={`mailto:${contactEmail}?subject=${encodeURIComponent(

@@ -48,9 +48,9 @@ import {
   type RequestDocUploadUrlResponse,
   type AddServiceRequestDocumentResponse,
 } from '@/services/gql/embassyServices';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
-import { useIsEmbassy } from '../communityVariant';
+import { useIsEmbassy, useOwnerEnum } from '../communityVariant';
 import { ServiceFee } from '../ServiceFee';
 import { CancelRequestDialog } from './CancelRequestDialog';
 import { statusBucket, BUCKET_PILL } from './requestStatus';
@@ -121,6 +121,7 @@ export function EmbassyTrackRequestDetail({
 }: EmbassyTrackRequestDetailProps) {
   const t = useTranslations('community.embassy.track.detail');
   const isEmbassy = useIsEmbassy();
+  const ownerEnum = useOwnerEnum();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -137,7 +138,7 @@ export function EmbassyTrackRequestDetail({
   const { data: typesData } = useQuery<ServiceRequestTypesDetailResponse>(
     SERVICE_REQUEST_TYPES_DETAIL,
     {
-      variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+      variables: { ownerType: ownerEnum, ownerEntityId: community.id },
       fetchPolicy: 'cache-and-network',
     },
   );

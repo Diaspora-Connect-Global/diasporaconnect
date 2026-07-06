@@ -27,7 +27,7 @@ import {
 import { EmbassyFeedList } from '../EmbassyFeedList';
 import { FeedListSkeleton } from '../EmbassySkeletons';
 import { useIsEmbassy } from '../communityVariant';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyFeedPost, EmbassyViewProps } from '../types';
 
 interface EmbassyUpdatesTabProps {

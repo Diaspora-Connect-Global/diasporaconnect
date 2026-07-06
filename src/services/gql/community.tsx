@@ -29,6 +29,11 @@ export interface CommunitySummary {
   priceCurrency?: string | null;
   defaultGroupId?: string | null;
   membershipStatus?: MembershipStatus | 'MEMBER' | null;
+  /**
+   * Enabled member-facing service module keys (e.g. 'posts', 'events').
+   * `null`/absent → treat as all enabled (legacy/non-loaded); `[]` → none enabled.
+   */
+  enabledServices?: string[] | null;
 }
 
 export interface CommunityDetail extends CommunitySummary {
@@ -98,6 +103,7 @@ export const GET_COMMUNITY = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      enabledServices
       communityType {
         name
         isEmbassy
@@ -124,6 +130,7 @@ export const GET_COMMUNITY_DETAILS = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      enabledServices
       contactEmail
       contactPhone
       address
@@ -131,6 +138,20 @@ export const GET_COMMUNITY_DETAILS = gql`
       communityType {
         name
         isEmbassy
+      }
+      embassyProfile {
+        country
+        countryCode
+        flagUrl
+        isOfficial
+        tagline
+        city
+        addressLine
+        phone
+        email
+        mapUrl
+        officeHours
+        emergencyLine
       }
     }
   }

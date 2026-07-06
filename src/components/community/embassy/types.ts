@@ -1,6 +1,7 @@
 import type { Attachment } from '@/services/gql/types/postsFeed';
 import type { MentionInputItem } from '@/components/custom/richTextRenderer';
-import type { CommunityVariant } from './communityVariant';
+import type { CommunityVariant, OwnerKind } from './communityVariant';
+import type { EmbassyProfileSource } from './embassyData';
 
 /** Mirrors the FeedPost shape produced by GET_FEED in CommunityDetailClient. */
 export interface EmbassyFeedPost {
@@ -28,11 +29,18 @@ export interface EmbassyCommunity {
   memberCount?: number;
   createdAt?: string;
   membershipStatus?: string | null;
+  /**
+   * Enabled member-facing service module keys. `null`/absent → treat as all
+   * enabled (legacy/non-loaded); `[]` → none enabled. Drives tab/widget gating.
+   */
+  enabledServices?: string[] | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
   address?: string | null;
   locationCountry?: string | null;
   communityType?: { name: string; isEmbassy: boolean } | null;
+  /** Real backend embassy metadata; null for non-embassy communities. */
+  embassyProfile?: EmbassyProfileSource | null;
 }
 
 /**
@@ -47,6 +55,12 @@ export interface EmbassyViewProps {
    * CommunityVariantProvider → useIsEmbassy()/useCommunityNoun().
    */
   variant: CommunityVariant;
+  /**
+   * Which owner entity backs this view. Defaults to 'community'. When
+   * 'association', every tab sends ASSOCIATION as its ownerType (never COMMUNITY)
+   * — threaded to the tabs via CommunityVariantProvider → useOwnerKind()/useOwnerEnum().
+   */
+  ownerKind?: OwnerKind;
   community: EmbassyCommunity;
   posts: EmbassyFeedPost[];
   feedLoading: boolean;

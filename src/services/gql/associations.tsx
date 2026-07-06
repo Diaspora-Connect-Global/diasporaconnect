@@ -30,6 +30,11 @@ export interface AssociationSummary {
   associationType?: { id: string; name: string } | null;
   /** Current user's membership status when available (ACTIVE | PENDING | SUSPENDED). Backend may also return "MEMBER" for ACTIVE. */
   membershipStatus?: MembershipStatus | 'MEMBER' | null;
+  /**
+   * Enabled member-facing service module keys (e.g. 'posts', 'events').
+   * `null`/absent → treat as all enabled (legacy/non-loaded); `[]` → none enabled.
+   */
+  enabledServices?: string[] | null;
 }
 
 export interface AssociationDetail extends AssociationSummary {
@@ -106,6 +111,7 @@ export const GET_ASSOCIATION = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      enabledServices
       associationType {
         id
         name
@@ -131,6 +137,7 @@ export const GET_ASSOCIATION_DETAILS = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      enabledServices
       associationType {
         id
         name

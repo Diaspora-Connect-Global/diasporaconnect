@@ -70,7 +70,7 @@ import {
   type CancelRegistrationData,
   type RegistrationFormField,
 } from '@/services/gql/events';
-import type { EmbassyProfile } from '../embassyMock';
+import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
 import { useIsEmbassy } from '../communityVariant';
 

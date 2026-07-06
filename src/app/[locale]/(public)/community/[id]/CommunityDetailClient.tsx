@@ -70,11 +70,26 @@ interface CommunityDetails {
   priceCurrency?: string | null;
   defaultGroupId?: string | null;
   membershipStatus?: string | null;
+  enabledServices?: string[] | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
   address?: string | null;
   locationCountry?: string | null;
   communityType?: { name: string; isEmbassy: boolean } | null;
+  embassyProfile?: {
+    country?: string | null;
+    countryCode?: string | null;
+    flagUrl?: string | null;
+    isOfficial?: boolean | null;
+    tagline?: string | null;
+    city?: string | null;
+    addressLine?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    mapUrl?: string | null;
+    officeHours?: string | null;
+    emergencyLine?: string | null;
+  } | null;
 }
 
 interface GetCommunityDetailsResponse {

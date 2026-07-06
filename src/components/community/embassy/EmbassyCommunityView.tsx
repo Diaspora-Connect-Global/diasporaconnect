@@ -12,7 +12,8 @@ import { EmbassySupportTab } from './tabs/EmbassySupportTab';
 import { EmbassyCommunityTab } from './tabs/EmbassyCommunityTab';
 import { ComingSoonTab } from './tabs/ComingSoonTab';
 import { parseEmbassyTab, EMBASSY_TABS } from './tabs';
-import { getEmbassyProfile } from './embassyMock';
+import { isTabEnabled } from '@/lib/communityServices';
+import { getEmbassyProfile } from './embassyData';
 import { CommunityVariantProvider } from './communityVariant';
 import type { EmbassyViewProps } from './types';
 
@@ -24,9 +25,14 @@ import type { EmbassyViewProps } from './types';
  * nothing itself (Home reuses the live community feed passed via props).
  */
 export function EmbassyCommunityView(props: EmbassyViewProps) {
-  const { community, variant } = props;
+  const { community, variant, ownerKind = 'community' } = props;
   const searchParams = useSearchParams();
-  const activeTab = parseEmbassyTab(searchParams.get('tab'));
+  const requestedTab = parseEmbassyTab(searchParams.get('tab'));
+  // A `?tab=` deep-link (or a stale link after a service is disabled) must never
+  // land on a gated tab — fall back to the always-on 'home' feed.
+  const activeTab = isTabEnabled(requestedTab, community.enabledServices)
+    ? requestedTab
+    : 'home';
   const profile = getEmbassyProfile(community.id, variant, community);
 
   const membership = {
@@ -74,7 +80,7 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
   }
 
   return (
-    <CommunityVariantProvider variant={variant}>
+    <CommunityVariantProvider variant={variant} ownerKind={ownerKind}>
       <div className="mx-auto min-h-full">
         <div className="min-w-0 flex-1">
           {/* One scroll area: everything scrolls together, but the header + tab bar
@@ -85,7 +91,7 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
                 the content so the whole page scrolls as one. */}
             <div className="z-20 bg-surface-default lg:sticky lg:top-0">
               <EmbassyHeader community={community} profile={profile} membership={membership} />
-              <EmbassyTabBar active={activeTab} />
+              <EmbassyTabBar active={activeTab} enabledServices={community.enabledServices} />
             </div>
             {renderActiveTab()}
           </div>

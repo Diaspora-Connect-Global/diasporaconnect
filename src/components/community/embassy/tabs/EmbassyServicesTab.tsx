@@ -29,9 +29,9 @@ import {
   type ServiceRequestType,
   type ServiceRequestTypesResponse,
 } from '@/services/gql/embassyServices';
-import { type EmbassyProfile } from '../embassyMock';
+import { type EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
-import { useIsEmbassy } from '../communityVariant';
+import { useIsEmbassy, useOwnerEnum } from '../communityVariant';
 import { ServiceGridSkeleton } from '../EmbassySkeletons';
 import { EmbassyServiceDetail } from './EmbassyServiceDetail';
 import { EmbassyServiceApply } from './EmbassyServiceApply';
@@ -84,6 +84,7 @@ interface EmbassyServicesTabProps {
 export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabProps) {
   const t = useTranslations('community.embassy.services');
   const isEmbassy = useIsEmbassy();
+  const ownerEnum = useOwnerEnum();
   const [search, setSearch] = useState('');
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -91,7 +92,7 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
   const applyMode = searchParams.get('apply') === '1';
 
   const { data, loading } = useQuery<ServiceRequestTypesResponse>(SERVICE_REQUEST_TYPES, {
-    variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+    variables: { ownerType: ownerEnum, ownerEntityId: community.id },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -313,10 +314,12 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
               {t('serviceHours')}
             </p>
             <p className="caption-medium mt-1 text-text-secondary">{t('serviceHoursAvail')}</p>
-            <p className="caption-medium mt-3 flex items-center gap-2 text-text-primary">
-              <CalendarDays className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
-              {profile.officeHours}
-            </p>
+            {profile.officeHours && (
+              <p className="caption-medium mt-3 flex items-center gap-2 text-text-primary">
+                <CalendarDays className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
+                {profile.officeHours}
+              </p>
+            )}
             <p className="caption-medium mt-2 flex items-center gap-2 text-text-secondary">
               <CalendarDays className="size-4 flex-shrink-0 text-text-secondary" aria-hidden />
               {t('closedDays')}

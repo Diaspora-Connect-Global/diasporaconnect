@@ -25,7 +25,7 @@ import { ButtonType2 } from '@/components/custom/button';
 import { EmbassyFeedList } from '../EmbassyFeedList';
 import { FeedListSkeleton } from '../EmbassySkeletons';
 import { embassyIcon } from '../icons';
-import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
+import { useIsEmbassy, useOwnerKind, useOwnerEnum } from '@/components/community/embassy/communityVariant';
 import { GET_EVENTS_BY_OWNER } from '@/services/gql/events';
 import {
   PUBLISHED_RESOURCES,
@@ -37,7 +37,8 @@ import {
 import {
   getQuickActions,
   type EmbassyProfile,
-} from '../embassyMock';
+} from '../embassyData';
+import { isTabEnabled, isServiceEnabled } from '@/lib/communityServices';
 import type { EmbassyTabKey } from '../tabs';
 import type { EmbassyViewProps } from '../types';
 
@@ -108,6 +109,8 @@ const MAX_HOME_POSTS = 3;
 export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
   const t = useTranslations('community.embassy');
   const isEmbassy = useIsEmbassy();
+  const ownerKind = useOwnerKind();
+  const ownerEnum = useOwnerEnum();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { community, posts, feedLoading } = props;
@@ -122,7 +125,14 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
     return { pathname, query };
   }
 
-  const quickActions = getQuickActions(isEmbassy ? 'embassy' : 'general');
+  // Quick actions must never deep-link to a gated tab. Filter by the same
+  // service gating that hides the tabs themselves.
+  const quickActions = getQuickActions(isEmbassy ? 'embassy' : 'general').filter((action) =>
+    isTabEnabled(action.tab, community.enabledServices),
+  );
+
+  // The right-rail Resources widget is gated on the 'resources' service.
+  const resourcesEnabled = isServiceEnabled('resources', community.enabledServices);
 
   const homePosts = posts.slice(0, MAX_HOME_POSTS);
 
@@ -142,7 +152,7 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
 
   // Upcoming events for THIS community (next 2–3, non-DRAFT, non-CANCELLED).
   const { data: eventsData } = useQuery<GetEventsByOwnerResponse>(GET_EVENTS_BY_OWNER, {
-    variables: { ownerId: community.id, ownerType: 'community', limit: 10, offset: 0 },
+    variables: { ownerId: community.id, ownerType: ownerKind, limit: 10, offset: 0 },
     fetchPolicy: 'cache-and-network',
   });
   const upcomingEvents = useMemo(() => {
@@ -165,7 +175,7 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
 
   // Published resources for THIS community.
   const { data: resourcesData } = useQuery<PublishedResourcesResponse>(PUBLISHED_RESOURCES, {
-    variables: { ownerType: 'COMMUNITY', ownerEntityId: community.id },
+    variables: { ownerType: ownerEnum, ownerEntityId: community.id },
     fetchPolicy: 'cache-and-network',
   });
   const resources: ResourceSummary[] = resourcesData?.publishedResources ?? [];
@@ -188,7 +198,8 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
     <div className="grid grid-cols-1 gap-6 px-3 py-6 lg:grid-cols-[1fr_20rem] lg:px-6">
       {/* Main column */}
       <div className="min-w-0 space-y-6">
-        {/* Quick Actions */}
+        {/* Quick Actions — hidden entirely when every action targets a gated tab */}
+        {quickActions.length > 0 && (
         <Card className="border-border-subtle">
           <CardContent className="p-5">
             <h2 className="heading-xsmall mb-4 text-text-primary">{t('home.quickActions')}</h2>
@@ -210,6 +221,7 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Emergency Alert — shown only when an emergency/advisory post exists */}
         {alertPost && (
@@ -313,7 +325,8 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
           </CardContent>
         </Card>
 
-        {/* Important Resources */}
+        {/* Important Resources — gated on the 'resources' service */}
+        {resourcesEnabled && (
         <Card className="border-border-subtle">
           <CardContent className="p-5">
             <h3 className="label-large mb-4 text-text-primary">{t('home.importantResources')}</h3>
@@ -353,6 +366,7 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
             )}
           </CardContent>
         </Card>
+        )}
 
         {/* Need Help? */}
         <Card className="border-border-subtle">

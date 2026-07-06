@@ -30,9 +30,10 @@ import { useSearchParams } from 'next/navigation';
 import { Link, usePathname } from '@/i18n/navigation';
 import { GET_EVENTS_BY_OWNER, type EventLocation } from '@/services/gql/events';
 import type { EmbassyViewProps } from '../types';
-import { getEmbassyProfile } from '../embassyMock';
+import { getEmbassyProfile } from '../embassyData';
 import { EmbassyEventDetail } from './EmbassyEventDetail';
 import { EmbassyEventsCalendar } from './EmbassyEventsCalendar';
+import { useOwnerKind } from '../communityVariant';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -397,6 +398,7 @@ function EventRow({
 
 export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
   const { community } = props;
+  const ownerKind = useOwnerKind();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedEventId = searchParams.get('event');
@@ -436,7 +438,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
   const [showAllCategories, setShowAllCategories] = useState(false);
 
   const { data, loading } = useQuery<GetEventsByOwnerResponse>(GET_EVENTS_BY_OWNER, {
-    variables: { ownerId: community.id, ownerType: 'community', limit, offset: 0 },
+    variables: { ownerId: community.id, ownerType: ownerKind, limit, offset: 0 },
     fetchPolicy: 'cache-and-network',
   });
 
