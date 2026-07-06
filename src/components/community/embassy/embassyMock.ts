@@ -87,6 +87,26 @@ export const EMBASSY_QUICK_ACTIONS: ReadonlyArray<EmbassyQuickAction> = [
   { key: 'events', icon: 'CalendarDays', label: 'Embassy Events', tab: 'events' },
 ];
 
+/**
+ * Quick actions for general (non-embassy) communities. Uses neutral,
+ * community-oriented labels instead of the embassy/consular ones, but points at
+ * the same shared tabs.
+ */
+export const GENERAL_QUICK_ACTIONS: ReadonlyArray<EmbassyQuickAction> = [
+  { key: 'discussions', icon: 'Users', label: 'Discussions', tab: 'community' },
+  { key: 'events', icon: 'CalendarDays', label: 'Events', tab: 'events' },
+  { key: 'updates', icon: 'Megaphone', label: 'Updates', tab: 'updates' },
+  { key: 'services', icon: 'LayoutGrid', label: 'Services', tab: 'services' },
+  { key: 'support', icon: 'LifeBuoy', label: 'Get Support', tab: 'support' },
+];
+
+/** Quick actions for the given community variant. */
+export function getQuickActions(
+  variant: 'embassy' | 'general' = 'embassy',
+): ReadonlyArray<EmbassyQuickAction> {
+  return variant === 'embassy' ? EMBASSY_QUICK_ACTIONS : GENERAL_QUICK_ACTIONS;
+}
+
 /* ── Community tab mock content ─────────────────────────────────────────── */
 
 export interface EmbassyStat {

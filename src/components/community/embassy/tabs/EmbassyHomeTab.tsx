@@ -35,7 +35,7 @@ import {
   type ResourceSummary,
 } from '@/services/gql/resources';
 import {
-  EMBASSY_QUICK_ACTIONS,
+  getQuickActions,
   type EmbassyProfile,
 } from '../embassyMock';
 import type { EmbassyTabKey } from '../tabs';
@@ -122,6 +122,8 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
     return { pathname, query };
   }
 
+  const quickActions = getQuickActions(isEmbassy ? 'embassy' : 'general');
+
   const homePosts = posts.slice(0, MAX_HOME_POSTS);
 
   // Derive the active emergency alert: the most recent post classified as
@@ -191,7 +193,7 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
           <CardContent className="p-5">
             <h2 className="heading-xsmall mb-4 text-text-primary">{t('home.quickActions')}</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {EMBASSY_QUICK_ACTIONS.map((action) => {
+              {quickActions.map((action) => {
                 const Icon = embassyIcon(action.icon);
                 return (
                   <Link
