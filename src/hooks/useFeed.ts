@@ -370,13 +370,19 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         // the recommender returned (keeps the cold-start fallback test honest).
         const merged = dedupePostsById(hydrated);
 
-        // C1: FOR_YOU exhausted with nothing to show (cold start). Degrade to
-        // the chronological feed (NETWORK → ALL) instead of an empty box.
-        if (
-          isRecommendedFeed &&
-          merged.length === 0 &&
-          !page?.nextCursor
-        ) {
+        // C1: FOR_YOU produced nothing renderable. Degrade to the chronological
+        // feed (NETWORK → ALL) instead of an empty box.
+        //
+        // This fires whenever hydration yields ZERO posts — covering two cases:
+        //   1. the recommender returned an empty page (cold start), and
+        //   2. it returned ranked ids that all failed to hydrate (e.g. ids
+        //      pointing at deleted/stale posts whose `content_item` projection
+        //      is out of sync).
+        // Previously we also required `!page?.nextCursor`, so a page full of
+        // un-hydratable items (cursor present) trapped the viewer on a
+        // permanently empty feed with no fallback. Keying purely off the
+        // hydrated count is what the ranked feed can actually render.
+        if (isRecommendedFeed && merged.length === 0) {
           const fallback = await fetchChronoFallback(initialLimit);
           if (cancelled) return;
           if (fallback) {
