@@ -40,7 +40,7 @@ import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFe
 import { useFeed } from '@/hooks/useFeed';
 import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { ChevronLeftIcon, ChevronRightIcon, Newspaper, Compass, Users } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, Compass, Users, SquarePen } from 'lucide-react';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -1226,12 +1226,21 @@ export default function Home() {
           )}
 
           {/* Feed Empty State — absolute last resort ("You" tab with no posts
-              and no chronological fallback available). */}
+              and no chronological fallback available). Instead of a dead-end
+              placeholder, invite the user to create the first post. */}
           {!feedLoading && !feedError && !hasPosts && viewMode === 'you' && (
             <EmptyState
-              icon={Newspaper}
-              title={tFeedback('empty.feed.title')}
-              description={tFeedback('empty.feed.description')}
+              icon={SquarePen}
+              title={tHome('youEmpty.title')}
+              description={tHome('youEmpty.description')}
+              action={
+                <Link href="/create-post" prefetch={false}>
+                  <ButtonType3 className="inline-flex items-center gap-2 border border-text-brand px-4 py-2 text-sm">
+                    <SquarePen className="h-4 w-4" />
+                    {tHome('youEmpty.createPost')}
+                  </ButtonType3>
+                </Link>
+              }
             />
           )}
 

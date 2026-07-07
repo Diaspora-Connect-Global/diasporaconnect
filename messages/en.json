@@ -405,6 +405,11 @@
             "discover": "Discover communities",
             "switchToYou": "Browse the You feed"
         },
+        "youEmpty": {
+            "title": "Your feed is empty",
+            "description": "Be the first to share something — create a post to get started.",
+            "createPost": "Create a post"
+        },
         "header": {
             "home": "Home",
             "community": "Community",

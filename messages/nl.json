@@ -405,6 +405,11 @@
             "discover": "Communities ontdekken",
             "switchToYou": "Bekijk de Voor jou-feed"
         },
+        "youEmpty": {
+            "title": "Je feed is leeg",
+            "description": "Wees de eerste die iets deelt — maak een bericht om te beginnen.",
+            "createPost": "Bericht maken"
+        },
         "header": {
             "home": "Startpagina",
             "community": "Gemeenschap",

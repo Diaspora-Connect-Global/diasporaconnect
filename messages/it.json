@@ -404,6 +404,11 @@
             "discover": "Scopri le community",
             "switchToYou": "Vai al feed « Per te »"
         },
+        "youEmpty": {
+            "title": "Il tuo feed è vuoto",
+            "description": "Sii il primo a condividere qualcosa — crea un post per iniziare.",
+            "createPost": "Crea un post"
+        },
         "header": {
             "home": "Home",
             "community": "Community",

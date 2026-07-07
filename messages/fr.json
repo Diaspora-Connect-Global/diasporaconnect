@@ -404,6 +404,11 @@
             "discover": "Découvrir des communautés",
             "switchToYou": "Voir le fil « Pour vous »"
         },
+        "youEmpty": {
+            "title": "Votre fil est vide",
+            "description": "Soyez le premier à partager quelque chose — créez une publication pour commencer.",
+            "createPost": "Créer une publication"
+        },
         "header": {
             "home": "Accueil",
             "community": "Communauté",
