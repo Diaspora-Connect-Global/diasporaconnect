@@ -337,9 +337,28 @@ export default function Community() {
         return searchedCommunities.map((c) => ({ ...c, avatarUrl: toCdnUrl(c.avatarUrl) }));
     }, [personalisedCommunities, searchedCommunities]);
 
+    // Authoritative set of communities the viewer has already joined: the
+    // LIST_MY_JOINED_COMMUNITIES result, plus any joined this session
+    // (joinedCommunities) so the card disappears immediately after joining,
+    // without waiting for a refetch to land.
+    const joinedCommunityIds = useMemo(() => {
+        const ids = new Set<string>(joinedCommunities);
+        for (const c of myCommunitiesData?.listUserCommunities ?? []) {
+            ids.add(c.id);
+        }
+        return ids;
+    }, [myCommunitiesData, joinedCommunities]);
+
     const visibleCommunities = useMemo(
         () =>
             renderList
+                // "Discover more communities" surfaces communities to join, so
+                // drop the ones the viewer is already a member of.
+                .filter(
+                    (c) =>
+                        !joinedCommunityIds.has(c.id) &&
+                        !JOINED_STATUSES.has(c.membershipStatus?.toUpperCase() ?? ''),
+                )
                 .filter((c) =>
                     visibilityFilter === 'ALL'
                         ? true
@@ -350,7 +369,7 @@ export default function Community() {
                     const isPaid = !!c.paymentType && c.paymentType !== 'NONE';
                     return pricingFilter === 'PAID' ? isPaid : !isPaid;
                 }),
-        [renderList, visibilityFilter, pricingFilter],
+        [renderList, joinedCommunityIds, visibilityFilter, pricingFilter],
     );
 
     const anyDiscoverLoading = discoverLoading || searchLoading;
