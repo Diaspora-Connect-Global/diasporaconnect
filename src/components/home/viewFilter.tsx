@@ -15,6 +15,20 @@ export default function ViewFilter() {
     }
   }, []);
 
+  // Keep the toggle highlight in sync when the feed is switched from elsewhere —
+  // e.g. the "Browse the You feed" CTA on the empty Following tab dispatches
+  // `viewFilterChange`. Without this the feed would switch to You while the
+  // Following button stayed selected.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<'you' | 'following'>).detail;
+      if (detail === 'you' || detail === 'following') setView(detail);
+    };
+    window.addEventListener('viewFilterChange', handler as EventListener);
+    return () =>
+      window.removeEventListener('viewFilterChange', handler as EventListener);
+  }, []);
+
   const handleViewChange = (newView: 'you' | 'following') => {
     setView(newView);
     sessionStorage.setItem('viewFilter', newView);

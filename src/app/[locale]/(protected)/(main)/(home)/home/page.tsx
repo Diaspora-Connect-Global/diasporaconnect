@@ -5,7 +5,6 @@ import { formatDateProximity } from '@/macros/time';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
-import { Virtuoso } from 'react-virtuoso';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
@@ -369,6 +368,9 @@ export default function Home() {
   // through `feedContainerRef` for backwards compatibility (some legacy
   // code paths may still rely on it).
   const [feedScrollEl, setFeedScrollEl] = useState<HTMLDivElement | null>(null);
+  // Sentinel node at the end of the plain feed list; the IntersectionObserver
+  // effect (declared after `feedItems`) pages in more posts when it nears view.
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const setFeedScrollRef = useCallback(
     (el: HTMLDivElement | null) => {
       setFeedScrollEl(el);
@@ -851,6 +853,22 @@ export default function Home() {
     return items;
   }, [posts, hasAssociations]);
 
+  // Infinite scroll for the plain (non-virtualized) feed: when the end sentinel
+  // approaches the scroll container's viewport, page in the next batch. Replaces
+  // Virtuoso's endReached/rangeChanged. No virtualization or size measurement.
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el || !hasPosts) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) handleEndReached();
+      },
+      { root: feedScrollEl ?? null, rootMargin: '800px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasPosts, feedScrollEl, handleEndReached, feedItems.length]);
+
   // Helper function to get profile data based on author type
   // Updated to handle uppercase author types from API
   const getProfileData = (post: ApiPost) => {
@@ -1134,7 +1152,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Feed Posts - Takes remaining space */}
+        {/* Feed Posts */}
         <div className="space-y-2">
           {/* Feed Loading State — only on initial load. Uses FeedCardSkeleton
               so the reserved height matches the real cards' dimensions and
@@ -1249,46 +1267,19 @@ export default function Home() {
               the surrounding chrome (top toggle, sidebar, modals) keeps
               its layout because we pass the existing scroll column as
               the custom scroll parent. */}
-          {/* Gate on `feedScrollEl` so the list mounts only once its scroll
-              container exists — Virtuoso then measures the correct parent on its
-              first render instead of switching from `undefined` (window) to the
-              element afterwards, which left the desktop feed blank once the
-              Discover rail above it collapsed. `initialItemCount` forces the first
-              rows to render immediately so the content gains height and Virtuoso's
-              ResizeObserver kicks in (a synthetic window resize does NOT — the
-              observer only reacts to real element resizes). */}
-          {hasPosts && feedScrollEl && (
-            <Virtuoso
-              data={feedItems}
-              customScrollParent={feedScrollEl}
-              initialItemCount={Math.min(feedItems.length, 8)}
-              endReached={handleEndReached}
-              rangeChanged={(range) => {
-                // Prefetch the next page slightly before the bottom so the
-                // hand-off feels seamless (handleEndReached self-guards on
-                // hasMore/loadingMore/loading).
-                if (range.endIndex > feedItems.length - 4) {
-                  handleEndReached();
-                }
-              }}
-              increaseViewportBy={{ top: 800, bottom: 1200 }}
-              computeItemKey={(_, item) =>
-                item.kind === 'post' ? item.post.id : 'associations-rail'
-              }
-              components={{
-                Footer: showLoadingFooter
-                  ? () => (
-                      <>
-                        <FeedCardSkeleton />
-                        <FeedCardSkeleton />
-                      </>
-                    )
-                  : undefined,
-              }}
-              itemContent={(_index, item) => {
+          {/* Plain (non-virtualized) list. Four attempts to make react-virtuoso
+              measure its scroll container on the desktop layout failed (it drew
+              zero rows until a real window resize), so the feed renders its cards
+              directly and lets the column's `overflow-y-auto` handle scrolling.
+              Infinite scroll is an IntersectionObserver sentinel below — no
+              measurement and no scroll-parent to observe, so it cannot hit that
+              class of bug. Fine for a feed of tens–hundreds of posts. */}
+          {hasPosts && (
+            <>
+              {feedItems.map((item, _index) => {
                 if (item.kind === 'associationsRail') {
                   return (
-                    <div className="mb-2 relative">
+                    <div key="associations-rail" className="mb-2 relative">
                       <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
                         <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">
                           {t('associationsYouMayLike') || 'Associations you may like'}
@@ -1375,6 +1366,7 @@ export default function Home() {
                 const dimsFor = getDimsFor(post.dimsByUrl);
                 return (
                   <ImpressionTracker
+                    key={post.id}
                     itemId={post.id}
                     itemType="POST"
                     source={post.__source}
@@ -1435,8 +1427,16 @@ export default function Home() {
                     </div>
                   </ImpressionTracker>
                 );
-              }}
-            />
+              })}
+              {showLoadingFooter && (
+                <>
+                  <FeedCardSkeleton />
+                  <FeedCardSkeleton />
+                </>
+              )}
+              {/* Infinite-scroll sentinel — observed by the effect near the top. */}
+              <div ref={loadMoreRef} className="h-px w-full" />
+            </>
           )}
         </div>
       </div>
