@@ -838,6 +838,23 @@ export default function Home() {
 
   const hasPosts = posts.length > 0;
 
+  // react-virtuoso measures its `customScrollParent` (the feed column) to decide
+  // how many rows to render. That column is attached via a callback ref
+  // (`feedScrollEl`) that only resolves AFTER the first paint, so on wide
+  // (desktop) layouts — where the column is `lg:max-w-[40vw]`, narrower than the
+  // window the list first measured against — Virtuoso can mount with ZERO
+  // visible rows and stay blank until something forces a re-measure (users saw
+  // this as an empty feed on desktop that only appeared after resizing the
+  // window). Nudge it to re-measure once the real scroll container is attached,
+  // and whenever the feed first populates or the tab changes.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !feedScrollEl || !hasPosts) return;
+    const id = requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [feedScrollEl, hasPosts, viewMode]);
+
   // Splice the associations rail into the virtualised feed at a fixed depth so
   // recs surface mid-scroll without dominating the column. Only injected when
   // the recommender actually returned associations — no skeleton-only row on
