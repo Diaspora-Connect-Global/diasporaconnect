@@ -1,56 +1,79 @@
 /**
  * Issue Reporter configuration.
  *
- * The report form is a NATIVE form styled to match the app, but it submits
- * directly to a Google Form's `formResponse` endpoint — Google stores every
- * submission in the linked Google Sheet. No GraphQL mutation is involved.
+ * The report form is NATIVE (matches the app theme + language) but submits
+ * directly to the "DiaspoPlug – Report an Issue" Google Form's `formResponse`
+ * endpoint — Google stores every submission in the linked Sheet. No GraphQL
+ * mutation is involved.
  *
- * To wire a real Google Form:
- *   1. Create the Form and add fields (description, category, plus hidden
- *      context fields for email / userId / url / meta).
- *   2. Open "Get pre-filled link", fill dummy values, copy the link. Each field
- *      appears as `entry.<number>=<value>` — those are the ids below.
- *   3. The form action is: https://docs.google.com/forms/d/e/<FORM_ID>/formResponse
- *
- * All values come from env so the form can be swapped without a code change.
+ * The defaults below are pulled from that live form. NOTE: Google accepts
+ * submissions at the PUBLISHED id (`/forms/d/e/<PUBLISHED_ID>/formResponse`),
+ * which is different from the edit/doc id in the form's `/edit` URL. If the form
+ * is ever rebuilt, refresh the published id, the three `entry.<id>` names, and
+ * the option list below (all overridable via env for a quick swap).
  */
 
-const FORM_ID = process.env.NEXT_PUBLIC_ISSUE_FORM_ID ?? "";
+// Published response id (from the form's action, NOT the /edit doc id).
+const FORM_ID =
+  process.env.NEXT_PUBLIC_ISSUE_FORM_ID ??
+  "1FAIpQLSdu6PrcmI8kn_wni1Up4qclB-Nu0Xn-CKMU7uAE8ezr62LtQg";
 
-/** Google's response endpoint for the configured form. Empty when unconfigured. */
-export const ISSUE_FORM_ACTION = FORM_ID
-  ? `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`
-  : "";
+/** Google's response endpoint for the configured form. */
+export const ISSUE_FORM_ACTION = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
 
-/**
- * Map of our field keys -> the Google Form `entry.<id>` names.
- * Only keys with a configured entry id are sent.
- */
+/** Our field keys -> the Google Form `entry.<id>` names (from the live form). */
 export const ISSUE_FORM_FIELDS = {
-  description: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_DESCRIPTION ?? "",
-  category: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_CATEGORY ?? "",
-  email: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_EMAIL ?? "",
-  userId: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_USERID ?? "",
-  url: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_URL ?? "",
-  meta: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_META ?? "",
+  email: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_EMAIL ?? "entry.1451048236",
+  issue: process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_ISSUE ?? "entry.1640192907",
+  description:
+    process.env.NEXT_PUBLIC_ISSUE_FORM_ENTRY_DESCRIPTION ?? "entry.1843089194",
 } as const;
 
 /**
- * Env fallback for the on/off flag. The backend feature flag
- * (see `useIssueReporterConfig`) takes precedence when available; this is what
- * we fall back to before the flag resolves or if the backend has no opinion.
- * Defaults to disabled so nothing renders until deliberately turned on.
+ * The exact dropdown options from the form's "What issue are you experiencing?"
+ * question. Google rejects any value that is not an exact match, so these
+ * strings must stay verbatim in sync with the form.
+ */
+export const ISSUE_OPTIONS = [
+  "Login",
+  "Registration / Sign Up",
+  "Forgot Password",
+  "Email Verification",
+  "OTP Verification",
+  "User Profile",
+  "Edit Profile",
+  "Upload Profile Photo",
+  "Search Users",
+  "Friend Request",
+  "Accept Friend Request",
+  "Messaging / Chat",
+  "Notifications",
+  "Feed / Home Timeline",
+  "Create a Post",
+  "Edit a Post",
+  "Delete a Post",
+  "Like a Post",
+  "Comment on a Post",
+  "Share a Post",
+  "Join a Community",
+  "Leave a Community",
+  "Community Feed",
+  "Community Customer Support",
+  "Apply for a Service",
+  "Events",
+  "Marketplace",
+  "Payments",
+  "Document Upload",
+  "Account Verification (KYC)",
+  "App Performance (Slow)",
+  "App Crash",
+  "Other",
+] as const;
+
+/**
+ * Env fallback for the on/off flag. The admin platform setting
+ * (`issue_reporter_enabled`, read in `useIssueReporterConfig`) takes precedence;
+ * this is only used before that resolves or if it is unset. Defaults to off.
  */
 export const ISSUE_REPORTER_ENV_ENABLED =
   process.env.NEXT_PUBLIC_ISSUE_REPORTER_ENABLED === "true";
-
-/** True only when a form id and the description entry id are both present. */
-export const ISSUE_REPORTER_CONFIGURED =
-  Boolean(ISSUE_FORM_ACTION) && Boolean(ISSUE_FORM_FIELDS.description);
-
-export type IssueCategory =
-  | "bug"
-  | "content"
-  | "account"
-  | "payment"
-  | "other";

@@ -1,45 +1,23 @@
-import { ISSUE_FORM_FIELDS } from "@/config/issueReporter";
-
-export interface IssueReportPayload {
-  description: string;
-  category: string;
-  /** Context captured automatically to make the report actionable. */
-  email?: string;
-  userId?: string;
-  url?: string;
-  meta?: string;
-}
-
 /**
  * Submits a report to the configured Google Form endpoint.
  *
- * Google's `formResponse` endpoint does not send CORS headers, so we POST with
+ * Google's `formResponse` endpoint sends no CORS headers, so we POST with
  * `mode: "no-cors"`. The response is opaque — we cannot read a status — so a
  * resolved promise means "the request left the browser", which we treat as
- * success. A rejected promise means the network itself failed (offline, etc.).
+ * success. A rejected promise means the network itself failed.
  *
- * Only fields with a configured `entry.<id>` are included.
+ * `entries` maps Google `entry.<id>` names to values; empty values are skipped.
  */
 export async function submitIssueReport(
   action: string,
-  fields: typeof ISSUE_FORM_FIELDS,
-  payload: IssueReportPayload
+  entries: Record<string, string>
 ): Promise<void> {
   if (!action) {
     throw new Error("Issue reporter is not configured.");
   }
 
   const body = new FormData();
-  const map: Array<[string, string | undefined]> = [
-    [fields.description, payload.description],
-    [fields.category, payload.category],
-    [fields.email, payload.email],
-    [fields.userId, payload.userId],
-    [fields.url, payload.url],
-    [fields.meta, payload.meta],
-  ];
-
-  for (const [entryId, value] of map) {
+  for (const [entryId, value] of Object.entries(entries)) {
     if (entryId && value != null && value !== "") {
       body.append(entryId, value);
     }

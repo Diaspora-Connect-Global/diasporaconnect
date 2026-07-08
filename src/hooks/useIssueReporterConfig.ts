@@ -5,7 +5,6 @@ import { GRAPHQL_URL } from "@/lib/seoFetch";
 import {
   ISSUE_FORM_ACTION,
   ISSUE_FORM_FIELDS,
-  ISSUE_REPORTER_CONFIGURED,
   ISSUE_REPORTER_ENV_ENABLED,
 } from "@/config/issueReporter";
 
@@ -18,19 +17,13 @@ export interface IssueReporterConfig {
   fields: typeof ISSUE_FORM_FIELDS;
 }
 
-/**
- * Platform-setting keys written by the admin hub (System Settings) and read here
- * through the public gateway — the same admin-writes / public-reads mechanism
- * proven by the SEO verification tokens (`getPublicSeoSettings`).
- */
+/** Admin platform-setting key that toggles the button live. */
 const KEY_ENABLED = "issue_reporter_enabled";
-const KEY_FORM_ID = "issue_reporter_form_id";
 
 /**
  * Reuses the gateway's existing public settings query `getPublicSeoSettings`,
- * whose hard-coded whitelist now includes the issue-reporter keys alongside the
- * SEO tokens. If the gateway hasn't been redeployed yet, the keys simply won't
- * be present and we fall back to the env flag — graceful, no errors.
+ * whose whitelist includes `issue_reporter_enabled` alongside the SEO tokens.
+ * If the gateway is unreachable we fall back to the env flag — graceful, no errors.
  */
 const PUBLIC_FLAG_QUERY = `
   query IssueReporterFlag {
@@ -47,20 +40,17 @@ interface PublicSetting {
 }
 
 /**
- * Resolves whether the issue reporter is on, and where it submits.
+ * Resolves whether the issue reporter button should show.
  *
- * Precedence for on/off:
- *   1. Admin platform setting (live toggle) — when the public query resolves.
+ * Precedence:
+ *   1. Admin platform setting `issue_reporter_enabled` (live toggle).
  *   2. Env fallback (NEXT_PUBLIC_ISSUE_REPORTER_ENABLED) — before/if it fails.
  *
- * The button never renders unless a Google Form is actually configured
- * (form id + description entry id), so a misconfigured deploy fails closed.
+ * The form endpoint + fields are static config (baked from the live Google Form),
+ * so the button is ready to submit the moment the admin flips it on.
  */
 export function useIssueReporterConfig(): IssueReporterConfig {
-  const [remote, setRemote] = useState<{
-    enabled?: boolean;
-    formId?: string;
-  } | null>(null);
+  const [remoteEnabled, setRemoteEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,13 +69,10 @@ export function useIssueReporterConfig(): IssueReporterConfig {
         const list = json?.data?.getPublicSeoSettings;
         if (!list || cancelled) return;
 
-        const map = Object.fromEntries(list.map((s) => [s.key, s.value]));
-        setRemote({
-          enabled: KEY_ENABLED in map ? map[KEY_ENABLED] === "true" : undefined,
-          formId: map[KEY_FORM_ID] || undefined,
-        });
+        const hit = list.find((s) => s.key === KEY_ENABLED);
+        if (hit) setRemoteEnabled(hit.value === "true");
       } catch {
-        // Public query not available yet — silently fall back to env.
+        // Public query unavailable — silently fall back to env.
       }
     })();
 
@@ -94,22 +81,12 @@ export function useIssueReporterConfig(): IssueReporterConfig {
     };
   }, []);
 
-  // Admin wins when it has an opinion; otherwise fall back to the env default.
   const flagEnabled =
-    remote?.enabled != null ? remote.enabled : ISSUE_REPORTER_ENV_ENABLED;
-
-  // Admin may override the form id; rebuild the action if it does.
-  const action = remote?.formId
-    ? `https://docs.google.com/forms/d/e/${remote.formId}/formResponse`
-    : ISSUE_FORM_ACTION;
-
-  const configured = remote?.formId
-    ? Boolean(ISSUE_FORM_FIELDS.description)
-    : ISSUE_REPORTER_CONFIGURED;
+    remoteEnabled != null ? remoteEnabled : ISSUE_REPORTER_ENV_ENABLED;
 
   return {
-    enabled: flagEnabled && configured,
-    action,
+    enabled: flagEnabled && Boolean(ISSUE_FORM_ACTION),
+    action: ISSUE_FORM_ACTION,
     fields: ISSUE_FORM_FIELDS,
   };
 }

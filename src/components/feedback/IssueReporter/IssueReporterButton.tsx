@@ -7,8 +7,10 @@ import { Bug } from "@phosphor-icons/react";
 
 import { useIssueReporterConfig } from "@/hooks/useIssueReporterConfig";
 import { useUserStore } from "@/store/useUserStore";
+import { ISSUE_OPTIONS } from "@/config/issueReporter";
 import { submitIssueReport } from "./submitIssueReport";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,14 +29,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const CATEGORIES = ["bug", "content", "account", "payment", "other"] as const;
-
 /**
  * Floating "Report an issue" button. Renders only when a system admin has the
- * feature flag on (or the env fallback is set) and a Google Form is configured.
+ * `issue_reporter_enabled` platform setting on (or the env fallback is set).
  *
  * The form is native (matches the app theme + language) but submits straight to
- * a Google Form, so reports land in a Google Sheet with no backend involved.
+ * the "DiaspoPlug – Report an Issue" Google Form, so reports land in a Sheet
+ * with no backend involved. Field ids + options are in `config/issueReporter`.
  */
 export function IssueReporterButton() {
   const { enabled, action, fields } = useIssueReporterConfig();
@@ -43,36 +44,39 @@ export function IssueReporterButton() {
   const t = useTranslations("issueReporter");
 
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<string>("bug");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [issue, setIssue] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (!enabled) return null;
 
   const reset = () => {
-    setCategory("bug");
+    setEmail(user?.email ?? "");
+    setIssue("");
     setDescription("");
   };
 
+  const canSubmit = Boolean(email.trim()) && Boolean(issue) && !submitting;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = description.trim();
-    if (!trimmed || submitting) return;
+    if (!canSubmit) return;
 
     setSubmitting(true);
     try {
-      const meta =
-        typeof navigator !== "undefined"
-          ? `locale=${locale}; ua=${navigator.userAgent}`
-          : `locale=${locale}`;
+      // Append page + locale context so reports are actionable, since the form
+      // has no dedicated fields for them.
+      const context =
+        typeof window !== "undefined"
+          ? `\n\n---\nPage: ${window.location.href}\nLocale: ${locale}`
+          : `\n\n---\nLocale: ${locale}`;
+      const body = `${description.trim()}${context}`;
 
-      await submitIssueReport(action, fields, {
-        description: trimmed,
-        category,
-        email: user?.email,
-        userId: user?.userId,
-        url: typeof window !== "undefined" ? window.location.href : undefined,
-        meta,
+      await submitIssueReport(action, {
+        [fields.email]: email.trim(),
+        [fields.issue]: issue,
+        [fields.description]: body,
       });
 
       toast.success(t("success"));
@@ -106,15 +110,27 @@ export function IssueReporterButton() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="issue-category">{t("categoryLabel")}</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Label htmlFor="issue-email">{t("emailLabel")}</Label>
+              <Input
+                id="issue-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t("emailPlaceholder")}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="issue-category">{t("issueLabel")}</Label>
+              <Select value={issue} onValueChange={setIssue}>
                 <SelectTrigger id="issue-category" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder={t("issuePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {t(`categories.${c}`)}
+                  {ISSUE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -130,7 +146,6 @@ export function IssueReporterButton() {
                 placeholder={t("descriptionPlaceholder")}
                 rows={5}
                 maxLength={2000}
-                required
               />
             </div>
 
@@ -145,7 +160,7 @@ export function IssueReporterButton() {
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={submitting || !description.trim()}>
+              <Button type="submit" disabled={!canSubmit}>
                 {submitting ? t("sending") : t("submit")}
               </Button>
             </DialogFooter>
