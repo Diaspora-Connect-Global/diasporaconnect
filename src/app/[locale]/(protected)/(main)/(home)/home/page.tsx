@@ -251,8 +251,31 @@ export default function Home() {
       fetchPolicy: 'cache-and-network',
     });
 
+  // Feed with infinite scroll. Declared before the discover-rail hydration so
+  // those effects can defer their (up-to-40) per-id getCommunity/getAssociation
+  // requests until the feed's critical path is clear — see the `feedLoading`
+  // gate below. On a returning (SWR-cached) visit `feedLoading` is already
+  // false, so the rails hydrate immediately with no added latency.
+  const {
+    posts,
+    loading: feedLoading,
+    error: feedError,
+    refetch: refetchFeed,
+    loadingMore: feedLoadingMore,
+    feedContainerRef,
+    loadMore: feedLoadMore,
+    hasMore: feedHasMore,
+    feedMeta,
+    updatePostCounts,
+    removePost,
+  } = useFeed({ mode: viewMode });
+
   // Hydrate communities by id, preserving the recommender's order.
   useEffect(() => {
+    // Defer the rail fan-out until the feed has painted so its ~20 network-only
+    // getCommunity requests don't contend with the feed's hydration for the
+    // browser's connection pool on first load.
+    if (feedLoading) return;
     const items = recCommunitiesData?.recommendedCommunities?.items;
     if (!items) return;
     if (items.length === 0) {
@@ -297,10 +320,13 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [recCommunitiesData, apolloClient]);
+  }, [recCommunitiesData, apolloClient, feedLoading]);
 
   // Hydrate associations by id, preserving the recommender's order.
   useEffect(() => {
+    // Deferred behind the feed's first paint — same rationale as the
+    // communities rail above.
+    if (feedLoading) return;
     const items = recAssociationsData?.recommendedAssociations?.items;
     if (!items) return;
     if (items.length === 0) {
@@ -340,28 +366,13 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [recAssociationsData, apolloClient]);
+  }, [recAssociationsData, apolloClient, feedLoading]);
 
   // Helper: re-fetch both ranked queries after a membership state change.
   const refetchCommunities = useCallback(() => {
     void refetchCommunitiesRanked();
     void refetchAssociationsRanked();
   }, [refetchCommunitiesRanked, refetchAssociationsRanked]);
-
-  // Feed with infinite scroll
-  const {
-    posts,
-    loading: feedLoading,
-    error: feedError,
-    refetch: refetchFeed,
-    loadingMore: feedLoadingMore,
-    feedContainerRef,
-    loadMore: feedLoadMore,
-    hasMore: feedHasMore,
-    feedMeta,
-    updatePostCounts,
-    removePost,
-  } = useFeed({ mode: viewMode });
 
   // Scroll container element captured via callback ref so Virtuoso can
   // virtualize against it instead of the window. The same node is exposed
