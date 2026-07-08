@@ -119,6 +119,50 @@ interface RankedFeedSnapshot {
 }
 const rankedFeedCache = new Map<FeedModeType, RankedFeedSnapshot>();
 
+/**
+ * Full-reload persistence layer for the SWR snapshot. The in-memory
+ * `rankedFeedCache` above only survives SPA navigation; a hard reload wipes it
+ * and the feed would fall back to a skeleton + two round-trips. The Apollo
+ * normalized cache, however, is persisted to localStorage (see graph-client)
+ * and restored synchronously on boot — so it still holds the individual posts.
+ *
+ * We persist just the ranked *order* (post ids) + paging meta per feed type to
+ * sessionStorage. On the next reload we replay those ids against the restored
+ * Apollo cache to repaint the exact feed instantly, then revalidate over the
+ * network. sessionStorage (not localStorage) scopes this to the tab session so
+ * a days-old feed never resurfaces, and JSON is tiny (ids only).
+ */
+const RANKED_FEED_SESSION_PREFIX = 'rankedFeed:v1:';
+
+interface PersistedRankedFeed {
+  ids: string[];
+  nextCursor: string | null;
+  meta: FeedStateMeta;
+  fallbackType: FeedModeType | null;
+}
+
+function readPersistedRankedFeed(feedType: FeedModeType): PersistedRankedFeed | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.sessionStorage.getItem(RANKED_FEED_SESSION_PREFIX + feedType);
+    return raw ? (JSON.parse(raw) as PersistedRankedFeed) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePersistedRankedFeed(feedType: FeedModeType, payload: PersistedRankedFeed): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(
+      RANKED_FEED_SESSION_PREFIX + feedType,
+      JSON.stringify(payload),
+    );
+  } catch {
+    /* quota / disabled storage — non-fatal, SWR just won't survive reload */
+  }
+}
+
 export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   const {
     mode = 'you',
@@ -348,6 +392,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       // pull-to-refresh), paint the previous result for this tab immediately so
       // the feed is visible while the network refetch below runs in the
       // background. Only the very first load with a cold cache shows a skeleton.
+      // `hadStalePaint` ⇒ we painted something (from either the in-memory
+      // snapshot or the persisted-ids replay), so the error branches below must
+      // preserve it instead of flashing an empty state.
+      let hadStalePaint = false;
       const snapshot = refreshTick === 0 ? rankedFeedCache.get(resolvedFeedType) : undefined;
       if (snapshot && snapshot.posts.length > 0) {
         setMergedPosts(snapshot.posts);
@@ -357,8 +405,37 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         fallbackTypeRef.current = snapshot.fallbackType;
         setFallbackActive(Boolean(snapshot.fallbackType));
         setRecommendedLoading(false);
+        hadStalePaint = true;
       } else {
-        setRecommendedLoading(true);
+        // Module cache miss (e.g. a hard reload) — try replaying the persisted
+        // ranked order against the restored Apollo cache for an instant repaint.
+        const persisted = refreshTick === 0 ? readPersistedRankedFeed(resolvedFeedType) : null;
+        const recovered: Post[] = [];
+        if (persisted?.ids?.length) {
+          for (const id of persisted.ids) {
+            try {
+              const cached = apolloClient.readQuery<GetPostData>({
+                query: GET_POST,
+                variables: { id },
+              });
+              if (cached?.post) recovered.push(normalizeFeedPost(cached.post));
+            } catch {
+              /* not in cache — skip, revalidation will fetch it */
+            }
+          }
+        }
+        if (recovered.length > 0 && persisted) {
+          setMergedPosts(recovered);
+          setTotal(recovered.length);
+          setNextCursor(persisted.nextCursor);
+          setFeedMeta(persisted.meta);
+          fallbackTypeRef.current = persisted.fallbackType;
+          setFallbackActive(Boolean(persisted.fallbackType));
+          setRecommendedLoading(false);
+          hadStalePaint = true;
+        } else {
+          setRecommendedLoading(true);
+        }
       }
       setRecommendedError(undefined);
       try {
@@ -380,9 +457,10 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         if (cancelled) return;
         if (error) {
           setRecommendedError(error);
-          // Keep any stale-but-visible posts (from the SWR snapshot) rather than
-          // flashing an empty/error state over content the user can still read.
-          if (!snapshot || snapshot.posts.length === 0) {
+          // Keep any stale-but-visible posts (from the SWR snapshot or the
+          // persisted-ids replay) rather than flashing an empty/error state over
+          // content the user can still read.
+          if (!hadStalePaint) {
             setMergedPosts([]);
             setTotal(0);
             setNextCursor(null);
@@ -455,7 +533,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         if (cancelled) return;
         setRecommendedError(e instanceof Error ? e : new Error(String(e)));
         // Preserve stale-but-visible posts on error (see the `if (error)` branch).
-        if (!snapshot || snapshot.posts.length === 0) {
+        if (!hadStalePaint) {
           setMergedPosts([]);
           setTotal(0);
           setNextCursor(null);
@@ -478,11 +556,20 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   // rather than just the first page.
   useEffect(() => {
     if (!isRankedFeed || mergedPosts.length === 0) return;
+    const fallbackType = fallbackActive ? fallbackTypeRef.current : null;
     rankedFeedCache.set(resolvedFeedType, {
       posts: mergedPosts,
       nextCursor,
       meta: feedMeta,
-      fallbackType: fallbackActive ? fallbackTypeRef.current : null,
+      fallbackType,
+    });
+    // Persist the order (ids only) so a hard reload can repaint from the
+    // restored Apollo cache — see readPersistedRankedFeed.
+    writePersistedRankedFeed(resolvedFeedType, {
+      ids: mergedPosts.map((p) => p.id),
+      nextCursor,
+      meta: feedMeta,
+      fallbackType,
     });
   }, [isRankedFeed, resolvedFeedType, mergedPosts, nextCursor, feedMeta, fallbackActive]);
 
