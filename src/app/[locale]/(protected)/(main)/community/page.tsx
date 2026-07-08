@@ -451,6 +451,7 @@ export default function Community() {
                             key={community.id}
                             title={community.name}
                             description={community.description || ''}
+                            avatarUrl={toCdnUrl(community.avatarUrl)}
                             communityType={community.communityType}
                         />
                     ))
@@ -538,6 +539,7 @@ export default function Community() {
                                             : tActions('join')
                                 }
                                 description={community.description || ''}
+                                avatarUrl={community.avatarUrl}
                                 isDisabled={isAlreadyJoined || isPendingStatus}
                                 access={access ?? undefined}
                                 communityType={community.communityType}

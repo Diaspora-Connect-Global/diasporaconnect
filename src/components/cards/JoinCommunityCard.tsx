@@ -22,6 +22,7 @@ interface JoinCommunityCardProps {
   icon?: React.ReactNode;
   iconBgColor?: string;
   iconColor?: string;
+  avatarUrl?: string | null;
   members?: number;
   isDisabled?: boolean;
   access?: AccessProfile;
@@ -36,6 +37,7 @@ export default function JoinCommunityCard({
   onButtonClick,
   onCardClick,
   icon,
+  avatarUrl,
   isDisabled = false,
   access,
   communityType,
@@ -65,10 +67,10 @@ export default function JoinCommunityCard({
           <div className={`rounded-full p-2`}>
             {icon ||
               <Image
-                width={10}
-                height={10}
-                src="/GLOBE.png"
-                alt="Profile"
+                width={40}
+                height={40}
+                src={avatarUrl || "/GLOBE.png"}
+                alt={title || "Community"}
                 className="w-10 h-10 rounded-full object-cover border-2 border-border-subtle"
               />
             }

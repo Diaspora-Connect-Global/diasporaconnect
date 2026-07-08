@@ -29,6 +29,7 @@ interface GhanaConnectHeaderProps {
     id: string;
     description?: string;
     logoIcon?: React.ReactNode;
+    avatarUrl?: string | null;
     onMenuClick?: () => void;
     access?: AccessProfile;
     communityType?: { name: string; isEmbassy: boolean } | null;
@@ -38,6 +39,7 @@ export function MyCommunityCard({
     title = "",
      description = "",
     logoIcon,
+    avatarUrl,
     id,
     access,
     communityType,
@@ -96,12 +98,12 @@ export function MyCommunityCard({
                     {/* Left section - Logo and branding */}
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1"> {/* min-w-0 and flex-1 to truncate text if needed */}
                         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"> {/* Smaller logo on mobile */}
-                            {logoIcon || 
+                            {logoIcon ||
                              <Image
                                 width={32}
                                 height={32}
-                                src="/GLOBE.png"
-                                alt="Profile"
+                                src={avatarUrl || "/GLOBE.png"}
+                                alt={title || "Community"}
                                 className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
                             />
                             }
