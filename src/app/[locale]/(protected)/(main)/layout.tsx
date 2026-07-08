@@ -9,7 +9,7 @@ import MessageWebSocketProvider from "@/components/provider/MessageWebSocketProv
 import NotificationWebSocketProvider from "@/components/provider/NotificationWebSocketProvider";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useProfileGuard } from "@/hooks/useProfileGuard";
-import { OfflineBanner } from "@/components/feedback";
+import { OfflineBanner, IssueReporterButton } from "@/components/feedback";
 import { useTranslations } from "next-intl";
 
 function PushNotificationRegistrar() {
@@ -74,6 +74,7 @@ export default function MainLayout({
         <div>
           <Header>{children}</Header>
         </div>
+        <IssueReporterButton />
       </NotificationWebSocketProvider>
     </MessageWebSocketProvider>
   );

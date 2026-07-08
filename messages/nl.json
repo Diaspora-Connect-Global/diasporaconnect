@@ -1,4 +1,25 @@
 {
+    "issueReporter": {
+        "open": "Probleem melden",
+        "title": "Probleem melden",
+        "subtitle": "Vertel ons wat er misging. Je melding gaat rechtstreeks naar ons team.",
+        "categoryLabel": "Waar gaat dit over?",
+        "categories": {
+            "bug": "Er werkt iets niet",
+            "content": "Inhoud melden",
+            "account": "Account of profiel",
+            "payment": "Betalingen of portemonnee",
+            "other": "Iets anders"
+        },
+        "descriptionLabel": "Beschrijf het probleem",
+        "descriptionPlaceholder": "Wat gebeurde er, en wat had je in plaats daarvan verwacht?",
+        "privacyNote": "We voegen je account-id en de huidige pagina toe om ons te helpen bij het onderzoek.",
+        "cancel": "Annuleren",
+        "submit": "Melding versturen",
+        "sending": "Versturen...",
+        "success": "Bedankt. Je melding is verzonden.",
+        "error": "Je melding kon niet worden verzonden. Probeer het opnieuw."
+    },
     "authentication": {
         "greetings": {
             "signup": "Welkom bij DiaspoPlug",

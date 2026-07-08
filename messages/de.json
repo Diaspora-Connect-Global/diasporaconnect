@@ -1,4 +1,25 @@
 {
+    "issueReporter": {
+        "open": "Problem melden",
+        "title": "Problem melden",
+        "subtitle": "Sagen Sie uns, was schiefgelaufen ist. Ihre Meldung geht direkt an unser Team.",
+        "categoryLabel": "Worum geht es?",
+        "categories": {
+            "bug": "Etwas funktioniert nicht",
+            "content": "Inhalt melden",
+            "account": "Konto oder Profil",
+            "payment": "Zahlungen oder Wallet",
+            "other": "Etwas anderes"
+        },
+        "descriptionLabel": "Beschreiben Sie das Problem",
+        "descriptionPlaceholder": "Was ist passiert und was haben Sie stattdessen erwartet?",
+        "privacyNote": "Wir fügen Ihre Konto-ID und die aktuelle Seite bei, um die Untersuchung zu erleichtern.",
+        "cancel": "Abbrechen",
+        "submit": "Meldung senden",
+        "sending": "Wird gesendet...",
+        "success": "Danke. Ihre Meldung wurde gesendet.",
+        "error": "Ihre Meldung konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+    },
     "authentication": {
         "greetings": {
             "signup": "Willkommen bei DiaspoPlug",

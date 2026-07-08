@@ -1,4 +1,25 @@
 {
+    "issueReporter": {
+        "open": "Signaler un problème",
+        "title": "Signaler un problème",
+        "subtitle": "Dites-nous ce qui n'a pas fonctionné. Votre signalement est transmis directement à notre équipe.",
+        "categoryLabel": "De quoi s'agit-il ?",
+        "categories": {
+            "bug": "Quelque chose ne fonctionne pas",
+            "content": "Signaler un contenu",
+            "account": "Compte ou profil",
+            "payment": "Paiements ou portefeuille",
+            "other": "Autre chose"
+        },
+        "descriptionLabel": "Décrivez le problème",
+        "descriptionPlaceholder": "Que s'est-il passé, et qu'attendiez-vous à la place ?",
+        "privacyNote": "Nous joignons l'identifiant de votre compte et la page actuelle pour faciliter notre enquête.",
+        "cancel": "Annuler",
+        "submit": "Envoyer le signalement",
+        "sending": "Envoi...",
+        "success": "Merci. Votre signalement a été envoyé.",
+        "error": "Impossible d'envoyer votre signalement. Veuillez réessayer."
+    },
     "authentication": {
         "greetings": {
             "signup": "Bienvenue sur DiaspoPlug",

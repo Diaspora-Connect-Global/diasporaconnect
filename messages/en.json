@@ -1,4 +1,25 @@
 {
+    "issueReporter": {
+        "open": "Report an issue",
+        "title": "Report an issue",
+        "subtitle": "Tell us what went wrong. Your report goes straight to our team.",
+        "categoryLabel": "What is this about?",
+        "categories": {
+            "bug": "Something is broken",
+            "content": "Report content",
+            "account": "Account or profile",
+            "payment": "Payments or wallet",
+            "other": "Something else"
+        },
+        "descriptionLabel": "Describe the issue",
+        "descriptionPlaceholder": "What happened, and what did you expect instead?",
+        "privacyNote": "We attach your account id and the current page to help us investigate.",
+        "cancel": "Cancel",
+        "submit": "Send report",
+        "sending": "Sending...",
+        "success": "Thanks. Your report has been sent.",
+        "error": "Could not send your report. Please try again."
+    },
     "authentication": {
         "greetings": {
             "signup": "Welcome to DiaspoPlug",
