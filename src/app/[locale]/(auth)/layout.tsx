@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl';
 import Image from "next/image";
 import { HeadingSmall } from "@/components/utils";
 import InfoLinks from "@/components/custom/infoLinks";
+import { IssueReporterButton } from "@/components/feedback";
 
 export default function AuthLayout({
     children,
@@ -42,6 +43,7 @@ export default function AuthLayout({
                         <InfoLinks />
                     </div>
             </div>
+            <IssueReporterButton />
         </div>
     )
 }
