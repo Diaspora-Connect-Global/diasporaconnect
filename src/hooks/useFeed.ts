@@ -103,6 +103,22 @@ export interface UseFeedResult {
   removePost: (postId: string) => void;
 }
 
+/**
+ * Stale-while-revalidate cache for the ranked feeds, keyed by feed type
+ * (FOR_YOU / FOLLOWING). Survives SPA navigation (module-level singleton, same
+ * lifetime as the Apollo client). Returning to the home feed paints the last
+ * result instantly instead of blocking behind a skeleton on the two sequential
+ * round-trips (`recommendedPosts` → `postsByIds`) every time — the network
+ * refetch still runs in the background and seamlessly replaces it.
+ */
+interface RankedFeedSnapshot {
+  posts: Post[];
+  nextCursor: string | null;
+  meta: FeedStateMeta;
+  fallbackType: FeedModeType | null;
+}
+const rankedFeedCache = new Map<FeedModeType, RankedFeedSnapshot>();
+
 export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   const {
     mode = 'you',
@@ -328,7 +344,22 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     const query = isRecommendedFeed ? RECOMMENDED_POSTS : JOINED_COMMUNITY_FEED;
 
     const run = async () => {
-      setRecommendedLoading(true);
+      // Stale-while-revalidate: on the initial mount (not an explicit
+      // pull-to-refresh), paint the previous result for this tab immediately so
+      // the feed is visible while the network refetch below runs in the
+      // background. Only the very first load with a cold cache shows a skeleton.
+      const snapshot = refreshTick === 0 ? rankedFeedCache.get(resolvedFeedType) : undefined;
+      if (snapshot && snapshot.posts.length > 0) {
+        setMergedPosts(snapshot.posts);
+        setTotal(snapshot.posts.length);
+        setNextCursor(snapshot.nextCursor);
+        setFeedMeta(snapshot.meta);
+        fallbackTypeRef.current = snapshot.fallbackType;
+        setFallbackActive(Boolean(snapshot.fallbackType));
+        setRecommendedLoading(false);
+      } else {
+        setRecommendedLoading(true);
+      }
       setRecommendedError(undefined);
       try {
         // `refreshTick > 0` ⇒ explicit pull-to-refresh. Pass refresh:true so
@@ -349,10 +380,14 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         if (cancelled) return;
         if (error) {
           setRecommendedError(error);
-          setMergedPosts([]);
-          setTotal(0);
-          setNextCursor(null);
-          setFeedMeta({ hasMore: false });
+          // Keep any stale-but-visible posts (from the SWR snapshot) rather than
+          // flashing an empty/error state over content the user can still read.
+          if (!snapshot || snapshot.posts.length === 0) {
+            setMergedPosts([]);
+            setTotal(0);
+            setNextCursor(null);
+            setFeedMeta({ hasMore: false });
+          }
           return;
         }
         const page: RankedFeedPage | undefined = data
@@ -419,10 +454,13 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       } catch (e) {
         if (cancelled) return;
         setRecommendedError(e instanceof Error ? e : new Error(String(e)));
-        setMergedPosts([]);
-        setTotal(0);
-        setNextCursor(null);
-        setFeedMeta({ hasMore: false });
+        // Preserve stale-but-visible posts on error (see the `if (error)` branch).
+        if (!snapshot || snapshot.posts.length === 0) {
+          setMergedPosts([]);
+          setTotal(0);
+          setNextCursor(null);
+          setFeedMeta({ hasMore: false });
+        }
       } finally {
         if (!cancelled) setRecommendedLoading(false);
       }
@@ -432,7 +470,21 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     return () => {
       cancelled = true;
     };
-  }, [isRankedFeed, isRecommendedFeed, initialLimit, apolloClient, hydrateRankedItems, fetchChronoFallback, refreshTick]);
+  }, [isRankedFeed, isRecommendedFeed, resolvedFeedType, initialLimit, apolloClient, hydrateRankedItems, fetchChronoFallback, refreshTick]);
+
+  // Keep the stale-while-revalidate snapshot in sync with the live ranked feed
+  // so a return navigation restores exactly what the user last saw — including
+  // pages appended via `loadMore` and optimistic engagement-count updates —
+  // rather than just the first page.
+  useEffect(() => {
+    if (!isRankedFeed || mergedPosts.length === 0) return;
+    rankedFeedCache.set(resolvedFeedType, {
+      posts: mergedPosts,
+      nextCursor,
+      meta: feedMeta,
+      fallbackType: fallbackActive ? fallbackTypeRef.current : null,
+    });
+  }, [isRankedFeed, resolvedFeedType, mergedPosts, nextCursor, feedMeta, fallbackActive]);
 
   // ============================================================================
   // LEGACY BRANCH — FOLLOWING / TRENDING / ... served by `feed` query
