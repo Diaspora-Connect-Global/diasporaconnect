@@ -644,11 +644,6 @@
         "noMembers": "Geen leden",
         "myCommunity": "Mijn gemeenschap",
         "discoverMore": "Meer gemeenschappen ontdekken",
-        "tabs": {
-            "label": "Gemeenschapssecties",
-            "communities": "Gemeenschappen",
-            "groups": "Groepen"
-        },
         "groups": {
             "myGroups": "Mijn groepen",
             "discover": "Groepen ontdekken",
@@ -731,7 +726,8 @@
                 "events": "Evenementen",
                 "verifiedServices": "Geverifieerde diensten",
                 "support": "Ondersteuning",
-                "community": "Community"
+                "community": "Community",
+                "groups": "Groepen"
             },
             "home": {
                 "quickActions": "Snelle acties",

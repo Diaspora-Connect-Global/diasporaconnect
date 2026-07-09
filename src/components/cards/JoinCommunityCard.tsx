@@ -123,8 +123,16 @@ export default function JoinCommunityCard({
 
           {access && <AccessBadges access={access} size="card" />}
 
-          {/* Button */}
-          <ButtonType1 onClick={onButtonClick} size="lg" disabled={isDisabled}>
+          {/* Button — stop propagation so the CTA doesn't also trigger the
+              card's onCardClick (e.g. navigating to a detail page). */}
+          <ButtonType1
+            onClick={(e) => {
+              e.stopPropagation();
+              onButtonClick?.();
+            }}
+            size="lg"
+            disabled={isDisabled}
+          >
             {buttonText}
           </ButtonType1>
         </div>

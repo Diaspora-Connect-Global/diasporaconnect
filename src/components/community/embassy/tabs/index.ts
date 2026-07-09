@@ -8,6 +8,7 @@ export const EMBASSY_TAB_KEYS = [
   'events',
   'support',
   'community',
+  'groups',
 ] as const;
 
 export type EmbassyTabKey = (typeof EMBASSY_TAB_KEYS)[number];
@@ -30,6 +31,7 @@ export const EMBASSY_TABS: ReadonlyArray<EmbassyTabDef> = [
   { key: 'events', icon: 'CalendarDays', labelKey: 'events' },
   { key: 'support', icon: 'LifeBuoy', labelKey: 'support' },
   { key: 'community', icon: 'Users', labelKey: 'community' },
+  { key: 'groups', icon: 'UsersRound', labelKey: 'groups' },
 ];
 
 /** Parse an arbitrary `?tab=` value into a known key, defaulting to home. */

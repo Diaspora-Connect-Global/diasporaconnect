@@ -14,6 +14,7 @@ import {
   Phone,
   FileDown,
   Tag,
+  UsersRound,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,6 +27,7 @@ const ICONS: Readonly<Record<string, LucideIcon>> = {
   ShieldCheck,
   LifeBuoy,
   Users,
+  UsersRound,
   FileText,
   BellRing,
   Plane,

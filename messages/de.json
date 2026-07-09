@@ -643,11 +643,6 @@
         "noMembers": "Keine Mitglieder",
         "myCommunity": "Meine Community",
         "discoverMore": "Weitere Communities entdecken",
-        "tabs": {
-            "label": "Community-Bereiche",
-            "communities": "Communities",
-            "groups": "Gruppen"
-        },
         "groups": {
             "myGroups": "Meine Gruppen",
             "discover": "Gruppen entdecken",
@@ -728,7 +723,8 @@
                 "events": "Veranstaltungen",
                 "verifiedServices": "Verifizierte Dienste",
                 "support": "Support",
-                "community": "Community"
+                "community": "Community",
+                "groups": "Gruppen"
             },
             "home": {
                 "quickActions": "Schnellaktionen",

@@ -10,6 +10,7 @@ import { EmbassyTrackRequestsTab } from './tabs/EmbassyTrackRequestsTab';
 import { EmbassyEventsTab } from './tabs/EmbassyEventsTab';
 import { EmbassySupportTab } from './tabs/EmbassySupportTab';
 import { EmbassyCommunityTab } from './tabs/EmbassyCommunityTab';
+import { EmbassyGroupsTab } from './tabs/EmbassyGroupsTab';
 import { ComingSoonTab } from './tabs/ComingSoonTab';
 import { parseEmbassyTab, EMBASSY_TABS } from './tabs';
 import { isTabEnabled } from '@/lib/communityServices';
@@ -66,6 +67,8 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
         return <EmbassySupportTab profile={profile} community={community} communityId={community.id} />;
       case 'community':
         return <EmbassyCommunityTab props={props} profile={profile} />;
+      case 'groups':
+        return <EmbassyGroupsTab community={community} />;
       default: {
         // Verified Services (and any future tab) — not built yet.
         const def = EMBASSY_TABS.find((tab) => tab.key === activeTab);

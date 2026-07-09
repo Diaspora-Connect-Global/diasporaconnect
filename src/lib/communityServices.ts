@@ -36,8 +36,8 @@ export type ServiceKey = (typeof CANONICAL_SERVICE_KEYS)[number];
  * `service_requests` powers both the "Services" catalog tab and the
  * "Track Requests" tab. `resources` gates the Home right-rail widget (not a tab)
  * and is handled via `isServiceEnabled` directly. Services with no community-tab
- * mapping (opportunities, marketplace, groups, registry) live on separate
- * top-level routes and are intentionally omitted here.
+ * mapping (opportunities, marketplace, registry) live on separate top-level
+ * routes and are intentionally omitted here.
  */
 export const SERVICE_TO_TAB: Readonly<Record<string, readonly EmbassyTabKey[]>> = {
   posts: ['updates'],
@@ -45,6 +45,7 @@ export const SERVICE_TO_TAB: Readonly<Record<string, readonly EmbassyTabKey[]>> 
   events: ['events'],
   support: ['support'],
   directory: ['community'],
+  groups: ['groups'],
 };
 
 /** The 'home' tab is the landing feed and is never gated. */
