@@ -23,6 +23,13 @@ import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membe
 import { cn } from '@/lib/utils';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { toCdnUrl } from '@/lib/cdn';
+import GroupsTab from './_components/GroupsTab';
+
+type CommunityTab = 'communities' | 'groups';
+
+function readTab(param: string | null): CommunityTab {
+    return param === 'groups' ? 'groups' : 'communities';
+}
 
 interface RequestMembershipPayload {
     id?: string | null;
@@ -136,8 +143,23 @@ export default function Community() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    const activeTab = readTab(searchParams.get('tab'));
     const visibilityFilter = readVisibility(searchParams.get('visibility'));
     const pricingFilter = readPricing(searchParams.get('pricing'));
+
+    const selectTab = useCallback(
+        (tab: CommunityTab) => {
+            const params = new URLSearchParams(Array.from(searchParams.entries()));
+            if (tab === 'communities') {
+                params.delete('tab');
+            } else {
+                params.set('tab', tab);
+            }
+            const query = params.toString();
+            router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+        },
+        [pathname, router, searchParams],
+    );
 
     const updateFilter = useCallback(
         (key: 'visibility' | 'pricing', value: string) => {
@@ -435,8 +457,47 @@ export default function Community() {
         );
     };
 
+    const TAB_OPTIONS: { key: CommunityTab; label: string }[] = [
+        { key: 'communities', label: t('tabs.communities') },
+        { key: 'groups', label: t('tabs.groups') },
+    ];
+
     return (
         <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
+            <div
+                className="flex items-center gap-2 border-b border-border-subtle mt-3"
+                role="tablist"
+                aria-label={t('tabs.label')}
+            >
+                {TAB_OPTIONS.map(({ key, label }) => {
+                    const active = activeTab === key;
+                    return (
+                        <button
+                            key={key}
+                            type="button"
+                            role="tab"
+                            aria-selected={active}
+                            onClick={() => selectTab(key)}
+                            className={cn(
+                                'relative px-4 py-3 text-sm transition-colors',
+                                active
+                                    ? 'text-text-brand font-semibold'
+                                    : 'text-text-secondary hover:text-text-primary',
+                            )}
+                        >
+                            {label}
+                            {active && (
+                                <span className="absolute inset-x-0 -bottom-px h-0.5 bg-surface-brand rounded-full" />
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {activeTab === 'groups' ? (
+                <GroupsTab />
+            ) : (
+                <>
             <p className="text-2xl heading-large my-5">{t('myCommunity')}</p>
 
             <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
@@ -578,6 +639,8 @@ export default function Community() {
                 onSuccess={handlePaymentSuccess}
                 onClose={handlePaymentClose}
             />
+                </>
+            )}
         </div>
     );
 }

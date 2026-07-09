@@ -124,6 +124,7 @@ export const SEARCH_GROUPS = gql`
         privacy
         memberCount
         ownerId
+        avatarUrl
       }
     }
   }
