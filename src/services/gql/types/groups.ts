@@ -340,25 +340,6 @@ export interface SearchGroupsResponse {
 }
 
 /**
- * Response from listing the groups that belong to a community.
- *
- * NOTE: This relies on a backend `listCommunityGroups(communityId)` resolver.
- * Groups are otherwise a top-level entity with no community scoping, so if the
- * backend has not implemented this field yet the query will error and callers
- * should degrade to an empty state.
- *
- * @interface ListCommunityGroupsResponse
- */
-export interface ListCommunityGroupsResponse {
-  listCommunityGroups: {
-    success: boolean;
-    message?: string;
-    total: number;
-    groups: Group[];
-  };
-}
-
-/**
  * Response from getting group members.
  *
  * @interface GetGroupMembersResponse

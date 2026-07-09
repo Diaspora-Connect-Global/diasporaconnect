@@ -11,13 +11,11 @@ import { EmptyState } from '@/components/feedback';
 import { useRouter } from '@/i18n/navigation';
 import { toCdnUrl } from '@/lib/cdn';
 import {
-  LIST_COMMUNITY_GROUPS,
   GET_GROUP,
   GET_MY_GROUPS,
   JOIN_GROUP,
   REQUEST_TO_JOIN_GROUP,
   GroupPrivacy,
-  type ListCommunityGroupsResponse,
   type GetGroupResponse,
   type GetMyGroupsResponse,
   type JoinGroupResponse,
@@ -35,12 +33,11 @@ interface EmbassyGroupsTabProps {
  * public ones (or request to join private ones). Clicking a card opens the
  * group's detail page.
  *
- * Data source: LIST_COMMUNITY_GROUPS(communityId). Groups are otherwise a
- * top-level entity with no community scoping, so this depends on a backend
- * `listCommunityGroups` resolver. Until that exists (query errors or returns
- * nothing) we fall back to the community's single built-in group
- * (`defaultGroupId`) so the tab shows real data today, and only render the
- * empty state when there is genuinely nothing to show.
+ * The backend does not (yet) expose a per-community group list — a community
+ * only carries a single built-in group via `defaultGroupId`. So this tab shows
+ * that default group today. When the backend adds a `listCommunityGroups`
+ * resolver, swap the GET_GROUP call below for the list query and map its rows
+ * into `groups`; the rest of the tab already handles a multi-group list.
  */
 export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
   const t = useTranslations('community');
@@ -50,43 +47,20 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
   // Groups joined this session so a card flips to "Joined" immediately.
   const [joinedThisSession, setJoinedThisSession] = useState<Set<string>>(new Set());
 
-  const { data, loading, error, refetch } = useQuery<ListCommunityGroupsResponse>(
-    LIST_COMMUNITY_GROUPS,
-    {
-      variables: { communityId: community.id, limit: 30, offset: 0 },
-      skip: !community.id,
-      fetchPolicy: 'cache-and-network',
-      // A missing backend resolver would otherwise surface as an uncaught
-      // Apollo error; swallow it and let the empty state handle it.
-      errorPolicy: 'all',
-    },
-  );
-
-  const primaryGroups = useMemo(
-    () => data?.listCommunityGroups?.groups ?? [],
-    [data],
-  );
-
-  // The primary community-scoped query is unavailable when it errored (no
-  // backend resolver yet) or finished with no rows. Only then do we reach for
-  // the default-group fallback.
-  const primaryUnavailable = !!error || (!loading && primaryGroups.length === 0);
-
-  const { data: defaultGroupData, loading: defaultGroupLoading } = useQuery<GetGroupResponse>(
+  const { data: defaultGroupData, loading, refetch } = useQuery<GetGroupResponse>(
     GET_GROUP,
     {
       variables: { groupId: community.defaultGroupId },
-      skip: !community.defaultGroupId || !primaryUnavailable,
+      skip: !community.defaultGroupId,
       fetchPolicy: 'cache-and-network',
     },
   );
-  const fallbackGroup = defaultGroupData?.getGroup?.group;
+  const defaultGroup = defaultGroupData?.getGroup?.group;
 
-  const groups: Group[] = useMemo(() => {
-    if (primaryGroups.length) return primaryGroups;
-    if (fallbackGroup) return [fallbackGroup];
-    return [];
-  }, [primaryGroups, fallbackGroup]);
+  const groups: Group[] = useMemo(
+    () => (defaultGroup ? [defaultGroup] : []),
+    [defaultGroup],
+  );
 
   const { data: myGroupsData, refetch: refetchMyGroups } = useQuery<GetMyGroupsResponse>(
     GET_MY_GROUPS,
@@ -102,6 +76,17 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
     for (const g of myGroupsData?.getMyGroups?.groups ?? []) ids.add(g.id);
     return ids;
   }, [myGroupsData, joinedThisSession]);
+
+  // Groups the viewer already belongs to render as a list; the rest render as
+  // joinable "discover" cards.
+  const joinedGroups = useMemo(
+    () => groups.filter((g) => joinedGroupIds.has(g.id)),
+    [groups, joinedGroupIds],
+  );
+  const discoverGroups = useMemo(
+    () => groups.filter((g) => !joinedGroupIds.has(g.id)),
+    [groups, joinedGroupIds],
+  );
 
   const handleJoin = async (groupId: string, isPrivate: boolean) => {
     try {
@@ -136,45 +121,83 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
     }
   };
 
-  // Still loading while the primary query runs, or while the default-group
-  // fallback is resolving after the primary came back empty/errored.
-  const isLoading =
-    (loading && primaryGroups.length === 0) ||
-    (primaryUnavailable && defaultGroupLoading && groups.length === 0);
+  const isLoading = loading && groups.length === 0;
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-7xl px-3 py-6 lg:px-6">
+        <div className="py-12 text-center text-text-secondary">{t('groups.loading')}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-7xl px-3 py-6 lg:px-6">
-      {isLoading ? (
-        <div className="py-12 text-center text-text-secondary">{t('groups.loading')}</div>
-      ) : groups.length === 0 ? (
-        <EmptyState size="md" icon={UsersRound} title={t('groups.noneFound')} />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {groups.map((group) => {
-            const isPrivate = group.privacy === GroupPrivacy.PRIVATE;
-            const isJoined = joinedGroupIds.has(group.id);
-            return (
-              <JoinCommunityCard
+    <div className="mx-auto max-w-7xl px-3 py-6 lg:px-6 space-y-8">
+      {/* Groups you've joined — list layout */}
+      <section>
+        <h2 className="heading-medium text-xl mb-4 text-text-primary">{t('groups.myGroups')}</h2>
+        {joinedGroups.length ? (
+          <div className="bg-surface-default rounded-2xl border border-border-subtle divide-y divide-border-subtle overflow-hidden">
+            {joinedGroups.map((group) => (
+              <button
                 key={group.id}
-                title={group.name}
-                members={group.memberCount ?? 0}
-                description={group.description || ''}
-                avatarUrl={toCdnUrl(group.avatarUrl)}
-                onCardClick={() => router.push(`/groups/${group.id}`)}
-                buttonText={
-                  isJoined
-                    ? t('groups.joined')
-                    : isPrivate
-                      ? t('groups.detail.requestToJoin')
-                      : tActions('join')
-                }
-                onButtonClick={() => handleJoin(group.id, isPrivate)}
-                isDisabled={isJoined || joinLoading || requestLoading}
-              />
-            );
-          })}
-        </div>
-      )}
+                type="button"
+                onClick={() => router.push(`/groups/${group.id}`)}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-hover"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={toCdnUrl(group.avatarUrl) || '/GLOBE.png'}
+                  alt={group.name}
+                  width={44}
+                  height={44}
+                  className="h-11 w-11 flex-shrink-0 rounded-full border border-border-subtle object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="label-large truncate text-text-primary">{group.name}</p>
+                  {group.description && (
+                    <p className="body-small truncate text-text-secondary">{group.description}</p>
+                  )}
+                </div>
+                <span className="caption-medium flex-shrink-0 text-text-secondary">
+                  {(group.memberCount ?? 0).toLocaleString()} {t('members')}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <EmptyState size="sm" icon={UsersRound} title={t('groups.noJoined')} />
+        )}
+      </section>
+
+      {/* Discover groups in this community — card layout */}
+      <section>
+        <h2 className="heading-medium text-xl mb-4 text-text-primary">{t('groups.discover')}</h2>
+        {discoverGroups.length ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {discoverGroups.map((group) => {
+              const isPrivate = group.privacy === GroupPrivacy.PRIVATE;
+              return (
+                <JoinCommunityCard
+                  key={group.id}
+                  title={group.name}
+                  members={group.memberCount ?? 0}
+                  description={group.description || ''}
+                  avatarUrl={toCdnUrl(group.avatarUrl)}
+                  onCardClick={() => router.push(`/groups/${group.id}`)}
+                  buttonText={
+                    isPrivate ? t('groups.detail.requestToJoin') : tActions('join')
+                  }
+                  onButtonClick={() => handleJoin(group.id, isPrivate)}
+                  isDisabled={joinLoading || requestLoading}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState size="sm" icon={UsersRound} title={t('groups.noneFound')} />
+        )}
+      </section>
     </div>
   );
 }

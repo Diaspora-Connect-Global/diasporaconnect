@@ -19,7 +19,6 @@ export type {
   GetGroupResponse,
   GetMyGroupsResponse,
   SearchGroupsResponse,
-  ListCommunityGroupsResponse,
   GetGroupMembersResponse,
   CheckGroupMembershipResponse,
   CreateGroupResponse,
@@ -125,40 +124,6 @@ export const SEARCH_GROUPS = gql`
         privacy
         memberCount
         ownerId
-      }
-    }
-  }
-`;
-
-/**
- * List the groups that belong to a specific community.
- *
- * NOTE: Requires a backend `listCommunityGroups(communityId)` resolver. Groups
- * are otherwise a top-level entity (see GET_MY_GROUPS / SEARCH_GROUPS) with no
- * community scoping. Until the backend exposes this field the query errors and
- * the UI should fall back to an empty state.
- *
- * @example
- * ```typescript
- * const { data } = useQuery<ListCommunityGroupsResponse>(LIST_COMMUNITY_GROUPS, {
- *   variables: { communityId: "community-uuid", limit: 20, offset: 0 }
- * });
- * ```
- */
-export const LIST_COMMUNITY_GROUPS = gql`
-  query ListCommunityGroups($communityId: ID!, $limit: Int, $offset: Int) {
-    listCommunityGroups(communityId: $communityId, limit: $limit, offset: $offset) {
-      success
-      message
-      total
-      groups {
-        id
-        name
-        description
-        privacy
-        memberCount
-        ownerId
-        avatarUrl
       }
     }
   }
