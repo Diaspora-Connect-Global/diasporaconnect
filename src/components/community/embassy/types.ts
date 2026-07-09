@@ -29,6 +29,8 @@ export interface EmbassyCommunity {
   memberCount?: number;
   createdAt?: string;
   membershipStatus?: string | null;
+  /** The community's single built-in group feed; used as a fallback list. */
+  defaultGroupId?: string | null;
   /**
    * Enabled member-facing service module keys. `null`/absent → treat as all
    * enabled (legacy/non-loaded); `[]` → none enabled. Drives tab/widget gating.

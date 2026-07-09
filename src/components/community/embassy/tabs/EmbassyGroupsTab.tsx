@@ -12,14 +12,17 @@ import { useRouter } from '@/i18n/navigation';
 import { toCdnUrl } from '@/lib/cdn';
 import {
   LIST_COMMUNITY_GROUPS,
+  GET_GROUP,
   GET_MY_GROUPS,
   JOIN_GROUP,
   REQUEST_TO_JOIN_GROUP,
   GroupPrivacy,
   type ListCommunityGroupsResponse,
+  type GetGroupResponse,
   type GetMyGroupsResponse,
   type JoinGroupResponse,
   type RequestToJoinGroupResponse,
+  type Group,
 } from '@/services/gql/groups';
 import type { EmbassyCommunity } from '../types';
 
@@ -34,8 +37,10 @@ interface EmbassyGroupsTabProps {
  *
  * Data source: LIST_COMMUNITY_GROUPS(communityId). Groups are otherwise a
  * top-level entity with no community scoping, so this depends on a backend
- * `listCommunityGroups` resolver — until that exists the query errors and this
- * tab degrades to the empty state rather than breaking the page.
+ * `listCommunityGroups` resolver. Until that exists (query errors or returns
+ * nothing) we fall back to the community's single built-in group
+ * (`defaultGroupId`) so the tab shows real data today, and only render the
+ * empty state when there is genuinely nothing to show.
  */
 export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
   const t = useTranslations('community');
@@ -57,6 +62,32 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
     },
   );
 
+  const primaryGroups = useMemo(
+    () => data?.listCommunityGroups?.groups ?? [],
+    [data],
+  );
+
+  // The primary community-scoped query is unavailable when it errored (no
+  // backend resolver yet) or finished with no rows. Only then do we reach for
+  // the default-group fallback.
+  const primaryUnavailable = !!error || (!loading && primaryGroups.length === 0);
+
+  const { data: defaultGroupData, loading: defaultGroupLoading } = useQuery<GetGroupResponse>(
+    GET_GROUP,
+    {
+      variables: { groupId: community.defaultGroupId },
+      skip: !community.defaultGroupId || !primaryUnavailable,
+      fetchPolicy: 'cache-and-network',
+    },
+  );
+  const fallbackGroup = defaultGroupData?.getGroup?.group;
+
+  const groups: Group[] = useMemo(() => {
+    if (primaryGroups.length) return primaryGroups;
+    if (fallbackGroup) return [fallbackGroup];
+    return [];
+  }, [primaryGroups, fallbackGroup]);
+
   const { data: myGroupsData, refetch: refetchMyGroups } = useQuery<GetMyGroupsResponse>(
     GET_MY_GROUPS,
     { variables: { limit: 50, offset: 0 }, fetchPolicy: 'cache-and-network' },
@@ -71,11 +102,6 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
     for (const g of myGroupsData?.getMyGroups?.groups ?? []) ids.add(g.id);
     return ids;
   }, [myGroupsData, joinedThisSession]);
-
-  const groups = useMemo(
-    () => data?.listCommunityGroups?.groups ?? [],
-    [data],
-  );
 
   const handleJoin = async (groupId: string, isPrivate: boolean) => {
     try {
@@ -110,13 +136,17 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
     }
   };
 
-  const showEmpty = !loading && (!!error || groups.length === 0);
+  // Still loading while the primary query runs, or while the default-group
+  // fallback is resolving after the primary came back empty/errored.
+  const isLoading =
+    (loading && primaryGroups.length === 0) ||
+    (primaryUnavailable && defaultGroupLoading && groups.length === 0);
 
   return (
     <div className="mx-auto max-w-7xl px-3 py-6 lg:px-6">
-      {loading && groups.length === 0 ? (
+      {isLoading ? (
         <div className="py-12 text-center text-text-secondary">{t('groups.loading')}</div>
-      ) : showEmpty ? (
+      ) : groups.length === 0 ? (
         <EmptyState size="md" icon={UsersRound} title={t('groups.noneFound')} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
