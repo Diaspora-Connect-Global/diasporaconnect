@@ -1,8 +1,65 @@
 import { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+// Hosts the app legitimately talks to. Kept beside the CSP so the two cannot
+// drift apart when a new backend or CDN is introduced.
+const API_HOST = 'https://api.diaspoplug.net';
+const WS_HOST = 'wss://api.diaspoplug.net';
+const CDN_HOSTS = ['https://cdn.diaspoplug.net', 'https://storage.googleapis.com'];
+const ASSET_HOST = process.env.ASSET_PREFIX || '';
+
+/**
+ * Content Security Policy.
+ *
+ * Shipped in Report-Only mode: a blocking CSP on a Next.js app is a breaking
+ * change (framework inline bootstrap scripts, styled-jsx, third-party embeds),
+ * so violations are reported first and the policy is promoted to enforcing
+ * `Content-Security-Policy` once the reports come back clean.
+ *
+ * `unsafe-inline`/`unsafe-eval` on script-src are what Next's inline bootstrap
+ * requires without a nonce; tightening that needs a nonce-based middleware and
+ * is deliberately out of scope here.
+ */
+const csp = [
+  `default-src 'self'`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${ASSET_HOST}`,
+  `style-src 'self' 'unsafe-inline' ${ASSET_HOST}`,
+  `img-src 'self' data: blob: https:`,
+  `font-src 'self' data: ${ASSET_HOST}`,
+  `connect-src 'self' ${API_HOST} ${WS_HOST} ${CDN_HOSTS.join(' ')} ${ASSET_HOST}`,
+  `media-src 'self' blob: ${CDN_HOSTS.join(' ')}`,
+  `worker-src 'self' blob:`,
+  `frame-ancestors 'self'`,
+  `base-uri 'self'`,
+  `form-action 'self'`,
+  `object-src 'none'`,
+]
+  .map((d) => d.replace(/\s+/g, ' ').trim())
+  .join('; ');
+
+const securityHeaders = [
+  // Force HTTPS for two years, including subdomains, and allow preload-list inclusion.
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  // Stop browsers guessing a response's type (MIME-confusion / drive-by XSS).
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  // Clickjacking protection for legacy browsers; frame-ancestors covers modern ones.
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  // Send only the origin cross-site, never the full path/query.
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  // The app requests none of these; deny them outright.
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+  // Explicitly off: the legacy auditor is itself an XSS vector on old browsers.
+  { key: 'X-XSS-Protection', value: '0' },
+  { key: 'Content-Security-Policy-Report-Only', value: csp },
+];
+
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Do not advertise the framework — one less fingerprinting signal.
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: '/:path*', headers: securityHeaders }];
+  },
   // Serve Next's build assets (_next/static: JS/CSS/chunks) from a CDN when
   // ASSET_PREFIX is set at build time — e.g. https://static.diaspoplug.net, a
   // Cloudflare-proxied host whose origin is this Cloud Run service and which
