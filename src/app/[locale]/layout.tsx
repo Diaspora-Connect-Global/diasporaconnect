@@ -48,7 +48,6 @@ export async function generateMetadata({
   const verificationTokens = await fetchVerificationTokens();
 
   const description = t('description');
-  const ogImage = '/og-default.png';
 
   const hreflangLanguages: Record<string, string> = {};
   for (const l of LOCALES) hreflangLanguages[l] = `${BASE}/${l}`;
@@ -84,6 +83,10 @@ export async function generateMetadata({
       shortcut: '/favicon.svg',
       apple: '/favicon.svg',
     },
+    // OG/Twitter images are supplied by the colocated opengraph-image.tsx
+    // (generated 1200x630 branded PNG) — no explicit `images` here so the file
+    // convention wins. An explicit `images` entry in the same segment would
+    // override the file convention (Next.js precedence), so it must be omitted.
     openGraph: {
       title: SITE_NAME,
       description,
@@ -92,7 +95,6 @@ export async function generateMetadata({
       locale: locale,
       alternateLocale: LOCALES.filter((l) => l !== locale),
       type: 'website',
-      images: [{ url: ogImage, width: 1200, height: 630, alt: `${SITE_NAME} — Connecting diaspora communities worldwide` }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -100,7 +102,6 @@ export async function generateMetadata({
       description,
       site: '@diaspoplug',
       creator: '@diaspoplug',
-      images: [ogImage],
     },
     alternates: {
       canonical: `${BASE}/en`,

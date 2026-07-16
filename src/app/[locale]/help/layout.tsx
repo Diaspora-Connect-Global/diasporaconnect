@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { BASE, SITE_NAME, buildAlternates, publicRobots } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, ogImages } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'Help & Support',
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     url: `${BASE}/en/help`,
     siteName: SITE_NAME,
     type: 'website',
+    ...ogImages(null, 'Help & Support'),
   },
 };
 

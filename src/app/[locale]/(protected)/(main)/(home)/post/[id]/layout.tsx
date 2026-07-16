@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
+import { ogImages, twitterImages } from '@/lib/seo';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://diaspoplug.com';
 const GRAPHQL_URL = 'https://api.diaspoplug.net/graphql';
 const DEFAULT_LOCALE = 'en';
-const DEFAULT_IMAGE = '/og-default.png';
 
 const POST_META_QUERY = `
   query GetPostMeta($id: String!) {
@@ -60,11 +60,11 @@ export async function generateMetadata({
   const postUrl = `${baseUrl}/${DEFAULT_LOCALE}/post/${id}`;
   const defaultTitle = 'Post | Diaspoplug';
   const defaultDesc = 'View this post on Diaspoplug.';
-  const defaultImage = { url: DEFAULT_IMAGE, width: 1200, height: 630, alt: 'Diaspoplug' };
 
   const result = await fetchPostMeta(id);
   const post = result?.data?.post;
 
+  // Posts without an image of their own fall back to the generated site card.
   if (!post) {
     return {
       title: defaultTitle,
@@ -74,13 +74,13 @@ export async function generateMetadata({
         description: defaultDesc,
         url: postUrl,
         siteName: 'Diaspoplug',
-        images: [defaultImage],
+        ...ogImages(null, 'Diaspoplug', DEFAULT_LOCALE),
       },
       twitter: {
         card: 'summary_large_image',
         title: defaultTitle,
         description: defaultDesc,
-        images: [DEFAULT_IMAGE],
+        ...twitterImages(null, DEFAULT_LOCALE),
       },
     };
   }
@@ -88,10 +88,6 @@ export async function generateMetadata({
   const title = truncate(post.text, 80) || defaultTitle;
   const description = truncate(post.text, 160) || defaultDesc;
   const firstImage = post.attachments?.find((a) => a.mimeType?.startsWith('image/'))?.url;
-  const imageUrl = firstImage || DEFAULT_IMAGE;
-  const images = firstImage
-    ? [{ url: firstImage, width: 1200, height: 630, alt: title }]
-    : [defaultImage];
 
   return {
     title: title.length > 60 ? title.slice(0, 57) + '...' : title,
@@ -101,13 +97,13 @@ export async function generateMetadata({
       description,
       url: postUrl,
       siteName: 'Diaspoplug',
-      images,
+      ...ogImages(firstImage, title, DEFAULT_LOCALE),
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      ...twitterImages(firstImage, DEFAULT_LOCALE),
     },
   };
 }

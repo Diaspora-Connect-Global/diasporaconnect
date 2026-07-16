@@ -38,12 +38,47 @@ export const publicRobots: Metadata['robots'] = {
   },
 };
 
-/** Shared robots directive for auth-gated / private pages */
+/**
+ * Robots directive for auth-gated / utility pages. These are now indexable
+ * (index, follow) so no page emits `noindex, nofollow`; crawler access to
+ * genuinely private paths is still controlled centrally in `app/robots.ts`.
+ */
 export const privateRobots: Metadata['robots'] = {
-  index: false,
-  follow: false,
-  googleBot: { index: false, follow: false },
+  index: true,
+  follow: true,
+  googleBot: {
+    index: true,
+    follow: true,
+    'max-snippet': -1,
+    'max-image-preview': 'large',
+    'max-video-preview': -1,
+  },
 };
+
+/**
+ * Absolute URL of the generated site-wide share card (`[locale]/opengraph-image.tsx`).
+ *
+ * Pages must reference this EXPLICITLY rather than relying on inheritance: Next's
+ * `opengraph-image` file convention only applies to the segment it lives in, so a
+ * child route that declares its own `openGraph` gets no image unless it sets one.
+ */
+export function defaultOgImageUrl(locale: string = 'en') {
+  return `${BASE}/${locale}/opengraph-image`;
+}
+
+/**
+ * Open Graph `images` for a page: the entity's own image (event cover, community
+ * banner…) when it has one, otherwise the generated site-wide card. Always emits
+ * an image so no share link renders without a preview.
+ */
+export function ogImages(image: string | null | undefined, alt: string, locale: string = 'en') {
+  return { images: [{ url: image || defaultOgImageUrl(locale), width: 1200, height: 630, alt }] };
+}
+
+/** Twitter `images` counterpart to `ogImages`, with the same fallback behaviour. */
+export function twitterImages(image: string | null | undefined, locale: string = 'en') {
+  return { images: [image || defaultOgImageUrl(locale)] };
+}
 
 /** Core Organisation JSON-LD — reused across pages */
 export const organisationSchema = {

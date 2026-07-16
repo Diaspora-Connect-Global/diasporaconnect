@@ -5,7 +5,11 @@ export const alt = `${SITE_NAME} — Connecting diaspora communities worldwide`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-// Branded, generated social-share card for the public landing page.
+// Site-wide branded social-share card. Colocated in the [locale] segment so the
+// root URL (`/en`, the link users actually share) and every locale page that
+// does not provide its own opengraph-image inherits a valid 1200x630 PNG.
+// Social scrapers (WhatsApp, Facebook, LinkedIn, X, Slack, iMessage) require a
+// raster image at this size — an SVG or a 1x1 placeholder yields no preview.
 export default async function OpengraphImage() {
   return new ImageResponse(
     (

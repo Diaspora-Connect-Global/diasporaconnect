@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Mail, Handshake, Clock, MessageCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import JsonLd from '@/components/seo/JsonLd';
-import { BASE, SITE_NAME, buildAlternates, publicRobots } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, ogImages } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     url: `${BASE}/en/contact`,
     siteName: SITE_NAME,
     type: 'website',
+    ...ogImages(null, 'Contact Us'),
   },
 };
 

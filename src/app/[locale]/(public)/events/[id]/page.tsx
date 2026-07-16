@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
-import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages, twitterImages } from '@/lib/seo';
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { eventSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import EventDetailClient from './EventDetailClient';
-
-const DEFAULT_IMAGE = '/og-default.png';
 
 const EVENT_SEO_QUERY = `
   query EventSeo($id: ID!) {
@@ -84,7 +82,7 @@ export async function generateMetadata({
   const title = truncate(event.title, 70);
   const description =
     truncate(plainText(event.description), 160) || `Discover this event on ${SITE_NAME}.`;
-  const image = event.coverImageUrl || DEFAULT_IMAGE;
+  const image = event.coverImageUrl;
 
   return {
     title,
@@ -97,9 +95,9 @@ export async function generateMetadata({
       url: `${BASE}/${locale}${path}`,
       siteName: SITE_NAME,
       type: 'website',
-      images: [{ url: image, width: 1200, height: 630, alt: event.title }],
+      ...ogImages(image, event.title, locale),
     },
-    twitter: { card: 'summary_large_image', title, description, images: [image] },
+    twitter: { card: 'summary_large_image', title, description, ...twitterImages(image, locale) },
   };
 }
 

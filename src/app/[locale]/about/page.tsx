@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Globe, Users, Target, Zap, Building2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import JsonLd from '@/components/seo/JsonLd';
-import { BASE, SITE_NAME, buildAlternates, publicRobots, organisationSchema, websiteSchema } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, organisationSchema, websiteSchema, ogImages, twitterImages } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'About DiaspoPlug — Connecting the diaspora across borders',
@@ -27,13 +27,13 @@ export const metadata: Metadata = {
     url: `${BASE}/en/about`,
     siteName: SITE_NAME,
     type: 'website',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'About DiaspoPlug' }],
+    ...ogImages(null, 'About DiaspoPlug'),
   },
   twitter: {
     card: 'summary_large_image',
     title: 'About DiaspoPlug',
     description: 'The platform connecting diaspora communities worldwide.',
-    images: ['/og-default.png'],
+    ...twitterImages(null),
   },
 };
 

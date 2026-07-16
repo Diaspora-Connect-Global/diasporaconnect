@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { FileText } from 'lucide-react';
 import JsonLd from '@/components/seo/JsonLd';
-import { BASE, SITE_NAME, buildAlternates, publicRobots } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, ogImages } from '@/lib/seo';
 
 const LAST_UPDATED = '2026-03-27';
 const LAST_UPDATED_DISPLAY = 'March 27, 2026';
@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     url: `${BASE}/en/terms`,
     siteName: SITE_NAME,
     type: 'website',
+    ...ogImages(null, 'Terms of Service'),
   },
 };
 

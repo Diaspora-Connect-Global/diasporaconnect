@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
-import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages, twitterImages } from '@/lib/seo';
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { organizationPageSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import AssociationDetailClient from './AssociationDetailClient';
 import { toCdnUrl } from '@/lib/cdn';
-
-const DEFAULT_IMAGE = '/og-default.png';
 
 const ASSOCIATION_SEO_QUERY = `
   query AssociationSeo($id: ID!) {
@@ -63,7 +61,7 @@ export async function generateMetadata({
   const description =
     truncate(plainText(a.description), 160) ||
     `${a.associationType?.name ? `${a.associationType.name} · ` : ''}Connect with ${a.name} on ${SITE_NAME}.`;
-  const image = toCdnUrl(a.avatarUrl) || DEFAULT_IMAGE;
+  const image = toCdnUrl(a.avatarUrl);
 
   return {
     title,
@@ -76,9 +74,9 @@ export async function generateMetadata({
       url: `${BASE}/${locale}${path}`,
       siteName: SITE_NAME,
       type: 'website',
-      images: [{ url: image, width: 1200, height: 630, alt: a.name }],
+      ...ogImages(image, a.name, locale),
     },
-    twitter: { card: 'summary_large_image', title, description, images: [image] },
+    twitter: { card: 'summary_large_image', title, description, ...twitterImages(image, locale) },
   };
 }
 

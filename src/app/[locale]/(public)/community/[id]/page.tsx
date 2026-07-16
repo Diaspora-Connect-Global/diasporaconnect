@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
-import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages, twitterImages } from '@/lib/seo';
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { organizationPageSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import CommunityDetailClient from './CommunityDetailClient';
 import { toCdnUrl } from '@/lib/cdn';
-
-const DEFAULT_IMAGE = '/og-default.png';
 
 const COMMUNITY_SEO_QUERY = `
   query CommunitySeo($id: ID!) {
@@ -67,7 +65,7 @@ export async function generateMetadata({
   const description =
     truncate(plainText(c.description), 160) ||
     `Join the ${c.name} community on ${SITE_NAME}.`;
-  const image = toCdnUrl(c.bannerUrl) || toCdnUrl(c.avatarUrl) || DEFAULT_IMAGE;
+  const image = toCdnUrl(c.bannerUrl) || toCdnUrl(c.avatarUrl);
 
   return {
     title,
@@ -80,9 +78,9 @@ export async function generateMetadata({
       url: `${BASE}/${locale}${path}`,
       siteName: SITE_NAME,
       type: 'website',
-      images: [{ url: image, width: 1200, height: 630, alt: c.name }],
+      ...ogImages(image, c.name, locale),
     },
-    twitter: { card: 'summary_large_image', title, description, images: [image] },
+    twitter: { card: 'summary_large_image', title, description, ...twitterImages(image, locale) },
   };
 }
 

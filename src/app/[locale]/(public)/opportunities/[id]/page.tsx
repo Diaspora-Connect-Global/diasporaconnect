@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
-import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots } from '@/lib/seo';
+import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages, twitterImages } from '@/lib/seo';
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { jobPostingSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import OpportunityDetailClient from './OpportunityDetailClient';
-
-const DEFAULT_IMAGE = '/og-default.png';
 
 const OPPORTUNITY_SEO_QUERY = `
   query OpportunitySeo($id: String!) {
@@ -86,9 +84,10 @@ export async function generateMetadata({
       url: `${BASE}/${locale}${path}`,
       siteName: SITE_NAME,
       type: 'website',
-      images: [{ url: DEFAULT_IMAGE, width: 1200, height: 630, alt: o.title }],
+      // Opportunities have no image of their own — falls back to the site card.
+      ...ogImages(null, o.title, locale),
     },
-    twitter: { card: 'summary_large_image', title, description, images: [DEFAULT_IMAGE] },
+    twitter: { card: 'summary_large_image', title, description, ...twitterImages(null, locale) },
   };
 }
 
