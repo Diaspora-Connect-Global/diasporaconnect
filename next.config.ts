@@ -78,26 +78,31 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Only hosts the app actually renders through next/image. A wildcard here
+    // ('**', and especially over plain http) turns /_next/image into an open
+    // proxy that will fetch and re-serve any URL on the internet from this
+    // origin — which, combined with dangerouslyAllowSVG below, means serving
+    // attacker-controlled SVG (and therefore script) as first-party content.
+    //
+    // Note this constrains next/image ONLY. Plain <img> bypasses the optimizer,
+    // so link previews and YouTube thumbnails (arbitrary external hosts, via
+    // <img> in LinkPreviewCard) are unaffected and need no entry here.
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'storage.googleapis.com',
-        pathname: '/diaspoplug-media/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.diaspoplug.net',
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: '**',
-      },
+      // Stored media, and its pre-CDN GCS origin — toCdnUrl() is a no-op when
+      // NEXT_PUBLIC_CDN_URL is unset, and raw GCS URLs persist in stored rows.
+      { protocol: 'https', hostname: 'cdn.diaspoplug.net' },
+      { protocol: 'https', hostname: 'storage.googleapis.com', pathname: '/diaspoplug-media/**' },
+      // Country-select flags (components/custom/input.tsx).
+      { protocol: 'https', hostname: 'flagcdn.com', pathname: '/**' },
     ],
+    // Required: local /public/*.svg (logos, nav and action icons) still routes
+    // through /_next/image, which 400s on image/svg+xml without this. No REMOTE
+    // svg is ever rendered via next/image, so with the wildcards gone this only
+    // ever applies to first-party assets.
     dangerouslyAllowSVG: true,
+    // Defence in depth for whatever the optimizer does serve.
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 };
 
