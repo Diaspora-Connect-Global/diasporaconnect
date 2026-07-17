@@ -16,6 +16,8 @@ import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import type { DisplayCurrency } from "@/store/useCurrencyStore";
+import DataExportSection from "@/components/settings/DataExportSection";
+import RecommendationDataSection from "@/components/settings/RecommendationDataSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 
 export default function SettingsPage() {
@@ -321,7 +323,12 @@ export default function SettingsPage() {
             )}
           </div>
 
-          {/* Privacy & Data — Danger Zone */}
+          {/* Privacy & Data.
+              Order is deliberate: export first, then the reversible
+              personalisation reset, then the destructive account deletion last —
+              GDPR guidance is to let people take their data before it's gone. */}
+          <DataExportSection />
+          <RecommendationDataSection />
           <DeleteAccountSection />
         </div>
       </div>

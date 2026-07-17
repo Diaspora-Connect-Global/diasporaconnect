@@ -1,31 +1,35 @@
 "use client";
 
 /**
- * @fileoverview Settings: "Delete my recommendation data" (GDPR right-to-erase).
+ * @fileoverview Settings: "Delete my account" (GDPR Art. 17 right-to-erasure).
  *
- * Calls the api-gateway `eraseMyAccountData` mutation, which wipes the caller's
- * footprint inside the recommendation-service (interest profile, interaction
- * log, feed impressions, blocks, memberships). This does NOT delete the user's
- * account in auth-service / user-service — that's a separate, not-yet-built flow.
+ * This is the REAL account-deletion flow. It calls `requestAccountDeletion`,
+ * which moves the account into a reversible 30-day grace window; a nightly job
+ * in auth-service performs the irreversible platform-wide erase at expiry.
  *
- * UX:
- *  - Primary CTA is a destructive button.
- *  - Confirmation dialog requires typing "DELETE" (case-sensitive) before
- *    enabling the confirm button — prevents accidental clicks.
- *  - On success: green toast w/ per-table counts, then nudges the user toward
- *    sign-out (routes to /signin after 3s).
- *  - On error: red toast w/ message; stays on the page.
- *  - Idempotent re-run (all zero counts) shows "Already erased — no data to
- *    remove." instead of "Removed 0..." for a friendlier read.
+ * Not to be confused with `eraseMyAccountData` (see RecommendationDataSection),
+ * which only clears the recommendation engine's footprint.
+ *
+ * UX decisions worth keeping:
+ *  - Scheduling REVOKES ALL SESSIONS server-side, so we must sign the user out
+ *    immediately afterwards. Leaving them on a "logged in" screen with a dead
+ *    token produces confusing 401s on the next click.
+ *  - The grace window is surfaced as a persistent banner with an Undo, because a
+ *    deletion the user cannot see or reverse is the worst failure mode here.
+ *  - Deletion is presented as reversible-for-30-days, never as instant, so the
+ *    copy matches what the backend actually does.
+ *  - We deliberately do NOT block on legal holds client-side: the server decides,
+ *    and a held account still shows as PENDING_DELETION (deferred, not cancelled).
  *
  * @module components/settings/DeleteAccountSection
  */
 
-import { useMemo, useState } from "react";
-import { useMutation } from "@apollo/client/react";
+import { useState } from "react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { Trash2, AlertTriangle, Loader2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,130 +41,166 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ERASE_MY_ACCOUNT_DATA } from "@/services/gql/postsFeed";
+import {
+  REQUEST_ACCOUNT_DELETION,
+  CANCEL_ACCOUNT_DELETION,
+  MY_ACCOUNT_DELETION_STATUS,
+} from "@/services/gql/account";
 import type {
-  EraseMyAccountDataData,
-  EraseUserDataRowCounts,
-} from "@/services/gql/types/recommendation";
+  RequestAccountDeletionData,
+  CancelAccountDeletionData,
+  MyAccountDeletionStatusData,
+} from "@/services/gql/types/account";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const CONFIRM_PHRASE = "DELETE";
-const POST_SUCCESS_REDIRECT_MS = 3000;
+const SIGN_OUT_DELAY_MS = 2500;
 
-/** Plain-English description of each table that the mutation wipes. */
-const ERASE_BULLETS: Array<{ key: keyof EraseUserDataRowCounts; label: string }> = [
-  { key: "interest_profile", label: "Your interest topics and personalisation profile" },
-  { key: "interaction_log", label: "Your view, like, save and share history" },
-  { key: "feed_impression", label: "What posts the feed has already shown you (impressions)" },
-  { key: "user_block", label: "Your hidden authors, posts and topics" },
-  { key: "user_membership", label: "Your community/association memberships used for ranking" },
-];
-
-/**
- * Compose a human-readable summary of per-table deletions for the success toast.
- *
- * Uses singular/plural-aware noun phrases. Returns `null` when every count is
- * zero (the caller renders an "already erased" message instead).
- */
-function formatDeletedSummary(counts: EraseUserDataRowCounts): string | null {
-  const parts: string[] = [];
-  if (counts.interest_profile > 0) {
-    parts.push(`${counts.interest_profile} interest profile`);
-  }
-  if (counts.interaction_log > 0) {
-    parts.push(`${counts.interaction_log} interaction events`);
-  }
-  if (counts.feed_impression > 0) {
-    parts.push(`${counts.feed_impression} impressions`);
-  }
-  if (counts.user_block > 0) {
-    parts.push(`${counts.user_block} blocks`);
-  }
-  if (counts.user_membership > 0) {
-    parts.push(`${counts.user_membership} memberships`);
-  }
-  if (parts.length === 0) return null;
-  return `Removed ${parts.join(", ")}.`;
+function formatDate(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString();
 }
 
 export default function DeleteAccountSection() {
+  const t = useTranslations("settings.deleteAccount");
   const router = useRouter();
+  const clearAuth = useAuthStore((s) => s.clearAuth);
+
   const [open, setOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const [reason, setReason] = useState("");
 
-  const [eraseMyAccountData, { loading }] = useMutation<EraseMyAccountDataData>(
-    ERASE_MY_ACCOUNT_DATA,
+  const { data: statusData, refetch } = useQuery<MyAccountDeletionStatusData>(
+    MY_ACCOUNT_DELETION_STATUS,
+    { fetchPolicy: "network-only" },
   );
 
-  const isConfirmReady = confirmText === CONFIRM_PHRASE && !loading;
+  const [requestDeletion, { loading: deleting }] =
+    useMutation<RequestAccountDeletionData>(REQUEST_ACCOUNT_DELETION);
+  const [cancelDeletion, { loading: cancelling }] =
+    useMutation<CancelAccountDeletionData>(CANCEL_ACCOUNT_DELETION);
 
-  /** Reset confirmation text on close so re-opening starts clean. */
+  const status = statusData?.myAccountDeletionStatus;
+  const isPending = status?.status === "PENDING_DELETION";
+  const isConfirmReady = confirmText === CONFIRM_PHRASE && !deleting;
+
   const handleOpenChange = (next: boolean) => {
-    if (loading) return; // don't allow dismissing mid-flight
+    if (deleting) return; // don't allow dismissing mid-flight
     setOpen(next);
-    if (!next) setConfirmText("");
+    if (!next) {
+      setConfirmText("");
+      setReason("");
+    }
   };
 
   const handleConfirm = async () => {
     if (!isConfirmReady) return;
     try {
-      const { data } = await eraseMyAccountData();
-      const result = data?.eraseMyAccountData;
-      if (!result || !result.success) {
-        toast.error(result?.message ?? "Failed to erase recommendation data. Please try again.");
+      const { data } = await requestDeletion({
+        variables: { reason: reason.trim() || null },
+      });
+      const res = data?.requestAccountDeletion;
+      if (!res?.success) {
+        toast.error(res?.message ?? t("couldNotSchedule"));
         return;
       }
 
-      const summary = formatDeletedSummary(result.rowsDeleted);
-      const headline =
-        "Your recommendation data has been erased. Sign-out to complete account removal.";
-      toast.success(summary ? `${headline} ${summary}` : `${headline} Already erased — no data to remove.`, {
-        duration: POST_SUCCESS_REDIRECT_MS,
-      });
-
+      const purgeOn = formatDate(res.purgeAfter);
+      toast.success(
+        purgeOn ? t("scheduledOn", { date: purgeOn }) : t("scheduled"),
+        { duration: SIGN_OUT_DELAY_MS },
+      );
       setOpen(false);
       setConfirmText("");
 
-      // Soft-nudge to sign-out. We don't programmatically log them out yet —
-      // the auth/user-service deletion is a separate, not-yet-built flow.
+      // The server has already revoked every session — keeping the user "logged
+      // in" here would just 401 on their next action. Sign out and send them to
+      // sign-in, where logging back in is the documented undo path.
       setTimeout(() => {
+        clearAuth();
         router.push("/signin");
-      }, POST_SUCCESS_REDIRECT_MS);
+      }, SIGN_OUT_DELAY_MS);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      toast.error(`Could not erase recommendation data: ${message}`);
+      const message = err instanceof Error ? err.message : t("unknownError");
+      toast.error(t("couldNotScheduleWithReason", { reason: message }));
     }
   };
 
-  // Memoise the bullet list so the dialog markup stays readable.
-  const bulletList = useMemo(
-    () =>
-      ERASE_BULLETS.map((b) => (
-        <li key={b.key} className="text-sm text-muted-foreground">
-          {b.label}
-        </li>
-      )),
-    [],
-  );
+  const handleCancel = async () => {
+    try {
+      const { data } = await cancelDeletion();
+      const res = data?.cancelAccountDeletion;
+      if (!res?.success) {
+        toast.error(res?.message ?? t("couldNotCancel"));
+        return;
+      }
+      toast.success(t("cancelled"));
+      await refetch();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t("unknownError");
+      toast.error(t("couldNotCancelWithReason", { reason: message }));
+    }
+  };
 
+  /* ---------------------------------------------------------------- */
+  /* Pending state: show the countdown + undo instead of the delete CTA */
+  /* ---------------------------------------------------------------- */
+  if (isPending) {
+    return (
+      <div
+        className="bg-surface-default border border-amber-400 dark:border-amber-700/60 rounded-lg p-6 space-y-4 shadow-sm"
+        data-testid="delete-account-pending"
+      >
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <h2 className="text-lg font-semibold text-foreground">
+            {t("pendingTitle")}
+          </h2>
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          {t("pendingBody", {
+            days: status?.daysRemaining ?? 0,
+            date: formatDate(status?.purgeAfter),
+          })}
+        </p>
+
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm font-medium text-foreground">{t("changedYourMind")}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCancel}
+            disabled={cancelling}
+            data-testid="delete-account-cancel"
+          >
+            {cancelling ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RotateCcw className="h-4 w-4" />
+            )}
+            {t("keepAccount")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Default state                                                     */
+  /* ---------------------------------------------------------------- */
   return (
     <div className="bg-surface-default border border-red-300 dark:border-red-900/50 rounded-lg p-6 space-y-4 shadow-sm">
       <div className="flex items-center gap-2">
         <AlertTriangle className="h-5 w-5 text-red-600" />
-        <h2 className="text-lg font-semibold text-foreground">
-          Delete my recommendation data
-        </h2>
+        <h2 className="text-lg font-semibold text-foreground">{t("title")}</h2>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        This permanently removes your interest profile, view history, and community
-        memberships from our recommendation engine. Your posts and account remain.
-        This action cannot be undone.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("description")}</p>
 
       <div className="flex items-center justify-between gap-4">
-        <p className="text-sm font-medium text-foreground">
-          Erase my recommendation footprint
-        </p>
+        <p className="text-sm font-medium text-foreground">{t("cta")}</p>
         <Button
           variant="outline"
           size="sm"
@@ -169,49 +209,62 @@ export default function DeleteAccountSection() {
           data-testid="delete-account-open"
         >
           <Trash2 className="h-4 w-4" />
-          Delete data
+          {t("button")}
         </Button>
       </div>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent showCloseButton={!loading}>
+        <DialogContent showCloseButton={!deleting}>
           <DialogHeader>
-            <DialogTitle className="text-red-600">
-              Are you absolutely sure?
-            </DialogTitle>
-            <DialogDescription>
-              The following will be permanently removed from our recommendation
-              engine. This cannot be undone.
-            </DialogDescription>
+            <DialogTitle className="text-red-600">{t("dialogTitle")}</DialogTitle>
+            <DialogDescription>{t("dialogDescription")}</DialogDescription>
           </DialogHeader>
 
-          <ul className="list-disc pl-6 space-y-1">{bulletList}</ul>
+          <ul className="list-disc pl-6 space-y-1">
+            <li className="text-sm text-muted-foreground">{t("bulletGrace")}</li>
+            <li className="text-sm text-muted-foreground">{t("bulletSignOut")}</li>
+            <li className="text-sm text-muted-foreground">{t("bulletUndo")}</li>
+            <li className="text-sm text-muted-foreground">{t("bulletFinal")}</li>
+            <li className="text-sm text-muted-foreground">{t("bulletExport")}</li>
+          </ul>
 
           <div className="space-y-2">
-            <label
-              htmlFor="delete-confirm-input"
-              className="text-sm font-medium text-foreground"
-            >
-              Type <span className="font-mono font-semibold">{CONFIRM_PHRASE}</span> to confirm
+            <label htmlFor="delete-reason-input" className="text-sm font-medium text-foreground">
+              {t("reasonLabel")}
+            </label>
+            <Input
+              id="delete-reason-input"
+              autoComplete="off"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              disabled={deleting}
+              placeholder={t("reasonPlaceholder")}
+              data-testid="delete-account-reason"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="delete-confirm-input" className="text-sm font-medium text-foreground">
+              {t.rich("confirmLabel", {
+                phrase: (chunks) => (
+                  <span className="font-mono font-semibold">{chunks}</span>
+                ),
+              })}
             </label>
             <Input
               id="delete-confirm-input"
               autoComplete="off"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
-              disabled={loading}
+              disabled={deleting}
               placeholder={CONFIRM_PHRASE}
               data-testid="delete-account-confirm-input"
             />
           </div>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={loading}
-            >
-              Cancel
+            <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={deleting}>
+              {t("keepMyAccount")}
             </Button>
             <Button
               variant="destructive"
@@ -219,7 +272,7 @@ export default function DeleteAccountSection() {
               disabled={!isConfirmReady}
               data-testid="delete-account-confirm"
             >
-              {loading ? "Erasing..." : "Erase my data"}
+              {deleting ? t("scheduling") : t("confirmButton")}
             </Button>
           </DialogFooter>
         </DialogContent>
