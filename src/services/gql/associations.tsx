@@ -205,9 +205,13 @@ export const REQUEST_JOIN_ASSOCIATION = gql`
    5. CANCEL PENDING REQUEST
    ============================================================================ */
 
+// Cancels a pending association join request. leaveCommunity handles both
+// COMMUNITY and ASSOCIATION via entityType and self-removes the caller's
+// membership row (a pending row is deleted just the same). Input
+// {entityId, entityType: 'ASSOCIATION'} already matches LeaveCommunityInput.
 export const CANCEL_JOIN_REQUEST = gql`
-  mutation CancelJoinRequest($input: CancelJoinRequestInput!) {
-    cancelJoinRequest(input: $input) {
+  mutation CancelJoinRequest($input: LeaveCommunityInput!) {
+    leaveCommunity(input: $input) {
       success
       message
     }

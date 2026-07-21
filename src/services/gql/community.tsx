@@ -198,9 +198,14 @@ export const REQUEST_JOIN_COMMUNITY = gql`
    4. CANCEL PENDING REQUEST
    ============================================================================ */
 
+// Cancels a pending join request by withdrawing the membership. There is no
+// dedicated cancel mutation for communities (cancelJoinRequest is group-only and
+// takes a groupId); leaveCommunity self-removes the caller's membership row —
+// which for a PENDING request is exactly a cancel. Input {entityId, entityType}
+// already matches LeaveCommunityInput.
 export const CANCEL_JOIN_REQUEST_COMMUNITY = gql`
-  mutation CancelJoinRequestCommunity($input: CancelJoinRequestInput!) {
-    cancelJoinRequest(input: $input) {
+  mutation CancelJoinRequestCommunity($input: LeaveCommunityInput!) {
+    leaveCommunity(input: $input) {
       success
       message
     }
