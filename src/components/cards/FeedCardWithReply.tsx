@@ -141,7 +141,8 @@ interface FeedCardProps {
 // are landing on the GQL `Comment` type in a parallel sweep. Once those land,
 // remove the intersection cast and read the fields directly off `ApiComment`.
 type CommentTrustFields = {
-    authorTier?: string;
+    // `authorTrustTier` is the tier field returned by GET_POST_COMMENTS.
+    authorTrustTier?: string;
     authorVerificationTier?: string;
     authorTrustScore?: number;
 };
@@ -180,7 +181,7 @@ function mapApiComment(c: ApiComment): Comment {
         parentId: c.parentId ?? undefined,
         mentionMap,
         authorTier: resolveUserTier({
-            tier: trust.authorTier,
+            tier: trust.authorTrustTier,
             verificationTier: trust.authorVerificationTier,
             trustScore: trust.authorTrustScore,
         }),

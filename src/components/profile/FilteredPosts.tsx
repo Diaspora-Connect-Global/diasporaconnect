@@ -23,6 +23,7 @@ import {
   Post,
 } from '@/services/gql/postsFeed';
 import FeedCardWithReply from '../cards/FeedCardWithReply';
+import { resolveUserTier } from '@/lib/userTier';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { toast } from 'sonner';
 import { Bookmark, Heart, MessageCircle, FileText, type LucideIcon } from 'lucide-react';
@@ -227,17 +228,24 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
       return {
         name: post.authorProfile.organizationProfile.name,
         avatar: '/default-avatar.png',
+        tier: undefined,
         type: 'Organization' as const,
       };
     }
     if (post.authorProfile?.userProfile) {
+      const userProfile = post.authorProfile.userProfile;
       return {
-        name: post.authorProfile.userProfile.name,
-        avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
+        name: userProfile.name,
+        avatar: userProfile.avatar || '/PROFILE.png',
+        tier: resolveUserTier({
+          tier: (userProfile as { tier?: string }).tier,
+          verificationTier: userProfile.verificationTier,
+          trustScore: (userProfile as { trustScore?: number }).trustScore,
+        }),
         type: 'User' as const,
       };
     }
-    return { name: 'Unknown', avatar: '/PROFILE.png', type: 'User' as const };
+    return { name: 'Unknown', avatar: '/PROFILE.png', tier: undefined, type: 'User' as const };
   };
 
 
@@ -322,6 +330,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 postId={post.id}
                 profileImage={profileData.avatar}
                 profileName={profileData.name}
+                profileTier={profileData.tier}
                 authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
                 authorEntityId={post.authorId}
                 authorEntityType={post.authorType}

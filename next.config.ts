@@ -8,6 +8,13 @@ const WS_HOST = 'wss://api.diaspoplug.net';
 const CDN_HOSTS = ['https://cdn.diaspoplug.net', 'https://storage.googleapis.com'];
 const ASSET_HOST = process.env.ASSET_PREFIX || '';
 
+// Stripe.js loads its SDK from js.stripe.com, talks to api.stripe.com, and
+// renders Elements / 3-D Secure challenges inside iframes it hosts on
+// js.stripe.com and hooks.stripe.com. See stripe.com/docs/security/guide#content-security-policy.
+const STRIPE_SCRIPT = 'https://js.stripe.com';
+const STRIPE_FRAMES = ['https://js.stripe.com', 'https://hooks.stripe.com'];
+const STRIPE_API = 'https://api.stripe.com';
+
 /**
  * Content Security Policy.
  *
@@ -22,13 +29,16 @@ const ASSET_HOST = process.env.ASSET_PREFIX || '';
  */
 const csp = [
   `default-src 'self'`,
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${ASSET_HOST}`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${STRIPE_SCRIPT} ${ASSET_HOST}`,
   `style-src 'self' 'unsafe-inline' ${ASSET_HOST}`,
   `img-src 'self' data: blob: https:`,
   `font-src 'self' data: ${ASSET_HOST}`,
-  `connect-src 'self' ${API_HOST} ${WS_HOST} ${CDN_HOSTS.join(' ')} ${ASSET_HOST}`,
+  `connect-src 'self' ${API_HOST} ${WS_HOST} ${STRIPE_API} ${CDN_HOSTS.join(' ')} ${ASSET_HOST}`,
   `media-src 'self' blob: ${CDN_HOSTS.join(' ')}`,
   `worker-src 'self' blob:`,
+  // frame-src has no fallback of its own here — without it, Stripe's iframes
+  // fall through to default-src 'self' and are blocked.
+  `frame-src 'self' ${STRIPE_FRAMES.join(' ')}`,
   `frame-ancestors 'self'`,
   `base-uri 'self'`,
   `form-action 'self'`,

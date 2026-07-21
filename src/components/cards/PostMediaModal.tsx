@@ -114,7 +114,7 @@ function mapApiComment(c: ApiComment): Comment {
         parentId: c.parentId ?? undefined,
         mentionMap,
         authorTier: resolveUserTier({
-            tier: (c as { authorTier?: string }).authorTier,
+            tier: (c as { authorTrustTier?: string }).authorTrustTier,
             verificationTier: (c as { authorVerificationTier?: string }).authorVerificationTier,
             trustScore: (c as { authorTrustScore?: number }).authorTrustScore,
         }),
