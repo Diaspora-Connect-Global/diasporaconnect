@@ -1,4 +1,8 @@
-import PaystackPop from '@paystack/inline-js';
+// NOTE: `@paystack/inline-js` touches `window` at module-evaluation time, so it
+// must NOT be imported statically — a top-level import makes every module that
+// pulls in this file crash during SSR with "window is not defined" (500 on hard
+// refresh of any page whose bundle includes a payment modal). It is loaded
+// lazily inside `openPaystackCheckout`, which only ever runs in the browser.
 
 export type PaystackChannel = 'card' | 'mobile_money' | 'bank' | 'ussd' | 'qr' | 'bank_transfer';
 
@@ -27,6 +31,10 @@ export async function openPaystackCheckout(
     params.publicKey ||
     process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ||
     'pk_test_a941b987b0cc71abf69f358dbe5b5bdeff170533';
+
+  // Browser-only SDK — import it lazily so this module is safe to evaluate on
+  // the server (see note at top of file).
+  const { default: PaystackPop } = await import('@paystack/inline-js');
 
   return new Promise((resolve, reject) => {
     try {

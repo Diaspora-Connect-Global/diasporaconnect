@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import JsonLd from '@/components/seo/JsonLd';
 import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages, twitterImages } from '@/lib/seo';
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
@@ -119,7 +120,12 @@ export default async function CommunityPublicPage({
   return (
     <>
       {seo}
-      <CommunityDetailClient />
+      {/* CommunityDetailClient calls useSearchParams(); it must sit under a
+          Suspense boundary or the server prerender of this dynamic route throws
+          (500 on hard refresh, while client navigation still works). */}
+      <Suspense fallback={null}>
+        <CommunityDetailClient />
+      </Suspense>
     </>
   );
 }

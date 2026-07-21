@@ -103,7 +103,10 @@ export default function EventDetailPage() {
   const [convertedPriceLabel, setConvertedPriceLabel] = useState<string | null>(null);
   const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
   const userEmail = useUserStore((s) => s.user?.email);
-  const isAuthHydrated = useAuthStore.persist.hasHydrated();
+  // `useAuthStore.persist` is undefined during SSR, so guard it — calling
+  // `.hasHydrated()` unguarded in render throws and 500s this page on hard
+  // refresh. On the server the store is never hydrated, so `false` is correct.
+  const isAuthHydrated = useAuthStore.persist?.hasHydrated() ?? false;
   const shouldLoadUserEventState = isAuthHydrated && !!sessionToken;
 
   const { data, loading, error } = useQuery<GetEventData>(GET_EVENT, {
