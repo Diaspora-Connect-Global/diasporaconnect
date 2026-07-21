@@ -16,7 +16,7 @@ import {
     type CommunityVisibility,
 } from '@/services/gql/community';
 import { toast } from 'sonner';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { MembershipPaymentModal } from './_components/MembershipPaymentModal';
 import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
@@ -154,6 +154,11 @@ export default function Community() {
     );
 
     const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
+    // Communities the viewer has just requested to join (APPROVAL/REQUEST policy)
+    // this session. Tracked optimistically so the card flips to "Pending"
+    // immediately, without waiting on — or depending on — the backend refetch
+    // reflecting the new PENDING status.
+    const [pendingCommunities, setPendingCommunities] = useState<Set<string>>(new Set());
     type JoinModalState =
         | { open: false }
         | { open: true; entity: SearchCommunityItem };
@@ -234,6 +239,7 @@ export default function Community() {
                 }, 100);
             } else if (payload.status === 'PENDING') {
                 toast.success(payload.message ?? 'Your request to join has been submitted for review.');
+                setPendingCommunities(prev => new Set(prev).add(communityId));
                 void refetchCommunities();
                 void refetchSearch();
             } else {
@@ -288,6 +294,25 @@ export default function Community() {
         [discoverData],
     );
 
+    // Persistent id -> real memberCount cache. The rec-backed DISCOVER list
+    // reports an unreliable count (often 0); SEARCH carries the real one. But
+    // once the viewer has a membership on a community (e.g. a PENDING request),
+    // the backend can drop it from SEARCH results — which would otherwise lose
+    // the count and fall the card back to 0. Remembering every real count we've
+    // seen keeps it stable across refetches.
+    const [memberCountCache, setMemberCountCache] = useState<Record<string, number>>({});
+    useEffect(() => {
+        const updates: Record<string, number> = {};
+        for (const c of searchedCommunities) {
+            if (typeof c.memberCount === 'number' && c.memberCount > 0 && memberCountCache[c.id] !== c.memberCount) {
+                updates[c.id] = c.memberCount;
+            }
+        }
+        if (Object.keys(updates).length > 0) {
+            setMemberCountCache((prev) => ({ ...prev, ...updates }));
+        }
+    }, [searchedCommunities, memberCountCache]);
+
     const renderList: SearchCommunityItem[] = useMemo(() => {
         if (personalisedCommunities.length > 0) {
             // Stitch in payment fields from the SEARCH result when we have
@@ -320,8 +345,9 @@ export default function Community() {
                     name: c.name,
                     description: c.description,
                     // Prefer the first non-zero count: `||` treats 0/null as "missing"
-                    // so a real positive SEARCH count wins when DISCOVER reports 0.
-                    memberCount: c.memberCount || pay.memberCount || 0,
+                    // so a real positive SEARCH count (live, then last-known via the
+                    // cache) wins when DISCOVER reports 0.
+                    memberCount: c.memberCount || pay.memberCount || memberCountCache[c.id] || 0,
                     avatarUrl: toCdnUrl(c.avatarUrl),
                     visibility: (c.visibility as CommunityVisibility) ?? null,
                     paymentType: pay.paymentType,
@@ -334,8 +360,12 @@ export default function Community() {
         }
         // Fallback: personalised was empty (e.g. recommender warming up) —
         // show the search catalog rather than an empty state.
-        return searchedCommunities.map((c) => ({ ...c, avatarUrl: toCdnUrl(c.avatarUrl) }));
-    }, [personalisedCommunities, searchedCommunities]);
+        return searchedCommunities.map((c) => ({
+            ...c,
+            avatarUrl: toCdnUrl(c.avatarUrl),
+            memberCount: c.memberCount || memberCountCache[c.id] || 0,
+        }));
+    }, [personalisedCommunities, searchedCommunities, memberCountCache]);
 
     // Authoritative set of communities the viewer has already joined: the
     // LIST_MY_JOINED_COMMUNITIES result, plus any joined this session
@@ -523,7 +553,7 @@ export default function Community() {
                 ) : visibleCommunities.length ? (
                     visibleCommunities.map((community) => {
                         const isAlreadyJoined = JOINED_STATUSES.has(community.membershipStatus?.toUpperCase() ?? '') || joinedCommunities.has(community.id);
-                        const isPendingStatus = community.membershipStatus === 'PENDING';
+                        const isPendingStatus = community.membershipStatus === 'PENDING' || pendingCommunities.has(community.id);
                         const access = communityToAccess(community);
                         return (
                             <JoinCommunityCard
