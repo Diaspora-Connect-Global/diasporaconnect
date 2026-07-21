@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import JoinAssociationCard from '@/components/cards/JoinAssociationCard';
 import { MyAssociationCard } from '@/components/cards/MyAssociationCard';
+import { PendingRequestCard } from '@/components/cards/PendingRequestCard';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
@@ -17,6 +18,7 @@ import {
   type AssociationPaymentType,
   type AssociationVisibility,
 } from '@/services/gql/associations';
+import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
 import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
 import { cn } from '@/lib/utils';
 import AccessBadges from '@/components/cards/AccessBadges';
@@ -178,10 +180,16 @@ export default function AssociationsPage() {
     ],
   });
 
+  const { data: pendingData, refetch: refetchPending } = useQuery<MyPendingRequestsData>(
+    GET_MY_PENDING_REQUESTS,
+    { fetchPolicy: 'cache-and-network' },
+  );
+
   const [cancelJoinRequest, { loading: cancelLoading }] = useMutation(CANCEL_JOIN_REQUEST, {
     refetchQueries: [
       { query: GET_MY_ASSOCIATIONS, variables: { page: 1, limit: PAGE_SIZE } },
       { query: SEARCH_ASSOCIATIONS, variables: { input: { page: 1, limit: PAGE_SIZE } } },
+      { query: GET_MY_PENDING_REQUESTS },
     ],
   });
 
@@ -199,6 +207,20 @@ export default function AssociationsPage() {
   const allDiscover = searchData?.searchAssociations?.associations ?? [];
   const myIds = new Set(myAssociations.map((a) => a.id));
   const discoverAssociations = allDiscover.filter((assn) => !myIds.has(assn.id));
+
+  // Pending join requests get their own section (below "My associations"),
+  // so keep the "My associations" list to active memberships only.
+  const activeMyAssociations = useMemo(
+    () => myAssociations.filter((a) => a.myMembership?.status !== 'PENDING'),
+    [myAssociations],
+  );
+  const pendingAssociationRequests = useMemo(
+    () =>
+      (pendingData?.getMyPendingRequests ?? []).filter(
+        (r) => r.entityType?.toUpperCase() === 'ASSOCIATION',
+      ),
+    [pendingData],
+  );
 
   const visibleDiscover = useMemo(
     () =>
@@ -233,6 +255,7 @@ export default function AssociationsPage() {
       }
       refetchMy();
       refetchSearch();
+      void refetchPending();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Failed to join');
     }
@@ -344,6 +367,7 @@ export default function AssociationsPage() {
         },
       });
       toast.success(t('toasts.requestCancelled'));
+      void refetchPending();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Failed to cancel request');
     }
@@ -356,8 +380,8 @@ export default function AssociationsPage() {
       <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[18rem]">
         {myLoading ? (
           <div className="text-center py-8 text-text-secondary">{t('loading')}</div>
-        ) : myAssociations.length > 0 ? (
-          myAssociations.map((assn) => (
+        ) : activeMyAssociations.length > 0 ? (
+          activeMyAssociations.map((assn) => (
             <MyAssociationCard
               key={assn.id}
               id={assn.id}
@@ -383,6 +407,27 @@ export default function AssociationsPage() {
           <div className="text-center py-8 text-text-secondary">{t('noAssociations')}</div>
         )}
       </div>
+
+      {pendingAssociationRequests.length > 0 && (
+        <>
+          <p className="heading-small my-5">{tCommunity('pendingRequestsTitle')}</p>
+          <div className="bg-surface-default rounded-md p-2 sm:p-4 overflow-auto scrollbar-hide max-h-[18rem]">
+            {pendingAssociationRequests.map((req) => (
+              <PendingRequestCard
+                key={req.id}
+                name={req.entityName}
+                href={`/association/${req.entityId}`}
+                pendingLabel={tActions('pending')}
+                cancelLabel={tCommunity('actions.cancelRequest')}
+                confirmTitle={tCommunity('cancelRequestTitle')}
+                confirmDescription={tCommunity('cancelRequestConfirm', { name: req.entityName })}
+                onCancel={() => handleCancelRequest(req.entityId)}
+                cancelling={cancelLoading}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       <p className="heading-small my-5">{t('discoverTitle')}</p>
 

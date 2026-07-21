@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from '@apollo/client/react';
 import JoinCommunityCard from "@/components/cards/JoinCommunityCard";
 import { MyCommunityCard } from "@/components/cards/MyCommunityCard";
+import { PendingRequestCard } from "@/components/cards/PendingRequestCard";
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { EmptyState } from '@/components/feedback';
 import { Globe } from 'lucide-react';
@@ -11,10 +12,12 @@ import {
     DISCOVER_COMMUNITIES,
     LIST_MY_JOINED_COMMUNITIES,
     REQUEST_JOIN_COMMUNITY,
+    CANCEL_JOIN_REQUEST_COMMUNITY,
     SEARCH_COMMUNITIES,
     type CommunityPaymentType,
     type CommunityVisibility,
 } from '@/services/gql/community';
+import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
@@ -201,10 +204,54 @@ export default function Community() {
         }
     );
 
+    const { data: pendingData, refetch: refetchPending } = useQuery<MyPendingRequestsData>(
+        GET_MY_PENDING_REQUESTS,
+        { fetchPolicy: 'cache-and-network' }
+    );
+
     const [requestJoinCommunity, { loading: joinLoading }] = useMutation<RequestJoinCommunityResponse>(REQUEST_JOIN_COMMUNITY, {
-        refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
+        refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }, { query: GET_MY_PENDING_REQUESTS }],
         awaitRefetchQueries: false,
     });
+
+    const [cancelJoinRequest, { loading: cancelLoading }] = useMutation(CANCEL_JOIN_REQUEST_COMMUNITY, {
+        refetchQueries: [{ query: GET_MY_PENDING_REQUESTS }],
+        awaitRefetchQueries: false,
+    });
+
+    // The viewer's pending community join requests (APPROVAL/REQUEST policy,
+    // awaiting an admin decision). `getMyPendingRequests` spans entity types,
+    // so filter to communities here.
+    const pendingCommunityRequests = useMemo(
+        () =>
+            (pendingData?.getMyPendingRequests ?? []).filter(
+                (r) => r.entityType?.toUpperCase() === 'COMMUNITY',
+            ),
+        [pendingData],
+    );
+    const pendingRequestIds = useMemo(
+        () => new Set(pendingCommunityRequests.map((r) => r.entityId)),
+        [pendingCommunityRequests],
+    );
+
+    const handleCancelRequest = async (communityId: string) => {
+        try {
+            await cancelJoinRequest({
+                variables: { input: { entityId: communityId, entityType: 'COMMUNITY' } },
+            });
+            setPendingCommunities((prev) => {
+                const next = new Set(prev);
+                next.delete(communityId);
+                return next;
+            });
+            toast.success(t('toasts.requestCancelled'));
+            void refetchPending();
+            void refetchCommunities();
+            void refetchSearch();
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : 'Failed to cancel request');
+        }
+    };
 
     const handleJoinCommunity = async (communityId: string, communityName: string) => {
         try {
@@ -242,6 +289,7 @@ export default function Community() {
                 setPendingCommunities(prev => new Set(prev).add(communityId));
                 void refetchCommunities();
                 void refetchSearch();
+                void refetchPending();
             } else {
                 toast.error('Failed to join community');
             }
@@ -383,11 +431,14 @@ export default function Community() {
         () =>
             renderList
                 // "Discover more communities" surfaces communities to join, so
-                // drop the ones the viewer is already a member of.
+                // drop the ones the viewer is already a member of — and the ones
+                // with a pending request, which get their own section above.
                 .filter(
                     (c) =>
                         !joinedCommunityIds.has(c.id) &&
-                        !JOINED_STATUSES.has(c.membershipStatus?.toUpperCase() ?? ''),
+                        !JOINED_STATUSES.has(c.membershipStatus?.toUpperCase() ?? '') &&
+                        !pendingRequestIds.has(c.id) &&
+                        !pendingCommunities.has(c.id),
                 )
                 .filter((c) =>
                     visibilityFilter === 'ALL'
@@ -399,7 +450,7 @@ export default function Community() {
                     const isPaid = !!c.paymentType && c.paymentType !== 'NONE';
                     return pricingFilter === 'PAID' ? isPaid : !isPaid;
                 }),
-        [renderList, joinedCommunityIds, visibilityFilter, pricingFilter],
+        [renderList, joinedCommunityIds, pendingRequestIds, pendingCommunities, visibilityFilter, pricingFilter],
     );
 
     const anyDiscoverLoading = discoverLoading || searchLoading;
@@ -491,6 +542,27 @@ export default function Community() {
                     </div>
                 )}
             </div>
+
+            {pendingCommunityRequests.length > 0 && (
+                <>
+                    <p className="text-2xl heading-medium my-5">{t('pendingRequestsTitle')}</p>
+                    <div className="bg-surface-default rounded-md p-2 sm:p-4 overflow-auto scrollbar-hide max-h-[300px]">
+                        {pendingCommunityRequests.map((req) => (
+                            <PendingRequestCard
+                                key={req.id}
+                                name={req.entityName}
+                                href={`/community/${req.entityId}`}
+                                pendingLabel={t('pendingBadge')}
+                                cancelLabel={t('actions.cancelRequest')}
+                                confirmTitle={t('cancelRequestTitle')}
+                                confirmDescription={t('cancelRequestConfirm', { name: req.entityName })}
+                                onCancel={() => handleCancelRequest(req.entityId)}
+                                cancelling={cancelLoading}
+                            />
+                        ))}
+                    </div>
+                </>
+            )}
 
             <p className="text-2xl heading-medium my-5">{t('discoverMore')}</p>
 

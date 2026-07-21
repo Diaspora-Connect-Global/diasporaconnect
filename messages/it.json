@@ -643,6 +643,10 @@
         "noMembers": "Nessun membro",
         "myCommunity": "La mia Community",
         "discoverMore": "Scopri altre community",
+        "pendingRequestsTitle": "Richieste in sospeso",
+        "pendingBadge": "In sospeso",
+        "cancelRequestTitle": "Annullare la richiesta di adesione?",
+        "cancelRequestConfirm": "La tua richiesta di adesione a {name} verrà ritirata.",
         "groups": {
             "myGroups": "I miei gruppi",
             "discover": "Scopri gruppi",

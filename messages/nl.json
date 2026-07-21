@@ -644,6 +644,10 @@
         "noMembers": "Geen leden",
         "myCommunity": "Mijn gemeenschap",
         "discoverMore": "Meer gemeenschappen ontdekken",
+        "pendingRequestsTitle": "Openstaande verzoeken",
+        "pendingBadge": "In afwachting",
+        "cancelRequestTitle": "Verzoek om deel te nemen annuleren?",
+        "cancelRequestConfirm": "Je verzoek om lid te worden van {name} wordt ingetrokken.",
         "groups": {
             "myGroups": "Mijn groepen",
             "discover": "Groepen ontdekken",

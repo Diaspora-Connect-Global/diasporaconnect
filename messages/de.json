@@ -643,6 +643,10 @@
         "noMembers": "Keine Mitglieder",
         "myCommunity": "Meine Community",
         "discoverMore": "Weitere Communities entdecken",
+        "pendingRequestsTitle": "Ausstehende Anfragen",
+        "pendingBadge": "Ausstehend",
+        "cancelRequestTitle": "Beitrittsanfrage abbrechen?",
+        "cancelRequestConfirm": "Deine Beitrittsanfrage an {name} wird zurückgezogen.",
         "groups": {
             "myGroups": "Meine Gruppen",
             "discover": "Gruppen entdecken",

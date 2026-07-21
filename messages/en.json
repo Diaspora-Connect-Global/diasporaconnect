@@ -644,6 +644,10 @@
         "noMembers": "No members",
         "myCommunity": "My Community",
         "discoverMore": "Discover more communities",
+        "pendingRequestsTitle": "Pending requests",
+        "pendingBadge": "Pending",
+        "cancelRequestTitle": "Cancel join request?",
+        "cancelRequestConfirm": "Your request to join {name} will be withdrawn.",
         "groups": {
             "myGroups": "My Groups",
             "discover": "Discover groups",
