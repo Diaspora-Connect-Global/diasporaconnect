@@ -284,6 +284,7 @@ export const GET_ASSOCIATION_MEMBERS = gql`
         joinedAt
       }
       total
+      hasMore
     }
   }
 `;

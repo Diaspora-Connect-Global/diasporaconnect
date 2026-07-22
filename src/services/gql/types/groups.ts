@@ -349,6 +349,8 @@ export interface GetGroupMembersResponse {
     success: boolean;
     message?: string;
     total: number;
+    /** Backend pagination flag: more rows exist beyond the current page. */
+    hasMore?: boolean;
     members: GroupMember[];
   };
 }

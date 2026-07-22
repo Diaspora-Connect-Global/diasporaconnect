@@ -304,6 +304,7 @@ export const GET_COMMUNITY_MEMBERS = gql`
         avatarUrl
       }
       total
+      hasMore
     }
   }
 `;

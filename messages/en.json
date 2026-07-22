@@ -678,6 +678,7 @@
                 "leftToast": "You left the group.",
                 "leaveFailed": "Failed to leave group",
                 "requestFailed": "Failed to send request",
+                "loadMore": "Load more",
                 "roles": {
                     "OWNER": "Owner",
                     "ADMIN": "Admin",
@@ -1971,6 +1972,7 @@
             "memberCount": "{count} members",
             "groupInfo": "Group Info",
             "addPeople": "Add people",
+            "loadMore": "Load more",
             "you": " (You)",
             "leaveGroup": "Leave Group",
             "deleteGroup": "Delete Group",
