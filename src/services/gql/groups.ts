@@ -145,6 +145,7 @@ export const GET_GROUP_MEMBERS = gql`
       success
       message
       total
+      hasMore
       members {
         id
         groupId

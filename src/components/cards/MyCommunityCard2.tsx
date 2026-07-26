@@ -15,6 +15,7 @@ import { useCommunityStore } from '@/store/useCommunityStore';
 import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
+import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
 import { AccessBadges } from './AccessBadges';
 import { CommunityTypeBadge } from './CommunityTypeBadge';
 import { toJoinPolicy } from '@/types/membership';
@@ -53,9 +54,28 @@ export function MyCommunityCard2() {
         LIST_MY_JOINED_COMMUNITIES
     );
 
+    const { data: pendingData } = useQuery<MyPendingRequestsData>(GET_MY_PENDING_REQUESTS, {
+        fetchPolicy: 'cache-and-network',
+    });
+
+    // Communities the viewer has only *requested* to join (awaiting approval)
+    // must not appear here as if joined — they live in the "Pending requests"
+    // section on the community page.
+    const pendingCommunityIds = useMemo(
+        () =>
+            new Set(
+                (pendingData?.getMyPendingRequests ?? [])
+                    .filter((r) => r.entityType?.toUpperCase() === 'COMMUNITY')
+                    .map((r) => r.entityId),
+            ),
+        [pendingData],
+    );
+
     const communities = useMemo(() => {
-        return communitiesData?.listUserCommunities || [];
-    }, [communitiesData]);
+        return (communitiesData?.listUserCommunities || []).filter(
+            (c) => !pendingCommunityIds.has(c.id),
+        );
+    }, [communitiesData, pendingCommunityIds]);
 
     const handleCommunityChange = (community: Community) => {
         console.log('Switched to:', community.name);

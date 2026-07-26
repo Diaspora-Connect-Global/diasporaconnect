@@ -33,6 +33,9 @@ import {
 } from '@/services/gql/groups';
 import { useUserStore } from '@/store/useUserStore';
 
+/** How many members to request per page (matches the backend default cap head-room). */
+const MEMBERS_PAGE_SIZE = 50;
+
 export default function GroupDetailPage() {
     const params = useParams();
     const groupId = Array.isArray(params.id) ? params.id[0] : (params.id ?? '');
@@ -62,12 +65,16 @@ export default function GroupDetailPage() {
             fetchPolicy: 'cache-and-network',
         });
 
-    const { data: membersData, refetch: refetchMembers } =
-        useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
-            variables: { groupId, membersLimit: 50, membersOffset: 0 },
-            skip: !groupId,
-            fetchPolicy: 'cache-and-network',
-        });
+    const {
+        data: membersData,
+        refetch: refetchMembers,
+        fetchMore: fetchMoreMembers,
+    } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
+        variables: { groupId, membersLimit: MEMBERS_PAGE_SIZE, membersOffset: 0 },
+        skip: !groupId,
+        fetchPolicy: 'cache-and-network',
+    });
+    const [loadingMoreMembers, setLoadingMoreMembers] = useState(false);
 
     const [joinGroup, { loading: joinLoading }] = useMutation<JoinGroupResponse>(JOIN_GROUP);
     const [leaveGroup, { loading: leaveLoading }] = useMutation<LeaveGroupResponse>(LEAVE_GROUP);
@@ -80,6 +87,40 @@ export default function GroupDetailPage() {
         () => membersData?.getGroupMembers?.members ?? [],
         [membersData],
     );
+    // Prefer the backend `hasMore` flag; fall back to comparing loaded rows
+    // against the reported total for older gateways that omit it.
+    const membersTotal = membersData?.getGroupMembers?.total ?? 0;
+    const hasMoreMembers =
+        membersData?.getGroupMembers?.hasMore ?? members.length < membersTotal;
+
+    const handleLoadMoreMembers = async () => {
+        if (loadingMoreMembers) return;
+        setLoadingMoreMembers(true);
+        try {
+            await fetchMoreMembers({
+                variables: { groupId, membersLimit: MEMBERS_PAGE_SIZE, membersOffset: members.length },
+                updateQuery: (prev, { fetchMoreResult }) => {
+                    if (!fetchMoreResult?.getGroupMembers) return prev;
+                    const prevMembers = prev.getGroupMembers?.members ?? [];
+                    const seen = new Set(prevMembers.map((m) => m.id));
+                    const merged = [
+                        ...prevMembers,
+                        ...fetchMoreResult.getGroupMembers.members.filter((m) => !seen.has(m.id)),
+                    ];
+                    return {
+                        getGroupMembers: {
+                            ...fetchMoreResult.getGroupMembers,
+                            members: merged,
+                        },
+                    };
+                },
+            });
+        } catch (err) {
+            console.error('Failed to load more members:', err);
+        } finally {
+            setLoadingMoreMembers(false);
+        }
+    };
 
     const isOwner = !!group && !!currentUserId && group.ownerId === currentUserId;
     const isMember = !!membership?.isMember && membership?.status !== 'PENDING';
@@ -301,6 +342,17 @@ export default function GroupDetailPage() {
                     </div>
                 )}
             </div>
+
+            {hasMoreMembers && (
+                <div className="mt-3 flex justify-center">
+                    <ButtonType3
+                        onClick={handleLoadMoreMembers}
+                        disabled={loadingMoreMembers}
+                    >
+                        {t('groups.detail.loadMore')}
+                    </ButtonType3>
+                </div>
+            )}
 
             <ConfirmationModal
                 open={leaveModalOpen}

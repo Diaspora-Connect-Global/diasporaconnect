@@ -65,6 +65,8 @@ interface CommunityMembersData {
   listCommunityMembers: {
     members: CommunityMember[];
     total: number;
+    /** Backend pagination flag: more rows exist beyond the current page. */
+    hasMore?: boolean;
   };
 }
 
@@ -82,6 +84,8 @@ interface AssociationMembersData {
   getAssociationMembers: {
     members: AssociationMemberRow[];
     total: number;
+    /** Backend pagination flag: more rows exist beyond the current page. */
+    hasMore?: boolean;
   };
 }
 function normalizeAssociationMember(m: AssociationMemberRow): CommunityMember {
@@ -214,6 +218,9 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
   const [membersOpen, setMembersOpen] = useState(false);
   const [allMemberRows, setAllMemberRows] = useState<CommunityMember[]>([]);
   const [allMemberTotal, setAllMemberTotal] = useState(0);
+  // Backend `hasMore` flag from the last-fetched page. `undefined` until the
+  // first page lands; we then prefer it over the row-count heuristic below.
+  const [allMemberHasMore, setAllMemberHasMore] = useState<boolean | undefined>(undefined);
   const [loadAllMembers, { loading: commAllLoading }] =
     useLazyQuery<CommunityMembersData>(GET_COMMUNITY_MEMBERS, {
       fetchPolicy: 'network-only',
@@ -223,13 +230,17 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
       fetchPolicy: 'network-only',
     });
   const allMembersLoading = isAssociation ? assocAllLoading : commAllLoading;
-  const hasMoreMembers = allMemberRows.length < allMemberTotal;
+  // Prefer the backend `hasMore` flag once we have it; fall back to the
+  // row-count heuristic for the initial render / older gateways that omit it.
+  const hasMoreMembers =
+    allMemberHasMore ?? allMemberRows.length < allMemberTotal;
 
   const fetchMembersPage = useCallback(
     async (offset: number) => {
       // Associations page by (page, limit); communities by (limit, offset).
       let members: CommunityMember[] = [];
       let total = 0;
+      let hasMore: boolean | undefined;
       if (isAssociation) {
         const pageNo = Math.floor(offset / MEMBERS_PAGE_SIZE) + 1;
         const { data } = await loadAllAssocMembers({
@@ -239,6 +250,7 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
         if (!page) return;
         members = page.members.map(normalizeAssociationMember);
         total = page.total ?? 0;
+        hasMore = page.hasMore;
       } else {
         const { data } = await loadAllMembers({
           variables: { communityId: community.id, limit: MEMBERS_PAGE_SIZE, offset },
@@ -247,12 +259,21 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
         if (!page) return;
         members = page.members;
         total = page.total ?? 0;
+        hasMore = page.hasMore;
       }
       setAllMemberTotal(total);
       setAllMemberRows((prev) => {
-        if (offset === 0) return members;
-        const seen = new Set(prev.map((m) => m.userId));
-        return [...prev, ...members.filter((m) => !seen.has(m.userId))];
+        const next =
+          offset === 0
+            ? members
+            : (() => {
+                const seen = new Set(prev.map((m) => m.userId));
+                return [...prev, ...members.filter((m) => !seen.has(m.userId))];
+              })();
+        // Derive hasMore: trust the backend flag when present, otherwise fall
+        // back to comparing accumulated rows against the reported total.
+        setAllMemberHasMore(hasMore ?? next.length < total);
+        return next;
       });
     },
     [isAssociation, loadAllAssocMembers, loadAllMembers, community.id],
@@ -262,6 +283,7 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
     setMembersOpen(true);
     setAllMemberRows([]);
     setAllMemberTotal(0);
+    setAllMemberHasMore(undefined);
     void fetchMembersPage(0);
   }, [fetchMembersPage]);
 

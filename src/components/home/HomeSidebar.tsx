@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import InfoLinks from "../custom/infoLinks";
 import { BodyMedium, BodySmall, LabelMedium, TextBrand, } from "../utils";
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -10,6 +10,7 @@ import { Link } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
 import { GET_USER_ASSOCIATIONS } from '@/services/gql/associations';
+import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
 import ViewFilter from './viewFilter';
 import { useUserStore } from '@/store/useUserStore';
 
@@ -239,9 +240,31 @@ function SidebarLists() {
         }));
     };
 
+    const { data: pendingData } = useQuery<MyPendingRequestsData>(GET_MY_PENDING_REQUESTS, {
+        fetchPolicy: 'cache-and-network',
+    });
+
+    // Associations the viewer has only *requested* to join (awaiting approval)
+    // must not appear here as if joined — they live in the "Pending requests"
+    // section on the association page.
+    const pendingAssociationIds = useMemo(
+        () =>
+            new Set(
+                (pendingData?.getMyPendingRequests ?? [])
+                    .filter((r) => r.entityType?.toUpperCase() === 'ASSOCIATION')
+                    .map((r) => r.entityId),
+            ),
+        [pendingData],
+    );
+
     const myGroups = groupsData?.getMyGroups?.groups || [];
-    const myAssociations =
-        userAssociationsData?.getUserAssociations || [];
+    const myAssociations = useMemo(
+        () =>
+            (userAssociationsData?.getUserAssociations || []).filter(
+                (a) => !pendingAssociationIds.has(a.id),
+            ),
+        [userAssociationsData, pendingAssociationIds],
+    );
     const visibleAssociations = myAssociations.slice(0, PREVIEW_LIMIT);
     const hasMoreAssociations = myAssociations.length > PREVIEW_LIMIT;
     const visibleGroups = myGroups.slice(0, PREVIEW_LIMIT);

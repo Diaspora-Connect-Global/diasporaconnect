@@ -83,6 +83,13 @@ function isSystemMessage(m: { type?: string; senderId?: string }): boolean {
     return m?.type === 'SYSTEM' || m?.senderId === SYSTEM_SENDER_ID;
 }
 
+/**
+ * Members fetched per page in the group info panel. Kept at 100 so it matches
+ * the `membersLimit: 100` used by the refetchQueries elsewhere (e.g.
+ * AddMembersModal) — the active query must share variables to be updated.
+ */
+const MEMBERS_PAGE_SIZE = 100;
+
 export default function GroupChat() {
     const t = useTranslations('chat.group');
     const tCommon = useTranslations('common');
@@ -138,10 +145,11 @@ export default function GroupChat() {
         skip: !chat?.id,
     });
 
-    const { data: membersData, loading: loadingMembers, refetch: refetchMembers } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
-        variables: { groupId: chat?.id || '', membersLimit: 100, membersOffset: 0 },
+    const { data: membersData, loading: loadingMembers, refetch: refetchMembers, fetchMore: fetchMoreMembers } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
+        variables: { groupId: chat?.id || '', membersLimit: MEMBERS_PAGE_SIZE, membersOffset: 0 },
         skip: !chat?.id,
     });
+    const [loadingMoreMembers, setLoadingMoreMembers] = useState(false);
 
     const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
         refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
@@ -175,6 +183,43 @@ export default function GroupChat() {
     const group = groupData?.getGroup?.group;
     const groupMembers = membersData?.getGroupMembers?.members || [];
     const groupMembersCount = membersData?.getGroupMembers?.total || 0;
+    // Prefer the backend `hasMore` flag; fall back to comparing loaded rows
+    // against the reported total for older gateways that omit it.
+    const hasMoreMembers =
+        membersData?.getGroupMembers?.hasMore ?? groupMembers.length < groupMembersCount;
+
+    const handleLoadMoreMembers = async () => {
+        if (loadingMoreMembers || !chat?.id) return;
+        setLoadingMoreMembers(true);
+        try {
+            await fetchMoreMembers({
+                variables: {
+                    groupId: chat.id,
+                    membersLimit: MEMBERS_PAGE_SIZE,
+                    membersOffset: groupMembers.length,
+                },
+                updateQuery: (prev, { fetchMoreResult }) => {
+                    if (!fetchMoreResult?.getGroupMembers) return prev;
+                    const prevMembers = prev.getGroupMembers?.members ?? [];
+                    const seen = new Set(prevMembers.map((m) => m.id));
+                    const merged = [
+                        ...prevMembers,
+                        ...fetchMoreResult.getGroupMembers.members.filter((m) => !seen.has(m.id)),
+                    ];
+                    return {
+                        getGroupMembers: {
+                            ...fetchMoreResult.getGroupMembers,
+                            members: merged,
+                        },
+                    };
+                },
+            });
+        } catch (err) {
+            console.error('Failed to load more group members:', err);
+        } finally {
+            setLoadingMoreMembers(false);
+        }
+    };
     const user = useUserStore((state) => state.user);
     const userTimeZone = user?.timezone || user?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -1097,6 +1142,17 @@ export default function GroupChat() {
                                                 </div>
                                             );
                                         })}
+                                        {hasMoreMembers && (
+                                            <div className="flex justify-center pt-2">
+                                                <ButtonType3
+                                                    className="text-xs py-1 px-3"
+                                                    onClick={handleLoadMoreMembers}
+                                                    disabled={loadingMoreMembers}
+                                                >
+                                                    {t('loadMore')}
+                                                </ButtonType3>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
