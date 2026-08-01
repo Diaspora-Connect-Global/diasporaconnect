@@ -34,6 +34,7 @@ import {
   InterestsPromptCard,
   INTERESTS_PROMPT_DISMISSED_KEY,
 } from '@/components/home/InterestsPromptCard';
+import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
 import { useApolloClient } from '@apollo/client/react';
 import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
@@ -368,6 +369,66 @@ export default function Home() {
     };
   }, [recAssociationsData, apolloClient, feedLoading]);
 
+  // ─── Pending join requests ────────────────────────────────────────────────
+  //
+  // Communities/associations the viewer has already requested to join (awaiting
+  // an admin decision) must not appear in the discover rails — the "Join" button
+  // there would just bounce off the backend with "You already have a pending
+  // request…". They live in the dedicated "Pending requests" sections on the
+  // community/association pages instead.
+  const { data: pendingData, refetch: refetchPending } =
+    useQuery<MyPendingRequestsData>(GET_MY_PENDING_REQUESTS, {
+      fetchPolicy: 'cache-and-network',
+    });
+
+  // Requested this session — keeps a card from flashing back in between the
+  // mutation resolving and the pending-requests refetch landing.
+  const [requestedEntities, setRequestedEntities] = useState<Set<string>>(new Set());
+
+  const pendingCommunityIds = useMemo(
+    () =>
+      new Set(
+        (pendingData?.getMyPendingRequests ?? [])
+          .filter((r) => r.entityType?.toUpperCase() === 'COMMUNITY')
+          .map((r) => r.entityId),
+      ),
+    [pendingData],
+  );
+
+  const pendingAssociationIds = useMemo(
+    () =>
+      new Set(
+        (pendingData?.getMyPendingRequests ?? [])
+          .filter((r) => r.entityType?.toUpperCase() === 'ASSOCIATION')
+          .map((r) => r.entityId),
+      ),
+    [pendingData],
+  );
+
+  const isPendingEntity = useCallback(
+    (id: string, status: string | undefined, pendingIds: Set<string>) =>
+      pendingIds.has(id) ||
+      requestedEntities.has(id) ||
+      status?.toUpperCase() === 'PENDING',
+    [requestedEntities],
+  );
+
+  const visibleCommunities = useMemo(
+    () =>
+      communities.filter(
+        (c) => !isPendingEntity(c.id, c.membershipStatus, pendingCommunityIds),
+      ),
+    [communities, pendingCommunityIds, isPendingEntity],
+  );
+
+  const visibleAssociations = useMemo(
+    () =>
+      associations.filter(
+        (a) => !isPendingEntity(a.id, a.membershipStatus, pendingAssociationIds),
+      ),
+    [associations, pendingAssociationIds, isPendingEntity],
+  );
+
   // Helper: re-fetch both ranked queries after a membership state change.
   const refetchCommunities = useCallback(() => {
     void refetchCommunitiesRanked();
@@ -486,7 +547,7 @@ export default function Home() {
   const isRecommendedArm = viewMode === 'you';
 
   const [requestJoinCommunity, { loading: joinCommunityLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
-    refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }],
+    refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }, { query: GET_MY_PENDING_REQUESTS }],
     awaitRefetchQueries: false,
   });
   const [requestJoinAssociation, { loading: joinAssociationLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_ASSOCIATION, {
@@ -494,7 +555,7 @@ export default function Home() {
     // section (HomeSidebar.tsx). Refetching it on a successful join means
     // the joined association appears in the sidebar list immediately,
     // without a page refresh.
-    refetchQueries: [{ query: GET_USER_ASSOCIATIONS }],
+    refetchQueries: [{ query: GET_USER_ASSOCIATIONS }, { query: GET_MY_PENDING_REQUESTS }],
     awaitRefetchQueries: false,
   });
   const joinLoading = joinCommunityLoading || joinAssociationLoading;
@@ -554,6 +615,11 @@ export default function Home() {
         if (status === 'ACTIVE') {
           setJoinedCommunities((prev) => new Set(prev).add(entityId));
           setTimeout(() => refetchCommunities(), 100);
+        } else {
+          // PENDING / PENDING_PAYMENT: drop the card from the rail right away so
+          // the user can't fire a second request against the same entity.
+          setRequestedEntities((prev) => new Set(prev).add(entityId));
+          void refetchPending();
         }
       } else {
         toast.error(failMessage);
@@ -831,7 +897,7 @@ export default function Home() {
       setCanScrollRight,
     );
     return cleanupCommunities;
-  }, [communities]);
+  }, [visibleCommunities]);
 
   // Separate effect for the associations rail — keyed on the actual DOM
   // node so Virtuoso remount → callback ref runs → state changes → effect
@@ -844,10 +910,10 @@ export default function Home() {
       setAssocCanScrollRight,
     );
     return cleanupAssociations;
-  }, [associationsScrollEl, associations]);
+  }, [associationsScrollEl, visibleAssociations]);
 
-  const hasCommunities = communities.length > 0;
-  const hasAssociations = associations.length > 0;
+  const hasCommunities = visibleCommunities.length > 0;
+  const hasAssociations = visibleAssociations.length > 0;
 
   const hasPosts = posts.length > 0;
 
@@ -1117,7 +1183,7 @@ export default function Home() {
                            snap-x snap-mandatory"
                 style={{ scrollBehavior: 'smooth' }}
               >
-                {communities.map((community) => (
+                {visibleCommunities.map((community) => (
                   <div key={community.id} className="flex-none snap-start">
                     <CommunityCardVariant2
                       icon={community.avatarUrl}
@@ -1339,7 +1405,7 @@ export default function Home() {
                         style={{ scrollBehavior: 'smooth' }}
                       >
                         <div className="contents">
-                        {associations.map((association) => (
+                        {visibleAssociations.map((association) => (
                           <div key={association.id} className="flex-none snap-start">
                             <CommunityCardVariant2
                               icon={association.avatarUrl}
