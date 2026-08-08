@@ -10,6 +10,7 @@ import { useConvertedDisplayPrice } from "@/hooks/useConvertedDisplayPrice";
 import type { CartItem, Product } from "./types";
 import { UserBadge } from "@/components/custom/userBadge";
 import { resolveUserTier } from "@/lib/userTier";
+import { ProductReviews } from "./ProductReviews";
 
 const DEFAULT_THUMBNAIL_COUNT = 4;
 
@@ -307,7 +308,8 @@ export function ProductDetail({
           </div>
         </div>
 
-      
+        {/* Ratings from verified buyers. Public — no sign-in required to read. */}
+        {product.id && <ProductReviews productId={String(product.id)} />}
       </div>
     </div>
   );

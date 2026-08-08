@@ -249,3 +249,61 @@ export interface ConfirmOrderDeliveryResponse {
 export interface CompleteMarketplaceOrderResponse {
   completeMarketplaceOrder: OrderResponse;
 }
+
+// ── Reviews ──────────────────────────────────────────────────────────────────
+
+export interface MarketplaceReviewType {
+  id: string;
+  author_id: string;
+  /** The reviewed product or service. */
+  target_id: string;
+  order_id: string;
+  vendor_id: string;
+  rating: number;
+  text?: string | null;
+  /** The vendor's public reply, if they have answered. */
+  reply?: string | null;
+  reply_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewListResponse {
+  success: boolean;
+  reviews: MarketplaceReviewType[];
+  total: number;
+  has_more: boolean;
+  /** Mean across every review for the target, not just the current page. */
+  average_rating: number;
+}
+
+export interface ReviewResponse {
+  success: boolean;
+  message?: string | null;
+  review?: MarketplaceReviewType | null;
+}
+
+export interface AddReviewInput {
+  target_id: string;
+  /** Proves the purchase: the buyer's own delivered/completed order. */
+  order_id: string;
+  vendor_id: string;
+  rating: number;
+  text?: string;
+}
+
+export interface ProductReviewsResponse {
+  productReviews: ReviewListResponse;
+}
+
+export interface VendorReviewsResponse {
+  vendorReviews: ReviewListResponse;
+}
+
+export interface AddReviewMutationResponse {
+  addReview: ReviewResponse;
+}
+
+export interface ReplyToReviewMutationResponse {
+  replyToReview: ReviewResponse;
+}

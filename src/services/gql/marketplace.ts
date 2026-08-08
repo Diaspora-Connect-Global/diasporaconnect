@@ -23,6 +23,14 @@ export type {
   CreateProductOrderInput,
   CreateServiceOrderInput,
   OrderItemInput,
+  MarketplaceReviewType,
+  ReviewListResponse,
+  ReviewResponse,
+  AddReviewInput,
+  ProductReviewsResponse,
+  VendorReviewsResponse,
+  AddReviewMutationResponse,
+  ReplyToReviewMutationResponse,
 } from "./types/marketplace";
 
 // ============================================================================
@@ -505,6 +513,76 @@ export const COMPLETE_MARKETPLACE_ORDER = gql`
         notes
         created_at
         updated_at
+      }
+    }
+  }
+`;
+
+// ============================================================================
+// REVIEWS
+// ============================================================================
+
+const REVIEW_FIELDS = `
+  id
+  author_id
+  target_id
+  order_id
+  vendor_id
+  rating
+  text
+  reply
+  reply_at
+  created_at
+  updated_at
+`;
+
+export const GET_PRODUCT_REVIEWS = gql`
+  query ProductReviews($product_id: ID!, $limit: Int, $offset: Int) {
+    productReviews(product_id: $product_id, limit: $limit, offset: $offset) {
+      success
+      total
+      has_more
+      average_rating
+      reviews {
+        ${REVIEW_FIELDS}
+      }
+    }
+  }
+`;
+
+export const GET_VENDOR_REVIEWS = gql`
+  query VendorReviews($vendor_id: ID!, $limit: Int, $offset: Int) {
+    vendorReviews(vendor_id: $vendor_id, limit: $limit, offset: $offset) {
+      success
+      total
+      has_more
+      average_rating
+      reviews {
+        ${REVIEW_FIELDS}
+      }
+    }
+  }
+`;
+
+export const ADD_REVIEW = gql`
+  mutation AddReview($input: AddReviewInput!) {
+    addReview(input: $input) {
+      success
+      message
+      review {
+        ${REVIEW_FIELDS}
+      }
+    }
+  }
+`;
+
+export const REPLY_TO_REVIEW = gql`
+  mutation ReplyToReview($review_id: ID!, $reply: String!) {
+    replyToReview(review_id: $review_id, reply: $reply) {
+      success
+      message
+      review {
+        ${REVIEW_FIELDS}
       }
     }
   }
