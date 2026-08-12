@@ -2431,7 +2431,16 @@
         "nightBanner": "Probablement pas le bon moment",
         "nightReason": "Il est tard à {city}. La réponse pourrait tarder.",
         "nightReasonGeneric": "Il est tard dans leur fuseau horaire. La réponse pourrait tarder."
-      }
+      },
+      "sendFailed": "Impossible d'envoyer votre message. Veuillez réessayer.",
+      "blockFailed": "Impossible de bloquer cet utilisateur. Veuillez réessayer.",
+      "yourTime": "Votre heure :",
+      "theirTime": "Heure de {name} :",
+      "fileTypeNotSupported": "Type de fichier non pris en charge : {name}",
+      "fileTooLarge": "{name} est trop volumineux (10 Mo maximum par fichier)",
+      "totalSizeExceeded": "La taille totale des pièces jointes dépasserait 50 Mo",
+      "tooManyFiles": "Vous pouvez joindre jusqu'à {max} fichiers",
+      "blockSuccess": "Utilisateur bloqué."
     },
     "group": {
       "message": "Message à {name}",
@@ -2496,7 +2505,12 @@
       "removeMember": "Retirer du groupe",
       "removeMemberConfirmation": "Êtes-vous sûr de vouloir retirer {name} de ce groupe ?",
       "remove": "Retirer",
-      "close": "Fermer"
+      "close": "Fermer",
+      "replyInFlight": "Veuillez attendre l'envoi de la réponse précédente.",
+      "replyTargetGone": "Ce message ne fait plus partie de cette conversation. Envoyez-le comme nouveau message ou rouvrez la réponse.",
+      "replyFailed": "Impossible d'envoyer votre réponse. Veuillez réessayer.",
+      "sendFailed": "Impossible d'envoyer votre message. Veuillez réessayer.",
+      "transferOwnershipFailed": "Impossible de transférer la propriété. Veuillez réessayer."
     },
     "dateLabels": {
       "today": "Aujourd’hui",

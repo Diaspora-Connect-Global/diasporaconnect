@@ -1,5 +1,6 @@
 'use client';
 import { ButtonType1 } from '../../custom/button';
+import { FitText } from '../../custom/FitText';
 import {
     Tooltip,
     TooltipContent,
@@ -106,19 +107,18 @@ export default function CommunityCardVariant2({
                     </div>
                 )}
 
-                {/* Button — full width to match the design mock. The label drops
-                    to 14px and truncates inside the button: the card is a fixed
-                    14.5rem, so long localized CTAs ("Rejoindre la communauté",
-                    "Unisciti all'associazione") overflow the pill at the base
-                    16px label size. */}
+                {/* Button — full width to match the design mock. The card is a
+                    fixed 14.5rem, so long localized CTAs ("Rejoindre la
+                    communauté", "Unisciti all'associazione") overflow the pill at
+                    the base 16px label size. FitText shrinks the label only as
+                    much as each language needs, so short labels keep full size. */}
                 <div className="w-full mt-auto pt-2">
                     <ButtonType1
                         onClick={onButtonClick}
-                        className="w-full min-w-0 px-2 text-sm"
+                        className="w-full min-w-0 px-2"
                         disabled={isDisabled}
-                        title={buttonText}
                     >
-                        <span className="block truncate">{buttonText}</span>
+                        <FitText>{buttonText}</FitText>
                     </ButtonType1>
                 </div>
             </div>

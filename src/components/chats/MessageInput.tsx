@@ -134,16 +134,16 @@ export function MessageInput({
             const file = files[i];
             const contentType = chatMediaContentType(file.type);
             if (contentType === "application/octet-stream") {
-                toast.error(`File type not supported: ${file.name}`);
+                toast.error(t('fileTypeNotSupported', { name: file.name }));
                 continue;
             }
             if (file.size > MAX_FILE_BYTES) {
-                toast.error(`${file.name} is too large (max 10MB per file)`);
+                toast.error(t('fileTooLarge', { name: file.name }));
                 continue;
             }
             const newTotal = currentTotal + next.reduce((s, f) => s + f.file.size, 0) + file.size;
             if (newTotal > MAX_TOTAL_BYTES) {
-                toast.error("Total attachment size would exceed 50MB");
+                toast.error(t('totalSizeExceeded'));
                 break;
             }
             const item: FileWithPreview = { file };
@@ -174,7 +174,7 @@ export function MessageInput({
             });
         }
         if (added < files.length && selectedFiles.length + next.length >= MAX_FILES) {
-            toast.error(`Maximum ${MAX_FILES} files allowed`);
+            toast.error(t('tooManyFiles', { max: MAX_FILES }));
         }
         e.target.value = "";
     };

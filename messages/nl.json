@@ -1992,7 +1992,16 @@
         "nightBanner": "Waarschijnlijk niet het juiste moment",
         "nightReason": "Het is laat in {city}. Een reactie kan even duren.",
         "nightReasonGeneric": "Het is laat in hun tijdzone. Een reactie kan even duren."
-      }
+      },
+      "sendFailed": "Uw bericht kon niet worden verzonden. Probeer het opnieuw.",
+      "blockFailed": "Deze gebruiker kon niet worden geblokkeerd. Probeer het opnieuw.",
+      "yourTime": "Uw tijd:",
+      "theirTime": "Tijd van {name}:",
+      "fileTypeNotSupported": "Bestandstype wordt niet ondersteund: {name}",
+      "fileTooLarge": "{name} is te groot (max. 10 MB per bestand)",
+      "totalSizeExceeded": "De totale grootte van de bijlagen zou 50 MB overschrijden",
+      "tooManyFiles": "U kunt maximaal {max} bestanden toevoegen",
+      "blockSuccess": "Gebruiker geblokkeerd."
     },
     "group": {
       "message": "Bericht aan {name}",
@@ -2057,7 +2066,12 @@
       "removeMember": "Uit groep verwijderen",
       "removeMemberConfirmation": "Weet u zeker dat u {name} uit deze groep wilt verwijderen?",
       "remove": "Verwijderen",
-      "close": "Sluiten"
+      "close": "Sluiten",
+      "replyInFlight": "Wacht tot het vorige antwoord is verzonden.",
+      "replyTargetGone": "Dit bericht maakt geen deel meer uit van dit gesprek. Verstuur het als nieuw bericht of open het antwoord opnieuw.",
+      "replyFailed": "Uw antwoord kon niet worden verzonden. Probeer het opnieuw.",
+      "sendFailed": "Uw bericht kon niet worden verzonden. Probeer het opnieuw.",
+      "transferOwnershipFailed": "Het eigendom kon niet worden overgedragen. Probeer het opnieuw."
     },
     "dateLabels": {
       "today": "Vandaag",

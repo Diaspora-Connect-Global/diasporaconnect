@@ -272,11 +272,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         } catch (error) {
             if (upload) finalizeUpload(upload.placeholderId);
             console.error('❌ Failed to send message:', error);
-            toast.error('Failed to send message. Please try again.');
+            toast.error(t('sendFailed'));
         } finally {
             setIsSending(false);
         }
-    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, uploadFiles, finalizeUpload]);
+    }, [conversationId, currentUserId, sendMessageMutation, addApiMessage, uploadFiles, finalizeUpload, t]);
 
     const handleBlockConfirm = async () => {
         setIsBlocking(true);
@@ -285,15 +285,17 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 variables: { input: { blockedId: chat.id } },
             });
             if (data?.blockUser?.success) {
-                toast.success(t('blockSuccess') || 'User blocked.');
+                toast.success(t('blockSuccess'));
                 setBlockModalOpen(false);
                 onBack?.();
             } else {
-                toast.error(data?.blockUser?.message || 'Failed to block user.');
+                // Backend copy is English-only, so it is logged rather than shown.
+                console.error('Block user failed:', data?.blockUser?.message);
+                toast.error(t('blockFailed'));
             }
         } catch (err) {
             console.error('Block user error:', err);
-            toast.error('Failed to block user.');
+            toast.error(t('blockFailed'));
         } finally {
             setIsBlocking(false);
         }
@@ -593,9 +595,9 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                 {/* ---- Timezone Bar ---- */}
                 <div className="flex-shrink-0 bg-chat-bar-bg px-4 py-2 border-t border-chat-bar-border flex items-center justify-center gap-2">
                     <p className="text-[11px] text-text-secondary leading-tight text-center">
-                        Your time: <span className="font-medium text-text-primary">{formatCurrentTime(userTimeZone)}</span>
+                        {t('yourTime')} <span className="font-medium text-text-primary">{formatCurrentTime(userTimeZone)}</span>
                         {otherLocalTime && (
-                            <> &bull; <span className="font-medium text-text-primary">{displayName}</span>&apos;s time: {otherLocalTime}</>
+                            <> &bull; {t('theirTime', { name: displayName })} {otherLocalTime}</>
                         )}
                     </p>
                     {otherLocalTime && (

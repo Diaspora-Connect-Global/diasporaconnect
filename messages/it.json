@@ -2431,7 +2431,16 @@
         "nightBanner": "Probabilmente non è il momento giusto",
         "nightReason": "È tardi a {city}. La risposta potrebbe tardare.",
         "nightReasonGeneric": "È tardi nel loro fuso orario. La risposta potrebbe tardare."
-      }
+      },
+      "sendFailed": "Impossibile inviare il messaggio. Riprova.",
+      "blockFailed": "Impossibile bloccare questo utente. Riprova.",
+      "yourTime": "La tua ora:",
+      "theirTime": "Ora di {name}:",
+      "fileTypeNotSupported": "Tipo di file non supportato: {name}",
+      "fileTooLarge": "{name} è troppo grande (massimo 10 MB per file)",
+      "totalSizeExceeded": "La dimensione totale degli allegati supererebbe 50 MB",
+      "tooManyFiles": "Puoi allegare fino a {max} file",
+      "blockSuccess": "Utente bloccato."
     },
     "group": {
       "message": "Messaggio a {name}",
@@ -2496,7 +2505,12 @@
       "transferOwnershipDescription": "Seleziona il nuovo proprietario. Diventerai un amministratore.",
       "changeGroupPhoto": "Cambia foto del gruppo",
       "useThisPhoto": "Usa questa foto",
-      "groupPhotoUpdated": "Foto del gruppo aggiornata"
+      "groupPhotoUpdated": "Foto del gruppo aggiornata",
+      "replyInFlight": "Attendi l'invio della risposta precedente.",
+      "replyTargetGone": "Questo messaggio non fa più parte della conversazione. Invialo come nuovo messaggio o riapri la risposta.",
+      "replyFailed": "Impossibile inviare la risposta. Riprova.",
+      "sendFailed": "Impossibile inviare il messaggio. Riprova.",
+      "transferOwnershipFailed": "Impossibile trasferire la proprietà. Riprova."
     },
     "dateLabels": {
       "today": "Oggi",

@@ -2431,7 +2431,16 @@
         "nightBanner": "Wahrscheinlich kein guter Zeitpunkt",
         "nightReason": "Es ist spät in {city}. Eine Antwort kann etwas dauern.",
         "nightReasonGeneric": "Es ist spät in der Zeitzone. Eine Antwort kann etwas dauern."
-      }
+      },
+      "sendFailed": "Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+      "blockFailed": "Dieser Nutzer konnte nicht blockiert werden. Bitte versuchen Sie es erneut.",
+      "yourTime": "Ihre Zeit:",
+      "theirTime": "Zeit von {name}:",
+      "fileTypeNotSupported": "Dateityp nicht unterstützt: {name}",
+      "fileTooLarge": "{name} ist zu groß (max. 10 MB pro Datei)",
+      "totalSizeExceeded": "Die Gesamtgröße der Anhänge würde 50 MB überschreiten",
+      "tooManyFiles": "Sie können bis zu {max} Dateien anhängen",
+      "blockSuccess": "Nutzer blockiert."
     },
     "group": {
       "message": "Nachricht an {name}",
@@ -2496,7 +2505,12 @@
       "transferOwnershipDescription": "Wählen Sie den neuen Eigentümer. Sie werden zum Admin.",
       "changeGroupPhoto": "Gruppenfoto ändern",
       "useThisPhoto": "Dieses Foto verwenden",
-      "groupPhotoUpdated": "Gruppenfoto aktualisiert"
+      "groupPhotoUpdated": "Gruppenfoto aktualisiert",
+      "replyInFlight": "Bitte warten Sie, bis die vorherige Antwort gesendet wurde.",
+      "replyTargetGone": "Diese Nachricht ist nicht mehr Teil dieser Unterhaltung. Senden Sie sie als neue Nachricht oder öffnen Sie die Antwort erneut.",
+      "replyFailed": "Ihre Antwort konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+      "sendFailed": "Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+      "transferOwnershipFailed": "Die Übertragung der Eigentümerschaft ist fehlgeschlagen. Bitte versuchen Sie es erneut."
     },
     "dateLabels": {
       "today": "Heute",

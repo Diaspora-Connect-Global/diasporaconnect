@@ -1,5 +1,6 @@
 'use client';
 import { ButtonType1 } from '../custom/button';
+import { FitText } from '../custom/FitText';
 import {
   Tooltip,
   TooltipContent,
@@ -132,10 +133,11 @@ export default function JoinCommunityCard({
             }}
             size="lg"
             disabled={isDisabled}
-            className="max-w-full min-w-0 text-sm"
-            title={buttonText}
+            /* Full width (not the base w-fit) so the label has a width that
+               doesn't depend on its own font size — see FitText. */
+            className="w-full min-w-0"
           >
-            <span className="block truncate">{buttonText}</span>
+            <FitText>{buttonText}</FitText>
           </ButtonType1>
         </div>
       </div>

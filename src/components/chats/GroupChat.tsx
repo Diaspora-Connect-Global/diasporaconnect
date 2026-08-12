@@ -468,7 +468,7 @@ export default function GroupChat() {
 
         if (replyingTo) {
             if (isSendingReplyRef.current) {
-                toast.error('Please wait for the previous reply to send.');
+                toast.error(t('replyInFlight'));
                 return;
             }
             const replyCtx = replyContextRef.current?.replyToId === replyingTo ? replyContextRef.current : null;
@@ -477,7 +477,7 @@ export default function GroupChat() {
             const messagesInConv = getApiMessagesByConversation(replyConvId);
             const targetInConv = messagesInConv.some((m) => m.id === replyTargetId);
             if (!targetInConv) {
-                toast.error('Reply target is no longer in this conversation. Send as a new message or reopen the reply.');
+                toast.error(t('replyTargetGone'));
                 setReplyingTo(null);
                 replyContextRef.current = null;
                 return;
@@ -520,7 +520,7 @@ export default function GroupChat() {
             } catch (error) {
                 console.error('Failed to send reply:', error);
                 if (upload) finalizeUpload(upload.placeholderId);
-                toast.error('Failed to send reply. Please try again.');
+                toast.error(t('replyFailed'));
             } finally {
                 isSendingReplyRef.current = false;
             }
@@ -561,7 +561,7 @@ export default function GroupChat() {
             } catch (error) {
                 console.error('Failed to send message:', error);
                 if (upload) finalizeUpload(upload.placeholderId);
-                toast.error('Failed to send message. Please try again.');
+                toast.error(t('sendFailed'));
             }
         }
     };
@@ -1354,7 +1354,7 @@ export default function GroupChat() {
                                                 }
                                             } catch (e) {
                                                 console.error(e);
-                                                toast.error('Failed to transfer ownership');
+                                                toast.error(t('transferOwnershipFailed'));
                                             }
                                         }}
                                     >

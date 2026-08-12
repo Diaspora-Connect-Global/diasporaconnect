@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
 import { Bug } from "@phosphor-icons/react";
@@ -37,10 +38,22 @@ import {
  * the "DiaspoPlug – Report an Issue" Google Form, so reports land in a Sheet
  * with no backend involved. Field ids + options are in `config/issueReporter`.
  */
+/**
+ * Chat puts its composer — including the send button — in the bottom-right
+ * corner, exactly where the floating button sits by default. On those routes we
+ * lift it above the composer (and the timezone bar below it) so it never covers
+ * a control. Matches `/{locale}/chat` and any nested chat route.
+ */
+const CHAT_ROUTE = /^\/[^/]+\/chat(\/|$)/;
+
+const FAB_POSITION_DEFAULT = "bottom-20 right-4 md:bottom-6 md:right-6";
+const FAB_POSITION_CHAT = "bottom-44 right-4 lg:bottom-28 lg:right-6";
+
 export function IssueReporterButton() {
   const { enabled, action, fields } = useIssueReporterConfig();
   const user = useUserStore((s) => s.user);
   const locale = useLocale();
+  const pathname = usePathname();
   const t = useTranslations("issueReporter");
 
   const [open, setOpen] = useState(false);
@@ -95,7 +108,9 @@ export function IssueReporterButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t("open")}
-        className="fixed bottom-20 right-4 z-50 h-12 gap-2 rounded-full shadow-lg md:bottom-6 md:right-6"
+        className={`fixed z-50 h-12 gap-2 rounded-full shadow-lg ${
+          CHAT_ROUTE.test(pathname) ? FAB_POSITION_CHAT : FAB_POSITION_DEFAULT
+        }`}
       >
         <Bug weight="bold" className="size-5" />
         <span className="hidden sm:inline">{t("open")}</span>

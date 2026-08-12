@@ -1992,7 +1992,16 @@
         "nightBanner": "Probably not a good time",
         "nightReason": "It's late in {city}. They may not reply right away.",
         "nightReasonGeneric": "It's late in their timezone. They may not reply right away."
-      }
+      },
+      "sendFailed": "Couldn't send your message. Please try again.",
+      "blockFailed": "Couldn't block this user. Please try again.",
+      "yourTime": "Your time:",
+      "theirTime": "{name}'s time:",
+      "fileTypeNotSupported": "File type not supported: {name}",
+      "fileTooLarge": "{name} is too large (max 10MB per file)",
+      "totalSizeExceeded": "Total attachment size would exceed 50MB",
+      "tooManyFiles": "You can attach up to {max} files",
+      "blockSuccess": "User blocked."
     },
     "group": {
       "message": "Message {name}",
@@ -2057,7 +2066,12 @@
       "removeMember": "Remove from Group",
       "removeMemberConfirmation": "Are you sure you want to remove {name} from this group?",
       "remove": "Remove",
-      "close": "Close"
+      "close": "Close",
+      "replyInFlight": "Please wait for the previous reply to send.",
+      "replyTargetGone": "That message is no longer in this conversation. Send it as a new message or reopen the reply.",
+      "replyFailed": "Couldn't send your reply. Please try again.",
+      "sendFailed": "Couldn't send your message. Please try again.",
+      "transferOwnershipFailed": "Couldn't transfer ownership. Please try again."
     },
     "dateLabels": {
       "today": "Today",
