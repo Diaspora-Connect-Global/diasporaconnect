@@ -13,6 +13,7 @@ import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 import { persistCacheSync, LocalStorageWrapper } from 'apollo3-cache-persist';
 import { toast } from 'sonner';
 
+import { errorMessage } from '@/lib/client-error-messages';
 import { useAuthStore } from '@/store/useAuthStore';
 
 /* ------------------------------------------------------------------ */
@@ -35,7 +36,7 @@ const showToastOnce = (message: string, duration = 4000) => {
 /* ------------------------------------------------------------------ */
 /* Clear session and redirect to sign-in when session is invalid/revoked */
 /* ------------------------------------------------------------------ */
-const LOCALES = ['en', 'fr', 'it', 'de'] as const;
+const LOCALES = ['en', 'fr', 'it', 'de', 'nl'] as const;
 
 function clearSessionAndRedirectToSignIn() {
   const { clearAuth } = useAuthStore.getState();
@@ -75,7 +76,7 @@ const errorLink = new ErrorLink(({ error, operation }) => {
       );
       
       // Show toast only if not already shown
-      showToastOnce('Something went wrong. Please try again.');
+      showToastOnce(errorMessage('generic'));
     });
   } else if (CombinedProtocolErrors.is(error)) {
     // Protocol errors (malformed requests, etc.)
@@ -87,31 +88,32 @@ const errorLink = new ErrorLink(({ error, operation }) => {
       );
     });
     
-    showToastOnce('Something went wrong. Please try again.');
+    showToastOnce(errorMessage('generic'));
   } else {
     // Network errors (server down, connection refused, etc.)
     console.error(`[Network error]: ${error}`);
     
-    const errorMessage = error?.message || '';
+    // Raw backend text — matched against, never shown to the user.
+    const rawMessage = error?.message || '';
     
     // Check for specific network error types
-    if (errorMessage.includes('Failed to fetch') || 
-        errorMessage.includes('ERR_CONNECTION_REFUSED')) {
-      showToastOnce('Unable to connect. Please try again later.', 5000);
-    } else if (errorMessage.includes('timeout')) {
-      showToastOnce('This is taking longer than expected. Please try again.');
-    } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+    if (rawMessage.includes('Failed to fetch') ||
+        rawMessage.includes('ERR_CONNECTION_REFUSED')) {
+      showToastOnce(errorMessage('connection'), 5000);
+    } else if (rawMessage.includes('timeout')) {
+      showToastOnce(errorMessage('timeout'));
+    } else if (rawMessage.includes('401') || rawMessage.includes('Unauthorized')) {
       clearSessionAndRedirectToSignIn();
       return;
-    } else if (errorMessage.includes('403') || errorMessage.includes('Forbidden')) {
+    } else if (rawMessage.includes('403') || rawMessage.includes('Forbidden')) {
       clearSessionAndRedirectToSignIn();
       return;
-    } else if (errorMessage.includes('404')) {
-      showToastOnce('We couldn\'t find what you\'re looking for.');
-    } else if (errorMessage.includes('500') || errorMessage.includes('Internal Server Error')) {
-      showToastOnce('Something went wrong on our end. Please try again later.', 5000);
+    } else if (rawMessage.includes('404')) {
+      showToastOnce(errorMessage('notFound'));
+    } else if (rawMessage.includes('500') || rawMessage.includes('Internal Server Error')) {
+      showToastOnce(errorMessage('server'), 5000);
     } else {
-      showToastOnce('Something went wrong. Please try again.');
+      showToastOnce(errorMessage('generic'));
     }
   }
 });

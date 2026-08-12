@@ -132,8 +132,10 @@ export default function JoinCommunityCard({
             }}
             size="lg"
             disabled={isDisabled}
+            className="max-w-full min-w-0 text-sm"
+            title={buttonText}
           >
-            {buttonText}
+            <span className="block truncate">{buttonText}</span>
           </ButtonType1>
         </div>
       </div>

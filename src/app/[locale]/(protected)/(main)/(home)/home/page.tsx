@@ -219,6 +219,7 @@ export default function Home() {
   const tCommon = useTranslations('common');
   const tJoinModal = useTranslations('home.joinModal');
   const tHome = useTranslations('home');
+  const tActions = useTranslations('actions');
   const [viewMode, setViewMode] = useState<FeedViewMode>('you');
   // Track the open media modal by postId rather than postIndex so the
   // open-media handler can be wired as a stable `useCallback`. With
@@ -1194,7 +1195,7 @@ export default function Home() {
                       onButtonClick={() => handleJoinClick('community', community)}
                       buttonText={
                         community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
-                          ? 'Joined'
+                          ? tActions('joined')
                           : t('joincommunity')
                       }
                       isDisabled={community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)}
@@ -1418,7 +1419,7 @@ export default function Home() {
                               buttonText={
                                 association.membershipStatus === 'MEMBER' ||
                                 joinedCommunities.has(association.id)
-                                  ? 'Joined'
+                                  ? tActions('joined')
                                   : t('joinassociation')
                               }
                               isDisabled={

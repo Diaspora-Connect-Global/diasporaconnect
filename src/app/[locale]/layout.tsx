@@ -7,6 +7,7 @@ import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, getMessages } from 'next-intl/server';
 import GraphQLProvider from "@/components/provider/apollo-provider";
+import ErrorMessagesBridge from "@/components/provider/error-messages-bridge";
 import { Toaster } from 'sonner';
 import { BASE, SITE_NAME, LOCALES, publicRobots } from '@/lib/seo';
 import { seoGraphQL } from '@/lib/seoFetch';
@@ -157,6 +158,8 @@ export default async function RootLayout({
           {`(function(){try{var t=localStorage.getItem('theme')||'light';var s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';var a=t==='system'?s:t;if(a==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})();`}
         </Script>
         <NextIntlClientProvider locale={locale} messages={messages}>
+          {/* Gives the Apollo error link (outside React) the locale's error copy. */}
+          <ErrorMessagesBridge />
           <ThemeProvider
             attribute="class"
             defaultTheme="light"

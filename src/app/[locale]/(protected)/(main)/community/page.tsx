@@ -635,9 +635,9 @@ export default function Community() {
                                 onButtonClick={() => handleJoinClick(community)}
                                 buttonText={
                                     isAlreadyJoined
-                                        ? 'Joined'
+                                        ? tActions('joined')
                                         : isPendingStatus
-                                            ? 'Pending'
+                                            ? tActions('pending')
                                             : tActions('join')
                                 }
                                 description={community.description || ''}

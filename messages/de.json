@@ -390,7 +390,22 @@
     "errors": {
       "emailRequired": "E-Mail ist erforderlich",
       "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-      "passwordTooShort": "Das Passwort muss mindestens 12 Zeichen lang sein"
+      "passwordTooShort": "Das Passwort muss mindestens 12 Zeichen lang sein",
+      "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "connection": "Verbindung nicht möglich. Bitte versuchen Sie es später erneut.",
+      "timeout": "Das dauert länger als erwartet. Bitte versuchen Sie es erneut.",
+      "notFound": "Wir konnten nicht finden, wonach Sie suchen.",
+      "server": "Bei uns ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+      "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "validation": "Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.",
+      "businessRule": "Diese Aktion ist derzeit nicht verfügbar.",
+      "insufficientInventory": "Der Bestand reicht für diese Bestellung nicht aus.",
+      "orderCancellationNotAllowed": "Diese Bestellung kann nicht mehr storniert werden.",
+      "invalidStatusTransition": "Diese Statusänderung ist nicht zulässig.",
+      "priceMismatch": "Der Preis hat sich geändert. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut.",
+      "unsupportedCurrencyPair": "Diese Währungskombination wird nicht unterstützt.",
+      "vendorProfileRequired": "Sie benötigen ein Verkäuferprofil, um fortzufahren.",
+      "kycRequired": "Schließen Sie die Identitätsprüfung ab, um fortzufahren."
     },
     "success": {
       "attendingEvent": "Sie nehmen am {event} Event teil",
@@ -1690,7 +1705,14 @@
       "serviceRequestDocumentAdded": "Ein neues Dokument wurde zu Ihrer Anfrage {requestNumber} hinzugefügt.",
       "serviceRequestDefaultTitle": "Aktualisierung zu Ihrer Anfrage",
       "serviceRequestFallback": "Es gibt eine Aktualisierung zu Ihrer Serviceanfrage.",
-      "actorFallback": "Jemand"
+      "actorFallback": "Jemand",
+      "membershipLeft": "Sie haben {communityName} verlassen",
+      "membershipRemoved": "Sie wurden aus {communityName} entfernt",
+      "associationLeft": "Sie haben {associationName} verlassen",
+      "associationRemoved": "Sie wurden aus {associationName} entfernt",
+      "postShare": "{actorName} hat Ihren Beitrag geteilt",
+      "postShareWithTitle": "{actorName} hat Ihren Beitrag „{postTitle}“ geteilt",
+      "commentLike": "{actorName} gefällt Ihr Kommentar"
     },
     "none": {
       "all": "Keine Benachrichtigungen verfügbar",
@@ -2479,7 +2501,8 @@
     "dateLabels": {
       "today": "Heute",
       "yesterday": "Gestern"
-    }
+    },
+    "loadConversationsError": "Ihre Unterhaltungen konnten nicht geladen werden. Bitte versuchen Sie es erneut."
   },
   "dialog": {
     "title": "Titel",

@@ -254,10 +254,19 @@ function buildNotificationView(
         actorHref,
       };
     }
-    // post.shared / comment.liked singular — no dedicated singular key.
-    const fallbackTitle = not.title || not.message || resolvedActor;
+    // post.shared / comment.liked singular.
+    if (isPostShare) {
+      return {
+        title: t(hasTitle ? 'messages.postShareWithTitle' : 'messages.postShare', {
+          actorName: resolvedActor,
+          postTitle: enriched.targetTitle || '',
+        }),
+        imageUrl: actorAvatar,
+        actorHref,
+      };
+    }
     return {
-      title: fallbackTitle,
+      title: t('messages.commentLike', { actorName: resolvedActor }),
       imageUrl: actorAvatar,
       actorHref,
     };
@@ -417,6 +426,29 @@ function buildNotificationView(
       title: t('messages.membershipRequest', { communityName }),
       imageUrl: actorAvatar,
       actorHref,
+    };
+  }
+
+  // Left / removed from a community or association. These are self-referential
+  // (no actor), and without a localized branch they fell through to the
+  // backend's English title ("Left the community").
+  const isLeftType = stype === 'membership.left' || stype === 'association.membership.left';
+  const isRemovedType =
+    stype === 'membership.removed' || stype === 'association.membership.removed';
+  if (isLeftType || isRemovedType) {
+    const asAssociation = isAssociation || stype.startsWith('association.');
+    const entityName =
+      enriched.entityName ||
+      t(asAssociation ? 'messages.associationFallback' : 'messages.communityFallback');
+    const key = asAssociation
+      ? isLeftType
+        ? 'messages.associationLeft'
+        : 'messages.associationRemoved'
+      : isLeftType
+        ? 'messages.membershipLeft'
+        : 'messages.membershipRemoved';
+    return {
+      title: t(key, asAssociation ? { associationName: entityName } : { communityName: entityName }),
     };
   }
 

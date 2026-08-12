@@ -106,14 +106,19 @@ export default function CommunityCardVariant2({
                     </div>
                 )}
 
-                {/* Button — full width to match the design mock */}
+                {/* Button — full width to match the design mock. The label drops
+                    to 14px and truncates inside the button: the card is a fixed
+                    14.5rem, so long localized CTAs ("Rejoindre la communauté",
+                    "Unisciti all'associazione") overflow the pill at the base
+                    16px label size. */}
                 <div className="w-full mt-auto pt-2">
                     <ButtonType1
                         onClick={onButtonClick}
-                        className="w-full"
+                        className="w-full min-w-0 px-2 text-sm"
                         disabled={isDisabled}
+                        title={buttonText}
                     >
-                        {buttonText}
+                        <span className="block truncate">{buttonText}</span>
                     </ButtonType1>
                 </div>
             </div>

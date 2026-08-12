@@ -1,5 +1,7 @@
 import { toast } from "sonner";
 
+import { errorMessage } from "@/lib/client-error-messages";
+
 export type VendorErrorAction =
   | "AUTH_REDIRECT"
   | "ONBOARDING_CTA"
@@ -24,7 +26,7 @@ function getErrorMessage(error: unknown): string {
   if (typeof error === "string") {
     return error;
   }
-  return "Something went wrong. Please try again.";
+  return "";
 }
 
 function normalizeCode(value: unknown): string | null {
@@ -140,15 +142,19 @@ export function handleVendorError({
   onOnboardingRequired,
 }: VendorErrorContext): VendorErrorAction {
   const action = mapVendorErrorToAction(error);
-  const message = getErrorMessage(error);
+  // Backend copy is English-only, so it is logged rather than shown.
+  const raw = getErrorMessage(error);
+  if (raw) {
+    console.error(`[vendor error] ${action}: ${raw}`);
+  }
 
   switch (action) {
     case "AUTH_REDIRECT":
-      toast.error("Session expired. Please sign in again.");
+      toast.error(errorMessage("sessionExpired"));
       router.replace(`/${locale}/signin`);
       return action;
     case "ONBOARDING_CTA":
-      toast.error("You need a vendor profile to continue.");
+      toast.error(errorMessage("vendorProfileRequired"));
       if (onOnboardingRequired) {
         onOnboardingRequired();
       } else {
@@ -156,11 +162,11 @@ export function handleVendorError({
       }
       return action;
     case "KYC_MODAL":
-      toast.error("Complete KYC to continue this action.");
+      toast.error(errorMessage("kycRequired"));
       openKycModal?.();
       return action;
     default:
-      toast.error(message);
+      toast.error(errorMessage("generic"));
       return action;
   }
 }

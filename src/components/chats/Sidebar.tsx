@@ -374,9 +374,11 @@ export default function ChatSideBar() {
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto scrollbar-hide">
+                    {/* Localized copy only — the raw backend message (e.g.
+                        "sorry, too many clients already") goes to the console. */}
                     {conversationsError && (
-                        <div className="p-4 text-red-500 text-sm">
-                            Error loading conversations: {conversationsError.message}
+                        <div className="p-4 text-text-danger text-sm">
+                            {t('loadConversationsError')}
                         </div>
                     )}
                     {activeTab === 'direct' ? (

@@ -390,7 +390,22 @@
     "errors": {
       "emailRequired": "L'email è obbligatoria",
       "invalidEmail": "Inserisci un indirizzo email valido",
-      "passwordTooShort": "La password deve contenere almeno 12 caratteri"
+      "passwordTooShort": "La password deve contenere almeno 12 caratteri",
+      "generic": "Si è verificato un errore. Riprova.",
+      "connection": "Impossibile connettersi. Riprova più tardi.",
+      "timeout": "Sta richiedendo più tempo del previsto. Riprova.",
+      "notFound": "Non abbiamo trovato quello che cerchi.",
+      "server": "Si è verificato un errore da parte nostra. Riprova più tardi.",
+      "sessionExpired": "La tua sessione è scaduta. Accedi di nuovo.",
+      "validation": "Controlla i dati inseriti e riprova.",
+      "businessRule": "Questa azione non è disponibile al momento.",
+      "insufficientInventory": "Le scorte non sono sufficienti per completare l'ordine.",
+      "orderCancellationNotAllowed": "Questo ordine non può più essere annullato.",
+      "invalidStatusTransition": "Questa modifica di stato non è consentita.",
+      "priceMismatch": "Il prezzo è cambiato. Aggiorna la pagina e riprova.",
+      "unsupportedCurrencyPair": "Questa combinazione di valute non è supportata.",
+      "vendorProfileRequired": "Ti serve un profilo venditore per continuare.",
+      "kycRequired": "Completa la verifica dell'identità per continuare."
     },
     "success": {
       "attendingEvent": "Stai partecipando all'evento {event}",
@@ -1690,7 +1705,14 @@
       "serviceRequestDocumentAdded": "Un nuovo documento è stato aggiunto alla tua richiesta {requestNumber}.",
       "serviceRequestDefaultTitle": "Aggiornamento sulla tua richiesta",
       "serviceRequestFallback": "C'è un aggiornamento sulla tua richiesta di servizio.",
-      "actorFallback": "Qualcuno"
+      "actorFallback": "Qualcuno",
+      "membershipLeft": "Hai lasciato {communityName}",
+      "membershipRemoved": "Sei stato rimosso da {communityName}",
+      "associationLeft": "Hai lasciato {associationName}",
+      "associationRemoved": "Sei stato rimosso da {associationName}",
+      "postShare": "{actorName} ha condiviso il tuo post",
+      "postShareWithTitle": "{actorName} ha condiviso il tuo post «{postTitle}»",
+      "commentLike": "A {actorName} è piaciuto il tuo commento"
     },
     "none": {
       "all": "Nessuna notifica disponibile",
@@ -2479,7 +2501,8 @@
     "dateLabels": {
       "today": "Oggi",
       "yesterday": "Ieri"
-    }
+    },
+    "loadConversationsError": "Impossibile caricare le tue conversazioni. Riprova."
   },
   "dialog": {
     "title": "Titolo",

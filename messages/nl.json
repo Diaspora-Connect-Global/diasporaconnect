@@ -390,7 +390,22 @@
     "errors": {
       "emailRequired": "E-mailadres is verplicht",
       "invalidEmail": "Voer een geldig e-mailadres in",
-      "passwordTooShort": "Het wachtwoord moet minstens 12 tekens bevatten"
+      "passwordTooShort": "Het wachtwoord moet minstens 12 tekens bevatten",
+      "generic": "Er is een fout opgetreden. Probeer het opnieuw.",
+      "connection": "Kan geen verbinding maken. Probeer het later opnieuw.",
+      "timeout": "Dit duurt langer dan verwacht. Probeer het opnieuw.",
+      "notFound": "We konden niet vinden wat je zoekt.",
+      "server": "Er is bij ons iets misgegaan. Probeer het later opnieuw.",
+      "sessionExpired": "Uw sessie is verlopen. Meld u opnieuw aan.",
+      "validation": "Controleer de ingevoerde gegevens en probeer het opnieuw.",
+      "businessRule": "Deze actie is momenteel niet beschikbaar.",
+      "insufficientInventory": "Er is niet genoeg voorraad om deze bestelling af te ronden.",
+      "orderCancellationNotAllowed": "Deze bestelling kan niet meer worden geannuleerd.",
+      "invalidStatusTransition": "Deze statuswijziging is niet toegestaan.",
+      "priceMismatch": "De prijs is gewijzigd. Vernieuw de pagina en probeer het opnieuw.",
+      "unsupportedCurrencyPair": "Deze valutacombinatie wordt niet ondersteund.",
+      "vendorProfileRequired": "U heeft een verkopersprofiel nodig om door te gaan.",
+      "kycRequired": "Rond de identiteitsverificatie af om door te gaan."
     },
     "success": {
       "attendingEvent": "U woont het evenement {event} bij",
@@ -1690,7 +1705,14 @@
       "serviceRequestDocumentAdded": "Er is een nieuw document toegevoegd aan uw verzoek {requestNumber}.",
       "serviceRequestDefaultTitle": "Update over uw verzoek",
       "serviceRequestFallback": "Er is een update over uw serviceverzoek.",
-      "actorFallback": "Iemand"
+      "actorFallback": "Iemand",
+      "membershipLeft": "U heeft {communityName} verlaten",
+      "membershipRemoved": "U bent verwijderd uit {communityName}",
+      "associationLeft": "U heeft {associationName} verlaten",
+      "associationRemoved": "U bent verwijderd uit {associationName}",
+      "postShare": "{actorName} heeft uw bericht gedeeld",
+      "postShareWithTitle": "{actorName} heeft uw bericht \"{postTitle}\" gedeeld",
+      "commentLike": "{actorName} vindt uw reactie leuk"
     },
     "none": {
       "all": "Geen meldingen beschikbaar",
@@ -2040,7 +2062,8 @@
     "dateLabels": {
       "today": "Vandaag",
       "yesterday": "Gisteren"
-    }
+    },
+    "loadConversationsError": "Je gesprekken konden niet worden geladen. Probeer het opnieuw."
   },
   "dialog": {
     "title": "Titel",

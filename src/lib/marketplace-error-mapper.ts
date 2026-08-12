@@ -1,5 +1,7 @@
 import { toast } from "sonner";
 
+import { errorMessage, type ErrorMessageKey } from "@/lib/client-error-messages";
+
 export type MarketplaceErrorAction =
   | "AUTH_REDIRECT"
   | "NOT_FOUND"
@@ -145,7 +147,36 @@ function firstMessage(error: unknown): string {
   if (typeof error === "string") {
     return error;
   }
-  return "Something went wrong. Please try again.";
+  return "";
+}
+
+/**
+ * Pick the localized copy for an error. Backend messages are English-only, so
+ * they are never shown: known codes (and their message-text equivalents) map to
+ * a translated key, and anything unrecognized falls back to the category or
+ * generic copy. The raw text is logged for debugging instead.
+ */
+const BUSINESS_RULE_KEYS: Array<[string, string, ErrorMessageKey]> = [
+  ["INSUFFICIENT_INVENTORY", "insufficient inventory", "insufficientInventory"],
+  ["ORDER_CANCELLATION_NOT_ALLOWED", "cancellation not allowed", "orderCancellationNotAllowed"],
+  ["INVALID_STATUS_TRANSITION", "status transition", "invalidStatusTransition"],
+  ["PRICE_MISMATCH", "price mismatch", "priceMismatch"],
+  ["UNSUPPORTED_CURRENCY_PAIR", "currency pair", "unsupportedCurrencyPair"],
+];
+
+function localizedMessage(error: unknown, action: MarketplaceErrorAction): string {
+  const codes = extractErrorCodes(error);
+  const message = firstMessage(error).toLowerCase();
+
+  for (const [code, phrase, key] of BUSINESS_RULE_KEYS) {
+    if (codes.includes(code) || message.includes(phrase)) {
+      return errorMessage(key);
+    }
+  }
+
+  if (action === "VALIDATION") return errorMessage("validation");
+  if (action === "BUSINESS_RULE") return errorMessage("businessRule");
+  return errorMessage("generic");
 }
 
 export function mapMarketplaceErrorToAction(error: unknown): MarketplaceErrorAction {
@@ -197,22 +228,22 @@ export function handleMarketplaceError({
   notFoundMessage,
 }: MarketplaceErrorContext): MarketplaceErrorAction {
   const action = mapMarketplaceErrorToAction(error);
-  const message = firstMessage(error);
+  const raw = firstMessage(error);
+  if (raw) {
+    console.error(`[marketplace error] ${action}: ${raw}`);
+  }
 
   switch (action) {
     case "AUTH_REDIRECT":
-      toast.error("Session expired. Please sign in again.");
+      toast.error(errorMessage("sessionExpired"));
       router.replace(`/${locale}/signin`);
       return action;
     case "NOT_FOUND":
-      toast.error(notFoundMessage ?? "We could not find what you were looking for.");
-      return action;
-    case "VALIDATION":
-    case "BUSINESS_RULE":
-      toast.error(message);
+      // `notFoundMessage` is supplied already translated by the caller.
+      toast.error(notFoundMessage ?? errorMessage("notFound"));
       return action;
     default:
-      toast.error(message);
+      toast.error(localizedMessage(error, action));
       return action;
   }
 }
