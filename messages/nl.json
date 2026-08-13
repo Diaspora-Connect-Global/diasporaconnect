@@ -1712,7 +1712,9 @@
       "associationRemoved": "U bent verwijderd uit {associationName}",
       "postShare": "{actorName} heeft uw bericht gedeeld",
       "postShareWithTitle": "{actorName} heeft uw bericht \"{postTitle}\" gedeeld",
-      "commentLike": "{actorName} vindt uw reactie leuk"
+      "commentLike": "{actorName} vindt uw reactie leuk",
+      "groupChatDigest": "Dagelijkse samenvatting van {groupName}",
+      "groupChatDigestFallback": "Uw dagelijkse groepschat-samenvatting staat klaar"
     },
     "none": {
       "all": "Geen meldingen beschikbaar",
@@ -1720,7 +1722,8 @@
       "events": "Momenteel geen evenementen",
       "associations": "Momenteel geen verenigingsmeldingen",
       "communities": "Momenteel geen gemeenschapsmeldingen"
-    }
+    },
+    "newNotifications": "{count, plural, =1 {1 nieuwe melding} other {# nieuwe meldingen}} — tik om te vernieuwen"
   },
   "privacy": {
     "public": "Openbaar",

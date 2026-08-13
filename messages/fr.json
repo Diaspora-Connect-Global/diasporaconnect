@@ -1712,7 +1712,9 @@
       "associationRemoved": "Vous avez été retiré de {associationName}",
       "postShare": "{actorName} a partagé votre publication",
       "postShareWithTitle": "{actorName} a partagé votre publication « {postTitle} »",
-      "commentLike": "{actorName} a aimé votre commentaire"
+      "commentLike": "{actorName} a aimé votre commentaire",
+      "groupChatDigest": "Résumé quotidien de {groupName}",
+      "groupChatDigestFallback": "Votre résumé quotidien de discussion de groupe est prêt"
     },
     "none": {
       "all": "Aucune notification disponible",
@@ -1720,7 +1722,8 @@
       "events": "Aucun événement pour le moment",
       "associations": "Aucune notification d'association pour le moment",
       "communities": "Aucune notification de communauté pour le moment"
-    }
+    },
+    "newNotifications": "{count, plural, =1 {1 nouvelle notification} other {# nouvelles notifications}} — appuyez pour actualiser"
   },
   "privacy": {
     "public": "Public",

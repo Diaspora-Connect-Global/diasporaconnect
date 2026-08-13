@@ -1712,7 +1712,9 @@
       "associationRemoved": "Sie wurden aus {associationName} entfernt",
       "postShare": "{actorName} hat Ihren Beitrag geteilt",
       "postShareWithTitle": "{actorName} hat Ihren Beitrag „{postTitle}“ geteilt",
-      "commentLike": "{actorName} gefällt Ihr Kommentar"
+      "commentLike": "{actorName} gefällt Ihr Kommentar",
+      "groupChatDigest": "Tageszusammenfassung für {groupName}",
+      "groupChatDigestFallback": "Ihre tägliche Gruppenchat-Zusammenfassung ist bereit"
     },
     "none": {
       "all": "Keine Benachrichtigungen verfügbar",
@@ -1720,7 +1722,8 @@
       "events": "Derzeit keine Veranstaltungen",
       "associations": "Derzeit keine Vereinsbenachrichtigungen",
       "communities": "Derzeit keine Community-Benachrichtigungen"
-    }
+    },
+    "newNotifications": "{count, plural, =1 {1 neue Benachrichtigung} other {# neue Benachrichtigungen}} — zum Aktualisieren tippen"
   },
   "privacy": {
     "public": "Öffentlich",
