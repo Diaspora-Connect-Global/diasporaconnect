@@ -2764,7 +2764,12 @@
         "approvalLabel": "Anfrage + Zustimmung",
         "approvalDescription": "Andere fragen an und werden bestätigt."
       },
-      "bannerComingSoon": "Banner-Upload kommt bald"
+      "avatarLabel": "Profilbild",
+      "avatarCta": "Profilbild hinzufügen",
+      "avatarHint": "Quadratisches Bild, mindestens 256 x 256",
+      "avatarChange": "Bild ändern",
+      "avatarRemove": "Bild entfernen",
+      "imageFailed": "Kreis erstellt — das Bild konnten wir nicht anhängen. Du kannst es in den Einstellungen hinzufügen."
     },
     "home": {
       "tabChat": "Chat",

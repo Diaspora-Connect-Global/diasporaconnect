@@ -2,14 +2,39 @@
 import { useState } from 'react';
 import { useLazyQuery } from '@apollo/client/react';
 import { toast } from 'sonner';
-import { GET_UPLOAD_URL, type GetUploadUrlResponse } from '@/services/gql/upload';
+import {
+  GET_UPLOAD_URL,
+  type GetUploadUrlResponse,
+  type UploadCategory,
+} from '@/services/gql/upload';
 import { resizeImage } from '@/lib/resizeImage';
 
-type ImageCategory = 'avatar' | 'group_avatar' | 'event_cover';
+/**
+ * The full set the backend's `getUploadUrl` accepts, rather than the three
+ * categories that happened to have callers first. Widening a union only adds
+ * callers; every existing one still type-checks.
+ */
+type ImageCategory = UploadCategory;
 
 interface UseImageUploadOptions {
   category: ImageCategory;
   contentType?: string;
+  /**
+   * Longest-side target handed to `resizeImage`. Defaults to 512, which is
+   * right for an avatar and far too small for a wide banner — pass ~1600 for
+   * cover art so it is not upscaled from a thumbnail at display size.
+   */
+  maxDimension?: number;
+  /**
+   * Skip the crop step: `handleFileSelect` sets `croppedImage` straight from
+   * the chosen file instead of opening the cropper.
+   *
+   * The only cropper here is `CircularImageCropper`, which is locked to
+   * `aspect={1}` and applies a circular mask on the canvas. That is correct for
+   * an avatar and actively wrong for a banner — it would return a circle on a
+   * transparent square. Banners therefore upload the file as chosen.
+   */
+  skipCrop?: boolean;
   onSuccess?: (publicUrl: string) => void;
   onError?: (error: Error) => void;
 }
@@ -152,7 +177,7 @@ interface UseImageUploadReturn {
  * User clicks save → uploadImage() uploads to cloud → onSuccess callback with publicUrl
  * 
  * @param {UseImageUploadOptions} options - Configuration options
- * @param {ImageCategory} options.category - Upload category: 'avatar' or 'group_avatar'
+ * @param {ImageCategory} options.category - Any category `getUploadUrl` accepts (see UploadCategory)
  * @param {string} [options.contentType='image/jpeg'] - MIME type for upload
  * @param {(publicUrl: string) => void} [options.onSuccess] - Called after successful upload with the public URL
  * @param {(error: Error) => void} [options.onError] - Called when upload fails
@@ -181,6 +206,8 @@ interface UseImageUploadReturn {
 export const useImageUpload = ({
   category,
   contentType = 'image/jpeg',
+  maxDimension = 512,
+  skipCrop = false,
   onSuccess,
   onError,
 }: UseImageUploadOptions): UseImageUploadReturn => {
@@ -206,7 +233,15 @@ export const useImageUpload = ({
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setRawImage(e.target?.result as string);
+        const dataUrl = e.target?.result as string;
+        if (skipCrop) {
+          // Same end state the cropper would have produced, minus the crop:
+          // `croppedImage` is what `uploadImage()` reads and what callers
+          // preview, so nothing downstream needs to know which path ran.
+          setCroppedImage(dataUrl);
+          return;
+        }
+        setRawImage(dataUrl);
         setShowCropper(true);
       };
       reader.readAsDataURL(file);
@@ -276,7 +311,7 @@ export const useImageUpload = ({
       const blob = await response.blob();
 
       const { file: uploadBody, blurDataUrl: blur } = await resizeImage(blob, {
-        maxDimension: 512,
+        maxDimension,
       });
       setBlurDataUrl(blur);
 

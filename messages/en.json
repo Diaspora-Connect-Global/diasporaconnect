@@ -2764,7 +2764,12 @@
         "approvalLabel": "Request + approval",
         "approvalDescription": "People request and are approved."
       },
-      "bannerComingSoon": "Banner upload is coming soon"
+      "avatarLabel": "Profile picture",
+      "avatarCta": "Add a profile picture",
+      "avatarHint": "Square image, at least 256 x 256",
+      "avatarChange": "Change picture",
+      "avatarRemove": "Remove picture",
+      "imageFailed": "Circle created — we couldn't attach the image. You can add it from settings."
     },
     "home": {
       "tabChat": "Chat",

@@ -9,14 +9,17 @@ import { toast } from 'sonner';
 import { RadioCard, RadioCardGroup } from '@/components/circles/primitives';
 import { ButtonType2 } from '@/components/custom/button';
 import { TextInput } from '@/components/custom/input';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import { useRouter } from '@/i18n/navigation';
-import { CREATE_CIRCLE } from '@/services/gql/circles';
+import { CircularImageCropper } from '@/lib/imagecropper';
+import { CREATE_CIRCLE, UPDATE_CIRCLE_PROFILE } from '@/services/gql/circles';
 import type {
   CircleJoinMode,
   CreateCircleData,
+  UpdateCircleProfileData,
 } from '@/services/gql/types/circles';
 
-import { CircleBannerField } from './CircleBannerField';
+import { CircleImageField } from './CircleBannerField';
 
 /** `Circle.name` is clamped to 120 characters by circle-service. */
 const MAX_NAME_LENGTH = 120;
@@ -48,6 +51,29 @@ const MAX_NAME_LENGTH = 120;
  * transaction that creates it. Asking someone to configure quorum and majority
  * before their circle has two members is asking a question they cannot answer
  * yet — hence the note, and `AMEND_RULES` later.
+ *
+ * ## Images are attached after creation, and cannot fail the creation
+ *
+ * `CreateCircleInput` has no `avatarUrl` / `bannerUrl`, because the frozen
+ * `CreateCircleRequest` proto has no such fields. Imagery goes through the
+ * LEAD-gated `updateCircleProfile`, which needs a circle id — so submit runs
+ * three steps in order:
+ *
+ *   1. `createCircle` — the only step allowed to fail the form.
+ *   2. upload each chosen file to GCS via `getUploadUrl` (signed PUT).
+ *   3. `updateCircleProfile` with whichever URLs came back.
+ *
+ * Creation deliberately runs FIRST, before the uploads, even though a signed
+ * upload URL needs no circle id. Once step 1 returns, the circle exists; if
+ * step 2 or 3 then fails, saying "we couldn't create your circle" would be a
+ * lie that sends the user off to create a second one. So steps 2–3 are wrapped
+ * as one best-effort phase: the failure surfaces as a non-blocking note that
+ * the circle is fine and the image can be added from settings, and navigation
+ * happens either way. Uploading first would only move the same problem —
+ * orphaned GCS objects for an abandoned form — while risking exactly the lie.
+ *
+ * A URL is never dropped silently: an upload that succeeds is either attached
+ * by step 3 or reported by the note.
  */
 export function CreateCircleForm() {
   const t = useTranslations('circles');
@@ -65,23 +91,84 @@ export function CreateCircleForm() {
    */
   const [discoverable, setDiscoverable] = useState(true);
   const [joinMode, setJoinMode] = useState<CircleJoinMode>('REQUEST');
+  /*
+   * Spans all three submit steps, not just the `createCircle` round trip, so
+   * the button stays busy while images upload. Apollo's own `loading` would go
+   * false the moment step 1 returned and re-arm the form mid-flight.
+   */
+  const [submitting, setSubmitting] = useState(false);
 
-  const [createCircle, { loading }] = useMutation<CreateCircleData>(
-    CREATE_CIRCLE,
-    {
-      onCompleted: (data) => {
-        const circle = data?.createCircle;
-        if (!circle?.id) return;
-        toast.success(t('create.success'));
-        router.push(`/circles/${circle.id}`);
-      },
-      onError: () => toast.error(t('create.error')),
-    },
-  );
+  /*
+   * Both pickers only hold a local data URL until submit — nothing is uploaded
+   * from an abandoned form.
+   *
+   * The avatar goes through the cropper: it is displayed as a circle, and
+   * `CircularImageCropper` is fixed at `aspect={1}` with a circular canvas
+   * mask, which is exactly right for that and exactly wrong for a wide banner.
+   * The banner therefore sets `skipCrop` and keeps the frame the user chose,
+   * resized to 1600px rather than the avatar's 512.
+   */
+  const avatar = useImageUpload({ category: 'community_avatar' });
+  const banner = useImageUpload({
+    category: 'cover',
+    maxDimension: 1600,
+    skipCrop: true,
+  });
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const [createCircle] = useMutation<CreateCircleData>(CREATE_CIRCLE);
+  const [updateCircleProfile] =
+    useMutation<UpdateCircleProfileData>(UPDATE_CIRCLE_PROFILE);
+
+  /**
+   * Steps 2 and 3, run after the circle exists. Never throws — the circle is
+   * already saved, so nothing in here may reach the form's error path.
+   *
+   * Returns false when anything the user chose did not end up on the circle,
+   * which is the signal to show the non-blocking note instead of plain success.
+   */
+  const attachImagery = async (circleId: string): Promise<boolean> => {
+    const wantsAvatar = Boolean(avatar.croppedImage);
+    const wantsBanner = Boolean(banner.croppedImage);
+    if (!wantsAvatar && !wantsBanner) return true;
+
+    /*
+     * `uploadImage` resolves to null on failure rather than rejecting, so one
+     * broken upload cannot discard the other's URL — a URL that reached GCS is
+     * always either attached below or reported to the user, never dropped.
+     */
+    const [avatarUrl, bannerUrl] = await Promise.all([
+      wantsAvatar ? avatar.uploadImage() : Promise.resolve(null),
+      wantsBanner ? banner.uploadImage() : Promise.resolve(null),
+    ]);
+
+    const uploadsComplete =
+      (!wantsAvatar || Boolean(avatarUrl)) &&
+      (!wantsBanner || Boolean(bannerUrl));
+
+    if (!avatarUrl && !bannerUrl) return false;
+
+    try {
+      // Omitted means unchanged, so a half-successful pair still attaches the
+      // half that worked instead of blanking the other.
+      await updateCircleProfile({
+        variables: {
+          input: {
+            circleId,
+            ...(avatarUrl ? { avatarUrl } : {}),
+            ...(bannerUrl ? { bannerUrl } : {}),
+          },
+        },
+      });
+    } catch {
+      return false;
+    }
+
+    return uploadsComplete;
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (loading) return;
+    if (submitting) return;
 
     const trimmed = name.trim();
     if (!trimmed) {
@@ -90,19 +177,45 @@ export function CreateCircleForm() {
     }
     setNameError(undefined);
 
-    void createCircle({
-      variables: {
-        input: {
-          name: trimmed,
-          discoverable,
-          joinMode,
+    setSubmitting(true);
+    try {
+      // Step 1. The ONLY step whose failure means "your circle was not created".
+      const { data } = await createCircle({
+        variables: {
+          input: {
+            name: trimmed,
+            discoverable,
+            joinMode,
+          },
         },
-      },
-    });
+      });
+
+      const circle = data?.createCircle;
+      if (!circle?.id) throw new Error('createCircle returned no circle');
+
+      // Steps 2–3. From here the circle exists no matter what happens.
+      const imageryAttached = await attachImagery(circle.id);
+
+      if (imageryAttached) {
+        toast.success(t('create.success'));
+      } else {
+        toast.message(t('create.imageFailed'));
+      }
+
+      router.push(`/circles/${circle.id}`);
+    } catch {
+      toast.error(t('create.error'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form
+      onSubmit={(event) => void handleSubmit(event)}
+      noValidate
+      className="space-y-6"
+    >
       <TextInput
         id="circle-name"
         label={t('create.nameLabel')}
@@ -116,7 +229,36 @@ export function CreateCircleForm() {
         errorMessage={nameError}
       />
 
-      <CircleBannerField />
+      <CircleImageField
+        variant="avatar"
+        name={name}
+        preview={avatar.croppedImage}
+        disabled={submitting}
+        onSelect={avatar.handleFileSelect}
+        onClear={avatar.reset}
+      />
+
+      {/*
+       * Mounted only while there is something to crop: the dialog owns its own
+       * `open`, and `rawImage` is cleared on both confirm and cancel.
+       */}
+      {avatar.rawImage && (
+        <CircularImageCropper
+          open={avatar.showCropper}
+          src={avatar.rawImage}
+          onCancel={avatar.handleCropCancel}
+          onConfirm={avatar.handleCropConfirm}
+        />
+      )}
+
+      <CircleImageField
+        variant="banner"
+        name={name}
+        preview={banner.croppedImage}
+        disabled={submitting}
+        onSelect={banner.handleFileSelect}
+        onClear={banner.reset}
+      />
 
       <fieldset className="space-y-3">
         <legend id={discoverabilityLabelId} className="label-medium text-text-primary">
@@ -178,8 +320,13 @@ export function CreateCircleForm() {
         {t('create.note')}
       </p>
 
-      <ButtonType2 type="submit" size="lg" className="w-full" disabled={loading}>
-        {loading ? t('create.submitting') : t('create.submit')}
+      <ButtonType2
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={submitting}
+      >
+        {submitting ? t('create.submitting') : t('create.submit')}
       </ButtonType2>
     </form>
   );

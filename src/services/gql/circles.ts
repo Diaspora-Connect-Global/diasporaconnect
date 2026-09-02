@@ -804,6 +804,29 @@ export const CREATE_CIRCLE = gql`
   ${CIRCLE_SUMMARY_FRAGMENT}
 `;
 
+/**
+ * Edit a circle's profile — LEAD only (`assertCircleLead` in the gateway).
+ *
+ * This is the ONLY way to attach an avatar or a banner. `CreateCircleInput`
+ * carries neither, and cannot: `CreateCircleRequest` in the frozen
+ * `circle.proto` has no `avatar_url` / `banner_url` field, so a value added to
+ * the create mutation would be accepted by GraphQL and dropped by
+ * circle-service. Creation and imagery are therefore two calls, in that order —
+ * the circle id does not exist until the first one returns, and its founder is
+ * a LEAD from that moment, so the gate passes immediately.
+ *
+ * Every field but `circleId` is optional and omitted-means-unchanged. Sending
+ * `bannerUrl` alone leaves the avatar, name and handle exactly as they were.
+ */
+export const UPDATE_CIRCLE_PROFILE = gql`
+  mutation UpdateCircleProfile($input: UpdateCircleProfileInput!) {
+    updateCircleProfile(input: $input) {
+      ...CircleSummaryFields
+    }
+  }
+  ${CIRCLE_SUMMARY_FRAGMENT}
+`;
+
 /** Ask to join a REQUEST-mode circle. */
 export const REQUEST_TO_JOIN_CIRCLE = gql`
   mutation RequestToJoinCircle($circleId: ID!, $note: String) {

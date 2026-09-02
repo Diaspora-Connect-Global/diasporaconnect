@@ -2764,7 +2764,12 @@
         "approvalLabel": "Aanvraag + goedkeuring",
         "approvalDescription": "Mensen vragen aan en worden goedgekeurd."
       },
-      "bannerComingSoon": "Banner uploaden komt binnenkort"
+      "avatarLabel": "Profielfoto",
+      "avatarCta": "Profielfoto toevoegen",
+      "avatarHint": "Vierkante afbeelding, minimaal 256 x 256",
+      "avatarChange": "Foto wijzigen",
+      "avatarRemove": "Foto verwijderen",
+      "imageFailed": "Kring aangemaakt — we konden de afbeelding niet toevoegen. Je kunt deze via de instellingen toevoegen."
     },
     "home": {
       "tabChat": "Chat",

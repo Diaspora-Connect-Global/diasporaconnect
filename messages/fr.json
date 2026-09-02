@@ -2764,7 +2764,12 @@
         "approvalLabel": "Demande + approbation",
         "approvalDescription": "Les gens font une demande et sont approuvés."
       },
-      "bannerComingSoon": "L’ajout de bannière arrive bientôt"
+      "avatarLabel": "Photo de profil",
+      "avatarCta": "Ajouter une photo de profil",
+      "avatarHint": "Image carrée, au moins 256 x 256",
+      "avatarChange": "Changer la photo",
+      "avatarRemove": "Supprimer la photo",
+      "imageFailed": "Cercle créé — nous n'avons pas pu joindre l'image. Vous pouvez l'ajouter depuis les paramètres."
     },
     "home": {
       "tabChat": "Chat",

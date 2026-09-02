@@ -751,6 +751,31 @@ export interface CreateCircleInput {
   idempotencyKey?: string | null;
 }
 
+/**
+ * LEAD-only profile edit, and the only carrier for `avatarUrl` / `bannerUrl` —
+ * `CreateCircleInput` has neither, because `CreateCircleRequest` in the frozen
+ * proto has neither.
+ *
+ * Every field except `circleId` is omitted-means-unchanged, so a caller that
+ * only has a banner sends only a banner.
+ */
+export interface UpdateCircleProfileInput {
+  circleId: string;
+  name?: string | null;
+  tagline?: string | null;
+  description?: string | null;
+  handle?: string | null;
+  /** Public URL from `getUploadUrl`, category `community_avatar`. */
+  avatarUrl?: string | null;
+  /** Public URL from `getUploadUrl`, category `cover`. */
+  bannerUrl?: string | null;
+  /**
+   * Requires the CUSTOM_BRANDING entitlement, enforced by circle-service. On a
+   * plan without it the value is kept and suppressed on read, never nulled.
+   */
+  brandJson?: string | null;
+}
+
 export interface InviteToCircleInput {
   circleId: string;
   /** For an existing platform user. */
@@ -974,6 +999,10 @@ export interface CreateCircleData {
   createCircle: Circle;
 }
 
+export interface UpdateCircleProfileData {
+  updateCircleProfile: Circle;
+}
+
 export interface RequestToJoinCircleData {
   requestToJoinCircle: CircleJoinRequest;
 }
@@ -1176,6 +1205,10 @@ export interface CirclePlansVariables {
 
 export interface CreateCircleVariables {
   input: CreateCircleInput;
+}
+
+export interface UpdateCircleProfileVariables {
+  input: UpdateCircleProfileInput;
 }
 
 export interface RequestToJoinCircleVariables {

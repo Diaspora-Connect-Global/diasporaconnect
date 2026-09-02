@@ -200,14 +200,12 @@ function SidebarLists() {
     const [openSections, setOpenSections] = useState({
         associations: true,
         groupChats: true,
-        circles: false,
         events: false,
         opportunities: false
     });
 
     const tPrivacy = useTranslations('privacy');
     const t = useTranslations('home');
-    const tHeader = useTranslations('home.header');
     const tActions = useTranslations('actions');
     const userId = useUserStore(state => state.user?.userId);
 
@@ -377,15 +375,6 @@ function SidebarLists() {
                     )}
                 </div>
             </Section>
-
-            {/* Circles Section */}
-            <Section
-                title={tHeader('circles')}
-                isOpen={openSections.circles}
-                onToggle={() => toggleSection('circles')}
-                image='/CIRCLES.svg'
-                link="/circles"
-            />
 
             {/* Events Section */}
             <Section

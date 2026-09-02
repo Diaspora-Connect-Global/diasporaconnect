@@ -2764,7 +2764,12 @@
         "approvalLabel": "Richiesta + approvazione",
         "approvalDescription": "Le persone fanno richiesta e vengono approvate."
       },
-      "bannerComingSoon": "Il caricamento del banner arriverà presto"
+      "avatarLabel": "Immagine del profilo",
+      "avatarCta": "Aggiungi un'immagine del profilo",
+      "avatarHint": "Immagine quadrata, almeno 256 x 256",
+      "avatarChange": "Cambia immagine",
+      "avatarRemove": "Rimuovi immagine",
+      "imageFailed": "Cerchia creata — non siamo riusciti ad allegare l'immagine. Puoi aggiungerla dalle impostazioni."
     },
     "home": {
       "tabChat": "Chat",

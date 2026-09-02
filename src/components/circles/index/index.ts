@@ -4,7 +4,10 @@
  */
 
 export { CirclePills, type CirclePillsProps } from './CirclePills';
-export { CircleBannerField } from './CircleBannerField';
+export {
+  CircleImageField,
+  type CircleImageFieldProps,
+} from './CircleBannerField';
 export {
   CircleAvatar,
   CircleBanner,
