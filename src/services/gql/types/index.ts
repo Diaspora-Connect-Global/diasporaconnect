@@ -53,3 +53,6 @@ export * from './marketplace';
 
 // Recommendation service types (feed ranking, interactions)
 export * from './recommendation';
+
+// Circles types (circle governance, projects, challenges, leaderboard, entitlements)
+export * from './circles';

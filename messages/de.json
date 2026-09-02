@@ -444,6 +444,7 @@
     "header": {
       "home": "Startseite",
       "community": "Community",
+      "circles": "Kreise",
       "marketplace": "Marktplatz",
       "post": "Beitrag",
       "chat": "Chat",
@@ -2685,6 +2686,305 @@
     },
     "media": {
       "imageUnavailable": "Bild nicht verfügbar"
+    }
+  },
+  "circles": {
+    "common": {
+      "circle": "Kreis",
+      "circles": "Kreise",
+      "memberCount": "{count, plural, =1 {1 Mitglied} other {# Mitglieder}}",
+      "lead": "Leitung",
+      "you": "Du",
+      "proposedBy": "Vorgeschlagen von {name}",
+      "startedBy": "Gestartet von {name}",
+      "joinedOn": "Beigetreten am {date}",
+      "seeAll": "Alle ansehen",
+      "active": "Aktiv",
+      "today": "Heute",
+      "loading": "Wird geladen...",
+      "retry": "Erneut versuchen",
+      "cancel": "Abbrechen",
+      "moreOptions": "Weitere Optionen",
+      "back": "Zurück"
+    },
+    "index": {
+      "title": "Meine Kreise",
+      "searchPlaceholder": "Kreise suchen",
+      "discoverTitle": "Kreise entdecken",
+      "createCta": "Kreis erstellen",
+      "join": "Beitreten",
+      "joining": "Beitritt läuft...",
+      "joined": "Beigetreten",
+      "requestAccess": "Zugang anfragen",
+      "requestSent": "Anfrage gesendet",
+      "unreadLabel": "{count, plural, =1 {1 ungelesene Nachricht} other {# ungelesene Nachrichten}}",
+      "access": {
+        "apply": "Offen • Alle können sich bewerben",
+        "invite": "Beitritt auf Einladung",
+        "approval": "Anfrage und Zustimmung"
+      },
+      "pills": {
+        "voteCloses": "Abstimmung endet {time}",
+        "noOpenVotes": "Keine offenen Abstimmungen",
+        "goal": "Ziel {percent} %",
+        "project": "Projekt",
+        "projectProgress": "Projekt {percent} %",
+        "challengeLive": "Challenge läuft"
+      }
+    },
+    "create": {
+      "title": "Kreis erstellen",
+      "subtitle": "Ein Kreis ist dein Raum. Halte ihn einfach.",
+      "nameLabel": "Name des Kreises",
+      "namePlaceholder": "z. B. Familie zuerst",
+      "nameRequired": "Gib deinem Kreis einen Namen.",
+      "bannerLabel": "Banner",
+      "bannerCta": "Banner hinzufügen",
+      "bannerHint": "Empfohlen 1200 x 400",
+      "bannerChange": "Banner ändern",
+      "bannerRemove": "Banner entfernen",
+      "note": "Entscheidungen trifft die Gruppe. Wie genau, kannst du später ändern.",
+      "submit": "Kreis erstellen",
+      "submitting": "Wird erstellt...",
+      "success": "Dein Kreis ist bereit.",
+      "error": "Wir konnten deinen Kreis nicht erstellen. Bitte versuche es erneut.",
+      "discoverability": {
+        "question": "1. Kann man diesen Kreis finden?",
+        "help": "Damit legst du fest, ob dein Kreis unter „Entdecken“ erscheint.",
+        "discoverable": "Ja, auffindbar machen",
+        "hidden": "Nein, verborgen halten"
+      },
+      "access": {
+        "question": "2. Wie kommt man hinein?",
+        "help": "Wähle, wie neue Mitglieder beitreten können.",
+        "applyLabel": "Alle können sich bewerben",
+        "applyDescription": "Andere können den Beitritt anfragen.",
+        "inviteLabel": "Nur mit Einladung",
+        "inviteDescription": "Nur eingeladene Personen können beitreten.",
+        "approvalLabel": "Anfrage + Zustimmung",
+        "approvalDescription": "Andere fragen an und werden bestätigt."
+      },
+      "bannerComingSoon": "Banner-Upload kommt bald"
+    },
+    "home": {
+      "tabChat": "Chat",
+      "tabMembers": "Mitglieder",
+      "pinnedPrefix": "Angepinnt:",
+      "composerPlaceholder": "Nachricht an {circleName} ...",
+      "send": "Senden",
+      "attach": "Zum Gespräch hinzufügen",
+      "addReaction": "Reaktion hinzufügen",
+      "cards": {
+        "projectLabel": "Projekt • Vorgeschlagen von {name}",
+        "motionLabel": "Antrag • Vorgeschlagen von {name}",
+        "challengeLabel": "Challenge • Gestartet von {name}",
+        "viewProject": "Projekt ansehen",
+        "viewMotion": "Antrag ansehen",
+        "viewChallenge": "Challenge ansehen",
+        "contributions": "{count, plural, =1 {1 Beitrag} other {# Beiträge}}",
+        "joined": "{count, plural, =1 {1 macht mit} other {# machen mit}}",
+        "daysLeft": "{days, plural, =1 {noch 1 Tag} other {noch # Tage}}",
+        "quorum": "Quorum: {voted} von {required}",
+        "tallyYes": "{count} Ja",
+        "tallyNo": "{count} Nein",
+        "tallyPending": "{count} Ausstehend",
+        "closes": "Endet {time}"
+      }
+    },
+    "motion": {
+      "title": "Antragsdetails",
+      "number": "Antrag Nr. {number}",
+      "voteTitle": "Abstimmen",
+      "voteYes": "Ja",
+      "voteNo": "Nein",
+      "voteAbstain": "Enthaltung",
+      "voteRecorded": "Deine Stimme ist gezählt.",
+      "tallyTitle": "Zwischenstand",
+      "tallyYes": "Ja",
+      "tallyNo": "Nein",
+      "tallyPending": "Ausstehend",
+      "quorumTitle": "Quorum-Fortschritt",
+      "quorumProgress": "{voted} von {required} erforderlich",
+      "timeTitle": "Verbleibende Zeit",
+      "closes": "Endet {time}",
+      "timeLeft": "noch {days} T {hours} Std.",
+      "detailsTitle": "Details",
+      "opened": "Eröffnet",
+      "electorate": "Stimmberechtigte",
+      "electorateValue": "{count, plural, =1 {1 Mitglied} other {# Mitglieder}}",
+      "decisionRule": "Entscheidungsregel",
+      "decisionRuleValue": "{n}/{d}-Mehrheit",
+      "quorumRule": "Quorum-Regel",
+      "quorumRuleValue": "{required} von {total}",
+      "viewDiscussion": "Diskussion ansehen",
+      "messageCount": "{count, plural, =1 {1 Nachricht} other {# Nachrichten}}",
+      "status": {
+        "open": "Offen",
+        "passed": "Angenommen",
+        "failed": "Abgelehnt",
+        "closed": "Geschlossen",
+        "withdrawn": "Zurückgezogen"
+      },
+      "callout": {
+        "failNotice": "Wenn bis {deadline} weniger als {required} von {total} abstimmen, ändert sich nichts.",
+        "silence": "Schweigen ist keine Zustimmung."
+      },
+      "notElector": "Du bist beigetreten, nachdem dieser Antrag eröffnet wurde, und gehörst daher nicht zu den Stimmberechtigten."
+    },
+    "project": {
+      "title": "Projekt",
+      "progressTitle": "Gesamtfortschritt",
+      "progressAmount": "{current} von {target}",
+      "contributionsTitle": "Beiträge",
+      "contributionCount": "{count, plural, =1 {1 Beitrag} other {# Beiträge}}",
+      "contribute": "Beitragen",
+      "contributing": "Wird übertragen...",
+      "contributeHint": "Mit einem Tippen kannst du auch direkt aus dem Chat beitragen.",
+      "contributeSuccess": "Danke — dein Beitrag ist angekommen."
+    },
+    "challenge": {
+      "title": "Challenge",
+      "verificationTitle": "Prüfmodus (gesperrt)",
+      "lockNote": "Sobald eine Challenge startet, ist der Prüfmodus gesperrt.",
+      "progressTitle": "Fortschritt",
+      "joined": "{count, plural, =1 {1 macht mit} other {# machen mit}}",
+      "daysLeft": "{days, plural, =1 {noch 1 Tag} other {noch # Tage}}",
+      "endsOn": "Endet am {date}",
+      "aboutTitle": "Über diese Challenge",
+      "join": "Ich bin dabei!",
+      "joining": "Wird eingetragen...",
+      "alreadyJoined": "Du bist dabei",
+      "leave": "Challenge verlassen",
+      "verification": {
+        "trustLabel": "Allen vertrauen",
+        "trustDescription": "Wir vertrauen einander, dass wir es ehrlich schaffen.",
+        "leadLabel": "Leitung bestätigt",
+        "leadDescription": "Die Leitung des Kreises bestätigt jede Erledigung.",
+        "voteLabel": "Der Kreis stimmt ab",
+        "voteDescription": "Der Kreis stimmt über jede Erledigung ab."
+      }
+    },
+    "members": {
+      "title": "Mitglieder",
+      "countTitle": "Mitglieder ({count})",
+      "searchPlaceholder": "Mitglieder suchen",
+      "lead": "Leitung",
+      "you": "Du",
+      "joinedOn": "Beigetreten am {date}",
+      "noResults": "Keine Mitglieder passen zu „{query}“.",
+      "invite": {
+        "title": "In den Kreis einladen",
+        "description": "Teile einen Link oder lade jemanden einzeln ein.",
+        "copyLink": "Link kopieren",
+        "linkCopied": "Link kopiert",
+        "invitePerson": "Jemanden einladen"
+      },
+      "actions": {
+        "viewProfile": "Profil ansehen",
+        "message": "Nachricht senden",
+        "makeLead": "Zur Leitung machen",
+        "remove": "Aus dem Kreis entfernen"
+      }
+    },
+    "leaderboard": {
+      "title": "Bestenliste",
+      "modeRanked": "Rangliste",
+      "modeCollective": "Kollektiv",
+      "collectiveTitle": "Unser gemeinsamer Fortschritt",
+      "points": "{points} Pkt.",
+      "builtTogether": "Gemeinsam aufgebaut",
+      "membersContributing": "{count, plural, =1 {1 Mitglied trägt bei} other {# Mitglieder tragen bei}}",
+      "breakdownTitle": "Aufschlüsselung der Beiträge",
+      "collectiveNote": "Im Kollektiv-Modus gewinnen wir gemeinsam."
+    },
+    "time": {
+      "daysHoursLeft": "noch {days} T {hours} Std.",
+      "hoursMinutesLeft": "noch {hours} Std. {minutes} Min.",
+      "daysLeft": "{count, plural, =1 {noch 1 Tag} other {noch # Tage}}",
+      "closesAt": "Endet {weekday} {time}",
+      "lastDay": "Letzter Tag",
+      "closed": "Geschlossen",
+      "ended": "Beendet",
+      "minutesLeft": "noch {minutes} Min."
+    },
+    "entitlements": {
+      "memberLimit": {
+        "title": "Du bist über deinem Mitglieder-Limit",
+        "body": "Du hast {current} Mitglieder. Dein Tarif umfasst {limit}. Niemand wird entfernt — du kannst nur niemanden Neues hinzufügen, bis die Mitgliederzahl wieder unter {limit} liegt.",
+        "cta": "Tarife ansehen"
+      },
+      "branding": {
+        "title": "Deine eigenen Farben pausieren",
+        "body": "Deine eigenen Farben sind gespeichert und kommen zurück, wenn du den Tarif wechselst. Dein Kreis behält vorerst das Standard-Design.",
+        "cta": "Tarife ansehen"
+      },
+      "circleLimit": {
+        "title": "Du hast alle deine Kreise angelegt",
+        "body": "Du hast {current} von {limit} Kreisen in deinem Tarif erstellt. Alle Kreise laufen genau wie bisher weiter — du kannst nur keinen neuen starten, bis einer archiviert ist oder sich dein Tarif ändert.",
+        "cta": "Tarife ansehen"
+      }
+    },
+    "empty": {
+      "circles": {
+        "title": "Noch keine Kreise",
+        "description": "Ein Kreis ist ein kleiner, privater Raum, in dem ein paar Leute gemeinsam entscheiden. Erstelle einen oder tritt einem Kreis bei, zu dem du eingeladen wurdest.",
+        "cta": "Kreis erstellen"
+      },
+      "discover": {
+        "title": "Noch nichts zu entdecken",
+        "description": "Es gibt gerade keine offenen Kreise zum Beitreten. Starte deinen eigenen und lade die Leute ein, die dabei sein sollen.",
+        "cta": "Kreis erstellen"
+      },
+      "motions": {
+        "title": "Keine offenen Anträge",
+        "description": "Sobald jemand etwas zur Entscheidung vorschlägt, erscheint es hier."
+      },
+      "projects": {
+        "title": "Noch keine Projekte",
+        "description": "Mit Projekten baut ein Kreis gemeinsam etwas auf. Schlage eines direkt aus dem Chat vor."
+      },
+      "challenges": {
+        "title": "Noch keine Challenges",
+        "description": "Challenges sind kleine Ziele, die ihr gemeinsam angeht. Starte eine und sieh, wer mitmacht."
+      },
+      "contributions": {
+        "title": "Noch keine Beiträge",
+        "description": "Sei die erste Person, die beiträgt — jeder Beitrag erscheint hier."
+      },
+      "messages": {
+        "title": "Noch keine Nachrichten",
+        "description": "Sag Hallo — hier redet, entscheidet und arbeitet dein Kreis."
+      },
+      "leaderboard": {
+        "title": "Noch nichts in der Wertung",
+        "description": "Punkte erscheinen, sobald Leute zu Projekten und Challenges beitragen."
+      }
+    },
+    "errors": {
+      "loadCircles": "Wir konnten deine Kreise nicht laden. Bitte versuche es erneut.",
+      "loadCircle": "Wir konnten diesen Kreis nicht laden. Bitte versuche es erneut.",
+      "loadMotion": "Wir konnten diesen Antrag nicht laden. Bitte versuche es erneut.",
+      "loadProject": "Wir konnten dieses Projekt nicht laden. Bitte versuche es erneut.",
+      "loadChallenge": "Wir konnten diese Challenge nicht laden. Bitte versuche es erneut.",
+      "loadMembers": "Wir konnten die Mitgliederliste nicht laden. Bitte versuche es erneut.",
+      "loadLeaderboard": "Wir konnten die Bestenliste nicht laden. Bitte versuche es erneut.",
+      "vote": "Deine Stimme wurde nicht gezählt. Bitte versuche es erneut.",
+      "alreadyVoted": "Du hast über diesen Antrag bereits abgestimmt.",
+      "votingClosed": "Die Abstimmung über diesen Antrag ist beendet.",
+      "join": "Wir konnten dich diesem Kreis nicht hinzufügen. Bitte versuche es erneut.",
+      "contribute": "Dein Beitrag ist nicht angekommen. Bitte versuche es erneut.",
+      "generic": "Wir konnten das nicht laden. Bitte versuche es erneut.",
+      "notFound": {
+        "title": "Kreis nicht gefunden",
+        "description": "Dieser Kreis wurde möglicherweise archiviert oder der Link ist nicht mehr gültig.",
+        "cta": "Zurück zu den Kreisen"
+      },
+      "noAccess": {
+        "title": "Dieser Kreis ist privat",
+        "description": "Nur Mitglieder sehen, was drinnen passiert. Frage nach Zugang — der Kreis entscheidet.",
+        "cta": "Zugang anfragen"
+      },
+      "joinChallenge": "Wir konnten dich nicht zu dieser Challenge hinzufügen"
     }
   }
 }
