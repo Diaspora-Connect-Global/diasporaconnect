@@ -445,6 +445,7 @@
     "header": {
       "home": "Startpagina",
       "community": "Gemeenschap",
+      "circles": "Kringen",
       "marketplace": "Marktplaats",
       "post": "Plaatsen",
       "chat": "Chat",
@@ -2685,6 +2686,305 @@
     },
     "media": {
       "imageUnavailable": "Afbeelding niet beschikbaar"
+    }
+  },
+  "circles": {
+    "common": {
+      "circle": "Kring",
+      "circles": "Kringen",
+      "memberCount": "{count, plural, =1 {1 lid} other {# leden}}",
+      "lead": "Leider",
+      "you": "Jij",
+      "proposedBy": "Voorgesteld door {name}",
+      "startedBy": "Gestart door {name}",
+      "joinedOn": "Lid sinds {date}",
+      "seeAll": "Alles bekijken",
+      "active": "Actief",
+      "today": "Vandaag",
+      "loading": "Laden...",
+      "retry": "Opnieuw proberen",
+      "cancel": "Annuleren",
+      "moreOptions": "Meer opties",
+      "back": "Terug"
+    },
+    "index": {
+      "title": "Mijn kringen",
+      "searchPlaceholder": "Kringen zoeken",
+      "discoverTitle": "Kringen ontdekken",
+      "createCta": "Kring maken",
+      "join": "Deelnemen",
+      "joining": "Deelnemen...",
+      "joined": "Deelgenomen",
+      "requestAccess": "Toegang aanvragen",
+      "requestSent": "Aanvraag verstuurd",
+      "unreadLabel": "{count, plural, =1 {1 ongelezen bericht} other {# ongelezen berichten}}",
+      "access": {
+        "apply": "Open • Iedereen kan zich aanmelden",
+        "invite": "Deelname op uitnodiging",
+        "approval": "Aanvraag en goedkeuring"
+      },
+      "pills": {
+        "voteCloses": "Stemming sluit {time}",
+        "noOpenVotes": "Geen open stemmingen",
+        "goal": "Doel {percent}%",
+        "project": "Project",
+        "projectProgress": "Project {percent}%",
+        "challengeLive": "Challenge loopt"
+      }
+    },
+    "create": {
+      "title": "Kring maken",
+      "subtitle": "Een kring is jouw ruimte. Hou het simpel.",
+      "nameLabel": "Naam van de kring",
+      "namePlaceholder": "bijv. Familie eerst",
+      "nameRequired": "Geef je kring een naam.",
+      "bannerLabel": "Banner",
+      "bannerCta": "Banner toevoegen",
+      "bannerHint": "Aanbevolen 1200 x 400",
+      "bannerChange": "Banner wijzigen",
+      "bannerRemove": "Banner verwijderen",
+      "note": "Beslissingen neemt de groep. Hoe dat gebeurt, kun je later aanpassen.",
+      "submit": "Kring maken",
+      "submitting": "Aanmaken...",
+      "success": "Je kring is klaar.",
+      "error": "We konden je kring niet aanmaken. Probeer het opnieuw.",
+      "discoverability": {
+        "question": "1. Kunnen mensen deze kring vinden?",
+        "help": "Dit bepaalt of je kring bij Ontdekken verschijnt.",
+        "discoverable": "Ja, maak hem vindbaar",
+        "hidden": "Nee, hou hem verborgen"
+      },
+      "access": {
+        "question": "2. Hoe komen mensen binnen?",
+        "help": "Kies hoe nieuwe leden kunnen deelnemen.",
+        "applyLabel": "Iedereen kan zich aanmelden",
+        "applyDescription": "Mensen kunnen deelname aanvragen.",
+        "inviteLabel": "Alleen op uitnodiging",
+        "inviteDescription": "Alleen uitgenodigde mensen kunnen deelnemen.",
+        "approvalLabel": "Aanvraag + goedkeuring",
+        "approvalDescription": "Mensen vragen aan en worden goedgekeurd."
+      },
+      "bannerComingSoon": "Banner uploaden komt binnenkort"
+    },
+    "home": {
+      "tabChat": "Chat",
+      "tabMembers": "Leden",
+      "pinnedPrefix": "Vastgezet:",
+      "composerPlaceholder": "Bericht aan {circleName}...",
+      "send": "Versturen",
+      "attach": "Aan het gesprek toevoegen",
+      "addReaction": "Reactie toevoegen",
+      "cards": {
+        "projectLabel": "Project • Voorgesteld door {name}",
+        "motionLabel": "Motie • Voorgesteld door {name}",
+        "challengeLabel": "Challenge • Gestart door {name}",
+        "viewProject": "Bekijk het project",
+        "viewMotion": "Bekijk de motie",
+        "viewChallenge": "Bekijk de challenge",
+        "contributions": "{count, plural, =1 {1 bijdrage} other {# bijdragen}}",
+        "joined": "{count, plural, =1 {1 deelnemer} other {# deelnemers}}",
+        "daysLeft": "{days, plural, =1 {nog 1 dag} other {nog # dagen}}",
+        "quorum": "Quorum: {voted} van {required}",
+        "tallyYes": "{count} Voor",
+        "tallyNo": "{count} Tegen",
+        "tallyPending": "{count} In afwachting",
+        "closes": "Sluit {time}"
+      }
+    },
+    "motion": {
+      "title": "Motiedetails",
+      "number": "Motie #{number}",
+      "voteTitle": "Stemmen",
+      "voteYes": "Voor",
+      "voteNo": "Tegen",
+      "voteAbstain": "Onthouding",
+      "voteRecorded": "Je stem is geteld.",
+      "tallyTitle": "Tussenstand",
+      "tallyYes": "Voor",
+      "tallyNo": "Tegen",
+      "tallyPending": "In afwachting",
+      "quorumTitle": "Quorumvoortgang",
+      "quorumProgress": "{voted} van {required} vereist",
+      "timeTitle": "Resterende tijd",
+      "closes": "Sluit {time}",
+      "timeLeft": "nog {days} d {hours} u",
+      "detailsTitle": "Details",
+      "opened": "Geopend",
+      "electorate": "Stemgerechtigden",
+      "electorateValue": "{count, plural, =1 {1 lid} other {# leden}}",
+      "decisionRule": "Besluitregel",
+      "decisionRuleValue": "{n}/{d} meerderheid",
+      "quorumRule": "Quorumregel",
+      "quorumRuleValue": "{required} van {total}",
+      "viewDiscussion": "Discussie bekijken",
+      "messageCount": "{count, plural, =1 {1 bericht} other {# berichten}}",
+      "status": {
+        "open": "Open",
+        "passed": "Aangenomen",
+        "failed": "Afgewezen",
+        "closed": "Gesloten",
+        "withdrawn": "Ingetrokken"
+      },
+      "callout": {
+        "failNotice": "Als er vóór {deadline} minder dan {required} van de {total} stemmen, verandert er niets.",
+        "silence": "Zwijgen is nooit instemming."
+      },
+      "notElector": "Je bent lid geworden nadat deze motie werd geopend en hoort daarom niet bij de stemgerechtigden."
+    },
+    "project": {
+      "title": "Project",
+      "progressTitle": "Totale voortgang",
+      "progressAmount": "{current} van {target}",
+      "contributionsTitle": "Bijdragen",
+      "contributionCount": "{count, plural, =1 {1 bijdrage} other {# bijdragen}}",
+      "contribute": "Bijdragen",
+      "contributing": "Bezig met bijdragen...",
+      "contributeHint": "Met één tik draag je ook vanuit de chat bij.",
+      "contributeSuccess": "Bedankt — je bijdrage is binnen."
+    },
+    "challenge": {
+      "title": "Challenge",
+      "verificationTitle": "Verificatiemodus (vergrendeld)",
+      "lockNote": "Zodra een challenge start, ligt de verificatiemodus vast.",
+      "progressTitle": "Voortgang",
+      "joined": "{count, plural, =1 {1 deelnemer} other {# deelnemers}}",
+      "daysLeft": "{days, plural, =1 {nog 1 dag} other {nog # dagen}}",
+      "endsOn": "Eindigt op {date}",
+      "aboutTitle": "Over deze challenge",
+      "join": "Ik doe mee!",
+      "joining": "Aanmelden...",
+      "alreadyJoined": "Je doet mee",
+      "leave": "Challenge verlaten",
+      "verification": {
+        "trustLabel": "Iedereen vertrouwen",
+        "trustDescription": "We vertrouwen elkaar dat we het eerlijk afmaken.",
+        "leadLabel": "Leider bevestigt",
+        "leadDescription": "De leider van de kring bevestigt elke voltooiing.",
+        "voteLabel": "De kring stemt",
+        "voteDescription": "De kring stemt over elke voltooiing."
+      }
+    },
+    "members": {
+      "title": "Leden",
+      "countTitle": "Leden ({count})",
+      "searchPlaceholder": "Leden zoeken",
+      "lead": "Leider",
+      "you": "Jij",
+      "joinedOn": "Lid sinds {date}",
+      "noResults": "Geen leden gevonden voor ‘{query}’.",
+      "invite": {
+        "title": "Uitnodigen voor de kring",
+        "description": "Deel een link of nodig iemand persoonlijk uit.",
+        "copyLink": "Link kopiëren",
+        "linkCopied": "Link gekopieerd",
+        "invitePerson": "Iemand uitnodigen"
+      },
+      "actions": {
+        "viewProfile": "Profiel bekijken",
+        "message": "Bericht sturen",
+        "makeLead": "Tot leider maken",
+        "remove": "Uit de kring verwijderen"
+      }
+    },
+    "leaderboard": {
+      "title": "Ranglijst",
+      "modeRanked": "Individueel",
+      "modeCollective": "Collectief",
+      "collectiveTitle": "Onze gezamenlijke voortgang",
+      "points": "{points} ptn",
+      "builtTogether": "Samen opgebouwd",
+      "membersContributing": "{count, plural, =1 {1 lid draagt bij} other {# leden dragen bij}}",
+      "breakdownTitle": "Verdeling van bijdragen",
+      "collectiveNote": "In collectieve modus winnen we samen."
+    },
+    "time": {
+      "daysHoursLeft": "nog {days} d {hours} u",
+      "hoursMinutesLeft": "nog {hours} u {minutes} min",
+      "daysLeft": "{count, plural, =1 {nog 1 dag} other {nog # dagen}}",
+      "closesAt": "Sluit {weekday} om {time}",
+      "lastDay": "Laatste dag",
+      "closed": "Gesloten",
+      "ended": "Beëindigd",
+      "minutesLeft": "nog {minutes} min."
+    },
+    "entitlements": {
+      "memberLimit": {
+        "title": "Je zit boven je ledenlimiet",
+        "body": "Je hebt {current} leden. Je abonnement dekt er {limit}. Er wordt niemand verwijderd — je kunt er alleen geen nieuwe bij tot je weer onder {limit} zit.",
+        "cta": "Abonnementen bekijken"
+      },
+      "branding": {
+        "title": "Je eigen kleuren staan even uit",
+        "body": "Je eigen kleuren zijn bewaard en komen terug als je van abonnement wisselt. Je kring houdt voorlopig het standaarduiterlijk.",
+        "cta": "Abonnementen bekijken"
+      },
+      "circleLimit": {
+        "title": "Je hebt al je kringen gebruikt",
+        "body": "Je hebt {current} van de {limit} kringen in je abonnement gemaakt. Alle kringen blijven gewoon werken zoals nu — je kunt alleen geen nieuwe starten tot er een is gearchiveerd of je abonnement verandert.",
+        "cta": "Abonnementen bekijken"
+      }
+    },
+    "empty": {
+      "circles": {
+        "title": "Nog geen kringen",
+        "description": "Een kring is een kleine, besloten ruimte waar een paar mensen samen beslissen. Maak er een, of sluit je aan bij een kring waarvoor je bent uitgenodigd.",
+        "cta": "Kring maken"
+      },
+      "discover": {
+        "title": "Nog niets te ontdekken",
+        "description": "Er zijn nu geen open kringen om aan deel te nemen. Begin je eigen kring en nodig de mensen uit die je erbij wilt.",
+        "cta": "Kring maken"
+      },
+      "motions": {
+        "title": "Geen open moties",
+        "description": "Zodra iemand iets voorstelt om over te beslissen, verschijnt het hier."
+      },
+      "projects": {
+        "title": "Nog geen projecten",
+        "description": "Met projecten bouwt een kring samen iets op. Stel er een voor vanuit de chat."
+      },
+      "challenges": {
+        "title": "Nog geen challenges",
+        "description": "Challenges zijn kleine doelen die je samen aangaat. Start er een en kijk wie meedoet."
+      },
+      "contributions": {
+        "title": "Nog geen bijdragen",
+        "description": "Wees de eerste die meedoet — elke bijdrage verschijnt hier."
+      },
+      "messages": {
+        "title": "Nog geen berichten",
+        "description": "Zeg even hallo — hier praat, beslist en werkt je kring."
+      },
+      "leaderboard": {
+        "title": "Nog niets op de ranglijst",
+        "description": "Punten verschijnen zodra mensen bijdragen aan projecten en challenges."
+      }
+    },
+    "errors": {
+      "loadCircles": "We konden je kringen niet laden. Probeer het opnieuw.",
+      "loadCircle": "We konden deze kring niet laden. Probeer het opnieuw.",
+      "loadMotion": "We konden deze motie niet laden. Probeer het opnieuw.",
+      "loadProject": "We konden dit project niet laden. Probeer het opnieuw.",
+      "loadChallenge": "We konden deze challenge niet laden. Probeer het opnieuw.",
+      "loadMembers": "We konden de ledenlijst niet laden. Probeer het opnieuw.",
+      "loadLeaderboard": "We konden de ranglijst niet laden. Probeer het opnieuw.",
+      "vote": "Je stem is niet doorgekomen. Probeer het opnieuw.",
+      "alreadyVoted": "Je hebt al over deze motie gestemd.",
+      "votingClosed": "De stemming over deze motie is gesloten.",
+      "join": "We konden je niet aan deze kring toevoegen. Probeer het opnieuw.",
+      "contribute": "Je bijdrage is niet doorgekomen. Probeer het opnieuw.",
+      "generic": "We konden dit niet laden. Probeer het opnieuw.",
+      "notFound": {
+        "title": "Kring niet gevonden",
+        "description": "Deze kring is misschien gearchiveerd, of de link is niet meer geldig.",
+        "cta": "Terug naar kringen"
+      },
+      "noAccess": {
+        "title": "Deze kring is besloten",
+        "description": "Alleen leden zien wat er binnen gebeurt. Vraag toegang aan, dan beslist de kring.",
+        "cta": "Toegang aanvragen"
+      },
+      "joinChallenge": "We konden je niet aan deze challenge toevoegen"
     }
   }
 }

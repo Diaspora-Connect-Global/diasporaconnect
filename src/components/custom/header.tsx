@@ -54,6 +54,7 @@ export default function Header({
     { name: t('home'), href: `/${currentLocale}/home`, icon: "/HOME", prefetch: false },
     // prefetch: false avoids "preloaded but not used" console warning for this route's CSS
     { name: t('community'), href: `/${currentLocale}/community`, icon: "/COMMUNITY", prefetch: false },
+    { name: t('circles'), href: `/${currentLocale}/circles`, icon: "/CIRCLES", prefetch: false },
     { name: t('post'), href: `/${currentLocale}/create-post`, icon: "/POST", disabled: true },
     { name: t('chat'), href: `/${currentLocale}/chat`, icon: "/CHAT", disabled: true },
     { name: t('notification'), href: `/${currentLocale}/notification`, icon: "/NOTIFICATION", prefetch: false },

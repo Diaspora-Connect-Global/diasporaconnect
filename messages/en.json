@@ -445,6 +445,7 @@
     "header": {
       "home": "Home",
       "community": "Community",
+      "circles": "Circles",
       "marketplace": "Marketplace",
       "post": "Post",
       "chat": "Chat",
@@ -2685,6 +2686,305 @@
     },
     "media": {
       "imageUnavailable": "Image unavailable"
+    }
+  },
+  "circles": {
+    "common": {
+      "circle": "Circle",
+      "circles": "Circles",
+      "memberCount": "{count, plural, =1 {1 member} other {# members}}",
+      "lead": "Lead",
+      "you": "You",
+      "proposedBy": "Proposed by {name}",
+      "startedBy": "Started by {name}",
+      "joinedOn": "Joined {date}",
+      "seeAll": "See all",
+      "active": "Active",
+      "today": "Today",
+      "loading": "Loading...",
+      "retry": "Try again",
+      "cancel": "Cancel",
+      "moreOptions": "More options",
+      "back": "Back"
+    },
+    "index": {
+      "title": "My Circles",
+      "searchPlaceholder": "Search circles",
+      "discoverTitle": "Discover Circles",
+      "createCta": "Create a Circle",
+      "join": "Join",
+      "joining": "Joining...",
+      "joined": "Joined",
+      "requestAccess": "Request Access",
+      "requestSent": "Request sent",
+      "unreadLabel": "{count, plural, =1 {1 unread message} other {# unread messages}}",
+      "access": {
+        "apply": "Open • Anyone can apply",
+        "invite": "Invite to join",
+        "approval": "Request and approval"
+      },
+      "pills": {
+        "voteCloses": "Vote closes {time}",
+        "noOpenVotes": "No open votes",
+        "goal": "Goal {percent}%",
+        "project": "Project",
+        "projectProgress": "Project {percent}%",
+        "challengeLive": "Challenge Live"
+      }
+    },
+    "create": {
+      "title": "Create a Circle",
+      "subtitle": "A circle is your space. Keep it simple.",
+      "nameLabel": "Circle name",
+      "namePlaceholder": "e.g. Family First",
+      "nameRequired": "Give your circle a name.",
+      "bannerLabel": "Banner",
+      "bannerCta": "Add a banner",
+      "bannerHint": "Recommended 1200 x 400",
+      "bannerChange": "Change banner",
+      "bannerRemove": "Remove banner",
+      "note": "Decisions are made by the group. You can change how, later.",
+      "submit": "Create Circle",
+      "submitting": "Creating...",
+      "success": "Your circle is ready.",
+      "error": "We couldn't create your circle. Please try again.",
+      "discoverability": {
+        "question": "1. Can people find this circle?",
+        "help": "This controls if your circle appears in Discover.",
+        "discoverable": "Yes, make it discoverable",
+        "hidden": "No, keep it hidden"
+      },
+      "access": {
+        "question": "2. How do people get in?",
+        "help": "Choose how new members can join.",
+        "applyLabel": "Anyone can apply",
+        "applyDescription": "People can request to join.",
+        "inviteLabel": "Invite only",
+        "inviteDescription": "Only invited people can join.",
+        "approvalLabel": "Request + approval",
+        "approvalDescription": "People request and are approved."
+      },
+      "bannerComingSoon": "Banner upload is coming soon"
+    },
+    "home": {
+      "tabChat": "Chat",
+      "tabMembers": "Members",
+      "pinnedPrefix": "Pinned:",
+      "composerPlaceholder": "Message {circleName}...",
+      "send": "Send",
+      "attach": "Add to the conversation",
+      "addReaction": "Add reaction",
+      "cards": {
+        "projectLabel": "Project • Proposed by {name}",
+        "motionLabel": "Motion • Proposed by {name}",
+        "challengeLabel": "Challenge • Started by {name}",
+        "viewProject": "View project",
+        "viewMotion": "View motion",
+        "viewChallenge": "View challenge",
+        "contributions": "{count, plural, =1 {1 contribution} other {# contributions}}",
+        "joined": "{count, plural, =1 {1 joined} other {# joined}}",
+        "daysLeft": "{days, plural, =1 {1 day left} other {# days left}}",
+        "quorum": "Quorum: {voted} of {required}",
+        "tallyYes": "{count} Yes",
+        "tallyNo": "{count} No",
+        "tallyPending": "{count} Pending",
+        "closes": "Closes {time}"
+      }
+    },
+    "motion": {
+      "title": "Motion details",
+      "number": "Motion #{number}",
+      "voteTitle": "Vote",
+      "voteYes": "Yes",
+      "voteNo": "No",
+      "voteAbstain": "Abstain",
+      "voteRecorded": "Your vote is in.",
+      "tallyTitle": "Tally so far",
+      "tallyYes": "Yes",
+      "tallyNo": "No",
+      "tallyPending": "Pending",
+      "quorumTitle": "Quorum progress",
+      "quorumProgress": "{voted} of {required} required",
+      "timeTitle": "Time remaining",
+      "closes": "Closes {time}",
+      "timeLeft": "{days}d {hours}h left",
+      "detailsTitle": "Details",
+      "opened": "Opened",
+      "electorate": "Electorate",
+      "electorateValue": "{count, plural, =1 {1 member} other {# members}}",
+      "decisionRule": "Decision rule",
+      "decisionRuleValue": "{n}/{d} majority",
+      "quorumRule": "Quorum rule",
+      "quorumRuleValue": "{required} of {total}",
+      "viewDiscussion": "View discussion",
+      "messageCount": "{count, plural, =1 {1 message} other {# messages}}",
+      "status": {
+        "open": "Open",
+        "passed": "Passed",
+        "failed": "Failed",
+        "closed": "Closed",
+        "withdrawn": "Withdrawn"
+      },
+      "callout": {
+        "failNotice": "If fewer than {required} of {total} vote by {deadline}, nothing changes.",
+        "silence": "Silence is never consent."
+      },
+      "notElector": "You joined after this motion opened, so you're not among its voters."
+    },
+    "project": {
+      "title": "Project",
+      "progressTitle": "Overall progress",
+      "progressAmount": "{current} of {target}",
+      "contributionsTitle": "Contributions",
+      "contributionCount": "{count, plural, =1 {1 contribution} other {# contributions}}",
+      "contribute": "Contribute",
+      "contributing": "Contributing...",
+      "contributeHint": "One tap to contribute from chat.",
+      "contributeSuccess": "Thanks — your contribution is in."
+    },
+    "challenge": {
+      "title": "Challenge",
+      "verificationTitle": "Verification mode (locked)",
+      "lockNote": "Once a challenge starts, the verification mode is locked.",
+      "progressTitle": "Progress",
+      "joined": "{count, plural, =1 {1 joined} other {# joined}}",
+      "daysLeft": "{days, plural, =1 {1 day left} other {# days left}}",
+      "endsOn": "Ends {date}",
+      "aboutTitle": "About this challenge",
+      "join": "I'm in!",
+      "joining": "Joining...",
+      "alreadyJoined": "You're in",
+      "leave": "Leave challenge",
+      "verification": {
+        "trustLabel": "Trust everyone",
+        "trustDescription": "We trust each other to complete it honestly.",
+        "leadLabel": "Lead confirms",
+        "leadDescription": "The circle lead confirms each completion.",
+        "voteLabel": "Circle votes",
+        "voteDescription": "The circle votes to confirm each completion."
+      }
+    },
+    "members": {
+      "title": "Members",
+      "countTitle": "Members ({count})",
+      "searchPlaceholder": "Search members",
+      "lead": "Lead",
+      "you": "You",
+      "joinedOn": "Joined {date}",
+      "noResults": "No members match “{query}”.",
+      "invite": {
+        "title": "Invite to circle",
+        "description": "Share a link or invite someone individually.",
+        "copyLink": "Copy link",
+        "linkCopied": "Link copied",
+        "invitePerson": "Invite someone"
+      },
+      "actions": {
+        "viewProfile": "View profile",
+        "message": "Send a message",
+        "makeLead": "Make lead",
+        "remove": "Remove from circle"
+      }
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "modeRanked": "Ranked",
+      "modeCollective": "Collective",
+      "collectiveTitle": "Our collective progress",
+      "points": "{points} pts",
+      "builtTogether": "Built together",
+      "membersContributing": "{count, plural, =1 {1 member contributing} other {# members contributing}}",
+      "breakdownTitle": "Contribution breakdown",
+      "collectiveNote": "In collective mode, we win together."
+    },
+    "time": {
+      "daysHoursLeft": "{days}d {hours}h left",
+      "hoursMinutesLeft": "{hours}h {minutes}m left",
+      "daysLeft": "{count, plural, =1 {1 day left} other {# days left}}",
+      "closesAt": "Closes {weekday} {time}",
+      "lastDay": "Last day",
+      "closed": "Closed",
+      "ended": "Ended",
+      "minutesLeft": "{minutes}m left"
+    },
+    "entitlements": {
+      "memberLimit": {
+        "title": "You're over your member limit",
+        "body": "You have {current} members. Your plan covers {limit}. Nobody is removed — you just can't add anyone new until you're under {limit}.",
+        "cta": "See plans"
+      },
+      "branding": {
+        "title": "Your custom colours are paused",
+        "body": "Your custom colours are saved and come back if you change plan. Your circle keeps the standard look for now.",
+        "cta": "See plans"
+      },
+      "circleLimit": {
+        "title": "You've used all your circles",
+        "body": "You've created {current} of {limit} circles on your plan. Every circle keeps working exactly as it does today — you just can't start a new one until one is archived or your plan changes.",
+        "cta": "See plans"
+      }
+    },
+    "empty": {
+      "circles": {
+        "title": "No circles yet",
+        "description": "A circle is a small, private space where a few people decide things together. Create one, or join a circle you're invited to.",
+        "cta": "Create a Circle"
+      },
+      "discover": {
+        "title": "Nothing to discover yet",
+        "description": "There are no open circles to join right now. Start your own and invite the people you want in it.",
+        "cta": "Create a Circle"
+      },
+      "motions": {
+        "title": "No open motions",
+        "description": "When someone proposes something for the circle to decide, it appears here."
+      },
+      "projects": {
+        "title": "No projects yet",
+        "description": "Projects are how a circle builds something together. Propose one straight from the chat."
+      },
+      "challenges": {
+        "title": "No challenges yet",
+        "description": "Challenges are small goals you take on together. Start one and see who's in."
+      },
+      "contributions": {
+        "title": "No contributions yet",
+        "description": "Be the first to chip in — every contribution shows up here."
+      },
+      "messages": {
+        "title": "No messages yet",
+        "description": "Say hello — this is where your circle talks, decides and gets things done."
+      },
+      "leaderboard": {
+        "title": "Nothing on the board yet",
+        "description": "Points appear once people start contributing to projects and challenges."
+      }
+    },
+    "errors": {
+      "loadCircles": "We couldn't load your circles. Please try again.",
+      "loadCircle": "We couldn't load this circle. Please try again.",
+      "loadMotion": "We couldn't load this motion. Please try again.",
+      "loadProject": "We couldn't load this project. Please try again.",
+      "loadChallenge": "We couldn't load this challenge. Please try again.",
+      "loadMembers": "We couldn't load the member list. Please try again.",
+      "loadLeaderboard": "We couldn't load the leaderboard. Please try again.",
+      "vote": "Your vote didn't go through. Please try again.",
+      "alreadyVoted": "You've already voted on this motion.",
+      "votingClosed": "Voting on this motion has closed.",
+      "join": "We couldn't add you to this circle. Please try again.",
+      "contribute": "Your contribution didn't go through. Please try again.",
+      "generic": "We couldn't load this. Please try again.",
+      "notFound": {
+        "title": "Circle not found",
+        "description": "This circle may have been archived, or the link is no longer valid.",
+        "cta": "Back to Circles"
+      },
+      "noAccess": {
+        "title": "This circle is private",
+        "description": "Only members can see what happens inside. Ask for access and the circle will decide.",
+        "cta": "Request Access"
+      },
+      "joinChallenge": "We couldn't add you to this challenge"
     }
   }
 }

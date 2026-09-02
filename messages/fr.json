@@ -444,6 +444,7 @@
     "header": {
       "home": "Accueil",
       "community": "Communauté",
+      "circles": "Cercles",
       "marketplace": "Marketplace",
       "post": "Publier",
       "chat": "Chat",
@@ -2685,6 +2686,305 @@
     },
     "media": {
       "imageUnavailable": "Image indisponible"
+    }
+  },
+  "circles": {
+    "common": {
+      "circle": "Cercle",
+      "circles": "Cercles",
+      "memberCount": "{count, plural, =1 {1 membre} other {# membres}}",
+      "lead": "Responsable",
+      "you": "Vous",
+      "proposedBy": "Proposé par {name}",
+      "startedBy": "Lancé par {name}",
+      "joinedOn": "A rejoint le {date}",
+      "seeAll": "Tout voir",
+      "active": "Actif",
+      "today": "Aujourd'hui",
+      "loading": "Chargement...",
+      "retry": "Réessayer",
+      "cancel": "Annuler",
+      "moreOptions": "Plus d'options",
+      "back": "Retour"
+    },
+    "index": {
+      "title": "Mes cercles",
+      "searchPlaceholder": "Rechercher des cercles",
+      "discoverTitle": "Découvrir des cercles",
+      "createCta": "Créer un cercle",
+      "join": "Rejoindre",
+      "joining": "Adhésion...",
+      "joined": "Rejoint",
+      "requestAccess": "Demander l'accès",
+      "requestSent": "Demande envoyée",
+      "unreadLabel": "{count, plural, =1 {1 message non lu} other {# messages non lus}}",
+      "access": {
+        "apply": "Ouvert • Tout le monde peut postuler",
+        "invite": "Adhésion sur invitation",
+        "approval": "Demande et approbation"
+      },
+      "pills": {
+        "voteCloses": "Fin du vote {time}",
+        "noOpenVotes": "Aucun vote en cours",
+        "goal": "Objectif {percent} %",
+        "project": "Projet",
+        "projectProgress": "Projet {percent} %",
+        "challengeLive": "Défi en cours"
+      }
+    },
+    "create": {
+      "title": "Créer un cercle",
+      "subtitle": "Un cercle, c'est votre espace. Restez simple.",
+      "nameLabel": "Nom du cercle",
+      "namePlaceholder": "ex. La famille d'abord",
+      "nameRequired": "Donnez un nom à votre cercle.",
+      "bannerLabel": "Bannière",
+      "bannerCta": "Ajouter une bannière",
+      "bannerHint": "Recommandé 1200 x 400",
+      "bannerChange": "Changer la bannière",
+      "bannerRemove": "Supprimer la bannière",
+      "note": "Les décisions sont prises par le groupe. Vous pourrez changer la façon plus tard.",
+      "submit": "Créer le cercle",
+      "submitting": "Création...",
+      "success": "Votre cercle est prêt.",
+      "error": "Nous n'avons pas pu créer votre cercle. Veuillez réessayer.",
+      "discoverability": {
+        "question": "1. Peut-on trouver ce cercle ?",
+        "help": "Cela détermine si votre cercle apparaît dans « Découvrir ».",
+        "discoverable": "Oui, le rendre visible",
+        "hidden": "Non, le garder masqué"
+      },
+      "access": {
+        "question": "2. Comment entre-t-on ?",
+        "help": "Choisissez comment les nouveaux membres peuvent rejoindre.",
+        "applyLabel": "Tout le monde peut postuler",
+        "applyDescription": "Les gens peuvent demander à rejoindre.",
+        "inviteLabel": "Sur invitation uniquement",
+        "inviteDescription": "Seules les personnes invitées peuvent rejoindre.",
+        "approvalLabel": "Demande + approbation",
+        "approvalDescription": "Les gens font une demande et sont approuvés."
+      },
+      "bannerComingSoon": "L’ajout de bannière arrive bientôt"
+    },
+    "home": {
+      "tabChat": "Chat",
+      "tabMembers": "Membres",
+      "pinnedPrefix": "Épinglé :",
+      "composerPlaceholder": "Message à {circleName}...",
+      "send": "Envoyer",
+      "attach": "Ajouter à la conversation",
+      "addReaction": "Ajouter une réaction",
+      "cards": {
+        "projectLabel": "Projet • Proposé par {name}",
+        "motionLabel": "Motion • Proposée par {name}",
+        "challengeLabel": "Défi • Lancé par {name}",
+        "viewProject": "Voir le projet",
+        "viewMotion": "Voir la motion",
+        "viewChallenge": "Voir le défi",
+        "contributions": "{count, plural, =1 {1 contribution} other {# contributions}}",
+        "joined": "{count, plural, =1 {1 participant} other {# participants}}",
+        "daysLeft": "{days, plural, =1 {1 jour restant} other {# jours restants}}",
+        "quorum": "Quorum : {voted} sur {required}",
+        "tallyYes": "{count} Pour",
+        "tallyNo": "{count} Contre",
+        "tallyPending": "{count} En attente",
+        "closes": "Clôture {time}"
+      }
+    },
+    "motion": {
+      "title": "Détails de la motion",
+      "number": "Motion n° {number}",
+      "voteTitle": "Voter",
+      "voteYes": "Pour",
+      "voteNo": "Contre",
+      "voteAbstain": "Abstention",
+      "voteRecorded": "Votre vote est enregistré.",
+      "tallyTitle": "Décompte actuel",
+      "tallyYes": "Pour",
+      "tallyNo": "Contre",
+      "tallyPending": "En attente",
+      "quorumTitle": "Progression du quorum",
+      "quorumProgress": "{voted} sur {required} requis",
+      "timeTitle": "Temps restant",
+      "closes": "Clôture {time}",
+      "timeLeft": "{days} j {hours} h restantes",
+      "detailsTitle": "Détails",
+      "opened": "Ouverte le",
+      "electorate": "Électeurs",
+      "electorateValue": "{count, plural, =1 {1 membre} other {# membres}}",
+      "decisionRule": "Règle de décision",
+      "decisionRuleValue": "Majorité des {n}/{d}",
+      "quorumRule": "Règle de quorum",
+      "quorumRuleValue": "{required} sur {total}",
+      "viewDiscussion": "Voir la discussion",
+      "messageCount": "{count, plural, =1 {1 message} other {# messages}}",
+      "status": {
+        "open": "Ouverte",
+        "passed": "Adoptée",
+        "failed": "Rejetée",
+        "closed": "Close",
+        "withdrawn": "Retirée"
+      },
+      "callout": {
+        "failNotice": "Si moins de {required} membres sur {total} votent d'ici {deadline}, rien ne change.",
+        "silence": "Le silence ne vaut jamais consentement."
+      },
+      "notElector": "Vous avez rejoint le cercle après l’ouverture de cette motion : vous ne faites pas partie des électeurs."
+    },
+    "project": {
+      "title": "Projet",
+      "progressTitle": "Progression globale",
+      "progressAmount": "{current} sur {target}",
+      "contributionsTitle": "Contributions",
+      "contributionCount": "{count, plural, =1 {1 contribution} other {# contributions}}",
+      "contribute": "Contribuer",
+      "contributing": "Contribution en cours...",
+      "contributeHint": "Un seul geste pour contribuer depuis le chat.",
+      "contributeSuccess": "Merci — votre contribution est enregistrée."
+    },
+    "challenge": {
+      "title": "Défi",
+      "verificationTitle": "Mode de vérification (verrouillé)",
+      "lockNote": "Une fois le défi lancé, le mode de vérification est verrouillé.",
+      "progressTitle": "Progression",
+      "joined": "{count, plural, =1 {1 participant} other {# participants}}",
+      "daysLeft": "{days, plural, =1 {1 jour restant} other {# jours restants}}",
+      "endsOn": "Se termine le {date}",
+      "aboutTitle": "À propos de ce défi",
+      "join": "Je participe !",
+      "joining": "Inscription...",
+      "alreadyJoined": "Vous participez",
+      "leave": "Quitter le défi",
+      "verification": {
+        "trustLabel": "Confiance à tous",
+        "trustDescription": "Nous nous faisons confiance pour aller au bout honnêtement.",
+        "leadLabel": "Le responsable confirme",
+        "leadDescription": "Le responsable du cercle confirme chaque réalisation.",
+        "voteLabel": "Le cercle vote",
+        "voteDescription": "Le cercle vote pour confirmer chaque réalisation."
+      }
+    },
+    "members": {
+      "title": "Membres",
+      "countTitle": "Membres ({count})",
+      "searchPlaceholder": "Rechercher des membres",
+      "lead": "Responsable",
+      "you": "Vous",
+      "joinedOn": "A rejoint le {date}",
+      "noResults": "Aucun membre ne correspond à « {query} ».",
+      "invite": {
+        "title": "Inviter dans le cercle",
+        "description": "Partagez un lien ou invitez quelqu'un individuellement.",
+        "copyLink": "Copier le lien",
+        "linkCopied": "Lien copié",
+        "invitePerson": "Inviter quelqu'un"
+      },
+      "actions": {
+        "viewProfile": "Voir le profil",
+        "message": "Envoyer un message",
+        "makeLead": "Nommer responsable",
+        "remove": "Retirer du cercle"
+      }
+    },
+    "leaderboard": {
+      "title": "Classement",
+      "modeRanked": "Individuel",
+      "modeCollective": "Collectif",
+      "collectiveTitle": "Notre progression collective",
+      "points": "{points} pts",
+      "builtTogether": "Construit ensemble",
+      "membersContributing": "{count, plural, =1 {1 membre contribue} other {# membres contribuent}}",
+      "breakdownTitle": "Détail des contributions",
+      "collectiveNote": "En mode collectif, on gagne ensemble."
+    },
+    "time": {
+      "daysHoursLeft": "{days} j {hours} h restantes",
+      "hoursMinutesLeft": "{hours} h {minutes} min restantes",
+      "daysLeft": "{count, plural, =1 {1 jour restant} other {# jours restants}}",
+      "closesAt": "Clôture {weekday} à {time}",
+      "lastDay": "Dernier jour",
+      "closed": "Clôturé",
+      "ended": "Terminé",
+      "minutesLeft": "{minutes} min restantes"
+    },
+    "entitlements": {
+      "memberLimit": {
+        "title": "Vous dépassez votre limite de membres",
+        "body": "Vous avez {current} membres. Votre formule en couvre {limit}. Personne n'est retiré — vous ne pouvez simplement plus en ajouter tant que vous n'êtes pas repassé sous {limit}.",
+        "cta": "Voir les formules"
+      },
+      "branding": {
+        "title": "Vos couleurs personnalisées sont en pause",
+        "body": "Vos couleurs personnalisées sont enregistrées et reviendront si vous changez de formule. Votre cercle garde l'apparence standard pour le moment.",
+        "cta": "Voir les formules"
+      },
+      "circleLimit": {
+        "title": "Vous avez utilisé tous vos cercles",
+        "body": "Vous avez créé {current} cercles sur les {limit} de votre formule. Tous vos cercles continuent de fonctionner comme aujourd'hui — vous ne pouvez simplement pas en créer un nouveau tant qu'aucun n'est archivé ou que votre formule ne change.",
+        "cta": "Voir les formules"
+      }
+    },
+    "empty": {
+      "circles": {
+        "title": "Aucun cercle pour l'instant",
+        "description": "Un cercle est un petit espace privé où quelques personnes décident ensemble. Créez-en un, ou rejoignez un cercle auquel vous êtes invité.",
+        "cta": "Créer un cercle"
+      },
+      "discover": {
+        "title": "Rien à découvrir pour l'instant",
+        "description": "Aucun cercle ouvert n'est disponible pour le moment. Créez le vôtre et invitez les personnes que vous voulez.",
+        "cta": "Créer un cercle"
+      },
+      "motions": {
+        "title": "Aucune motion en cours",
+        "description": "Dès que quelqu'un propose quelque chose à décider, cela apparaît ici."
+      },
+      "projects": {
+        "title": "Aucun projet pour l'instant",
+        "description": "Les projets permettent au cercle de construire quelque chose ensemble. Proposez-en un directement depuis le chat."
+      },
+      "challenges": {
+        "title": "Aucun défi pour l'instant",
+        "description": "Les défis sont de petits objectifs que vous relevez ensemble. Lancez-en un et voyez qui participe."
+      },
+      "contributions": {
+        "title": "Aucune contribution pour l'instant",
+        "description": "Soyez le premier à participer — chaque contribution apparaît ici."
+      },
+      "messages": {
+        "title": "Aucun message pour l'instant",
+        "description": "Dites bonjour — c'est ici que votre cercle échange, décide et avance."
+      },
+      "leaderboard": {
+        "title": "Rien au classement pour l'instant",
+        "description": "Les points apparaissent dès que les membres contribuent aux projets et aux défis."
+      }
+    },
+    "errors": {
+      "loadCircles": "Nous n'avons pas pu charger vos cercles. Veuillez réessayer.",
+      "loadCircle": "Nous n'avons pas pu charger ce cercle. Veuillez réessayer.",
+      "loadMotion": "Nous n'avons pas pu charger cette motion. Veuillez réessayer.",
+      "loadProject": "Nous n'avons pas pu charger ce projet. Veuillez réessayer.",
+      "loadChallenge": "Nous n'avons pas pu charger ce défi. Veuillez réessayer.",
+      "loadMembers": "Nous n'avons pas pu charger la liste des membres. Veuillez réessayer.",
+      "loadLeaderboard": "Nous n'avons pas pu charger le classement. Veuillez réessayer.",
+      "vote": "Votre vote n'a pas été enregistré. Veuillez réessayer.",
+      "alreadyVoted": "Vous avez déjà voté sur cette motion.",
+      "votingClosed": "Le vote sur cette motion est terminé.",
+      "join": "Nous n'avons pas pu vous ajouter à ce cercle. Veuillez réessayer.",
+      "contribute": "Votre contribution n'a pas abouti. Veuillez réessayer.",
+      "generic": "Nous n'avons pas pu charger cela. Veuillez réessayer.",
+      "notFound": {
+        "title": "Cercle introuvable",
+        "description": "Ce cercle a peut-être été archivé, ou le lien n'est plus valide.",
+        "cta": "Retour aux cercles"
+      },
+      "noAccess": {
+        "title": "Ce cercle est privé",
+        "description": "Seuls les membres voient ce qui s'y passe. Demandez l'accès et le cercle décidera.",
+        "cta": "Demander l'accès"
+      },
+      "joinChallenge": "Nous n’avons pas pu vous ajouter à ce défi"
     }
   }
 }

@@ -444,6 +444,7 @@
     "header": {
       "home": "Home",
       "community": "Community",
+      "circles": "Cerchie",
       "marketplace": "Marketplace",
       "post": "Pubblica",
       "chat": "Chat",
@@ -2685,6 +2686,305 @@
     },
     "media": {
       "imageUnavailable": "Immagine non disponibile"
+    }
+  },
+  "circles": {
+    "common": {
+      "circle": "Cerchia",
+      "circles": "Cerchie",
+      "memberCount": "{count, plural, =1 {1 membro} other {# membri}}",
+      "lead": "Referente",
+      "you": "Tu",
+      "proposedBy": "Proposto da {name}",
+      "startedBy": "Avviata da {name}",
+      "joinedOn": "Iscritto il {date}",
+      "seeAll": "Vedi tutte",
+      "active": "Attiva",
+      "today": "Oggi",
+      "loading": "Caricamento...",
+      "retry": "Riprova",
+      "cancel": "Annulla",
+      "moreOptions": "Altre opzioni",
+      "back": "Indietro"
+    },
+    "index": {
+      "title": "Le mie cerchie",
+      "searchPlaceholder": "Cerca cerchie",
+      "discoverTitle": "Scopri cerchie",
+      "createCta": "Crea una cerchia",
+      "join": "Unisciti",
+      "joining": "Adesione in corso...",
+      "joined": "Iscritto",
+      "requestAccess": "Richiedi accesso",
+      "requestSent": "Richiesta inviata",
+      "unreadLabel": "{count, plural, =1 {1 messaggio non letto} other {# messaggi non letti}}",
+      "access": {
+        "apply": "Aperta • Tutti possono candidarsi",
+        "invite": "Ingresso su invito",
+        "approval": "Richiesta e approvazione"
+      },
+      "pills": {
+        "voteCloses": "Fine voto {time}",
+        "noOpenVotes": "Nessun voto aperto",
+        "goal": "Obiettivo {percent}%",
+        "project": "Progetto",
+        "projectProgress": "Progetto {percent}%",
+        "challengeLive": "Sfida in corso"
+      }
+    },
+    "create": {
+      "title": "Crea una cerchia",
+      "subtitle": "Una cerchia è il tuo spazio. Mantienila semplice.",
+      "nameLabel": "Nome della cerchia",
+      "namePlaceholder": "es. La famiglia prima di tutto",
+      "nameRequired": "Dai un nome alla tua cerchia.",
+      "bannerLabel": "Banner",
+      "bannerCta": "Aggiungi un banner",
+      "bannerHint": "Consigliato 1200 x 400",
+      "bannerChange": "Cambia banner",
+      "bannerRemove": "Rimuovi banner",
+      "note": "Le decisioni le prende il gruppo. Il come lo puoi cambiare più tardi.",
+      "submit": "Crea la cerchia",
+      "submitting": "Creazione...",
+      "success": "La tua cerchia è pronta.",
+      "error": "Non siamo riusciti a creare la tua cerchia. Riprova.",
+      "discoverability": {
+        "question": "1. Le persone possono trovare questa cerchia?",
+        "help": "Questo determina se la tua cerchia compare in «Scopri».",
+        "discoverable": "Sì, rendila visibile",
+        "hidden": "No, tienila nascosta"
+      },
+      "access": {
+        "question": "2. Come si entra?",
+        "help": "Scegli come possono entrare i nuovi membri.",
+        "applyLabel": "Tutti possono candidarsi",
+        "applyDescription": "Le persone possono chiedere di entrare.",
+        "inviteLabel": "Solo su invito",
+        "inviteDescription": "Possono entrare solo le persone invitate.",
+        "approvalLabel": "Richiesta + approvazione",
+        "approvalDescription": "Le persone fanno richiesta e vengono approvate."
+      },
+      "bannerComingSoon": "Il caricamento del banner arriverà presto"
+    },
+    "home": {
+      "tabChat": "Chat",
+      "tabMembers": "Membri",
+      "pinnedPrefix": "In evidenza:",
+      "composerPlaceholder": "Scrivi a {circleName}...",
+      "send": "Invia",
+      "attach": "Aggiungi alla conversazione",
+      "addReaction": "Aggiungi una reazione",
+      "cards": {
+        "projectLabel": "Progetto • Proposto da {name}",
+        "motionLabel": "Mozione • Proposta da {name}",
+        "challengeLabel": "Sfida • Avviata da {name}",
+        "viewProject": "Vedi il progetto",
+        "viewMotion": "Vedi la mozione",
+        "viewChallenge": "Vedi la sfida",
+        "contributions": "{count, plural, =1 {1 contributo} other {# contributi}}",
+        "joined": "{count, plural, =1 {1 partecipante} other {# partecipanti}}",
+        "daysLeft": "{days, plural, =1 {1 giorno rimasto} other {# giorni rimasti}}",
+        "quorum": "Quorum: {voted} su {required}",
+        "tallyYes": "{count} Sì",
+        "tallyNo": "{count} No",
+        "tallyPending": "{count} In attesa",
+        "closes": "Chiude {time}"
+      }
+    },
+    "motion": {
+      "title": "Dettagli della mozione",
+      "number": "Mozione n. {number}",
+      "voteTitle": "Vota",
+      "voteYes": "Sì",
+      "voteNo": "No",
+      "voteAbstain": "Astensione",
+      "voteRecorded": "Il tuo voto è stato registrato.",
+      "tallyTitle": "Conteggio attuale",
+      "tallyYes": "Sì",
+      "tallyNo": "No",
+      "tallyPending": "In attesa",
+      "quorumTitle": "Progresso del quorum",
+      "quorumProgress": "{voted} su {required} richiesti",
+      "timeTitle": "Tempo rimanente",
+      "closes": "Chiude {time}",
+      "timeLeft": "{days} g {hours} h rimaste",
+      "detailsTitle": "Dettagli",
+      "opened": "Aperta il",
+      "electorate": "Aventi diritto",
+      "electorateValue": "{count, plural, =1 {1 membro} other {# membri}}",
+      "decisionRule": "Regola di decisione",
+      "decisionRuleValue": "Maggioranza di {n}/{d}",
+      "quorumRule": "Regola di quorum",
+      "quorumRuleValue": "{required} su {total}",
+      "viewDiscussion": "Vedi la discussione",
+      "messageCount": "{count, plural, =1 {1 messaggio} other {# messaggi}}",
+      "status": {
+        "open": "Aperta",
+        "passed": "Approvata",
+        "failed": "Respinta",
+        "closed": "Chiusa",
+        "withdrawn": "Ritirata"
+      },
+      "callout": {
+        "failNotice": "Se entro {deadline} votano meno di {required} membri su {total}, non cambia nulla.",
+        "silence": "Il silenzio non è mai consenso."
+      },
+      "notElector": "Ti sei unito dopo l’apertura di questa mozione, quindi non sei tra gli aventi diritto."
+    },
+    "project": {
+      "title": "Progetto",
+      "progressTitle": "Avanzamento complessivo",
+      "progressAmount": "{current} su {target}",
+      "contributionsTitle": "Contributi",
+      "contributionCount": "{count, plural, =1 {1 contributo} other {# contributi}}",
+      "contribute": "Contribuisci",
+      "contributing": "Contributo in corso...",
+      "contributeHint": "Basta un tocco per contribuire dalla chat.",
+      "contributeSuccess": "Grazie — il tuo contributo è stato registrato."
+    },
+    "challenge": {
+      "title": "Sfida",
+      "verificationTitle": "Modalità di verifica (bloccata)",
+      "lockNote": "Una volta avviata la sfida, la modalità di verifica è bloccata.",
+      "progressTitle": "Avanzamento",
+      "joined": "{count, plural, =1 {1 partecipante} other {# partecipanti}}",
+      "daysLeft": "{days, plural, =1 {1 giorno rimasto} other {# giorni rimasti}}",
+      "endsOn": "Termina il {date}",
+      "aboutTitle": "Informazioni sulla sfida",
+      "join": "Ci sto!",
+      "joining": "Adesione in corso...",
+      "alreadyJoined": "Ci sei",
+      "leave": "Abbandona la sfida",
+      "verification": {
+        "trustLabel": "Fiducia reciproca",
+        "trustDescription": "Ci fidiamo l'uno dell'altro per portarla a termine onestamente.",
+        "leadLabel": "Conferma il referente",
+        "leadDescription": "Il referente della cerchia conferma ogni completamento.",
+        "voteLabel": "Vota la cerchia",
+        "voteDescription": "La cerchia vota per confermare ogni completamento."
+      }
+    },
+    "members": {
+      "title": "Membri",
+      "countTitle": "Membri ({count})",
+      "searchPlaceholder": "Cerca membri",
+      "lead": "Referente",
+      "you": "Tu",
+      "joinedOn": "Iscritto il {date}",
+      "noResults": "Nessun membro corrisponde a «{query}».",
+      "invite": {
+        "title": "Invita nella cerchia",
+        "description": "Condividi un link o invita qualcuno singolarmente.",
+        "copyLink": "Copia il link",
+        "linkCopied": "Link copiato",
+        "invitePerson": "Invita qualcuno"
+      },
+      "actions": {
+        "viewProfile": "Vedi il profilo",
+        "message": "Invia un messaggio",
+        "makeLead": "Rendi referente",
+        "remove": "Rimuovi dalla cerchia"
+      }
+    },
+    "leaderboard": {
+      "title": "Classifica",
+      "modeRanked": "Individuale",
+      "modeCollective": "Collettiva",
+      "collectiveTitle": "Il nostro progresso collettivo",
+      "points": "{points} pt",
+      "builtTogether": "Costruito insieme",
+      "membersContributing": "{count, plural, =1 {1 membro contribuisce} other {# membri contribuiscono}}",
+      "breakdownTitle": "Dettaglio dei contributi",
+      "collectiveNote": "In modalità collettiva vinciamo insieme."
+    },
+    "time": {
+      "daysHoursLeft": "{days} g {hours} h rimaste",
+      "hoursMinutesLeft": "{hours} h {minutes} min rimasti",
+      "daysLeft": "{count, plural, =1 {1 giorno rimasto} other {# giorni rimasti}}",
+      "closesAt": "Chiude {weekday} alle {time}",
+      "lastDay": "Ultimo giorno",
+      "closed": "Chiuso",
+      "ended": "Terminato",
+      "minutesLeft": "{minutes} min rimasti"
+    },
+    "entitlements": {
+      "memberLimit": {
+        "title": "Hai superato il limite di membri",
+        "body": "Hai {current} membri. Il tuo piano ne copre {limit}. Nessuno viene rimosso: semplicemente non puoi aggiungerne di nuovi finché non torni sotto {limit}.",
+        "cta": "Vedi i piani"
+      },
+      "branding": {
+        "title": "I tuoi colori personalizzati sono in pausa",
+        "body": "I tuoi colori personalizzati sono salvati e torneranno se cambi piano. Per ora la tua cerchia mantiene l'aspetto standard.",
+        "cta": "Vedi i piani"
+      },
+      "circleLimit": {
+        "title": "Hai usato tutte le tue cerchie",
+        "body": "Hai creato {current} cerchie su {limit} previste dal tuo piano. Tutte le cerchie continuano a funzionare esattamente come oggi: semplicemente non puoi avviarne una nuova finché non ne archivi una o non cambi piano.",
+        "cta": "Vedi i piani"
+      }
+    },
+    "empty": {
+      "circles": {
+        "title": "Ancora nessuna cerchia",
+        "description": "Una cerchia è un piccolo spazio privato in cui poche persone decidono insieme. Creane una o entra in una cerchia a cui sei stato invitato.",
+        "cta": "Crea una cerchia"
+      },
+      "discover": {
+        "title": "Ancora niente da scoprire",
+        "description": "Al momento non ci sono cerchie aperte a cui unirsi. Avvia la tua e invita le persone che vuoi.",
+        "cta": "Crea una cerchia"
+      },
+      "motions": {
+        "title": "Nessuna mozione aperta",
+        "description": "Quando qualcuno propone qualcosa da decidere, comparirà qui."
+      },
+      "projects": {
+        "title": "Ancora nessun progetto",
+        "description": "I progetti sono il modo in cui una cerchia costruisce qualcosa insieme. Proponine uno direttamente dalla chat."
+      },
+      "challenges": {
+        "title": "Ancora nessuna sfida",
+        "description": "Le sfide sono piccoli obiettivi da affrontare insieme. Avviane una e vedi chi ci sta."
+      },
+      "contributions": {
+        "title": "Ancora nessun contributo",
+        "description": "Sii il primo a dare una mano: ogni contributo comparirà qui."
+      },
+      "messages": {
+        "title": "Ancora nessun messaggio",
+        "description": "Saluta il gruppo: qui la tua cerchia parla, decide e porta avanti le cose."
+      },
+      "leaderboard": {
+        "title": "Ancora nulla in classifica",
+        "description": "I punti compaiono quando le persone iniziano a contribuire a progetti e sfide."
+      }
+    },
+    "errors": {
+      "loadCircles": "Non siamo riusciti a caricare le tue cerchie. Riprova.",
+      "loadCircle": "Non siamo riusciti a caricare questa cerchia. Riprova.",
+      "loadMotion": "Non siamo riusciti a caricare questa mozione. Riprova.",
+      "loadProject": "Non siamo riusciti a caricare questo progetto. Riprova.",
+      "loadChallenge": "Non siamo riusciti a caricare questa sfida. Riprova.",
+      "loadMembers": "Non siamo riusciti a caricare l'elenco dei membri. Riprova.",
+      "loadLeaderboard": "Non siamo riusciti a caricare la classifica. Riprova.",
+      "vote": "Il tuo voto non è stato registrato. Riprova.",
+      "alreadyVoted": "Hai già votato questa mozione.",
+      "votingClosed": "Il voto su questa mozione è chiuso.",
+      "join": "Non siamo riusciti ad aggiungerti a questa cerchia. Riprova.",
+      "contribute": "Il tuo contributo non è andato a buon fine. Riprova.",
+      "generic": "Non siamo riusciti a caricare questo contenuto. Riprova.",
+      "notFound": {
+        "title": "Cerchia non trovata",
+        "description": "Questa cerchia potrebbe essere stata archiviata oppure il link non è più valido.",
+        "cta": "Torna alle cerchie"
+      },
+      "noAccess": {
+        "title": "Questa cerchia è privata",
+        "description": "Solo i membri vedono cosa succede all'interno. Chiedi l'accesso e la cerchia deciderà.",
+        "cta": "Richiedi accesso"
+      },
+      "joinChallenge": "Non siamo riusciti ad aggiungerti a questa sfida"
     }
   }
 }
