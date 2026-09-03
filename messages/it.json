@@ -645,17 +645,16 @@
         "title": "Opportunità non trovata",
         "description": "L'opportunità con ID `{id}` non esiste."
       },
-      "create": "Crea opportunità",
-      "createRestricted": "La creazione e la gestione delle opportunità è riservata agli amministratori di comunità, di associazione e agli amministratori di sistema. Contatta il tuo amministratore.",
-      "discover": "Scopri"
+      "errors": {
+        "insufficient_data": "Verifica il tuo input e riprova",
+        "not_authorized": "Non hai il permesso di eseguire questa azione",
+        "not_found": "L'opportunità o la candidatura non è stata trovata",
+        "conflict": "Questa azione non può essere completata a causa dello stato attuale",
+        "failed": "L'operazione non è riuscita. Riprova più tardi",
+        "unknown_error": "Si è verificato un errore imprevisto"
+      }
     },
     "noSuggestions": "Nessun suggerimento di amici disponibile",
-    "errors": {
-      "insufficient_data": "Verifica il tuo input e riprova",
-      "not_authorized": "Non hai il permesso di eseguire questa azione",
-      "not_found": "L'elemento non è stato trovato",
-      "conflict": "Questa azione non può essere completata a causa dello stato attuale",
-      "failed": "L'operazione non è riuscita. Riprova più tardi",
       "unknown_error": "Si è verificato un errore imprevisto"
     }
   },

@@ -648,7 +648,23 @@
       "notFound": {
         "title": "Opportunity not found",
         "description": "The opportunity with ID `{id}` does not exist."
+      },
+      "errors": {
+        "insufficient_data": "Please check your input and try again",
+        "not_authorized": "You do not have permission to perform this action",
+        "not_found": "The opportunity or application was not found",
+        "conflict": "This action cannot be completed due to the current state",
+        "failed": "Operation failed. Please try again later",
+        "unknown_error": "An unexpected error occurred"
       }
+    },
+    "errors": {
+      "insufficient_data": "Please check your input and try again",
+      "not_authorized": "You do not have permission to perform this action",
+      "not_found": "The item was not found",
+      "conflict": "This action cannot be completed due to the current state",
+      "failed": "Operation failed. Please try again later",
+      "unknown_error": "An unexpected error occurred"
     }
   },
   "community": {

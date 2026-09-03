@@ -645,11 +645,24 @@
         "title": "Möglichkeit nicht gefunden",
         "description": "Die Möglichkeit mit der ID `{id}` existiert nicht."
       },
-      "create": "Möglichkeit erstellen",
-      "createRestricted": "Das Erstellen und Verwalten von Möglichkeiten ist auf Community-Admins, Vereins-Admins und Systemadmins beschränkt. Wenden Sie sich bitte an Ihren Administrator.",
-      "discover": "Entdecken"
+      "errors": {
+        "insufficient_data": "Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut",
+        "not_authorized": "Sie haben nicht die Berechtigung, diese Aktion durchzuführen",
+        "not_found": "Die Möglichkeit oder Bewerbung wurde nicht gefunden",
+        "conflict": "Diese Aktion kann aufgrund des aktuellen Status nicht abgeschlossen werden",
+        "failed": "Operation fehlgeschlagen. Bitte versuchen Sie es später erneut",
+        "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
+      }
     },
-    "noSuggestions": "Keine Freundschaftsvorschläge verfügbar"
+    "noSuggestions": "Keine Freundschaftsvorschläge verfügbar",
+    "errors": {
+      "insufficient_data": "Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut",
+      "not_authorized": "Sie haben keine Berechtigung, diese Aktion durchzuführen",
+      "not_found": "Das Element wurde nicht gefunden",
+      "conflict": "Diese Aktion kann aufgrund des aktuellen Status nicht abgeschlossen werden",
+      "failed": "Operation fehlgeschlagen. Bitte versuchen Sie es später erneut",
+      "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
+    }
   },
   "community": {
     "discover": "Community entdecken",

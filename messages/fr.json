@@ -645,11 +645,24 @@
         "title": "Opportunité introuvable",
         "description": "L'opportunité avec l'ID `{id}` n'existe pas."
       },
-      "create": "Créer une opportunité",
-      "createRestricted": "La création et la gestion des opportunités sont réservées aux administrateurs de communauté, d'association et aux administrateurs système. Si vous devez publier une opportunité, veuillez contacter votre administrateur.",
-      "discover": "Découvrir"
+      "errors": {
+        "insufficient_data": "Veuillez vérifier votre saisie et réessayer",
+        "not_authorized": "Vous n'avez pas la permission d'effectuer cette action",
+        "not_found": "L'opportunité ou la candidature n'a pas été trouvée",
+        "conflict": "Cette action ne peut pas être complétée en raison de l'état actuel",
+        "failed": "L'opération a échoué. Veuillez réessayer plus tard",
+        "unknown_error": "Une erreur inattendue s'est produite"
+      }
     },
-    "noSuggestions": "Aucune suggestion d'ami disponible"
+    "noSuggestions": "Aucune suggestion d'ami disponible",
+    "errors": {
+      "insufficient_data": "Veuillez vérifier votre saisie et réessayer",
+      "not_authorized": "Vous n'avez pas la permission d'effectuer cette action",
+      "not_found": "L'élément n'a pas été trouvé",
+      "conflict": "Cette action ne peut pas être complétée en raison de l'état actuel",
+      "failed": "L'opération a échoué. Veuillez réessayer plus tard",
+      "unknown_error": "Une erreur inattendue s'est produite"
+    }
   },
   "community": {
     "discover": "Découvrir la communauté",
