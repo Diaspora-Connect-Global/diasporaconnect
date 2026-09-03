@@ -675,7 +675,7 @@ export default function Opportunities() {
           const result = await withdrawApplication({ variables: { applicationId } });
           const outcome = readMutationOutcome(result, d => d.withdrawApplication);
           if (!outcome.ok) {
-            toast.error(t(refusalMessageKey(outcome.message, "opportunities.errors")));
+            toast.error(t(refusalMessageKey(outcome.message, "errors")));
             return;
           }
           toast.success(t("toasts.withdrawSuccess"));
@@ -691,7 +691,7 @@ export default function Opportunities() {
           const result = await unsaveOpportunity({ variables: { id: opportunityId } });
           const outcome = readMutationOutcome(result, d => d.unsaveOpportunity);
           if (!outcome.ok) {
-            toast.error(t(refusalMessageKey(outcome.message, "opportunities.errors")));
+            toast.error(t(refusalMessageKey(outcome.message, "errors")));
             return;
           }
           toast.success(t("toasts.unsaveSuccess"));
