@@ -21,7 +21,7 @@ import { EmptyState, ErrorState } from '@/components/feedback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
 import { useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { CIRCLE_AUDIT_TRAIL } from '@/services/gql/circles-governance';
 import type {
   CircleAuditTrailData,
@@ -198,7 +198,7 @@ export default function CircleHistoryPage() {
   if (isInitialLoading) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <HistorySkeleton />
         </div>
@@ -209,7 +209,7 @@ export default function CircleHistoryPage() {
   if (error && events.length === 0) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <div className="flex flex-1 items-center justify-center">
             <ErrorState
@@ -226,7 +226,7 @@ export default function CircleHistoryPage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
 
         <div className="flex flex-col gap-4 py-4">

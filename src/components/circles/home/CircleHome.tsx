@@ -488,14 +488,31 @@ export function CircleHome({ circleId }: CircleHomeProps) {
         )}
 
         <div className="shrink-0">
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            placeholder={t('home.composerPlaceholder', { circleName: circle.name })}
-            disabled={!conversationId || !currentUserId || !isMember}
-            conversationId={conversationId ?? undefined}
-            senderId={currentUserId}
-            onTyping={emitTyping}
-          />
+          {conversationId ? (
+            <MessageInput
+              onSendMessage={handleSendMessage}
+              placeholder={t('home.composerPlaceholder', { circleName: circle.name })}
+              disabled={!currentUserId || !isMember}
+              conversationId={conversationId}
+              senderId={currentUserId}
+              onTyping={emitTyping}
+            />
+          ) : (
+            /*
+             * Chat is provisioned per circle and is currently switched off
+             * platform-wide (CIRCLE_CHAT_ENABLED), so there is no conversation
+             * to write into. Previously this still rendered a MessageInput with
+             * a "Message <circle>…" placeholder and `disabled`, which reads as a
+             * working composer that silently swallows what you type — the exact
+             * kind of control that is worse than no control. Say what is
+             * happening instead.
+             */
+            <div className="border-t border-border-subtle bg-surface-subtle px-4 py-3 text-center">
+              <p className="caption-small text-text-secondary">
+                {t('home.chatUnavailable')}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

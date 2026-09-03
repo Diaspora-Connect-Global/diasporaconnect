@@ -36,7 +36,7 @@ export function SilenceCallout({
   const deadline = formatDeadline(closesAt, locale, 'long');
 
   return (
-    <aside className="rounded-xl border-l-4 border-text-danger bg-surface-subtle px-4 py-4">
+    <aside className="rounded-xl bg-surface-subtle px-4 py-4">
       <p className="label-medium text-text-primary">
         {t('failNotice', { required, total, deadline })}
       </p>

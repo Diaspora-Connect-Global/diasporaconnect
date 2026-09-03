@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { FEED_COLUMN_CLASS } from "@/lib/feedColumnLayout";
+import { CIRCLE_COLUMN_CLASS } from "@/lib/feedColumnLayout";
 
 /**
  * Loading skeleton for the Circles index.
@@ -12,7 +12,7 @@ import { FEED_COLUMN_CLASS } from "@/lib/feedColumnLayout";
 export default function CirclesLoading() {
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {/* "My Circles" heading */}
         <Skeleton className="h-7 w-32 mb-4 shrink-0" />
 

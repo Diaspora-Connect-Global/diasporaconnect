@@ -11,7 +11,7 @@ import { EmptyState, ErrorState } from '@/components/feedback';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { useUserStore } from '@/store/useUserStore';
 import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
 import {
@@ -26,7 +26,7 @@ import type {
 } from '@/services/gql/types/circles';
 import {
   ChallengeProgress,
-  JoinChallengeButton,
+  SubmitEntryForm,
   VerificationModePanel,
 } from '@/components/circles/challenge';
 
@@ -119,10 +119,6 @@ export default function CircleChallengePage() {
     [participantIds, usersById],
   );
 
-  const joined = Boolean(
-    currentUserId && participantIds.includes(currentUserId),
-  );
-
   const starter = challenge?.createdBy
     ? usersById[challenge.createdBy]
     : undefined;
@@ -153,7 +149,7 @@ export default function CircleChallengePage() {
   if (challengeLoading && !challenge) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <Skeleton className="mb-3 h-8 w-3/4" />
           <Skeleton className="mb-6 h-10 w-48" />
@@ -168,7 +164,7 @@ export default function CircleChallengePage() {
   if (challengeError && !challenge) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <ErrorState
             title={t('errors.loadChallenge')}
@@ -185,7 +181,7 @@ export default function CircleChallengePage() {
   if (!challenge) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <EmptyState
             title={t('errors.noAccess.title')}
@@ -203,7 +199,7 @@ export default function CircleChallengePage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
 
         <h1 className="heading-small text-text-primary">{challenge.title}</h1>
@@ -248,10 +244,17 @@ export default function CircleChallengePage() {
         )}
 
         <div className="mt-8 pb-4">
-          <JoinChallengeButton
+          {/*
+            The raw entries are passed rather than a `joined` boolean: a
+            recurring challenge is meant to be entered again each period, so
+            the CTA has to ask "entered for THIS period?" — a question a single
+            has-ever-entered flag cannot answer.
+          */}
+          <SubmitEntryForm
             circleId={circleId}
             challenge={challenge}
-            joined={joined}
+            entries={entries}
+            currentUserId={currentUserId}
             loading={entriesLoading}
           />
         </div>

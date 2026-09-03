@@ -24,28 +24,26 @@ import type { ChainVerdict } from './auditEventCopy';
  * would cry wolf on every restart; rendering it as verified would present an
  * unchecked page as proof. See `chainVerdict()` for how the two are separated.
  *
- * Styling follows `SilenceCallout`: a coloured accent bar over
+ * Styling follows `SilenceCallout`: a plain surface card, with the verdict
  * `surface-subtle` with `text-text-primary`, the one pairing documented as
  * legible in both themes. The bar carries no information, so its contrast never
  * has to be read. Note `border-success` / `border-warning` / `border-info` are
- * all RED from a globals.css bug — the accent uses `text-*` tokens instead.
+ * carried by the icon and its colour rather than a coloured border — cards in
+ * this feature deliberately have no colour on their border.
  */
 const VERDICT_STYLE: Record<
   ChainVerdict,
-  { accent: string; icon: typeof ShieldCheck; iconClass: string }
+  { icon: typeof ShieldCheck; iconClass: string }
 > = {
   VERIFIED: {
-    accent: 'border-text-success',
     icon: ShieldCheck,
     iconClass: 'text-text-success',
   },
   BROKEN: {
-    accent: 'border-text-danger',
     icon: ShieldAlert,
     iconClass: 'text-text-danger',
   },
   UNCHECKED: {
-    accent: 'border-border-darker',
     icon: ShieldQuestion,
     iconClass: 'text-text-secondary',
   },
@@ -71,7 +69,7 @@ export function ChainVerdictBanner({ verdict, className }: ChainVerdictBannerPro
 
   return (
     <aside
-      className={`rounded-xl border-l-4 ${style.accent} bg-surface-subtle px-4 py-4 ${className ?? ''}`}
+      className={`rounded-xl bg-surface-subtle px-4 py-4 ${className ?? ''}`}
       // A broken chain is an alert in the accessibility sense too: it is a
       // finding about the integrity of the record, not a status decoration.
       role={verdict === 'BROKEN' ? 'alert' : undefined}

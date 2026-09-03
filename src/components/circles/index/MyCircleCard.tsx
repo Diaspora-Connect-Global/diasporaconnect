@@ -41,7 +41,12 @@ export function MyCircleCard({ circle, unreadCount }: MyCircleCardProps) {
       <CircleBanner src={toCdnUrl(circle.bannerUrl)} className="h-28" />
 
       <div className="p-4">
-        <div className="-mt-12 mb-3 flex">
+        {/* `relative z-10` is load-bearing, not decorative: `CircleBanner` is
+            positioned (it holds an absolutely-positioned <img>), and a positioned
+            element paints above a static one in the same stacking context no
+            matter what the source order or the negative margin says. Without
+            this the banner covered the top half of the avatar. */}
+        <div className="relative z-10 -mt-12 mb-3 flex">
           <CircleAvatar
             name={circle.name}
             src={toCdnUrl(circle.avatarUrl)}

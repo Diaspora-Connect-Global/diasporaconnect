@@ -5,14 +5,14 @@ import { ChevronLeft } from 'lucide-react';
 
 import { CreateCircleForm } from '@/components/circles/index';
 import { Link } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 
 export default function CreateCirclePage() {
   const t = useTranslations('circles');
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         <div className="mx-auto w-full max-w-md">
           <div className="mb-4 flex items-center">
             <Link

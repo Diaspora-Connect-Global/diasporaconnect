@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 
 /**
  * Loading skeleton for "Create a Circle".
@@ -10,7 +10,7 @@ import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 export default function CreateCircleLoading() {
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         <div className="mx-auto w-full max-w-md">
           {/* Back control */}
           <Skeleton className="mb-4 size-9 rounded-full" />

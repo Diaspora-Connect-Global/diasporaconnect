@@ -232,62 +232,88 @@ export function InviteLinksPanel({ circleId }: InviteLinksPanelProps) {
         </div>
       )}
 
-      <form className="mt-4 flex flex-wrap items-end gap-3" onSubmit={handleMint}>
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="circle-invite-link-uses"
-            className="label-small text-text-primary"
-          >
-            {t('mint.maxUses')}
-          </label>
-          <input
-            id="circle-invite-link-uses"
-            type="number"
-            inputMode="numeric"
-            min={CIRCLE_INVITE_LINK_MIN_USES}
-            max={CIRCLE_INVITE_LINK_MAX_USES}
-            value={maxUses}
-            onChange={(event) => setMaxUses(event.target.value)}
-            aria-describedby="circle-invite-link-uses-hint"
-            className="body-small w-24 rounded-full border border-border-subtle bg-surface-subtle px-4 py-2 text-text-primary outline-none focus-visible:border-text-brand"
-          />
-          <span
-            id="circle-invite-link-uses-hint"
-            className="caption-small text-text-secondary"
-          >
-            {t('mint.maxUsesHint', { max: CIRCLE_INVITE_LINK_MAX_USES })}
-          </span>
+      {/*
+        Uses and Expires read as ONE line because they are two halves of a
+        single decision — how many people, for how long — and the trade-off
+        between them is only visible when they are seen together.
+
+        The pair wraps on the CONTAINER running out of room, not the window:
+        this panel sits in the narrow middle column of the three-column feed
+        shell, so a `sm:` breakpoint would happily promise two columns at
+        1440px in a column nowhere near wide enough to hold them. `flex-wrap`
+        against a real flex-basis answers the only question that matters — is
+        there room here — and neither control can push the page sideways.
+
+        The submit button is deliberately OUT of that row. Left in it, it
+        competed for the same line and was the thing that wrapped, which is
+        what made the two fields look stacked in the first place.
+      */}
+      <form className="mt-4 flex flex-col gap-3" onSubmit={handleMint}>
+        <div className="flex flex-wrap items-start gap-3">
+          {/* Fixed and non-shrinking: a 1-100 count does not get wider with
+              the column, and the hint below it needs a stable measure. */}
+          <div className="flex w-28 shrink-0 flex-col gap-1">
+            <label
+              htmlFor="circle-invite-link-uses"
+              className="label-small text-text-primary"
+            >
+              {t('mint.maxUses')}
+            </label>
+            <input
+              id="circle-invite-link-uses"
+              type="number"
+              inputMode="numeric"
+              min={CIRCLE_INVITE_LINK_MIN_USES}
+              max={CIRCLE_INVITE_LINK_MAX_USES}
+              value={maxUses}
+              onChange={(event) => setMaxUses(event.target.value)}
+              aria-describedby="circle-invite-link-uses-hint"
+              className="body-small w-full rounded-full border border-border-subtle bg-surface-subtle px-4 py-2 text-text-primary outline-none focus-visible:border-text-brand"
+            />
+            <span
+              id="circle-invite-link-uses-hint"
+              className="caption-small text-text-secondary"
+            >
+              {t('mint.maxUsesHint', { max: CIRCLE_INVITE_LINK_MAX_USES })}
+            </span>
+          </div>
+
+          {/* Takes the remaining width. `basis-40` is the point below which
+              the longest translated preset would start being clipped by the
+              native select, so it is also the point at which this wraps. */}
+          <div className="flex min-w-0 grow basis-40 flex-col gap-1">
+            <label
+              htmlFor="circle-invite-link-expiry"
+              className="label-small text-text-primary"
+            >
+              {t('mint.expiry')}
+            </label>
+            <select
+              id="circle-invite-link-expiry"
+              value={expiryHours}
+              onChange={(event) =>
+                setExpiryHours(Number(event.target.value) as ExpiryPresetHours)
+              }
+              className="body-small w-full rounded-full border border-border-subtle bg-surface-subtle px-4 py-2 text-text-primary outline-none focus-visible:border-text-brand"
+            >
+              {/*
+                Presets rather than a date picker: every value here is inside
+                the +14-day ceiling, so there is no way to ask for a life the
+                server will silently shorten.
+              */}
+              {EXPIRY_PRESET_HOURS.map((hours) => (
+                <option key={hours} value={hours}>
+                  {t(`mint.expiryOption.${hours}`)}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="circle-invite-link-expiry"
-            className="label-small text-text-primary"
-          >
-            {t('mint.expiry')}
-          </label>
-          <select
-            id="circle-invite-link-expiry"
-            value={expiryHours}
-            onChange={(event) =>
-              setExpiryHours(Number(event.target.value) as ExpiryPresetHours)
-            }
-            className="body-small rounded-full border border-border-subtle bg-surface-subtle px-4 py-2 text-text-primary outline-none focus-visible:border-text-brand"
-          >
-            {/*
-              Presets rather than a date picker: every value here is inside the
-              +14-day ceiling, so there is no way to ask for a life the server
-              will silently shorten.
-            */}
-            {EXPIRY_PRESET_HOURS.map((hours) => (
-              <option key={hours} value={hours}>
-                {t(`mint.expiryOption.${hours}`)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <ButtonType2 type="submit" disabled={!usesValid || minting || (atCap && capKnown)}>
+        <ButtonType2
+          type="submit"
+          disabled={!usesValid || minting || (atCap && capKnown)}
+        >
           <span className="flex items-center gap-2">
             {minting && (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />

@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
  * already on screen and only the main column is mirrored here — the same split
  * the sibling `circles/[id]/loading.tsx` documents.
  *
- * The column geometry (`FEED_COLUMN_CLASS`) is inlined rather than imported so
+ * The column geometry (`CIRCLE_COLUMN_CLASS`) is inlined rather than imported so
  * this file pulls in nothing but the skeleton primitive; a route-level
  * `loading.tsx` should not drag the client module graph it is standing in for.
  * Keep it in step with `@/lib/feedColumnLayout` by hand.

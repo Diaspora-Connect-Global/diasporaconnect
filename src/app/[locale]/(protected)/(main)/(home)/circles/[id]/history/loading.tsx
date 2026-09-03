@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 
 /**
  * Loading skeleton for the decision history.
@@ -17,7 +17,7 @@ import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 export default function CircleHistoryLoading() {
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {/* Back arrow + title */}
         <div className="flex shrink-0 items-center gap-2">
           <Skeleton className="size-8 rounded-full" />

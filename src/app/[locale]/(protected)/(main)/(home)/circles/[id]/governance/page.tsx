@@ -16,7 +16,7 @@ import {
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { CIRCLE, CIRCLE_GOVERNANCE_RULES } from '@/services/gql/circles';
 import { CIRCLE_GOVERNANCE_RULE_HISTORY } from '@/services/gql/circles-governance';
 import type {
@@ -150,7 +150,7 @@ export default function CircleGovernancePage() {
   if (loading && rules.length === 0) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <GovernanceSkeleton />
         </div>
@@ -161,7 +161,7 @@ export default function CircleGovernancePage() {
   if (error && rules.length === 0) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <div className="flex flex-1 items-center justify-center">
             <ErrorState
@@ -178,7 +178,7 @@ export default function CircleGovernancePage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
 
         <div className="flex flex-col gap-4 py-4">

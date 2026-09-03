@@ -19,7 +19,7 @@ import { EmptyState, ErrorState } from '@/components/feedback';
 import { ButtonType1 } from '@/components/custom/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { CIRCLE_PLAN_SCREEN } from '@/services/gql/circles-billing';
 import type {
   CirclePlanScreenData,
@@ -123,7 +123,7 @@ export default function CirclePlanPage() {
 
   const shell = (children: ReactNode) => (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
         {children}
       </div>

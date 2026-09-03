@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { FEED_COLUMN_CLASS } from "@/lib/feedColumnLayout";
+import { CIRCLE_COLUMN_CLASS } from "@/lib/feedColumnLayout";
 
 /**
  * Loading skeleton for the invite-link redeem screen.
@@ -19,7 +19,7 @@ import { FEED_COLUMN_CLASS } from "@/lib/feedColumnLayout";
 export default function CircleJoinLoading() {
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={`${FEED_COLUMN_CLASS} justify-center`}>
+      <div className={`${CIRCLE_COLUMN_CLASS} justify-center`}>
         <div className="mx-auto flex w-full max-w-md flex-col items-center rounded-xl border border-border-subtle p-6">
           {/* Icon disc */}
           <Skeleton className="mb-4 size-12 rounded-full" />

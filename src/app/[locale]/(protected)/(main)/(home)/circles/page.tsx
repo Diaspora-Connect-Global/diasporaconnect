@@ -14,7 +14,7 @@ import {
   useCircleUnreadCounts,
 } from '@/components/circles/index';
 import { Link } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { MY_CIRCLES, SEARCH_CIRCLES } from '@/services/gql/circles';
 import type {
   MyCirclesData,
@@ -89,7 +89,7 @@ export default function CirclesPage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
           <h1 className="heading-small text-text-primary">{t('index.title')}</h1>
           <Link href="/circles/create">
@@ -113,11 +113,6 @@ export default function CirclesPage() {
             icon={Users}
             title={t('empty.circles.title')}
             description={t('empty.circles.description')}
-            action={
-              <Link href="/circles/create">
-                <ButtonType2>{t('empty.circles.cta')}</ButtonType2>
-              </Link>
-            }
           />
         ) : (
           <div className="space-y-4">

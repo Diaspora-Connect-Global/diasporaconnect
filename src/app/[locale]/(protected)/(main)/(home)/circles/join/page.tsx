@@ -26,7 +26,7 @@ import {
 } from '@/components/circles/join';
 import { ButtonType2 } from '@/components/custom/button';
 import { Link, useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { REDEEM_CIRCLE_INVITE_LINK } from '@/services/gql/circles-invites';
 import type {
   RedeemCircleInviteLinkData,
@@ -268,7 +268,7 @@ export default function CircleJoinPage() {
         the spinner and then never mention that they joined, or why they did
         not. `polite` rather than `assertive`: it is worth waiting a beat for.
       */}
-      <div className={`${FEED_COLUMN_CLASS} justify-center`} aria-live="polite">
+      <div className={`${CIRCLE_COLUMN_CLASS} justify-center`} aria-live="polite">
         {state.kind === 'working' && (
           <JoinCard
             icon={<Loader2 className="size-6 animate-spin" />}

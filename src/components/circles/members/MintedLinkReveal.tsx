@@ -58,7 +58,7 @@ export function MintedLinkReveal({ url, onDismiss }: MintedLinkRevealProps) {
   }
 
   return (
-    <div className="rounded-xl border border-border-brand bg-surface-default p-4">
+    <div className="rounded-xl border border-border-subtle bg-surface-default p-4">
       <div className="flex items-start gap-2">
         <TriangleAlert
           aria-hidden="true"

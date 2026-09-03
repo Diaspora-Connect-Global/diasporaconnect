@@ -21,7 +21,7 @@ import {
 import { ErrorState } from '@/components/feedback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import {
   CIRCLE_CHAT,
   CIRCLE_MEMBERS,
@@ -174,7 +174,7 @@ export default function CircleMotionPage() {
   if (motionLoading && !motion) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <MotionSkeleton />
         </div>
@@ -190,7 +190,7 @@ export default function CircleMotionPage() {
   if (motionError || !motion) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <div className="flex flex-1 items-center justify-center">
             <ErrorState
@@ -228,7 +228,7 @@ export default function CircleMotionPage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
 
         <div className="flex flex-col gap-6 py-4">

@@ -11,7 +11,7 @@ import { EmptyState, ErrorState } from '@/components/feedback';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { useUserStore } from '@/store/useUserStore';
 import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
 import {
@@ -28,6 +28,7 @@ import type {
   CircleProjectVariables,
 } from '@/services/gql/types/circles';
 import {
+  AddGoalForm,
   ContributeForm,
   ContributionList,
   GoalProgressPanel,
@@ -65,6 +66,7 @@ export default function CircleProjectPage() {
   const currentUserId = useUserStore((state) => state.user?.userId) ?? null;
 
   const [limit, setLimit] = useState(CONTRIBUTIONS_PAGE);
+  const [addingGoal, setAddingGoal] = useState(false);
 
   const {
     data: projectData,
@@ -153,7 +155,7 @@ export default function CircleProjectPage() {
   if (loading && !project) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <Skeleton className="mb-3 h-8 w-3/4" />
           <Skeleton className="mb-4 h-10 w-48" />
@@ -169,7 +171,7 @@ export default function CircleProjectPage() {
   if (projectError && !project) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <ErrorState
             title={t('errors.loadProject')}
@@ -190,7 +192,7 @@ export default function CircleProjectPage() {
   if (!project) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <EmptyState
             title={t('errors.noAccess.title')}
@@ -208,7 +210,7 @@ export default function CircleProjectPage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
 
         <h1 className="heading-small text-text-primary">{project.title}</h1>
@@ -254,6 +256,32 @@ export default function CircleProjectPage() {
             ))}
           </section>
         )}
+
+        {/*
+          A project with no goal cannot be contributed to at all —
+          `ContributeForm` needs one and renders nothing without it — so this is
+          not an extra: it is the step that makes a freshly created project
+          usable. Creation puts a project straight into ACTIVE with zero goals,
+          which is exactly the state that would otherwise be a dead end.
+        */}
+        <section className="mt-8">
+          {addingGoal ? (
+            <AddGoalForm
+              circleId={circleId}
+              projectId={projectId}
+              onDone={() => setAddingGoal(false)}
+            />
+          ) : (
+            <ButtonType1
+              className="w-full"
+              onClick={() => setAddingGoal(true)}
+            >
+              {goals.length === 0
+                ? t('newGoal.ctaFirst')
+                : t('newGoal.cta')}
+            </ButtonType1>
+          )}
+        </section>
 
         <section className="mt-8">
           <h2 className="label-medium text-text-primary">

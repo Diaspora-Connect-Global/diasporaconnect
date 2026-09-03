@@ -16,12 +16,10 @@ import { cn } from '@/lib/utils';
  * a semantic status and nothing computes it — the section that gets it is the
  * one whose action is hard to walk back.
  *
- * `border-border-danger` is used deliberately while its neighbours are NOT:
- * `--border-success`, `--border-warning` and `--border-info` are all defined as
- * `#e7000c` in globals.css — the same red — so any of the three would draw a
- * danger border while claiming to mean something else. `border-border-danger`
- * is the one member of that family whose value matches its name. The others are
- * avoided across this screen, not worked around.
+ * Cards in this feature carry NO colour on their border — the tone is shown by
+ * the heading and the action itself. `--border-danger` is also the only one of
+ * the four semantic border tokens that is not silently red, so relying on it
+ * would have been inconsistent as well as decorative.
  */
 export interface SettingsSectionProps {
   title: string;
@@ -45,7 +43,7 @@ export function SettingsSection({
     <section
       className={cn(
         'rounded-lg border bg-surface-default p-4 sm:p-5',
-        tone === 'danger' ? 'border-border-danger' : 'border-border-subtle',
+        'border-border-subtle',
         className,
       )}
     >

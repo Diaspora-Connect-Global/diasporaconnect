@@ -10,7 +10,7 @@ import { ButtonType1 } from '@/components/custom/button';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { useUserStore } from '@/store/useUserStore';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
 import { CIRCLE_LEADERBOARD } from '@/services/gql/circles';
@@ -99,7 +99,7 @@ export default function CircleLeaderboardPage() {
   if (loading && !leaderboard) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <Skeleton className="mx-auto mb-6 h-10 w-56 rounded-full" />
           <Skeleton className="h-64 w-full rounded-2xl" />
@@ -111,7 +111,7 @@ export default function CircleLeaderboardPage() {
   if (error && !leaderboard) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <ErrorState
             title={t('errors.loadLeaderboard')}
@@ -126,7 +126,7 @@ export default function CircleLeaderboardPage() {
   if (!leaderboard) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={FEED_COLUMN_CLASS}>
+        <div className={CIRCLE_COLUMN_CLASS}>
           {header}
           <EmptyState
             title={t('errors.noAccess.title')}
@@ -144,7 +144,7 @@ export default function CircleLeaderboardPage() {
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
 
         {rankingEnabled && (
