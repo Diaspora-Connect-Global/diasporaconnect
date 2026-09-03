@@ -92,6 +92,21 @@ export function CircleHomeHeader({
                 {t('leaderboard.title')}
               </Link>
             </DropdownMenuItem>
+            {/* The four screens added after the first cut. Without these the
+                routes exist and compile but are unreachable — there is no other
+                navigation into them anywhere in the app. */}
+            <DropdownMenuItem asChild className="body-medium text-text-primary">
+              <Link href={`/circles/${circleId}/history`}>{t('history.title')}</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="body-medium text-text-primary">
+              <Link href={`/circles/${circleId}/governance`}>{t('governance.title')}</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="body-medium text-text-primary">
+              <Link href={`/circles/${circleId}/plan`}>{t('plan.title')}</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="body-medium text-text-primary">
+              <Link href={`/circles/${circleId}/settings`}>{t('settings.title')}</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

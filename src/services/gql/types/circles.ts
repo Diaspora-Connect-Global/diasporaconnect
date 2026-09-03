@@ -40,7 +40,42 @@
  */
 
 // ============================================================================
-// ENUMS (string unions — values are verbatim from dto/enums.ts)
+// ENUMS
+// ============================================================================
+//
+// ⚠ THESE ARE THE VALUES THAT TRAVEL ON THE WIRE — NOT THE PROTO ENUM NAMES.
+//
+// `circle.proto` names several enum values with a disambiguating prefix
+// (`MEMBERSHIP_ACTIVE`, `PROJECT_DRAFT`, `GOAL_OPEN`, `LEAD_CONFIRMS`, …) so
+// that `MembershipStatus.ACTIVE` does not collide with `CircleStatus.ACTIVE`
+// inside one flat proto namespace. Those names are NOT what circle-service
+// sends. It serialises its domain value objects, which are bare — `ACTIVE`,
+// `PENDING`, `DRAFT`, `LEAD` — and they cross gRPC as plain strings
+// (`enums: String`), so nothing ever translates them back.
+//
+// Re-aligning the unions below with the proto's prefixed NAMES would silently
+// break every status comparison and every `Record<CircleXStatus, …>` lookup in
+// the feature: a missed lookup renders a blank label rather than throwing, so
+// it survives review and ships. This has already caused two production bugs —
+// a members list that reported "0 members" to a circle's own member, and a
+// gateway membership check that denied every member of every circle.
+//
+// ── THE ONE EXCEPTION: STATUS *FILTERS* ─────────────────────────────────────
+// The api-gateway registers its GraphQL enums (`registerEnumType`) with the
+// PREFIXED proto names, and the `status:` filter arguments are typed with those
+// enums — but the gateway forwards the value to circle-service verbatim, with
+// no translation. So the two directions genuinely differ today:
+//
+//   reading a status back  → bare value        (`ACTIVE`)   ← the unions below
+//   sending a status filter → prefixed enum name (`MEMBERSHIP_ACTIVE`)
+//                                                ← the `*StatusFilter` types
+//
+// A filter is therefore accepted by the gateway and then matches NOTHING in
+// circle-service. That is a gateway bug and it is not fixable from here: the
+// GraphQL schema rejects a bare value outright, so sending `ACTIVE` turns a
+// wrong-result bug into a hard validation error. Keep sending the prefixed
+// name until the gateway maps or re-registers its enums; when it does, the
+// `*StatusFilter` types below collapse back into their bare counterparts.
 // ============================================================================
 
 /** Owner kind for a circle subscription. Only CIRCLE in v1. */
@@ -64,21 +99,35 @@ export type CircleJoinMode = 'INVITE_ONLY' | 'REQUEST';
 /** A LEAD is a facilitator, not a boss — they hold only what the circle left them. */
 export type CircleMemberRole = 'MEMBER' | 'LEAD';
 
-/** MEMBERSHIP_REMOVED always carries a `removedByMotionId` — a motion removes people, not the platform. */
+/** REMOVED always carries a `removedByMotionId` — a motion removes people, not the platform. */
 export type CircleMembershipStatus =
+  | 'ACTIVE'
+  | 'LEFT'
+  | 'REMOVED'
+  | 'SUSPENDED';
+
+/** Prefixed spelling the gateway's `$status: CircleMembershipStatus` arg requires. See the header. */
+export type CircleMembershipStatusFilter =
   | 'MEMBERSHIP_ACTIVE'
   | 'MEMBERSHIP_LEFT'
   | 'MEMBERSHIP_REMOVED'
   | 'MEMBERSHIP_SUSPENDED';
 
 export type CircleInvitationStatus =
-  | 'INVITATION_PENDING'
-  | 'INVITATION_ACCEPTED'
-  | 'INVITATION_DECLINED'
-  | 'INVITATION_REVOKED'
-  | 'INVITATION_EXPIRED';
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'DECLINED'
+  | 'REVOKED'
+  | 'EXPIRED';
 
 export type CircleJoinRequestStatus =
+  | 'PENDING'
+  | 'ADMITTED'
+  | 'DECLINED'
+  | 'WITHDRAWN';
+
+/** Prefixed spelling the gateway's `$status: CircleJoinRequestStatus` arg requires. See the header. */
+export type CircleJoinRequestStatusFilter =
   | 'JOIN_REQUEST_PENDING'
   | 'JOIN_REQUEST_ADMITTED'
   | 'JOIN_REQUEST_DECLINED'
@@ -121,6 +170,14 @@ export type CircleVoteChoice = 'YES' | 'NO' | 'ABSTAIN';
 export type CircleTieBreak = 'REJECT' | 'LEAD';
 
 export type CircleProjectStatus =
+  | 'DRAFT'
+  | 'ACTIVE'
+  | 'COMPLETED'
+  | 'ABANDONED'
+  | 'ARCHIVED';
+
+/** Prefixed spelling the gateway's `$status: CircleProjectStatus` arg requires. See the header. */
+export type CircleProjectStatusFilter =
   | 'PROJECT_DRAFT'
   | 'PROJECT_ACTIVE'
   | 'PROJECT_COMPLETED'
@@ -133,12 +190,20 @@ export type CircleGoalScope = 'SHARED' | 'INDIVIDUAL';
 export type CircleMetricKind = 'COUNT' | 'AMOUNT' | 'BOOLEAN' | 'DURATION';
 
 export type CircleGoalStatus =
-  | 'GOAL_OPEN'
-  | 'GOAL_MET'
-  | 'GOAL_MISSED'
-  | 'GOAL_CANCELLED';
+  | 'OPEN'
+  | 'MET'
+  | 'MISSED'
+  | 'CANCELLED';
 
 export type CircleChallengeStatus =
+  | 'DRAFT'
+  | 'ACTIVE'
+  | 'JUDGING'
+  | 'CLOSED'
+  | 'CANCELLED';
+
+/** Prefixed spelling the gateway's `$status: CircleChallengeStatus` arg requires. See the header. */
+export type CircleChallengeStatusFilter =
   | 'CHALLENGE_DRAFT'
   | 'CHALLENGE_ACTIVE'
   | 'CHALLENGE_JUDGING'
@@ -150,15 +215,15 @@ export type CircleChallengeStatus =
  * IMMUTABLE once the challenge leaves DRAFT. The platform never adjudicates
  * whether someone really ran the ten kilometres.
  */
-export type CircleVerificationMode = 'HONOUR' | 'LEAD_CONFIRMS' | 'CIRCLE_CONFIRMS';
+export type CircleVerificationMode = 'HONOUR' | 'LEAD' | 'CIRCLE';
 
 export type CircleChallengeCadence = 'ONE_OFF' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
 
 export type CircleEntryVerificationState =
-  | 'ENTRY_PENDING'
-  | 'ENTRY_ACCEPTED'
-  | 'ENTRY_REJECTED'
-  | 'ENTRY_DISPUTED';
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'REJECTED'
+  | 'DISPUTED';
 
 export type CircleScoreSource =
   | 'CHALLENGE_ENTRY'
@@ -180,10 +245,10 @@ export type CircleEntitlementKey =
 export type CircleEntitlementValueKind = 'INT' | 'BOOL';
 
 export type CircleSubscriptionStatus =
-  | 'SUBSCRIPTION_ACTIVE'
-  | 'SUBSCRIPTION_PAST_DUE'
-  | 'SUBSCRIPTION_CANCELLED'
-  | 'SUBSCRIPTION_EXPIRED';
+  | 'ACTIVE'
+  | 'PAST_DUE'
+  | 'CANCELLED'
+  | 'EXPIRED';
 
 /** NONE is the free plan — priced at zero, not absent. */
 export type CirclePriceInterval = 'MONTH' | 'YEAR' | 'ONE_TIME' | 'NONE';
@@ -1111,7 +1176,8 @@ export type LeaveCircleVariables = CircleIdVariables;
 
 export interface CircleMembersVariables extends PaginationVariables {
   circleId: string;
-  status?: CircleMembershipStatus | null;
+  /** Prefixed — this is a gateway filter arg, not a value read back. See the ENUMS header. */
+  status?: CircleMembershipStatusFilter | null;
 }
 
 export interface CircleInvitationsVariables extends PaginationVariables {
@@ -1120,7 +1186,8 @@ export interface CircleInvitationsVariables extends PaginationVariables {
 
 export interface CircleJoinRequestsVariables extends PaginationVariables {
   circleId: string;
-  status?: CircleJoinRequestStatus | null;
+  /** Prefixed — this is a gateway filter arg, not a value read back. See the ENUMS header. */
+  status?: CircleJoinRequestStatusFilter | null;
 }
 
 export interface CircleMotionsVariables extends PaginationVariables {
@@ -1145,7 +1212,8 @@ export type EnactCircleMotionVariables = CircleMotionVariables;
 
 export interface CircleProjectsVariables extends PaginationVariables {
   circleId: string;
-  status?: CircleProjectStatus | null;
+  /** Prefixed — this is a gateway filter arg, not a value read back. See the ENUMS header. */
+  status?: CircleProjectStatusFilter | null;
 }
 
 export interface CircleProjectVariables {
@@ -1169,7 +1237,8 @@ export interface CircleContributionsVariables extends PaginationVariables {
 
 export interface CircleChallengesVariables extends PaginationVariables {
   circleId: string;
-  status?: CircleChallengeStatus | null;
+  /** Prefixed — this is a gateway filter arg, not a value read back. See the ENUMS header. */
+  status?: CircleChallengeStatusFilter | null;
 }
 
 export interface CircleChallengeVariables {

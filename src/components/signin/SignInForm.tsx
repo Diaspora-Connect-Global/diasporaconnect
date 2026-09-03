@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from '@/i18n/navigation';
+import { getAndClearRedirectUrl } from '@/lib/authRedirect';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -173,7 +174,10 @@ export default function SignInForm() {
                 setRememberMeStore(rememberMe);
 
                 toast.success(t('login.welcomeBack', { name: data.login.user.firstName }));
-                router.push('/home');
+                // Return them to whatever they were trying to reach, if the
+                // protected layout stashed it on the way out. The stored path is
+                // locale-agnostic, so this router adds the right prefix.
+                router.push(getAndClearRedirectUrl() ?? '/home');
             } else {
                 const errorMessage = data?.login.error || data?.login.message || t('login.failed');
                 // Credential/server errors → persistent banner above the button.

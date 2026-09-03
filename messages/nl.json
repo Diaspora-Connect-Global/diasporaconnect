@@ -2878,17 +2878,31 @@
       "joinedOn": "Lid sinds {date}",
       "noResults": "Geen leden gevonden voor ‘{query}’.",
       "invite": {
-        "title": "Uitnodigen voor de kring",
-        "description": "Deel een link of nodig iemand persoonlijk uit.",
+        "title": "Uitnodigen",
+        "description": "Nodig iemand uit via e-mail of telefoon, of deel de pagina van de kring.",
         "copyLink": "Link kopiëren",
         "linkCopied": "Link gekopieerd",
-        "invitePerson": "Iemand uitnodigen"
+        "invitePerson": "Iemand uitnodigen",
+        "copyCircleLink": "Link naar de kring kopiëren",
+        "circleLinkCopied": "Link naar de kring gekopieerd"
       },
       "actions": {
         "viewProfile": "Profiel bekijken",
         "message": "Bericht sturen",
         "makeLead": "Tot leider maken",
         "remove": "Uit de kring verwijderen"
+      },
+      "past": {
+        "title": "{count, plural, =1 {1 oud-lid} other {# oud-leden}}",
+        "description": "Iedereen die ooit in deze kring zat, en waarom niet meer.",
+        "endedOn": "op {date}",
+        "viewMotion": "Bekijk de motie achter deze verwijdering",
+        "platformNote": "Een maatregel van het platform tegen dit account — geen besluit van deze kring.",
+        "reason": {
+          "LEFT": "Zelf vertrokken",
+          "REMOVED": "Verwijderd via motie",
+          "SUSPENDED": "Geschorst door het platform"
+        }
       }
     },
     "leaderboard": {
@@ -2990,6 +3004,449 @@
         "cta": "Toegang aanvragen"
       },
       "joinChallenge": "We konden je niet aan deze challenge toevoegen"
+    },
+    "settings": {
+      "title": "Kringinstellingen",
+      "loadFailed": "We konden deze instellingen niet laden. Probeer het opnieuw.",
+      "notAMember": "Alleen leden kunnen de instellingen van een kring openen. Vraag iemand van binnen om je uit te nodigen.",
+      "statusNotice": {
+        "suspended": "Deze kring is door het platform geschorst, daarom zijn de instellingen voorlopig alleen-lezen.",
+        "archived": "Deze kring is gearchiveerd. Er is niets verloren gegaan, maar de instellingen blijven alleen-lezen tot hij wordt teruggehaald.",
+        "dissolved": "Deze kring is opgeheven. De gegevens blijven bestaan, maar er kan niets meer worden gewijzigd."
+      },
+      "profile": {
+        "title": "Profiel",
+        "description": "Hoe je kring zich voorstelt, overal waar hij verschijnt.",
+        "readOnlyDescription": "Hoe deze kring zich op dit moment voorstelt.",
+        "leadOnlyNote": "Alleen een begeleider kan het profiel bewerken.",
+        "nameLabel": "Naam van de kring",
+        "namePlaceholder": "bijv. Accra Founders",
+        "nameRequired": "Geef je kring een naam.",
+        "tooLong": "Houd het op maximaal {max} tekens.",
+        "handleLabel": "Kenmerk",
+        "handlePlaceholder": "accra-founders",
+        "handleHint": "Kleine letters, cijfers, _ en -, beginnend en eindigend met een letter of cijfer. Maximaal {max} tekens.",
+        "handleInvalid": "Gebruik kleine letters, cijfers, _ of -, beginnend en eindigend met een letter of cijfer.",
+        "taglineLabel": "Slogan",
+        "taglinePlaceholder": "Eén regel over deze kring",
+        "descriptionLabel": "Over",
+        "descriptionPlaceholder": "Waar deze kring voor is en wat hier gebeurt.",
+        "notClearable": "Dit kun je wijzigen, maar nog niet leegmaken. Schrijf iets anders, of zet de oude tekst terug.",
+        "imageReplaceOnly": "Afbeeldingen kun je vervangen, maar nog niet verwijderen.",
+        "imageFailed": "De afbeelding is niet geüpload, daarom is er niets opgeslagen. Probeer het opnieuw.",
+        "nothingToSave": "Er is nog niets gewijzigd.",
+        "save": "Wijzigingen opslaan",
+        "saving": "Bezig met opslaan…",
+        "saved": "Profiel bijgewerkt.",
+        "saveFailed": "We konden je wijzigingen niet opslaan. Probeer het opnieuw."
+      },
+      "discovery": {
+        "title": "Vinden en deelnemen",
+        "description": "Twee losse instellingen: of mensen deze kring kunnen vinden, en hoe ze binnenkomen.",
+        "readOnlyDescription": "Hoe deze kring op dit moment wordt gevonden en hoe je deelneemt.",
+        "discoverabilityQuestion": "Kunnen mensen deze kring vinden?",
+        "discoverabilityHelp": "Dit bepaalt of de kring verschijnt in de zoekresultaten en bij Ontdekken.",
+        "discoverableTitle": "Vindbaar",
+        "discoverableDescription": "Iedereen kan deze kring tegenkomen.",
+        "hiddenTitle": "Verborgen",
+        "hiddenDescription": "Alleen mensen met de link zien hem.",
+        "accessQuestion": "Hoe komen mensen binnen?",
+        "accessHelp": "Los van vindbaarheid — een verborgen kring kan nog steeds aanvragen aannemen.",
+        "requestTitle": "Op aanvraag",
+        "requestDescription": "Mensen vragen deelname aan, en de kring beslist samen.",
+        "inviteTitle": "Alleen op uitnodiging",
+        "inviteDescription": "Alleen uitgenodigde mensen kunnen deelnemen.",
+        "discoverabilitySaved": "Vindbaarheid bijgewerkt.",
+        "joinModeSaved": "Deelname bijgewerkt.",
+        "saveFailed": "We konden deze instelling niet wijzigen. Probeer het opnieuw.",
+        "leadNote": "Je kunt deze twee instellingen wijzigen omdat je begeleider bent. Elk lid kan ook om een wijziging vragen door een motie te openen, en dan beslist de kring samen.",
+        "proposeInstead": "Alleen een begeleider kan deze direct wijzigen. Je kunt de kring om de wijziging vragen door een motie te openen."
+      },
+      "archive": {
+        "title": "Deze kring archiveren",
+        "description": "Berg de kring op zonder er iets van te verliezen.",
+        "statusArchived": "Gearchiveerd",
+        "alreadyArchivedDescription": "Deze kring is al gearchiveerd.",
+        "alreadyArchivedBody": "Alles is er nog — leden, beslissingen, projecten en geschiedenis. Een kring terughalen kan nog niet vanaf dit scherm; neem contact op met support als je dat nodig hebt.",
+        "bulletKept": "Er wordt niets verwijderd. Leden, beslissingen, projecten en geschiedenis blijven precies zoals ze zijn.",
+        "bulletQuiet": "De kring is geen actieve plek meer: hij verdwijnt uit Ontdekken en neemt geen nieuwe leden meer aan.",
+        "bulletReversible": "Archiveren is niet definitief. Een kring kan worden teruggehaald — alleen nog niet vanaf dit scherm.",
+        "button": "Kring archiveren",
+        "dialogTitle": "{name} archiveren?",
+        "dialogDescription": "Hiermee sluit je de kring. Hij wordt niet verwijderd en niets erin gaat verloren.",
+        "cancel": "Open laten",
+        "confirm": "Kring archiveren",
+        "archiving": "Bezig met archiveren…",
+        "archived": "Kring gearchiveerd.",
+        "failed": "We konden deze kring niet archiveren. Probeer het opnieuw.",
+        "leadOnlyBody": "Alleen een begeleider kan deze kring archiveren.",
+        "dissolvedBody": "Deze kring is opgeheven, en dat is definitief. Hij kan niet meer worden gearchiveerd of heropend.",
+        "proposeInstead": "Je kunt de kring vragen om te sluiten door een motie te openen; de leden beslissen samen."
+      }
+    },
+    "history": {
+      "title": "Besluitgeschiedenis",
+      "intro": "Elk besluit van deze kring, nieuwste eerst. Elke regel is verzegeld aan de vorige, zodat het verslag te controleren is en niet op je blauwe ogen geloofd hoeft te worden.",
+      "loadOlder": "Oudere regels laden",
+      "beginning": "Dit is het volledige verslag, terug tot de dag dat deze kring begon.",
+      "platformAction": "Ingreep van het platform",
+      "error": {
+        "load": "We konden de besluitgeschiedenis niet laden. Probeer het opnieuw."
+      },
+      "empty": {
+        "title": "Nog niets besloten",
+        "description": "Zodra deze kring de eerste motie indient, wordt hier elke stap van het besluit vastgelegd."
+      },
+      "entry": {
+        "seq": "nr. {seq}",
+        "undated": "Geen datum vastgelegd"
+      },
+      "chain": {
+        "verified": {
+          "title": "Verslag gecontroleerd",
+          "body": "Elke regel past nog steeds bij de vorige. Er is niets gewijzigd of verwijderd sinds het werd vastgelegd."
+        },
+        "broken": {
+          "title": "Dit verslag past niet meer bij zijn zegel",
+          "body": "Er is een regel gewijzigd of verwijderd. Niets hieronder kan gelden als bewijs van wat deze kring heeft besloten. Meld dit alsjeblieft."
+        },
+        "unchecked": {
+          "title": "Niet gecontroleerd",
+          "body": "We konden het verslag zojuist niet controleren, dus we beweren niet dat het ongeschonden is. Probeer het zo nog eens — meestal was de dienst even niet bereikbaar."
+        }
+      },
+      "actor": {
+        "by": "Door {name}",
+        "unresolved": "een lid",
+        "erased": "Door een lid dat zijn account inmiddels heeft verwijderd",
+        "automatic": "Automatisch vastgelegd — niemand heeft gehandeld",
+        "notPublished": "Vastgelegd — individuele stemmen worden nooit gepubliceerd"
+      },
+      "events": {
+        "motionOpened": "Motie ingediend",
+        "motionOpenedTitled": "Ingediend: {title}",
+        "voteCast": "Er is een stem uitgebracht",
+        "motionTallied": "Stemmen geteld",
+        "motionWithdrawn": "Motie ingetrokken",
+        "motionExpired": "Stemming gesloten zonder besluit",
+        "motionEnacted": "Besluit uitgevoerd",
+        "motionEnactmentFailed": "Besluit kon niet worden uitgevoerd",
+        "ruleAmended": "Besluitregel gewijzigd",
+        "limitReached": "Limiet van het abonnement bereikt",
+        "inviteLinkMinted": "Uitnodigingslink aangemaakt",
+        "inviteLinkRevoked": "Uitnodigingslink ingetrokken",
+        "inviteLinkRedeemed": "Iemand is via een uitnodigingslink lid geworden",
+        "circleSuspended": "Kring geschorst door het platform",
+        "circleUnsuspended": "Schorsing opgeheven door het platform",
+        "circleDissolved": "Kring opgeheven door het platform",
+        "unknown": "Vastgelegde gebeurtenis"
+      }
+    },
+    "governance": {
+      "title": "Hoe deze kring beslist",
+      "intro": "De regels die deze kring zichzelf heeft gegeven: waarvoor een stemming nodig is, en wat ze aan de leider of aan elk lid overlaat.",
+      "error": {
+        "load": "We konden de besluitregels niet laden. Probeer het opnieuw."
+      },
+      "empty": {
+        "title": "Nog geen regels vastgelegd",
+        "description": "Deze kring heeft haar besluitregels nog niet gepubliceerd. Zodra dat gebeurt, zie je hier precies wat elk soort besluit vraagt."
+      },
+      "pinned": {
+        "title": "Dit zijn de regels van vandaag",
+        "body": "Een motie houdt de regels waaronder ze is ingediend zolang ze loopt. Een regel hier wijzigen verandert nooit een stemming die al bezig is — precies dat voorkomt dat een wijziging een besluit halverwege herschrijft."
+      },
+      "howItWorks": {
+        "title": "Zo werkt een stemming hier",
+        "quorum": "Het quorum gaat over opkomst, niet over instemming: een onthouding telt als meedoen.",
+        "majority": "De uitslag wordt alleen uit voor- en tegenstemmen berekend. Onthoudingen blijven buiten beschouwing.",
+        "tie": "Een exact gelijkspel komt er nooit vanzelf door.",
+        "silence": "Loopt de termijn af zonder quorum, dan gebeurt er niets. Zwijgen is nooit instemming."
+      },
+      "field": {
+        "proposer": "Wie mag indienen",
+        "passes": "Wat haar aanneemt",
+        "quorum": "Hoeveel er moeten stemmen",
+        "window": "Stemming open",
+        "tie": "Bij gelijkspel"
+      },
+      "proposer": {
+        "member": "Elk lid",
+        "lead": "Alleen leiders"
+      },
+      "value": {
+        "unspecified": "Niet vastgelegd"
+      },
+      "majority": {
+        "unanimous": "Iedereen die stemt moet voor stemmen",
+        "simple": "Meer voor dan tegen",
+        "twoThirds": "Minstens twee derde voor",
+        "threeQuarters": "Minstens drie kwart voor",
+        "custom": "Minstens {n} van elke {d} voor",
+        "note": "Alleen berekend uit voor- en tegenstemmen."
+      },
+      "quorum": {
+        "everyone": "Alle leden moeten stemmen",
+        "half": "De helft van de kring moet stemmen",
+        "twoThirds": "Twee derde van de kring moet stemmen",
+        "threeQuarters": "Drie kwart van de kring moet stemmen",
+        "custom": "{n} van elke {d} leden moeten stemmen",
+        "note": "Een onthouding telt als stemmen.",
+        "today": "Dat zijn vandaag {required} van jullie {total} leden."
+      },
+      "window": {
+        "hours": "{count, plural, =1 {1 uur} other {# uur}}",
+        "days": "{count, plural, =1 {1 dag} other {# dagen}}",
+        "weeks": "{count, plural, =1 {1 week} other {# weken}}",
+        "note": "Gerekend vanaf het moment dat de motie wordt ingediend."
+      },
+      "tie": {
+        "reject": "Ze wordt afgewezen",
+        "lead": "De stem van de leider geeft de doorslag"
+      },
+      "history": {
+        "title": "Hoe deze regel is veranderd",
+        "versions": "{count, plural, =1 {1 versie} other {# versies}}",
+        "version": "Versie {version}",
+        "current": "Van kracht sinds {from}",
+        "range": "{from} tot {until}",
+        "summary": "{majority} · {quorum} · {window} open",
+        "viewMotion": "Bekijk de motie die haar veranderde",
+        "seeded": "De startregel van de kring"
+      },
+      "motionKind": {
+        "ADMIT_MEMBER": "Een nieuw lid toelaten",
+        "REMOVE_MEMBER": "Een lid verwijderen",
+        "APPOINT_LEAD": "Een leider aanstellen",
+        "REMOVE_LEAD": "Een leider ontheffen",
+        "AMEND_RULES": "Deze regels wijzigen",
+        "CHANGE_JOIN_MODE": "Wijzigen hoe mensen lid worden",
+        "SET_DISCOVERABLE": "Wijzigen of de kring vindbaar is",
+        "CREATE_PROJECT": "Een project starten",
+        "CLOSE_PROJECT": "Een project afsluiten",
+        "CREATE_CHALLENGE": "Een challenge starten",
+        "VERIFY_CHALLENGE_ENTRY": "Een challenge-inzending bevestigen",
+        "CHANGE_PLAN": "Het abonnement van de kring wijzigen",
+        "DISSOLVE_CIRCLE": "De kring opheffen",
+        "CUSTOM": "Elk ander besluit"
+      }
+    },
+    "plan": {
+      "title": "Abonnement en gebruik",
+      "loadError": "We konden je abonnement niet laden. Probeer het opnieuw.",
+      "partialLoad": "Een deel van deze pagina is niet geladen. Wat je ziet is actueel — probeer het opnieuw voor de rest.",
+      "membersOnly": {
+        "title": "Alleen voor leden",
+        "description": "Het abonnement van een kring en het gebruik ervan zijn alleen zichtbaar voor de leden. Je kring heeft sowieso een abonnement — elke kring heeft er altijd een."
+      },
+      "price": {
+        "free": "Gratis",
+        "perMonth": "{price} / maand",
+        "perYear": "{price} / jaar",
+        "oneTime": "{price} eenmalig",
+        "flat": "{price}",
+        "yearlyNote": "De jaarprijs is een eigen prijs, niet twaalf maandprijzen bij elkaar."
+      },
+      "current": {
+        "heading": "Je kring gebruikt",
+        "unnamedPlan": "Je abonnement",
+        "status": {
+          "ACTIVE": "Actief",
+          "PAST_DUE": "Betaling te laat",
+          "CANCELLED": "Loopt af",
+          "EXPIRED": "Verlopen"
+        },
+        "renewsLabel": "Verlengt op",
+        "endingLabel": "Gaat over naar gratis op",
+        "sinceLabel": "Op dit abonnement sinds",
+        "paidByLabel": "Betaald door",
+        "payerNote": "Betalen voor de kring geeft geen extra zeggenschap. Wie betaalt heeft dezelfde ene stem als iedereen en kan niets alleen beslissen.",
+        "alwaysOnAPlan": "Elke kring heeft altijd een abonnement. Het gratis abonnement is er een, niet het ontbreken ervan.",
+        "moveToFree": "Terug naar het gratis abonnement"
+      },
+      "allowance": {
+        "heading": "Wat je abonnement dekt",
+        "intro": "En wat jullie nu gebruiken, zodat je vooraf ziet waarom iets geweigerd zou worden.",
+        "unlimited": "Onbeperkt",
+        "covered": "{limit} gedekt",
+        "usedOf": "{current} van {limit}",
+        "usedUnlimited": "{current} in gebruik, onbeperkt",
+        "megabytes": "{value} MB",
+        "full": "Vol",
+        "on": "Aan",
+        "off": "Uit",
+        "window": "{days, plural, =1 {Laatste dag} other {Laatste # dagen}}",
+        "windowUnlimited": "De hele geschiedenis",
+        "windowNote": "Dit verandert alleen hoe ver de chat wordt teruggetoond. Er wordt niets verwijderd, en een langere periode brengt de oudere berichten meteen terug.",
+        "brandingOffNote": "Je eigen kleuren zijn bewaard en komen meteen terug bij een abonnement dat ze bevat. Zolang toont je kring gewoon het standaarduiterlijk.",
+        "name": {
+          "MAX_MEMBERS": "Leden",
+          "MAX_ACTIVE_PROJECTS": "Lopende projecten",
+          "MAX_ACTIVE_CHALLENGES": "Lopende challenges",
+          "CHAT_HISTORY_DAYS": "Chatgeschiedenis",
+          "STORAGE_MB": "Opslag",
+          "CUSTOM_BRANDING": "Eigen kleuren"
+        },
+        "locked": {
+          "MAX_MEMBERS": "Je hebt {current} leden. Je abonnement dekt er {limit}. Er wordt niemand verwijderd — je kunt er alleen geen nieuwe bij tot je weer onder {limit} zit of terug op het grotere abonnement.",
+          "MAX_ACTIVE_PROJECTS": "Er lopen {current} projecten. Je abonnement dekt er {limit}. Er wordt niets afgesloten of verwijderd — je kunt er alleen geen nieuw starten tot er een klaar is of je abonnement verandert.",
+          "MAX_ACTIVE_CHALLENGES": "Er lopen {current} challenges. Je abonnement dekt er {limit}. Er wordt niets geannuleerd — je kunt er alleen geen nieuwe starten tot er een afloopt of je abonnement verandert.",
+          "STORAGE_MB": "Je gebruikt {current} van {limit}. Er wordt niets verwijderd — je kunt alleen niets nieuws uploaden tot er ruimte vrijkomt of je abonnement verandert."
+        }
+      },
+      "billing": {
+        "heading": "Betaalde abonnementen zetten we voorlopig met de hand klaar",
+        "body": "We kunnen nog geen betaling voor een kring in de app aannemen. Gratis abonnementen wisselen meteen; voor al het andere: laat ons weten wat je kring nodig heeft, dan zetten wij het klaar. Ondertussen verandert er niets aan je kring.",
+        "cta": "Neem contact op"
+      },
+      "catalogue": {
+        "heading": "Alle abonnementen",
+        "intro": "Abonnementen worden op maat samengesteld: elk heeft zijn eigen set limieten en is geen trede hoger of lager dan de andere.",
+        "current": "Huidig abonnement",
+        "default": "Standaard",
+        "switchTo": "Overstappen naar dit abonnement",
+        "notPurchasable": "Dit abonnement is nog niet zelf af te sluiten — wij zetten het voor je klaar.",
+        "contactUs": "Neem contact op",
+        "leadOnly": "Alleen een leider kan het abonnement van de kring wijzigen.",
+        "unavailable": "De lijst met abonnementen is nu niet beschikbaar."
+      },
+      "change": {
+        "title": "Overstappen naar {plan}?",
+        "noDirection": "Dit is geen upgrade en geen downgrade — gewoon een andere set limieten.",
+        "increases": "Alles wat dit abonnement verhoogt, geldt meteen.",
+        "decreases": "Alles wat het verlaagt gaat simpelweg op slot. Je kring houdt elk lid, project en elke challenge die er al is, en kan er pas weer nieuwe bij zodra je onder de nieuwe limiet zit.",
+        "willLockHeading": "Dit zou meteen vol zijn:",
+        "willLockRow": "{name}: nu {current}, {limit} gedekt",
+        "willLockReassurance": "Niets uit deze lijst wordt verwijderd. Alleen nieuwe toevoegingen wachten.",
+        "confirm": "Abonnement wijzigen",
+        "back": "Nu niet",
+        "submitting": "Bezig met wisselen…",
+        "success": "Je kring zit nu op {plan}.",
+        "error": "We konden het abonnement niet wijzigen. Er is niets aan je kring veranderd — probeer het opnieuw."
+      },
+      "cancel": {
+        "title": "Terug naar het gratis abonnement?",
+        "body": "Je kring blijft precies zoals hij is — dezelfde leden, dezelfde projecten, dezelfde challenges, dezelfde chat. Hij gaat alleen over naar het gratis abonnement.",
+        "locksNotEvicts": "Zit er iets boven een limiet van het gratis abonnement, dan gaat die limiet simpelweg op slot: er wordt niets verwijderd, en je kunt er weer nieuwe bij zodra je eronder zit.",
+        "stayUntil": "Blijf op dit abonnement tot {date}",
+        "confirmNow": "Nu overstappen",
+        "keep": "Dit abonnement houden",
+        "submitting": "Bezig met wisselen…",
+        "successNow": "Je kring zit op het gratis abonnement.",
+        "successLater": "Je kring gaat aan het einde van deze periode over naar het gratis abonnement.",
+        "error": "We konden het abonnement niet wijzigen. Er is niets aan je kring veranderd — probeer het opnieuw."
+      }
+    },
+    "invites": {
+      "title": "Uitnodigingslinks",
+      "description": "Eén link waarmee anderen lid kunnen worden, totdat hij verloopt of op is. Alleen een leider kan er een maken.",
+      "loading": "Uitnodigingslinks laden...",
+      "loadError": "We konden de uitnodigingslinks van deze kring niet laden.",
+      "empty": "Nog geen uitnodigingslinks.",
+      "mint": {
+        "maxUses": "Aantal keer",
+        "maxUsesHint": "1-{max} personen",
+        "expiry": "Verloopt",
+        "expiryOption": {
+          "24": "Over 1 dag",
+          "168": "Over 7 dagen",
+          "336": "Over 14 dagen"
+        },
+        "submit": "Link maken",
+        "capReached": "Deze kring heeft al het maximum van {max} actieve links. Trek er een in om een nieuwe te maken.",
+        "capRemaining": "{live} van {max} actieve links in gebruik."
+      },
+      "minted": {
+        "title": "Kopieer deze link nu",
+        "shownOnce": "Dit is de enige keer dat je hem ziet. Ben je hem kwijt, trek de link dan in en maak een nieuwe.",
+        "copy": "Link kopiëren",
+        "copied": "Gekopieerd",
+        "copiedHint": "De link staat op je klembord.",
+        "copyFailed": "We konden je klembord niet bereiken. Selecteer de link hierboven en kopieer hem met de hand.",
+        "dismiss": "Ik heb hem gekopieerd"
+      },
+      "link": {
+        "status": {
+          "ACTIVE": "Actief",
+          "REVOKED": "Ingetrokken",
+          "EXPIRED": "Verlopen",
+          "EXHAUSTED": "Volledig gebruikt"
+        },
+        "remaining": "Nog {remaining} van {max} keer te gebruiken",
+        "used": "{used} van {max} keer gebruikt",
+        "revoke": "Intrekken",
+        "revokeConfirm": "Definitief intrekken?",
+        "revokeYes": "Intrekken",
+        "revokeCancel": "Behouden",
+        "revokedOn": "Ingetrokken op {date}",
+        "revokedNoDate": "Ingetrokken",
+        "expiredOn": "Verlopen op {date}",
+        "expiredNoDate": "Verlopen"
+      },
+      "countdown": {
+        "daysHours": "Nog {days} d {hours} u",
+        "days": "Nog {days} dagen",
+        "hoursMinutes": "Nog {hours} u {minutes} min",
+        "minutes": "Nog {minutes} min",
+        "expiresAt": "Verloopt op {datetime}",
+        "expired": "Verlopen"
+      }
+    },
+    "join": {
+      "working": {
+        "title": "Je wordt lid van de kring...",
+        "description": "We controleren je uitnodigingslink."
+      },
+      "joined": {
+        "title": "Je bent binnen",
+        "description": "Je bent nu lid van {circle}. We brengen je er meteen naartoe."
+      },
+      "already": {
+        "title": "Je bent al lid",
+        "description": "Deze link heb je niet nodig. Je hoort al bij deze kring, dus we brengen je er meteen naartoe."
+      },
+      "open": "Kring openen",
+      "myCircles": "Naar mijn kringen",
+      "retry": "Opnieuw proberen",
+      "askForNewLink": "Vraag degene die de link deelde om een nieuwe uitnodigingslink.",
+      "refused": {
+        "MISSING_TOKEN": {
+          "title": "Deze link is onvolledig",
+          "description": "De uitnodigingscode ontbreekt in het adres. Links worden vaak afgekapt als ze in een chat worden geplakt. Vraag hem opnieuw en open hem volledig."
+        },
+        "MALFORMED_TOKEN": {
+          "title": "Deze link lijkt afgekapt",
+          "description": "De uitnodigingscode is niet compleet. Dat gebeurt meestal als een link in een bericht over twee regels loopt. Vraag hem opnieuw en open het hele adres."
+        },
+        "INVALID": {
+          "title": "Deze uitnodigingslink is niet geldig",
+          "description": "We konden hem aan geen enkele kring koppelen. Misschien is hij verkeerd overgenomen of onderweg afgekapt."
+        },
+        "EXPIRED": {
+          "title": "Deze uitnodigingslink is verlopen",
+          "description": "Uitnodigingslinks gelden maar een paar dagen. Deze is over de datum en kan niet meer worden gebruikt."
+        },
+        "REVOKED": {
+          "title": "Deze uitnodigingslink is ingetrokken",
+          "description": "Een leider van de kring heeft deze link ingetrokken. Wie er al via de link lid is geworden, blijft lid, maar de link zelf werkt niet meer."
+        },
+        "EXHAUSTED": {
+          "title": "Deze uitnodigingslink is opgebruikt",
+          "description": "Elke uitnodigingslink kan een beperkt aantal keer worden gebruikt, en dat aantal is bereikt."
+        },
+        "CIRCLE_FULL": {
+          "title": "Deze kring is vol",
+          "description": "Er was niets mis met je link. De kring heeft alleen het maximale aantal leden bereikt dat het abonnement toestaat. Een nieuwe link helpt niet: iemand in de kring moet ruimte maken of overstappen naar een groter abonnement."
+        },
+        "CIRCLE_UNAVAILABLE": {
+          "title": "Deze kring neemt geen nieuwe leden aan",
+          "description": "Er was niets mis met je link, maar de kring is op dit moment niet open. Hiervandaan kun je niets doen: kijk later nog eens of vraag iemand uit de kring."
+        },
+        "UNKNOWN": {
+          "title": "We konden deze link niet gebruiken",
+          "description": "Er ging iets mis onderweg naar de kring. Opnieuw proberen helpt vaak."
+        }
+      }
     }
   }
 }

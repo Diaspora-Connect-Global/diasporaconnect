@@ -13,11 +13,14 @@ import {
 import { GET_CONVERSATIONS } from '@/services/gql/messaging';
 import type {
   CircleChallengesData,
+  CircleChallengesVariables,
   CircleGoalProgressData,
   CircleMotionsData,
+  CircleMotionsVariables,
   CircleProjectGoalsData,
   CircleProjectGoal,
   CircleProjectsData,
+  CircleProjectsVariables,
 } from '@/services/gql/types/circles';
 import type { GetConversationsData } from '@/services/gql/types/messaging';
 
@@ -100,7 +103,7 @@ function headlineGoal(
 ): CircleProjectGoal | null {
   if (!goals?.length) return null;
   return (
-    goals.find((g) => g.scope === 'SHARED' && g.status === 'GOAL_OPEN') ?? null
+    goals.find((g) => g.scope === 'SHARED' && g.status === 'OPEN') ?? null
   );
 }
 
@@ -115,19 +118,19 @@ function soonestDeadline(deadlines: (string | null | undefined)[]): string | nul
 }
 
 export function useCircleSignals(circleId: string): CircleSignals {
-  const motions = useQuery<CircleMotionsData>(CIRCLE_MOTIONS, {
+  const motions = useQuery<CircleMotionsData, CircleMotionsVariables>(CIRCLE_MOTIONS, {
     variables: { circleId, status: 'OPEN', limit: OPEN_MOTION_PAGE, offset: 0 },
     skip: !circleId,
     ...SIGNAL_QUERY_OPTIONS,
   });
 
-  const challenges = useQuery<CircleChallengesData>(CIRCLE_CHALLENGES, {
+  const challenges = useQuery<CircleChallengesData, CircleChallengesVariables>(CIRCLE_CHALLENGES, {
     variables: { circleId, status: 'CHALLENGE_ACTIVE', limit: 1, offset: 0 },
     skip: !circleId,
     ...SIGNAL_QUERY_OPTIONS,
   });
 
-  const projects = useQuery<CircleProjectsData>(CIRCLE_PROJECTS, {
+  const projects = useQuery<CircleProjectsData, CircleProjectsVariables>(CIRCLE_PROJECTS, {
     variables: { circleId, status: 'PROJECT_ACTIVE', limit: 1, offset: 0 },
     skip: !circleId,
     ...SIGNAL_QUERY_OPTIONS,

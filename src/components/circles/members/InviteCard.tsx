@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
-import { Check, Link2, Loader2, Send } from 'lucide-react';
+import { Check, Link2, Loader2, Send, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -17,14 +17,24 @@ export interface InviteCardProps {
 }
 
 /**
- * Invite someone to the circle.
+ * Invite ONE named person to the circle.
  *
- * "Share a link" copies the circle's own URL. There is deliberately no invite
- * TOKEN in the API — `inviteToCircle` takes a person (`inviteeUserId`) or a
- * contact (`inviteeContact`), never a redeemable link — so the copied URL is
- * exactly what it says it is: a link to the circle. Whether it gets the
- * recipient in is the circle's `joinMode`, which is the circle's decision to
- * make, not this button's.
+ * ── THIS IS NOT THE INVITE-LINK PANEL, AND THE DIFFERENCE IS THE POINT ──────
+ * `inviteToCircle` addresses somebody: a user id or a contact, an invitation
+ * that lands in their inbox and can be withdrawn. It is open to every member.
+ * `InviteLinksPanel` mints a BEARER credential that whoever holds the URL can
+ * use, that the circle cannot see the holders of, and that survives being
+ * forwarded — which is why only a lead may create one. The two sit together
+ * because they answer the same question, and are kept visibly distinct because
+ * they are not the same permission.
+ *
+ * ── "COPY CIRCLE LINK" IS NOT AN INVITE LINK ────────────────────────────────
+ * It copies this circle's own page URL — no token, nothing redeemable. It used
+ * to be described here as unambiguous on the grounds that the API had no invite
+ * tokens at all; that stopped being true the day `mintCircleInviteLink`
+ * shipped, so the label now says which link it is rather than relying on there
+ * being only one kind. Whether that URL gets the recipient in is the circle's
+ * `joinMode`, which is the circle's decision to make, not this button's.
  *
  * The contact field is labelled rather than placeholder-only: the label is the
  * one string this card has for the action, and a visible label survives being
@@ -47,7 +57,7 @@ export function InviteCard({ circleId }: InviteCardProps) {
     try {
       await navigator.clipboard.writeText(url);
       setUncopiedLink(null);
-      toast.success(t('linkCopied'));
+      toast.success(t('circleLinkCopied'));
     } catch {
       // Clipboard access is refused outside a secure context and inside some
       // embedded browsers. Claiming success there would be a silent no-op, so
@@ -62,22 +72,30 @@ export function InviteCard({ circleId }: InviteCardProps) {
     if (!trimmed || loading) return;
 
     // `inviteeContact` is the path for someone who is not on the platform yet;
-    // an existing user is matched server-side. A GraphQL failure is already
-    // surfaced by the client's global error link, so it is not re-toasted here.
-    const { data } = await invite({
-      variables: { input: { circleId, inviteeContact: trimmed } },
-    });
+    // an existing user is matched server-side.
+    try {
+      const { data } = await invite({
+        variables: { input: { circleId, inviteeContact: trimmed } },
+      });
 
-    if (data?.inviteToCircle) {
-      setInvited(trimmed);
-      setContact('');
+      if (data?.inviteToCircle) {
+        setInvited(trimmed);
+        setContact('');
+      }
+    } catch {
+      // The client's global ErrorLink already toasts GraphQL failures; catching
+      // here only stops the rejection escaping the submit handler unhandled.
+      // Without it a refused invite — a non-member calling a lead-gated
+      // mutation, a malformed address — surfaced as an unhandled promise
+      // rejection, and the field kept its text with no sign anything failed.
+      // Same shape as `handleMint` / `handleRevoke` in `InviteLinksPanel`.
     }
   }
 
   return (
     <section className="rounded-xl border border-border-subtle p-4">
       <div className="flex items-start gap-3">
-        <Link2
+        <UserPlus
           aria-hidden="true"
           className="mt-0.5 size-5 shrink-0 text-text-brand"
         />
@@ -138,7 +156,7 @@ export function InviteCard({ circleId }: InviteCardProps) {
         className="label-small mt-3 flex cursor-pointer items-center gap-2 text-text-brand"
       >
         <Link2 className="size-4 shrink-0" aria-hidden="true" />
-        {t('copyLink')}
+        {t('copyCircleLink')}
       </button>
 
       {uncopiedLink && (

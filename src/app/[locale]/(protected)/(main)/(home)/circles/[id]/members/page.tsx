@@ -6,16 +6,39 @@ import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 
-import { InviteCard, MembersList } from '@/components/circles/members';
+import {
+  InviteCard,
+  InviteLinksPanel,
+  MembersList,
+  PastMembersSection,
+} from '@/components/circles/members';
 import { ErrorState } from '@/components/feedback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
 import { useRouter } from '@/i18n/navigation';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
-import { CIRCLE_MEMBERS } from '@/services/gql/circles';
-import type { CircleMembersData } from '@/services/gql/types/circles';
+import { CIRCLE_MEMBERS, MY_CIRCLE_MEMBERSHIP } from '@/services/gql/circles';
+import { CIRCLE_PAST_MEMBERS } from '@/services/gql/circles-invites';
+import type {
+  CircleMembersData,
+  CircleMembersVariables,
+  MyCircleMembershipData,
+  MyCircleMembershipVariables,
+} from '@/services/gql/types/circles';
+import type {
+  CirclePastMembersData,
+  CirclePastMembersVariables,
+} from '@/services/gql/types/circles-invites';
 import { useChatStore } from '@/store/ChatStore';
 import { useUserStore } from '@/store/useUserStore';
+
+/**
+ * Past members accumulate for the life of the circle while active membership is
+ * entitlement-capped, so this is the one list on the screen that grows without
+ * bound. Capped per reason and treated as "the most recent"; a circle that
+ * outgrows it needs paging, not a bigger number.
+ */
+const PAST_MEMBERS_LIMIT = 25;
 
 function MembersSkeleton() {
   return (
@@ -33,16 +56,30 @@ function MembersSkeleton() {
 }
 
 /**
- * Circle members.
+ * Circle members — who is here, who used to be, and how to let someone in.
  *
- * This screen is a ROSTER, not a management console. The only mutation it
- * reaches is `inviteToCircle` — adding someone is not a decision about an
- * existing member. Everything that changes somebody else's standing (removal,
- * appointing a lead) is the enactment of a motion, and the API offers no
- * mutation for it at all.
+ * ── STILL A ROSTER, NOT A MANAGEMENT CONSOLE ────────────────────────────────
+ * Nothing on this screen changes an existing member's standing. There is no
+ * remove control and no promote control, because the API offers no mutation for
+ * either: removing somebody is the ENACTMENT of a passed REMOVE_MEMBER motion,
+ * so a button here would be either dead or a lie about who decided. If removal
+ * is ever surfaced from this screen it must read "Propose removal", open a
+ * motion, and land the user on that motion.
  *
- * `leaveCircle` belongs here too and is deliberately not wired: the members
- * namespace has no label for the action. See the note on `MemberRow`.
+ * The mutations this screen does reach are all about ADMISSION, which is not a
+ * decision about anyone already inside: `inviteToCircle` (any member, one named
+ * person) and `mintCircleInviteLink` / `revokeCircleInviteLink` (lead only, a
+ * shareable bearer credential).
+ *
+ * ── FORMER MEMBERS ARE PART OF THE ROSTER ───────────────────────────────────
+ * `circle_membership` rows are never deleted; a departure rewrites the status.
+ * Showing only the active half let this screen quietly assert the circle had
+ * always been its current membership, with the people it voted out — and the
+ * motions that decided it — simply absent. Each ending is now labelled with its
+ * reason, and a removal links to the motion that caused it.
+ *
+ * `leaveCircle` still belongs here and is still not wired: the members
+ * namespace has no label for the action. Reported rather than invented.
  */
 export default function CircleMembersPage() {
   const params = useParams();
@@ -55,7 +92,7 @@ export default function CircleMembersPage() {
   const circleId = typeof params.id === 'string' ? params.id : '';
   const currentUserId = useUserStore((state) => state.user?.userId);
 
-  const { data, loading, error, refetch } = useQuery<CircleMembersData>(
+  const { data, loading, error, refetch } = useQuery<CircleMembersData, CircleMembersVariables>(
     CIRCLE_MEMBERS,
     {
       variables: { circleId, status: 'MEMBERSHIP_ACTIVE' },
@@ -65,9 +102,40 @@ export default function CircleMembersPage() {
 
   const members = data?.circleMembers ?? [];
 
+  /*
+   * Former members, in one round trip (three aliased calls). Failures degrade
+   * to no section rather than taking the page down: the active roster is what
+   * this screen is for, and history is worth less than the list it annotates.
+   */
+  const { data: pastData } = useQuery<
+    CirclePastMembersData,
+    CirclePastMembersVariables
+  >(CIRCLE_PAST_MEMBERS, {
+    variables: { circleId, limit: PAST_MEMBERS_LIMIT },
+    skip: !circleId,
+    errorPolicy: 'all',
+  });
+
+  /*
+   * Advisory only — the gateway enforces the same gate and refuses the link
+   * operations outright for anyone else. Used to keep the LEAD-only panel, and
+   * its LEAD-only query, off every ordinary member's screen: an unskipped
+   * `circleInviteLinks` would put a permission error in front of them.
+   */
+  const { data: membershipData } = useQuery<
+    MyCircleMembershipData,
+    MyCircleMembershipVariables
+  >(MY_CIRCLE_MEMBERSHIP, {
+    variables: { circleId },
+    skip: !circleId,
+    errorPolicy: 'all',
+  });
+  const isLead = membershipData?.myCircleMembership?.isLead ?? false;
+
   // Circle membership is entitlement-capped (12 on the free plan), which is the
   // precondition `useCircleUsers` documents for resolving identities one call
-  // at a time. Do not reuse this on an unbounded list.
+  // at a time. Do not reuse this on an unbounded list. Former members are
+  // resolved separately, and only once their section is opened.
   const { usersById } = useCircleUsers(members.map((member) => member.userId));
 
   /*
@@ -133,7 +201,22 @@ export default function CircleMembersPage() {
               currentUserId={currentUserId}
               onSendMessage={handleSendMessage}
             />
+
+            <PastMembersSection
+              circleId={circleId}
+              left={pastData?.left ?? []}
+              removed={pastData?.removed ?? []}
+              suspended={pastData?.suspended ?? []}
+            />
+
             <InviteCard circleId={circleId} />
+
+            {/*
+              Minting a shareable link is a lead's call, not a member's: an
+              invitation names its addressee, a link is a bearer credential that
+              opens the circle to an audience the rest never agreed to.
+            */}
+            {isLead && <InviteLinksPanel circleId={circleId} />}
           </div>
         )}
       </div>

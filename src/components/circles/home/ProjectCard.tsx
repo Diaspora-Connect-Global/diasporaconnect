@@ -54,7 +54,7 @@ interface ContributionsData {
  */
 function pickHeadlineGoal(goals: CircleProjectGoal[]): CircleProjectGoal | null {
   return (
-    goals.find((g) => g.scope === 'SHARED' && g.status === 'GOAL_OPEN') ??
+    goals.find((g) => g.scope === 'SHARED' && g.status === 'OPEN') ??
     goals.find((g) => g.scope === 'SHARED') ??
     goals[0] ??
     null

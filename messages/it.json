@@ -2878,17 +2878,31 @@
       "joinedOn": "Iscritto il {date}",
       "noResults": "Nessun membro corrisponde a «{query}».",
       "invite": {
-        "title": "Invita nella cerchia",
-        "description": "Condividi un link o invita qualcuno singolarmente.",
+        "title": "Invita",
+        "description": "Invita qualcuno via e-mail o telefono, oppure condividi la pagina della cerchia.",
         "copyLink": "Copia il link",
         "linkCopied": "Link copiato",
-        "invitePerson": "Invita qualcuno"
+        "invitePerson": "Invita qualcuno",
+        "copyCircleLink": "Copia il link della cerchia",
+        "circleLinkCopied": "Link della cerchia copiato"
       },
       "actions": {
         "viewProfile": "Vedi il profilo",
         "message": "Invia un messaggio",
         "makeLead": "Rendi referente",
         "remove": "Rimuovi dalla cerchia"
+      },
+      "past": {
+        "title": "{count, plural, =1 {1 ex membro} other {# ex membri}}",
+        "description": "Tutte le persone che hanno fatto parte di questa cerchia e il motivo per cui non ne fanno più parte.",
+        "endedOn": "il {date}",
+        "viewMotion": "Vedi la mozione all'origine di questa rimozione",
+        "platformNote": "Un provvedimento della piattaforma sull'account — non una decisione di questa cerchia.",
+        "reason": {
+          "LEFT": "Ha lasciato la cerchia",
+          "REMOVED": "Rimozione per mozione",
+          "SUSPENDED": "Sospensione della piattaforma"
+        }
       }
     },
     "leaderboard": {
@@ -2990,6 +3004,449 @@
         "cta": "Richiedi accesso"
       },
       "joinChallenge": "Non siamo riusciti ad aggiungerti a questa sfida"
+    },
+    "settings": {
+      "title": "Impostazioni della cerchia",
+      "loadFailed": "Non siamo riusciti a caricare queste impostazioni. Riprova.",
+      "notAMember": "Solo i membri possono aprire le impostazioni di una cerchia. Chiedi a qualcuno di dentro di invitarti.",
+      "statusNotice": {
+        "suspended": "Questa cerchia è stata sospesa dalla piattaforma, quindi per ora le sue impostazioni sono in sola lettura.",
+        "archived": "Questa cerchia è archiviata. Non è andato perso nulla, ma le impostazioni restano in sola lettura finché non viene riaperta.",
+        "dissolved": "Questa cerchia è stata sciolta. Il suo archivio resta, ma non si può più modificare nulla."
+      },
+      "profile": {
+        "title": "Profilo",
+        "description": "Come si presenta la tua cerchia, ovunque compaia.",
+        "readOnlyDescription": "Come si presenta al momento questa cerchia.",
+        "leadOnlyNote": "Solo una guida può modificare il profilo.",
+        "nameLabel": "Nome della cerchia",
+        "namePlaceholder": "es. Accra Founders",
+        "nameRequired": "Dai un nome alla tua cerchia.",
+        "tooLong": "Non superare i {max} caratteri.",
+        "handleLabel": "Identificativo",
+        "handlePlaceholder": "accra-founders",
+        "handleHint": "Lettere minuscole, numeri, _ e -, con lettera o numero all’inizio e alla fine. Fino a {max} caratteri.",
+        "handleInvalid": "Usa lettere minuscole, numeri, _ o -, con lettera o numero all’inizio e alla fine.",
+        "taglineLabel": "Slogan",
+        "taglinePlaceholder": "Una riga su questa cerchia",
+        "descriptionLabel": "Informazioni",
+        "descriptionPlaceholder": "A cosa serve questa cerchia e cosa ci succede.",
+        "notClearable": "Puoi cambiarlo, ma non ancora svuotarlo. Scrivi qualcos’altro, oppure rimetti il testo di prima.",
+        "imageReplaceOnly": "Le immagini si possono sostituire, ma non ancora rimuovere.",
+        "imageFailed": "L'immagine non è stata caricata, quindi non è stato salvato nulla. Riprova.",
+        "nothingToSave": "Non è ancora cambiato nulla.",
+        "save": "Salva le modifiche",
+        "saving": "Salvataggio…",
+        "saved": "Profilo aggiornato.",
+        "saveFailed": "Non siamo riusciti a salvare le tue modifiche. Riprova."
+      },
+      "discovery": {
+        "title": "Trovare ed entrare",
+        "description": "Due impostazioni separate: se le persone possono trovare questa cerchia, e come ci entrano.",
+        "readOnlyDescription": "Come si trova al momento questa cerchia e come ci si entra.",
+        "discoverabilityQuestion": "Le persone possono trovare questa cerchia?",
+        "discoverabilityHelp": "Questo determina se la cerchia compare nella ricerca e in «Scopri».",
+        "discoverableTitle": "Visibile",
+        "discoverableDescription": "Chiunque può imbattersi in questa cerchia.",
+        "hiddenTitle": "Nascosta",
+        "hiddenDescription": "La vedrà solo chi ha il link.",
+        "accessQuestion": "Come si entra?",
+        "accessHelp": "Separato dalla visibilità: una cerchia nascosta può comunque accettare richieste.",
+        "requestTitle": "Su richiesta",
+        "requestDescription": "Le persone chiedono di entrare e la cerchia decide insieme.",
+        "inviteTitle": "Solo su invito",
+        "inviteDescription": "Possono entrare solo le persone invitate.",
+        "discoverabilitySaved": "Visibilità aggiornata.",
+        "joinModeSaved": "Modalità di ingresso aggiornata.",
+        "saveFailed": "Non siamo riusciti a cambiare questa impostazione. Riprova.",
+        "leadNote": "Puoi cambiare queste due impostazioni perché sei una guida. Anche qualsiasi membro può chiedere una modifica aprendo una mozione, e la cerchia decide insieme.",
+        "proposeInstead": "Solo una guida può cambiarle direttamente. Puoi chiedere la modifica alla cerchia aprendo una mozione."
+      },
+      "archive": {
+        "title": "Archivia questa cerchia",
+        "description": "Metti via la cerchia senza perderne niente.",
+        "statusArchived": "Archiviata",
+        "alreadyArchivedDescription": "Questa cerchia è già archiviata.",
+        "alreadyArchivedBody": "C’è ancora tutto — membri, decisioni, progetti e cronologia. Riaprire una cerchia non si può ancora fare da questa schermata; scrivi al supporto se ti serve.",
+        "bulletKept": "Non viene cancellato nulla. Membri, decisioni, progetti e cronologia restano esattamente come sono.",
+        "bulletQuiet": "La cerchia smette di essere un luogo attivo: esce dalla scoperta e non accoglie più nuovi membri.",
+        "bulletReversible": "Archiviare non è definitivo. Una cerchia si può riaprire — solo non ancora da questa schermata.",
+        "button": "Archivia la cerchia",
+        "dialogTitle": "Archiviare {name}?",
+        "dialogDescription": "Così la cerchia viene chiusa. Non viene cancellata, e niente di ciò che contiene va perso.",
+        "cancel": "Lasciala aperta",
+        "confirm": "Archivia la cerchia",
+        "archiving": "Archiviazione…",
+        "archived": "Cerchia archiviata.",
+        "failed": "Non siamo riusciti ad archiviare questa cerchia. Riprova.",
+        "leadOnlyBody": "Solo una guida può archiviare questa cerchia.",
+        "dissolvedBody": "Questa cerchia è stata sciolta, ed è definitivo. Non può più essere archiviata né riaperta.",
+        "proposeInstead": "Puoi chiedere alla cerchia di chiudere aprendo una mozione: decidono insieme i membri."
+      }
+    },
+    "history": {
+      "title": "Storico delle decisioni",
+      "intro": "Ogni decisione presa da questa cerchia, dalla più recente. Ogni voce è sigillata a quella precedente: lo storico si verifica, non si prende sulla fiducia.",
+      "loadOlder": "Carica voci precedenti",
+      "beginning": "Questo è lo storico completo, fino al giorno in cui è nata questa cerchia.",
+      "platformAction": "Intervento della piattaforma",
+      "error": {
+        "load": "Non siamo riusciti a caricare lo storico delle decisioni. Riprova."
+      },
+      "empty": {
+        "title": "Ancora nessuna decisione",
+        "description": "Quando questa cerchia presenterà la prima mozione, ogni passaggio della decisione verrà registrato qui."
+      },
+      "entry": {
+        "seq": "n. {seq}",
+        "undated": "Nessuna data registrata"
+      },
+      "chain": {
+        "verified": {
+          "title": "Storico verificato",
+          "body": "Ogni voce corrisponde ancora a quella precedente. Nulla è stato modificato o rimosso da quando è stato registrato."
+        },
+        "broken": {
+          "title": "Lo storico non corrisponde più al suo sigillo",
+          "body": "Una voce è stata modificata o rimossa. Nulla di quanto segue può valere come prova di ciò che questa cerchia ha deciso. Ti chiediamo di segnalarlo."
+        },
+        "unchecked": {
+          "title": "Non verificato",
+          "body": "Non siamo riusciti a verificare lo storico in questo momento, quindi non affermiamo che sia intatto. Riprova tra poco: di solito il servizio era solo momentaneamente irraggiungibile."
+        }
+      },
+      "actor": {
+        "by": "Da {name}",
+        "unresolved": "un membro",
+        "erased": "Da un membro che ha poi eliminato il proprio account",
+        "automatic": "Registrato automaticamente — nessuno è intervenuto",
+        "notPublished": "Registrato — i voti individuali non vengono mai pubblicati"
+      },
+      "events": {
+        "motionOpened": "Mozione presentata",
+        "motionOpenedTitled": "Presentata: {title}",
+        "voteCast": "È stato espresso un voto",
+        "motionTallied": "Voti conteggiati",
+        "motionWithdrawn": "Mozione ritirata",
+        "motionExpired": "Votazione chiusa senza decisione",
+        "motionEnacted": "Decisione applicata",
+        "motionEnactmentFailed": "Non è stato possibile applicare la decisione",
+        "ruleAmended": "Regola di governo modificata",
+        "limitReached": "Limite del piano raggiunto",
+        "inviteLinkMinted": "Link d'invito creato",
+        "inviteLinkRevoked": "Link d'invito revocato",
+        "inviteLinkRedeemed": "Qualcuno è entrato con un link d'invito",
+        "circleSuspended": "Cerchia sospesa dalla piattaforma",
+        "circleUnsuspended": "Sospensione revocata dalla piattaforma",
+        "circleDissolved": "Cerchia sciolta dalla piattaforma",
+        "unknown": "Evento registrato"
+      }
+    },
+    "governance": {
+      "title": "Come decide questa cerchia",
+      "intro": "Le regole che questa cerchia si è data: cosa richiede un voto e cosa lascia al referente o a ogni membro.",
+      "error": {
+        "load": "Non siamo riusciti a caricare le regole di governo. Riprova."
+      },
+      "empty": {
+        "title": "Nessuna regola definita",
+        "description": "Questa cerchia non ha ancora pubblicato le sue regole di governo. Quando lo farà, vedrai esattamente cosa richiede ogni tipo di decisione."
+      },
+      "pinned": {
+        "title": "Queste sono le regole di oggi",
+        "body": "Una mozione mantiene le regole in vigore al momento della presentazione fino alla sua chiusura. Modificare una regola qui non cambia mai una votazione già in corso: è proprio questo a impedire che una modifica riscriva una decisione a metà strada."
+      },
+      "howItWorks": {
+        "title": "Come funziona qui una votazione",
+        "quorum": "Il quorum misura la partecipazione, non il consenso: un'astensione conta come partecipazione.",
+        "majority": "Il risultato si calcola solo sui voti a favore e contrari. Le astensioni restano fuori.",
+        "tie": "Un pareggio esatto non fa mai passare nulla da solo.",
+        "silence": "Se il termine scade senza quorum, non succede nulla. Il silenzio non è mai consenso."
+      },
+      "field": {
+        "proposer": "Chi può presentarla",
+        "passes": "Cosa la fa approvare",
+        "quorum": "Quanti devono votare",
+        "window": "Votazione aperta per",
+        "tie": "In caso di parità"
+      },
+      "proposer": {
+        "member": "Qualsiasi membro",
+        "lead": "Solo i referenti"
+      },
+      "value": {
+        "unspecified": "Non specificato"
+      },
+      "majority": {
+        "unanimous": "Tutti i votanti devono votare a favore",
+        "simple": "Più voti a favore che contrari",
+        "twoThirds": "Almeno due terzi a favore",
+        "threeQuarters": "Almeno tre quarti a favore",
+        "custom": "Almeno {n} voti a favore su {d}",
+        "note": "Calcolato solo sui voti a favore e contrari."
+      },
+      "quorum": {
+        "everyone": "Devono votare tutti i membri",
+        "half": "Deve votare metà della cerchia",
+        "twoThirds": "Devono votare due terzi della cerchia",
+        "threeQuarters": "Devono votare tre quarti della cerchia",
+        "custom": "Devono votare {n} membri su {d}",
+        "note": "Un'astensione conta come voto.",
+        "today": "Oggi sono {required} dei vostri {total} membri."
+      },
+      "window": {
+        "hours": "{count, plural, =1 {1 ora} other {# ore}}",
+        "days": "{count, plural, =1 {1 giorno} other {# giorni}}",
+        "weeks": "{count, plural, =1 {1 settimana} other {# settimane}}",
+        "note": "A partire dal momento in cui la mozione viene presentata."
+      },
+      "tie": {
+        "reject": "Viene respinta",
+        "lead": "Decide il voto del referente"
+      },
+      "history": {
+        "title": "Come è cambiata questa regola",
+        "versions": "{count, plural, =1 {1 versione} other {# versioni}}",
+        "version": "Versione {version}",
+        "current": "In vigore dal {from}",
+        "range": "Dal {from} al {until}",
+        "summary": "{majority} · {quorum} · aperta per {window}",
+        "viewMotion": "Vedi la mozione che l'ha cambiata",
+        "seeded": "Regola iniziale della cerchia"
+      },
+      "motionKind": {
+        "ADMIT_MEMBER": "Ammettere un nuovo membro",
+        "REMOVE_MEMBER": "Escludere un membro",
+        "APPOINT_LEAD": "Nominare un referente",
+        "REMOVE_LEAD": "Revocare un referente",
+        "AMEND_RULES": "Modificare queste regole",
+        "CHANGE_JOIN_MODE": "Cambiare come si entra",
+        "SET_DISCOVERABLE": "Cambiare se la cerchia è trovabile",
+        "CREATE_PROJECT": "Avviare un progetto",
+        "CLOSE_PROJECT": "Chiudere un progetto",
+        "CREATE_CHALLENGE": "Avviare una sfida",
+        "VERIFY_CHALLENGE_ENTRY": "Confermare una partecipazione a una sfida",
+        "CHANGE_PLAN": "Cambiare il piano della cerchia",
+        "DISSOLVE_CIRCLE": "Sciogliere la cerchia",
+        "CUSTOM": "Qualsiasi altra decisione"
+      }
+    },
+    "plan": {
+      "title": "Piano e utilizzo",
+      "loadError": "Non siamo riusciti a caricare il tuo piano. Riprova.",
+      "partialLoad": "Una parte di questa pagina non si è caricata. Quello che vedi è aggiornato — riprova per il resto.",
+      "membersOnly": {
+        "title": "Solo per i membri",
+        "description": "Il piano di una cerchia e il suo utilizzo sono visibili ai suoi membri. La tua cerchia ha comunque un piano — ogni cerchia ne ha sempre uno."
+      },
+      "price": {
+        "free": "Gratuito",
+        "perMonth": "{price} / mese",
+        "perYear": "{price} / anno",
+        "oneTime": "{price} una tantum",
+        "flat": "{price}",
+        "yearlyNote": "Il prezzo annuale è un prezzo a sé, non dodici mensilità."
+      },
+      "current": {
+        "heading": "La tua cerchia usa",
+        "unnamedPlan": "Il tuo piano",
+        "status": {
+          "ACTIVE": "Attivo",
+          "PAST_DUE": "Pagamento in ritardo",
+          "CANCELLED": "In scadenza",
+          "EXPIRED": "Scaduto"
+        },
+        "renewsLabel": "Si rinnova il",
+        "endingLabel": "Passa al piano gratuito il",
+        "sinceLabel": "Su questo piano dal",
+        "paidByLabel": "Pagato da",
+        "payerNote": "Pagare per la cerchia non dà alcun potere in più. Chi paga ha lo stesso singolo voto di tutti gli altri e non può decidere nulla da solo.",
+        "alwaysOnAPlan": "Ogni cerchia ha sempre un piano. Quello gratuito è un piano, non l’assenza di un piano.",
+        "moveToFree": "Torna al piano gratuito"
+      },
+      "allowance": {
+        "heading": "Cosa copre il tuo piano",
+        "intro": "E cosa state usando ora, così vedi perché qualcosa verrebbe rifiutato prima ancora di provarci.",
+        "unlimited": "Illimitato",
+        "covered": "{limit} coperti",
+        "usedOf": "{current} su {limit}",
+        "usedUnlimited": "{current} in uso, illimitato",
+        "megabytes": "{value} MB",
+        "full": "Al completo",
+        "on": "Attivo",
+        "off": "Disattivo",
+        "window": "{days, plural, =1 {Ultimo giorno} other {Ultimi # giorni}}",
+        "windowUnlimited": "Tutta la cronologia",
+        "windowNote": "Questo cambia solo fin dove la chat viene mostrata. Non viene cancellato nulla, e un periodo più lungo riporta subito i messaggi più vecchi.",
+        "brandingOffNote": "I tuoi colori personalizzati sono salvati e tornano subito con un piano che li include. Nel frattempo la tua cerchia mostra semplicemente l’aspetto standard.",
+        "name": {
+          "MAX_MEMBERS": "Membri",
+          "MAX_ACTIVE_PROJECTS": "Progetti attivi",
+          "MAX_ACTIVE_CHALLENGES": "Sfide attive",
+          "CHAT_HISTORY_DAYS": "Cronologia chat",
+          "STORAGE_MB": "Spazio",
+          "CUSTOM_BRANDING": "Colori personalizzati"
+        },
+        "locked": {
+          "MAX_MEMBERS": "Hai {current} membri. Il tuo piano ne copre {limit}. Nessuno viene rimosso: semplicemente non puoi aggiungerne di nuovi finché non torni sotto {limit} o al piano più ampio.",
+          "MAX_ACTIVE_PROJECTS": "Hai {current} progetti attivi. Il tuo piano ne copre {limit}. Non viene chiuso né cancellato nulla: semplicemente non puoi avviarne un altro finché uno non si conclude o il piano non cambia.",
+          "MAX_ACTIVE_CHALLENGES": "Hai {current} sfide attive. Il tuo piano ne copre {limit}. Non viene annullato nulla: semplicemente non puoi avviarne un’altra finché una non si chiude o il piano non cambia.",
+          "STORAGE_MB": "Stai usando {current} su {limit}. Non viene cancellato nulla: semplicemente non puoi caricare altro finché non liberi spazio o il piano non cambia."
+        }
+      },
+      "billing": {
+        "heading": "Per ora configuriamo i piani a pagamento a mano",
+        "body": "Non possiamo ancora accettare pagamenti per una cerchia dentro l’app. I piani gratuiti si attivano subito; per tutto il resto, dicci di cosa ha bisogno la tua cerchia e lo configuriamo noi. Nel frattempo per la tua cerchia non cambia nulla.",
+        "cta": "Parla con noi"
+      },
+      "catalogue": {
+        "heading": "Tutti i piani",
+        "intro": "I piani sono costruiti su misura: ognuno ha il proprio insieme di limiti, non è un gradino sopra o sotto gli altri.",
+        "current": "Piano attuale",
+        "default": "Predefinito",
+        "switchTo": "Passa a questo piano",
+        "notPurchasable": "Questo piano non è ancora self-service — lo configuriamo noi per te.",
+        "contactUs": "Parla con noi",
+        "leadOnly": "Solo un referente può cambiare il piano della cerchia.",
+        "unavailable": "L’elenco dei piani non è disponibile in questo momento."
+      },
+      "change": {
+        "title": "Passare a {plan}?",
+        "noDirection": "Non è un upgrade né un downgrade — solo un insieme di limiti diverso.",
+        "increases": "Tutto ciò che questo piano alza vale da subito.",
+        "decreases": "Tutto ciò che abbassa si limita a bloccarsi. La tua cerchia mantiene ogni membro, progetto e sfida che ha già, e potrà aggiungerne di nuovi solo una volta rientrata sotto il nuovo limite.",
+        "willLockHeading": "Questi sarebbero subito al completo:",
+        "willLockRow": "{name}: ora {current}, coperti {limit}",
+        "willLockReassurance": "Niente di questo elenco viene rimosso. Aspettano solo le nuove aggiunte.",
+        "confirm": "Cambia piano",
+        "back": "Non ora",
+        "submitting": "Cambio in corso…",
+        "success": "La tua cerchia ora usa {plan}.",
+        "error": "Non siamo riusciti a cambiare piano. La tua cerchia è invariata — riprova."
+      },
+      "cancel": {
+        "title": "Tornare al piano gratuito?",
+        "body": "La tua cerchia resta esattamente com’è — stessi membri, stessi progetti, stesse sfide, stessa chat. Passa semplicemente al piano gratuito.",
+        "locksNotEvicts": "Se qualcosa supera un limite del piano gratuito, quel limite si blocca e basta: non viene rimosso nulla, e potrai aggiungerne di nuovi appena sarai rientrato sotto.",
+        "stayUntil": "Resta su questo piano fino al {date}",
+        "confirmNow": "Passa ora",
+        "keep": "Mantieni questo piano",
+        "submitting": "Cambio in corso…",
+        "successNow": "La tua cerchia è sul piano gratuito.",
+        "successLater": "La tua cerchia passerà al piano gratuito alla fine di questo periodo.",
+        "error": "Non siamo riusciti a cambiare piano. La tua cerchia è invariata — riprova."
+      }
+    },
+    "invites": {
+      "title": "Link di invito",
+      "description": "Un link con cui altri possono unirsi, finché non scade o si esauriscono gli utilizzi. Solo un referente può crearlo.",
+      "loading": "Caricamento dei link di invito...",
+      "loadError": "Non siamo riusciti a caricare i link di invito di questa cerchia.",
+      "empty": "Ancora nessun link di invito.",
+      "mint": {
+        "maxUses": "Utilizzi",
+        "maxUsesHint": "Da 1 a {max} persone",
+        "expiry": "Scade",
+        "expiryOption": {
+          "24": "Tra 1 giorno",
+          "168": "Tra 7 giorni",
+          "336": "Tra 14 giorni"
+        },
+        "submit": "Crea link",
+        "capReached": "Questa cerchia ha già il massimo di {max} link attivi. Revocane uno per crearne un altro.",
+        "capRemaining": "{live} link attivi su {max}."
+      },
+      "minted": {
+        "title": "Copia subito questo link",
+        "shownOnce": "Verrà mostrato solo questa volta. Se lo perdi, revoca il link e creane un altro.",
+        "copy": "Copia il link",
+        "copied": "Copiato",
+        "copiedHint": "Il link è nei tuoi appunti.",
+        "copyFailed": "Non siamo riusciti ad accedere agli appunti. Seleziona il link qui sopra e copialo a mano.",
+        "dismiss": "L'ho copiato"
+      },
+      "link": {
+        "status": {
+          "ACTIVE": "Attivo",
+          "REVOKED": "Revocato",
+          "EXPIRED": "Scaduto",
+          "EXHAUSTED": "Utilizzi esauriti"
+        },
+        "remaining": "{remaining} utilizzi rimasti su {max}",
+        "used": "{used} utilizzi su {max} consumati",
+        "revoke": "Revoca",
+        "revokeConfirm": "Revocare definitivamente?",
+        "revokeYes": "Revoca",
+        "revokeCancel": "Mantieni",
+        "revokedOn": "Revocato il {date}",
+        "revokedNoDate": "Revocato",
+        "expiredOn": "Scaduto il {date}",
+        "expiredNoDate": "Scaduto"
+      },
+      "countdown": {
+        "daysHours": "Ancora {days} g {hours} h",
+        "days": "Ancora {days} giorni",
+        "hoursMinutes": "Ancora {hours} h {minutes} min",
+        "minutes": "Ancora {minutes} min",
+        "expiresAt": "Scade il {datetime}",
+        "expired": "Scaduto"
+      }
+    },
+    "join": {
+      "working": {
+        "title": "Ti stiamo aggiungendo alla cerchia...",
+        "description": "Stiamo verificando il tuo link di invito."
+      },
+      "joined": {
+        "title": "Ci sei",
+        "description": "Ora fai parte di {circle}. Ti portiamo lì subito."
+      },
+      "already": {
+        "title": "Fai già parte di questa cerchia",
+        "description": "Questo link non ti serve. Sei già membro, quindi ti portiamo lì subito."
+      },
+      "open": "Apri la cerchia",
+      "myCircles": "Vai alle mie cerchie",
+      "retry": "Riprova",
+      "askForNewLink": "Chiedi un nuovo link di invito a chi te l'ha condiviso.",
+      "refused": {
+        "MISSING_TOKEN": {
+          "title": "Questo link è incompleto",
+          "description": "Nell'indirizzo manca il codice di invito. I link vengono spesso troncati quando si incollano in una chat. Fattelo mandare di nuovo e aprilo per intero."
+        },
+        "MALFORMED_TOKEN": {
+          "title": "Questo link sembra troncato",
+          "description": "Il codice di invito non è completo. Di solito succede quando un link va a capo in un messaggio. Fattelo mandare di nuovo e apri l'indirizzo completo."
+        },
+        "INVALID": {
+          "title": "Questo link di invito non è valido",
+          "description": "Non siamo riusciti a collegarlo a nessuna cerchia. Potrebbe essere stato digitato male o troncato lungo il percorso."
+        },
+        "EXPIRED": {
+          "title": "Questo link di invito è scaduto",
+          "description": "I link di invito durano solo pochi giorni. Questo ha superato la sua data e non può più essere usato."
+        },
+        "REVOKED": {
+          "title": "Questo link di invito è stato revocato",
+          "description": "Un referente della cerchia ha ritirato questo link. Chi è già entrato tramite il link resta membro, ma il link non funziona più."
+        },
+        "EXHAUSTED": {
+          "title": "Questo link di invito è esaurito",
+          "description": "Ogni link di invito può essere usato un numero limitato di volte, e questo ha raggiunto il suo limite."
+        },
+        "CIRCLE_FULL": {
+          "title": "Questa cerchia è al completo",
+          "description": "Il tuo link era valido. La cerchia ha semplicemente raggiunto il numero di membri consentito dal suo piano. Un nuovo link non servirebbe: qualcuno della cerchia dovrebbe liberare un posto o passare a un piano più ampio."
+        },
+        "CIRCLE_UNAVAILABLE": {
+          "title": "Questa cerchia non accetta nuovi membri",
+          "description": "Il tuo link era valido, ma al momento la cerchia non è aperta. Da qui non puoi fare nulla: riprova più avanti o chiedi a qualcuno che ne fa parte."
+        },
+        "UNKNOWN": {
+          "title": "Non siamo riusciti a usare questo link",
+          "description": "Qualcosa è andato storto lungo il percorso verso la cerchia. Spesso basta riprovare."
+        }
+      }
     }
   }
 }

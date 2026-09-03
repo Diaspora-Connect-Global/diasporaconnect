@@ -2878,17 +2878,31 @@
       "joinedOn": "A rejoint le {date}",
       "noResults": "Aucun membre ne correspond à « {query} ».",
       "invite": {
-        "title": "Inviter dans le cercle",
-        "description": "Partagez un lien ou invitez quelqu'un individuellement.",
+        "title": "Inviter",
+        "description": "Invitez quelqu'un par e-mail ou téléphone, ou partagez la page du cercle.",
         "copyLink": "Copier le lien",
         "linkCopied": "Lien copié",
-        "invitePerson": "Inviter quelqu'un"
+        "invitePerson": "Inviter quelqu'un",
+        "copyCircleLink": "Copier le lien du cercle",
+        "circleLinkCopied": "Lien du cercle copié"
       },
       "actions": {
         "viewProfile": "Voir le profil",
         "message": "Envoyer un message",
         "makeLead": "Nommer responsable",
         "remove": "Retirer du cercle"
+      },
+      "past": {
+        "title": "{count, plural, =1 {1 ancien membre} other {# anciens membres}}",
+        "description": "Toutes les personnes qui ont fait partie de ce cercle, et pourquoi elles n'en font plus partie.",
+        "endedOn": "le {date}",
+        "viewMotion": "Voir la motion à l'origine de ce retrait",
+        "platformNote": "Une mesure de la plateforme visant ce compte — pas une décision de ce cercle.",
+        "reason": {
+          "LEFT": "A quitté le cercle",
+          "REMOVED": "Retrait par motion",
+          "SUSPENDED": "Suspension par la plateforme"
+        }
       }
     },
     "leaderboard": {
@@ -2990,6 +3004,449 @@
         "cta": "Demander l'accès"
       },
       "joinChallenge": "Nous n’avons pas pu vous ajouter à ce défi"
+    },
+    "settings": {
+      "title": "Paramètres du cercle",
+      "loadFailed": "Nous n'avons pas pu charger ces paramètres. Veuillez réessayer.",
+      "notAMember": "Seuls les membres peuvent ouvrir les paramètres d'un cercle. Demandez à quelqu'un de l'intérieur de vous inviter.",
+      "statusNotice": {
+        "suspended": "Ce cercle a été suspendu par la plateforme ; ses paramètres sont donc en lecture seule pour le moment.",
+        "archived": "Ce cercle est archivé. Rien n'a été perdu, mais ses paramètres restent en lecture seule tant qu'il n'est pas rouvert.",
+        "dissolved": "Ce cercle a été dissous. Ses archives demeurent, mais plus rien ne peut être modifié."
+      },
+      "profile": {
+        "title": "Profil",
+        "description": "La façon dont votre cercle se présente, partout où il apparaît.",
+        "readOnlyDescription": "La façon dont ce cercle se présente actuellement.",
+        "leadOnlyNote": "Seule une personne référente peut modifier le profil.",
+        "nameLabel": "Nom du cercle",
+        "namePlaceholder": "p. ex. Accra Founders",
+        "nameRequired": "Donnez un nom à votre cercle.",
+        "tooLong": "Limitez-vous à {max} caractères.",
+        "handleLabel": "Identifiant",
+        "handlePlaceholder": "accra-founders",
+        "handleHint": "Minuscules, chiffres, _ et -, en commençant et en terminant par une lettre ou un chiffre. Jusqu’à {max} caractères.",
+        "handleInvalid": "Utilisez des minuscules, des chiffres, _ ou -, en commençant et en terminant par une lettre ou un chiffre.",
+        "taglineLabel": "Accroche",
+        "taglinePlaceholder": "Une ligne sur ce cercle",
+        "descriptionLabel": "À propos",
+        "descriptionPlaceholder": "À quoi sert ce cercle, et ce qui s'y passe.",
+        "notClearable": "Vous pouvez le modifier, mais pas encore le vider. Écrivez autre chose, ou remettez le texte précédent.",
+        "imageReplaceOnly": "Les images peuvent être remplacées, mais pas encore supprimées.",
+        "imageFailed": "L'image n'a pas été envoyée, rien n'a donc été enregistré. Veuillez réessayer.",
+        "nothingToSave": "Rien n'a encore changé.",
+        "save": "Enregistrer les modifications",
+        "saving": "Enregistrement…",
+        "saved": "Profil mis à jour.",
+        "saveFailed": "Nous n'avons pas pu enregistrer vos modifications. Veuillez réessayer."
+      },
+      "discovery": {
+        "title": "Trouver et rejoindre",
+        "description": "Deux paramètres distincts : si les gens peuvent trouver ce cercle, et comment ils y entrent.",
+        "readOnlyDescription": "Comment ce cercle se trouve et se rejoint actuellement.",
+        "discoverabilityQuestion": "Peut-on trouver ce cercle ?",
+        "discoverabilityHelp": "Cela détermine si le cercle apparaît dans la recherche et dans « Découvrir ».",
+        "discoverableTitle": "Visible",
+        "discoverableDescription": "Tout le monde peut tomber sur ce cercle.",
+        "hiddenTitle": "Masqué",
+        "hiddenDescription": "Seules les personnes ayant le lien le verront.",
+        "accessQuestion": "Comment entre-t-on ?",
+        "accessHelp": "Indépendant de la visibilité — un cercle masqué peut tout de même accepter des demandes.",
+        "requestTitle": "Sur demande",
+        "requestDescription": "Les gens demandent à rejoindre, et le cercle décide ensemble.",
+        "inviteTitle": "Sur invitation uniquement",
+        "inviteDescription": "Seules les personnes invitées peuvent rejoindre.",
+        "discoverabilitySaved": "Visibilité mise à jour.",
+        "joinModeSaved": "Mode d’adhésion mis à jour.",
+        "saveFailed": "Nous n'avons pas pu modifier ce paramètre. Veuillez réessayer.",
+        "leadNote": "Vous pouvez modifier ces deux paramètres parce que vous êtes référent. Tout membre peut aussi demander un changement en ouvrant une motion, et le cercle décide ensemble.",
+        "proposeInstead": "Seule une personne référente peut les modifier directement. Vous pouvez demander ce changement au cercle en ouvrant une motion."
+      },
+      "archive": {
+        "title": "Archiver ce cercle",
+        "description": "Ranger le cercle sans en perdre quoi que ce soit.",
+        "statusArchived": "Archivé",
+        "alreadyArchivedDescription": "Ce cercle est déjà archivé.",
+        "alreadyArchivedBody": "Tout est toujours là — membres, décisions, projets et historique. Rouvrir un cercle n'est pas encore possible depuis cet écran ; contactez le support si vous en avez besoin.",
+        "bulletKept": "Rien n’est supprimé. Les membres, les décisions, les projets et l’historique restent exactement tels quels.",
+        "bulletQuiet": "Le cercle cesse d’être un lieu actif : il disparaît de la découverte et n’accueille plus de nouveaux membres.",
+        "bulletReversible": "Archiver n’est pas définitif. Un cercle peut être rouvert — mais pas encore depuis cet écran.",
+        "button": "Archiver le cercle",
+        "dialogTitle": "Archiver {name} ?",
+        "dialogDescription": "Cela ferme le cercle. Il n’est pas supprimé, et rien de ce qu’il contient n’est perdu.",
+        "cancel": "Le laisser ouvert",
+        "confirm": "Archiver le cercle",
+        "archiving": "Archivage…",
+        "archived": "Cercle archivé.",
+        "failed": "Nous n'avons pas pu archiver ce cercle. Veuillez réessayer.",
+        "leadOnlyBody": "Seule une personne référente peut archiver ce cercle.",
+        "dissolvedBody": "Ce cercle a été dissous, ce qui est définitif. Il ne peut plus être archivé ni rouvert.",
+        "proposeInstead": "Vous pouvez demander au cercle de se dissoudre en ouvrant une motion : les membres décident ensemble."
+      }
+    },
+    "history": {
+      "title": "Historique des décisions",
+      "intro": "Chaque décision prise par ce cercle, de la plus récente à la plus ancienne. Chaque entrée est scellée à la précédente : l'historique se vérifie, il ne se croit pas sur parole.",
+      "loadOlder": "Charger les entrées plus anciennes",
+      "beginning": "Voilà l'historique complet, jusqu'à la création de ce cercle.",
+      "platformAction": "Action de la plateforme",
+      "error": {
+        "load": "Nous n'avons pas pu charger l'historique des décisions. Veuillez réessayer."
+      },
+      "empty": {
+        "title": "Rien n'a encore été décidé",
+        "description": "Dès que ce cercle déposera sa première motion, chaque étape de la décision sera consignée ici."
+      },
+      "entry": {
+        "seq": "n° {seq}",
+        "undated": "Aucune date enregistrée"
+      },
+      "chain": {
+        "verified": {
+          "title": "Historique vérifié",
+          "body": "Chaque entrée correspond toujours à la précédente. Rien n'a été modifié ni supprimé depuis son enregistrement."
+        },
+        "broken": {
+          "title": "L'historique ne correspond plus à son sceau",
+          "body": "Une entrée a été modifiée ou supprimée. Rien de ce qui suit ne peut valoir preuve de ce que ce cercle a décidé. Merci de le signaler."
+        },
+        "unchecked": {
+          "title": "Non vérifié",
+          "body": "Nous n'avons pas pu vérifier l'historique à l'instant ; nous n'affirmons donc pas qu'il est intact. Réessayez dans un moment — le service était sans doute momentanément injoignable."
+        }
+      },
+      "actor": {
+        "by": "Par {name}",
+        "unresolved": "un membre",
+        "erased": "Par un membre qui a depuis supprimé son compte",
+        "automatic": "Enregistré automatiquement — personne n'est intervenu",
+        "notPublished": "Enregistré — les votes individuels ne sont jamais publiés"
+      },
+      "events": {
+        "motionOpened": "Motion déposée",
+        "motionOpenedTitled": "Déposée : {title}",
+        "voteCast": "Un vote a été exprimé",
+        "motionTallied": "Votes dépouillés",
+        "motionWithdrawn": "Motion retirée",
+        "motionExpired": "Vote clos sans décision",
+        "motionEnacted": "Décision appliquée",
+        "motionEnactmentFailed": "La décision n'a pas pu être appliquée",
+        "ruleAmended": "Règle de gouvernance modifiée",
+        "limitReached": "Limite de la formule atteinte",
+        "inviteLinkMinted": "Lien d'invitation créé",
+        "inviteLinkRevoked": "Lien d'invitation révoqué",
+        "inviteLinkRedeemed": "Quelqu'un a rejoint le cercle via un lien d'invitation",
+        "circleSuspended": "Cercle suspendu par la plateforme",
+        "circleUnsuspended": "Suspension levée par la plateforme",
+        "circleDissolved": "Cercle dissous par la plateforme",
+        "unknown": "Événement enregistré"
+      }
+    },
+    "governance": {
+      "title": "Comment ce cercle décide",
+      "intro": "Les règles que ce cercle s'est données : ce qui exige un vote, et ce qu'il laisse au responsable ou à chaque membre.",
+      "error": {
+        "load": "Nous n'avons pas pu charger les règles de gouvernance. Veuillez réessayer."
+      },
+      "empty": {
+        "title": "Aucune règle définie",
+        "description": "Ce cercle n'a pas encore publié ses règles de gouvernance. Dès qu'il le fera, vous verrez exactement ce qu'exige chaque type de décision."
+      },
+      "pinned": {
+        "title": "Ce sont les règles d'aujourd'hui",
+        "body": "Une motion conserve les règles en vigueur au moment de son dépôt, jusqu'à sa clôture. Modifier une règle ici ne change jamais un vote en cours — c'est ce qui empêche un amendement de réécrire une décision en pleine route."
+      },
+      "howItWorks": {
+        "title": "Comment se déroule un vote ici",
+        "quorum": "Le quorum mesure la participation, pas l'accord : une abstention compte comme une participation.",
+        "majority": "Le résultat se calcule uniquement sur les Pour et les Contre. Les abstentions sont écartées.",
+        "tie": "Une égalité parfaite ne fait jamais adopter une motion d'elle-même.",
+        "silence": "Si le délai expire sans quorum, rien ne se passe. Le silence ne vaut jamais consentement."
+      },
+      "field": {
+        "proposer": "Qui peut déposer",
+        "passes": "Ce qui la fait adopter",
+        "quorum": "Combien doivent voter",
+        "window": "Vote ouvert pendant",
+        "tie": "En cas d'égalité"
+      },
+      "proposer": {
+        "member": "Tout membre",
+        "lead": "Les responsables uniquement"
+      },
+      "value": {
+        "unspecified": "Non précisé"
+      },
+      "majority": {
+        "unanimous": "Tous les votants doivent voter Pour",
+        "simple": "Plus de Pour que de Contre",
+        "twoThirds": "Au moins deux tiers de Pour",
+        "threeQuarters": "Au moins trois quarts de Pour",
+        "custom": "Au moins {n} Pour sur {d}",
+        "note": "Calculé uniquement sur les Pour et les Contre."
+      },
+      "quorum": {
+        "everyone": "Tous les membres doivent voter",
+        "half": "La moitié du cercle doit voter",
+        "twoThirds": "Deux tiers du cercle doivent voter",
+        "threeQuarters": "Trois quarts du cercle doivent voter",
+        "custom": "{n} membres sur {d} doivent voter",
+        "note": "Une abstention compte comme un vote.",
+        "today": "Soit {required} de vos {total} membres aujourd'hui."
+      },
+      "window": {
+        "hours": "{count, plural, =1 {1 heure} other {# heures}}",
+        "days": "{count, plural, =1 {1 jour} other {# jours}}",
+        "weeks": "{count, plural, =1 {1 semaine} other {# semaines}}",
+        "note": "À compter du dépôt de la motion."
+      },
+      "tie": {
+        "reject": "Elle est rejetée",
+        "lead": "La voix du responsable départage"
+      },
+      "history": {
+        "title": "Comment cette règle a changé",
+        "versions": "{count, plural, =1 {1 version} other {# versions}}",
+        "version": "Version {version}",
+        "current": "En vigueur depuis le {from}",
+        "range": "Du {from} au {until}",
+        "summary": "{majority} · {quorum} · ouvert pendant {window}",
+        "viewMotion": "Voir la motion qui l'a modifiée",
+        "seeded": "Règle initiale du cercle"
+      },
+      "motionKind": {
+        "ADMIT_MEMBER": "Admettre un nouveau membre",
+        "REMOVE_MEMBER": "Exclure un membre",
+        "APPOINT_LEAD": "Nommer un responsable",
+        "REMOVE_LEAD": "Révoquer un responsable",
+        "AMEND_RULES": "Modifier ces règles",
+        "CHANGE_JOIN_MODE": "Changer la manière de rejoindre",
+        "SET_DISCOVERABLE": "Changer la visibilité du cercle",
+        "CREATE_PROJECT": "Lancer un projet",
+        "CLOSE_PROJECT": "Clôturer un projet",
+        "CREATE_CHALLENGE": "Lancer un défi",
+        "VERIFY_CHALLENGE_ENTRY": "Valider une participation à un défi",
+        "CHANGE_PLAN": "Changer la formule du cercle",
+        "DISSOLVE_CIRCLE": "Dissoudre le cercle",
+        "CUSTOM": "Toute autre décision"
+      }
+    },
+    "plan": {
+      "title": "Formule et utilisation",
+      "loadError": "Nous n'avons pas pu charger votre formule. Veuillez réessayer.",
+      "partialLoad": "Une partie de cette page ne s'est pas chargée. Ce qui s'affiche est à jour — réessayez pour le reste.",
+      "membersOnly": {
+        "title": "Réservé aux membres",
+        "description": "La formule d'un cercle et son utilisation ne sont visibles que par ses membres. Votre cercle a une formule dans tous les cas — chaque cercle en a toujours une."
+      },
+      "price": {
+        "free": "Gratuit",
+        "perMonth": "{price} / mois",
+        "perYear": "{price} / an",
+        "oneTime": "{price} en une fois",
+        "flat": "{price}",
+        "yearlyNote": "Le prix annuel est un prix à part entière, pas douze mois cumulés."
+      },
+      "current": {
+        "heading": "Votre cercle utilise",
+        "unnamedPlan": "Votre formule",
+        "status": {
+          "ACTIVE": "Active",
+          "PAST_DUE": "Paiement en retard",
+          "CANCELLED": "Se termine",
+          "EXPIRED": "Expirée"
+        },
+        "renewsLabel": "Renouvellement le",
+        "endingLabel": "Passe à la formule gratuite le",
+        "sinceLabel": "Sur cette formule depuis le",
+        "paidByLabel": "Payée par",
+        "payerNote": "Payer pour le cercle ne donne aucun pouvoir supplémentaire. La personne qui paie a la même voix unique que tout le monde et ne peut rien décider seule.",
+        "alwaysOnAPlan": "Chaque cercle a toujours une formule. La gratuite en est une, ce n'est pas l'absence de formule.",
+        "moveToFree": "Revenir à la formule gratuite"
+      },
+      "allowance": {
+        "heading": "Ce que couvre votre formule",
+        "intro": "Et ce que vous utilisez actuellement, pour voir pourquoi une action serait refusée avant même de l'essayer.",
+        "unlimited": "Illimité",
+        "covered": "{limit} couverts",
+        "usedOf": "{current} sur {limit}",
+        "usedUnlimited": "{current} utilisés, illimité",
+        "megabytes": "{value} Mo",
+        "full": "Complet",
+        "on": "Activé",
+        "off": "Désactivé",
+        "window": "{days, plural, =1 {Dernier jour} other {# derniers jours}}",
+        "windowUnlimited": "Tout l'historique",
+        "windowNote": "Cela change seulement jusqu'où la discussion est affichée. Rien n'est supprimé, et une période plus longue ramène immédiatement les anciens messages.",
+        "brandingOffNote": "Vos couleurs personnalisées sont enregistrées et reviennent immédiatement avec une formule qui les inclut. Entre-temps, votre cercle affiche simplement l'apparence standard.",
+        "name": {
+          "MAX_MEMBERS": "Membres",
+          "MAX_ACTIVE_PROJECTS": "Projets en cours",
+          "MAX_ACTIVE_CHALLENGES": "Défis en cours",
+          "CHAT_HISTORY_DAYS": "Historique de la discussion",
+          "STORAGE_MB": "Stockage",
+          "CUSTOM_BRANDING": "Couleurs personnalisées"
+        },
+        "locked": {
+          "MAX_MEMBERS": "Vous avez {current} membres. Votre formule en couvre {limit}. Personne n'est retiré — vous ne pouvez simplement plus en ajouter tant que vous n'êtes pas repassé sous {limit} ou revenu à la formule plus large.",
+          "MAX_ACTIVE_PROJECTS": "Vous avez {current} projets en cours. Votre formule en couvre {limit}. Rien n'est fermé ni supprimé — vous ne pouvez simplement pas en lancer un autre tant qu'un projet ne se termine pas ou que votre formule ne change pas.",
+          "MAX_ACTIVE_CHALLENGES": "Vous avez {current} défis en cours. Votre formule en couvre {limit}. Rien n'est annulé — vous ne pouvez simplement pas en lancer un autre tant qu'un défi ne se termine pas ou que votre formule ne change pas.",
+          "STORAGE_MB": "Vous utilisez {current} sur {limit}. Rien n'est supprimé — vous ne pouvez simplement plus rien téléverser tant que de la place n'est pas libérée ou que votre formule ne change pas."
+        }
+      },
+      "billing": {
+        "heading": "Pour le moment, nous mettons les formules payantes en place à la main",
+        "body": "Nous ne pouvons pas encore encaisser un paiement pour un cercle dans l'application. Les formules gratuites s'activent immédiatement ; pour le reste, dites-nous ce dont votre cercle a besoin et nous nous en occupons. Rien ne change pour votre cercle en attendant.",
+        "cta": "Parlez-nous"
+      },
+      "catalogue": {
+        "heading": "Toutes les formules",
+        "intro": "Les formules sont composées sur mesure : chacune a son propre jeu de limites, ce n'est pas un cran au-dessus ou en dessous des autres.",
+        "current": "Formule actuelle",
+        "default": "Par défaut",
+        "switchTo": "Passer à cette formule",
+        "notPurchasable": "Cette formule n'est pas encore en libre-service — nous la mettons en place pour vous.",
+        "contactUs": "Parlez-nous",
+        "leadOnly": "Seul un responsable peut changer la formule du cercle.",
+        "unavailable": "La liste des formules n'est pas disponible pour le moment."
+      },
+      "change": {
+        "title": "Passer à {plan} ?",
+        "noDirection": "Ce n'est ni une montée ni une descente en gamme — juste un autre jeu de limites.",
+        "increases": "Tout ce que cette formule augmente prend effet immédiatement.",
+        "decreases": "Tout ce qu'elle réduit se verrouille simplement. Votre cercle garde tous les membres, projets et défis qu'il a déjà, et ne pourra en ajouter de nouveaux qu'une fois repassé sous la nouvelle limite.",
+        "willLockHeading": "Ceci serait complet dès maintenant :",
+        "willLockRow": "{name} : {current} actuellement, {limit} couverts",
+        "willLockReassurance": "Rien de cette liste n'est retiré. Seuls les nouveaux ajouts attendent.",
+        "confirm": "Changer de formule",
+        "back": "Pas maintenant",
+        "submitting": "Changement…",
+        "success": "Votre cercle utilise désormais {plan}.",
+        "error": "Nous n'avons pas pu changer de formule. Votre cercle est inchangé — veuillez réessayer."
+      },
+      "cancel": {
+        "title": "Revenir à la formule gratuite ?",
+        "body": "Votre cercle reste exactement tel quel — mêmes membres, mêmes projets, mêmes défis, même discussion. Il passe simplement à la formule gratuite.",
+        "locksNotEvicts": "Si quelque chose dépasse une limite de la formule gratuite, cette limite se verrouille simplement : rien n'est retiré, et vous pourrez de nouveau en ajouter dès que vous serez repassé en dessous.",
+        "stayUntil": "Rester sur cette formule jusqu’au {date}",
+        "confirmNow": "Passer maintenant",
+        "keep": "Garder cette formule",
+        "submitting": "Changement…",
+        "successNow": "Votre cercle utilise la formule gratuite.",
+        "successLater": "Votre cercle passera à la formule gratuite à la fin de cette période.",
+        "error": "Nous n'avons pas pu changer de formule. Votre cercle est inchangé — veuillez réessayer."
+      }
+    },
+    "invites": {
+      "title": "Liens d'invitation",
+      "description": "Un lien qui permet de rejoindre le cercle, jusqu'à son expiration ou son épuisement. Seul un responsable peut en créer un.",
+      "loading": "Chargement des liens d'invitation...",
+      "loadError": "Nous n'avons pas pu charger les liens d'invitation de ce cercle.",
+      "empty": "Aucun lien d'invitation pour l'instant.",
+      "mint": {
+        "maxUses": "Utilisations",
+        "maxUsesHint": "1 à {max} personnes",
+        "expiry": "Expire",
+        "expiryOption": {
+          "24": "Dans 1 jour",
+          "168": "Dans 7 jours",
+          "336": "Dans 14 jours"
+        },
+        "submit": "Créer un lien",
+        "capReached": "Ce cercle a déjà le maximum de {max} liens actifs. Révoquez-en un pour en créer un autre.",
+        "capRemaining": "{live} liens actifs sur {max}."
+      },
+      "minted": {
+        "title": "Copiez ce lien maintenant",
+        "shownOnce": "C'est la seule fois qu'il sera affiché. Si vous le perdez, révoquez le lien et créez-en un autre.",
+        "copy": "Copier le lien",
+        "copied": "Copié",
+        "copiedHint": "Le lien est dans votre presse-papiers.",
+        "copyFailed": "Nous n'avons pas pu accéder à votre presse-papiers. Sélectionnez le lien ci-dessus et copiez-le à la main.",
+        "dismiss": "Je l'ai copié"
+      },
+      "link": {
+        "status": {
+          "ACTIVE": "Actif",
+          "REVOKED": "Révoqué",
+          "EXPIRED": "Expiré",
+          "EXHAUSTED": "Toutes les utilisations épuisées"
+        },
+        "remaining": "{remaining} utilisations restantes sur {max}",
+        "used": "{used} utilisations sur {max} épuisées",
+        "revoke": "Révoquer",
+        "revokeConfirm": "Révoquer définitivement ?",
+        "revokeYes": "Révoquer",
+        "revokeCancel": "Conserver",
+        "revokedOn": "Révoqué le {date}",
+        "revokedNoDate": "Révoqué",
+        "expiredOn": "Expiré le {date}",
+        "expiredNoDate": "Expiré"
+      },
+      "countdown": {
+        "daysHours": "Encore {days} j {hours} h",
+        "days": "Encore {days} jours",
+        "hoursMinutes": "Encore {hours} h {minutes} min",
+        "minutes": "Encore {minutes} min",
+        "expiresAt": "Expire le {datetime}",
+        "expired": "Expiré"
+      }
+    },
+    "join": {
+      "working": {
+        "title": "Adhésion au cercle...",
+        "description": "Nous vérifions votre lien d'invitation."
+      },
+      "joined": {
+        "title": "Vous y êtes",
+        "description": "Vous avez rejoint {circle}. Nous vous y emmenons."
+      },
+      "already": {
+        "title": "Vous êtes déjà membre",
+        "description": "Ce lien ne vous est pas nécessaire. Vous faites déjà partie de ce cercle, nous vous y emmenons."
+      },
+      "open": "Ouvrir le cercle",
+      "myCircles": "Voir mes cercles",
+      "retry": "Réessayer",
+      "askForNewLink": "Demandez un nouveau lien d'invitation à la personne qui vous l'a partagé.",
+      "refused": {
+        "MISSING_TOKEN": {
+          "title": "Ce lien est incomplet",
+          "description": "Le code d'invitation est absent de l'adresse. Les liens sont souvent tronqués lorsqu'ils sont collés dans une messagerie. Demandez-le à nouveau et ouvrez-le en entier."
+        },
+        "MALFORMED_TOKEN": {
+          "title": "Ce lien semble tronqué",
+          "description": "Le code d'invitation n'est pas complet. Cela arrive généralement quand un lien passe à la ligne dans un message. Demandez-le à nouveau et ouvrez l'adresse complète."
+        },
+        "INVALID": {
+          "title": "Ce lien d'invitation n'est pas valide",
+          "description": "Nous n'avons pu le rattacher à aucun cercle. Il a peut-être été mal saisi ou tronqué en chemin."
+        },
+        "EXPIRED": {
+          "title": "Ce lien d'invitation a expiré",
+          "description": "Les liens d'invitation ne durent que quelques jours. Celui-ci a dépassé sa date et ne peut plus être utilisé."
+        },
+        "REVOKED": {
+          "title": "Ce lien d'invitation a été révoqué",
+          "description": "Un responsable du cercle a retiré ce lien. Les personnes déjà entrées par ce biais restent membres, mais le lien lui-même ne fonctionne plus."
+        },
+        "EXHAUSTED": {
+          "title": "Ce lien d'invitation est épuisé",
+          "description": "Chaque lien d'invitation ne peut servir qu'un nombre limité de fois, et cette limite est atteinte."
+        },
+        "CIRCLE_FULL": {
+          "title": "Ce cercle est complet",
+          "description": "Votre lien était valable. Le cercle a simplement atteint le nombre de membres autorisé par son offre. Un nouveau lien n'y changera rien : il faudrait qu'une personne du cercle libère une place ou passe à une offre supérieure."
+        },
+        "CIRCLE_UNAVAILABLE": {
+          "title": "Ce cercle n'accepte pas de nouveaux membres",
+          "description": "Votre lien était valable, mais le cercle n'est pas ouvert pour le moment. Vous ne pouvez rien faire d'ici : revenez plus tard ou adressez-vous à quelqu'un du cercle."
+        },
+        "UNKNOWN": {
+          "title": "Nous n'avons pas pu utiliser ce lien",
+          "description": "Un problème est survenu en route vers le cercle. Réessayer suffit souvent."
+        }
+      }
     }
   }
 }

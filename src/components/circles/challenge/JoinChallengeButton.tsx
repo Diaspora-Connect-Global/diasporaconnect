@@ -57,7 +57,7 @@ export function JoinChallengeButton({
     awaitRefetchQueries: true,
   });
 
-  if (challenge.status !== 'CHALLENGE_ACTIVE') return null;
+  if (challenge.status !== 'ACTIVE') return null;
 
   if (joined) {
     return (

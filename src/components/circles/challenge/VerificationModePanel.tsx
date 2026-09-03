@@ -25,12 +25,12 @@ const MODE_PRESENTATION: Record<
     label: 'challenge.verification.trustLabel',
     description: 'challenge.verification.trustDescription',
   },
-  LEAD_CONFIRMS: {
+  LEAD: {
     icon: UserCheck,
     label: 'challenge.verification.leadLabel',
     description: 'challenge.verification.leadDescription',
   },
-  CIRCLE_CONFIRMS: {
+  CIRCLE: {
     icon: Vote,
     label: 'challenge.verification.voteLabel',
     description: 'challenge.verification.voteDescription',

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { saveRedirectUrl } from "@/lib/authRedirect";
 import Header from "@/components/custom/header";
 import LoadingScreen from "@/components/custom/LoadingScreen";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -51,9 +52,14 @@ export default function MainLayout({
   useEffect(() => {
     if (hydrated && !isAuthenticated && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
+      // Remember where they were going. Without this, a signed-out person
+      // following ANY deep link lands on the home feed afterwards — which for a
+      // circle invite means the invite is silently lost, and the recipient of an
+      // invite is precisely the person least likely to already have an account.
+      saveRedirectUrl(pathname, window.location.search);
       router.replace("/signin");
     }
-  }, [hydrated, isAuthenticated, router]);
+  }, [hydrated, isAuthenticated, router, pathname]);
 
   // Show loading until hydrated and authenticated
   if (!hydrated || !isAuthenticated) {

@@ -32,6 +32,7 @@ import { GET_MESSAGES } from '@/services/gql/messaging';
 import type {
   CircleChatData,
   CircleMembersData,
+  CircleMembersVariables,
   CircleMotionData,
   CircleMotionTallyData,
 } from '@/services/gql/types/circles';
@@ -120,7 +121,7 @@ export default function CircleMotionPage() {
    * join date is the one fact that decides it. Served `cache-first` because a
    * join date never changes and the members screen issues the identical query.
    */
-  const { data: membersData } = useQuery<CircleMembersData>(CIRCLE_MEMBERS, {
+  const { data: membersData } = useQuery<CircleMembersData, CircleMembersVariables>(CIRCLE_MEMBERS, {
     variables: { circleId, status: 'MEMBERSHIP_ACTIVE' },
     skip: !circleId || !currentUserId,
     fetchPolicy: 'cache-first',

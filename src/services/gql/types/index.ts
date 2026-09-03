@@ -56,3 +56,15 @@ export * from './recommendation';
 
 // Circles types (circle governance, projects, challenges, leaderboard, entitlements)
 export * from './circles';
+
+// Circles governance read-models (decision history / audit trail, rule versions)
+export * from './circles-governance';
+
+// Circle settings screen (discoverability, join mode, archive)
+export * from './circles-settings';
+
+// Circle invite links + former-member views (members screen)
+export * from './circles-invites';
+
+// Circle plan & subscription screen (catalogue, entitlements usage, change/cancel)
+export * from './circles-billing';

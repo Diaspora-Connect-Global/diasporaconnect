@@ -2878,17 +2878,31 @@
       "joinedOn": "Beigetreten am {date}",
       "noResults": "Keine Mitglieder passen zu „{query}“.",
       "invite": {
-        "title": "In den Kreis einladen",
-        "description": "Teile einen Link oder lade jemanden einzeln ein.",
+        "title": "Einladen",
+        "description": "Lade jemanden per E-Mail oder Telefon ein oder teile die Seite des Kreises.",
         "copyLink": "Link kopieren",
         "linkCopied": "Link kopiert",
-        "invitePerson": "Jemanden einladen"
+        "invitePerson": "Jemanden einladen",
+        "copyCircleLink": "Kreis-Link kopieren",
+        "circleLinkCopied": "Kreis-Link kopiert"
       },
       "actions": {
         "viewProfile": "Profil ansehen",
         "message": "Nachricht senden",
         "makeLead": "Zur Leitung machen",
         "remove": "Aus dem Kreis entfernen"
+      },
+      "past": {
+        "title": "{count, plural, =1 {1 ehemaliges Mitglied} other {# ehemalige Mitglieder}}",
+        "description": "Alle, die einmal in diesem Kreis waren – und warum sie es nicht mehr sind.",
+        "endedOn": "am {date}",
+        "viewMotion": "Antrag zu dieser Entfernung ansehen",
+        "platformNote": "Eine Maßnahme der Plattform gegen dieses Konto – keine Entscheidung dieses Kreises.",
+        "reason": {
+          "LEFT": "Ausgetreten",
+          "REMOVED": "Per Antrag entfernt",
+          "SUSPENDED": "Von der Plattform gesperrt"
+        }
       }
     },
     "leaderboard": {
@@ -2990,6 +3004,449 @@
         "cta": "Zugang anfragen"
       },
       "joinChallenge": "Wir konnten dich nicht zu dieser Challenge hinzufügen"
+    },
+    "settings": {
+      "title": "Kreis-Einstellungen",
+      "loadFailed": "Wir konnten diese Einstellungen nicht laden. Bitte versuche es erneut.",
+      "notAMember": "Nur Mitglieder können die Einstellungen eines Kreises öffnen. Bitte jemanden von innen, dich einzuladen.",
+      "statusNotice": {
+        "suspended": "Dieser Kreis wurde von der Plattform gesperrt, deshalb sind seine Einstellungen vorerst schreibgeschützt.",
+        "archived": "Dieser Kreis ist archiviert. Es ist nichts verloren gegangen, aber die Einstellungen bleiben schreibgeschützt, bis er zurückgeholt wird.",
+        "dissolved": "Dieser Kreis wurde aufgelöst. Seine Aufzeichnungen bleiben erhalten, aber es lässt sich nichts mehr ändern."
+      },
+      "profile": {
+        "title": "Profil",
+        "description": "Wie sich dein Kreis vorstellt, überall wo er auftaucht.",
+        "readOnlyDescription": "So stellt sich dieser Kreis derzeit vor.",
+        "leadOnlyNote": "Nur eine Leitung kann das Profil bearbeiten.",
+        "nameLabel": "Name des Kreises",
+        "namePlaceholder": "z. B. Accra Founders",
+        "nameRequired": "Gib deinem Kreis einen Namen.",
+        "tooLong": "Bitte höchstens {max} Zeichen.",
+        "handleLabel": "Kennung",
+        "handlePlaceholder": "accra-founders",
+        "handleHint": "Kleinbuchstaben, Zahlen, _ und -, am Anfang und Ende ein Buchstabe oder eine Zahl. Bis zu {max} Zeichen.",
+        "handleInvalid": "Verwende Kleinbuchstaben, Zahlen, _ oder -, am Anfang und Ende ein Buchstabe oder eine Zahl.",
+        "taglineLabel": "Kurzbeschreibung",
+        "taglinePlaceholder": "Eine Zeile über diesen Kreis",
+        "descriptionLabel": "Über den Kreis",
+        "descriptionPlaceholder": "Wofür dieser Kreis da ist und was hier passiert.",
+        "notClearable": "Das lässt sich ändern, aber noch nicht leeren. Schreib etwas anderes, oder setze den alten Text wieder ein.",
+        "imageReplaceOnly": "Bilder lassen sich ersetzen, aber noch nicht entfernen.",
+        "imageFailed": "Das Bild wurde nicht hochgeladen, deshalb wurde nichts gespeichert. Bitte versuche es erneut.",
+        "nothingToSave": "Bisher hat sich nichts geändert.",
+        "save": "Änderungen speichern",
+        "saving": "Wird gespeichert…",
+        "saved": "Profil aktualisiert.",
+        "saveFailed": "Wir konnten deine Änderungen nicht speichern. Bitte versuche es erneut."
+      },
+      "discovery": {
+        "title": "Finden und beitreten",
+        "description": "Zwei getrennte Einstellungen: ob man diesen Kreis finden kann, und wie man hineinkommt.",
+        "readOnlyDescription": "Wie dieser Kreis derzeit gefunden wird und wie man beitritt.",
+        "discoverabilityQuestion": "Kann man diesen Kreis finden?",
+        "discoverabilityHelp": "Das legt fest, ob der Kreis in der Suche und unter „Entdecken“ erscheint.",
+        "discoverableTitle": "Auffindbar",
+        "discoverableDescription": "Alle können auf diesen Kreis stoßen.",
+        "hiddenTitle": "Verborgen",
+        "hiddenDescription": "Nur wer den Link hat, sieht ihn.",
+        "accessQuestion": "Wie kommt man hinein?",
+        "accessHelp": "Unabhängig von der Auffindbarkeit — ein verborgener Kreis kann trotzdem Anfragen annehmen.",
+        "requestTitle": "Auf Anfrage",
+        "requestDescription": "Andere fragen den Beitritt an, und der Kreis entscheidet gemeinsam.",
+        "inviteTitle": "Nur mit Einladung",
+        "inviteDescription": "Nur eingeladene Personen können beitreten.",
+        "discoverabilitySaved": "Auffindbarkeit aktualisiert.",
+        "joinModeSaved": "Beitritt aktualisiert.",
+        "saveFailed": "Wir konnten diese Einstellung nicht ändern. Bitte versuche es erneut.",
+        "leadNote": "Du kannst diese beiden Einstellungen ändern, weil du eine Leitung bist. Jedes Mitglied kann eine Änderung außerdem per Antrag vorschlagen — dann entscheidet der Kreis gemeinsam.",
+        "proposeInstead": "Nur eine Leitung kann das direkt ändern. Du kannst den Kreis per Antrag um die Änderung bitten."
+      },
+      "archive": {
+        "title": "Diesen Kreis archivieren",
+        "description": "Den Kreis weglegen, ohne etwas davon zu verlieren.",
+        "statusArchived": "Archiviert",
+        "alreadyArchivedDescription": "Dieser Kreis ist bereits archiviert.",
+        "alreadyArchivedBody": "Alles ist noch da — Mitglieder, Entscheidungen, Projekte und Verlauf. Einen Kreis zurückzuholen geht über diesen Bildschirm noch nicht; wende dich bei Bedarf an den Support.",
+        "bulletKept": "Nichts wird gelöscht. Mitglieder, Entscheidungen, Projekte und Verlauf bleiben genau so, wie sie sind.",
+        "bulletQuiet": "Der Kreis ist kein aktiver Ort mehr: Er verschwindet aus der Entdeckung und nimmt keine neuen Mitglieder mehr auf.",
+        "bulletReversible": "Archivieren ist nicht endgültig. Ein Kreis kann zurückgeholt werden — nur noch nicht über diesen Bildschirm.",
+        "button": "Kreis archivieren",
+        "dialogTitle": "{name} archivieren?",
+        "dialogDescription": "Damit wird der Kreis geschlossen. Er wird nicht gelöscht, und nichts darin geht verloren.",
+        "cancel": "Offen lassen",
+        "confirm": "Kreis archivieren",
+        "archiving": "Wird archiviert…",
+        "archived": "Kreis archiviert.",
+        "failed": "Wir konnten diesen Kreis nicht archivieren. Bitte versuche es erneut.",
+        "leadOnlyBody": "Nur eine Leitung kann diesen Kreis archivieren.",
+        "dissolvedBody": "Dieser Kreis wurde aufgelöst, und das ist endgültig. Er kann weder archiviert noch wieder geöffnet werden.",
+        "proposeInstead": "Du kannst den Kreis per Antrag bitten, sich aufzulösen — die Mitglieder entscheiden gemeinsam."
+      }
+    },
+    "history": {
+      "title": "Entscheidungsverlauf",
+      "intro": "Jede Entscheidung dieses Kreises, neueste zuerst. Jeder Eintrag ist mit dem vorherigen versiegelt — der Verlauf lässt sich prüfen und nicht nur glauben.",
+      "loadOlder": "Ältere Einträge laden",
+      "beginning": "Das ist der vollständige Verlauf, zurück bis zur Gründung dieses Kreises.",
+      "platformAction": "Plattform-Eingriff",
+      "error": {
+        "load": "Wir konnten den Entscheidungsverlauf nicht laden. Bitte versuche es erneut."
+      },
+      "empty": {
+        "title": "Noch nichts entschieden",
+        "description": "Sobald dieser Kreis den ersten Antrag stellt, wird hier jeder Schritt der Entscheidung festgehalten."
+      },
+      "entry": {
+        "seq": "Nr. {seq}",
+        "undated": "Kein Datum erfasst"
+      },
+      "chain": {
+        "verified": {
+          "title": "Verlauf geprüft",
+          "body": "Jeder Eintrag passt weiterhin zum vorherigen. Seit dem Eintragen wurde nichts geändert oder entfernt."
+        },
+        "broken": {
+          "title": "Der Verlauf passt nicht mehr zu seiner Versiegelung",
+          "body": "Ein Eintrag wurde geändert oder entfernt. Nichts hier darf als Beleg dafür gelten, was dieser Kreis entschieden hat. Bitte melde das."
+        },
+        "unchecked": {
+          "title": "Nicht geprüft",
+          "body": "Wir konnten den Verlauf gerade nicht prüfen und behaupten deshalb nicht, dass er unversehrt ist. Versuche es gleich noch einmal — meist war der Dienst nur kurz nicht erreichbar."
+        }
+      },
+      "actor": {
+        "by": "Von {name}",
+        "unresolved": "einem Mitglied",
+        "erased": "Von einem Mitglied, das sein Konto inzwischen gelöscht hat",
+        "automatic": "Automatisch erfasst — niemand hat gehandelt",
+        "notPublished": "Erfasst — einzelne Stimmen werden nie veröffentlicht"
+      },
+      "events": {
+        "motionOpened": "Antrag gestellt",
+        "motionOpenedTitled": "Gestellt: {title}",
+        "voteCast": "Eine Stimme wurde abgegeben",
+        "motionTallied": "Stimmen ausgezählt",
+        "motionWithdrawn": "Antrag zurückgezogen",
+        "motionExpired": "Abstimmung ohne Entscheidung beendet",
+        "motionEnacted": "Entscheidung umgesetzt",
+        "motionEnactmentFailed": "Entscheidung konnte nicht umgesetzt werden",
+        "ruleAmended": "Abstimmungsregel geändert",
+        "limitReached": "Tarifgrenze erreicht",
+        "inviteLinkMinted": "Einladungslink erstellt",
+        "inviteLinkRevoked": "Einladungslink widerrufen",
+        "inviteLinkRedeemed": "Jemand ist über einen Einladungslink beigetreten",
+        "circleSuspended": "Kreis von der Plattform gesperrt",
+        "circleUnsuspended": "Sperre von der Plattform aufgehoben",
+        "circleDissolved": "Kreis von der Plattform aufgelöst",
+        "unknown": "Erfasstes Ereignis"
+      }
+    },
+    "governance": {
+      "title": "Wie dieser Kreis entscheidet",
+      "intro": "Die Regeln, die dieser Kreis sich selbst gegeben hat: was eine Abstimmung braucht und was der Leitung oder jedem Mitglied überlassen bleibt.",
+      "error": {
+        "load": "Wir konnten die Abstimmungsregeln nicht laden. Bitte versuche es erneut."
+      },
+      "empty": {
+        "title": "Noch keine Regeln festgelegt",
+        "description": "Dieser Kreis hat seine Abstimmungsregeln noch nicht veröffentlicht. Sobald das geschieht, siehst du hier genau, was jede Art von Entscheidung braucht."
+      },
+      "pinned": {
+        "title": "Das sind die heutigen Regeln",
+        "body": "Ein Antrag behält die Regeln, unter denen er gestellt wurde, bis er endet. Eine Änderung hier verändert nie eine laufende Abstimmung — genau das verhindert, dass eine Regeländerung eine Entscheidung mittendrin umschreibt."
+      },
+      "howItWorks": {
+        "title": "So läuft eine Abstimmung hier",
+        "quorum": "Beim Quorum zählt die Beteiligung, nicht die Zustimmung: Eine Enthaltung gilt als Teilnahme.",
+        "majority": "Das Ergebnis wird nur aus Ja- und Nein-Stimmen berechnet. Enthaltungen bleiben außen vor.",
+        "tie": "Ein Gleichstand geht von allein nie durch.",
+        "silence": "Endet die Frist ohne Quorum, passiert nichts. Schweigen ist keine Zustimmung."
+      },
+      "field": {
+        "proposer": "Wer stellen darf",
+        "passes": "Was ihn annimmt",
+        "quorum": "Wie viele abstimmen müssen",
+        "window": "Abstimmung offen",
+        "tie": "Bei Gleichstand"
+      },
+      "proposer": {
+        "member": "Jedes Mitglied",
+        "lead": "Nur die Leitung"
+      },
+      "value": {
+        "unspecified": "Nicht festgelegt"
+      },
+      "majority": {
+        "unanimous": "Alle, die abstimmen, müssen mit Ja stimmen",
+        "simple": "Mehr Ja als Nein",
+        "twoThirds": "Mindestens zwei Drittel Ja",
+        "threeQuarters": "Mindestens drei Viertel Ja",
+        "custom": "Mindestens {n} von je {d} Ja",
+        "note": "Nur aus Ja- und Nein-Stimmen berechnet."
+      },
+      "quorum": {
+        "everyone": "Alle Mitglieder müssen abstimmen",
+        "half": "Die Hälfte des Kreises muss abstimmen",
+        "twoThirds": "Zwei Drittel des Kreises müssen abstimmen",
+        "threeQuarters": "Drei Viertel des Kreises müssen abstimmen",
+        "custom": "{n} von je {d} Mitgliedern müssen abstimmen",
+        "note": "Eine Enthaltung zählt als Abstimmen.",
+        "today": "Das sind heute {required} von euren {total} Mitgliedern."
+      },
+      "window": {
+        "hours": "{count, plural, =1 {1 Stunde} other {# Stunden}}",
+        "days": "{count, plural, =1 {1 Tag} other {# Tage}}",
+        "weeks": "{count, plural, =1 {1 Woche} other {# Wochen}}",
+        "note": "Ab dem Moment, in dem der Antrag gestellt wird."
+      },
+      "tie": {
+        "reject": "Er wird abgelehnt",
+        "lead": "Die Stimme der Leitung entscheidet"
+      },
+      "history": {
+        "title": "Wie sich diese Regel geändert hat",
+        "versions": "{count, plural, =1 {1 Fassung} other {# Fassungen}}",
+        "version": "Fassung {version}",
+        "current": "In Kraft seit {from}",
+        "range": "{from} bis {until}",
+        "summary": "{majority} · {quorum} · {window} lang offen",
+        "viewMotion": "Antrag ansehen, der sie geändert hat",
+        "seeded": "Die Startregel des Kreises"
+      },
+      "motionKind": {
+        "ADMIT_MEMBER": "Ein neues Mitglied aufnehmen",
+        "REMOVE_MEMBER": "Ein Mitglied ausschließen",
+        "APPOINT_LEAD": "Eine Leitung ernennen",
+        "REMOVE_LEAD": "Eine Leitung abberufen",
+        "AMEND_RULES": "Diese Regeln ändern",
+        "CHANGE_JOIN_MODE": "Ändern, wie man beitritt",
+        "SET_DISCOVERABLE": "Ändern, ob der Kreis auffindbar ist",
+        "CREATE_PROJECT": "Ein Projekt starten",
+        "CLOSE_PROJECT": "Ein Projekt abschließen",
+        "CREATE_CHALLENGE": "Eine Challenge starten",
+        "VERIFY_CHALLENGE_ENTRY": "Einen Challenge-Beitrag bestätigen",
+        "CHANGE_PLAN": "Den Tarif des Kreises ändern",
+        "DISSOLVE_CIRCLE": "Den Kreis auflösen",
+        "CUSTOM": "Alles Weitere"
+      }
+    },
+    "plan": {
+      "title": "Tarif & Nutzung",
+      "loadError": "Wir konnten deinen Tarif nicht laden. Bitte versuche es erneut.",
+      "partialLoad": "Ein Teil dieser Seite wurde nicht geladen. Das Angezeigte ist aktuell — versuche es für den Rest erneut.",
+      "membersOnly": {
+        "title": "Nur für Mitglieder",
+        "description": "Tarif und Nutzung eines Kreises sehen nur seine Mitglieder. Dein Kreis hat so oder so einen Tarif — jeder Kreis hat immer einen."
+      },
+      "price": {
+        "free": "Kostenlos",
+        "perMonth": "{price} / Monat",
+        "perYear": "{price} / Jahr",
+        "oneTime": "{price} einmalig",
+        "flat": "{price}",
+        "yearlyNote": "Der Jahrespreis ist ein eigener Preis, nicht zwölf Monatspreise."
+      },
+      "current": {
+        "heading": "Dein Kreis nutzt",
+        "unnamedPlan": "Dein Tarif",
+        "status": {
+          "ACTIVE": "Aktiv",
+          "PAST_DUE": "Zahlung überfällig",
+          "CANCELLED": "Läuft aus",
+          "EXPIRED": "Abgelaufen"
+        },
+        "renewsLabel": "Verlängert sich am",
+        "endingLabel": "Wechselt zum kostenlosen Tarif am",
+        "sinceLabel": "In diesem Tarif seit",
+        "paidByLabel": "Bezahlt von",
+        "payerNote": "Zu bezahlen bringt kein zusätzliches Mitspracherecht. Wer bezahlt, hat genau eine Stimme wie alle anderen und kann nichts allein entscheiden.",
+        "alwaysOnAPlan": "Jeder Kreis hat immer einen Tarif. Der kostenlose ist einer davon, nicht das Fehlen eines Tarifs.",
+        "moveToFree": "Zurück zum kostenlosen Tarif wechseln"
+      },
+      "allowance": {
+        "heading": "Was dein Tarif abdeckt",
+        "intro": "Und was ihr gerade nutzt — damit du schon vorher siehst, warum etwas abgelehnt würde.",
+        "unlimited": "Unbegrenzt",
+        "covered": "{limit} abgedeckt",
+        "usedOf": "{current} von {limit}",
+        "usedUnlimited": "{current} genutzt, unbegrenzt",
+        "megabytes": "{value} MB",
+        "full": "Voll",
+        "on": "An",
+        "off": "Aus",
+        "window": "{days, plural, =1 {Letzter Tag} other {Letzte # Tage}}",
+        "windowUnlimited": "Vollständig",
+        "windowNote": "Das ändert nur, wie weit der Chat zurück angezeigt wird. Es wird nichts gelöscht, und ein längerer Zeitraum bringt die älteren Nachrichten sofort zurück.",
+        "brandingOffNote": "Deine eigenen Farben sind gespeichert und kommen mit einem Tarif, der sie enthält, sofort zurück. Solange zeigt dein Kreis einfach das Standard-Design.",
+        "name": {
+          "MAX_MEMBERS": "Mitglieder",
+          "MAX_ACTIVE_PROJECTS": "Laufende Projekte",
+          "MAX_ACTIVE_CHALLENGES": "Laufende Challenges",
+          "CHAT_HISTORY_DAYS": "Chat-Verlauf",
+          "STORAGE_MB": "Speicher",
+          "CUSTOM_BRANDING": "Eigene Farben"
+        },
+        "locked": {
+          "MAX_MEMBERS": "Du hast {current} Mitglieder. Dein Tarif umfasst {limit}. Niemand wird entfernt — du kannst nur niemanden Neues aufnehmen, bis du wieder unter {limit} bist oder zurück im größeren Tarif.",
+          "MAX_ACTIVE_PROJECTS": "Bei dir laufen {current} Projekte. Dein Tarif umfasst {limit}. Nichts wird geschlossen oder gelöscht — du kannst nur kein neues starten, bis eines abgeschlossen ist oder sich dein Tarif ändert.",
+          "MAX_ACTIVE_CHALLENGES": "Bei dir laufen {current} Challenges. Dein Tarif umfasst {limit}. Nichts wird abgebrochen — du kannst nur keine neue starten, bis eine endet oder sich dein Tarif ändert.",
+          "STORAGE_MB": "Du nutzt {current} von {limit}. Es wird nichts gelöscht — du kannst nur nichts Neues hochladen, bis Platz frei wird oder sich dein Tarif ändert."
+        }
+      },
+      "billing": {
+        "heading": "Bezahlte Tarife richten wir derzeit von Hand ein",
+        "body": "Wir können für einen Kreis noch keine Zahlung in der App entgegennehmen. Kostenlose Tarife wechseln sofort; für alles andere sag uns, was dein Kreis braucht, und wir richten es ein. An deinem Kreis ändert sich in der Zwischenzeit nichts.",
+        "cta": "Sprich mit uns"
+      },
+      "catalogue": {
+        "heading": "Alle Tarife",
+        "intro": "Tarife werden individuell zusammengestellt. Jeder ist ein eigenes Set an Grenzen und keine Stufe über oder unter den anderen.",
+        "current": "Aktueller Tarif",
+        "default": "Standard",
+        "switchTo": "Zu diesem Tarif wechseln",
+        "notPurchasable": "Diesen Tarif gibt es noch nicht zur Selbstbuchung — wir richten ihn für dich ein.",
+        "contactUs": "Sprich mit uns",
+        "leadOnly": "Nur die Leitung kann den Tarif des Kreises ändern.",
+        "unavailable": "Die Tarifliste ist gerade nicht verfügbar."
+      },
+      "change": {
+        "title": "Zu {plan} wechseln?",
+        "noDirection": "Das ist kein Upgrade und kein Downgrade — nur ein anderes Set an Grenzen.",
+        "increases": "Alles, was dieser Tarif erhöht, gilt sofort.",
+        "decreases": "Alles, was er senkt, wird einfach gesperrt. Dein Kreis behält jedes Mitglied, jedes Projekt und jede Challenge, die er schon hat, und kann Neues erst wieder hinzufügen, wenn er unter der neuen Grenze liegt.",
+        "willLockHeading": "Das wäre sofort voll:",
+        "willLockRow": "{name}: jetzt {current}, abgedeckt {limit}",
+        "willLockReassurance": "Nichts aus dieser Liste wird entfernt. Nur Neues muss warten.",
+        "confirm": "Tarif wechseln",
+        "back": "Jetzt nicht",
+        "submitting": "Wird gewechselt …",
+        "success": "Dein Kreis nutzt jetzt {plan}.",
+        "error": "Wir konnten den Tarif nicht wechseln. An deinem Kreis hat sich nichts geändert — bitte versuche es erneut."
+      },
+      "cancel": {
+        "title": "Zurück zum kostenlosen Tarif wechseln?",
+        "body": "Dein Kreis bleibt genau so, wie er ist — dieselben Mitglieder, dieselben Projekte, dieselben Challenges, derselbe Chat. Er wechselt nur in den kostenlosen Tarif.",
+        "locksNotEvicts": "Liegt etwas über einer Grenze des kostenlosen Tarifs, wird diese Grenze einfach gesperrt: Es wird nichts entfernt, und du kannst wieder Neues hinzufügen, sobald du darunter liegst.",
+        "stayUntil": "Bis zum {date} in diesem Tarif bleiben",
+        "confirmNow": "Jetzt wechseln",
+        "keep": "Tarif behalten",
+        "submitting": "Wird gewechselt …",
+        "successNow": "Dein Kreis nutzt jetzt den kostenlosen Tarif.",
+        "successLater": "Dein Kreis wechselt am Ende dieses Zeitraums in den kostenlosen Tarif.",
+        "error": "Wir konnten den Tarif nicht ändern. An deinem Kreis hat sich nichts geändert — bitte versuche es erneut."
+      }
+    },
+    "invites": {
+      "title": "Einladungslinks",
+      "description": "Ein Link, über den andere beitreten können – bis er abläuft oder aufgebraucht ist. Nur die Leitung kann einen erstellen.",
+      "loading": "Einladungslinks werden geladen...",
+      "loadError": "Die Einladungslinks dieses Kreises konnten nicht geladen werden.",
+      "empty": "Noch keine Einladungslinks.",
+      "mint": {
+        "maxUses": "Nutzungen",
+        "maxUsesHint": "1-{max} Personen",
+        "expiry": "Läuft ab",
+        "expiryOption": {
+          "24": "In 1 Tag",
+          "168": "In 7 Tagen",
+          "336": "In 14 Tagen"
+        },
+        "submit": "Link erstellen",
+        "capReached": "Dieser Kreis hat bereits die maximal {max} aktiven Links. Widerrufe einen, um einen neuen zu erstellen.",
+        "capRemaining": "{live} von {max} aktiven Links belegt."
+      },
+      "minted": {
+        "title": "Kopiere diesen Link jetzt",
+        "shownOnce": "Er wird nur dieses eine Mal angezeigt. Wenn du ihn verlierst, widerrufe den Link und erstelle einen neuen.",
+        "copy": "Link kopieren",
+        "copied": "Kopiert",
+        "copiedHint": "Der Link ist in deiner Zwischenablage.",
+        "copyFailed": "Wir konnten nicht auf deine Zwischenablage zugreifen. Markiere den Link oben und kopiere ihn von Hand.",
+        "dismiss": "Ich habe ihn kopiert"
+      },
+      "link": {
+        "status": {
+          "ACTIVE": "Aktiv",
+          "REVOKED": "Widerrufen",
+          "EXPIRED": "Abgelaufen",
+          "EXHAUSTED": "Alle Nutzungen aufgebraucht"
+        },
+        "remaining": "{remaining} von {max} Nutzungen übrig",
+        "used": "{used} von {max} Nutzungen verbraucht",
+        "revoke": "Widerrufen",
+        "revokeConfirm": "Endgültig widerrufen?",
+        "revokeYes": "Widerrufen",
+        "revokeCancel": "Behalten",
+        "revokedOn": "Widerrufen am {date}",
+        "revokedNoDate": "Widerrufen",
+        "expiredOn": "Abgelaufen am {date}",
+        "expiredNoDate": "Abgelaufen"
+      },
+      "countdown": {
+        "daysHours": "Noch {days} T {hours} Std.",
+        "days": "Noch {days} Tage",
+        "hoursMinutes": "Noch {hours} Std. {minutes} Min.",
+        "minutes": "Noch {minutes} Min.",
+        "expiresAt": "Läuft ab am {datetime}",
+        "expired": "Abgelaufen"
+      }
+    },
+    "join": {
+      "working": {
+        "title": "Du trittst dem Kreis bei...",
+        "description": "Wir prüfen deinen Einladungslink."
+      },
+      "joined": {
+        "title": "Du bist dabei",
+        "description": "Du bist {circle} beigetreten. Wir bringen dich jetzt dorthin."
+      },
+      "already": {
+        "title": "Du bist bereits Mitglied",
+        "description": "Diesen Link brauchst du nicht. Du gehörst schon zu diesem Kreis, wir bringen dich jetzt dorthin."
+      },
+      "open": "Kreis öffnen",
+      "myCircles": "Zu meinen Kreisen",
+      "retry": "Erneut versuchen",
+      "askForNewLink": "Bitte die Person, die ihn geteilt hat, um einen neuen Einladungslink.",
+      "refused": {
+        "MISSING_TOKEN": {
+          "title": "Dieser Link ist unvollständig",
+          "description": "In der Adresse fehlt der Einladungscode. Links werden beim Einfügen in einen Chat oft abgeschnitten. Lass ihn dir noch einmal schicken und öffne ihn vollständig."
+        },
+        "MALFORMED_TOKEN": {
+          "title": "Dieser Link wirkt abgeschnitten",
+          "description": "Der Einladungscode ist nicht vollständig. Das passiert meist, wenn ein Link in einer Nachricht über zwei Zeilen umbricht. Lass ihn dir noch einmal schicken und öffne die ganze Adresse."
+        },
+        "INVALID": {
+          "title": "Dieser Einladungslink ist ungültig",
+          "description": "Wir konnten ihn keinem Kreis zuordnen. Vielleicht wurde er vertippt oder auf dem Weg zu dir abgeschnitten."
+        },
+        "EXPIRED": {
+          "title": "Dieser Einladungslink ist abgelaufen",
+          "description": "Einladungslinks gelten nur wenige Tage. Dieser hat sein Datum überschritten und kann nicht mehr verwendet werden."
+        },
+        "REVOKED": {
+          "title": "Dieser Einladungslink wurde widerrufen",
+          "description": "Die Leitung des Kreises hat diesen Link zurückgezogen. Wer bereits darüber beigetreten ist, bleibt Mitglied, aber der Link selbst funktioniert nicht mehr."
+        },
+        "EXHAUSTED": {
+          "title": "Dieser Einladungslink ist aufgebraucht",
+          "description": "Jeder Einladungslink lässt sich nur begrenzt oft nutzen, und diese Grenze ist hier erreicht."
+        },
+        "CIRCLE_FULL": {
+          "title": "Dieser Kreis ist voll",
+          "description": "Mit deinem Link war alles in Ordnung. Der Kreis hat nur die Mitgliederzahl erreicht, die sein Tarif erlaubt. Ein neuer Link hilft nicht: Jemand im Kreis müsste Platz schaffen oder auf einen größeren Tarif wechseln."
+        },
+        "CIRCLE_UNAVAILABLE": {
+          "title": "Dieser Kreis nimmt keine neuen Mitglieder auf",
+          "description": "Mit deinem Link war alles in Ordnung, aber der Kreis ist derzeit nicht geöffnet. Von hier aus kannst du nichts tun: Schau später noch einmal vorbei oder frag jemanden aus dem Kreis."
+        },
+        "UNKNOWN": {
+          "title": "Wir konnten diesen Link nicht verwenden",
+          "description": "Auf dem Weg zum Kreis ist etwas schiefgegangen. Ein erneuter Versuch hilft oft."
+        }
+      }
     }
   }
 }

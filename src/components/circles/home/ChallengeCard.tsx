@@ -41,8 +41,8 @@ interface ChallengeEntriesData {
 /** Verification mode → the message key describing it in the circle's own words. */
 const VERIFICATION_KEY: Record<CircleVerificationMode, string> = {
   HONOUR: 'trustLabel',
-  LEAD_CONFIRMS: 'leadLabel',
-  CIRCLE_CONFIRMS: 'voteLabel',
+  LEAD: 'leadLabel',
+  CIRCLE: 'voteLabel',
 };
 
 /**

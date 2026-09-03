@@ -2878,17 +2878,31 @@
       "joinedOn": "Joined {date}",
       "noResults": "No members match “{query}”.",
       "invite": {
-        "title": "Invite to circle",
-        "description": "Share a link or invite someone individually.",
+        "title": "Invite",
+        "description": "Invite one person by email or phone, or share the circle's page.",
         "copyLink": "Copy link",
         "linkCopied": "Link copied",
-        "invitePerson": "Invite someone"
+        "invitePerson": "Invite someone",
+        "copyCircleLink": "Copy circle link",
+        "circleLinkCopied": "Circle link copied"
       },
       "actions": {
         "viewProfile": "View profile",
         "message": "Send a message",
         "makeLead": "Make lead",
         "remove": "Remove from circle"
+      },
+      "past": {
+        "title": "{count, plural, =1 {1 former member} other {# former members}}",
+        "description": "Everyone who has been in this circle, and why they are no longer.",
+        "endedOn": "on {date}",
+        "viewMotion": "View the motion behind this removal",
+        "platformNote": "A platform action against their account — not a decision of this circle.",
+        "reason": {
+          "LEFT": "Left",
+          "REMOVED": "Removed by motion",
+          "SUSPENDED": "Suspended by the platform"
+        }
       }
     },
     "leaderboard": {
@@ -2990,6 +3004,449 @@
         "cta": "Request Access"
       },
       "joinChallenge": "We couldn't add you to this challenge"
+    },
+    "settings": {
+      "title": "Circle settings",
+      "loadFailed": "We couldn't load these settings. Please try again.",
+      "notAMember": "Only members can open a circle's settings. Ask someone inside to invite you.",
+      "statusNotice": {
+        "suspended": "This circle has been suspended by the platform, so its settings are read-only for now.",
+        "archived": "This circle is archived. Nothing has been lost, but its settings stay read-only until it is brought back.",
+        "dissolved": "This circle has been dissolved. Its record remains, but nothing can be changed."
+      },
+      "profile": {
+        "title": "Profile",
+        "description": "How your circle introduces itself, wherever it appears.",
+        "readOnlyDescription": "How this circle currently introduces itself.",
+        "leadOnlyNote": "Only a lead can edit the profile.",
+        "nameLabel": "Circle name",
+        "namePlaceholder": "e.g. Accra Founders",
+        "nameRequired": "Give your circle a name.",
+        "tooLong": "Keep this to {max} characters or fewer.",
+        "handleLabel": "Handle",
+        "handlePlaceholder": "accra-founders",
+        "handleHint": "Lowercase letters, numbers, _ and -, starting and ending with a letter or number. Up to {max} characters.",
+        "handleInvalid": "Use lowercase letters, numbers, _ or -, starting and ending with a letter or number.",
+        "taglineLabel": "Tagline",
+        "taglinePlaceholder": "One line about this circle",
+        "descriptionLabel": "About",
+        "descriptionPlaceholder": "What this circle is for, and what happens here.",
+        "notClearable": "This can be changed, but not yet emptied. Write something else, or put the old text back.",
+        "imageReplaceOnly": "Pictures can be replaced, but not yet removed.",
+        "imageFailed": "The picture didn't upload, so nothing was saved. Please try again.",
+        "nothingToSave": "Nothing has changed yet.",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "saved": "Profile updated.",
+        "saveFailed": "We couldn't save your changes. Please try again."
+      },
+      "discovery": {
+        "title": "Finding and joining",
+        "description": "Two separate settings: whether people can find this circle, and how they get in.",
+        "readOnlyDescription": "How this circle is currently found and joined.",
+        "discoverabilityQuestion": "Can people find this circle?",
+        "discoverabilityHelp": "This decides whether the circle appears in search and under Discover.",
+        "discoverableTitle": "Findable",
+        "discoverableDescription": "Anyone can come across this circle.",
+        "hiddenTitle": "Hidden",
+        "hiddenDescription": "Only people with the link will see it.",
+        "accessQuestion": "How do people get in?",
+        "accessHelp": "Separate from being findable — a hidden circle can still accept requests.",
+        "requestTitle": "By request",
+        "requestDescription": "People ask to join, and the circle decides together.",
+        "inviteTitle": "By invitation only",
+        "inviteDescription": "Only people who are invited can join.",
+        "discoverabilitySaved": "Findability updated.",
+        "joinModeSaved": "Joining updated.",
+        "saveFailed": "We couldn't change that setting. Please try again.",
+        "leadNote": "You can change these two settings because you are a lead. Any member can also ask for a change by opening a motion, and the circle decides together.",
+        "proposeInstead": "Only a lead can change these directly. You can ask the circle to change them by opening a motion."
+      },
+      "archive": {
+        "title": "Archive this circle",
+        "description": "Put the circle away without losing any of it.",
+        "statusArchived": "Archived",
+        "alreadyArchivedDescription": "This circle is already archived.",
+        "alreadyArchivedBody": "Everything is still here — members, decisions, projects and history. Bringing a circle back is not something you can do from this screen yet; ask support if you need it.",
+        "bulletKept": "Nothing is deleted. Members, decisions, projects and history all stay exactly as they are.",
+        "bulletQuiet": "The circle stops being an active place: it drops out of discovery and no longer takes new members.",
+        "bulletReversible": "Archiving is not final. A circle can be brought back — though not yet from this screen.",
+        "button": "Archive circle",
+        "dialogTitle": "Archive {name}?",
+        "dialogDescription": "This closes the circle down. It does not delete it, and nothing inside it is lost.",
+        "cancel": "Keep it open",
+        "confirm": "Archive circle",
+        "archiving": "Archiving…",
+        "archived": "Circle archived.",
+        "failed": "We couldn't archive this circle. Please try again.",
+        "leadOnlyBody": "Only a lead can archive this circle.",
+        "dissolvedBody": "This circle has been dissolved, which is final. It can no longer be archived or reopened.",
+        "proposeInstead": "You can ask the circle to wind down by opening a motion, and the members decide together."
+      }
+    },
+    "history": {
+      "title": "Decision history",
+      "intro": "Every decision this circle has made, newest first. Each entry is sealed to the one before it, so the record can be checked rather than taken on trust.",
+      "loadOlder": "Load older entries",
+      "beginning": "That's the whole record, back to the day this circle started.",
+      "platformAction": "Platform action",
+      "error": {
+        "load": "We couldn't load the decision history. Please try again."
+      },
+      "empty": {
+        "title": "Nothing decided yet",
+        "description": "When this circle opens its first motion, every step of the decision will be recorded here."
+      },
+      "entry": {
+        "seq": "#{seq}",
+        "undated": "No date recorded"
+      },
+      "chain": {
+        "verified": {
+          "title": "Record verified",
+          "body": "Every entry still matches the one before it. Nothing has been changed or removed since it was written."
+        },
+        "broken": {
+          "title": "This record no longer matches its seal",
+          "body": "An entry has been changed or removed. Nothing below can be treated as proof of what this circle decided. Please report this."
+        },
+        "unchecked": {
+          "title": "Not verified",
+          "body": "We couldn't check the record just now, so we're not claiming it's intact. Try again in a moment — usually the service was briefly unreachable."
+        }
+      },
+      "actor": {
+        "by": "By {name}",
+        "unresolved": "a member",
+        "erased": "By a member who has since deleted their account",
+        "automatic": "Recorded automatically — no one acted",
+        "notPublished": "Recorded — individual votes are never published"
+      },
+      "events": {
+        "motionOpened": "Motion opened",
+        "motionOpenedTitled": "Opened: {title}",
+        "voteCast": "A vote was cast",
+        "motionTallied": "Votes counted",
+        "motionWithdrawn": "Motion withdrawn",
+        "motionExpired": "Voting closed without a decision",
+        "motionEnacted": "Decision applied",
+        "motionEnactmentFailed": "Decision couldn't be applied",
+        "ruleAmended": "Governance rule changed",
+        "limitReached": "Plan limit reached",
+        "inviteLinkMinted": "Invite link created",
+        "inviteLinkRevoked": "Invite link revoked",
+        "inviteLinkRedeemed": "Someone joined with an invite link",
+        "circleSuspended": "Circle suspended by the platform",
+        "circleUnsuspended": "Suspension lifted by the platform",
+        "circleDissolved": "Circle dissolved by the platform",
+        "unknown": "Recorded event"
+      }
+    },
+    "governance": {
+      "title": "How this circle decides",
+      "intro": "The rules this circle has set for itself: what needs a vote, and what it leaves to a lead or to any member.",
+      "error": {
+        "load": "We couldn't load the governance rules. Please try again."
+      },
+      "empty": {
+        "title": "No rules set yet",
+        "description": "This circle hasn't published its governance rules. Once it does, you'll see exactly what each kind of decision takes."
+      },
+      "pinned": {
+        "title": "These are today's rules",
+        "body": "A motion keeps the rules it opened under for as long as it runs. Changing a rule here never changes a vote already in progress — that is what stops an amendment rewriting a decision midway."
+      },
+      "howItWorks": {
+        "title": "How a vote works here",
+        "quorum": "Quorum is about turnout, not agreement: an abstention counts as taking part.",
+        "majority": "The result is worked out from Yes and No votes only. Abstentions are set aside.",
+        "tie": "An exact tie never passes on its own.",
+        "silence": "If the window closes without quorum, nothing happens. Silence is never consent."
+      },
+      "field": {
+        "proposer": "Who can propose",
+        "passes": "What passes it",
+        "quorum": "How many must vote",
+        "window": "Voting stays open",
+        "tie": "If it's tied"
+      },
+      "proposer": {
+        "member": "Any member",
+        "lead": "Leads only"
+      },
+      "value": {
+        "unspecified": "Not specified"
+      },
+      "majority": {
+        "unanimous": "Everyone who votes must say Yes",
+        "simple": "More Yes than No",
+        "twoThirds": "At least two thirds Yes",
+        "threeQuarters": "At least three quarters Yes",
+        "custom": "At least {n} in every {d} Yes",
+        "note": "Counted from Yes and No votes only."
+      },
+      "quorum": {
+        "everyone": "Every member must vote",
+        "half": "Half the circle must vote",
+        "twoThirds": "Two thirds of the circle must vote",
+        "threeQuarters": "Three quarters of the circle must vote",
+        "custom": "{n} in every {d} members must vote",
+        "note": "An abstention counts as voting.",
+        "today": "That's {required} of your {total} members today."
+      },
+      "window": {
+        "hours": "{count, plural, =1 {1 hour} other {# hours}}",
+        "days": "{count, plural, =1 {1 day} other {# days}}",
+        "weeks": "{count, plural, =1 {1 week} other {# weeks}}",
+        "note": "Counted from the moment the motion opens."
+      },
+      "tie": {
+        "reject": "It doesn't pass",
+        "lead": "The lead's vote decides"
+      },
+      "history": {
+        "title": "How this rule changed",
+        "versions": "{count, plural, =1 {1 version} other {# versions}}",
+        "version": "Version {version}",
+        "current": "In force since {from}",
+        "range": "{from} to {until}",
+        "summary": "{majority} · {quorum} · open for {window}",
+        "viewMotion": "See the motion that changed it",
+        "seeded": "The circle's starting rule"
+      },
+      "motionKind": {
+        "ADMIT_MEMBER": "Admitting a new member",
+        "REMOVE_MEMBER": "Removing a member",
+        "APPOINT_LEAD": "Appointing a lead",
+        "REMOVE_LEAD": "Removing a lead",
+        "AMEND_RULES": "Changing these rules",
+        "CHANGE_JOIN_MODE": "Changing how people join",
+        "SET_DISCOVERABLE": "Changing whether the circle can be found",
+        "CREATE_PROJECT": "Starting a project",
+        "CLOSE_PROJECT": "Closing a project",
+        "CREATE_CHALLENGE": "Starting a challenge",
+        "VERIFY_CHALLENGE_ENTRY": "Confirming a challenge entry",
+        "CHANGE_PLAN": "Changing the circle's plan",
+        "DISSOLVE_CIRCLE": "Dissolving the circle",
+        "CUSTOM": "Anything else"
+      }
+    },
+    "plan": {
+      "title": "Plan & usage",
+      "loadError": "We couldn't load your plan. Please try again.",
+      "partialLoad": "Some of this screen didn't load. What's shown is up to date — try again for the rest.",
+      "membersOnly": {
+        "title": "Members only",
+        "description": "A circle's plan and what it's using are visible to its members. Your circle is on a plan either way — every circle always is."
+      },
+      "price": {
+        "free": "Free",
+        "perMonth": "{price} / month",
+        "perYear": "{price} / year",
+        "oneTime": "{price} one-off",
+        "flat": "{price}",
+        "yearlyNote": "The yearly price is its own price, not twelve monthly ones."
+      },
+      "current": {
+        "heading": "Your circle is on",
+        "unnamedPlan": "Your plan",
+        "status": {
+          "ACTIVE": "Active",
+          "PAST_DUE": "Payment overdue",
+          "CANCELLED": "Ending",
+          "EXPIRED": "Expired"
+        },
+        "renewsLabel": "Renews",
+        "endingLabel": "Moves to free",
+        "sinceLabel": "On this plan since",
+        "paidByLabel": "Paid by",
+        "payerNote": "Paying for the circle grants no extra say. Whoever pays has the same single vote as everyone else and can decide nothing alone.",
+        "alwaysOnAPlan": "Every circle is always on a plan. The free one is a plan, not the absence of one.",
+        "moveToFree": "Move back to the free plan"
+      },
+      "allowance": {
+        "heading": "What your plan covers",
+        "intro": "And what you're using now, so you can see why something would be turned down before you try it.",
+        "unlimited": "Unlimited",
+        "covered": "{limit} covered",
+        "usedOf": "{current} of {limit}",
+        "usedUnlimited": "{current} used, unlimited",
+        "megabytes": "{value} MB",
+        "full": "Full",
+        "on": "On",
+        "off": "Off",
+        "window": "{days, plural, =1 {Last day} other {Last # days}}",
+        "windowUnlimited": "All of it",
+        "windowNote": "This only changes how far back the chat is shown. Nothing is deleted, and a longer window brings the older messages straight back.",
+        "brandingOffNote": "Your custom colours are saved and come straight back on a plan that includes them. Your circle just shows the standard look meanwhile.",
+        "name": {
+          "MAX_MEMBERS": "Members",
+          "MAX_ACTIVE_PROJECTS": "Active projects",
+          "MAX_ACTIVE_CHALLENGES": "Active challenges",
+          "CHAT_HISTORY_DAYS": "Chat history",
+          "STORAGE_MB": "Storage",
+          "CUSTOM_BRANDING": "Custom colours"
+        },
+        "locked": {
+          "MAX_MEMBERS": "You have {current} members. Your plan covers {limit}. Nobody is removed — you just can't add anyone new until you're under {limit} or back on the larger plan.",
+          "MAX_ACTIVE_PROJECTS": "You have {current} projects running. Your plan covers {limit}. Nothing is closed or deleted — you just can't start another until one finishes or your plan changes.",
+          "MAX_ACTIVE_CHALLENGES": "You have {current} challenges running. Your plan covers {limit}. Nothing is cancelled — you just can't start another until one closes or your plan changes.",
+          "STORAGE_MB": "You're using {current} of {limit}. Nothing is deleted — you just can't upload anything new until some space is freed or your plan changes."
+        }
+      },
+      "billing": {
+        "heading": "We set paid plans up by hand for now",
+        "body": "We can't take payment for a circle inside the app yet. Free plans switch straight away; for anything else, tell us what your circle needs and we'll set it up. Nothing about your circle changes while you wait.",
+        "cta": "Talk to us"
+      },
+      "catalogue": {
+        "heading": "Every plan",
+        "intro": "Plans are built to order, so each one is its own set of limits rather than a step up or down from the others.",
+        "current": "Current plan",
+        "default": "Default",
+        "switchTo": "Switch to this plan",
+        "notPurchasable": "This plan isn't self-serve yet — we set it up for you.",
+        "contactUs": "Talk to us",
+        "leadOnly": "Only a lead can change the circle's plan.",
+        "unavailable": "The list of plans isn't available right now."
+      },
+      "change": {
+        "title": "Switch to {plan}?",
+        "noDirection": "This isn't an upgrade or a downgrade — just a different set of limits.",
+        "increases": "Anything this plan raises takes effect straight away.",
+        "decreases": "Anything it lowers simply locks. Your circle keeps every member, project and challenge it already has, and can only add new ones once it's back under the new limit.",
+        "willLockHeading": "These would be full right away:",
+        "willLockRow": "{name}: {current} now, {limit} covered",
+        "willLockReassurance": "Nothing on this list is removed. Only new additions wait.",
+        "confirm": "Switch plan",
+        "back": "Not now",
+        "submitting": "Switching…",
+        "success": "Your circle is now on {plan}.",
+        "error": "We couldn't switch the plan. Your circle is unchanged — please try again."
+      },
+      "cancel": {
+        "title": "Move back to the free plan?",
+        "body": "Your circle stays exactly as it is — same members, same projects, same challenges, same chat. It just moves onto the free plan.",
+        "locksNotEvicts": "If anything ends up over a free-plan limit, that limit simply locks: nothing is removed, and you can add new ones again once you are under it.",
+        "stayUntil": "Stay on this plan until {date}",
+        "confirmNow": "Move now",
+        "keep": "Keep this plan",
+        "submitting": "Moving…",
+        "successNow": "Your circle is on the free plan.",
+        "successLater": "Your circle moves to the free plan at the end of this period.",
+        "error": "We couldn't change the plan. Your circle is unchanged — please try again."
+      }
+    },
+    "invites": {
+      "title": "Invite links",
+      "description": "One link that lets people join, until it expires or runs out of uses. Only a lead can create one.",
+      "loading": "Loading invite links...",
+      "loadError": "We couldn't load this circle's invite links.",
+      "empty": "No invite links yet.",
+      "mint": {
+        "maxUses": "Uses",
+        "maxUsesHint": "1-{max} people",
+        "expiry": "Expires",
+        "expiryOption": {
+          "24": "In 1 day",
+          "168": "In 7 days",
+          "336": "In 14 days"
+        },
+        "submit": "Create link",
+        "capReached": "This circle already has the maximum of {max} live links. Revoke one to create another.",
+        "capRemaining": "{live} of {max} live links in use."
+      },
+      "minted": {
+        "title": "Copy this link now",
+        "shownOnce": "This is the only time it will be shown. If you lose it, revoke the link and create another.",
+        "copy": "Copy link",
+        "copied": "Copied",
+        "copiedHint": "The link is on your clipboard.",
+        "copyFailed": "We couldn't reach your clipboard. Select the link above and copy it by hand.",
+        "dismiss": "I've copied it"
+      },
+      "link": {
+        "status": {
+          "ACTIVE": "Active",
+          "REVOKED": "Revoked",
+          "EXPIRED": "Expired",
+          "EXHAUSTED": "All uses spent"
+        },
+        "remaining": "{remaining} of {max} uses left",
+        "used": "{used} of {max} uses spent",
+        "revoke": "Revoke",
+        "revokeConfirm": "Revoke for good?",
+        "revokeYes": "Revoke",
+        "revokeCancel": "Keep",
+        "revokedOn": "Revoked {date}",
+        "revokedNoDate": "Revoked",
+        "expiredOn": "Expired {date}",
+        "expiredNoDate": "Expired"
+      },
+      "countdown": {
+        "daysHours": "{days}d {hours}h left",
+        "days": "{days} days left",
+        "hoursMinutes": "{hours}h {minutes}m left",
+        "minutes": "{minutes}m left",
+        "expiresAt": "Expires {datetime}",
+        "expired": "Expired"
+      }
+    },
+    "join": {
+      "working": {
+        "title": "Joining the circle...",
+        "description": "Checking your invite link."
+      },
+      "joined": {
+        "title": "You're in",
+        "description": "You've joined {circle}. Taking you there now."
+      },
+      "already": {
+        "title": "You're already a member",
+        "description": "You don't need this link. You're already part of this circle, so we're taking you there now."
+      },
+      "open": "Open circle",
+      "myCircles": "Go to my circles",
+      "retry": "Try again",
+      "askForNewLink": "Ask whoever shared it for a new invite link.",
+      "refused": {
+        "MISSING_TOKEN": {
+          "title": "This link is incomplete",
+          "description": "The invite code is missing from the address. Links often get cut short when they are pasted into a chat. Ask for it again and open it in full."
+        },
+        "MALFORMED_TOKEN": {
+          "title": "This link looks cut short",
+          "description": "The invite code is not complete. That usually happens when a link breaks across two lines in a message. Ask for it again and open the whole address."
+        },
+        "INVALID": {
+          "title": "This invite link is not valid",
+          "description": "We could not match it to any circle. It may have been mistyped or cut short on its way to you."
+        },
+        "EXPIRED": {
+          "title": "This invite link has expired",
+          "description": "Invite links only last a few days. This one has passed its date, so it cannot be used any more."
+        },
+        "REVOKED": {
+          "title": "This invite link was withdrawn",
+          "description": "A lead of the circle took this link down. Anyone who already joined through it stays a member, but the link itself no longer works."
+        },
+        "EXHAUSTED": {
+          "title": "This invite link is used up",
+          "description": "Every invite link can be used a limited number of times, and this one has reached its limit."
+        },
+        "CIRCLE_FULL": {
+          "title": "This circle is full",
+          "description": "There was nothing wrong with your link. The circle has simply reached the number of members its plan allows. A new link will not help: someone in the circle would need to make room or move to a larger plan."
+        },
+        "CIRCLE_UNAVAILABLE": {
+          "title": "This circle is not taking new members",
+          "description": "There was nothing wrong with your link, but the circle is not open at the moment. There is nothing to do from here: check back later or ask someone in it."
+        },
+        "UNKNOWN": {
+          "title": "We could not use this link",
+          "description": "Something went wrong on the way to the circle. Trying again often works."
+        }
+      }
     }
   }
 }
