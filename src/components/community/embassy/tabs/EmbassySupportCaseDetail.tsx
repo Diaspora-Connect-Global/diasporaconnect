@@ -448,6 +448,9 @@ function CancelCaseDialog({
   onCancelled,
 }: CancelCaseDialogProps) {
   const t = useTranslations('community.embassy.support.detail.cancelDialog');
+  // Refusal messages live one level up, at `community.embassy.support.errors`,
+  // so they are reusable by every support-case operation — not just this dialog.
+  const tErr = useTranslations('community.embassy.support');
   const [reason, setReason] = useState('');
   const [cancelCase, { loading }] = useMutation<CancelCaseResponse>(CANCEL_CASE);
 
@@ -461,8 +464,7 @@ function CancelCaseDialog({
       const result = await cancelCase({ variables: { caseId, reason: reason.trim() } });
       const outcome = readMutationOutcome(result, (d) => d.cancelCase);
       if (!outcome.ok) {
-        const errorKey = refusalMessageKey(outcome.message, 'support.errors');
-        toast.error(t(errorKey));
+        toast.error(tErr(refusalMessageKey(outcome.message, 'errors')));
         return;
       }
       toast.success(t('success'));

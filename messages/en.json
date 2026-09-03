@@ -1436,17 +1436,17 @@
             "confirm": "Withdraw case",
             "success": "Case withdrawn",
             "error": "We couldn't withdraw the case. Please try again."
-          },
-          "errors": {
-            "not_found": "Case not found.",
-            "not_authorized": "You don't have permission to withdraw this case.",
-            "insufficient_data": "Please provide all required information.",
-            "conflict": "The case cannot be withdrawn in its current state.",
-            "failed": "Failed to withdraw the case.",
-            "unknown_error": "An unexpected error occurred."
           }
         },
-        "contactTitleGeneral": "Contact the Community"
+        "contactTitleGeneral": "Contact the Community",
+        "errors": {
+          "not_found": "We couldn’t find this case.",
+          "not_authorized": "You don’t have permission to do that on this case.",
+          "insufficient_data": "Please provide all required information.",
+          "conflict": "This case can’t be changed in its current state.",
+          "failed": "We couldn’t complete that action. Please try again.",
+          "unknown_error": "An unexpected error occurred. Please try again."
+        }
       },
       "community": {
         "overview": "Community Overview",

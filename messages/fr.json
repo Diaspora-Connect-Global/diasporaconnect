@@ -1433,17 +1433,17 @@
             "confirm": "Withdraw case",
             "success": "Case withdrawn",
             "error": "We couldn't withdraw the case. Please try again."
-          },
-          "errors": {
-            "not_found": "Cas non trouvé.",
-            "not_authorized": "Vous n'avez pas la permission de retirer ce cas.",
-            "insufficient_data": "Veuillez fournir toutes les informations requises.",
-            "conflict": "Le cas ne peut pas être retiré dans son état actuel.",
-            "failed": "Impossible de retirer le cas.",
-            "unknown_error": "Une erreur inattendue s'est produite."
           }
         },
-        "contactTitleGeneral": "Contact the Community"
+        "contactTitleGeneral": "Contact the Community",
+        "errors": {
+          "not_found": "Nous n’avons pas trouvé ce dossier.",
+          "not_authorized": "Vous n’avez pas l’autorisation d’effectuer cette action sur ce dossier.",
+          "insufficient_data": "Veuillez fournir toutes les informations requises.",
+          "conflict": "Ce dossier ne peut pas être modifié dans son état actuel.",
+          "failed": "Nous n’avons pas pu effectuer cette action. Veuillez réessayer.",
+          "unknown_error": "Une erreur inattendue s’est produite. Veuillez réessayer."
+        }
       },
       "community": {
         "overview": "Aperçu de la communauté",

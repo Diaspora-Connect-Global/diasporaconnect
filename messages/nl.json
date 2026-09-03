@@ -1436,17 +1436,17 @@
             "confirm": "Withdraw case",
             "success": "Case withdrawn",
             "error": "We couldn't withdraw the case. Please try again."
-          },
-          "errors": {
-            "not_found": "Zaak niet gevonden.",
-            "not_authorized": "U bent niet bevoegd om deze zaak in te trekken.",
-            "insufficient_data": "Verstrek alle vereiste informatie.",
-            "conflict": "De zaak kan niet in de huidige staat worden ingetrokken.",
-            "failed": "Kon de zaak niet intrekken.",
-            "unknown_error": "Er is een onverwachte fout opgetreden."
           }
         },
-        "contactTitleGeneral": "Contact the Community"
+        "contactTitleGeneral": "Contact the Community",
+        "errors": {
+          "not_found": "We konden deze zaak niet vinden.",
+          "not_authorized": "U hebt geen toestemming voor deze actie op deze zaak.",
+          "insufficient_data": "Verstrek alle vereiste informatie.",
+          "conflict": "Deze zaak kan in de huidige staat niet worden gewijzigd.",
+          "failed": "We konden die actie niet voltooien. Probeer het opnieuw.",
+          "unknown_error": "Er is een onverwachte fout opgetreden. Probeer het opnieuw."
+        }
       },
       "community": {
         "overview": "Community-overzicht",
