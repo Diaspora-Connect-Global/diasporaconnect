@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { UsersRound } from 'lucide-react';
+import { MessageCircle, UsersRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -30,8 +30,16 @@ interface EmbassyGroupsTabProps {
 
 /**
  * Lists the groups that belong to this community and lets the viewer join
- * public ones (or request to join private ones). Clicking a card opens the
- * group's detail page.
+ * public ones (or request to join private ones).
+ *
+ * Clicking a group the viewer has ALREADY joined opens that group's chat —
+ * `/chat?t=groups&ct=group&gid=<groupId>`, the same deep link the group-chat
+ * notifications use (see `chatDeepLink` in `src/services/gql/notification.ts`
+ * and the `gid` branch in the chat page). The chat page persists it as the
+ * active chat and `GroupChat` resolves — or lazily creates — the underlying
+ * GROUP conversation from the groupId via `useChatConversation`, so no
+ * conversation lookup is needed here. Cards in "Discover" still open the group
+ * detail page: a non-member has no chat to open.
  *
  * The backend does not (yet) expose a per-community group list — a community
  * only carries a single built-in group via `defaultGroupId`. So this tab shows
@@ -121,6 +129,15 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
     }
   };
 
+  /**
+   * Open a joined group's chat. `t=groups` selects the Groups tab in the chat
+   * sidebar; `ct=group` + `gid` deep-link straight to this group, so it works
+   * on a cold load with nothing in sessionStorage.
+   */
+  const handleOpenChat = (groupId: string) => {
+    router.push(`/chat?t=groups&ct=group&gid=${encodeURIComponent(groupId)}`);
+  };
+
   const isLoading = loading && groups.length === 0;
 
   if (isLoading) {
@@ -142,7 +159,8 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
               <button
                 key={group.id}
                 type="button"
-                onClick={() => router.push(`/groups/${group.id}`)}
+                onClick={() => handleOpenChat(group.id)}
+                aria-label={t('groups.openChat', { name: group.name })}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-hover"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -162,6 +180,10 @@ export function EmbassyGroupsTab({ community }: EmbassyGroupsTabProps) {
                 <span className="caption-medium flex-shrink-0 text-text-secondary">
                   {(group.memberCount ?? 0).toLocaleString()} {t('members')}
                 </span>
+                <MessageCircle
+                  aria-hidden="true"
+                  className="h-4 w-4 flex-shrink-0 text-text-secondary"
+                />
               </button>
             ))}
           </div>
