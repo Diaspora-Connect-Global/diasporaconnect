@@ -103,7 +103,7 @@ export function CircleProfileSection({ circle, canEdit }: CircleProfileSectionPr
    * Spans the whole submit — upload, then mutate — rather than tracking
    * Apollo's `loading`, which would go false the moment the mutation returned
    * and re-arm the form while an image was still in flight. Same reasoning as
-   * `CreateCircleForm`.
+   * `CreateCircleScreen`.
    */
   const [saving, setSaving] = useState(false);
 
@@ -188,7 +188,7 @@ export function CircleProfileSection({ circle, canEdit }: CircleProfileSectionPr
     setSaving(true);
     try {
       /*
-       * Upload first here, unlike `CreateCircleForm`, and for the mirror-image
+       * Upload first here, unlike `CreateCircleScreen`, and for the mirror-image
        * reason: the circle already exists, so there is no risk of reporting a
        * failed image as a failed circle. Uploading before the mutation means a
        * broken upload aborts the save instead of half-applying it.

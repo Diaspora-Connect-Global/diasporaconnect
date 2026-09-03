@@ -22,7 +22,7 @@ import { CircleAvatar, CircleBanner } from './CircleImagery';
  *
  * The fields live on `UpdateCircleProfileRequest`, reached through the gateway's
  * LEAD-gated `updateCircleProfile`. So creation is two calls, and this component
- * only *chooses* the file: `CreateCircleForm` owns the upload and the ordering
+ * only *chooses* the file: `CreateCircleScreen` owns the upload and the ordering
  * (create, then upload, then attach), because only it knows the circle id and
  * only it can decide that a failed image must not read as a failed circle.
  *

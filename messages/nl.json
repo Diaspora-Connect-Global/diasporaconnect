@@ -3323,6 +3323,10 @@
         "membership": {
           "title": "Nog geen besluiten over het lidmaatschap",
           "description": "Als de kring stemt over het toelaten of verwijderen van iemand, of over het aanstellen van een leider, verschijnt het besluit hier met de regels waaronder het is genomen."
+        },
+        "activity": {
+          "title": "Nog niets vastgelegd",
+          "description": "Elke motie, elke uitnodigingslink en elke actie van het platform wordt hier vastgelegd op het moment dat het gebeurt. Voor deze kring is nog niets vastgelegd."
         }
       },
       "entry": {
@@ -3375,7 +3379,8 @@
       "tabs": {
         "label": "Weergave besluitgeschiedenis",
         "motions": "Moties",
-        "membership": "Wijzigingen in het lidmaatschap"
+        "membership": "Wijzigingen in het lidmaatschap",
+        "activity": "Alles"
       },
       "table": {
         "caption": "Besluiten die deze kring heeft genomen, nieuwste eerst. Elke rij toont de regels die golden toen de motie werd ingediend.",
@@ -3407,6 +3412,9 @@
       "decided": {
         "lapsed": "Verlopen op {date}",
         "unknown": "Niet vastgelegd"
+      },
+      "activity": {
+        "note": "Het volledige verslag, nieuwste eerst — moties, uitnodigingslinks, abonnementslimieten en alles wat het platform heeft gedaan. Individuele stemmen worden hier vastgelegd maar nooit openbaar gemaakt."
       }
     },
     "governance": {

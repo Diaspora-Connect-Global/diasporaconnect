@@ -3323,6 +3323,10 @@
         "membership": {
           "title": "Aucune décision sur les membres pour l'instant",
           "description": "Dès que le cercle votera pour admettre ou exclure quelqu'un, ou pour nommer un responsable, la décision apparaîtra ici avec les règles sous lesquelles elle a été prise."
+        },
+        "activity": {
+          "title": "Rien d'enregistré pour l'instant",
+          "description": "Chaque motion, chaque lien d'invitation et chaque action de la plateforme est consignée ici au moment où elle se produit. Rien n'a encore été enregistré pour ce cercle."
         }
       },
       "entry": {
@@ -3375,7 +3379,8 @@
       "tabs": {
         "label": "Vue de l'historique des décisions",
         "motions": "Motions",
-        "membership": "Changements de membres"
+        "membership": "Changements de membres",
+        "activity": "Tout"
       },
       "table": {
         "caption": "Les décisions prises par ce cercle, de la plus récente à la plus ancienne. Chaque ligne indique les règles en vigueur au moment du dépôt de la motion.",
@@ -3407,6 +3412,9 @@
       "decided": {
         "lapsed": "Expirée le {date}",
         "unknown": "Aucune date enregistrée"
+      },
+      "activity": {
+        "note": "Le journal complet, du plus récent au plus ancien — motions, liens d'invitation, limites de formule et tout ce qu'a fait la plateforme. Les votes individuels y sont consignés mais ne sont jamais publiés."
       }
     },
     "governance": {

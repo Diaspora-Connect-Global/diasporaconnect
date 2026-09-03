@@ -14,7 +14,6 @@ export {
   type CircleAvatarProps,
   type CircleBannerProps,
 } from './CircleImagery';
-export { CreateCircleForm } from './CreateCircleForm';
 export {
   DiscoverCircleCard,
   type DiscoverCircleCardProps,

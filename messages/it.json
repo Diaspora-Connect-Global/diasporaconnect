@@ -3323,6 +3323,10 @@
         "membership": {
           "title": "Ancora nessuna decisione sui membri",
           "description": "Quando la cerchia voterà per ammettere o escludere qualcuno, o per nominare un referente, la decisione comparirà qui insieme alle regole con cui è stata presa."
+        },
+        "activity": {
+          "title": "Ancora niente registrato",
+          "description": "Ogni mozione, ogni link d'invito e ogni azione della piattaforma viene registrata qui nel momento in cui accade. Per questa cerchia non è ancora stato registrato niente."
         }
       },
       "entry": {
@@ -3375,7 +3379,8 @@
       "tabs": {
         "label": "Vista dello storico delle decisioni",
         "motions": "Mozioni",
-        "membership": "Cambiamenti nei membri"
+        "membership": "Cambiamenti nei membri",
+        "activity": "Tutto"
       },
       "table": {
         "caption": "Le decisioni prese da questa cerchia, dalla più recente. Ogni riga mostra le regole in vigore al momento della presentazione della mozione.",
@@ -3407,6 +3412,9 @@
       "decided": {
         "lapsed": "Scaduta il {date}",
         "unknown": "Non registrata"
+      },
+      "activity": {
+        "note": "Il registro completo, dal più recente — mozioni, link d'invito, limiti del piano e tutto ciò che ha fatto la piattaforma. I voti individuali vengono registrati qui ma non sono mai resi pubblici."
       }
     },
     "governance": {

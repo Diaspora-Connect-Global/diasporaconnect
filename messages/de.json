@@ -3323,6 +3323,10 @@
         "membership": {
           "title": "Noch keine Entscheidungen zu Mitgliedern",
           "description": "Wenn der Kreis darüber abstimmt, jemanden aufzunehmen oder auszuschließen oder eine Leitung zu ernennen, erscheint die Entscheidung hier — zusammen mit den Regeln, unter denen sie getroffen wurde."
+        },
+        "activity": {
+          "title": "Noch nichts aufgezeichnet",
+          "description": "Jeder Antrag, jeder Einladungslink und jede Aktion der Plattform wird hier in dem Moment festgehalten, in dem sie passiert. Für diesen Kreis wurde noch nichts aufgezeichnet."
         }
       },
       "entry": {
@@ -3375,7 +3379,8 @@
       "tabs": {
         "label": "Ansicht des Entscheidungsverlaufs",
         "motions": "Anträge",
-        "membership": "Änderungen bei den Mitgliedern"
+        "membership": "Änderungen bei den Mitgliedern",
+        "activity": "Alles"
       },
       "table": {
         "caption": "Entscheidungen dieses Kreises, neueste zuerst. Jede Zeile zeigt die Regeln, die galten, als der Antrag gestellt wurde.",
@@ -3407,6 +3412,9 @@
       "decided": {
         "lapsed": "Abgelaufen {date}",
         "unknown": "Nicht erfasst"
+      },
+      "activity": {
+        "note": "Der vollständige Verlauf, neueste zuerst — Anträge, Einladungslinks, Tarifgrenzen und alles, was die Plattform getan hat. Einzelne Stimmen werden hier festgehalten, aber nie veröffentlicht."
       }
     },
     "governance": {
@@ -3918,21 +3926,21 @@
     },
     "report": {
       "title": "An DiaspoPlug melden",
-      "intro": "Melden Sie hier illegale Aktivitäten oder Verstöße gegen unsere Plattformregeln. DiaspoPlug schlichtet keine internen Streitigkeiten innerhalb von Circles.",
-      "notMember": "Sie müssen Mitglied dieses Circles sein, um ihn zu melden.",
-      "reasonLabel": "Was möchten Sie melden?",
+      "intro": "Melde hier illegale Aktivitäten oder Verstöße gegen unsere Plattformregeln. DiaspoPlug schlichtet keine internen Streitigkeiten innerhalb eines Kreises.",
+      "notMember": "Du musst Mitglied dieses Kreises sein, um ihn zu melden.",
+      "reasonLabel": "Was möchtest du melden?",
       "reasonPlaceholder": "Grund auswählen",
-      "reasonsUnavailable": "Gründe konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
-      "detailsLabel": "Erzählen Sie uns mehr",
-      "detailsPlaceholder": "Bitte so ausführlich wie möglich beschreiben ...",
-      "detailsHint": "Nennen Sie Daten, Namen und alles Weitere, das uns hilft zu verstehen, was passiert ist.",
-      "confidentialityNote": "Meldungen gehen an das DiaspoPlug Trust-&-Safety-Team. Ihre Identität wird vertraulich behandelt.",
+      "reasonsUnavailable": "Wir konnten die Gründe nicht laden. Bitte versuche es erneut.",
+      "detailsLabel": "Erzähl uns mehr",
+      "detailsPlaceholder": "Beschreibe so ausführlich wie möglich, was passiert ist…",
+      "detailsHint": "Nenne Daten, Namen und alles Weitere, das uns hilft zu verstehen, was passiert ist.",
+      "confidentialityNote": "Meldungen gehen an das DiaspoPlug Trust-&-Safety-Team. Deine Identität wird vertraulich behandelt.",
       "submit": "Meldung senden",
-      "submitting": "Wird gesendet ...",
+      "submitting": "Wird gesendet…",
       "success": "Meldung gesendet",
       "sentTitle": "Meldung eingegangen",
-      "sentBody": "Das DiaspoPlug Trust-&-Safety-Team prüft sie. Wir melden uns, falls wir weitere Informationen benötigen.",
-      "backToCircle": "Zurück zum Circle"
+      "sentBody": "Das DiaspoPlug Trust-&-Safety-Team prüft sie. Wir melden uns, falls wir weitere Informationen brauchen.",
+      "backToCircle": "Zurück zum Kreis"
     }
   },
   "feed": {

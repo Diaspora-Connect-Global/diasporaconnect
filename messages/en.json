@@ -3323,6 +3323,10 @@
         "membership": {
           "title": "No membership decisions yet",
           "description": "When the circle votes to admit or remove someone, or to appoint a lead, the decision appears here with the rules it was decided under."
+        },
+        "activity": {
+          "title": "Nothing recorded yet",
+          "description": "Every motion, invite link and platform action is written here the moment it happens. Nothing has been recorded for this circle yet."
         }
       },
       "entry": {
@@ -3375,7 +3379,8 @@
       "tabs": {
         "label": "Decision history view",
         "motions": "Motions",
-        "membership": "Membership changes"
+        "membership": "Membership changes",
+        "activity": "Everything"
       },
       "table": {
         "caption": "Decisions this circle has made, newest first. Each row shows the rules that applied when the motion opened.",
@@ -3407,6 +3412,9 @@
       "decided": {
         "lapsed": "Lapsed {date}",
         "unknown": "Not recorded"
+      },
+      "activity": {
+        "note": "The complete record, newest first — motions, invite links, plan limits and anything the platform did. Individual votes are recorded here but never published."
       }
     },
     "governance": {
