@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
+import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import {
     GET_POST_COMMENTS,
     LIKE_COMMENT,
@@ -235,7 +236,13 @@ export default function PostMediaModal({
         const newText = editPostText.trim();
         if (!newText) return;
         try {
-            await editPostMutation({ variables: { input: { id: postId, text: newText } } });
+            const result = await editPostMutation({ variables: { input: { id: postId, text: newText } } });
+            const outcome = readMutationOutcome(result, d => d.editPost);
+            if (!outcome.ok) {
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(t(key));
+                return;
+            }
             setIsEditingPost(false);
             toast.success('Post updated');
         } catch {
@@ -245,7 +252,13 @@ export default function PostMediaModal({
 
     const handleDeletePostConfirm = async () => {
         try {
-            await deletePostMutation({ variables: { id: postId } });
+            const result = await deletePostMutation({ variables: { id: postId } });
+            const outcome = readMutationOutcome(result, d => d.deletePost);
+            if (!outcome.ok) {
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(t(key));
+                return;
+            }
             setDeletePostModalOpen(false);
             toast.success('Post deleted');
             onDelete?.(postId);
@@ -262,7 +275,15 @@ export default function PostMediaModal({
         setCommentCount(n => Math.max(0, n - 1));
         setDeleteCommentId(null);
         try {
-            await deleteCommentMutation({ variables: { input: { commentId } } });
+            const result = await deleteCommentMutation({ variables: { input: { commentId } } });
+            const outcome = readMutationOutcome(result, d => d.deleteComment);
+            if (!outcome.ok) {
+                setLoadedComments(snapshot);
+                setCommentCount(n => n + 1);
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(t(key));
+                return;
+            }
             toast.success('Comment deleted');
         } catch {
             setLoadedComments(snapshot);
@@ -278,7 +299,15 @@ export default function PostMediaModal({
         setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: newText } : c));
         setEditingCommentId(null);
         try {
-            await editCommentMutation({ variables: { input: { commentId, text: newText } } });
+            const result = await editCommentMutation({ variables: { input: { commentId, text: newText } } });
+            const outcome = readMutationOutcome(result, d => d.editComment);
+            if (!outcome.ok) {
+                if (previous) setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: previous.content } : c));
+                setEditingCommentId(commentId);
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(t(key));
+                return;
+            }
             toast.success('Comment updated');
         } catch {
             if (previous) setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: previous.content } : c));
