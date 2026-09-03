@@ -8,6 +8,7 @@ export const EMBASSY_TAB_KEYS = [
   'events',
   'support',
   'community',
+  'rules',
   'groups',
 ] as const;
 
@@ -31,6 +32,7 @@ export const EMBASSY_TABS: ReadonlyArray<EmbassyTabDef> = [
   { key: 'events', icon: 'CalendarDays', labelKey: 'events' },
   { key: 'support', icon: 'LifeBuoy', labelKey: 'support' },
   { key: 'community', icon: 'Users', labelKey: 'community' },
+  { key: 'rules', icon: 'ShieldCheck', labelKey: 'rules' },
   { key: 'groups', icon: 'UsersRound', labelKey: 'groups' },
 ];
 

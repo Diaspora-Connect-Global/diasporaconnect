@@ -10,10 +10,7 @@ import {
   MessageSquare,
   CalendarDays,
   ConciergeBell,
-  ShieldCheck,
   BadgeCheck,
-  Check,
-  ChevronRight,
   UserPlus,
   Mail,
   Phone,
@@ -36,6 +33,7 @@ import {
   SERVICE_REQUEST_TYPES,
   type ServiceRequestTypesResponse,
 } from '@/services/gql/embassyServices';
+import { ExpandableText } from '../ExpandableText';
 import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
 import {
@@ -193,18 +191,6 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
     [servicesData],
   );
 
-  /* ── Community Guidelines ──────────────────────────────────────────────
-   * Real `communityRules` (a single string) split into list items on newlines.
-   * When it is empty/absent we render an empty state — no fabricated defaults. */
-  const ruleItems = useMemo(
-    () =>
-      (community.communityRules ?? '')
-        .split(/\r?\n/)
-        .map((r) => r.trim())
-        .filter(Boolean),
-    [community.communityRules],
-  );
-  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   /* ── About card meta ───────────────────────────────────────────────────*/
   const location = countryLabel(community.locationCountry) || community.address || profile.city;
@@ -379,9 +365,11 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
             </div>
 
             {(community.description || profile.tagline) && (
-              <p className="caption-large text-text-secondary">
-                {community.description || profile.tagline}
-              </p>
+              <ExpandableText
+                text={community.description || profile.tagline}
+                limit={280}
+                className="caption-large text-text-secondary"
+              />
             )}
 
             {/* Meta row */}
@@ -452,39 +440,6 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
 
       {/* ── Right rail ──────────────────────────────────────────────── */}
       <aside className="space-y-6">
-        {/* Community Guidelines */}
-        <Card className="border-border-subtle">
-          <CardContent className="p-5">
-            <h3 className="label-large flex items-center gap-2 text-text-primary">
-              <ShieldCheck className="size-4 text-text-success" aria-hidden />
-              {t('guidelinesTitle')}
-            </h3>
-            <p className="caption-medium mt-1 text-text-secondary">{t('guidelinesSubtitle')}</p>
-
-            {ruleItems.length > 0 ? (
-              <ul className="mt-3 space-y-2">
-                {ruleItems.map((g) => (
-                  <li key={g} className="caption-large flex items-center gap-2 text-text-primary">
-                    <Check className="size-4 flex-shrink-0 text-text-success" aria-hidden />
-                    {g}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="caption-large mt-3 text-text-secondary">{t('guidelinesEmpty')}</p>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setGuidelinesOpen(true)}
-              className="label-medium mt-3 inline-flex items-center gap-1 text-text-brand"
-            >
-              {t('viewFullGuidelines')}
-              <ChevronRight className="size-4" aria-hidden />
-            </button>
-          </CardContent>
-        </Card>
-
         {/* Member highlights */}
         <Card className="border-border-subtle">
           <CardContent className="p-5">
@@ -545,36 +500,6 @@ export function EmbassyCommunityTab({ props, profile }: EmbassyCommunityTabProps
           </CardContent>
         </Card>
       </aside>
-
-      {/* ── Full Guidelines dialog ─────────────────────────────────────── */}
-      <Dialog open={guidelinesOpen} onOpenChange={setGuidelinesOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="heading-xsmall flex items-center gap-2 text-text-primary">
-              <ShieldCheck className="size-5 text-text-success" aria-hidden />
-              {t('guidelinesTitle')}
-            </DialogTitle>
-            <DialogDescription className="caption-medium text-text-secondary">
-              {t('guidelinesSubtitle')}
-            </DialogDescription>
-          </DialogHeader>
-          {ruleItems.length > 0 ? (
-            <ul className="space-y-2">
-              {ruleItems.map((g) => (
-                <li
-                  key={g}
-                  className="caption-large flex items-start gap-2 text-text-primary"
-                >
-                  <Check className="mt-0.5 size-4 flex-shrink-0 text-text-success" aria-hidden />
-                  {g}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="caption-large text-text-secondary">{t('guidelinesEmpty')}</p>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* ── All members dialog ─────────────────────────────────────────── */}
       <Dialog open={membersOpen} onOpenChange={setMembersOpen}>

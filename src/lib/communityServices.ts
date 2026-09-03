@@ -48,8 +48,17 @@ export const SERVICE_TO_TAB: Readonly<Record<string, readonly EmbassyTabKey[]>> 
   groups: ['groups'],
 };
 
-/** The 'home' tab is the landing feed and is never gated. */
-const ALWAYS_ON_TAB: EmbassyTabKey = 'home';
+/**
+ * Tabs that no service module gates.
+ *
+ * 'home' is the landing feed. 'rules' is the community's own guidelines — it is
+ * a property of the community itself, not of any service it has switched on, so
+ * routing it through SERVICE_TO_TAB would hide it from every community with a
+ * non-null `enabledServices` (the `!services` branch below returns false for any
+ * unmapped tab). Whether it is worth showing at all is a question about
+ * CONTENT, and is answered by the tab bar's `hasRules`, not here.
+ */
+const ALWAYS_ON_TABS: ReadonlySet<EmbassyTabKey> = new Set<EmbassyTabKey>(['home', 'rules']);
 
 /**
  * Is a given service enabled?
@@ -65,14 +74,15 @@ export function isServiceEnabled(
 
 /**
  * Should a tab be shown?
- * 'home' is always visible. `enabledServices == null` → show all (non-destructive).
+ * 'home' and 'rules' are always visible. `enabledServices == null` → show all
+ * (non-destructive).
  * Otherwise the tab is shown iff at least one service that maps to it is enabled.
  */
 export function isTabEnabled(
   tabKey: string,
   enabledServices?: readonly string[] | null,
 ): boolean {
-  if (tabKey === ALWAYS_ON_TAB) return true;
+  if (ALWAYS_ON_TABS.has(tabKey as EmbassyTabKey)) return true;
   if (enabledServices == null) return true;
   const services = SERVICE_TO_TAB[tabKey];
   if (!services || services.length === 0) return false;

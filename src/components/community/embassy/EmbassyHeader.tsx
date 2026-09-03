@@ -8,6 +8,7 @@ import { useIsEmbassy } from '@/components/community/embassy/communityVariant';
 import type { EmbassyProfile } from './embassyData';
 import type { EmbassyViewProps } from './types';
 import { toCdnUrl } from '@/lib/cdn';
+import { ExpandableText } from './ExpandableText';
 
 interface EmbassyHeaderProps {
   community: EmbassyViewProps['community'];
@@ -105,9 +106,15 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
                     />
                   )}
                 </div>
-                <p className="label-medium mt-0.5 text-gray-900">
-                  {community.description || profile.tagline}
-                </p>
+                {/* Collapsed by default: this sits above the tab bar on EVERY
+                    tab, so an uncapped description pushed the whole mini-app
+                    down the page on each one. Smaller and secondary-coloured
+                    too — the name is the heading here, not this. */}
+                <ExpandableText
+                  text={community.description || profile.tagline}
+                  limit={120}
+                  className="caption-large mt-0.5 text-gray-600"
+                />
 
                 {/* Contact meta row */}
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 caption-medium text-gray-500">

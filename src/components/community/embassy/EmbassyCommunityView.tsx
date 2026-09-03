@@ -11,6 +11,7 @@ import { EmbassyEventsTab } from './tabs/EmbassyEventsTab';
 import { EmbassySupportTab } from './tabs/EmbassySupportTab';
 import { EmbassyCommunityTab } from './tabs/EmbassyCommunityTab';
 import { EmbassyGroupsTab } from './tabs/EmbassyGroupsTab';
+import { EmbassyRulesTab } from './tabs/EmbassyRulesTab';
 import { ComingSoonTab } from './tabs/ComingSoonTab';
 import { parseEmbassyTab, EMBASSY_TABS } from './tabs';
 import { isTabEnabled } from '@/lib/communityServices';
@@ -67,6 +68,8 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
         return <EmbassySupportTab profile={profile} community={community} communityId={community.id} />;
       case 'community':
         return <EmbassyCommunityTab props={props} profile={profile} />;
+      case 'rules':
+        return <EmbassyRulesTab community={community} />;
       case 'groups':
         return <EmbassyGroupsTab community={community} />;
       default: {
@@ -94,7 +97,11 @@ export function EmbassyCommunityView(props: EmbassyViewProps) {
                 the content so the whole page scrolls as one. */}
             <div className="z-20 bg-surface-default lg:sticky lg:top-0">
               <EmbassyHeader community={community} profile={profile} membership={membership} />
-              <EmbassyTabBar active={activeTab} enabledServices={community.enabledServices} />
+              <EmbassyTabBar
+                active={activeTab}
+                enabledServices={community.enabledServices}
+                hasRules={Boolean(community.communityRules?.trim())}
+              />
             </div>
             {renderActiveTab()}
           </div>
