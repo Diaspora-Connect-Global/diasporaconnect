@@ -1,0 +1,50 @@
+'use client';
+
+import { ArrowUpIcon, RefreshCwIcon } from 'lucide-react';
+import { ButtonType2, ButtonType3 } from '@/components/custom/button';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { useApolloClient } from '@apollo/client/react';
+import { MY_PAYMENT_INTENTS } from '@/services/gql/payments';
+
+export default function WalletHeader() {
+  const t = useTranslations('wallet');
+  const router = useRouter();
+  const locale = useLocale();
+  const client = useApolloClient();
+
+  const handleRefresh = async () => {
+    await client.refetchQueries({ include: [MY_PAYMENT_INTENTS] });
+  };
+
+  const handleWithdraw = () => {
+    router.push(`/${locale}/vendors/payouts`);
+  };
+
+  return (
+    <div className="flex justify-between items-center">
+      <div>
+        <h1 className="heading-large text-text-primary">{t('title')}</h1>
+      </div>
+
+      <div className="flex gap-2">
+        <ButtonType2
+          onClick={handleWithdraw}
+          className="bg-[#3CCF4E] hover:bg-[#35b944] text-white px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
+        >
+          <ArrowUpIcon className="w-4 h-4" />
+          {t('withdraw')}
+        </ButtonType2>
+
+        <ButtonType3
+          onClick={handleRefresh}
+          className="p-2 hover:bg-surface-subtle rounded-full transition-colors"
+          aria-label={t('refreshWallet')}
+        >
+          <RefreshCwIcon className="w-5 h-5" />
+        </ButtonType3>
+      </div>
+    </div>
+  );
+}

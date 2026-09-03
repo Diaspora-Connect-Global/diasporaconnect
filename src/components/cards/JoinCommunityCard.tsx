@@ -1,0 +1,146 @@
+'use client';
+import { ButtonType1 } from '../custom/button';
+import { FitText } from '../custom/FitText';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useTranslations } from 'next-intl';
+import Image from 'next/image'
+import { AccessBadges } from './AccessBadges';
+import { CommunityTypeBadge } from './CommunityTypeBadge';
+import type { AccessProfile } from '@/types/membership';
+
+
+interface JoinCommunityCardProps {
+  title: string;
+  description?: string;
+  buttonText: string;
+  onButtonClick?: () => void;
+  onCardClick?: () => void;
+  icon?: React.ReactNode;
+  iconBgColor?: string;
+  iconColor?: string;
+  avatarUrl?: string | null;
+  members?: number;
+  isDisabled?: boolean;
+  access?: AccessProfile;
+  communityType?: { name: string; isEmbassy: boolean } | null;
+}
+
+export default function JoinCommunityCard({
+  title,
+  members,
+  description,
+  buttonText,
+  onButtonClick,
+  onCardClick,
+  icon,
+  avatarUrl,
+  isDisabled = false,
+  access,
+  communityType,
+}: JoinCommunityCardProps) {
+  const t = useTranslations('community');
+
+  // Check if text is likely truncated (approximate character limits)
+  const isTitleTruncated = title.length > 40;
+  const isDescriptionTruncated = description && description.length > 80;
+
+  return (
+    <TooltipProvider>
+      <div
+        className="relative bg-surface-default rounded-2xl w-full min-w-[200px] p-6 border border-border-subtle"
+        onClick={onCardClick}
+      >
+        {/* Community type — top-right icon pill (hover shows the name) */}
+        {communityType && (
+          <CommunityTypeBadge
+            communityType={communityType}
+            className="absolute top-3 right-3 z-10"
+          />
+        )}
+
+        <div className="flex flex-col items-center text-center gap-2">
+          {/* Icon */}
+          <div className={`rounded-full p-2`}>
+            {icon ||
+              <Image
+                width={40}
+                height={40}
+                src={avatarUrl || "/GLOBE.png"}
+                alt={title || "Community"}
+                className="w-10 h-10 rounded-full object-cover border-2 border-border-subtle"
+              />
+            }
+          </div>
+
+          {/* Title - max 2 lines with conditional tooltip */}
+          {isTitleTruncated ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h2 className="caption-large line-clamp-2 min-h-[2.5rem] cursor-help">
+                  {title}
+                </h2>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs">{title}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <h2 className="caption-large line-clamp-2 min-h-[2.5rem]">
+              {title}
+            </h2>
+          )}
+
+          {/* Description - max 3 lines with conditional tooltip */}
+          {description && (
+            isDescriptionTruncated ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="body-small text-text-primary line-clamp-3 min-h-[3.5rem] cursor-help">
+                    {description}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">{description}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <p className="body-small text-text-primary line-clamp-3 min-h-[3.5rem]">
+                {description}
+              </p>
+            )
+          )}
+
+          {/* Members */}
+          {members != null && (
+            <p className="caption-medium text-text-primary">
+              {members.toLocaleString()} {t('members')}
+            </p>
+          )}
+
+          {access && <AccessBadges access={access} size="card" />}
+
+          {/* Button — stop propagation so the CTA doesn't also trigger the
+              card's onCardClick (e.g. navigating to a detail page). */}
+          <ButtonType1
+            onClick={(e) => {
+              e.stopPropagation();
+              onButtonClick?.();
+            }}
+            size="lg"
+            disabled={isDisabled}
+            /* Full width (not the base w-fit) so the label has a width that
+               doesn't depend on its own font size — see FitText. */
+            className="w-full min-w-0"
+          >
+            <FitText>{buttonText}</FitText>
+          </ButtonType1>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+}

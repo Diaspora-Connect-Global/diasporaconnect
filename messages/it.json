@@ -654,9 +654,7 @@
         "unknown_error": "Si è verificato un errore imprevisto"
       }
     },
-    "noSuggestions": "Nessun suggerimento di amici disponibile",
-      "unknown_error": "Si è verificato un errore imprevisto"
-    }
+    "noSuggestions": "Nessun suggerimento di amici disponibile"
   },
   "community": {
     "discover": "Scopri community",
@@ -2379,6 +2377,15 @@
         "accountNamePlaceholder": "Mario Rossi",
         "savePayoutMethod": "Salva metodo di pagamento"
       }
+    },
+    "errors": {
+      "unknown_error": "Si è verificato un errore sconosciuto. Riprova.",
+      "insufficient_data": "Fornisci tutte le informazioni richieste.",
+      "not_authorized": "Non hai il permesso di eseguire questa azione.",
+      "not_found": "La risorsa non è stata trovata.",
+      "conflict": "Si è verificato un conflitto. La risorsa potrebbe essere stata modificata. Aggiorna e riprova.",
+      "failed": "L'operazione non è riuscita. Riprova.",
+      "servicePackagePublished": "Pacchetto di servizio pubblicato con successo"
     }
   },
   "common": {

@@ -1,0 +1,34 @@
+# Feed & Image Features
+- [ ] Add overlay for feed image
+      File: src/components/feed/FeedCard.tsx
+      Description: Add dark overlay on hover with like/comment icons
+      Priority: Medium
+      Related: src/styles/feed.css
+      
+# User Interface
+- FIXME Images fallback avatar for "People you may know"
+      File: src/components/people/PeopleYouMayKnow.tsx
+      Description: Show default avatar when user image fails to load
+      Fallback: /public/images/default-avatar.png
+      Priority: High
+      Edge case: Handle null/undefined image URLs
+      
+# Profile & Trust System  
+- [ ] Implement actual tier logic
+      File: src/components/profile/TrustScore.tsx
+      Description: Calculate user tier based on trust score
+      Requirements:
+        - Define tier thresholds
+        - Bronze: 0-25
+        - Silver: 26-50
+        - Gold: 51-75
+        - Platinum: 76-100
+      Backend: Need GET /api/trust-score/:userId endpoint
+      Priority: High
+      Blocked by: Trust score calculation algorithm
+
+TODO: Refactor loading states
+  @file: src/pages/profile/[id]/page.tsx
+  @related: src/components/skeleton/ProfileLoadingSkeleton.tsx
+  @priority: high
+  @due: 2024-01-15

@@ -1,0 +1,74 @@
+steps:
+  # Build the Docker image. NEXT_PUBLIC_* env vars MUST be passed as
+  # --build-arg here (not as Cloud Run runtime env) because Next.js inlines
+  # them into the client JS bundle at build time. The actual values are
+  # supplied via Cloud Build substitutions (set on the trigger / Secret
+  # Manager — never commit live keys here).
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg=NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}'
+      - '--build-arg=NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${_NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}'
+      - '--build-arg=NEXT_PUBLIC_CDN_URL=${_NEXT_PUBLIC_CDN_URL}'
+      - '--build-arg=ASSET_PREFIX=${_ASSET_PREFIX}'
+      - '-t'
+      - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '.'
+    id: 'Build'
+
+  # Push the image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+    id: 'Push'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - '${_SERVICE_NAME}'
+      - '--image=${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '--update-labels=managed-by=gcp-cloud-build-deploy-cloud-run,gcb-trigger-id=${_TRIGGER_ID},commit-sha=${COMMIT_SHA},gcb-build-id=${BUILD_ID}'
+      # Keep one instance warm so a freshly-deployed revision is pre-started and
+      # health-checked before traffic flips to it — eliminates the post-deploy
+      # cold start users otherwise feel as a long load.
+      - '--min-instances=1'
+      # Extra CPU during container startup → faster Node/Next.js boot.
+      - '--cpu-boost'
+      - '--region=${_DEPLOY_REGION}'
+      - '--quiet'
+    id: 'Deploy'
+
+images:
+  - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+
+substitutions:
+  _AR_HOSTNAME: europe-west1-docker.pkg.dev
+  _AR_PROJECT_ID: daily-spark-b2cbe
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _DEPLOY_REGION: europe-west1
+  _SERVICE_NAME: diaspoplug-frontend
+  _TRIGGER_ID: 996823a0-861f-4f6a-b1f5-c98495bf7065
+  # Override these on the Cloud Build trigger (Console → Cloud Build →
+  # Triggers → Edit → Substitution variables). Default empty so a
+  # local / manual build still succeeds — Stripe simply falls back to
+  # the "Card payments unavailable" UX implemented in lib/stripe.ts.
+  _NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ""
+  _NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ""
+  # Media CDN host (public, not a secret) — served via the Cloudflare Worker
+  # in front of the GCS bucket. Empty would disable the CDN.
+  _NEXT_PUBLIC_CDN_URL: "https://cdn.diaspoplug.net"
+  # App-asset CDN (assetPrefix) for _next/static JS/CSS. Leave EMPTY until a
+  # CDN host is configured to proxy this service's /_next/* and edge-cache
+  # /_next/static/* — setting it before that will 404 all assets. Point it at a
+  # Cloudflare-proxied subdomain (e.g. https://static.diaspoplug.net) whose
+  # origin is this Cloud Run service. Override on the Cloud Build trigger.
+  _ASSET_PREFIX: ""
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  substitutionOption: ALLOW_LOOSE

@@ -1,0 +1,264 @@
+import { useState } from "react";
+import { ButtonType1, ButtonType2, ButtonType4Pill } from "../custom/button";
+import { Button } from "../ui/button";
+import { BanIcon, MoreHorizontalIcon, Loader2 } from "lucide-react";
+import { Trash } from "iconsax-reactjs";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "../ui/dropdown-menu";
+import { useFriendActions } from "@/hooks/friends/useFriendActions";
+import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { ConfirmationModal } from "@/components/custom/confirmationModal";
+
+export type FriendButtonType = 
+    | "message" 
+    | "addFriend" 
+    | "accept" 
+    | "ignore" 
+    | "cancelRequest"
+    | "removeFriend"
+    | "blockFriend"
+    | "dropdown";
+
+interface DropdownOption {
+    type: "removeFriend" | "blockFriend";
+    separator?: boolean;
+}
+
+interface FriendActionButtonsProps {
+    userId: string;
+    buttonsToShow: FriendButtonType[];
+    dropdownOptions?: DropdownOption[];
+    className?: string;
+    connectionId: string;
+    searchQuery?: string;
+    isSearching?: boolean;
+    onConnectionAction?: () => void;
+}
+
+export const FriendActionButtons = ({ 
+    userId, 
+    buttonsToShow,
+    connectionId,
+    dropdownOptions = [],
+    className = "flex space-x-2",
+    searchQuery = "",
+    isSearching = false,
+    onConnectionAction,
+}: FriendActionButtonsProps) => {
+    const tCommon = useTranslations('common');
+    const {
+        sendMessage,
+        addFriend,
+        acceptRequest,
+        ignoreRequest,
+        cancelRequest,
+        removeFriend,
+        blockFriend,
+        isActionLoading,
+        t,
+    } = useFriendActions({ searchQuery, isSearching, onConnectionAction });
+
+    const [confirmAction, setConfirmAction] = useState<'removeFriend' | 'blockFriend' | null>(null);
+
+    // Check loading states for each action
+    const isAddFriendLoading = isActionLoading('addFriend', userId);
+    const isAcceptLoading = isActionLoading('acceptRequest', connectionId);
+    const isIgnoreLoading = isActionLoading('ignoreRequest', connectionId);
+    const isCancelLoading = isActionLoading('cancelRequest', connectionId);
+    const isRemoveLoading = isActionLoading('removeFriend', connectionId);
+    const isBlockLoading = isActionLoading('blockFriend', userId);
+
+    const buttonMap: Record<FriendButtonType, ReactNode> = {
+        message: (
+            <ButtonType1 key="message" onClick={() => sendMessage(userId)}>
+                {t('message')}
+            </ButtonType1>
+        ),
+        addFriend: (
+            <ButtonType2 
+                key="addFriend" 
+                onClick={() => addFriend(userId)}
+                disabled={isAddFriendLoading}
+            >
+                {isAddFriendLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('addFriend')
+                )}
+            </ButtonType2>
+        ),
+        accept: (
+            <ButtonType2
+                key="accept"
+                className="flex-1 text-sm"
+                onClick={() => acceptRequest(connectionId)}
+                disabled={isAcceptLoading}
+            >
+                {isAcceptLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('accept')
+                )}
+            </ButtonType2>
+        ),
+        ignore: (
+            <ButtonType1
+                key="ignore"
+                className="flex-1 text-sm"
+                onClick={() => ignoreRequest(connectionId)}
+                disabled={isIgnoreLoading}
+            >
+                {isIgnoreLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('ignore')
+                )}
+            </ButtonType1>
+        ),
+        cancelRequest: (
+            <ButtonType1 
+                key="cancelRequest" 
+                onClick={() => cancelRequest(connectionId)}
+                disabled={isCancelLoading}
+            >
+                {isCancelLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('cancelRequest')
+                )}
+            </ButtonType1>
+        ),
+        removeFriend: (
+            <ButtonType1 
+                key="removeFriend" 
+                onClick={() => setConfirmAction('removeFriend')}
+                disabled={isRemoveLoading}
+            >
+                {isRemoveLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    t('removeFriend')
+                )}
+            </ButtonType1>
+        ),
+        blockFriend: (
+            <ButtonType4Pill
+                key="blockFriend" 
+                >
+                  Blocked
+            </ButtonType4Pill>
+        ),
+        dropdown: (
+            <DropdownMenu key="dropdown">
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        className="cursor-pointer bg-surface-default border-0 shadow-none text-text-primary p-1"
+                        variant="outline"
+                        aria-label={tCommon('openMenu')}
+                        size="icon-sm"
+                        disabled={isRemoveLoading || isBlockLoading}
+                    >
+                        {(isRemoveLoading || isBlockLoading) ? (
+                            <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                        ) : (
+                            <MoreHorizontalIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        )}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-surface-default min-w-[200px]">
+                    {dropdownOptions.map((option, index) => {
+                        const items = [];
+                        
+                        if (option.type === "removeFriend") {
+                            items.push(
+                                <DropdownMenuItem
+                                    key="removeFriend"
+                                    onSelect={() => setConfirmAction('removeFriend')}
+                                    className="body-large text-text-primary flex items-center"
+                                    disabled={isRemoveLoading}
+                                >
+                                    {isRemoveLoading ? (
+                                        <Loader2 className="w-8 h-8 animate-spin" />
+                                    ) : (
+                                        <Trash size="32" />
+                                    )}
+                                    <span>{t('removeFriend')}</span>
+                                </DropdownMenuItem>
+                            );
+                        }
+                        
+                        if (option.type === "blockFriend") {
+                            items.push(
+                                <DropdownMenuItem
+                                    key="blockFriend"
+                                    onSelect={() => setConfirmAction('blockFriend')}
+                                    className="body-large flex items-center"
+                                    disabled={isBlockLoading}
+                                >
+                                    {isBlockLoading ? (
+                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                    ) : (
+                                        <BanIcon />
+                                    )}
+                                    <span>{t('blockFriend')}</span>
+                                </DropdownMenuItem>
+                            );
+                        }
+                        
+                        if (option.separator && index < dropdownOptions.length - 1) {
+                            items.push(<DropdownMenuSeparator key={`separator-${index}`} />);
+                        }
+                        
+                        return items;
+                    })}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+    };
+
+    const handleConfirmAction = () => {
+        if (confirmAction === 'removeFriend') {
+            removeFriend(connectionId);
+            setConfirmAction(null);
+        } else if (confirmAction === 'blockFriend') {
+            blockFriend(userId);
+            setConfirmAction(null);
+        }
+    };
+
+    const isRemoveModal = confirmAction === 'removeFriend';
+    const isBlockModal = confirmAction === 'blockFriend';
+
+    return (
+        <div className={className}>
+            {buttonsToShow.map(buttonType => buttonMap[buttonType])}
+
+            <ConfirmationModal
+                open={isRemoveModal}
+                onCancel={() => setConfirmAction(null)}
+                onConfirm={handleConfirmAction}
+                title={t('removeFriendConfirmTitle') || 'Remove friend?'}
+                description={t('removeFriendConfirmDescription') || 'This will remove this person from your friends list. They will need to send a new request to connect again.'}
+                confirmText={t('removeFriend') || tCommon('remove') || 'Remove'}
+                confirmVariant="destructive"
+                isLoading={isRemoveLoading}
+            />
+            <ConfirmationModal
+                open={isBlockModal}
+                onCancel={() => setConfirmAction(null)}
+                onConfirm={handleConfirmAction}
+                title={t('blockFriendConfirmTitle') || 'Block this user?'}
+                description={t('blockFriendConfirmDescription') || 'They will no longer be able to message you or see your profile.'}
+                confirmText={t('blockFriend') || 'Block'}
+                confirmVariant="destructive"
+                isLoading={isBlockLoading}
+            />
+        </div>
+    );
+};
