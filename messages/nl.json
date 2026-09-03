@@ -2581,6 +2581,15 @@
         "accountNamePlaceholder": "Jan de Vries",
         "savePayoutMethod": "Uitbetalingsmethode opslaan"
       }
+    },
+    "errors": {
+      "unknown_error": "Er is een onbekende fout opgetreden. Probeer het opnieuw.",
+      "insufficient_data": "Geef alle vereiste informatie op.",
+      "not_authorized": "Je hebt geen toestemming voor deze actie.",
+      "not_found": "De resource is niet gevonden.",
+      "conflict": "Er is een conflict opgetreden. De resource kan zijn gewijzigd. Vernieuw en probeer opnieuw.",
+      "failed": "De bewerking is mislukt. Probeer het opnieuw.",
+      "servicePackagePublished": "Servicepakket succesvol gepubliceerd"
     }
   },
   "search": {

@@ -2385,6 +2385,15 @@
         "accountNamePlaceholder": "Max Mustermann",
         "savePayoutMethod": "Auszahlungsmethode speichern"
       }
+    },
+    "errors": {
+      "unknown_error": "Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "insufficient_data": "Bitte geben Sie alle erforderlichen Informationen an.",
+      "not_authorized": "Sie haben keine Berechtigung für diese Aktion.",
+      "not_found": "Die Ressource wurde nicht gefunden.",
+      "conflict": "Es gab einen Konflikt. Die Ressource könnte geändert worden sein. Bitte aktualisieren Sie und versuchen Sie es erneut.",
+      "failed": "Der Vorgang ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "servicePackagePublished": "Servicepaket erfolgreich veröffentlicht"
     }
   },
   "common": {

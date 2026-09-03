@@ -2581,6 +2581,15 @@
         "accountNamePlaceholder": "John Doe",
         "savePayoutMethod": "Save payout method"
       }
+    },
+    "errors": {
+      "unknown_error": "An unknown error occurred. Please try again.",
+      "insufficient_data": "Please provide all required information.",
+      "not_authorized": "You don't have permission to perform this action.",
+      "not_found": "The resource was not found.",
+      "conflict": "There was a conflict. The resource may have been modified. Please refresh and try again.",
+      "failed": "The operation failed. Please try again.",
+      "servicePackagePublished": "Service package published successfully"
     }
   },
   "search": {

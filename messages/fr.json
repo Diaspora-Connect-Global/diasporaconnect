@@ -2385,6 +2385,15 @@
         "accountNamePlaceholder": "Jean Dupont",
         "savePayoutMethod": "Enregistrer la méthode de paiement"
       }
+    },
+    "errors": {
+      "unknown_error": "Une erreur inconnue s'est produite. Veuillez réessayer.",
+      "insufficient_data": "Veuillez fournir toutes les informations requises.",
+      "not_authorized": "Vous n'avez pas la permission d'effectuer cette action.",
+      "not_found": "La ressource n'a pas été trouvée.",
+      "conflict": "Il y a eu un conflit. La ressource a peut-être été modifiée. Veuillez rafraîchir et réessayer.",
+      "failed": "L'opération a échoué. Veuillez réessayer.",
+      "servicePackagePublished": "Le package de service a été publié avec succès"
     }
   },
   "common": {
