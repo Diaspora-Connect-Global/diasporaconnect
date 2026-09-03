@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { ArrowLeft, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -7,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from '@/i18n/navigation';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { CIRCLE, MY_CIRCLE_MEMBERSHIP } from '@/services/gql/circles';
 import type {
   CircleData,
@@ -18,12 +19,27 @@ import type {
 import type { CircleSettingsPermissions } from '@/services/gql/types/circles-settings';
 
 import { CircleArchiveSection } from './CircleArchiveSection';
+import { CircleBrandingSection } from './CircleBrandingSection';
 import { CircleDiscoverySection } from './CircleDiscoverySection';
+import { CirclePlanBillingSection } from './CirclePlanBillingSection';
 import { CircleProfileSection } from './CircleProfileSection';
 import { isCircleLive } from './liveness';
+import { SettingsNav, type CircleSettingsPanelId } from './SettingsNav';
 
 /**
  * Circle settings.
+ *
+ * ── A MENU AND ONE PANEL ────────────────────────────────────────────────────
+ * The blocks used to be stacked, which put the archive control at the bottom of
+ * every scroll and made a settings visit feel like a run past a cliff edge. They
+ * are now peers behind a menu: one column of destinations on `lg`, a horizontal
+ * strip below it, and exactly one panel rendered at a time.
+ *
+ * Panels MOUNT on selection rather than being rendered hidden. That is what
+ * keeps the two data-fetching panels — Plan & billing and Branding — from
+ * issuing their queries on every visit to a screen most people open to fix a
+ * tagline. Both read roots the plan screen also reads, so a lead who visits
+ * either and then follows the link arrives on a warm cache.
  *
  * ── TWO QUERIES, BECAUSE THERE ARE TWO QUESTIONS ────────────────────────────
  * `circle` answers *what is configured*; `myCircleMembership` answers *what may
@@ -52,6 +68,13 @@ import { isCircleLive } from './liveness';
  * indirectly — archiving stamps `archivedAt` and moves `status` — and it keeps
  * this component free of hand-written cache writers, which are the usual place
  * a stale settings screen comes from.
+ *
+ * ── COLUMN WIDTH ────────────────────────────────────────────────────────────
+ * `CIRCLE_COLUMN_CLASS`, like every other Circles route. The 40vw cap on
+ * `FEED_COLUMN_CLASS` is a reading measure for the feed; here it would centre a
+ * 60vw block inside the `(home)` shell and leave the sidebar floating in the
+ * middle of the page — and it has nowhere near enough width for a menu beside a
+ * panel.
  */
 export interface CircleSettingsScreenProps {
   circleId: string;
@@ -80,6 +103,14 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
   const tErrors = useTranslations('circles.errors');
   const tGlobal = useTranslations('common');
   const router = useRouter();
+
+  /*
+   * Local state rather than a `?section=` search param. `useSearchParams` in a
+   * client page under the app router forces the whole route into a CSR bailout
+   * unless it is wrapped in Suspense, and deep-linking into a settings tab is
+   * not worth that trade today. The panel is a view, not a place.
+   */
+  const [panel, setPanel] = useState<CircleSettingsPanelId>('general');
 
   const {
     data: circleData,
@@ -222,42 +253,62 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
     }
 
     return (
-      <div className="space-y-4 py-4">
-        {/*
-         * Said once, at the top, rather than repeated inside each section: the
-         * reason every control is read-only is a property of the CIRCLE, not of
-         * three independent settings. `surface-brand-light` is the same light
-         * blue in both themes and so is legible only against `text-text-brand`.
-         */}
-        {frozenReason && (
-          <p
-            role="status"
-            className="body-small rounded-lg bg-surface-brand-light p-4 text-text-brand"
-          >
-            {frozenReason}
-          </p>
-        )}
+      <div className="flex flex-col gap-4 py-4 lg:flex-row lg:items-start lg:gap-8">
+        <SettingsNav circleId={circleId} active={panel} onSelect={setPanel} />
 
-        <CircleProfileSection circle={circle} canEdit={permissions.canEditProfile} />
-        <CircleDiscoverySection
-          circle={circle}
-          canEdit={permissions.canChangeDiscovery}
-          canPropose={permissions.canPropose}
-          onChanged={refresh}
-        />
-        <CircleArchiveSection
-          circle={circle}
-          canArchive={permissions.canArchive}
-          canPropose={permissions.canPropose}
-          onArchived={refresh}
-        />
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          {/*
+           * Said once, above whichever panel is open, rather than repeated
+           * inside each: the reason every control is read-only is a property of
+           * the CIRCLE, not of four independent settings.
+           * `surface-brand-light` is the same light blue in both themes and so
+           * is legible only against `text-text-brand`.
+           */}
+          {frozenReason && (
+            <p
+              role="status"
+              className="body-small rounded-lg bg-surface-brand-light p-4 text-text-brand"
+            >
+              {frozenReason}
+            </p>
+          )}
+
+          {panel === 'general' && (
+            <CircleProfileSection
+              circle={circle}
+              canEdit={permissions.canEditProfile}
+            />
+          )}
+
+          {panel === 'access' && (
+            <CircleDiscoverySection
+              circle={circle}
+              canEdit={permissions.canChangeDiscovery}
+              canPropose={permissions.canPropose}
+              onChanged={refresh}
+            />
+          )}
+
+          {panel === 'branding' && <CircleBrandingSection circleId={circleId} />}
+
+          {panel === 'plan' && <CirclePlanBillingSection circleId={circleId} />}
+
+          {panel === 'danger' && (
+            <CircleArchiveSection
+              circle={circle}
+              canArchive={permissions.canArchive}
+              canPropose={permissions.canPropose}
+              onArchived={refresh}
+            />
+          )}
+        </div>
       </div>
     );
   };
 
   return (
     <div className="h-app-inner flex overflow-hidden">
-      <div className={FEED_COLUMN_CLASS}>
+      <div className={CIRCLE_COLUMN_CLASS}>
         {header}
         {body()}
       </div>

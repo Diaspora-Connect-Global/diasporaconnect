@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Flame, Gavel, MessageSquare, Target } from 'lucide-react';
+import { Flame, FolderKanban, Gavel, MessageSquare, Target } from 'lucide-react';
 
 import { Countdown, StatusPill } from '@/components/circles/primitives';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,12 +48,17 @@ function useNowAfterMount(): number | null {
  * These answer "does anything need me?" at a glance, so the colour ladder is
  * load-bearing rather than decorative:
  *
- *   neutral  nothing is waiting on you ("No open votes")
+ *   neutral  nothing is waiting on you ("No open votes", project progress)
  *   brand    something is running (unread messages, an open vote)
  *   danger   an open vote closes within 24 hours
  *
  * A circle with a vote closing tonight is therefore visibly louder than one
  * with the same vote closing next week, without either card changing shape.
+ *
+ * Project progress is deliberately the quietest chip on the row. It is a
+ * readout, not a call to action — nobody has to do anything because a project
+ * is 75% of the way through its goals — so it does not compete with the two
+ * chips that do mean "this needs you".
  */
 export function CirclePills({ signals, unreadCount }: CirclePillsProps) {
   const t = useTranslations('circles');
@@ -131,6 +136,36 @@ export function CirclePills({ signals, unreadCount }: CirclePillsProps) {
           label={t('motion.status.open')}
         />
       )}
+
+      {/*
+        The project chip has three states, and only one shows at a time:
+
+          Project 75%  a percentage exists (>= 2 live goals, some MET)
+          Project      a project is running but has nothing to measure yet
+          –            the goal chip below already says a project is running
+
+        `projectPercent` (how many of the project's goals are MET) and
+        `goalPercent` (how far the headline goal itself has come) are different
+        facts and may both show. `useCircleSignals` suppresses the project one
+        below two goals precisely so they can never restate each other and
+        disagree — a lone goal 60% of the way to its target is not MET, so
+        "Project 0%, Goal 60%" would read as a contradiction.
+      */}
+      {signals.projectPercent !== null ? (
+        <StatusPill
+          variant="neutral"
+          icon={<FolderKanban aria-hidden="true" />}
+          label={t('index.pills.projectProgress', {
+            percent: signals.projectPercent,
+          })}
+        />
+      ) : signals.hasActiveProject && signals.goalPercent === null ? (
+        <StatusPill
+          variant="neutral"
+          icon={<FolderKanban aria-hidden="true" />}
+          label={t('index.pills.project')}
+        />
+      ) : null}
 
       {signals.goalPercent !== null ? (
         <StatusPill

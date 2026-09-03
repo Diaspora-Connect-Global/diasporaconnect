@@ -15,6 +15,7 @@ import type {
   CircleProjectGoal,
 } from '@/services/gql/types/circles';
 
+import { pickHeadlineGoal } from './headlineGoal';
 import { InlineCard } from './InlineCard';
 
 /**
@@ -42,23 +43,6 @@ interface GoalProgressData {
 }
 interface ContributionsData {
   circleContributions?: CircleContribution[] | null;
-}
-
-/**
- * The goal whose progress represents the project.
- *
- * A SHARED goal belongs to the circle; an INDIVIDUAL goal is one member's
- * slice. Leading with an individual goal would show one person's progress under
- * the project's name, so shared wins — and an open shared goal wins over a met
- * or cancelled one, because that is the one still being worked on.
- */
-function pickHeadlineGoal(goals: CircleProjectGoal[]): CircleProjectGoal | null {
-  return (
-    goals.find((g) => g.scope === 'SHARED' && g.status === 'OPEN') ??
-    goals.find((g) => g.scope === 'SHARED') ??
-    goals[0] ??
-    null
-  );
 }
 
 /**

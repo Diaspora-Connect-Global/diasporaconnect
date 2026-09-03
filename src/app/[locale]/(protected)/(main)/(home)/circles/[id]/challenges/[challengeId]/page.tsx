@@ -3,17 +3,15 @@
 import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 
 import { ButtonType1 } from '@/components/custom/button';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { useUserStore } from '@/store/useUserStore';
-import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
+import { useCircleUsers } from '@/hooks/useCircleUsers';
 import {
   CIRCLE_CHALLENGE,
   CIRCLE_CHALLENGE_ENTRIES,
@@ -25,13 +23,15 @@ import type {
   CircleChallengeVariables,
 } from '@/services/gql/types/circles';
 import {
+  ChallengeActivity,
+  ChallengeAside,
+  ChallengeHeader,
   ChallengeProgress,
-  SubmitEntryForm,
   VerificationModePanel,
 } from '@/components/circles/challenge';
 
 /**
- * Entries fetched to derive the participant list.
+ * Entries fetched to derive the participant list and the activity feed.
  *
  * A recurring challenge produces one entry PER PERIOD per person, so the row
  * count outruns the head count; the cap is generous enough that a circle capped
@@ -40,19 +40,46 @@ import {
 const ENTRIES_PAGE = 100;
 
 /**
+ * Geometry of the challenge screen inside the `(home)` sidebar shell.
+ *
+ * `CIRCLE_COLUMN_CLASS` is deliberately NOT reused. It is `flex-1` with no
+ * width cap, which is right for the single-column Circles screens — a capped
+ * column would leave `20vw` sidebar + `40vw` content as a 60vw block that the
+ * centring shell pushes into the middle of the page, so the sidebar stops
+ * looking like a sidebar. This screen has a second column that takes the
+ * remaining width, so the row fills the viewport on its own and the main column
+ * can be pinned; that is exactly the arrangement `FEED_COLUMN_POST_PAGE_CLASS`
+ * describes for the post page, and pinning stops the column resizing as the
+ * side panel's content loads.
+ *
+ * Below `lg` the shell itself scrolls and the two columns simply stack, so the
+ * side panel becomes the last section of one continuous page rather than a
+ * second scroll region fighting the first. That is also why each piece is
+ * mounted exactly once: rendering the panel twice behind `lg:hidden` /
+ * `hidden lg:block` would put two entry forms in the DOM with duplicate input
+ * ids and two independent idempotency keys.
+ */
+const SHELL_CLASS = 'h-app-inner overflow-y-auto scrollbar-hide lg:flex lg:overflow-hidden';
+const MAIN_COLUMN_CLASS =
+  'mx-4 flex w-full min-w-0 flex-col py-4 lg:w-[40vw] lg:min-w-[40vw] lg:max-w-[40vw] lg:flex-none lg:overflow-y-auto lg:overflow-x-hidden scrollbar-hide';
+const SIDE_COLUMN_CLASS =
+  'mx-4 mb-6 min-w-0 lg:mb-0 lg:flex-1 lg:overflow-y-auto lg:py-4 scrollbar-hide';
+
+/**
  * Screen 6 — Challenge detail.
  *
- * Title, who started it, the locked verification mode, progress, and the
- * "I'm in!" CTA.
+ * What it is, who started it, the locked verification mode, who is in, what
+ * people have been doing — and, in the side panel, what that mode actually
+ * means plus the "I'm in!" CTA.
  *
  * The verification mode is the centrepiece rather than a settings row: it is
  * the platform-never-adjudicates rule in miniature. The circle decided who
- * confirms a completion, that decision froze when the challenge started, and
- * this screen states it as settled fact.
+ * confirms a completion, that decision froze the moment the challenge left
+ * DRAFT, and this screen states it as settled fact — which is why nothing here
+ * offers to change it, not even disabled.
  */
 export default function CircleChallengePage() {
   const t = useTranslations('circles');
-  const locale = useLocale();
   const router = useRouter();
   const params = useParams();
 
@@ -119,27 +146,11 @@ export default function CircleChallengePage() {
     [participantIds, usersById],
   );
 
-  const starter = challenge?.createdBy
-    ? usersById[challenge.createdBy]
-    : undefined;
-
-  const startedOn = useMemo(() => {
-    const iso = challenge?.startsAt ?? challenge?.createdAt;
-    if (!iso) return '';
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return '';
-    return new Intl.DateTimeFormat(locale, {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }).format(date);
-  }, [challenge?.startsAt, challenge?.createdAt, locale]);
-
   const header = (
     <button
       type="button"
       onClick={() => router.push(`/circles/${circleId}`)}
-      className="mb-4 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+      className="mb-4 inline-flex w-fit items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
     >
       <ArrowLeft className="size-4" />
       <span className="label-medium">{t('challenge.title')}</span>
@@ -148,14 +159,17 @@ export default function CircleChallengePage() {
 
   if (challengeLoading && !challenge) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className={SHELL_CLASS}>
+        <div className={MAIN_COLUMN_CLASS}>
           {header}
+          <Skeleton className="mb-3 h-6 w-40 rounded-full" />
           <Skeleton className="mb-3 h-8 w-3/4" />
-          <Skeleton className="mb-6 h-10 w-48" />
-          <Skeleton className="mb-3 h-4 w-40" />
+          <Skeleton className="mb-6 h-4 w-2/3" />
           <Skeleton className="mb-6 h-24 w-full rounded-2xl" />
           <Skeleton className="h-32 w-full" />
+        </div>
+        <div className={SIDE_COLUMN_CLASS}>
+          <Skeleton className="h-72 w-full rounded-2xl" />
         </div>
       </div>
     );
@@ -163,8 +177,8 @@ export default function CircleChallengePage() {
 
   if (challengeError && !challenge) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className={SHELL_CLASS}>
+        <div className={MAIN_COLUMN_CLASS}>
           {header}
           <ErrorState
             title={t('errors.loadChallenge')}
@@ -180,8 +194,8 @@ export default function CircleChallengePage() {
   // error, so absence is far more likely to be "not your circle" than a bad id.
   if (!challenge) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className={SHELL_CLASS}>
+        <div className={MAIN_COLUMN_CLASS}>
           {header}
           <EmptyState
             title={t('errors.noAccess.title')}
@@ -198,66 +212,45 @@ export default function CircleChallengePage() {
   }
 
   return (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
+    <div className={SHELL_CLASS}>
+      <div className={MAIN_COLUMN_CLASS}>
         {header}
 
-        <h1 className="heading-small text-text-primary">{challenge.title}</h1>
-
-        {challenge.createdBy && (
-          <div className="mt-3 flex items-center gap-3">
-            <Avatar className="size-9 shrink-0 border border-border-subtle">
-              <AvatarImage src={starter?.avatarUrl ?? undefined} alt="" />
-              <AvatarFallback className="caption-small bg-surface-subtle text-text-primary">
-                {(circleUserDisplayName(starter, '?').charAt(0) || '?').toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <p className="label-small truncate text-text-primary">
-                {t('common.startedBy', {
-                  name: circleUserDisplayName(starter, t('common.loading')),
-                })}
-              </p>
-              {startedOn && (
-                <p className="caption-small text-text-secondary">{startedOn}</p>
-              )}
-            </div>
-          </div>
-        )}
+        <ChallengeHeader
+          challenge={challenge}
+          starter={
+            challenge.createdBy ? usersById[challenge.createdBy] : undefined
+          }
+        />
 
         <VerificationModePanel mode={challenge.verificationMode} />
 
-        <ChallengeProgress
-          participants={participants}
-          endsAt={challenge.endsAt}
+        <ChallengeProgress participants={participants} endsAt={challenge.endsAt} />
+
+        <ChallengeActivity
+          entries={entries}
+          usersById={usersById}
+          currentUserId={currentUserId}
+          loading={entriesLoading}
         />
 
-        {challenge.description && (
-          <section className="mt-6">
-            <h2 className="label-medium text-text-primary">
-              {t('challenge.aboutTitle')}
-            </h2>
-            <p className="body-small mt-2 whitespace-pre-line text-text-primary">
-              {challenge.description}
-            </p>
-          </section>
-        )}
+        <div className="pb-4" />
+      </div>
 
-        <div className="mt-8 pb-4">
-          {/*
-            The raw entries are passed rather than a `joined` boolean: a
-            recurring challenge is meant to be entered again each period, so
-            the CTA has to ask "entered for THIS period?" — a question a single
-            has-ever-entered flag cannot answer.
-          */}
-          <SubmitEntryForm
-            circleId={circleId}
-            challenge={challenge}
-            entries={entries}
-            currentUserId={currentUserId}
-            loading={entriesLoading}
-          />
-        </div>
+      <div className={SIDE_COLUMN_CLASS}>
+        {/*
+          The raw entries are passed rather than a `joined` boolean: a recurring
+          challenge is meant to be entered again each period, so the CTA has to
+          ask "entered for THIS period?" — a question a single has-ever-entered
+          flag cannot answer.
+        */}
+        <ChallengeAside
+          circleId={circleId}
+          challenge={challenge}
+          entries={entries}
+          currentUserId={currentUserId}
+          loading={entriesLoading}
+        />
       </div>
     </div>
   );

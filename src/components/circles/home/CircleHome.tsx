@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { MessageSquare } from 'lucide-react';
+import { History, MessageSquare, Sparkles } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -17,6 +17,7 @@ import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { Link } from '@/i18n/navigation';
 import { getDateLabel, getMessageDateKey } from '@/lib/chatTime';
+import { readMutationOutcome } from '@/lib/mutationOutcome';
 import {
   CIRCLE,
   CIRCLE_CHALLENGES,
@@ -40,6 +41,8 @@ import { useChatStore, type ApiMessage } from '@/store/ChatStore';
 import { useUserStore } from '@/store/useUserStore';
 
 import { ChallengeCard } from './ChallengeCard';
+import { CircleLivePanel } from './CircleLivePanel';
+import { CircleMembersPanel } from './CircleMembersPanel';
 import { CircleMessageBubble } from './CircleMessageBubble';
 import { CircleHomeHeader } from './CircleHomeHeader';
 import { MotionCard } from './MotionCard';
@@ -75,6 +78,21 @@ const MESSAGE_PAGE_SIZE = 50;
  */
 const CHAT_COLUMN_CLASS =
   'mx-4 flex w-full min-w-0 flex-1 flex-col lg:w-[40vw] lg:min-w-[40vw] lg:max-w-[40vw] lg:flex-none';
+
+/**
+ * The rail beside the conversation: what is live, and who is here.
+ *
+ * Desktop only, and that is not a compromise — on a phone the whole viewport is
+ * the conversation, and both panels already have full-size homes one tap away
+ * (the artefact cards are IN the stream; Members is the adjacent tab). A
+ * collapsed drawer would add a control that duplicates the tab strip.
+ *
+ * `lg:flex-1` rather than a fixed width, matching `post/[id]`'s right rail: the
+ * chat column is the pinned measure, so the rail takes whatever is left instead
+ * of leaving the pair floating in the middle of a wide screen.
+ */
+const SIDEBAR_CLASS =
+  'hidden lg:flex lg:min-w-0 lg:flex-1 flex-col gap-4 overflow-y-auto py-4 pr-4 scrollbar-hide';
 
 interface CircleData {
   circle?: Circle | null;
@@ -266,7 +284,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
       const content = attachments[0] ? trimmed || attachments[0].publicUrl : trimmed;
 
       try {
-        const { data } = await sendMessage({
+        const result = await sendMessage({
           variables: {
             conversationId,
             messageType,
@@ -279,6 +297,19 @@ export function CircleHome({ circleId }: CircleHomeProps) {
           },
         });
 
+        /*
+         * The client runs `errorPolicy: 'all'`, so a REFUSED send resolves with
+         * `data: null` and the catch below never fires. Before this, a rejected
+         * message simply vanished: no bubble, no toast, nothing to retry — the
+         * worst failure mode a composer has. Read the outcome explicitly.
+         */
+        const outcome = readMutationOutcome(result, (d) => d.sendMessage);
+        if (!outcome.ok) {
+          toast.error(tGroup('sendFailed'));
+          return;
+        }
+
+        const data = result.data;
         if (data?.sendMessage) {
           const sent: ApiMessage = {
             id: data.sendMessage,
@@ -392,15 +423,51 @@ export function CircleHome({ circleId }: CircleHomeProps) {
           avatarUrl={circle.avatarUrl}
         />
 
+        {/*
+         * The banner row under the header.
+         *
+         * The design put a PINNED MESSAGE here; message-service has no pin —
+         * no field on a message, no mutation, nothing on the conversation — so
+         * there is nothing true to render and inventing one line of chat would
+         * be a fabricated message attributed to a real circle.
+         *
+         * What does belong in exactly this slot is the CHAT_HISTORY_DAYS
+         * entitlement. `circleChat` already returns `historyLimited` and
+         * `historyDays` and nothing read them, so a circle on a short-history
+         * plan silently appeared to have started later than it did — the chat
+         * just began mid-conversation with no explanation. Nothing is deleted
+         * by a plan change, and saying so is the point of the row.
+         */}
+        {chat?.available && chat.historyLimited && chat.historyDays > 0 && (
+          <div className="shrink-0 border-b border-border-subtle bg-surface-subtle px-3 py-2 sm:px-4">
+            <p className="caption-small flex items-start gap-2 text-text-secondary">
+              <History aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+              {t('home.historyLimited', { days: chat.historyDays })}
+            </p>
+          </div>
+        )}
+
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-4 scrollbar-hide sm:px-4">
           {timeline.length === 0 ? (
             messagesLoading ? (
               <MessageListSkeleton />
-            ) : (
+            ) : conversationId ? (
               <EmptyState
                 icon={MessageSquare}
                 title={t('empty.messages.title')}
                 description={t('empty.messages.description')}
+              />
+            ) : (
+              /*
+               * Chat is off, so "Say hello — this is where your circle talks"
+               * would invite something the composer below has just said is
+               * impossible. The rest of the circle still works, and the +
+               * menu in the header is how you reach it.
+               */
+              <EmptyState
+                icon={Sparkles}
+                title={t('home.noChatEmpty.title')}
+                description={t('home.noChatEmpty.description')}
               />
             )
           ) : (
@@ -515,6 +582,24 @@ export function CircleHome({ circleId }: CircleHomeProps) {
           )}
         </div>
       </div>
+
+      {/*
+       * The rail. Both panels read their own data and degrade to nothing on
+       * failure, so a circle-service hiccup costs the context beside the
+       * conversation rather than the conversation itself.
+       *
+       * No `aria-label`: this is a complementary landmark and each panel
+       * already carries its own heading. Naming the whole aside after one of
+       * the two would announce the roster as part of "What's live".
+       */}
+      <aside className={SIDEBAR_CLASS}>
+        <CircleLivePanel circleId={circleId} />
+        <CircleMembersPanel
+          circleId={circleId}
+          memberCount={circle.memberCount}
+          currentUserId={currentUserId}
+        />
+      </aside>
     </div>
   );
 }
@@ -536,11 +621,16 @@ function CircleHomeSkeleton() {
   return (
     <div className="flex h-app-inner overflow-hidden">
       <div className={CHAT_COLUMN_CLASS}>
+        {/* Mirrors the real header's shape — avatar left, name over count —
+            so nothing jumps sideways when the circle resolves. */}
         <div className="shrink-0 border-b border-border-subtle px-4 pt-2">
-          <div className="flex flex-col items-center gap-1">
-            <Skeleton className="size-10 rounded-full" />
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-20" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-8 shrink-0 rounded-full" />
+            <Skeleton className="size-9 shrink-0 rounded-full" />
+            <div className="flex flex-1 flex-col gap-1.5">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-20" />
+            </div>
           </div>
           <div className="mt-3 flex gap-4 pb-2">
             <Skeleton className="h-4 flex-1" />
@@ -550,6 +640,11 @@ function CircleHomeSkeleton() {
         <div className="min-h-0 flex-1 px-4 py-4">
           <MessageListSkeleton />
         </div>
+      </div>
+
+      <div className={SIDEBAR_CLASS} aria-hidden="true">
+        <Skeleton className="h-36 w-full rounded-2xl" />
+        <Skeleton className="h-56 w-full rounded-2xl" />
       </div>
     </div>
   );

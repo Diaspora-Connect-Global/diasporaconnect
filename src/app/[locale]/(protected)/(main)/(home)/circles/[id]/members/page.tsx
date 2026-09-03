@@ -1,15 +1,18 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 
 import {
+  filterCircleMembers,
+  GovernanceCallout,
   InviteCard,
   InviteLinksPanel,
-  MembersList,
+  MembersTable,
+  MembersToolbar,
   PastMembersSection,
 } from '@/components/circles/members';
 import { ErrorState } from '@/components/feedback';
@@ -40,17 +43,23 @@ import { useUserStore } from '@/store/useUserStore';
  */
 const PAST_MEMBERS_LIMIT = 25;
 
+/** The invite panel the toolbar's button expands, for `aria-controls`. */
+const INVITE_PANEL_ID = 'circle-members-invite-panel';
+
 function MembersSkeleton() {
   return (
     <div className="flex flex-col gap-4 py-4">
-      <Skeleton className="h-10 w-full rounded-full" />
-      <Skeleton className="h-5 w-32" />
-      {[...Array(5)].map((_, index) => (
-        <div key={index} className="flex items-center gap-3">
-          <Skeleton className="size-10 shrink-0 rounded-full" />
-          <Skeleton className="h-4 w-40" />
-        </div>
-      ))}
+      <div className="rounded-xl border border-border-subtle">
+        <Skeleton className="h-12 w-full rounded-t-xl rounded-b-none" />
+        {[...Array(5)].map((_, index) => (
+          <div key={index} className="flex items-center gap-3 px-4 py-3">
+            <Skeleton className="size-8 shrink-0 rounded-full" />
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="ml-auto h-4 w-24" />
+          </div>
+        ))}
+      </div>
+      <Skeleton className="h-16 w-full rounded-xl" />
     </div>
   );
 }
@@ -62,21 +71,27 @@ function MembersSkeleton() {
  * Nothing on this screen changes an existing member's standing. There is no
  * remove control and no promote control, because the API offers no mutation for
  * either: removing somebody is the ENACTMENT of a passed REMOVE_MEMBER motion,
- * so a button here would be either dead or a lie about who decided. If removal
- * is ever surfaced from this screen it must read "Propose removal", open a
- * motion, and land the user on that motion.
+ * so a button here would be either dead or a lie about who decided. The rule is
+ * no longer only enforced by omission — `GovernanceCallout` states it under the
+ * table, because a members list with no remove button reads as a missing
+ * feature until the screen explains that the circle, not an admin, decides.
+ * If removal is ever surfaced from this screen it must read "Propose removal",
+ * open a motion, and land the user on that motion.
  *
  * The mutations this screen does reach are all about ADMISSION, which is not a
  * decision about anyone already inside: `inviteToCircle` (any member, one named
  * person) and `mintCircleInviteLink` / `revokeCircleInviteLink` (lead only, a
- * shareable bearer credential).
+ * shareable bearer credential). Both live behind the toolbar's "Invite to
+ * circle" disclosure rather than sitting open under the roster — the roster and
+ * the governance rule are what the screen is for.
  *
  * ── FORMER MEMBERS ARE PART OF THE ROSTER ───────────────────────────────────
  * `circle_membership` rows are never deleted; a departure rewrites the status.
  * Showing only the active half let this screen quietly assert the circle had
  * always been its current membership, with the people it voted out — and the
- * motions that decided it — simply absent. Each ending is now labelled with its
- * reason, and a removal links to the motion that caused it.
+ * motions that decided it — simply absent. Each ending is labelled with its
+ * reason, and a removal links to the motion that caused it. The callout closes
+ * the screen underneath it: those rows are the rule in evidence.
  *
  * `leaveCircle` still belongs here and is still not wired: the members
  * namespace has no label for the action. Reported rather than invented.
@@ -92,6 +107,9 @@ export default function CircleMembersPage() {
   const circleId = typeof params.id === 'string' ? params.id : '';
   const currentUserId = useUserStore((state) => state.user?.userId);
 
+  const [query, setQuery] = useState('');
+  const [inviteOpen, setInviteOpen] = useState(false);
+
   const { data, loading, error, refetch } = useQuery<CircleMembersData, CircleMembersVariables>(
     CIRCLE_MEMBERS,
     {
@@ -100,7 +118,7 @@ export default function CircleMembersPage() {
     },
   );
 
-  const members = data?.circleMembers ?? [];
+  const members = useMemo(() => data?.circleMembers ?? [], [data]);
 
   /*
    * Former members, in one round trip (three aliased calls). Failures degrade
@@ -139,6 +157,23 @@ export default function CircleMembersPage() {
   const { usersById } = useCircleUsers(members.map((member) => member.userId));
 
   /*
+   * The table shows the matches; the count beside the title reports the whole
+   * roster. Searching narrows what you can see, never what the circle IS.
+   */
+  const youLabel = t('you');
+  const visibleMembers = useMemo(
+    () =>
+      filterCircleMembers({
+        members,
+        usersById,
+        query,
+        currentUserId,
+        youLabel,
+      }),
+    [members, usersById, query, currentUserId, youLabel],
+  );
+
+  /*
    * Opening a direct conversation is the app's existing handshake, copied from
    * `useFriendActions.sendMessage`: the chat page reads its target from the
    * store and from `sessionStorage`, and only supports a `gid` deep-link for
@@ -158,22 +193,38 @@ export default function CircleMembersPage() {
   );
 
   /*
-   * Back arrow + page title, matching the app's detail-screen chrome. The arrow
-   * is icon-only and carries a generic accessible name rather than the title:
-   * labelling it "Members" would announce it as a link TO this page,
-   * which is where the user already is.
+   * Back arrow + page title on the left, search + invite on the right — the
+   * app's detail-screen chrome, widened into a toolbar. The arrow is icon-only
+   * and carries a generic accessible name rather than the title: labelling it
+   * "Members" would announce it as a link TO this page, which is where the user
+   * already is. The row stacks on a phone so neither control is squeezed.
    */
   const header = (
-    <div className="flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={() => router.push(`/circles/${circleId}`)}
-        aria-label={tGlobal('previousPage')}
-        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <h1 className="label-large text-text-primary">{t('title')}</h1>
+    <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => router.push(`/circles/${circleId}`)}
+          aria-label={tGlobal('previousPage')}
+          className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
+        >
+          <ArrowLeft className="size-5" />
+        </button>
+        <div className="min-w-0">
+          <h1 className="label-large text-text-primary">{t('title')}</h1>
+          <p className="caption-small text-text-secondary">
+            {tCommon('memberCount', { count: members.length })}
+          </p>
+        </div>
+      </div>
+
+      <MembersToolbar
+        query={query}
+        onQueryChange={setQuery}
+        inviteOpen={inviteOpen}
+        onToggleInvite={() => setInviteOpen((open) => !open)}
+        invitePanelId={INVITE_PANEL_ID}
+      />
     </div>
   );
 
@@ -195,11 +246,37 @@ export default function CircleMembersPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-6 py-4">
-            <MembersList
-              members={members}
+            {/*
+              The wrapper always exists so the toolbar button's `aria-controls`
+              always resolves, but its contents mount only when opened —
+              `InviteLinksPanel` runs a LEAD-gated query on mount and there is
+              no reason to spend it on a member who never asked to invite.
+            */}
+            <div
+              id={INVITE_PANEL_ID}
+              hidden={!inviteOpen}
+              className="flex flex-col gap-4"
+            >
+              {inviteOpen && (
+                <>
+                  <InviteCard circleId={circleId} />
+
+                  {/*
+                    Minting a shareable link is a lead's call, not a member's: an
+                    invitation names its addressee, a link is a bearer credential
+                    that opens the circle to an audience the rest never agreed to.
+                  */}
+                  {isLead && <InviteLinksPanel circleId={circleId} />}
+                </>
+              )}
+            </div>
+
+            <MembersTable
+              members={visibleMembers}
               usersById={usersById}
               currentUserId={currentUserId}
               onSendMessage={handleSendMessage}
+              query={query}
             />
 
             <PastMembersSection
@@ -209,14 +286,13 @@ export default function CircleMembersPage() {
               suspended={pastData?.suspended ?? []}
             />
 
-            <InviteCard circleId={circleId} />
-
             {/*
-              Minting a shareable link is a lead's call, not a member's: an
-              invitation names its addressee, a link is a bearer credential that
-              opens the circle to an audience the rest never agreed to.
+              The footer of the screen, and the point of it. It explains the
+              control the roster does not have, and it lands immediately after
+              the former-members list — where the "Removed by motion" rows and
+              their links to the deciding motions are the evidence for it.
             */}
-            {isLead && <InviteLinksPanel circleId={circleId} />}
+            <GovernanceCallout />
           </div>
         )}
       </div>

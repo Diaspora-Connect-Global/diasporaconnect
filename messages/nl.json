@@ -2785,7 +2785,9 @@
       "access": {
         "apply": "Open • Iedereen kan zich aanmelden",
         "invite": "Deelname op uitnodiging",
-        "approval": "Aanvraag en goedkeuring"
+        "approval": "Aanvraag en goedkeuring",
+        "public": "Openbaar",
+        "inviteOnly": "Alleen op uitnodiging"
       },
       "pills": {
         "voteCloses": "Stemming sluit {time}",
@@ -2804,7 +2806,7 @@
       "nameRequired": "Geef je kring een naam.",
       "bannerLabel": "Banner",
       "bannerCta": "Banner toevoegen",
-      "bannerHint": "Aanbevolen 1200 x 400",
+      "bannerHint": "Aanbevolen 1020 x 480",
       "bannerChange": "Banner wijzigen",
       "bannerRemove": "Banner verwijderen",
       "note": "Beslissingen neemt de groep. Hoe dat gebeurt, kun je later aanpassen.",
@@ -2833,7 +2835,16 @@
       "avatarHint": "Vierkante afbeelding, minimaal 256 x 256",
       "avatarChange": "Foto wijzigen",
       "avatarRemove": "Foto verwijderen",
-      "imageFailed": "Kring aangemaakt — we konden de afbeelding niet toevoegen. Je kunt deze via de instellingen toevoegen."
+      "imageFailed": "Kring aangemaakt — we konden de afbeelding niet toevoegen. Je kunt deze via de instellingen toevoegen.",
+      "headline": "Laten we je kring maken",
+      "errors": {
+        "insufficient_data": "Er ontbreekt iets. Controleer de naam van de kring en probeer het opnieuw.",
+        "not_authorized": "Je mag op dit moment geen kring maken.",
+        "not_found": "We konden niet vinden waar dit naar verwijst. Probeer het opnieuw.",
+        "conflict": "Zo'n kring bestaat al. Probeer een andere naam.",
+        "failed": "We konden je kring niet aanmaken. Probeer het opnieuw.",
+        "unknown_error": "Er ging iets mis. Probeer het opnieuw."
+      }
     },
     "home": {
       "tabChat": "Chat",
@@ -2859,7 +2870,23 @@
         "tallyPending": "{count} In afwachting",
         "closes": "Sluit {time}"
       },
-      "chatUnavailable": "Chat is nog niet beschikbaar in kringen. Projecten, challenges en stemmingen werken gewoon."
+      "chatUnavailable": "Chat is nog niet beschikbaar in kringen. Projecten, challenges en stemmingen werken gewoon.",
+      "live": {
+        "title": "Wat er loopt",
+        "empty": "Er loopt nu niets.",
+        "openVotes": "{count, plural, =1 {1 open stemming} other {# open stemmingen}}",
+        "projectMeta": "Project · {percent}% klaar",
+        "projectMetaPlain": "Project",
+        "challengeMeta": "Challenge · {days, plural, =1 {nog 1 dag} other {nog # dagen}}",
+        "challengeMetaPlain": "Challenge",
+        "challengeMetaEnded": "Challenge · Beëindigd",
+        "viewAll": "Alles bekijken"
+      },
+      "historyLimited": "Je ziet de laatste {days, plural, =1 {dag} other {# dagen}} van deze chat. Oudere berichten zijn niet verwijderd.",
+      "noChatEmpty": {
+        "title": "Hier is nog niets",
+        "description": "Chat staat nog niet aan, maar hier verschijnen wel de projecten, challenges en stemmingen van je kring. Start er een via het +-menu hierboven."
+      }
     },
     "motion": {
       "title": "Motiedetails",
@@ -2897,9 +2924,29 @@
       },
       "callout": {
         "failNotice": "Als er vóór {deadline} minder dan {required} van de {total} stemmen, verandert er niets.",
-        "silence": "Zwijgen is nooit instemming."
+        "silence": "Zwijgen is nooit instemming.",
+        "failNoticeNoDeadline": "Als er vóór het sluiten minder dan {required} van de {total} stemmen, verandert er niets."
       },
-      "notElector": "Je bent lid geworden nadat deze motie werd geopend en hoort daarom niet bij de stemgerechtigden."
+      "notElector": "Je bent lid geworden nadat deze motie werd geopend en hoort daarom niet bij de stemgerechtigden.",
+      "voteChangeable": "Je kunt je stem wijzigen tot de stemming sluit.",
+      "enactmentFailedLead": "De kring heeft dit aangenomen, maar het besluit uitvoeren lukte niet:",
+      "withdrawn": "Motie ingetrokken.",
+      "enacted": "Het besluit is uitgevoerd.",
+      "menu": {
+        "withdraw": "Motie intrekken",
+        "enact": "Dit besluit uitvoeren"
+      },
+      "withdrawDialog": {
+        "title": "Deze motie intrekken?",
+        "description": "De stemming stopt meteen en niets van wat deze motie voorstelde gaat door. Al uitgebrachte stemmen blijven in het verslag van de kring staan, en de motie kan niet opnieuw worden geopend.",
+        "confirm": "Motie intrekken",
+        "working": "Bezig met intrekken…"
+      },
+      "writeErrors": {
+        "notProposer": "Alleen het lid dat een motie heeft ingediend, kan haar intrekken.",
+        "notOpen": "Deze motie is niet meer open en kan dus niet worden ingetrokken.",
+        "notEnactable": "Alleen een motie die de kring heeft aangenomen, kan worden uitgevoerd."
+      }
     },
     "project": {
       "title": "Project",
@@ -2910,7 +2957,18 @@
       "contribute": "Bijdragen",
       "contributing": "Bezig met bijdragen...",
       "contributeHint": "Met één tik draag je ook vanuit de chat bij.",
-      "contributeSuccess": "Bedankt — je bijdrage is binnen."
+      "contributeSuccess": "Bedankt — je bijdrage is binnen.",
+      "meta": "Voorgesteld door {name} · {date}",
+      "status": {
+        "draft": "Concept",
+        "completed": "Voltooid",
+        "abandoned": "Gestaakt",
+        "archived": "Gearchiveerd"
+      },
+      "correction": "Correctie",
+      "contributionCountPartial": "Tot nu toe {count} getoond",
+      "discussion": "Discussie bekijken",
+      "messageCount": "{count, plural, =1 {1 bericht} other {# berichten}}"
     },
     "challenge": {
       "title": "Challenge",
@@ -2932,7 +2990,55 @@
         "leadDescription": "De leider van de kring bevestigt elke voltooiing.",
         "voteLabel": "De kring stemt",
         "voteDescription": "De kring stemt over elke voltooiing."
-      }
+      },
+      "about": {
+        "trust": "Niemand controleert hier iemand. Zeg je dat je het hebt gedaan, dan telt het — dat heeft je kring met zichzelf afgesproken.",
+        "lead": "Een leider van de kring bevestigt elke inzending. Leg vast wat je hebt gedaan, dan zet een leider het op gedaan.",
+        "vote": "Jullie bevestigen elkaar. Elke inzending gaat naar de kring, en de kring stemt of het telt."
+      },
+      "state": {
+        "draft": {
+          "label": "Nog niet begonnen",
+          "note": "Deze challenge is nog niet begonnen, dus er valt nog niets vast te leggen."
+        },
+        "judging": {
+          "label": "Wordt bevestigd",
+          "note": "Er kan niets meer worden ingezonden terwijl de kring bevestigt wat al is vastgelegd."
+        },
+        "closed": {
+          "label": "Afgelopen",
+          "note": "Deze challenge is afgelopen. Er kan niets meer worden vastgelegd."
+        },
+        "cancelled": {
+          "label": "Geannuleerd",
+          "note": "Je kring heeft deze challenge geannuleerd."
+        }
+      },
+      "activityTitle": "Recente activiteit",
+      "activityEmpty": {
+        "title": "Nog niets vastgelegd",
+        "description": "Wees de eerste die iets vastlegt — elke inzending verschijnt hier."
+      },
+      "activityLogged": "Een inzending vastgelegd.",
+      "activityLoggedValue": "{value} vastgelegd.",
+      "activityEvidence": "Bewijs bekijken",
+      "entryState": {
+        "pending": "In afwachting",
+        "rejected": "Niet meegeteld",
+        "disputed": "Betwist"
+      },
+      "yourProgressTitle": "Jouw voortgang",
+      "yourProgressNone": "Je hebt nog niets vastgelegd.",
+      "yourProgressLogged": "{count, plural, =1 {1 inzending vastgelegd} other {# inzendingen vastgelegd}}",
+      "yourProgressCap": {
+        "ONE_OFF": "{done} van {cap} vastgelegd",
+        "DAILY": "{done} van {cap} vandaag vastgelegd",
+        "WEEKLY": "{done} van {cap} deze week vastgelegd",
+        "MONTHLY": "{done} van {cap} deze maand vastgelegd"
+      },
+      "yourProgressPoints": "{points, plural, =1 {1 punt verdiend} other {# punten verdiend}}",
+      "yourProgressPending": "{count, plural, =1 {1 inzending wacht op bevestiging} other {# inzendingen wachten op bevestiging}}",
+      "yourProgressClaimed": "{total} in totaal vastgelegd"
     },
     "members": {
       "title": "Leden",
@@ -2953,9 +3059,7 @@
       },
       "actions": {
         "viewProfile": "Profiel bekijken",
-        "message": "Bericht sturen",
-        "makeLead": "Tot leider maken",
-        "remove": "Uit de kring verwijderen"
+        "message": "Bericht sturen"
       },
       "past": {
         "title": "{count, plural, =1 {1 oud-lid} other {# oud-leden}}",
@@ -2968,18 +3072,39 @@
           "REMOVED": "Verwijderd via motie",
           "SUSPENDED": "Geschorst door het platform"
         }
-      }
+      },
+      "columns": {
+        "member": "Lid",
+        "role": "Rol",
+        "joined": "Lid sinds"
+      },
+      "roleMember": "Lid",
+      "inviteToCircle": "Uitnodigen voor de kring",
+      "governanceNote": "Om een lid te verwijderen moet er een motie worden ingediend die de kring aanneemt.",
+      "emptyRoster": "Geen leden om te tonen."
     },
     "leaderboard": {
       "title": "Ranglijst",
       "modeRanked": "Individueel",
       "modeCollective": "Collectief",
       "collectiveTitle": "Onze gezamenlijke voortgang",
-      "points": "{points} ptn",
+      "points": "{points, number} ptn",
       "builtTogether": "Samen opgebouwd",
       "membersContributing": "{count, plural, =1 {1 lid draagt bij} other {# leden dragen bij}}",
       "breakdownTitle": "Verdeling van bijdragen",
-      "collectiveNote": "In collectieve modus winnen we samen."
+      "collectiveNote": "In collectieve modus winnen we samen.",
+      "thisWeek": "Deze week",
+      "dayPoints": "{day}: {points} ptn",
+      "weekPartial": "We konden alleen de laatste {count} puntenregels lezen, dus deze week is niet compleet.",
+      "standingsTitle": "Stand",
+      "rankedTitle": "Hoe jij ervoor staat",
+      "rankValue": "#{rank}",
+      "yourStandingOf": "Jouw plek, van de {total}",
+      "yourStanding": "Jouw plek",
+      "notOnBoard": "Je staat nog niet met punten op de ranglijst",
+      "leadingNow": "Op kop",
+      "rankedNote": "Punten komen uit projecten en challenges, en een correctie kan een score weer omlaag brengen.",
+      "topContributors": "{count, plural, =1 {Topbijdrager} other {Top # bijdragers}}"
     },
     "time": {
       "daysHoursLeft": "nog {days} d {hours} u",
@@ -3147,6 +3272,40 @@
         "leadOnlyBody": "Alleen een begeleider kan deze kring archiveren.",
         "dissolvedBody": "Deze kring is opgeheven, en dat is definitief. Hij kan niet meer worden gearchiveerd of heropend.",
         "proposeInstead": "Je kunt de kring vragen om te sluiten door een motie te openen; de leden beslissen samen."
+      },
+      "nav": {
+        "label": "Onderdelen van de instellingen",
+        "general": "Algemeen",
+        "access": "Toegang en vindbaarheid",
+        "branding": "Huisstijl",
+        "plan": "Abonnement en facturering",
+        "danger": "Gevarenzone",
+        "members": "Leden"
+      },
+      "branding": {
+        "title": "Huisstijl",
+        "description": "De kleuren die je kring aan zijn leden laat zien.",
+        "customColours": "Eigen kleuren",
+        "included": "Inbegrepen",
+        "hidden": "Verborgen",
+        "includedBody": "Je abonnement bevat eigen kleuren, dus je kring toont zijn eigen uiterlijk.",
+        "hiddenBody": "Eigen kleuren die je hebt opgeslagen blijven precies zoals ze zijn en komen meteen terug bij een abonnement met huisstijl. Zolang toont je kring het standaarduiterlijk.",
+        "hiddenWhy": "De huisstijl is verborgen omdat je huidige abonnement geen eigen huisstijl bevat.",
+        "noEditor": "Er zit nog geen kleurkiezer in de app, dus hier valt voorlopig niets te wijzigen.",
+        "changePlan": "Abonnement wijzigen",
+        "unknown": "We konden nu niet zien wat je abonnement dekt.",
+        "loadFailed": "We konden niet laden wat je abonnement dekt. Probeer het opnieuw."
+      },
+      "plan": {
+        "title": "Abonnement en facturering",
+        "description": "Op welk abonnement je kring zit, en wat er in rekening wordt gebracht.",
+        "changePlan": "Abonnement wijzigen",
+        "seePlans": "Alle abonnementen bekijken",
+        "nextBillingLabel": "Volgende betaaldatum",
+        "amountLabel": "Bedrag",
+        "membersIncluded": "{limit} leden inbegrepen",
+        "membersUnlimited": "Onbeperkt aantal leden",
+        "loadFailed": "We konden je abonnement niet laden. Probeer het opnieuw."
       }
     },
     "history": {
@@ -3160,7 +3319,11 @@
       },
       "empty": {
         "title": "Nog niets besloten",
-        "description": "Zodra deze kring de eerste motie indient, wordt hier elke stap van het besluit vastgelegd."
+        "description": "Zodra deze kring de eerste motie indient, wordt hier elke stap van het besluit vastgelegd.",
+        "membership": {
+          "title": "Nog geen besluiten over het lidmaatschap",
+          "description": "Als de kring stemt over het toelaten of verwijderen van iemand, of over het aanstellen van een leider, verschijnt het besluit hier met de regels waaronder het is genomen."
+        }
       },
       "entry": {
         "seq": "nr. {seq}",
@@ -3205,6 +3368,45 @@
         "circleUnsuspended": "Schorsing opgeheven door het platform",
         "circleDissolved": "Kring opgeheven door het platform",
         "unknown": "Vastgelegde gebeurtenis"
+      },
+      "subtitle": "Een verslag van hoe we hier beslissen.",
+      "loadMore": "Meer laden",
+      "proposerErased": "Voorgesteld door een verwijderd account",
+      "tabs": {
+        "label": "Weergave besluitgeschiedenis",
+        "motions": "Moties",
+        "membership": "Wijzigingen in het lidmaatschap"
+      },
+      "table": {
+        "caption": "Besluiten die deze kring heeft genomen, nieuwste eerst. Elke rij toont de regels die golden toen de motie werd ingediend.",
+        "motion": "Motie",
+        "outcome": "Uitslag",
+        "decided": "Besloten",
+        "rules": "Regels van toen"
+      },
+      "outcome": {
+        "passed": "Aangenomen",
+        "enacted": "Uitgevoerd",
+        "enactmentFailed": "Aangenomen — niet uitgevoerd",
+        "rejected": "Afgewezen",
+        "expired": "Verlopen — geen besluit",
+        "withdrawn": "Ingetrokken",
+        "open": "Nog open",
+        "unknown": "Vastgelegd"
+      },
+      "rules": {
+        "majority": {
+          "unanimous": "Unaniem",
+          "simple": "Gewone meerderheid",
+          "fraction": "{n}/{d} meerderheid"
+        },
+        "quorum": "Quorum {required} van {total}",
+        "unavailable": "Niet vastgelegd",
+        "note": "Elke rij toont de regels die die motie vastlegde toen ze werd ingediend — niet de regels van de kring vandaag."
+      },
+      "decided": {
+        "lapsed": "Verlopen op {date}",
+        "unknown": "Niet vastgelegd"
       }
     },
     "governance": {
@@ -3357,7 +3559,12 @@
           "MAX_ACTIVE_PROJECTS": "Er lopen {current} projecten. Je abonnement dekt er {limit}. Er wordt niets afgesloten of verwijderd — je kunt er alleen geen nieuw starten tot er een klaar is of je abonnement verandert.",
           "MAX_ACTIVE_CHALLENGES": "Er lopen {current} challenges. Je abonnement dekt er {limit}. Er wordt niets geannuleerd — je kunt er alleen geen nieuwe starten tot er een afloopt of je abonnement verandert.",
           "STORAGE_MB": "Je gebruikt {current} van {limit}. Er wordt niets verwijderd — je kunt alleen niets nieuws uploaden tot er ruimte vrijkomt of je abonnement verandert."
-        }
+        },
+        "hidden": "Verborgen",
+        "brandingHiddenWhy": "De huisstijl is verborgen omdat je huidige abonnement geen eigen huisstijl bevat.",
+        "changePlan": "Abonnement wijzigen",
+        "seePlans": "Meer over abonnementen",
+        "everythingElse": "Al het andere dat je abonnement dekt"
       },
       "billing": {
         "heading": "Betaalde abonnementen zetten we voorlopig met de hand klaar",
@@ -3400,6 +3607,18 @@
         "successNow": "Je kring zit op het gratis abonnement.",
         "successLater": "Je kring gaat aan het einde van deze periode over naar het gratis abonnement.",
         "error": "We konden het abonnement niet wijzigen. Er is niets aan je kring veranderd — probeer het opnieuw."
+      },
+      "governance": {
+        "title": "Wie betaalt, beslist niet",
+        "body": "Betalen geeft je toegang, geen macht. De besluitvorming is van de kring: elk lid heeft één stem, en niemand kan hier iets alleen beslissen."
+      },
+      "statusBar": {
+        "planLabel": "Huidig abonnement",
+        "statusLabel": "Status",
+        "upToMembers": "Tot {limit} leden",
+        "unlimitedMembers": "Onbeperkt aantal leden",
+        "overCapacity": "Boven de limiet",
+        "withinPlan": "Binnen je abonnement"
       }
     },
     "invites": {
@@ -3696,6 +3915,24 @@
       "submit": "Versturen",
       "accepted": "Je doet mee — het telt",
       "pending": "Verstuurd — wacht op bevestiging"
+    },
+    "report": {
+      "title": "Melden bij DiaspoPlug",
+      "intro": "Gebruik dit om illegale activiteiten of schendingen van onze platformregels te melden. DiaspoPlug beslecht geen interne geschillen binnen een kring — daar beslist de kring zelf over.",
+      "notMember": "Je moet lid zijn van deze kring om hem te melden.",
+      "reasonLabel": "Wat wil je melden?",
+      "reasonPlaceholder": "Kies een reden",
+      "reasonsUnavailable": "We konden de redenen niet laden. Probeer het later opnieuw.",
+      "detailsLabel": "Vertel ons meer",
+      "detailsPlaceholder": "Geef zo veel mogelijk details...",
+      "detailsHint": "Vermeld datums, namen en al het andere dat ons helpt te begrijpen wat er is gebeurd.",
+      "confidentialityNote": "Meldingen gaan naar het Trust & Safety-team van DiaspoPlug. Je identiteit blijft vertrouwelijk.",
+      "submit": "Melding versturen",
+      "submitting": "Bezig met versturen...",
+      "success": "Melding verstuurd",
+      "sentTitle": "Melding ontvangen",
+      "sentBody": "Het Trust & Safety-team van DiaspoPlug beoordeelt de melding. We nemen contact op als we meer informatie nodig hebben.",
+      "backToCircle": "Terug naar de kring"
     }
   },
   "feed": {

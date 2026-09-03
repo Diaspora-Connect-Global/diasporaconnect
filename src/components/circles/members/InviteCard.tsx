@@ -6,6 +6,10 @@ import { Check, Link2, Loader2, Send, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
+import {
+  readCircleWrite,
+  refusalMessageKey,
+} from '@/components/circles/governance/mutationOutcome';
 import { INVITE_TO_CIRCLE } from '@/services/gql/circles';
 import type {
   InviteToCircleData,
@@ -42,6 +46,7 @@ export interface InviteCardProps {
  */
 export function InviteCard({ circleId }: InviteCardProps) {
   const t = useTranslations('circles.members.invite');
+  const tActions = useTranslations('circles.actions');
 
   const [contact, setContact] = useState('');
   const [invited, setInvited] = useState<string | null>(null);
@@ -74,21 +79,38 @@ export function InviteCard({ circleId }: InviteCardProps) {
     // `inviteeContact` is the path for someone who is not on the platform yet;
     // an existing user is matched server-side.
     try {
-      const { data } = await invite({
+      const result = await invite({
         variables: { input: { circleId, inviteeContact: trimmed } },
       });
 
-      if (data?.inviteToCircle) {
-        setInvited(trimmed);
-        setContact('');
+      /*
+       * `data`, not the absence of a throw. The app's global
+       * `errorPolicy: 'all'` RESOLVES a refused mutation with `data: null`, so
+       * the catch below never saw a server refusal — a non-member calling this,
+       * a malformed address, a circle that stopped being active between load
+       * and submit all came back looking like nothing had happened, with the
+       * field still full and no sign anything failed.
+       *
+       * The refusal sentence itself is never rendered: it is operator English
+       * carrying raw UUIDs, in a product that ships in five locales. It is
+       * classified into a key and answered from our own copy. See
+       * `governance/mutationOutcome.ts`.
+       */
+      const outcome = readCircleWrite(result, (d) => d.inviteToCircle);
+      if (!outcome.ok) {
+        toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
+        return;
       }
-    } catch {
-      // The client's global ErrorLink already toasts GraphQL failures; catching
-      // here only stops the rejection escaping the submit handler unhandled.
-      // Without it a refused invite — a non-member calling a lead-gated
-      // mutation, a malformed address — surfaced as an unhandled promise
-      // rejection, and the field kept its text with no sign anything failed.
-      // Same shape as `handleMint` / `handleRevoke` in `InviteLinksPanel`.
+
+      // The success signal is the echoed contact below, and it is gated on the
+      // outcome — never on the mere fact that the await returned.
+      setInvited(trimmed);
+      setContact('');
+    } catch (error) {
+      // A few failures genuinely do reject (a link-level throw, an aborted
+      // request). Both paths converge on the same classified outcome.
+      const outcome = readCircleWrite({ error }, () => null);
+      toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
     }
   }
 

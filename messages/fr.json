@@ -2785,7 +2785,9 @@
       "access": {
         "apply": "Ouvert • Tout le monde peut postuler",
         "invite": "Adhésion sur invitation",
-        "approval": "Demande et approbation"
+        "approval": "Demande et approbation",
+        "public": "Public",
+        "inviteOnly": "Sur invitation uniquement"
       },
       "pills": {
         "voteCloses": "Fin du vote {time}",
@@ -2804,7 +2806,7 @@
       "nameRequired": "Donnez un nom à votre cercle.",
       "bannerLabel": "Bannière",
       "bannerCta": "Ajouter une bannière",
-      "bannerHint": "Recommandé 1200 x 400",
+      "bannerHint": "Recommandé 1020 x 480",
       "bannerChange": "Changer la bannière",
       "bannerRemove": "Supprimer la bannière",
       "note": "Les décisions sont prises par le groupe. Vous pourrez changer la façon plus tard.",
@@ -2833,7 +2835,16 @@
       "avatarHint": "Image carrée, au moins 256 x 256",
       "avatarChange": "Changer la photo",
       "avatarRemove": "Supprimer la photo",
-      "imageFailed": "Cercle créé — nous n'avons pas pu joindre l'image. Vous pouvez l'ajouter depuis les paramètres."
+      "imageFailed": "Cercle créé — nous n'avons pas pu joindre l'image. Vous pouvez l'ajouter depuis les paramètres.",
+      "headline": "Créons votre cercle",
+      "errors": {
+        "insufficient_data": "Il manque quelque chose. Vérifiez le nom du cercle et réessayez.",
+        "not_authorized": "Vous n'êtes pas autorisé à créer un cercle pour le moment.",
+        "not_found": "Nous n'avons pas trouvé ce à quoi cela renvoie. Veuillez réessayer.",
+        "conflict": "Un cercle comme celui-ci existe déjà. Essayez un autre nom.",
+        "failed": "Nous n'avons pas pu créer votre cercle. Veuillez réessayer.",
+        "unknown_error": "Un problème est survenu. Veuillez réessayer."
+      }
     },
     "home": {
       "tabChat": "Chat",
@@ -2859,7 +2870,23 @@
         "tallyPending": "{count} En attente",
         "closes": "Clôture {time}"
       },
-      "chatUnavailable": "La messagerie n'est pas encore disponible dans les cercles. Les projets, les défis et les votes fonctionnent normalement."
+      "chatUnavailable": "La messagerie n'est pas encore disponible dans les cercles. Les projets, les défis et les votes fonctionnent normalement.",
+      "live": {
+        "title": "En ce moment",
+        "empty": "Rien en cours pour le moment.",
+        "openVotes": "{count, plural, =1 {1 vote en cours} other {# votes en cours}}",
+        "projectMeta": "Projet · {percent} % réalisé",
+        "projectMetaPlain": "Projet",
+        "challengeMeta": "Défi · {days, plural, =1 {1 jour restant} other {# jours restants}}",
+        "challengeMetaPlain": "Défi",
+        "challengeMetaEnded": "Défi · Terminé",
+        "viewAll": "Tout voir"
+      },
+      "historyLimited": "Affichage {days, plural, =1 {du dernier jour} other {des # derniers jours}} de cette discussion. Rien de plus ancien n'a été supprimé.",
+      "noChatEmpty": {
+        "title": "Rien ici pour l'instant",
+        "description": "La messagerie n'est pas encore activée, mais c'est bien ici qu'apparaissent les projets, les défis et les votes de votre cercle. Lancez-en un depuis le menu + ci-dessus."
+      }
     },
     "motion": {
       "title": "Détails de la motion",
@@ -2897,9 +2924,29 @@
       },
       "callout": {
         "failNotice": "Si moins de {required} membres sur {total} votent d'ici {deadline}, rien ne change.",
-        "silence": "Le silence ne vaut jamais consentement."
+        "silence": "Le silence ne vaut jamais consentement.",
+        "failNoticeNoDeadline": "Si moins de {required} membres sur {total} votent avant la clôture, rien ne change."
       },
-      "notElector": "Vous avez rejoint le cercle après l’ouverture de cette motion : vous ne faites pas partie des électeurs."
+      "notElector": "Vous avez rejoint le cercle après l’ouverture de cette motion : vous ne faites pas partie des électeurs.",
+      "voteChangeable": "Vous pouvez modifier votre vote jusqu'à la clôture du scrutin.",
+      "enactmentFailedLead": "Le cercle a adopté cette motion, mais la décision n'a pas pu être appliquée :",
+      "withdrawn": "Motion retirée.",
+      "enacted": "La décision a été appliquée.",
+      "menu": {
+        "withdraw": "Retirer la motion",
+        "enact": "Appliquer cette décision"
+      },
+      "withdrawDialog": {
+        "title": "Retirer cette motion ?",
+        "description": "Le vote s'arrête immédiatement et rien de ce que cette motion proposait n'aura lieu. Les votes déjà exprimés restent dans l'historique du cercle, et la motion ne peut pas être rouverte.",
+        "confirm": "Retirer la motion",
+        "working": "Retrait…"
+      },
+      "writeErrors": {
+        "notProposer": "Seul le membre qui a déposé la motion peut la retirer.",
+        "notOpen": "Cette motion n'est plus ouverte : elle ne peut donc plus être retirée.",
+        "notEnactable": "Seule une motion adoptée par le cercle peut être appliquée."
+      }
     },
     "project": {
       "title": "Projet",
@@ -2910,7 +2957,18 @@
       "contribute": "Contribuer",
       "contributing": "Contribution en cours...",
       "contributeHint": "Un seul geste pour contribuer depuis le chat.",
-      "contributeSuccess": "Merci — votre contribution est enregistrée."
+      "contributeSuccess": "Merci — votre contribution est enregistrée.",
+      "meta": "Proposé par {name} · {date}",
+      "status": {
+        "draft": "Brouillon",
+        "completed": "Terminé",
+        "abandoned": "Abandonné",
+        "archived": "Archivé"
+      },
+      "correction": "Correction",
+      "contributionCountPartial": "Affichage de {count} pour l'instant",
+      "discussion": "Voir la discussion",
+      "messageCount": "{count, plural, =1 {1 message} other {# messages}}"
     },
     "challenge": {
       "title": "Défi",
@@ -2932,7 +2990,55 @@
         "leadDescription": "Le responsable du cercle confirme chaque réalisation.",
         "voteLabel": "Le cercle vote",
         "voteDescription": "Le cercle vote pour confirmer chaque réalisation."
-      }
+      },
+      "about": {
+        "trust": "Personne ne vérifie personne ici. Quand vous dites l'avoir fait, cela compte — c'est l'accord que votre cercle a passé avec lui-même.",
+        "lead": "Un responsable du cercle confirme chaque participation. Enregistrez ce que vous avez fait, et un responsable la valide.",
+        "vote": "Vous vous validez les uns les autres. Chaque participation passe devant le cercle, et le cercle vote pour dire si elle compte."
+      },
+      "state": {
+        "draft": {
+          "label": "Pas encore lancé",
+          "note": "Ce défi n'a pas encore commencé : il n'y a donc rien à enregistrer."
+        },
+        "judging": {
+          "label": "En cours de validation",
+          "note": "Les participations sont closes pendant que le cercle valide ce qui a déjà été enregistré."
+        },
+        "closed": {
+          "label": "Terminé",
+          "note": "Ce défi est terminé. Plus rien ne peut être enregistré."
+        },
+        "cancelled": {
+          "label": "Annulé",
+          "note": "Votre cercle a annulé ce défi."
+        }
+      },
+      "activityTitle": "Activité récente",
+      "activityEmpty": {
+        "title": "Rien d'enregistré pour l'instant",
+        "description": "Soyez le premier à enregistrer quelque chose — chaque participation apparaît ici."
+      },
+      "activityLogged": "A enregistré une participation.",
+      "activityLoggedValue": "A enregistré {value}.",
+      "activityEvidence": "Voir la preuve",
+      "entryState": {
+        "pending": "En attente",
+        "rejected": "Non comptée",
+        "disputed": "Contestée"
+      },
+      "yourProgressTitle": "Votre progression",
+      "yourProgressNone": "Vous n'avez encore rien enregistré.",
+      "yourProgressLogged": "{count, plural, =1 {1 participation enregistrée} other {# participations enregistrées}}",
+      "yourProgressCap": {
+        "ONE_OFF": "{done} sur {cap} enregistrées",
+        "DAILY": "{done} sur {cap} enregistrées aujourd'hui",
+        "WEEKLY": "{done} sur {cap} enregistrées cette semaine",
+        "MONTHLY": "{done} sur {cap} enregistrées ce mois-ci"
+      },
+      "yourProgressPoints": "{points, plural, =1 {1 point gagné} other {# points gagnés}}",
+      "yourProgressPending": "{count, plural, =1 {1 participation en attente de validation} other {# participations en attente de validation}}",
+      "yourProgressClaimed": "Total enregistré : {total}"
     },
     "members": {
       "title": "Membres",
@@ -2953,9 +3059,7 @@
       },
       "actions": {
         "viewProfile": "Voir le profil",
-        "message": "Envoyer un message",
-        "makeLead": "Nommer responsable",
-        "remove": "Retirer du cercle"
+        "message": "Envoyer un message"
       },
       "past": {
         "title": "{count, plural, =1 {1 ancien membre} other {# anciens membres}}",
@@ -2968,18 +3072,39 @@
           "REMOVED": "Retrait par motion",
           "SUSPENDED": "Suspension par la plateforme"
         }
-      }
+      },
+      "columns": {
+        "member": "Membre",
+        "role": "Rôle",
+        "joined": "Membre depuis"
+      },
+      "roleMember": "Membre",
+      "inviteToCircle": "Inviter dans le cercle",
+      "governanceNote": "Pour exclure un membre, une motion doit être déposée et adoptée par le cercle.",
+      "emptyRoster": "Aucun membre à afficher."
     },
     "leaderboard": {
       "title": "Classement",
       "modeRanked": "Individuel",
       "modeCollective": "Collectif",
       "collectiveTitle": "Notre progression collective",
-      "points": "{points} pts",
+      "points": "{points, number} pts",
       "builtTogether": "Construit ensemble",
       "membersContributing": "{count, plural, =1 {1 membre contribue} other {# membres contribuent}}",
       "breakdownTitle": "Détail des contributions",
-      "collectiveNote": "En mode collectif, on gagne ensemble."
+      "collectiveNote": "En mode collectif, on gagne ensemble.",
+      "thisWeek": "Cette semaine",
+      "dayPoints": "{day} : {points} pts",
+      "weekPartial": "Seules les {count} dernières entrées de score ont pu être lues : cette semaine est donc incomplète.",
+      "standingsTitle": "Classement général",
+      "rankedTitle": "Votre position",
+      "rankValue": "n° {rank}",
+      "yourStandingOf": "Votre position, sur {total}",
+      "yourStanding": "Votre position",
+      "notOnBoard": "Vous n'avez pas encore de points au classement",
+      "leadingNow": "En tête",
+      "rankedNote": "Les points viennent des projets et des défis, et une correction peut faire redescendre un score.",
+      "topContributors": "{count, plural, =1 {Meilleur contributeur} other {Meilleurs # contributeurs}}"
     },
     "time": {
       "daysHoursLeft": "{days} j {hours} h restantes",
@@ -3147,6 +3272,40 @@
         "leadOnlyBody": "Seule une personne référente peut archiver ce cercle.",
         "dissolvedBody": "Ce cercle a été dissous, ce qui est définitif. Il ne peut plus être archivé ni rouvert.",
         "proposeInstead": "Vous pouvez demander au cercle de se dissoudre en ouvrant une motion : les membres décident ensemble."
+      },
+      "nav": {
+        "label": "Sections des paramètres",
+        "general": "Général",
+        "access": "Accès et découverte",
+        "branding": "Couleurs",
+        "plan": "Formule et facturation",
+        "danger": "Zone sensible",
+        "members": "Membres"
+      },
+      "branding": {
+        "title": "Couleurs",
+        "description": "Les couleurs que votre cercle affiche à ses membres.",
+        "customColours": "Couleurs personnalisées",
+        "included": "Incluses",
+        "hidden": "Masquées",
+        "includedBody": "Votre formule inclut les couleurs personnalisées : votre cercle affiche donc sa propre apparence.",
+        "hiddenBody": "Les couleurs personnalisées que vous avez enregistrées sont conservées telles quelles et reviennent immédiatement avec une formule qui les inclut. Entre-temps, votre cercle affiche l'apparence standard.",
+        "hiddenWhy": "Les couleurs sont masquées parce que votre formule actuelle n'inclut pas les couleurs personnalisées.",
+        "noEditor": "Il n'y a pas encore de sélecteur de couleurs dans l'application : rien ne peut donc être modifié ici pour le moment.",
+        "changePlan": "Changer de formule",
+        "unknown": "Nous n'avons pas pu déterminer ce que couvre votre formule pour le moment.",
+        "loadFailed": "Nous n'avons pas pu charger ce que couvre votre formule. Veuillez réessayer."
+      },
+      "plan": {
+        "title": "Formule et facturation",
+        "description": "La formule de votre cercle, et ce qui lui est facturé.",
+        "changePlan": "Changer de formule",
+        "seePlans": "Voir toutes les formules",
+        "nextBillingLabel": "Prochaine facturation",
+        "amountLabel": "Montant",
+        "membersIncluded": "{limit} membres inclus",
+        "membersUnlimited": "Membres illimités",
+        "loadFailed": "Nous n'avons pas pu charger votre formule. Veuillez réessayer."
       }
     },
     "history": {
@@ -3160,7 +3319,11 @@
       },
       "empty": {
         "title": "Rien n'a encore été décidé",
-        "description": "Dès que ce cercle déposera sa première motion, chaque étape de la décision sera consignée ici."
+        "description": "Dès que ce cercle déposera sa première motion, chaque étape de la décision sera consignée ici.",
+        "membership": {
+          "title": "Aucune décision sur les membres pour l'instant",
+          "description": "Dès que le cercle votera pour admettre ou exclure quelqu'un, ou pour nommer un responsable, la décision apparaîtra ici avec les règles sous lesquelles elle a été prise."
+        }
       },
       "entry": {
         "seq": "n° {seq}",
@@ -3205,6 +3368,45 @@
         "circleUnsuspended": "Suspension levée par la plateforme",
         "circleDissolved": "Cercle dissous par la plateforme",
         "unknown": "Événement enregistré"
+      },
+      "subtitle": "Le journal de la façon dont nous décidons.",
+      "loadMore": "Charger la suite",
+      "proposerErased": "Proposé par un compte supprimé",
+      "tabs": {
+        "label": "Vue de l'historique des décisions",
+        "motions": "Motions",
+        "membership": "Changements de membres"
+      },
+      "table": {
+        "caption": "Les décisions prises par ce cercle, de la plus récente à la plus ancienne. Chaque ligne indique les règles en vigueur au moment du dépôt de la motion.",
+        "motion": "Motion",
+        "outcome": "Résultat",
+        "decided": "Décidée le",
+        "rules": "Règles d'alors"
+      },
+      "outcome": {
+        "passed": "Adoptée",
+        "enacted": "Appliquée",
+        "enactmentFailed": "Adoptée — non appliquée",
+        "rejected": "Rejetée",
+        "expired": "Expirée — aucune décision",
+        "withdrawn": "Retirée",
+        "open": "Toujours ouverte",
+        "unknown": "Enregistrée"
+      },
+      "rules": {
+        "majority": {
+          "unanimous": "Unanimité",
+          "simple": "Majorité simple",
+          "fraction": "Majorité des {n}/{d}"
+        },
+        "quorum": "Quorum {required} sur {total}",
+        "unavailable": "Non enregistré",
+        "note": "Chaque ligne indique les règles que cette motion a figées à son dépôt — pas les règles du cercle aujourd'hui."
+      },
+      "decided": {
+        "lapsed": "Expirée le {date}",
+        "unknown": "Aucune date enregistrée"
       }
     },
     "governance": {
@@ -3357,7 +3559,12 @@
           "MAX_ACTIVE_PROJECTS": "Vous avez {current} projets en cours. Votre formule en couvre {limit}. Rien n'est fermé ni supprimé — vous ne pouvez simplement pas en lancer un autre tant qu'un projet ne se termine pas ou que votre formule ne change pas.",
           "MAX_ACTIVE_CHALLENGES": "Vous avez {current} défis en cours. Votre formule en couvre {limit}. Rien n'est annulé — vous ne pouvez simplement pas en lancer un autre tant qu'un défi ne se termine pas ou que votre formule ne change pas.",
           "STORAGE_MB": "Vous utilisez {current} sur {limit}. Rien n'est supprimé — vous ne pouvez simplement plus rien téléverser tant que de la place n'est pas libérée ou que votre formule ne change pas."
-        }
+        },
+        "hidden": "Masqué",
+        "brandingHiddenWhy": "Les couleurs sont masquées parce que votre formule actuelle n'inclut pas les couleurs personnalisées.",
+        "changePlan": "Changer de formule",
+        "seePlans": "En savoir plus sur les formules",
+        "everythingElse": "Ce que votre formule couvre par ailleurs"
       },
       "billing": {
         "heading": "Pour le moment, nous mettons les formules payantes en place à la main",
@@ -3400,6 +3607,18 @@
         "successNow": "Votre cercle utilise la formule gratuite.",
         "successLater": "Votre cercle passera à la formule gratuite à la fin de cette période.",
         "error": "Nous n'avons pas pu changer de formule. Votre cercle est inchangé — veuillez réessayer."
+      },
+      "governance": {
+        "title": "Qui paie ne décide pas",
+        "body": "Le paiement donne accès, pas le pouvoir. La gouvernance appartient au cercle : chaque membre a une voix, et rien ici ne se décide seul."
+      },
+      "statusBar": {
+        "planLabel": "Formule actuelle",
+        "statusLabel": "Statut",
+        "upToMembers": "Jusqu'à {limit} membres",
+        "unlimitedMembers": "Membres illimités",
+        "overCapacity": "Limite dépassée",
+        "withinPlan": "Dans les limites de votre formule"
       }
     },
     "invites": {
@@ -3696,6 +3915,24 @@
       "submit": "Envoyer",
       "accepted": "Vous participez — cela compte",
       "pending": "Envoyé — en attente de validation"
+    },
+    "report": {
+      "title": "Signaler à DiaspoPlug",
+      "intro": "Utilisez ce formulaire pour signaler une activité illégale ou une violation des règles de la plateforme. DiaspoPlug ne tranche pas les litiges internes à un cercle.",
+      "notMember": "Vous devez être membre de ce cercle pour le signaler.",
+      "reasonLabel": "Que souhaitez-vous signaler ?",
+      "reasonPlaceholder": "Choisir un motif",
+      "reasonsUnavailable": "Nous n'avons pas pu charger les motifs. Veuillez réessayer.",
+      "detailsLabel": "Dites-nous en plus",
+      "detailsPlaceholder": "Donnez autant de détails que possible.",
+      "detailsHint": "Indiquez les dates, les noms et tout ce qui nous aide à comprendre ce qui s'est passé.",
+      "confidentialityNote": "Les signalements sont transmis à l'équipe Trust & Safety de DiaspoPlug. Votre identité restera confidentielle.",
+      "submit": "Envoyer le signalement",
+      "submitting": "Envoi...",
+      "success": "Signalement envoyé",
+      "sentTitle": "Signalement reçu",
+      "sentBody": "L'équipe Trust & Safety de DiaspoPlug va l'examiner. Nous vous contacterons si nous avons besoin de plus d'informations.",
+      "backToCircle": "Retour au cercle"
     }
   },
   "feed": {

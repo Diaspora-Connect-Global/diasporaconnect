@@ -3,13 +3,13 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { Users } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  DiscoverCircleRow,
+  DiscoverCircleCard,
   MyCircleCard,
   useCircleUnreadCounts,
 } from '@/components/circles/index';
@@ -25,13 +25,25 @@ import type {
 const MY_CIRCLES_PAGE = 20;
 
 /**
- * Discover is a preview on this screen, so it fetches a page and reveals two.
- * "See all" expands what is already loaded rather than linking anywhere: a
- * dedicated `/circles/discover` route is where a real "all" belongs, and
- * pointing at a route that does not exist would be a dead end.
+ * Discover is a preview on this screen, so it fetches a page and reveals one
+ * row of it. "See all" expands what is already loaded rather than linking
+ * anywhere: a dedicated `/circles/discover` route is where a real "all"
+ * belongs, and pointing at a route that does not exist would be a dead end.
  */
 const DISCOVER_PAGE = 12;
-const DISCOVER_PREVIEW = 2;
+/** One full row of the three-across grid — the preview is a row, not a count. */
+const DISCOVER_PREVIEW = 3;
+
+/**
+ * Both grids, one class.
+ *
+ * Three across on desktop, per the design. Two at `sm` and one below that,
+ * because `CIRCLE_COLUMN_CLASS` is uncapped — it takes whatever the sidebar
+ * leaves — so the tiles have to earn their width rather than assume it.
+ * `items-stretch` (the grid default) plus `h-full` inside each tile is what
+ * lets a tile with a two-line name stay level with its neighbours.
+ */
+const CARD_GRID_CLASS = 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3';
 
 export default function CirclesPage() {
   const t = useTranslations('circles');
@@ -93,7 +105,11 @@ export default function CirclesPage() {
         <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
           <h1 className="heading-small text-text-primary">{t('index.title')}</h1>
           <Link href="/circles/create">
-            <ButtonType2>{t('index.createCta')}</ButtonType2>
+            {/* The glyph is decorative — "Create a Circle" already says it. */}
+            <ButtonType2 className="inline-flex items-center gap-1.5">
+              <Plus aria-hidden="true" className="size-4 shrink-0" />
+              {t('index.createCta')}
+            </ButtonType2>
           </Link>
         </div>
 
@@ -115,7 +131,7 @@ export default function CirclesPage() {
             description={t('empty.circles.description')}
           />
         ) : (
-          <div className="space-y-4">
+          <div className={CARD_GRID_CLASS}>
             {myCircles.map((circle) => (
               <MyCircleCard
                 key={circle.id}
@@ -131,7 +147,7 @@ export default function CirclesPage() {
         )}
 
         <div className="mb-4 mt-8 flex shrink-0 items-center justify-between gap-3">
-          <h2 className="label-medium text-text-primary">
+          <h2 className="label-large text-text-primary">
             {t('index.discoverTitle')}
           </h2>
           {!showAllDiscover && discoverable.length > DISCOVER_PREVIEW ? (
@@ -160,9 +176,9 @@ export default function CirclesPage() {
             description={t('empty.discover.description')}
           />
         ) : (
-          <div className="space-y-3">
+          <div className={CARD_GRID_CLASS}>
             {visibleDiscover.map((circle) => (
-              <DiscoverCircleRow key={circle.id} circle={circle} />
+              <DiscoverCircleCard key={circle.id} circle={circle} />
             ))}
           </div>
         )}
@@ -171,24 +187,25 @@ export default function CirclesPage() {
   );
 }
 
-/** Shaped like `MyCircleCard`: banner, overlapping avatar, name, count, pills. */
+/**
+ * Shaped like `MyCircleCard`: 16:9 banner, name, member count, pill row — laid
+ * out on the same grid so the real cards land where the skeletons stood.
+ */
 function MyCirclesSkeleton() {
   return (
-    <div className="space-y-4">
-      {[0, 1].map((i) => (
+    <div className={CARD_GRID_CLASS}>
+      {[0, 1, 2].map((i) => (
         <div
           key={i}
           className="overflow-hidden rounded-lg border border-border-subtle"
         >
-          <Skeleton className="h-28 w-full rounded-none" />
+          <Skeleton className="aspect-[16/9] w-full rounded-none" />
           <div className="p-4">
-            <Skeleton className="-mt-12 mb-3 size-14 rounded-full border-4 border-surface-default" />
             <Skeleton className="mb-2 h-5 w-40" />
             <Skeleton className="mb-3 h-3 w-24" />
             <div className="flex items-center gap-2">
               <Skeleton className="h-5 w-12 rounded-full" />
               <Skeleton className="h-5 w-28 rounded-full" />
-              <Skeleton className="h-5 w-20 rounded-full" />
             </div>
           </div>
         </div>
@@ -197,21 +214,22 @@ function MyCirclesSkeleton() {
   );
 }
 
-/** Shaped like `DiscoverCircleRow`: avatar, name, count, access line, CTA. */
+/** Shaped like `DiscoverCircleCard`: avatar, name, meta line, tagline, CTA. */
 function DiscoverSkeleton() {
   return (
-    <div className="space-y-3">
-      {[0, 1].map((i) => (
+    <div className={CARD_GRID_CLASS}>
+      {[0, 1, 2].map((i) => (
         <div key={i} className="rounded-lg border border-border-subtle p-4">
           <div className="flex items-start gap-3">
-            <Skeleton className="size-11 shrink-0 rounded-full" />
+            <Skeleton className="size-10 shrink-0 rounded-full" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-4 w-36" />
-              <Skeleton className="h-3 w-20" />
-              <Skeleton className="h-3 w-44" />
+              <Skeleton className="h-3 w-28" />
             </div>
           </div>
-          <Skeleton className="mt-3 h-9 w-full rounded-full" />
+          <Skeleton className="mt-3 h-3 w-full" />
+          <Skeleton className="mt-1.5 h-3 w-3/4" />
+          <Skeleton className="mt-4 h-9 w-full rounded-full" />
         </div>
       ))}
     </div>

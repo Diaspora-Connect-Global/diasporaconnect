@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 
 import { Link } from '@/i18n/navigation';
 
+import { MOTION_CARD_CLASS } from './MotionSection';
+
 export interface ViewDiscussionProps {
   circleId: string;
   /**
@@ -24,19 +26,24 @@ export function ViewDiscussion({ circleId, messageCount }: ViewDiscussionProps) 
   return (
     <Link
       href={`/circles/${circleId}`}
-      className="flex items-center gap-3 rounded-xl border border-border-subtle px-4 py-3 transition-colors hover:bg-surface-subtle"
+      className={`${MOTION_CARD_CLASS} flex items-center gap-3 py-3.5 transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand sm:py-4`}
     >
       <MessageCircle
         aria-hidden="true"
         className="size-5 shrink-0 text-text-brand"
       />
-      <span className="min-w-0 flex-1">
-        <span className="label-medium block text-text-primary">
-          {t('viewDiscussion')}
-        </span>
+      {/*
+        Label and count on ONE line, as a single sentence a reader takes in at a
+        glance. The count is a parenthetical because it qualifies the link
+        rather than being a second fact about it — and it is dropped entirely,
+        parentheses and all, when the chat could not be read. An empty "( )" is
+        worse than no count.
+      */}
+      <span className="label-medium min-w-0 flex-1 text-text-primary">
+        {t('viewDiscussion')}
         {typeof messageCount === 'number' && (
-          <span className="caption-small block text-text-secondary">
-            {t('messageCount', { count: messageCount })}
+          <span className="body-small ml-1.5 text-text-secondary">
+            ({t('messageCount', { count: messageCount })})
           </span>
         )}
       </span>

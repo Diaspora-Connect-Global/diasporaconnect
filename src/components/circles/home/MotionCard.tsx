@@ -5,6 +5,7 @@ import { Clock, Gavel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Countdown, ProgressWithLabel, StatusPill, type StatusPillVariant } from '@/components/circles/primitives';
+import { cn } from '@/lib/utils';
 import { CIRCLE_MOTION_TALLY } from '@/services/gql/circles';
 import type {
   CircleMotion,
@@ -131,7 +132,14 @@ export function MotionCard({ circleId, motion, proposerName }: MotionCardProps) 
         <p className="body-small mt-1 line-clamp-2 text-text-secondary">{motion.rationale}</p>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+      {/*
+        One row: the three counts and the quorum they are measured against.
+        Quorum used to sit below as a labelled bar, which read as a second,
+        separate fact — but "3 Yes, 0 No, 3 Pending" is meaningless without
+        "of how many", and a member deciding whether their vote still matters
+        needs both in one glance. The bar stays underneath as the shape of it.
+      */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="label-small text-text-success">
           {t('home.cards.tallyYes', { count: yes })}
         </span>
@@ -141,16 +149,36 @@ export function MotionCard({ circleId, motion, proposerName }: MotionCardProps) 
         <span className="label-small text-text-secondary">
           {t('home.cards.tallyPending', { count: pending })}
         </span>
+
+        {required !== null && (
+          <>
+            <span aria-hidden="true" className="h-3.5 w-px bg-border-subtle" />
+            <span
+              className={cn(
+                'label-small',
+                quorumMet ? 'text-text-success' : 'text-text-secondary',
+              )}
+            >
+              {t('home.cards.quorum', { voted: cast, required })}
+            </span>
+          </>
+        )}
       </div>
 
+      {/*
+        Hidden from the accessibility tree on purpose: the row above already
+        states "Quorum: 3 of 4" in words, and an unlabelled progressbar would
+        announce a bare percentage that repeats it less clearly.
+      */}
       {required !== null && (
-        <ProgressWithLabel
-          className="mt-2"
-          value={quorumPercent}
-          label={t('home.cards.quorum', { voted: cast, required })}
-          showPercentage={false}
-          tone={quorumMet ? 'success' : 'brand'}
-        />
+        <div aria-hidden="true">
+          <ProgressWithLabel
+            className="mt-2"
+            value={quorumPercent}
+            showPercentage={false}
+            tone={quorumMet ? 'success' : 'brand'}
+          />
+        </div>
       )}
 
       {isOpen && closesAt && (
@@ -184,13 +212,10 @@ export function MotionCard({ circleId, motion, proposerName }: MotionCardProps) 
                 hours: '{hours}',
                 minutes: '{minutes}',
               }),
-              // The catalogue has no minutes-only string, and the final hour of
-              // a vote is exactly when people read this. Borrowing the
-              // hours+minutes form with a zero renders "0h 45m left" — clumsy,
-              // but translated in all five locales, which the primitive's
-              // English default would not be. See the report:
-              // `circles.time.minutesLeft`.
-              minutes: t('time.hoursMinutesLeft', { hours: 0, minutes: '{minutes}' }),
+              // The catalogue does ship a minutes-only string, and the final
+              // hour of a vote is exactly when people read this — borrowing
+              // the hours+minutes form with a zero rendered "0h 45m left".
+              minutes: t('time.minutesLeft', { minutes: '{minutes}' }),
               ended: t('time.closed'),
             }}
           />

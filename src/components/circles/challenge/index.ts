@@ -1,4 +1,9 @@
 export {
+  ChallengeHeader,
+  type ChallengeHeaderProps,
+} from './ChallengeHeader';
+
+export {
   VerificationModePanel,
   type VerificationModePanelProps,
 } from './VerificationModePanel';
@@ -7,6 +12,17 @@ export {
   ChallengeProgress,
   type ChallengeProgressProps,
 } from './ChallengeProgress';
+
+export {
+  ChallengeActivity,
+  type ChallengeActivityProps,
+} from './ChallengeActivity';
+
+/**
+ * The side panel: what the locked verification mode means, your own standing,
+ * and the one action the screen has.
+ */
+export { ChallengeAside, type ChallengeAsideProps } from './ChallengeAside';
 
 /**
  * The "I'm in!" CTA and the claim behind it.
@@ -26,3 +42,24 @@ export {
 } from './CreateChallengeForm';
 
 export { periodKeyFor } from './periodKey';
+
+/**
+ * Both wire spellings of `verificationMode`, resolved to the bare domain value.
+ * Read `verificationMode.ts` before comparing this enum against a literal.
+ */
+export {
+  normalizeVerificationMode,
+  verificationModePresentation,
+  VERIFICATION_MODE_PRESENTATION,
+  type VerificationModePresentation,
+} from './verificationMode';
+
+export {
+  acceptsEntries,
+  challengeStatePresentation,
+  normalizeChallengeStatus,
+  CHALLENGE_STATE_PRESENTATION,
+  type ChallengeStatePresentation,
+} from './challengeState';
+
+export { deriveMyProgress, type MyChallengeProgress } from './myProgress';

@@ -22,14 +22,40 @@ import {
   SegmentedControl,
   type SegmentedOption,
 } from '@/components/circles/primitives';
-import { CollectiveView, RankedList } from '@/components/circles/leaderboard';
+import {
+  CollectiveView,
+  ContributionBreakdown,
+  LEADERBOARD_PAGE_LIMIT,
+  RankedList,
+  RankedSummary,
+  useWeeklyScoreSeries,
+} from '@/components/circles/leaderboard';
 
-const LEADERBOARD_LIMIT = 50;
+/**
+ * Widest the two columns are allowed to get. `CIRCLE_COLUMN_CLASS` deliberately
+ * has no cap so the sidebar stays at the page edge, which on a wide monitor
+ * would otherwise stretch a six-row list across most of the screen.
+ */
+const SHELL_CLASS = 'mx-auto w-full max-w-5xl';
 
 type LeaderboardMode = 'RANKED' | 'COLLECTIVE';
 
 /**
  * Screen 8 — Leaderboard.
+ *
+ * ## Two framings, two layouts — not one layout sorted two ways
+ *
+ * Each mode is a hero panel plus a list panel, and the hero is what makes them
+ * different readings of the same ledger rather than a toggle over a sort order:
+ *
+ *   COLLECTIVE — the shared total and the week that built it, then an
+ *                un-numbered breakdown of who contributed to it.
+ *   RANKED     — the viewer's own position and who is out in front, then the
+ *                numbered standings.
+ *
+ * Neither hero appears in the other mode. A circle total sitting above a ranked
+ * list, or a rank column under "our collective progress", would collapse the two
+ * back into one screen with a different sort applied.
  *
  * ## Ranking off is a state, not a filter
  *
@@ -42,6 +68,17 @@ type LeaderboardMode = 'RANKED' | 'COLLECTIVE';
  * refetch that turns it off) can leave a ranked view on screen. Hiding the
  * ranked tab while leaving the state reachable would put the decision back in
  * the UI's hands, where it does not belong.
+ *
+ * The right-hand column is gated on rows existing for the same reason, and the
+ * collective panel then simply takes the full measure — it is complete on its
+ * own, so nothing has to be invented to fill the gap.
+ *
+ * ## The row count is a page, not a census
+ *
+ * The board comes back one page at a time and the API carries no contributor
+ * total, so the page size lives beside the panels that print counts from it
+ * (`boardPage.ts`) rather than as a private constant here — the request and the
+ * claim made about its result have to move together.
  *
  * ## The query is nullable
  *
@@ -62,7 +99,7 @@ export default function CircleLeaderboardPage() {
     CircleLeaderboardData,
     CircleLeaderboardVariables
   >(CIRCLE_LEADERBOARD, {
-    variables: { circleId, limit: LEADERBOARD_LIMIT },
+    variables: { circleId, limit: LEADERBOARD_PAGE_LIMIT },
     skip: !circleId,
     errorPolicy: 'all',
   });
@@ -76,6 +113,22 @@ export default function CircleLeaderboardPage() {
 
   const userIds = useMemo(() => rows.map((row) => row.userId), [rows]);
   const { usersById } = useCircleUsers(userIds);
+
+  /*
+   * The day series is the circle's, not any one member's, so it is read
+   * regardless of the ranking switch — turning individual scoring off hides the
+   * comparison between people, not when the circle earned its points. Called
+   * unconditionally because it is a hook; it skips itself without a circle id
+   * and degrades to `unavailable` (chart absent) if the ledger cannot be read.
+   */
+  const week = useWeeklyScoreSeries(
+    circleId,
+    // `undefined` while the leaderboard is still loading, so the ledger is read
+    // ONCE under the season the total above it is using. Written as an explicit
+    // ternary rather than `leaderboard?.seasonKey` so a resolved board with an
+    // absent field still yields `null` and cannot hold the query forever.
+    leaderboard ? leaderboard.seasonKey ?? null : undefined,
+  );
 
   const options: readonly [
     SegmentedOption<LeaderboardMode>,
@@ -100,9 +153,14 @@ export default function CircleLeaderboardPage() {
     return (
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
-          {header}
-          <Skeleton className="mx-auto mb-6 h-10 w-56 rounded-full" />
-          <Skeleton className="h-64 w-full rounded-2xl" />
+          <div className={SHELL_CLASS}>
+            {header}
+            <Skeleton className="mx-auto mb-6 h-10 w-56 rounded-full" />
+            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
+              <Skeleton className="h-80 w-full rounded-2xl" />
+              <Skeleton className="hidden h-80 w-full rounded-2xl lg:block" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -112,12 +170,14 @@ export default function CircleLeaderboardPage() {
     return (
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
-          {header}
-          <ErrorState
-            title={t('errors.loadLeaderboard')}
-            retryLabel={t('common.retry')}
-            onRetry={() => void refetch()}
-          />
+          <div className={SHELL_CLASS}>
+            {header}
+            <ErrorState
+              title={t('errors.loadLeaderboard')}
+              retryLabel={t('common.retry')}
+              onRetry={() => void refetch()}
+            />
+          </div>
         </div>
       </div>
     );
@@ -127,50 +187,87 @@ export default function CircleLeaderboardPage() {
     return (
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
-          {header}
-          <EmptyState
-            title={t('errors.noAccess.title')}
-            description={t('errors.noAccess.description')}
-            action={
-              <Link href="/circles">
-                <ButtonType1>{t('errors.notFound.cta')}</ButtonType1>
-              </Link>
-            }
-          />
+          <div className={SHELL_CLASS}>
+            {header}
+            <EmptyState
+              title={t('errors.noAccess.title')}
+              description={t('errors.noAccess.description')}
+              action={
+                <Link href="/circles">
+                  <ButtonType1>{t('errors.notFound.cta')}</ButtonType1>
+                </Link>
+              }
+            />
+          </div>
         </div>
       </div>
     );
   }
 
+  const hasBreakdown = rows.length > 0;
+
   return (
     <div className="h-app-inner flex overflow-hidden">
       <div className={CIRCLE_COLUMN_CLASS}>
-        {header}
+        <div className={SHELL_CLASS}>
+          {header}
 
-        {rankingEnabled && (
-          <SegmentedControl
-            className="mx-auto mb-5 w-full max-w-xs"
-            aria-label={t('leaderboard.title')}
-            options={options}
-            value={mode}
-            onChange={setPreferredMode}
-          />
-        )}
+          {rankingEnabled && (
+            <SegmentedControl
+              className="mx-auto mb-6 w-full max-w-xs"
+              aria-label={t('leaderboard.title')}
+              options={options}
+              value={mode}
+              onChange={setPreferredMode}
+            />
+          )}
 
-        <div className="pb-4">
-          {mode === 'RANKED' ? (
-            <RankedList
-              rows={rows}
-              usersById={usersById}
-              currentUserId={currentUserId}
+          {/*
+            Ranked with an empty board has no hero to show and no list to show —
+            "#—  of 0" beside an empty panel is two ways of saying the same
+            nothing. One empty state says it once.
+          */}
+          {mode === 'RANKED' && !hasBreakdown ? (
+            <EmptyState
+              title={t('empty.leaderboard.title')}
+              description={t('empty.leaderboard.description')}
             />
           ) : (
-            <CollectiveView
-              collectiveTotal={leaderboard.collectiveTotal}
-              rows={rows}
-              usersById={usersById}
-              currentUserId={currentUserId}
-            />
+            <div
+              className={
+                hasBreakdown
+                  ? 'grid grid-cols-1 items-start gap-8 pb-4 lg:grid-cols-2 lg:gap-12'
+                  : 'mx-auto w-full max-w-xl pb-4'
+              }
+            >
+              {mode === 'RANKED' ? (
+                <RankedSummary
+                  rows={rows}
+                  usersById={usersById}
+                  currentUserId={currentUserId}
+                />
+              ) : (
+                <CollectiveView
+                  collectiveTotal={leaderboard.collectiveTotal}
+                  week={week}
+                />
+              )}
+
+              {hasBreakdown &&
+                (mode === 'RANKED' ? (
+                  <RankedList
+                    rows={rows}
+                    usersById={usersById}
+                    currentUserId={currentUserId}
+                  />
+                ) : (
+                  <ContributionBreakdown
+                    rows={rows}
+                    usersById={usersById}
+                    currentUserId={currentUserId}
+                  />
+                ))}
+            </div>
           )}
         </div>
       </div>

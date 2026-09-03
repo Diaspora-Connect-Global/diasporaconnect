@@ -2785,7 +2785,9 @@
       "access": {
         "apply": "Open • Anyone can apply",
         "invite": "Invite to join",
-        "approval": "Request and approval"
+        "approval": "Request and approval",
+        "public": "Public",
+        "inviteOnly": "Invite only"
       },
       "pills": {
         "voteCloses": "Vote closes {time}",
@@ -2804,7 +2806,7 @@
       "nameRequired": "Give your circle a name.",
       "bannerLabel": "Banner",
       "bannerCta": "Add a banner",
-      "bannerHint": "Recommended 1200 x 400",
+      "bannerHint": "Recommended 1020 x 480",
       "bannerChange": "Change banner",
       "bannerRemove": "Remove banner",
       "note": "Decisions are made by the group. You can change how, later.",
@@ -2833,7 +2835,16 @@
       "avatarHint": "Square image, at least 256 x 256",
       "avatarChange": "Change picture",
       "avatarRemove": "Remove picture",
-      "imageFailed": "Circle created — we couldn't attach the image. You can add it from settings."
+      "imageFailed": "Circle created — we couldn't attach the image. You can add it from settings.",
+      "headline": "Let's create your circle",
+      "errors": {
+        "insufficient_data": "Something's missing. Check the circle's name and try again.",
+        "not_authorized": "You're not allowed to create a circle right now.",
+        "not_found": "We couldn't find what that refers to. Please try again.",
+        "conflict": "A circle like this already exists. Try a different name.",
+        "failed": "We couldn't create your circle. Please try again.",
+        "unknown_error": "Something went wrong. Please try again."
+      }
     },
     "home": {
       "tabChat": "Chat",
@@ -2859,7 +2870,23 @@
         "tallyPending": "{count} Pending",
         "closes": "Closes {time}"
       },
-      "chatUnavailable": "Chat isn't available in circles yet. Projects, challenges and votes all still work."
+      "chatUnavailable": "Chat isn't available in circles yet. Projects, challenges and votes all still work.",
+      "live": {
+        "title": "What's live",
+        "empty": "Nothing running right now.",
+        "openVotes": "{count, plural, =1 {1 open vote} other {# open votes}}",
+        "projectMeta": "Project · {percent}% complete",
+        "projectMetaPlain": "Project",
+        "challengeMeta": "Challenge · {days, plural, =1 {1 day left} other {# days left}}",
+        "challengeMetaPlain": "Challenge",
+        "challengeMetaEnded": "Challenge · Ended",
+        "viewAll": "View all"
+      },
+      "historyLimited": "Showing the last {days, plural, =1 {1 day} other {# days}} of this chat. Nothing older has been deleted.",
+      "noChatEmpty": {
+        "title": "Nothing here yet",
+        "description": "Chat isn't switched on yet, but this is still where your circle's projects, challenges and votes appear. Start one from the + menu above."
+      }
     },
     "motion": {
       "title": "Motion details",
@@ -2897,9 +2924,29 @@
       },
       "callout": {
         "failNotice": "If fewer than {required} of {total} vote by {deadline}, nothing changes.",
-        "silence": "Silence is never consent."
+        "silence": "Silence is never consent.",
+        "failNoticeNoDeadline": "If fewer than {required} of {total} vote before this closes, nothing changes."
       },
-      "notElector": "You joined after this motion opened, so you're not among its voters."
+      "notElector": "You joined after this motion opened, so you're not among its voters.",
+      "voteChangeable": "You can change your vote until voting closes.",
+      "enactmentFailedLead": "The circle passed this, but applying the decision didn't work:",
+      "withdrawn": "Motion withdrawn.",
+      "enacted": "The decision has been applied.",
+      "menu": {
+        "withdraw": "Withdraw motion",
+        "enact": "Apply this decision"
+      },
+      "withdrawDialog": {
+        "title": "Withdraw this motion?",
+        "description": "Voting stops straight away and nothing this motion proposed will happen. Ballots already cast stay in the circle's record, and the motion can't be reopened.",
+        "confirm": "Withdraw motion",
+        "working": "Withdrawing…"
+      },
+      "writeErrors": {
+        "notProposer": "Only the member who proposed a motion can withdraw it.",
+        "notOpen": "This motion is no longer open, so it can't be withdrawn.",
+        "notEnactable": "Only a motion the circle has passed can be applied."
+      }
     },
     "project": {
       "title": "Project",
@@ -2910,7 +2957,18 @@
       "contribute": "Contribute",
       "contributing": "Contributing...",
       "contributeHint": "One tap to contribute from chat.",
-      "contributeSuccess": "Thanks — your contribution is in."
+      "contributeSuccess": "Thanks — your contribution is in.",
+      "meta": "Proposed by {name} · {date}",
+      "status": {
+        "draft": "Draft",
+        "completed": "Completed",
+        "abandoned": "Abandoned",
+        "archived": "Archived"
+      },
+      "correction": "Correction",
+      "contributionCountPartial": "Showing {count} so far",
+      "discussion": "View discussion",
+      "messageCount": "{count, plural, =1 {1 message} other {# messages}}"
     },
     "challenge": {
       "title": "Challenge",
@@ -2932,7 +2990,55 @@
         "leadDescription": "The circle lead confirms each completion.",
         "voteLabel": "Circle votes",
         "voteDescription": "The circle votes to confirm each completion."
-      }
+      },
+      "about": {
+        "trust": "Nobody checks up on anybody here. When you say you've done it, it counts — that's the deal your circle made with itself.",
+        "lead": "A circle lead confirms each entry. Log what you did, and a lead marks it done.",
+        "vote": "You verify each other. Every entry goes to the circle, and the circle votes on whether it counts."
+      },
+      "state": {
+        "draft": {
+          "label": "Not started",
+          "note": "This challenge hasn't started yet, so there's nothing to log."
+        },
+        "judging": {
+          "label": "Being confirmed",
+          "note": "Entries are closed while the circle confirms what's already been logged."
+        },
+        "closed": {
+          "label": "Finished",
+          "note": "This challenge has finished. Nothing more can be logged."
+        },
+        "cancelled": {
+          "label": "Cancelled",
+          "note": "Your circle cancelled this challenge."
+        }
+      },
+      "activityTitle": "Recent activity",
+      "activityEmpty": {
+        "title": "Nothing logged yet",
+        "description": "Be the first to log something — every entry shows up here."
+      },
+      "activityLogged": "Logged an entry.",
+      "activityLoggedValue": "Logged {value}.",
+      "activityEvidence": "See proof",
+      "entryState": {
+        "pending": "Waiting",
+        "rejected": "Not counted",
+        "disputed": "Disputed"
+      },
+      "yourProgressTitle": "Your progress",
+      "yourProgressNone": "You haven't logged anything yet.",
+      "yourProgressLogged": "{count, plural, =1 {1 entry logged} other {# entries logged}}",
+      "yourProgressCap": {
+        "ONE_OFF": "{done} of {cap} logged",
+        "DAILY": "{done} of {cap} logged today",
+        "WEEKLY": "{done} of {cap} logged this week",
+        "MONTHLY": "{done} of {cap} logged this month"
+      },
+      "yourProgressPoints": "{points, plural, =1 {1 point earned} other {# points earned}}",
+      "yourProgressPending": "{count, plural, =1 {1 entry waiting to be confirmed} other {# entries waiting to be confirmed}}",
+      "yourProgressClaimed": "{total} logged in total"
     },
     "members": {
       "title": "Members",
@@ -2953,9 +3059,7 @@
       },
       "actions": {
         "viewProfile": "View profile",
-        "message": "Send a message",
-        "makeLead": "Make lead",
-        "remove": "Remove from circle"
+        "message": "Send a message"
       },
       "past": {
         "title": "{count, plural, =1 {1 former member} other {# former members}}",
@@ -2968,18 +3072,39 @@
           "REMOVED": "Removed by motion",
           "SUSPENDED": "Suspended by the platform"
         }
-      }
+      },
+      "columns": {
+        "member": "Member",
+        "role": "Role",
+        "joined": "Joined"
+      },
+      "roleMember": "Member",
+      "inviteToCircle": "Invite to circle",
+      "governanceNote": "To remove a member, a motion must be created and approved by the circle.",
+      "emptyRoster": "No members to show."
     },
     "leaderboard": {
       "title": "Leaderboard",
       "modeRanked": "Ranked",
       "modeCollective": "Collective",
       "collectiveTitle": "Our collective progress",
-      "points": "{points} pts",
+      "points": "{points, number} pts",
       "builtTogether": "Built together",
       "membersContributing": "{count, plural, =1 {1 member contributing} other {# members contributing}}",
       "breakdownTitle": "Contribution breakdown",
-      "collectiveNote": "In collective mode, we win together."
+      "collectiveNote": "In collective mode, we win together.",
+      "thisWeek": "This week",
+      "dayPoints": "{day}: {points} pts",
+      "weekPartial": "Only the most recent {count} score entries could be read, so this week is incomplete.",
+      "standingsTitle": "Standings",
+      "rankedTitle": "Where you stand",
+      "rankValue": "#{rank}",
+      "yourStandingOf": "Your standing, out of {total}",
+      "yourStanding": "Your standing",
+      "notOnBoard": "You have no points on the board yet",
+      "leadingNow": "Out in front",
+      "rankedNote": "Points come from projects and challenges, and a correction can bring a score back down.",
+      "topContributors": "{count, plural, =1 {Top contributor} other {Top # contributors}}"
     },
     "time": {
       "daysHoursLeft": "{days}d {hours}h left",
@@ -3147,6 +3272,40 @@
         "leadOnlyBody": "Only a lead can archive this circle.",
         "dissolvedBody": "This circle has been dissolved, which is final. It can no longer be archived or reopened.",
         "proposeInstead": "You can ask the circle to wind down by opening a motion, and the members decide together."
+      },
+      "nav": {
+        "label": "Settings sections",
+        "general": "General",
+        "access": "Access & discovery",
+        "branding": "Branding",
+        "plan": "Plan & billing",
+        "danger": "Danger zone",
+        "members": "Members"
+      },
+      "branding": {
+        "title": "Branding",
+        "description": "The colours your circle shows to its members.",
+        "customColours": "Custom colours",
+        "included": "Included",
+        "hidden": "Hidden",
+        "includedBody": "Your plan includes custom colours, so your circle shows its own look.",
+        "hiddenBody": "Any custom colours you have saved are kept exactly as they are and come straight back on a plan that includes branding. Your circle shows the standard look meanwhile.",
+        "hiddenWhy": "Branding is hidden because your current plan doesn't include custom branding.",
+        "noEditor": "There's no colour picker in the app yet, so nothing here can be changed for now.",
+        "changePlan": "Change plan",
+        "unknown": "We couldn't tell what your plan covers just now.",
+        "loadFailed": "We couldn't load what your plan covers. Please try again."
+      },
+      "plan": {
+        "title": "Plan & billing",
+        "description": "What your circle is on, and what it's billed.",
+        "changePlan": "Change plan",
+        "seePlans": "See all plans",
+        "nextBillingLabel": "Next billing date",
+        "amountLabel": "Amount",
+        "membersIncluded": "{limit} members included",
+        "membersUnlimited": "Unlimited members",
+        "loadFailed": "We couldn't load your plan. Please try again."
       }
     },
     "history": {
@@ -3160,7 +3319,11 @@
       },
       "empty": {
         "title": "Nothing decided yet",
-        "description": "When this circle opens its first motion, every step of the decision will be recorded here."
+        "description": "When this circle opens its first motion, every step of the decision will be recorded here.",
+        "membership": {
+          "title": "No membership decisions yet",
+          "description": "When the circle votes to admit or remove someone, or to appoint a lead, the decision appears here with the rules it was decided under."
+        }
       },
       "entry": {
         "seq": "#{seq}",
@@ -3205,6 +3368,45 @@
         "circleUnsuspended": "Suspension lifted by the platform",
         "circleDissolved": "Circle dissolved by the platform",
         "unknown": "Recorded event"
+      },
+      "subtitle": "A log of how we decide things.",
+      "loadMore": "Load more",
+      "proposerErased": "Proposed by a deleted account",
+      "tabs": {
+        "label": "Decision history view",
+        "motions": "Motions",
+        "membership": "Membership changes"
+      },
+      "table": {
+        "caption": "Decisions this circle has made, newest first. Each row shows the rules that applied when the motion opened.",
+        "motion": "Motion",
+        "outcome": "Outcome",
+        "decided": "Decided",
+        "rules": "Rules at the time"
+      },
+      "outcome": {
+        "passed": "Passed",
+        "enacted": "Enacted",
+        "enactmentFailed": "Passed — not applied",
+        "rejected": "Rejected",
+        "expired": "Expired — no decision",
+        "withdrawn": "Withdrawn",
+        "open": "Still open",
+        "unknown": "Recorded"
+      },
+      "rules": {
+        "majority": {
+          "unanimous": "Unanimous",
+          "simple": "Simple majority",
+          "fraction": "{n}/{d} majority"
+        },
+        "quorum": "Quorum {required} of {total}",
+        "unavailable": "Not recorded",
+        "note": "Each row shows the rules that motion pinned when it opened — not the circle's rules today."
+      },
+      "decided": {
+        "lapsed": "Lapsed {date}",
+        "unknown": "Not recorded"
       }
     },
     "governance": {
@@ -3357,7 +3559,12 @@
           "MAX_ACTIVE_PROJECTS": "You have {current} projects running. Your plan covers {limit}. Nothing is closed or deleted — you just can't start another until one finishes or your plan changes.",
           "MAX_ACTIVE_CHALLENGES": "You have {current} challenges running. Your plan covers {limit}. Nothing is cancelled — you just can't start another until one closes or your plan changes.",
           "STORAGE_MB": "You're using {current} of {limit}. Nothing is deleted — you just can't upload anything new until some space is freed or your plan changes."
-        }
+        },
+        "hidden": "Hidden",
+        "brandingHiddenWhy": "Branding is hidden because your current plan doesn't include custom branding.",
+        "changePlan": "Change plan",
+        "seePlans": "Learn more about plans",
+        "everythingElse": "Everything else your plan covers"
       },
       "billing": {
         "heading": "We set paid plans up by hand for now",
@@ -3400,6 +3607,18 @@
         "successNow": "Your circle is on the free plan.",
         "successLater": "Your circle moves to the free plan at the end of this period.",
         "error": "We couldn't change the plan. Your circle is unchanged — please try again."
+      },
+      "governance": {
+        "title": "Whoever pays doesn't decide",
+        "body": "Payment gives you access, not power. Governance belongs to the circle: every member has one vote, and nothing here can be decided alone."
+      },
+      "statusBar": {
+        "planLabel": "Current plan",
+        "statusLabel": "Status",
+        "upToMembers": "Up to {limit} members",
+        "unlimitedMembers": "Unlimited members",
+        "overCapacity": "Over capacity",
+        "withinPlan": "Within your plan"
       }
     },
     "invites": {
@@ -3696,6 +3915,24 @@
       "submit": "Send it",
       "accepted": "You're in — it counts",
       "pending": "Sent — waiting to be confirmed"
+    },
+    "report": {
+      "title": "Report to DiaspoPlug",
+      "intro": "Use this to report illegal activity or violations of our platform rules. DiaspoPlug does not settle internal disputes within circles.",
+      "notMember": "You need to be a member of this circle to report it.",
+      "reasonLabel": "What are you reporting?",
+      "reasonPlaceholder": "Select a reason",
+      "reasonsUnavailable": "Reasons could not be loaded. Please try again later.",
+      "detailsLabel": "Tell us more",
+      "detailsPlaceholder": "Provide as much detail as possible...",
+      "detailsHint": "Include dates, names and anything else that helps us understand what happened.",
+      "confidentialityNote": "Reports are sent to the DiaspoPlug Trust & Safety team. Your identity will be kept confidential.",
+      "submit": "Submit report",
+      "submitting": "Sending...",
+      "success": "Report sent",
+      "sentTitle": "Report received",
+      "sentBody": "The DiaspoPlug Trust & Safety team will review it. We will contact you if we need more information.",
+      "backToCircle": "Back to circle"
     }
   },
   "requests": {

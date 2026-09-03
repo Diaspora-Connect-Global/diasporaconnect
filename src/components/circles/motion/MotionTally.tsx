@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 
+import { MotionSection } from './MotionSection';
+
 interface TallyCellProps {
   value: number;
   label: string;
@@ -12,9 +14,19 @@ interface TallyCellProps {
 
 function TallyCell({ value, label, tone }: TallyCellProps) {
   return (
-    <div className="flex flex-1 flex-col gap-0.5">
-      <span className={cn('heading-xsmall', tone)}>{value}</span>
-      <span className="caption-small text-text-secondary">{label}</span>
+    /*
+      A divider between cells rather than three boxes: the three figures are one
+      reading, not three cards, and boxing them would imply each is separately
+      actionable. `first:border-l-0` keeps the leading edge clean at every
+      breakpoint without a conditional in the parent.
+    */
+    <div className="flex flex-1 flex-col items-center gap-1 border-l border-border-subtle px-2 py-1 first:border-l-0">
+      <span className={cn('heading-xsmall sm:heading-small tabular-nums', tone)}>
+        {value}
+      </span>
+      <span className="caption-small text-center text-text-secondary">
+        {label}
+      </span>
     </div>
   );
 }
@@ -32,14 +44,20 @@ export interface MotionTallyProps {
  * There is deliberately no per-member vote roster anywhere in this feature:
  * individual ballots are never published, so the API exposes a tally and
  * nothing else. Do not add a "who voted how" list here.
+ *
+ * ── "PENDING" IS NOT A THIRD OPINION ────────────────────────────────────────
+ * The third figure counts electors who have not voted, and it is deliberately
+ * rendered in the neutral text colour rather than borrowing Yes's green or No's
+ * red. Tinting it either way would suggest silence leans somewhere; it does
+ * not, and a motion that closes on nothing but pending votes changes nothing at
+ * all. See `SilenceCallout`, which says so in words.
  */
 export function MotionTally({ yes, no, pending }: MotionTallyProps) {
   const t = useTranslations('circles.motion');
 
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="label-large text-text-primary">{t('tallyTitle')}</h2>
-      <div className="flex items-start gap-3">
+    <MotionSection title={t('tallyTitle')}>
+      <div className="flex items-stretch">
         <TallyCell value={yes} label={t('tallyYes')} tone="text-text-success" />
         <TallyCell value={no} label={t('tallyNo')} tone="text-text-danger" />
         <TallyCell
@@ -48,6 +66,6 @@ export function MotionTally({ yes, no, pending }: MotionTallyProps) {
           tone="text-text-primary"
         />
       </div>
-    </section>
+    </MotionSection>
   );
 }

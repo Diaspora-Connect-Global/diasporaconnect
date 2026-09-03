@@ -63,9 +63,9 @@ export function PlanCatalogue({
       {ordered.length === 0 ? (
         <p className="body-small text-text-secondary">{t('unavailable')}</p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-3 lg:grid-cols-2">
           {ordered.map((plan) => (
-            <li key={plan.id}>
+            <li key={plan.id} className="flex">
               <PlanCard
                 plan={plan}
                 isCurrent={plan.id === currentPlanId}
@@ -104,7 +104,7 @@ function PlanCard({ plan, isCurrent, canManage, onChoose }: PlanCardProps) {
   const purchasable = circlePlanIsFree(plan);
 
   return (
-    <article className="rounded-2xl border border-border-subtle p-4">
+    <article className="flex w-full flex-col rounded-2xl border border-border-subtle p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           <h3 className="label-large text-text-primary">{plan.name}</h3>
@@ -125,7 +125,7 @@ function PlanCard({ plan, isCurrent, canManage, onChoose }: PlanCardProps) {
         <PlanPriceList plan={plan} />
       </div>
 
-      <dl className="mt-4 flex flex-col gap-1.5 border-t border-border-subtle pt-3">
+      <dl className="mt-4 flex flex-1 flex-col gap-1.5 border-t border-border-subtle pt-3">
         {allowances.map((allowance) => (
           <div key={allowance.key} className="flex items-baseline justify-between gap-3">
             <dt className="caption-small text-text-secondary">

@@ -2785,7 +2785,9 @@
       "access": {
         "apply": "Offen • Alle können sich bewerben",
         "invite": "Beitritt auf Einladung",
-        "approval": "Anfrage und Zustimmung"
+        "approval": "Anfrage und Zustimmung",
+        "public": "Öffentlich",
+        "inviteOnly": "Nur mit Einladung"
       },
       "pills": {
         "voteCloses": "Abstimmung endet {time}",
@@ -2804,7 +2806,7 @@
       "nameRequired": "Gib deinem Kreis einen Namen.",
       "bannerLabel": "Banner",
       "bannerCta": "Banner hinzufügen",
-      "bannerHint": "Empfohlen 1200 x 400",
+      "bannerHint": "Empfohlen 1020 x 480",
       "bannerChange": "Banner ändern",
       "bannerRemove": "Banner entfernen",
       "note": "Entscheidungen trifft die Gruppe. Wie genau, kannst du später ändern.",
@@ -2833,7 +2835,16 @@
       "avatarHint": "Quadratisches Bild, mindestens 256 x 256",
       "avatarChange": "Bild ändern",
       "avatarRemove": "Bild entfernen",
-      "imageFailed": "Kreis erstellt — das Bild konnten wir nicht anhängen. Du kannst es in den Einstellungen hinzufügen."
+      "imageFailed": "Kreis erstellt — das Bild konnten wir nicht anhängen. Du kannst es in den Einstellungen hinzufügen.",
+      "headline": "Erstellen wir deinen Kreis",
+      "errors": {
+        "insufficient_data": "Da fehlt noch etwas. Prüfe den Namen des Kreises und versuche es erneut.",
+        "not_authorized": "Du darfst gerade keinen Kreis erstellen.",
+        "not_found": "Wir konnten nicht finden, worauf sich das bezieht. Bitte versuche es erneut.",
+        "conflict": "So einen Kreis gibt es schon. Versuche einen anderen Namen.",
+        "failed": "Wir konnten deinen Kreis nicht erstellen. Bitte versuche es erneut.",
+        "unknown_error": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+      }
     },
     "home": {
       "tabChat": "Chat",
@@ -2859,7 +2870,23 @@
         "tallyPending": "{count} Ausstehend",
         "closes": "Endet {time}"
       },
-      "chatUnavailable": "Chat ist in Kreisen noch nicht verfügbar. Projekte, Challenges und Abstimmungen funktionieren weiterhin."
+      "chatUnavailable": "Chat ist in Kreisen noch nicht verfügbar. Projekte, Challenges und Abstimmungen funktionieren weiterhin.",
+      "live": {
+        "title": "Was gerade läuft",
+        "empty": "Gerade läuft nichts.",
+        "openVotes": "{count, plural, =1 {1 offene Abstimmung} other {# offene Abstimmungen}}",
+        "projectMeta": "Projekt · {percent} % erledigt",
+        "projectMetaPlain": "Projekt",
+        "challengeMeta": "Challenge · {days, plural, =1 {noch 1 Tag} other {noch # Tage}}",
+        "challengeMetaPlain": "Challenge",
+        "challengeMetaEnded": "Challenge · Beendet",
+        "viewAll": "Alle ansehen"
+      },
+      "historyLimited": "{days, plural, =1 {Angezeigt wird der letzte Tag dieses Chats.} other {Angezeigt werden die letzten # Tage dieses Chats.}} Ältere Nachrichten wurden nicht gelöscht.",
+      "noChatEmpty": {
+        "title": "Hier ist noch nichts",
+        "description": "Der Chat ist noch nicht freigeschaltet, aber hier erscheinen trotzdem die Projekte, Challenges und Abstimmungen deines Kreises. Starte etwas über das +-Menü oben."
+      }
     },
     "motion": {
       "title": "Antragsdetails",
@@ -2897,9 +2924,29 @@
       },
       "callout": {
         "failNotice": "Wenn bis {deadline} weniger als {required} von {total} abstimmen, ändert sich nichts.",
-        "silence": "Schweigen ist keine Zustimmung."
+        "silence": "Schweigen ist keine Zustimmung.",
+        "failNoticeNoDeadline": "Wenn bis zum Ende weniger als {required} von {total} abstimmen, ändert sich nichts."
       },
-      "notElector": "Du bist beigetreten, nachdem dieser Antrag eröffnet wurde, und gehörst daher nicht zu den Stimmberechtigten."
+      "notElector": "Du bist beigetreten, nachdem dieser Antrag eröffnet wurde, und gehörst daher nicht zu den Stimmberechtigten.",
+      "voteChangeable": "Du kannst deine Stimme ändern, bis die Abstimmung endet.",
+      "enactmentFailedLead": "Der Kreis hat das angenommen, aber die Umsetzung hat nicht geklappt:",
+      "withdrawn": "Antrag zurückgezogen.",
+      "enacted": "Die Entscheidung wurde umgesetzt.",
+      "menu": {
+        "withdraw": "Antrag zurückziehen",
+        "enact": "Diese Entscheidung umsetzen"
+      },
+      "withdrawDialog": {
+        "title": "Diesen Antrag zurückziehen?",
+        "description": "Die Abstimmung endet sofort, und nichts von dem, was dieser Antrag vorschlägt, wird passieren. Bereits abgegebene Stimmen bleiben im Verlauf des Kreises erhalten, und der Antrag lässt sich nicht wieder eröffnen.",
+        "confirm": "Antrag zurückziehen",
+        "working": "Wird zurückgezogen…"
+      },
+      "writeErrors": {
+        "notProposer": "Nur wer einen Antrag gestellt hat, kann ihn zurückziehen.",
+        "notOpen": "Dieser Antrag ist nicht mehr offen und lässt sich deshalb nicht zurückziehen.",
+        "notEnactable": "Nur ein Antrag, den der Kreis angenommen hat, lässt sich umsetzen."
+      }
     },
     "project": {
       "title": "Projekt",
@@ -2910,7 +2957,18 @@
       "contribute": "Beitragen",
       "contributing": "Wird übertragen...",
       "contributeHint": "Mit einem Tippen kannst du auch direkt aus dem Chat beitragen.",
-      "contributeSuccess": "Danke — dein Beitrag ist angekommen."
+      "contributeSuccess": "Danke — dein Beitrag ist angekommen.",
+      "meta": "Vorgeschlagen von {name} · {date}",
+      "status": {
+        "draft": "Entwurf",
+        "completed": "Abgeschlossen",
+        "abandoned": "Aufgegeben",
+        "archived": "Archiviert"
+      },
+      "correction": "Korrektur",
+      "contributionCountPartial": "Bisher {count} angezeigt",
+      "discussion": "Diskussion ansehen",
+      "messageCount": "{count, plural, =1 {1 Nachricht} other {# Nachrichten}}"
     },
     "challenge": {
       "title": "Challenge",
@@ -2932,7 +2990,55 @@
         "leadDescription": "Die Leitung des Kreises bestätigt jede Erledigung.",
         "voteLabel": "Der Kreis stimmt ab",
         "voteDescription": "Der Kreis stimmt über jede Erledigung ab."
-      }
+      },
+      "about": {
+        "trust": "Hier kontrolliert niemand irgendwen. Wenn du sagst, du hast es geschafft, dann zählt es — so hat euer Kreis es untereinander abgemacht.",
+        "lead": "Eine Leitung des Kreises bestätigt jeden Beitrag. Trag ein, was du gemacht hast, und die Leitung hakt es ab.",
+        "vote": "Ihr bestätigt euch gegenseitig. Jeder Beitrag geht an den Kreis, und der Kreis stimmt darüber ab, ob er zählt."
+      },
+      "state": {
+        "draft": {
+          "label": "Noch nicht gestartet",
+          "note": "Diese Challenge hat noch nicht begonnen, es gibt also noch nichts einzutragen."
+        },
+        "judging": {
+          "label": "Wird bestätigt",
+          "note": "Neue Beiträge sind geschlossen, während der Kreis bestätigt, was schon eingetragen wurde."
+        },
+        "closed": {
+          "label": "Beendet",
+          "note": "Diese Challenge ist beendet. Es lässt sich nichts mehr eintragen."
+        },
+        "cancelled": {
+          "label": "Abgebrochen",
+          "note": "Dein Kreis hat diese Challenge abgebrochen."
+        }
+      },
+      "activityTitle": "Neueste Aktivität",
+      "activityEmpty": {
+        "title": "Noch nichts eingetragen",
+        "description": "Sei die erste Person, die etwas einträgt — jeder Beitrag erscheint hier."
+      },
+      "activityLogged": "Hat einen Beitrag eingetragen.",
+      "activityLoggedValue": "Hat {value} eingetragen.",
+      "activityEvidence": "Nachweis ansehen",
+      "entryState": {
+        "pending": "Wartet",
+        "rejected": "Zählt nicht",
+        "disputed": "Angefochten"
+      },
+      "yourProgressTitle": "Dein Fortschritt",
+      "yourProgressNone": "Du hast noch nichts eingetragen.",
+      "yourProgressLogged": "{count, plural, =1 {1 Beitrag eingetragen} other {# Beiträge eingetragen}}",
+      "yourProgressCap": {
+        "ONE_OFF": "{done} von {cap} eingetragen",
+        "DAILY": "{done} von {cap} heute eingetragen",
+        "WEEKLY": "{done} von {cap} diese Woche eingetragen",
+        "MONTHLY": "{done} von {cap} diesen Monat eingetragen"
+      },
+      "yourProgressPoints": "{points, plural, =1 {1 Punkt gesammelt} other {# Punkte gesammelt}}",
+      "yourProgressPending": "{count, plural, =1 {1 Beitrag wartet auf Bestätigung} other {# Beiträge warten auf Bestätigung}}",
+      "yourProgressClaimed": "Insgesamt {total} eingetragen"
     },
     "members": {
       "title": "Mitglieder",
@@ -2953,9 +3059,7 @@
       },
       "actions": {
         "viewProfile": "Profil ansehen",
-        "message": "Nachricht senden",
-        "makeLead": "Zur Leitung machen",
-        "remove": "Aus dem Kreis entfernen"
+        "message": "Nachricht senden"
       },
       "past": {
         "title": "{count, plural, =1 {1 ehemaliges Mitglied} other {# ehemalige Mitglieder}}",
@@ -2968,18 +3072,39 @@
           "REMOVED": "Per Antrag entfernt",
           "SUSPENDED": "Von der Plattform gesperrt"
         }
-      }
+      },
+      "columns": {
+        "member": "Mitglied",
+        "role": "Rolle",
+        "joined": "Beigetreten"
+      },
+      "roleMember": "Mitglied",
+      "inviteToCircle": "In den Kreis einladen",
+      "governanceNote": "Um ein Mitglied auszuschließen, muss ein Antrag gestellt und vom Kreis angenommen werden.",
+      "emptyRoster": "Keine Mitglieder anzuzeigen."
     },
     "leaderboard": {
       "title": "Bestenliste",
       "modeRanked": "Rangliste",
       "modeCollective": "Kollektiv",
       "collectiveTitle": "Unser gemeinsamer Fortschritt",
-      "points": "{points} Pkt.",
+      "points": "{points, number} Pkt.",
       "builtTogether": "Gemeinsam aufgebaut",
       "membersContributing": "{count, plural, =1 {1 Mitglied trägt bei} other {# Mitglieder tragen bei}}",
       "breakdownTitle": "Aufschlüsselung der Beiträge",
-      "collectiveNote": "Im Kollektiv-Modus gewinnen wir gemeinsam."
+      "collectiveNote": "Im Kollektiv-Modus gewinnen wir gemeinsam.",
+      "thisWeek": "Diese Woche",
+      "dayPoints": "{day}: {points} Pkt.",
+      "weekPartial": "Es konnten nur die letzten {count} Punkteinträge gelesen werden, diese Woche ist daher unvollständig.",
+      "standingsTitle": "Wertung",
+      "rankedTitle": "Wo du stehst",
+      "rankValue": "Platz {rank}",
+      "yourStandingOf": "Dein Platz von {total}",
+      "yourStanding": "Dein Platz",
+      "notOnBoard": "Du hast noch keine Punkte in der Wertung",
+      "leadingNow": "Ganz vorn",
+      "rankedNote": "Punkte kommen aus Projekten und Challenges — und eine Korrektur kann einen Punktestand auch wieder senken.",
+      "topContributors": "{count, plural, =1 {Top-Beitragende} other {Top # Beitragende}}"
     },
     "time": {
       "daysHoursLeft": "noch {days} T {hours} Std.",
@@ -3147,6 +3272,40 @@
         "leadOnlyBody": "Nur eine Leitung kann diesen Kreis archivieren.",
         "dissolvedBody": "Dieser Kreis wurde aufgelöst, und das ist endgültig. Er kann weder archiviert noch wieder geöffnet werden.",
         "proposeInstead": "Du kannst den Kreis per Antrag bitten, sich aufzulösen — die Mitglieder entscheiden gemeinsam."
+      },
+      "nav": {
+        "label": "Bereiche der Einstellungen",
+        "general": "Allgemein",
+        "access": "Zugang & Auffindbarkeit",
+        "branding": "Farben",
+        "plan": "Tarif & Abrechnung",
+        "danger": "Gefahrenbereich",
+        "members": "Mitglieder"
+      },
+      "branding": {
+        "title": "Farben",
+        "description": "Die Farben, die dein Kreis seinen Mitgliedern zeigt.",
+        "customColours": "Eigene Farben",
+        "included": "Enthalten",
+        "hidden": "Ausgeblendet",
+        "includedBody": "Dein Tarif enthält eigene Farben, dein Kreis zeigt also sein eigenes Design.",
+        "hiddenBody": "Alle eigenen Farben, die du gespeichert hast, bleiben genau so erhalten und kommen mit einem Tarif, der eigene Farben enthält, sofort zurück. Solange zeigt dein Kreis das Standard-Design.",
+        "hiddenWhy": "Die eigenen Farben sind ausgeblendet, weil dein aktueller Tarif sie nicht enthält.",
+        "noEditor": "In der App gibt es noch keine Farbauswahl, deshalb lässt sich hier vorerst nichts ändern.",
+        "changePlan": "Tarif wechseln",
+        "unknown": "Wir konnten gerade nicht feststellen, was dein Tarif abdeckt.",
+        "loadFailed": "Wir konnten nicht laden, was dein Tarif abdeckt. Bitte versuche es erneut."
+      },
+      "plan": {
+        "title": "Tarif & Abrechnung",
+        "description": "Welchen Tarif dein Kreis nutzt und was dafür berechnet wird.",
+        "changePlan": "Tarif wechseln",
+        "seePlans": "Alle Tarife ansehen",
+        "nextBillingLabel": "Nächste Abrechnung",
+        "amountLabel": "Betrag",
+        "membersIncluded": "{limit} Mitglieder enthalten",
+        "membersUnlimited": "Unbegrenzt viele Mitglieder",
+        "loadFailed": "Wir konnten deinen Tarif nicht laden. Bitte versuche es erneut."
       }
     },
     "history": {
@@ -3160,7 +3319,11 @@
       },
       "empty": {
         "title": "Noch nichts entschieden",
-        "description": "Sobald dieser Kreis den ersten Antrag stellt, wird hier jeder Schritt der Entscheidung festgehalten."
+        "description": "Sobald dieser Kreis den ersten Antrag stellt, wird hier jeder Schritt der Entscheidung festgehalten.",
+        "membership": {
+          "title": "Noch keine Entscheidungen zu Mitgliedern",
+          "description": "Wenn der Kreis darüber abstimmt, jemanden aufzunehmen oder auszuschließen oder eine Leitung zu ernennen, erscheint die Entscheidung hier — zusammen mit den Regeln, unter denen sie getroffen wurde."
+        }
       },
       "entry": {
         "seq": "Nr. {seq}",
@@ -3205,6 +3368,45 @@
         "circleUnsuspended": "Sperre von der Plattform aufgehoben",
         "circleDissolved": "Kreis von der Plattform aufgelöst",
         "unknown": "Erfasstes Ereignis"
+      },
+      "subtitle": "Eine Aufzeichnung davon, wie wir hier entscheiden.",
+      "loadMore": "Mehr laden",
+      "proposerErased": "Vorgeschlagen von einem gelöschten Konto",
+      "tabs": {
+        "label": "Ansicht des Entscheidungsverlaufs",
+        "motions": "Anträge",
+        "membership": "Änderungen bei den Mitgliedern"
+      },
+      "table": {
+        "caption": "Entscheidungen dieses Kreises, neueste zuerst. Jede Zeile zeigt die Regeln, die galten, als der Antrag gestellt wurde.",
+        "motion": "Antrag",
+        "outcome": "Ergebnis",
+        "decided": "Entschieden",
+        "rules": "Damals geltende Regeln"
+      },
+      "outcome": {
+        "passed": "Angenommen",
+        "enacted": "Umgesetzt",
+        "enactmentFailed": "Angenommen — nicht umgesetzt",
+        "rejected": "Abgelehnt",
+        "expired": "Abgelaufen — keine Entscheidung",
+        "withdrawn": "Zurückgezogen",
+        "open": "Noch offen",
+        "unknown": "Erfasst"
+      },
+      "rules": {
+        "majority": {
+          "unanimous": "Einstimmig",
+          "simple": "Einfache Mehrheit",
+          "fraction": "{n}/{d}-Mehrheit"
+        },
+        "quorum": "Quorum {required} von {total}",
+        "unavailable": "Nicht erfasst",
+        "note": "Jede Zeile zeigt die Regeln, die dieser Antrag beim Stellen festgehalten hat — nicht die heutigen Regeln des Kreises."
+      },
+      "decided": {
+        "lapsed": "Abgelaufen {date}",
+        "unknown": "Nicht erfasst"
       }
     },
     "governance": {
@@ -3357,7 +3559,12 @@
           "MAX_ACTIVE_PROJECTS": "Bei dir laufen {current} Projekte. Dein Tarif umfasst {limit}. Nichts wird geschlossen oder gelöscht — du kannst nur kein neues starten, bis eines abgeschlossen ist oder sich dein Tarif ändert.",
           "MAX_ACTIVE_CHALLENGES": "Bei dir laufen {current} Challenges. Dein Tarif umfasst {limit}. Nichts wird abgebrochen — du kannst nur keine neue starten, bis eine endet oder sich dein Tarif ändert.",
           "STORAGE_MB": "Du nutzt {current} von {limit}. Es wird nichts gelöscht — du kannst nur nichts Neues hochladen, bis Platz frei wird oder sich dein Tarif ändert."
-        }
+        },
+        "hidden": "Ausgeblendet",
+        "brandingHiddenWhy": "Die eigenen Farben sind ausgeblendet, weil dein aktueller Tarif sie nicht enthält.",
+        "changePlan": "Tarif wechseln",
+        "seePlans": "Mehr über Tarife erfahren",
+        "everythingElse": "Alles Weitere, was dein Tarif abdeckt"
       },
       "billing": {
         "heading": "Bezahlte Tarife richten wir derzeit von Hand ein",
@@ -3400,6 +3607,18 @@
         "successNow": "Dein Kreis nutzt jetzt den kostenlosen Tarif.",
         "successLater": "Dein Kreis wechselt am Ende dieses Zeitraums in den kostenlosen Tarif.",
         "error": "Wir konnten den Tarif nicht ändern. An deinem Kreis hat sich nichts geändert — bitte versuche es erneut."
+      },
+      "governance": {
+        "title": "Wer zahlt, entscheidet nicht",
+        "body": "Bezahlen verschafft Zugang, keine Macht. Entschieden wird im Kreis: Jedes Mitglied hat eine Stimme, und niemand kann hier etwas allein entscheiden."
+      },
+      "statusBar": {
+        "planLabel": "Aktueller Tarif",
+        "statusLabel": "Status",
+        "upToMembers": "Bis zu {limit} Mitglieder",
+        "unlimitedMembers": "Unbegrenzt viele Mitglieder",
+        "overCapacity": "Über der Grenze",
+        "withinPlan": "Im Rahmen deines Tarifs"
       }
     },
     "invites": {
@@ -3696,6 +3915,24 @@
       "submit": "Absenden",
       "accepted": "Du bist dabei — es zählt",
       "pending": "Gesendet — wartet auf Bestätigung"
+    },
+    "report": {
+      "title": "An DiaspoPlug melden",
+      "intro": "Melden Sie hier illegale Aktivitäten oder Verstöße gegen unsere Plattformregeln. DiaspoPlug schlichtet keine internen Streitigkeiten innerhalb von Circles.",
+      "notMember": "Sie müssen Mitglied dieses Circles sein, um ihn zu melden.",
+      "reasonLabel": "Was möchten Sie melden?",
+      "reasonPlaceholder": "Grund auswählen",
+      "reasonsUnavailable": "Gründe konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+      "detailsLabel": "Erzählen Sie uns mehr",
+      "detailsPlaceholder": "Bitte so ausführlich wie möglich beschreiben ...",
+      "detailsHint": "Nennen Sie Daten, Namen und alles Weitere, das uns hilft zu verstehen, was passiert ist.",
+      "confidentialityNote": "Meldungen gehen an das DiaspoPlug Trust-&-Safety-Team. Ihre Identität wird vertraulich behandelt.",
+      "submit": "Meldung senden",
+      "submitting": "Wird gesendet ...",
+      "success": "Meldung gesendet",
+      "sentTitle": "Meldung eingegangen",
+      "sentBody": "Das DiaspoPlug Trust-&-Safety-Team prüft sie. Wir melden uns, falls wir weitere Informationen benötigen.",
+      "backToCircle": "Zurück zum Circle"
     }
   },
   "feed": {

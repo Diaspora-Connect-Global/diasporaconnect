@@ -6,6 +6,9 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 
 import {
+  MOTION_CARD_CLASS,
+  MotionActionsMenu,
+  MotionCard,
   MotionDetails,
   MotionHeader,
   MotionTally,
@@ -39,29 +42,53 @@ import type {
 import type { GetMessagesData } from '@/services/gql/types/messaging';
 import { useUserStore } from '@/store/useUserStore';
 
+/**
+ * The reading measure for the whole screen.
+ *
+ * `CIRCLE_COLUMN_CLASS` is deliberately uncapped so the circles sidebar stays
+ * pinned to the edge of the viewport (see `lib/feedColumnLayout`), which leaves
+ * this page's content free to run the full width of a desktop monitor. It must
+ * not: this is a page someone READS before making a decision, and a rationale
+ * paragraph set 1600px wide is unreadable. The cap goes on the content, not the
+ * column, so the sidebar keeps its position.
+ */
+const MOTION_MEASURE_CLASS = 'mx-auto flex w-full max-w-3xl flex-col gap-4';
+
 function MotionSkeleton() {
+  // The same shell the real cards use, so the skeleton cannot drift away from
+  // the layout it stands in for.
+  const card = MOTION_CARD_CLASS;
   return (
-    <div className="flex flex-col gap-6 py-2">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-6 w-16 rounded-full" />
-        <Skeleton className="h-4 w-20" />
+    <div className={MOTION_MEASURE_CLASS}>
+      <div className={card}>
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-16 rounded-full" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+        <Skeleton className="mt-4 h-8 w-3/4" />
+        <div className="mt-4 flex items-center gap-3">
+          <Skeleton className="size-9 shrink-0 rounded-full" />
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-40" />
+          </div>
+        </div>
+        <Skeleton className="mt-4 h-12 w-full" />
       </div>
-      <Skeleton className="h-7 w-3/4" />
-      <div className="flex items-center gap-2">
-        <Skeleton className="size-8 shrink-0 rounded-full" />
-        <div className="flex flex-col gap-1.5">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-3 w-40" />
+      <div className={card}>
+        <Skeleton className="h-5 w-16" />
+        <div className="mt-3 flex gap-3">
+          <Skeleton className="h-20 flex-1 rounded-xl" />
+          <Skeleton className="h-20 flex-1 rounded-xl" />
+          <Skeleton className="h-20 flex-1 rounded-xl" />
         </div>
       </div>
-      <Skeleton className="h-12 w-full" />
-      <div className="flex gap-3">
-        <Skeleton className="h-20 flex-1 rounded-xl" />
-        <Skeleton className="h-20 flex-1 rounded-xl" />
-        <Skeleton className="h-20 flex-1 rounded-xl" />
+      <div className={card}>
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="mt-4 h-10 w-full" />
       </div>
-      <Skeleton className="h-24 w-full rounded-xl" />
-      <Skeleton className="h-32 w-full rounded-xl" />
+      <Skeleton className="h-24 w-full rounded-2xl" />
+      <Skeleton className="h-44 w-full rounded-2xl" />
     </div>
   );
 }
@@ -152,13 +179,19 @@ export default function CircleMotionPage() {
   const tally = tallyData?.circleMotionTally ?? null;
 
   /*
-   * Back arrow + page title, matching the app's detail-screen chrome. The arrow
-   * is icon-only and carries a generic accessible name rather than the title:
-   * labelling it "Motion details" would announce it as a link TO this page,
-   * which is where the user already is.
+   * Back arrow + page title + overflow, matching the app's detail-screen
+   * chrome. The arrow is icon-only and carries a generic accessible name rather
+   * than the title: labelling it "Motion details" would announce it as a link
+   * TO this page, which is where the user already is.
+   *
+   * The row keeps its bottom rule and its own padding so it reads as chrome
+   * belonging to the viewport, not as the first card in the stack — and it
+   * spans the full column while the content below is centred at a reading
+   * measure, which is what puts the back arrow at the edge where the eye
+   * expects it.
    */
   const header = (
-    <div className="flex shrink-0 items-center gap-2">
+    <div className="flex shrink-0 items-center gap-2 border-b border-border-subtle pb-3">
       <button
         type="button"
         onClick={() => router.push(`/circles/${circleId}`)}
@@ -167,7 +200,25 @@ export default function CircleMotionPage() {
       >
         <ArrowLeft className="size-5" />
       </button>
-      <span className="label-large text-text-primary">{t('title')}</span>
+      <span className="label-large min-w-0 flex-1 truncate text-text-primary">
+        {t('title')}
+      </span>
+      {motion && (
+        /*
+          No `myCircleMembership` read to feed this: neither action is a lead's.
+          Withdrawal is the proposer's own right and enactment is mechanical, so
+          the page already holds every fact the menu gates on. Fetching a role
+          would suggest one of them is a role's to exercise.
+        */
+        <MotionActionsMenu
+          circleId={circleId}
+          motion={motion}
+          isProposer={Boolean(
+            currentUserId && motion.proposedBy === currentUserId,
+          )}
+          onChanged={() => void refetchMotion()}
+        />
+      )}
     </div>
   );
 
@@ -176,7 +227,9 @@ export default function CircleMotionPage() {
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
           {header}
-          <MotionSkeleton />
+          <div className="py-4">
+            <MotionSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -226,52 +279,85 @@ export default function CircleMotionPage() {
       new Date(myJoinedAt).getTime() > new Date(motion.opensAt).getTime(),
   );
 
+  /*
+   * Whether `TimeRemaining` will actually render something. It returns null for
+   * a missing or unparseable `closesAt`, and the two-column grid below has to
+   * know: a lone child in `sm:grid-cols-2` would leave the quorum bar squeezed
+   * into the left half with an empty column beside it, which reads as a panel
+   * that failed to load rather than as one that had nothing to say.
+   */
+  const hasDeadline = Boolean(
+    motion.closesAt && !Number.isNaN(new Date(motion.closesAt).getTime()),
+  );
+
   return (
     <div className="h-app-inner flex overflow-hidden">
       <div className={CIRCLE_COLUMN_CLASS}>
         {header}
 
-        <div className="flex flex-col gap-6 py-4">
-          <MotionHeader motion={motion} />
+        <div className={`${MOTION_MEASURE_CLASS} py-4`}>
+          <MotionCard>
+            <MotionHeader motion={motion} />
+          </MotionCard>
 
-          <VotePanel
-            circleId={circleId}
-            motionId={motion.id}
-            isOpen={isMotionOpen(motion)}
-            closesAt={motion.closesAt}
-            isOutsideElectorate={isOutsideElectorate}
-            opensAt={motion.opensAt}
-            memberJoinedAt={myJoinedAt}
-          />
+          <MotionCard>
+            <VotePanel
+              circleId={circleId}
+              motionId={motion.id}
+              isOpen={isMotionOpen(motion)}
+              closesAt={motion.closesAt}
+              isOutsideElectorate={isOutsideElectorate}
+              opensAt={motion.opensAt}
+              memberJoinedAt={myJoinedAt}
+            />
+          </MotionCard>
 
           {/*
-            While a motion is OPEN the live tally is the truth; once it is
-            decided the outcome columns are the record that was written once, at
-            tally, from the pinned thresholds — and never touched again.
+            Tally, quorum and deadline are three readings of ONE question —
+            where does the vote stand right now — so they share a card rather
+            than sitting as three separate panels a reader has to reassemble.
+            Quorum and time pair up side by side from `sm` because each is two
+            short lines; the tally keeps the full width because three figures
+            squeezed into a third of a card stop being scannable.
           */}
-          <MotionTally
-            yes={tally ? tally.yes : motion.outcomeYes}
-            no={tally ? tally.no : motion.outcomeNo}
-            pending={
-              tally
-                ? tally.notVoted
-                : Math.max(
-                    0,
-                    motion.electorateSize -
-                      (motion.outcomeYes +
-                        motion.outcomeNo +
-                        motion.outcomeAbstain),
-                  )
-            }
-          />
+          <MotionCard className="flex flex-col gap-5">
+            {/*
+              While a motion is OPEN the live tally is the truth; once it is
+              decided the outcome columns are the record that was written once,
+              at tally, from the pinned thresholds — and never touched again.
+            */}
+            <MotionTally
+              yes={tally ? tally.yes : motion.outcomeYes}
+              no={tally ? tally.no : motion.outcomeNo}
+              pending={
+                tally
+                  ? tally.notVoted
+                  : Math.max(
+                      0,
+                      motion.electorateSize -
+                        (motion.outcomeYes +
+                          motion.outcomeNo +
+                          motion.outcomeAbstain),
+                    )
+              }
+            />
 
-          <QuorumProgress
-            voted={cast}
-            required={required}
-            quorumMet={tally?.quorumMet ?? false}
-          />
+            <div
+              className={`grid gap-5 border-t border-border-subtle pt-5 sm:gap-8 ${
+                hasDeadline ? 'sm:grid-cols-2' : ''
+              }`}
+            >
+              <QuorumProgress
+                voted={cast}
+                required={required}
+                quorumMet={tally?.quorumMet ?? false}
+              />
 
-          {motion.closesAt && <TimeRemaining closesAt={motion.closesAt} />}
+              {hasDeadline && motion.closesAt && (
+                <TimeRemaining closesAt={motion.closesAt} />
+              )}
+            </div>
+          </MotionCard>
 
           <SilenceCallout
             required={required}
@@ -279,7 +365,9 @@ export default function CircleMotionPage() {
             closesAt={motion.closesAt}
           />
 
-          <MotionDetails motion={motion} />
+          <MotionCard>
+            <MotionDetails motion={motion} />
+          </MotionCard>
 
           <ViewDiscussion
             circleId={circleId}

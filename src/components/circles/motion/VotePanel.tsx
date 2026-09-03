@@ -1,12 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CombinedGraphQLErrors } from '@apollo/client';
 import { useMutation } from '@apollo/client/react';
 import { Check, CircleCheck, CircleX, Loader2, Minus } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
+/*
+ * Imported from the MODULE, not from `@/components/circles/governance`.
+ * That barrel re-exports `RuleCard`, which imports `requiredVotes` from
+ * `@/components/circles/motion` — so going through the barrel would close a
+ * cycle between the two index files. `mutationOutcome` itself depends on
+ * nothing in either folder.
+ */
+import {
+  readCircleWrite,
+  refusalMessageKey,
+  type CircleWriteRefusal,
+} from '@/components/circles/governance/mutationOutcome';
 import { cn } from '@/lib/utils';
 import { formatChatTimestamp, formatDateOnly } from '@/macros/time';
 import {
@@ -19,31 +30,37 @@ import type {
   CircleVoteChoice,
 } from '@/services/gql/types/circles';
 
+import { MotionSection } from './MotionSection';
+import { useMotionRefusalMessage } from './motionRefusal';
+
 /**
- * Resting colours per choice. The selected state adds a 2px border in the
- * choice's own text token — `border-success` / `border-danger` are NOT usable
- * here, because every one of those border tokens resolves to red.
+ * Colour appears ONLY on the choice the viewer has actually selected.
  *
- * The border is always present at `transparent` so selecting one does not
- * resize the row.
+ * At rest all three buttons are neutral. That is the point: a permanently green
+ * "Yes" and a permanently red "No" colour the OPTIONS, and a member scanning
+ * the row reads the tint as a recommendation before they read the label. Tinting
+ * only the selected one makes the colour mean "this is your ballot" — a state,
+ * not a nudge — which is also the only thing on this screen worth colouring.
+ *
+ * `border-success` / `border-danger` are NOT usable for the selected ring:
+ * every semantic border token resolves to the same red (`#e7000c`) in both
+ * themes, so a "success border" would be a red border. The text tokens are the
+ * real per-choice colours, and each is paired with its own surface — the same
+ * pairing `StatusPill` uses, which is the app's documented both-theme pair.
  */
-const CHOICE_STYLE: Record<
-  CircleVoteChoice,
-  { surface: string; selectedBorder: string }
-> = {
-  YES: {
-    surface: 'bg-surface-success text-text-success',
-    selectedBorder: 'border-text-success',
-  },
-  NO: {
-    surface: 'bg-surface-danger text-text-danger',
-    selectedBorder: 'border-text-danger',
-  },
-  ABSTAIN: {
-    surface: 'bg-surface-subtle text-text-primary',
-    selectedBorder: 'border-text-primary',
-  },
+const CHOICE_SELECTED: Record<CircleVoteChoice, string> = {
+  YES: 'bg-surface-success text-text-success border-text-success',
+  NO: 'bg-surface-danger text-text-danger border-text-danger',
+  // Abstain is neutral by design — it is a real, counted ballot, but it is not
+  // an opinion, and giving it a colour of its own would invent one.
+  ABSTAIN: 'bg-surface-subtle text-text-primary border-text-primary',
 };
+
+// `enabled:hover:` rather than `hover:` — a disabled button still matches
+// `:hover`, so a plain hover class would light up the three dead controls while
+// a vote is in flight and repaint whichever one is currently selected.
+const CHOICE_RESTING =
+  'bg-surface-default text-text-primary border-border-subtle enabled:hover:bg-surface-subtle';
 
 /**
  * Has the pinned deadline passed on the viewer's own clock?
@@ -75,20 +92,6 @@ function useIsPastDeadline(deadline?: string | null): boolean {
   return past;
 }
 
-/**
- * Flatten whatever the mutation rejected with into matchable text.
- *
- * Apollo 4 wraps GraphQL errors in `CombinedGraphQLErrors`, whose own
- * `message` summarises rather than carrying every entry — and the refusal we
- * need to recognise is in the entries.
- */
-function errorText(error: unknown): string {
-  if (CombinedGraphQLErrors.is(error)) {
-    return error.errors.map((e) => e.message).join(' ');
-  }
-  return error instanceof Error ? error.message : '';
-}
-
 interface VoteButtonProps {
   choice: CircleVoteChoice;
   label: string;
@@ -108,8 +111,6 @@ function VoteButton({
   pending,
   onSelect,
 }: VoteButtonProps) {
-  const style = CHOICE_STYLE[choice];
-
   return (
     <button
       type="button"
@@ -117,12 +118,13 @@ function VoteButton({
       disabled={disabled}
       onClick={() => onSelect(choice)}
       className={cn(
-        'label-medium flex flex-1 cursor-pointer flex-col items-center justify-center gap-1.5',
-        'rounded-xl border-2 border-transparent px-3 py-4 transition-colors',
+        'label-medium flex flex-1 cursor-pointer flex-col items-center justify-center gap-2',
+        // The border is 2px in BOTH states so selecting one does not resize the
+        // row and shove its neighbours a pixel sideways.
+        'rounded-xl border-2 px-3 py-4 transition-colors',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand',
         'disabled:cursor-not-allowed disabled:opacity-50',
-        style.surface,
-        selected && style.selectedBorder,
+        selected ? CHOICE_SELECTED[choice] : CHOICE_RESTING,
         '[&_svg]:size-6 [&_svg]:shrink-0',
       )}
     >
@@ -168,8 +170,9 @@ export interface VotePanelProps {
  *     instead of leaving three dead controls on screen.
  *
  *  3. It does not treat a cast vote as final. Votes stay changeable until the
- *     pinned `closesAt`, so the buttons stay live after a cast and the current
- *     choice simply shows as selected.
+ *     pinned `closesAt`, so the buttons stay live after a cast, the current
+ *     choice shows as selected, and the panel says in words that it can still
+ *     be changed. A confirmation that read as final would misstate the rule.
  */
 export function VotePanel({
   circleId,
@@ -183,17 +186,9 @@ export function VotePanel({
   const t = useTranslations('circles.motion');
   const tMembers = useTranslations('circles.members');
   const tErrors = useTranslations('circles.errors');
+  const tActions = useTranslations('circles.actions');
+  const motionRefusalMessage = useMotionRefusalMessage();
   const locale = useLocale();
-
-  /*
-   * `circles.motion.notElector` is not in the message catalogue yet — the
-   * namespace is owned by the i18n pass and this string was not part of it.
-   * Rather than print a key path, or (far worse) leave three live-looking
-   * buttons that circle-service will refuse, the panel falls back to stating
-   * the two PINNED facts that decide enfranchisement: when the motion opened,
-   * and when this member joined. Delete the guard once the sentence lands.
-   */
-  const hasNotElectorCopy = t.has('notElector');
 
   const [choice, setChoice] = useState<CircleVoteChoice | null>(null);
   const [pendingChoice, setPendingChoice] = useState<CircleVoteChoice | null>(
@@ -208,14 +203,6 @@ export function VotePanel({
     CastCircleVoteAndTallyData,
     { circleId: string; input: CastCircleVoteInput }
   >(CAST_CIRCLE_VOTE_AND_TALLY, {
-    /*
-     * The client's global default is `errorPolicy: 'all'`, under which a
-     * GraphQL error RESOLVES the promise instead of rejecting it. That default
-     * suits reads, where a partial result is still worth rendering; it is wrong
-     * for a ballot, where a partial result means the vote may or may not have
-     * been recorded and the UI would show a confirmation either way.
-     */
-    errorPolicy: 'none',
     // `castCircleVoteAndTally` exists precisely so the fresh tally arrives with
     // the write. Refetching `circleMotionTally` here would spend the round trip
     // this mutation was chosen to save, so the result is written into the cache
@@ -231,6 +218,17 @@ export function VotePanel({
     },
   });
 
+  /** Motion-specific copy first, then the shared circles vocabulary. */
+  function refusalCopy(
+    raw: string | null,
+    refusal: CircleWriteRefusal | null,
+  ): string {
+    return (
+      motionRefusalMessage(raw) ??
+      tActions(`writeErrors.${refusalMessageKey(refusal)}`)
+    );
+  }
+
   async function handleSelect(next: CircleVoteChoice) {
     if (votingClosed || pendingChoice) return;
 
@@ -241,39 +239,38 @@ export function VotePanel({
       const result = await castVote({
         variables: { circleId, input: { motionId, choice: next } },
       });
-      // A resolved mutation with no tally is not a recorded vote. Showing the
-      // confirmation anyway would be the worst failure this screen has: a
-      // member believing they voted when the ballot never landed.
-      if (!result.data?.castCircleVoteAndTally) {
-        throw new Error('castCircleVoteAndTally returned no tally');
+
+      /*
+       * The app's global `errorPolicy: 'all'` RESOLVES a refused mutation with
+       * `data: null` — it does not throw — so `await` returning is not evidence
+       * of anything. `readCircleWrite` gates on the root field actually coming
+       * back, which is the only reliable signal, and classifies the refusal
+       * otherwise. Showing the confirmation on a resolved-but-refused write is
+       * the worst failure this screen has: a member believing they voted when
+       * the ballot never landed.
+       */
+      const outcome = readCircleWrite(result, (d) => d.castCircleVoteAndTally);
+      if (!outcome.ok) {
+        setErrorMessage(refusalCopy(outcome.message, outcome.refusal));
+        return;
       }
+
       setChoice(next);
       toast.success(t('voteRecorded'));
     } catch (error) {
-      // circle-service refuses a vote for exactly two reasons worth naming: the
-      // window closed under the viewer, or they are not in the pinned
-      // electorate. Both are matched on the domain error's own wording
-      // (`MotionClosedError` / `NotAnElectorError`); anything else is a
-      // transient failure and gets the retryable message.
-      const raw = errorText(error);
-      if (/pinned electorate|not an elector/i.test(raw)) {
-        setErrorMessage(
-          hasNotElectorCopy ? t('notElector') : tErrors('vote'),
-        );
-      } else if (/voting is closed|no longer open/i.test(raw)) {
-        setErrorMessage(tErrors('votingClosed'));
-      } else {
-        setErrorMessage(tErrors('vote'));
-      }
+      // A few failures genuinely do reject — a link-level throw, an aborted
+      // request. Both paths converge on the same outcome shape.
+      const outcome = readCircleWrite({ error }, () => null);
+      setErrorMessage(refusalCopy(outcome.message, outcome.refusal));
     } finally {
       setPendingChoice(null);
     }
   }
 
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="label-large text-text-primary">{t('voteTitle')}</h2>
+  const buttonsDisabled = votingClosed || pendingChoice !== null;
 
+  return (
+    <MotionSection title={t('voteTitle')}>
       {isOutsideElectorate && !votingClosed ? (
         /*
          * Someone who joined after this motion opened is deliberately not an
@@ -282,56 +279,66 @@ export function VotePanel({
          * under way. Say that, rather than showing three buttons that cannot work.
          */
         <div className="rounded-xl bg-surface-subtle px-4 py-3">
-          {hasNotElectorCopy ? (
-            <p className="body-small text-text-primary">{t('notElector')}</p>
-          ) : (
-            <div className="flex flex-col gap-1">
-              {opensAt && (
-                <p className="body-small text-text-primary">
-                  <span className="text-text-secondary">{t('opened')} </span>
-                  {formatChatTimestamp(opensAt, { locale })}
-                </p>
-              )}
-              {memberJoinedAt && (
-                <p className="body-small text-text-primary">
-                  {tMembers('joinedOn', {
-                    date: formatDateOnly(memberJoinedAt, { locale }),
-                  })}
-                </p>
-              )}
-            </div>
-          )}
+          <p className="body-small text-text-primary">{t('notElector')}</p>
+          <div className="mt-2 flex flex-col gap-0.5">
+            {opensAt && (
+              <p className="caption-small text-text-secondary">
+                {t('opened')} {formatChatTimestamp(opensAt, { locale })}
+              </p>
+            )}
+            {memberJoinedAt && (
+              <p className="caption-small text-text-secondary">
+                {tMembers('joinedOn', {
+                  date: formatDateOnly(memberJoinedAt, { locale }),
+                })}
+              </p>
+            )}
+          </div>
         </div>
       ) : (
-        <div className="flex items-stretch gap-3">
-          <VoteButton
-            choice="YES"
-            label={t('voteYes')}
-            icon={<CircleCheck />}
-            selected={choice === 'YES'}
-            disabled={votingClosed || pendingChoice !== null}
-            pending={pendingChoice === 'YES'}
-            onSelect={handleSelect}
-          />
-          <VoteButton
-            choice="NO"
-            label={t('voteNo')}
-            icon={<CircleX />}
-            selected={choice === 'NO'}
-            disabled={votingClosed || pendingChoice !== null}
-            pending={pendingChoice === 'NO'}
-            onSelect={handleSelect}
-          />
-          <VoteButton
-            choice="ABSTAIN"
-            label={t('voteAbstain')}
-            icon={<Minus />}
-            selected={choice === 'ABSTAIN'}
-            disabled={votingClosed || pendingChoice !== null}
-            pending={pendingChoice === 'ABSTAIN'}
-            onSelect={handleSelect}
-          />
-        </div>
+        <>
+          <div className="flex items-stretch gap-2.5 sm:gap-3">
+            <VoteButton
+              choice="YES"
+              label={t('voteYes')}
+              icon={<CircleCheck />}
+              selected={choice === 'YES'}
+              disabled={buttonsDisabled}
+              pending={pendingChoice === 'YES'}
+              onSelect={handleSelect}
+            />
+            <VoteButton
+              choice="NO"
+              label={t('voteNo')}
+              icon={<CircleX />}
+              selected={choice === 'NO'}
+              disabled={buttonsDisabled}
+              pending={pendingChoice === 'NO'}
+              onSelect={handleSelect}
+            />
+            <VoteButton
+              choice="ABSTAIN"
+              label={t('voteAbstain')}
+              icon={<Minus />}
+              selected={choice === 'ABSTAIN'}
+              disabled={buttonsDisabled}
+              pending={pendingChoice === 'ABSTAIN'}
+              onSelect={handleSelect}
+            />
+          </div>
+
+          {/*
+            Stated up front, not only after a vote lands: a member deciding
+            whether to commit needs to know the commitment is reversible BEFORE
+            they make it. It is dropped once voting closes, where it would be a
+            promise the server no longer keeps.
+          */}
+          {!votingClosed && (
+            <p className="caption-small text-text-secondary">
+              {t('voteChangeable')}
+            </p>
+          )}
+        </>
       )}
 
       {votingClosed && (
@@ -352,6 +359,6 @@ export function VotePanel({
           {errorMessage}
         </p>
       )}
-    </section>
+    </MotionSection>
   );
 }

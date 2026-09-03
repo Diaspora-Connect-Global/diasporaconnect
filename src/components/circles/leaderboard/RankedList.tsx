@@ -2,85 +2,66 @@
 
 import { useTranslations } from 'next-intl';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { EmptyState } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import type { CircleLeaderboardRow } from '@/services/gql/types/circles';
-import { circleUserDisplayName, type CircleUser } from '@/hooks/useCircleUsers';
+import type { CircleUser } from '@/hooks/useCircleUsers';
+
+import { ScoreRows } from './ScoreRows';
+import { isWholeBoard } from './boardPage';
 
 export interface RankedListProps {
   rows: CircleLeaderboardRow[];
   usersById: Record<string, CircleUser>;
   currentUserId?: string | null;
+  className?: string;
 }
 
 /**
- * The ranked standings — rank, avatar, name, points.
+ * The standings — rank, avatar, name, points.
  *
- * Rendered ONLY when the circle has ranking enabled. The page decides that; see
- * the page for why this component must never be reachable otherwise.
+ * Rendered ONLY when the circle has ranking enabled, and only with rows; the
+ * page decides both. A ranking-disabled circle must never be able to reach this
+ * component, which is why the page derives the mode rather than storing it.
  *
- * Rows are shown in the order the server returned them and the server's `rank`
- * is displayed verbatim — re-sorting or re-numbering client-side would quietly
- * invent a different answer than the one the score ledger computed, and ties
- * (which share a rank) would come out renumbered.
+ * The `rank` column is the whole difference from `ContributionBreakdown`: the
+ * two panels list the same people in the same order, and the number is what
+ * turns "here is how the total was built" into "here is where you stand".
+ *
+ * The footer count is only presented as a total when the page proves it is one
+ * — see `boardPage.ts`; otherwise it says top-N.
  */
 export function RankedList({
   rows,
   usersById,
   currentUserId,
+  className,
 }: RankedListProps) {
   const t = useTranslations('circles');
 
-  if (rows.length === 0) {
-    return (
-      <EmptyState
-        title={t('empty.leaderboard.title')}
-        description={t('empty.leaderboard.description')}
-      />
-    );
-  }
-
   return (
-    <ol className="divide-y divide-border-subtle">
-      {rows.map((row) => {
-        const user = usersById[row.userId];
-        const isMe = Boolean(currentUserId) && row.userId === currentUserId;
-        const name = isMe
-          ? t('common.you')
-          : circleUserDisplayName(user, t('common.loading'));
+    <section
+      className={cn(
+        'flex flex-col rounded-2xl border border-border-subtle p-5',
+        className,
+      )}
+    >
+      <h2 className="label-medium text-text-primary">
+        {t('leaderboard.standingsTitle')}
+      </h2>
 
-        return (
-          <li
-            key={row.userId}
-            className={cn(
-              'flex items-center gap-3 py-3',
-              // The viewer's own row is tinted rather than badged: it needs to
-              // be findable in a scroll, not decorated.
-              isMe && 'rounded-lg bg-surface-subtle px-2',
-            )}
-          >
-            <span className="label-small w-6 shrink-0 text-center text-text-secondary tabular-nums">
-              {row.rank}
-            </span>
+      <ScoreRows
+        className="mt-2"
+        rows={rows}
+        usersById={usersById}
+        currentUserId={currentUserId}
+        showRank
+      />
 
-            <Avatar className="size-9 shrink-0 border border-border-subtle">
-              <AvatarImage src={user?.avatarUrl ?? undefined} alt="" />
-              <AvatarFallback className="caption-small bg-surface-subtle text-text-primary">
-                {(name.trim().charAt(0) || '?').toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-
-            <p className="label-small min-w-0 flex-1 truncate text-text-primary">
-              {name}
-            </p>
-
-            <span className="label-small shrink-0 text-text-primary tabular-nums">
-              {t('leaderboard.points', { points: row.points })}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+      <p className="caption-small mt-4 border-t border-border-subtle pt-4 text-text-secondary">
+        {isWholeBoard(rows.length)
+          ? t('leaderboard.membersContributing', { count: rows.length })
+          : t('leaderboard.topContributors', { count: rows.length })}
+      </p>
+    </section>
   );
 }

@@ -26,6 +26,8 @@ export {
 
 export { PlanCatalogue, type PlanCatalogueProps } from './PlanCatalogue';
 
+export { PlanStatusBar, type PlanStatusBarProps } from './PlanStatusBar';
+
 export {
   CirclePriceLine,
   PlanPriceList,

@@ -65,8 +65,10 @@ export interface ContributionListProps {
  *
  * Rows are ledger ENTRIES, not people: the same member appears once per
  * contribution, and a correction appears as its own NEGATIVE row rather than
- * editing the row it corrects. Negative rows are tinted so a ledger that has
- * been corrected reads as corrected instead of looking like a data glitch.
+ * editing the row it corrects. Corrections are tinted AND labelled — the tint
+ * alone is not enough, because colour is the one cue a reader can be unable to
+ * see, and "why is this one red and minus" is exactly the question a labelled
+ * row answers. A row's own note wins over the generic label when it has one.
  *
  * This list is never summed — `GoalProgressPanel` reads the authoritative total
  * from `circleGoalProgress`. See that file for why.
@@ -123,13 +125,20 @@ export function ContributionList({
           : circleUserDisplayName(user, t('common.loading'));
 
         const value = formatGoalValue(contribution.value, goal, locale);
-        const isCorrection = Number(contribution.value) < 0;
+
+        /*
+         * A correction is a row that REDUCES the total. Both facts are checked
+         * because they are independently true: `correctsContributionId` names
+         * the row being corrected, but a negative row logged without one is
+         * still a reduction, and a reader who sees an unexplained minus sign
+         * has been left to guess whether the ledger is broken.
+         */
+        const isCorrection =
+          Number(contribution.value) < 0 ||
+          Boolean(contribution.correctsContributionId);
 
         return (
-          <li
-            key={contribution.id}
-            className="flex items-center gap-3 py-3"
-          >
+          <li key={contribution.id} className="flex items-center gap-3 py-3">
             <Avatar className="size-9 shrink-0 border border-border-subtle">
               <AvatarImage src={user?.avatarUrl ?? undefined} alt="" />
               <AvatarFallback className="caption-small bg-surface-subtle text-text-primary">
@@ -139,10 +148,16 @@ export function ContributionList({
 
             <div className="min-w-0 flex-1">
               <p className="label-small truncate text-text-primary">{name}</p>
-              {contribution.note && (
+              {isCorrection ? (
                 <p className="caption-small truncate text-text-secondary">
-                  {contribution.note}
+                  {contribution.note?.trim() || t('project.correction')}
                 </p>
+              ) : (
+                contribution.note && (
+                  <p className="caption-small truncate text-text-secondary">
+                    {contribution.note}
+                  </p>
+                )
               )}
             </div>
 
@@ -150,7 +165,7 @@ export function ContributionList({
               {value && (
                 <p
                   className={cn(
-                    'label-small',
+                    'label-small tabular-nums',
                     isCorrection ? 'text-text-danger' : 'text-text-primary',
                   )}
                 >

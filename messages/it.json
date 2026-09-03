@@ -2785,7 +2785,9 @@
       "access": {
         "apply": "Aperta • Tutti possono candidarsi",
         "invite": "Ingresso su invito",
-        "approval": "Richiesta e approvazione"
+        "approval": "Richiesta e approvazione",
+        "public": "Pubblica",
+        "inviteOnly": "Solo su invito"
       },
       "pills": {
         "voteCloses": "Fine voto {time}",
@@ -2804,7 +2806,7 @@
       "nameRequired": "Dai un nome alla tua cerchia.",
       "bannerLabel": "Banner",
       "bannerCta": "Aggiungi un banner",
-      "bannerHint": "Consigliato 1200 x 400",
+      "bannerHint": "Consigliato 1020 x 480",
       "bannerChange": "Cambia banner",
       "bannerRemove": "Rimuovi banner",
       "note": "Le decisioni le prende il gruppo. Il come lo puoi cambiare più tardi.",
@@ -2833,7 +2835,16 @@
       "avatarHint": "Immagine quadrata, almeno 256 x 256",
       "avatarChange": "Cambia immagine",
       "avatarRemove": "Rimuovi immagine",
-      "imageFailed": "Cerchia creata — non siamo riusciti ad allegare l'immagine. Puoi aggiungerla dalle impostazioni."
+      "imageFailed": "Cerchia creata — non siamo riusciti ad allegare l'immagine. Puoi aggiungerla dalle impostazioni.",
+      "headline": "Creiamo la tua cerchia",
+      "errors": {
+        "insufficient_data": "Manca qualcosa. Controlla il nome della cerchia e riprova.",
+        "not_authorized": "In questo momento non puoi creare una cerchia.",
+        "not_found": "Non abbiamo trovato ciò a cui si riferisce. Riprova.",
+        "conflict": "Una cerchia così esiste già. Prova con un altro nome.",
+        "failed": "Non siamo riusciti a creare la tua cerchia. Riprova.",
+        "unknown_error": "Si è verificato un errore. Riprova."
+      }
     },
     "home": {
       "tabChat": "Chat",
@@ -2859,7 +2870,23 @@
         "tallyPending": "{count} In attesa",
         "closes": "Chiude {time}"
       },
-      "chatUnavailable": "La chat non è ancora disponibile nelle cerchie. Progetti, sfide e votazioni funzionano regolarmente."
+      "chatUnavailable": "La chat non è ancora disponibile nelle cerchie. Progetti, sfide e votazioni funzionano regolarmente.",
+      "live": {
+        "title": "Cosa c'è in corso",
+        "empty": "Al momento non c'è niente in corso.",
+        "openVotes": "{count, plural, =1 {1 voto aperto} other {# voti aperti}}",
+        "projectMeta": "Progetto · {percent}% completato",
+        "projectMetaPlain": "Progetto",
+        "challengeMeta": "Sfida · {days, plural, =1 {1 giorno rimasto} other {# giorni rimasti}}",
+        "challengeMetaPlain": "Sfida",
+        "challengeMetaEnded": "Sfida · Terminata",
+        "viewAll": "Vedi tutto"
+      },
+      "historyLimited": "Stiamo mostrando {days, plural, =1 {l'ultimo giorno} other {gli ultimi # giorni}} di questa chat. Niente di più vecchio è stato cancellato.",
+      "noChatEmpty": {
+        "title": "Ancora niente qui",
+        "description": "La chat non è ancora attiva, ma è qui che compaiono comunque i progetti, le sfide e le votazioni della tua cerchia. Avviane uno dal menu + qui sopra."
+      }
     },
     "motion": {
       "title": "Dettagli della mozione",
@@ -2897,9 +2924,29 @@
       },
       "callout": {
         "failNotice": "Se entro {deadline} votano meno di {required} membri su {total}, non cambia nulla.",
-        "silence": "Il silenzio non è mai consenso."
+        "silence": "Il silenzio non è mai consenso.",
+        "failNoticeNoDeadline": "Se prima della chiusura votano meno di {required} membri su {total}, non cambia nulla."
       },
-      "notElector": "Ti sei unito dopo l’apertura di questa mozione, quindi non sei tra gli aventi diritto."
+      "notElector": "Ti sei unito dopo l’apertura di questa mozione, quindi non sei tra gli aventi diritto.",
+      "voteChangeable": "Puoi cambiare il tuo voto fino alla chiusura della votazione.",
+      "enactmentFailedLead": "La cerchia l'ha approvata, ma applicare la decisione non ha funzionato:",
+      "withdrawn": "Mozione ritirata.",
+      "enacted": "La decisione è stata applicata.",
+      "menu": {
+        "withdraw": "Ritira la mozione",
+        "enact": "Applica questa decisione"
+      },
+      "withdrawDialog": {
+        "title": "Ritirare questa mozione?",
+        "description": "La votazione si ferma subito e non accadrà nulla di ciò che questa mozione proponeva. I voti già espressi restano nel registro della cerchia, e la mozione non si può riaprire.",
+        "confirm": "Ritira la mozione",
+        "working": "Ritiro in corso…"
+      },
+      "writeErrors": {
+        "notProposer": "Solo il membro che ha presentato la mozione può ritirarla.",
+        "notOpen": "Questa mozione non è più aperta, quindi non si può ritirare.",
+        "notEnactable": "Si può applicare solo una mozione approvata dalla cerchia."
+      }
     },
     "project": {
       "title": "Progetto",
@@ -2910,7 +2957,18 @@
       "contribute": "Contribuisci",
       "contributing": "Contributo in corso...",
       "contributeHint": "Basta un tocco per contribuire dalla chat.",
-      "contributeSuccess": "Grazie — il tuo contributo è stato registrato."
+      "contributeSuccess": "Grazie — il tuo contributo è stato registrato.",
+      "meta": "Proposto da {name} · {date}",
+      "status": {
+        "draft": "Bozza",
+        "completed": "Completato",
+        "abandoned": "Abbandonato",
+        "archived": "Archiviato"
+      },
+      "correction": "Correzione",
+      "contributionCountPartial": "Per ora ne mostriamo {count}",
+      "discussion": "Vedi la discussione",
+      "messageCount": "{count, plural, =1 {1 messaggio} other {# messaggi}}"
     },
     "challenge": {
       "title": "Sfida",
@@ -2932,7 +2990,55 @@
         "leadDescription": "Il referente della cerchia conferma ogni completamento.",
         "voteLabel": "Vota la cerchia",
         "voteDescription": "La cerchia vota per confermare ogni completamento."
-      }
+      },
+      "about": {
+        "trust": "Qui nessuno controlla nessuno. Quando dici di averlo fatto, vale: è il patto che la vostra cerchia ha stretto con sé stessa.",
+        "lead": "Ogni voce la conferma un referente della cerchia. Registra quello che hai fatto e un referente la segna come completata.",
+        "vote": "Vi verificate a vicenda. Ogni voce passa alla cerchia, e la cerchia vota se conta o no."
+      },
+      "state": {
+        "draft": {
+          "label": "Non ancora iniziata",
+          "note": "Questa sfida non è ancora iniziata, quindi non c'è niente da registrare."
+        },
+        "judging": {
+          "label": "In conferma",
+          "note": "Non si può più registrare nulla mentre la cerchia conferma quello che è già stato registrato."
+        },
+        "closed": {
+          "label": "Conclusa",
+          "note": "Questa sfida è conclusa. Non si può registrare altro."
+        },
+        "cancelled": {
+          "label": "Annullata",
+          "note": "La tua cerchia ha annullato questa sfida."
+        }
+      },
+      "activityTitle": "Attività recenti",
+      "activityEmpty": {
+        "title": "Ancora niente di registrato",
+        "description": "Sii il primo a registrare qualcosa: ogni voce comparirà qui."
+      },
+      "activityLogged": "Ha registrato una voce.",
+      "activityLoggedValue": "Ha registrato {value}.",
+      "activityEvidence": "Vedi la prova",
+      "entryState": {
+        "pending": "In attesa",
+        "rejected": "Non conteggiata",
+        "disputed": "Contestata"
+      },
+      "yourProgressTitle": "I tuoi progressi",
+      "yourProgressNone": "Non hai ancora registrato niente.",
+      "yourProgressLogged": "{count, plural, =1 {1 voce registrata} other {# voci registrate}}",
+      "yourProgressCap": {
+        "ONE_OFF": "{done} su {cap} registrate",
+        "DAILY": "{done} su {cap} registrate oggi",
+        "WEEKLY": "{done} su {cap} registrate questa settimana",
+        "MONTHLY": "{done} su {cap} registrate questo mese"
+      },
+      "yourProgressPoints": "{points, plural, =1 {1 punto guadagnato} other {# punti guadagnati}}",
+      "yourProgressPending": "{count, plural, =1 {1 voce in attesa di conferma} other {# voci in attesa di conferma}}",
+      "yourProgressClaimed": "Registrato in totale: {total}"
     },
     "members": {
       "title": "Membri",
@@ -2953,9 +3059,7 @@
       },
       "actions": {
         "viewProfile": "Vedi il profilo",
-        "message": "Invia un messaggio",
-        "makeLead": "Rendi referente",
-        "remove": "Rimuovi dalla cerchia"
+        "message": "Invia un messaggio"
       },
       "past": {
         "title": "{count, plural, =1 {1 ex membro} other {# ex membri}}",
@@ -2968,18 +3072,39 @@
           "REMOVED": "Rimozione per mozione",
           "SUSPENDED": "Sospensione della piattaforma"
         }
-      }
+      },
+      "columns": {
+        "member": "Membro",
+        "role": "Ruolo",
+        "joined": "Iscritto il"
+      },
+      "roleMember": "Membro",
+      "inviteToCircle": "Invita nella cerchia",
+      "governanceNote": "Per escludere un membro bisogna presentare una mozione e la cerchia deve approvarla.",
+      "emptyRoster": "Nessun membro da mostrare."
     },
     "leaderboard": {
       "title": "Classifica",
       "modeRanked": "Individuale",
       "modeCollective": "Collettiva",
       "collectiveTitle": "Il nostro progresso collettivo",
-      "points": "{points} pt",
+      "points": "{points, number} pt",
       "builtTogether": "Costruito insieme",
       "membersContributing": "{count, plural, =1 {1 membro contribuisce} other {# membri contribuiscono}}",
       "breakdownTitle": "Dettaglio dei contributi",
-      "collectiveNote": "In modalità collettiva vinciamo insieme."
+      "collectiveNote": "In modalità collettiva vinciamo insieme.",
+      "thisWeek": "Questa settimana",
+      "dayPoints": "{day}: {points} pt",
+      "weekPartial": "Siamo riusciti a leggere solo le {count} voci di punteggio più recenti, quindi questa settimana è incompleta.",
+      "standingsTitle": "Classifica",
+      "rankedTitle": "A che punto sei",
+      "rankValue": "#{rank}",
+      "yourStandingOf": "La tua posizione, su {total}",
+      "yourStanding": "La tua posizione",
+      "notOnBoard": "Non hai ancora punti in classifica",
+      "leadingNow": "Sei in testa",
+      "rankedNote": "I punti arrivano dai progetti e dalle sfide, e una correzione può anche far scendere un punteggio.",
+      "topContributors": "{count, plural, =1 {Primo per contributi} other {Primi # per contributi}}"
     },
     "time": {
       "daysHoursLeft": "{days} g {hours} h rimaste",
@@ -3147,6 +3272,40 @@
         "leadOnlyBody": "Solo una guida può archiviare questa cerchia.",
         "dissolvedBody": "Questa cerchia è stata sciolta, ed è definitivo. Non può più essere archiviata né riaperta.",
         "proposeInstead": "Puoi chiedere alla cerchia di chiudere aprendo una mozione: decidono insieme i membri."
+      },
+      "nav": {
+        "label": "Sezioni delle impostazioni",
+        "general": "Generale",
+        "access": "Trovare ed entrare",
+        "branding": "Colori",
+        "plan": "Piano e fatturazione",
+        "danger": "Zona pericolo",
+        "members": "Membri"
+      },
+      "branding": {
+        "title": "Colori",
+        "description": "I colori che la tua cerchia mostra ai suoi membri.",
+        "customColours": "Colori personalizzati",
+        "included": "Inclusi",
+        "hidden": "Nascosti",
+        "includedBody": "Il tuo piano include i colori personalizzati, quindi la tua cerchia mostra il suo aspetto.",
+        "hiddenBody": "I colori personalizzati che hai salvato restano esattamente come sono e tornano subito con un piano che li include. Nel frattempo la tua cerchia mostra l'aspetto standard.",
+        "hiddenWhy": "I colori sono nascosti perché il tuo piano attuale non include i colori personalizzati.",
+        "noEditor": "Nell'app non c'è ancora un selettore di colori, quindi per ora qui non si può cambiare niente.",
+        "changePlan": "Cambia piano",
+        "unknown": "Al momento non siamo riusciti a capire cosa copre il tuo piano.",
+        "loadFailed": "Non siamo riusciti a caricare cosa copre il tuo piano. Riprova."
+      },
+      "plan": {
+        "title": "Piano e fatturazione",
+        "description": "Il piano su cui si trova la tua cerchia e quanto le viene addebitato.",
+        "changePlan": "Cambia piano",
+        "seePlans": "Vedi tutti i piani",
+        "nextBillingLabel": "Prossimo addebito",
+        "amountLabel": "Importo",
+        "membersIncluded": "{limit} membri inclusi",
+        "membersUnlimited": "Membri illimitati",
+        "loadFailed": "Non siamo riusciti a caricare il tuo piano. Riprova."
       }
     },
     "history": {
@@ -3160,7 +3319,11 @@
       },
       "empty": {
         "title": "Ancora nessuna decisione",
-        "description": "Quando questa cerchia presenterà la prima mozione, ogni passaggio della decisione verrà registrato qui."
+        "description": "Quando questa cerchia presenterà la prima mozione, ogni passaggio della decisione verrà registrato qui.",
+        "membership": {
+          "title": "Ancora nessuna decisione sui membri",
+          "description": "Quando la cerchia voterà per ammettere o escludere qualcuno, o per nominare un referente, la decisione comparirà qui insieme alle regole con cui è stata presa."
+        }
       },
       "entry": {
         "seq": "n. {seq}",
@@ -3205,6 +3368,45 @@
         "circleUnsuspended": "Sospensione revocata dalla piattaforma",
         "circleDissolved": "Cerchia sciolta dalla piattaforma",
         "unknown": "Evento registrato"
+      },
+      "subtitle": "Il registro di come decidiamo le cose.",
+      "loadMore": "Carica altro",
+      "proposerErased": "Proposta da un account eliminato",
+      "tabs": {
+        "label": "Vista dello storico delle decisioni",
+        "motions": "Mozioni",
+        "membership": "Cambiamenti nei membri"
+      },
+      "table": {
+        "caption": "Le decisioni prese da questa cerchia, dalla più recente. Ogni riga mostra le regole in vigore al momento della presentazione della mozione.",
+        "motion": "Mozione",
+        "outcome": "Esito",
+        "decided": "Decisa il",
+        "rules": "Regole di allora"
+      },
+      "outcome": {
+        "passed": "Approvata",
+        "enacted": "Applicata",
+        "enactmentFailed": "Approvata — non applicata",
+        "rejected": "Respinta",
+        "expired": "Scaduta — nessuna decisione",
+        "withdrawn": "Ritirata",
+        "open": "Ancora aperta",
+        "unknown": "Registrata"
+      },
+      "rules": {
+        "majority": {
+          "unanimous": "All'unanimità",
+          "simple": "Maggioranza semplice",
+          "fraction": "Maggioranza di {n}/{d}"
+        },
+        "quorum": "Quorum {required} su {total}",
+        "unavailable": "Non registrate",
+        "note": "Ogni riga mostra le regole che quella mozione ha fissato alla sua apertura, non le regole di oggi della cerchia."
+      },
+      "decided": {
+        "lapsed": "Scaduta il {date}",
+        "unknown": "Non registrata"
       }
     },
     "governance": {
@@ -3357,7 +3559,12 @@
           "MAX_ACTIVE_PROJECTS": "Hai {current} progetti attivi. Il tuo piano ne copre {limit}. Non viene chiuso né cancellato nulla: semplicemente non puoi avviarne un altro finché uno non si conclude o il piano non cambia.",
           "MAX_ACTIVE_CHALLENGES": "Hai {current} sfide attive. Il tuo piano ne copre {limit}. Non viene annullato nulla: semplicemente non puoi avviarne un’altra finché una non si chiude o il piano non cambia.",
           "STORAGE_MB": "Stai usando {current} su {limit}. Non viene cancellato nulla: semplicemente non puoi caricare altro finché non liberi spazio o il piano non cambia."
-        }
+        },
+        "hidden": "Nascosto",
+        "brandingHiddenWhy": "I colori sono nascosti perché il tuo piano attuale non include i colori personalizzati.",
+        "changePlan": "Cambia piano",
+        "seePlans": "Scopri di più sui piani",
+        "everythingElse": "Tutto il resto che copre il tuo piano"
       },
       "billing": {
         "heading": "Per ora configuriamo i piani a pagamento a mano",
@@ -3400,6 +3607,18 @@
         "successNow": "La tua cerchia è sul piano gratuito.",
         "successLater": "La tua cerchia passerà al piano gratuito alla fine di questo periodo.",
         "error": "Non siamo riusciti a cambiare piano. La tua cerchia è invariata — riprova."
+      },
+      "governance": {
+        "title": "Chi paga non decide",
+        "body": "Pagare dà accesso, non potere. Le decisioni sono della cerchia: ogni membro ha un voto, e qui niente si decide da soli."
+      },
+      "statusBar": {
+        "planLabel": "Piano attuale",
+        "statusLabel": "Stato",
+        "upToMembers": "Fino a {limit} membri",
+        "unlimitedMembers": "Membri illimitati",
+        "overCapacity": "Oltre il limite",
+        "withinPlan": "Entro il tuo piano"
       }
     },
     "invites": {
@@ -3696,6 +3915,24 @@
       "submit": "Invia",
       "accepted": "Ci sei — vale",
       "pending": "Inviata — in attesa di conferma"
+    },
+    "report": {
+      "title": "Segnala a DiaspoPlug",
+      "intro": "Usa questo modulo per segnalare attività illegali o violazioni delle regole della piattaforma. DiaspoPlug non risolve le controversie interne alle cerchie.",
+      "notMember": "Devi essere membro di questa cerchia per segnalarla.",
+      "reasonLabel": "Che cosa vuoi segnalare?",
+      "reasonPlaceholder": "Seleziona un motivo",
+      "reasonsUnavailable": "Non siamo riusciti a caricare i motivi. Riprova più tardi.",
+      "detailsLabel": "Raccontaci di più",
+      "detailsPlaceholder": "Descrivi cosa è successo, con quanti più dettagli possibile…",
+      "detailsHint": "Indica date, nomi e qualsiasi altro elemento che ci aiuti a capire cosa è successo.",
+      "confidentialityNote": "Le segnalazioni vengono inviate al team Trust & Safety di DiaspoPlug. La tua identità resta riservata.",
+      "submit": "Invia segnalazione",
+      "submitting": "Invio in corso…",
+      "success": "Segnalazione inviata",
+      "sentTitle": "Segnalazione ricevuta",
+      "sentBody": "Il team Trust & Safety di DiaspoPlug la esaminerà. Ti contatteremo se ci servono altre informazioni.",
+      "backToCircle": "Torna alla cerchia"
     }
   },
   "feed": {

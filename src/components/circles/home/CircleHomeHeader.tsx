@@ -30,10 +30,22 @@ interface CircleHomeHeaderProps {
 }
 
 /**
- * Header for the circle home screen: identity, an overflow menu, and the
+ * Header for the circle home screen: identity, the two menus, and the
  * Chat / Members strip.
  *
- * ── WHY LINKS AND NOT `SegmentedControl` ────────────────────────────────────
+ * ── IDENTITY READS LEFT TO RIGHT ────────────────────────────────────────────
+ * Avatar, then name over member count, on one line — a chat header, not a
+ * profile card. The earlier centred stack cost three rows of a column whose
+ * whole job is to show the conversation, and put the name where nothing else on
+ * the screen is centred.
+ *
+ * ── SEARCH, NOTIFICATIONS AND THE VIEWER'S OWN AVATAR ARE NOT HERE ──────────
+ * They sit in the app's global header (`components/custom/header.tsx`), which
+ * is mounted by the `(main)` layout directly above this one. Repeating them
+ * would give the page two search boxes and two bells a few pixels apart, and
+ * the second set would be the one that does less.
+ *
+ * ── WHY THE TABS ARE LINKS AND NOT `SegmentedControl` ───────────────────────
  * The two tabs are two ROUTES, not two states of this page — Members is its own
  * screen. `SegmentedControl` is a toggle: it renders `aria-pressed` buttons and
  * announces a state that never actually flips here, and a screen reader would
@@ -52,7 +64,8 @@ export function CircleHomeHeader({
 }: CircleHomeHeaderProps) {
   const t = useTranslations('circles');
 
-  const tabClass = 'flex flex-1 items-center justify-center gap-2 border-b-2 pb-2 pt-1 label-medium transition-colors [&_svg]:size-4 [&_svg]:shrink-0';
+  const tabClass =
+    'flex flex-1 items-center justify-center gap-2 border-b-2 pb-2 pt-1 label-medium transition-colors [&_svg]:size-4 [&_svg]:shrink-0';
 
   return (
     <header className="shrink-0 border-b border-border-subtle bg-surface-default px-3 pt-2 sm:px-4">
@@ -62,19 +75,20 @@ export function CircleHomeHeader({
           // The circles catalogue has no dedicated back label; this string is
           // exactly the right words and is already translated everywhere.
           aria-label={t('errors.notFound.cta')}
-          className="rounded-full p-1.5 text-text-primary hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
+          className="shrink-0 rounded-full p-1.5 text-text-primary hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
         >
           <ChevronLeft aria-hidden="true" className="size-5" />
         </Link>
 
-        <div className="flex min-w-0 flex-1 flex-col items-center">
-          <Avatar className="size-10">
-            <AvatarImage src={toCdnUrl(avatarUrl) || undefined} alt="" />
-            <AvatarFallback className="label-small">
-              {name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <h1 className="heading-xsmall mt-1 max-w-full truncate text-text-primary">{name}</h1>
+        <Avatar className="size-9 shrink-0">
+          <AvatarImage src={toCdnUrl(avatarUrl) || undefined} alt="" />
+          <AvatarFallback className="label-small">
+            {name.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="min-w-0 flex-1">
+          <h1 className="label-large truncate text-text-primary">{name}</h1>
           <p className="caption-small text-text-secondary">
             {t('common.memberCount', { count: memberCount })}
           </p>
@@ -97,7 +111,7 @@ export function CircleHomeHeader({
           <DropdownMenuTrigger asChild>
             <ButtonType3
               aria-label={t('actions.startSomething')}
-              className="p-1.5 text-text-primary hover:bg-surface-subtle"
+              className="shrink-0 p-1.5 text-text-primary hover:bg-surface-subtle"
             >
               <Plus aria-hidden="true" className="size-5" />
             </ButtonType3>
@@ -125,7 +139,7 @@ export function CircleHomeHeader({
           <DropdownMenuTrigger asChild>
             <ButtonType3
               aria-label={t('common.moreOptions')}
-              className="p-1.5 text-text-primary hover:bg-surface-subtle"
+              className="shrink-0 p-1.5 text-text-primary hover:bg-surface-subtle"
             >
               <MoreHorizontal aria-hidden="true" className="size-5" />
             </ButtonType3>

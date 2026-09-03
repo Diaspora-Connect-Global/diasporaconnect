@@ -16,9 +16,9 @@ export {
 } from './CircleImagery';
 export { CreateCircleForm } from './CreateCircleForm';
 export {
-  DiscoverCircleRow,
-  type DiscoverCircleRowProps,
-} from './DiscoverCircleRow';
+  DiscoverCircleCard,
+  type DiscoverCircleCardProps,
+} from './DiscoverCircleCard';
 export { MyCircleCard, type MyCircleCardProps } from './MyCircleCard';
 export {
   useCircleSignals,

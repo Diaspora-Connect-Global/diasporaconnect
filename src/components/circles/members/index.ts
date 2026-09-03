@@ -1,5 +1,17 @@
-export { MemberRow, type MemberRowProps } from './MemberRow';
-export { MembersList, type MembersListProps } from './MembersList';
+// The active roster, as a table: Member · Role · Joined. There is deliberately
+// no remove or promote control anywhere in here — see `GovernanceCallout`.
+export { MembersTable, type MembersTableProps } from './MembersTable';
+export { MemberTableRow, type MemberTableRowProps } from './MemberTableRow';
+export { MembersToolbar, type MembersToolbarProps } from './MembersToolbar';
+export {
+  GovernanceCallout,
+  type GovernanceCalloutProps,
+} from './GovernanceCallout';
+export {
+  filterCircleMembers,
+  type FilterCircleMembersArgs,
+} from './filterMembers';
+
 export { InviteCard, type InviteCardProps } from './InviteCard';
 
 // Former members — the half of the roster that used to be here, and why.

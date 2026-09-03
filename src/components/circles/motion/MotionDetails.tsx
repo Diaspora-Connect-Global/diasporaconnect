@@ -5,13 +5,14 @@ import { useLocale, useTranslations } from 'next-intl';
 import { formatChatTimestamp } from '@/macros/time';
 import type { CircleMotion } from '@/services/gql/types/circles';
 
+import { MotionSection } from './MotionSection';
 import { requiredVotes } from './quorum';
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-border-subtle py-2.5 last:border-b-0">
-      <dt className="body-small text-text-secondary">{label}</dt>
-      <dd className="label-small text-right text-text-primary">{value}</dd>
+    <div className="flex flex-col gap-0.5 border-b border-border-subtle py-2.5 last:border-b-0 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+      <dt className="body-small shrink-0 text-text-secondary">{label}</dt>
+      <dd className="label-small text-text-primary sm:text-right">{value}</dd>
     </div>
   );
 }
@@ -40,8 +41,7 @@ export function MotionDetails({ motion }: MotionDetailsProps) {
   const required = requiredVotes(motion);
 
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="label-large text-text-primary">{t('detailsTitle')}</h2>
+    <MotionSection title={t('detailsTitle')}>
       <dl className="flex flex-col">
         {openedAt && (
           <DetailRow
@@ -68,6 +68,6 @@ export function MotionDetails({ motion }: MotionDetailsProps) {
           })}
         />
       </dl>
-    </section>
+    </MotionSection>
   );
 }

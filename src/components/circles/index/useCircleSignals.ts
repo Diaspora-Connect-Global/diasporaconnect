@@ -69,6 +69,41 @@ export interface CircleSignals {
   /** 0-100 for the circle's headline shared goal, or null when it has none. */
   goalPercent: number | null;
   /**
+   * 0-100 for the active PROJECT as a whole: the share of its goals that are
+   * MET. Null when the project has fewer than two live goals.
+   *
+   * ## Why a goals-met ratio, and why it is not `goalPercent`
+   *
+   * There is no project-level progress anywhere on the gateway — `circleProjectProgress`
+   * does not exist, and `circleGoalProgress` answers for ONE goal at a time.
+   * Averaging every goal's `percentComplete` would mean one query per goal per
+   * card, which is exactly the fan-out this hook already warns about. The goal
+   * rows are already in hand though, and each carries a `status`, so "3 of 4
+   * goals met" is a real project-level fact bought for nothing.
+   *
+   * CANCELLED goals leave the denominator: a goal the circle withdrew is no
+   * longer part of what the project set out to do, and counting it would make
+   * cancelling something *lower* the project's progress.
+   *
+   * ## Why fewer than two goals yields null
+   *
+   * With a single goal the project's progress IS that goal's progress, and the
+   * two chips would sit side by side disagreeing — "Project 0%, Goal 60%" —
+   * because a goal 60% of the way to its target is still not MET. Above one
+   * goal the two say genuinely different things and can be read together.
+   */
+  projectPercent: number | null;
+  /**
+   * True when the circle has a PROJECT_ACTIVE project.
+   *
+   * Kept separate from `projectPercent` because a brand-new project has no
+   * goals yet, so there is no percentage to state — and "this circle has
+   * something running" is worth a chip on its own. Without this a circle whose
+   * project was created five minutes ago looked identical on the index to one
+   * with nothing going on at all.
+   */
+  hasActiveProject: boolean;
+  /**
    * True only until the motions query has answered for the first time.
    *
    * Deliberately not "is anything in flight": `cache-and-network` reports
@@ -105,6 +140,21 @@ function headlineGoal(
   return (
     goals.find((g) => g.scope === 'SHARED' && g.status === 'OPEN') ?? null
   );
+}
+
+/**
+ * Share of a project's goals that are MET, 0-100.
+ *
+ * Null below two live goals — see `projectPercent` on `CircleSignals` for why.
+ */
+function goalsMetPercent(
+  goals: CircleProjectGoal[] | undefined,
+): number | null {
+  if (!goals?.length) return null;
+  const live = goals.filter((g) => g.status !== 'CANCELLED');
+  if (live.length < 2) return null;
+  const met = live.filter((g) => g.status === 'MET').length;
+  return Math.round((met / live.length) * 100);
 }
 
 /** The earliest future-or-past deadline among open motions. Pure — no clock read. */
@@ -159,6 +209,9 @@ export function useCircleSignals(circleId: string): CircleSignals {
     [motions.data],
   );
 
+  const projectGoals = goals.data?.circleProjectGoals;
+  const hasProject = projectId !== null;
+
   return useMemo(() => {
     const percent = progress.data?.circleGoalProgress?.percentComplete;
 
@@ -169,6 +222,8 @@ export function useCircleSignals(circleId: string): CircleSignals {
       // `percentComplete` is an Int 0-100 clamped by circle-service. Guard the
       // absent case explicitly: `0` is a real, meaningful percentage.
       goalPercent: typeof percent === 'number' ? percent : null,
+      projectPercent: goalsMetPercent(projectGoals),
+      hasActiveProject: hasProject,
       // A warm cache satisfies this on the first render, so returning to the
       // index never flashes skeletons over pills it already knows.
       votesPending: motions.data === undefined && motions.error === undefined,
@@ -179,6 +234,8 @@ export function useCircleSignals(circleId: string): CircleSignals {
     motions.data,
     motions.error,
     progress.data,
+    projectGoals,
+    hasProject,
   ]);
 }
 

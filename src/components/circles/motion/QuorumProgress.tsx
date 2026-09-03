@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { ProgressWithLabel } from '@/components/circles/primitives';
 
+import { MotionSection } from './MotionSection';
+
 export interface QuorumProgressProps {
   /** Ballots cast so far — yes + no + abstain. */
   voted: number;
@@ -20,6 +22,10 @@ export interface QuorumProgressProps {
  * required" says. It turns success-coloured only once quorum is met, and that
  * is a statement about turnout alone: a motion can clear quorum and still be
  * rejected on the majority, so nothing here may be read as an outcome.
+ *
+ * `required` is derived from the motion's PINNED `quorumNumerator` /
+ * `quorumDenominator` / `electorateSize` by `requiredVotes()`, never from the
+ * circle's current rule — see the note on `MotionDetails`.
  */
 export function QuorumProgress({
   voted,
@@ -33,13 +39,12 @@ export function QuorumProgress({
   const percent = required > 0 ? (voted / required) * 100 : 100;
 
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="label-large text-text-primary">{t('quorumTitle')}</h2>
+    <MotionSection title={t('quorumTitle')}>
       <ProgressWithLabel
         value={percent}
         label={t('quorumProgress', { voted, required })}
         tone={quorumMet ? 'success' : 'brand'}
       />
-    </section>
+    </MotionSection>
   );
 }

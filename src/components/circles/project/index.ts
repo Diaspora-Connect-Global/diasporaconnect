@@ -8,6 +8,18 @@ export {
   type ContributionListProps,
 } from './ContributionList';
 
+export {
+  ContributionsPanel,
+  type ContributionsPanelProps,
+} from './ContributionsPanel';
+
+export { ProjectHeader, type ProjectHeaderProps } from './ProjectHeader';
+
+export {
+  ProjectDiscussion,
+  type ProjectDiscussionProps,
+} from './ProjectDiscussion';
+
 export { ContributeForm, type ContributeFormProps } from './ContributeForm';
 
 export {

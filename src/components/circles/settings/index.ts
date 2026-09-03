@@ -1,9 +1,9 @@
 /**
  * Components for the Circle settings screen (`/circles/[id]/settings`).
  *
- * `CircleSettingsScreen` is the only export the route needs; the sections are
- * exported alongside it because each owns one mutation and is independently
- * testable, not because they are meant to be composed elsewhere.
+ * `CircleSettingsScreen` is the only export the route needs; the panels are
+ * exported alongside it because each owns one mutation or one read and is
+ * independently testable, not because they are meant to be composed elsewhere.
  */
 
 export {
@@ -19,8 +19,21 @@ export {
   type CircleDiscoverySectionProps,
 } from './CircleDiscoverySection';
 export {
+  CircleBrandingSection,
+  type CircleBrandingSectionProps,
+} from './CircleBrandingSection';
+export {
+  CirclePlanBillingSection,
+  type CirclePlanBillingSectionProps,
+} from './CirclePlanBillingSection';
+export {
   CircleArchiveSection,
   type CircleArchiveSectionProps,
 } from './CircleArchiveSection';
 export { SettingsSection, type SettingsSectionProps } from './SettingsSection';
+export {
+  SettingsNav,
+  type SettingsNavProps,
+  type CircleSettingsPanelId,
+} from './SettingsNav';
 export { isCircleLive } from './liveness';

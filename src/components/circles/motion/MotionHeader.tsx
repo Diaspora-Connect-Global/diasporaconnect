@@ -34,20 +34,28 @@ export function MotionHeader({ motion }: MotionHeaderProps) {
   const openedAt = motion.opensAt ?? motion.createdAt ?? null;
 
   return (
-    <header className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
+    <header className="flex min-w-0 flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
         <MotionStatusPill status={motion.status} />
-        <span className="caption-small text-text-secondary">
+        {/*
+          The motion number is a stable handle people quote to each other
+          ("go and vote on #12"), so it is selectable text and sits at the
+          opposite edge from the status rather than trailing it — a member
+          scanning for a number should always find it in the same place.
+        */}
+        <span className="caption-small shrink-0 tabular-nums text-text-secondary">
           {t('number', { number: motion.motionNumber })}
         </span>
       </div>
 
       {motion.title && (
-        <h1 className="heading-xsmall text-text-primary">{motion.title}</h1>
+        <h1 className="heading-xsmall sm:heading-small text-balance text-text-primary">
+          {motion.title}
+        </h1>
       )}
 
       {motion.proposedBy && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <AvatarGroup
             size="md"
             users={[
@@ -59,7 +67,7 @@ export function MotionHeader({ motion }: MotionHeaderProps) {
             ]}
           />
           <div className="min-w-0">
-            <p className="label-small text-text-primary">
+            <p className="label-small truncate text-text-primary">
               {tCommon('proposedBy', { name: proposerName })}
             </p>
             {openedAt && (
@@ -72,7 +80,10 @@ export function MotionHeader({ motion }: MotionHeaderProps) {
       )}
 
       {motion.rationale && (
-        <p className="body-medium whitespace-pre-line text-text-primary">
+        // Capped at a reading measure rather than the card's full width: on a
+        // wide desktop an uncapped paragraph runs past 120 characters a line,
+        // which is where the eye starts losing its place returning to the left.
+        <p className="body-medium max-w-prose whitespace-pre-line text-text-primary">
           {motion.rationale}
         </p>
       )}
@@ -83,11 +94,31 @@ export function MotionHeader({ motion }: MotionHeaderProps) {
         `enactmentError` set, NOT as a GraphQL error. The circle decided and the
         decision did not land — swallowing that would leave the circle believing
         something happened that did not.
+
+        ── WHY THERE IS A LEAD-IN AND WHY IT PROMISES NOTHING ─────────────────
+        `enactmentError` alone is operator English ("MAX_MEMBERS_LIMIT_REACHED
+        (limit=25, usage=25)") presented bare, which reads as though the VOTE
+        failed. The lead-in states the two facts that are true and separates
+        them: the circle passed this, and applying it did not work.
+
+        It deliberately does NOT say "we'll try again". A leader-locked sweeper
+        does retry PASSED motions every few minutes, but it gives up after a
+        fixed number of attempts and `enactmentAttempts` is NOT exposed on
+        `CircleMotionType` — so this screen genuinely cannot tell "retrying
+        shortly" from "permanently given up". Promising a retry we cannot see
+        the budget for would be a guess dressed as a status, and the member
+        would wait for something that is never coming. The overflow menu offers
+        the manual apply instead, which works either way.
       */}
       {motion.status === 'ENACTMENT_FAILED' && motion.enactmentError && (
-        <p className="body-small rounded-lg bg-surface-danger px-3 py-2 text-text-danger">
-          {motion.enactmentError}
-        </p>
+        <div className="rounded-xl bg-surface-danger px-3 py-2.5">
+          <p className="label-small text-text-danger">
+            {t('enactmentFailedLead')}
+          </p>
+          <p className="body-small mt-1 text-text-danger">
+            {motion.enactmentError}
+          </p>
+        </div>
       )}
     </header>
   );

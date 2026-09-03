@@ -9,40 +9,46 @@ import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
  * `circles/loading.tsx` documents for the index.
  *
  * The tall block below the header stands in for the chain-verdict callout, so
- * the log does not jump upward when the verdict lands. Deliberately drawn as a
- * neutral grey block rather than a tinted one: a placeholder must not imply an
- * outcome, least of all on the one element of this screen that carries a
- * verdict about the integrity of the record.
+ * the table does not jump upward when the verdict lands. Deliberately drawn as
+ * a neutral grey block rather than a tinted one: a placeholder must not imply
+ * an outcome, least of all on the one element of this screen that carries a
+ * verdict about the integrity of the record. The same rule applies to the
+ * outcome column — its placeholder is grey, never green.
  */
 export default function CircleHistoryLoading() {
   return (
     <div className="h-app-inner flex overflow-hidden">
       <div className={CIRCLE_COLUMN_CLASS}>
-        {/* Back arrow + title */}
-        <div className="flex shrink-0 items-center gap-2">
+        {/* Back arrow + heading + subtitle */}
+        <div className="flex shrink-0 items-start gap-2">
           <Skeleton className="size-8 rounded-full" />
-          <Skeleton className="h-5 w-40" />
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-3 w-56" />
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 py-4">
-          {/* Intro line */}
-          <Skeleton className="h-3 w-3/4" />
-
           {/* Chain verdict callout */}
           <Skeleton className="h-20 w-full rounded-xl" />
 
-          {/* Day heading */}
-          <Skeleton className="h-3 w-28" />
+          {/* Motions / Membership changes tabs */}
+          <Skeleton className="h-9 w-full max-w-sm rounded-full" />
 
-          {/* Log entries: headline + meta on the left, seq on the right */}
+          {/* Column headings */}
+          <Skeleton className="h-3 w-full" />
+
+          {/* Rows: motion + proposer, outcome, decided, rules at the time */}
           <div className="flex flex-col gap-4">
             {[...Array(7)].map((_, index) => (
-              <div key={index} className="flex items-start justify-between gap-3">
+              <div key={index} className="flex items-start gap-4">
                 <div className="flex flex-1 flex-col gap-1.5">
                   <Skeleton className="h-4 w-2/3" />
                   <Skeleton className="h-3 w-1/3" />
                 </div>
-                <Skeleton className="h-3 w-8 shrink-0" />
+                <Skeleton className="h-5 w-16 shrink-0 rounded-full" />
+                <Skeleton className="h-3 w-24 shrink-0" />
+                <Skeleton className="h-3 w-40 shrink-0" />
               </div>
             ))}
           </div>

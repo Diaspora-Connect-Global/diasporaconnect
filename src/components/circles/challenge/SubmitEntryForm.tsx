@@ -20,7 +20,9 @@ import type {
 } from '@/services/gql/types/circles';
 import type { CircleEntryDraft } from '@/services/gql/types/circles-actions';
 
+import { acceptsEntries } from './challengeState';
 import { periodKeyFor } from './periodKey';
+import { normalizeVerificationMode } from './verificationMode';
 
 /**
  * @fileoverview "I'm in!" — and everything the claim can carry with it.
@@ -73,7 +75,7 @@ export interface SubmitEntryFormProps {
   circleId: string;
   challenge: CircleChallenge;
   /** Every entry loaded for this challenge; filtered to the viewer here. */
-  entries: CircleChallengeEntry[];
+  entries: readonly CircleChallengeEntry[];
   /** Null while the session is still resolving — the CTA waits rather than lying. */
   currentUserId: string | null;
   /** Suppresses the CTA until the viewer's entries are known. */
@@ -129,10 +131,17 @@ export function SubmitEntryForm({
 
   const recurring = !!challenge.cadence && challenge.cadence !== 'ONE_OFF';
 
+  const verificationMode = normalizeVerificationMode(challenge.verificationMode);
+
   // Only an ACTIVE challenge accepts entries. A DRAFT has not started and a
   // CLOSED or CANCELLED one cannot be joined; rendering a disabled button in
-  // those states would read as "you are not allowed", which is untrue.
-  if (challenge.status !== 'ACTIVE') return null;
+  // those states would read as "you are not allowed", which is untrue. The
+  // caller renders the lifecycle explanation in place of the CTA.
+  //
+  // Compared through `acceptsEntries` rather than `status !== 'ACTIVE'`: the
+  // status enum travels under two spellings, and a prefixed `CHALLENGE_ACTIVE`
+  // would silently strip the CTA from a live challenge. See `challengeState.ts`.
+  if (!acceptsEntries(challenge.status)) return null;
 
   if (enteredThisPeriod) {
     return (
@@ -254,8 +263,13 @@ export function SubmitEntryForm({
        * Shown only when someone other than the submitter decides. Under HONOUR
        * the entry is accepted on the submitter's word the instant it lands, so
        * asking for proof would imply a review that never happens.
+       *
+       * Normalised first: the mode arrives bare today (`LEAD`) but the schema's
+       * own spelling is prefixed (`LEAD_CONFIRMS`), and a raw `!== 'HONOUR'`
+       * test is only accidentally right on one of the two. See
+       * `verificationMode.ts`.
        */}
-      {challenge.verificationMode && challenge.verificationMode !== 'HONOUR' && (
+      {verificationMode !== null && verificationMode !== 'HONOUR' && (
         <TextInput
           id={`entry-evidence-${challenge.id}`}
           type="url"

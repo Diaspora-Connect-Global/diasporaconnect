@@ -127,23 +127,19 @@ export function ContributeForm({ circleId, goal }: ContributeFormProps) {
 
   if (!open) {
     return (
-      <div className="space-y-2">
-        <ButtonType2
-          size="lg"
-          className="w-full"
-          onClick={openForm}
-        >
-          {t('project.contribute')}
-        </ButtonType2>
-        <p className="caption-small text-center text-text-secondary">
-          {t('project.contributeHint')}
-        </p>
-      </div>
+      <ButtonType2 size="lg" className="w-full" onClick={openForm}>
+        {t('project.contribute')}
+      </ButtonType2>
     );
   }
 
+  /*
+   * No card chrome of its own. This form is always rendered inside a container
+   * that already draws a border — nesting a second one turns the primary action
+   * into a box inside a box, which reads as a modal that failed to open.
+   */
   return (
-    <div className="space-y-3 rounded-2xl border border-border-subtle p-4">
+    <div className="space-y-3">
       <TextInput
         id={`contribute-${goal.id}`}
         type="text"

@@ -46,7 +46,7 @@ export interface ChallengeProgressProps {
 }
 
 /**
- * "{n} joined", the participant stack, and how long is left.
+ * Who is in, and how long is left.
  *
  * ## Why the ICU message rather than the `Countdown` primitive
  *
@@ -63,7 +63,8 @@ export function ChallengeProgress({
   participants,
   endsAt,
 }: ChallengeProgressProps) {
-  const t = useTranslations('circles');
+  const t = useTranslations('circles.challenge');
+  const tCommon = useTranslations('circles.common');
   const locale = useLocale();
 
   const daysLeft = useDaysRemaining(endsAt);
@@ -80,47 +81,46 @@ export function ChallengeProgress({
   }, [endsAt, locale]);
 
   return (
-    <section className="mt-6">
-      <h2 className="label-medium text-text-primary">
-        {t('challenge.progressTitle')}
-      </h2>
+    <section className="mt-8">
+      <h2 className="label-medium text-text-primary">{t('progressTitle')}</h2>
 
-      <p className="body-small mt-2 text-text-primary">
-        {t('challenge.joined', { count: participants.length })}
-      </p>
-
-      {participants.length > 0 && (
-        <AvatarGroup
-          className="mt-2"
-          size="md"
-          max={5}
-          users={participants.map((participant) => ({
-            id: participant.userId,
-            // AvatarGroup builds its initials and its `aria-label` roster from
-            // `name`, so an unresolved profile gets the loading label rather
-            // than an empty bubble.
-            name: participant.name ?? t('common.loading'),
-            avatarUrl: participant.avatarUrl,
-          }))}
-        />
-      )}
-
-      {(daysLeft !== null || endsOn) && (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          {daysLeft !== null ? (
-            <span className="label-small text-text-primary">
-              {t('challenge.daysLeft', { days: daysLeft })}
-            </span>
-          ) : (
-            <span />
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex min-w-0 items-center gap-3">
+          {participants.length > 0 && (
+            <AvatarGroup
+              size="md"
+              max={5}
+              users={participants.map((participant) => ({
+                id: participant.userId,
+                // AvatarGroup builds its initials and its `aria-label` roster
+                // from `name`, so an unresolved profile gets the loading label
+                // rather than an empty bubble.
+                name: participant.name ?? tCommon('loading'),
+                avatarUrl: participant.avatarUrl,
+              }))}
+            />
           )}
-          {endsOn && (
-            <span className="caption-small text-text-secondary">
-              {t('challenge.endsOn', { date: endsOn })}
-            </span>
-          )}
+
+          <span className="label-small text-text-primary">
+            {t('joined', { count: participants.length })}
+          </span>
         </div>
-      )}
+
+        {(endsOn || daysLeft !== null) && (
+          <div className="shrink-0 text-right">
+            {endsOn && (
+              <p className="caption-small text-text-secondary">
+                {t('endsOn', { date: endsOn })}
+              </p>
+            )}
+            {daysLeft !== null && (
+              <p className="caption-small text-text-secondary">
+                {t('daysLeft', { days: daysLeft })}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
