@@ -566,7 +566,10 @@
         }
       },
       "linkCopied": "Link in die Zwischenablage kopiert",
-      "shareFailed": "Dieses Event konnte nicht geteilt werden"
+      "shareFailed": "Dieses Event konnte nicht geteilt werden",
+      "eventSaved": "Event gespeichert",
+      "eventRemovedFromSaved": "Event aus Favoriten entfernt",
+      "saveFailed": "Event konnte nicht gespeichert werden"
     },
     "opportunities": {
       "opportunities": "Möglichkeiten",
@@ -1529,6 +1532,14 @@
         "saved": "Access settings updated.",
         "saveFailed": "Could not update access settings."
       }
+    },
+    "errors": {
+      "unknown_error": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "insufficient_data": "Bitte füllen Sie alle erforderlichen Felder aus.",
+      "not_authorized": "Sie haben keine Berechtigung für diese Aktion.",
+      "not_found": "Dieses Element wurde nicht gefunden.",
+      "conflict": "Dieser Vorgang kann im aktuellen Status nicht abgeschlossen werden.",
+      "failed": "Operation fehlgeschlagen. Bitte versuchen Sie es erneut."
     }
   },
   "association": {
@@ -3678,6 +3689,16 @@
       "conflict": "Diese Aktion steht in Konflikt mit dem aktuellen Status. Bitte aktualisieren Sie und versuchen Sie es erneut",
       "failed": "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut",
       "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
+    }
+  },
+  "events": {
+    "errors": {
+      "not_authorized": "Sie haben keine Berechtigung, diese Aktion auszuführen.",
+      "not_found": "Das Event oder die Registrierung wurde nicht gefunden.",
+      "insufficient_data": "Erforderliche Informationen fehlen. Bitte überprüfen Sie Ihre Eingaben.",
+      "conflict": "Diese Aktion kann aufgrund des aktuellen Status nicht ausgeführt werden.",
+      "failed": "Die Operation fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      "unknown_error": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
     }
   }
 }

@@ -567,7 +567,10 @@
         }
       },
       "linkCopied": "Link gekopieerd naar klembord",
-      "shareFailed": "Kan dit evenement niet delen"
+      "shareFailed": "Kan dit evenement niet delen",
+      "eventSaved": "Evenement opgeslagen",
+      "eventRemovedFromSaved": "Evenement verwijderd uit opgeslagen",
+      "saveFailed": "Kan evenement niet opslaan"
     },
     "opportunities": {
       "opportunities": "Kansen",
@@ -1529,6 +1532,14 @@
         "saved": "Access settings updated.",
         "saveFailed": "Could not update access settings."
       }
+    },
+    "errors": {
+      "unknown_error": "Er is een fout opgetreden. Probeer het opnieuw.",
+      "insufficient_data": "Vul alle verplichte velden in.",
+      "not_authorized": "U hebt geen toestemming om deze actie uit te voeren.",
+      "not_found": "Dit item is niet gevonden.",
+      "conflict": "Deze bewerking kan in de huidige status niet worden voltooid.",
+      "failed": "Bewerking mislukt. Probeer het opnieuw."
     }
   },
   "association": {
@@ -3678,6 +3689,16 @@
       "conflict": "Deze bewerking veroorzaakt een conflict met de huidige status. Vernieuw en probeer het opnieuw",
       "failed": "Bewerking mislukt. Probeer het opnieuw",
       "unknown_error": "Er is een onverwachte fout opgetreden"
+    }
+  },
+  "events": {
+    "errors": {
+      "not_authorized": "U heeft geen toestemming om deze actie uit te voeren.",
+      "not_found": "Het evenement of de registratie is niet gevonden.",
+      "insufficient_data": "Vereiste informatie ontbreekt. Controleer uw invoer.",
+      "conflict": "Deze actie kan niet worden voltooid vanwege de huidige status.",
+      "failed": "De bewerking is mislukt. Probeer het opnieuw.",
+      "unknown_error": "Er is een onverwachte fout opgetreden. Probeer het later opnieuw."
     }
   }
 }

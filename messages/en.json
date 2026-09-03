@@ -567,7 +567,10 @@
         }
       },
       "linkCopied": "Link copied to clipboard",
-      "shareFailed": "Could not share this event"
+      "shareFailed": "Could not share this event",
+      "eventSaved": "Event saved",
+      "eventRemovedFromSaved": "Event removed from saved",
+      "saveFailed": "Failed to save event"
     },
     "opportunities": {
       "opportunities": "Opportunities",
@@ -1529,6 +1532,14 @@
         "saved": "Access settings updated.",
         "saveFailed": "Could not update access settings."
       }
+    },
+    "errors": {
+      "unknown_error": "An error occurred. Please try again.",
+      "insufficient_data": "Please fill in all required fields.",
+      "not_authorized": "You don't have permission to perform this action.",
+      "not_found": "This item was not found.",
+      "conflict": "This operation cannot be completed in the current state.",
+      "failed": "Operation failed. Please try again."
     }
   },
   "association": {
@@ -3678,6 +3689,16 @@
       "post_deleted": "Post deleted successfully",
       "comment_updated": "Comment updated successfully",
       "comment_deleted": "Comment deleted successfully"
+    }
+  },
+  "events": {
+    "errors": {
+      "not_authorized": "You do not have permission to perform this action.",
+      "not_found": "The event or registration was not found.",
+      "insufficient_data": "Missing required information. Please check your input.",
+      "conflict": "This action cannot be completed due to the current state.",
+      "failed": "The operation failed. Please try again.",
+      "unknown_error": "An unexpected error occurred. Please try again later."
     }
   }
 }

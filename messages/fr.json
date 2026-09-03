@@ -566,7 +566,10 @@
         }
       },
       "linkCopied": "Lien copié dans le presse-papiers",
-      "shareFailed": "Impossible de partager cet événement"
+      "shareFailed": "Impossible de partager cet événement",
+      "eventSaved": "Événement enregistré",
+      "eventRemovedFromSaved": "Événement supprimé des favoris",
+      "saveFailed": "Impossible d'enregistrer l'événement"
     },
     "opportunities": {
       "opportunities": "Opportunités",
@@ -1529,6 +1532,14 @@
         "saved": "Access settings updated.",
         "saveFailed": "Could not update access settings."
       }
+    },
+    "errors": {
+      "unknown_error": "Une erreur s'est produite. Veuillez réessayer.",
+      "insufficient_data": "Veuillez remplir tous les champs obligatoires.",
+      "not_authorized": "Vous n'avez pas la permission pour effectuer cette action.",
+      "not_found": "Cet élément n'a pas été trouvé.",
+      "conflict": "Cette opération ne peut pas être effectuée dans l'état actuel.",
+      "failed": "Opération échouée. Veuillez réessayer."
     }
   },
   "association": {
@@ -3678,6 +3689,16 @@
       "conflict": "Cette opération entre en conflit avec l'état actuel. Veuillez actualiser et réessayer",
       "failed": "Opération échouée. Veuillez réessayer",
       "unknown_error": "Une erreur inattendue s'est produite"
+    }
+  },
+  "events": {
+    "errors": {
+      "not_authorized": "Vous n'avez pas la permission d'effectuer cette action.",
+      "not_found": "L'événement ou l'enregistrement n'a pas été trouvé.",
+      "insufficient_data": "Informations requises manquantes. Veuillez vérifier votre saisie.",
+      "conflict": "Cette action ne peut pas être complétée en raison de l'état actuel.",
+      "failed": "L'opération a échoué. Veuillez réessayer.",
+      "unknown_error": "Une erreur inattendue s'est produite. Veuillez réessayer plus tard."
     }
   }
 }
