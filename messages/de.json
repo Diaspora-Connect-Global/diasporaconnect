@@ -3652,6 +3652,12 @@
       "conflict": "Diese Aktion steht in Konflikt mit dem aktuellen Status. Bitte aktualisieren Sie und versuchen Sie es erneut",
       "failed": "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut",
       "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
+    },
+    "success": {
+      "post_updated": "Beitrag erfolgreich aktualisiert",
+      "post_deleted": "Beitrag erfolgreich gelöscht",
+      "comment_updated": "Kommentar erfolgreich aktualisiert",
+      "comment_deleted": "Kommentar erfolgreich gelöscht"
     }
   }
 }

@@ -3653,5 +3653,15 @@
       "failed": "De actie is mislukt. Probeer alstublieft opnieuw",
       "unknown_error": "Er is een onverwachte fout opgetreden"
     }
+  },
+  "feed": {
+    "errors": {
+      "insufficient_data": "Vereiste informatie ontbreekt. Probeer alstublieft opnieuw.",
+      "not_authorized": "U bent niet gemachtigd om dit te doen.",
+      "not_found": "Het gezochte item bestaat niet.",
+      "conflict": "Deze actie is in conflict met de huidige status. Vernieuw alstublieft en probeer opnieuw.",
+      "failed": "Er is iets misgegaan. Probeer alstublieft opnieuw.",
+      "unknown_error": "Er is een onverwachte fout opgetreden. Probeer alstublieft opnieuw."
+    }
   }
 }

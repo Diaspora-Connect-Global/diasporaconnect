@@ -3652,6 +3652,12 @@
       "conflict": "Questa operazione entra in conflitto con lo stato attuale. Aggiorna e riprova",
       "failed": "L'operazione non è riuscita. Riprova",
       "unknown_error": "Si è verificato un errore imprevisto"
+    },
+    "success": {
+      "post_updated": "Post aggiornato con successo",
+      "post_deleted": "Post eliminato con successo",
+      "comment_updated": "Commento aggiornato con successo",
+      "comment_deleted": "Commento eliminato con successo"
     }
   }
 }

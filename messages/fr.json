@@ -3652,6 +3652,12 @@
       "conflict": "Cette action entre en conflit avec l'état actuel. Veuillez rafraîchir et réessayer",
       "failed": "L'opération a échoué. Veuillez réessayer",
       "unknown_error": "Une erreur inattendue s'est produite"
+    },
+    "success": {
+      "post_updated": "Publication mise à jour avec succès",
+      "post_deleted": "Publication supprimée avec succès",
+      "comment_updated": "Commentaire mis à jour avec succès",
+      "comment_deleted": "Commentaire supprimé avec succès"
     }
   }
 }
