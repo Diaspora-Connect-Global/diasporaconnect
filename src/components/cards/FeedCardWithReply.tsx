@@ -12,6 +12,7 @@ import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText
 import { useUserStore } from '@/store/useUserStore';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { GET_POST_COMMENTS, LIKE_COMMENT, REMOVE_COMMENT_LIKE, DELETE_POST, EDIT_POST, UPDATE_POST_VISIBILITY, EDIT_COMMENT, DELETE_COMMENT, GetPostCommentsData, LikeCommentData, RemoveCommentLikeData, EditCommentData, DeleteCommentData } from '@/services/gql/postsFeed';
+import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import type { SearchUsersResponse } from '@/services/gql/types/connection';
 import type { MentionUser } from '@/components/custom/messageInputGlobal';
@@ -266,7 +267,13 @@ function FeedCardWithReplyInner({
                 : selectedVisibility === 'CONNECTIONS' ? 'FRIENDS'
                     : 'ONLY_ME';
         try {
-            await updateVisibilityMutation({ variables: { postId, visibility: beValue } });
+            const result = await updateVisibilityMutation({ variables: { postId, visibility: beValue } });
+            const outcome = readMutationOutcome(result, d => d.updatePostVisibility);
+            if (!outcome.ok) {
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(feedErrors(key));
+                return;
+            }
             setVisibilityModalOpen(false);
             toast.success('Visibility updated');
         } catch (err) {
@@ -277,7 +284,13 @@ function FeedCardWithReplyInner({
 
     const handleDeletePostConfirm = async () => {
         try {
-            await deletePost({ variables: { id: postId } });
+            const result = await deletePost({ variables: { id: postId } });
+            const outcome = readMutationOutcome(result, d => d.deletePost);
+            if (!outcome.ok) {
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(feedErrors(key));
+                return;
+            }
             setDeletePostModalOpen(false);
             toast.success('Post deleted');
             onDelete?.(postId);
@@ -291,7 +304,13 @@ function FeedCardWithReplyInner({
     const handleEditPostSubmit = async () => {
         if (!editPostText.trim() && !hasAnyMedia) return;
         try {
-            await editPostMutation({ variables: { input: { id: postId, text: editPostText } } });
+            const result = await editPostMutation({ variables: { input: { id: postId, text: editPostText } } });
+            const outcome = readMutationOutcome(result, d => d.editPost);
+            if (!outcome.ok) {
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(feedErrors(key));
+                return;
+            }
             setPostContent(editPostText);
             setIsEditingPost(false);
             toast.success('Post updated');
@@ -329,7 +348,17 @@ function FeedCardWithReplyInner({
         setLoadedComments((prev) => prev.map((c) => c.id === commentId ? { ...c, content: newText } : c));
         setEditingCommentId(null);
         try {
-            await editCommentMutation({ variables: { input: { commentId, text: newText } } });
+            const result = await editCommentMutation({ variables: { input: { commentId, text: newText } } });
+            const outcome = readMutationOutcome(result, d => d.editComment);
+            if (!outcome.ok) {
+                if (previous) {
+                    setLoadedComments((prev) => prev.map((c) => c.id === commentId ? { ...c, content: previous.content } : c));
+                }
+                setEditingCommentId(commentId);
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(feedErrors(key));
+                return;
+            }
             toast.success('Comment updated');
         } catch {
             if (previous) {
@@ -347,7 +376,18 @@ function FeedCardWithReplyInner({
         setCommentCount((c) => Math.max(0, c - 1));
         setDeleteCommentId(null);
         try {
-            await deleteCommentMutation({ variables: { input: { commentId } } });
+            const result = await deleteCommentMutation({ variables: { input: { commentId } } });
+            const outcome = readMutationOutcome(result, d => d.deleteComment);
+            if (!outcome.ok) {
+                setLoadedComments((prev) => {
+                    const exists = prev.some((c) => c.id === commentId);
+                    return exists ? prev : loadedComments;
+                });
+                setCommentCount((c) => c + 1);
+                const key = refusalMessageKey(outcome.message, 'feed.errors');
+                toast.error(feedErrors(key));
+                return;
+            }
             toast.success('Comment deleted');
         } catch {
             setLoadedComments((prev) => {
@@ -522,6 +562,7 @@ function FeedCardWithReplyInner({
     ];
 
     const t = useTranslations('actions');
+    const feedErrors = useTranslations('feed.errors');
 
     // Sync state with props when they change (important for refetch scenarios)
     useEffect(() => {

@@ -1,1 +1,0 @@
-export { IssueReporterButton } from "./IssueReporterButton";

@@ -944,6 +944,14 @@
           "toastInterested": "Marked as interested.",
           "toastNotGoing": "Marked as not going.",
           "back": "Back to Events"
+        },
+        "errors": {
+          "unknown_error": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später.",
+          "insufficient_data": "Bitte füllen Sie alle erforderlichen Felder aus.",
+          "not_authorized": "Sie haben keine Berechtigung für diese Aktion.",
+          "not_found": "Diese Veranstaltung konnte nicht gefunden werden.",
+          "conflict": "Diese Operation kann im aktuellen Status nicht durchgeführt werden.",
+          "failed": "Vorgang fehlgeschlagen. Bitte versuchen Sie es später."
         }
       },
       "services": {
@@ -3634,6 +3642,16 @@
       "submit": "Absenden",
       "accepted": "Du bist dabei — es zählt",
       "pending": "Gesendet — wartet auf Bestätigung"
+    }
+  },
+  "feed": {
+    "errors": {
+      "insufficient_data": "Bitte füllen Sie alle erforderlichen Felder aus",
+      "not_authorized": "Sie haben keine Berechtigung für diese Aktion",
+      "not_found": "Das gesuchte Element wurde nicht gefunden",
+      "conflict": "Diese Aktion steht in Konflikt mit dem aktuellen Status. Bitte aktualisieren Sie und versuchen Sie es erneut",
+      "failed": "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut",
+      "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
     }
   }
 }

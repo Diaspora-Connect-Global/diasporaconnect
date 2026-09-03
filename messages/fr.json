@@ -944,6 +944,14 @@
           "toastInterested": "Marked as interested.",
           "toastNotGoing": "Marked as not going.",
           "back": "Back to Events"
+        },
+        "errors": {
+          "unknown_error": "Une erreur s'est produite. Veuillez réessayer.",
+          "insufficient_data": "Veuillez remplir tous les champs obligatoires.",
+          "not_authorized": "Vous n'avez pas la permission d'effectuer cette action.",
+          "not_found": "Cet événement n'a pas pu être trouvé.",
+          "conflict": "Cette opération ne peut pas être effectuée dans l'état actuel.",
+          "failed": "L'opération a échoué. Veuillez réessayer."
         }
       },
       "services": {
@@ -3634,6 +3642,16 @@
       "submit": "Envoyer",
       "accepted": "Vous participez — cela compte",
       "pending": "Envoyé — en attente de validation"
+    }
+  },
+  "feed": {
+    "errors": {
+      "insufficient_data": "Veuillez fournir toutes les informations requises",
+      "not_authorized": "Vous n'avez pas la permission d'effectuer cette action",
+      "not_found": "L'élément que vous recherchez n'a pas été trouvé",
+      "conflict": "Cette action entre en conflit avec l'état actuel. Veuillez rafraîchir et réessayer",
+      "failed": "L'opération a échoué. Veuillez réessayer",
+      "unknown_error": "Une erreur inattendue s'est produite"
     }
   }
 }

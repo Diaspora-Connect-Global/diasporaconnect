@@ -947,6 +947,14 @@
           "toastInterested": "Marked as interested.",
           "toastNotGoing": "Marked as not going.",
           "back": "Back to Events"
+        },
+        "errors": {
+          "unknown_error": "An error occurred. Please try again.",
+          "insufficient_data": "Please fill in all required fields.",
+          "not_authorized": "You don't have permission to perform this action.",
+          "not_found": "This event was not found.",
+          "conflict": "This operation cannot be completed in the current state.",
+          "failed": "Operation failed. Please try again."
         }
       },
       "services": {
@@ -3634,6 +3642,26 @@
       "submit": "Send it",
       "accepted": "You're in — it counts",
       "pending": "Sent — waiting to be confirmed"
+    }
+  },
+  "feed": {
+    "errors": {
+      "insufficient_data": "Please provide all required information",
+      "not_authorized": "You don't have permission to perform this action",
+      "not_found": "The item you're looking for was not found",
+      "conflict": "This operation conflicts with the current state. Please refresh and try again",
+      "failed": "Operation failed. Please try again",
+      "unknown_error": "An unexpected error occurred"
+    }
+  },
+  "feed": {
+    "errors": {
+      "insufficient_data": "Missing required information. Please try again.",
+      "not_authorized": "You don't have permission to do this.",
+      "not_found": "The item you're looking for doesn't exist.",
+      "conflict": "This action conflicts with the current state. Please refresh and try again.",
+      "failed": "Something went wrong. Please try again.",
+      "unknown_error": "An unexpected error occurred. Please try again."
     }
   }
 }

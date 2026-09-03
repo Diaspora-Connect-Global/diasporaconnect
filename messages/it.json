@@ -944,6 +944,14 @@
           "toastInterested": "Marked as interested.",
           "toastNotGoing": "Marked as not going.",
           "back": "Back to Events"
+        },
+        "errors": {
+          "unknown_error": "Si è verificato un errore. Riprova.",
+          "insufficient_data": "Completa tutti i campi obbligatori.",
+          "not_authorized": "Non hai il permesso di eseguire questa azione.",
+          "not_found": "Questo evento non è stato trovato.",
+          "conflict": "Questa operazione non può essere completata nello stato attuale.",
+          "failed": "Operazione non riuscita. Riprova."
         }
       },
       "services": {
@@ -3634,6 +3642,16 @@
       "submit": "Invia",
       "accepted": "Ci sei — vale",
       "pending": "Inviata — in attesa di conferma"
+    }
+  },
+  "feed": {
+    "errors": {
+      "insufficient_data": "Fornisci tutte le informazioni richieste",
+      "not_authorized": "Non hai l'autorizzazione per eseguire questa azione",
+      "not_found": "L'elemento che stai cercando non è stato trovato",
+      "conflict": "Questa operazione entra in conflitto con lo stato attuale. Aggiorna e riprova",
+      "failed": "L'operazione non è riuscita. Riprova",
+      "unknown_error": "Si è verificato un errore imprevisto"
     }
   }
 }

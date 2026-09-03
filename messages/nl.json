@@ -947,6 +947,14 @@
           "toastInterested": "Marked as interested.",
           "toastNotGoing": "Marked as not going.",
           "back": "Back to Events"
+        },
+        "errors": {
+          "unknown_error": "Er is een fout opgetreden. Probeer het later opnieuw.",
+          "insufficient_data": "Vul alstublieft alle verplichte velden in.",
+          "not_authorized": "U hebt geen toestemming om deze actie uit te voeren.",
+          "not_found": "Deze evenement kon niet worden gevonden.",
+          "conflict": "Deze bewerking kan niet worden voltooid in de huidige status.",
+          "failed": "Bewerking mislukt. Probeer het later opnieuw."
         }
       },
       "services": {
@@ -3634,6 +3642,16 @@
       "submit": "Versturen",
       "accepted": "Je doet mee — het telt",
       "pending": "Verstuurd — wacht op bevestiging"
+    }
+  },
+  "feed": {
+    "errors": {
+      "insufficient_data": "Geef alstublieft alle vereiste informatie",
+      "not_authorized": "U bent niet gemachtigd om deze actie uit te voeren",
+      "not_found": "Het gezochte item is niet gevonden",
+      "conflict": "Deze actie is in conflict met de huidige status. Vernieuw alstublieft en probeer opnieuw",
+      "failed": "De actie is mislukt. Probeer alstublieft opnieuw",
+      "unknown_error": "Er is een onverwachte fout opgetreden"
     }
   }
 }
