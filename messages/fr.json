@@ -1417,6 +1417,14 @@
             "confirm": "Withdraw case",
             "success": "Case withdrawn",
             "error": "We couldn't withdraw the case. Please try again."
+          },
+          "errors": {
+            "not_found": "Cas non trouvé.",
+            "not_authorized": "Vous n'avez pas la permission de retirer ce cas.",
+            "insufficient_data": "Veuillez fournir toutes les informations requises.",
+            "conflict": "Le cas ne peut pas être retiré dans son état actuel.",
+            "failed": "Impossible de retirer le cas.",
+            "unknown_error": "Une erreur inattendue s'est produite."
           }
         },
         "contactTitleGeneral": "Contact the Community"

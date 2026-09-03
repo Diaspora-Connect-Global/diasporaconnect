@@ -1417,6 +1417,14 @@
             "confirm": "Withdraw case",
             "success": "Case withdrawn",
             "error": "We couldn't withdraw the case. Please try again."
+          },
+          "errors": {
+            "not_found": "Fall nicht gefunden.",
+            "not_authorized": "Sie haben keine Berechtigung, diesen Fall zurückzuziehen.",
+            "insufficient_data": "Bitte geben Sie alle erforderlichen Informationen an.",
+            "conflict": "Der Fall kann in seinem aktuellen Status nicht zurückgezogen werden.",
+            "failed": "Fall konnte nicht zurückgezogen werden.",
+            "unknown_error": "Ein unerwarteter Fehler ist aufgetreten."
           }
         },
         "contactTitleGeneral": "Contact the Community"
