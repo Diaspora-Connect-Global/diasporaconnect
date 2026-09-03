@@ -1,6 +1,13 @@
 'use client';
 
-import { ChevronLeft, MessageSquare, MoreHorizontal, Trophy, Users } from 'lucide-react';
+import {
+  ChevronLeft,
+  MessageSquare,
+  MoreHorizontal,
+  Plus,
+  Trophy,
+  Users,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { ButtonType3 } from '@/components/custom/button';
@@ -72,6 +79,47 @@ export function CircleHomeHeader({
             {t('common.memberCount', { count: memberCount })}
           </p>
         </div>
+
+        {/*
+         * Starting something is its own control, not an item buried in the
+         * overflow menu. Without it the circle is READ-ONLY from its own home
+         * screen: every viewer exists and none of the four creation routes has
+         * any navigation into it.
+         *
+         * Deliberately NOT gated on role or entitlement here. Whether an action
+         * needs a vote is a per-kind governance rule and whether a slot is free
+         * is an entitlement read; both are answered ON the destination screen,
+         * where there is room to explain them. Hiding the menu would teach a
+         * member the feature does not exist — and this header does not load
+         * either query, so any gate here would be a guess.
+         */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <ButtonType3
+              aria-label={t('actions.startSomething')}
+              className="p-1.5 text-text-primary hover:bg-surface-subtle"
+            >
+              <Plus aria-hidden="true" className="size-5" />
+            </ButtonType3>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[200px] bg-surface-default">
+            <DropdownMenuItem asChild className="body-medium text-text-primary">
+              <Link href={`/circles/${circleId}/projects/new`}>
+                {t('newProject.cta')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="body-medium text-text-primary">
+              <Link href={`/circles/${circleId}/challenges/new`}>
+                {t('newChallenge.cta')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="body-medium text-text-primary">
+              <Link href={`/circles/${circleId}/motions/new`}>
+                {t('newMotion.cta')}
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

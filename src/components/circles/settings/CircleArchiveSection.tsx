@@ -17,6 +17,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ARCHIVE_CIRCLE } from '@/services/gql/circles-settings';
+import {
+  readCircleWrite,
+  refusalMessageKey,
+} from '@/components/circles/governance/mutationOutcome';
 import type { Circle } from '@/services/gql/types/circles';
 import type {
   ArchiveCircleData,
@@ -85,6 +89,7 @@ export function CircleArchiveSection({
   onArchived,
 }: CircleArchiveSectionProps) {
   const t = useTranslations('circles.settings');
+  const tActions = useTranslations('circles.actions');
   const [open, setOpen] = useState(false);
 
   const [archiveCircle, { loading: archiving }] = useMutation<
@@ -104,15 +109,33 @@ export function CircleArchiveSection({
   const handleConfirm = async () => {
     if (archiving) return;
     try {
-      await archiveCircle({ variables: { circleId: circle.id } });
+      const result = await archiveCircle({ variables: { circleId: circle.id } });
+
+      /*
+       * `data`, not the absence of a throw. Under the global
+       * `errorPolicy: 'all'` a REFUSED mutation resolves, so the catch below
+       * never fired for a server refusal — "this requires a motion", "the
+       * circle is suspended", a missing-lead invariant — and this closed the
+       * dialog and announced the circle archived when it was still live. Of
+       * every false-success path in this feature it was the worst: the member
+       * believes a circle is gone and stops looking at it.
+       *
+       * The refusal is classified into translated copy rather than echoing
+       * circle-service's sentence, which is operator English carrying raw
+       * UUIDs. See `governance/mutationOutcome.ts`.
+       */
+      const outcome = readCircleWrite(result, (d) => d.archiveCircle);
+      if (!outcome.ok) {
+        toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
+        return;
+      }
+
       setOpen(false);
       toast.success(t('archive.archived'));
       onArchived();
-    } catch (err) {
-      // circle-service's own message: "this requires a motion", "the circle is
-      // suspended", a missing-lead invariant. Losing it would leave the user
-      // with nothing to act on.
-      toast.error(err instanceof Error ? err.message : t('archive.failed'));
+    } catch (error) {
+      const outcome = readCircleWrite({ error }, () => null);
+      toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
     }
   };
 

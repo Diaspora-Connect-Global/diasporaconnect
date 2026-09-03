@@ -665,6 +665,7 @@
     "cancelRequestConfirm": "Votre demande d'adhésion à {name} sera retirée.",
     "groups": {
       "myGroups": "Mes groupes",
+      "openChat": "Ouvrir la conversation de {name}",
       "discover": "Découvrir des groupes",
       "searchPlaceholder": "Rechercher des groupes",
       "loading": "Chargement des groupes...",
@@ -745,6 +746,7 @@
         "verifiedServices": "Services vérifiés",
         "support": "Assistance",
         "community": "Communauté",
+        "rules": "Règles",
         "groups": "Groupes"
       },
       "home": {
@@ -2794,7 +2796,8 @@
         "tallyNo": "{count} Contre",
         "tallyPending": "{count} En attente",
         "closes": "Clôture {time}"
-      }
+      },
+      "chatUnavailable": "La messagerie n'est pas encore disponible dans les cercles. Les projets, les défis et les votes fonctionnent normalement."
     },
     "motion": {
       "title": "Détails de la motion",
@@ -3447,6 +3450,190 @@
           "description": "Un problème est survenu en route vers le cercle. Réessayer suffit souvent."
         }
       }
+    },
+    "actions": {
+      "startSomething": "Lancer quelque chose",
+      "allowance": {
+        "remaining": "{current} sur {limit} utilisés — il en reste {remaining}",
+        "none": "Vous utilisez la totalité de vos {limit}. Rien de ce qui est en cours ne s'arrête — vous ne pouvez simplement pas en lancer un autre tant qu'aucun n'est clôturé."
+      },
+      "route": {
+        "question": "Comment procéder ?",
+        "directTitle": "Lancer maintenant",
+        "directDescription": "Votre cercle le laisse à chaque membre. Cela prend effet aussitôt.",
+        "motionTitle": "Soumettre au cercle",
+        "motionDescription": "Le cercle vote d'abord.",
+        "motionRule": "{quorum} · {majority} · ouvert pendant {window}",
+        "onlyDirect": "Votre cercle le laisse à chaque membre : cela prend effet dès que vous le lancez.",
+        "onlyMotion": "Celle-ci passe d'abord par le cercle. {rule}"
+      },
+      "blocked": {
+        "ENTITLEMENT_LOCKED": "Votre cercle utilise la totalité de son quota. Rien de ce qui est en cours ne s'arrête — vous ne pouvez simplement pas en lancer un autre tant qu'aucun n'est clôturé.",
+        "PROPOSER_ROLE": "Votre cercle réserve cela aux responsables. Demandez à un responsable de le proposer.",
+        "CIRCLE_NOT_ACTIVE": "Ce cercle n'accepte rien de nouveau pour le moment.",
+        "NOT_A_MEMBER": "Vous n'êtes pas membre de ce cercle.",
+        "NO_RULE": "Ce cercle n'a pas de règle pour ce type de décision : elle ne peut donc pas être mise au vote."
+      },
+      "writeErrors": {
+        "entitlementLocked": "Vous avez atteint la limite de votre cercle. Rien de ce qui est en cours ne s'arrête — clôturez-en un d'abord.",
+        "circleNotActive": "Ce cercle n'accepte rien de nouveau pour le moment.",
+        "notAMember": "Vous n'êtes plus membre de ce cercle. Rechargez la page.",
+        "proposerRole": "Votre cercle réserve cela aux responsables.",
+        "noGovernanceRule": "Ce cercle n'a pas de règle pour ce type de décision : elle ne peut donc pas être mise au vote.",
+        "dormantNoElectorate": "Un cercle a besoin d’au moins deux membres actifs pour tenir un vote.",
+        "duplicateMotion": "Une motion est déjà ouverte à ce sujet. Allez voter sur celle-là.",
+        "subjectRequired": "Choisissez d'abord sur quoi porte cette motion.",
+        "goalScope": "Un objectif commun ne peut être attribué à personne, et un objectif individuel doit l'être.",
+        "assigneeNotMember": "Cette personne n'est pas membre actif de ce cercle : elle ne pourrait jamais contribuer à l'objectif.",
+        "targetValue": "Indiquez un objectif supérieur à zéro.",
+        "verificationMode": "Le serveur n'a pas accepté ce mode de validation. Choisissez « Confiance à tous », ou soumettez plutôt le défi au cercle.",
+        "challengeState": "Ce défi n'accepte pas cela pour le moment.",
+        "idempotencyKey": "Un problème est survenu de notre côté. Réessayez.",
+        "periodMismatch": "La période vient de changer. Rechargez la page et réessayez.",
+        "unknown": "Cela n'a pas abouti. Réessayez."
+      }
+    },
+    "newProject": {
+      "title": "Lancer un projet",
+      "subtitle": "Quelque chose sur quoi le cercle travaille ensemble.",
+      "cta": "Nouveau projet",
+      "titleLabel": "De quoi s'agit-il ?",
+      "titlePlaceholder": "ex. Fonds de rentrée scolaire",
+      "descriptionLabel": "À quoi sert-il ? (facultatif)",
+      "descriptionPlaceholder": "Une phrase ou deux auxquelles le cercle pourra revenir.",
+      "startsOnLabel": "Débute le (facultatif)",
+      "dueOnLabel": "Échéance (facultatif)",
+      "submitDirect": "Lancer le projet",
+      "submitMotion": "Proposer le projet",
+      "submitting": "En cours...",
+      "createdDirect": "Projet lancé",
+      "motionOpened": "Proposé — le cercle peut voter",
+      "motionTitle": "Lancer le projet « {project} »"
+    },
+    "newChallenge": {
+      "title": "Lancer un défi",
+      "subtitle": "Quelque chose que tout le monde fait, suivi ensemble.",
+      "cta": "Nouveau défi",
+      "titleLabel": "Quel est le défi ?",
+      "titlePlaceholder": "ex. Marcher 10 000 pas",
+      "descriptionLabel": "Des précisions ? (facultatif)",
+      "descriptionPlaceholder": "Ce qui compte, et ce qui ne compte pas.",
+      "verificationQuestion": "Qui confirme que c’est fait ?",
+      "verificationLockNote": "Ce choix est figé dès le lancement du défi et ne pourra plus être modifié.",
+      "cadenceQuestion": "À quelle fréquence peut-on participer ?",
+      "cadence": {
+        "ONE_OFF": {
+          "title": "Une fois",
+          "description": "Une participation chacun, pour tout le défi."
+        },
+        "DAILY": {
+          "title": "Chaque jour",
+          "description": "Une nouvelle participation chaque jour."
+        },
+        "WEEKLY": {
+          "title": "Chaque semaine",
+          "description": "Une nouvelle participation chaque semaine."
+        },
+        "MONTHLY": {
+          "title": "Chaque mois",
+          "description": "Une nouvelle participation chaque mois."
+        }
+      },
+      "pointsLabel": "Points par participation (facultatif)",
+      "pointsPlaceholder": "1",
+      "maxEntriesLabel": "Participations par période (facultatif)",
+      "maxEntriesPlaceholder": "Sans limite",
+      "startsAtLabel": "Débute le (facultatif)",
+      "endsAtLabel": "Se termine le (facultatif)",
+      "submitDirect": "Lancer le défi",
+      "submitMotion": "Proposer le défi",
+      "submitting": "En cours...",
+      "started": "Défi lancé",
+      "createdNotStarted": "Enregistré comme brouillon, mais il n'a pas pu démarrer. {reason}",
+      "motionOpened": "Proposé — le cercle peut voter",
+      "motionTitle": "Lancer le défi « {challenge} »"
+    },
+    "newMotion": {
+      "title": "Proposer quelque chose",
+      "subtitle": "Soumettez une décision au cercle.",
+      "cta": "Proposer quelque chose",
+      "kindLabel": "Que proposez-vous ?",
+      "kindPlaceholder": "Choisir une décision",
+      "ruleSummary": "{quorum} · {majority} · ouvert pendant {window}",
+      "proposedElsewhere": "Celle-ci se propose depuis l'écran qui en recueille les détails, pour que le cercle vote sur quelque chose de complet.",
+      "goToScreen": "Y aller",
+      "subjectMemberLabel": "Quel membre ?",
+      "subjectMemberPlaceholder": "Choisir un membre",
+      "subjectProjectLabel": "Quel projet ?",
+      "subjectProjectPlaceholder": "Choisir un projet",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "Ce sur quoi le cercle décide",
+      "rationaleLabel": "Pourquoi ? (facultatif)",
+      "rationalePlaceholder": "Vos arguments, dans vos propres mots.",
+      "rationaleHint": "Tout le monde le voit au moment de voter.",
+      "open": "Ouvrir le vote",
+      "opening": "Ouverture...",
+      "opened": "Motion ouverte",
+      "cannotPropose": "Vous ne pouvez pas ouvrir de motion dans ce cercle.",
+      "circleCannotVote": "Ce cercle ne peut pas tenir de vote pour le moment. Tout le reste fonctionne."
+    },
+    "newGoal": {
+      "cta": "Ajouter un objectif",
+      "ctaFirst": "Ajouter le premier objectif",
+      "scopeQuestion": "À qui appartient l'objectif ?",
+      "scopeSharedTitle": "Tout le cercle",
+      "scopeSharedDescription": "Un seul chiffre vers lequel tout le monde avance ensemble.",
+      "scopeIndividualTitle": "Une personne",
+      "scopeIndividualDescription": "Un objectif pour un membre, seul à pouvoir y inscrire des contributions.",
+      "assigneeLabel": "Pour qui ?",
+      "assigneePlaceholder": "Choisir un membre",
+      "metricQuestion": "Que mesure-t-il ?",
+      "metric": {
+        "COUNT": {
+          "title": "Un nombre",
+          "description": "Livres, pas, séances — tout ce qui se compte."
+        },
+        "AMOUNT": {
+          "title": "De l’argent",
+          "description": "Un montant à réunir ou à épargner, dans une seule devise."
+        },
+        "DURATION": {
+          "title": "Du temps",
+          "description": "Heures ou minutes — tout ce qui se mesure en temps."
+        }
+      },
+      "currencyLabel": "Devise",
+      "currencyPlaceholder": "Choisir une devise",
+      "unitLabel": "Unité (facultatif)",
+      "unitPlaceholder": "ex. km, livres",
+      "targetLabel": "Objectif",
+      "targetMoneyLabel": "Montant visé",
+      "targetPlaceholder": "0",
+      "dueOnLabel": "Échéance (facultatif)",
+      "add": "Ajouter l'objectif",
+      "adding": "Ajout...",
+      "added": "Objectif ajouté",
+      "errors": {
+        "assigneeRequired": "Choisissez à qui cet objectif est destiné.",
+        "targetRequired": "Indiquez un objectif.",
+        "targetNotANumber": "Ce n'est pas un nombre.",
+        "targetNotPositive": "L'objectif doit être supérieur à zéro.",
+        "targetTooSmall": "Trop petit pour être enregistré — utilisez un nombre plus grand ou une unité plus petite.",
+        "unitRequired": "Choisissez une devise."
+      }
+    },
+    "newEntry": {
+      "logThisPeriod": "Enregistrer celle-ci",
+      "doneThisPeriod": "Enregistré pour cette fois",
+      "claimLabel": "Combien ? (facultatif)",
+      "claimPlaceholder": "ex. 5",
+      "noteLabel": "Note (facultatif)",
+      "notePlaceholder": "Ce qui mérite d’être précisé.",
+      "evidenceLabel": "Lien vers une preuve (facultatif)",
+      "evidencePlaceholder": "https://",
+      "submit": "Envoyer",
+      "accepted": "Vous participez — cela compte",
+      "pending": "Envoyé — en attente de validation"
     }
   }
 }

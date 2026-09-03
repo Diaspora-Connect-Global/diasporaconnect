@@ -17,3 +17,20 @@ export {
   parseContributionValue,
   type GoalMetric,
 } from './metric';
+
+// ── Creation flows ─────────────────────────────────────────────────────────
+export {
+  CreateProjectForm,
+  type CreateProjectFormProps,
+} from './CreateProjectForm';
+
+export { AddGoalForm, type AddGoalFormProps } from './AddGoalForm';
+
+export {
+  isMoneyDraft,
+  normaliseGoalDraft,
+  toAddGoalInput,
+  validateGoalDraft,
+  type GoalDraftError,
+  type GoalDraftValidation,
+} from './goalDraft';

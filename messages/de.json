@@ -665,6 +665,7 @@
     "cancelRequestConfirm": "Deine Beitrittsanfrage an {name} wird zurückgezogen.",
     "groups": {
       "myGroups": "Meine Gruppen",
+      "openChat": "Chat von {name} öffnen",
       "discover": "Gruppen entdecken",
       "searchPlaceholder": "Gruppen suchen",
       "loading": "Gruppen werden geladen...",
@@ -745,6 +746,7 @@
         "verifiedServices": "Verifizierte Dienste",
         "support": "Support",
         "community": "Community",
+        "rules": "Regeln",
         "groups": "Gruppen"
       },
       "home": {
@@ -2794,7 +2796,8 @@
         "tallyNo": "{count} Nein",
         "tallyPending": "{count} Ausstehend",
         "closes": "Endet {time}"
-      }
+      },
+      "chatUnavailable": "Chat ist in Kreisen noch nicht verfügbar. Projekte, Challenges und Abstimmungen funktionieren weiterhin."
     },
     "motion": {
       "title": "Antragsdetails",
@@ -3447,6 +3450,190 @@
           "description": "Auf dem Weg zum Kreis ist etwas schiefgegangen. Ein erneuter Versuch hilft oft."
         }
       }
+    },
+    "actions": {
+      "startSomething": "Etwas starten",
+      "allowance": {
+        "remaining": "{current} von {limit} genutzt — {remaining} übrig",
+        "none": "Du nutzt alle {limit}. Nichts Laufendes wird gestoppt — du kannst nur nichts Neues starten, bis eines abgeschlossen ist."
+      },
+      "route": {
+        "question": "Wie soll das passieren?",
+        "directTitle": "Jetzt starten",
+        "directDescription": "Dein Kreis überlässt das jedem Mitglied. Es gilt sofort.",
+        "motionTitle": "Dem Kreis vorlegen",
+        "motionDescription": "Der Kreis stimmt zuerst darüber ab.",
+        "motionRule": "{quorum} · {majority} · {window} lang offen",
+        "onlyDirect": "Dein Kreis überlässt das jedem Mitglied, es gilt also, sobald du es startest.",
+        "onlyMotion": "Das geht zuerst an den Kreis. {rule}"
+      },
+      "blocked": {
+        "ENTITLEMENT_LOCKED": "Dein Kreis nutzt sein gesamtes Kontingent. Nichts Laufendes wird gestoppt — du kannst nur nichts Neues starten, bis eines abgeschlossen ist.",
+        "PROPOSER_ROLE": "Dein Kreis behält das der Leitung vor. Bitte die Leitung, es vorzuschlagen.",
+        "CIRCLE_NOT_ACTIVE": "Dieser Kreis nimmt derzeit nichts Neues an.",
+        "NOT_A_MEMBER": "Du bist kein Mitglied dieses Kreises.",
+        "NO_RULE": "Dieser Kreis hat für diese Art von Entscheidung keine Regel, sie kann also nicht abgestimmt werden."
+      },
+      "writeErrors": {
+        "entitlementLocked": "Du hast das Limit deines Kreises erreicht. Nichts Laufendes wird gestoppt — schließe zuerst eines ab.",
+        "circleNotActive": "Dieser Kreis nimmt derzeit nichts Neues an.",
+        "notAMember": "Du bist kein Mitglied dieses Kreises mehr. Lade die Seite neu.",
+        "proposerRole": "Dein Kreis behält das der Leitung vor.",
+        "noGovernanceRule": "Dieser Kreis hat für diese Art von Entscheidung keine Regel, sie kann also nicht abgestimmt werden.",
+        "dormantNoElectorate": "Ein Kreis braucht mindestens zwei aktive Mitglieder für eine Abstimmung.",
+        "duplicateMotion": "Dazu läuft bereits ein Antrag. Stimme über diesen ab.",
+        "subjectRequired": "Wähle zuerst, worum es in diesem Antrag geht.",
+        "goalScope": "Einem gemeinsamen Ziel kann niemand zugewiesen werden, ein persönliches Ziel braucht dagegen eine Zuweisung.",
+        "assigneeNotMember": "Diese Person ist kein aktives Mitglied dieses Kreises und könnte nie zum Ziel beitragen.",
+        "targetValue": "Gib einen Zielwert größer als null an.",
+        "verificationMode": "Der Server hat diese Art der Bestätigung nicht akzeptiert. Wähle „Allen vertrauen“ oder lege die Challenge dem Kreis vor.",
+        "challengeState": "Diese Challenge nimmt das gerade nicht an.",
+        "idempotencyKey": "Bei uns ist etwas schiefgelaufen. Versuche es erneut.",
+        "periodMismatch": "Der Zeitraum hat gerade gewechselt. Lade die Seite neu und versuche es erneut.",
+        "unknown": "Das hat nicht geklappt. Versuche es erneut."
+      }
+    },
+    "newProject": {
+      "title": "Ein Projekt starten",
+      "subtitle": "Etwas, woran der Kreis gemeinsam arbeitet.",
+      "cta": "Neues Projekt",
+      "titleLabel": "Worum geht es?",
+      "titlePlaceholder": "z. B. Schulstart-Fonds",
+      "descriptionLabel": "Wofür ist es? (optional)",
+      "descriptionPlaceholder": "Ein, zwei Sätze, auf die der Kreis zurückkommen kann.",
+      "startsOnLabel": "Beginnt (optional)",
+      "dueOnLabel": "Fällig (optional)",
+      "submitDirect": "Projekt starten",
+      "submitMotion": "Projekt vorschlagen",
+      "submitting": "Wird verarbeitet...",
+      "createdDirect": "Projekt gestartet",
+      "motionOpened": "Vorgeschlagen — der Kreis kann jetzt abstimmen",
+      "motionTitle": "Das Projekt „{project}“ starten"
+    },
+    "newChallenge": {
+      "title": "Eine Challenge starten",
+      "subtitle": "Etwas, das alle machen und gemeinsam verfolgen.",
+      "cta": "Neue Challenge",
+      "titleLabel": "Was ist die Challenge?",
+      "titlePlaceholder": "z. B. 10.000 Schritte gehen",
+      "descriptionLabel": "Weitere Details? (optional)",
+      "descriptionPlaceholder": "Was zählt und was nicht.",
+      "verificationQuestion": "Wer bestätigt, dass es geschafft wurde?",
+      "verificationLockNote": "Das wird mit dem Start der Challenge festgelegt und kann danach nicht mehr geändert werden.",
+      "cadenceQuestion": "Wie oft kann man mitmachen?",
+      "cadence": {
+        "ONE_OFF": {
+          "title": "Einmal",
+          "description": "Ein Beitrag pro Person für die ganze Challenge."
+        },
+        "DAILY": {
+          "title": "Jeden Tag",
+          "description": "Jeden Tag ein neuer Beitrag."
+        },
+        "WEEKLY": {
+          "title": "Jede Woche",
+          "description": "Jede Woche ein neuer Beitrag."
+        },
+        "MONTHLY": {
+          "title": "Jeden Monat",
+          "description": "Jeden Monat ein neuer Beitrag."
+        }
+      },
+      "pointsLabel": "Punkte pro Beitrag (optional)",
+      "pointsPlaceholder": "1",
+      "maxEntriesLabel": "Beiträge pro Zeitraum (optional)",
+      "maxEntriesPlaceholder": "Kein Limit",
+      "startsAtLabel": "Beginnt (optional)",
+      "endsAtLabel": "Endet (optional)",
+      "submitDirect": "Challenge starten",
+      "submitMotion": "Challenge vorschlagen",
+      "submitting": "Wird verarbeitet...",
+      "started": "Challenge gestartet",
+      "createdNotStarted": "Als Entwurf gespeichert, konnte aber nicht starten. {reason}",
+      "motionOpened": "Vorgeschlagen — der Kreis kann jetzt abstimmen",
+      "motionTitle": "Die Challenge „{challenge}“ starten"
+    },
+    "newMotion": {
+      "title": "Etwas vorschlagen",
+      "subtitle": "Lege dem Kreis eine Entscheidung vor.",
+      "cta": "Etwas vorschlagen",
+      "kindLabel": "Was schlägst du vor?",
+      "kindPlaceholder": "Entscheidung wählen",
+      "ruleSummary": "{quorum} · {majority} · {window} lang offen",
+      "proposedElsewhere": "Das wird auf der Seite vorgeschlagen, die die Details erfasst — so stimmt der Kreis über etwas Vollständiges ab.",
+      "goToScreen": "Dorthin gehen",
+      "subjectMemberLabel": "Welches Mitglied?",
+      "subjectMemberPlaceholder": "Mitglied wählen",
+      "subjectProjectLabel": "Welches Projekt?",
+      "subjectProjectPlaceholder": "Projekt wählen",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "Worüber der Kreis entscheidet",
+      "rationaleLabel": "Warum? (optional)",
+      "rationalePlaceholder": "Die Begründung, in deinen eigenen Worten.",
+      "rationaleHint": "Alle sehen das während der Abstimmung.",
+      "open": "Abstimmung eröffnen",
+      "opening": "Wird eröffnet...",
+      "opened": "Antrag eröffnet",
+      "cannotPropose": "Du kannst in diesem Kreis keinen Antrag eröffnen.",
+      "circleCannotVote": "Dieser Kreis kann gerade nicht abstimmen. Alles andere funktioniert weiterhin."
+    },
+    "newGoal": {
+      "cta": "Ziel hinzufügen",
+      "ctaFirst": "Erstes Ziel hinzufügen",
+      "scopeQuestion": "Wessen Ziel ist es?",
+      "scopeSharedTitle": "Der ganze Kreis",
+      "scopeSharedDescription": "Eine Zahl, auf die alle gemeinsam hinarbeiten.",
+      "scopeIndividualTitle": "Eine Person",
+      "scopeIndividualDescription": "Ein Ziel für ein Mitglied, das als Einziges dafür etwas eintragen kann.",
+      "assigneeLabel": "Für wen ist es?",
+      "assigneePlaceholder": "Mitglied wählen",
+      "metricQuestion": "Was wird gemessen?",
+      "metric": {
+        "COUNT": {
+          "title": "Eine Anzahl",
+          "description": "Bücher, Schritte, Termine — alles Zählbare."
+        },
+        "AMOUNT": {
+          "title": "Geld",
+          "description": "Ein Betrag zum Sammeln oder Sparen, in einer Währung."
+        },
+        "DURATION": {
+          "title": "Zeit",
+          "description": "Stunden oder Minuten — alles, was in Zeit gemessen wird."
+        }
+      },
+      "currencyLabel": "Währung",
+      "currencyPlaceholder": "Währung wählen",
+      "unitLabel": "Einheit (optional)",
+      "unitPlaceholder": "z. B. km, Bücher",
+      "targetLabel": "Zielwert",
+      "targetMoneyLabel": "Zielbetrag",
+      "targetPlaceholder": "0",
+      "dueOnLabel": "Fällig (optional)",
+      "add": "Ziel hinzufügen",
+      "adding": "Wird hinzugefügt...",
+      "added": "Ziel hinzugefügt",
+      "errors": {
+        "assigneeRequired": "Wähle, für wen dieses Ziel ist.",
+        "targetRequired": "Gib einen Zielwert an.",
+        "targetNotANumber": "Das ist keine Zahl.",
+        "targetNotPositive": "Der Zielwert muss größer als null sein.",
+        "targetTooSmall": "Das ist zu klein zum Erfassen — nimm eine größere Zahl oder eine kleinere Einheit.",
+        "unitRequired": "Wähle eine Währung."
+      }
+    },
+    "newEntry": {
+      "logThisPeriod": "Diesen eintragen",
+      "doneThisPeriod": "Vorerst eingetragen",
+      "claimLabel": "Wie viel? (optional)",
+      "claimPlaceholder": "z. B. 5",
+      "noteLabel": "Notiz (optional)",
+      "notePlaceholder": "Alles, was dazu erwähnenswert ist.",
+      "evidenceLabel": "Link zum Nachweis (optional)",
+      "evidencePlaceholder": "https://",
+      "submit": "Absenden",
+      "accepted": "Du bist dabei — es zählt",
+      "pending": "Gesendet — wartet auf Bestätigung"
     }
   }
 }

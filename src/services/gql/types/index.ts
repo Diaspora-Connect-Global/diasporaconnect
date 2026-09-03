@@ -68,3 +68,7 @@ export * from './circles-invites';
 
 // Circle plan & subscription screen (catalogue, entitlements usage, change/cancel)
 export * from './circles-billing';
+
+// Circle creation flows (new project/goal/challenge/entry/motion) — adds the
+// SEND-direction verification mode, form drafts and the direct-or-motion policy
+export * from './circles-actions';

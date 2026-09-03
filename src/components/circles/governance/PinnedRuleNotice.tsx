@@ -22,11 +22,14 @@ import { useTranslations } from 'next-intl';
  * governance model rests on — so the screen that could most easily obscure it
  * is the screen that has to state it.
  *
- * Presented as an accent callout rather than a footnote for the same reason
+ * Presented as a filled callout rather than a footnote for the same reason
  * `SilenceCallout` is: `surface-subtle` with `text-text-primary` is the pairing
- * documented as legible in both themes, and the coloured bar carries no
- * information, so its contrast never has to be read. (`border-warning` and
- * `border-info` are both RED from a globals.css bug — never reach for them.)
+ * documented as legible in both themes, so the notice reads without depending
+ * on any border at all.
+ *
+ * No coloured border, per the feature-wide card rule — the pin icon and the
+ * heading carry the emphasis. (`border-warning` and `border-info` are both RED
+ * from a globals.css bug in any case — never reach for them.)
  */
 export interface PinnedRuleNoticeProps {
   className?: string;
@@ -37,7 +40,7 @@ export function PinnedRuleNotice({ className }: PinnedRuleNoticeProps) {
 
   return (
     <aside
-      className={`rounded-xl border-l-4 border-text-brand bg-surface-subtle px-4 py-4 ${className ?? ''}`}
+      className={`rounded-xl bg-surface-subtle px-4 py-4 ${className ?? ''}`}
     >
       <div className="flex items-start gap-2.5">
         <Pin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-text-brand" />

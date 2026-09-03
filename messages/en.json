@@ -666,6 +666,7 @@
     "cancelRequestConfirm": "Your request to join {name} will be withdrawn.",
     "groups": {
       "myGroups": "My Groups",
+      "openChat": "Open the {name} chat",
       "discover": "Discover groups",
       "searchPlaceholder": "Search groups",
       "loading": "Loading groups...",
@@ -748,6 +749,7 @@
         "verifiedServices": "Verified Services",
         "support": "Support",
         "community": "Community",
+        "rules": "Rules",
         "groups": "Groups"
       },
       "home": {
@@ -2794,7 +2796,8 @@
         "tallyNo": "{count} No",
         "tallyPending": "{count} Pending",
         "closes": "Closes {time}"
-      }
+      },
+      "chatUnavailable": "Chat isn't available in circles yet. Projects, challenges and votes all still work."
     },
     "motion": {
       "title": "Motion details",
@@ -3447,6 +3450,190 @@
           "description": "Something went wrong on the way to the circle. Trying again often works."
         }
       }
+    },
+    "actions": {
+      "startSomething": "Start something",
+      "allowance": {
+        "remaining": "{current} of {limit} in use — {remaining} left",
+        "none": "You're using all {limit}. Nothing already running stops — you just can't start another until one is closed."
+      },
+      "route": {
+        "question": "How should this happen?",
+        "directTitle": "Start it now",
+        "directDescription": "Your circle leaves this to any member. It takes effect straight away.",
+        "motionTitle": "Put it to the circle",
+        "motionDescription": "The circle votes on it first.",
+        "motionRule": "{quorum} · {majority} · open for {window}",
+        "onlyDirect": "Your circle leaves this to any member, so it takes effect as soon as you start it.",
+        "onlyMotion": "This one goes to the circle first. {rule}"
+      },
+      "blocked": {
+        "ENTITLEMENT_LOCKED": "Your circle is using its whole allowance. Nothing already running stops — you just can't start another until one is closed.",
+        "PROPOSER_ROLE": "Your circle reserves this to its leads. Ask a lead to propose it.",
+        "CIRCLE_NOT_ACTIVE": "This circle isn't taking new work right now.",
+        "NOT_A_MEMBER": "You're not a member of this circle.",
+        "NO_RULE": "This circle has no rule for this kind of decision, so it can't be put to a vote."
+      },
+      "writeErrors": {
+        "entitlementLocked": "You're at your circle's limit. Nothing already running stops — close one first.",
+        "circleNotActive": "This circle isn't taking new work right now.",
+        "notAMember": "You're no longer a member of this circle. Reload the page.",
+        "proposerRole": "Your circle reserves this to its leads.",
+        "noGovernanceRule": "This circle has no rule for that kind of decision, so it can't be put to a vote.",
+        "dormantNoElectorate": "A circle needs at least two active members to hold a vote.",
+        "duplicateMotion": "There's already an open motion about this. Go and vote on that one.",
+        "subjectRequired": "Choose what this motion is about first.",
+        "goalScope": "A shared goal can't have someone assigned to it, and an individual goal needs one.",
+        "assigneeNotMember": "That person isn't an active member of this circle, so they could never contribute to the goal.",
+        "targetValue": "Give a target greater than zero.",
+        "verificationMode": "The server didn't accept that way of confirming. Choose “Trust everyone”, or put the challenge to the circle instead.",
+        "challengeState": "This challenge isn't accepting that right now.",
+        "idempotencyKey": "Something went wrong on our side. Try again.",
+        "periodMismatch": "This period just rolled over. Reload the page and try again.",
+        "unknown": "That didn't go through. Try again."
+      }
+    },
+    "newProject": {
+      "title": "Start a project",
+      "subtitle": "Something the circle works on together.",
+      "cta": "New project",
+      "titleLabel": "What is it?",
+      "titlePlaceholder": "e.g. Back-to-school fund",
+      "descriptionLabel": "What's it for? (optional)",
+      "descriptionPlaceholder": "A sentence or two the circle can come back to.",
+      "startsOnLabel": "Starts (optional)",
+      "dueOnLabel": "Due (optional)",
+      "submitDirect": "Start project",
+      "submitMotion": "Propose project",
+      "submitting": "Working...",
+      "createdDirect": "Project started",
+      "motionOpened": "Proposed — the circle can vote now",
+      "motionTitle": "Start the project “{project}”"
+    },
+    "newChallenge": {
+      "title": "Start a challenge",
+      "subtitle": "Something everyone does, tracked together.",
+      "cta": "New challenge",
+      "titleLabel": "What's the challenge?",
+      "titlePlaceholder": "e.g. Walk 10,000 steps",
+      "descriptionLabel": "Any details? (optional)",
+      "descriptionPlaceholder": "What counts, and what doesn't.",
+      "verificationQuestion": "Who confirms it was done?",
+      "verificationLockNote": "This is fixed once the challenge starts and can't be changed afterwards.",
+      "cadenceQuestion": "How often can someone take part?",
+      "cadence": {
+        "ONE_OFF": {
+          "title": "Once",
+          "description": "One entry each, for the whole challenge."
+        },
+        "DAILY": {
+          "title": "Every day",
+          "description": "A fresh entry each day."
+        },
+        "WEEKLY": {
+          "title": "Every week",
+          "description": "A fresh entry each week."
+        },
+        "MONTHLY": {
+          "title": "Every month",
+          "description": "A fresh entry each month."
+        }
+      },
+      "pointsLabel": "Points per entry (optional)",
+      "pointsPlaceholder": "1",
+      "maxEntriesLabel": "Entries per period (optional)",
+      "maxEntriesPlaceholder": "No limit",
+      "startsAtLabel": "Starts (optional)",
+      "endsAtLabel": "Ends (optional)",
+      "submitDirect": "Start challenge",
+      "submitMotion": "Propose challenge",
+      "submitting": "Working...",
+      "started": "Challenge started",
+      "createdNotStarted": "Saved as a draft, but it couldn't start. {reason}",
+      "motionOpened": "Proposed — the circle can vote now",
+      "motionTitle": "Start the challenge “{challenge}”"
+    },
+    "newMotion": {
+      "title": "Propose something",
+      "subtitle": "Put a decision to the circle.",
+      "cta": "Propose something",
+      "kindLabel": "What are you proposing?",
+      "kindPlaceholder": "Choose a decision",
+      "ruleSummary": "{quorum} · {majority} · open for {window}",
+      "proposedElsewhere": "This one is proposed from the screen that collects its details, so the circle votes on something complete.",
+      "goToScreen": "Go there",
+      "subjectMemberLabel": "Which member?",
+      "subjectMemberPlaceholder": "Choose a member",
+      "subjectProjectLabel": "Which project?",
+      "subjectProjectPlaceholder": "Choose a project",
+      "titleLabel": "Title",
+      "titlePlaceholder": "What the circle is deciding",
+      "rationaleLabel": "Why? (optional)",
+      "rationalePlaceholder": "The case for it, in your own words.",
+      "rationaleHint": "Everyone sees this while they vote.",
+      "open": "Open the vote",
+      "opening": "Opening...",
+      "opened": "Motion opened",
+      "cannotPropose": "You can't open a motion in this circle.",
+      "circleCannotVote": "This circle can't hold a vote right now. Everything else still works."
+    },
+    "newGoal": {
+      "cta": "Add a goal",
+      "ctaFirst": "Add the first goal",
+      "scopeQuestion": "Whose goal is it?",
+      "scopeSharedTitle": "The whole circle",
+      "scopeSharedDescription": "One number everyone pushes toward together.",
+      "scopeIndividualTitle": "One person",
+      "scopeIndividualDescription": "A target for one member, who is the only one who can log against it.",
+      "assigneeLabel": "Who's it for?",
+      "assigneePlaceholder": "Choose a member",
+      "metricQuestion": "What does it measure?",
+      "metric": {
+        "COUNT": {
+          "title": "A count",
+          "description": "Books, steps, sessions — anything countable."
+        },
+        "AMOUNT": {
+          "title": "Money",
+          "description": "An amount to raise or save, in one currency."
+        },
+        "DURATION": {
+          "title": "Time",
+          "description": "Hours or minutes — anything measured in time."
+        }
+      },
+      "currencyLabel": "Currency",
+      "currencyPlaceholder": "Choose a currency",
+      "unitLabel": "Unit (optional)",
+      "unitPlaceholder": "e.g. km, books",
+      "targetLabel": "Target",
+      "targetMoneyLabel": "Target amount",
+      "targetPlaceholder": "0",
+      "dueOnLabel": "Due (optional)",
+      "add": "Add goal",
+      "adding": "Adding...",
+      "added": "Goal added",
+      "errors": {
+        "assigneeRequired": "Choose who this goal is for.",
+        "targetRequired": "Give a target.",
+        "targetNotANumber": "That isn't a number.",
+        "targetNotPositive": "The target has to be more than zero.",
+        "targetTooSmall": "That's too small to record — use a larger number or a smaller unit.",
+        "unitRequired": "Choose a currency."
+      }
+    },
+    "newEntry": {
+      "logThisPeriod": "Log this one",
+      "doneThisPeriod": "Logged for now",
+      "claimLabel": "How much? (optional)",
+      "claimPlaceholder": "e.g. 5",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "Anything worth saying about it.",
+      "evidenceLabel": "Link to proof (optional)",
+      "evidencePlaceholder": "https://",
+      "submit": "Send it",
+      "accepted": "You're in — it counts",
+      "pending": "Sent — waiting to be confirmed"
     }
   }
 }

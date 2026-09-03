@@ -8,6 +8,10 @@ import { toast } from 'sonner';
 
 import { RadioCard, RadioCardGroup } from '@/components/circles/primitives';
 import {
+  readCircleWrite,
+  refusalMessageKey,
+} from '@/components/circles/governance/mutationOutcome';
+import {
   SET_CIRCLE_DISCOVERABLE,
   SET_CIRCLE_JOIN_MODE,
 } from '@/services/gql/circles-settings';
@@ -93,6 +97,7 @@ export function CircleDiscoverySection({
   onChanged,
 }: CircleDiscoverySectionProps) {
   const t = useTranslations('circles.settings');
+  const tActions = useTranslations('circles.actions');
   const discoverabilityLabelId = useId();
   const accessLabelId = useId();
 
@@ -121,19 +126,33 @@ export function CircleDiscoverySection({
     if (next === circle.discoverable || savingDiscoverable) return;
     setPendingDiscoverable(next);
     try {
-      await setDiscoverable({
+      const result = await setDiscoverable({
         variables: { circleId: circle.id, discoverable: next },
       });
+
+      /*
+       * `data`, not the absence of a throw. The global `errorPolicy: 'all'`
+       * resolves a REFUSED mutation, so the catch below never saw a server
+       * refusal — a lost LEAD role or a status that stopped being live between
+       * load and click reported "saved" over a toggle that did not move.
+       *
+       * This used to surface `err.message` on the theory that circle-service's
+       * own sentence was the only part worth reading. It is operator English
+       * carrying raw UUIDs, and it is never translated, so the classified key
+       * is the better answer in a five-locale UI. See
+       * `governance/mutationOutcome.ts`.
+       */
+      const outcome = readCircleWrite(result, (d) => d.setCircleDiscoverable);
+      if (!outcome.ok) {
+        toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
+        return;
+      }
+
       toast.success(t('discovery.discoverabilitySaved'));
       onChanged();
-    } catch (err) {
-      /*
-       * circle-service's own words, whatever they were: a lost LEAD role, a
-       * status that stopped being live between load and click, a validation
-       * refusal. The gateway's `assertOk` rethrows `res.message` intact, and a
-       * generic string here would throw away the only part worth reading.
-       */
-      toast.error(err instanceof Error ? err.message : t('discovery.saveFailed'));
+    } catch (error) {
+      const outcome = readCircleWrite({ error }, () => null);
+      toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
     } finally {
       setPendingDiscoverable(null);
     }
@@ -143,11 +162,22 @@ export function CircleDiscoverySection({
     if (next === circle.joinMode || savingJoinMode) return;
     setPendingJoinMode(next);
     try {
-      await setJoinMode({ variables: { circleId: circle.id, joinMode: next } });
+      const result = await setJoinMode({
+        variables: { circleId: circle.id, joinMode: next },
+      });
+
+      // Same false-success trap as above.
+      const outcome = readCircleWrite(result, (d) => d.setCircleJoinMode);
+      if (!outcome.ok) {
+        toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
+        return;
+      }
+
       toast.success(t('discovery.joinModeSaved'));
       onChanged();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('discovery.saveFailed'));
+    } catch (error) {
+      const outcome = readCircleWrite({ error }, () => null);
+      toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
     } finally {
       setPendingJoinMode(null);
     }

@@ -8,6 +8,10 @@ import { toast } from 'sonner';
 import { ButtonType1, ButtonType2 } from '@/components/custom/button';
 import { TextInput } from '@/components/custom/input';
 import { LOG_CIRCLE_CONTRIBUTION } from '@/services/gql/circles';
+import {
+  readCircleWrite,
+  refusalMessageKey,
+} from '@/components/circles/governance/mutationOutcome';
 import type {
   CircleProjectGoal,
   LogCircleContributionData,
@@ -52,6 +56,7 @@ export interface ContributeFormProps {
  */
 export function ContributeForm({ circleId, goal }: ContributeFormProps) {
   const t = useTranslations('circles');
+  const tActions = useTranslations('circles.actions');
 
   const [open, setOpen] = useState(false);
   const [rawValue, setRawValue] = useState('');
@@ -92,19 +97,31 @@ export function ContributeForm({ circleId, goal }: ContributeFormProps) {
     if (idempotencyKey === null) setIdempotencyKey(key);
 
     try {
-      await logContribution({
+      const result = await logContribution({
         variables: {
           circleId,
           input: { goalId: goal.id, value: parsed, idempotencyKey: key },
         },
       });
+
+      // `data`, not the absence of a throw. The global `errorPolicy: 'all'`
+      // makes a REFUSED mutation resolve, so the catch below never saw a server
+      // refusal and this reported "contribution saved" over a contribution that
+      // was never logged. See `governance/mutationOutcome.ts`.
+      const outcome = readCircleWrite(result, (d) => d.logCircleContribution);
+      if (!outcome.ok) {
+        toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
+        return;
+      }
+
       toast.success(t('project.contributeSuccess'));
       closeForm();
-    } catch {
+    } catch (error) {
       // The key is intentionally NOT rotated here: the next attempt must reuse
       // it so a request that succeeded but lost its response cannot be logged
       // a second time.
-      toast.error(t('errors.contribute'));
+      const outcome = readCircleWrite({ error }, () => null);
+      toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
     }
   }
 

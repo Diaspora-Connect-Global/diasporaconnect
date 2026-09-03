@@ -666,6 +666,7 @@
     "cancelRequestConfirm": "Je verzoek om lid te worden van {name} wordt ingetrokken.",
     "groups": {
       "myGroups": "Mijn groepen",
+      "openChat": "Chat van {name} openen",
       "discover": "Groepen ontdekken",
       "searchPlaceholder": "Groepen zoeken",
       "loading": "Groepen laden...",
@@ -748,6 +749,7 @@
         "verifiedServices": "Geverifieerde diensten",
         "support": "Ondersteuning",
         "community": "Community",
+        "rules": "Regels",
         "groups": "Groepen"
       },
       "home": {
@@ -2794,7 +2796,8 @@
         "tallyNo": "{count} Tegen",
         "tallyPending": "{count} In afwachting",
         "closes": "Sluit {time}"
-      }
+      },
+      "chatUnavailable": "Chat is nog niet beschikbaar in kringen. Projecten, challenges en stemmingen werken gewoon."
     },
     "motion": {
       "title": "Motiedetails",
@@ -3447,6 +3450,190 @@
           "description": "Er ging iets mis onderweg naar de kring. Opnieuw proberen helpt vaak."
         }
       }
+    },
+    "actions": {
+      "startSomething": "Iets starten",
+      "allowance": {
+        "remaining": "{current} van {limit} in gebruik — nog {remaining} over",
+        "none": "Je gebruikt alle {limit}. Er stopt niets wat al loopt — je kunt alleen geen nieuwe starten tot er een is afgesloten."
+      },
+      "route": {
+        "question": "Hoe wil je dit doen?",
+        "directTitle": "Nu starten",
+        "directDescription": "Je kring laat dit aan elk lid over. Het gaat meteen in.",
+        "motionTitle": "Aan de kring voorleggen",
+        "motionDescription": "De kring stemt er eerst over.",
+        "motionRule": "{quorum} · {majority} · {window} open",
+        "onlyDirect": "Je kring laat dit aan elk lid over, dus het gaat in zodra je het start.",
+        "onlyMotion": "Deze gaat eerst naar de kring. {rule}"
+      },
+      "blocked": {
+        "ENTITLEMENT_LOCKED": "Je kring gebruikt zijn hele ruimte. Er stopt niets wat al loopt — je kunt alleen geen nieuwe starten tot er een is afgesloten.",
+        "PROPOSER_ROLE": "Je kring houdt dit bij de leiders. Vraag een leider om het voor te stellen.",
+        "CIRCLE_NOT_ACTIVE": "Deze kring neemt op dit moment niets nieuws aan.",
+        "NOT_A_MEMBER": "Je bent geen lid van deze kring.",
+        "NO_RULE": "Deze kring heeft geen regel voor dit soort besluit, dus er kan niet over gestemd worden."
+      },
+      "writeErrors": {
+        "entitlementLocked": "Je zit op de limiet van je kring. Er stopt niets wat al loopt — sluit er eerst een af.",
+        "circleNotActive": "Deze kring neemt op dit moment niets nieuws aan.",
+        "notAMember": "Je bent geen lid meer van deze kring. Laad de pagina opnieuw.",
+        "proposerRole": "Je kring houdt dit bij de leiders.",
+        "noGovernanceRule": "Deze kring heeft geen regel voor dat soort besluit, dus er kan niet over gestemd worden.",
+        "dormantNoElectorate": "Een kring heeft minstens twee actieve leden nodig om te stemmen.",
+        "duplicateMotion": "Hier loopt al een motie over. Ga daarop stemmen.",
+        "subjectRequired": "Kies eerst waar deze motie over gaat.",
+        "goalScope": "Een gedeeld doel kan aan niemand worden toegewezen, en een persoonlijk doel heeft juist een toewijzing nodig.",
+        "assigneeNotMember": "Die persoon is geen actief lid van deze kring en zou dus nooit aan het doel kunnen bijdragen.",
+        "targetValue": "Geef een doel groter dan nul op.",
+        "verificationMode": "De server accepteerde die manier van bevestigen niet. Kies “Iedereen vertrouwen”, of leg de challenge aan de kring voor.",
+        "challengeState": "Deze challenge accepteert dat op dit moment niet.",
+        "idempotencyKey": "Er ging iets mis aan onze kant. Probeer het opnieuw.",
+        "periodMismatch": "De periode is net gewisseld. Laad de pagina opnieuw en probeer het nog eens.",
+        "unknown": "Dat is niet gelukt. Probeer het opnieuw."
+      }
+    },
+    "newProject": {
+      "title": "Een project starten",
+      "subtitle": "Iets waar de kring samen aan werkt.",
+      "cta": "Nieuw project",
+      "titleLabel": "Waar gaat het over?",
+      "titlePlaceholder": "bijv. Schoolstartfonds",
+      "descriptionLabel": "Waar is het voor? (optioneel)",
+      "descriptionPlaceholder": "Een of twee zinnen waar de kring op terug kan komen.",
+      "startsOnLabel": "Begint op (optioneel)",
+      "dueOnLabel": "Deadline (optioneel)",
+      "submitDirect": "Project starten",
+      "submitMotion": "Project voorstellen",
+      "submitting": "Bezig...",
+      "createdDirect": "Project gestart",
+      "motionOpened": "Voorgesteld — de kring kan nu stemmen",
+      "motionTitle": "Het project “{project}” starten"
+    },
+    "newChallenge": {
+      "title": "Een challenge starten",
+      "subtitle": "Iets wat iedereen doet, samen bijgehouden.",
+      "cta": "Nieuwe challenge",
+      "titleLabel": "Wat is de challenge?",
+      "titlePlaceholder": "bijv. 10.000 stappen lopen",
+      "descriptionLabel": "Nog details? (optioneel)",
+      "descriptionPlaceholder": "Wat telt en wat niet.",
+      "verificationQuestion": "Wie bevestigt dat het gedaan is?",
+      "verificationLockNote": "Dit ligt vast zodra de challenge start en kan daarna niet meer worden gewijzigd.",
+      "cadenceQuestion": "Hoe vaak kan iemand meedoen?",
+      "cadence": {
+        "ONE_OFF": {
+          "title": "Eén keer",
+          "description": "Eén inzending per persoon, voor de hele challenge."
+        },
+        "DAILY": {
+          "title": "Elke dag",
+          "description": "Elke dag een nieuwe inzending."
+        },
+        "WEEKLY": {
+          "title": "Elke week",
+          "description": "Elke week een nieuwe inzending."
+        },
+        "MONTHLY": {
+          "title": "Elke maand",
+          "description": "Elke maand een nieuwe inzending."
+        }
+      },
+      "pointsLabel": "Punten per inzending (optioneel)",
+      "pointsPlaceholder": "1",
+      "maxEntriesLabel": "Inzendingen per periode (optioneel)",
+      "maxEntriesPlaceholder": "Geen limiet",
+      "startsAtLabel": "Begint op (optioneel)",
+      "endsAtLabel": "Eindigt op (optioneel)",
+      "submitDirect": "Challenge starten",
+      "submitMotion": "Challenge voorstellen",
+      "submitting": "Bezig...",
+      "started": "Challenge gestart",
+      "createdNotStarted": "Als concept opgeslagen, maar kon niet starten. {reason}",
+      "motionOpened": "Voorgesteld — de kring kan nu stemmen",
+      "motionTitle": "De challenge “{challenge}” starten"
+    },
+    "newMotion": {
+      "title": "Iets voorstellen",
+      "subtitle": "Leg een besluit aan de kring voor.",
+      "cta": "Iets voorstellen",
+      "kindLabel": "Wat stel je voor?",
+      "kindPlaceholder": "Kies een besluit",
+      "ruleSummary": "{quorum} · {majority} · {window} open",
+      "proposedElsewhere": "Deze stel je voor vanaf het scherm dat de details verzamelt, zodat de kring over iets volledigs stemt.",
+      "goToScreen": "Ga daarheen",
+      "subjectMemberLabel": "Welk lid?",
+      "subjectMemberPlaceholder": "Kies een lid",
+      "subjectProjectLabel": "Welk project?",
+      "subjectProjectPlaceholder": "Kies een project",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "Waar de kring over beslist",
+      "rationaleLabel": "Waarom? (optioneel)",
+      "rationalePlaceholder": "Je argumenten, in je eigen woorden.",
+      "rationaleHint": "Iedereen ziet dit tijdens het stemmen.",
+      "open": "Stemming openen",
+      "opening": "Openen...",
+      "opened": "Motie geopend",
+      "cannotPropose": "Je kunt in deze kring geen motie openen.",
+      "circleCannotVote": "Deze kring kan op dit moment niet stemmen. Al het andere werkt gewoon."
+    },
+    "newGoal": {
+      "cta": "Doel toevoegen",
+      "ctaFirst": "Eerste doel toevoegen",
+      "scopeQuestion": "Van wie is het doel?",
+      "scopeSharedTitle": "De hele kring",
+      "scopeSharedDescription": "Eén getal waar iedereen samen naartoe werkt.",
+      "scopeIndividualTitle": "Eén persoon",
+      "scopeIndividualDescription": "Een doel voor één lid, dat als enige er iets voor kan bijhouden.",
+      "assigneeLabel": "Voor wie is het?",
+      "assigneePlaceholder": "Kies een lid",
+      "metricQuestion": "Wat meet het?",
+      "metric": {
+        "COUNT": {
+          "title": "Een aantal",
+          "description": "Boeken, stappen, sessies — alles wat telbaar is."
+        },
+        "AMOUNT": {
+          "title": "Geld",
+          "description": "Een bedrag om op te halen of te sparen, in één valuta."
+        },
+        "DURATION": {
+          "title": "Tijd",
+          "description": "Uren of minuten — alles wat in tijd wordt gemeten."
+        }
+      },
+      "currencyLabel": "Valuta",
+      "currencyPlaceholder": "Kies een valuta",
+      "unitLabel": "Eenheid (optioneel)",
+      "unitPlaceholder": "bijv. km, boeken",
+      "targetLabel": "Doel",
+      "targetMoneyLabel": "Doelbedrag",
+      "targetPlaceholder": "0",
+      "dueOnLabel": "Deadline (optioneel)",
+      "add": "Doel toevoegen",
+      "adding": "Toevoegen...",
+      "added": "Doel toegevoegd",
+      "errors": {
+        "assigneeRequired": "Kies voor wie dit doel is.",
+        "targetRequired": "Geef een doel op.",
+        "targetNotANumber": "Dat is geen getal.",
+        "targetNotPositive": "Het doel moet groter zijn dan nul.",
+        "targetTooSmall": "Te klein om vast te leggen — gebruik een groter getal of een kleinere eenheid.",
+        "unitRequired": "Kies een valuta."
+      }
+    },
+    "newEntry": {
+      "logThisPeriod": "Deze vastleggen",
+      "doneThisPeriod": "Voor nu vastgelegd",
+      "claimLabel": "Hoeveel? (optioneel)",
+      "claimPlaceholder": "bijv. 5",
+      "noteLabel": "Notitie (optioneel)",
+      "notePlaceholder": "Alles wat het vermelden waard is.",
+      "evidenceLabel": "Link naar bewijs (optioneel)",
+      "evidencePlaceholder": "https://",
+      "submit": "Versturen",
+      "accepted": "Je doet mee — het telt",
+      "pending": "Verstuurd — wacht op bevestiging"
     }
   }
 }

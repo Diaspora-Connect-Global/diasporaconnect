@@ -665,6 +665,7 @@
     "cancelRequestConfirm": "La tua richiesta di adesione a {name} verrà ritirata.",
     "groups": {
       "myGroups": "I miei gruppi",
+      "openChat": "Apri la chat di {name}",
       "discover": "Scopri gruppi",
       "searchPlaceholder": "Cerca gruppi",
       "loading": "Caricamento dei gruppi...",
@@ -745,6 +746,7 @@
         "verifiedServices": "Servizi verificati",
         "support": "Assistenza",
         "community": "Comunità",
+        "rules": "Regole",
         "groups": "Gruppi"
       },
       "home": {
@@ -2794,7 +2796,8 @@
         "tallyNo": "{count} No",
         "tallyPending": "{count} In attesa",
         "closes": "Chiude {time}"
-      }
+      },
+      "chatUnavailable": "La chat non è ancora disponibile nelle cerchie. Progetti, sfide e votazioni funzionano regolarmente."
     },
     "motion": {
       "title": "Dettagli della mozione",
@@ -3447,6 +3450,190 @@
           "description": "Qualcosa è andato storto lungo il percorso verso la cerchia. Spesso basta riprovare."
         }
       }
+    },
+    "actions": {
+      "startSomething": "Avvia qualcosa",
+      "allowance": {
+        "remaining": "{current} su {limit} in uso — ne restano {remaining}",
+        "none": "Stai usando tutti i {limit} disponibili. Nulla di ciò che è in corso si ferma: semplicemente non puoi avviarne un altro finché non ne chiudi uno."
+      },
+      "route": {
+        "question": "Come vuoi procedere?",
+        "directTitle": "Avvia subito",
+        "directDescription": "La tua cerchia lo lascia a ogni membro. Ha effetto immediato.",
+        "motionTitle": "Sottoporlo alla cerchia",
+        "motionDescription": "Prima la cerchia vota.",
+        "motionRule": "{quorum} · {majority} · aperta per {window}",
+        "onlyDirect": "La tua cerchia lo lascia a ogni membro, quindi ha effetto appena lo avvii.",
+        "onlyMotion": "Questa passa prima dalla cerchia. {rule}"
+      },
+      "blocked": {
+        "ENTITLEMENT_LOCKED": "La tua cerchia sta usando tutta la sua disponibilità. Nulla di ciò che è in corso si ferma: semplicemente non puoi avviarne un altro finché non ne chiudi uno.",
+        "PROPOSER_ROLE": "La tua cerchia lo riserva ai referenti. Chiedi a un referente di proporlo.",
+        "CIRCLE_NOT_ACTIVE": "Questa cerchia al momento non accetta nuove attività.",
+        "NOT_A_MEMBER": "Non sei un membro di questa cerchia.",
+        "NO_RULE": "Questa cerchia non ha una regola per questo tipo di decisione, quindi non può essere messa ai voti."
+      },
+      "writeErrors": {
+        "entitlementLocked": "Hai raggiunto il limite della tua cerchia. Nulla di ciò che è in corso si ferma: chiudine prima uno.",
+        "circleNotActive": "Questa cerchia al momento non accetta nuove attività.",
+        "notAMember": "Non sei più un membro di questa cerchia. Ricarica la pagina.",
+        "proposerRole": "La tua cerchia lo riserva ai referenti.",
+        "noGovernanceRule": "Questa cerchia non ha una regola per quel tipo di decisione, quindi non può essere messa ai voti.",
+        "dormantNoElectorate": "Una cerchia ha bisogno di almeno due membri attivi per tenere un voto.",
+        "duplicateMotion": "C’è già una mozione aperta su questo. Vai a votare quella.",
+        "subjectRequired": "Scegli prima su cosa verte questa mozione.",
+        "goalScope": "Un obiettivo condiviso non può essere assegnato a nessuno, mentre uno individuale richiede un assegnatario.",
+        "assigneeNotMember": "Quella persona non è un membro attivo di questa cerchia, quindi non potrebbe mai contribuire all’obiettivo.",
+        "targetValue": "Indica un obiettivo maggiore di zero.",
+        "verificationMode": "Il server non ha accettato quel modo di confermare. Scegli «Fiducia reciproca» oppure sottoponi la sfida alla cerchia.",
+        "challengeState": "Questa sfida al momento non lo accetta.",
+        "idempotencyKey": "Qualcosa è andato storto da parte nostra. Riprova.",
+        "periodMismatch": "Il periodo è appena cambiato. Ricarica la pagina e riprova.",
+        "unknown": "Non è andata a buon fine. Riprova."
+      }
+    },
+    "newProject": {
+      "title": "Avvia un progetto",
+      "subtitle": "Qualcosa su cui la cerchia lavora insieme.",
+      "cta": "Nuovo progetto",
+      "titleLabel": "Di cosa si tratta?",
+      "titlePlaceholder": "es. Fondo per il rientro a scuola",
+      "descriptionLabel": "A cosa serve? (facoltativo)",
+      "descriptionPlaceholder": "Una o due frasi a cui la cerchia possa tornare.",
+      "startsOnLabel": "Inizia il (facoltativo)",
+      "dueOnLabel": "Scadenza (facoltativo)",
+      "submitDirect": "Avvia il progetto",
+      "submitMotion": "Proponi il progetto",
+      "submitting": "In corso...",
+      "createdDirect": "Progetto avviato",
+      "motionOpened": "Proposto — ora la cerchia può votare",
+      "motionTitle": "Avviare il progetto «{project}»"
+    },
+    "newChallenge": {
+      "title": "Avvia una sfida",
+      "subtitle": "Qualcosa che fanno tutti, monitorato insieme.",
+      "cta": "Nuova sfida",
+      "titleLabel": "Qual è la sfida?",
+      "titlePlaceholder": "es. Camminare 10.000 passi",
+      "descriptionLabel": "Altri dettagli? (facoltativo)",
+      "descriptionPlaceholder": "Cosa vale e cosa no.",
+      "verificationQuestion": "Chi conferma che è stata completata?",
+      "verificationLockNote": "Viene fissato all’avvio della sfida e non può più essere cambiato.",
+      "cadenceQuestion": "Ogni quanto si può partecipare?",
+      "cadence": {
+        "ONE_OFF": {
+          "title": "Una volta",
+          "description": "Una partecipazione a testa, per tutta la sfida."
+        },
+        "DAILY": {
+          "title": "Ogni giorno",
+          "description": "Una nuova partecipazione ogni giorno."
+        },
+        "WEEKLY": {
+          "title": "Ogni settimana",
+          "description": "Una nuova partecipazione ogni settimana."
+        },
+        "MONTHLY": {
+          "title": "Ogni mese",
+          "description": "Una nuova partecipazione ogni mese."
+        }
+      },
+      "pointsLabel": "Punti per partecipazione (facoltativo)",
+      "pointsPlaceholder": "1",
+      "maxEntriesLabel": "Partecipazioni per periodo (facoltativo)",
+      "maxEntriesPlaceholder": "Nessun limite",
+      "startsAtLabel": "Inizia il (facoltativo)",
+      "endsAtLabel": "Finisce il (facoltativo)",
+      "submitDirect": "Avvia la sfida",
+      "submitMotion": "Proponi la sfida",
+      "submitting": "In corso...",
+      "started": "Sfida avviata",
+      "createdNotStarted": "Salvata come bozza, ma non è riuscita ad avviarsi. {reason}",
+      "motionOpened": "Proposta — ora la cerchia può votare",
+      "motionTitle": "Avviare la sfida «{challenge}»"
+    },
+    "newMotion": {
+      "title": "Proponi qualcosa",
+      "subtitle": "Sottoponi una decisione alla cerchia.",
+      "cta": "Proponi qualcosa",
+      "kindLabel": "Cosa vuoi proporre?",
+      "kindPlaceholder": "Scegli una decisione",
+      "ruleSummary": "{quorum} · {majority} · aperta per {window}",
+      "proposedElsewhere": "Questa si propone dalla schermata che ne raccoglie i dettagli, così la cerchia vota su qualcosa di completo.",
+      "goToScreen": "Vai lì",
+      "subjectMemberLabel": "Quale membro?",
+      "subjectMemberPlaceholder": "Scegli un membro",
+      "subjectProjectLabel": "Quale progetto?",
+      "subjectProjectPlaceholder": "Scegli un progetto",
+      "titleLabel": "Titolo",
+      "titlePlaceholder": "Ciò su cui la cerchia decide",
+      "rationaleLabel": "Perché? (facoltativo)",
+      "rationalePlaceholder": "Le tue ragioni, con parole tue.",
+      "rationaleHint": "Tutti lo vedono mentre votano.",
+      "open": "Apri il voto",
+      "opening": "Apertura...",
+      "opened": "Mozione aperta",
+      "cannotPropose": "Non puoi aprire una mozione in questa cerchia.",
+      "circleCannotVote": "Questa cerchia al momento non può tenere un voto. Tutto il resto funziona."
+    },
+    "newGoal": {
+      "cta": "Aggiungi un obiettivo",
+      "ctaFirst": "Aggiungi il primo obiettivo",
+      "scopeQuestion": "Di chi è l’obiettivo?",
+      "scopeSharedTitle": "Tutta la cerchia",
+      "scopeSharedDescription": "Un unico numero verso cui tutti avanzano insieme.",
+      "scopeIndividualTitle": "Una persona",
+      "scopeIndividualDescription": "Un obiettivo per un membro, l’unico che può registrarvi contributi.",
+      "assigneeLabel": "Per chi è?",
+      "assigneePlaceholder": "Scegli un membro",
+      "metricQuestion": "Cosa misura?",
+      "metric": {
+        "COUNT": {
+          "title": "Un conteggio",
+          "description": "Libri, passi, sessioni — tutto ciò che si conta."
+        },
+        "AMOUNT": {
+          "title": "Denaro",
+          "description": "Un importo da raccogliere o risparmiare, in una sola valuta."
+        },
+        "DURATION": {
+          "title": "Tempo",
+          "description": "Ore o minuti — tutto ciò che si misura in tempo."
+        }
+      },
+      "currencyLabel": "Valuta",
+      "currencyPlaceholder": "Scegli una valuta",
+      "unitLabel": "Unità (facoltativo)",
+      "unitPlaceholder": "es. km, libri",
+      "targetLabel": "Obiettivo",
+      "targetMoneyLabel": "Importo obiettivo",
+      "targetPlaceholder": "0",
+      "dueOnLabel": "Scadenza (facoltativo)",
+      "add": "Aggiungi obiettivo",
+      "adding": "Aggiunta in corso...",
+      "added": "Obiettivo aggiunto",
+      "errors": {
+        "assigneeRequired": "Scegli a chi è destinato questo obiettivo.",
+        "targetRequired": "Indica un obiettivo.",
+        "targetNotANumber": "Questo non è un numero.",
+        "targetNotPositive": "L’obiettivo deve essere maggiore di zero.",
+        "targetTooSmall": "Troppo piccolo per essere registrato: usa un numero più grande o un’unità più piccola.",
+        "unitRequired": "Scegli una valuta."
+      }
+    },
+    "newEntry": {
+      "logThisPeriod": "Registra questa",
+      "doneThisPeriod": "Registrata per ora",
+      "claimLabel": "Quanto? (facoltativo)",
+      "claimPlaceholder": "es. 5",
+      "noteLabel": "Nota (facoltativo)",
+      "notePlaceholder": "Qualcosa che valga la pena aggiungere.",
+      "evidenceLabel": "Link a una prova (facoltativo)",
+      "evidencePlaceholder": "https://",
+      "submit": "Invia",
+      "accepted": "Ci sei — vale",
+      "pending": "Inviata — in attesa di conferma"
     }
   }
 }
