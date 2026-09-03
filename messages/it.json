@@ -652,7 +652,10 @@
         "conflict": "Questa azione non può essere completata a causa dello stato attuale",
         "failed": "L'operazione non è riuscita. Riprova più tardi",
         "unknown_error": "Si è verificato un errore imprevisto"
-      }
+      },
+      "create": "Crea opportunità",
+      "discover": "Scopri",
+      "createRestricted": "La creazione e la gestione delle opportunità sono riservate agli amministratori della community, agli amministratori dell'associazione e agli amministratori di sistema. Se desideri pubblicare un'opportunità, contatta l'amministratore della tua community o associazione."
     },
     "noSuggestions": "Nessun suggerimento di amici disponibile",
     "errors": {

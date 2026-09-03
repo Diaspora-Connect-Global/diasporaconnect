@@ -652,7 +652,10 @@
         "conflict": "Diese Aktion kann aufgrund des aktuellen Status nicht abgeschlossen werden",
         "failed": "Operation fehlgeschlagen. Bitte versuchen Sie es später erneut",
         "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
-      }
+      },
+      "create": "Gelegenheit erstellen",
+      "discover": "Entdecken",
+      "createRestricted": "Das Erstellen und Verwalten von Gelegenheiten ist Community-Admins, Verbands-Admins und System-Admins vorbehalten. Wenn Sie eine Gelegenheit veröffentlichen möchten, wenden Sie sich bitte an Ihren Community- oder Verbands-Admin."
     },
     "noSuggestions": "Keine Freundschaftsvorschläge verfügbar",
     "errors": {

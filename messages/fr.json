@@ -652,7 +652,10 @@
         "conflict": "Cette action ne peut pas être complétée en raison de l'état actuel",
         "failed": "L'opération a échoué. Veuillez réessayer plus tard",
         "unknown_error": "Une erreur inattendue s'est produite"
-      }
+      },
+      "create": "Créer une opportunité",
+      "discover": "Découvrir",
+      "createRestricted": "La création et la gestion des opportunités sont réservées aux administrateurs de communauté, aux administrateurs d'association et aux administrateurs système. Si vous souhaitez publier une opportunité, veuillez contacter l'administrateur de votre communauté ou de votre association."
     },
     "noSuggestions": "Aucune suggestion d'ami disponible",
     "errors": {
