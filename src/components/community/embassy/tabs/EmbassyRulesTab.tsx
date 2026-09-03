@@ -1,10 +1,28 @@
 'use client';
 
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { ShieldCheck, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { EmbassyCommunity } from '../types';
+import { parseRules, inlineRuns } from './parseRules';
+
+/** Render `**bold**` runs without ever touching dangerouslySetInnerHTML. */
+function Inline({ text }: { text: string }) {
+  return (
+    <>
+      {inlineRuns(text).map((run, i) => (
+        <Fragment key={i}>
+          {run.bold ? (
+            <strong className="font-semibold text-text-primary">{run.text}</strong>
+          ) : (
+            run.text
+          )}
+        </Fragment>
+      ))}
+    </>
+  );
+}
 
 /**
  * The community's rules / guidelines, as a tab of their own.
@@ -15,10 +33,15 @@ import type { EmbassyCommunity } from '../types';
  * get a shareable `?tab=rules` URL and no longer compete with member
  * highlights for the rail.
  *
- * `communityRules` is a single free-text string; one rule per line is the
- * convention the admin console writes. Blank lines are dropped. When it is
- * empty we say so — there are no fabricated default rules, because a community
- * that has not written any has not agreed to any.
+ * `communityRules` is a single free-text column that admins fill with light
+ * Markdown — headings, a numbered list, bold rule titles, indented
+ * explanations. `parseRules` turns that into blocks; splitting on `\n` and
+ * ticking every line (what this did before, inherited from the rail card)
+ * printed the literal `###` and `**`, made the document title look like a
+ * rule, and broke each explanation off into a rule of its own.
+ *
+ * When there are no rules we say so — there are no fabricated defaults,
+ * because a community that has not written any has not agreed to any.
  */
 export interface EmbassyRulesTabProps {
   community: EmbassyCommunity;
@@ -27,14 +50,7 @@ export interface EmbassyRulesTabProps {
 export function EmbassyRulesTab({ community }: EmbassyRulesTabProps) {
   const t = useTranslations('community.embassy.community');
 
-  const ruleItems = useMemo(
-    () =>
-      (community.communityRules ?? '')
-        .split(/\r?\n/)
-        .map((r) => r.trim())
-        .filter(Boolean),
-    [community.communityRules],
-  );
+  const blocks = useMemo(() => parseRules(community.communityRules), [community.communityRules]);
 
   return (
     <div className="mx-auto max-w-3xl px-3 py-6 lg:px-6">
@@ -46,21 +62,46 @@ export function EmbassyRulesTab({ community }: EmbassyRulesTabProps) {
           </h2>
           <p className="caption-medium mt-1 text-text-secondary">{t('guidelinesSubtitle')}</p>
 
-          {ruleItems.length > 0 ? (
-            <ul className="mt-5 space-y-3">
-              {ruleItems.map((rule) => (
-                <li
-                  key={rule}
-                  // `items-start`, not `items-center`: a rule that wraps to two
-                  // lines would otherwise centre its tick against the whole
-                  // block instead of against the first line.
-                  className="body-small flex items-start gap-2.5 text-text-primary"
-                >
-                  <Check className="mt-0.5 size-4 flex-shrink-0 text-text-success" aria-hidden />
-                  <span className="min-w-0 break-words">{rule}</span>
-                </li>
-              ))}
-            </ul>
+          {blocks.length > 0 ? (
+            <div className="mt-5 space-y-4">
+              {blocks.map((block, i) => {
+                if (block.kind === 'heading') {
+                  return (
+                    <h3 key={i} className="label-large pt-1 text-text-primary">
+                      <Inline text={block.text} />
+                    </h3>
+                  );
+                }
+                if (block.kind === 'paragraph') {
+                  return (
+                    <p key={i} className="body-small text-text-secondary">
+                      <Inline text={block.text} />
+                    </p>
+                  );
+                }
+                return (
+                  // `items-start`, not `items-center`: a rule that wraps would
+                  // otherwise centre its tick against the whole block instead
+                  // of against the first line.
+                  <div key={i} className="flex items-start gap-2.5">
+                    <Check
+                      className="mt-1 size-4 flex-shrink-0 text-text-success"
+                      aria-hidden
+                    />
+                    <div className="min-w-0 space-y-1">
+                      <p className="body-small break-words text-text-primary">
+                        <Inline text={block.title} />
+                      </p>
+                      {block.body && (
+                        <p className="caption-large break-words text-text-secondary">
+                          <Inline text={block.body} />
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
             <p className="body-small mt-5 text-text-secondary">{t('guidelinesEmpty')}</p>
           )}
