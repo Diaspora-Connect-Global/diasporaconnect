@@ -1290,6 +1290,16 @@
           }
         }
       },
+      "requests": {
+        "errors": {
+          "unknown_error": "Une erreur s'est produite. Veuillez réessayer.",
+          "insufficient_data": "Veuillez remplir tous les champs requis.",
+          "not_authorized": "Vous n'êtes pas autorisé à effectuer cette action.",
+          "not_found": "Cette demande n'a pas été trouvée.",
+          "conflict": "Cette opération ne peut pas être effectuée dans l'état actuel.",
+          "failed": "L'opération a échoué. Veuillez réessayer."
+        }
+      },
       "support": {
         "title": "Support Center",
         "subtitle": "Submit a request for help and track your cases.",
@@ -3658,6 +3668,16 @@
       "post_deleted": "Publication supprimée avec succès",
       "comment_updated": "Commentaire mis à jour avec succès",
       "comment_deleted": "Commentaire supprimé avec succès"
+    }
+  },
+  "requests": {
+    "errors": {
+      "insufficient_data": "Veuillez fournir toutes les informations requises",
+      "not_authorized": "Vous n'avez pas la permission d'effectuer cette action",
+      "not_found": "L'élément que vous recherchez est introuvable",
+      "conflict": "Cette opération entre en conflit avec l'état actuel. Veuillez actualiser et réessayer",
+      "failed": "Opération échouée. Veuillez réessayer",
+      "unknown_error": "Une erreur inattendue s'est produite"
     }
   }
 }

@@ -1290,6 +1290,16 @@
           }
         }
       },
+      "requests": {
+        "errors": {
+          "unknown_error": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+          "insufficient_data": "Bitte füllen Sie alle erforderlichen Felder aus.",
+          "not_authorized": "Sie haben keine Berechtigung für diese Aktion.",
+          "not_found": "Diese Anfrage wurde nicht gefunden.",
+          "conflict": "Diese Aktion kann in diesem Zustand nicht ausgeführt werden.",
+          "failed": "Vorgang fehlgeschlagen. Bitte versuchen Sie es erneut."
+        }
+      },
       "support": {
         "title": "Support Center",
         "subtitle": "Submit a request for help and track your cases.",
@@ -3658,6 +3668,16 @@
       "post_deleted": "Beitrag erfolgreich gelöscht",
       "comment_updated": "Kommentar erfolgreich aktualisiert",
       "comment_deleted": "Kommentar erfolgreich gelöscht"
+    }
+  },
+  "requests": {
+    "errors": {
+      "insufficient_data": "Bitte füllen Sie alle erforderlichen Felder aus",
+      "not_authorized": "Sie haben keine Berechtigung für diese Aktion",
+      "not_found": "Das gesuchte Element wurde nicht gefunden",
+      "conflict": "Diese Aktion steht in Konflikt mit dem aktuellen Status. Bitte aktualisieren Sie und versuchen Sie es erneut",
+      "failed": "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut",
+      "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
     }
   }
 }

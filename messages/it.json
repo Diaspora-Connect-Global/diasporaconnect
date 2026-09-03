@@ -1290,6 +1290,16 @@
           }
         }
       },
+      "requests": {
+        "errors": {
+          "unknown_error": "Si è verificato un errore. Riprova.",
+          "insufficient_data": "Compila tutti i campi obbligatori.",
+          "not_authorized": "Non sei autorizzato a eseguire questa azione.",
+          "not_found": "Questa richiesta non è stata trovata.",
+          "conflict": "Questa operazione non può essere completata nello stato attuale.",
+          "failed": "L'operazione non è riuscita. Riprova."
+        }
+      },
       "support": {
         "title": "Support Center",
         "subtitle": "Submit a request for help and track your cases.",
@@ -3658,6 +3668,16 @@
       "post_deleted": "Post eliminato con successo",
       "comment_updated": "Commento aggiornato con successo",
       "comment_deleted": "Commento eliminato con successo"
+    }
+  },
+  "requests": {
+    "errors": {
+      "insufficient_data": "Si prega di fornire tutte le informazioni richieste",
+      "not_authorized": "Non hai il permesso di eseguire questa azione",
+      "not_found": "L'elemento che stai cercando non è stato trovato",
+      "conflict": "Questa operazione è in conflitto con lo stato attuale. Si prega di aggiornare e riprovare",
+      "failed": "Operazione non riuscita. Riprova",
+      "unknown_error": "Si è verificato un errore imprevisto"
     }
   }
 }

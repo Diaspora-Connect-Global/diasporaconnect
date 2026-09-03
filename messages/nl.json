@@ -1293,6 +1293,16 @@
           }
         }
       },
+      "requests": {
+        "errors": {
+          "unknown_error": "Er is een fout opgetreden. Probeer het opnieuw.",
+          "insufficient_data": "Vul alstublieft alle vereiste velden in.",
+          "not_authorized": "Je bent niet bevoegd om deze actie uit te voeren.",
+          "not_found": "Dit verzoek is niet gevonden.",
+          "conflict": "Deze bewerking kan in de huidige status niet worden voltooid.",
+          "failed": "Bewerking mislukt. Probeer het opnieuw."
+        }
+      },
       "support": {
         "title": "Support Center",
         "subtitle": "Submit a request for help and track your cases.",
@@ -3658,6 +3668,16 @@
       "post_deleted": "Bericht succesvol verwijderd",
       "comment_updated": "Opmerking succesvol bijgewerkt",
       "comment_deleted": "Opmerking succesvol verwijderd"
+    }
+  },
+  "requests": {
+    "errors": {
+      "insufficient_data": "Gelieve alle vereiste informatie in te vullen",
+      "not_authorized": "U hebt geen toestemming om deze actie uit te voeren",
+      "not_found": "Het item dat u zoekt, is niet gevonden",
+      "conflict": "Deze bewerking veroorzaakt een conflict met de huidige status. Vernieuw en probeer het opnieuw",
+      "failed": "Bewerking mislukt. Probeer het opnieuw",
+      "unknown_error": "Er is een onverwachte fout opgetreden"
     }
   }
 }
