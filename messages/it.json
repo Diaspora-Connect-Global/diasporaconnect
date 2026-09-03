@@ -654,7 +654,15 @@
         "unknown_error": "Si è verificato un errore imprevisto"
       }
     },
-    "noSuggestions": "Nessun suggerimento di amici disponibile"
+    "noSuggestions": "Nessun suggerimento di amici disponibile",
+    "errors": {
+      "insufficient_data": "Verifica il tuo input e riprova",
+      "not_authorized": "Non hai il permesso di eseguire questa azione",
+      "not_found": "L'elemento non è stato trovato",
+      "conflict": "Questa azione non può essere completata a causa dello stato attuale",
+      "failed": "L'operazione non è riuscita. Riprova più tardi",
+      "unknown_error": "Si è verificato un errore imprevisto"
+    }
   },
   "community": {
     "discover": "Scopri community",
