@@ -1770,7 +1770,19 @@
       "postShareWithTitle": "{actorName} a partagé votre publication « {postTitle} »",
       "commentLike": "{actorName} a aimé votre commentaire",
       "groupChatDigest": "Résumé quotidien de {groupName}",
-      "groupChatDigestFallback": "Votre résumé quotidien de discussion de groupe est prêt"
+      "groupChatDigestFallback": "Votre résumé quotidien de discussion de groupe est prêt",
+      "postReaction": "{actorName} a réagi à votre publication",
+      "postReactionWithTitle": "{actorName} a réagi à votre publication « {postTitle} »",
+      "postReactionHopeful": "{actorName} a réagi avec espoir à votre publication",
+      "postReactionHopefulWithTitle": "{actorName} a réagi avec espoir à votre publication « {postTitle} »",
+      "postReactionSad": "{actorName} a réagi avec compassion à votre publication",
+      "postReactionSadWithTitle": "{actorName} a réagi avec compassion à votre publication « {postTitle} »",
+      "groupedPostReaction": "{actorName} et {others, plural, =1 {1 autre personne} other {# autres personnes}} ont réagi à votre publication",
+      "groupedPostReactionWithTitle": "{actorName} et {others, plural, =1 {1 autre personne} other {# autres personnes}} ont réagi à votre publication « {postTitle} »",
+      "groupedPostReactionHopeful": "{actorName} et {others, plural, =1 {1 autre personne} other {# autres personnes}} ont réagi avec espoir à votre publication",
+      "groupedPostReactionHopefulWithTitle": "{actorName} et {others, plural, =1 {1 autre personne} other {# autres personnes}} ont réagi avec espoir à votre publication « {postTitle} »",
+      "groupedPostReactionSad": "{actorName} et {others, plural, =1 {1 autre personne} other {# autres personnes}} ont réagi avec compassion à votre publication",
+      "groupedPostReactionSadWithTitle": "{actorName} et {others, plural, =1 {1 autre personne} other {# autres personnes}} ont réagi avec compassion à votre publication « {postTitle} »"
     },
     "none": {
       "all": "Aucune notification disponible",
@@ -3978,5 +3990,19 @@
       "failed": "L'opération a échoué. Veuillez réessayer.",
       "unknown_error": "Une erreur inattendue s'est produite. Veuillez réessayer plus tard."
     }
+  },
+  "reactions": {
+    "happy": "Joie",
+    "hopeful": "Espoir",
+    "sad": "Compassion",
+    "choose": "Choisir une réaction",
+    "total": "Total",
+    "trigger": "{count, plural, =0 {Aucune réaction} one {# réaction} other {# réactions}}. Choisir une réaction",
+    "triggerSelected": "{count, plural, one {# réaction} other {# réactions}}. Votre réaction : {reaction}. Modifier ou retirer",
+    "optionSelected": "{reaction}, sélectionnée. Activer pour retirer",
+    "optionSelectedWithCount": "{reaction}, {count, plural, one {# réaction} other {# réactions}}, sélectionnée. Activer pour retirer",
+    "comments": "{count, plural, one {# commentaire} other {# commentaires}}",
+    "shares": "{count, plural, one {# partage} other {# partages}}",
+    "saves": "{count, plural, one {# enregistrement} other {# enregistrements}}"
   }
 }

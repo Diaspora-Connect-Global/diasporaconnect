@@ -1770,7 +1770,19 @@
       "postShareWithTitle": "{actorName} hat Ihren Beitrag „{postTitle}“ geteilt",
       "commentLike": "{actorName} gefällt Ihr Kommentar",
       "groupChatDigest": "Tageszusammenfassung für {groupName}",
-      "groupChatDigestFallback": "Ihre tägliche Gruppenchat-Zusammenfassung ist bereit"
+      "groupChatDigestFallback": "Ihre tägliche Gruppenchat-Zusammenfassung ist bereit",
+      "postReaction": "{actorName} hat auf Ihren Beitrag reagiert",
+      "postReactionWithTitle": "{actorName} hat auf Ihren Beitrag „{postTitle}“ reagiert",
+      "postReactionHopeful": "{actorName} hat mit Zuversicht auf Ihren Beitrag reagiert",
+      "postReactionHopefulWithTitle": "{actorName} hat mit Zuversicht auf Ihren Beitrag „{postTitle}“ reagiert",
+      "postReactionSad": "{actorName} hat mit Mitgefühl auf Ihren Beitrag reagiert",
+      "postReactionSadWithTitle": "{actorName} hat mit Mitgefühl auf Ihren Beitrag „{postTitle}“ reagiert",
+      "groupedPostReaction": "{actorName} und {others, plural, =1 {1 weitere Person} other {# weitere Personen}} haben auf Ihren Beitrag reagiert",
+      "groupedPostReactionWithTitle": "{actorName} und {others, plural, =1 {1 weitere Person} other {# weitere Personen}} haben auf Ihren Beitrag „{postTitle}“ reagiert",
+      "groupedPostReactionHopeful": "{actorName} und {others, plural, =1 {1 weitere Person} other {# weitere Personen}} haben mit Zuversicht auf Ihren Beitrag reagiert",
+      "groupedPostReactionHopefulWithTitle": "{actorName} und {others, plural, =1 {1 weitere Person} other {# weitere Personen}} haben mit Zuversicht auf Ihren Beitrag „{postTitle}“ reagiert",
+      "groupedPostReactionSad": "{actorName} und {others, plural, =1 {1 weitere Person} other {# weitere Personen}} haben mit Mitgefühl auf Ihren Beitrag reagiert",
+      "groupedPostReactionSadWithTitle": "{actorName} und {others, plural, =1 {1 weitere Person} other {# weitere Personen}} haben mit Mitgefühl auf Ihren Beitrag „{postTitle}“ reagiert"
     },
     "none": {
       "all": "Keine Benachrichtigungen verfügbar",
@@ -3978,5 +3990,19 @@
       "failed": "Die Operation fehlgeschlagen. Bitte versuchen Sie es später erneut.",
       "unknown_error": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
     }
+  },
+  "reactions": {
+    "happy": "Freude",
+    "hopeful": "Hoffnung",
+    "sad": "Mitgefühl",
+    "choose": "Reaktion wählen",
+    "total": "Gesamt",
+    "trigger": "{count, plural, =0 {Noch keine Reaktionen} one {# Reaktion} other {# Reaktionen}}. Reaktion wählen",
+    "triggerSelected": "{count, plural, one {# Reaktion} other {# Reaktionen}}. Deine Reaktion: {reaction}. Ändern oder entfernen",
+    "optionSelected": "{reaction}, ausgewählt. Zum Entfernen aktivieren",
+    "optionSelectedWithCount": "{reaction}, {count, plural, one {# Reaktion} other {# Reaktionen}}, ausgewählt. Zum Entfernen aktivieren",
+    "comments": "{count, plural, one {# Kommentar} other {# Kommentare}}",
+    "shares": "{count, plural, one {# Mal geteilt} other {# Mal geteilt}}",
+    "saves": "{count, plural, one {# Mal gespeichert} other {# Mal gespeichert}}"
   }
 }

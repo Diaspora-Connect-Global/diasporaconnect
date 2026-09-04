@@ -1770,7 +1770,19 @@
       "postShareWithTitle": "{actorName} ha condiviso il tuo post «{postTitle}»",
       "commentLike": "A {actorName} è piaciuto il tuo commento",
       "groupChatDigest": "Riepilogo giornaliero di {groupName}",
-      "groupChatDigestFallback": "Il riepilogo giornaliero della chat di gruppo è pronto"
+      "groupChatDigestFallback": "Il riepilogo giornaliero della chat di gruppo è pronto",
+      "postReaction": "{actorName} ha reagito al tuo post",
+      "postReactionWithTitle": "{actorName} ha reagito al tuo post «{postTitle}»",
+      "postReactionHopeful": "{actorName} ha reagito con speranza al tuo post",
+      "postReactionHopefulWithTitle": "{actorName} ha reagito con speranza al tuo post «{postTitle}»",
+      "postReactionSad": "{actorName} ha reagito con partecipazione al tuo post",
+      "postReactionSadWithTitle": "{actorName} ha reagito con partecipazione al tuo post «{postTitle}»",
+      "groupedPostReaction": "{actorName} e altre {others, plural, =1 {1 persona} other {# persone}} hanno reagito al tuo post",
+      "groupedPostReactionWithTitle": "{actorName} e altre {others, plural, =1 {1 persona} other {# persone}} hanno reagito al tuo post «{postTitle}»",
+      "groupedPostReactionHopeful": "{actorName} e altre {others, plural, =1 {1 persona} other {# persone}} hanno reagito con speranza al tuo post",
+      "groupedPostReactionHopefulWithTitle": "{actorName} e altre {others, plural, =1 {1 persona} other {# persone}} hanno reagito con speranza al tuo post «{postTitle}»",
+      "groupedPostReactionSad": "{actorName} e altre {others, plural, =1 {1 persona} other {# persone}} hanno reagito con partecipazione al tuo post",
+      "groupedPostReactionSadWithTitle": "{actorName} e altre {others, plural, =1 {1 persona} other {# persone}} hanno reagito con partecipazione al tuo post «{postTitle}»"
     },
     "none": {
       "all": "Nessuna notifica disponibile",
@@ -3978,5 +3990,19 @@
       "failed": "L'operazione non è riuscita. Riprova.",
       "unknown_error": "Si è verificato un errore inaspettato. Riprova più tardi."
     }
+  },
+  "reactions": {
+    "happy": "Gioia",
+    "hopeful": "Speranza",
+    "sad": "Partecipazione",
+    "choose": "Scegli una reazione",
+    "total": "Totale",
+    "trigger": "{count, plural, =0 {Ancora nessuna reazione} one {# reazione} other {# reazioni}}. Scegli una reazione",
+    "triggerSelected": "{count, plural, one {# reazione} other {# reazioni}}. La tua reazione: {reaction}. Cambia o rimuovi",
+    "optionSelected": "{reaction}, selezionata. Attiva per rimuovere",
+    "optionSelectedWithCount": "{reaction}, {count, plural, one {# reazione} other {# reazioni}}, selezionata. Attiva per rimuovere",
+    "comments": "{count, plural, one {# commento} other {# commenti}}",
+    "shares": "{count, plural, one {# condivisione} other {# condivisioni}}",
+    "saves": "{count, plural, one {# salvataggio} other {# salvataggi}}"
   }
 }

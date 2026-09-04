@@ -43,6 +43,157 @@ function normalizeSocialType(rawType: string | undefined): string {
   return (rawType || '').toLowerCase().replace(/_/g, '.');
 }
 
+/* ------------------------------------------------------------------ *
+ * Post reactions — mirrors notification-service `post-reaction-copy.ts`
+ *
+ * A post reaction arrives on the SAME notification type as a like
+ * (`post.liked`) — deliberately, so the row keeps its place in the Social
+ * tab and its client-side grouping. The flavour lives on the payload:
+ *
+ *   data.soleReactionType — 'HAPPY' | 'HOPEFUL' | 'SAD' | null. Non-null
+ *     ONLY when the whole group provably shares one flavour.
+ *   data.reactionCounts   — e.g. { HAPPY: 3, SAD: 1 }. `{}` means "the mix
+ *     is unknown", never "there were none".
+ *
+ * THE COPY RULE: name a feeling back to the author only when it is proven.
+ * Mixed or unknown falls back to the neutral "reacted" verb, because no
+ * single phrasing is true of everyone in a mixed group. SAD renders as
+ * SYMPATHY, never sadness — "reacted with sadness to your post" is readable
+ * as sadness ABOUT the post, the negative-feedback reading we must never
+ * produce. And a SAD reaction must NEVER be announced as a like: someone
+ * reacts Sad in sympathy on a bereavement post and the author is told
+ * "Ama liked your post" is exactly the failure this exists to prevent, so
+ * ambiguity resolves to neutral, never to "liked".
+ * ------------------------------------------------------------------ */
+
+type PostReactionKind = 'HAPPY' | 'HOPEFUL' | 'SAD';
+
+/**
+ * Wire aliases → canonical kind. `LIKE` / `LIKED` are the pre-reaction
+ * vocabulary and mean HAPPY: Happy IS the existing Like, so a legacy like and
+ * a HAPPY reaction must produce byte-identical copy.
+ */
+const REACTION_KIND_ALIASES: Readonly<Record<string, PostReactionKind>> = {
+  HAPPY: 'HAPPY',
+  LIKE: 'HAPPY',
+  LIKED: 'HAPPY',
+  HOPEFUL: 'HOPEFUL',
+  HOPE: 'HOPEFUL',
+  SAD: 'SAD',
+};
+
+function normalizeReactionKind(raw: unknown): PostReactionKind | null {
+  if (typeof raw !== 'string') return null;
+  return REACTION_KIND_ALIASES[raw.trim().toUpperCase()] ?? null;
+}
+
+/** Canonicalize a `reactionCounts` object, dropping non-positive/unknown entries. */
+function parseReactionCounts(raw: unknown): Partial<Record<PostReactionKind, number>> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const out: Partial<Record<PostReactionKind, number>> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    const kind = normalizeReactionKind(key);
+    if (!kind) continue;
+    const n = Math.floor(Number(value));
+    if (!Number.isFinite(n) || n <= 0) continue;
+    // Aliases can collide (LIKE + HAPPY both map to HAPPY) — sum, don't clobber.
+    out[kind] = (out[kind] ?? 0) + n;
+  }
+  return out;
+}
+
+/**
+ * Did this payload come from the reaction-aware backend at all?
+ *
+ * Presence, not truthiness — `soleReactionType: null` and `reactionCounts: {}`
+ * are both meaningful ("mixed / unknown"), and `totalReactionCount` is written
+ * unconditionally so it survives a serializer that strips nulls.
+ */
+function isReactionAwarePayload(data: Record<string, unknown>): boolean {
+  return (
+    'soleReactionType' in data ||
+    'reactionCounts' in data ||
+    'topReactionType' in data ||
+    'totalReactionCount' in data
+  );
+}
+
+/**
+ * The flavour we may name, or `null` for a mixed/unknown group.
+ *
+ * LEGACY IS NOT UNKNOWN. Notifications written before the backend became
+ * reaction-aware carry no reaction fields at all; by definition those were
+ * plain likes, so they resolve to HAPPY and reproduce today's copy exactly.
+ * Only a reaction-aware payload that fails to prove a single flavour is
+ * treated as mixed.
+ */
+function resolveSoleReactionKind(data: Record<string, unknown>): PostReactionKind | null {
+  const declared = normalizeReactionKind(data.soleReactionType);
+  if (declared) return declared;
+
+  // Recover the flavour from the breakdown when `soleReactionType` is absent
+  // or was dropped in transit but the counts still prove a single flavour.
+  const kinds = Object.keys(parseReactionCounts(data.reactionCounts)) as PostReactionKind[];
+  if (kinds.length === 1) return kinds[0];
+  if (kinds.length > 1) return null; // provably mixed
+
+  return isReactionAwarePayload(data) ? null : 'HAPPY';
+}
+
+/**
+ * i18n key for the reaction sentence.
+ *
+ * HAPPY resolves to the pre-existing `postLike` / `groupedPostLike` keys rather
+ * than being regularised into a `postReaction*` name — Happy IS the Like, that
+ * wording is already shipped and already translated in all five locales, and
+ * keeping it means a legacy notification renders through the identical key it
+ * renders through today. The asymmetry is deliberate.
+ */
+function postReactionMessageKey(
+  soleKind: PostReactionKind | null,
+  grouped: boolean,
+  hasTitle: boolean
+): string {
+  const stem =
+    soleKind === 'HAPPY'
+      ? 'postLike'
+      : soleKind === 'HOPEFUL'
+        ? 'postReactionHopeful'
+        : soleKind === 'SAD'
+          ? 'postReactionSad'
+          : 'postReaction';
+  const name = grouped ? `grouped${stem.charAt(0).toUpperCase()}${stem.slice(1)}` : stem;
+  return `messages.${name}${hasTitle ? 'WithTitle' : ''}`;
+}
+
+/**
+ * Resolve a reaction sentence, tolerating a locale that has not yet been given
+ * the new keys.
+ *
+ * `src/i18n/request.ts` loads exactly ONE messages file per locale with no
+ * cross-locale fallback, and next-intl returns the (namespace-prefixed) key
+ * path on a miss rather than throwing — so between this deploy and the de/fr/
+ * it/nl translations landing, a non-English reader would see the literal string
+ * "notification.messages.postReactionSad" on a bereavement post. The backend's
+ * own `message` is already reaction-correct (it is the fix this change exists
+ * to surface), so an English sentence is the better of the two bad options.
+ *
+ * This NEVER fires for the Happy/legacy path — `postLike` / `groupedPostLike`
+ * already exist in all five locales — so today's copy is untouched by it.
+ * Delete the guard once all five locales carry the reaction keys.
+ */
+function translateReaction(
+  t: Translator,
+  key: string,
+  values: Record<string, string | number>,
+  backendMessage: string | null | undefined
+): string {
+  const text = t(key, values);
+  const isMiss = !text || text === key || text.endsWith(key);
+  if (!isMiss) return text;
+  return stripEmoji(backendMessage) || text;
+}
+
 interface NotificationGroup {
   key: string;
   primary: Notification;
@@ -200,17 +351,26 @@ function buildNotificationView(
     if (count > 1) {
       const others = count - 1;
       const values = { actorName: resolvedActor, others, postTitle: enriched.targetTitle || '' };
-      const key = isPostLike
-        ? hasTitle
-          ? 'messages.groupedPostLikeWithTitle'
-          : 'messages.groupedPostLike'
-        : isPostComment
-          ? 'messages.groupedPostComment'
-          : isPostMention
-            ? 'messages.groupedPostMention'
-            : isPostShare
-              ? 'messages.groupedPostShare'
-              : 'messages.groupedCommentLike';
+      if (isPostLike) {
+        return {
+          title: translateReaction(
+            t,
+            postReactionMessageKey(resolveSoleReactionKind(data), true, hasTitle),
+            values,
+            not.message
+          ),
+          description,
+          imageUrl: actorAvatar,
+          actorHref,
+        };
+      }
+      const key = isPostComment
+        ? 'messages.groupedPostComment'
+        : isPostMention
+          ? 'messages.groupedPostMention'
+          : isPostShare
+            ? 'messages.groupedPostShare'
+            : 'messages.groupedCommentLike';
       return {
         title: t(key, values),
         description,
@@ -224,10 +384,12 @@ function buildNotificationView(
     // rather than emitting a raw key.
     if (isPostLike) {
       return {
-        title: t(hasTitle ? 'messages.postLikeWithTitle' : 'messages.postLike', {
-          actorName: resolvedActor,
-          postTitle: enriched.targetTitle || '',
-        }),
+        title: translateReaction(
+          t,
+          postReactionMessageKey(resolveSoleReactionKind(data), false, hasTitle),
+          { actorName: resolvedActor, postTitle: enriched.targetTitle || '' },
+          not.message
+        ),
         description,
         imageUrl: actorAvatar,
         actorHref,

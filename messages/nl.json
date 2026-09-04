@@ -1770,7 +1770,19 @@
       "postShareWithTitle": "{actorName} heeft uw bericht \"{postTitle}\" gedeeld",
       "commentLike": "{actorName} vindt uw reactie leuk",
       "groupChatDigest": "Dagelijkse samenvatting van {groupName}",
-      "groupChatDigestFallback": "Uw dagelijkse groepschat-samenvatting staat klaar"
+      "groupChatDigestFallback": "Uw dagelijkse groepschat-samenvatting staat klaar",
+      "postReaction": "{actorName} heeft op uw bericht gereageerd",
+      "postReactionWithTitle": "{actorName} heeft op uw bericht \"{postTitle}\" gereageerd",
+      "postReactionHopeful": "{actorName} heeft met hoop op uw bericht gereageerd",
+      "postReactionHopefulWithTitle": "{actorName} heeft met hoop op uw bericht \"{postTitle}\" gereageerd",
+      "postReactionSad": "{actorName} heeft met medeleven op uw bericht gereageerd",
+      "postReactionSadWithTitle": "{actorName} heeft met medeleven op uw bericht \"{postTitle}\" gereageerd",
+      "groupedPostReaction": "{actorName} en {others, plural, =1 {1 ander} other {# anderen}} hebben op uw bericht gereageerd",
+      "groupedPostReactionWithTitle": "{actorName} en {others, plural, =1 {1 ander} other {# anderen}} hebben op uw bericht \"{postTitle}\" gereageerd",
+      "groupedPostReactionHopeful": "{actorName} en {others, plural, =1 {1 ander} other {# anderen}} hebben met hoop op uw bericht gereageerd",
+      "groupedPostReactionHopefulWithTitle": "{actorName} en {others, plural, =1 {1 ander} other {# anderen}} hebben met hoop op uw bericht \"{postTitle}\" gereageerd",
+      "groupedPostReactionSad": "{actorName} en {others, plural, =1 {1 ander} other {# anderen}} hebben met medeleven op uw bericht gereageerd",
+      "groupedPostReactionSadWithTitle": "{actorName} en {others, plural, =1 {1 ander} other {# anderen}} hebben met medeleven op uw bericht \"{postTitle}\" gereageerd"
     },
     "none": {
       "all": "Geen meldingen beschikbaar",
@@ -3978,5 +3990,19 @@
       "failed": "De bewerking is mislukt. Probeer het opnieuw.",
       "unknown_error": "Er is een onverwachte fout opgetreden. Probeer het later opnieuw."
     }
+  },
+  "reactions": {
+    "happy": "Blij",
+    "hopeful": "Hoop",
+    "sad": "Medeleven",
+    "choose": "Kies een reactie",
+    "total": "Totaal",
+    "trigger": "{count, plural, =0 {Nog geen reacties} one {# reactie} other {# reacties}}. Kies een reactie",
+    "triggerSelected": "{count, plural, one {# reactie} other {# reacties}}. Jouw reactie: {reaction}. Wijzigen of verwijderen",
+    "optionSelected": "{reaction}, geselecteerd. Activeer om te verwijderen",
+    "optionSelectedWithCount": "{reaction}, {count, plural, one {# reactie} other {# reacties}}, geselecteerd. Activeer om te verwijderen",
+    "comments": "{count, plural, one {# reactie} other {# reacties}}",
+    "shares": "{count, plural, one {# keer gedeeld} other {# keer gedeeld}}",
+    "saves": "{count, plural, one {# keer opgeslagen} other {# keer opgeslagen}}"
   }
 }
