@@ -298,13 +298,13 @@ export default function FeedCardFiltered({
             const outcome = readMutationOutcome(result, d => d.editPost);
             if (!outcome.ok) {
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             setIsEditingPost(false);
             toast.success(t('feed.success.post_updated'));
         } catch {
-            toast.error(t('feed.errors.failed'));
+            toast.error(tRoot('feed.errors.failed'));
         }
     };
 
@@ -314,14 +314,14 @@ export default function FeedCardFiltered({
             const outcome = readMutationOutcome(result, d => d.deletePost);
             if (!outcome.ok) {
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             setDeletePostModalOpen(false);
             toast.success(t('feed.success.post_deleted'));
             onDelete?.(resolvedPostId);
         } catch {
-            toast.error(t('feed.errors.failed'));
+            toast.error(tRoot('feed.errors.failed'));
         }
     };
 
@@ -338,14 +338,14 @@ export default function FeedCardFiltered({
                 if (previous) setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: previous.content } : c));
                 setEditingCommentId(commentId);
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             toast.success(t('feed.success.comment_updated'));
         } catch {
             if (previous) setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: previous.content } : c));
             setEditingCommentId(commentId);
-            toast.error(t('feed.errors.failed'));
+            toast.error(tRoot('feed.errors.failed'));
         }
     };
 
@@ -362,14 +362,14 @@ export default function FeedCardFiltered({
                 setLoadedComments(snapshot);
                 setCommentCount(n => n + 1);
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             toast.success(t('feed.success.comment_deleted'));
         } catch {
             setLoadedComments(snapshot);
             setCommentCount(n => n + 1);
-            toast.error(t('feed.errors.failed'));
+            toast.error(tRoot('feed.errors.failed'));
         }
     };
 
@@ -439,6 +439,10 @@ export default function FeedCardFiltered({
     const commentsData = commentsLoaded ? loadedComments : commentsDataProp;
 
     const t = useTranslations('actions');
+    // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+    // key path (e.g. 'feed.errors.not_found'), so it must be handed to an
+    // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+    const tRoot = useTranslations();
 
     useEffect(() => setIsLiked(externalIsLiked), [externalIsLiked]);
     useEffect(() => setIsSaved(externalIsSaved), [externalIsSaved]);

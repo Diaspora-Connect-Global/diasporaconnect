@@ -110,6 +110,10 @@ export default function SharePostModal({
   onShared,
 }: SharePostModalProps) {
   const t = useTranslations('actions');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'feed.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
   const currentUserId = useUserStore((s) => s.user?.userId ?? null);
 
   const [shareLink, setShareLink] = useState<string>(initialShareLink ?? '');
@@ -258,7 +262,7 @@ export default function SharePostModal({
         });
         const outcome = readMutationOutcome(result, d => d.createConversation);
         if (!outcome.ok) {
-          toast.error(t(refusalMessageKey(outcome.message, 'feed.errors')));
+          toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
           setSendingTo(null);
           return;
         }
@@ -268,7 +272,7 @@ export default function SharePostModal({
         const sendResult = await sendToConversation(conversationId, link);
         const sendOutcome = readMutationOutcome(sendResult, d => d.sendMessage);
         if (!sendOutcome.ok) {
-          toast.error(t(refusalMessageKey(sendOutcome.message, 'feed.errors')));
+          toast.error(tRoot(refusalMessageKey(sendOutcome.message, 'feed.errors')));
           setSendingTo(null);
           return;
         }
@@ -295,7 +299,7 @@ export default function SharePostModal({
         const sendResult = await sendToConversation(groupConversation.id, link);
         const sendOutcome = readMutationOutcome(sendResult, d => d.sendMessage);
         if (!sendOutcome.ok) {
-          toast.error(t(refusalMessageKey(sendOutcome.message, 'feed.errors')));
+          toast.error(tRoot(refusalMessageKey(sendOutcome.message, 'feed.errors')));
           setSendingTo(null);
           return;
         }

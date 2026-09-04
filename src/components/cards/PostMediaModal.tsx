@@ -153,6 +153,10 @@ export default function PostMediaModal({
     onDelete,
 }: PostMediaModalProps) {
     const t = useTranslations('actions');
+    // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+    // key path (e.g. 'feed.errors.not_found'), so it must be handed to an
+    // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+    const tRoot = useTranslations();
     const router = useRouter();
     const currentUserAvatar = useUserStore(s => s.user?.avatarUrl) || '/PROFILE.png';
 
@@ -240,7 +244,7 @@ export default function PostMediaModal({
             const outcome = readMutationOutcome(result, d => d.editPost);
             if (!outcome.ok) {
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             setIsEditingPost(false);
@@ -256,7 +260,7 @@ export default function PostMediaModal({
             const outcome = readMutationOutcome(result, d => d.deletePost);
             if (!outcome.ok) {
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             setDeletePostModalOpen(false);
@@ -281,7 +285,7 @@ export default function PostMediaModal({
                 setLoadedComments(snapshot);
                 setCommentCount(n => n + 1);
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             toast.success('Comment deleted');
@@ -305,7 +309,7 @@ export default function PostMediaModal({
                 if (previous) setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: previous.content } : c));
                 setEditingCommentId(commentId);
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(t(key));
+                toast.error(tRoot(key));
                 return;
             }
             toast.success('Comment updated');

@@ -271,7 +271,7 @@ function FeedCardWithReplyInner({
             const outcome = readMutationOutcome(result, d => d.updatePostVisibility);
             if (!outcome.ok) {
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(feedErrors(key));
+                toast.error(tRoot(key));
                 return;
             }
             setVisibilityModalOpen(false);
@@ -288,7 +288,7 @@ function FeedCardWithReplyInner({
             const outcome = readMutationOutcome(result, d => d.deletePost);
             if (!outcome.ok) {
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(feedErrors(key));
+                toast.error(tRoot(key));
                 return;
             }
             setDeletePostModalOpen(false);
@@ -308,7 +308,7 @@ function FeedCardWithReplyInner({
             const outcome = readMutationOutcome(result, d => d.editPost);
             if (!outcome.ok) {
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(feedErrors(key));
+                toast.error(tRoot(key));
                 return;
             }
             setPostContent(editPostText);
@@ -356,7 +356,7 @@ function FeedCardWithReplyInner({
                 }
                 setEditingCommentId(commentId);
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(feedErrors(key));
+                toast.error(tRoot(key));
                 return;
             }
             toast.success('Comment updated');
@@ -385,7 +385,7 @@ function FeedCardWithReplyInner({
                 });
                 setCommentCount((c) => c + 1);
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
-                toast.error(feedErrors(key));
+                toast.error(tRoot(key));
                 return;
             }
             toast.success('Comment deleted');
@@ -562,7 +562,10 @@ function FeedCardWithReplyInner({
     ];
 
     const t = useTranslations('actions');
-    const feedErrors = useTranslations('feed.errors');
+    // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+    // key path (e.g. 'feed.errors.not_found'), so it must be handed to an
+    // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+    const tRoot = useTranslations();
 
     // Sync state with props when they change (important for refetch scenarios)
     useEffect(() => {

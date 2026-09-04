@@ -287,6 +287,10 @@ interface Props {
 
 export function EmbassyEventsCalendar({ community, profile }: Props) {
   const t = useTranslations('community.embassy.events.calendar');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'events.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
   const ownerKind = useOwnerKind();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -428,7 +432,7 @@ export function EmbassyEventsCalendar({ community, profile }: Props) {
       const result = await registerMutation({ variables: { input: { eventId: evt.id } } });
       const outcome = readMutationOutcome(result, d => d.registerForEvent);
       if (!outcome.ok) {
-        toast.error(t(refusalMessageKey(outcome.message, 'events.errors')));
+        toast.error(tRoot(refusalMessageKey(outcome.message, 'events.errors')));
         return;
       }
       toast.success(t('toastGoing'));

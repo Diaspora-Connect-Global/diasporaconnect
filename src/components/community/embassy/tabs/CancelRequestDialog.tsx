@@ -43,6 +43,10 @@ export function CancelRequestDialog({
   onCancelled,
 }: CancelRequestDialogProps) {
   const t = useTranslations('community.embassy.track.detail.cancel');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'requests.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
   const [reason, setReason] = useState('');
 
   const [cancelServiceRequest, { loading }] = useMutation<CancelServiceRequestResponse>(
@@ -57,7 +61,7 @@ export function CancelRequestDialog({
       const outcome = readMutationOutcome(result, d => d.cancelServiceRequest);
       if (!outcome.ok) {
         const key = refusalMessageKey(outcome.message, 'requests.errors');
-        toast.error(t(key));
+        toast.error(tRoot(key));
         return;
       }
       toast.success(t('success'));

@@ -149,6 +149,10 @@ export default function CommunityDetailPage() {
   const t = useTranslations('community');
   const tActions = useTranslations('actions');
   const tJoinModal = useTranslations('home.joinModal');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'community.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
 
   const { data: detailsData, loading: detailsLoading } = useQuery<GetCommunityDetailsResponse>(
     GET_COMMUNITY_DETAILS,
@@ -424,7 +428,7 @@ export default function CommunityDetailPage() {
       const outcome = readMutationOutcome(result, d => d.leaveCommunity);
       if (!outcome.ok) {
         const key = refusalMessageKey(outcome.message, 'community.errors');
-        toast.error(t(key));
+        toast.error(tRoot(key));
         return;
       }
       setLeaveModalOpen(false);
@@ -445,7 +449,7 @@ export default function CommunityDetailPage() {
       const outcome = readMutationOutcome(result, d => d.leaveCommunity);
       if (!outcome.ok) {
         const key = refusalMessageKey(outcome.message, 'community.errors');
-        toast.error(t(key));
+        toast.error(tRoot(key));
         return;
       }
       toast.success(t('toasts.requestCancelled'));

@@ -251,6 +251,10 @@ interface EmbassyEventDetailProps {
  */
 export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEventDetailProps) {
   const t = useTranslations('community.embassy.events.detail');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'events.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
   const isEmbassyVariant = useIsEmbassy();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -304,7 +308,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
       const outcome = readMutationOutcome(res, (d) => d.registerForEvent);
       if (!outcome.ok) {
         const key = refusalMessageKey(outcome.message, 'events.errors');
-        toast.error(t(key));
+        toast.error(tRoot(key));
         return;
       }
 
@@ -319,7 +323,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
       await refetch();
     } catch (err) {
       // Network error or exception
-      toast.error(t('events.errors.failed'));
+      toast.error(tRoot('events.errors.failed'));
     }
   }
 
@@ -370,14 +374,14 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
       const outcome = readMutationOutcome(res, (d) => d.cancelEventRegistration);
       if (!outcome.ok) {
         const key = refusalMessageKey(outcome.message, 'events.errors');
-        toast.error(t(key));
+        toast.error(tRoot(key));
         return;
       }
 
       toast.success(t('toastCancelled'));
       await refetch();
     } catch {
-      toast.error(t('events.errors.failed'));
+      toast.error(tRoot('events.errors.failed'));
     }
   }
 

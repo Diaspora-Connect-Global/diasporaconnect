@@ -128,6 +128,10 @@ export default function AssociationsPage() {
   const tDiscovery = useTranslations('association.discovery');
   const tCommunity = useTranslations('community');
   const tJoinModal = useTranslations('home.joinModal');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'community.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -247,7 +251,7 @@ export default function AssociationsPage() {
     const result = await requestJoin({ variables: { associationId } });
     const outcome = readMutationOutcome(result, (d) => d.requestMembership);
     if (!outcome.ok) {
-      toast.error(t(refusalMessageKey(outcome.message, 'community.errors')));
+      toast.error(tRoot(refusalMessageKey(outcome.message, 'community.errors')));
       return;
     }
     const status = result?.data?.requestMembership?.status;
@@ -355,7 +359,7 @@ export default function AssociationsPage() {
     const result = await leaveAssociation({ variables: { associationId: leaveModal.id } });
     const outcome = readMutationOutcome(result, (d) => d.leaveAssociation);
     if (!outcome.ok) {
-      toast.error(t(refusalMessageKey(outcome.message, 'community.errors')));
+      toast.error(tRoot(refusalMessageKey(outcome.message, 'community.errors')));
       return;
     }
     setLeaveModal({ open: false, id: '', name: '' });
@@ -370,7 +374,7 @@ export default function AssociationsPage() {
     });
     const outcome = readMutationOutcome(result, (d) => d.cancelJoinRequest);
     if (!outcome.ok) {
-      toast.error(t(refusalMessageKey(outcome.message, 'community.errors')));
+      toast.error(tRoot(refusalMessageKey(outcome.message, 'community.errors')));
       return;
     }
     toast.success(t('toasts.requestCancelled'));

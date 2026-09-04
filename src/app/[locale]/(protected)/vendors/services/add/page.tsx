@@ -25,7 +25,10 @@ const AddServiceFlow = () => {
   const t = useTranslations('vendors.services');
   const tForm = useTranslations('vendors.services.form');
   const tCommon = useTranslations('common');
-  const tErrors = useTranslations('vendors.errors');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'vendors.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
   const locale = useLocale();
   const router = useRouter();
   
@@ -125,7 +128,7 @@ const AddServiceFlow = () => {
 
     const outcome = readMutationOutcome(result, (d) => d.createServicePackage);
     if (!outcome.ok) {
-      toast.error(tErrors(refusalMessageKey(outcome.message, 'vendors.errors')));
+      toast.error(tRoot(refusalMessageKey(outcome.message, 'vendors.errors')));
       return null;
     }
 
@@ -557,7 +560,7 @@ const AddServiceFlow = () => {
                       const publishResult = await publishServicePackage({ variables: { packageId } });
                       const publishOutcome = readMutationOutcome(publishResult, (d) => d.publishServicePackage);
                       if (!publishOutcome.ok) {
-                        toast.error(tErrors(refusalMessageKey(publishOutcome.message, 'vendors.errors')));
+                        toast.error(tRoot(refusalMessageKey(publishOutcome.message, 'vendors.errors')));
                         return;
                       }
                       toast.success(tForm('servicePackagePublished'));

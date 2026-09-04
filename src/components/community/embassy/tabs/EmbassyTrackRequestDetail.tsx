@@ -570,6 +570,10 @@ interface PaymentSectionProps {
 }
 function PaymentSection({ request, onRetried }: PaymentSectionProps) {
   const t = useTranslations('community.embassy.track.detail');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'requests.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
   const [retryPayment, { loading }] = useMutation<RetryServiceRequestPaymentResponse>(
     RETRY_SERVICE_REQUEST_PAYMENT,
   );
@@ -589,7 +593,7 @@ function PaymentSection({ request, onRetried }: PaymentSectionProps) {
     const result = await retryPayment({ variables: { requestId: request.id } });
     const outcome = readMutationOutcome(result, (d) => d.retryServiceRequestPayment);
     if (!outcome.ok) {
-      toast.error(t(refusalMessageKey(outcome.message, 'requests.errors')));
+      toast.error(tRoot(refusalMessageKey(outcome.message, 'requests.errors')));
       return;
     }
     // TODO: mirror MembershipPaymentModal's Stripe/Paystack mount once the
@@ -649,6 +653,10 @@ interface SupplyInfoSectionProps {
 }
 function SupplyInfoSection({ request, formFields, onSupplied }: SupplyInfoSectionProps) {
   const t = useTranslations('community.embassy.track.detail');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
+  // key path (e.g. 'requests.errors.not_found'), so it must be handed to an
+  // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
+  const tRoot = useTranslations();
   const isEmbassy = useIsEmbassy();
   const [message, setMessage] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -687,7 +695,7 @@ function SupplyInfoSection({ request, formFields, onSupplied }: SupplyInfoSectio
       const supplyResult = await supplyInfo({ variables: { requestId: request.id, formResponsesJson: responses } });
       const supplyOutcome = readMutationOutcome(supplyResult, (d) => d.supplyServiceRequestInfo);
       if (!supplyOutcome.ok) {
-        toast.error(t(refusalMessageKey(supplyOutcome.message, 'requests.errors')));
+        toast.error(tRoot(refusalMessageKey(supplyOutcome.message, 'requests.errors')));
         return;
       }
 
@@ -704,7 +712,7 @@ function SupplyInfoSection({ request, formFields, onSupplied }: SupplyInfoSectio
         });
         const urlOutcome = readMutationOutcome(urlResult, (d) => d.requestServiceRequestDocumentUploadUrl);
         if (!urlOutcome.ok) {
-          toast.error(t(refusalMessageKey(urlOutcome.message, 'requests.errors')));
+          toast.error(tRoot(refusalMessageKey(urlOutcome.message, 'requests.errors')));
           return;
         }
 
@@ -720,7 +728,7 @@ function SupplyInfoSection({ request, formFields, onSupplied }: SupplyInfoSectio
           });
           const docOutcome = readMutationOutcome(docResult, (d) => d.addServiceRequestDocument);
           if (!docOutcome.ok) {
-            toast.error(t(refusalMessageKey(docOutcome.message, 'requests.errors')));
+            toast.error(tRoot(refusalMessageKey(docOutcome.message, 'requests.errors')));
             return;
           }
         }
