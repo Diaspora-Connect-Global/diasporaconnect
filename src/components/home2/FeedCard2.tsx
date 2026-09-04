@@ -53,7 +53,7 @@ import { getFirstUrlInText } from '@/lib/urlPreview';
 import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
-import ReactionBar2, { REACTION_LABEL_KEY, reactionIcon } from '@/components/home2/ReactionBar2';
+import ReactionBar2 from '@/components/home2/ReactionBar2';
 import {
     DEFAULT_REACTION,
     applyBreakdownDelta,
@@ -623,7 +623,6 @@ function FeedCard2Inner({
     ];
 
     const t = useTranslations('actions');
-    const tReactions = useTranslations('reactions');
     // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
     // key path (e.g. 'feed.errors.not_found'), so it must be handed to an
     // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
@@ -1622,32 +1621,14 @@ function FeedCard2Inner({
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[1rem]">
-                        {(() => {
-                            // Mirrors the cluster: same glyph, same red, same
-                            // label — a "Like" button that stayed grey while the
-                            // cluster went red would read as a bug. This button
-                            // always acts on HAPPY, so it reads as selected only
-                            // when HAPPY is.
-                            const isHappy = selectedReaction === DEFAULT_REACTION;
-                            const ActiveIcon = reactionIcon(selectedReaction ?? DEFAULT_REACTION, isHappy);
-                            return (
-                                <button
-                                    type="button"
-                                    aria-pressed={isHappy}
-                                    className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
-                                    onClick={handleLike}
-                                >
-                                    <ActiveIcon
-                                        className={`w-[1.25rem] h-[1.25rem] ${isHappy ? 'text-border-danger' : 'text-text-secondary'}`}
-                                    />
-                                    <span className={isHappy ? 'text-border-danger' : ''}>
-                                        {selectedReaction
-                                            ? tReactions(REACTION_LABEL_KEY[selectedReaction])
-                                            : t('like')}
-                                    </span>
-                                </button>
-                            );
-                        })()}
+                        {/* NO Like button here, deliberately.
+                            Reacting happens in the rail above: the cluster opens
+                            it, and the three reactions live there. A second
+                            control doing the same thing — and only ever able to
+                            express HAPPY — would be both redundant and a lesser
+                            version of the rail, since it cannot reach Hopeful or
+                            Sad. `handleLike` is still used by the double-tap
+                            gesture and the rail's own HAPPY path. */}
                         <button
                             className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
                             onClick={toggleCommentInput}
