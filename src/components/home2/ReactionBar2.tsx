@@ -169,7 +169,7 @@ const HOLD_MOVE_CANCEL_PX = 10;
  * confirmed it, though the design's own icon table renders a selected
  * Happy in BLUE. One token, one place, if that turns out to be deliberate.
  */
-const SELECTED_DISC = 'bg-border-danger';
+export const SELECTED_DISC = 'bg-border-danger';
 
 interface ReactionBar2Props {
     /**
@@ -283,7 +283,10 @@ function ReactionBar2Inner({
             holdFiredRef.current = false;
             return;
         }
-        setOpen((v) => !v);
+        // Deliberately does NOT open a menu. The three reactions now live in
+        // the always-visible ReactionRail pinned to the card edge, so opening a
+        // second rail here would duplicate it. The cluster is a summary — it
+        // reports what the post has; the rail is where you choose.
     }, []);
 
     const clusterKinds = visibleClusterReactions(breakdown);
@@ -302,14 +305,11 @@ function ReactionBar2Inner({
         onSelectReaction(selected === kind ? null : kind);
     };
 
-    const handleClusterKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const handleClusterKeyDown = useCallback(() => {
         // Enter/Space already open it via click. ArrowDown/Up are the menu
         // idiom and would otherwise do nothing, since the Radix trigger that
         // normally handles them is the hidden edge anchor.
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            e.preventDefault();
-            setOpen(true);
-        }
+        // No-op: there is no menu to open from here any more.
     }, []);
 
     return (
@@ -366,8 +366,6 @@ function ReactionBar2Inner({
                         <button
                             ref={clusterButtonRef}
                             type="button"
-                            aria-haspopup="menu"
-                            aria-expanded={open}
                             aria-label={triggerLabel}
                             onClick={handleClusterClick}
                             onKeyDown={handleClusterKeyDown}

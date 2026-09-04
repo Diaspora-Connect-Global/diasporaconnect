@@ -54,6 +54,7 @@ import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
 import ReactionBar2 from '@/components/home2/ReactionBar2';
+import ReactionRail from '@/components/home2/ReactionRail';
 import {
     DEFAULT_REACTION,
     applyBreakdownDelta,
@@ -1513,6 +1514,13 @@ function FeedCard2Inner({
                 and the rail is portalled to <body> anyway, so it cannot be
                 clipped by the card or by `.feed-card-cv` paint containment. */}
             <div className="relative w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
+                {/* ALWAYS-VISIBLE reaction rail, pinned to the card's right edge.
+                    Not a menu: the three reactions are permanent chrome, so a
+                    reader sees them without discovering a control first. It sits
+                    just inside the edge because `.feed-card-cv` sets
+                    content-visibility, whose paint containment would silently
+                    clip anything hanging outside the card. */}
+                <ReactionRail selected={selectedReaction} onSelect={handleSelectReaction} />
                 {/* AI category pill — only rendered when the post has been
                     classified. Sits at the top-left of the card, inside the
                     surface so it scrolls with the card content. */}
