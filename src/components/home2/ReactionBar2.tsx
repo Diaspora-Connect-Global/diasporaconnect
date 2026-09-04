@@ -183,12 +183,20 @@ const CLUSTER_ICON_SIZE: Record<number, string> = {
 };
 
 /**
- * FIXED cluster footprint. The glyph group is centred inside it, so the
- * total beside it never moves and the row never reflows when a post goes
- * from one reaction type to three. Sized for the worst case: three
- * 0.875rem glyphs at 1px apart = 2.75rem exactly.
+ * The glyph group sizes to its CONTENT, deliberately.
+ *
+ * It used to be a fixed 2.75rem footprint — the worst case of three glyphs —
+ * with the group centred inside it. That kept the total from shifting when a
+ * post gained a second reaction, but it bought that with a permanent hole: a
+ * single heart sat centred in a box nearly three times its width, leaving ~0.8rem
+ * of dead space before the number, which read as the count belonging to
+ * something else.
+ *
+ * A count that nudges sideways when a reaction type appears is a far smaller
+ * cost than every single-reaction post looking broken, and single-reaction posts
+ * are the common case by a wide margin.
  */
-const CLUSTER_WIDTH = 'w-[2.75rem]';
+const CLUSTER_WIDTH = 'w-auto';
 
 /**
  * Press-and-hold threshold. Long enough that a normal tap never crosses it
@@ -475,7 +483,7 @@ function ReactionBar2Inner({
                             // selection + selection handles; touch-manipulation
                             // drops the double-tap delay WITHOUT taking over
                             // panning, so a finger drag still scrolls the feed.
-                            className="group inline-flex touch-manipulation select-none items-center gap-[0.375rem] rounded-full -mx-[0.25rem] px-[0.25rem] py-[0.125rem] text-sm text-text-secondary transition-colors [-webkit-touch-callout:none] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
+                            className="group inline-flex touch-manipulation select-none items-center gap-[0.25rem] rounded-full -mx-[0.25rem] px-[0.25rem] py-[0.125rem] text-sm text-text-secondary transition-colors [-webkit-touch-callout:none] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
                         >
                             {/* FIXED-WIDTH footprint with the group centred: one,
                                 two or three glyphs all occupy the same space, so

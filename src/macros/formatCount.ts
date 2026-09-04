@@ -29,13 +29,18 @@ export function formatCount(num: number, decimals: number = 1): string {
     return value.toFixed(decimals) + 'T';
   }
   
-  const value = num / Math.pow(1000, order);
-  const formattedValue = value.toFixed(decimals);
-  
-  // Remove trailing zeros and decimal point if not needed
-  const cleanedValue = parseFloat(formattedValue).toString();
-  
-  return cleanedValue + units[unitIndex];
+  let effectiveOrder = order;
+  let cleaned = parseFloat((num / Math.pow(1000, effectiveOrder)).toFixed(decimals));
+
+  // Promote when ROUNDING pushes the value up a whole unit. 999_999 sits in the
+  // thousands by magnitude, but rounds to 1000.0 — and "1000K" is not a number
+  // anyone writes. Same at every boundary: 999_999_999 would read "1000M".
+  if (cleaned >= 1000 && effectiveOrder < units.length) {
+    effectiveOrder += 1;
+    cleaned = parseFloat((num / Math.pow(1000, effectiveOrder)).toFixed(decimals));
+  }
+
+  return cleaned.toString() + units[effectiveOrder - 1];
 }
 
 /**
