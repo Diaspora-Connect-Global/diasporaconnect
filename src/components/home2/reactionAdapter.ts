@@ -209,6 +209,33 @@ export function planReactionWrite(
     };
 }
 
+/**
+ * The per-kind movement a reaction change causes, derived from the before/after
+ * pair alone.
+ *
+ * A SWITCH moves one count between buckets and leaves the total alone; a fresh
+ * reaction only adds; clearing one only subtracts. `previous` is the RAW stored
+ * reaction, so `null` means a pre-migration untyped like — which belongs to no
+ * bucket, so nothing is decremented and the untyped remainder shrinks by one on
+ * its own.
+ *
+ * Lives here, exported, because the parent feed applies it optimistically and
+ * the result has to be verifiable without mounting a component.
+ */
+export function deriveKindDelta(
+    previous: ReactionKind | null,
+    next: ReactionKind | null,
+    adding: boolean,
+): Partial<Record<ReactionKind, number>> {
+    const d: Partial<Record<ReactionKind, number>> = {};
+    if (previous) d[previous] = -1;
+    if (adding && next) d[next] = (d[next] ?? 0) + 1;
+    // A re-pick of the same reaction nets to zero; drop the key rather than
+    // sending a 0, so an untouched bucket is never rewritten.
+    for (const k of Object.keys(d) as ReactionKind[]) if (d[k] === 0) delete d[k];
+    return d;
+}
+
 /** Apply a plan's `breakdownDelta` to a breakdown, clamped at zero. */
 export function applyBreakdownDelta(
     breakdown: ReactionBreakdown,

@@ -58,7 +58,6 @@ import ReactionRail from '@/components/home2/ReactionRail';
 import {
     DEFAULT_REACTION,
     type SessionReactionPick,
-    applyBreakdownDelta,
     planReactionWrite,
     readSelectedReaction,
     type ReactionBreakdown,
@@ -322,7 +321,20 @@ function FeedCard2Inner({
     useEffect(() => { setLikeCount(likes); }, [likes]);
     useEffect(() => { setShareCount(shares); }, [shares]);
     useEffect(() => { setSaveCount(saves); }, [saves]);
-    useEffect(() => { setBreakdown(reactionBreakdown); }, [reactionBreakdown]);
+    // Keyed on the VALUES, not the object. The parent rebuilds this literal on
+    // every render, so depending on its identity re-ran this constantly — which
+    // is how an optimistic switch got overwritten by the stale server counts
+    // before the eye could see it.
+    const bdHappy = reactionBreakdown?.HAPPY;
+    const bdHopeful = reactionBreakdown?.HOPEFUL;
+    const bdSad = reactionBreakdown?.SAD;
+    useEffect(() => {
+        setBreakdown(
+            bdHappy === undefined || bdHopeful === undefined || bdSad === undefined
+                ? undefined
+                : { HAPPY: bdHappy, HOPEFUL: bdHopeful, SAD: bdSad },
+        );
+    }, [bdHappy, bdHopeful, bdSad]);
     useEffect(() => { setCommentCount(comments); }, [comments]);
 
     const [postContent, setPostContent] = useState(content);
@@ -728,7 +740,10 @@ function FeedCard2Inner({
         // The server value arrives on the next fetch; this just keeps the UI
         // honest until then.
         setSessionReaction(kind);
-        if (breakdown) setBreakdown((b) => (b ? applyBreakdownDelta(b, plan.breakdownDelta) : b));
+        // The per-kind breakdown is deliberately NOT updated here. `onReact`
+        // makes the parent move the counts, and the effect above re-syncs this
+        // card from that result — so a local mutation here is overwritten
+        // moments later and only ever served to disagree with the parent.
 
         if (plan.op === null) return;
         setIsLiked(plan.liked ?? false);

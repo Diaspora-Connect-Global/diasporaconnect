@@ -19,7 +19,7 @@ import { formatDateProximity } from '@/macros/time';
 // /home2 renders its OWN snapshot copy of the card, not the shared one —
 // editing `@/components/cards/FeedCardWithReply` would change the live feed.
 import FeedCard2 from '@/components/home2/FeedCard2';
-import type { ReactionKind } from '@/components/home2/reactionAdapter';
+import { deriveKindDelta, type ReactionKind } from '@/components/home2/reactionAdapter';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
@@ -811,20 +811,40 @@ export default function HomeFeed2() {
       //   add with delta 1  -> a first reaction, so was not
       const wasReacted = !adding || delta === 0;
 
-      // `myReaction` travels WITH `hasLiked`, both forwards and on rollback.
-      // The card derives the selected icon from it, so updating one without the
-      // other tells the card "you reacted" while leaving it to guess which —
-      // and it guessed Happy every time.
+      // A SWITCH moves one reaction between buckets: the old kind loses a
+      // count, the new kind gains one, and the TOTAL does not move. Derived
+      // here rather than passed in, because it follows entirely from the
+      // before/after pair the card already sends.
+      //
+      // `previousReaction` is null for a pre-migration untyped like, which
+      // belongs to no bucket — so nothing is decremented and the untyped
+      // remainder simply shrinks by one on its own. That is correct.
+      const kindDelta = deriveKindDelta(previousReaction, reaction, adding);
+
+      const toCountsDelta = (d: typeof kindDelta) => ({
+        ...(d.HAPPY !== undefined ? { happy: d.HAPPY } : {}),
+        ...(d.HOPEFUL !== undefined ? { hopeful: d.HOPEFUL } : {}),
+        ...(d.SAD !== undefined ? { sad: d.SAD } : {}),
+      });
+      const invert = (d: typeof kindDelta) =>
+        Object.fromEntries(Object.entries(d).map(([k, v]) => [k, -v])) as typeof kindDelta;
+
+      // `myReaction` and the per-kind counts travel WITH `hasLiked`, forwards
+      // and on rollback. Updating one without the others tells the card "you
+      // reacted" while leaving it to guess which — and it guessed Happy — or
+      // leaves the old kind sitting in the breakdown beside the new one.
       updatePostCounts(postId, {
         likes: delta,
         hasLiked: adding,
         myReaction: adding ? reaction : null,
+        ...toCountsDelta(kindDelta),
       });
       const rollback = () =>
         updatePostCounts(postId, {
           likes: -delta,
           hasLiked: wasReacted,
           myReaction: previousReaction,
+          ...toCountsDelta(invert(kindDelta)),
         });
 
       try {

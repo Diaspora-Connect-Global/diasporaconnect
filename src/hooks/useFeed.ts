@@ -99,7 +99,7 @@ export interface UseFeedResult {
   loadMore: () => void;
   feedContainerRef: React.RefObject<HTMLDivElement | null>;
   feedMeta: FeedStateMeta;
-  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean; myReaction: 'HAPPY' | 'HOPEFUL' | 'SAD' | null }>) => void;
+  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean; myReaction: 'HAPPY' | 'HOPEFUL' | 'SAD' | null; happy: number; hopeful: number; sad: number }>) => void;
   removePost: (postId: string) => void;
 }
 
@@ -957,7 +957,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const updatePostCounts = useCallback((
     postId: string,
-    delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean; myReaction: 'HAPPY' | 'HOPEFUL' | 'SAD' | null }>,
+    delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean; myReaction: 'HAPPY' | 'HOPEFUL' | 'SAD' | null; happy: number; hopeful: number; sad: number }>,
   ) => {
     const applyDelta = (p: Post): Post => {
       const updated: Post = {
@@ -967,6 +967,22 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
           // so without it the first optimistic tap strips happy/hopeful/sad off
           // the post and the cluster collapses for the rest of the session.
           ...p.engagementCounts,
+          // Per-kind deltas move a reaction between buckets on a SWITCH. The
+          // parent has to own this: FeedCard2 re-syncs its local breakdown from
+          // this object on every render, so a card-only optimistic update is
+          // overwritten by the stale server value moments later — which showed
+          // the OLD and NEW reaction side by side with a doubled total.
+          // Undefined per-kind counts stay undefined: 0 would assert we measured
+          // a breakdown we never received.
+          ...(delta.happy !== undefined && p.engagementCounts?.happy !== undefined
+            ? { happy: Math.max(0, p.engagementCounts.happy + delta.happy) }
+            : {}),
+          ...(delta.hopeful !== undefined && p.engagementCounts?.hopeful !== undefined
+            ? { hopeful: Math.max(0, p.engagementCounts.hopeful + delta.hopeful) }
+            : {}),
+          ...(delta.sad !== undefined && p.engagementCounts?.sad !== undefined
+            ? { sad: Math.max(0, p.engagementCounts.sad + delta.sad) }
+            : {}),
           likes: (p.engagementCounts?.likes ?? 0) + (delta.likes ?? 0),
           comments: (p.engagementCounts?.comments ?? 0) + (delta.comments ?? 0),
           shares: (p.engagementCounts?.shares ?? 0) + (delta.shares ?? 0),
