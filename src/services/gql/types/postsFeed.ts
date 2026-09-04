@@ -43,9 +43,18 @@ export interface EngagementCounts {
  * @property {boolean} hasShared - Whether the current user has shared the post
  */
 export interface UserEngagement {
+  /** True for ANY reaction — Happy, Hopeful or Sad — and for untyped legacy likes. */
   hasLiked: boolean;
   hasSaved: boolean;
   hasShared: boolean;
+  /**
+   * WHICH reaction the viewer left, or null.
+   *
+   * `hasLiked` says WHETHER, this says WHICH — read them together. null with
+   * hasLiked=true is a pre-migration untyped like: display it as Happy, but do
+   * not write it back as 'HAPPY'. Absent on an older gateway, so guard.
+   */
+  myReaction?: 'HAPPY' | 'HOPEFUL' | 'SAD' | null;
 }
 
 // ============================================================================

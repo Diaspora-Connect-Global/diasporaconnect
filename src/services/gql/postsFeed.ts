@@ -130,6 +130,7 @@ export const FULL_POST_FRAGMENT = gql`
       hasLiked
       hasShared
       hasSaved
+      myReaction
     }
     recentComments {
       id
@@ -513,6 +514,7 @@ export const GET_USER_ENGAGED_POSTS = gql`
           hasLiked
           hasSaved
           hasShared
+          myReaction
         }
         categories
         aiTopics
@@ -570,6 +572,7 @@ export const GET_USER_POSTS = gql`
         hasLiked
         hasSaved
         hasShared
+        myReaction
       }
       categories
       aiTopics
@@ -630,6 +633,7 @@ export const GET_SAVED_POSTS = gql`
           hasLiked
           hasSaved
           hasShared
+          myReaction
         }
         categories
         aiTopics
@@ -691,6 +695,7 @@ export const GET_LIKED_POSTS = gql`
           hasLiked
           hasSaved
           hasShared
+          myReaction
         }
         categories
         aiTopics
@@ -752,6 +757,7 @@ export const GET_COMMENTED_POSTS = gql`
           hasLiked
           hasSaved
           hasShared
+          myReaction
         }
         categories
         aiTopics

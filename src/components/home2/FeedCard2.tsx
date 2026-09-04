@@ -692,8 +692,9 @@ function FeedCard2Inner({
      *
      * The mapping onto what the backend can store lives entirely in
      * `planReactionWrite` (./reactionAdapter) — this function only applies
-     * the plan. Today HAPPY is the existing Like and round-trips for real;
-     * HOPEFUL and SAD write nothing and are session-only.
+     * the plan. All three reactions now round-trip: they are stored as a LIKE
+     * row carrying a reaction_type, so a switch updates that row in place
+     * rather than moving the count.
      */
     const handleSelectReaction = (kind: ReactionKind | null) => {
         const plan = planReactionWrite(selectedReaction, kind);

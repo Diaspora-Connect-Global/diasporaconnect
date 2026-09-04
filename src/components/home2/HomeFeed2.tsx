@@ -1588,6 +1588,10 @@ export default function HomeFeed2() {
                         onDelete={removePost}
                         joinButton={false}
                         isLiked={post.userEngagement.hasLiked}
+                        // WHICH reaction the server recorded. Without this the
+                        // card sees only hasLiked and assumes Happy — which is
+                        // why a stored Hopeful or Sad came back as a heart.
+                        serverReaction={post.userEngagement.myReaction ?? null}
                         isSaved={post.userEngagement.hasSaved}
                         isShared={post.userEngagement.hasShared}
                         onOpenMedia={handleOpenMedia}

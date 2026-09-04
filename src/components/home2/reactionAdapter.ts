@@ -46,13 +46,7 @@ export const REACTION_ORDER: readonly ReactionKind[] = ['HAPPY', 'HOPEFUL', 'SAD
  */
 export const DEFAULT_REACTION: ReactionKind = 'HAPPY';
 
-/** The reactions that cannot yet be persisted. Empty once the backend ships. */
-export const SESSION_ONLY_REACTIONS: readonly ReactionKind[] = ['HOPEFUL', 'SAD'] as const;
 
-/** True for a reaction the server cannot record today. */
-export function isSessionOnlyReaction(kind: ReactionKind | null): boolean {
-    return kind !== null && kind !== DEFAULT_REACTION;
-}
 
 /**
  * Per-reaction counts.
@@ -93,16 +87,28 @@ export function readSelectedReaction(
     engagement: ReactionSourceEngagement,
     sessionPick: ReactionKind | null,
 ): ReactionKind | null {
+    // 1. Server truth wins outright.
     if (engagement.reaction) return engagement.reaction;
+
+    // 2. Then what the viewer JUST picked, still awaiting confirmation. This
+    //    MUST come before the hasLiked fallback below. Optimistically, tapping
+    //    Hopeful flips hasLiked true while the server reaction is still null —
+    //    so checking hasLiked first returned Happy, and every Hopeful and Sad
+    //    tap appeared to select the heart instead.
+    if (sessionPick) return sessionPick;
+
+    // 3. Reacted, but we do not know which: a pre-migration row stored before
+    //    reaction types existed. Displayed as Happy — never written back as
+    //    Happy, so the distinction survives.
     if (engagement.hasLiked) return DEFAULT_REACTION;
-    return isSessionOnlyReaction(sessionPick) ? sessionPick : null;
+    return null;
 }
 
 /**
  * The write the UI should perform for a reaction change.
  *
- * `liked === null` means no server round-trip is needed — which today is
- * every transition that neither adds nor removes a Happy.
+ * All three reactions persist, so `op === null` now means only "nothing
+ * changed" — re-picking what is already selected.
  */
 export interface ReactionWritePlan {
     /**
@@ -160,7 +166,6 @@ export interface ReactionWritePlan {
  * drop `liked`), and have FeedCard2's `handleSelectReaction` call an
  * `onReact(postId, reaction)` prop — wired in HomeFeed2 to the new typed
  * mutation — in place of today's `onLike(postId, liked)`. Delete
- * `SESSION_ONLY_REACTIONS` / `isSessionOnlyReaction` and the session-pick
  * branch of `readSelectedReaction` at the same time.
  */
 export function planReactionWrite(
