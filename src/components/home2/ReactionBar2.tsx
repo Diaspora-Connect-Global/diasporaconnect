@@ -122,7 +122,7 @@ export function reactionIcon(kind: ReactionKind, filled: boolean) {
  * The result is the ONLY set of numbers this component renders — glyphs,
  * tooltip rows and total all read from it — so they cannot contradict.
  */
-function clusterCounts(
+export function clusterCounts(
     breakdown: ReactionBreakdown | undefined,
     total: number,
     selected: ReactionKind | null,
@@ -132,11 +132,26 @@ function clusterCounts(
         HOPEFUL: breakdown?.HOPEFUL ?? 0,
         SAD: breakdown?.SAD ?? 0,
     };
-    if (!breakdown && selected) counts[selected] = 1;
+    // The viewer's OWN reaction must be represented before the remainder is
+    // worked out, whether or not the breakdown has caught up with it.
+    //
+    // `total` counts it the instant they tap. The breakdown may not: it lags a
+    // refetch, and it is all zeros whenever the per-kind counts did not survive
+    // the trip. Leaving that gap made their reaction fall into the untyped
+    // remainder below and get credited to HAPPY — so a lone Sad rendered as
+    // "heart + thumbs-down, 1": a phantom Happy nobody gave, sitting next to
+    // their real reaction showing zero.
+    //
+    // Raising it to at least 1 is safe in both directions. If the breakdown
+    // already counts them it is a no-op, and if it does not, one of the likes
+    // in `total` is demonstrably theirs.
+    if (selected && counts[selected] < 1) counts[selected] = 1;
 
     const typed = counts.HAPPY + counts.HOPEFUL + counts.SAD;
-    // Clamped at zero: an optimistic per-kind bump can briefly run ahead of
-    // the server's total, and a negative remainder would silently eat Happys.
+    // Whatever `total` holds beyond the kinds we can name is a pre-migration
+    // untyped like, which displays as Happy — the same rule readSelectedReaction
+    // uses. Clamped at zero: an optimistic per-kind bump can briefly run ahead
+    // of the server's total, and a negative remainder would eat real Happys.
     counts.HAPPY += Math.max(0, total - typed);
     return counts;
 }
@@ -150,7 +165,7 @@ function clusterCounts(
  * Hopeful to a post nobody else has and without this the glyph would not
  * show until a refetch, reading as though the tap did nothing.
  */
-function visibleClusterReactions(
+export function visibleClusterReactions(
     counts: Record<ReactionKind, number>,
     selected: ReactionKind | null,
 ): ReactionKind[] {
