@@ -1,31 +1,33 @@
 'use client';
 
 /* =====================================================================
- *  ReactionBar2 — grouped reaction control for the /home2 feed clone.
+ *  ReactionBar2 — reaction control for the /home2 feed clone.
  *
- *  Three tightly-clustered reaction glyphs (Happy / Hopeful / Sad) plus
- *  one total, then the remaining interaction counts in the SAME row —
- *  which sits directly under the post content and above the
- *  Comment / Share / Save action buttons, with a divider between them:
+ *  TWO SURFACES WITH CLEANLY SEPARATED JOBS:
  *
- *      [♡ 🙏 👎] 2,000   💬 320   ↗ 150   🔖 780
- *      ─────────────────────────────────────────
+ *   • The CLUSTER (small glyphs beside the total) says WHAT THE POST HAS.
+ *     Purely informational: only reactions with a count appear, every
+ *     glyph gets identical styling, and the viewer's own selection is
+ *     NOT shown here. It is a summary, not a control surface.
+ *
+ *   • The RAIL (slides out from the card's right edge) says WHAT YOU
+ *     PICKED. The selected option is a solid red disc with the glyph
+ *     knocked out in white. This is the only place selection appears.
+ *
+ *  The counts row sits under the post content and above the
+ *  Comment / Share / Save buttons, divided from them:
+ *
+ *      [♡🙏👎] 2,000   💬 320   ↗ 150   🔖 780
+ *      ────────────────────────────────────────
  *      💬 Comment      ↗ Share      🔖 Save
- *
- *  Tapping the cluster slides a VERTICAL RAIL out from the side edge of
- *  the card: a rounded pill, TALLER THAN IT IS WIDE, with the three
- *  options in a single column — Happy top, Hopeful middle, Sad bottom.
- *  It stays open after a pick so a second tap can change or remove, and
- *  the selection is highlighted in place (red, filled). Radix drives it,
- *  so Up/Down arrows follow the visual axis and Escape closes.
  *
  *  ── WHAT IS REAL TODAY ──────────────────────────────────────────────
  *   • `total` is `engagementCounts.likes` — REAL.
  *   • `commentCount` / `shareCount` / `saveCount` — REAL.
- *   • `breakdown` (per-reaction counts) is OPTIONAL and ABSENT today.
- *     When absent NOTHING breakdown-shaped renders — no zeroed panel,
- *     no placeholders, no ratio-split of the total. When the backend
- *     starts returning it, it lights up with no code change.
+ *   • `breakdown` (per-reaction counts) is OPTIONAL and ABSENT today, so
+ *     the cluster falls back to a single Happy glyph (see
+ *     `visibleClusterReactions`). No zeroed panel, no placeholders, no
+ *     ratio-split of the total, and never all three by default.
  *   • HAPPY is the existing Like and round-trips for real; HOPEFUL and
  *     SAD are session-only until post-feed-service ships reaction types.
  *
@@ -33,7 +35,7 @@
  *  is the one function to swap. This component never mentions LIKE.
  * ===================================================================== */
 
-import { memo } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Bookmark } from 'lucide-react';
 import {
@@ -50,8 +52,10 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCount } from '@/macros/formatCount';
 import {
+    DEFAULT_REACTION,
     REACTION_ORDER,
     type ReactionBreakdown,
     type ReactionKind,
@@ -93,25 +97,92 @@ export function reactionIcon(kind: ReactionKind, filled: boolean) {
 }
 
 /**
- * Selected-state colour for every reaction.
+ * Which glyphs the summary cluster shows.
  *
- * `text-border-danger` is the token the card already uses for a liked
- * heart (#e7000c, identical in light and dark). All three reactions use
- * it: the design's prose states the rule twice ("Red when selected") and
- * the product owner confirmed it, even though the design's own icon table
- * renders a selected Happy in BLUE. One token, one place — if the blue
- * thumbs-up turns out to be deliberate, change it here.
+ * FALLBACK, stated explicitly because it is a judgement call: with no
+ * `breakdown` we know the TOTAL but not its composition, so we render a
+ * single HAPPY glyph — every pre-migration like displays as Happy, so
+ * that is the one thing the total can honestly be attributed to. We do
+ * NOT render all three by default; that would assert reactions the post
+ * may not have. The cluster becomes accurate on its own the day real
+ * per-reaction counts arrive.
+ *
+ * A zero-count reaction never appears. If a breakdown exists but is all
+ * zeroes (a post nobody has reacted to) we still return one glyph — the
+ * cluster doubles as the control that opens the rail, so it can never be
+ * empty, and Happy is what tapping it would give you.
  */
-const SELECTED_COLOR = 'text-border-danger';
+function visibleClusterReactions(breakdown: ReactionBreakdown | undefined): ReactionKind[] {
+    if (breakdown) {
+        const present = REACTION_ORDER.filter((k) => (breakdown[k] ?? 0) > 0);
+        if (present.length > 0) return present;
+    }
+    return [DEFAULT_REACTION];
+}
+
+/**
+ * Glyph size per cluster population. More reactions ⇒ smaller glyphs, so
+ * the group always fits the fixed footprint below. See CLUSTER_WIDTH.
+ */
+const CLUSTER_ICON_SIZE: Record<number, string> = {
+    1: 'w-[1.125rem] h-[1.125rem]',
+    2: 'w-[1rem] h-[1rem]',
+    3: 'w-[0.875rem] h-[0.875rem]',
+};
+
+/**
+ * FIXED cluster footprint. The glyph group is centred inside it, so the
+ * total beside it never moves and the row never reflows when a post goes
+ * from one reaction type to three. Sized for the worst case: three
+ * 0.875rem glyphs at 1px apart = 2.75rem exactly.
+ */
+const CLUSTER_WIDTH = 'w-[2.75rem]';
+
+/**
+ * Press-and-hold threshold. Long enough that a normal tap never crosses it
+ * (a deliberate tap is well under 200ms), short enough that the hold does
+ * not feel stuck. Below this the gesture is a TAP and opens the rail; at or
+ * above it the gesture is a HOLD that reveals the name and the tap on
+ * release is swallowed — reading a name must never cast a reaction.
+ */
+const HOLD_MS = 450;
+
+/**
+ * Finger drift that cancels a pending hold. A press inside a scrolling feed
+ * is usually the start of a scroll, so movement hands the gesture back to the
+ * browser. `touch-action` is deliberately left scrollable (see the button's
+ * `touch-manipulation`), so the browser also fires `pointercancel` when it
+ * takes over — this threshold is the belt to that braces.
+ */
+const HOLD_MOVE_CANCEL_PX = 10;
+
+/**
+ * Selected-state colour, RAIL ONLY.
+ *
+ * `border-danger` is the existing danger token (#e7000c, identical in
+ * light and dark) — the same one the card already used for a liked
+ * heart. Selected renders as a solid disc of it with a WHITE glyph
+ * knocked out: white on #e7000c is 4.77:1, which clears AA for both
+ * normal text (4.5:1) and non-text UI (3:1).
+ *
+ * The design's prose states the red rule twice and the product owner
+ * confirmed it, though the design's own icon table renders a selected
+ * Happy in BLUE. One token, one place, if that turns out to be deliberate.
+ */
+const SELECTED_DISC = 'bg-border-danger';
 
 interface ReactionBar2Props {
-    /** The reaction rendered as selected, or null when the post has none. */
+    /**
+     * The viewer's own reaction, or null. Drives the RAIL only — it is
+     * deliberately never rendered in the cluster.
+     */
     selected: ReactionKind | null;
     /** REAL: `engagementCounts.likes`, the authoritative total. */
     total: number;
     /**
-     * Per-reaction counts. OPTIONAL — absent today. Absent ⇒ no breakdown
-     * UI at all. Present ⇒ counts appear in the rail and in the hover panel.
+     * Per-reaction counts. OPTIONAL — absent today. Drives which glyphs
+     * the cluster shows and the hover panel; absent ⇒ no panel and a
+     * single Happy glyph. See `visibleClusterReactions`.
      */
     breakdown?: ReactionBreakdown;
     /** REAL: `userEngagement.hasSaved`. */
@@ -143,190 +214,391 @@ function ReactionBar2Inner({
     onSave,
 }: ReactionBar2Props) {
     const t = useTranslations('reactions');
+    const [open, setOpen] = useState(false);
+    const clusterButtonRef = useRef<HTMLButtonElement>(null);
 
-    const selectedLabel = selected ? t(REACTION_LABEL_KEY[selected]) : undefined;
+    // Tooltip visibility is CONTROLLED so two very different input paths can
+    // drive one surface: Radix still owns pointer-hover and keyboard focus and
+    // reports them through `onOpenChange`, while touch press-and-hold is driven
+    // here. Radix tooltips deliberately never open on touch, so without this
+    // half the users would have no way to read a name.
+    const [tipOpen, setTipOpen] = useState(false);
+    const holdTimerRef = useRef<number | null>(null);
+    const holdFiredRef = useRef(false);
+    const holdOriginRef = useRef<{ x: number; y: number } | null>(null);
 
-    // The accessible name has to carry BOTH the total and the current pick:
-    // three decorative glyphs and a bare number convey neither to a screen
-    // reader, and the count is the thing the control is named after. The
-    // visible number is abbreviated ("2K"); this one is exact.
-    const triggerLabel = selected
-        ? t('triggerSelected', { count: total, reaction: selectedLabel as string })
-        : t('trigger', { count: total });
+    const clearHold = useCallback(() => {
+        if (holdTimerRef.current !== null) {
+            window.clearTimeout(holdTimerRef.current);
+            holdTimerRef.current = null;
+        }
+    }, []);
+
+    // Clean up a pending timer if the card unmounts mid-press (feed virtualises).
+    useEffect(() => clearHold, [clearHold]);
+
+    const handlePointerDown = useCallback(
+        (e: React.PointerEvent) => {
+            // Reset here rather than on release: a hold that ends off the button
+            // never produces a click, and a stale flag would swallow the NEXT
+            // genuine tap.
+            holdFiredRef.current = false;
+            // Mouse already has hover; only touch/pen need the hold gesture.
+            if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+            holdOriginRef.current = { x: e.clientX, y: e.clientY };
+            clearHold();
+            holdTimerRef.current = window.setTimeout(() => {
+                holdTimerRef.current = null;
+                holdFiredRef.current = true;
+                setTipOpen(true);
+            }, HOLD_MS);
+        },
+        [clearHold],
+    );
+
+    const handlePointerMove = useCallback(
+        (e: React.PointerEvent) => {
+            if (holdTimerRef.current === null) return;
+            const origin = holdOriginRef.current;
+            if (!origin) return;
+            if (Math.hypot(e.clientX - origin.x, e.clientY - origin.y) > HOLD_MOVE_CANCEL_PX) {
+                clearHold();
+            }
+        },
+        [clearHold],
+    );
+
+    // Release (or the browser stealing the gesture for a scroll) ends the hold
+    // and dismisses the label immediately — it must never linger and demand a
+    // second tap to clear.
+    const handlePointerEnd = useCallback(() => {
+        clearHold();
+        if (holdFiredRef.current) setTipOpen(false);
+    }, [clearHold]);
+
+    const handleClusterClick = useCallback(() => {
+        if (holdFiredRef.current) {
+            // This click is the tail of a press-and-hold. Swallow it: the user
+            // was reading the name, not choosing a reaction.
+            holdFiredRef.current = false;
+            return;
+        }
+        setOpen((v) => !v);
+    }, []);
+
+    const clusterKinds = visibleClusterReactions(breakdown);
+    const iconSize = CLUSTER_ICON_SIZE[clusterKinds.length] ?? CLUSTER_ICON_SIZE[3];
+
+    // The accessible name carries the TOTAL and the control's purpose, and
+    // deliberately does NOT enumerate which reactions are present or which
+    // one the viewer picked — sighted users get exactly that summary from
+    // the cluster, and parity is the point. Your own selection is announced
+    // by the rail's checked item when it opens, which is also the only
+    // place it is shown visually.
+    const triggerLabel = t('trigger', { count: total });
 
     const handlePick = (kind: ReactionKind) => {
         // Picking the already-selected reaction clears it.
         onSelectReaction(selected === kind ? null : kind);
     };
 
+    const handleClusterKeyDown = useCallback((e: React.KeyboardEvent) => {
+        // Enter/Space already open it via click. ArrowDown/Up are the menu
+        // idiom and would otherwise do nothing, since the Radix trigger that
+        // normally handles them is the hidden edge anchor.
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            setOpen(true);
+        }
+    }, []);
+
     return (
         <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle flex-wrap">
-            {/* ── Reaction cluster + total. The whole thing is one control. ── */}
-            <div className="relative">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+                {/* ── THE EDGE ANCHOR ──────────────────────────────────────
+                     Radix anchors a menu to its Trigger and `DropdownMenu`
+                     exposes no separate Anchor part, so the Trigger IS this
+                     invisible zero-size marker pinned to the CARD's right
+                     border, level with the post content. The visible cluster
+                     below drives `open` itself.
+
+                     Without this the rail would hang off the counts row at
+                     the bottom of the card, which is where the trigger
+                     actually lives — not beside the content where the design
+                     puts it. `absolute` resolves against the card root
+                     (FeedCard2 marks it `relative`), so this element must not
+                     sit inside any positioned element of its own or it would
+                     anchor to that instead. ── */}
+                <DropdownMenuTrigger asChild>
+                    <span
+                        aria-hidden="true"
+                        tabIndex={-1}
+                        className="pointer-events-none absolute right-0 top-[3.5rem] block h-0 w-0"
+                    />
+                </DropdownMenuTrigger>
+
+                {/* ── Cluster + total. The visible control.
+                     The three glyphs are uniform and unlabelled, so the NAMES
+                     live in a tooltip on this one button. Not per-glyph: the
+                     glyphs are aria-hidden decorations inside a single
+                     control, and making each hoverable would add three focus
+                     stops and contradict "the cluster is one control".
+
+                     This tooltip also REPLACES the hand-rolled peer-hover
+                     breakdown panel that used to live here. Two hover
+                     surfaces on the same button would have collided, and the
+                     old one was `aria-hidden` — so its numbers reached nobody
+                     using a screen reader. Radix is portalled (no clipping)
+                     and becomes `aria-describedby`, so the breakdown is now
+                     announced rather than hidden.
+
+                     THE NAME IS REACHABLE ON EVERY INPUT:
+                       pointer        → hover (Radix)
+                       keyboard       → focus (Radix)
+                       touch          → press and hold (driven here; Radix
+                                        tooltips never open on touch)
+                       assistive tech → the rail's captions and each item's
+                                        accessible name
+                     It is never tooltip-ONLY: the rail captions stay visible,
+                     so a touch user who simply taps still reads every name. ── */}
+                <Tooltip open={tipOpen} onOpenChange={setTipOpen}>
+                    <TooltipTrigger asChild>
                         <button
+                            ref={clusterButtonRef}
                             type="button"
+                            aria-haspopup="menu"
+                            aria-expanded={open}
                             aria-label={triggerLabel}
-                            title={triggerLabel}
-                            className="group peer inline-flex items-center gap-[0.375rem] rounded-full -mx-[0.25rem] px-[0.25rem] py-[0.125rem] text-sm text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
+                            onClick={handleClusterClick}
+                            onKeyDown={handleClusterKeyDown}
+                            onPointerDown={handlePointerDown}
+                            onPointerMove={handlePointerMove}
+                            onPointerUp={handlePointerEnd}
+                            onPointerCancel={handlePointerEnd}
+                            onPointerLeave={handlePointerEnd}
+                            // A sustained press raises the iOS callout / Android
+                            // context menu, which would cover the very label the
+                            // hold is meant to reveal. `-webkit-touch-callout`
+                            // handles iOS Safari, this handler handles the
+                            // context menu everywhere else (and right-click on
+                            // desktop). CSS alone is NOT sufficient.
+                            onContextMenu={(e) => e.preventDefault()}
+                            // select-none stops the press turning into a text
+                            // selection + selection handles; touch-manipulation
+                            // drops the double-tap delay WITHOUT taking over
+                            // panning, so a finger drag still scrolls the feed.
+                            className="group inline-flex touch-manipulation select-none items-center gap-[0.375rem] rounded-full -mx-[0.25rem] px-[0.25rem] py-[0.125rem] text-sm text-text-secondary transition-colors [-webkit-touch-callout:none] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
                         >
-                            {/* Three glyphs 2px apart so they read as ONE cluster,
-                                not three buttons. Decorative — the button's
-                                aria-label carries the meaning. */}
-                            <span aria-hidden="true" className="inline-flex items-center gap-[2px]">
-                                {REACTION_ORDER.map((kind) => {
-                                    const isOn = selected === kind;
-                                    const Icon = reactionIcon(kind, isOn);
+                            {/* FIXED-WIDTH footprint with the group centred: one,
+                                two or three glyphs all occupy the same space, so
+                                the total never shifts and the row never reflows.
+                                Every glyph is styled IDENTICALLY — outline, one
+                                colour, no fill, no selection state. The cluster
+                                reports what the post has; it does not highlight
+                                you. Decorative: the button's aria-label carries
+                                the meaning. */}
+                            <span
+                                aria-hidden="true"
+                                className={`inline-flex ${CLUSTER_WIDTH} items-center justify-center gap-[1px]`}
+                            >
+                                {clusterKinds.map((kind) => {
+                                    const Icon = reactionIcon(kind, false);
                                     return (
                                         <Icon
                                             key={kind}
-                                            className={`w-[1.125rem] h-[1.125rem] transition-colors ${
-                                                isOn
-                                                    ? SELECTED_COLOR
-                                                    : 'text-text-secondary group-hover:text-text-primary'
-                                            }`}
+                                            className={`${iconSize} shrink-0 text-text-secondary transition-colors group-hover:text-text-primary`}
                                         />
                                     );
                                 })}
                             </span>
-                            <span
-                                className={`tabular-nums ${selected ? `${SELECTED_COLOR} font-semibold` : ''}`}
-                            >
-                                {formatCount(total)}
-                            </span>
+                            <span className="tabular-nums">{formatCount(total)}</span>
                         </button>
-                    </DropdownMenuTrigger>
+                    </TooltipTrigger>
 
-                    {/* ── The rail. Slides out from the SIDE of the card as a
-                         vertical rounded pill. `side="right"` with Radix's own
-                         collision detection, so it flips to the left when a
-                         narrow viewport leaves no room — the slide-in animation
-                         is already keyed off `data-side`, so both directions
-                         animate correctly.
+                    {/* Names come from the SAME translated keys the rail
+                        captions use — never hardcoded, and correct in all five
+                        locales (the non-English ones are nouns: Freude / Joie /
+                        Gioia / Blij, and Sad reads as compassion throughout).
 
-                         prefers-reduced-motion: the `motion-reduce:` overrides
-                         are written with the SAME `data-[state=…]` qualifier as
-                         the animations they cancel. A bare
-                         `motion-reduce:animate-none` would lose the specificity
-                         fight against `data-[state=open]:animate-in` and the
-                         rail would keep sliding for users who asked it not to. ── */}
-                    <DropdownMenuContent
-                        side="right"
-                        align="center"
-                        sideOffset={10}
-                        collisionPadding={12}
-                        aria-label={t('choose')}
-                        className="flex w-auto min-w-0 flex-col items-stretch gap-[0.125rem] rounded-full border-border-subtle bg-surface-default p-[0.375rem] shadow-lg motion-reduce:transition-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-[state=closed]:animate-none"
+                        Content is the DESCRIPTION (aria-describedby), never the
+                        name: the button keeps its own aria-label, and the two
+                        strings differ, so nothing is announced twice.
+
+                        The reveal zooms out: it scales up from 75% into place
+                        as it fades in. The shared primitive's own `zoom-in-95`
+                        is unqualified (0,1,0), so the `data-[state=open]:`
+                        qualifier here (0,2,0) wins deterministically instead of
+                        depending on which utility Tailwind emits last.
+
+                        prefers-reduced-motion: `animate-none!` — Tailwind v4's
+                        important suffix. The bare form would LOSE to the
+                        primitive's `data-[state=closed]:animate-out` on
+                        specificity; important sidesteps the whole fight. The
+                        label still APPEARS, it simply arrives without the
+                        scale or fade. */}
+                    <TooltipContent
+                        side="top"
+                        align="start"
+                        sideOffset={6}
+                        className="duration-150 data-[state=open]:zoom-in-75 motion-reduce:animate-none! motion-reduce:transition-none!"
                     >
-                        {/* Radio semantics: exactly one may be selected. Built on
-                            the Radix primitive rather than the shared ui wrapper
-                            because that wrapper reserves `pl-8` for an indicator
-                            dot, which would break the pill. Selection is carried
-                            by aria-checked plus the red fill. */}
-                        <DropdownMenuPrimitive.RadioGroup value={selected ?? ''}>
-                            {REACTION_ORDER.map((kind) => {
-                                const isOn = selected === kind;
-                                const Icon = reactionIcon(kind, isOn);
-                                const label = t(REACTION_LABEL_KEY[kind]);
-                                const count = breakdown?.[kind] ?? 0;
-                                // Only the SELECTED item needs an explicit name:
-                                // it has to announce that activating again
-                                // removes the reaction, which no visible text
-                                // says. Unselected items are named by their own
-                                // content, which already includes the count when
-                                // a breakdown is present.
-                                const selectedName = breakdown
-                                    ? t('optionSelectedWithCount', { reaction: label, count })
-                                    : t('optionSelected', { reaction: label });
-                                return (
-                                    <DropdownMenuPrimitive.RadioItem
-                                        key={kind}
-                                        value={kind}
-                                        aria-label={isOn ? selectedName : undefined}
-                                        title={isOn ? selectedName : label}
-                                        // preventDefault KEEPS THE RAIL OPEN after
-                                        // a pick, so a second tap can change or
-                                        // remove without reopening. Escape, a click
-                                        // outside or Tab still dismiss it, so it is
-                                        // not a focus trap.
-                                        onSelect={(e) => {
-                                            e.preventDefault();
-                                            handlePick(kind);
-                                        }}
-                                        className="flex cursor-pointer select-none flex-col items-center gap-[0.125rem] rounded-2xl px-[0.5rem] py-[0.375rem] outline-none transition-colors data-[highlighted]:bg-surface-alt data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                                    >
-                                        <Icon
-                                            className={`w-[1.25rem] h-[1.25rem] shrink-0 ${
-                                                isOn ? SELECTED_COLOR : 'text-text-secondary'
-                                            }`}
-                                        />
-                                        {/* The caption sits UNDER the glyph rather
-                                            than beside it: a heart, praying hands
-                                            and a thumbs-down are not self-evident,
-                                            so the labels stay visible — but side-by-
-                                            side text would make the rail wider than
-                                            it is tall, which is the opposite of the
-                                            pill the design asks for. */}
-                                        <span
-                                            className={`text-[0.625rem] font-medium leading-tight ${
-                                                isOn ? SELECTED_COLOR : 'text-text-primary'
-                                            }`}
-                                        >
-                                            {label}
+                        {breakdown ? (
+                            <div className="flex flex-col gap-[0.125rem]">
+                                {clusterKinds.map((kind) => (
+                                    <div key={kind} className="flex items-center gap-3">
+                                        <span>{t(REACTION_LABEL_KEY[kind])}</span>
+                                        <span className="ml-auto tabular-nums">
+                                            {formatCount(breakdown[kind] ?? 0)}
                                         </span>
-                                        {/* Per-reaction count ONLY when the
-                                            backend actually supplies one. */}
-                                        {breakdown && (
-                                            <span className="tabular-nums text-[0.625rem] leading-tight text-text-secondary">
-                                                {formatCount(count)}
-                                            </span>
-                                        )}
-                                    </DropdownMenuPrimitive.RadioItem>
-                                );
-                            })}
-                        </DropdownMenuPrimitive.RadioGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* ── Hover breakdown panel. Renders ONLY when the backend gives
-                     us per-reaction counts; today `breakdown` is undefined and
-                     this whole node is absent from the tree. aria-hidden because
-                     the same numbers are in the rail, which is reachable by
-                     keyboard and touch — hover alone is neither. ── */}
-                {breakdown && (
-                    <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 hidden min-w-[9rem] rounded-lg border border-border-subtle bg-surface-default p-2 shadow-md peer-hover:block peer-focus-visible:block"
-                    >
-                        {REACTION_ORDER.map((kind) => {
-                            const Icon = reactionIcon(kind, selected === kind);
-                            return (
-                                <div
-                                    key={kind}
-                                    className="flex items-center gap-2 px-1 py-0.5 text-xs text-text-secondary"
-                                >
-                                    <Icon
-                                        className={`w-[0.875rem] h-[0.875rem] ${
-                                            selected === kind ? SELECTED_COLOR : 'text-text-secondary'
-                                        }`}
-                                    />
-                                    <span>{t(REACTION_LABEL_KEY[kind])}</span>
-                                    <span className="ml-auto tabular-nums text-text-primary">
-                                        {formatCount(breakdown[kind] ?? 0)}
+                                    </div>
+                                ))}
+                                <div className="mt-[0.125rem] flex items-center gap-3 border-t border-background/30 pt-[0.125rem]">
+                                    <span>{t('total')}</span>
+                                    <span className="ml-auto tabular-nums font-medium">
+                                        {formatCount(total)}
                                     </span>
                                 </div>
+                            </div>
+                        ) : (
+                            // Without a breakdown the cluster is a single Happy
+                            // glyph, so this list always has exactly one entry;
+                            // the join is future-proofing, not a real list.
+                            clusterKinds.map((kind) => t(REACTION_LABEL_KEY[kind])).join(', ')
+                        )}
+                    </TooltipContent>
+                </Tooltip>
+
+                {/* ── THE RAIL ─────────────────────────────────────────────
+                     A vertical rounded pill, taller than wide, straddling the
+                     card's right border beside the content. `side="right"`
+                     from the edge anchor puts its left edge ON the border;
+                     the negative sideOffset pulls it back by half its own
+                     (fixed) width so it sits half in, half out.
+
+                     The width is FIXED rather than content-sized precisely so
+                     that offset is exact in every locale — a German label is
+                     far wider than an English one, and a content-sized rail
+                     would straddle by a different amount in each language.
+
+                     Collision handling is left ON: on a narrow viewport where
+                     half a rail would fall off-screen, Radix shifts or flips
+                     it inward. Being usable beats being pixel-perfect.
+
+                     prefers-reduced-motion: `animate-none!` — Tailwind v4's
+                     important suffix, same as the tooltip. The bare form
+                     would lose to `data-[state=open]:animate-in` on
+                     specificity, and matching the qualifier only ties it,
+                     leaving the outcome to Tailwind's emit order. Important
+                     settles it outright: the rail appears without sliding. ── */}
+                <DropdownMenuContent
+                    side="right"
+                    align="start"
+                    sideOffset={-36}
+                    collisionPadding={8}
+                    aria-label={t('choose')}
+                    onCloseAutoFocus={(e) => {
+                        // Radix would return focus to the Trigger, which here
+                        // is the invisible edge anchor. Send it to the visible
+                        // cluster the user actually operated.
+                        e.preventDefault();
+                        clusterButtonRef.current?.focus();
+                    }}
+                    onInteractOutside={(e) => {
+                        // The cluster lives outside the rail, so clicking it
+                        // to close would otherwise fire dismiss-on-outside AND
+                        // the button's own toggle — closing then reopening.
+                        // Let the button own that interaction.
+                        if (clusterButtonRef.current?.contains(e.target as Node)) {
+                            e.preventDefault();
+                        }
+                    }}
+                    className="flex w-[4.5rem] flex-col items-stretch gap-[0.125rem] rounded-full border-border-subtle bg-surface-default p-[0.375rem] shadow-lg motion-reduce:animate-none! motion-reduce:transition-none!"
+                >
+                    {/* Radio semantics: exactly one may be selected. Built on
+                        the Radix primitive rather than the shared ui wrapper
+                        because that wrapper reserves `pl-8` for an indicator
+                        dot, which would break the pill. */}
+                    <DropdownMenuPrimitive.RadioGroup value={selected ?? ''}>
+                        {REACTION_ORDER.map((kind) => {
+                            const isOn = selected === kind;
+                            const Icon = reactionIcon(kind, isOn);
+                            const label = t(REACTION_LABEL_KEY[kind]);
+                            const count = breakdown?.[kind] ?? 0;
+                            // Only the SELECTED item needs an explicit name: it
+                            // has to announce that activating again removes the
+                            // reaction, which no visible text says. Unselected
+                            // items are named by their own content.
+                            const selectedName = breakdown
+                                ? t('optionSelectedWithCount', { reaction: label, count })
+                                : t('optionSelected', { reaction: label });
+                            return (
+                                <DropdownMenuPrimitive.RadioItem
+                                    key={kind}
+                                    value={kind}
+                                    // aria-label ONLY on the selected item, and no
+                                    // `title`: an unselected item's title would
+                                    // repeat its own visible caption, and on the
+                                    // selected one it was byte-identical to the
+                                    // aria-label — name and description the same
+                                    // string is the classic double-announcement.
+                                    aria-label={isOn ? selectedName : undefined}
+                                    // preventDefault KEEPS THE RAIL OPEN after a
+                                    // pick, so a second tap can change or remove
+                                    // without reopening. Escape, a click outside
+                                    // or Tab still dismiss it, so it is not a
+                                    // focus trap.
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        handlePick(kind);
+                                    }}
+                                    className="flex cursor-pointer select-none flex-col items-center gap-[0.125rem] rounded-2xl px-[0.25rem] py-[0.375rem] outline-none transition-colors data-[highlighted]:bg-surface-alt data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                                >
+                                    {/* Selected = solid red disc, glyph knocked
+                                        out in white. The box keeps its size
+                                        either way so picking never nudges the
+                                        layout. Outline vs filled still tracks
+                                        selection, so it is not carried by
+                                        colour alone. */}
+                                    <span
+                                        className={`flex h-[1.75rem] w-[1.75rem] items-center justify-center rounded-full transition-colors ${
+                                            isOn ? SELECTED_DISC : ''
+                                        }`}
+                                    >
+                                        <Icon
+                                            className={`w-[1.125rem] h-[1.125rem] shrink-0 ${
+                                                isOn ? 'text-white' : 'text-text-secondary'
+                                            }`}
+                                        />
+                                    </span>
+                                    {/* The caption sits UNDER the glyph rather
+                                        than beside it: a heart, praying hands
+                                        and a thumbs-down are not self-evident,
+                                        so labels stay visible — but side-by-side
+                                        text would make the rail wider than tall,
+                                        the opposite of the pill the design asks
+                                        for. Centred and wrapping, so a long
+                                        locale (de "Hoffnungsvoll") stacks rather
+                                        than widening the rail. */}
+                                    <span
+                                        className={`text-center text-[0.625rem] font-medium leading-tight ${
+                                            isOn ? 'text-border-danger' : 'text-text-primary'
+                                        }`}
+                                    >
+                                        {label}
+                                    </span>
+                                    {/* Per-reaction count ONLY when the backend
+                                        actually supplies one. */}
+                                    {breakdown && (
+                                        <span className="tabular-nums text-[0.625rem] leading-tight text-text-secondary">
+                                            {formatCount(count)}
+                                        </span>
+                                    )}
+                                </DropdownMenuPrimitive.RadioItem>
                             );
                         })}
-                        <div className="mt-1 flex items-center gap-2 border-t border-border-subtle px-1 pt-1 text-xs">
-                            <span className="text-text-secondary">{t('total')}</span>
-                            <span className="ml-auto tabular-nums font-medium text-text-primary">
-                                {formatCount(total)}
-                            </span>
-                        </div>
-                    </div>
-                )}
-            </div>
+                    </DropdownMenuPrimitive.RadioGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* ── The remaining real counts, same row, same rhythm. ── */}
             {commentCount > 0 && (
@@ -334,7 +606,6 @@ function ReactionBar2Inner({
                     type="button"
                     onClick={onOpenComments}
                     aria-label={t('comments', { count: commentCount })}
-                    title={t('comments', { count: commentCount })}
                     className="inline-flex items-center gap-[0.375rem] rounded-full text-sm text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
                 >
                     <img
@@ -354,7 +625,6 @@ function ReactionBar2Inner({
                     type="button"
                     onClick={onShare}
                     aria-label={t('shares', { count: shareCount })}
-                    title={t('shares', { count: shareCount })}
                     className="inline-flex items-center gap-[0.375rem] rounded-full text-sm text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
                 >
                     <img
@@ -374,7 +644,6 @@ function ReactionBar2Inner({
                     type="button"
                     onClick={onSave}
                     aria-label={t('saves', { count: saveCount })}
-                    title={t('saves', { count: saveCount })}
                     className="inline-flex items-center gap-[0.375rem] rounded-full text-sm text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-default"
                 >
                     <Bookmark

@@ -1507,7 +1507,13 @@ function FeedCard2Inner({
     /* --------------------------------------------------------------- */
     return (
         <>
-            <div className="w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
+            {/* `relative` is load-bearing: ReactionBar2 pins an invisible
+                anchor to this card's right border so the reaction rail can
+                straddle the edge beside the post content, instead of hanging
+                off the counts row at the bottom. No `overflow-hidden` here —
+                and the rail is portalled to <body> anyway, so it cannot be
+                clipped by the card or by `.feed-card-cv` paint containment. */}
+            <div className="relative w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
                 {/* AI category pill — only rendered when the post has been
                     classified. Sits at the top-left of the card, inside the
                     surface so it scrolls with the card content. */}
