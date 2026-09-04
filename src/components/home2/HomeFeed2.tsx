@@ -790,7 +790,16 @@ export default function HomeFeed2() {
   // successful forever. The rollback re-runs the inverse delta, which the
   // card picks up through its prop-sync effects.
   const handleReact = useCallback(
-    async (postId: string, op: 'add' | 'remove', reaction: ReactionKind | null, delta: number) => {
+    async (
+      postId: string,
+      op: 'add' | 'remove',
+      reaction: ReactionKind | null,
+      delta: number,
+      // Deliberately NOT defaulted. A default made every call site compile
+      // while silently rolling back to the wrong reaction, which is exactly
+      // the kind of omission tsc should be catching for us.
+      previousReaction: ReactionKind | null,
+    ) => {
       const adding = op === 'add';
       // `delta` comes from the card, which knows the BEFORE state. A SWITCH
       // (Happy→Sad) sends 0: the server updates the row in place rather than
@@ -802,9 +811,21 @@ export default function HomeFeed2() {
       //   add with delta 1  -> a first reaction, so was not
       const wasReacted = !adding || delta === 0;
 
-      updatePostCounts(postId, { likes: delta, hasLiked: adding });
+      // `myReaction` travels WITH `hasLiked`, both forwards and on rollback.
+      // The card derives the selected icon from it, so updating one without the
+      // other tells the card "you reacted" while leaving it to guess which —
+      // and it guessed Happy every time.
+      updatePostCounts(postId, {
+        likes: delta,
+        hasLiked: adding,
+        myReaction: adding ? reaction : null,
+      });
       const rollback = () =>
-        updatePostCounts(postId, { likes: -delta, hasLiked: wasReacted });
+        updatePostCounts(postId, {
+          likes: -delta,
+          hasLiked: wasReacted,
+          myReaction: previousReaction,
+        });
 
       try {
         const result = adding
@@ -1677,7 +1698,16 @@ export default function HomeFeed2() {
           shareCount={modalPost.engagementCounts.shares}
           // The modal has a plain like button and only ever means Happy.
           onLike={(liked) =>
-            handleReact(modalPost.id, liked ? 'add' : 'remove', liked ? 'HAPPY' : null, liked ? 1 : -1)
+            handleReact(
+              modalPost.id,
+              liked ? 'add' : 'remove',
+              liked ? 'HAPPY' : null,
+              liked ? 1 : -1,
+              // The reaction actually stored, so a refused unlike restores the
+              // real one. Passing null here would resurrect a SAD post as
+              // unreacted, and the old default did exactly that invisibly.
+              modalPost.userEngagement.myReaction ?? null,
+            )
           }
           onSave={(saved) => handleSave(modalPost.id, saved)}
           onShare={() => handleShare(modalPost.id)}

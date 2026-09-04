@@ -22,14 +22,16 @@
  *      💬 Comment      ↗ Share      🔖 Save
  *
  *  ── WHAT IS REAL TODAY ──────────────────────────────────────────────
- *   • `total` is `engagementCounts.likes` — REAL.
+ *   • `total` is `engagementCounts.likes` — REAL, and counts EVERY
+ *     reaction row including pre-migration ones that carry no kind.
  *   • `commentCount` / `shareCount` / `saveCount` — REAL.
- *   • `breakdown` (per-reaction counts) is OPTIONAL and ABSENT today, so
- *     the cluster falls back to a single Happy glyph (see
- *     `visibleClusterReactions`). No zeroed panel, no placeholders, no
- *     ratio-split of the total, and never all three by default.
- *   • HAPPY is the existing Like and round-trips for real; HOPEFUL and
- *     SAD are session-only until post-feed-service ships reaction types.
+ *   • `breakdown` (per-reaction counts) is OPTIONAL. When present the
+ *     cluster shows EVERY kind that has a count, in the fixed order
+ *     Happy, Hopeful, Sad, followed by their sum. When absent the
+ *     component degrades to the same shape rather than collapsing to one
+ *     glyph — see `clusterCounts` for exactly what it infers and why.
+ *   • The number beside the glyphs is ALWAYS the sum of the counts those
+ *     glyphs stand for, so the two can never contradict each other.
  *
  *  The whole LIKE mapping lives in ./reactionAdapter — `planReactionWrite`
  *  is the one function to swap. This component never mentions LIKE.
@@ -55,7 +57,6 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCount } from '@/macros/formatCount';
 import {
-    DEFAULT_REACTION,
     REACTION_ORDER,
     type ReactionBreakdown,
     type ReactionKind,
@@ -97,40 +98,63 @@ export function reactionIcon(kind: ReactionKind, filled: boolean) {
 }
 
 /**
- * Which glyphs the summary cluster shows.
+ * The per-reaction counts the cluster actually DISPLAYS, which is not
+ * always the raw `breakdown`. Two adjustments, both forced by the data
+ * that really exists:
  *
- * FALLBACK, stated explicitly because it is a judgement call: with no
- * `breakdown` we know the TOTAL but not its composition, so we render a
- * single HAPPY glyph — every pre-migration like displays as Happy, so
- * that is the one thing the total can honestly be attributed to. We do
- * NOT render all three by default; that would assert reactions the post
- * may not have. The cluster becomes accurate on its own the day real
- * per-reaction counts arrive.
+ *  1. UNTYPED LIKES. `total` (`engagementCounts.likes`) counts every
+ *     reaction row, including pre-migration ones stored before reaction
+ *     types existed. Those rows carry no kind, so `happy + hopeful + sad`
+ *     is legitimately SMALLER than `total`. The remainder is credited to
+ *     HAPPY — the same rule `readSelectedReaction` already applies when
+ *     it renders an untyped like as a heart. Crediting it anywhere else
+ *     would invent Hopefuls and Sads nobody gave; dropping it would make
+ *     the glyphs and the number beside them disagree.
  *
- * A zero-count reaction never appears. If a breakdown exists but is all
- * zeroes (a post nobody has reacted to) we still return one glyph — the
- * cluster doubles as the control that opens the rail, so it can never be
- * empty, and Happy is what tapping it would give you.
+ *  2. NO BREAKDOWN AT ALL. When the API supplies no per-kind counts, the
+ *     one kind still known for certain is the viewer's own, so it takes 1
+ *     and everything else falls to HAPPY under rule 1. THIS IS THE CASE
+ *     THAT USED TO COLLAPSE THE WHOLE CLUSTER TO ONE GLYPH: a post with
+ *     fifty likes turned into a lone thumbs-down the moment the viewer
+ *     picked Sad, because the fifty had nowhere to go. Now the fifty stay
+ *     a heart and the viewer's Sad is added beside it.
+ *
+ * The result is the ONLY set of numbers this component renders — glyphs,
+ * tooltip rows and total all read from it — so they cannot contradict.
+ */
+function clusterCounts(
+    breakdown: ReactionBreakdown | undefined,
+    total: number,
+    selected: ReactionKind | null,
+): Record<ReactionKind, number> {
+    const counts: Record<ReactionKind, number> = {
+        HAPPY: breakdown?.HAPPY ?? 0,
+        HOPEFUL: breakdown?.HOPEFUL ?? 0,
+        SAD: breakdown?.SAD ?? 0,
+    };
+    if (!breakdown && selected) counts[selected] = 1;
+
+    const typed = counts.HAPPY + counts.HOPEFUL + counts.SAD;
+    // Clamped at zero: an optimistic per-kind bump can briefly run ahead of
+    // the server's total, and a negative remainder would silently eat Happys.
+    counts.HAPPY += Math.max(0, total - typed);
+    return counts;
+}
+
+/**
+ * Every glyph the cluster draws, in the fixed order HAPPY, HOPEFUL, SAD —
+ * all of them, never just the viewer's own pick.
+ *
+ * A kind with a count always appears. The viewer's own selection appears
+ * even at zero, because the server count lags an optimistic tap: react
+ * Hopeful to a post nobody else has and without this the glyph would not
+ * show until a refetch, reading as though the tap did nothing.
  */
 function visibleClusterReactions(
-    breakdown: ReactionBreakdown | undefined,
+    counts: Record<ReactionKind, number>,
     selected: ReactionKind | null,
 ): ReactionKind[] {
-    if (breakdown) {
-        // Everything the post actually has, PLUS the viewer's own pick. The
-        // union matters because the server count lags an optimistic tap: react
-        // Hopeful to a post nobody else has, and without this the glyph would
-        // not appear until a refetch — reading as though the tap did nothing.
-        const present = REACTION_ORDER.filter(
-            (k) => (breakdown[k] ?? 0) > 0 || k === selected,
-        );
-        if (present.length > 0) return present;
-    }
-    // No breakdown yet (the API cannot supply per-reaction counts on every
-    // surface). Show the viewer's OWN reaction, which is the one thing we know
-    // for certain — falling back to Happy here would show a heart to someone
-    // who just picked Sad.
-    return [selected ?? DEFAULT_REACTION];
+    return REACTION_ORDER.filter((k) => counts[k] > 0 || k === selected);
 }
 
 /**
@@ -190,12 +214,19 @@ interface ReactionBar2Props {
      * deliberately never rendered in the cluster.
      */
     selected: ReactionKind | null;
-    /** REAL: `engagementCounts.likes`, the authoritative total. */
+    /**
+     * REAL: `engagementCounts.likes` — every reaction row on the post,
+     * INCLUDING pre-migration ones that carry no kind. It is therefore the
+     * floor for what the cluster displays, not the exact figure: see
+     * `clusterCounts`, which reconciles it against `breakdown`.
+     */
     total: number;
     /**
-     * Per-reaction counts. OPTIONAL — absent today. Drives which glyphs
-     * the cluster shows and the hover panel; absent ⇒ no panel and a
-     * single Happy glyph. See `visibleClusterReactions`.
+     * Per-reaction counts. OPTIONAL. Drives which glyphs the cluster shows
+     * and the numbers in the tooltip. Absent ⇒ the cluster still renders
+     * (the untyped total displays as Happy, plus the viewer's own pick);
+     * only the itemised tooltip is withheld, because with no per-kind data
+     * its numbers would be invented. See `clusterCounts`.
      */
     breakdown?: ReactionBreakdown;
     /** REAL: `userEngagement.hasSaved`. */
@@ -302,17 +333,26 @@ function ReactionBar2Inner({
         // reports what the post has; the rail is where you choose.
     }, []);
 
+    // ONE source of truth for the whole cluster: what each kind is worth,
+    // which glyphs that makes visible, and the number beside them.
+    const counts = clusterCounts(breakdown, total, selected);
+    const clusterKinds = visibleClusterReactions(counts, selected);
+
+    // The displayed total is the SUM of the counts the glyphs stand for, not
+    // the raw `total` prop. The two differ only when an optimistic per-kind
+    // bump has run ahead of the server's total, and in that window the sum is
+    // the one that agrees with what is on screen. Every kind with a count is
+    // always drawn, so "sum of all kinds" and "sum of the kinds shown" are the
+    // same number — a kind that is hidden contributes 0.
+    const displayTotal = counts.HAPPY + counts.HOPEFUL + counts.SAD;
+
     // A post with NO reactions shows nothing — not a heart beside a 0. The
     // cluster used to render unconditionally because it WAS the control that
     // opened the rail; the rail is now permanent chrome on the card, so hiding
-    // an empty summary costs nothing.
-    //
-    // `total` decides, because it is authoritative: it counts untyped
-    // pre-migration rows the three flavours cannot account for. `selected` is
-    // OR-ed in so a first tap shows immediately, before the server count lands.
-    const hasAnyReaction = total > 0 || selected !== null;
+    // an empty summary costs nothing. `selected` is OR-ed in so a first tap
+    // shows immediately, before the server count lands.
+    const hasAnyReaction = displayTotal > 0 || selected !== null;
 
-    const clusterKinds = visibleClusterReactions(breakdown, selected);
     const iconSize = CLUSTER_ICON_SIZE[clusterKinds.length] ?? CLUSTER_ICON_SIZE[3];
 
     // The accessible name carries the TOTAL and the control's purpose, and
@@ -321,7 +361,7 @@ function ReactionBar2Inner({
     // the cluster, and parity is the point. Your own selection is announced
     // by the rail's checked item when it opens, which is also the only
     // place it is shown visually.
-    const triggerLabel = t('trigger', { count: total });
+    const triggerLabel = t('trigger', { count: displayTotal });
 
     const handlePick = (kind: ReactionKind) => {
         // Picking the already-selected reaction clears it.
@@ -444,7 +484,7 @@ function ReactionBar2Inner({
                                     );
                                 })}
                             </span>
-                            <span className="tabular-nums">{formatCount(total)}</span>
+                            <span className="tabular-nums">{formatCount(displayTotal)}</span>
                         </button>
                     </TooltipTrigger>
 
@@ -481,21 +521,22 @@ function ReactionBar2Inner({
                                     <div key={kind} className="flex items-center gap-3">
                                         <span>{t(REACTION_LABEL_KEY[kind])}</span>
                                         <span className="ml-auto tabular-nums">
-                                            {formatCount(breakdown[kind] ?? 0)}
+                                            {formatCount(counts[kind])}
                                         </span>
                                     </div>
                                 ))}
                                 <div className="mt-[0.125rem] flex items-center gap-3 border-t border-background/30 pt-[0.125rem]">
                                     <span>{t('total')}</span>
                                     <span className="ml-auto tabular-nums font-medium">
-                                        {formatCount(total)}
+                                        {formatCount(displayTotal)}
                                     </span>
                                 </div>
                             </div>
                         ) : (
-                            // Without a breakdown the cluster is a single Happy
-                            // glyph, so this list always has exactly one entry;
-                            // the join is future-proofing, not a real list.
+                            // No per-kind data, so NAMES ONLY. The glyphs are an
+                            // honest inference (untyped likes are Happy, plus
+                            // your own pick); itemised numbers beside them would
+                            // dress that inference up as a measurement.
                             clusterKinds.map((kind) => t(REACTION_LABEL_KEY[kind])).join(', ')
                         )}
                     </TooltipContent>
@@ -557,7 +598,7 @@ function ReactionBar2Inner({
                             const isOn = selected === kind;
                             const Icon = reactionIcon(kind, isOn);
                             const label = t(REACTION_LABEL_KEY[kind]);
-                            const count = breakdown?.[kind] ?? 0;
+                            const count = counts[kind];
                             // Only the SELECTED item needs an explicit name: it
                             // has to announce that activating again removes the
                             // reaction, which no visible text says. Unselected

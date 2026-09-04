@@ -57,6 +57,7 @@ import ReactionBar2 from '@/components/home2/ReactionBar2';
 import ReactionRail from '@/components/home2/ReactionRail';
 import {
     DEFAULT_REACTION,
+    type SessionReactionPick,
     applyBreakdownDelta,
     planReactionWrite,
     readSelectedReaction,
@@ -168,6 +169,12 @@ interface FeedCardProps {
         op: 'add' | 'remove',
         reaction: ReactionKind | null,
         totalDelta: number,
+        /**
+         * What was selected BEFORE this change. The parent cannot re-derive it
+         * — it only knows `hasLiked`, which is true for all three kinds — so a
+         * refused mutation could not roll back to the right icon without it.
+         */
+        previousReaction: ReactionKind | null,
     ) => void;
     onComment?: () => void;
     onShare?: (postId: string) => void;
@@ -305,7 +312,7 @@ function FeedCard2Inner({
      * someone's Sad as a like would attribute a reaction they never gave.
      * See ./reactionAdapter for the full boundary.
      */
-    const [sessionReaction, setSessionReaction] = useState<ReactionKind | null>(null);
+    const [sessionReaction, setSessionReaction] = useState<SessionReactionPick>(undefined);
     const [breakdown, setBreakdown] = useState<ReactionBreakdown | undefined>(reactionBreakdown);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showComments, setShowComments] = useState(false);
@@ -671,14 +678,22 @@ function FeedCard2Inner({
         setSaveCount(saves);
     }, [saves]);
 
-    // When the SERVER-backed like flag changes — a refetch, or an optimistic
-    // rollback upstream after a refused mutation — re-derive the pick. A like
-    // means HAPPY and outranks anything unsaved; a session-only HOPEFUL/SAD
-    // survives only while there is no like, which is exactly the state those
-    // two imply today. So a reaction the server refused disappears with it.
+    // Drop the local pick when the SERVER genuinely says something new.
+    //
+    // This keys on `serverReaction`, NOT on `isLiked`. Keying it on the like
+    // flag was the "first click always selects Happy" bug: tapping Sad calls
+    // onReact, the parent optimistically flips hasLiked, that flips the
+    // `initialIsLiked` PROP, this effect fired and nulled the 'SAD' that had
+    // just been set — and readSelectedReaction then fell through to its
+    // hasLiked -> HAPPY branch. The second tap appeared to work only because
+    // the prop was already true by then, so the dependency never changed and
+    // the effect never re-ran.
+    //
+    // Resetting to `undefined` (not null) hands authority back to the server
+    // rather than asserting "the viewer cleared this".
     useEffect(() => {
-        setSessionReaction((r) => (initialIsLiked ? null : r));
-    }, [initialIsLiked]);
+        setSessionReaction(undefined);
+    }, [serverReaction]);
 
     /** The reaction that renders as selected. Server truth beats session pick. */
     const selectedReaction = readSelectedReaction(
@@ -699,6 +714,16 @@ function FeedCard2Inner({
     const handleSelectReaction = (kind: ReactionKind | null) => {
         const plan = planReactionWrite(selectedReaction, kind);
 
+        // What the parent must restore if the mutation is refused. This is the
+        // RAW prior `myReaction`, NOT the derived `selectedReaction`.
+        //
+        // They differ for a pre-migration untyped like, where `hasLiked` is
+        // true and `myReaction` is null: `selectedReaction` reports HAPPY for
+        // DISPLAY, so rolling back with it would write a claimed 'HAPPY' onto a
+        // row that never had a reaction type — turning a refused mutation into
+        // a silent data change.
+        const previousReaction = serverReaction ?? null;
+
         // Every reaction now round-trips, so nothing is session-only any more.
         // The server value arrives on the next fetch; this just keeps the UI
         // honest until then.
@@ -710,7 +735,7 @@ function FeedCard2Inner({
         setLikeCount((c) => Math.max(0, c + plan.totalDelta));
         // The one mutation-bearing callback. When real reactions ship this
         // becomes `onReact(postId, kind)` — see planReactionWrite's doc.
-        onReact?.(postId, plan.op, plan.reaction, plan.totalDelta);
+        onReact?.(postId, plan.op, plan.reaction, plan.totalDelta, previousReaction);
     };
 
     // Bare "Like" affordances (action row, media modal, comment sheet) act on

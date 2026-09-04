@@ -86,12 +86,28 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     comments: p.engagementCounts?.comments ?? 0,
     shares: p.engagementCounts?.shares ?? 0,
     saves: p.engagementCounts?.saves ?? 0,
+    // Per-reaction counts. Deliberately NOT defaulted to 0: `undefined` means
+    // "this gateway did not measure them", while 0 means "measured, nobody
+    // picked it". The cluster needs that difference to decide between showing
+    // a real breakdown and showing nothing.
+    //
+    // This object is rebuilt field-by-field, so anything not named here is
+    // DROPPED. Omitting these was why the counter could never show more than
+    // one glyph however correct the query was.
+    happy: p.engagementCounts?.happy,
+    hopeful: p.engagementCounts?.hopeful,
+    sad: p.engagementCounts?.sad,
   };
 
   const userEngagement: UserEngagement = {
     hasLiked: p.userEngagement?.hasLiked ?? false,
     hasSaved: p.userEngagement?.hasSaved ?? false,
     hasShared: p.userEngagement?.hasShared ?? false,
+    // WHICH reaction, not merely whether. Dropping this here is what made every
+    // stored HOPEFUL or SAD come back to the card as a bare `hasLiked`, which
+    // it could only render as a heart. `null` with hasLiked=true is an untyped
+    // pre-migration like: display it as Happy, never write it back as HAPPY.
+    myReaction: p.userEngagement?.myReaction ?? null,
   };
 
   let authorProfile: AuthorProfile | undefined;

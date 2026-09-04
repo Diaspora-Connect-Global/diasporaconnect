@@ -99,7 +99,7 @@ export interface UseFeedResult {
   loadMore: () => void;
   feedContainerRef: React.RefObject<HTMLDivElement | null>;
   feedMeta: FeedStateMeta;
-  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean }>) => void;
+  updatePostCounts: (postId: string, delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean; myReaction: 'HAPPY' | 'HOPEFUL' | 'SAD' | null }>) => void;
   removePost: (postId: string) => void;
 }
 
@@ -957,23 +957,35 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const updatePostCounts = useCallback((
     postId: string,
-    delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean }>,
+    delta: Partial<{ likes: number; comments: number; shares: number; saves: number; hasLiked: boolean; hasSaved: boolean; myReaction: 'HAPPY' | 'HOPEFUL' | 'SAD' | null }>,
   ) => {
     const applyDelta = (p: Post): Post => {
       const updated: Post = {
         ...p,
         engagementCounts: {
+          // The spread is load-bearing: this literal replaces the whole object,
+          // so without it the first optimistic tap strips happy/hopeful/sad off
+          // the post and the cluster collapses for the rest of the session.
+          ...p.engagementCounts,
           likes: (p.engagementCounts?.likes ?? 0) + (delta.likes ?? 0),
           comments: (p.engagementCounts?.comments ?? 0) + (delta.comments ?? 0),
           shares: (p.engagementCounts?.shares ?? 0) + (delta.shares ?? 0),
           saves: (p.engagementCounts?.saves ?? 0) + (delta.saves ?? 0),
         },
       };
-      if (delta.hasLiked !== undefined || delta.hasSaved !== undefined) {
+      if (
+        delta.hasLiked !== undefined ||
+        delta.hasSaved !== undefined ||
+        delta.myReaction !== undefined
+      ) {
         updated.userEngagement = {
           ...p.userEngagement,
           ...(delta.hasLiked !== undefined ? { hasLiked: delta.hasLiked } : {}),
           ...(delta.hasSaved !== undefined ? { hasSaved: delta.hasSaved } : {}),
+          // WHICH reaction, carried optimistically alongside hasLiked. Without
+          // it the card is told only "you reacted" and has to guess the kind,
+          // which is how every first tap rendered as Happy.
+          ...(delta.myReaction !== undefined ? { myReaction: delta.myReaction } : {}),
         };
       }
       return updated;

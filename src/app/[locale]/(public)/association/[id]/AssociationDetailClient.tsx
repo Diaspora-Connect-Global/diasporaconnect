@@ -251,7 +251,13 @@ export default function AssociationPage() {
         updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
         try {
             if (liked) {
-                await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+                await addEngagement({
+          // A bare like IS Happy. Omitting reactionType stores NULL — an
+          // untyped row indistinguishable from a pre-migration like, which
+          // both loses the information and keeps manufacturing legacy-shaped
+          // data the reaction cluster then has to guess about.
+          variables: { input: { postId, engagementType: 'LIKE', reactionType: 'HAPPY' } },
+        });
             } else {
                 await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
             }

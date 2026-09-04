@@ -1,36 +1,34 @@
 /* =====================================================================
  *  reactionAdapter — THE SINGLE SEAM between the reaction vocabulary the
- *  /home2 UI speaks and what post-feed-service can store today.
+ *  /home2 UI speaks and what post-feed-service stores.
  *
- *  ── THE BOUNDARY BETWEEN REAL AND PENDING ───────────────────────────
+ *  ── ALL THREE REACTIONS PERSIST ─────────────────────────────────────
  *
  *  HAPPY **IS** THE EXISTING LIKE. Not a stand-in for it — the same
- *  thing. When the backend ships reaction types, existing like rows
- *  migrate to HAPPY. So today:
+ *  thing. All three reactions are stored as a single LIKE row carrying a
+ *  `reaction_type` of HAPPY | HOPEFUL | SAD, so:
  *
- *   • HAPPY round-trips for real. `userEngagement.hasLiked === true`
- *     means HAPPY is selected; selecting HAPPY fires the existing
- *     add-LIKE mutation, clearing it fires remove-LIKE, and the total
- *     (`engagementCounts.likes`) moves accordingly. Nothing is faked.
+ *   • Selecting any reaction is an add-LIKE carrying its type; clearing
+ *     one is a remove-LIKE.
  *
- *   • HOPEFUL and SAD have nowhere real to go yet. They are held in
- *     component state for the session, do not survive a refresh, and do
- *     not follow the user to another device. They are deliberately NOT
- *     written as a LIKE: a LIKE row will migrate to HAPPY, so recording
- *     someone's Sad as a like would permanently attribute a reaction
- *     they did not give. An honest reset beats a wrong persisted value,
- *     and localStorage would only make the wrongness durable.
+ *   • SWITCHING between two reactions updates that one row IN PLACE.
+ *     The total does not move (`totalDelta === 0`) and the author is not
+ *     notified a second time. Only the per-kind breakdown shifts.
  *
- *  Consequence worth knowing: moving from HAPPY to HOPEFUL/SAD removes
- *  the like (total −1), because the server would otherwise keep holding
- *  a Happy the user has moved away from.
+ *   • A row with `reaction_type = NULL` is a PRE-MIGRATION like, stored
+ *     before reaction types existed. It is DISPLAYED as Happy but must
+ *     never be written back as HAPPY and never counted into
+ *     `EngagementCounts.happy` — the distinction is what lets the
+ *     breakdown and the total stay honest about each other.
  *
  *  ── SAD IS NOT A DOWNVOTE ───────────────────────────────────────────
  *  Sad is how a reader says a post about bereavement or hard news landed.
  *  It is empathy and engagement. It must never hide, report, downrank or
  *  "show fewer like this", and it must never be labelled dislike / thumbs
  *  down / not interested / negative anywhere a user or a screen reader
- *  can meet it.
+ *  can meet it. (The non-English locales render it as compassion —
+ *  Mitgefühl, Compassion, Partecipazione, Medeleven — which is the sense
+ *  intended everywhere.)
  * ===================================================================== */
 
 /** The reaction vocabulary the UI speaks. Independent of `EngagementType`. */
@@ -60,42 +58,57 @@ export type ReactionBreakdown = Record<ReactionKind, number>;
 
 /** The server-side engagement facts the adapter reads from. */
 export interface ReactionSourceEngagement {
-    /** REAL today: `userEngagement.hasLiked` — i.e. "HAPPY is selected". */
+    /** `userEngagement.hasLiked` — true for ANY reaction, since all three are LIKE rows. */
     hasLiked: boolean;
     /**
-     * The reaction the server recorded. Does not exist yet. When
-     * post-feed-service ships reaction types, pass it straight through
-     * from `userEngagement` and every selection becomes durable.
+     * The reaction the server recorded (`userEngagement.myReaction`), or null
+     * for a pre-migration like stored before reaction types existed.
      */
     reaction?: ReactionKind | null;
 }
 
 /**
+ * A viewer's local, not-yet-reconciled choice.
+ *
+ * THREE distinct states, and the difference between the last two is the whole
+ * point: `undefined` means "the viewer has not touched this post, defer to the
+ * server", while `null` means "the viewer deliberately CLEARED their reaction".
+ * Collapsing them into one nullable value makes a deselect indistinguishable
+ * from no-opinion, so a stale server reaction immediately re-selects itself.
+ */
+export type SessionReactionPick = ReactionKind | null | undefined;
+
+/**
  * Resolve which reaction renders as selected.
  *
- * Precedence: the server's recorded reaction (once it exists) wins; then
- * `hasLiked` — which IS Happy — wins over a session pick, because the
- * server holding a like is a stronger fact than an unsaved choice; then
- * the session-only pick (HOPEFUL / SAD), which is meaningful precisely
- * when there is no like.
+ * PRECEDENCE — local intent first, and that ordering is the bug fix.
+ *
+ * It used to read the server's reaction first. That is wrong the moment a
+ * viewer changes an already-persisted reaction: switching a stored SAD to
+ * HOPEFUL leaves `reaction` reading 'SAD' until a refetch, so the UI showed
+ * the old choice and the new one looked like it had not registered.
+ *
+ * A defined `sessionPick` means the viewer has acted on THIS post since the
+ * last time the server told us anything, so it is by definition newer than
+ * `reaction`. `undefined` means they have not, and the server wins.
  *
  * @param engagement  what the API returned for this post
- * @param sessionPick the reaction chosen in this browser session. Not
- *                    persisted anywhere and does not survive a refresh.
+ * @param sessionPick the local choice: a kind, `null` for a deliberate clear,
+ *                    or `undefined` for "no local opinion".
  */
 export function readSelectedReaction(
     engagement: ReactionSourceEngagement,
-    sessionPick: ReactionKind | null,
+    sessionPick: SessionReactionPick,
 ): ReactionKind | null {
-    // 1. Server truth wins outright.
-    if (engagement.reaction) return engagement.reaction;
+    // 1. The viewer's own most recent action on this post outranks everything.
+    //    Note `null` is a REAL answer here (a deliberate deselect), which is
+    //    why this tests against undefined rather than truthiness — `if
+    //    (sessionPick)` would fall through on a clear and re-select the stale
+    //    server value, undoing the deselect on the very next render.
+    if (sessionPick !== undefined) return sessionPick;
 
-    // 2. Then what the viewer JUST picked, still awaiting confirmation. This
-    //    MUST come before the hasLiked fallback below. Optimistically, tapping
-    //    Hopeful flips hasLiked true while the server reaction is still null —
-    //    so checking hasLiked first returned Happy, and every Hopeful and Sad
-    //    tap appeared to select the heart instead.
-    if (sessionPick) return sessionPick;
+    // 2. Otherwise the server's recorded reaction.
+    if (engagement.reaction) return engagement.reaction;
 
     // 3. Reacted, but we do not know which: a pre-migration row stored before
     //    reaction types existed. Displayed as Happy — never written back as
