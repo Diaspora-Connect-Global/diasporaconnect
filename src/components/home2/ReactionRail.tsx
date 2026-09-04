@@ -58,13 +58,29 @@ import {
  *
  * ## Drag versus tap versus SCROLL
  *
- * The rail lives inside a vertically scrolling feed and wants to be dragged
- * vertically, so movement alone cannot separate "move the rail" from "scroll the
- * feed" — whichever the code claims, it steals the other. It is therefore a
- * PRESS-AND-HOLD on touch, matching how `ReactionBar2` disambiguates the same
- * gesture on the same card: hold `HOLD_MS`, the rail visibly lifts, and only
- * then does it follow the finger. A finger that starts moving before the hold
+ * The rail lives inside a vertically scrolling feed, so on the VERTICAL axis
+ * movement alone cannot separate "move the rail" from "scroll the feed" —
+ * whichever the code claims, it steals the other. A vertical drag is therefore a
+ * PRESS-AND-HOLD, matching how `ReactionBar2` disambiguates the same gesture on
+ * the same card: hold `HOLD_MS`, the rail visibly lifts, and only then does it
+ * follow the finger. A finger that starts moving UP or DOWN before the hold
  * matures is a scroll and is handed straight back to the browser.
+ *
+ * The HORIZONTAL axis is not ambiguous and must not be treated as if it were.
+ * The feed pans only vertically, so a sideways drag is never a scroll — and
+ * requiring the hold for it did not defer the gesture, it DESTROYED it: the
+ * browser claimed the touch for a pan that has nowhere to go, fired
+ * `pointercancel`, and the rail neither moved nor scrolled anything. That is the
+ * "the rail is not draggable" report, and it is exactly what a hand does when it
+ * grabs a pill pinned to the right edge and pulls it inward. So a
+ * horizontally-dominant movement of `TOUCH_AXIS_ARM_PX` arms the drag AT ONCE,
+ * with no hold. The hold remains the only way in on the vertical axis, where the
+ * conflict is real.
+ *
+ * The arming has to happen on `pointermove`, which the browser dispatches BEFORE
+ * the matching `touchmove` — so the `touchmove` that follows already sees an
+ * armed drag and calls `preventDefault()`, and the pan never starts. `armed` is
+ * therefore set before the first displacement is applied, not after it.
  *
  * Critically, `touch-action` stays SCROLLABLE (`manipulation`, never `none`).
  * `touch-action: none` opts the element out of panning for every touch that
@@ -109,8 +125,25 @@ const HOLD_MS = 350;
  * Finger drift that cancels a pending hold. Finger jitter during a hold is much
  * larger than mouse jitter, so this is well above `MOUSE_DRAG_THRESHOLD`;
  * anything past it is the beginning of a scroll, which belongs to the browser.
+ *
+ * Only reached by VERTICALLY-dominant drift now — sideways movement arms the
+ * drag instead of cancelling it, because sideways is not a scroll.
  */
 const HOLD_MOVE_CANCEL_PX = 10;
+
+/**
+ * Sideways finger movement that arms a touch drag immediately, skipping the
+ * hold. Deliberately BELOW the browser's own touch slop (~8px in Chrome): the
+ * pan starts on the first `touchmove` past that slop which nobody prevented, so
+ * arming has to happen while there is still a `touchmove` left to prevent.
+ * Above the slop this would be a race the rail loses about half the time, which
+ * is far worse than either outcome consistently.
+ *
+ * It is also high enough not to fire on a tap: a tap that slides 6px sideways
+ * across a 28px glyph is no longer a tap, and the rail moving 6px is a truthful
+ * answer to it.
+ */
+const TOUCH_AXIS_ARM_PX = 6;
 
 const STORAGE_KEY = 'diaspoplug:reaction-rail-offset';
 
@@ -458,12 +491,26 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
                 if (st.pointerType === 'mouse') {
                     if (Math.hypot(dx, dy) < MOUSE_DRAG_THRESHOLD) return;
                     st.armed = true;
+                } else if (Math.abs(dx) >= TOUCH_AXIS_ARM_PX && Math.abs(dx) > Math.abs(dy)) {
+                    // SIDEWAYS: not a scroll, so arm now rather than making the
+                    // viewer hold first. The feed pans only vertically, so this
+                    // gesture had no other owner — left to the browser it became
+                    // a pan with nowhere to go, and the `pointercancel` that
+                    // followed threw the drag away without scrolling anything.
+                    //
+                    // The baseline is deliberately NOT re-set here, unlike the
+                    // hold below: the movement that armed this drag IS the
+                    // viewer's intent, so the rail must already be `dx` along
+                    // rather than starting over from the finger's new position.
+                    clearHold();
+                    st.armed = true;
+                    setMode('armed');
                 } else {
-                    // Moved before the hold matured: this is a scroll. Drop the
-                    // gesture entirely so the browser owns it — we never called
-                    // preventDefault and never captured, so it is still the
-                    // browser's to take, and nothing here should touch its
-                    // gesture machinery on the way out.
+                    // Moved UP or DOWN before the hold matured: this is a
+                    // scroll. Drop the gesture entirely so the browser owns it —
+                    // we never called preventDefault and never captured, so it
+                    // is still the browser's to take, and nothing here should
+                    // touch its gesture machinery on the way out.
                     if (Math.hypot(dx, dy) >= HOLD_MOVE_CANCEL_PX) {
                         clearHold();
                         detachWindowListeners();
