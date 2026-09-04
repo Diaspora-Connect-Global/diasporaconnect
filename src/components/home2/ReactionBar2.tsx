@@ -112,12 +112,25 @@ export function reactionIcon(kind: ReactionKind, filled: boolean) {
  * cluster doubles as the control that opens the rail, so it can never be
  * empty, and Happy is what tapping it would give you.
  */
-function visibleClusterReactions(breakdown: ReactionBreakdown | undefined): ReactionKind[] {
+function visibleClusterReactions(
+    breakdown: ReactionBreakdown | undefined,
+    selected: ReactionKind | null,
+): ReactionKind[] {
     if (breakdown) {
-        const present = REACTION_ORDER.filter((k) => (breakdown[k] ?? 0) > 0);
+        // Everything the post actually has, PLUS the viewer's own pick. The
+        // union matters because the server count lags an optimistic tap: react
+        // Hopeful to a post nobody else has, and without this the glyph would
+        // not appear until a refetch — reading as though the tap did nothing.
+        const present = REACTION_ORDER.filter(
+            (k) => (breakdown[k] ?? 0) > 0 || k === selected,
+        );
         if (present.length > 0) return present;
     }
-    return [DEFAULT_REACTION];
+    // No breakdown yet (the API cannot supply per-reaction counts on every
+    // surface). Show the viewer's OWN reaction, which is the one thing we know
+    // for certain — falling back to Happy here would show a heart to someone
+    // who just picked Sad.
+    return [selected ?? DEFAULT_REACTION];
 }
 
 /**
@@ -289,7 +302,7 @@ function ReactionBar2Inner({
         // reports what the post has; the rail is where you choose.
     }, []);
 
-    const clusterKinds = visibleClusterReactions(breakdown);
+    const clusterKinds = visibleClusterReactions(breakdown, selected);
     const iconSize = CLUSTER_ICON_SIZE[clusterKinds.length] ?? CLUSTER_ICON_SIZE[3];
 
     // The accessible name carries the TOTAL and the control's purpose, and

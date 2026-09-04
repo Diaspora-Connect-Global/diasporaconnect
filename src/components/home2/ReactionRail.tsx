@@ -52,10 +52,14 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
         <div
             role="radiogroup"
             aria-label={t('choose')}
-            // `top-[4.5rem]` puts it level with the body text, below the author
-            // row, matching the design. `right-[0.5rem]` keeps it inside the
-            // card's 1rem padding so paint containment cannot clip it.
-            className="absolute right-[0.5rem] top-[4.5rem] z-10 flex w-[2.75rem] flex-col items-center gap-[0.375rem] rounded-full border border-border-subtle bg-surface-default p-[0.5rem] shadow-lg"
+            // Anchored from the BOTTOM, not the top: it should sit directly
+            // above the counter row, and that row's distance from the card
+            // bottom is fixed (counts row + divider + action row + padding)
+            // whereas the distance from the TOP varies with body text and
+            // media. Anchoring to the top would drift down long posts.
+            // `right-[0.5rem]` keeps it inside the card's 1rem padding, so
+            // `.feed-card-cv` paint containment cannot clip it.
+            className="absolute right-[0.5rem] bottom-[6rem] z-10 flex w-[2.75rem] flex-col items-center gap-[0.375rem] rounded-full border border-border-subtle bg-surface-default p-[0.5rem] shadow-lg"
         >
             {REACTION_ORDER.map((kind) => {
                 const isOn = selected === kind;
