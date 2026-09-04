@@ -330,18 +330,61 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
         return () => rail.removeEventListener('touchmove', blockScrollWhileDragging);
     }, []);
 
+    /**
+     * The move/end pair lives on `window`, not on the rail.
+     *
+     * They used to be React props on the 44px pill, with pointer capture taken
+     * only AFTER the first move that displaced the rail. That ordering meant the
+     * pointer had to stay inside the pill for the entire run-up to a drag — the
+     * press, the 4px mouse threshold or the 350ms hold, and the first move — or
+     * the element simply stopped receiving events and the gesture died with no
+     * trace. Any drag quicker than a careful crawl left the pill first, which is
+     * why the rail read as "not draggable" rather than as flaky.
+     *
+     * Binding to `window` makes the drag independent of what is under the
+     * cursor. Capture is still taken on the first real displacement, but it is
+     * now an optimisation for cross-iframe and cross-window cases rather than
+     * the thing holding the gesture together.
+     *
+     * Indirected through refs so the listener identities stay stable for
+     * removeEventListener while still calling the latest closures.
+     */
+    const moveRef = useRef<(e: PointerEvent) => void>(() => {});
+    const endRef = useRef<(e: PointerEvent) => void>(() => {});
+
+    const winMove = useCallback((e: PointerEvent) => moveRef.current(e), []);
+    const winEnd = useCallback((e: PointerEvent) => endRef.current(e), []);
+
+    const detachWindowListeners = useCallback(() => {
+        window.removeEventListener('pointermove', winMove);
+        window.removeEventListener('pointerup', winEnd);
+        window.removeEventListener('pointercancel', winEnd);
+    }, [winMove, winEnd]);
+
+    const attachWindowListeners = useCallback(() => {
+        // Detach first: a press whose pointerup was never seen (it landed in
+        // another window, or the tab lost focus mid-gesture) would otherwise
+        // leave a duplicate set bound for the life of the component.
+        detachWindowListeners();
+        window.addEventListener('pointermove', winMove);
+        window.addEventListener('pointerup', winEnd);
+        window.addEventListener('pointercancel', winEnd);
+    }, [detachWindowListeners, winMove, winEnd]);
+
     // A virtualised feed unmounts cards mid-gesture. Pointer capture is released
-    // by the browser when the element leaves the document, and every other
-    // listener is either a React prop or torn down above — but the hold timer is
-    // a live handle into a dead component, and a drag that was in flight has a
-    // position the viewer chose and would otherwise lose.
+    // by the browser when the element leaves the document — but three things
+    // outlive the component and must be undone by hand: the hold timer, which is
+    // a live handle into a dead component; the window-level move/end listeners,
+    // which are no longer React props and so are torn down by nobody; and a drag
+    // in flight, whose position the viewer chose and would otherwise lose.
     useEffect(
         () => () => {
             clearHold();
+            detachWindowListeners();
             if (dragRef.current?.moved) writeStoredOffset(desiredRef.current);
             dragRef.current = null;
         },
-        [clearHold],
+        [clearHold, detachWindowListeners],
     );
 
     const handlePointerDown = useCallback(
@@ -355,6 +398,7 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
             clearHold();
 
             suppressClickRef.current = false;
+            attachWindowListeners();
             dragRef.current = {
                 pointerId: e.pointerId,
                 pointerType: e.pointerType,
@@ -397,11 +441,11 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
                 setMode('armed');
             }, HOLD_MS);
         },
-        [clearHold],
+        [clearHold, attachWindowListeners],
     );
 
     const handlePointerMove = useCallback(
-        (e: React.PointerEvent<HTMLDivElement>) => {
+        (e: PointerEvent) => {
             const st = dragRef.current;
             if (!st || st.pointerId !== e.pointerId) return;
             st.lastX = e.clientX;
@@ -422,6 +466,7 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
                     // gesture machinery on the way out.
                     if (Math.hypot(dx, dy) >= HOLD_MOVE_CANCEL_PX) {
                         clearHold();
+                        detachWindowListeners();
                         dragRef.current = null;
                     }
                     return;
@@ -445,7 +490,7 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
                 // this a fast flick that leaves the 44px rail between two move
                 // events would lose the rest of the drag and its own pointerup.
                 try {
-                    e.currentTarget.setPointerCapture(e.pointerId);
+                    railRef.current?.setPointerCapture(e.pointerId);
                 } catch {
                     // Non-fatal: the drag still tracks while the pointer stays
                     // over the rail, and pointerup still ends it.
@@ -460,16 +505,17 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
             desiredRef.current = next;
             applyOffset(next);
         },
-        [clampToCard, applyOffset, clearHold],
+        [clampToCard, applyOffset, clearHold, detachWindowListeners],
     );
 
     const endGesture = useCallback(
-        (e: React.PointerEvent<HTMLDivElement>) => {
+        (e: PointerEvent) => {
             const st = dragRef.current;
             if (st && st.pointerId !== e.pointerId) return;
             dragRef.current = null;
             clearHold();
-            releaseCapture(e.currentTarget, e.pointerId);
+            detachWindowListeners();
+            if (railRef.current) releaseCapture(railRef.current, e.pointerId);
             setMode('idle');
             // A hold that never moved is still a TAP — the reaction is cast on
             // release. Arming must not punish a viewer for pressing a beat too
@@ -478,8 +524,14 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
             suppressClickRef.current = true;
             writeStoredOffset(desiredRef.current);
         },
-        [clearHold],
+        [clearHold, detachWindowListeners],
     );
+
+    // The window listeners are stable wrappers; point them at this render's
+    // closures. Done during render rather than in an effect so a pointerdown
+    // and its first pointermove in the same frame cannot see a stale handler.
+    moveRef.current = handlePointerMove;
+    endRef.current = endGesture;
 
     /**
      * Swallow the click a finished drag drags behind it, in the CAPTURE phase so
@@ -528,9 +580,6 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
             role="group"
             aria-label={t('choose')}
             onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={endGesture}
-            onPointerCancel={endGesture}
             onClickCapture={handleClickCapture}
             onContextMenu={handleContextMenu}
             style={{
@@ -554,7 +603,7 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
             // be scrolled from the one element a reader's thumb rests on. Scroll
             // is suppressed only for an armed drag, by the non-passive touchmove
             // listener above.
-            className={`absolute bottom-[6rem] right-[0.5rem] z-40 flex w-[2.75rem] touch-manipulation select-none flex-col items-center gap-[0.375rem] rounded-full border bg-surface-default p-[0.5rem] ${
+            className={`absolute bottom-[6rem] right-[0.5rem] z-40 flex w-[2.75rem] touch-manipulation select-none flex-col items-center gap-[0.625rem] rounded-full border bg-surface-default p-[0.625rem] ${
                 lifted
                     ? 'cursor-grabbing border-border-brand opacity-90 shadow-xl [&_button]:cursor-grabbing'
                     : 'cursor-grab border-border-subtle shadow-lg'
