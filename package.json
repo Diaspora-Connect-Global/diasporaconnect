@@ -12,7 +12,8 @@
     "start": "next start",
     "start:3000": "next start -p 3000",
     "lint": "eslint",
-    "copy-pdf-worker": "node scripts/copy-pdf-worker.mjs"
+    "copy-pdf-worker": "node scripts/copy-pdf-worker.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
@@ -72,6 +73,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/apollo-upload-client": "^19.0.0",
     "@types/node": "^20",
