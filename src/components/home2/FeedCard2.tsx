@@ -155,7 +155,20 @@ interface FeedCardProps {
     // wire them as stable `useCallback` references without an inline arrow
     // per card per render — that arrow recreation was the dominant cause of
     // every visible card re-rendering on every `loadMore`.
-    onLike?: (postId: string, liked: boolean) => void;
+    /**
+     * Fired when the viewer's reaction changes. `op` is 'add' (write or switch)
+     * or 'remove'; `reaction` is the kind to store on an add.
+     *
+     * Replaces the old `onLike(postId, liked)`: a boolean cannot express WHICH
+     * of the three reactions was chosen, and a switch is neither a like nor an
+     * unlike — it updates the row in place and must not move the total.
+     */
+    onReact?: (
+        postId: string,
+        op: 'add' | 'remove',
+        reaction: ReactionKind | null,
+        totalDelta: number,
+    ) => void;
     onComment?: () => void;
     onShare?: (postId: string) => void;
     onSave?: (postId: string, saved: boolean) => void;
@@ -261,7 +274,7 @@ function FeedCard2Inner({
     reactionBreakdown,
     serverReaction = null,
     commentsData: commentsDataProp = [],
-    onLike,
+    onReact,
     onComment,
     onShare,
     onSave,
@@ -685,15 +698,18 @@ function FeedCard2Inner({
     const handleSelectReaction = (kind: ReactionKind | null) => {
         const plan = planReactionWrite(selectedReaction, kind);
 
-        setSessionReaction(kind === DEFAULT_REACTION ? null : kind);
+        // Every reaction now round-trips, so nothing is session-only any more.
+        // The server value arrives on the next fetch; this just keeps the UI
+        // honest until then.
+        setSessionReaction(kind);
         if (breakdown) setBreakdown((b) => (b ? applyBreakdownDelta(b, plan.breakdownDelta) : b));
 
-        if (plan.liked === null) return;
-        setIsLiked(plan.liked);
+        if (plan.op === null) return;
+        setIsLiked(plan.liked ?? false);
         setLikeCount((c) => Math.max(0, c + plan.totalDelta));
         // The one mutation-bearing callback. When real reactions ship this
         // becomes `onReact(postId, kind)` — see planReactionWrite's doc.
-        onLike?.(postId, plan.liked);
+        onReact?.(postId, plan.op, plan.reaction, plan.totalDelta);
     };
 
     // Bare "Like" affordances (action row, media modal, comment sheet) act on

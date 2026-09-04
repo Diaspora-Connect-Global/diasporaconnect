@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { GripVertical } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { REACTION_ORDER, type ReactionKind } from '@/components/home2/reactionAdapter';
 import {
@@ -221,12 +220,12 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
                 dragging ? 'cursor-grabbing opacity-90 shadow-xl' : ''
             }`}
         >
-            {/* Grip: signals the rail is movable. Decorative — the whole rail is
-                draggable, so this is an affordance, not the only handle. */}
-            <GripVertical
-                aria-hidden
-                className="h-[0.875rem] w-[0.875rem] shrink-0 cursor-grab text-text-tertiary"
-            />
+            {/* NO visible grip. The whole rail is draggable, but the handle is
+                deliberately invisible: the rail is primarily three reaction
+                buttons, and a grip icon advertises a secondary capability at the
+                cost of a fourth thing to look at in a 44px pill. Drag still
+                works from anywhere on the rail — it is discoverable by trying,
+                not by being told. */}
             {REACTION_ORDER.map((kind) => {
                 const isOn = selected === kind;
                 const Icon = reactionIcon(kind, isOn);

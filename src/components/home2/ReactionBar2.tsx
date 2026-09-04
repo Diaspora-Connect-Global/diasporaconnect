@@ -302,6 +302,16 @@ function ReactionBar2Inner({
         // reports what the post has; the rail is where you choose.
     }, []);
 
+    // A post with NO reactions shows nothing — not a heart beside a 0. The
+    // cluster used to render unconditionally because it WAS the control that
+    // opened the rail; the rail is now permanent chrome on the card, so hiding
+    // an empty summary costs nothing.
+    //
+    // `total` decides, because it is authoritative: it counts untyped
+    // pre-migration rows the three flavours cannot account for. `selected` is
+    // OR-ed in so a first tap shows immediately, before the server count lands.
+    const hasAnyReaction = total > 0 || selected !== null;
+
     const clusterKinds = visibleClusterReactions(breakdown, selected);
     const iconSize = CLUSTER_ICON_SIZE[clusterKinds.length] ?? CLUSTER_ICON_SIZE[3];
 
@@ -324,6 +334,17 @@ function ReactionBar2Inner({
         // normally handles them is the hidden edge anchor.
         // No-op: there is no menu to open from here any more.
     }, []);
+
+    // Nothing to report at all ⇒ render NOTHING. The wrapper carries a bottom
+    // border and padding, so an empty row would leave a stray divider floating
+    // above the action buttons — which is what a bare "heart 0" looked like.
+    //
+    // Placed HERE, below every hook: an early return above a useCallback breaks
+    // the rules of hooks, because the hook order would differ between a post
+    // with reactions and one without.
+    const hasAnythingToShow =
+        hasAnyReaction || commentCount > 0 || shareCount > 0 || saveCount > 0;
+    if (!hasAnythingToShow) return null;
 
     return (
         <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle flex-wrap">
@@ -374,6 +395,7 @@ function ReactionBar2Inner({
                                         accessible name
                      It is never tooltip-ONLY: the rail captions stay visible,
                      so a touch user who simply taps still reads every name. ── */}
+                {hasAnyReaction && (
                 <Tooltip open={tipOpen} onOpenChange={setTipOpen}>
                     <TooltipTrigger asChild>
                         <button
@@ -478,6 +500,7 @@ function ReactionBar2Inner({
                         )}
                     </TooltipContent>
                 </Tooltip>
+                )}
 
                 {/* ── THE RAIL ─────────────────────────────────────────────
                      A vertical rounded pill, taller than wide, straddling the

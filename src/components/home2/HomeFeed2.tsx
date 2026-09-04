@@ -19,6 +19,7 @@ import { formatDateProximity } from '@/macros/time';
 // /home2 renders its OWN snapshot copy of the card, not the shared one —
 // editing `@/components/cards/FeedCardWithReply` would change the live feed.
 import FeedCard2 from '@/components/home2/FeedCard2';
+import type { ReactionKind } from '@/components/home2/reactionAdapter';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
@@ -788,27 +789,48 @@ export default function HomeFeed2() {
   // `readMutationOutcome` or a refused like would sit on screen looking
   // successful forever. The rollback re-runs the inverse delta, which the
   // card picks up through its prop-sync effects.
-  const handleLike = useCallback(async (postId: string, liked: boolean) => {
-    updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
-    const rollback = () =>
-      updatePostCounts(postId, { likes: liked ? -1 : 1, hasLiked: !liked });
-    try {
-      const result = liked
-        ? await addEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } })
-        : await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
-      const outcome = readMutationOutcome(result, (d) =>
-        liked ? d?.addEngagement : d?.removeEngagement,
-      );
-      if (!outcome.ok) {
+  const handleReact = useCallback(
+    async (postId: string, op: 'add' | 'remove', reaction: ReactionKind | null, delta: number) => {
+      const adding = op === 'add';
+      // `delta` comes from the card, which knows the BEFORE state. A SWITCH
+      // (Happy→Sad) sends 0: the server updates the row in place rather than
+      // inserting a second one, so the total must not move. Re-deriving this
+      // here would need post state this component does not hold.
+      // What hasLiked was BEFORE this change, derived from the transition:
+      //   remove            -> was reacted
+      //   add with delta 0  -> a switch, so was already reacted
+      //   add with delta 1  -> a first reaction, so was not
+      const wasReacted = !adding || delta === 0;
+
+      updatePostCounts(postId, { likes: delta, hasLiked: adding });
+      const rollback = () =>
+        updatePostCounts(postId, { likes: -delta, hasLiked: wasReacted });
+
+      try {
+        const result = adding
+          ? await addEngagement({
+              variables: {
+                // reactionType is sent EXPLICITLY. Omitting it stores NULL —
+                // an untyped like, indistinguishable from a pre-migration row.
+                input: { postId, engagementType: 'LIKE', reactionType: reaction ?? 'HAPPY' },
+              },
+            })
+          : await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+        const outcome = readMutationOutcome(result, (d) =>
+          adding ? d?.addEngagement : d?.removeEngagement,
+        );
+        if (!outcome.ok) {
+          rollback();
+          toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
+        }
+      } catch (err) {
         rollback();
-        toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
+        console.error(`Failed to ${adding ? 'react to' : 'un-react'} post:`, err);
+        toast.error(tRoot('feed.errors.failed'));
       }
-    } catch (err) {
-      rollback();
-      console.error(`Failed to ${liked ? 'like' : 'unlike'} post:`, err);
-      toast.error(tRoot('feed.errors.failed'));
-    }
-  }, [addEngagement, removeEngagement, updatePostCounts, tRoot]);
+    },
+    [addEngagement, removeEngagement, updatePostCounts, tRoot],
+  );
 
   const handleSave = useCallback(async (postId: string, saved: boolean) => {
     updatePostCounts(postId, { saves: saved ? 1 : -1, hasSaved: saved });
@@ -1559,7 +1581,7 @@ export default function HomeFeed2() {
                                   }
                                 : undefined
                         }
-                        onLike={handleLike}
+                        onReact={handleReact}
                         onShare={handleShare}
                         onSave={handleSave}
                         onSendComment={handleSendComment}
@@ -1649,7 +1671,10 @@ export default function HomeFeed2() {
           likeCount={modalPost.engagementCounts.likes}
           commentCount={modalPost.engagementCounts.comments}
           shareCount={modalPost.engagementCounts.shares}
-          onLike={(liked) => handleLike(modalPost.id, liked)}
+          // The modal has a plain like button and only ever means Happy.
+          onLike={(liked) =>
+            handleReact(modalPost.id, liked ? 'add' : 'remove', liked ? 'HAPPY' : null, liked ? 1 : -1)
+          }
           onSave={(saved) => handleSave(modalPost.id, saved)}
           onShare={() => handleShare(modalPost.id)}
           onSendComment={(text, parentId, mentions) => handleSendComment(modalPost.id, text, parentId, mentions)}

@@ -442,6 +442,19 @@ export type EngagementType = 'LIKE' | 'SAVE' | 'SHARE';
 export interface AddEngagementInput {
   postId: string;
   engagementType: EngagementType;
+  /**
+   * Which reaction a LIKE carries: HAPPY | HOPEFUL | SAD. Optional, and
+   * meaningful only when `engagementType` is 'LIKE'.
+   *
+   * OMITTING IT IS NOT THE SAME AS 'HAPPY'. An omitted value stores NULL — an
+   * untyped like, which is what every row created before reactions existed
+   * looks like. Those are DISPLAYED as Happy but are not stored as Happy, so
+   * the distinction stays recoverable. Send the value explicitly.
+   *
+   * Re-sending with a different reaction UPDATES the existing row rather than
+   * adding a second one, so a switch does not change the total.
+   */
+  reactionType?: 'HAPPY' | 'HOPEFUL' | 'SAD';
 }
 
 export interface RemoveEngagementInput {

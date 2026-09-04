@@ -106,9 +106,20 @@ export function readSelectedReaction(
  */
 export interface ReactionWritePlan {
     /**
-     * Target value of `hasLiked`, or null when nothing needs writing.
-     * The caller fires add-LIKE on `true`, remove-LIKE on `false`, and
-     * no mutation at all on `null`.
+     * What the server must do: 'add' writes/updates the reaction, 'remove'
+     * clears it, null means nothing to write.
+     *
+     * A SWITCH is an 'add', not a remove-then-add: post-feed-service updates
+     * the existing row in place, so the total is unchanged and the author is
+     * not notified a second time.
+     */
+    op: 'add' | 'remove' | null;
+    /** The reaction to store on an 'add'. Null on 'remove'. */
+    reaction: ReactionKind | null;
+    /**
+     * Target value of `hasLiked` for optimistic UI, or null when nothing is
+     * written. All three reactions are stored as a LIKE row, so any selection
+     * means hasLiked=true.
      */
     liked: boolean | null;
     /** Delta to apply to the displayed TOTAL (`engagementCounts.likes`). */
@@ -157,24 +168,25 @@ export function planReactionWrite(
     next: ReactionKind | null,
 ): ReactionWritePlan {
     if (previous === next) {
-        return { liked: null, totalDelta: 0, breakdownDelta: {} };
+        return { op: null, reaction: null, liked: null, totalDelta: 0, breakdownDelta: {} };
     }
 
     const breakdownDelta: Partial<Record<ReactionKind, number>> = {};
     if (previous) breakdownDelta[previous] = -1;
     if (next) breakdownDelta[next] = 1;
 
-    // Happy IS the Like, so the only server-visible question is whether
-    // Happy just turned on or off. Hopeful and Sad write nothing.
-    const wasHappy = previous === DEFAULT_REACTION;
-    const isHappy = next === DEFAULT_REACTION;
-    if (wasHappy === isHappy) {
-        return { liked: null, totalDelta: 0, breakdownDelta };
+    // All three reactions now persist. Every one is stored as a LIKE row
+    // carrying a reaction_type, so the TOTAL only moves when a reaction is
+    // added from nothing or cleared entirely — switching Happy→Sad updates the
+    // row in place and leaves the count alone.
+    if (next === null) {
+        return { op: 'remove', reaction: null, liked: false, totalDelta: -1, breakdownDelta };
     }
-
     return {
-        liked: isHappy,
-        totalDelta: isHappy ? 1 : -1,
+        op: 'add',
+        reaction: next,
+        liked: true,
+        totalDelta: previous === null ? 1 : 0,
         breakdownDelta,
     };
 }
