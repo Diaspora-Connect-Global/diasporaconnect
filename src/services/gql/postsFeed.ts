@@ -122,6 +122,9 @@ export const FULL_POST_FRAGMENT = gql`
       comments
       shares
       saves
+      happy
+      hopeful
+      sad
     }
     userEngagement {
       hasLiked
@@ -502,6 +505,9 @@ export const GET_USER_ENGAGED_POSTS = gql`
           comments
           shares
           saves
+          happy
+          hopeful
+          sad
         }
         userEngagement {
           hasLiked
@@ -556,6 +562,9 @@ export const GET_USER_POSTS = gql`
         comments
         shares
         saves
+        happy
+        hopeful
+        sad
       }
       userEngagement {
         hasLiked
@@ -613,6 +622,9 @@ export const GET_SAVED_POSTS = gql`
           comments
           shares
           saves
+          happy
+          hopeful
+          sad
         }
         userEngagement {
           hasLiked
@@ -671,6 +683,9 @@ export const GET_LIKED_POSTS = gql`
           comments
           shares
           saves
+          happy
+          hopeful
+          sad
         }
         userEngagement {
           hasLiked
@@ -729,6 +744,9 @@ export const GET_COMMENTED_POSTS = gql`
           comments
           shares
           saves
+          happy
+          hopeful
+          sad
         }
         userEngagement {
           hasLiked

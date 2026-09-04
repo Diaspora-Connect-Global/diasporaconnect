@@ -18,10 +18,20 @@
  * @property {number} saves - Number of times the post was saved
  */
 export interface EngagementCounts {
+  /**
+   * TOTAL reactions, across every flavour, INCLUDING pre-migration likes that
+   * carry no stored reaction type. So `happy + hopeful + sad` does NOT
+   * necessarily equal this — the difference is exactly the untyped legacy rows.
+   * Show this as the combined count; never sum the three to derive it.
+   */
   likes: number;
   comments: number;
   shares: number;
   saves: number;
+  /** Per-reaction counts. Absent on an older gateway; guard before use. */
+  happy?: number;
+  hopeful?: number;
+  sad?: number;
 }
 
 /**

@@ -1543,6 +1543,22 @@ export default function HomeFeed2() {
                         comments={post.engagementCounts.comments}
                         shares={post.engagementCounts.shares}
                         saves={post.engagementCounts.saves}
+                        // Per-reaction counts drive WHICH glyphs the cluster shows.
+                        // Undefined until every field is present — a partial object
+                        // would render a cluster asserting reactions we did not
+                        // actually measure. The total stays `likes`, which counts
+                        // untyped legacy rows the three flavours cannot account for.
+                        reactionBreakdown={
+                            post.engagementCounts.happy !== undefined &&
+                            post.engagementCounts.hopeful !== undefined &&
+                            post.engagementCounts.sad !== undefined
+                                ? {
+                                      HAPPY: post.engagementCounts.happy,
+                                      HOPEFUL: post.engagementCounts.hopeful,
+                                      SAD: post.engagementCounts.sad,
+                                  }
+                                : undefined
+                        }
                         onLike={handleLike}
                         onShare={handleShare}
                         onSave={handleSave}
