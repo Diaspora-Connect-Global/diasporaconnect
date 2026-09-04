@@ -493,7 +493,7 @@ function ReactionBar2Inner({
                 <DropdownMenuContent
                     side="right"
                     align="start"
-                    sideOffset={-36}
+                    sideOffset={-24}
                     collisionPadding={8}
                     aria-label={t('choose')}
                     onCloseAutoFocus={(e) => {
@@ -512,7 +512,7 @@ function ReactionBar2Inner({
                             e.preventDefault();
                         }
                     }}
-                    className="flex w-[4.5rem] flex-col items-stretch gap-[0.125rem] rounded-full border-border-subtle bg-surface-default p-[0.375rem] shadow-lg motion-reduce:animate-none! motion-reduce:transition-none!"
+                    className="flex w-[3rem] flex-col items-center gap-[0.25rem] rounded-full border-border-subtle bg-surface-default p-[0.5rem] shadow-lg motion-reduce:animate-none! motion-reduce:transition-none!"
                 >
                     {/* Radio semantics: exactly one may be selected. Built on
                         the Radix primitive rather than the shared ui wrapper
@@ -541,7 +541,13 @@ function ReactionBar2Inner({
                                     // selected one it was byte-identical to the
                                     // aria-label — name and description the same
                                     // string is the classic double-announcement.
-                                    aria-label={isOn ? selectedName : undefined}
+                                    // The rail is glyphs only, so there is no
+                                    // visible text to name an item. EVERY item
+                                    // therefore needs an explicit name — before,
+                                    // unselected items were named by their own
+                                    // caption, and dropping the caption without
+                                    // this would leave them announced as blank.
+                                    aria-label={isOn ? selectedName : label}
                                     // preventDefault KEEPS THE RAIL OPEN after a
                                     // pick, so a second tap can change or remove
                                     // without reopening. Escape, a click outside
@@ -551,7 +557,7 @@ function ReactionBar2Inner({
                                         e.preventDefault();
                                         handlePick(kind);
                                     }}
-                                    className="flex cursor-pointer select-none flex-col items-center gap-[0.125rem] rounded-2xl px-[0.25rem] py-[0.375rem] outline-none transition-colors data-[highlighted]:bg-surface-alt data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                                    className="flex cursor-pointer select-none items-center justify-center rounded-full p-[0.125rem] outline-none transition-colors data-[highlighted]:bg-surface-alt data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                                 >
                                     {/* Selected = solid red disc, glyph knocked
                                         out in white. The box keeps its size
@@ -570,29 +576,6 @@ function ReactionBar2Inner({
                                             }`}
                                         />
                                     </span>
-                                    {/* The caption sits UNDER the glyph rather
-                                        than beside it: a heart, praying hands
-                                        and a thumbs-down are not self-evident,
-                                        so labels stay visible — but side-by-side
-                                        text would make the rail wider than tall,
-                                        the opposite of the pill the design asks
-                                        for. Centred and wrapping, so a long
-                                        locale (de "Hoffnungsvoll") stacks rather
-                                        than widening the rail. */}
-                                    <span
-                                        className={`text-center text-[0.625rem] font-medium leading-tight ${
-                                            isOn ? 'text-border-danger' : 'text-text-primary'
-                                        }`}
-                                    >
-                                        {label}
-                                    </span>
-                                    {/* Per-reaction count ONLY when the backend
-                                        actually supplies one. */}
-                                    {breakdown && (
-                                        <span className="tabular-nums text-[0.625rem] leading-tight text-text-secondary">
-                                            {formatCount(count)}
-                                        </span>
-                                    )}
                                 </DropdownMenuPrimitive.RadioItem>
                             );
                         })}
