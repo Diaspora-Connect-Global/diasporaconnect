@@ -27,7 +27,9 @@ export type SubjectKind =
     | 'event'
     | 'opportunity'
     | 'post'
-    | 'group';
+    | 'group'
+    /** No entity at all — the platform itself is the sender. */
+    | 'platform';
 
 interface NotificationCardProps {
     /** Main title (e.g. app name or actor). */
@@ -99,8 +101,10 @@ export function NotificationCard({
      *   4. `imageUrl`         — the actor's avatar (the pre-existing path; still
      *                           the right answer for a person-centred row whose
      *                           subject fields have not resolved).
-     *   5. a generic asset    — now the RARE case: a system notice with no
-     *                           subject entity at all ("Here's what you missed").
+     *   5. a generic asset    — now the RARE case: the platform itself is the
+     *                           sender (a system announcement, an admin
+     *                           broadcast, the "Here's what you missed"
+     *                           digest), or the row is unclassifiable.
      *
      * A picture that 404s at runtime drops to the NEXT rule rather than leaving
      * a broken-image glyph, which is why 2 and 4 are gated on their fail flags.
@@ -110,9 +114,20 @@ export function NotificationCard({
     const showEntityAvatar = !subjectSrc && trimmedSubjectName.length > 0;
     const actorSrc =
         !subjectSrc && !showEntityAvatar && imageUrl && !actorImageFailed ? imageUrl : null;
-    // The globe is a Ghana-flag world icon: fine for a platform announcement,
-    // wrong for a person, so a known-person subject keeps the silhouette.
-    const genericSrc = subjectKind === 'user' ? '/PROFILE.png' : '/GLOBE.png';
+    // Three generic marks, in decreasing specificity:
+    //   'platform' → the DiaspoPlug logo. These rows are SENT BY the platform
+    //                and have no entity behind them, so the brand is the honest
+    //                answer; `/LOGO.svg` is the same mark the header, the public
+    //                shell, the loading screen and the SEO metadata all use.
+    //   'user'     → a silhouette. The globe is a Ghana-flag world icon and
+    //                reads as an org, which is wrong for a person.
+    //   otherwise  → the globe, now only for a genuinely unclassifiable row.
+    const genericSrc =
+        subjectKind === 'platform'
+            ? '/LOGO.svg'
+            : subjectKind === 'user'
+              ? '/PROFILE.png'
+              : '/GLOBE.png';
 
     // Plain <img>, not next/image: these are arbitrary remote entity pictures
     // and `next.config.ts` allows a narrow set of hosts through the optimizer
@@ -121,6 +136,14 @@ export function NotificationCard({
     // of degrading. Same call the app already makes in AvatarGroup and
     // CircleImagery; at 32–40px the optimizer buys nothing anyway.
     const imageClass = 'w-full h-full rounded-full object-cover border-2 border-border-subtle';
+    // The brand mark is a ~1.3:1 logo, not a square portrait — `object-cover`
+    // would crop a fifth of it away inside the circle, so it gets `contain` on
+    // the surface colour instead. Every other picture here is a real avatar and
+    // is meant to fill the circle.
+    const genericClass =
+        subjectKind === 'platform'
+            ? 'w-full h-full rounded-full object-contain bg-surface-default p-0.5 border-2 border-border-subtle'
+            : imageClass;
 
     const handleMarkAsRead = (event: Event) => {
         event.preventDefault();
@@ -169,7 +192,7 @@ export function NotificationCard({
                                         <img
                                             src={genericSrc}
                                             alt=""
-                                            className={imageClass}
+                                            className={genericClass}
                                         />
                                     ))}
                                 </div>

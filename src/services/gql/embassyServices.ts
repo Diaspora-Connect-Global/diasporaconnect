@@ -568,6 +568,8 @@ export const SERVICE_REQUEST = gql`
       id
       requestNumber
       status
+      ownerType
+      ownerEntityId
       requestTypeId
       category
       formResponsesJson
@@ -673,6 +675,17 @@ export interface ServiceRequestDetail {
   id: string;
   requestNumber: string;
   status: string;
+  /** Owner scope of the request: COMMUNITY | ASSOCIATION | MARKETPLACE | SYSTEM. */
+  ownerType?: string | null;
+  /**
+   * Id of the owning community/association (null for SYSTEM-owned requests).
+   *
+   * The authoritative answer to "which embassy is this request with?". The
+   * notification payloads do NOT reliably carry it (only `servicerequest.
+   * submitted` ever includes `ownerEntityId`, and only when the producer had
+   * one), so `useEnrichedNotification` reads it from here instead.
+   */
+  ownerEntityId?: string | null;
   requestTypeId: string;
   category?: string | null;
   formResponsesJson?: string | null;

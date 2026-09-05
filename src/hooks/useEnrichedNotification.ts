@@ -47,7 +47,14 @@ export type NotificationSubjectKind =
   | 'event'
   | 'opportunity'
   | 'post'
-  | 'group';
+  | 'group'
+  /**
+   * The platform itself is the sender and there is no other entity involved —
+   * a system announcement, an admin broadcast, the weekly "here's what you
+   * missed" digest. These have no name to take an initial from, so the
+   * renderer shows the DiaspoPlug brand mark rather than a letter.
+   */
+  | 'platform';
 
 /**
  * Result of enriching a notification with data resolved from the API.
@@ -85,10 +92,13 @@ export interface EnrichedNotification {
    * Subject — the entity the notification is ABOUT.
    *
    * NOT the actor: a "membership approved" notification is about the
-   * COMMUNITY, even though a person approved it. `null` on all three means
-   * "this notification has no subject entity" (a pure system notice such as
-   * "Here's what you missed") — only then should the caller fall back to a
-   * generic platform icon.
+   * COMMUNITY, even though a person approved it.
+   *
+   * A pure platform notice ("Here's what you missed", a system announcement, an
+   * admin broadcast) has no subject entity at all and reports
+   * `subjectKind: 'platform'` with both other fields null — the caller renders
+   * the brand mark. `null` on ALL THREE means the row could not be classified
+   * at all, and is the only remaining case for a generic icon.
    *
    * Resolved entirely from data the hook already fetches; see
    * `resolveSubject` below for the per-type mapping.
@@ -286,6 +296,50 @@ function extractNameFromMessage(
       if (candidate.split(/\s+/).filter(Boolean).length > 4) continue;
       return candidate;
     }
+  }
+  return null;
+}
+
+/**
+ * Placeholders the notification service interpolates into a message when it
+ * could not resolve the real name ("Your application for \"the opportunity\"
+ * was accepted"). Extracting one of those is worse than extracting nothing —
+ * it would put a "T" on every unresolved row.
+ */
+const GENERIC_QUOTED_NAMES = new Set([
+  'the opportunity',
+  'the event',
+  'the post',
+  'the request',
+  'the group',
+  'the community',
+]);
+
+/**
+ * Pull an entity name back out of a human-readable notification message.
+ *
+ * notification-service writes the entity's name INSIDE the sentence whenever
+ * the structured payload has no field for it — e.g. the opportunity-application
+ * family sends `data: { applicationId, opportunityId, opportunityTitle? }` and
+ * `message: 'Your application for "Sales Lead" has been accepted.'`, where
+ * `opportunityTitle` is undefined whenever the producer could not enrich the
+ * event. The quoted span is then the ONLY place the title survives.
+ *
+ * Deliberately double/typographic quotes and guillemets only — a single quote
+ * would match the apostrophes in "Here's what you missed on Ama's post".
+ */
+const QUOTED_NAME_RE = /["“„«]\s*([^"“”„«»\n]{2,80}?)\s*["”»]/;
+
+function extractQuotedName(
+  ...messages: Array<string | null | undefined>
+): string | null {
+  for (const raw of messages) {
+    if (!raw) continue;
+    const candidate = String(raw).match(QUOTED_NAME_RE)?.[1]?.trim();
+    if (!candidate) continue;
+    if (GENERIC_QUOTED_NAMES.has(candidate.toLowerCase())) continue;
+    if (isUuidLike(candidate)) continue;
+    return candidate;
   }
   return null;
 }
@@ -592,9 +646,16 @@ export function useEnrichedNotification(
   );
   const needsOpportunity = Boolean(opportunityId && type.includes('opportunity'));
   const needsEvent = Boolean(eventId && type.startsWith('event.'));
-  const needsAssociation = Boolean(entityId && entityType === 'association');
   const needsCommunity = Boolean(entityId && entityType === 'community');
   const needsServiceRequest = Boolean(requestId && type.startsWith('servicerequest'));
+
+  /**
+   * Every notification produced by the opportunity-application family
+   * (`opportunity.application.submitted | received | accepted | rejected`, plus
+   * the `reviewed` / `withdrawn` topics that exist upstream). The row is about
+   * the OPPORTUNITY applied to — not about whoever reviewed the application.
+   */
+  const isOpportunityApplication = subjectType.startsWith('opportunity.application');
 
   const actorQuery = useQuery<{
     getProfile: {
@@ -715,13 +776,76 @@ export function useEnrichedNotification(
     fetchPolicy: 'cache-first',
   });
 
+  // Service request — resolve the live status, the (humanized) category and the
+  // OWNING ENTITY so the notification sentence and avatar reflect the request.
+  //
+  // Declared before the community/association queries because its `ownerEntityId`
+  // is what feeds them; see the owner-resolution comment below.
+  const serviceRequestQuery = useQuery<{
+    serviceRequest: {
+      status?: string;
+      category?: string | null;
+      ownerType?: string | null;
+      ownerEntityId?: string | null;
+    } | null;
+  }>(SERVICE_REQUEST, {
+    variables: { id: requestId ?? '' },
+    skip: !needsServiceRequest,
+    fetchPolicy: 'cache-first',
+    errorPolicy: 'ignore',
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Owning community/embassy for a service request.
+   *
+   * ROOT CAUSE this replaces: the id was read from the notification payload
+   * ALONE, and the payload almost never has it. notification-service writes
+   * `ownerEntityId` on exactly one topic — `servicerequest.submitted` — and
+   * even there only conditionally (`...(event.ownerEntityId ? { … } : {})`,
+   * over a field the producer types `string | null`). Every other topic
+   * (`assigned`, `status.changed`, `info.requested`, `approved`, `rejected`,
+   * `completed`, `note.added`, `document.added`) ships `{ requestId,
+   * requestNumber, … }` and nothing else — their wire DTOs do not even declare
+   * an owner field. So `needsServiceCommunity` was false, `getCommunity` never
+   * ran, and BOTH `subjectImageUrl` and `serviceOwnerName` came back null →
+   * the row fell all the way through to the globe.
+   *
+   * `serviceRequest.ownerEntityId` is the authoritative answer and it rides
+   * along on the request query THIS HOOK ALREADY ISSUES for the same row (see
+   * `needsServiceRequest` — `requestId` is present on every servicerequest
+   * payload), so recovering it costs no extra round trip. The community/
+   * association lookup it unlocks is one request per distinct owner, shared by
+   * every row on the page through the Apollo cache.
+   * ------------------------------------------------------------------ */
+  const isServiceRequestType = type.startsWith('servicerequest');
+  const fetchedServiceRequest = serviceRequestQuery.data?.serviceRequest;
+  const serviceOwnerType = (fetchedServiceRequest?.ownerType || '').trim().toUpperCase();
+  const serviceOwnerEntityId = isServiceRequestType
+    ? pickString(data, ['ownerEntityId', 'communityId', 'entityId']) ||
+      (fetchedServiceRequest?.ownerEntityId || '').trim() ||
+      undefined
+    : undefined;
+  // An unknown owner type resolves as a community — that is what the payload-only
+  // path always assumed, and what the service-request UI routes to.
+  const serviceAssociationId =
+    serviceOwnerType === 'ASSOCIATION' ? serviceOwnerEntityId : undefined;
+  const serviceCommunityId = serviceAssociationId ? undefined : serviceOwnerEntityId;
+  const needsServiceCommunity = Boolean(serviceCommunityId);
+
   // `avatarUrl` is already selected by both queries — type widening only.
+  //
+  // The association lookup now also serves ASSOCIATION-owned service requests.
+  // It stays gated on a known id, so a community-owned request never triggers it.
+  const associationLookupId =
+    entityId && entityType === 'association' ? entityId : serviceAssociationId;
+  const needsAssociation = Boolean(associationLookupId);
   const associationQuery = useQuery<{
     getAssociation: { name?: string; avatarUrl?: string } | null;
   }>(GET_ASSOCIATION, {
-    variables: { id: entityId ?? '' },
+    variables: { id: associationLookupId ?? '' },
     skip: !needsAssociation,
     fetchPolicy: 'cache-first',
+    errorPolicy: 'ignore',
   });
 
   const communityQuery = useQuery<{
@@ -732,25 +856,6 @@ export function useEnrichedNotification(
     fetchPolicy: 'cache-first',
   });
 
-  // Service request — resolve the live status and (humanized) category so the
-  // notification sentence reflects the current state of the request.
-  const serviceRequestQuery = useQuery<{
-    serviceRequest: { status?: string; category?: string | null } | null;
-  }>(SERVICE_REQUEST, {
-    variables: { id: requestId ?? '' },
-    skip: !needsServiceRequest,
-    fetchPolicy: 'cache-first',
-    errorPolicy: 'ignore',
-  });
-
-  // Owning community/embassy for a service request — the entity that received
-  // the request. Resolve its name from the community service so notifications
-  // can read "<Community> received your <service> request". The id lives under
-  // ownerEntityId/communityId/entityId depending on the backend path.
-  const serviceCommunityId = type.startsWith('servicerequest')
-    ? pickString(data, ['ownerEntityId', 'communityId', 'entityId'])
-    : undefined;
-  const needsServiceCommunity = Boolean(serviceCommunityId);
   const serviceCommunityQuery = useQuery<{
     getCommunity: { name?: string; avatarUrl?: string } | null;
   }>(GET_COMMUNITY, {
@@ -1098,24 +1203,36 @@ export function useEnrichedNotification(
   let targetTitle: string | null = null;
   let targetSnippet: string | null = null;
 
+  // Prefer backend-supplied names in the payload to avoid an extra request when
+  // possible. We only fall through to the fetched title otherwise.
+  const opportunityTitleInPayload = pickString(data, [
+    'opportunityTitle',
+    'opportunityName',
+    'jobTitle',
+    'roleTitle',
+    'positionTitle',
+    'listingTitle',
+    'title',
+    'name',
+  ]);
+
   if (needsPost) {
     targetTitle = postTitle;
     targetSnippet = postSnippet;
-  } else if (needsOpportunity) {
-    // Prefer backend-supplied names in the payload to avoid an extra request
-    // when possible. We only fall through to the fetched title otherwise.
+  } else if (needsOpportunity || isOpportunityApplication) {
+    // The application family is included even when `needsOpportunity` is false:
+    // opportunity-service only enriches `opportunityTitle` onto the Kafka event
+    // when it had the opportunity loaded, so an application notification can
+    // arrive carrying neither a title NOR an `opportunityId` to fetch one with.
+    // The message still quotes it ("Your application for \"Sales Lead\" …"), so
+    // recover it from there rather than rendering the anonymous
+    // "Your application was accepted" fallback copy.
     targetTitle =
-      pickString(data, [
-        'opportunityTitle',
-        'opportunityName',
-        'jobTitle',
-        'roleTitle',
-        'positionTitle',
-        'listingTitle',
-        'title',
-        'name',
-      ]) ||
+      opportunityTitleInPayload ||
       opp?.title ||
+      (isOpportunityApplication
+        ? extractQuotedName(notification.message, notification.body, notification.title)
+        : null) ||
       null;
   } else if (needsEvent) {
     targetTitle =
@@ -1163,17 +1280,23 @@ export function useEnrichedNotification(
 
   // Service request status + service name. Prefer the live request status; for
   // the service name we humanize the category when no display name is available.
-  const serviceRequestObj = serviceRequestQuery.data?.serviceRequest;
+  // `servicerequest.submitted` also carries the raw category on the payload, so
+  // fall back to that while the request query is still resolving.
+  const serviceRequestObj = fetchedServiceRequest;
   const requestStatus = serviceRequestObj?.status?.trim() || null;
-  const serviceCategory = serviceRequestObj?.category?.trim();
+  const serviceCategory =
+    serviceRequestObj?.category?.trim() || pickString(data, ['category']);
   const serviceName = serviceCategory ? humanizeToken(serviceCategory) : null;
 
   // Owning community/embassy display name — prefer an explicit name field in the
-  // payload, then the resolved community. Only for service-request notifications.
-  const serviceOwnerName = type.startsWith('servicerequest')
+  // payload, then the resolved owner. Only for service-request notifications.
+  // Either lookup can be the live one: a request type may be owned by a
+  // community (the embassy case) or by an association.
+  const serviceOwnerName = isServiceRequestType
     ? cleanDisplayName(
         pickString(data, ['communityName', 'ownerEntityName', 'embassyName', 'entityName']) ||
-          serviceCommunityQuery.data?.getCommunity?.name
+          serviceCommunityQuery.data?.getCommunity?.name ||
+          (serviceAssociationId ? associationQuery.data?.getAssociation?.name : undefined)
       )
     : null;
 
@@ -1276,20 +1399,23 @@ export function useEnrichedNotification(
 
   // An opportunity has no image of its own (verified against the Opportunity
   // type) — the poster's avatar/logo is the only picture there is.
+  //
+  // `ownerProfile.avatarUrl` matters for the application family specifically:
+  // for a USER-owned opportunity, opportunity-service returns an EMPTY
+  // `owner.avatarUrl` (it stores no user media — the same reason `owner.name`
+  // comes back as a raw uuid). The profile that fills the poster's NAME already
+  // carries their picture, so reading it here costs nothing and is the only way
+  // a person-posted opportunity ever gets a face.
   const opportunitySubject = (): Subject => ({
-    subjectImageUrl: normalizeImageUrl(opp?.owner?.avatarUrl),
-    subjectName: cleanDisplayName(
-      targetTitle ||
-        pickString(data, [
-          'opportunityTitle',
-          'opportunityName',
-          'jobTitle',
-          'listingTitle',
-          'title',
-          'name',
-        ]) ||
-        opp?.title
-    ),
+    subjectImageUrl: normalizeImageUrl(opp?.owner?.avatarUrl || ownerProfile?.avatarUrl),
+    subjectName:
+      cleanDisplayName(targetTitle || opportunityTitleInPayload || opp?.title) ||
+      // Never a globe. An application row whose opportunity cannot be named is
+      // still about a specific POSTER; failing even that, the notice itself
+      // ("Application Accepted!") is a letter, and a letter beats a globe.
+      cleanDisplayName(opportunityPoster) ||
+      cleanDisplayName(notification.title) ||
+      null,
     subjectKind: 'opportunity',
   });
 
@@ -1321,13 +1447,25 @@ export function useEnrichedNotification(
   function resolveSubject(): Subject {
     // Service request → the owning community/embassy, which is the name the
     // row's sentence already carries ("<Community> received your … request").
+    // The owner id now comes from the request itself, not just the payload —
+    // see the owner-resolution block above for why the payload is not enough.
     if (subjectType.startsWith('servicerequest')) {
       return {
         subjectImageUrl: normalizeImageUrl(
-          entityImageInPayload || serviceCommunityQuery.data?.getCommunity?.avatarUrl
+          entityImageInPayload ||
+            serviceCommunityQuery.data?.getCommunity?.avatarUrl ||
+            (serviceAssociationId
+              ? associationQuery.data?.getAssociation?.avatarUrl
+              : undefined)
         ),
-        subjectName: serviceOwnerName,
-        subjectKind: 'community',
+        // Never a globe: an owner we cannot resolve still leaves a row that is
+        // about one specific REQUEST, so name that instead — the service
+        // ("Passport renewal"), then the request number ("DP-2026-0002").
+        subjectName:
+          serviceOwnerName ||
+          cleanDisplayName(serviceName) ||
+          cleanDisplayName(pickString(data, ['requestNumber'])),
+        subjectKind: serviceAssociationId ? 'association' : 'community',
       };
     }
 
@@ -1357,6 +1495,12 @@ export function useEnrichedNotification(
       return eventSubject();
     }
 
+    // Opportunities — including the whole application family
+    // (`opportunity.application.submitted | received | accepted | rejected`,
+    // plus the upstream `reviewed` / `withdrawn` topics). An application
+    // notification is about the OPPORTUNITY applied to, never about the person
+    // who reviewed it, so it resolves through exactly the same path as
+    // "new opportunity" rows rather than a second, parallel one.
     if (subjectType.includes('opportunity')) return opportunitySubject();
 
     // Membership lifecycle (approved / requested / left / removed) is about the
@@ -1364,9 +1508,27 @@ export function useEnrichedNotification(
     if (isAssociationSubject) return associationSubject();
     if (isCommunitySubject) return communitySubject();
 
-    // Unknown type: show the person when one is involved. Otherwise this is a
-    // pure system notice ("Here's what you missed") with no subject entity —
-    // the only case where the renderer should keep the globe.
+    // Platform-issued notices: a system announcement, an admin broadcast, or the
+    // weekly "Here's what you missed" digest. These genuinely have no subject
+    // entity — nobody sent them but the platform — so there is no name to take
+    // an initial from and a letter would be a fabrication. They show the
+    // DiaspoPlug mark instead; the sender IS the brand.
+    //
+    // `subjectType` maps `_`→`.`, so this matches both wire forms the backend
+    // produces: `system.announcement` / `digest.whats_new` (createAndSend) and
+    // `SYSTEM_ANNOUNCEMENT` / `WHATS_NEW_DIGEST` (the raw-SQL upsert path).
+    // `group.chat.digest` also contains "digest" but has already returned above.
+    if (
+      subjectType.startsWith('system.') ||
+      subjectType === 'broadcast' ||
+      subjectType.includes('digest')
+    ) {
+      return { subjectImageUrl: null, subjectName: null, subjectKind: 'platform' };
+    }
+
+    // Unknown type: show the person when one is involved. Otherwise the row is
+    // genuinely unclassifiable — the only case left where the renderer keeps
+    // the globe.
     return personSubjectKnown ? personSubject() : NO_SUBJECT;
   }
 
