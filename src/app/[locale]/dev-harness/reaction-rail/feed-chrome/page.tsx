@@ -18,8 +18,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import ReactionRail from '@/components/home2/ReactionRail';
-import type { ReactionKind } from '@/components/home2/reactionAdapter';
+import ReactionRail from '@/components/reactions/ReactionRail';
+import type { ReactionKind } from '@/components/reactions/reactionAdapter';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 
 function HarnessCard({ index }: { index: number }) {

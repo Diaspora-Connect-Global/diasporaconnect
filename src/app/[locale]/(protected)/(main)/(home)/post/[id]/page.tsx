@@ -9,16 +9,47 @@ import { GET_USER_PROFILE } from '@/services/gql/profile';
 import type { GetProfileResponse } from '@/services/gql/types/profile';
 import { normalizeFeedPost, splitPostAttachments } from '@/lib/normalizeFeedPost';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import { deriveKindDelta, type ReactionKind } from '@/components/reactions/reactionAdapter';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import SimilarPosts from '@/components/post/SimilarPosts';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_POST_PAGE_CLASS } from '@/lib/feedColumnLayout';
 import { cn } from '@/lib/utils';
 import { useUserStore } from '@/store/useUserStore';
 import type { Profile } from '@/services/gql/types/profile';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
+
+/**
+ * Optimistic reaction state for THIS post.
+ *
+ * This page has no `useFeed`, so there is no `updatePostCounts` to lean on —
+ * the counts come straight off the `GET_POST` result. The patch is kept as
+ * DELTAS over that server value (plus the two absolute facts) so it composes
+ * with a later refetch instead of pinning a stale snapshot, and so a rollback
+ * is literally the same delta with the sign flipped.
+ *
+ * `hasLiked` and `myReaction` travel together with the per-kind deltas: telling
+ * the card "you reacted" without saying WHICH leaves it guessing (it guesses
+ * Happy), and moving one bucket without the other leaves the old reaction
+ * sitting in the breakdown beside the new one.
+ */
+interface ReactionPatch {
+  /** Delta on the displayed total (`engagementCounts.likes`). */
+  likes: number;
+  /** Per-kind deltas; a SWITCH moves one between buckets and leaves `likes` at 0. */
+  happy: number;
+  hopeful: number;
+  sad: number;
+  /** Absolute, not a delta. */
+  hasLiked: boolean;
+  /** Absolute: WHICH reaction is now selected, or null when cleared. */
+  myReaction: ReactionKind | null;
+}
 
 function formatFullNameFromProfile(p: Profile | null): string {
   if (!p) return '';
@@ -32,6 +63,9 @@ function formatFullNameFromProfile(p: Profile | null): string {
 export default function PostPage() {
   const params = useParams();
   const router = useRouter();
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED key
+  // ('feed.errors.not_found'), so it must go to an UNSCOPED translator.
+  const tRoot = useTranslations();
   const searchParams = useSearchParams();
   const postId = params.id as string;
   const focusCommentId = searchParams.get('commentId');
@@ -76,24 +110,75 @@ export default function PostPage() {
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
-  // Card handlers now receive the post id as the first arg (see
-  // FeedCardWithReply prop signature). On this single-post page we just
-  // ignore it — the route param `postId` is the canonical source.
-  const handleLike = async (_postId: string, liked: boolean) => {
+  const [reactionPatch, setReactionPatch] = useState<ReactionPatch | null>(null);
+
+  // Card handlers receive the post id as the first arg (see FeedCardWithReply's
+  // prop signature). On this single-post page we ignore it — the route param
+  // `postId` is the canonical source.
+  //
+  // Apollo runs `errorPolicy: 'all'`, so a REFUSED mutation RESOLVES with
+  // `data: null` and the catch never fires — only a transport failure reaches
+  // it. The optimistic patch is therefore gated on `readMutationOutcome`, or a
+  // refused reaction stays on screen looking successful.
+  const handleReact = async (
+    _postId: string,
+    op: 'add' | 'remove',
+    reaction: ReactionKind | null,
+    delta: number,
+    // The RAW prior `myReaction`, not the derived selection — they differ for a
+    // pre-migration untyped like, where the derived value reports HAPPY for
+    // display and rolling back with it would claim a type the row never had.
+    previousReaction: ReactionKind | null,
+  ) => {
+    const adding = op === 'add';
+    // A SWITCH (Happy→Sad) sends delta 0 — the server updates the row in place,
+    // so the total must not move. What hasLiked was BEFORE this change:
+    //   remove -> was reacted; add with delta 0 -> a switch, so was reacted;
+    //   add with delta 1 -> a first reaction, so was not.
+    const wasReacted = !adding || delta === 0;
+    // `previousReaction` null is a pre-migration untyped like, which belongs to
+    // no bucket — nothing is decremented and the untyped remainder shrinks by
+    // one on its own. That is correct.
+    const kindDelta = deriveKindDelta(previousReaction, reaction, adding);
+
+    const patch = (
+      sign: 1 | -1,
+      hasLiked: boolean,
+      myReaction: ReactionKind | null,
+    ) =>
+      setReactionPatch((prev) => ({
+        likes: (prev?.likes ?? 0) + sign * delta,
+        happy: (prev?.happy ?? 0) + sign * (kindDelta.HAPPY ?? 0),
+        hopeful: (prev?.hopeful ?? 0) + sign * (kindDelta.HOPEFUL ?? 0),
+        sad: (prev?.sad ?? 0) + sign * (kindDelta.SAD ?? 0),
+        hasLiked,
+        myReaction,
+      }));
+
+    patch(1, adding, adding ? reaction : null);
+    const rollback = () => patch(-1, wasReacted, previousReaction);
+
     try {
-      if (liked) {
-        await addEngagement({
-          // A bare like IS Happy. Omitting reactionType stores NULL — an
-          // untyped row indistinguishable from a pre-migration like, which
-          // both loses the information and keeps manufacturing legacy-shaped
-          // data the reaction cluster then has to guess about.
-          variables: { input: { postId, engagementType: 'LIKE', reactionType: 'HAPPY' } },
-        });
-      } else {
-        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      const result = adding
+        ? await addEngagement({
+            variables: {
+              // reactionType is sent EXPLICITLY. Omitting it stores NULL — an
+              // untyped like, indistinguishable from a pre-migration row.
+              input: { postId, engagementType: 'LIKE', reactionType: reaction ?? 'HAPPY' },
+            },
+          })
+        : await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      const outcome = readMutationOutcome(result, (d) =>
+        adding ? d?.addEngagement : d?.removeEngagement,
+      );
+      if (!outcome.ok) {
+        rollback();
+        toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
       }
-    } catch {
-      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
+    } catch (err) {
+      rollback();
+      console.error(`Failed to ${adding ? 'react to' : 'un-react'} post:`, err);
+      toast.error(tRoot('feed.errors.failed'));
     }
   };
 
@@ -267,6 +352,38 @@ export default function PostPage() {
     };
   }
 
+  // Server counts with the optimistic patch folded in. Same values the
+  // `useFeed` pages get out of `updatePostCounts` — computed here because this
+  // page holds no feed state of its own.
+  const baseCounts = normalizedPostResolved.engagementCounts;
+  const baseEngagement = normalizedPostResolved.userEngagement;
+  const serverHasLiked = baseEngagement?.hasLiked ?? false;
+  const serverReaction = baseEngagement?.myReaction ?? null;
+  // Once the server reports the reaction the patch was asserting, the patch has
+  // been ABSORBED into the server counts — keep applying its deltas on top and
+  // the same reaction would be counted twice. Drop it and let the server win.
+  const patch =
+    reactionPatch &&
+    reactionPatch.hasLiked === serverHasLiked &&
+    reactionPatch.myReaction === serverReaction
+      ? null
+      : reactionPatch;
+  const likeCount = Math.max(0, (baseCounts?.likes ?? 0) + (patch?.likes ?? 0));
+  const viewerHasLiked = patch ? patch.hasLiked : serverHasLiked;
+  const viewerReaction = patch ? patch.myReaction : serverReaction;
+  // Built ONLY when all three per-kind counts came back. Undefined means "not
+  // measured" — rendering zeros would assert a breakdown we never received.
+  const reactionBreakdown =
+    baseCounts?.happy !== undefined &&
+    baseCounts?.hopeful !== undefined &&
+    baseCounts?.sad !== undefined
+      ? {
+          HAPPY: Math.max(0, baseCounts.happy + (patch?.happy ?? 0)),
+          HOPEFUL: Math.max(0, baseCounts.hopeful + (patch?.hopeful ?? 0)),
+          SAD: Math.max(0, baseCounts.sad + (patch?.sad ?? 0)),
+        }
+      : undefined;
+
   return (
     <div className="h-app-inner flex overflow-hidden">
       {/* Fixed `40vw` on lg+ so width does not track the right rail (`FEED_COLUMN_POST_PAGE_CLASS`) */}
@@ -308,15 +425,20 @@ export default function PostPage() {
               .filter(Boolean) || []
           }
           documents={splitPostAttachments(normalizedPostResolved.attachments).documents}
-          likes={normalizedPostResolved.engagementCounts?.likes ?? 0}
+          likes={likeCount}
           comments={normalizedPostResolved.engagementCounts?.comments ?? 0}
           shares={normalizedPostResolved.engagementCounts?.shares ?? 0}
-          onLike={handleLike}
+          reactionBreakdown={reactionBreakdown}
+          onReact={handleReact}
           onShare={handleShare}
           onSave={handleSave}
           onSendComment={handleSendComment}
           joinButton={false}
-          isLiked={normalizedPostResolved.userEngagement?.hasLiked || false}
+          isLiked={viewerHasLiked}
+          // WHICH reaction is recorded — without it the card sees only
+          // hasLiked and assumes Happy, so a stored Hopeful or Sad comes back
+          // as a heart.
+          serverReaction={viewerReaction}
           isSaved={normalizedPostResolved.userEngagement?.hasSaved || false}
           isShared={normalizedPostResolved.userEngagement?.hasShared || false}
           initialFocusCommentId={focusCommentId ?? undefined}

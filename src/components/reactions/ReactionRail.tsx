@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { REACTION_ORDER, type ReactionKind } from '@/components/home2/reactionAdapter';
 import {
     REACTION_LABEL_KEY,
+    REACTION_ORDER,
     reactionIcon,
     SELECTED_DISC,
-} from '@/components/home2/ReactionBar2';
+    type ReactionKind,
+} from '@/components/reactions/reactionAdapter';
 
 /**
  * The always-visible reaction rail: a slim vertical pill of three glyphs that
@@ -32,7 +33,8 @@ import {
  * outside it.
  *
  * The clamp is measured against `offsetParent`, which resolves to the card's own
- * `relative` wrapper in `FeedCard2` — `offsetParent` follows `position`, and
+ * `relative` wrapper — in `FeedCard2` and in the shared `FeedCardWithReply`
+ * alike. `offsetParent` follows `position`, and
  * containment does not change `position`, so `.feed-card-cv` two levels up is
  * never the anchor even though its layout containment makes it a containing
  * block for absolutely-positioned descendants. The card wrapper's padding box is
@@ -272,7 +274,7 @@ export default function ReactionRail({ selected, onSelect }: ReactionRailProps) 
     const clampToCard = useCallback((next: Offset): Offset | null => {
         const rail = railRef.current;
         // `offsetParent` is the card's own `relative` wrapper — the rail's direct
-        // parent in FeedCard2, and the box `bottom`/`right` already resolve
+        // parent in FeedCard2 / FeedCardWithReply, and the box `bottom`/`right` already resolve
         // against, so offsetTop/offsetLeft below share its coordinate space.
         const card = rail?.offsetParent as HTMLElement | null;
         if (!rail || !card) return null;

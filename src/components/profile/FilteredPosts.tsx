@@ -23,9 +23,11 @@ import {
   Post,
 } from '@/services/gql/postsFeed';
 import FeedCardWithReply from '../cards/FeedCardWithReply';
+import { deriveKindDelta, type ReactionKind } from '@/components/reactions/reactionAdapter';
 import { resolveUserTier } from '@/lib/userTier';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { toast } from 'sonner';
+import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import { Bookmark, Heart, MessageCircle, FileText, type LucideIcon } from 'lucide-react';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { EmptyState } from '@/components/feedback';
@@ -53,12 +55,43 @@ interface FilteredPostsProps {
   isOwnProfile: boolean;
 }
 
+/**
+ * Optimistic reaction state for one post.
+ *
+ * These tabs read their posts straight off the Apollo query result — there is
+ * no `useFeed` and therefore no `updatePostCounts` — so the optimistic layer
+ * lives here, keyed by post id. It is kept as DELTAS over the server value
+ * (plus the two absolute facts) so it composes with a refetch instead of
+ * pinning a stale snapshot, and so a rollback is the same delta sign-flipped.
+ *
+ * `hasLiked` and `myReaction` move together with the per-kind deltas: telling
+ * the card "you reacted" without saying WHICH leaves it guessing (it guesses
+ * Happy), and moving one bucket without the other leaves the old reaction in
+ * the breakdown beside the new one with a doubled total.
+ */
+interface ReactionPatch {
+  /** Delta on the displayed total (`engagementCounts.likes`). */
+  likes: number;
+  /** Per-kind deltas; a SWITCH moves one between buckets and leaves `likes` at 0. */
+  happy: number;
+  hopeful: number;
+  sad: number;
+  /** Absolute, not a delta. */
+  hasLiked: boolean;
+  /** Absolute: WHICH reaction is now selected, or null when cleared. */
+  myReaction: ReactionKind | null;
+}
+
 export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsProps) {
   const t = useTranslations('profile.navigation');
   const tFeedback = useTranslations('feedback');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED key
+  // ('feed.errors.not_found'), so it must go to an UNSCOPED translator.
+  const tRoot = useTranslations();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<TabId>('myPosts');
+  const [reactionPatches, setReactionPatches] = useState<Record<string, ReactionPatch>>({});
 
   // Navigate to the post detail page unless the click originated from an
   // interactive child (buttons, links, inputs, media, or any element
@@ -169,21 +202,71 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
     activeTab === 'liked' ? likedLoading : commentedLoading;
 
   // ---- Handlers ----
-  const handleLike = async (postId: string, liked: boolean) => {
+  // Apollo runs `errorPolicy: 'all'`, so a REFUSED mutation RESOLVES with
+  // `data: null` and the catch never fires — only a transport failure reaches
+  // it. The optimistic patch is therefore gated on `readMutationOutcome`, or a
+  // refused reaction stays on screen looking successful.
+  const handleReact = async (
+    postId: string,
+    op: 'add' | 'remove',
+    reaction: ReactionKind | null,
+    delta: number,
+    // The RAW prior `myReaction`, not the derived selection — they differ for a
+    // pre-migration untyped like, where the derived value reports HAPPY for
+    // display and rolling back with it would claim a type the row never had.
+    previousReaction: ReactionKind | null,
+  ) => {
+    const adding = op === 'add';
+    // A SWITCH (Happy→Sad) sends delta 0 — the server updates the row in place,
+    // so the total must not move. What hasLiked was BEFORE this change:
+    //   remove -> was reacted; add with delta 0 -> a switch, so was reacted;
+    //   add with delta 1 -> a first reaction, so was not.
+    const wasReacted = !adding || delta === 0;
+    // `previousReaction` null is a pre-migration untyped like, which belongs to
+    // no bucket — nothing is decremented and the untyped remainder shrinks by
+    // one on its own. That is correct.
+    const kindDelta = deriveKindDelta(previousReaction, reaction, adding);
+
+    const patch = (sign: 1 | -1, hasLiked: boolean, myReaction: ReactionKind | null) =>
+      setReactionPatches((prev) => {
+        const before = prev[postId];
+        return {
+          ...prev,
+          [postId]: {
+            likes: (before?.likes ?? 0) + sign * delta,
+            happy: (before?.happy ?? 0) + sign * (kindDelta.HAPPY ?? 0),
+            hopeful: (before?.hopeful ?? 0) + sign * (kindDelta.HOPEFUL ?? 0),
+            sad: (before?.sad ?? 0) + sign * (kindDelta.SAD ?? 0),
+            hasLiked,
+            myReaction,
+          },
+        };
+      });
+
+    patch(1, adding, adding ? reaction : null);
+    const rollback = () => patch(-1, wasReacted, previousReaction);
+
     try {
-      if (liked) {
-        await addEngagement({
-          // A bare like IS Happy. Omitting reactionType stores NULL — an
-          // untyped row indistinguishable from a pre-migration like, which
-          // both loses the information and keeps manufacturing legacy-shaped
-          // data the reaction cluster then has to guess about.
-          variables: { input: { postId, engagementType: 'LIKE', reactionType: 'HAPPY' } },
-        });
-      } else {
-        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      const result = adding
+        ? await addEngagement({
+            variables: {
+              // reactionType is sent EXPLICITLY. Omitting it stores NULL — an
+              // untyped like, indistinguishable from a pre-migration row.
+              input: { postId, engagementType: 'LIKE', reactionType: reaction ?? 'HAPPY' },
+            },
+          })
+        : await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      const outcome = readMutationOutcome(result, (d) =>
+        adding ? d?.addEngagement : d?.removeEngagement,
+      );
+      if (!outcome.ok) {
+        rollback();
+        toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
       }
-    } catch {
-      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
+    } catch (err) {
+      rollback();
+      console.error(`Failed to ${adding ? 'react to' : 'un-react'} post:`, err);
+      toast.error(tRoot('feed.errors.failed'));
     }
   };
 
@@ -312,6 +395,37 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
         {/* Posts */}
         {posts.map((post) => {
           const profileData = getProfileData(post);
+          // Server counts with this post's optimistic patch folded in.
+          const counts = post.engagementCounts;
+          const serverHasLiked = post.userEngagement?.hasLiked ?? false;
+          const serverReaction = post.userEngagement?.myReaction ?? null;
+          const pending = reactionPatches[post.id];
+          // Once the server reports the reaction the patch was asserting, the
+          // patch has been ABSORBED into the server counts — these tabs run
+          // `cache-and-network`, so leaving it applied would count the same
+          // reaction twice after a tab switch refetches. Let the server win.
+          const patch =
+            pending &&
+            pending.hasLiked === serverHasLiked &&
+            pending.myReaction === serverReaction
+              ? undefined
+              : pending;
+          const likeCount = Math.max(0, (counts?.likes ?? 0) + (patch?.likes ?? 0));
+          const viewerHasLiked = patch ? patch.hasLiked : serverHasLiked;
+          const viewerReaction = patch ? patch.myReaction : serverReaction;
+          // Built ONLY when all three per-kind counts came back. Undefined means
+          // "not measured" — rendering zeros would assert a breakdown we never
+          // received. The total stays `likes`, which also counts untyped rows.
+          const reactionBreakdown =
+            counts?.happy !== undefined &&
+            counts?.hopeful !== undefined &&
+            counts?.sad !== undefined
+              ? {
+                  HAPPY: Math.max(0, counts.happy + (patch?.happy ?? 0)),
+                  HOPEFUL: Math.max(0, counts.hopeful + (patch?.hopeful ?? 0)),
+                  SAD: Math.max(0, counts.sad + (patch?.sad ?? 0)),
+                }
+              : undefined;
           return (
             <div
               key={post.id}
@@ -360,15 +474,20 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                     .filter(Boolean) || []
                 }
                 documents={splitPostAttachments(post.attachments).documents}
-                likes={post.engagementCounts.likes}
+                likes={likeCount}
                 comments={post.engagementCounts.comments}
                 shares={post.engagementCounts.shares}
-                onLike={handleLike}
+                reactionBreakdown={reactionBreakdown}
+                onReact={handleReact}
                 onShare={handleShare}
                 onSave={handleSave}
                 onSendComment={handleSendComment}
                 joinButton={false}
-                isLiked={post.userEngagement.hasLiked}
+                isLiked={viewerHasLiked}
+                // WHICH reaction is recorded — without it the card sees only
+                // hasLiked and assumes Happy, so a stored Hopeful or Sad comes
+                // back as a heart.
+                serverReaction={viewerReaction}
                 isSaved={post.userEngagement.hasSaved}
                 isShared={post.userEngagement.hasShared}
               />

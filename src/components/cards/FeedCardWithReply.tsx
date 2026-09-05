@@ -33,6 +33,16 @@ import { getFirstUrlInText } from '@/lib/urlPreview';
 import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
+import ReactionBar2 from '@/components/reactions/ReactionBar2';
+import ReactionRail from '@/components/reactions/ReactionRail';
+import {
+    DEFAULT_REACTION,
+    planReactionWrite,
+    readSelectedReaction,
+    type ReactionBreakdown,
+    type ReactionKind,
+    type SessionReactionPick,
+} from '@/components/reactions/reactionAdapter';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -106,12 +116,63 @@ interface FeedCardProps {
     likes: number;
     comments: number;
     shares: number;
+    /**
+     * The reaction the SERVER recorded for this viewer: 'HAPPY' | 'HOPEFUL' |
+     * 'SAD', or null.
+     *
+     * `null` on a post the viewer HAS liked is meaningful and not the same as
+     * "no reaction": it is a PRE-MIGRATION like, stored before reaction types
+     * existed. It displays as Happy and must never be written back as HAPPY —
+     * see `readSelectedReaction` in ../reactions/reactionAdapter.
+     */
+    serverReaction?: ReactionKind | null;
+    /**
+     * Per-kind counts. UNDEFINED MEANS NOT MEASURED, which is not the same as
+     * all-zero: absent, the cluster infers its glyphs honestly (untyped likes
+     * read as Happy, plus the viewer's own pick) and withholds the itemised
+     * numbers rather than presenting an inference as a measurement. Never
+     * synthesise `{HAPPY:0,HOPEFUL:0,SAD:0}` to fill this in.
+     */
+    reactionBreakdown?: ReactionBreakdown;
     commentsData?: Comment[];
     // Handlers receive the post id as the first argument so the parent can
     // wire them as stable `useCallback` references without an inline arrow
     // per card per render — that arrow recreation was the dominant cause of
     // every visible card re-rendering on every `loadMore`.
+    /**
+     * The BINARY like callback. Still supported and still the default: a caller
+     * that passes only this gets exactly the card it got before reactions
+     * existed — the Like button, the heart-and-count chip, no rail, no cluster.
+     * Nothing about it changed, and nothing about it is deprecated for a
+     * surface that genuinely only has a like.
+     */
     onLike?: (postId: string, liked: boolean) => void;
+    /**
+     * Fired when the viewer's reaction changes. `op` is 'add' (write or switch)
+     * or 'remove'; `reaction` is the kind to store on an add.
+     *
+     * PASSING THIS IS WHAT TURNS THE REACTION UI ON. It is the one signal that
+     * the caller can actually persist a Hopeful or a Sad; without it the rail
+     * would offer two choices that silently collapse into a plain like on the
+     * next refetch, which is worse than not offering them. Same signature as
+     * FeedCard2's, so a call site can be moved between the two cards verbatim.
+     *
+     * Replaces `onLike` for such callers: a boolean cannot express WHICH of the
+     * three was chosen, and a switch is neither a like nor an unlike — it
+     * updates the row in place and must not move the total.
+     */
+    onReact?: (
+        postId: string,
+        op: 'add' | 'remove',
+        reaction: ReactionKind | null,
+        totalDelta: number,
+        /**
+         * What was selected BEFORE this change. The parent cannot re-derive it
+         * — it only knows `hasLiked`, which is true for all three kinds — so a
+         * refused mutation could not roll back to the right icon without it.
+         */
+        previousReaction: ReactionKind | null,
+    ) => void;
     onComment?: () => void;
     onShare?: (postId: string) => void;
     onSave?: (postId: string, saved: boolean) => void;
@@ -213,8 +274,11 @@ function FeedCardWithReplyInner({
     likes,
     comments,
     shares,
+    serverReaction = null,
+    reactionBreakdown,
     commentsData: commentsDataProp = [],
     onLike,
+    onReact,
     onComment,
     onShare,
     onSave,
@@ -234,6 +298,37 @@ function FeedCardWithReplyInner({
     const [isShared, setIsShared] = useState(initialIsShared);
     const [likeCount, setLikeCount] = useState(likes);
     const [shareCount, setShareCount] = useState(shares);
+    /**
+     * Is this call site reaction-aware?
+     *
+     * The presence of `onReact` is the ONLY test, and it is deliberately a
+     * capability test rather than a feature flag: `onReact` is the only route
+     * by which a Hopeful or a Sad can reach the server, so a caller without one
+     * cannot store them. Showing the rail anyway would offer three choices of
+     * which two quietly degrade to a plain like on the next refetch — a card
+     * that lies about what it recorded, on a bereavement post especially.
+     *
+     * So a caller that has not migrated keeps EXACTLY the card it had: the Like
+     * button, the heart-and-count chip, `handleLike`'s original binary body.
+     * Nothing below is conditional on anything else, and no hook is conditional
+     * on this — only what is rendered.
+     */
+    const reactionsEnabled = typeof onReact === 'function';
+    /**
+     * The reaction picked in THIS session — TRI-STATE, and the third state is
+     * the whole point.
+     *
+     *   undefined → the viewer has not touched this post; the server wins.
+     *   null      → the viewer deliberately CLEARED their reaction.
+     *   a kind    → the viewer picked that one.
+     *
+     * Collapsing `null` and `undefined` into one nullable value makes a
+     * deselect indistinguishable from no-opinion, so the stale server reaction
+     * re-selects itself on the very next render and the clear appears not to
+     * have registered.
+     */
+    const [sessionReaction, setSessionReaction] = useState<SessionReactionPick>(undefined);
+    const [breakdown, setBreakdown] = useState<ReactionBreakdown | undefined>(reactionBreakdown);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [showCommentInput, setShowCommentInput] = useState(false);
@@ -592,8 +687,124 @@ function FeedCardWithReplyInner({
         setShareCount(shares);
     }, [shares]);
 
+    // The per-kind breakdown is OWNED BY THE PARENT. This card never mutates it
+    // locally; it only mirrors what it is handed, so the two can never
+    // disagree.
+    //
+    // Keyed on the three VALUES, not on the object. The parent rebuilds that
+    // literal on every render, so depending on its identity re-ran this
+    // constantly — which is how an optimistic switch got overwritten by the
+    // stale server counts before the eye could see it.
+    //
+    // A partial breakdown collapses to `undefined` rather than to zeros:
+    // undefined means NOT MEASURED, and inventing a 0 for a kind the server
+    // never reported would present a guess as a count.
+    const bdHappy = reactionBreakdown?.HAPPY;
+    const bdHopeful = reactionBreakdown?.HOPEFUL;
+    const bdSad = reactionBreakdown?.SAD;
+    useEffect(() => {
+        setBreakdown(
+            bdHappy === undefined || bdHopeful === undefined || bdSad === undefined
+                ? undefined
+                : { HAPPY: bdHappy, HOPEFUL: bdHopeful, SAD: bdSad },
+        );
+    }, [bdHappy, bdHopeful, bdSad]);
+
+    // Drop the local pick when the SERVER genuinely says something new.
+    //
+    // This keys on `serverReaction`, NOT on `isLiked`. Keying it on the like
+    // flag is the "first click always selects Happy" bug: tapping Sad calls
+    // onReact, the parent optimistically flips hasLiked, that flips the
+    // `initialIsLiked` PROP, this effect fires and nulls the 'SAD' that was
+    // just set — and readSelectedReaction then falls through to its
+    // hasLiked -> HAPPY branch. The second tap appears to work only because the
+    // prop is already true by then, so the dependency never changes and the
+    // effect never re-runs.
+    //
+    // Resetting to `undefined` (not null) hands authority back to the server
+    // rather than asserting "the viewer cleared this".
+    useEffect(() => {
+        setSessionReaction(undefined);
+    }, [serverReaction]);
+
+    /**
+     * The reaction that renders as selected — local intent first, then the
+     * server's value, then the `hasLiked` → Happy fallback for a pre-migration
+     * untyped like.
+     *
+     * A LEGACY CALLER NEVER CONSULTS `sessionReaction`. That is not a shortcut,
+     * it preserves a real behaviour: without `onReact` the only signal the
+     * parent can send back is `isLiked`, and a parent that ROLLS BACK a refused
+     * like flips exactly that prop. A session pick would outrank the rollback
+     * and leave the heart lit on a like the server refused. With no rail there
+     * is nothing but Happy to express anyway, so `isLiked` is the complete
+     * truth and deferring to it is both simpler and more correct.
+     */
+    const selectedReaction = reactionsEnabled
+        ? readSelectedReaction({ hasLiked: isLiked, reaction: serverReaction }, sessionReaction)
+        : isLiked
+          ? DEFAULT_REACTION
+          : null;
+
     /* ------------------- Interaction Handlers ------------------- */
+    /**
+     * Select / change / clear the reaction.
+     *
+     * The mapping onto what the backend stores lives entirely in
+     * `planReactionWrite` (../reactions/reactionAdapter) — this function only
+     * applies the plan. All three reactions round-trip: each is stored as a
+     * LIKE row carrying a reaction_type, so a SWITCH updates that row in place
+     * and must not move the total.
+     */
+    const handleSelectReaction = (kind: ReactionKind | null) => {
+        const plan = planReactionWrite(selectedReaction, kind);
+
+        // What the parent must restore if the mutation is refused. This is the
+        // RAW prior `myReaction`, NOT the derived `selectedReaction`.
+        //
+        // They differ for a pre-migration untyped like, where `hasLiked` is
+        // true and `myReaction` is null: `selectedReaction` reports HAPPY for
+        // DISPLAY, so rolling back with it would write a claimed 'HAPPY' onto a
+        // row that never had a reaction type — turning a refused mutation into
+        // a silent data change.
+        const previousReaction = serverReaction ?? null;
+
+        setSessionReaction(kind);
+        // `breakdown` is deliberately NOT touched here. `onReact` makes the
+        // parent move the counts and the effect above re-syncs this card from
+        // that result, so a local mutation would be overwritten moments later
+        // and only ever serve to disagree with the parent in the meantime.
+
+        if (plan.op === null) return;
+        setIsLiked(plan.liked ?? false);
+        setLikeCount((c) => Math.max(0, c + plan.totalDelta));
+
+        if (onReact) {
+            onReact(postId, plan.op, plan.reaction, plan.totalDelta, previousReaction);
+            return;
+        }
+        // No reaction-aware callback: the only thing this caller can express is
+        // liked / not liked. Unreachable while the rail and the cluster are
+        // gated on `reactionsEnabled`, but it keeps the component correct on
+        // its own rather than correct only because of where it is rendered.
+        if (plan.liked !== null) onLike?.(postId, plan.liked);
+    };
+
+    /**
+     * The bare "Like" affordances — the action-row button, the image hover
+     * overlay, both media-modal bars. Happy IS the Like, so on a
+     * reaction-aware card they route through the same selection path as the
+     * rail and the two surfaces can never disagree.
+     *
+     * The legacy branch is the ORIGINAL function, unchanged, on purpose: a
+     * caller that has not migrated should be able to read it and see the code
+     * it has always run rather than have to prove an equivalence.
+     */
     const handleLike = () => {
+        if (reactionsEnabled) {
+            handleSelectReaction(selectedReaction === DEFAULT_REACTION ? null : DEFAULT_REACTION);
+            return;
+        }
         const newLikedState = !isLiked;
         setIsLiked(newLikedState);
         setLikeCount((c) => newLikedState ? c + 1 : c - 1);
@@ -1404,7 +1615,27 @@ function FeedCardWithReplyInner({
     /* --------------------------------------------------------------- */
     return (
         <>
-            <div className="w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
+            {/* `relative` is load-bearing for the reaction rail, twice over.
+                The rail is absolutely positioned and clamps its drag to
+                `offsetParent`, which `position` alone decides — so this element
+                is both what it hangs off and what bounds it. And the cards on
+                several of these routes are wrapped in `.feed-card-cv`
+                (`content-visibility: auto`), whose implied PAINT CONTAINMENT
+                clips to the padding box: a rail that escaped this box would
+                simply not be painted, with no error and nothing in the DOM to
+                explain it. This padding box sits strictly inside that clip box,
+                so clamping to it is conservative in the safe direction.
+                No `overflow-hidden` here, and ReactionBar2 also pins an
+                invisible anchor to this border for its own edge menu. */}
+            <div className="relative w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
+                {/* ALWAYS-VISIBLE reaction rail, pinned to the card's right
+                    edge — but ONLY for a caller that can persist a reaction
+                    (see `reactionsEnabled`). Not a menu: the three reactions
+                    are permanent chrome, so a reader sees them without having
+                    to discover a control first. */}
+                {reactionsEnabled && (
+                    <ReactionRail selected={selectedReaction} onSelect={handleSelectReaction} />
+                )}
                 {/* AI category pill — only rendered when the post has been
                     classified. Sits at the top-left of the card, inside the
                     surface so it scrolls with the card content. */}
@@ -1492,54 +1723,107 @@ function FeedCardWithReplyInner({
                     </div>
                 )}
 
-                {/* Reaction Bar - only visible when at least one count > 0 */}
-                {(likeCount > 0 || displayedCommentCount > 0 || shareCount > 0) && (
-                    <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
-                        {likeCount > 0 && (
-                            <button
-                                className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
-                                onClick={handleLike}
-                                title={`${likeCount.toLocaleString()} likes`}
-                            >
-                                <GoHeartFill
-                                    className={`w-[1.25rem] h-[1.25rem] ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`}
-                                />
-                                <span>{formatCount(likeCount)}</span>
-                            </button>
-                        )}
-                        {displayedCommentCount > 0 && (
-                            <button
-                                className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
-                                onClick={toggleComments}
-                                title={`${displayedCommentCount.toLocaleString()} comments`}
-                            >
-                                <img width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[1.25rem] h-[1.25rem] object-contain" />
-                                <span>{formatCount(displayedCommentCount)}</span>
-                            </button>
-                        )}
-                        {shareCount > 0 && (
-                            <button
-                                className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
-                                onClick={handleShare}
-                                title={`${shareCount.toLocaleString()} shares`}
-                            >
-                                <img width={20} height={20} src="/SHARE.svg" alt="shares" className="w-[1.25rem] h-[1.25rem] object-contain" />
-                                <span>{formatCount(shareCount)}</span>
-                            </button>
-                        )}
-                    </div>
+                {/* ── THE COUNT ROW ───────────────────────────────────────
+                     The COUNT SURVIVES in both modes; only its shape changes.
+
+                     Reaction-aware: the single heart-and-number chip becomes
+                     ReactionBar2's glyph cluster + total, which additionally
+                     OPENS "who reacted" on a tap. Same position, same row, same
+                     rhythm, and it still hides itself when every count is zero.
+
+                     `saveCount={0}` is not a placeholder: this card has never
+                     had a `saves` prop and so has no save figure to show. The
+                     chip renders only above zero, so passing 0 reproduces
+                     today's row exactly rather than displaying a count that
+                     would be a guess. `isSaved` is still passed because it is
+                     that chip's fill state the day a `saves` prop arrives.
+
+                     Legacy: byte-for-byte the row this card has always drawn. ── */}
+                {reactionsEnabled ? (
+                    <ReactionBar2
+                        // Without this the cluster stays inert: the sheet would
+                        // have no post to ask about, so it keeps the old
+                        // read-only behaviour and its accessible name falls
+                        // back to the bare count rather than promising an
+                        // action it cannot perform.
+                        postId={postId}
+                        selected={selectedReaction}
+                        total={likeCount}
+                        breakdown={breakdown}
+                        isSaved={isSaved}
+                        commentCount={displayedCommentCount}
+                        shareCount={shareCount}
+                        saveCount={0}
+                        onSelectReaction={handleSelectReaction}
+                        onOpenComments={toggleComments}
+                        onShare={handleShare}
+                        onSave={handleSave}
+                    />
+                ) : (
+                    /* Reaction Bar - only visible when at least one count > 0 */
+                    (likeCount > 0 || displayedCommentCount > 0 || shareCount > 0) && (
+                        <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle">
+                            {likeCount > 0 && (
+                                <button
+                                    className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
+                                    onClick={handleLike}
+                                    title={`${likeCount.toLocaleString()} likes`}
+                                >
+                                    <GoHeartFill
+                                        className={`w-[1.25rem] h-[1.25rem] ${isLiked ? 'text-border-danger' : 'text-text-secondary'}`}
+                                    />
+                                    <span>{formatCount(likeCount)}</span>
+                                </button>
+                            )}
+                            {displayedCommentCount > 0 && (
+                                <button
+                                    className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
+                                    onClick={toggleComments}
+                                    title={`${displayedCommentCount.toLocaleString()} comments`}
+                                >
+                                    <img width={20} height={20} src="/COMMENT.svg" alt="comments" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                                    <span>{formatCount(displayedCommentCount)}</span>
+                                </button>
+                            )}
+                            {shareCount > 0 && (
+                                <button
+                                    className="inline-flex items-center gap-[0.375rem] text-sm text-text-secondary hover:text-text-primary"
+                                    onClick={handleShare}
+                                    title={`${shareCount.toLocaleString()} shares`}
+                                >
+                                    <img width={20} height={20} src="/SHARE.svg" alt="shares" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                                    <span>{formatCount(shareCount)}</span>
+                                </button>
+                            )}
+                        </div>
+                    )
                 )}
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[1rem]">
-                        <button
-                            className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
-                            onClick={handleLike}
-                        >
-                            <img width={20} height={20} src="/LIKE.svg" alt="like" className="w-[1.25rem] h-[1.25rem] object-contain" />
-                            <span>{t('like')}</span>
-                        </button>
+                        {/* NO Like button on a reaction-aware card, deliberately.
+                            Reacting happens in the rail: a second control doing
+                            the same job — and only ever able to express HAPPY —
+                            would be both redundant and a strictly lesser version
+                            of it, since it cannot reach Hopeful or Sad, and two
+                            controls disagreeing about what you picked is worse
+                            than one.
+
+                            `handleLike` is NOT dead: the image hover overlay and
+                            both media-modal bars still call it, and on this card
+                            it now routes through the same selection path as the
+                            rail. A legacy caller keeps the button exactly where
+                            it has always been. */}
+                        {!reactionsEnabled && (
+                            <button
+                                className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
+                                onClick={handleLike}
+                            >
+                                <img width={20} height={20} src="/LIKE.svg" alt="like" className="w-[1.25rem] h-[1.25rem] object-contain" />
+                                <span>{t('like')}</span>
+                            </button>
+                        )}
                         <button
                             className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
                             onClick={toggleCommentInput}

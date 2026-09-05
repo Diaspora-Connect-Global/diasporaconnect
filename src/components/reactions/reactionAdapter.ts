@@ -1,6 +1,9 @@
 /* =====================================================================
  *  reactionAdapter — THE SINGLE SEAM between the reaction vocabulary the
- *  /home2 UI speaks and what post-feed-service stores.
+ *  UI speaks and what post-feed-service stores. Shared by every reaction
+ *  surface on both feed cards (`home2/FeedCard2` and the original
+ *  `cards/FeedCardWithReply`), which is why it lives here and not under
+ *  `home2/`.
  *
  *  ── ALL THREE REACTIONS PERSIST ─────────────────────────────────────
  *
@@ -30,6 +33,16 @@
  *  Mitgefühl, Compassion, Partecipazione, Medeleven — which is the sense
  *  intended everywhere.)
  * ===================================================================== */
+
+import type { ComponentType } from 'react';
+import {
+    PiHeart,
+    PiHeartFill,
+    PiHandsPraying,
+    PiHandsPrayingFill,
+    PiThumbsDown,
+    PiThumbsDownFill,
+} from 'react-icons/pi';
 
 /** The reaction vocabulary the UI speaks. Independent of `EngagementType`. */
 export type ReactionKind = 'HAPPY' | 'HOPEFUL' | 'SAD';
@@ -248,3 +261,71 @@ export function applyBreakdownDelta(
     }
     return next;
 }
+
+/* =====================================================================
+ *  PRESENTATION VOCABULARY — glyphs, label keys, the selected token.
+ *
+ *  These live HERE, in the pure module every reaction surface already
+ *  imports, rather than in `ReactionBar2` where they used to.
+ *
+ *  They were exported from `ReactionBar2` while it was the only surface
+ *  that drew a reaction. It is not any more — `ReactionRail`,
+ *  `ReactionsSheet` and now the shared `FeedCardWithReply` all draw the
+ *  same three glyphs — and reaching back into a COMPONENT for them made
+ *  the dependency graph a ring: ReactionBar2 → ReactionsSheet →
+ *  ReactionBar2. That ring is why the sheet has to be a `next/dynamic`
+ *  import (see the note at its call site).
+ *
+ *  Every arrow now points one way, into this leaf module. No component
+ *  imports another component for its vocabulary.
+ * ===================================================================== */
+
+/**
+ * Glyphs for the three reactions. Outline by default, filled when selected.
+ *
+ * SAD USES A THUMBS-DOWN GLYPH ONLY BECAUSE THE SUPPLIED DESIGN DOES.
+ * It is NOT a downvote, a dislike or a "show me fewer of these". Sad is
+ * how a reader says a post about bereavement or hard news landed — that
+ * is empathy and engagement. Never label it "dislike", "thumbs down",
+ * "not interested" or "negative" (a screen-reader user has only the
+ * label to go on), and never wire it to hiding, reporting or downranking.
+ */
+const REACTION_ICONS: Record<
+    ReactionKind,
+    {
+        Outline: ComponentType<{ className?: string }>;
+        Filled: ComponentType<{ className?: string }>;
+    }
+> = {
+    HAPPY: { Outline: PiHeart, Filled: PiHeartFill },
+    HOPEFUL: { Outline: PiHandsPraying, Filled: PiHandsPrayingFill },
+    SAD: { Outline: PiThumbsDown, Filled: PiThumbsDownFill },
+};
+
+/** i18n key suffix under the `reactions` namespace. */
+export const REACTION_LABEL_KEY: Record<ReactionKind, string> = {
+    HAPPY: 'happy',
+    HOPEFUL: 'hopeful',
+    SAD: 'sad',
+};
+
+/** Outline by default, filled when selected. Reused by every reaction surface. */
+export function reactionIcon(kind: ReactionKind, filled: boolean) {
+    const set = REACTION_ICONS[kind];
+    return filled ? set.Filled : set.Outline;
+}
+
+/**
+ * Selected-state colour, RAIL ONLY.
+ *
+ * `border-danger` is the existing danger token (#e7000c, identical in
+ * light and dark) — the same one the card already used for a liked
+ * heart. Selected renders as a solid disc of it with a WHITE glyph
+ * knocked out: white on #e7000c is 4.77:1, which clears AA for both
+ * normal text (4.5:1) and non-text UI (3:1).
+ *
+ * The design's prose states the red rule twice and the product owner
+ * confirmed it, though the design's own icon table renders a selected
+ * Happy in BLUE. One token, one place, if that turns out to be deliberate.
+ */
+export const SELECTED_DISC = 'bg-border-danger';

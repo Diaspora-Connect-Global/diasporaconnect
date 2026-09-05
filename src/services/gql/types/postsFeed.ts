@@ -795,7 +795,7 @@ export interface SharePostData {
  * The reaction vocabulary on the wire.
  *
  * Deliberately the same three values as the UI's `ReactionKind`
- * (`@/components/home2/reactionAdapter`) — declared separately here so the
+ * (`@/components/reactions/reactionAdapter`) — declared separately here so the
  * transport types stay free of a component import, not because they can drift.
  */
 export type PostReactionType = 'HAPPY' | 'HOPEFUL' | 'SAD';

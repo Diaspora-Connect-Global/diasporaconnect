@@ -85,10 +85,11 @@ import type {
 } from '@/services/gql/types/postsFeed';
 import {
     DEFAULT_REACTION,
+    REACTION_LABEL_KEY,
     REACTION_ORDER,
+    reactionIcon,
     type ReactionKind,
-} from '@/components/home2/reactionAdapter';
-import { REACTION_LABEL_KEY, reactionIcon } from '@/components/home2/ReactionBar2';
+} from '@/components/reactions/reactionAdapter';
 
 /* --------------------------------------------------------------- */
 /*  Shape / sizing constants                                       */

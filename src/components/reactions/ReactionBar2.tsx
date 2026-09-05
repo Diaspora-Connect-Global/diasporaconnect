@@ -1,7 +1,13 @@
 'use client';
 
 /* =====================================================================
- *  ReactionBar2 — reaction control for the /home2 feed clone.
+ *  ReactionBar2 — the reaction + interaction count row.
+ *
+ *  Shared: rendered by `home2/FeedCard2` and by the original
+ *  `cards/FeedCardWithReply`, which is the card the great majority of
+ *  routes actually use. The name is historical — it was born for the
+ *  /home2 clone — and is kept only because renaming it would churn every
+ *  call site for nothing.
  *
  *  TWO SURFACES WITH CLEANLY SEPARATED JOBS:
  *
@@ -46,14 +52,6 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Bookmark } from 'lucide-react';
-import {
-    PiHeart,
-    PiHeartFill,
-    PiHandsPraying,
-    PiHandsPrayingFill,
-    PiThumbsDown,
-    PiThumbsDownFill,
-} from 'react-icons/pi';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import {
     DropdownMenu,
@@ -63,67 +61,36 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCount } from '@/macros/formatCount';
 import {
+    REACTION_LABEL_KEY,
     REACTION_ORDER,
+    reactionIcon,
+    SELECTED_DISC,
     type ReactionBreakdown,
     type ReactionKind,
-} from '@/components/home2/reactionAdapter';
+} from '@/components/reactions/reactionAdapter';
 
 /**
  * The "who reacted" panel, loaded on demand.
  *
- * Deliberately `next/dynamic` rather than a plain import, for two reasons that
- * both point the same way:
+ * Deliberately `next/dynamic` rather than a plain import: it is a panel most
+ * readers never open, so it has no business in the chunk every feed card
+ * already costs.
  *
- *  1. It is a panel most readers never open, so it has no business in the
- *     chunk every feed card already costs.
- *  2. It imports `reactionIcon` / `REACTION_LABEL_KEY` back out of THIS file,
- *     which as a static import would be a module cycle. Loading it lazily
- *     breaks the cycle at the bundle boundary instead of relying on nothing
- *     ever reading those bindings at module scope — a rule a future edit
- *     would have no way of knowing it had to keep.
+ * It used to carry a SECOND justification — the sheet imported `reactionIcon` /
+ * `REACTION_LABEL_KEY` back out of this file, so a static import would have
+ * been a module cycle and lazy loading broke it at the bundle boundary. That
+ * reason is gone: both now live in `./reactionAdapter`, the leaf module every
+ * reaction surface imports, so the graph is acyclic on its own and no longer
+ * depends on a rule a future edit had no way of knowing it had to keep. The
+ * code-splitting reason stands by itself.
  *
  * `ssr: false` because it only ever mounts from a click. `loading: null`
  * because the panel is its own loading state.
  */
-const ReactionsSheet = dynamic(() => import('@/components/home2/ReactionsSheet'), {
+const ReactionsSheet = dynamic(() => import('@/components/reactions/ReactionsSheet'), {
     ssr: false,
     loading: () => null,
 });
-
-/**
- * Glyphs for the three reactions. Outline by default, filled when selected.
- *
- * SAD USES A THUMBS-DOWN GLYPH ONLY BECAUSE THE SUPPLIED DESIGN DOES.
- * It is NOT a downvote, a dislike or a "show me fewer of these". Sad is
- * how a reader says a post about bereavement or hard news landed — that
- * is empathy and engagement. Never label it "dislike", "thumbs down",
- * "not interested" or "negative" (a screen-reader user has only the
- * label to go on), and never wire it to hiding, reporting or downranking.
- */
-const REACTION_ICONS: Record<
-    ReactionKind,
-    {
-        Outline: React.ComponentType<{ className?: string }>;
-        Filled: React.ComponentType<{ className?: string }>;
-    }
-> = {
-    HAPPY: { Outline: PiHeart, Filled: PiHeartFill },
-    HOPEFUL: { Outline: PiHandsPraying, Filled: PiHandsPrayingFill },
-    SAD: { Outline: PiThumbsDown, Filled: PiThumbsDownFill },
-};
-
-/** i18n key suffix under the `reactions` namespace. */
-export const REACTION_LABEL_KEY: Record<ReactionKind, string> = {
-    HAPPY: 'happy',
-    HOPEFUL: 'hopeful',
-    SAD: 'sad',
-};
-
-/** Outline by default, filled when selected. Reused by the action-row button. */
-export function reactionIcon(kind: ReactionKind, filled: boolean) {
-    const set = REACTION_ICONS[kind];
-    return filled ? set.Filled : set.Outline;
-}
 
 /**
  * The per-reaction counts the cluster actually DISPLAYS, which is not
@@ -243,21 +210,6 @@ const HOLD_MS = 450;
  * takes over — this threshold is the belt to that braces.
  */
 const HOLD_MOVE_CANCEL_PX = 10;
-
-/**
- * Selected-state colour, RAIL ONLY.
- *
- * `border-danger` is the existing danger token (#e7000c, identical in
- * light and dark) — the same one the card already used for a liked
- * heart. Selected renders as a solid disc of it with a WHITE glyph
- * knocked out: white on #e7000c is 4.77:1, which clears AA for both
- * normal text (4.5:1) and non-text UI (3:1).
- *
- * The design's prose states the red rule twice and the product owner
- * confirmed it, though the design's own icon table renders a selected
- * Happy in BLUE. One token, one place, if that turns out to be deliberate.
- */
-export const SELECTED_DISC = 'bg-border-danger';
 
 interface ReactionBar2Props {
     /**
@@ -501,7 +453,7 @@ function ReactionBar2Inner({
                      the bottom of the card, which is where the trigger
                      actually lives — not beside the content where the design
                      puts it. `absolute` resolves against the card root
-                     (FeedCard2 marks it `relative`), so this element must not
+                     (both FeedCard2 and FeedCardWithReply mark it `relative`), so this element must not
                      sit inside any positioned element of its own or it would
                      anchor to that instead. ── */}
                 <DropdownMenuTrigger asChild>

@@ -14,7 +14,7 @@
  *     a grouped Happy/Hopeful/Sad summary. All three round-trip: they are
  *     stored as a LIKE row carrying a reaction_type, so a switch updates that
  *     row in place. Tapping the count opens the "who reacted" panel. The whole
- *     mapping lives in ./reactionAdapter — `planReactionWrite` is the one
+ *     mapping lives in ../reactions/reactionAdapter — `planReactionWrite` is the one
  *     function to swap.
  *   - new `saves` prop, so the save count can sit in the same row.
  *   - new optional `reactionBreakdown` / `serverReaction` props, undefined
@@ -54,8 +54,8 @@ import { getFirstUrlInText } from '@/lib/urlPreview';
 import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
-import ReactionBar2 from '@/components/home2/ReactionBar2';
-import ReactionRail from '@/components/home2/ReactionRail';
+import ReactionBar2 from '@/components/reactions/ReactionBar2';
+import ReactionRail from '@/components/reactions/ReactionRail';
 import {
     DEFAULT_REACTION,
     type SessionReactionPick,
@@ -63,7 +63,7 @@ import {
     readSelectedReaction,
     type ReactionBreakdown,
     type ReactionKind,
-} from '@/components/home2/reactionAdapter';
+} from '@/components/reactions/reactionAdapter';
 
 /* --------------------------------------------------------------- */
 /*  Types                                                          */
@@ -310,7 +310,7 @@ function FeedCard2Inner({
      * cannot store yet. It resets on refresh and is deliberately not
      * mirrored to localStorage — a like row migrates to HAPPY, so writing
      * someone's Sad as a like would attribute a reaction they never gave.
-     * See ./reactionAdapter for the full boundary.
+     * See ../reactions/reactionAdapter for the full boundary.
      */
     const [sessionReaction, setSessionReaction] = useState<SessionReactionPick>(undefined);
     const [breakdown, setBreakdown] = useState<ReactionBreakdown | undefined>(reactionBreakdown);
@@ -719,7 +719,7 @@ function FeedCard2Inner({
      * Select / change / clear the reaction.
      *
      * The mapping onto what the backend can store lives entirely in
-     * `planReactionWrite` (./reactionAdapter) — this function only applies
+     * `planReactionWrite` (../reactions/reactionAdapter) — this function only applies
      * the plan. All three reactions now round-trip: they are stored as a LIKE
      * row carrying a reaction_type, so a switch updates that row in place
      * rather than moving the count.

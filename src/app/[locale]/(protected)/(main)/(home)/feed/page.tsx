@@ -1,6 +1,7 @@
 'use client';
 
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
+import { deriveKindDelta, type ReactionKind } from '@/components/reactions/reactionAdapter';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { formatDateProximity } from '@/macros/time';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
@@ -13,6 +14,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import { ChevronLeft, Newspaper } from 'lucide-react';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { resolveUserTier } from '@/lib/userTier';
@@ -64,6 +66,10 @@ export default function FeedPage() {
   const t = useTranslations('community');
   const tFeedback = useTranslations('feedback');
   const tCategory = useTranslations('categoryBadge');
+  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED key
+  // ('feed.errors.not_found'), so it must go to an UNSCOPED translator or
+  // next-intl prefixes the scope again and renders the raw key.
+  const tRoot = useTranslations();
   const searchParams = useSearchParams();
   const hashtag = searchParams.get('hashtag') ?? null;
   const category = searchParams.get('category') ?? null;
@@ -86,24 +92,76 @@ export default function FeedPage() {
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
 
-  const handleLike = async (postId: string, liked: boolean) => {
-    updatePostCounts(postId, { likes: liked ? 1 : -1, hasLiked: liked });
+  // Apollo runs `errorPolicy: 'all'` here, so a REFUSED mutation RESOLVES with
+  // `data: null` and the catch below never fires — only a transport failure
+  // reaches it. Every optimistic reaction is therefore gated on
+  // `readMutationOutcome`, or a refused reaction sits on screen looking
+  // successful forever.
+  const handleReact = async (
+    postId: string,
+    op: 'add' | 'remove',
+    reaction: ReactionKind | null,
+    delta: number,
+    // The RAW prior `myReaction`, not the derived selection — they differ for a
+    // pre-migration untyped like, where the derived value reports HAPPY for
+    // display and rolling back with it would claim a type the row never had.
+    previousReaction: ReactionKind | null,
+  ) => {
+    const adding = op === 'add';
+    // A SWITCH (Happy→Sad) sends delta 0: the server updates the row in place,
+    // so the total must not move. What hasLiked was BEFORE this change:
+    //   remove -> was reacted; add with delta 0 -> a switch, so was reacted;
+    //   add with delta 1 -> a first reaction, so was not.
+    const wasReacted = !adding || delta === 0;
+    const kindDelta = deriveKindDelta(previousReaction, reaction, adding);
+
+    const toCountsDelta = (d: typeof kindDelta) => ({
+      ...(d.HAPPY !== undefined ? { happy: d.HAPPY } : {}),
+      ...(d.HOPEFUL !== undefined ? { hopeful: d.HOPEFUL } : {}),
+      ...(d.SAD !== undefined ? { sad: d.SAD } : {}),
+    });
+    const invert = (d: typeof kindDelta) =>
+      Object.fromEntries(Object.entries(d).map(([k, v]) => [k, -v])) as typeof kindDelta;
+
+    // `myReaction` and the per-kind counts travel WITH `hasLiked`, forwards and
+    // on rollback — updating one without the others tells the card "you
+    // reacted" while leaving it to guess which, or leaves the old kind in the
+    // breakdown beside the new one with a doubled total.
+    updatePostCounts(postId, {
+      likes: delta,
+      hasLiked: adding,
+      myReaction: adding ? reaction : null,
+      ...toCountsDelta(kindDelta),
+    });
+    const rollback = () =>
+      updatePostCounts(postId, {
+        likes: -delta,
+        hasLiked: wasReacted,
+        myReaction: previousReaction,
+        ...toCountsDelta(invert(kindDelta)),
+      });
+
     try {
-      if (liked) {
-        await addEngagement({
-          // A bare like IS Happy. Omitting reactionType stores NULL — an
-          // untyped row indistinguishable from a pre-migration like, which
-          // both loses the information and keeps manufacturing legacy-shaped
-          // data the reaction cluster then has to guess about.
-          variables: { input: { postId, engagementType: 'LIKE', reactionType: 'HAPPY' } },
-        });
-      } else {
-        await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      const result = adding
+        ? await addEngagement({
+            variables: {
+              // reactionType is sent EXPLICITLY. Omitting it stores NULL — an
+              // untyped like, indistinguishable from a pre-migration row.
+              input: { postId, engagementType: 'LIKE', reactionType: reaction ?? 'HAPPY' },
+            },
+          })
+        : await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+      const outcome = readMutationOutcome(result, (d) =>
+        adding ? d?.addEngagement : d?.removeEngagement,
+      );
+      if (!outcome.ok) {
+        rollback();
+        toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
       }
     } catch (err) {
-      updatePostCounts(postId, { likes: liked ? -1 : 1, hasLiked: !liked });
-      console.error(`Failed to ${liked ? 'like' : 'unlike'} post:`, err);
-      toast.error(`Failed to ${liked ? 'like' : 'unlike'} post`);
+      rollback();
+      console.error(`Failed to ${adding ? 'react to' : 'un-react'} post:`, err);
+      toast.error(tRoot('feed.errors.failed'));
     }
   };
 
@@ -289,13 +347,32 @@ export default function FeedPage() {
                     likes={post.engagementCounts.likes}
                     comments={post.engagementCounts.comments}
                     shares={post.engagementCounts.shares}
-                    onLike={handleLike}
+                    // Built ONLY when all three per-kind counts are present.
+                    // Undefined means "not measured" — rendering zeros would
+                    // assert a breakdown we never received. The total stays
+                    // `likes`, which also counts untyped legacy rows.
+                    reactionBreakdown={
+                      post.engagementCounts.happy !== undefined &&
+                      post.engagementCounts.hopeful !== undefined &&
+                      post.engagementCounts.sad !== undefined
+                        ? {
+                            HAPPY: post.engagementCounts.happy,
+                            HOPEFUL: post.engagementCounts.hopeful,
+                            SAD: post.engagementCounts.sad,
+                          }
+                        : undefined
+                    }
+                    onReact={handleReact}
                     onShare={handleShare}
                     onSave={handleSave}
                     onSendComment={handleSendComment}
                     onDelete={removePost}
                     joinButton={false}
                     isLiked={post.userEngagement.hasLiked}
+                    // WHICH reaction the server recorded — without it the card
+                    // sees only hasLiked and assumes Happy, so a stored Hopeful
+                    // or Sad comes back as a heart.
+                    serverReaction={post.userEngagement.myReaction ?? null}
                     isSaved={post.userEngagement.hasSaved}
                     isShared={post.userEngagement.hasShared}
                     onOpenMedia={(_postId, mediaIndex) => setModalState({ postIndex, mediaIndex })}
@@ -333,7 +410,18 @@ export default function FeedPage() {
           likeCount={modalPost.engagementCounts.likes}
           commentCount={modalPost.engagementCounts.comments}
           shareCount={modalPost.engagementCounts.shares}
-          onLike={(liked) => handleLike(modalPost.id, liked)}
+          // The modal has a plain like button and only ever means Happy.
+          onLike={(liked) =>
+            handleReact(
+              modalPost.id,
+              liked ? 'add' : 'remove',
+              liked ? 'HAPPY' : null,
+              liked ? 1 : -1,
+              // The reaction actually stored, so a refused unlike restores the
+              // real one instead of resurrecting a SAD post as unreacted.
+              modalPost.userEngagement.myReaction ?? null,
+            )
+          }
           onSave={(saved) => handleSave(modalPost.id, saved)}
           onShare={() => handleShare(modalPost.id)}
           onSendComment={(text, parentId, mentions) => handleSendComment(modalPost.id, text, parentId, mentions)}

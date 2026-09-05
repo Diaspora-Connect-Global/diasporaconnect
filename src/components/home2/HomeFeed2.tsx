@@ -19,7 +19,7 @@ import { formatDateProximity } from '@/macros/time';
 // /home2 renders its OWN snapshot copy of the card, not the shared one —
 // editing `@/components/cards/FeedCardWithReply` would change the live feed.
 import FeedCard2 from '@/components/home2/FeedCard2';
-import { deriveKindDelta, type ReactionKind } from '@/components/home2/reactionAdapter';
+import { deriveKindDelta, type ReactionKind } from '@/components/reactions/reactionAdapter';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
