@@ -265,6 +265,7 @@ export function EmbassyHomeTab({ props, profile }: EmbassyHomeTabProps) {
                 fallbackAvatar={profile.flagUrl || '/GLOBE.png'}
                 isMember={props.isActive}
                 onLike={props.onLike}
+                onReact={props.onReact}
                 onSave={props.onSave}
                 onShare={props.onShare}
                 onSendComment={props.onSendComment}

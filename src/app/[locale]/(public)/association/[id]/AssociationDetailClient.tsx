@@ -47,6 +47,7 @@ import {
     type CreateCommentData,
 } from '@/services/gql/postsFeed';
 import type { Attachment } from '@/services/gql/types/postsFeed';
+import { deriveKindDelta, type ReactionKind } from '@/components/reactions/reactionAdapter';
 import { type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { toCdnUrl } from '@/lib/cdn';
 import { EmbassyCommunityView } from '@/components/community/embassy/EmbassyCommunityView';
@@ -95,11 +96,23 @@ interface FeedPost {
         comments: number;
         shares: number;
         saves: number;
+        // Per-reaction counts from the `FullPost` fragment GET_FEED selects.
+        // OPTIONAL, and undefined means NOT MEASURED — never zero. The card
+        // withholds the itemised breakdown entirely rather than presenting an
+        // inference as a measurement, so these must stay undefined when the
+        // gateway did not return them.
+        happy?: number;
+        hopeful?: number;
+        sad?: number;
     };
     userEngagement: {
         hasLiked: boolean;
         hasSaved: boolean;
         hasShared?: boolean;
+        // WHICH reaction the server recorded. `null` beside `hasLiked: true` is
+        // a pre-migration untyped like — displayed as Happy, never written back
+        // as HAPPY.
+        myReaction?: ReactionKind | null;
     };
     categories?: string[];
     attachments?: Attachment[];
@@ -222,7 +235,14 @@ export default function AssociationPage() {
 
     const updatePostCounts = (
         postId: string,
-        delta: { likes?: number; comments?: number; shares?: number; saves?: number; hasLiked?: boolean; hasSaved?: boolean; hasShared?: boolean }
+        delta: {
+            likes?: number; comments?: number; shares?: number; saves?: number;
+            hasLiked?: boolean; hasSaved?: boolean; hasShared?: boolean;
+            // Per-kind deltas + the absolute reaction. They travel together with
+            // `hasLiked` in ONE call — see `handleReact`.
+            happy?: number; hopeful?: number; sad?: number;
+            myReaction?: ReactionKind | null;
+        }
     ) => {
         setLocalPosts((prev) =>
             prev.map((p) =>
@@ -230,6 +250,25 @@ export default function AssociationPage() {
                     ? {
                           ...p,
                           engagementCounts: {
+                              // The spread is load-bearing: this literal REPLACES
+                              // the whole object, so without it the first
+                              // optimistic tap strips happy/hopeful/sad off the
+                              // post and the reaction cluster collapses for the
+                              // rest of the session.
+                              ...p.engagementCounts,
+                              // A per-kind delta only applies to a bucket the
+                              // server actually reported. Creating one from
+                              // undefined would invent a measured breakdown out
+                              // of a single optimistic tap.
+                              ...(delta.happy !== undefined && p.engagementCounts.happy !== undefined
+                                  ? { happy: Math.max(0, p.engagementCounts.happy + delta.happy) }
+                                  : {}),
+                              ...(delta.hopeful !== undefined && p.engagementCounts.hopeful !== undefined
+                                  ? { hopeful: Math.max(0, p.engagementCounts.hopeful + delta.hopeful) }
+                                  : {}),
+                              ...(delta.sad !== undefined && p.engagementCounts.sad !== undefined
+                                  ? { sad: Math.max(0, p.engagementCounts.sad + delta.sad) }
+                                  : {}),
                               likes: p.engagementCounts.likes + (delta.likes ?? 0),
                               comments: p.engagementCounts.comments + (delta.comments ?? 0),
                               shares: p.engagementCounts.shares + (delta.shares ?? 0),
@@ -240,11 +279,112 @@ export default function AssociationPage() {
                               ...(delta.hasLiked !== undefined ? { hasLiked: delta.hasLiked } : {}),
                               ...(delta.hasSaved !== undefined ? { hasSaved: delta.hasSaved } : {}),
                               ...(delta.hasShared !== undefined ? { hasShared: delta.hasShared } : {}),
+                              // WHICH reaction, carried optimistically alongside
+                              // hasLiked. Tested against `undefined`, not
+                              // truthiness: `null` is a REAL value here (the
+                              // viewer cleared their reaction), and treating it
+                              // as "no opinion" would leave the old kind
+                              // selected.
+                              ...(delta.myReaction !== undefined ? { myReaction: delta.myReaction } : {}),
                           },
                       }
                     : p
             )
         );
+    };
+
+    /**
+     * The reaction write for the embassy feed, owned HERE rather than in
+     * `EmbassyFeedList`.
+     *
+     * It has to live above `EmbassyCommunityView`, because that component picks
+     * its tab with a `switch` and UNMOUNTS the list on every tab change — state
+     * held inside the list would lose the viewer's just-made reaction the moment
+     * they looked at another tab. `localPosts` is this component's own state,
+     * two levels above that switch, and a tab change is a same-route `?tab=`
+     * soft navigation which does not remount it.
+     *
+     * Apollo runs `errorPolicy: 'all'`, so a REFUSED mutation RESOLVES with
+     * `data: null` and the catch below never fires — only a transport failure
+     * reaches it. The optimistic update is therefore gated on
+     * `readMutationOutcome`, or a refused reaction sits on screen looking
+     * successful.
+     */
+    const handleReact = async (
+        postId: string,
+        op: 'add' | 'remove',
+        reaction: ReactionKind | null,
+        delta: number,
+        // The RAW prior `myReaction`, NOT the card's derived selection. They
+        // differ for a pre-migration untyped like, where the derived value
+        // reports HAPPY for display — rolling back with it would claim a
+        // reaction type the row never had, turning a refused mutation into a
+        // silent data change.
+        previousReaction: ReactionKind | null,
+    ) => {
+        const adding = op === 'add';
+        // A SWITCH (Happy→Sad) sends delta 0 — the server updates the LIKE row
+        // in place, so the total must not move. What hasLiked was BEFORE this
+        // change:
+        //   remove           -> was reacted
+        //   add with delta 0 -> a switch, so was already reacted
+        //   add with delta 1 -> a first reaction, so was not
+        const wasReacted = !adding || delta === 0;
+        // A SWITCH moves one count between buckets and leaves the total alone.
+        // `previousReaction` null is a pre-migration untyped like, which belongs
+        // to no bucket — nothing is decremented and the untyped remainder
+        // shrinks by one on its own. That is correct.
+        const kindDelta = deriveKindDelta(previousReaction, reaction, adding);
+        const toCountsDelta = (d: typeof kindDelta) => ({
+            ...(d.HAPPY !== undefined ? { happy: d.HAPPY } : {}),
+            ...(d.HOPEFUL !== undefined ? { hopeful: d.HOPEFUL } : {}),
+            ...(d.SAD !== undefined ? { sad: d.SAD } : {}),
+        });
+        const invert = (d: typeof kindDelta) =>
+            Object.fromEntries(Object.entries(d).map(([k, v]) => [k, -v])) as typeof kindDelta;
+
+        // ONE update. `myReaction` and the per-kind counts travel WITH
+        // `hasLiked`, forwards and on rollback: splitting them tells the card
+        // "you reacted" while leaving it to guess which (it guesses Happy — the
+        // "first tap always selects Happy" bug), or leaves the old kind in the
+        // breakdown beside the new one with a doubled total.
+        updatePostCounts(postId, {
+            likes: delta,
+            hasLiked: adding,
+            myReaction: adding ? reaction : null,
+            ...toCountsDelta(kindDelta),
+        });
+        const rollback = () =>
+            updatePostCounts(postId, {
+                likes: -delta,
+                hasLiked: wasReacted,
+                myReaction: previousReaction,
+                ...toCountsDelta(invert(kindDelta)),
+            });
+
+        try {
+            const result = adding
+                ? await addEngagement({
+                      variables: {
+                          // reactionType is sent EXPLICITLY. Omitting it stores
+                          // NULL — an untyped like, indistinguishable from a
+                          // pre-migration row.
+                          input: { postId, engagementType: 'LIKE', reactionType: reaction ?? 'HAPPY' },
+                      },
+                  })
+                : await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
+            const outcome = readMutationOutcome(result, (d) =>
+                adding ? d?.addEngagement : d?.removeEngagement,
+            );
+            if (!outcome.ok) {
+                rollback();
+                toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
+            }
+        } catch (err) {
+            rollback();
+            console.error(`Failed to ${adding ? 'react to' : 'un-react'} post:`, err);
+            toast.error(tRoot('feed.errors.failed'));
+        }
     };
 
     const handleLike = async (postId: string, liked: boolean) => {
@@ -714,6 +854,7 @@ export default function AssociationPage() {
                 onLeaveClick={handleLeaveClick}
                 onCancelRequest={handleCancelRequest}
                 onLike={handleLike}
+                onReact={handleReact}
                 onSave={handleSave}
                 onShare={handleShare}
                 onSendComment={handleSendComment}

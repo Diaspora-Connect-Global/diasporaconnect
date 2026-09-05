@@ -179,6 +179,7 @@ export function EmbassyUpdatesTab({ props, profile }: EmbassyUpdatesTabProps) {
                 fallbackAvatar={profile.flagUrl || '/GLOBE.png'}
                 isMember={props.isActive}
                 onLike={props.onLike}
+                onReact={props.onReact}
                 onSave={props.onSave}
                 onShare={props.onShare}
                 onSendComment={props.onSendComment}
