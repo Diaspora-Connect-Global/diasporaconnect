@@ -13,6 +13,8 @@ import {
 } from '@/services/gql/connection';
 import { GET_POST_COMMENTS } from '@/services/gql/postsFeed';
 import { SERVICE_REQUEST } from '@/services/gql/embassyServices';
+import { GET_MY_GROUPS } from '@/services/gql/groups';
+import { toCdnUrl } from '@/lib/cdn';
 import type { Notification } from '@/services/gql/notification';
 
 /** Shape of a connection peer as returned by the connection queries. */
@@ -32,6 +34,20 @@ interface ConnectionRow {
   requester?: ConnectionPeer | null;
   receiver?: ConnectionPeer | null;
 }
+
+/**
+ * What kind of thing a notification is ABOUT. Drives which picture the row's
+ * avatar shows (and, for the renderer, which placeholder shape to use when no
+ * picture resolved).
+ */
+export type NotificationSubjectKind =
+  | 'user'
+  | 'community'
+  | 'association'
+  | 'event'
+  | 'opportunity'
+  | 'post'
+  | 'group';
 
 /**
  * Result of enriching a notification with data resolved from the API.
@@ -64,6 +80,34 @@ export interface EnrichedNotification {
   serviceName: string | null;
   /** Owning community/embassy name for a service request, or null. */
   serviceOwnerName: string | null;
+
+  /* ---------------------------------------------------------------- *
+   * Subject — the entity the notification is ABOUT.
+   *
+   * NOT the actor: a "membership approved" notification is about the
+   * COMMUNITY, even though a person approved it. `null` on all three means
+   * "this notification has no subject entity" (a pure system notice such as
+   * "Here's what you missed") — only then should the caller fall back to a
+   * generic platform icon.
+   *
+   * Resolved entirely from data the hook already fetches; see
+   * `resolveSubject` below for the per-type mapping.
+   * ---------------------------------------------------------------- */
+
+  /**
+   * The entity the notification is ABOUT — what the row's avatar should show.
+   * Already run through `toCdnUrl`; empty values normalise to `null`, never `''`.
+   */
+  subjectImageUrl: string | null;
+  /**
+   * Display name of that entity — used for the avatar's initial letter AND the
+   * alt text. Populated even when `subjectImageUrl` is null, so a community
+   * called "Better Africa Today" can still render a "B".
+   */
+  subjectName: string | null;
+  /** Which kind of entity the subject is, or null when there isn't one. */
+  subjectKind: NotificationSubjectKind | null;
+
   /** True while any of the enrichment queries is in-flight. */
   isLoading: boolean;
 }
@@ -137,6 +181,41 @@ function cleanDisplayName(value: string | null | undefined): string | null {
   if (!v) return null;
   if (isUuidLike(v)) return null;
   return v;
+}
+
+/**
+ * Normalise a stored media URL for display: trim, rewrite through the CDN the
+ * rest of the app uses, and collapse anything empty to `null`.
+ *
+ * `toCdnUrl` returns `''` for nullish input and is a no-op for non-GCS URLs, so
+ * the second emptiness check is what guarantees callers never receive `''`.
+ */
+function normalizeImageUrl(value: string | null | undefined): string | null {
+  const raw = (value || '').trim();
+  if (!raw) return null;
+  const cdn = (toCdnUrl(raw) || '').trim();
+  return cdn || null;
+}
+
+/**
+ * First displayable image among a post's attachments. Posts carry their own
+ * media, which is the most honest picture of "this post" when we can't resolve
+ * a person for the row.
+ */
+function firstImageAttachmentUrl(
+  attachments:
+    | Array<{ type?: string; mimeType?: string; url?: string } | null>
+    | null
+    | undefined
+): string | undefined {
+  if (!attachments) return undefined;
+  for (const att of attachments) {
+    if (!att?.url) continue;
+    const kind = (att.type || '').toLowerCase();
+    const mime = (att.mimeType || '').toLowerCase();
+    if (kind.includes('image') || mime.startsWith('image/')) return att.url;
+  }
+  return undefined;
 }
 
 /**
@@ -339,6 +418,13 @@ export function useEnrichedNotification(
   currentUserId?: string
 ): EnrichedNotification {
   const type = (notification.type || '').toLowerCase();
+  // The backend's raw-SQL upsert path stores the enum NAME (`POST_LIKED`,
+  // `GROUP_CHAT_DIGEST`) while `createAndSend` stores the dotted value
+  // (`post.liked`). `subjectType` reconciles both to the dotted form and is
+  // used for SUBJECT classification only — the query gates below keep matching
+  // on the raw `type` exactly as before, so this cannot change how many
+  // requests the hook issues.
+  const subjectType = type.replace(/_/g, '.');
   const rawData = normalizeData(notification.data) || {};
 
   // Some backends wrap the actual payload inside a `data`/`payload`/`metadata`
@@ -477,6 +563,7 @@ export function useEnrichedNotification(
     'applicationOpportunityId',
   ]);
   const eventId = pickString(data, ['eventId']);
+  const groupId = pickString(data, ['groupId']);
   const requestId = pickString(data, ['requestId']);
   const entityId = pickString(data, ['entityId']);
   const entityType = pickString(data, ['entityType'])?.toLowerCase();
@@ -525,8 +612,38 @@ export function useEnrichedNotification(
     fetchPolicy: 'cache-first',
   });
 
+  // NOTE: `GET_POST` selects the full `FullPost` fragment — author, author
+  // profile and attachments are already on the wire. The extra fields below are
+  // a TYPE widening only; they add nothing to the request.
   const postQuery = useQuery<{
-    post: { id: string; text?: string; content?: string } | null;
+    post: {
+      id: string;
+      text?: string;
+      content?: string;
+      author?: {
+        id?: string;
+        displayName?: string;
+        avatarUrl?: string;
+      } | null;
+      authorProfile?: {
+        userProfile?: {
+          id?: string;
+          name?: string;
+          displayName?: string;
+          avatarUrl?: string;
+        } | null;
+        organizationProfile?: {
+          id?: string;
+          name?: string;
+          logoUrl?: string;
+        } | null;
+      } | null;
+      attachments?: Array<{
+        type?: string;
+        mimeType?: string;
+        url?: string;
+      }> | null;
+    } | null;
   }>(GET_POST, {
     variables: { id: postId ?? '' },
     skip: !needsPost,
@@ -534,11 +651,19 @@ export function useEnrichedNotification(
     errorPolicy: 'ignore',
   });
 
+  // `owner.avatarUrl` is already in the `GET_OPPORTUNITY` selection set — an
+  // opportunity has no image of its own, so the poster's avatar/logo is the
+  // only picture available for it.
   const opportunityQuery = useQuery<{
     getOpportunity: {
       id: string;
       title?: string;
-      owner?: { id?: string; name?: string; type?: string } | null;
+      owner?: {
+        id?: string;
+        name?: string;
+        type?: string;
+        avatarUrl?: string;
+      } | null;
     } | null;
   }>(GET_OPPORTUNITY, {
     variables: { id: opportunityId ?? '' },
@@ -590,23 +715,22 @@ export function useEnrichedNotification(
     fetchPolicy: 'cache-first',
   });
 
-  const associationQuery = useQuery<{ getAssociation: { name?: string } | null }>(
-    GET_ASSOCIATION,
-    {
-      variables: { id: entityId ?? '' },
-      skip: !needsAssociation,
-      fetchPolicy: 'cache-first',
-    }
-  );
+  // `avatarUrl` is already selected by both queries — type widening only.
+  const associationQuery = useQuery<{
+    getAssociation: { name?: string; avatarUrl?: string } | null;
+  }>(GET_ASSOCIATION, {
+    variables: { id: entityId ?? '' },
+    skip: !needsAssociation,
+    fetchPolicy: 'cache-first',
+  });
 
-  const communityQuery = useQuery<{ getCommunity: { name?: string } | null }>(
-    GET_COMMUNITY,
-    {
-      variables: { id: entityId ?? '' },
-      skip: !needsCommunity,
-      fetchPolicy: 'cache-first',
-    }
-  );
+  const communityQuery = useQuery<{
+    getCommunity: { name?: string; avatarUrl?: string } | null;
+  }>(GET_COMMUNITY, {
+    variables: { id: entityId ?? '' },
+    skip: !needsCommunity,
+    fetchPolicy: 'cache-first',
+  });
 
   // Service request — resolve the live status and (humanized) category so the
   // notification sentence reflects the current state of the request.
@@ -627,15 +751,47 @@ export function useEnrichedNotification(
     ? pickString(data, ['ownerEntityId', 'communityId', 'entityId'])
     : undefined;
   const needsServiceCommunity = Boolean(serviceCommunityId);
-  const serviceCommunityQuery = useQuery<{ getCommunity: { name?: string } | null }>(
-    GET_COMMUNITY,
-    {
-      variables: { id: serviceCommunityId ?? '' },
-      skip: !needsServiceCommunity,
-      fetchPolicy: 'cache-first',
-      errorPolicy: 'ignore',
-    }
+  const serviceCommunityQuery = useQuery<{
+    getCommunity: { name?: string; avatarUrl?: string } | null;
+  }>(GET_COMMUNITY, {
+    variables: { id: serviceCommunityId ?? '' },
+    skip: !needsServiceCommunity,
+    fetchPolicy: 'cache-first',
+    errorPolicy: 'ignore',
+  });
+
+  // Group subject: group notifications carry a `groupId` but not always a name,
+  // and never an avatar — the daily chat digest sends only
+  // `{ conversationId, groupId, digestDate, … }`, so without this lookup a
+  // digest row has no name to show an initial letter for either.
+  //
+  // Deliberately the BATCH query rather than a per-row `GET_GROUP`: a group
+  // notification is by definition about a group the viewer belongs to, so one
+  // `getMyGroups` page covers every group row on the screen. Variables are
+  // fixed, so Apollo dedupes it to a SINGLE request no matter how many rows
+  // mount — and they match the chat sidebar's, so it is often already cached.
+  const isGroupType = subjectType.startsWith('group.');
+  const groupNameInPayload = pickString(data, ['groupName']);
+  const groupImageInPayload = pickString(data, ['groupAvatarUrl', 'groupImageUrl']);
+  const needsGroupLookup = Boolean(
+    isGroupType && groupId && (!groupNameInPayload || !groupImageInPayload)
   );
+
+  const myGroupsQuery = useQuery<{
+    getMyGroups: {
+      success: boolean;
+      groups: Array<{ id: string; name?: string; avatarUrl?: string }>;
+    };
+  }>(GET_MY_GROUPS, {
+    variables: { limit: 50, offset: 0 },
+    skip: !needsGroupLookup,
+    fetchPolicy: 'cache-first',
+    errorPolicy: 'ignore',
+  });
+
+  const matchedGroup = needsGroupLookup
+    ? myGroupsQuery.data?.getMyGroups?.groups?.find((g) => g.id === groupId) || null
+    : null;
 
   // Connection fallback: when the notification payload doesn't expose a peer
   // name (or even a user id), we resolve it by listing the current user's
@@ -1021,6 +1177,201 @@ export function useEnrichedNotification(
       )
     : null;
 
+  /* ------------------------------------------------------------------ *
+   * Subject — the entity the notification is ABOUT.
+   *
+   * Every row used to fall back to the same globe because the only image the
+   * page ever resolved was a PERSON's avatar. Everything below is extracted
+   * from data the hook was ALREADY fetching (community, association, event,
+   * opportunity, post) — the only lookup added for it is the single shared
+   * `getMyGroups` batch above.
+   *
+   * The mapping follows one rule: pick the entity whose NAME the row already
+   * displays, so the picture and the sentence agree.
+   * ------------------------------------------------------------------ */
+
+  // Entity-scoped image keys ONLY. The generic `avatarUrl` / `imageUrl` payload
+  // keys are already consumed as the ACTOR's avatar further up; reusing them
+  // here would put the approver's face on a community row.
+  const entityImageInPayload = pickString(data, [
+    'communityAvatarUrl',
+    'communityLogoUrl',
+    'associationAvatarUrl',
+    'associationLogoUrl',
+    'entityAvatarUrl',
+    'entityImageUrl',
+    'entityLogoUrl',
+  ]);
+  const eventImageInPayload = pickString(data, [
+    'eventCoverImageUrl',
+    'eventImageUrl',
+    'eventBannerUrl',
+  ]);
+
+  const isAssociationSubject =
+    entityType === 'association' || subjectType.includes('association');
+  const isCommunitySubject =
+    entityType === 'community' ||
+    subjectType.includes('community') ||
+    subjectType.startsWith('membership.');
+
+  type Subject = Pick<
+    EnrichedNotification,
+    'subjectImageUrl' | 'subjectName' | 'subjectKind'
+  >;
+  const NO_SUBJECT: Subject = {
+    subjectImageUrl: null,
+    subjectName: null,
+    subjectKind: null,
+  };
+
+  // A person is the subject as soon as we know *of* one, even if the name and
+  // avatar are still resolving — `subjectKind: 'user'` with null fields tells
+  // the renderer to draw a person placeholder rather than the platform globe.
+  const personSubjectKnown = Boolean(
+    actorName || actorAvatarUrl || resolvedActorUserId
+  );
+  const personSubject = (): Subject =>
+    personSubjectKnown
+      ? {
+          // `notification.imageUrl` is only trusted for a person subject: for
+          // entity rows it is just as likely to be the actor's face.
+          subjectImageUrl: normalizeImageUrl(actorAvatarUrl || notification.imageUrl),
+          subjectName: cleanDisplayName(actorName),
+          subjectKind: 'user',
+        }
+      : NO_SUBJECT;
+
+  const communitySubject = (): Subject => ({
+    subjectImageUrl: normalizeImageUrl(
+      entityImageInPayload || communityQuery.data?.getCommunity?.avatarUrl
+    ),
+    subjectName: cleanDisplayName(entityName),
+    subjectKind: 'community',
+  });
+
+  const associationSubject = (): Subject => ({
+    subjectImageUrl: normalizeImageUrl(
+      entityImageInPayload || associationQuery.data?.getAssociation?.avatarUrl
+    ),
+    subjectName: cleanDisplayName(entityName),
+    subjectKind: 'association',
+  });
+
+  const groupSubject = (): Subject => ({
+    subjectImageUrl: normalizeImageUrl(groupImageInPayload || matchedGroup?.avatarUrl),
+    subjectName: cleanDisplayName(groupNameInPayload || matchedGroup?.name || entityName),
+    subjectKind: 'group',
+  });
+
+  const eventSubject = (): Subject => ({
+    subjectImageUrl: normalizeImageUrl(eventImageInPayload || eventObj?.coverImageUrl),
+    subjectName: cleanDisplayName(
+      targetTitle ||
+        pickString(data, ['eventName', 'eventTitle', 'name', 'title']) ||
+        eventObj?.title
+    ),
+    subjectKind: 'event',
+  });
+
+  // An opportunity has no image of its own (verified against the Opportunity
+  // type) — the poster's avatar/logo is the only picture there is.
+  const opportunitySubject = (): Subject => ({
+    subjectImageUrl: normalizeImageUrl(opp?.owner?.avatarUrl),
+    subjectName: cleanDisplayName(
+      targetTitle ||
+        pickString(data, [
+          'opportunityTitle',
+          'opportunityName',
+          'jobTitle',
+          'listingTitle',
+          'title',
+          'name',
+        ]) ||
+        opp?.title
+    ),
+    subjectKind: 'opportunity',
+  });
+
+  // Only reached when a post notification has no resolvable actor at all. The
+  // post's own media is the most honest picture of "this post"; its author's
+  // avatar is the fallback.
+  const postSubject = (): Subject => {
+    const image =
+      firstImageAttachmentUrl(postObj?.attachments) ||
+      postObj?.author?.avatarUrl ||
+      postObj?.authorProfile?.userProfile?.avatarUrl ||
+      postObj?.authorProfile?.organizationProfile?.logoUrl;
+    const name =
+      postTitle ||
+      cleanDisplayName(postObj?.author?.displayName) ||
+      cleanDisplayName(
+        postObj?.authorProfile?.userProfile?.displayName ||
+          postObj?.authorProfile?.userProfile?.name
+      ) ||
+      cleanDisplayName(postObj?.authorProfile?.organizationProfile?.name);
+    if (!image && !name) return NO_SUBJECT;
+    return {
+      subjectImageUrl: normalizeImageUrl(image),
+      subjectName: name || null,
+      subjectKind: 'post',
+    };
+  };
+
+  function resolveSubject(): Subject {
+    // Service request → the owning community/embassy, which is the name the
+    // row's sentence already carries ("<Community> received your … request").
+    if (subjectType.startsWith('servicerequest')) {
+      return {
+        subjectImageUrl: normalizeImageUrl(
+          entityImageInPayload || serviceCommunityQuery.data?.getCommunity?.avatarUrl
+        ),
+        subjectName: serviceOwnerName,
+        subjectKind: 'community',
+      };
+    }
+
+    // Post / comment interactions → the person who acted; the row reads
+    // "<Name> liked your post". The post itself is the fallback when no actor
+    // resolves, so these rows never degrade to the globe.
+    if (subjectType.startsWith('post.') || subjectType.startsWith('comment.')) {
+      return personSubjectKnown ? personSubject() : postSubject();
+    }
+
+    // Connection requests / accepts and direct messages → the other person.
+    if (isConnectionType || subjectType.startsWith('message.')) {
+      return personSubject();
+    }
+
+    // The daily chat digest is machine-written — there is no actor, and the
+    // row names only the group.
+    if (subjectType.startsWith('group.chat.digest')) return groupSubject();
+
+    // Any other group notification is "<Name> sent a message in <Group>": the
+    // sender leads the sentence, the group backs it up.
+    if (isGroupType) {
+      return personSubjectKnown ? personSubject() : groupSubject();
+    }
+
+    if (subjectType.startsWith('event.') || (subjectType.includes('event') && eventId)) {
+      return eventSubject();
+    }
+
+    if (subjectType.includes('opportunity')) return opportunitySubject();
+
+    // Membership lifecycle (approved / requested / left / removed) is about the
+    // ORG, even though a person performed the action.
+    if (isAssociationSubject) return associationSubject();
+    if (isCommunitySubject) return communitySubject();
+
+    // Unknown type: show the person when one is involved. Otherwise this is a
+    // pure system notice ("Here's what you missed") with no subject entity —
+    // the only case where the renderer should keep the globe.
+    return personSubjectKnown ? personSubject() : NO_SUBJECT;
+  }
+
+  const subject = resolveSubject();
+
   const isLoading =
     (needsServiceRequest && serviceRequestQuery.loading) ||
     (needsServiceCommunity && serviceCommunityQuery.loading) ||
@@ -1031,6 +1382,7 @@ export function useEnrichedNotification(
     (needsEvent && eventQuery.loading) ||
     (needsAssociation && associationQuery.loading) ||
     (needsCommunity && communityQuery.loading) ||
+    (needsGroupLookup && myGroupsQuery.loading) ||
     (needsConnectionFallback &&
       (myConnectionsQuery.loading || pendingConnectionsQuery.loading)) ||
     (needsCommentFallback && postCommentsQuery.loading) ||
@@ -1049,6 +1401,9 @@ export function useEnrichedNotification(
     requestStatus,
     serviceName,
     serviceOwnerName,
+    subjectImageUrl: subject.subjectImageUrl,
+    subjectName: subject.subjectName,
+    subjectKind: subject.subjectKind,
     isLoading,
   };
 }

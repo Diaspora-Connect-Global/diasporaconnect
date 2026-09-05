@@ -1,6 +1,9 @@
 'use client';
 
-import { NotificationCard } from '@/components/cards/notification/NotificationCard';
+import {
+  NotificationCard,
+  type SubjectKind,
+} from '@/components/cards/notification/NotificationCard';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Bell, Check, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -704,6 +707,34 @@ const PAGE_SIZE = 20;
 
 type NotificationFilter = 'all' | 'opportunities' | 'events' | 'associations' | 'communities';
 
+/**
+ * The subject half of the enrichment contract — the entity a notification is
+ * ABOUT (the community, event, group or person), as opposed to the actor who
+ * triggered it.
+ *
+ * Read through a tolerant local shape rather than off `EnrichedNotification`
+ * directly: the fields are supplied by the enrichment hook, and typing them as
+ * optional here means this page compiles whether or not that half has landed.
+ * Values are also normalised — a blank string is "no subject", never a name
+ * whose initial would be a space.
+ */
+interface NotificationSubject {
+  subjectImageUrl?: string | null;
+  subjectName?: string | null;
+  subjectKind?: SubjectKind | null;
+}
+
+function readSubject(enriched: EnrichedNotification): Required<NotificationSubject> {
+  const e = enriched as EnrichedNotification & NotificationSubject;
+  const imageUrl = typeof e.subjectImageUrl === 'string' ? e.subjectImageUrl.trim() : '';
+  const name = typeof e.subjectName === 'string' ? e.subjectName.trim() : '';
+  return {
+    subjectImageUrl: imageUrl || null,
+    subjectName: name || null,
+    subjectKind: e.subjectKind ?? null,
+  };
+}
+
 function NotificationRow({
   group,
   t,
@@ -724,6 +755,7 @@ function NotificationRow({
   const not = group.primary;
   const enriched = useEnrichedNotification(not, currentUserId);
   const view = buildNotificationView(not, enriched, t, locale, enriched.isLoading, group);
+  const subject = readSubject(enriched);
 
   const isRead = group.members.every(
     (m) => (m.isRead ?? m.read ?? false) || readIds.has(m.id)
@@ -735,6 +767,9 @@ function NotificationRow({
       title={view.title || undefined}
       description={view.description}
       imageUrl={view.imageUrl}
+      subjectImageUrl={subject.subjectImageUrl}
+      subjectName={subject.subjectName}
+      subjectKind={subject.subjectKind}
       actorHref={view.actorHref}
       time={not.createdAt}
       read={isRead}

@@ -10,9 +10,24 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '../../ui/button';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image'
 import Link from 'next/link';
 import { formatDateProximity } from '@/macros/time';
+import { useImageFallback } from '@/components/ui/ImageWithFallback';
+import { EntityAvatar } from './EntityAvatar';
+
+/**
+ * What kind of entity a notification is ABOUT. Structurally identical to
+ * `NotificationSubjectKind` in `useEnrichedNotification`; declared here so the
+ * card stays a self-contained presentational component.
+ */
+export type SubjectKind =
+    | 'user'
+    | 'community'
+    | 'association'
+    | 'event'
+    | 'opportunity'
+    | 'post'
+    | 'group';
 
 interface NotificationCardProps {
     /** Main title (e.g. app name or actor). */
@@ -26,6 +41,18 @@ interface NotificationCardProps {
     imageUrl?: string;
     /** When set, the avatar becomes a link to this URL (e.g. actor profile). */
     actorHref?: string;
+    /**
+     * Picture of the entity the notification is ABOUT — the community, event,
+     * group or person the row concerns. Already CDN-rewritten by the caller.
+     */
+    subjectImageUrl?: string | null;
+    /**
+     * Name of that entity. Drives the initial-letter fallback, so a community
+     * with no logo still renders something specific to itself.
+     */
+    subjectName?: string | null;
+    /** Kind of that entity; only steers the last-resort placeholder. */
+    subjectKind?: SubjectKind | null;
     time: string;
     read: boolean;
     onMarkAsRead?: () => void;
@@ -42,6 +69,9 @@ export function NotificationCard({
     logoIcon,
     imageUrl,
     actorHref,
+    subjectImageUrl,
+    subjectName,
+    subjectKind,
     time = "3d",
     read = true,
     onMarkAsRead,
@@ -50,6 +80,47 @@ export function NotificationCard({
 }: NotificationCardProps) {
     const t = useTranslations('notification');
     const tCommon = useTranslations('common');
+
+    // Two independent "this URL 404'd" flags, each reset when its own src
+    // changes. Only the `failed` half of the hook is used: its built-in
+    // `/PROFILE.png` swap is the wrong fallback here — a broken community logo
+    // should degrade to that community's initial, not to a person silhouette.
+    const { onError: onSubjectImageError, failed: subjectImageFailed } =
+        useImageFallback(subjectImageUrl);
+    const { onError: onActorImageError, failed: actorImageFailed } =
+        useImageFallback(imageUrl);
+
+    /* --------------------------------------------------------------- *
+     * Which picture the row shows, in order:
+     *
+     *   1. `logoIcon`         — caller-supplied escape hatch, wins outright.
+     *   2. `subjectImageUrl`  — the real picture of the thing this row is about.
+     *   3. `subjectName`      — its initial on a name-derived colour.
+     *   4. `imageUrl`         — the actor's avatar (the pre-existing path; still
+     *                           the right answer for a person-centred row whose
+     *                           subject fields have not resolved).
+     *   5. a generic asset    — now the RARE case: a system notice with no
+     *                           subject entity at all ("Here's what you missed").
+     *
+     * A picture that 404s at runtime drops to the NEXT rule rather than leaving
+     * a broken-image glyph, which is why 2 and 4 are gated on their fail flags.
+     * --------------------------------------------------------------- */
+    const trimmedSubjectName = (subjectName || '').trim();
+    const subjectSrc = subjectImageUrl && !subjectImageFailed ? subjectImageUrl : null;
+    const showEntityAvatar = !subjectSrc && trimmedSubjectName.length > 0;
+    const actorSrc =
+        !subjectSrc && !showEntityAvatar && imageUrl && !actorImageFailed ? imageUrl : null;
+    // The globe is a Ghana-flag world icon: fine for a platform announcement,
+    // wrong for a person, so a known-person subject keeps the silhouette.
+    const genericSrc = subjectKind === 'user' ? '/PROFILE.png' : '/GLOBE.png';
+
+    // Plain <img>, not next/image: these are arbitrary remote entity pictures
+    // and `next.config.ts` allows a narrow set of hosts through the optimizer
+    // (cdn.diaspoplug.net, storage.googleapis.com/diaspoplug-media/**), so a
+    // community logo stored anywhere else would fail the row outright instead
+    // of degrading. Same call the app already makes in AvatarGroup and
+    // CircleImagery; at 32–40px the optimizer buys nothing anyway.
+    const imageClass = 'w-full h-full rounded-full object-cover border-2 border-border-subtle';
 
     const handleMarkAsRead = (event: Event) => {
         event.preventDefault();
@@ -74,21 +145,31 @@ export function NotificationCard({
                         {(() => {
                             const avatar = (
                                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                    {logoIcon ?? (imageUrl ? (
-                                        <Image
-                                            width={40}
-                                            height={40}
-                                            src={imageUrl}
+                                    {logoIcon ?? (subjectSrc ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={subjectSrc}
+                                            // Decorative: the row's title already names the entity.
                                             alt=""
-                                            className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
+                                            onError={onSubjectImageError}
+                                            className={imageClass}
+                                        />
+                                    ) : showEntityAvatar ? (
+                                        <EntityAvatar name={trimmedSubjectName} />
+                                    ) : actorSrc ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={actorSrc}
+                                            alt=""
+                                            onError={onActorImageError}
+                                            className={imageClass}
                                         />
                                     ) : (
-                                        <Image
-                                            width={32}
-                                            height={32}
-                                            src="/GLOBE.png"
-                                            alt="Profile"
-                                            className="w-full h-full rounded-full object-cover border-2 border-border-subtle"
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={genericSrc}
+                                            alt=""
+                                            className={imageClass}
                                         />
                                     ))}
                                 </div>
