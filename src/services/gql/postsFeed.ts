@@ -50,6 +50,11 @@ export type {
   GetLikedPostsData,
   GetCommentedPostsData,
   SharePostData,
+  PostReactionType,
+  PostReactor,
+  PostReactionsPage,
+  PostReactionsData,
+  PostReactionsVars,
 } from './types';
 
 // ============================================================================
@@ -304,6 +309,44 @@ export const GET_POST_COMMENTS = gql`
         type
         mimeType
       }
+    }
+  }
+`;
+
+/**
+ * The people who reacted to a post — one page of them, plus the post-wide
+ * reaction summary that the tiles and tab counts render.
+ *
+ * `reactionType` narrows the list SERVER-side (that is what the sheet's
+ * Happy / Hopeful / Sad tabs send); omit it — or send null — for "All".
+ * A reactor whose `reactionType` comes back null is a PRE-MIGRATION like,
+ * stored before reaction types existed: a real reaction whose kind was never
+ * recorded. Display it as Happy, and never write it back as 'HAPPY'.
+ *
+ * `total` counts EVERY reaction row including those untyped ones, so
+ * `happy + hopeful + sad` is legitimately <= `total`; the remainder is the
+ * legacy rows. The summary describes the whole post, not the page and not the
+ * filter, so it does not move when `reactionType` is set.
+ *
+ * Cursor-paged: pass `nextCursor` back as `cursor` for the following page and
+ * stop when `hasMore` is false. The server clamps `limit` (default 30, max 100).
+ */
+export const POST_REACTIONS = gql`
+  query PostReactions($postId: String!, $reactionType: String, $limit: Int, $cursor: String) {
+    postReactions(postId: $postId, reactionType: $reactionType, limit: $limit, cursor: $cursor) {
+      reactors {
+        userId
+        reactionType
+        reactedAt
+        fullName
+        avatarUrl
+      }
+      nextCursor
+      hasMore
+      total
+      happy
+      hopeful
+      sad
     }
   }
 `;

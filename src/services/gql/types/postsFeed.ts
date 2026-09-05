@@ -786,3 +786,75 @@ export interface SharePostData {
     shareLink: string;
   };
 }
+
+// ============================================================================
+// POST REACTIONS ("who reacted") TYPES
+// ============================================================================
+
+/**
+ * The reaction vocabulary on the wire.
+ *
+ * Deliberately the same three values as the UI's `ReactionKind`
+ * (`@/components/home2/reactionAdapter`) — declared separately here so the
+ * transport types stay free of a component import, not because they can drift.
+ */
+export type PostReactionType = 'HAPPY' | 'HOPEFUL' | 'SAD';
+
+/**
+ * One person who reacted to a post.
+ */
+export interface PostReactor {
+  userId: string;
+  /**
+   * WHICH reaction they left, or `null` for a PRE-MIGRATION untyped like —
+   * a row stored before reaction types existed.
+   *
+   * `null` is not "no reaction": it is a real reaction whose kind was never
+   * recorded. Display it as Happy (the heart), exactly as `readSelectedReaction`
+   * already does for the viewer's own untyped like, and never write it back
+   * as 'HAPPY'.
+   */
+  reactionType: PostReactionType | null;
+  /** ISO timestamp of when the reaction was left. */
+  reactedAt: string;
+  fullName: string;
+  avatarUrl?: string | null;
+}
+
+/**
+ * One page of reactors plus the post-wide reaction summary.
+ *
+ * The summary fields (`total` / `happy` / `hopeful` / `sad`) describe the WHOLE
+ * post, not the page and not the filter — they are what the tiles and tab
+ * counts render, so they must not change when `reactionType` narrows the list.
+ */
+export interface PostReactionsPage {
+  reactors: PostReactor[];
+  /** Cursor for the next page; null/absent when the list is exhausted. */
+  nextCursor?: string | null;
+  hasMore: boolean;
+  /**
+   * EVERY reaction row on the post, INCLUDING untyped legacy ones. So
+   * `happy + hopeful + sad` is legitimately ≤ `total`; the difference is
+   * exactly the pre-migration rows. Never sum the three to derive this.
+   */
+  total: number;
+  /** Rows explicitly stored as HAPPY. Excludes untyped legacy rows. */
+  happy: number;
+  hopeful: number;
+  sad: number;
+}
+
+/** Response from `postReactions`. */
+export interface PostReactionsData {
+  postReactions: PostReactionsPage;
+}
+
+/** Variables for `postReactions`. */
+export interface PostReactionsVars {
+  postId: string;
+  /** Omit (or pass null) for the "All" tab; a kind narrows the list server-side. */
+  reactionType?: PostReactionType | null;
+  limit?: number;
+  cursor?: string | null;
+}

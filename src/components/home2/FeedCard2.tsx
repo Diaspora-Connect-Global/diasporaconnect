@@ -11,10 +11,11 @@
  *
  *  Divergence so far:
  *   - the like/comment/share count row is replaced by <ReactionBar2>,
- *     a grouped Happy/Hopeful/Sad control. Happy IS the existing Like and
- *     round-trips for real; Hopeful and Sad are session-only until
- *     post-feed-service ships reaction types. The whole mapping lives in
- *     ./reactionAdapter — `planReactionWrite` is the one function to swap.
+ *     a grouped Happy/Hopeful/Sad summary. All three round-trip: they are
+ *     stored as a LIKE row carrying a reaction_type, so a switch updates that
+ *     row in place. Tapping the count opens the "who reacted" panel. The whole
+ *     mapping lives in ./reactionAdapter — `planReactionWrite` is the one
+ *     function to swap.
  *   - new `saves` prop, so the save count can sit in the same row.
  *   - new optional `reactionBreakdown` / `serverReaction` props, undefined
  *     today, ready for the backend work.
@@ -1670,6 +1671,11 @@ function FeedCard2Inner({
                     zero) because the cluster is now the primary way to react —
                     hiding it at zero would hide the control itself. */}
                 <ReactionBar2
+                    // Without this the count cluster stays inert: the sheet has
+                    // no post to ask about, so it keeps the old dead-affordance
+                    // behaviour and its aria-label falls back to the bare count
+                    // rather than promising an action it cannot perform.
+                    postId={postId}
                     selected={selectedReaction}
                     total={likeCount}
                     breakdown={breakdown}

@@ -3997,12 +3997,20 @@
     "sad": "Sad",
     "choose": "Choose a reaction",
     "total": "Total",
-    "trigger": "{count, plural, =0 {No reactions yet} one {# reaction} other {# reactions}}. Choose a reaction",
-    "triggerSelected": "{count, plural, one {# reaction} other {# reactions}}. Your reaction: {reaction}. Change or remove",
     "optionSelected": "{reaction}, selected. Activate to remove",
     "optionSelectedWithCount": "{reaction}, {count, plural, one {# reaction} other {# reactions}}, selected. Activate to remove",
     "comments": "{count, plural, one {# comment} other {# comments}}",
     "shares": "{count, plural, one {# share} other {# shares}}",
-    "saves": "{count, plural, one {# save} other {# saves}}"
+    "saves": "{count, plural, one {# save} other {# saves}}",
+    "sheetTitle": "Reactions",
+    "peopleReacted": "{count, plural, =0 {No reactions yet} one {# person reacted} other {# people reacted}}",
+    "all": "All",
+    "filterByReaction": "Filter by reaction",
+    "viewReactors": "{count, plural, one {# reaction} other {# reactions}}. See who reacted",
+    "reactionCount": "{count, plural, one {# reaction} other {# reactions}}",
+    "emptyAll": "No one has reacted to this post yet",
+    "emptyKind": "No one has reacted with {reaction} yet",
+    "loadError": "Reactions could not be loaded",
+    "retry": "Try again"
   }
 }

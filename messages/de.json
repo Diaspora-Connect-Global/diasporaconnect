@@ -3997,12 +3997,20 @@
     "sad": "Mitgefühl",
     "choose": "Reaktion wählen",
     "total": "Gesamt",
-    "trigger": "{count, plural, =0 {Noch keine Reaktionen} one {# Reaktion} other {# Reaktionen}}. Reaktion wählen",
-    "triggerSelected": "{count, plural, one {# Reaktion} other {# Reaktionen}}. Deine Reaktion: {reaction}. Ändern oder entfernen",
     "optionSelected": "{reaction}, ausgewählt. Zum Entfernen aktivieren",
     "optionSelectedWithCount": "{reaction}, {count, plural, one {# Reaktion} other {# Reaktionen}}, ausgewählt. Zum Entfernen aktivieren",
     "comments": "{count, plural, one {# Kommentar} other {# Kommentare}}",
     "shares": "{count, plural, one {# Mal geteilt} other {# Mal geteilt}}",
-    "saves": "{count, plural, one {# Mal gespeichert} other {# Mal gespeichert}}"
+    "saves": "{count, plural, one {# Mal gespeichert} other {# Mal gespeichert}}",
+    "sheetTitle": "Reaktionen",
+    "peopleReacted": "{count, plural, =0 {Noch keine Reaktionen} one {# Person hat reagiert} other {# Personen haben reagiert}}",
+    "all": "Alle",
+    "filterByReaction": "Nach Reaktion filtern",
+    "viewReactors": "{count, plural, one {# Reaktion} other {# Reaktionen}}. Sehen, wer reagiert hat",
+    "reactionCount": "{count, plural, one {# Reaktion} other {# Reaktionen}}",
+    "emptyAll": "Auf diesen Beitrag hat noch niemand reagiert",
+    "emptyKind": "Noch niemand hat mit {reaction} reagiert",
+    "loadError": "Reaktionen konnten nicht geladen werden",
+    "retry": "Erneut versuchen"
   }
 }

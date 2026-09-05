@@ -3997,12 +3997,20 @@
     "sad": "Partecipazione",
     "choose": "Scegli una reazione",
     "total": "Totale",
-    "trigger": "{count, plural, =0 {Ancora nessuna reazione} one {# reazione} other {# reazioni}}. Scegli una reazione",
-    "triggerSelected": "{count, plural, one {# reazione} other {# reazioni}}. La tua reazione: {reaction}. Cambia o rimuovi",
     "optionSelected": "{reaction}, selezionata. Attiva per rimuovere",
     "optionSelectedWithCount": "{reaction}, {count, plural, one {# reazione} other {# reazioni}}, selezionata. Attiva per rimuovere",
     "comments": "{count, plural, one {# commento} other {# commenti}}",
     "shares": "{count, plural, one {# condivisione} other {# condivisioni}}",
-    "saves": "{count, plural, one {# salvataggio} other {# salvataggi}}"
+    "saves": "{count, plural, one {# salvataggio} other {# salvataggi}}",
+    "sheetTitle": "Reazioni",
+    "peopleReacted": "{count, plural, =0 {Ancora nessuna reazione} one {# persona ha reagito} other {# persone hanno reagito}}",
+    "all": "Tutte",
+    "filterByReaction": "Filtra per reazione",
+    "viewReactors": "{count, plural, one {# reazione} other {# reazioni}}. Guarda chi ha reagito",
+    "reactionCount": "{count, plural, one {# reazione} other {# reazioni}}",
+    "emptyAll": "Nessuno ha ancora reagito a questo post",
+    "emptyKind": "Nessuno ha ancora reagito con {reaction}",
+    "loadError": "Impossibile caricare le reazioni",
+    "retry": "Riprova"
   }
 }

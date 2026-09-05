@@ -5,10 +5,15 @@
  *
  *  TWO SURFACES WITH CLEANLY SEPARATED JOBS:
  *
- *   • The CLUSTER (small glyphs beside the total) says WHAT THE POST HAS.
- *     Purely informational: only reactions with a count appear, every
- *     glyph gets identical styling, and the viewer's own selection is
- *     NOT shown here. It is a summary, not a control surface.
+ *   • The CLUSTER (small glyphs beside the total) says WHAT THE POST HAS,
+ *     and OPENS THE LIST OF WHO. Only reactions with a count appear,
+ *     every glyph gets identical styling, and the viewer's own selection
+ *     is NOT shown here — the cluster reports the room, not you.
+ *     Pressing it (tap, click, Enter or Space) opens `ReactionsSheet`:
+ *     a bottom sheet on touch, a popover anchored to the cluster itself
+ *     on a mouse-and-keyboard screen. A press-and-HOLD is a different
+ *     gesture — it reveals the reaction names and its trailing click is
+ *     swallowed, so reading a name never opens the list.
  *
  *   • The RAIL (slides out from the card's right edge) says WHAT YOU
  *     PICKED. The selected option is a solid red disc with the glyph
@@ -38,6 +43,7 @@
  * ===================================================================== */
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Bookmark } from 'lucide-react';
 import {
@@ -61,6 +67,28 @@ import {
     type ReactionBreakdown,
     type ReactionKind,
 } from '@/components/home2/reactionAdapter';
+
+/**
+ * The "who reacted" panel, loaded on demand.
+ *
+ * Deliberately `next/dynamic` rather than a plain import, for two reasons that
+ * both point the same way:
+ *
+ *  1. It is a panel most readers never open, so it has no business in the
+ *     chunk every feed card already costs.
+ *  2. It imports `reactionIcon` / `REACTION_LABEL_KEY` back out of THIS file,
+ *     which as a static import would be a module cycle. Loading it lazily
+ *     breaks the cycle at the bundle boundary instead of relying on nothing
+ *     ever reading those bindings at module scope — a rule a future edit
+ *     would have no way of knowing it had to keep.
+ *
+ * `ssr: false` because it only ever mounts from a click. `loading: null`
+ * because the panel is its own loading state.
+ */
+const ReactionsSheet = dynamic(() => import('@/components/home2/ReactionsSheet'), {
+    ssr: false,
+    loading: () => null,
+});
 
 /**
  * Glyphs for the three reactions. Outline by default, filled when selected.
@@ -233,6 +261,13 @@ export const SELECTED_DISC = 'bg-border-danger';
 
 interface ReactionBar2Props {
     /**
+     * The post whose reactors the cluster lists. OPTIONAL only so this
+     * component stays usable from a call site that has not passed it yet:
+     * with no id there is nothing to query, so the cluster keeps its old
+     * behaviour of reporting the counts and opening nothing.
+     */
+    postId?: string;
+    /**
      * The viewer's own reaction, or null. Drives the RAIL only — it is
      * deliberately never rendered in the cluster.
      */
@@ -268,6 +303,7 @@ interface ReactionBar2Props {
 }
 
 function ReactionBar2Inner({
+    postId,
     selected,
     total,
     breakdown,
@@ -283,6 +319,14 @@ function ReactionBar2Inner({
     const t = useTranslations('reactions');
     const [open, setOpen] = useState(false);
     const clusterButtonRef = useRef<HTMLButtonElement>(null);
+
+    // The "who reacted" panel. `sheetMounted` latches TRUE on the first open
+    // and never goes back: unmounting on close would throw away the loaded
+    // pages and skip the closing animation, while mounting it up-front would
+    // instantiate a query hook for every card in the feed — which is exactly
+    // the "do not fetch until it is opened" rule, expressed as a mount.
+    const [sheetMounted, setSheetMounted] = useState(false);
+    const [sheetOpen, setSheetOpen] = useState(false);
 
     // Tooltip visibility is CONTROLLED so two very different input paths can
     // drive one surface: Radix still owns pointer-hover and keyboard focus and
@@ -343,18 +387,40 @@ function ReactionBar2Inner({
         if (holdFiredRef.current) setTipOpen(false);
     }, [clearHold]);
 
+    /**
+     * TOGGLE, not open.
+     *
+     * The desktop variant is a popover anchored to this very button, and it
+     * deliberately does NOT dismiss when the press lands on its anchor — so
+     * pressing the cluster a second time has to close it from here. If this
+     * only ever opened, that second press would close the popover via
+     * dismiss-on-outside and reopen it in the same gesture, which reads as a
+     * dead control.
+     */
+    const toggleSheet = useCallback(() => {
+        // No post id means no query to run, so the cluster stays a read-only
+        // summary rather than opening an empty panel.
+        if (!postId) return;
+        // The name tooltip is superseded by the panel — on a mouse it would
+        // otherwise sit over the popover it just opened, because the pointer
+        // is still resting on the button that anchors both.
+        setTipOpen(false);
+        setSheetMounted(true);
+        setSheetOpen((wasOpen) => !wasOpen);
+    }, [postId]);
+
     const handleClusterClick = useCallback(() => {
         if (holdFiredRef.current) {
             // This click is the tail of a press-and-hold. Swallow it: the user
-            // was reading the name, not choosing a reaction.
+            // was reading the reaction names, not asking who reacted.
             holdFiredRef.current = false;
             return;
         }
-        // Deliberately does NOT open a menu. The three reactions now live in
-        // the always-visible ReactionRail pinned to the card edge, so opening a
-        // second rail here would duplicate it. The cluster is a summary — it
-        // reports what the post has; the rail is where you choose.
-    }, []);
+        // Opens the LIST OF WHO, not a second reaction menu — choosing still
+        // belongs to the always-visible rail pinned to the card edge. The
+        // cluster answers "who?", the rail answers "which?".
+        toggleSheet();
+    }, [toggleSheet]);
 
     // ONE source of truth for the whole cluster: what each kind is worth,
     // which glyphs that makes visible, and the number beside them.
@@ -384,19 +450,31 @@ function ReactionBar2Inner({
     // the cluster, and parity is the point. Your own selection is announced
     // by the rail's checked item when it opens, which is also the only
     // place it is shown visually.
-    const triggerLabel = t('trigger', { count: displayTotal });
+    //
+    // "See who reacted" is only promised when there is a post id to query.
+    // Without one the label is the bare count, because naming an action the
+    // control cannot perform is worse than naming no action at all.
+    const triggerLabel = postId
+        ? t('viewReactors', { count: displayTotal })
+        : t('reactionCount', { count: displayTotal });
 
     const handlePick = (kind: ReactionKind) => {
         // Picking the already-selected reaction clears it.
         onSelectReaction(selected === kind ? null : kind);
     };
 
-    const handleClusterKeyDown = useCallback(() => {
-        // Enter/Space already open it via click. ArrowDown/Up are the menu
-        // idiom and would otherwise do nothing, since the Radix trigger that
-        // normally handles them is the hidden edge anchor.
-        // No-op: there is no menu to open from here any more.
-    }, []);
+    const handleClusterKeyDown = useCallback(
+        (e: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+            // preventDefault does two jobs: it stops Space scrolling the feed
+            // out from under the panel, and it stops the browser synthesising a
+            // click from this key — so the sheet toggles exactly once rather
+            // than once here and once again in handleClusterClick.
+            e.preventDefault();
+            toggleSheet();
+        },
+        [toggleSheet],
+    );
 
     // Nothing to report at all ⇒ render NOTHING. The wrapper carries a bottom
     // border and padding, so an empty row would leave a stray divider floating
@@ -465,6 +543,12 @@ function ReactionBar2Inner({
                             ref={clusterButtonRef}
                             type="button"
                             aria-label={triggerLabel}
+                            // The panel is a dialog on touch and a popover on a
+                            // pointer screen; both are announced as "dialog", and
+                            // only when there is actually one to open. Pressing
+                            // again closes it, so the state is announced too.
+                            aria-haspopup={postId ? 'dialog' : undefined}
+                            aria-expanded={postId ? sheetOpen : undefined}
                             onClick={handleClusterClick}
                             onKeyDown={handleClusterKeyDown}
                             onPointerDown={handlePointerDown}
@@ -733,6 +817,28 @@ function ReactionBar2Inner({
                     />
                     <span className="tabular-nums">{formatCount(saveCount)}</span>
                 </button>
+            )}
+
+            {/* ── WHO REACTED ──────────────────────────────────────────
+                 Rendered OUTSIDE the DropdownMenu above so the rail and
+                 this panel are siblings rather than nested layers, and
+                 last in the row because both of its shapes portal out to
+                 <body> and so contribute nothing to this flex line.
+
+                 `counts` and `displayTotal` are handed over as the opening
+                 numbers so the panel's tiles and tabs paint the figures
+                 already on screen on their first frame, instead of dashes
+                 that resolve a moment later into the same values. The
+                 server's own summary replaces them when it lands. ── */}
+            {sheetMounted && postId && (
+                <ReactionsSheet
+                    open={sheetOpen}
+                    onOpenChange={setSheetOpen}
+                    postId={postId}
+                    anchorRef={clusterButtonRef}
+                    initialCounts={counts}
+                    initialTotal={displayTotal}
+                />
             )}
         </div>
     );
