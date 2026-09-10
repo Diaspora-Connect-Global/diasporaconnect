@@ -451,9 +451,21 @@ export const LIST_MY_JOINED_COMMUNITIES = gql`
   }
 `;
 
+/**
+ * Another member's communities, for their profile page.
+ *
+ * `listUserCommunities` takes NO argument — it always reads the token user, so
+ * asking it for `$userId` was a validation error (a 400 on the whole request,
+ * taking every batched query down with it). `getUserCommunities` is the
+ * arg-taking one; it returns only the target's PUBLIC communities unless you
+ * are them or a platform admin.
+ *
+ * Aliased back to `listUserCommunities` so ProfileCommunities can read one key
+ * whichever query it ran.
+ */
 export const LIST_USER_COMMUNITIES_BY_ID = gql`
   query ListUserCommunitiesById($userId: ID!) {
-    listUserCommunities(userId: $userId) {
+    listUserCommunities: getUserCommunities(userId: $userId) {
       id
       name
       avatarUrl
