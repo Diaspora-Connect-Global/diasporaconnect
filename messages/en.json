@@ -1631,19 +1631,27 @@
       "connection": {
         "request": "Connection request",
         "requested": "Connection request",
-        "accepted": "Connection accepted"
+        "accepted": "Connection accepted",
+        "rejected": "Connection declined",
+        "reminder": "Connection reminder"
       },
       "post": {
         "like": "Like",
         "comment": "Comment",
         "commented": "Comment",
-        "mention": "Mention"
+        "mention": "Mention",
+        "liked": "Post liked",
+        "mentioned": "Mentioned in a post",
+        "shared": "Post shared"
       },
       "message": {
-        "received": "New message"
+        "received": "New message",
+        "mentioned": "Mentioned in a chat"
       },
       "group": {
-        "message": "Group message",
+        "message": {
+          "received": "New group message"
+        },
         "chat": {
           "digest": "Daily group chat summary"
         }
@@ -1651,13 +1659,38 @@
       "event": {
         "reminder": "Event reminder",
         "invite": "Event invite",
-        "register": "Event Register"
+        "register": "Event Register",
+        "cancelled": "Event cancelled",
+        "check_in": "Event check-in",
+        "completed": "Event ended",
+        "payment": {
+          "confirmed": "Payment confirmed",
+          "failed": "Payment failed"
+        },
+        "published": "New event",
+        "refund": {
+          "issued": "Refund issued"
+        },
+        "registration": {
+          "cancelled": "Registration cancelled",
+          "confirmed": "Registration confirmed",
+          "pending": "Registration pending"
+        },
+        "save": {
+          "reminder": "Saved event reminder"
+        },
+        "ticket": {
+          "sold_out": "Tickets sold out"
+        },
+        "updated": "Event updated"
       },
       "membership": {
         "approved": "Membership approved",
         "request": "Membership request",
         "removed": "Removed from community",
-        "left": "Left the community"
+        "left": "Left the community",
+        "banned": "Banned from community",
+        "suspended": "Membership suspended"
       },
       "association": {
         "membership": {
@@ -1671,7 +1704,9 @@
         "default": "Opportunity",
         "application": {
           "submitted": "Application submitted",
-          "accepted": "Application accepted"
+          "accepted": "Application accepted",
+          "received": "New application",
+          "rejected": "Application update"
         }
       },
       "servicerequest": {
@@ -1694,7 +1729,92 @@
         },
         "default": "Service request"
       },
-      "default": "Notification"
+      "default": "Notification",
+      "account": {
+        "verified": "Account verified"
+      },
+      "alumni": {
+        "match": "Alumni match"
+      },
+      "broadcast": "Announcement",
+      "calendar": {
+        "reminder": "Calendar reminder"
+      },
+      "case": {
+        "assigned": "Case assigned",
+        "closed": "Case closed",
+        "evidence": {
+          "added": "New evidence"
+        },
+        "note": {
+          "added": "New note"
+        },
+        "reopened": "Case reopened",
+        "resolved": "Case resolved",
+        "status": {
+          "changed": "Status updated"
+        },
+        "submitted": "Case submitted"
+      },
+      "colleague": {
+        "match": "Colleague match"
+      },
+      "comment": {
+        "liked": "Comment liked"
+      },
+      "community": {
+        "mentioned": "Community mentioned"
+      },
+      "digest": {
+        "whats_new": "What's new"
+      },
+      "education": {
+        "added": "Education added"
+      },
+      "escrow": {
+        "released": "Funds released"
+      },
+      "follow": {
+        "new": "New follower"
+      },
+      "friend": {
+        "suggestion": "People you may know"
+      },
+      "kyc": {
+        "approved": "Identity verified",
+        "rejected": "Verification declined"
+      },
+      "payment": {
+        "confirmed": "Payment confirmed",
+        "failed": "Payment failed"
+      },
+      "profile": {
+        "created": "Profile created",
+        "picture": {
+          "uploaded": "Profile photo updated"
+        },
+        "updated": "Profile updated",
+        "viewed": "Profile viewed"
+      },
+      "resource": {
+        "published": "New resource"
+      },
+      "skill": {
+        "added": "Skill added",
+        "endorsed": "Skill endorsed"
+      },
+      "system": {
+        "announcement": "Announcement"
+      },
+      "vendor": {
+        "suspended": "Vendor suspended",
+        "verified": "Vendor verified"
+      },
+      "work": {
+        "experience": {
+          "added": "Work experience added"
+        }
+      }
     },
     "messages": {
       "membershipApproved": "Your membership to {communityName} was approved",

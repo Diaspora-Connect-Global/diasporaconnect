@@ -1631,19 +1631,27 @@
       "connection": {
         "request": "Verbindungsanfrage",
         "requested": "Verbindungsanfrage",
-        "accepted": "Verbindung angenommen"
+        "accepted": "Verbindung angenommen",
+        "rejected": "Kontaktanfrage abgelehnt",
+        "reminder": "Kontakterinnerung"
       },
       "post": {
         "like": "Gefällt mir",
         "comment": "Kommentar",
         "commented": "Kommentar",
-        "mention": "Erwähnung"
+        "mention": "Erwähnung",
+        "liked": "Beitrag gefällt",
+        "mentioned": "In einem Beitrag erwähnt",
+        "shared": "Beitrag geteilt"
       },
       "message": {
-        "received": "Neue Nachricht"
+        "received": "Neue Nachricht",
+        "mentioned": "In einem Chat erwähnt"
       },
       "group": {
-        "message": "Gruppennachricht",
+        "message": {
+          "received": "Neue Gruppennachricht"
+        },
         "chat": {
           "digest": "Tägliche Gruppenchat-Zusammenfassung"
         }
@@ -1651,13 +1659,38 @@
       "event": {
         "reminder": "Terminerinnerung",
         "invite": "Termineinladung",
-        "register": "Event-Anmeldung"
+        "register": "Event-Anmeldung",
+        "cancelled": "Veranstaltung abgesagt",
+        "check_in": "Veranstaltungs-Check-in",
+        "completed": "Veranstaltung beendet",
+        "payment": {
+          "confirmed": "Zahlung bestätigt",
+          "failed": "Zahlung fehlgeschlagen"
+        },
+        "published": "Neue Veranstaltung",
+        "refund": {
+          "issued": "Rückerstattung veranlasst"
+        },
+        "registration": {
+          "cancelled": "Anmeldung storniert",
+          "confirmed": "Anmeldung bestätigt",
+          "pending": "Anmeldung ausstehend"
+        },
+        "save": {
+          "reminder": "Erinnerung: gemerkte Veranstaltung"
+        },
+        "ticket": {
+          "sold_out": "Tickets ausverkauft"
+        },
+        "updated": "Veranstaltung aktualisiert"
       },
       "membership": {
         "approved": "Mitgliedschaft genehmigt",
         "request": "Mitgliedschaftsanfrage",
         "removed": "Aus der Community entfernt",
-        "left": "Community verlassen"
+        "left": "Community verlassen",
+        "banned": "Aus der Community verbannt",
+        "suspended": "Mitgliedschaft ausgesetzt"
       },
       "association": {
         "membership": {
@@ -1671,7 +1704,9 @@
         "default": "Gelegenheit",
         "application": {
           "submitted": "Bewerbung eingereicht",
-          "accepted": "Bewerbung angenommen"
+          "accepted": "Bewerbung angenommen",
+          "received": "Neue Bewerbung",
+          "rejected": "Bewerbungsupdate"
         }
       },
       "servicerequest": {
@@ -1694,7 +1729,92 @@
         },
         "default": "Serviceanfrage"
       },
-      "default": "Benachrichtigung"
+      "default": "Benachrichtigung",
+      "account": {
+        "verified": "Konto verifiziert"
+      },
+      "alumni": {
+        "match": "Alumni-Übereinstimmung"
+      },
+      "broadcast": "Ankündigung",
+      "calendar": {
+        "reminder": "Kalendererinnerung"
+      },
+      "case": {
+        "assigned": "Fall zugewiesen",
+        "closed": "Fall geschlossen",
+        "evidence": {
+          "added": "Neuer Nachweis"
+        },
+        "note": {
+          "added": "Neue Notiz"
+        },
+        "reopened": "Fall wiedereröffnet",
+        "resolved": "Fall gelöst",
+        "status": {
+          "changed": "Status aktualisiert"
+        },
+        "submitted": "Fall eingereicht"
+      },
+      "colleague": {
+        "match": "Kollegen-Übereinstimmung"
+      },
+      "comment": {
+        "liked": "Kommentar gefällt"
+      },
+      "community": {
+        "mentioned": "Community erwähnt"
+      },
+      "digest": {
+        "whats_new": "Das ist neu"
+      },
+      "education": {
+        "added": "Ausbildung hinzugefügt"
+      },
+      "escrow": {
+        "released": "Treuhandgeld freigegeben"
+      },
+      "follow": {
+        "new": "Neuer Follower"
+      },
+      "friend": {
+        "suggestion": "Personen, die du kennen könntest"
+      },
+      "kyc": {
+        "approved": "Identität verifiziert",
+        "rejected": "Verifizierung abgelehnt"
+      },
+      "payment": {
+        "confirmed": "Zahlung bestätigt",
+        "failed": "Zahlung fehlgeschlagen"
+      },
+      "profile": {
+        "created": "Profil erstellt",
+        "picture": {
+          "uploaded": "Profilbild aktualisiert"
+        },
+        "updated": "Profil aktualisiert",
+        "viewed": "Profil angesehen"
+      },
+      "resource": {
+        "published": "Neue Ressource"
+      },
+      "skill": {
+        "added": "Fähigkeit hinzugefügt",
+        "endorsed": "Fähigkeit bestätigt"
+      },
+      "system": {
+        "announcement": "Ankündigung"
+      },
+      "vendor": {
+        "suspended": "Verkäufer gesperrt",
+        "verified": "Verkäufer verifiziert"
+      },
+      "work": {
+        "experience": {
+          "added": "Berufserfahrung hinzugefügt"
+        }
+      }
     },
     "messages": {
       "membershipApproved": "Ihre Mitgliedschaft in {communityName} wurde genehmigt",

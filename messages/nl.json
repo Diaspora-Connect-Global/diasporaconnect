@@ -1631,19 +1631,27 @@
       "connection": {
         "request": "Verbindingsverzoek",
         "requested": "Verbindingsverzoek",
-        "accepted": "Verbinding geaccepteerd"
+        "accepted": "Verbinding geaccepteerd",
+        "rejected": "Connectieverzoek afgewezen",
+        "reminder": "Connectieherinnering"
       },
       "post": {
         "like": "Vind ik leuk",
         "comment": "Reactie",
         "commented": "Reactie",
-        "mention": "Vermelding"
+        "mention": "Vermelding",
+        "liked": "Post geliket",
+        "mentioned": "Genoemd in een post",
+        "shared": "Post gedeeld"
       },
       "message": {
-        "received": "Nieuw bericht"
+        "received": "Nieuw bericht",
+        "mentioned": "Genoemd in een chat"
       },
       "group": {
-        "message": "Groepsbericht",
+        "message": {
+          "received": "Nieuw groepsbericht"
+        },
         "chat": {
           "digest": "Dagelijkse groepschat-samenvatting"
         }
@@ -1651,13 +1659,38 @@
       "event": {
         "reminder": "Evenementherinnering",
         "invite": "Evenementuitnodiging",
-        "register": "Evenementinschrijving"
+        "register": "Evenementinschrijving",
+        "cancelled": "Evenement geannuleerd",
+        "check_in": "Evenement check-in",
+        "completed": "Evenement afgelopen",
+        "payment": {
+          "confirmed": "Betaling bevestigd",
+          "failed": "Betaling mislukt"
+        },
+        "published": "Nieuw evenement",
+        "refund": {
+          "issued": "Terugbetaling uitgevoerd"
+        },
+        "registration": {
+          "cancelled": "Inschrijving geannuleerd",
+          "confirmed": "Inschrijving bevestigd",
+          "pending": "Inschrijving in behandeling"
+        },
+        "save": {
+          "reminder": "Herinnering opgeslagen evenement"
+        },
+        "ticket": {
+          "sold_out": "Tickets uitverkocht"
+        },
+        "updated": "Evenement bijgewerkt"
       },
       "membership": {
         "approved": "Lidmaatschap goedgekeurd",
         "request": "Lidmaatschapsverzoek",
         "removed": "Verwijderd uit de community",
-        "left": "Community verlaten"
+        "left": "Community verlaten",
+        "banned": "Verbannen uit community",
+        "suspended": "Lidmaatschap opgeschort"
       },
       "association": {
         "membership": {
@@ -1671,7 +1704,9 @@
         "default": "Kans",
         "application": {
           "submitted": "Sollicitatie ingediend",
-          "accepted": "Sollicitatie geaccepteerd"
+          "accepted": "Sollicitatie geaccepteerd",
+          "received": "Nieuwe sollicitatie",
+          "rejected": "Update sollicitatie"
         }
       },
       "servicerequest": {
@@ -1694,7 +1729,92 @@
         },
         "default": "Serviceverzoek"
       },
-      "default": "Melding"
+      "default": "Melding",
+      "account": {
+        "verified": "Account geverifieerd"
+      },
+      "alumni": {
+        "match": "Alumni-match"
+      },
+      "broadcast": "Aankondiging",
+      "calendar": {
+        "reminder": "Agenda-herinnering"
+      },
+      "case": {
+        "assigned": "Zaak toegewezen",
+        "closed": "Zaak gesloten",
+        "evidence": {
+          "added": "Nieuw bewijsstuk"
+        },
+        "note": {
+          "added": "Nieuwe notitie"
+        },
+        "reopened": "Zaak heropend",
+        "resolved": "Zaak opgelost",
+        "status": {
+          "changed": "Status bijgewerkt"
+        },
+        "submitted": "Zaak ingediend"
+      },
+      "colleague": {
+        "match": "Collega-match"
+      },
+      "comment": {
+        "liked": "Reactie geliket"
+      },
+      "community": {
+        "mentioned": "Community genoemd"
+      },
+      "digest": {
+        "whats_new": "Wat is er nieuw"
+      },
+      "education": {
+        "added": "Opleiding toegevoegd"
+      },
+      "escrow": {
+        "released": "Geld vrijgegeven"
+      },
+      "follow": {
+        "new": "Nieuwe volger"
+      },
+      "friend": {
+        "suggestion": "Mensen die je misschien kent"
+      },
+      "kyc": {
+        "approved": "Identiteit geverifieerd",
+        "rejected": "Verificatie afgewezen"
+      },
+      "payment": {
+        "confirmed": "Betaling bevestigd",
+        "failed": "Betaling mislukt"
+      },
+      "profile": {
+        "created": "Profiel aangemaakt",
+        "picture": {
+          "uploaded": "Profielfoto bijgewerkt"
+        },
+        "updated": "Profiel bijgewerkt",
+        "viewed": "Profiel bekeken"
+      },
+      "resource": {
+        "published": "Nieuwe bron"
+      },
+      "skill": {
+        "added": "Vaardigheid toegevoegd",
+        "endorsed": "Vaardigheid onderschreven"
+      },
+      "system": {
+        "announcement": "Aankondiging"
+      },
+      "vendor": {
+        "suspended": "Verkoper geschorst",
+        "verified": "Verkoper geverifieerd"
+      },
+      "work": {
+        "experience": {
+          "added": "Werkervaring toegevoegd"
+        }
+      }
     },
     "messages": {
       "membershipApproved": "Uw lidmaatschap voor {communityName} is goedgekeurd",

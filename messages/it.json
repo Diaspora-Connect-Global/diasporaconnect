@@ -1631,19 +1631,27 @@
       "connection": {
         "request": "Richiesta di connessione",
         "requested": "Richiesta di connessione",
-        "accepted": "Connessione accettata"
+        "accepted": "Connessione accettata",
+        "rejected": "Richiesta di contatto rifiutata",
+        "reminder": "Promemoria contatto"
       },
       "post": {
         "like": "Mi piace",
         "comment": "Commento",
         "commented": "Commento",
-        "mention": "Menzione"
+        "mention": "Menzione",
+        "liked": "Post apprezzato",
+        "mentioned": "Menzionato in un post",
+        "shared": "Post condiviso"
       },
       "message": {
-        "received": "Nuovo messaggio"
+        "received": "Nuovo messaggio",
+        "mentioned": "Menzionato in una chat"
       },
       "group": {
-        "message": "Messaggio di gruppo",
+        "message": {
+          "received": "Nuovo messaggio di gruppo"
+        },
         "chat": {
           "digest": "Riepilogo giornaliero della chat di gruppo"
         }
@@ -1651,13 +1659,38 @@
       "event": {
         "reminder": "Promemoria evento",
         "invite": "Invito a evento",
-        "register": "Iscrizione all'evento"
+        "register": "Iscrizione all'evento",
+        "cancelled": "Evento annullato",
+        "check_in": "Check-in evento",
+        "completed": "Evento concluso",
+        "payment": {
+          "confirmed": "Pagamento confermato",
+          "failed": "Pagamento non riuscito"
+        },
+        "published": "Nuovo evento",
+        "refund": {
+          "issued": "Rimborso emesso"
+        },
+        "registration": {
+          "cancelled": "Iscrizione annullata",
+          "confirmed": "Iscrizione confermata",
+          "pending": "Iscrizione in attesa"
+        },
+        "save": {
+          "reminder": "Promemoria evento salvato"
+        },
+        "ticket": {
+          "sold_out": "Biglietti esauriti"
+        },
+        "updated": "Evento aggiornato"
       },
       "membership": {
         "approved": "Iscrizione approvata",
         "request": "Richiesta di iscrizione",
         "removed": "Rimosso dalla comunità",
-        "left": "Comunità lasciata"
+        "left": "Comunità lasciata",
+        "banned": "Bandito dalla comunità",
+        "suspended": "Iscrizione sospesa"
       },
       "association": {
         "membership": {
@@ -1671,7 +1704,9 @@
         "default": "Opportunità",
         "application": {
           "submitted": "Candidatura inviata",
-          "accepted": "Candidatura accettata"
+          "accepted": "Candidatura accettata",
+          "received": "Nuova candidatura",
+          "rejected": "Aggiornamento candidatura"
         }
       },
       "servicerequest": {
@@ -1694,7 +1729,92 @@
         },
         "default": "Richiesta di servizio"
       },
-      "default": "Notifica"
+      "default": "Notifica",
+      "account": {
+        "verified": "Account verificato"
+      },
+      "alumni": {
+        "match": "Corrispondenza ex studenti"
+      },
+      "broadcast": "Annuncio",
+      "calendar": {
+        "reminder": "Promemoria calendario"
+      },
+      "case": {
+        "assigned": "Caso assegnato",
+        "closed": "Caso chiuso",
+        "evidence": {
+          "added": "Nuova prova"
+        },
+        "note": {
+          "added": "Nuova nota"
+        },
+        "reopened": "Caso riaperto",
+        "resolved": "Caso risolto",
+        "status": {
+          "changed": "Stato aggiornato"
+        },
+        "submitted": "Caso inviato"
+      },
+      "colleague": {
+        "match": "Corrispondenza colleghi"
+      },
+      "comment": {
+        "liked": "Commento apprezzato"
+      },
+      "community": {
+        "mentioned": "Comunità menzionata"
+      },
+      "digest": {
+        "whats_new": "Novità"
+      },
+      "education": {
+        "added": "Istruzione aggiunta"
+      },
+      "escrow": {
+        "released": "Fondi rilasciati"
+      },
+      "follow": {
+        "new": "Nuovo follower"
+      },
+      "friend": {
+        "suggestion": "Persone che potresti conoscere"
+      },
+      "kyc": {
+        "approved": "Identità verificata",
+        "rejected": "Verifica rifiutata"
+      },
+      "payment": {
+        "confirmed": "Pagamento confermato",
+        "failed": "Pagamento non riuscito"
+      },
+      "profile": {
+        "created": "Profilo creato",
+        "picture": {
+          "uploaded": "Foto profilo aggiornata"
+        },
+        "updated": "Profilo aggiornato",
+        "viewed": "Profilo visualizzato"
+      },
+      "resource": {
+        "published": "Nuova risorsa"
+      },
+      "skill": {
+        "added": "Competenza aggiunta",
+        "endorsed": "Competenza confermata"
+      },
+      "system": {
+        "announcement": "Annuncio"
+      },
+      "vendor": {
+        "suspended": "Venditore sospeso",
+        "verified": "Venditore verificato"
+      },
+      "work": {
+        "experience": {
+          "added": "Esperienza lavorativa aggiunta"
+        }
+      }
     },
     "messages": {
       "membershipApproved": "La tua iscrizione a {communityName} è stata approvata",
