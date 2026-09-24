@@ -20,6 +20,8 @@ import type { GetProfileResponse } from '@/services/gql/profile';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { mapApiConnectionStatusToFriendType } from '@/lib/mapProfileConnectionStatus';
+import { useUserStore } from '@/store/useUserStore';
+import { useEffect } from 'react';
 
 type ProfilePayload = GetProfileResponse['getProfile'];
 
@@ -46,7 +48,19 @@ export function UserProfileNotFound() {
 }
 
 export function UserProfileView({ result, loading, error, onRefetch }: UserProfileViewProps) {
-    if (loading) {
+    const router = useRouter();
+    const currentUserId = useUserStore((s) => s.user?.userId);
+    const viewedUserId = result?.success ? result.profile?.userId : undefined;
+    // Opening your own share link (`/@you` or `/<your id>`) must not render you
+    // as a stranger with an "Add friend" button — send you to your own profile,
+    // which carries the owner-only controls (edit, share, avatar) this view lacks.
+    const isSelf = !!currentUserId && !!viewedUserId && currentUserId === viewedUserId;
+
+    useEffect(() => {
+        if (isSelf) router.replace('/profile');
+    }, [isSelf, router]);
+
+    if (loading || isSelf) {
         return <LoadingScreen text={'loadingProfile'} />;
     }
 
