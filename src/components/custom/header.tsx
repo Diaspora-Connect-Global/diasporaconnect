@@ -1,37 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { cloneElement, isValidElement, ReactNode, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import GlobalSearchBar from './GlobalSearchBar';
 import { ThemeToggle } from '@/app/[locale]/theme-toggle';
 import { useTranslations } from 'next-intl';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ChevronRight as CR, SettingsIcon } from 'lucide-react';
-import { LogoutCurve } from 'iconsax-reactjs';
-import { QuestionIcon, X } from "@phosphor-icons/react";
+import { X } from "@phosphor-icons/react";
 import React from 'react';
-import { ButtonType3 } from '@/components/custom/button';
 import HomeSidebar from '../home/HomeSidebar';
-import { useRouter } from "next/navigation";
-import { LogoutConfirmModal } from '../auth/LogoutConfirmModal';
-import { clearStorage } from '@/lib/logout';
-import { useUserStore } from '@/store/useUserStore';
+import { ButtonType3 } from '@/components/custom/button';
 import { useNotificationBadge } from '@/hooks/useNotificationBadge';
 import { useChatStore } from '@/store/ChatStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
-import { useImageFallback } from '@/components/ui/ImageWithFallback';
+import { AccountMenuPanel } from './AccountMenuPanel';
 
 export default function Header({
   children,
@@ -191,7 +174,7 @@ export default function Header({
                 </div>
 
                 {/* User Profile */}
-                <DropdownMenuAvatar />
+                <AccountMenuPanel />
 
 
               </div>
@@ -264,145 +247,5 @@ export default function Header({
   );
 }
 
-
-export function MyAvatar() {
-  const url = useUserStore((s) => s.user?.avatarUrl);
-  const { src: avatarSrc, onError: onAvatarError } = useImageFallback(url, '/PROFILE.png');
-
-  return (
-    <Avatar>
-      {url ? (
-        // Plain <img> so the browser can serve cached images instantly without
-        // Radix's JS-managed loading state, which briefly shows the fallback
-        // every time this component mounts (e.g. when the dropdown opens).
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={avatarSrc}
-          alt="Profile"
-          className="aspect-square size-full rounded-full object-cover"
-          onError={onAvatarError}
-        />
-      ) : (
-        <AvatarFallback>
-          <Image width={32} height={32} src="/PROFILE.png" alt="Profile" />
-        </AvatarFallback>
-      )}
-    </Avatar>
-  );
-}
-
-
-interface DMItemProps {
-  icon: ReactNode;
-  text: string;
-  onClick?: () => void;
-}
-
-export function DMItem({ icon: Icon, text, onClick }: DMItemProps) {
-  const renderIcon = () => {
-    if (!isValidElement(Icon)) return Icon;
-
-    const props: any = {
-      className: "w-full h-full text-primary",
-    };
-
-    // Only add `size` if the icon likely supports it
-    const iconName = (Icon.type as any)?.displayName || '';
-    const supportsSize = /Wallet|Logout|Storefront|Question|FileDollar/.test(iconName);
-
-    if (supportsSize) {
-      props.size = 20;
-    }
-
-    return cloneElement(Icon, props);
-  };
-
-  return (
-    <div
-      onClick={onClick}
-      className="flex items-center space-x-3 my-2 cursor-pointer select-none"
-    >
-      <div className="w-6 h-6 rounded flex items-center justify-center p-1">
-        {renderIcon()}
-      </div>
-      <span className="text-sm">{text}</span>
-    </div>
-  );
-}
-
-
-
-
-export function DropdownMenuAvatar() {
-  const t = useTranslations('home.header');
-  const [open, setOpen] = useState(false);
-  const firstName = useUserStore((s) => s.user?.firstName);
-  const middleName = useUserStore((s) => s.user?.middleName);
-  const lastName = useUserStore((s) => s.user?.lastName);
-  const router = useRouter(); // Add this
-  const [lOpen, setLOpen] = useState(false);
-  const logout = () => {
-    clearStorage();
-    router.replace("/signin");
-  }
-
-  return (
-    <><DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <ButtonType3 className="focus:outline-none p-0 min-w-0 border-0 bg-transparent rounded-full">
-          <MyAvatar />
-        </ButtonType3>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="lg:w-100 mx-20 mt-4" align="start">
-        <DropdownMenuLabel>
-          <Link onClick={() => setOpen(false)} href={"/profile"} prefetch={false} className='flex items-center justify-between'>
-            <div className='flex space-x-4 items-center my-2'>
-              <MyAvatar />
-              <p className='text-xl'>{firstName} {middleName} {lastName}</p>
-            </div>
-            <CR />
-          </Link>
-        </DropdownMenuLabel>
-        {/* <DropdownMenuSeparator /> */}
-        {/* <DropdownMenuGroup>
-    <DropdownMenuItem>
-
-      <DMItem icon={<StorefrontIcon />} text={t('becomeVendor')} />
-    </DropdownMenuItem>
-    <DropdownMenuItem>
-
-      <DMItem icon={<IconFileDollar />} text={'Become a vendor'} />
-    </DropdownMenuItem>
-  </DropdownMenuGroup> */}
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          {/* <DropdownMenuItem asChild>
-    </DropdownMenuItem> */}
-          <DropdownMenuItem asChild>
-            <Link href="/settings" prefetch={false}>
-              <DMItem icon={<SettingsIcon className='w-full h-full' />} text={t('settingsPrivacy')} />
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link onClick={() => setOpen(false)} href={"/help"} prefetch={false} className='flex items-center justify-between'>
-              <DMItem icon={<QuestionIcon size={32} />} text={t('helpSupport')} />
-
-            </Link>
-
-
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <DMItem icon={<LogoutCurve
-            size={40} />} text={t('logout')} onClick={() => setLOpen(true)} />
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-    <LogoutConfirmModal
-        open={lOpen}
-        onCancel={() => setLOpen(false)}
-        onConfirm={logout} />
-        </>
-  )
-}
+// Kept for existing importers (create-post, vendor sidebar).
+export { MyAvatar } from './MyAvatar';

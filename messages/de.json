@@ -461,7 +461,12 @@
       "wallet": "Wallet",
       "settingsPrivacy": "Einstellungen & Datenschutz",
       "helpSupport": "Hilfe & Support",
-      "logout": "Abmelden"
+      "logout": "Abmelden",
+      "myProfile": "Mein Profil",
+      "myNetwork": "Mein Netzwerk",
+      "myCommunities": "Meine Communities",
+      "tagline": "Verbinden · Teilen · Aufbauen",
+      "copyright": "DiaspoPlug © {year}"
     },
     "associations": {
       "discover": "Vereine entdecken",

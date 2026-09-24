@@ -461,7 +461,12 @@
       "wallet": "Portafoglio",
       "settingsPrivacy": "Impostazioni e privacy",
       "helpSupport": "Aiuto e supporto",
-      "logout": "Esci"
+      "logout": "Esci",
+      "myProfile": "Il mio profilo",
+      "myNetwork": "La mia rete",
+      "myCommunities": "Le mie community",
+      "tagline": "Connetti · Condividi · Costruisci",
+      "copyright": "DiaspoPlug © {year}"
     },
     "associations": {
       "discover": "Scopri associazioni",

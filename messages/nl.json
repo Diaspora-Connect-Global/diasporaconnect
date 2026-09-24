@@ -462,7 +462,12 @@
       "wallet": "Portemonnee",
       "settingsPrivacy": "Instellingen & Privacy",
       "helpSupport": "Hulp & Ondersteuning",
-      "logout": "Uitloggen"
+      "logout": "Uitloggen",
+      "myProfile": "Mijn profiel",
+      "myNetwork": "Mijn netwerk",
+      "myCommunities": "Mijn community's",
+      "tagline": "Verbinden · Delen · Bouwen",
+      "copyright": "DiaspoPlug © {year}"
     },
     "associations": {
       "discover": "Verenigingen ontdekken",

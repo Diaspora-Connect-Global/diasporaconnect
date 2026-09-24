@@ -461,7 +461,12 @@
       "wallet": "Portefeuille",
       "settingsPrivacy": "Paramètres et confidentialité",
       "helpSupport": "Aide et assistance",
-      "logout": "Déconnexion"
+      "logout": "Déconnexion",
+      "myProfile": "Mon profil",
+      "myNetwork": "Mon réseau",
+      "myCommunities": "Mes communautés",
+      "tagline": "Connecter · Partager · Construire",
+      "copyright": "DiaspoPlug © {year}"
     },
     "associations": {
       "discover": "Découvrir des associations",

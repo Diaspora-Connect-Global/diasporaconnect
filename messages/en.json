@@ -462,7 +462,12 @@
       "wallet": "Wallet",
       "settingsPrivacy": "Settings & Privacy",
       "helpSupport": "Help & Support",
-      "logout": "Logout"
+      "logout": "Logout",
+      "myProfile": "My Profile",
+      "myNetwork": "My Network",
+      "myCommunities": "My Communities",
+      "tagline": "Connect · Share · Build",
+      "copyright": "DiaspoPlug © {year}"
     },
     "associations": {
       "discover": "Discover associations",
