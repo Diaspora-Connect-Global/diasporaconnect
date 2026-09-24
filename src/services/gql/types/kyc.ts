@@ -98,11 +98,21 @@ export interface SubmitKycInput {
   providerStrategy?: string;
 }
 
+export interface BeneficialOwnerInput {
+  /** The owner's individual KYC profile id (getMyKYCProfile.profileId). */
+  individualProfileId: string;
+  /** 0–100; all owners must total 100. The submitter must be one of them. */
+  ownershipPercentage: number;
+  role?: string;
+}
+
 export interface SubmitBusinessKybInput {
   businessName: string;
   registrationNumber: string;
   countryOfIncorporation: string;
+  /** @deprecated ids only — shares are split equally. Prefer `owners`. */
   beneficialOwners?: string[];
+  owners?: BeneficialOwnerInput[];
   providerStrategy?: string;
 }
 
