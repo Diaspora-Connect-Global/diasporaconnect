@@ -96,7 +96,9 @@ export default function Chat() {
             // For real API conversations, the id is the user/group ID
             setChatInfo({
                 id: activeChat.id,
-                name: activeChat.id, // Will be resolved by child components
+                // Resolved by the child chat components from the profile. Never
+                // seed it with the id: this field is rendered as a name.
+                name: '',
                 type: activeChat.type,
                 lastMessage: '',
                 lastMessageTime: '',

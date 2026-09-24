@@ -2067,7 +2067,8 @@
       "liked": "Aimé",
       "commented": "Commenté",
       "noCommunities": "Aucune communauté rejointe pour le moment.",
-      "noPosts": "Aucune publication {type} pour le moment."
+      "noPosts": "Aucune publication {type} pour le moment.",
+      "socials": "Réseaux"
     },
     "profileCompletion": {
       "title": "Complétion du profil",
@@ -2102,6 +2103,61 @@
       "viewAsOthers": "Voir comme les autres",
       "linkCopied": "Lien copié",
       "copyFailed": "Impossible de copier le lien"
+    },
+    "socials": {
+      "title": "Réseaux sociaux",
+      "add": "Ajouter un réseau",
+      "addTitle": "Ajouter un lien de réseau social",
+      "editTitle": "Modifier le lien",
+      "platform": "Plateforme",
+      "linkLabel": "Lien ou nom d'utilisateur",
+      "previewAs": "Sera enregistré sous {url}",
+      "previewInvalid": "Saisissez un lien ou un nom d'utilisateur {platform} valide.",
+      "previewWrongPlatform": "Ce lien n'est pas un lien {platform}.",
+      "publicNotice": "Ce lien sera public sur votre profil. DiaspoPlug le consulte pour vérifier qu'il existe.",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "edit": "Modifier le lien {platform}",
+      "editShort": "Modifier",
+      "remove": "Supprimer le lien {platform}",
+      "removeShort": "Supprimer",
+      "recheck": "Revérifier le lien {platform}",
+      "recheckShort": "Revérifier",
+      "confirmRemove": "Supprimer ce lien de votre profil ?",
+      "confirmRemoveYes": "Supprimer",
+      "status": {
+        "CONFIRMED": "Confirmé",
+        "UNCONFIRMED": "Non confirmé",
+        "NOT_FOUND": "Introuvable",
+        "PENDING": "Vérification…"
+      },
+      "statusHelp": {
+        "UNCONFIRMED": "Le site ne nous a pas permis de confirmer ce profil (souvent une page de connexion). Il reste visible sur votre profil.",
+        "NOT_FOUND": "Nous n'avons pas trouvé ce profil, il est donc masqué pour les autres. Vérifiez le lien et modifiez-le."
+      },
+      "emptyOwnTitle": "Aucun lien de réseau social",
+      "emptyOwn": "Ajoutez des liens vers vos autres profils pour qu'on puisse vous retrouver ailleurs.",
+      "emptyOther": "Aucun lien de réseau social pour l'instant.",
+      "listLabel": "Liens de réseaux sociaux",
+      "loadError": "Impossible de charger les liens de réseaux sociaux pour le moment.",
+      "retry": "Réessayer",
+      "opensInNewTab": "(s'ouvre dans un nouvel onglet)",
+      "limitNote": "Jusqu'à {max} liens, dont {websites} sites web au maximum.",
+      "added": "Lien ajouté — nous le vérifions maintenant.",
+      "updated": "Lien mis à jour.",
+      "removed": "Lien supprimé.",
+      "recheckStarted": "Nouvelle vérification du lien en cours.",
+      "errors": {
+        "INVALID_URL": "Cela ne ressemble pas à un lien ou à un nom d'utilisateur valide.",
+        "WRONG_PLATFORM": "Ce lien appartient à une autre plateforme.",
+        "LIMIT_REACHED": "Vous avez atteint la limite de {max} liens ({websites} sites web).",
+        "DUPLICATE": "Ce lien, ou un lien pour cette plateforme, figure déjà sur votre profil.",
+        "NOT_FOUND": "Ce lien n'existe plus. Actualisez la page et réessayez.",
+        "RATE_LIMITED": "Vous pouvez revérifier un lien une fois par jour. Réessayez après {time}.",
+        "RATE_LIMITED_NO_TIME": "Vous pouvez revérifier un lien une fois par jour.",
+        "failed": "Une erreur s'est produite. Veuillez réessayer."
+      }
     }
   },
   "settings": {
@@ -2617,7 +2673,14 @@
     "decreaseQuantity": "Diminuer la quantité",
     "increaseQuantity": "Augmenter la quantité",
     "remove": "Supprimer",
-    "delete": "Effacer"
+    "delete": "Effacer",
+    "identity": {
+      "unknownUser": "Utilisateur inconnu",
+      "aMember": "un membre",
+      "someone": "Quelqu'un",
+      "customer": "Client",
+      "attendee": "Participant"
+    }
   },
   "metadata": {
     "title": "Diaspora Connect Global",
@@ -2766,7 +2829,23 @@
       "replyTargetGone": "Ce message ne fait plus partie de cette conversation. Envoyez-le comme nouveau message ou rouvrez la réponse.",
       "replyFailed": "Impossible d'envoyer votre réponse. Veuillez réessayer.",
       "sendFailed": "Impossible d'envoyer votre message. Veuillez réessayer.",
-      "transferOwnershipFailed": "Impossible de transférer la propriété. Veuillez réessayer."
+      "transferOwnershipFailed": "Impossible de transférer la propriété. Veuillez réessayer.",
+      "typingOne": "{name} est en train d'écrire…",
+      "typingMany": "{count} personnes écrivent…",
+      "dailySummary": {
+        "title": "Résumé du jour",
+        "messageCount": "{count, plural, one {# message} other {# messages}}",
+        "topics": "Sujets",
+        "keyPoints": "Points clés",
+        "decisions": "Décisions",
+        "actionItems": "Actions à mener",
+        "viewMessages": "Voir les messages",
+        "viewMessagesAria": "Voir les messages sur « {topic} »",
+        "participants": "Participants",
+        "messageUnavailable": "Ce message n'est plus disponible",
+        "findingMessages": "Recherche des messages…",
+        "aiGenerated": "Résumé généré par l'IA"
+      }
     },
     "dateLabels": {
       "today": "Aujourd’hui",

@@ -227,6 +227,38 @@ export interface GroupChatSummary {
   messageCount: number;
   /** ISO-8601 timestamp */
   generatedAt: string;
+  /**
+   * Topic bulletins. Not selected by GROUP_CHAT_DAILY_SUMMARY (see
+   * GROUP_CHAT_DAILY_SUMMARY_TOPICS); absent/empty on older digests.
+   */
+  topics?: ChatSummaryTopic[] | null;
+}
+
+/**
+ * A person who took part in one topic of the digest. `userId` exists only to
+ * LINK somewhere — it must never be rendered; show `displayName`.
+ */
+export interface ChatSummaryParticipant {
+  userId: string;
+  displayName: string;
+}
+
+/** One topic bulletin of the daily digest. */
+export interface ChatSummaryTopic {
+  title: string;
+  summary: string;
+  participants: ChatSummaryParticipant[];
+  /** Source message ids, chronological; the first is the jump target. */
+  messageIds: string[];
+}
+
+/** Result shape for the GROUP_CHAT_DAILY_SUMMARY_TOPICS query. */
+export interface GroupChatDailySummaryTopicsData {
+  groupChatDailySummary: {
+    conversationId: string;
+    digestDate: string;
+    topics?: ChatSummaryTopic[] | null;
+  } | null;
 }
 
 /** Result shape for the GROUP_CHAT_DAILY_SUMMARY query. */

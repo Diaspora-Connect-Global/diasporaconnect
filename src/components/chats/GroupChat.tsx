@@ -1,4 +1,4 @@
-import { ChevronRight, MessageCircle, MoreVertical, X, Camera, Sparkles } from "lucide-react";
+import { ChevronRight, MessageCircle, MoreVertical, X, Camera } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
@@ -48,8 +48,16 @@ import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { useMutation as useGqlMutation } from "@apollo/client/react";
-import { SEND_MESSAGE, GET_CONVERSATIONS, GROUP_CHAT_DAILY_SUMMARY } from "@/services/gql/messaging";
-import type { SendMessageData, GroupChatDailySummaryData, GroupChatDailySummaryVariables } from "@/services/gql/types/messaging";
+import { SEND_MESSAGE, GET_CONVERSATIONS, GROUP_CHAT_DAILY_SUMMARY, GROUP_CHAT_DAILY_SUMMARY_TOPICS } from "@/services/gql/messaging";
+import type {
+    SendMessageData,
+    GroupChatDailySummaryData,
+    GroupChatDailySummaryVariables,
+    GroupChatDailySummaryTopicsData,
+} from "@/services/gql/types/messaging";
+import { DailySummaryCard } from "./DailySummaryCard";
+import { parseDigestBody, resolveJumpTargets } from "@/lib/dailySummary";
+import { displayName as personName, stripIds } from "@/lib/displayName";
 import { SYSTEM_SENDER_ID } from "@/services/gql/types/messaging";
 import { useChatConversation } from "@/hooks/useChatConversation";
 import { useChatMessages } from "@/hooks/useChatMessages";
@@ -83,6 +91,22 @@ function isSystemMessage(m: { type?: string; senderId?: string }): boolean {
     return m?.type === 'SYSTEM' || m?.senderId === SYSTEM_SENDER_ID;
 }
 
+/** DOM id of a rendered message (an element id, never visible text). */
+function messageDomId(messageId: string): string {
+    return `msg-${messageId}`;
+}
+
+/** Page size of the message window. */
+const MESSAGE_PAGE_SIZE = 50;
+/**
+ * Hard ceiling for paging back to find a summarised message. The window
+ * DOUBLES per step (50 → 100 → 200 → 400 → 500), so reaching the ceiling costs
+ * at most 4 extra fetches rather than one per page.
+ */
+const MESSAGE_WINDOW_MAX = 500;
+/** How long jumped-to messages stay highlighted. */
+const JUMP_HIGHLIGHT_MS = 2600;
+
 /**
  * Members fetched per page in the group info panel. Kept at 100 so it matches
  * the `membersLimit: 100` used by the refetchQueries elsewhere (e.g.
@@ -92,6 +116,8 @@ const MEMBERS_PAGE_SIZE = 100;
 
 export default function GroupChat() {
     const t = useTranslations('chat.group');
+    const tSummary = useTranslations('chat.group.dailySummary');
+    const tIdentity = useTranslations('common.identity');
     const tCommon = useTranslations('common');
     const tDates = useTranslations('chat.dateLabels');
     const locale = useLocale();
@@ -250,6 +276,24 @@ export default function GroupChat() {
     });
     const dailySummary = dailySummaryData?.groupChatDailySummary ?? null;
 
+    // Topic bulletins of the same digest. A separate, uncached, fail-soft query:
+    // until the gateway knows `topics` this errors at validation, `data` stays
+    // empty and the card keeps its overview/key-points layout.
+    const { data: summaryTopicsData } = useQuery<
+        GroupChatDailySummaryTopicsData,
+        GroupChatDailySummaryVariables
+    >(GROUP_CHAT_DAILY_SUMMARY_TOPICS, {
+        variables: { groupId: chat?.id || '', conversationId: conversationId || '' },
+        skip: !chat?.id || !conversationId,
+        fetchPolicy: 'no-cache',
+        errorPolicy: 'all',
+    });
+    const summaryTopicsResult = summaryTopicsData?.groupChatDailySummary ?? null;
+    const summaryTopics =
+        summaryTopicsResult && (!dailySummary || summaryTopicsResult.digestDate === dailySummary.digestDate)
+            ? (summaryTopicsResult.topics ?? []).filter(Boolean)
+            : [];
+
     // Absolute instant used to place the digest chronologically in the timeline
     // (it summarizes `digestDate` and is generated shortly after that day ends).
     const dailySummaryInsertTime = (() => {
@@ -257,56 +301,6 @@ export default function GroupChat() {
         const t = Date.parse(dailySummary.generatedAt);
         return Number.isNaN(t) ? Date.parse(dailySummary.digestDate) : t;
     })();
-
-    // The digest rendered as a distinct, centered "system" entry — visually
-    // unlike the left/right chat bubbles, with the date carried in its header.
-    const dailySummaryEntry = dailySummary ? (
-        <div key="daily-summary" className="flex justify-center px-2 py-1">
-            <div className="w-full max-w-md rounded-2xl border border-primary/30 bg-bg-secondary/60 px-3 py-3 space-y-2">
-                <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
-                    <span className="text-sm font-semibold text-text-primary">
-                        Daily summary
-                    </span>
-                    <span className="text-xs text-text-secondary ml-auto shrink-0">
-                        {dailySummary.digestDate}
-                        {dailySummary.messageCount > 0
-                            ? ` · ${dailySummary.messageCount} messages`
-                            : ''}
-                    </span>
-                </div>
-                {dailySummary.summary && (
-                    <p className="text-sm leading-relaxed whitespace-pre-line text-text-primary">
-                        {dailySummary.summary}
-                    </p>
-                )}
-                {dailySummary.keyPoints.length > 0 && (
-                    <div>
-                        <p className="text-xs font-semibold text-text-secondary mb-1">
-                            Key points
-                        </p>
-                        <ul className="list-disc pl-5 space-y-0.5 text-sm text-text-primary">
-                            {dailySummary.keyPoints.map((kp, i) => (
-                                <li key={`kp-${i}`}>{kp}</li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-                {dailySummary.actionItems.length > 0 && (
-                    <div>
-                        <p className="text-xs font-semibold text-text-secondary mb-1">
-                            Action items
-                        </p>
-                        <ul className="list-disc pl-5 space-y-0.5 text-sm text-text-primary">
-                            {dailySummary.actionItems.map((ai, i) => (
-                                <li key={`ai-${i}`}>{ai}</li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-            </div>
-        </div>
-    ) : null;
 
     // Group avatar upload (info sidebar)
     const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -368,7 +362,86 @@ export default function GroupChat() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [mainThreadMessages]);
 
-    const { refetch: refetchMessages } = useChatMessages({ conversationId });
+    // The message window grows (never shrinks) while "View messages" pages back
+    // to find a summarised message; reset per conversation.
+    const [messageLimit, setMessageLimit] = useState(MESSAGE_PAGE_SIZE);
+    useEffect(() => {
+        setMessageLimit(MESSAGE_PAGE_SIZE);
+    }, [conversationId]);
+    const {
+        refetch: refetchMessages,
+        loading: messagesLoading,
+        hasMore: hasOlderMessages,
+    } = useChatMessages({ conversationId, limit: messageLimit });
+
+    // ── Daily-summary "View messages": jump to a topic's source messages ──
+    const [pendingJump, setPendingJump] = useState<{ ids: string[]; topicIndex: number | null } | null>(null);
+    const [highlightIds, setHighlightIds] = useState<ReadonlySet<string>>(() => new Set());
+    const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => () => {
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    }, []);
+    // A jump in flight belongs to the conversation it was asked in.
+    useEffect(() => {
+        setPendingJump(null);
+        setHighlightIds(new Set());
+    }, [conversationId]);
+
+    const memberAvatar = (userId: string) =>
+        toCdnUrl(groupMembers.find((m) => m.userId === userId)?.profile?.avatarUrl) || undefined;
+
+    const handleViewSummaryMessages = useCallback((ids: string[], topicIndex: number | null = null) => {
+        const wanted = ids.filter(Boolean);
+        if (wanted.length) setPendingJump({ ids: wanted, topicIndex });
+    }, []);
+
+    useEffect(() => {
+        if (!pendingJump || !conversationId) return;
+        // Read the store directly, not the render-time snapshot: the history
+        // hook syncs a freshly loaded page into the store in an effect that
+        // runs just before this one, and the snapshot would still be the old
+        // window — which would page back a second time for nothing.
+        const loaded = useChatStore.getState().getApiMessagesByConversation(conversationId);
+        const { targetId, highlightIds: found } = resolveJumpTargets(pendingJump.ids, loaded);
+        if (targetId) {
+            setPendingJump(null);
+            setHighlightIds(new Set(found));
+            if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+            highlightTimerRef.current = setTimeout(() => setHighlightIds(new Set()), JUMP_HIGHLIGHT_MS);
+            requestAnimationFrame(() => {
+                document
+                    .getElementById(messageDomId(targetId))
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+            return;
+        }
+        if (messagesLoading) return; // a page is on its way
+        if (hasOlderMessages && messageLimit < MESSAGE_WINDOW_MAX) {
+            setMessageLimit((n) => Math.min(n * 2, MESSAGE_WINDOW_MAX));
+            return;
+        }
+        setPendingJump(null);
+        toast.error(tSummary('messageUnavailable'));
+    }, [pendingJump, conversationId, apiMessages, messagesLoading, hasOlderMessages, messageLimit, tSummary]);
+
+    // The digest rendered as a distinct, centered "system" entry — visually
+    // unlike the left/right chat bubbles, with the date carried in its header.
+    const dailySummaryEntry = dailySummary ? (
+        <div key="daily-summary" className="flex justify-center px-2 py-1">
+            <DailySummaryCard
+                digestDate={dailySummary.digestDate}
+                messageCount={dailySummary.messageCount}
+                overview={dailySummary.summary}
+                topics={summaryTopics}
+                keyPoints={dailySummary.keyPoints}
+                decisions={dailySummary.decisions}
+                actionItems={dailySummary.actionItems}
+                onViewMessages={handleViewSummaryMessages}
+                pendingTopicIndex={pendingJump?.topicIndex ?? null}
+                avatarFor={memberAvatar}
+            />
+        </div>
+    ) : null;
 
     // WebSocket: subscribe to events for this conversation (connection is managed by MessageWebSocketProvider)
     useEffect(() => {
@@ -425,13 +498,18 @@ export default function GroupChat() {
     const getUserById = (userId: string) => {
         const member = groupMembers.find((m) => m.userId === userId);
         if (member?.profile) {
-            const name = [member.profile.firstName, member.profile.lastName].filter(Boolean).join(' ').trim();
-            return { id: member.userId, name: name || 'Unknown User', avatar: toCdnUrl(member.profile.avatarUrl) };
+            return {
+                id: member.userId,
+                name: personName(member.profile, tIdentity('unknownUser')),
+                avatar: toCdnUrl(member.profile.avatarUrl),
+            };
         }
-        return users?.find((u) => u.id === userId);
+        const stored = users?.find((u) => u.id === userId);
+        // Never let an id-shaped "name" through (and never fall back to the id).
+        return stored ? { ...stored, name: personName(stored, tIdentity('unknownUser')) } : undefined;
     };
 
-    const getSenderName = (senderId: string): string => getUserById(senderId)?.name ?? 'Unknown User';
+    const getSenderName = (senderId: string): string => getUserById(senderId)?.name ?? tIdentity('unknownUser');
 
     const handleSendMessage = async (messageText: string, files?: File[]) => {
         const hasText = !!messageText.trim();
@@ -810,24 +888,41 @@ export default function GroupChat() {
                                 // AI daily digest: render as a distinct, centered
                                 // "Daily summary" card rather than a chat bubble.
                                 if (isSystemMessage(message)) {
+                                    // The backend posts the digest as plain text; parse
+                                    // it into the card. When the query-driven digest for
+                                    // the same day carries topic bulletins, show that
+                                    // richer version in its place.
+                                    const parsed = parseDigestBody(message.content);
+                                    const rich =
+                                        !!dailySummary &&
+                                        parsed?.digestDate === dailySummary.digestDate &&
+                                        summaryTopics.length > 0;
                                     nodes.push(
-                                        <div key={message.id} className="flex justify-center px-2 py-1">
-                                            <div className="w-full max-w-md rounded-2xl border border-primary/30 bg-bg-secondary/60 px-3 py-3 space-y-2">
-                                                <div className="flex items-center gap-2">
-                                                    <Sparkles className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
-                                                    <span className="text-sm font-semibold text-text-primary">
-                                                        Daily summary
-                                                    </span>
-                                                    <span className="text-xs text-text-secondary ml-auto shrink-0">
-                                                        {formatChatTimestamp(message.createdAt, { timeZone: userTimeZone })}
-                                                    </span>
-                                                </div>
-                                                {message.content && (
-                                                    <p className="text-sm leading-relaxed whitespace-pre-line text-text-primary">
-                                                        {message.content}
-                                                    </p>
-                                                )}
-                                            </div>
+                                        <div key={message.id} id={messageDomId(message.id)} className="flex justify-center px-2 py-1">
+                                            {rich && dailySummary ? (
+                                                <DailySummaryCard
+                                                    digestDate={dailySummary.digestDate}
+                                                    messageCount={dailySummary.messageCount}
+                                                    overview={dailySummary.summary}
+                                                    topics={summaryTopics}
+                                                    keyPoints={dailySummary.keyPoints}
+                                                    decisions={dailySummary.decisions}
+                                                    actionItems={dailySummary.actionItems}
+                                                    onViewMessages={handleViewSummaryMessages}
+                                                    pendingTopicIndex={pendingJump?.topicIndex ?? null}
+                                                    avatarFor={memberAvatar}
+                                                />
+                                            ) : parsed ? (
+                                                <DailySummaryCard
+                                                    digestDate={parsed.digestDate}
+                                                    messageCount={parsed.messageCount}
+                                                    overview={parsed.overview}
+                                                    keyPoints={parsed.keyPoints}
+                                                    actionItems={parsed.actionItems}
+                                                />
+                                            ) : (
+                                                <DailySummaryCard overview={stripIds(message.content, tIdentity('aMember'))} />
+                                            )}
                                         </div>
                                     );
                                     return;
@@ -849,10 +944,13 @@ export default function GroupChat() {
                                         <DateSeparator key={`sep-${dateKey}`} label={getDateLabel(message.createdAt, userTimeZone, { today: tDates('today'), yesterday: tDates('yesterday') }, locale)} />
                                     );
                                 }
+                                const highlighted = highlightIds.has(message.id);
                                 nodes.push(
                                     <div
                                         key={message.id}
-                                        className={`flex min-w-0 ${isMe ? 'justify-end' : 'justify-start'}`}
+                                        id={messageDomId(message.id)}
+                                        data-highlighted={highlighted || undefined}
+                                        className={`flex min-w-0 rounded-2xl transition-colors duration-500 ${isMe ? 'justify-end' : 'justify-start'} ${highlighted ? 'bg-primary/10 ring-2 ring-primary/40' : ''}`}
                                     >
                                         <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md min-w-0 ${isMe ? 'ml-auto' : ''}`}>
                                             {message.status === 'sending' ? (
@@ -976,8 +1074,8 @@ export default function GroupChat() {
                             <div className="flex-shrink-0 px-3 py-1.5 flex items-center gap-2 text-text-tertiary text-xs sm:text-sm">
                                 <TypingDots dotClassName="bg-text-tertiary" />
                                 {typingUserIds.size === 1
-                                    ? `${getSenderName([...typingUserIds][0])} is typing...`
-                                    : `${typingUserIds.size} people are typing...`}
+                                    ? t('typingOne', { name: getSenderName([...typingUserIds][0]) })
+                                    : t('typingMany', { count: typingUserIds.size })}
                             </div>
                         )}
                     </div>
@@ -1123,7 +1221,7 @@ export default function GroupChat() {
                                                     <div className="flex-1 min-w-0">
                                                         <div className="inline-flex items-center gap-1 max-w-full">
                                                             <p className="text-sm font-medium text-text-primary truncate">
-                                                                {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
+                                                                {personName(member?.profile, tIdentity('unknownUser'))}
                                                             </p>
                                                             {memberTier && <UserBadge tier={memberTier} size="xs" />}
                                                         </div>
@@ -1332,7 +1430,7 @@ export default function GroupChat() {
                                         <div className="min-w-0">
                                             <div className="inline-flex items-center gap-1 max-w-full">
                                                 <p className="text-sm font-medium text-text-primary truncate">
-                                                    {[member?.profile?.firstName, member?.profile?.lastName].filter(Boolean).join(' ').trim() || group?.name || 'Unknown'}
+                                                    {personName(member?.profile, tIdentity('unknownUser'))}
                                                 </p>
                                                 {memberTier && <UserBadge tier={memberTier} size="xs" />}
                                             </div>

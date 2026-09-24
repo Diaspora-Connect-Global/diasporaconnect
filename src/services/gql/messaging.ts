@@ -25,6 +25,9 @@ export type {
   GroupChatSummary,
   GroupChatDailySummaryData,
   GroupChatDailySummaryVariables,
+  GroupChatDailySummaryTopicsData,
+  ChatSummaryTopic,
+  ChatSummaryParticipant,
 } from './types/messaging';
 
 // ============================================================================
@@ -56,6 +59,38 @@ export const GROUP_CHAT_DAILY_SUMMARY = gql`
       confidence
       messageCount
       generatedAt
+    }
+  }
+`;
+
+// Topic bulletins of the same digest, fetched SEPARATELY on purpose: `topics`
+// is newer than the rest of the digest, and a gateway that does not know the
+// field rejects the whole document at validation. Kept apart (and run with
+// `fetchPolicy: 'no-cache'` + `errorPolicy: 'all'`) it fails soft — the card
+// falls back to the overview/key-points layout — and never touches the cached
+// GROUP_CHAT_DAILY_SUMMARY result. Same variables as that query.
+export const GROUP_CHAT_DAILY_SUMMARY_TOPICS = gql`
+  query GroupChatDailySummaryTopics(
+    $groupId: ID!
+    $conversationId: ID!
+    $date: String
+  ) {
+    groupChatDailySummary(
+      groupId: $groupId
+      conversationId: $conversationId
+      date: $date
+    ) {
+      conversationId
+      digestDate
+      topics {
+        title
+        summary
+        participants {
+          userId
+          displayName
+        }
+        messageIds
+      }
     }
   }
 `;

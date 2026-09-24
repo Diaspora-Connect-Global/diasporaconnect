@@ -16,6 +16,7 @@ import { SERVICE_REQUEST } from '@/services/gql/embassyServices';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
 import { toCdnUrl } from '@/lib/cdn';
 import type { Notification } from '@/services/gql/notification';
+import { containsId, looksLikeId } from '@/lib/displayName';
 
 /** Shape of a connection peer as returned by the connection queries. */
 interface ConnectionPeer {
@@ -177,9 +178,10 @@ function pickString(data: NotificationDataRecord, keys: string[]): string | unde
  * backend occasionally slips into display-name fields (e.g. the opportunity
  * owner's user id instead of a resolved full name).
  */
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function isUuidLike(value: string | null | undefined): boolean {
-  return !!value && UUID_RE.test(value.trim());
+  // Also catches id fragments ("3f9a2b1c"), labelled ids ("User 3f9a2b1c")
+  // and erasure tombstones — see lib/displayName.
+  return !!value && (looksLikeId(value) || containsId(value));
 }
 
 /**

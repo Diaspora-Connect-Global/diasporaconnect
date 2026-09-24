@@ -2067,7 +2067,8 @@
       "liked": "Geliked",
       "commented": "Gereageerd",
       "noCommunities": "Nog geen gemeenschappen deelgenomen.",
-      "noPosts": "Nog geen {type} berichten."
+      "noPosts": "Nog geen {type} berichten.",
+      "socials": "Socials"
     },
     "profileCompletion": {
       "title": "Profielafronding",
@@ -2102,6 +2103,61 @@
       "viewAsOthers": "Bekijken als anderen",
       "linkCopied": "Link gekopieerd",
       "copyFailed": "Kan de link niet kopiëren"
+    },
+    "socials": {
+      "title": "Socials",
+      "add": "Social toevoegen",
+      "addTitle": "Social-link toevoegen",
+      "editTitle": "Social-link bewerken",
+      "platform": "Platform",
+      "linkLabel": "Link of gebruikersnaam",
+      "previewAs": "Wordt opgeslagen als {url}",
+      "previewInvalid": "Voer een geldige {platform}-link of gebruikersnaam in.",
+      "previewWrongPlatform": "Dat is geen {platform}-link.",
+      "publicNotice": "Deze link is openbaar op je profiel. DiaspoPlug bezoekt de link om te controleren of die bestaat.",
+      "save": "Opslaan",
+      "saving": "Opslaan…",
+      "cancel": "Annuleren",
+      "edit": "{platform}-link bewerken",
+      "editShort": "Bewerken",
+      "remove": "{platform}-link verwijderen",
+      "removeShort": "Verwijderen",
+      "recheck": "{platform}-link opnieuw controleren",
+      "recheckShort": "Opnieuw controleren",
+      "confirmRemove": "Deze link van je profiel verwijderen?",
+      "confirmRemoveYes": "Verwijderen",
+      "status": {
+        "CONFIRMED": "Bevestigd",
+        "UNCONFIRMED": "Niet bevestigd",
+        "NOT_FOUND": "Niet gevonden",
+        "PENDING": "Controleren…"
+      },
+      "statusHelp": {
+        "UNCONFIRMED": "De site liet ons dit profiel niet bevestigen (vaak door een inlogpagina). De link blijft zichtbaar op je profiel.",
+        "NOT_FOUND": "We konden dit profiel niet vinden, daarom is het verborgen voor anderen. Controleer de link en pas hem aan."
+      },
+      "emptyOwnTitle": "Nog geen social-links",
+      "emptyOwn": "Voeg links naar je andere profielen toe, zodat mensen je ook daar kunnen vinden.",
+      "emptyOther": "Nog geen social-links.",
+      "listLabel": "Social-links",
+      "loadError": "Social-links kunnen nu niet worden geladen.",
+      "retry": "Opnieuw proberen",
+      "opensInNewTab": "(opent in een nieuw tabblad)",
+      "limitNote": "Maximaal {max} links, waarvan maximaal {websites} websites.",
+      "added": "Link toegevoegd — we controleren hem nu.",
+      "updated": "Link bijgewerkt.",
+      "removed": "Link verwijderd.",
+      "recheckStarted": "De link wordt opnieuw gecontroleerd.",
+      "errors": {
+        "INVALID_URL": "Dat lijkt geen geldige link of gebruikersnaam.",
+        "WRONG_PLATFORM": "Die link hoort bij een ander platform.",
+        "LIMIT_REACHED": "Je hebt de limiet van {max} links ({websites} websites) bereikt.",
+        "DUPLICATE": "Deze link, of een link voor dit platform, staat al op je profiel.",
+        "NOT_FOUND": "Deze link bestaat niet meer. Vernieuw de pagina en probeer het opnieuw.",
+        "RATE_LIMITED": "Je kunt een link één keer per dag opnieuw controleren. Probeer het na {time} opnieuw.",
+        "RATE_LIMITED_NO_TIME": "Je kunt een link één keer per dag opnieuw controleren.",
+        "failed": "Er ging iets mis. Probeer het opnieuw."
+      }
     }
   },
   "common": {
@@ -2134,7 +2190,14 @@
     "decreaseQuantity": "Hoeveelheid verminderen",
     "increaseQuantity": "Hoeveelheid verhogen",
     "remove": "Verwijderen",
-    "delete": "Verwijderen"
+    "delete": "Verwijderen",
+    "identity": {
+      "unknownUser": "Onbekende gebruiker",
+      "aMember": "een lid",
+      "someone": "Iemand",
+      "customer": "Klant",
+      "attendee": "Deelnemer"
+    }
   },
   "metadata": {
     "title": "Diaspora Connect Global",
@@ -2283,7 +2346,23 @@
       "replyTargetGone": "Dit bericht maakt geen deel meer uit van dit gesprek. Verstuur het als nieuw bericht of open het antwoord opnieuw.",
       "replyFailed": "Uw antwoord kon niet worden verzonden. Probeer het opnieuw.",
       "sendFailed": "Uw bericht kon niet worden verzonden. Probeer het opnieuw.",
-      "transferOwnershipFailed": "Het eigendom kon niet worden overgedragen. Probeer het opnieuw."
+      "transferOwnershipFailed": "Het eigendom kon niet worden overgedragen. Probeer het opnieuw.",
+      "typingOne": "{name} is aan het typen…",
+      "typingMany": "{count} mensen zijn aan het typen…",
+      "dailySummary": {
+        "title": "Dagelijkse samenvatting",
+        "messageCount": "{count, plural, one {# bericht} other {# berichten}}",
+        "topics": "Onderwerpen",
+        "keyPoints": "Belangrijkste punten",
+        "decisions": "Beslissingen",
+        "actionItems": "Actiepunten",
+        "viewMessages": "Berichten bekijken",
+        "viewMessagesAria": "Berichten over ‘{topic}’ bekijken",
+        "participants": "Deelnemers",
+        "messageUnavailable": "Dat bericht is niet meer beschikbaar",
+        "findingMessages": "Berichten zoeken…",
+        "aiGenerated": "Door AI gegenereerde samenvatting"
+      }
     },
     "dateLabels": {
       "today": "Vandaag",

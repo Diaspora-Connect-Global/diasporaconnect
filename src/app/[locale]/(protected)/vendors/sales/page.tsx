@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
+import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
 import { LIST_VENDOR_ORDERS } from '@/services/gql/vendor';
@@ -40,6 +41,10 @@ const SalesDashboard = () => {
   });
 
   const allOrders: VendorOrder[] = data?.listVendorOrders.items ?? [];
+  // Buyers are shown (and searched) by name, resolved from their profiles — never by id.
+  const tIdentity = useTranslations('common.identity');
+  const { usersById: buyersById } = useCircleUsers(allOrders.map((o) => o.buyerId));
+  const buyerName = (buyerId: string) => circleUserDisplayName(buyersById[buyerId], tIdentity('unknownUser'));
   const totalCount = data?.listVendorOrders.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
@@ -47,7 +52,7 @@ const SalesDashboard = () => {
     ? allOrders.filter(
         (o) =>
           o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          o.buyerId.toLowerCase().includes(searchTerm.toLowerCase())
+          buyerName(o.buyerId).toLowerCase().includes(searchTerm.toLowerCase())
       )
     : allOrders;
 
@@ -122,7 +127,7 @@ const SalesDashboard = () => {
                       <td className="px-6 py-4 text-sm text-text-secondary">
                         {new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
-                      <td className="px-6 py-4 text-sm text-text-primary font-mono">{order.buyerId.slice(0, 8)}…</td>
+                      <td className="px-6 py-4 text-sm text-text-primary">{buyerName(order.buyerId)}</td>
                       <td className="px-6 py-4 text-sm text-text-primary font-medium">
                         {formatAmount(order.totalAmount, order.currency)}
                       </td>

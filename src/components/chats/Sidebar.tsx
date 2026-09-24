@@ -20,6 +20,8 @@ import { GET_USER_PROFILE } from "@/services/gql/profile";
 import type { GetProfileResponse } from "@/services/gql/profile";
 import { EmptyState, NoResults } from "@/components/feedback";
 import { toCdnUrl } from "@/lib/cdn";
+import { displayName as personName, safeName, stripIds } from "@/lib/displayName";
+import { SYSTEM_SENDER_ID } from "@/services/gql/types/messaging";
 
 type TabType = 'direct' | 'groups';
 
@@ -119,8 +121,8 @@ export default function ChatSideBar() {
                 const otherUserObj = connectionMap.get(otherParticipantId);
                 const fallbackProfile = profileFallbackById[otherParticipantId];
                 const displayName = otherUserObj
-                    ? [otherUserObj.firstName, otherUserObj.lastName].filter(Boolean).join(' ').trim() || t('unknownUser')
-                    : (fallbackProfile?.name || t('unknownUser'));
+                    ? personName(otherUserObj, t('unknownUser'))
+                    : safeName(fallbackProfile?.name, t('unknownUser'));
                 const avatar = toCdnUrl(otherUserObj?.avatarUrl) || fallbackProfile?.avatar || '';
 
                 // Store the real conversation mapping so DirectMessageChat can look it up by chat.id
@@ -142,7 +144,7 @@ export default function ChatSideBar() {
                 return {
                     id: chatId,
                     conversationId: conv.id,
-                    name: displayName || 'Unknown',
+                    name: displayName,
                     type: 'direct' as const,
                     lastMessage: conv.lastMessage?.content || t('empty.title'),
                     lastMessageTime: conv.lastMessage?.createdAt || conv.lastMessageAt || '',
@@ -677,6 +679,7 @@ interface GroupsListProps {
 
 function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], limit = 50, offset = 0, userTimeZone }: GroupsListProps) {
     const t = useTranslations('chat');
+    const tIdentity = useTranslations('common.identity');
     const tFeedback = useTranslations('feedback');
     const setRealConversation = useChatStore((s) => s.setRealConversation);
 
@@ -762,12 +765,19 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
             {sortedGroups.map((group) => {
                 const correspondingConversation = conversations.find(
                     (conv: { type?: string; groupId?: string }) => conv.type === 'GROUP' && conv.groupId === group.id
-                ) as { id?: string; lastMessage?: { content?: string; replyToId?: string | null }; lastMessageAt?: string; unreadCount?: number } | undefined;
+                ) as { id?: string; lastMessage?: { content?: string; replyToId?: string | null; type?: string; senderId?: string }; lastMessageAt?: string; unreadCount?: number } | undefined;
 
                 const lastMsg = correspondingConversation?.lastMessage;
                 const isLastMessageReply = !!lastMsg?.replyToId;
+                // The AI digest is a server-generated SYSTEM message: scrub any id it
+                // might carry before it becomes the preview line.
+                const isSystemPreview =
+                    (lastMsg?.type ?? '').toUpperCase() === 'SYSTEM' || lastMsg?.senderId === SYSTEM_SENDER_ID;
+                const lastContent = lastMsg?.content != null && isSystemPreview
+                    ? stripIds(lastMsg.content, tIdentity('aMember'))
+                    : lastMsg?.content;
                 const previewText = (lastMsg && !isLastMessageReply)
-                    ? (lastMsg.content ?? group.description ?? t('group.memberCount', { count: group.memberCount }))
+                    ? (lastContent ?? group.description ?? t('group.memberCount', { count: group.memberCount }))
                     : (group.description ?? t('group.memberCount', { count: group.memberCount }));
 
                 return (

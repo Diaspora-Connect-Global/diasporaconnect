@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { circleUserDisplayName, useCircleUser } from "@/hooks/useCircleUsers";
 import { useMutation, useQuery, useApolloClient } from "@apollo/client/react";
 import { Package } from "lucide-react";
 import { toast } from "sonner";
@@ -61,6 +62,9 @@ export default function OrderDetailsPage() {
   });
 
   const order = data?.getMarketplaceOrder?.order;
+  // The customer is shown by name, resolved from their profile — never by id.
+  const tIdentity = useTranslations("common.identity");
+  const { user: buyer } = useCircleUser(order?.buyer_id ?? null);
 
   useEffect(() => {
     const items = order?.items ?? [];
@@ -274,8 +278,10 @@ export default function OrderDetailsPage() {
         <div className="space-y-6">
           {/* Buyer Info */}
           <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
-            <h3 className="text-sm font-medium text-text-secondary mb-4">Customer ID</h3>
-            <p className="text-sm font-mono text-text-primary break-all">{order.buyer_id}</p>
+            <h3 className="text-sm font-medium text-text-secondary mb-4">{tIdentity("customer")}</h3>
+            <p className="text-sm text-text-primary break-all">
+              {circleUserDisplayName(buyer, tIdentity("unknownUser"))}
+            </p>
           </div>
 
           {/* Shipping Address */}

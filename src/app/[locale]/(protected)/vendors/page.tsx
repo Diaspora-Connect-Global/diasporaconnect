@@ -9,6 +9,7 @@ import { useQuery } from "@apollo/client/react";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { circleUserDisplayName, useCircleUsers } from "@/hooks/useCircleUsers";
 
 export default function OverviewPage() {
   const t = useTranslations("vendors.orders");
@@ -23,6 +24,9 @@ export default function OverviewPage() {
 
   const dashboard = dashboardData?.getVendorDashboard;
   const orders = ordersData?.listVendorOrders.items ?? [];
+  // Customers are shown by name, resolved from their profiles — never by id.
+  const tIdentity = useTranslations("common.identity");
+  const { usersById: buyersById } = useCircleUsers(orders.map((o) => o.buyerId));
   const formatMinor = (amount: number) => (amount / 100).toFixed(2);
 
   const statsCards = dashboard
@@ -136,7 +140,9 @@ export default function OverviewPage() {
                     <td className="px-6 py-4 text-sm text-text-primary">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-sm text-text-primary">{order.buyerId}</td>
+                    <td className="px-6 py-4 text-sm text-text-primary">
+                      {circleUserDisplayName(buyersById[order.buyerId], tIdentity("unknownUser"))}
+                    </td>
                     <td className="px-6 py-4 text-sm text-text-primary">
                       {order.currency} {formatMinor(order.totalAmount)}
                     </td>

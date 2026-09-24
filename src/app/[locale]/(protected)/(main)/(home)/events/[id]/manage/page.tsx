@@ -35,6 +35,8 @@ import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/butto
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import { TextInput, TextArea, Select } from "@/components/custom/input";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { circleUserDisplayName, useCircleUsers } from "@/hooks/useCircleUsers";
 import {
   Loader2, ChevronLeft, Users, TicketIcon, Tag, BarChart2,
   ClipboardList, Settings, Plus, Trash2, PauseCircle,
@@ -108,6 +110,9 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
   });
 
   const list = data?.getEventRegistrations;
+  // Attendees are shown by name, resolved from their profiles — never by id.
+  const tIdentity = useTranslations('common.identity');
+  const { usersById } = useCircleUsers((list?.registrations ?? []).map((r) => r.userId));
 
   const statusBadge = (s: string) => {
     const colors: Record<string, string> = {
@@ -148,7 +153,7 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
             <table className="w-full text-sm">
               <thead className="bg-surface-subtle text-text-secondary">
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium">User ID</th>
+                  <th className="px-4 py-2 text-left font-medium">{tIdentity('attendee')}</th>
                   <th className="px-4 py-2 text-left font-medium">Qty</th>
                   <th className="px-4 py-2 text-left font-medium">Status</th>
                   <th className="px-4 py-2 text-left font-medium">Amount</th>
@@ -158,7 +163,9 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
               <tbody className="divide-y divide-border-subtle">
                 {list.registrations.map((r) => (
                   <tr key={r.id} className="hover:bg-surface-subtle">
-                    <td className="px-4 py-2 font-mono text-xs text-text-secondary truncate max-w-[120px]">{r.userId}</td>
+                    <td className="px-4 py-2 text-text-primary truncate max-w-[200px]">
+                      {circleUserDisplayName(usersById[r.userId], tIdentity('unknownUser'))}
+                    </td>
                     <td className="px-4 py-2">{r.quantity}</td>
                     <td className="px-4 py-2">{statusBadge(r.status)}</td>
                     <td className="px-4 py-2 text-text-secondary">{r.totalAmount ? `${r.currency} ${(Number(r.totalAmount) / 100).toFixed(2)}` : '—'}</td>
@@ -191,6 +198,9 @@ function AttendanceTab({ eventId }: { eventId: string }) {
     variables: { eventId, limit: 50 },
   });
   const list = data?.getEventAttendance;
+  // Attendees are shown by name, resolved from their profiles — never by id.
+  const tIdentity = useTranslations('common.identity');
+  const { usersById } = useCircleUsers((list?.attendance ?? []).map((a) => a.userId));
 
   const methodIcon = (m: string) => {
     if (m === 'qr_code') return <QrCode className="w-3 h-3" />;
@@ -210,7 +220,7 @@ function AttendanceTab({ eventId }: { eventId: string }) {
             <table className="w-full text-sm">
               <thead className="bg-surface-subtle text-text-secondary">
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium">User ID</th>
+                  <th className="px-4 py-2 text-left font-medium">{tIdentity('attendee')}</th>
                   <th className="px-4 py-2 text-left font-medium">Method</th>
                   <th className="px-4 py-2 text-left font-medium">Checked in</th>
                   <th className="px-4 py-2 text-left font-medium">Checked out</th>
@@ -219,7 +229,9 @@ function AttendanceTab({ eventId }: { eventId: string }) {
               <tbody className="divide-y divide-border-subtle">
                 {list.attendance.map((a) => (
                   <tr key={a.id} className="hover:bg-surface-subtle">
-                    <td className="px-4 py-2 font-mono text-xs text-text-secondary truncate max-w-[120px]">{a.userId}</td>
+                    <td className="px-4 py-2 text-text-primary truncate max-w-[200px]">
+                      {circleUserDisplayName(usersById[a.userId], tIdentity('unknownUser'))}
+                    </td>
                     <td className="px-4 py-2">
                       <span className="flex items-center gap-1 text-text-secondary capitalize">
                         {methodIcon(a.checkInMethod)} {a.checkInMethod.replace('_', ' ')}

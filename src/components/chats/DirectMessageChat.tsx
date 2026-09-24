@@ -36,6 +36,7 @@ import { GET_MY_CONNECTIONS } from "@/services/gql/connection";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
+import { displayName as personName, safeName } from '@/lib/displayName';
 import { resolveCountryName, getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
 import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime";
 import { DateSeparator } from "./DateSeparator";
@@ -107,12 +108,12 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         : null;
     const profileFallback = otherUserProfileData?.getProfile?.profile;
 
-    const displayName = otherProfile
-        ? [otherProfile.firstName, otherProfile.lastName].filter(Boolean).join(' ').trim() || chat.name || t('unknownUser')
-        : (
-            [profileFallback?.firstName, profileFallback?.lastName].filter(Boolean).join(' ').trim() ||
-            (chat.name && chat.name !== chat.id ? chat.name : t('unknownUser'))
-        );
+    // Profile name first, then the list's name — each checked so an id can never
+    // stand in for a name (`safeName` rejects id-shaped strings).
+    const displayName = personName(
+        otherProfile ?? profileFallback,
+        safeName(chat.name && chat.name !== chat.id ? chat.name : '', t('unknownUser')),
+    );
     const otherAvatar = toCdnUrl(otherProfile?.avatarUrl ?? profileFallback?.avatarUrl ?? chat.avatar ?? '');
 
     // Trust badge — sourced from either the connection summary or the full

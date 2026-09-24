@@ -28,6 +28,8 @@ interface UseChatMessagesResult {
     /** Refetch GraphQL message history. Wired into WebSocket onMessage listeners. */
     refetch: () => Promise<unknown>;
     loading: boolean;
+    /** Server says older messages exist beyond the loaded window. */
+    hasMore: boolean;
 }
 
 /**
@@ -88,5 +90,5 @@ export function useChatMessages({
         });
     }, [conversationId, shouldMarkAsRead, markConversationAsRead]);
 
-    return { refetch, loading };
+    return { refetch, loading, hasMore: !!messagesData?.getMessages?.hasMore };
 }

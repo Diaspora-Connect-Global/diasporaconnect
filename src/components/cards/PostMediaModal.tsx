@@ -4,6 +4,7 @@ import { X, ChevronLeft, ChevronRight, Bookmark, Loader2, Globe, Users, Lock, Mo
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
+import { displayName as personName } from '@/lib/displayName';
 import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import {
@@ -97,12 +98,12 @@ function entityFallbackAvatar(authorType?: string): string {
         : '/PROFILE.png';
 }
 
-function mapApiComment(c: ApiComment): Comment {
+function mapApiComment(c: ApiComment, unknownAuthorLabel: string): Comment {
     const mentionMap = buildMentionMap(c.mentions ?? []);
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
     return {
         id: c.id,
-        author: c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId,
+        author: personName({ displayName: c.authorDisplayName ?? selfMention?.displayName, handle: selfMention?.handle }, unknownAuthorLabel),
         authorImage: c.authorAvatarUrl ?? selfMention?.avatarUrl ?? entityFallbackAvatar(c.authorType),
         authorHandle: c.authorHandle ?? selfMention?.handle,
         authorId: c.authorId,
@@ -351,12 +352,14 @@ export default function PostMediaModal({
         if (postId) fetchComments({ variables: { postId, limit: 20, offset: 0 } });
     }, [postId, fetchComments]);
 
+    // Shown when a comment's author has no resolvable name — never the author id.
+    const unknownCommentAuthor = useTranslations('common.identity')('unknownUser');
     useEffect(() => {
         if (commentsData?.postComments) {
             setLoadedComments(prev => {
                 const prevMap = new Map(prev.map(c => [c.id, c]));
                 return commentsData.postComments.map(c => {
-                    const mapped = mapApiComment(c);
+                    const mapped = mapApiComment(c, unknownCommentAuthor);
                     const existing = prevMap.get(mapped.id);
                     if (existing) {
                         mapped.hasLiked = existing.hasLiked;
@@ -368,7 +371,7 @@ export default function PostMediaModal({
             });
             setCommentsLoaded(true);
         }
-    }, [commentsData]);
+    }, [commentsData, unknownCommentAuthor]);
 
     const handleLikeComment = useCallback(async (commentId: string) => {
         const comment = loadedComments.find(c => c.id === commentId);

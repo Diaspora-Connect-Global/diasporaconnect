@@ -2067,7 +2067,8 @@
       "liked": "Liked",
       "commented": "Commented",
       "noCommunities": "No communities joined yet.",
-      "noPosts": "No {type} posts yet."
+      "noPosts": "No {type} posts yet.",
+      "socials": "Socials"
     },
     "profileCompletion": {
       "title": "Profile completion",
@@ -2102,6 +2103,61 @@
       "viewAsOthers": "View as others",
       "linkCopied": "Link copied",
       "copyFailed": "Couldn't copy the link"
+    },
+    "socials": {
+      "title": "Socials",
+      "add": "Add social",
+      "addTitle": "Add a social link",
+      "editTitle": "Edit social link",
+      "platform": "Platform",
+      "linkLabel": "Link or username",
+      "previewAs": "Will be saved as {url}",
+      "previewInvalid": "Enter a valid {platform} link or username.",
+      "previewWrongPlatform": "That link isn't a {platform} link.",
+      "publicNotice": "This link will be public on your profile. DiaspoPlug visits it to check that it exists.",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "edit": "Edit {platform} link",
+      "editShort": "Edit",
+      "remove": "Remove {platform} link",
+      "removeShort": "Remove",
+      "recheck": "Re-check {platform} link",
+      "recheckShort": "Re-check",
+      "confirmRemove": "Remove this link from your profile?",
+      "confirmRemoveYes": "Remove",
+      "status": {
+        "CONFIRMED": "Confirmed",
+        "UNCONFIRMED": "Couldn't confirm",
+        "NOT_FOUND": "Not found",
+        "PENDING": "Checking…"
+      },
+      "statusHelp": {
+        "UNCONFIRMED": "The site didn't let us confirm this profile (often a login wall). It still shows on your profile.",
+        "NOT_FOUND": "We couldn't find this profile, so it's hidden from others. Check the link and edit it."
+      },
+      "emptyOwnTitle": "No social links yet",
+      "emptyOwn": "Add links to your other profiles so people can find you elsewhere.",
+      "emptyOther": "No social links yet.",
+      "listLabel": "Social links",
+      "loadError": "We couldn't load social links right now.",
+      "retry": "Try again",
+      "opensInNewTab": "(opens in a new tab)",
+      "limitNote": "Up to {max} links, including up to {websites} websites.",
+      "added": "Link added — we're checking it now.",
+      "updated": "Link updated.",
+      "removed": "Link removed.",
+      "recheckStarted": "Checking the link again.",
+      "errors": {
+        "INVALID_URL": "That doesn't look like a valid link or username.",
+        "WRONG_PLATFORM": "That link belongs to a different platform.",
+        "LIMIT_REACHED": "You've reached the limit of {max} links ({websites} websites).",
+        "DUPLICATE": "That link, or one for this platform, is already on your profile.",
+        "NOT_FOUND": "That link no longer exists. Refresh and try again.",
+        "RATE_LIMITED": "You can re-check a link once a day. Try again after {time}.",
+        "RATE_LIMITED_NO_TIME": "You can re-check a link once a day.",
+        "failed": "Something went wrong. Please try again."
+      }
     }
   },
   "common": {
@@ -2134,7 +2190,14 @@
     "decreaseQuantity": "Decrease quantity",
     "increaseQuantity": "Increase quantity",
     "remove": "Remove",
-    "delete": "Delete"
+    "delete": "Delete",
+    "identity": {
+      "unknownUser": "Unknown user",
+      "aMember": "a member",
+      "someone": "Someone",
+      "customer": "Customer",
+      "attendee": "Attendee"
+    }
   },
   "metadata": {
     "title": "Diaspora Connect Global",
@@ -2283,7 +2346,23 @@
       "replyTargetGone": "That message is no longer in this conversation. Send it as a new message or reopen the reply.",
       "replyFailed": "Couldn't send your reply. Please try again.",
       "sendFailed": "Couldn't send your message. Please try again.",
-      "transferOwnershipFailed": "Couldn't transfer ownership. Please try again."
+      "transferOwnershipFailed": "Couldn't transfer ownership. Please try again.",
+      "typingOne": "{name} is typing…",
+      "typingMany": "{count} people are typing…",
+      "dailySummary": {
+        "title": "Daily Summary",
+        "messageCount": "{count, plural, one {# message} other {# messages}}",
+        "topics": "Topics",
+        "keyPoints": "Key points",
+        "decisions": "Decisions",
+        "actionItems": "Action items",
+        "viewMessages": "View messages",
+        "viewMessagesAria": "View messages about “{topic}”",
+        "participants": "Participants",
+        "messageUnavailable": "That message is no longer available",
+        "findingMessages": "Finding messages…",
+        "aiGenerated": "AI-generated summary"
+      }
     },
     "dateLabels": {
       "today": "Today",

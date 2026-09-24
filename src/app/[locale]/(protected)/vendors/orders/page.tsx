@@ -1,6 +1,7 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { useTranslations } from 'next-intl';
+import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
 import { ButtonType3 } from '@/components/custom/button';
 import { useMutation, useQuery } from "@apollo/client/react";
 import { LIST_VENDOR_ORDERS } from "@/services/gql/vendor";
@@ -110,17 +111,24 @@ export default function OrdersPage() {
     }
   };
 
+  // Customers are shown by name, resolved from their profiles — never by id.
+  const tIdentity = useTranslations('common.identity');
+  const unknownCustomer = tIdentity('unknownUser');
+  const { usersById: buyersById } = useCircleUsers(
+    useMemo(() => (data?.listVendorOrders.items ?? []).map((o) => o.buyerId), [data])
+  );
+
   const allOrders: Order[] = useMemo(
     () =>
       (data?.listVendorOrders.items ?? []).map((order) => ({
         id: order.id,
         date: new Date(order.createdAt).toLocaleDateString(),
-        customer: order.buyerId,
+        customer: circleUserDisplayName(buyersById[order.buyerId], unknownCustomer),
         amount: `${order.currency} ${(order.totalAmount / 100).toFixed(2)}`,
         delivery: optimisticStatuses[order.id] ?? order.status,
         action: "View order",
       })),
-    [data, optimisticStatuses]
+    [data, optimisticStatuses, buyersById, unknownCustomer]
   );
 
   const getDeliveryStatusColor = (status: OrderStatus): string => {

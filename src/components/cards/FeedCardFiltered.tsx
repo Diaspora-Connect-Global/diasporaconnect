@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ButtonType1, ButtonType3 } from '@/components/custom/button';
 import { GoHeartFill } from 'react-icons/go';
 import { useTranslations } from 'next-intl';
+import { displayName as personName } from '@/lib/displayName';
 import MessageInputGlobal from '@/components/custom/messageInputGlobal';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { renderRichText, MentionMap, buildMentionMap, buildMentionInputsFromText, isShortEmojiOnly, type MentionInputItem } from '@/components/custom/richTextRenderer';
@@ -115,11 +116,11 @@ type CommentTrustFields = {
     authorTrustScore?: number;
 };
 
-function mapApiComment(c: ApiComment): Comment {
+function mapApiComment(c: ApiComment, unknownAuthorLabel: string): Comment {
     const mentionMap = buildMentionMap(c.mentions ?? []);
 
     const selfMention = c.mentions?.find(m => m.entityId === c.authorId);
-    const authorName = c.authorDisplayName ?? selfMention?.displayName ?? selfMention?.handle ?? c.authorId;
+    const authorName = personName({ displayName: c.authorDisplayName ?? selfMention?.displayName, handle: selfMention?.handle }, unknownAuthorLabel);
     const authorAvatar = c.authorAvatarUrl ?? selfMention?.avatarUrl ?? '/PROFILE.png';
 
     const trust = c as ApiComment & CommentTrustFields;
@@ -396,12 +397,14 @@ export default function FeedCardFiltered({
         } catch { /* leave UI unchanged */ }
     }, [loadedComments, likeCommentMutation, removeCommentLikeMutation]);
 
+    // Shown when a comment's author has no resolvable name — never the author id.
+    const unknownCommentAuthor = useTranslations('common.identity')('unknownUser');
     useEffect(() => {
         if (commentsQueryData?.postComments) {
             setLoadedComments(prev => {
                 const prevMap = new Map(prev.map(c => [c.id, c]));
                 return commentsQueryData.postComments.map(c => {
-                    const mapped = mapApiComment(c);
+                    const mapped = mapApiComment(c, unknownCommentAuthor);
                     const existing = prevMap.get(mapped.id);
                     if (existing) {
                         mapped.hasLiked = existing.hasLiked;
@@ -412,7 +415,7 @@ export default function FeedCardFiltered({
             });
             setCommentsLoaded(true);
         }
-    }, [commentsQueryData]);
+    }, [commentsQueryData, unknownCommentAuthor]);
 
     const loadComments = useCallback(() => {
         if (!commentsLoaded && resolvedPostId) {

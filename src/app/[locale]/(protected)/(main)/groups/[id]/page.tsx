@@ -13,6 +13,7 @@ import { EmptyState } from '@/components/feedback';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Link, useRouter } from '@/i18n/navigation';
 import { toCdnUrl } from '@/lib/cdn';
+import { displayName as personName } from '@/lib/displayName';
 import { cn } from '@/lib/utils';
 import {
     GET_GROUP,
@@ -42,6 +43,7 @@ export default function GroupDetailPage() {
 
     const t = useTranslations('community');
     const tActions = useTranslations('actions');
+    const tIdentity = useTranslations('common.identity');
     const router = useRouter();
 
     const currentUserId = useUserStore((s) => s.user?.userId);
@@ -189,9 +191,6 @@ export default function GroupDetailPage() {
         }
     };
 
-    const memberName = (first?: string, last?: string) =>
-        [first, last].filter(Boolean).join(' ').trim();
-
     if (groupLoading && !group) {
         return (
             <div className="lg:w-[60vw] h-app-inner px-4 py-6 overflow-y-auto scrollbar-hide">
@@ -299,7 +298,7 @@ export default function GroupDetailPage() {
                 {members.length ? (
                     <ul className="flex flex-col divide-y divide-border-subtle">
                         {members.map((m) => {
-                            const name = memberName(m.profile?.firstName, m.profile?.lastName) || m.userId;
+                            const name = personName(m.profile, tIdentity('unknownUser'));
                             const location = [m.profile?.city, m.profile?.residenceCountry]
                                 .filter(Boolean)
                                 .join(', ');

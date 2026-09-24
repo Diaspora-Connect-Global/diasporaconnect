@@ -2067,7 +2067,8 @@
       "liked": "Mi piace",
       "commented": "Commentato",
       "noCommunities": "Nessuna community ancora.",
-      "noPosts": "Nessun post {type} ancora."
+      "noPosts": "Nessun post {type} ancora.",
+      "socials": "Social"
     },
     "profileCompletion": {
       "title": "Completamento profilo",
@@ -2102,6 +2103,61 @@
       "viewAsOthers": "Visualizza come gli altri",
       "linkCopied": "Link copiato",
       "copyFailed": "Impossibile copiare il link"
+    },
+    "socials": {
+      "title": "Social",
+      "add": "Aggiungi social",
+      "addTitle": "Aggiungi un link social",
+      "editTitle": "Modifica link social",
+      "platform": "Piattaforma",
+      "linkLabel": "Link o nome utente",
+      "previewAs": "Verrà salvato come {url}",
+      "previewInvalid": "Inserisci un link o un nome utente {platform} valido.",
+      "previewWrongPlatform": "Questo non è un link {platform}.",
+      "publicNotice": "Questo link sarà pubblico sul tuo profilo. DiaspoPlug lo visita per verificare che esista.",
+      "save": "Salva",
+      "saving": "Salvataggio…",
+      "cancel": "Annulla",
+      "edit": "Modifica il link {platform}",
+      "editShort": "Modifica",
+      "remove": "Rimuovi il link {platform}",
+      "removeShort": "Rimuovi",
+      "recheck": "Ricontrolla il link {platform}",
+      "recheckShort": "Ricontrolla",
+      "confirmRemove": "Rimuovere questo link dal tuo profilo?",
+      "confirmRemoveYes": "Rimuovi",
+      "status": {
+        "CONFIRMED": "Confermato",
+        "UNCONFIRMED": "Non confermato",
+        "NOT_FOUND": "Non trovato",
+        "PENDING": "Verifica…"
+      },
+      "statusHelp": {
+        "UNCONFIRMED": "Il sito non ci ha permesso di confermare questo profilo (spesso per una pagina di accesso). Resta visibile sul tuo profilo.",
+        "NOT_FOUND": "Non abbiamo trovato questo profilo, quindi è nascosto agli altri. Controlla il link e modificalo."
+      },
+      "emptyOwnTitle": "Ancora nessun link social",
+      "emptyOwn": "Aggiungi i link ai tuoi altri profili così le persone possono trovarti anche altrove.",
+      "emptyOther": "Ancora nessun link social.",
+      "listLabel": "Link social",
+      "loadError": "Al momento non è possibile caricare i link social.",
+      "retry": "Riprova",
+      "opensInNewTab": "(si apre in una nuova scheda)",
+      "limitNote": "Fino a {max} link, di cui al massimo {websites} siti web.",
+      "added": "Link aggiunto: lo stiamo verificando.",
+      "updated": "Link aggiornato.",
+      "removed": "Link rimosso.",
+      "recheckStarted": "Stiamo ricontrollando il link.",
+      "errors": {
+        "INVALID_URL": "Non sembra un link o un nome utente valido.",
+        "WRONG_PLATFORM": "Questo link appartiene a un'altra piattaforma.",
+        "LIMIT_REACHED": "Hai raggiunto il limite di {max} link ({websites} siti web).",
+        "DUPLICATE": "Questo link, o uno per questa piattaforma, è già sul tuo profilo.",
+        "NOT_FOUND": "Questo link non esiste più. Aggiorna la pagina e riprova.",
+        "RATE_LIMITED": "Puoi ricontrollare un link una volta al giorno. Riprova dopo {time}.",
+        "RATE_LIMITED_NO_TIME": "Puoi ricontrollare un link una volta al giorno.",
+        "failed": "Qualcosa è andato storto. Riprova."
+      }
     }
   },
   "settings": {
@@ -2617,7 +2673,14 @@
     "decreaseQuantity": "Diminuisci quantità",
     "increaseQuantity": "Aumenta quantità",
     "remove": "Rimuovi",
-    "delete": "Elimina"
+    "delete": "Elimina",
+    "identity": {
+      "unknownUser": "Utente sconosciuto",
+      "aMember": "un membro",
+      "someone": "Qualcuno",
+      "customer": "Cliente",
+      "attendee": "Partecipante"
+    }
   },
   "metadata": {
     "title": "Diaspora Connect Global",
@@ -2766,7 +2829,23 @@
       "replyTargetGone": "Questo messaggio non fa più parte della conversazione. Invialo come nuovo messaggio o riapri la risposta.",
       "replyFailed": "Impossibile inviare la risposta. Riprova.",
       "sendFailed": "Impossibile inviare il messaggio. Riprova.",
-      "transferOwnershipFailed": "Impossibile trasferire la proprietà. Riprova."
+      "transferOwnershipFailed": "Impossibile trasferire la proprietà. Riprova.",
+      "typingOne": "{name} sta scrivendo…",
+      "typingMany": "{count} persone stanno scrivendo…",
+      "dailySummary": {
+        "title": "Riepilogo giornaliero",
+        "messageCount": "{count, plural, one {# messaggio} other {# messaggi}}",
+        "topics": "Argomenti",
+        "keyPoints": "Punti chiave",
+        "decisions": "Decisioni",
+        "actionItems": "Azioni da fare",
+        "viewMessages": "Vedi messaggi",
+        "viewMessagesAria": "Vedi i messaggi su «{topic}»",
+        "participants": "Partecipanti",
+        "messageUnavailable": "Questo messaggio non è più disponibile",
+        "findingMessages": "Ricerca dei messaggi…",
+        "aiGenerated": "Riepilogo generato dall'IA"
+      }
     },
     "dateLabels": {
       "today": "Oggi",

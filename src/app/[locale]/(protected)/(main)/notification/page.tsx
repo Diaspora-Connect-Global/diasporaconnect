@@ -7,6 +7,7 @@ import {
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Bell, Check, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { stripIds } from '@/lib/displayName';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NetworkStatus } from '@apollo/client';
@@ -251,8 +252,12 @@ interface NotificationView {
 // strip them from any string sourced from the notification payload.
 const EMOJI_RE =
   /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{1F1E6}-\u{1F1FF}]/gu;
+/**
+ * Clean backend-provided copy for display: drop emoji and any user id the
+ * server interpolated into it (the ids are never shown to a person).
+ */
 function stripEmoji(value: string | null | undefined): string {
-  return (value || '').replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim();
+  return stripIds((value || '').replace(EMOJI_RE, '')).replace(/\s{2,}/g, ' ').trim();
 }
 
 /**

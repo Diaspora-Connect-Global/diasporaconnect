@@ -2067,7 +2067,8 @@
       "liked": "Gefällt mir",
       "commented": "Kommentiert",
       "noCommunities": "Noch keine Communities beigetreten.",
-      "noPosts": "Noch keine {type} Beiträge."
+      "noPosts": "Noch keine {type} Beiträge.",
+      "socials": "Social Media"
     },
     "profileCompletion": {
       "title": "Profilvollständigkeit",
@@ -2102,6 +2103,61 @@
       "viewAsOthers": "Als andere ansehen",
       "linkCopied": "Link kopiert",
       "copyFailed": "Link konnte nicht kopiert werden"
+    },
+    "socials": {
+      "title": "Social Media",
+      "add": "Link hinzufügen",
+      "addTitle": "Social-Media-Link hinzufügen",
+      "editTitle": "Social-Media-Link bearbeiten",
+      "platform": "Plattform",
+      "linkLabel": "Link oder Benutzername",
+      "previewAs": "Wird gespeichert als {url}",
+      "previewInvalid": "Gib einen gültigen {platform}-Link oder Benutzernamen ein.",
+      "previewWrongPlatform": "Das ist kein {platform}-Link.",
+      "publicNotice": "Dieser Link ist in deinem Profil öffentlich sichtbar. DiaspoPlug ruft ihn auf, um zu prüfen, ob er existiert.",
+      "save": "Speichern",
+      "saving": "Wird gespeichert…",
+      "cancel": "Abbrechen",
+      "edit": "{platform}-Link bearbeiten",
+      "editShort": "Bearbeiten",
+      "remove": "{platform}-Link entfernen",
+      "removeShort": "Entfernen",
+      "recheck": "{platform}-Link erneut prüfen",
+      "recheckShort": "Erneut prüfen",
+      "confirmRemove": "Diesen Link aus deinem Profil entfernen?",
+      "confirmRemoveYes": "Entfernen",
+      "status": {
+        "CONFIRMED": "Bestätigt",
+        "UNCONFIRMED": "Nicht bestätigt",
+        "NOT_FOUND": "Nicht gefunden",
+        "PENDING": "Wird geprüft…"
+      },
+      "statusHelp": {
+        "UNCONFIRMED": "Die Seite hat keine Bestätigung zugelassen (oft wegen einer Anmeldeseite). Der Link bleibt in deinem Profil sichtbar.",
+        "NOT_FOUND": "Wir konnten dieses Profil nicht finden, deshalb ist es für andere ausgeblendet. Prüfe den Link und bearbeite ihn."
+      },
+      "emptyOwnTitle": "Noch keine Social-Media-Links",
+      "emptyOwn": "Füge Links zu deinen anderen Profilen hinzu, damit man dich auch dort findet.",
+      "emptyOther": "Noch keine Social-Media-Links.",
+      "listLabel": "Social-Media-Links",
+      "loadError": "Social-Media-Links können gerade nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "opensInNewTab": "(öffnet in einem neuen Tab)",
+      "limitNote": "Bis zu {max} Links, davon bis zu {websites} Websites.",
+      "added": "Link hinzugefügt – wir prüfen ihn jetzt.",
+      "updated": "Link aktualisiert.",
+      "removed": "Link entfernt.",
+      "recheckStarted": "Der Link wird erneut geprüft.",
+      "errors": {
+        "INVALID_URL": "Das sieht nicht nach einem gültigen Link oder Benutzernamen aus.",
+        "WRONG_PLATFORM": "Dieser Link gehört zu einer anderen Plattform.",
+        "LIMIT_REACHED": "Du hast das Limit von {max} Links ({websites} Websites) erreicht.",
+        "DUPLICATE": "Dieser Link oder ein Link für diese Plattform ist bereits in deinem Profil.",
+        "NOT_FOUND": "Dieser Link existiert nicht mehr. Aktualisiere die Seite und versuche es erneut.",
+        "RATE_LIMITED": "Du kannst einen Link einmal pro Tag erneut prüfen. Versuche es nach {time} wieder.",
+        "RATE_LIMITED_NO_TIME": "Du kannst einen Link einmal pro Tag erneut prüfen.",
+        "failed": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+      }
     }
   },
   "settings": {
@@ -2617,7 +2673,14 @@
     "decreaseQuantity": "Menge verringern",
     "increaseQuantity": "Menge erhöhen",
     "remove": "Entfernen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "identity": {
+      "unknownUser": "Unbekannter Nutzer",
+      "aMember": "ein Mitglied",
+      "someone": "Jemand",
+      "customer": "Kunde",
+      "attendee": "Teilnehmer"
+    }
   },
   "metadata": {
     "title": "Diaspora Connect Global",
@@ -2766,7 +2829,23 @@
       "replyTargetGone": "Diese Nachricht ist nicht mehr Teil dieser Unterhaltung. Senden Sie sie als neue Nachricht oder öffnen Sie die Antwort erneut.",
       "replyFailed": "Ihre Antwort konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
       "sendFailed": "Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
-      "transferOwnershipFailed": "Die Übertragung der Eigentümerschaft ist fehlgeschlagen. Bitte versuchen Sie es erneut."
+      "transferOwnershipFailed": "Die Übertragung der Eigentümerschaft ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "typingOne": "{name} schreibt…",
+      "typingMany": "{count} Personen schreiben…",
+      "dailySummary": {
+        "title": "Tageszusammenfassung",
+        "messageCount": "{count, plural, one {# Nachricht} other {# Nachrichten}}",
+        "topics": "Themen",
+        "keyPoints": "Wichtige Punkte",
+        "decisions": "Entscheidungen",
+        "actionItems": "Aufgaben",
+        "viewMessages": "Nachrichten ansehen",
+        "viewMessagesAria": "Nachrichten zu „{topic}“ ansehen",
+        "participants": "Beteiligte",
+        "messageUnavailable": "Diese Nachricht ist nicht mehr verfügbar",
+        "findingMessages": "Nachrichten werden gesucht…",
+        "aiGenerated": "KI-generierte Zusammenfassung"
+      }
     },
     "dateLabels": {
       "today": "Heute",
