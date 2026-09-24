@@ -177,7 +177,9 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
         [router, t]
     );
 
-    const addFriend = useCallback(async (userId: string) => {
+    // Resolves `true` only when the server confirmed the request was sent,
+    // so callers (e.g. People-you-may-know) can undo an optimistic hide.
+    const addFriend = useCallback(async (userId: string): Promise<boolean> => {
         const actionKey = `addFriend-${userId}`;
         setActionLoading(actionKey, true);
 
@@ -193,12 +195,14 @@ export const useFriendActions = (options?: UseFriendActionsOptions) => {
             if (data?.sendConnectionRequest.success) {
                 toast.success(t('toasts.requestSent'));
                 onConnectionAction?.();
-            } else {
-                toast.error(data?.sendConnectionRequest.message || 'Failed to send request');
+                return true;
             }
+            toast.error(data?.sendConnectionRequest.message || 'Failed to send request');
+            return false;
         } catch (error) {
             console.error('Error sending friend request:', error);
             toast.error('Failed to send friend request');
+            return false;
         } finally {
             setActionLoading(actionKey, false);
         }

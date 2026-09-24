@@ -38,13 +38,17 @@ export function PeopleYouMayKnow() {
 
     // Track which user is currently being added
     const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+    // People the viewer just sent a request to. Hidden immediately on
+    // click (optimistic) and kept hidden, so the card can't linger or
+    // flash back while the list refetches; restored only if the send fails.
+    const [requestedIds, setRequestedIds] = useState<Set<string>>(() => new Set());
 
     // Phase 2: PYMK is now sourced from recommendation-service via
     // `recommendedPeople`. The gateway server-hydrates the user `Profile`
     // and resolves community names for `sharedCommunityIds`, so a single
     // round-trip carries everything the card needs. The old
     // `GET_FRIEND_SUGGESTIONS` path (user-service heuristic) is gone.
-    const { data, loading, refetch } = useQuery<RecommendedPeopleData>(
+    const { data, loading } = useQuery<RecommendedPeopleData>(
         RECOMMENDED_PEOPLE,
         {
             variables: { limit: 3 },
@@ -52,23 +56,30 @@ export function PeopleYouMayKnow() {
         }
     );
 
-    // Connection-status filtering is the gateway's responsibility — its
-    // `recommendedPeople` resolver passes `excludeUserIds` (accepted +
-    // pending) to the rec-service so already-related users never enter
-    // the candidate pool. We deliberately don't double-filter on the
-    // client here: doing so would hide a backend bug rather than fix it.
-    const suggestions = data?.recommendedPeople?.items ?? [];
+    // Relationship filtering (friends, pending either way, blocked, self)
+    // is enforced server-side in recommendation-service. The only
+    // client-side filter is the viewer's own just-sent requests, so the
+    // card disappears the moment they click.
+    const suggestions = (data?.recommendedPeople?.items ?? []).filter(
+        (s) => !requestedIds.has(s.profile.userId),
+    );
 
     const handleAddFriend = async (userId: string) => {
         setLoadingUserId(userId);
+        setRequestedIds((prev) => new Set(prev).add(userId));
         try {
-            await addFriend(userId);
-            // Success toast handled in the hook.
-            setTimeout(() => {
-                refetch();
-            }, 500);
-        } catch (error) {
-            console.error('Error adding friend:', error);
+            // Success/error toasts are handled in the hook.
+            // On success the mutation's refetchQueries has already
+            // refreshed every RecommendedPeople observer; keep the id
+            // hidden regardless so the card can never flash back.
+            const sent = await addFriend(userId);
+            if (!sent) {
+                setRequestedIds((prev) => {
+                    const next = new Set(prev);
+                    next.delete(userId);
+                    return next;
+                });
+            }
         } finally {
             setLoadingUserId(null);
         }
