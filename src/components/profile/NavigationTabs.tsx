@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from 'react';
+import type { ReactNode } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import FilteredPosts from "./FilteredPosts";
 import ProfileCommunities from "./ProfileCommunities";
@@ -54,6 +55,15 @@ interface NavigationTabsProps {
 
 }
 
+/** Card for tab content; on phones it joins the tab bar above into one card. */
+function ContentCard({ children }: { children: ReactNode }) {
+  return (
+    <Card className="p-0 max-lg:rounded-t-none max-lg:border-t-0 lg:rounded-2xl lg:border-[#E7ECF5] lg:shadow-none">
+      <CardContent className="p-0">{children}</CardContent>
+    </Card>
+  );
+}
+
 export function NavigationTabs({
 userId,
 isOwnProfile =false,
@@ -62,8 +72,20 @@ userData
   const t = useTranslations('profile.navigation');
   const tActions = useTranslations('actions');
   
-  // State for main tabs and sub-tabs
-  const [activeTab, setActiveTab] = useState("posts");
+  // The active tab lives in the URL (?tab=about) so other parts of the page —
+  // "Edit profile", "Complete your profile" — can open a tab directly, and the
+  // choice survives a refresh or a shared link.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const requested = searchParams.get('tab');
+  const activeTab = requested === 'communities' || requested === 'about' ? requested : 'posts';
+  const setActiveTab = (id: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (id === 'posts') params.delete('tab');
+    else params.set('tab', id);
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : '?', { scroll: false });
+  };
 
   // Main horizontal tabs
   const mainTabs = [
@@ -78,7 +100,9 @@ userData
     switch (activeTab) {
       case 'about':
         return (
-         <AboutContent isOwnProfile={isOwnProfile} userId= {userId} userData={userData}/>
+          <ContentCard>
+            <AboutContent isOwnProfile={isOwnProfile} userId={userId} userData={userData} />
+          </ContentCard>
         );
 
       case 'posts':
@@ -88,7 +112,9 @@ userData
 
       case 'communities':
         return (
-          <ProfileCommunities userId={userId} isOwnProfile={isOwnProfile} />
+          <ContentCard>
+            <ProfileCommunities userId={userId} isOwnProfile={isOwnProfile} />
+          </ContentCard>
         );
 
       default:
@@ -97,32 +123,36 @@ userData
   };
 
   return (
-    <Card className=" p-0 mb-6">
-      <CardContent className="p-0">
-        {/* Main Horizontal Tabs */}
-        <div className="flex border-b bg-surface-subtle rounded-t-lg">
-          {mainTabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`px-6 py-3 text-sm font-medium cursor-pointer transition-colors ${activeTab === tab.id
-                  ? 'text-primary border-b-2 border-border-brand'
-                  : 'text-muted-foreground hover:text-foreground'
-                }`}
-              onClick={() => {
-                setActiveTab(tab.id);
-               
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+    <div className="mb-6 lg:space-y-4">
+      {/* Main horizontal tabs — their own card, as in the desktop design */}
+      <Card className="p-0 max-lg:rounded-b-none max-lg:border-b-0 lg:rounded-2xl lg:border-[#E7ECF5] lg:shadow-none">
+        <CardContent className="p-0">
+          <div role="tablist" className="flex px-2 lg:px-4">
+            {mainTabs.map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative px-4 lg:px-6 py-3 lg:py-4 text-sm lg:text-[15px] font-medium cursor-pointer transition-colors ${
+                    active ? 'text-[#1F5FD6]' : 'text-[#1B2A5E]/80 hover:text-[#1B2A5E]'
+                  }`}
+                >
+                  {tab.label}
+                  {active && (
+                    <span aria-hidden className="absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-[#1F5FD6]" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
-        <div>
-          {renderMainContent()}
-        </div>
-      </CardContent>
-    </Card>
+      <div role="tabpanel">{renderMainContent()}</div>
+    </div>
   );
 }
-

@@ -123,11 +123,13 @@ export function LevelGauge({
 
         {/* Score & label - positioned absolutely in center */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-5xl font-bold" style={{ color: activeColor }}>
+          {/* Sized to fit inside the inner ring (diameter = 0.64 * size): at
+              text-5xl the "NN/100" line was wider than the ring and overlapped it. */}
+          <p className="text-4xl font-bold leading-none" style={{ color: activeColor }}>
             {Math.round(normalizedScore)}
-            <span className="text-2xl text-text-secondary">/100</span>
+            <span className="text-lg text-text-secondary">/100</span>
           </p>
-          <p className="text-sm text-text-secondary mt-1">{centerLabel}</p>
+          <p className="text-sm text-text-secondary mt-1.5">{centerLabel}</p>
         </div>
       </div>
     </div>

@@ -2053,7 +2053,8 @@
       "cityPlaceholder": "City",
       "livingHereSince": "Living here since",
       "country": "Country",
-      "whenJoined": "When joined"
+      "whenJoined": "When joined",
+      "joinedUnknown": "Unknown"
     },
     "navigation": {
       "about": "About",
@@ -2071,13 +2072,15 @@
     "profileCompletion": {
       "title": "Profile completion",
       "complete": "complete",
-      "completeProfile": "Complete profile"
+      "completeProfile": "Complete profile",
+      "completeYourProfile": "Complete your profile"
     },
     "trustScore": {
       "title": "Trust score",
       "description": "Your trust score grows when you verify your identity, complete your profile, earn good reviews, and stay active. It signals how reliable you are to others on the platform.",
       "notEarned": "Not yet earned",
-      "notEarnedHint": "Complete your first transaction to earn the starter badge."
+      "notEarnedHint": "Complete your first transaction to earn the starter badge.",
+      "aboutLabel": "About the trust score"
     },
     "kyc": {
       "title": "KYC verification",
@@ -2085,7 +2088,20 @@
       "notVerified": "Not verified",
       "pending": "Under review",
       "rejected": "Not approved",
-      "level": "Level {level}"
+      "level": "Level {level}",
+      "notVerifiedHint": "Verify your identity to unlock more features.",
+      "pendingHint": "We're reviewing your documents.",
+      "verifyIdentity": "Verify identity",
+      "tryAgain": "Try again"
+    },
+    "header": {
+      "editProfile": "Edit profile",
+      "shareProfile": "Share profile",
+      "moreActions": "More profile actions",
+      "copyProfileLink": "Copy profile link",
+      "viewAsOthers": "View as others",
+      "linkCopied": "Link copied",
+      "copyFailed": "Couldn't copy the link"
     }
   },
   "common": {
@@ -2413,6 +2429,41 @@
       "system": {
         "title": "System Default",
         "description": "Follow system theme settings"
+      }
+    },
+    "username": {
+      "title": "Username",
+      "description": "Your username is your public handle. Anyone can open your profile with the link below.",
+      "none": "You don't have a username yet. Choose one below.",
+      "profileLink": "Your profile link",
+      "copy": "Copy link",
+      "copiedShort": "Copied",
+      "copied": "Profile link copied",
+      "copyFailed": "Couldn't copy the link",
+      "label": "New username",
+      "placeholder": "yourname",
+      "rules": "3–30 characters: letters, numbers, underscores and periods. Must start with a letter.",
+      "changeLimit": "You can change your username once every {days} days.",
+      "lockedUntil": "You can change your username again on {date}.",
+      "tooSoon": "You can't change your username again yet.",
+      "checking": "Checking availability…",
+      "available": "@{username} is available",
+      "taken": "This username is already taken",
+      "unavailable": "This username isn't available",
+      "invalid": "This username isn't valid",
+      "checkFailed": "Couldn't check availability. Please try again.",
+      "unchanged": "This is already your username",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Your username is now @{username}",
+      "saveFailed": "Couldn't update your username. Please try again.",
+      "errors": {
+        "tooShort": "Must be at least 3 characters",
+        "tooLong": "Must be at most 30 characters",
+        "invalidChars": "Only letters, numbers, underscores and periods",
+        "mustStartWithLetter": "Must start with a letter",
+        "periodPlacement": "Periods can't be at the end or next to each other",
+        "trailingUnderscore": "Can't end with an underscore"
       }
     }
   },

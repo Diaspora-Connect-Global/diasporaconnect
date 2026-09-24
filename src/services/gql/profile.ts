@@ -9,6 +9,13 @@ export type {
   UpdateProfileResponse,
   UploadProfilePictureResponse,
   UploadCoverPhotoResponse,
+  GetProfileByUsernameResponse,
+  UsernameAvailability,
+  UsernameAvailabilityResponse,
+  UsernameUnavailableReason,
+  UpdateUsernameCode,
+  UpdateUsernameResult,
+  UpdateUsernameResponse,
 } from './types';
 
 // ============================================================================
@@ -33,6 +40,9 @@ export const GET_MY_PROFILE = gql`
       message
       profile {
         userId
+        username
+        usernameChangedAt
+        usernameNextChangeAt
         email
         phone
         firstName
@@ -83,6 +93,7 @@ export const GET_USER_PROFILE = gql`
       message
       profile {
         userId
+        username
         email
         firstName
         middleName
@@ -103,8 +114,75 @@ export const GET_USER_PROFILE = gql`
   }
 `;
 
+/**
+ * Load another user's profile by their username (the `/@username` route).
+ * Same selection and response shape as GET_USER_PROFILE, so both routes can
+ * feed the same view. Send the NORMALIZED username (lowercase, no '@').
+ */
+export const GET_PROFILE_BY_USERNAME = gql`
+  query GetProfileByUsername($username: String!) {
+    profileByUsername(username: $username) {
+      success
+      message
+      profile {
+        userId
+        username
+        email
+        firstName
+        middleName
+        lastName
+        countryOfOrigin
+        residenceCountry
+        city
+        location
+        bio
+        avatarUrl
+        connectionCount
+        trustScore
+        updatedAt
+      }
+      connectionStatus
+      connectionId
+    }
+  }
+`;
+
+/**
+ * Is `username` free for the current user? `reason` is INVALID | RESERVED |
+ * TAKEN when unavailable. Always query network-only — availability changes.
+ */
+export const USERNAME_AVAILABILITY = gql`
+  query UsernameAvailability($username: String!) {
+    usernameAvailability(username: $username) {
+      available
+      reason
+    }
+  }
+`;
+
 // ============================================================================
 // PROFILE MUTATIONS
+// ============================================================================
+
+/**
+ * Change the current user's username. Refusals RESOLVE with
+ * `{ success: false, code }` (INVALID | RESERVED | TAKEN | TOO_SOON) — check
+ * `success`, never just the absence of a throw.
+ */
+export const UPDATE_USERNAME = gql`
+  mutation UpdateUsername($username: String!) {
+    updateUsername(username: $username) {
+      success
+      code
+      message
+      username
+      nextChangeAt
+    }
+  }
+`;
+
+// ============================================================================
+// PROFILE MUTATIONS (continued)
 // ============================================================================
 
 /**

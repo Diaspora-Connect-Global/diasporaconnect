@@ -2053,7 +2053,8 @@
       "cityPlaceholder": "Stad",
       "livingHereSince": "Woon hier sinds",
       "country": "Land",
-      "whenJoined": "Wanneer deelgenomen"
+      "whenJoined": "Wanneer deelgenomen",
+      "joinedUnknown": "Onbekend"
     },
     "navigation": {
       "about": "Over",
@@ -2071,13 +2072,15 @@
     "profileCompletion": {
       "title": "Profielafronding",
       "complete": "voltooid",
-      "completeProfile": "Profiel voltooien"
+      "completeProfile": "Profiel voltooien",
+      "completeYourProfile": "Vul je profiel aan"
     },
     "trustScore": {
       "title": "Vertrouwensscore",
       "description": "Je vertrouwensscore stijgt wanneer je je identiteit verifieert, je profiel invult, goede beoordelingen krijgt en actief blijft. Hij laat anderen zien hoe betrouwbaar je bent op het platform.",
       "notEarned": "Nog niet verdiend",
-      "notEarnedHint": "Rond je eerste transactie af om het starter-badge te verdienen."
+      "notEarnedHint": "Rond je eerste transactie af om het starter-badge te verdienen.",
+      "aboutLabel": "Over de vertrouwensscore"
     },
     "kyc": {
       "title": "KYC-verificatie",
@@ -2085,7 +2088,20 @@
       "notVerified": "Niet geverifieerd",
       "pending": "In behandeling",
       "rejected": "Niet goedgekeurd",
-      "level": "Niveau {level}"
+      "level": "Niveau {level}",
+      "notVerifiedHint": "Verifieer je identiteit om meer functies te ontgrendelen.",
+      "pendingHint": "We beoordelen je documenten.",
+      "verifyIdentity": "Identiteit verifiëren",
+      "tryAgain": "Opnieuw proberen"
+    },
+    "header": {
+      "editProfile": "Profiel bewerken",
+      "shareProfile": "Profiel delen",
+      "moreActions": "Meer profielacties",
+      "copyProfileLink": "Profiellink kopiëren",
+      "viewAsOthers": "Bekijken als anderen",
+      "linkCopied": "Link gekopieerd",
+      "copyFailed": "Kan de link niet kopiëren"
     }
   },
   "common": {
@@ -2413,6 +2429,41 @@
       "system": {
         "title": "Systeemstandaard",
         "description": "Systeemthema-instellingen volgen"
+      }
+    },
+    "username": {
+      "title": "Gebruikersnaam",
+      "description": "Je gebruikersnaam is je openbare naam. Iedereen kan je profiel openen via de link hieronder.",
+      "none": "Je hebt nog geen gebruikersnaam. Kies er hieronder een.",
+      "profileLink": "Link naar je profiel",
+      "copy": "Link kopiëren",
+      "copiedShort": "Gekopieerd",
+      "copied": "Profiellink gekopieerd",
+      "copyFailed": "De link kon niet worden gekopieerd",
+      "label": "Nieuwe gebruikersnaam",
+      "placeholder": "jouwnaam",
+      "rules": "3–30 tekens: letters, cijfers, underscores en punten. Moet met een letter beginnen.",
+      "changeLimit": "Je kunt je gebruikersnaam eens per {days} dagen wijzigen.",
+      "lockedUntil": "Je kunt je gebruikersnaam weer wijzigen op {date}.",
+      "tooSoon": "Je kunt je gebruikersnaam nog niet opnieuw wijzigen.",
+      "checking": "Beschikbaarheid controleren…",
+      "available": "@{username} is beschikbaar",
+      "taken": "Deze gebruikersnaam is al in gebruik",
+      "unavailable": "Deze gebruikersnaam is niet beschikbaar",
+      "invalid": "Deze gebruikersnaam is ongeldig",
+      "checkFailed": "De beschikbaarheid kon niet worden gecontroleerd. Probeer het opnieuw.",
+      "unchanged": "Dit is al je gebruikersnaam",
+      "save": "Opslaan",
+      "saving": "Opslaan…",
+      "saved": "Je gebruikersnaam is nu @{username}",
+      "saveFailed": "Je gebruikersnaam kon niet worden gewijzigd. Probeer het opnieuw.",
+      "errors": {
+        "tooShort": "Minimaal 3 tekens",
+        "tooLong": "Maximaal 30 tekens",
+        "invalidChars": "Alleen letters, cijfers, underscores en punten",
+        "mustStartWithLetter": "Moet met een letter beginnen",
+        "periodPlacement": "Punten mogen niet aan het einde of direct na elkaar staan",
+        "trailingUnderscore": "Mag niet eindigen op een underscore"
       }
     }
   },

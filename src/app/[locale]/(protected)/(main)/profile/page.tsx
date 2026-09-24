@@ -21,6 +21,7 @@ import { useImageUpload } from "@/hooks/useImageUpload";
 import { useUserStore } from "@/store/useUserStore";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { useRouter as useQueryRouter, useSearchParams } from "next/navigation";
 
 const UPDATE_PROFILE = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
@@ -50,6 +51,8 @@ interface UpdateProfileResponse {
 export default function ProfilePage() {
     const tCommon = useTranslations("common");
     const router = useRouter();
+    const queryRouter = useQueryRouter();
+    const searchParams = useSearchParams();
     const setUser = useUserStore(state => state.setUser);
     const [editAvatarOpen, setEditAvatarOpen] = useState(false);
     const avatarDialogContentRef = useRef<HTMLDivElement | null>(null);
@@ -140,8 +143,11 @@ export default function ProfilePage() {
         router.push('/verifykyc');
     }
 
+    /** Every profile section is edited in place on the About tab. */
     function handleCompleteProfile(): void {
-        router.push('/settings');
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tab', 'about');
+        queryRouter.replace(`?${params.toString()}`, { scroll: false });
     }
 
     const handleAvatarUpload = async () => {
@@ -182,9 +188,9 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="flex flex-col lg:flex-row lg:space-x-5 my-2 space-y-2 lg:space-y-0 h-app-inner mx-2">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-5 my-2 space-y-2 lg:space-y-0 h-app-inner mx-2 lg:mx-6 lg:my-5">
             {/* Profile Header - First on mobile, part of left column on desktop */}
-            <div className="lg:w-[50vw] order-1 lg:order-none space-y-2 flex flex-col">
+            <div className="lg:flex-1 lg:min-w-0 order-1 lg:order-none space-y-2 lg:space-y-4 flex flex-col">
                 <ProfileHeader
                     userId='me'
                     friendType="friends"
@@ -218,7 +224,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Right Column - Second on mobile */}
-            <div className="lg:w-[25vw] space-y-2 mb-4 order-2 lg:order-none">
+            <div className="lg:w-[360px] xl:w-[380px] lg:shrink-0 space-y-2 lg:space-y-4 mb-4 order-2 lg:order-none">
                 <div className='min-h-0'>
                     <ProfileCompletion
                         percentage={profile?.profileCompletion?.percentage}

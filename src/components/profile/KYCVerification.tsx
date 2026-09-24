@@ -2,7 +2,13 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ShieldCheckIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react";
 import { useTranslations } from 'next-intl';
 import { useRef } from "react";
 import CompleteKYCModal, { CompleteKYCModalRef } from "./modals/CompleteKYCModal";
@@ -30,52 +36,82 @@ export function KYCVerification({ verified }: KYCVerificationProps) {
 
   const isVerified =
     isVerifiedKycStatus(liveStatus) || verified === 'verified';
-  const isRejected = liveStatus === 'REJECTED' || liveStatus === 'EXPIRED';
+  const isRejected = !isVerified && (liveStatus === 'REJECTED' || liveStatus === 'EXPIRED');
   const isPending =
-    liveStatus === 'SUBMITTED' ||
-    liveStatus === 'PENDING' ||
-    liveStatus === 'UNDER_REVIEW';
+    !isVerified &&
+    (liveStatus === 'SUBMITTED' ||
+      liveStatus === 'PENDING' ||
+      liveStatus === 'UNDER_REVIEW');
 
-  const statusLabel = isVerified
-    ? t('verified')
-    : isPending
-      ? t('pending')
-      : isRejected
-        ? t('rejected')
-        : t('notVerified');
+  const openModal = () => modalRef.current?.open();
 
-  const statusColor = isVerified
-    ? 'text-text-success'
-    : isPending
-      ? 'text-text-brand'
-      : 'text-text-warning';
+  const linkClass =
+    "mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#1F5FD6] cursor-pointer rounded-md hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]";
+
+  let body;
+  if (isVerified) {
+    body = (
+      <div className="flex items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-text-success">
+          <CheckCircleIcon size={22} weight="fill" aria-hidden />
+          {t('verified')}
+        </span>
+        {kycLevel > 0 && (
+          <span className="text-xs text-text-secondary">{t('level', { level: kycLevel })}</span>
+        )}
+      </div>
+    );
+  } else if (isPending) {
+    body = (
+      <>
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#1F5FD6]">
+          <ClockIcon size={22} weight="fill" aria-hidden />
+          {t('pending')}
+        </span>
+        <p className="mt-1.5 text-sm text-text-secondary">{t('pendingHint')}</p>
+      </>
+    );
+  } else if (isRejected) {
+    body = (
+      <>
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-text-danger">
+          <WarningCircleIcon size={22} weight="fill" aria-hidden />
+          {t('rejected')}
+        </span>
+        {rejectionReason && (
+          <p className="mt-1.5 text-sm text-text-secondary break-words">{rejectionReason}</p>
+        )}
+        <button type="button" onClick={openModal} className={linkClass}>
+          {t('tryAgain')}
+          <ArrowRightIcon size={16} aria-hidden />
+        </button>
+      </>
+    );
+  } else {
+    body = (
+      <>
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-text-danger">
+          <WarningCircleIcon size={22} weight="fill" aria-hidden />
+          {t('notVerified')}
+        </span>
+        <p className="mt-1.5 text-sm text-text-secondary">{t('notVerifiedHint')}</p>
+        <button type="button" onClick={openModal} className={linkClass}>
+          {t('verifyIdentity')}
+          <ArrowRightIcon size={16} aria-hidden />
+        </button>
+      </>
+    );
+  }
 
   return (
     <>
-      <Card className="h-full">
-        <CardContent className="h-full flex flex-col">
-          <div className="flex-1 min-h-0 flex flex-col justify-between">
-            <div
-              onClick={() => modalRef.current?.open()}
-              className="flex items-center justify-between cursor-pointer"
-            >
-              <span className="text-sm font-medium">{t('title')}</span>
-              <ChevronRight className="w-4 h-4" />
-            </div>
-
-            <div className="flex items-center justify-between mt-2">
-              <span className={`text-sm ${statusColor}`}>{statusLabel}</span>
-              {isVerified && kycLevel > 0 && (
-                <span className="text-xs text-text-secondary">
-                  {t('level', { level: kycLevel })}
-                </span>
-              )}
-            </div>
-
-            {isRejected && rejectionReason && (
-              <p className="mt-1 text-xs text-text-warning">{rejectionReason}</p>
-            )}
-          </div>
+      <Card className="h-full gap-0 py-0 rounded-2xl border-[#E7ECF5] shadow-none">
+        <CardContent className="p-5">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-[#1B2A5E] dark:text-text-primary">
+            <ShieldCheckIcon size={20} className="text-[#1F5FD6]" aria-hidden />
+            {t('title')}
+          </h2>
+          <div className="mt-3">{body}</div>
         </CardContent>
       </Card>
 

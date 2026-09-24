@@ -2053,7 +2053,8 @@
       "cityPlaceholder": "Stadt",
       "livingHereSince": "Wohnt hier seit",
       "country": "Land",
-      "whenJoined": "Beitrittsdatum"
+      "whenJoined": "Beitrittsdatum",
+      "joinedUnknown": "Unbekannt"
     },
     "navigation": {
       "about": "Über",
@@ -2071,13 +2072,15 @@
     "profileCompletion": {
       "title": "Profilvollständigkeit",
       "complete": "vollständig",
-      "completeProfile": "Profil vervollständigen"
+      "completeProfile": "Profil vervollständigen",
+      "completeYourProfile": "Profil vervollständigen"
     },
     "trustScore": {
       "title": "Vertrauenswertung",
       "description": "Deine Vertrauenswertung steigt, wenn du deine Identität verifizierst, dein Profil vervollständigst, gute Bewertungen erhältst und aktiv bleibst. Sie zeigt anderen, wie zuverlässig du auf der Plattform bist.",
       "notEarned": "Noch nicht freigeschaltet",
-      "notEarnedHint": "Schließe deine erste Transaktion ab, um das Starter-Abzeichen zu erhalten."
+      "notEarnedHint": "Schließe deine erste Transaktion ab, um das Starter-Abzeichen zu erhalten.",
+      "aboutLabel": "Über den Vertrauenswert"
     },
     "kyc": {
       "title": "KYC-Verifizierung",
@@ -2085,7 +2088,20 @@
       "notVerified": "Nicht verifiziert",
       "pending": "In Prüfung",
       "rejected": "Nicht genehmigt",
-      "level": "Stufe {level}"
+      "level": "Stufe {level}",
+      "notVerifiedHint": "Bestätige deine Identität, um weitere Funktionen freizuschalten.",
+      "pendingHint": "Wir prüfen deine Dokumente.",
+      "verifyIdentity": "Identität bestätigen",
+      "tryAgain": "Erneut versuchen"
+    },
+    "header": {
+      "editProfile": "Profil bearbeiten",
+      "shareProfile": "Profil teilen",
+      "moreActions": "Weitere Profilaktionen",
+      "copyProfileLink": "Profillink kopieren",
+      "viewAsOthers": "Als andere ansehen",
+      "linkCopied": "Link kopiert",
+      "copyFailed": "Link konnte nicht kopiert werden"
     }
   },
   "settings": {
@@ -2220,6 +2236,41 @@
       "system": {
         "title": "Systemstandard",
         "description": "Systemthema-Einstellungen folgen"
+      }
+    },
+    "username": {
+      "title": "Benutzername",
+      "description": "Dein Benutzername ist dein öffentlicher Name auf der Plattform. Über den Link unten kann jeder dein Profil öffnen.",
+      "none": "Du hast noch keinen Benutzernamen. Wähle unten einen aus.",
+      "profileLink": "Dein Profil-Link",
+      "copy": "Link kopieren",
+      "copiedShort": "Kopiert",
+      "copied": "Profil-Link kopiert",
+      "copyFailed": "Der Link konnte nicht kopiert werden",
+      "label": "Neuer Benutzername",
+      "placeholder": "deinname",
+      "rules": "3–30 Zeichen: Buchstaben, Zahlen, Unterstriche und Punkte. Muss mit einem Buchstaben beginnen.",
+      "changeLimit": "Du kannst deinen Benutzernamen einmal alle {days} Tage ändern.",
+      "lockedUntil": "Du kannst deinen Benutzernamen am {date} wieder ändern.",
+      "tooSoon": "Du kannst deinen Benutzernamen noch nicht erneut ändern.",
+      "checking": "Verfügbarkeit wird geprüft…",
+      "available": "@{username} ist verfügbar",
+      "taken": "Dieser Benutzername ist bereits vergeben",
+      "unavailable": "Dieser Benutzername ist nicht verfügbar",
+      "invalid": "Dieser Benutzername ist ungültig",
+      "checkFailed": "Die Verfügbarkeit konnte nicht geprüft werden. Bitte versuche es erneut.",
+      "unchanged": "Das ist bereits dein Benutzername",
+      "save": "Speichern",
+      "saving": "Wird gespeichert…",
+      "saved": "Dein Benutzername ist jetzt @{username}",
+      "saveFailed": "Dein Benutzername konnte nicht geändert werden. Bitte versuche es erneut.",
+      "errors": {
+        "tooShort": "Mindestens 3 Zeichen",
+        "tooLong": "Höchstens 30 Zeichen",
+        "invalidChars": "Nur Buchstaben, Zahlen, Unterstriche und Punkte",
+        "mustStartWithLetter": "Muss mit einem Buchstaben beginnen",
+        "periodPlacement": "Punkte dürfen nicht am Ende oder direkt hintereinander stehen",
+        "trailingUnderscore": "Darf nicht mit einem Unterstrich enden"
       }
     }
   },

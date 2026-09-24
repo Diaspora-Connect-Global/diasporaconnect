@@ -2053,7 +2053,8 @@
       "cityPlaceholder": "Ville",
       "livingHereSince": "Réside ici depuis",
       "country": "Pays",
-      "whenJoined": "Date d'inscription"
+      "whenJoined": "Date d'inscription",
+      "joinedUnknown": "Inconnue"
     },
     "navigation": {
       "about": "À propos",
@@ -2071,13 +2072,15 @@
     "profileCompletion": {
       "title": "Complétion du profil",
       "complete": "complété",
-      "completeProfile": "Compléter le profil"
+      "completeProfile": "Compléter le profil",
+      "completeYourProfile": "Compléter votre profil"
     },
     "trustScore": {
       "title": "Score de confiance",
       "description": "Votre score de confiance augmente lorsque vous vérifiez votre identité, complétez votre profil, recevez de bons avis et restez actif. Il indique aux autres utilisateurs à quel point vous êtes fiable sur la plateforme.",
       "notEarned": "Pas encore obtenu",
-      "notEarnedHint": "Finalisez votre première transaction pour décrocher le badge starter."
+      "notEarnedHint": "Finalisez votre première transaction pour décrocher le badge starter.",
+      "aboutLabel": "À propos du score de confiance"
     },
     "kyc": {
       "title": "Vérification KYC",
@@ -2085,7 +2088,20 @@
       "notVerified": "Non vérifié",
       "pending": "En cours d'examen",
       "rejected": "Non approuvé",
-      "level": "Niveau {level}"
+      "level": "Niveau {level}",
+      "notVerifiedHint": "Vérifiez votre identité pour débloquer plus de fonctionnalités.",
+      "pendingHint": "Nous examinons vos documents.",
+      "verifyIdentity": "Vérifier l'identité",
+      "tryAgain": "Réessayer"
+    },
+    "header": {
+      "editProfile": "Modifier le profil",
+      "shareProfile": "Partager le profil",
+      "moreActions": "Plus d'actions sur le profil",
+      "copyProfileLink": "Copier le lien du profil",
+      "viewAsOthers": "Voir comme les autres",
+      "linkCopied": "Lien copié",
+      "copyFailed": "Impossible de copier le lien"
     }
   },
   "settings": {
@@ -2220,6 +2236,41 @@
       "system": {
         "title": "Par défaut du système",
         "description": "Suivre les paramètres du thème système"
+      }
+    },
+    "username": {
+      "title": "Nom d'utilisateur",
+      "description": "Votre nom d'utilisateur est votre identifiant public. Tout le monde peut ouvrir votre profil avec le lien ci-dessous.",
+      "none": "Vous n'avez pas encore de nom d'utilisateur. Choisissez-en un ci-dessous.",
+      "profileLink": "Lien de votre profil",
+      "copy": "Copier le lien",
+      "copiedShort": "Copié",
+      "copied": "Lien du profil copié",
+      "copyFailed": "Impossible de copier le lien",
+      "label": "Nouveau nom d'utilisateur",
+      "placeholder": "votrenom",
+      "rules": "3 à 30 caractères : lettres, chiffres, tirets bas et points. Doit commencer par une lettre.",
+      "changeLimit": "Vous pouvez changer votre nom d'utilisateur une fois tous les {days} jours.",
+      "lockedUntil": "Vous pourrez de nouveau changer votre nom d'utilisateur le {date}.",
+      "tooSoon": "Vous ne pouvez pas encore changer à nouveau votre nom d'utilisateur.",
+      "checking": "Vérification de la disponibilité…",
+      "available": "@{username} est disponible",
+      "taken": "Ce nom d'utilisateur est déjà pris",
+      "unavailable": "Ce nom d'utilisateur n'est pas disponible",
+      "invalid": "Ce nom d'utilisateur n'est pas valide",
+      "checkFailed": "Impossible de vérifier la disponibilité. Veuillez réessayer.",
+      "unchanged": "C'est déjà votre nom d'utilisateur",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saved": "Votre nom d'utilisateur est maintenant @{username}",
+      "saveFailed": "Impossible de modifier votre nom d'utilisateur. Veuillez réessayer.",
+      "errors": {
+        "tooShort": "Au moins 3 caractères",
+        "tooLong": "30 caractères maximum",
+        "invalidChars": "Uniquement des lettres, chiffres, tirets bas et points",
+        "mustStartWithLetter": "Doit commencer par une lettre",
+        "periodPlacement": "Les points ne peuvent pas être à la fin ni se suivre",
+        "trailingUnderscore": "Ne peut pas se terminer par un tiret bas"
       }
     }
   },

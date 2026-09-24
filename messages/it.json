@@ -2053,7 +2053,8 @@
       "cityPlaceholder": "Città",
       "livingHereSince": "Vive qui dal",
       "country": "Paese",
-      "whenJoined": "Data di iscrizione"
+      "whenJoined": "Data di iscrizione",
+      "joinedUnknown": "Sconosciuta"
     },
     "navigation": {
       "about": "Informazioni",
@@ -2071,13 +2072,15 @@
     "profileCompletion": {
       "title": "Completamento profilo",
       "complete": "completo",
-      "completeProfile": "Completa profilo"
+      "completeProfile": "Completa profilo",
+      "completeYourProfile": "Completa il tuo profilo"
     },
     "trustScore": {
       "title": "Punteggio di fiducia",
       "description": "Il tuo punteggio di fiducia aumenta quando verifichi la tua identità, completi il profilo, ricevi recensioni positive e rimani attivo. Indica agli altri quanto sei affidabile sulla piattaforma.",
       "notEarned": "Non ancora ottenuto",
-      "notEarnedHint": "Completa la tua prima transazione per ottenere il badge starter."
+      "notEarnedHint": "Completa la tua prima transazione per ottenere il badge starter.",
+      "aboutLabel": "Informazioni sul punteggio di fiducia"
     },
     "kyc": {
       "title": "Verifica KYC",
@@ -2085,7 +2088,20 @@
       "notVerified": "Non verificato",
       "pending": "In revisione",
       "rejected": "Non approvato",
-      "level": "Livello {level}"
+      "level": "Livello {level}",
+      "notVerifiedHint": "Verifica la tua identità per sbloccare altre funzionalità.",
+      "pendingHint": "Stiamo esaminando i tuoi documenti.",
+      "verifyIdentity": "Verifica identità",
+      "tryAgain": "Riprova"
+    },
+    "header": {
+      "editProfile": "Modifica profilo",
+      "shareProfile": "Condividi profilo",
+      "moreActions": "Altre azioni del profilo",
+      "copyProfileLink": "Copia link del profilo",
+      "viewAsOthers": "Visualizza come gli altri",
+      "linkCopied": "Link copiato",
+      "copyFailed": "Impossibile copiare il link"
     }
   },
   "settings": {
@@ -2220,6 +2236,41 @@
       "system": {
         "title": "Predefinito del sistema",
         "description": "Segui le impostazioni del tema di sistema"
+      }
+    },
+    "username": {
+      "title": "Nome utente",
+      "description": "Il tuo nome utente è il tuo identificativo pubblico. Chiunque può aprire il tuo profilo con il link qui sotto.",
+      "none": "Non hai ancora un nome utente. Scegline uno qui sotto.",
+      "profileLink": "Link al tuo profilo",
+      "copy": "Copia link",
+      "copiedShort": "Copiato",
+      "copied": "Link del profilo copiato",
+      "copyFailed": "Impossibile copiare il link",
+      "label": "Nuovo nome utente",
+      "placeholder": "tuonome",
+      "rules": "3–30 caratteri: lettere, numeri, trattini bassi e punti. Deve iniziare con una lettera.",
+      "changeLimit": "Puoi cambiare il tuo nome utente una volta ogni {days} giorni.",
+      "lockedUntil": "Potrai cambiare di nuovo il tuo nome utente il {date}.",
+      "tooSoon": "Non puoi ancora cambiare di nuovo il tuo nome utente.",
+      "checking": "Verifica della disponibilità…",
+      "available": "@{username} è disponibile",
+      "taken": "Questo nome utente è già in uso",
+      "unavailable": "Questo nome utente non è disponibile",
+      "invalid": "Questo nome utente non è valido",
+      "checkFailed": "Impossibile verificare la disponibilità. Riprova.",
+      "unchanged": "Questo è già il tuo nome utente",
+      "save": "Salva",
+      "saving": "Salvataggio…",
+      "saved": "Il tuo nome utente ora è @{username}",
+      "saveFailed": "Impossibile aggiornare il nome utente. Riprova.",
+      "errors": {
+        "tooShort": "Almeno 3 caratteri",
+        "tooLong": "Al massimo 30 caratteri",
+        "invalidChars": "Solo lettere, numeri, trattini bassi e punti",
+        "mustStartWithLetter": "Deve iniziare con una lettera",
+        "periodPlacement": "I punti non possono essere alla fine né consecutivi",
+        "trailingUnderscore": "Non può terminare con un trattino basso"
       }
     }
   },

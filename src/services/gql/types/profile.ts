@@ -93,6 +93,12 @@ export interface ProfileCompletion {
  */
 export interface Profile {
   userId: string;
+  /** Canonical lowercase handle, no '@'. Absent until the backend assigns one. */
+  username?: string | null;
+  /** ISO timestamp of the last custom username change; null if never changed. */
+  usernameChangedAt?: string | null;
+  /** ISO timestamp from which the next change is allowed; null = allowed now. Own profile only. */
+  usernameNextChangeAt?: string | null;
   email: string;
   phone?: string;
   timezone?: string;
@@ -270,4 +276,40 @@ export interface UploadCoverPhotoResponse {
     };
     error?: string;
   };
+}
+
+// ============================================================================
+// USERNAME TYPES
+// ============================================================================
+
+/** Response of `profileByUsername` — same shape as `getProfile`. */
+export interface GetProfileByUsernameResponse {
+  profileByUsername: GetProfileResponse['getProfile'];
+}
+
+export type UsernameUnavailableReason = 'INVALID' | 'RESERVED' | 'TAKEN';
+
+export interface UsernameAvailability {
+  available: boolean;
+  reason?: UsernameUnavailableReason | string | null;
+}
+
+export interface UsernameAvailabilityResponse {
+  usernameAvailability: UsernameAvailability;
+}
+
+export type UpdateUsernameCode = 'INVALID' | 'RESERVED' | 'TAKEN' | 'TOO_SOON';
+
+export interface UpdateUsernameResult {
+  success: boolean;
+  /** null on success. */
+  code?: UpdateUsernameCode | string | null;
+  message?: string | null;
+  username?: string | null;
+  /** ISO timestamp from which the next change is allowed. */
+  nextChangeAt?: string | null;
+}
+
+export interface UpdateUsernameResponse {
+  updateUsername: UpdateUsernameResult;
 }

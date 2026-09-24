@@ -117,14 +117,14 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
   // ---- Tabs config ----
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = isOwnProfile
     ? [
-        { id: 'myPosts', label: t('posts'), icon: <FileText className="w-4 h-4" /> },
-        { id: 'saved', label: t('saved'), icon: <Bookmark className="w-4 h-4" /> },
-        { id: 'liked', label: t('liked'), icon: <Heart className="w-4 h-4" /> },
-        { id: 'commented', label: t('commented'), icon: <MessageCircle className="w-4 h-4" /> },
+        { id: 'myPosts', label: t('posts'), icon: <FileText className="w-4 h-4 lg:w-5 lg:h-5" /> },
+        { id: 'saved', label: t('saved'), icon: <Bookmark className="w-4 h-4 lg:w-5 lg:h-5" /> },
+        { id: 'liked', label: t('liked'), icon: <Heart className="w-4 h-4 lg:w-5 lg:h-5" /> },
+        { id: 'commented', label: t('commented'), icon: <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5" /> },
       ]
     : [
         // Other users only see their posts
-        { id: 'myPosts', label: t('posts'), icon: <FileText className="w-4 h-4" /> },
+        { id: 'myPosts', label: t('posts'), icon: <FileText className="w-4 h-4 lg:w-5 lg:h-5" /> },
       ];
 
   // ---- "My Posts" / user posts via feed with authorId ----
@@ -340,28 +340,37 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
 
   // ---- Render ----
   return (
-    <div className="overflow-hidden lg:flex">
-      {/* Left: Sub-tabs */}
-      <div className="lg:w-[12vw] flex lg:flex-col border-r border-border-subtle bg-surface-default">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`w-full text-left flex items-center justify-center lg:justify-start gap-2 lg:p-3 p-2 transition-colors border-t first:border-t-0 cursor-pointer
-              ${
-                activeTab === tab.id
-                  ? 'text-brand bg-brand/5 font-medium border-b-2 border-b-border-brand'
-                  : 'text-text-primary hover:bg-muted'
+    <div className="max-lg:overflow-hidden max-lg:rounded-b-xl max-lg:border max-lg:border-t-0 max-lg:bg-card max-lg:shadow-sm lg:flex lg:items-start lg:gap-4">
+      {/* Left: Sub-tabs — a horizontal row on phones, the sidebar card on desktop */}
+      <nav
+        aria-label={t('posts')}
+        className={`flex bg-surface-default max-lg:border-r max-lg:border-border-subtle lg:w-[220px] lg:shrink-0 lg:flex-col lg:gap-1 lg:rounded-2xl lg:border lg:border-[#E7ECF5] lg:p-2 ${
+          tabs.length === 1 ? 'lg:hidden' : ''
+        }`}
+      >
+        {tabs.map((tab) => {
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              aria-current={active ? 'page' : undefined}
+              onClick={() => setActiveTab(tab.id)}
+              className={`w-full text-left flex items-center justify-center gap-2 p-2 transition-colors cursor-pointer border-t first:border-t-0 lg:justify-start lg:gap-3 lg:rounded-xl lg:border-0 lg:px-4 lg:py-3 ${
+                active
+                  ? 'text-brand bg-brand/5 font-medium border-b-2 border-b-border-brand lg:border-b-0 lg:bg-[#EAF1FD] lg:text-[#1F5FD6]'
+                  : 'text-text-primary hover:bg-muted lg:text-[#1B2A5E] lg:hover:bg-[#F3F6FC]'
               }`}
-          >
-            {tab.icon}
-            <span className="text-sm hidden sm:inline">{tab.label}</span>
-          </button>
-        ))}
-      </div>
+            >
+              {tab.icon}
+              <span className="text-sm hidden sm:inline lg:text-[15px]">{tab.label}</span>
+            </button>
+          );
+        })}
+      </nav>
 
       {/* Right: Feed */}
-      <div className="flex-1 overflow-y-auto bg-surface-default p-4 space-y-4 max-h-[70vh]">
+      <div className="flex-1 min-w-0 overflow-y-auto bg-surface-default p-4 space-y-4 max-h-[70vh] lg:rounded-2xl lg:border lg:border-[#E7ECF5]">
         {/* Loading skeletons */}
         {loading && posts.length === 0 && (
           <div className="space-y-4">

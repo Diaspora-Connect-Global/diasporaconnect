@@ -56,7 +56,11 @@ export default function MainLayout({
       // following ANY deep link lands on the home feed afterwards — which for a
       // circle invite means the invite is silently lost, and the recipient of an
       // invite is precisely the person least likely to already have an account.
-      saveRedirectUrl(pathname, window.location.search);
+      //
+      // The BROWSER path, not usePathname(): a proxy-rewritten URL such as
+      // `/@steven` (served by the internal `/{locale}/u/steven` route) must come
+      // back as `/@steven`, and the rewritten form is what the router may report.
+      saveRedirectUrl(window.location.pathname || pathname, window.location.search);
       router.replace("/signin");
     }
   }, [hydrated, isAuthenticated, router, pathname]);

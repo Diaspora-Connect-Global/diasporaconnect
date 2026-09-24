@@ -19,6 +19,7 @@ import type { DisplayCurrency } from "@/store/useCurrencyStore";
 import DataExportSection from "@/components/settings/DataExportSection";
 import RecommendationDataSection from "@/components/settings/RecommendationDataSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
+import UsernameSection from "@/components/settings/UsernameSection";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -63,6 +64,9 @@ export default function SettingsPage() {
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
+          {/* Username — identity first: it is the public handle (/@username). */}
+          <UsernameSection />
+
           {/* Notifications Section */}
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
