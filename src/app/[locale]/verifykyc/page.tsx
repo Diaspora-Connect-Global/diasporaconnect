@@ -41,7 +41,7 @@ export default function VerifyPage() {
   const [backImage, setBackImage] = useState<string | null>(null);
   const [selfieImage, setSelfieImage] = useState<string | null>(null);
 
-  const { initiate, initiating, submitKyc, submitting, pollStatus } =
+  const { initiate, initiating, submitKyc, submitting, pollStatus, completeVerification } =
     useKYCVerification();
 
   const goBack = (previousStep: Step) => setStep(previousStep);
@@ -101,6 +101,18 @@ export default function VerifyPage() {
     }
   }, [pollStatus]);
 
+  /** Onfido capture finished: start the check, then wait for its result. */
+  const handleOnfidoComplete = useCallback(async () => {
+    try {
+      await completeVerification();
+    } catch {
+      toast.error('Could not submit your verification. Please try again.');
+      setStep('provider');
+      return;
+    }
+    await startPolling();
+  }, [completeVerification, startPolling]);
+
   // Manual fallback submission via submitKYC (no provider SDK available).
   const handleManualSubmit = useCallback(async () => {
     try {
@@ -134,7 +146,7 @@ export default function VerifyPage() {
               sdkToken={onfidoToken}
               className="flex-1"
               onComplete={() => {
-                void startPolling();
+                void handleOnfidoComplete();
               }}
               onError={() => {
                 toast.error('Verification could not be completed. Please try again.');
@@ -208,7 +220,7 @@ export default function VerifyPage() {
             <OnfidoFlow
               sdkToken={onfidoToken}
               onComplete={() => {
-                void startPolling();
+                void handleOnfidoComplete();
               }}
               onError={() => {
                 toast.error('Verification could not be completed. Please try again.');

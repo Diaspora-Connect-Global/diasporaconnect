@@ -30,7 +30,7 @@ const CompleteKYCModal = forwardRef<CompleteKYCModalRef>((_, ref) => {
   const [phase, setPhase] = useState<Phase>("choose");
   const [onfidoToken, setOnfidoToken] = useState<string | null>(null);
 
-  const { initiate, initiating, pollStatus } = useKYCVerification();
+  const { initiate, initiating, pollStatus, completeVerification } = useKYCVerification();
 
   useImperativeHandle(ref, () => ({
     open: () => {
@@ -73,6 +73,14 @@ const CompleteKYCModal = forwardRef<CompleteKYCModalRef>((_, ref) => {
 
   const handleOnfidoComplete = async () => {
     setPhase("verifying");
+    try {
+      // Starts the Onfido check — without it nothing is ever verified.
+      await completeVerification();
+    } catch {
+      toast.error("Could not submit your verification. Please try again.");
+      setPhase("choose");
+      return;
+    }
     const final = await pollStatus({ timeoutMs: 90000, intervalMs: 3000 });
     if (isVerifiedKycStatus(final.status)) {
       setPhase("done");

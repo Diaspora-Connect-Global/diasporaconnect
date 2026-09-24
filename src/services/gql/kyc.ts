@@ -83,6 +83,21 @@ export const INITIATE_KYC_VERIFICATION = gql`
 `;
 
 /**
+ * Call when the Onfido Web SDK reports completion. Starts the Onfido check —
+ * nothing is verified until this runs. The result arrives by webhook, so poll
+ * getMyKYCStatus afterwards. Auth: Yes.
+ */
+export const COMPLETE_KYC_VERIFICATION = gql`
+  mutation CompleteKYCVerification {
+    completeKYCVerification {
+      status
+      kycLevel
+      profileId
+    }
+  }
+`;
+
+/**
  * Manual individual KYC submission (fallback when no provider SDK token is issued). Auth: Yes.
  * input.providerStrategy: 'onfido' | 'itsme' | 'sumsub' | 'manual'
  */

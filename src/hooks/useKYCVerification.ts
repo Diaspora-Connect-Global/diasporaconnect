@@ -12,6 +12,7 @@ import {
   INITIATE_KYC_VERIFICATION,
   KYC_TERMINAL_STATUSES,
   SUBMIT_BUSINESS_KYB,
+  COMPLETE_KYC_VERIFICATION,
   SUBMIT_KYC,
 } from '@/services/gql/kyc';
 import type {
@@ -66,6 +67,9 @@ export interface UseKYCVerificationResult {
   submitting: boolean;
   submitBusinessKyb: (input: SubmitBusinessKybInput) => Promise<KycStatusDTO | null>;
   submittingKyb: boolean;
+  /** Onfido SDK finished — starts the check. Throws if it was not started. */
+  completeVerification: () => Promise<KycStatusDTO>;
+  completing: boolean;
 
   // ── polling ───────────────────────────────────────────────────────
   /** Polls getMyKYCStatus until terminal (APPROVED/VERIFIED/REJECTED/EXPIRED) or timeout. */
@@ -112,6 +116,9 @@ export function useKYCVerification(options?: { skip?: boolean }): UseKYCVerifica
     useMutation<SubmitKycResponse>(SUBMIT_KYC);
   const [submitKybMutation, { loading: submittingKyb }] =
     useMutation<SubmitBusinessKybResponse>(SUBMIT_BUSINESS_KYB);
+  const [completeMutation, { loading: completing }] = useMutation<{
+    completeKYCVerification: KycStatusDTO | null;
+  }>(COMPLETE_KYC_VERIFICATION);
 
   // Lazy query used by the poller so it doesn't disturb the live `status` cache binding.
   const [fetchStatus] = useLazyQuery<GetMyKycStatusResponse>(GET_MY_KYC_STATUS, {
@@ -148,6 +155,20 @@ export function useKYCVerification(options?: { skip?: boolean }): UseKYCVerifica
     },
     [submitKycMutation],
   );
+
+  /**
+   * Tell the backend the Onfido SDK finished so it starts the check. Throws if
+   * the check was not started — a refused mutation can resolve with
+   * `data: null` rather than rejecting, so the data itself is checked.
+   */
+  const completeVerification = useCallback(async (): Promise<KycStatusDTO> => {
+    const res = await completeMutation();
+    const result = res.data?.completeKYCVerification;
+    if (!result) {
+      throw new Error(res.error?.message ?? 'Could not start the verification check');
+    }
+    return result;
+  }, [completeMutation]);
 
   const submitBusinessKyb = useCallback(
     async (input: SubmitBusinessKybInput): Promise<KycStatusDTO | null> => {
@@ -221,6 +242,8 @@ export function useKYCVerification(options?: { skip?: boolean }): UseKYCVerifica
     submitting,
     submitBusinessKyb,
     submittingKyb,
+    completeVerification,
+    completing,
 
     pollStatus,
     isPolling,
