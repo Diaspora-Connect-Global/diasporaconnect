@@ -121,7 +121,7 @@ export default function Header({
     <div >
       <div className="h-app-top-down w-full bg-surface-default  top-0 z-50">
         <div className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
-          <div className="mx-auto "> {/* Responsive padding */}
+          <div className="mx-auto pr-3 sm:pr-4 lg:pr-0"> {/* Keeps the avatar off the screen edge on phones/tablets */}
             <div className="flex  justify-between h-app-top-down"> {/* Standard header height */}
               <div className='flex'>
                 {/* Mobile menu button */}
