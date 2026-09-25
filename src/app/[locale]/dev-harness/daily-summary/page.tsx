@@ -83,6 +83,7 @@ function Harness() {
                 overview={parsed?.overview}
                 keyPoints={parsed?.keyPoints}
                 actionItems={parsed?.actionItems}
+                timestamp="5:26 PM"
             />
         );
     } else {
@@ -97,6 +98,7 @@ function Harness() {
                 decisions={legacy ? [] : ['Meet at the main gate at 10am']}
                 actionItems={['Ama to book the pavilion']}
                 onViewMessages={onViewMessages}
+                timestamp="5:26 PM"
             />
         );
     }

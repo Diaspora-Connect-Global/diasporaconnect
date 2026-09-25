@@ -2361,7 +2361,8 @@
         "participants": "Participants",
         "messageUnavailable": "That message is no longer available",
         "findingMessages": "Finding messages…",
-        "aiGenerated": "AI-generated summary"
+        "aiGenerated": "AI-generated",
+        "manageInSettings": "Manage in Settings"
       }
     },
     "dateLabels": {
@@ -2486,6 +2487,25 @@
       "adPersonalization": {
         "title": "Ad Personalization",
         "description": "Personalize ads based on your activity"
+      },
+      "aiSummaries": {
+        "title": "AI chat summaries",
+        "notice": {
+          "what": "Once a day, AI summarises the messages in each of your group chats into short topics and posts that summary in the group.",
+          "provider": "To write it, the text of group messages and the display names of the people who sent them are sent to an external AI provider.",
+          "control": "You can turn either setting off at any time. Changes apply from the next summary."
+        },
+        "includeMyMessages": {
+          "title": "Include my messages in AI summaries",
+          "description": "When off, your messages and your name are left out before anything is sent to the AI provider."
+        },
+        "showSummaries": {
+          "title": "Show AI summaries in my group chats",
+          "description": "When off, you won’t get summary notifications and summary cards are hidden in your group chats."
+        },
+        "saved": "Your AI summary settings were saved.",
+        "saveFailed": "Couldn’t save your AI summary settings. Please try again.",
+        "loadFailed": "Your AI summary settings couldn’t be loaded right now. Please try again later."
       }
     },
     "language": {

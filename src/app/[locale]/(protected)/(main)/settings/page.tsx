@@ -20,6 +20,7 @@ import DataExportSection from "@/components/settings/DataExportSection";
 import RecommendationDataSection from "@/components/settings/RecommendationDataSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import UsernameSection from "@/components/settings/UsernameSection";
+import AiSummarySettings from "@/components/settings/AiSummarySettings";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -174,7 +175,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Privacy Section */}
-          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
+          <div id="privacy" className="scroll-mt-24 bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -216,6 +217,10 @@ export default function SettingsPage() {
                   }
                 />
               </div>
+
+              {/* AI group-chat summaries — notice + persisted opt-outs.
+                  Deep-link target: /settings#ai-summaries */}
+              <AiSummarySettings />
             </div>
           </div>
 

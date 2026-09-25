@@ -37,18 +37,28 @@ const FRAGMENT_SRC = `(?=${HEX}{0,30}[0-9])(?=${HEX}{0,30}[a-f])${HEX}{8,31}`;
  * An optional label glued to the id ("User 3f9a…", "user:3f9a…", "@3f9a…"),
  * consumed with it so "User 3f9a2b1c joined" does not become "User  joined".
  */
-const LABEL_SRC = `(?:\\b(?:user|member|sender|author|userid|user_id|id)\\s*[:#_-]?\\s*)?@?`;
+// Whitespace runs are BOUNDED: two adjacent unbounded `\s*` split N spaces
+// N² ways, and "user" + a long run of spaces took seconds to scan.
+const LABEL_SRC = `(?:\\b(?:user|member|sender|author|userid|user_id|id)\\s{0,3}[:#_-]?\\s{0,3})?@?`;
 
 const ID_BODY_SRC = `(?:${TOMBSTONE_SRC}|${UUID_SRC}|${UUID_COMPACT_SRC}|${FRAGMENT_SRC})`;
+
+/**
+ * The backend's own pseudonymous label for a person: `user_<hex>` /
+ * `User <hex>` (older AI digests stored in chat carry `user_07b4a12e`). With
+ * that explicit label ANY run of 8+ hex characters is an id — including
+ * all-digit or all-letter ones the bare FRAGMENT deliberately lets through.
+ */
+const USER_LABELLED_SRC = `\\buser(?:[_:-]|\\s{1,3})${HEX}{8,64}`;
 
 /**
  * Word-ish boundaries on both sides so an id is only matched as a whole token
  * (never the middle of a longer word or number). `\b` alone is not enough for
  * the tombstone, whose body contains `:`.
  */
-const ID_IN_TEXT_SRC = `(?<![0-9a-z_])${LABEL_SRC}${ID_BODY_SRC}(?![0-9a-z_])`;
+const ID_IN_TEXT_SRC = `(?<![0-9a-z_])(?:${LABEL_SRC}${ID_BODY_SRC}|${USER_LABELLED_SRC})(?![0-9a-z_])`;
 
-const WHOLE_ID_RE = new RegExp(`^\\s*${LABEL_SRC}${ID_BODY_SRC}\\s*$`, 'i');
+const WHOLE_ID_RE = new RegExp(`^\\s*(?:${LABEL_SRC}${ID_BODY_SRC}|${USER_LABELLED_SRC})\\s*$`, 'i');
 
 function idInTextRe(): RegExp {
     // A fresh instance per call: a shared /g regex carries `lastIndex` between

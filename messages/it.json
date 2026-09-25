@@ -2270,6 +2270,25 @@
       "adPersonalization": {
         "title": "Personalizzazione annunci",
         "description": "Personalizza gli annunci in base alla tua attività"
+      },
+      "aiSummaries": {
+        "title": "Riepiloghi della chat con IA",
+        "notice": {
+          "what": "Una volta al giorno, un’IA riassume i messaggi di ciascuna delle tue chat di gruppo in brevi argomenti e pubblica il riepilogo nel gruppo.",
+          "provider": "Per scriverlo, il testo dei messaggi del gruppo e i nomi visualizzati di chi li ha inviati vengono inviati a un fornitore di IA esterno.",
+          "control": "Puoi disattivare entrambe le impostazioni in qualsiasi momento. Le modifiche valgono dal riepilogo successivo."
+        },
+        "includeMyMessages": {
+          "title": "Includi i miei messaggi nei riepiloghi IA",
+          "description": "Se disattivato, i tuoi messaggi e il tuo nome vengono esclusi prima che qualcosa venga inviato al fornitore di IA."
+        },
+        "showSummaries": {
+          "title": "Mostra i riepiloghi IA nelle mie chat di gruppo",
+          "description": "Se disattivato, non riceverai notifiche dei riepiloghi e le schede di riepilogo saranno nascoste nelle tue chat di gruppo."
+        },
+        "saved": "Le tue impostazioni dei riepiloghi IA sono state salvate.",
+        "saveFailed": "Impossibile salvare le impostazioni dei riepiloghi IA. Riprova.",
+        "loadFailed": "Al momento non è possibile caricare le impostazioni dei riepiloghi IA. Riprova più tardi."
       }
     },
     "language": {
@@ -2844,7 +2863,8 @@
         "participants": "Partecipanti",
         "messageUnavailable": "Questo messaggio non è più disponibile",
         "findingMessages": "Ricerca dei messaggi…",
-        "aiGenerated": "Riepilogo generato dall'IA"
+        "aiGenerated": "Generato dall'IA",
+        "manageInSettings": "Gestisci nelle impostazioni"
       }
     },
     "dateLabels": {

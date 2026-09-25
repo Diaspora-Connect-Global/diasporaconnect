@@ -2270,6 +2270,25 @@
       "adPersonalization": {
         "title": "Personnalisation des publicités",
         "description": "Personnaliser les publicités en fonction de votre activité"
+      },
+      "aiSummaries": {
+        "title": "Résumés de discussion par IA",
+        "notice": {
+          "what": "Une fois par jour, une IA résume les messages de chacune de vos discussions de groupe en quelques sujets et publie ce résumé dans le groupe.",
+          "provider": "Pour le rédiger, le texte des messages du groupe et les noms affichés de leurs expéditeurs sont envoyés à un fournisseur d’IA externe.",
+          "control": "Vous pouvez désactiver l’un ou l’autre de ces paramètres à tout moment. Les changements s’appliquent dès le prochain résumé."
+        },
+        "includeMyMessages": {
+          "title": "Inclure mes messages dans les résumés IA",
+          "description": "Si désactivé, vos messages et votre nom sont retirés avant tout envoi au fournisseur d’IA."
+        },
+        "showSummaries": {
+          "title": "Afficher les résumés IA dans mes discussions de groupe",
+          "description": "Si désactivé, vous ne recevez plus de notifications de résumé et les cartes de résumé sont masquées dans vos discussions de groupe."
+        },
+        "saved": "Vos paramètres de résumés IA ont été enregistrés.",
+        "saveFailed": "Impossible d’enregistrer vos paramètres de résumés IA. Veuillez réessayer.",
+        "loadFailed": "Vos paramètres de résumés IA ne peuvent pas être chargés pour le moment. Veuillez réessayer plus tard."
       }
     },
     "language": {
@@ -2844,7 +2863,8 @@
         "participants": "Participants",
         "messageUnavailable": "Ce message n'est plus disponible",
         "findingMessages": "Recherche des messages…",
-        "aiGenerated": "Résumé généré par l'IA"
+        "aiGenerated": "Généré par l'IA",
+        "manageInSettings": "Gérer dans les paramètres"
       }
     },
     "dateLabels": {

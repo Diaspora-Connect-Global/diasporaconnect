@@ -51,6 +51,30 @@ test.describe('stripIds', () => {
         expect(stripIds(`ping @${UUID} please`, 'a member')).toBe('ping a member please');
         expect(stripIds(`by user:${UUID}`, 'a member')).toBe('by a member');
     });
+    test('replaces the backend\'s "user_<hex>" / "User <hex>" labels stored in old digests', () => {
+        // Verbatim from a stored digest the owner screenshotted.
+        expect(stripIds("The group chat had a single message from user_07b4a12e who said 'Ok'.", 'a member')).toBe(
+            "The group chat had a single message from a member who said 'Ok'.",
+        );
+        expect(stripIds('user_07b4a12e said Ok', 'a member')).toBe('A member said Ok');
+        // With the explicit label, ANY 8+ hex run is an id — even all digits / all letters.
+        expect(stripIds('User 12345678 asked about visas', 'a member')).toBe('A member asked about visas');
+        expect(stripIds('thanks user_abcdefab!', 'a member')).toBe('thanks a member!');
+        expect(stripIds('USER_07B4A12E3F9A left', 'a member')).toBe('A member left');
+        expect(stripIds(`user ${UUID} left`, 'a member')).toBe('A member left');
+        expect(looksLikeId('user_12345678')).toBe(true);
+        // …but ordinary prose after the word "user" is untouched.
+        expect(stripIds('The user accessed 20260924 data; user feedback deadbeef')).toBe(
+            'The user accessed 20260924 data; user feedback deadbeef',
+        );
+    });
+    test('scans pathological whitespace in linear time (no regex backtracking blow-up)', () => {
+        // "user" + 100k spaces took ~30 s with unbounded `\s*` pairs in the label.
+        const started = Date.now();
+        const text = `user${' '.repeat(100_000)}z`;
+        expect(stripIds(text, 'a member')).toBe(text);
+        expect(Date.now() - started).toBeLessThan(500);
+    });
     test('removes ids without a replacement and tidies what is left', () => {
         expect(stripIds(`Meeting (${FRAGMENT}) moved`)).toBe('Meeting moved');
         expect(stripIds(`${TOMBSTONE} left`)).toBe('left');

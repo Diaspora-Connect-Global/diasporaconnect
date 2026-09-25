@@ -60,6 +60,7 @@ import { parseDigestBody, resolveJumpTargets } from "@/lib/dailySummary";
 import { displayName as personName, stripIds } from "@/lib/displayName";
 import { SYSTEM_SENDER_ID } from "@/services/gql/types/messaging";
 import { useChatConversation } from "@/hooks/useChatConversation";
+import { useAiSummaryPreferences } from "@/hooks/useAiSummaryPreferences";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { useMediaUpload } from "@/hooks/useMediaUpload";
@@ -262,6 +263,11 @@ export default function GroupChat() {
         enabled: groupMembers.length > 0,
     });
 
+    // Settings → Privacy → "Show AI summaries in my group chats". The digest is
+    // a SHARED chat message, so for a user who turned it off it is hidden here,
+    // client-side (and the digest queries below are skipped entirely).
+    const { showSummaries: showAiSummaries } = useAiSummaryPreferences();
+
     // AI "Daily summary" digest of the group chat. Non-blocking: absence (or a
     // backend/ai-service hiccup) simply renders nothing. Latest digest only
     // (no `date` arg). Skipped until we have both the group + conversation id.
@@ -270,11 +276,11 @@ export default function GroupChat() {
         GroupChatDailySummaryVariables
     >(GROUP_CHAT_DAILY_SUMMARY, {
         variables: { groupId: chat?.id || '', conversationId: conversationId || '' },
-        skip: !chat?.id || !conversationId,
+        skip: !chat?.id || !conversationId || !showAiSummaries,
         fetchPolicy: 'cache-and-network',
         errorPolicy: 'all',
     });
-    const dailySummary = dailySummaryData?.groupChatDailySummary ?? null;
+    const dailySummary = showAiSummaries ? dailySummaryData?.groupChatDailySummary ?? null : null;
 
     // Topic bulletins of the same digest. A separate, uncached, fail-soft query:
     // until the gateway knows `topics` this errors at validation, `data` stays
@@ -284,7 +290,7 @@ export default function GroupChat() {
         GroupChatDailySummaryVariables
     >(GROUP_CHAT_DAILY_SUMMARY_TOPICS, {
         variables: { groupId: chat?.id || '', conversationId: conversationId || '' },
-        skip: !chat?.id || !conversationId,
+        skip: !chat?.id || !conversationId || !showAiSummaries,
         fetchPolicy: 'no-cache',
         errorPolicy: 'all',
     });
@@ -439,6 +445,7 @@ export default function GroupChat() {
                 onViewMessages={handleViewSummaryMessages}
                 pendingTopicIndex={pendingJump?.topicIndex ?? null}
                 avatarFor={memberAvatar}
+                timestamp={dailySummary.generatedAt ? formatChatTimestamp(dailySummary.generatedAt, { timeZone: userTimeZone }) : null}
             />
         </div>
     ) : null;
@@ -888,6 +895,9 @@ export default function GroupChat() {
                                 // AI daily digest: render as a distinct, centered
                                 // "Daily summary" card rather than a chat bubble.
                                 if (isSystemMessage(message)) {
+                                    // Hidden for a user who turned off "Show AI
+                                    // summaries in my group chats" (Settings → Privacy).
+                                    if (!showAiSummaries) return;
                                     // The backend posts the digest as plain text; parse
                                     // it into the card. When the query-driven digest for
                                     // the same day carries topic bulletins, show that
@@ -897,6 +907,7 @@ export default function GroupChat() {
                                         !!dailySummary &&
                                         parsed?.digestDate === dailySummary.digestDate &&
                                         summaryTopics.length > 0;
+                                    const systemTime = formatChatTimestamp(message.createdAt, { timeZone: userTimeZone });
                                     nodes.push(
                                         <div key={message.id} id={messageDomId(message.id)} className="flex justify-center px-2 py-1">
                                             {rich && dailySummary ? (
@@ -911,6 +922,7 @@ export default function GroupChat() {
                                                     onViewMessages={handleViewSummaryMessages}
                                                     pendingTopicIndex={pendingJump?.topicIndex ?? null}
                                                     avatarFor={memberAvatar}
+                                                    timestamp={systemTime}
                                                 />
                                             ) : parsed ? (
                                                 <DailySummaryCard
@@ -919,9 +931,10 @@ export default function GroupChat() {
                                                     overview={parsed.overview}
                                                     keyPoints={parsed.keyPoints}
                                                     actionItems={parsed.actionItems}
+                                                    timestamp={systemTime}
                                                 />
                                             ) : (
-                                                <DailySummaryCard overview={stripIds(message.content, tIdentity('aMember'))} />
+                                                <DailySummaryCard overview={stripIds(message.content, tIdentity('aMember'))} timestamp={systemTime} />
                                             )}
                                         </div>
                                     );

@@ -2270,6 +2270,25 @@
       "adPersonalization": {
         "title": "Anzeigenpersonalisierung",
         "description": "Anzeigen basierend auf Ihrer Aktivität personalisieren"
+      },
+      "aiSummaries": {
+        "title": "KI-Chat-Zusammenfassungen",
+        "notice": {
+          "what": "Einmal am Tag fasst eine KI die Nachrichten in jedem deiner Gruppenchats in kurzen Themen zusammen und veröffentlicht diese Zusammenfassung in der Gruppe.",
+          "provider": "Dafür werden der Text der Gruppennachrichten und die Anzeigenamen der Absender an einen externen KI-Anbieter gesendet.",
+          "control": "Du kannst beide Einstellungen jederzeit ausschalten. Änderungen gelten ab der nächsten Zusammenfassung."
+        },
+        "includeMyMessages": {
+          "title": "Meine Nachrichten in KI-Zusammenfassungen einbeziehen",
+          "description": "Wenn ausgeschaltet, werden deine Nachrichten und dein Name entfernt, bevor etwas an den KI-Anbieter gesendet wird."
+        },
+        "showSummaries": {
+          "title": "KI-Zusammenfassungen in meinen Gruppenchats anzeigen",
+          "description": "Wenn ausgeschaltet, erhältst du keine Benachrichtigungen zu Zusammenfassungen und die Zusammenfassungskarten werden in deinen Gruppenchats ausgeblendet."
+        },
+        "saved": "Deine Einstellungen für KI-Zusammenfassungen wurden gespeichert.",
+        "saveFailed": "Deine Einstellungen für KI-Zusammenfassungen konnten nicht gespeichert werden. Bitte versuche es erneut.",
+        "loadFailed": "Deine Einstellungen für KI-Zusammenfassungen können gerade nicht geladen werden. Bitte versuche es später erneut."
       }
     },
     "language": {
@@ -2844,7 +2863,8 @@
         "participants": "Beteiligte",
         "messageUnavailable": "Diese Nachricht ist nicht mehr verfügbar",
         "findingMessages": "Nachrichten werden gesucht…",
-        "aiGenerated": "KI-generierte Zusammenfassung"
+        "aiGenerated": "KI-generiert",
+        "manageInSettings": "In den Einstellungen verwalten"
       }
     },
     "dateLabels": {

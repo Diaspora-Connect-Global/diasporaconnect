@@ -22,6 +22,9 @@ import { EmptyState, NoResults } from "@/components/feedback";
 import { toCdnUrl } from "@/lib/cdn";
 import { displayName as personName, safeName, stripIds } from "@/lib/displayName";
 import { SYSTEM_SENDER_ID } from "@/services/gql/types/messaging";
+import { computeChatUnread, conversationKind, formatBadgeCount, listedKind } from "@/lib/chatUnread";
+import { CONVERSATION_LIST_VARIABLES } from "@/hooks/useChatUnread";
+import { useAiSummaryPreferences } from "@/hooks/useAiSummaryPreferences";
 
 type TabType = 'direct' | 'groups';
 
@@ -45,7 +48,7 @@ export default function ChatSideBar() {
     const searchParams = useSearchParams();
 
     const [searchQuery, setSearchQuery] = useState('');
-    const { activeChat, setActiveChat, setRealConversation, setTotalChatUnreadCount } = useChatStore();
+    const { activeChat, setActiveChat, setRealConversation } = useChatStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'direct' | 'group'>('direct');
     const [directChats, setDirectChats] = useState<ChatItem[]>([]);
@@ -58,8 +61,9 @@ export default function ChatSideBar() {
     const userTimeZone = user?.timezone || user?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Fetch real conversations from API
+    // Same variables as the nav badge (useChatUnread) → one shared cache entry.
     const { data: conversationsData, loading: loadingConversations, error: conversationsError } = useQuery<GetConversationsData>(GET_CONVERSATIONS, {
-        variables: { limit: 100, offset: 0 },
+        variables: CONVERSATION_LIST_VARIABLES,
         fetchPolicy: 'network-only',
     });
 
@@ -98,16 +102,12 @@ export default function ChatSideBar() {
 
         const apiConversations = conversationsData.getConversations;
 
+        // One classifier (lib/chatUnread) for the list AND the badges, so a chat
+        // is counted exactly where it is shown. (The old "2-person GROUP with no
+        // groupId is really a DM" heuristic is gone: no such rows exist, and
+        // it now matches circle chats, which belong on the circles page.)
         const dmConversations = apiConversations
-            .filter((conv: any) => {
-                const typeDirect = conv.type === 'DIRECT' || conv.type === 'direct';
-                const misclassifiedAsGroup =
-                    (conv.type === 'GROUP' || conv.type === 'group') &&
-                    (conv.groupId == null || conv.groupId === '') &&
-                    (conv.participantIds?.length === 2 || conv.participantCount === 2);
-                const isDirect = typeDirect || misclassifiedAsGroup;
-                return isDirect && conv.isActive;
-            })
+            .filter((conv) => listedKind(conv) === 'direct')
             .sort((a: any, b: any) => {
                 const timeA = a.lastMessage?.createdAt || a.lastMessageAt || a.updatedAt || '';
                 const timeB = b.lastMessage?.createdAt || b.lastMessageAt || b.updatedAt || '';
@@ -171,14 +171,7 @@ export default function ChatSideBar() {
 
         const missingParticipantIds = Array.from(new Set(
             conversationsData.getConversations
-                .filter((conv: any) => {
-                    const typeDirect = conv.type === 'DIRECT' || conv.type === 'direct';
-                    const misclassifiedAsGroup =
-                        (conv.type === 'GROUP' || conv.type === 'group') &&
-                        (conv.groupId == null || conv.groupId === '') &&
-                        (conv.participantIds?.length === 2 || conv.participantCount === 2);
-                    return (typeDirect || misclassifiedAsGroup) && conv.isActive;
-                })
+                .filter((conv) => listedKind(conv) === 'direct')
                 .map((conv: any) => conv.participantIds?.find((id: string) => id !== currentUserId))
                 .filter((id: string | undefined) => !!id && !connectionIds.has(id) && !profileFallbackById[id])
         )) as string[];
@@ -219,14 +212,7 @@ export default function ChatSideBar() {
         const list = conversationsData?.getConversations ?? [];
         const directParticipantIds = Array.from(new Set(
             list
-                .filter((conv: any) => {
-                    const typeDirect = conv.type === 'DIRECT' || conv.type === 'direct';
-                    const misclassifiedAsGroup =
-                        (conv.type === 'GROUP' || conv.type === 'group') &&
-                        (conv.groupId == null || conv.groupId === '') &&
-                        (conv.participantIds?.length === 2 || conv.participantCount === 2);
-                    return typeDirect || misclassifiedAsGroup;
-                })
+                .filter((conv) => conversationKind(conv) === 'direct')
                 .map((conv: any) => conv.participantIds?.find((id: string) => id !== currentUserId))
                 .filter(Boolean)
         )) as string[];
@@ -260,16 +246,9 @@ export default function ChatSideBar() {
         };
     }, [conversationsData, currentUserId]);
 
-    const directUnreadCount = directChats.reduce((sum, chat) => sum + chat.unread, 0);
-
-    const groupsUnreadCount = (conversationsData?.getConversations ?? [])
-        .filter((conv: any) => conv.type === 'GROUP' || conv.type === 'group')
-        .reduce((sum: number, conv: any) => sum + (conv.unreadCount ?? 0), 0);
-
-    // Keep global store in sync so the navbar badge reflects real-time totals
-    useEffect(() => {
-        setTotalChatUnreadCount(directUnreadCount + groupsUnreadCount);
-    }, [directUnreadCount, groupsUnreadCount, setTotalChatUnreadCount]);
+    // Tab counts come from the same function (and cache entry) as the nav badge.
+    const { direct: directUnreadCount, groups: groupsUnreadCount } =
+        computeChatUnread(conversationsData?.getConversations);
 
     // Filter based on search query
     const filteredDirectMessages = directChats.filter(chat =>
@@ -442,7 +421,7 @@ function TabButton({ active, onClick, label, notificationCount }: TabButtonProps
                 {notificationCount > 0 && (
                     <div className="relative">
                         <span className="-top-3 right-0 text-text-brand text-xs rounded-full min-w-5 h-5 flex items-center justify-center px-1">
-                            {notificationCount > 99 ? '99+' : notificationCount}
+                            {formatBadgeCount(notificationCount)}
                         </span>
                     </div>
                 )}
@@ -588,7 +567,7 @@ function ChatItem({ chat, isActive, onClick, userTimeZone }: ChatItemProps) {
 
                 {chat.unread > 0 ? (
                     <div className="bg-text-brand text-white text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
-                        {chat.unread > 99 ? '99+' : chat.unread}
+                        {formatBadgeCount(chat.unread)}
                     </div>
                 ) : (
                     <div className="text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
@@ -680,6 +659,9 @@ interface GroupsListProps {
 function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], limit = 50, offset = 0, userTimeZone }: GroupsListProps) {
     const t = useTranslations('chat');
     const tIdentity = useTranslations('common.identity');
+    // "Show AI summaries in my group chats" off → the AI digest (a SYSTEM
+    // message) is never used as this user's preview line.
+    const { showSummaries: showAiSummaries } = useAiSummaryPreferences();
     const tFeedback = useTranslations('feedback');
     const setRealConversation = useChatStore((s) => s.setRealConversation);
 
@@ -693,7 +675,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
         const list = conversations as Array<{ id?: string; type?: string; groupId?: string | null; participantIds?: string[] }>;
         if (!list?.length) return;
         list.forEach((conv) => {
-            const isGroup = conv.type === 'GROUP' || conv.type === 'group';
+            const isGroup = listedKind(conv as { id: string }) === 'group';
             const groupId = conv.groupId;
             if (isGroup && groupId && conv.id) {
                 setRealConversation(groupId, {
@@ -734,8 +716,8 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
 
     // Sort by latest chat activity (newest first)
     const sortedGroups = [...filteredGroups].sort((a, b) => {
-        const convA = conversations.find((c: { type?: string; groupId?: string }) => c.type === 'GROUP' && c.groupId === a.id) as { lastMessageAt?: string; lastMessage?: { createdAt?: string }; createdAt?: string } | undefined;
-        const convB = conversations.find((c: { type?: string; groupId?: string }) => c.type === 'GROUP' && c.groupId === b.id) as { lastMessageAt?: string; lastMessage?: { createdAt?: string }; createdAt?: string } | undefined;
+        const convA = conversations.find((c: { id: string; type?: string; groupId?: string }) => listedKind(c) === 'group' && c.groupId === a.id) as { lastMessageAt?: string; lastMessage?: { createdAt?: string }; createdAt?: string } | undefined;
+        const convB = conversations.find((c: { id: string; type?: string; groupId?: string }) => listedKind(c) === 'group' && c.groupId === b.id) as { lastMessageAt?: string; lastMessage?: { createdAt?: string }; createdAt?: string } | undefined;
         const timeA = convA?.lastMessageAt || convA?.lastMessage?.createdAt || convA?.createdAt || a.createdAt || '';
         const timeB = convB?.lastMessageAt || convB?.lastMessage?.createdAt || convB?.createdAt || b.createdAt || '';
         return new Date(timeB).getTime() - new Date(timeA).getTime();
@@ -764,7 +746,7 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
         <div className="space-y-1 p-2">
             {sortedGroups.map((group) => {
                 const correspondingConversation = conversations.find(
-                    (conv: { type?: string; groupId?: string }) => conv.type === 'GROUP' && conv.groupId === group.id
+                    (conv: { id: string; type?: string; groupId?: string }) => listedKind(conv) === 'group' && conv.groupId === group.id
                 ) as { id?: string; lastMessage?: { content?: string; replyToId?: string | null; type?: string; senderId?: string }; lastMessageAt?: string; unreadCount?: number } | undefined;
 
                 const lastMsg = correspondingConversation?.lastMessage;
@@ -776,7 +758,8 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
                 const lastContent = lastMsg?.content != null && isSystemPreview
                     ? stripIds(lastMsg.content, tIdentity('aMember'))
                     : lastMsg?.content;
-                const previewText = (lastMsg && !isLastMessageReply)
+                const hideDigestPreview = isSystemPreview && !showAiSummaries;
+                const previewText = (lastMsg && !isLastMessageReply && !hideDigestPreview)
                     ? (lastContent ?? group.description ?? t('group.memberCount', { count: group.memberCount }))
                     : (group.description ?? t('group.memberCount', { count: group.memberCount }));
 

@@ -12,7 +12,8 @@ import React from 'react';
 import HomeSidebar from '../home/HomeSidebar';
 import { ButtonType3 } from '@/components/custom/button';
 import { useNotificationBadge } from '@/hooks/useNotificationBadge';
-import { useChatStore } from '@/store/ChatStore';
+import { useChatUnread } from '@/hooks/useChatUnread';
+import { formatBadgeCount } from '@/lib/chatUnread';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { AccountMenuPanel } from './AccountMenuPanel';
 
@@ -28,7 +29,9 @@ export default function Header({
   const { count: polledCount } = useNotificationBadge(true);
   const liveCount = useNotificationStore((s) => s.unreadCount);
   const unreadNotificationCount = Math.max(polledCount ?? 0, liveCount);
-  const totalChatUnreadCount = useChatStore((s) => s.totalChatUnreadCount);
+  // Loaded here, in the authenticated layout, so the badge is right on ANY
+  // page — not only after the chat page has been opened.
+  const { total: totalChatUnreadCount } = useChatUnread();
 
   const segments = pathname.split('/').filter(segment => segment);
   const currentLocale = segments[0] || 'en';
@@ -95,8 +98,9 @@ export default function Header({
                   <span
                     className="absolute -top-1 -right-1 min-w-[1rem] h-4 px-1 flex items-center justify-center rounded-full bg-text-danger text-white text-[10px] font-medium"
                     aria-label={`${totalChatUnreadCount} unread messages`}
+                    data-testid="chat-nav-badge"
                   >
-                    {totalChatUnreadCount > 99 ? '99+' : totalChatUnreadCount}
+                    {formatBadgeCount(totalChatUnreadCount)}
                   </span>
                 )}
               </div>

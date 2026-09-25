@@ -39,7 +39,15 @@ for (const [label, viewport] of Object.entries(VIEWPORTS)) {
         await expect(card(page).getByRole('heading', { name: 'Daily Summary' })).toBeVisible();
         await expect(card(page)).toContainText('Sep 23, 2026');
         await expect(card(page)).toContainText('42 messages');
-        await expect(page.getByTestId('daily-summary-ai-label')).toHaveText('AI-generated summary');
+        await expect(page.getByTestId('daily-summary-ai-label')).toHaveText('AI-generated');
+        // The disclosure links to the setting that controls it.
+        await expect(card(page).getByRole('link', { name: 'Manage in Settings' })).toHaveAttribute(
+            'href',
+            '/en/settings#ai-summaries',
+        );
+        // The message time sits OUTSIDE the card, like other chat messages.
+        await expect(page.getByText('5:26 PM')).toBeVisible();
+        await expect(card(page)).not.toContainText('5:26 PM');
         await expect(card(page)).toContainText('Community picnic on Saturday');
         await expect(card(page)).toContainText('Visa appointment tips');
         await expect(card(page)).toContainText('Key points');
@@ -100,7 +108,8 @@ test('translated in German', async () => {
     const page = await context.newPage();
     await page.goto('/de/dev-harness/daily-summary', { waitUntil: 'load' });
     await expect(card(page).getByRole('heading', { name: 'Tageszusammenfassung' })).toBeVisible();
-    await expect(page.getByTestId('daily-summary-ai-label')).toHaveText('KI-generierte Zusammenfassung');
+    await expect(page.getByTestId('daily-summary-ai-label')).toHaveText('KI-generiert');
+    await expect(card(page).getByRole('link', { name: 'In den Einstellungen verwalten' })).toBeVisible();
     await expect(card(page)).toContainText('42 Nachrichten');
     await expect(card(page)).toContainText('23.09.2026');
     await context.close();

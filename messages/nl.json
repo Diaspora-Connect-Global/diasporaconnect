@@ -2361,7 +2361,8 @@
         "participants": "Deelnemers",
         "messageUnavailable": "Dat bericht is niet meer beschikbaar",
         "findingMessages": "Berichten zoeken…",
-        "aiGenerated": "Door AI gegenereerde samenvatting"
+        "aiGenerated": "Door AI gegenereerd",
+        "manageInSettings": "Beheren in Instellingen"
       }
     },
     "dateLabels": {
@@ -2486,6 +2487,25 @@
       "adPersonalization": {
         "title": "Advertentiepersonalisatie",
         "description": "Advertenties personaliseren op basis van uw activiteit"
+      },
+      "aiSummaries": {
+        "title": "AI-chatsamenvattingen",
+        "notice": {
+          "what": "Eén keer per dag vat AI de berichten in elk van je groepschats samen in korte onderwerpen en plaatst die samenvatting in de groep.",
+          "provider": "Om die te schrijven worden de tekst van groepsberichten en de weergavenamen van de afzenders naar een externe AI-aanbieder gestuurd.",
+          "control": "Je kunt beide instellingen op elk moment uitzetten. Wijzigingen gelden vanaf de volgende samenvatting."
+        },
+        "includeMyMessages": {
+          "title": "Mijn berichten opnemen in AI-samenvattingen",
+          "description": "Als dit uit staat, worden je berichten en je naam weggelaten voordat er iets naar de AI-aanbieder wordt gestuurd."
+        },
+        "showSummaries": {
+          "title": "AI-samenvattingen tonen in mijn groepschats",
+          "description": "Als dit uit staat, krijg je geen meldingen over samenvattingen en worden samenvattingskaarten in je groepschats verborgen."
+        },
+        "saved": "Je instellingen voor AI-samenvattingen zijn opgeslagen.",
+        "saveFailed": "Je instellingen voor AI-samenvattingen konden niet worden opgeslagen. Probeer het opnieuw.",
+        "loadFailed": "Je instellingen voor AI-samenvattingen kunnen nu niet worden geladen. Probeer het later opnieuw."
       }
     },
     "language": {

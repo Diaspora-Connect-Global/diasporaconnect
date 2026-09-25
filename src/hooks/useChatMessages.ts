@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useEffect, useRef } from "react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 
 import {
     GET_CONVERSATIONS,
@@ -15,6 +15,9 @@ import type {
     MessageMention,
 } from "@/services/gql/types/messaging";
 import { useChatStore, type ApiMessage } from "@/store/ChatStore";
+import { messageService } from "@/services/websocket/messageService";
+import { setViewingConversation } from "@/lib/chatUnread";
+import { CONVERSATION_LIST_VARIABLES, clearCachedUnread } from "@/hooks/useChatUnread";
 
 interface UseChatMessagesParams {
     conversationId: string | null;
@@ -50,8 +53,9 @@ export function useChatMessages({
         fetchPolicy: "network-only",
     });
 
+    const client = useApolloClient();
     const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
-        refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
+        refetchQueries: [{ query: GET_CONVERSATIONS, variables: CONVERSATION_LIST_VARIABLES }],
     });
 
     // Sync GraphQL messages into the store. Handles empty results correctly
@@ -89,6 +93,63 @@ export function useChatMessages({
             console.warn("markConversationAsRead failed:", err);
         });
     }, [conversationId, shouldMarkAsRead, markConversationAsRead]);
+
+    // While the conversation is on screen, messages that arrive in it are read
+    // too. Previously only the OPEN marked read, so a message received while the
+    // chat was already open stayed unread, and re-clicking the same chat did not
+    // re-run the effect above: a badge the user could not clear without leaving
+    // the chat. Tells the nav badge not to count this conversation meanwhile.
+    const markTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+        if (!shouldMarkAsRead || !conversationId) return;
+        setViewingConversation(conversationId);
+
+        const markReadNow = () => {
+            markConversationAsRead({
+                variables: { conversationId },
+                // Local clear instead of refetching the whole list per message.
+                refetchQueries: [],
+                update: (cache) => clearCachedUnread(cache, conversationId),
+            }).catch((err) => console.warn("markConversationAsRead failed:", err));
+        };
+        const scheduleMarkRead = () => {
+            if (markTimerRef.current) clearTimeout(markTimerRef.current);
+            markTimerRef.current = setTimeout(() => {
+                markTimerRef.current = null;
+                markReadNow();
+            }, 750); // coalesce bursts
+        };
+
+        const unsubMessage = messageService.onMessage((m) => {
+            if (m.conversationId !== conversationId) return;
+            if (document.visibilityState !== "visible") return; // read on return instead
+            scheduleMarkRead();
+        });
+        // Back to the tab with this chat open: whatever arrived meanwhile is now seen.
+        const onVisible = () => {
+            if (document.visibilityState !== "visible") return;
+            const cached = client.cache.readQuery<{ getConversations?: Array<{ id: string; unreadCount?: number | null }> }>({
+                query: GET_CONVERSATIONS,
+                variables: CONVERSATION_LIST_VARIABLES,
+            });
+            const conv = cached?.getConversations?.find((c) => c.id === conversationId);
+            if ((conv?.unreadCount ?? 0) > 0) scheduleMarkRead();
+        };
+        document.addEventListener("visibilitychange", onVisible);
+
+        return () => {
+            unsubMessage();
+            document.removeEventListener("visibilitychange", onVisible);
+            // Switching chats inside the coalescing window must not drop the
+            // pending read: flush it now, or that message stays unread.
+            if (markTimerRef.current) {
+                clearTimeout(markTimerRef.current);
+                markTimerRef.current = null;
+                markReadNow();
+            }
+            setViewingConversation(null);
+        };
+    }, [conversationId, shouldMarkAsRead, markConversationAsRead, client]);
 
     return { refetch, loading, hasMore: !!messagesData?.getMessages?.hasMore };
 }
