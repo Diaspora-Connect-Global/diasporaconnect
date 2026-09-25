@@ -6,6 +6,7 @@ import { ButtonType2, ButtonType3 } from '@/components/custom/button';
 import { useKYCVerification, isVerifiedKycStatus } from '@/hooks/useKYCVerification';
 import OnfidoFlow from '@/components/profile/kyc/OnfidoFlow';
 import type { KycProvider } from '@/services/gql/types/kyc';
+import { useKycProviders } from '@/hooks/useKycProviders';
 import {
   CountryStep,
   DoneStep,
@@ -44,6 +45,12 @@ export default function VerifyPage() {
   const { initiate, initiating, submitKyc, submitting, pollStatus, completeVerification } =
     useKYCVerification();
 
+  // itsme is Belgian-only; everyone else has exactly one method (Onfido), so
+  // the chooser is skipped and "Start verification" begins it directly.
+  const { providers, loading: providersLoading } = useKycProviders();
+  const hasChoice = providers.length > 1;
+  const chooserStep: Step = hasChoice ? 'provider' : 'start';
+
   const goBack = (previousStep: Step) => setStep(previousStep);
 
   /**
@@ -81,11 +88,20 @@ export default function VerifyPage() {
         setStep('pick-country');
       } catch {
         toast.error('Could not start verification. Please try again.');
-        setStep('provider');
+        setStep(chooserStep);
       }
     },
-    [initiate],
+    [initiate, chooserStep],
   );
+
+  /** Show the method chooser, or start the only available method directly. */
+  const openChooser = useCallback(() => {
+    if (hasChoice) {
+      setStep('provider');
+      return;
+    }
+    void beginVerification(providers[0] ?? 'ONFIDO');
+  }, [hasChoice, providers, beginVerification]);
 
   /** Poll getMyKYCStatus until terminal, then route to done/rejected. */
   const startPolling = useCallback(async () => {
@@ -107,11 +123,11 @@ export default function VerifyPage() {
       await completeVerification();
     } catch {
       toast.error('Could not submit your verification. Please try again.');
-      setStep('provider');
+      setStep(chooserStep);
       return;
     }
     await startPolling();
-  }, [completeVerification, startPolling]);
+  }, [completeVerification, startPolling, chooserStep]);
 
   // Manual fallback submission via submitKYC (no provider SDK available).
   const handleManualSubmit = useCallback(async () => {
@@ -128,11 +144,12 @@ export default function VerifyPage() {
     <main className="min-h-screen bg-white text-black">
       {/* === MOBILE ONLY VIEW === */}
       <div className="block md:hidden">
-        {step === 'start' && <StartStep onNext={() => setStep('provider')} />}
+        {step === 'start' && <StartStep onNext={openChooser} disabled={initiating || providersLoading} />}
 
         {step === 'provider' && (
           <ProviderStep
             provider={provider}
+            providers={providers}
             initiating={initiating}
             onSelect={setProvider}
             onContinue={() => beginVerification(provider)}
@@ -150,9 +167,9 @@ export default function VerifyPage() {
               }}
               onError={() => {
                 toast.error('Verification could not be completed. Please try again.');
-                setStep('provider');
+                setStep(chooserStep);
               }}
-              onCancel={() => setStep('provider')}
+              onCancel={() => setStep(chooserStep)}
             />
           </div>
         )}
@@ -164,7 +181,7 @@ export default function VerifyPage() {
             onSelect={setCountry}
             onDocTypeChange={setDocType}
             onNext={() => setStep('enter-id')}
-            onBack={() => goBack('provider')}
+            onBack={() => goBack(chooserStep)}
           />
         )}
 
@@ -209,7 +226,7 @@ export default function VerifyPage() {
         {step === 'done' && <DoneStep />}
 
         {step === 'rejected' && (
-          <RejectedStep onRetry={() => setStep('provider')} />
+          <RejectedStep onRetry={() => setStep(chooserStep)} />
         )}
       </div>
 
@@ -224,13 +241,14 @@ export default function VerifyPage() {
               }}
               onError={() => {
                 toast.error('Verification could not be completed. Please try again.');
-                setStep('provider');
+                setStep(chooserStep);
               }}
-              onCancel={() => setStep('provider')}
+              onCancel={() => setStep(chooserStep)}
             />
           ) : step === 'provider' ? (
             <ProviderStep
               provider={provider}
+              providers={providers}
               initiating={initiating}
               onSelect={setProvider}
               onContinue={() => beginVerification(provider)}
@@ -241,7 +259,7 @@ export default function VerifyPage() {
           ) : step === 'done' ? (
             <DoneStep />
           ) : step === 'rejected' ? (
-            <RejectedStep onRetry={() => setStep('provider')} />
+            <RejectedStep onRetry={() => setStep(chooserStep)} />
           ) : (
             <>
               <h1 className="text-xl font-bold mb-3">Verify your identity</h1>
@@ -249,8 +267,8 @@ export default function VerifyPage() {
                 Complete identity verification to unlock higher limits and the verified badge.
               </p>
               <ButtonType2
-                onClick={() => setStep('provider')}
-                disabled={submitting}
+                onClick={openChooser}
+                disabled={submitting || initiating || providersLoading}
                 size="lg"
                 className="rounded-xl w-full"
               >
@@ -268,18 +286,20 @@ export default function VerifyPage() {
 
 function ProviderStep({
   provider,
+  providers,
   initiating,
   onSelect,
   onContinue,
   onBack,
 }: {
   provider: KycProvider;
+  providers: KycProvider[];
   initiating: boolean;
   onSelect: (p: KycProvider) => void;
   onContinue: () => void;
   onBack: () => void;
 }) {
-  const options: { id: KycProvider; title: string; subtitle: string }[] = [
+  const allOptions: { id: KycProvider; title: string; subtitle: string }[] = [
     {
       id: 'ONFIDO',
       title: 'Document & selfie',
@@ -291,6 +311,7 @@ function ProviderStep({
       subtitle: 'Verify instantly with your Belgian digital identity.',
     },
   ];
+  const options = allOptions.filter((opt) => providers.includes(opt.id));
 
   return (
     <div className="flex flex-col justify-between h-screen md:h-auto p-6">

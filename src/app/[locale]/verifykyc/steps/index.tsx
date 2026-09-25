@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/radio-group";
 import { ArrowLeft } from "lucide-react";
 
-export function StartStep({ onNext }: { onNext: () => void }) {
+export function StartStep({ onNext, disabled = false }: { onNext: () => void; disabled?: boolean }) {
     return (
         <div className="flex flex-col justify-between h-screen p-6">
             <div className="flex-1 overflow-y-auto">
@@ -24,7 +24,7 @@ export function StartStep({ onNext }: { onNext: () => void }) {
                 </ul>
             </div>
 
-            <ButtonType2 onClick={onNext} size="lg" className="rounded-xl w-full">
+            <ButtonType2 onClick={onNext} disabled={disabled} size="lg" className="rounded-xl w-full">
                 Start verification
             </ButtonType2>
         </div>

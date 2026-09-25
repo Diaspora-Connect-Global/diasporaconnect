@@ -10,6 +10,7 @@ import {
   useKYCVerification,
   isVerifiedKycStatus,
 } from "@/hooks/useKYCVerification";
+import { useKycProviders } from "@/hooks/useKycProviders";
 import type { KycProvider } from "@/services/gql/types/kyc";
 
 export interface CompleteKYCModalRef {
@@ -31,6 +32,9 @@ const CompleteKYCModal = forwardRef<CompleteKYCModalRef>((_, ref) => {
   const [onfidoToken, setOnfidoToken] = useState<string | null>(null);
 
   const { initiate, initiating, pollStatus, completeVerification } = useKYCVerification();
+  // itsme is Belgian-only: offered solely to users whose profile residence is Belgium.
+  const { providers } = useKycProviders();
+  const itsmeAvailable = providers.includes("ITSME");
 
   useImperativeHandle(ref, () => ({
     open: () => {
@@ -123,17 +127,19 @@ const CompleteKYCModal = forwardRef<CompleteKYCModalRef>((_, ref) => {
               </p>
             </button>
 
-            <button
-              type="button"
-              disabled={initiating}
-              onClick={() => start("ITSME")}
-              className="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-border-brand disabled:opacity-50"
-            >
-              <p className="label-medium text-text-primary">itsme (Belgium)</p>
-              <p className="body-small text-text-secondary">
-                Verify instantly with your Belgian digital identity.
-              </p>
-            </button>
+            {itsmeAvailable && (
+              <button
+                type="button"
+                disabled={initiating}
+                onClick={() => start("ITSME")}
+                className="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-border-brand disabled:opacity-50"
+              >
+                <p className="label-medium text-text-primary">itsme (Belgium)</p>
+                <p className="body-small text-text-secondary">
+                  Verify instantly with your Belgian digital identity.
+                </p>
+              </button>
+            )}
 
             <ButtonType3
               size="lg"
