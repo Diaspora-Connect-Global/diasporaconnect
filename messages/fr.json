@@ -651,7 +651,7 @@
       },
       "notFound": {
         "title": "Opportunité introuvable",
-        "description": "L'opportunité avec l'ID `{id}` n'existe pas."
+        "description": "Cette opportunité n'existe pas."
       },
       "errors": {
         "insufficient_data": "Veuillez vérifier votre saisie et réessayer",
@@ -1977,6 +1977,7 @@
   "profile": {
     "userNotFound": "Ce profil est introuvable.",
     "goBack": "Retour",
+    "avatarUpdated": "Photo de profil mise à jour",
     "workExperience": {
       "title": "Expérience professionnelle",
       "addExperience": "Ajouter une expérience",

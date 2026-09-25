@@ -655,7 +655,7 @@
       },
       "notFound": {
         "title": "Kans niet gevonden",
-        "description": "De kans met ID `{id}` bestaat niet."
+        "description": "Deze kans bestaat niet."
       },
       "errors": {
         "insufficient_data": "Controleer uw invoer en probeer het opnieuw",
@@ -1977,6 +1977,7 @@
   "profile": {
     "userNotFound": "Dit profiel kon niet worden gevonden.",
     "goBack": "Terug gaan",
+    "avatarUpdated": "Profielfoto bijgewerkt",
     "workExperience": {
       "title": "Werkervaring",
       "addExperience": "Ervaring toevoegen",

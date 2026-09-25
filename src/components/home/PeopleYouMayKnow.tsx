@@ -17,6 +17,7 @@ export function PeopleYouMayKnow() {
     const t = useTranslations('home');
     const tActions = useTranslations('actions');
     const tFeedback = useTranslations('feedback');
+    const tIdentity = useTranslations('common.identity');
     const { addFriend } = useFriendActions();
 
     // Track which user is currently being added
@@ -101,8 +102,8 @@ export function PeopleYouMayKnow() {
                                 mutualConnectionCount: suggestion.mutualConnectionCount,
                                 sharedCommunityNames: suggestion.sharedCommunityNames,
                                 matchReason: suggestion.matchReason,
-                            }) || (t('suggestedForYou') || 'Suggested for you');
-                            const displayName = `${suggestion.profile.firstName ?? ''} ${suggestion.profile.lastName ?? ''}`.trim() || 'Member';
+                            }) || t('suggestedForYou');
+                            const displayName = `${suggestion.profile.firstName ?? ''} ${suggestion.profile.lastName ?? ''}`.trim() || tIdentity('unknownUser');
                             // Defensive cast — `trustScore`/`trustTier` are
                             // landing on `ProfileSummary` in a parallel GQL
                             // sweep; types may not be updated yet.

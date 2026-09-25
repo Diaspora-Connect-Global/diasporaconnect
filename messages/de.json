@@ -651,7 +651,7 @@
       },
       "notFound": {
         "title": "Möglichkeit nicht gefunden",
-        "description": "Die Möglichkeit mit der ID `{id}` existiert nicht."
+        "description": "Diese Möglichkeit existiert nicht."
       },
       "errors": {
         "insufficient_data": "Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut",
@@ -1977,6 +1977,7 @@
   "profile": {
     "userNotFound": "Dieses Profil wurde nicht gefunden.",
     "goBack": "Zurück",
+    "avatarUpdated": "Profilbild aktualisiert",
     "workExperience": {
       "title": "Berufserfahrung",
       "addExperience": "Erfahrung hinzufügen",

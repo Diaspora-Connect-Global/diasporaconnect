@@ -655,7 +655,7 @@
       },
       "notFound": {
         "title": "Opportunity not found",
-        "description": "The opportunity with ID `{id}` does not exist."
+        "description": "This opportunity does not exist."
       },
       "errors": {
         "insufficient_data": "Please check your input and try again",
@@ -1977,6 +1977,7 @@
   "profile": {
     "userNotFound": "This profile could not be found.",
     "goBack": "Go back",
+    "avatarUpdated": "Profile picture updated",
     "workExperience": {
       "title": "Work experience",
       "addExperience": "Add experience",

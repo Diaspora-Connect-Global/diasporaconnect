@@ -72,7 +72,7 @@ export default function OpportunityId() {
                 <div className="lg:max-w-[60vw] mx-2 py-4 flex items-center justify-center">
                     <div className="text-text-secondary font-medium text-center">
                         <p className="text-2xl mb-2">{t('title')}</p>
-                        <p>{t('description', { id: opportunityId })}</p>
+                        <p>{t('description')}</p>
                     </div>
                 </div>
             );

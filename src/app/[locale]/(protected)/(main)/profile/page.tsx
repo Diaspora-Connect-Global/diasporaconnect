@@ -51,6 +51,7 @@ interface UpdateProfileResponse {
 export default function ProfilePage() {
     const tCommon = useTranslations("common");
     const tFeedback = useTranslations("feedback");
+    const tProfile = useTranslations("profile");
     const router = useRouter();
     const queryRouter = useQueryRouter();
     const searchParams = useSearchParams();
@@ -66,16 +67,17 @@ export default function ProfilePage() {
     const [updateProfile, { loading: updating }] = useMutation<UpdateProfileResponse>(UPDATE_PROFILE, {
         onCompleted: (res) => {
             if (res.updateProfile.success) {
-                toast.success(res.updateProfile.message || "Profile picture updated");
+                toast.success(res.updateProfile.message || tProfile("avatarUpdated"));
                 setEditAvatarOpen(false);
                 reset(); // Reset the image upload state
                 refetch(); // Refetch profile to get updated data
             } else {
-                toast.error(res.updateProfile.message || "Update failed");
+                toast.error(res.updateProfile.message || tFeedback("error.description"));
             }
         },
-        onError: (err) => {
-            toast.error(err.message);
+        onError: () => {
+            // Never surface a raw backend/network error message to the user.
+            toast.error(tFeedback("error.description"));
         },
     });
 
@@ -153,7 +155,7 @@ export default function ProfilePage() {
 
     const handleAvatarUpload = async () => {
         if (!profile) {
-            toast.error("Profile not loaded");
+            toast.error(tFeedback("error.description"));
             return;
         }
 
