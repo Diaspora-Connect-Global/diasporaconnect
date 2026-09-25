@@ -9,6 +9,7 @@ import FilteredPosts from "./FilteredPosts";
 import ProfileCommunities from "./ProfileCommunities";
 import { useTranslations } from 'next-intl';
 import AboutContent from "./AboutContent";
+import ProfileSocials from "./socials/ProfileSocials";
 import { Profile } from "@/services/gql/profile";
 
 interface PersonalDetailsData {
@@ -78,7 +79,8 @@ userData
   const searchParams = useSearchParams();
   const router = useRouter();
   const requested = searchParams.get('tab');
-  const activeTab = requested === 'communities' || requested === 'about' ? requested : 'posts';
+  const activeTab =
+    requested === 'communities' || requested === 'about' || requested === 'socials' ? requested : 'posts';
   const setActiveTab = (id: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (id === 'posts') params.delete('tab');
@@ -92,6 +94,7 @@ userData
     { id: 'posts', label: t('posts') },
     { id: 'communities', label: t('communities') },
     { id: 'about', label: t('about') },
+    { id: 'socials', label: t('socials') },
   ];
 
 
@@ -117,6 +120,14 @@ userData
           </ContentCard>
         );
 
+      case 'socials':
+        // Mounted only while this tab is open, so its query is lazy.
+        return (
+          <ContentCard>
+            <ProfileSocials userId={userId} isOwnProfile={isOwnProfile} />
+          </ContentCard>
+        );
+
       default:
         return null;
     }
@@ -127,7 +138,8 @@ userData
       {/* Main horizontal tabs — their own card, as in the desktop design */}
       <Card className="p-0 max-lg:rounded-b-none max-lg:border-b-0 lg:rounded-2xl lg:border-[#E7ECF5] lg:shadow-none">
         <CardContent className="p-0">
-          <div role="tablist" className="flex px-2 lg:px-4">
+          {/* Four tabs overflow narrow phones in longer locales: scroll rather than wrap. */}
+          <div role="tablist" className="flex px-2 lg:px-4 overflow-x-auto scrollbar-hide">
             {mainTabs.map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -137,7 +149,7 @@ userData
                   role="tab"
                   aria-selected={active}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative px-4 lg:px-6 py-3 lg:py-4 text-sm lg:text-[15px] font-medium cursor-pointer transition-colors ${
+                  className={`relative shrink-0 whitespace-nowrap px-4 lg:px-6 py-3 lg:py-4 text-sm lg:text-[15px] font-medium cursor-pointer transition-colors ${
                     active ? 'text-[#1F5FD6]' : 'text-[#1B2A5E]/80 hover:text-[#1B2A5E]'
                   }`}
                 >
