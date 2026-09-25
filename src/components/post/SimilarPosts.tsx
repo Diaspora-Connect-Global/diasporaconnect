@@ -142,23 +142,10 @@ export default function SimilarPosts({ postId, limit = 10 }: SimilarPostsProps) 
   // Best-effort surface: any unhandled error → render nothing.
   if (error && !data) return null;
 
-  const showSkeleton = loading || hydrating || hydrated === null;
-
-  if (showSkeleton) {
-    return (
-      <section aria-label="Similar posts" className="mt-4 w-full min-w-0">
-        <h2 className="label-large text-text-primary mb-3">Similar posts</h2>
-        <div className="space-y-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-16 w-full rounded-lg bg-surface-alt animate-pulse"
-            />
-          ))}
-        </div>
-      </section>
-    );
-  }
+  // Secondary, below-the-fold section appended at the END of the post column:
+  // render nothing until it is fully hydrated (no skeletons), so it can never
+  // shift the post above it, and never flash an interim "no similar posts".
+  if (loading || hydrating || hydrated === null) return null;
 
   if (!hydrated.length) {
     return (

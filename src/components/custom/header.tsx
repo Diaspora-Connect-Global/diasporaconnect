@@ -89,7 +89,7 @@ export default function Header({
                 {showNotificationBadge && (
                   <span
                     className="absolute -top-1 -right-1 min-w-[1rem] h-4 px-1 flex items-center justify-center rounded-full bg-text-danger text-white text-[10px] font-medium"
-                    aria-label={`${unreadNotificationCount} unread notifications`}
+                    aria-label={t('unreadNotificationsLabel', { count: unreadNotificationCount })}
                   >
                     {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                   </span>
@@ -97,7 +97,7 @@ export default function Header({
                 {showChatBadge && (
                   <span
                     className="absolute -top-1 -right-1 min-w-[1rem] h-4 px-1 flex items-center justify-center rounded-full bg-text-danger text-white text-[10px] font-medium"
-                    aria-label={`${totalChatUnreadCount} unread messages`}
+                    aria-label={t('unreadMessagesLabel', { count: totalChatUnreadCount })}
                     data-testid="chat-nav-badge"
                   >
                     {formatBadgeCount(totalChatUnreadCount)}
@@ -123,7 +123,11 @@ export default function Header({
 
   return (
     <div >
-      <div className="h-app-top-down w-full bg-surface-default  top-0 z-50">
+      {/* sticky: the `top-0 z-50` were already here but inert without a
+          position, so a page that overflowed the inner area scrolled the header
+          away. The content frame below (`lg:max-w-[80vw] mx-auto`) is the same
+          frame SidebarShell's grid uses, so the sidebar lines up with the logo. */}
+      <div className="sticky h-app-top-down w-full bg-surface-default top-0 z-50">
         <div className="lg:max-w-[80vw] mx-auto  bg-surface-default"> {/* Full width header */}
           <div className="mx-auto pr-3 sm:pr-4 lg:pr-0"> {/* Keeps the avatar off the screen edge on phones/tablets */}
             <div className="flex  justify-between h-app-top-down"> {/* Standard header height */}

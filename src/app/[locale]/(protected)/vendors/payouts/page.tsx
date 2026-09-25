@@ -33,6 +33,7 @@ import type {
 } from '@/services/gql/types/payments';
 import { handleVendorError } from '@/lib/vendor-error-mapper';
 import VendorKycRequiredModal from '@/components/vendors/VendorKycRequiredModal';
+import PageLoader from '@/components/custom/PageLoader';
 
 interface Transaction {
   id: string;
@@ -55,17 +56,24 @@ const PayoutsDashboard = () => {
   const [payoutProvider, setPayoutProvider] = useState('MOBILE_MONEY');
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   const [isKycMandatory, setIsKycMandatory] = useState(true);
-  const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
-  const { data: dashboardData } = useQuery<GetVendorDashboardResponse>(GET_VENDOR_DASHBOARD);
-  const { data: escrowOrdersData } = useQuery<ListVendorOrdersResponse>(LIST_VENDOR_ORDERS, {
-    variables: { status: 'IN_PROGRESS', limit: 100, offset: 0 },
-  });
-  const { data: eligibilityData } = useQuery<GetVendorEligibilityResponse>(GET_VENDOR_ELIGIBILITY);
-  const { data: payoutAccountsData } = useQuery<MyPayoutAccountsResponse>(MY_PAYOUT_ACCOUNTS);
-  const { data: paymentIntentsData } = useQuery<MyPaymentIntentsResponse>(MY_PAYMENT_INTENTS, {
-    variables: { page: currentPage, limit: rowsPerPage },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: vendorData, loading: vendorLoading } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
+  const { data: dashboardData, loading: dashboardLoading } =
+    useQuery<GetVendorDashboardResponse>(GET_VENDOR_DASHBOARD);
+  const { data: escrowOrdersData, loading: escrowOrdersLoading } = useQuery<ListVendorOrdersResponse>(
+    LIST_VENDOR_ORDERS,
+    { variables: { status: 'IN_PROGRESS', limit: 100, offset: 0 } }
+  );
+  const { data: eligibilityData, loading: eligibilityLoading } =
+    useQuery<GetVendorEligibilityResponse>(GET_VENDOR_ELIGIBILITY);
+  const { data: payoutAccountsData, loading: payoutAccountsLoading } =
+    useQuery<MyPayoutAccountsResponse>(MY_PAYOUT_ACCOUNTS);
+  const { data: paymentIntentsData, loading: paymentIntentsLoading } = useQuery<MyPaymentIntentsResponse>(
+    MY_PAYMENT_INTENTS,
+    {
+      variables: { page: currentPage, limit: rowsPerPage },
+      fetchPolicy: 'cache-and-network',
+    }
+  );
   const [requestPayout, { loading: requestingPayout }] = useMutation<{ requestPayout: string }>(REQUEST_PAYOUT);
   const [createPayoutAccount, { loading: creatingPayoutAccount }] =
     useMutation<CreatePayoutAccountResponse>(CREATE_PAYOUT_ACCOUNT);
@@ -201,6 +209,22 @@ const PayoutsDashboard = () => {
       });
     }
   };
+
+  // All 6 queries fire in parallel above (no waterfall). Gate on every one
+  // that feeds visible content — balance, escrow, eligibility, payout
+  // methods and transaction history — so the page never shows a '—'
+  // balance or a false "No payout accounts yet." while still loading.
+  const criticalLoading =
+    (vendorLoading && !vendorData) ||
+    (dashboardLoading && !dashboardData) ||
+    (escrowOrdersLoading && !escrowOrdersData) ||
+    (eligibilityLoading && !eligibilityData) ||
+    (payoutAccountsLoading && !payoutAccountsData) ||
+    (paymentIntentsLoading && !paymentIntentsData);
+
+  if (criticalLoading) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="min-h-screen  p-6">

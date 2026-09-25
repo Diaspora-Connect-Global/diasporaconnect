@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 
 import {
@@ -31,6 +31,13 @@ interface UseChatMessagesResult {
     /** Refetch GraphQL message history. Wired into WebSocket onMessage listeners. */
     refetch: () => Promise<unknown>;
     loading: boolean;
+    /**
+     * True until this conversation's FIRST history page has landed in the store
+     * (or failed). Unlike `loading` it stays false on refetches and on a growing
+     * page window, so a page-level loader gated on it never flashes back over a
+     * chat that is already on screen.
+     */
+    initialLoading: boolean;
     /** Server says older messages exist beyond the loaded window. */
     hasMore: boolean;
 }
@@ -47,11 +54,13 @@ export function useChatMessages({
 }: UseChatMessagesParams): UseChatMessagesResult {
     const setApiMessages = useChatStore((s) => s.setApiMessages);
 
-    const { data: messagesData, refetch, loading } = useQuery<GetMessagesData>(GET_MESSAGES, {
+    const { data: messagesData, refetch, loading, error } = useQuery<GetMessagesData>(GET_MESSAGES, {
         variables: { conversationId: conversationId || "", limit, offset },
         skip: !conversationId,
         fetchPolicy: "network-only",
     });
+    // Which conversation's history has been synced into the store at least once.
+    const [historyReadyFor, setHistoryReadyFor] = useState<string | null>(null);
 
     const client = useApolloClient();
     const [markConversationAsRead] = useMutation<MarkConversationAsReadData>(MARK_CONVERSATION_AS_READ, {
@@ -84,6 +93,7 @@ export function useChatMessages({
         }));
 
         setApiMessages(conversationId, history);
+        setHistoryReadyFor(conversationId);
     }, [messagesData, conversationId, setApiMessages]);
 
     // Mark as read on open. The mutation's refetchQueries refreshes the sidebar badges.
@@ -151,5 +161,7 @@ export function useChatMessages({
         };
     }, [conversationId, shouldMarkAsRead, markConversationAsRead, client]);
 
-    return { refetch, loading, hasMore: !!messagesData?.getMessages?.hasMore };
+    const initialLoading = !!conversationId && historyReadyFor !== conversationId && !error;
+
+    return { refetch, loading, initialLoading, hasMore: !!messagesData?.getMessages?.hasMore };
 }

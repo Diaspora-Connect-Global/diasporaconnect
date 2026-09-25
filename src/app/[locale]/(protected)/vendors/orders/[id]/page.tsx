@@ -7,6 +7,7 @@ import { useMutation, useQuery, useApolloClient } from "@apollo/client/react";
 import { Package } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
+import PageLoader from "@/components/custom/PageLoader";
 import {
   GET_MARKETPLACE_ORDER,
   CANCEL_MARKETPLACE_ORDER,
@@ -135,12 +136,8 @@ export default function OrderDetailsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-8">
-        <p className="text-text-secondary">Loading order…</p>
-      </div>
-    );
+  if (loading && !data) {
+    return <PageLoader />;
   }
 
   if (error || !order) {

@@ -41,6 +41,7 @@ import { resolveCountryName, getCountryTimezone, isGoodTimeToMessage, formatCurr
 import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime";
 import { DateSeparator } from "./DateSeparator";
 import { UserBadge } from "@/components/custom/userBadge";
+import PageLoader from "@/components/custom/PageLoader";
 import { resolveUserTier } from "@/lib/userTier";
 import { toCdnUrl } from "@/lib/cdn";
 
@@ -70,7 +71,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     const currentUserId = user?.userId;
     const userTimeZone = user?.timezone || user?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    const { conversationId } = useChatConversation({
+    const { conversationId, resolving: resolvingConversation } = useChatConversation({
         chatId: chat.id,
         type: 'direct',
         currentUserId,
@@ -79,7 +80,11 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
 
     const apiMessages = getApiMessagesByConversation(conversationId || '');
 
-    const { refetch: refetchMessages } = useChatMessages({ conversationId });
+    const { refetch: refetchMessages, initialLoading: messagesInitialLoading } = useChatMessages({ conversationId });
+    // The header comes from the chat row we already have; the message area
+    // waits for the conversation and its first page instead of flashing the
+    // "say hello" empty state over a chat that has history.
+    const messagesPending = resolvingConversation || messagesInitialLoading;
 
     const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE, {
         refetchQueries: [{ query: GET_CONVERSATIONS, variables: { limit: 100, offset: 0 } }],
@@ -520,8 +525,10 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 md:px-4 py-4"
                     style={{ scrollbarGutter: 'stable' }}
                 >
+                    {messagesPending && <PageLoader />}
+
                     {/* Empty state */}
-                    {apiMessages.length === 0 && (
+                    {!messagesPending && apiMessages.length === 0 && (
                         <div className="flex flex-col items-center justify-center h-full gap-3 text-text-secondary">
                             <Avatar className="w-20 h-20">
                                 <AvatarImage src={otherAvatar || undefined} alt="" />
@@ -540,7 +547,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
                     )}
 
                     {/* Messages with date separators */}
-                    {(() => {
+                    {!messagesPending && (() => {
                         const nodes: React.ReactNode[] = [];
                         let lastDateKey = '';
 

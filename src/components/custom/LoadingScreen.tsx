@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Spinner } from '@/components/ui/spinner';
 
 /**
@@ -45,6 +46,13 @@ interface LoadingScreenProps {
 }
 
 /**
+ * Full-screen BOOT loader (logo + brand spinner). Use it only before the app
+ * shell exists — the (main) boot gate, RootGate/Home2Gate, auth/onboarding and
+ * the vendor workspace gate. Once the header/sidebar are on screen use
+ * `PageLoader` instead: this one is `fixed inset-0` and would cover the shell.
+ * Boot callers pass no `text` — a caption that appears mid-boot reads as a
+ * second loader.
+ *
  * Full-screen loading component with customizable logo, spinner, and text.
  * 
  * @description
@@ -113,15 +121,23 @@ export default function LoadingScreen({
   showSpinner = true,
   bgColor = 'bg-background'
 }: LoadingScreenProps) {
+  const t = useTranslations('common');
   return (
-    <div className={`fixed inset-0 flex items-center justify-center ${bgColor}`}>
-      <div className="flex flex-col items-center gap-6">
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className={`fixed inset-0 flex items-center justify-center ${bgColor}`}
+    >
+      {/* Announced once; the visuals below are decorative. */}
+      <span className="sr-only">{text || t('loading')}</span>
+      <div className="flex flex-col items-center gap-6" aria-hidden>
         {/* Logo Section */}
         {showLogo && (
           <div className="relative w-32 h-32">
             <Image
               src="/LOGO.svg"
-              alt="Logo"
+              alt=""
               fill
               className="object-contain"
               priority

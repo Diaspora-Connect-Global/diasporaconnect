@@ -8,6 +8,7 @@ import { UPDATE_PRODUCT, LIST_VENDOR_PRODUCTS } from "@/services/gql/vendor";
 import { GET_PRODUCT } from "@/services/gql/marketplace";
 import type { GetProductResponse } from "@/services/gql/types/marketplace";
 import { handleVendorError } from "@/lib/vendor-error-mapper";
+import PageLoader from "@/components/custom/PageLoader";
 
 export default function EditProductPage() {
   const params = useParams();
@@ -89,11 +90,7 @@ export default function EditProductPage() {
   };
 
   if (fetching && !ready) {
-    return (
-      <div className="p-8">
-        <p className="text-text-secondary">Loading product…</p>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!data?.getProduct?.product && !fetching) {

@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState } from '@/components/feedback';
 import { cn } from '@/lib/utils';
 import type {
@@ -84,20 +84,10 @@ export function ContributionList({
   const locale = useLocale();
 
   if (loading && contributions.length === 0) {
-    return (
-      <ul className="divide-y divide-border-subtle">
-        {[0, 1, 2].map((i) => (
-          <li key={i} className="flex items-center gap-3 py-3">
-            <Skeleton className="size-9 shrink-0 rounded-full" />
-            <Skeleton className="h-4 w-28" />
-            <div className="ml-auto flex flex-col items-end gap-1">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-3 w-16" />
-            </div>
-          </li>
-        ))}
-      </ul>
-    );
+    // This rail fetches its own page of the ledger independently of the rest
+    // of the project screen, so its loading state is an on-demand panel, not
+    // part of the page's first paint.
+    return <PageLoader />;
   }
 
   if (contributions.length === 0) {

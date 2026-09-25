@@ -21,8 +21,8 @@ import {
   specFor,
 } from '@/components/circles/history';
 import { ButtonType1 } from '@/components/custom/button';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
 import { useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
@@ -57,44 +57,6 @@ const PAGE_SIZE = 50;
  * therefore chosen per tab rather than shared — see `pager`.
  */
 type HistoryTab = 'MOTIONS' | 'MEMBERSHIP' | 'ACTIVITY';
-
-function HistorySkeleton() {
-  return (
-    <div className="flex flex-col gap-4 py-4">
-      <Skeleton className="h-20 w-full rounded-xl" />
-      <Skeleton className="h-9 w-64 rounded-full" />
-      <Skeleton className="h-3 w-full" />
-      {[...Array(6)].map((_, index) => (
-        <div key={index} className="flex items-start gap-4">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-3 w-1/3" />
-          </div>
-          <Skeleton className="h-5 w-16 shrink-0 rounded-full" />
-          <Skeleton className="h-3 w-24 shrink-0" />
-          <Skeleton className="h-3 w-40 shrink-0" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/** Placeholder for the raw log, which loads only when its tab is first opened. */
-function LogSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      {[...Array(6)].map((_, index) => (
-        <div key={index} className="flex items-start justify-between gap-4">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-3 w-1/3" />
-          </div>
-          <Skeleton className="h-3 w-10 shrink-0" />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 /**
  * The circle's decision history.
@@ -515,7 +477,7 @@ export default function CircleHistoryPage() {
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
           {header}
-          <HistorySkeleton />
+          <PageLoader />
         </div>
       </div>
     );
@@ -535,7 +497,9 @@ export default function CircleHistoryPage() {
 
   if (tab === 'ACTIVITY') {
     if (activityInitialLoading) {
-      body = <LogSkeleton />;
+      // The trail is fetched only once this tab is first opened — an on-demand
+      // panel inside an already-revealed page, not part of first paint.
+      body = <PageLoader />;
     } else if (activityEvents.length > 0) {
       body = (
         <>

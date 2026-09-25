@@ -466,7 +466,9 @@
       "myNetwork": "La mia rete",
       "myCommunities": "Le mie community",
       "tagline": "Connetti · Condividi · Costruisci",
-      "copyright": "DiaspoPlug © {year}"
+      "copyright": "DiaspoPlug © {year}",
+      "unreadNotificationsLabel": "{count, plural, =1 {1 notifica non letta} other {# notifiche non lette}}",
+      "unreadMessagesLabel": "{count, plural, =1 {1 messaggio non letto} other {# messaggi non letti}}"
     },
     "associations": {
       "discover": "Scopri associazioni",
@@ -509,7 +511,8 @@
       "leaveConfirm": {
         "title": "Uscire dall'associazione?",
         "description": "Dovrai richiedere di nuovo l'adesione per vedere i contenuti."
-      }
+      },
+      "noneJoined": "Non ti sei ancora iscritto a nessuna associazione"
     },
     "joinModal": {
       "communityTitle": "Unirsi alla comunità?",
@@ -1569,7 +1572,8 @@
       "not_found": "Questo elemento non è stato trovato.",
       "conflict": "Questa operazione non può essere completata nello stato attuale.",
       "failed": "Operazione non riuscita. Riprova."
-    }
+    },
+    "noCommunity": "Nessuna comunità"
   },
   "association": {
     "discovery": {
@@ -2595,7 +2599,8 @@
         "maxRevisions": "Numero massimo di revisioni consentite",
         "saveAndAddAnother": "Salva e aggiungi un altro servizio",
         "saveAndPreview": "Salva e anteprima"
-      }
+      },
+      "noServicesFound": "Nessun servizio trovato"
     },
     "sales": {
       "title": "Vendite",
@@ -2615,7 +2620,8 @@
       "actions": "Azioni",
       "viewOrder": "Visualizza ordine",
       "rowsPerPage": "Righe per pagina:",
-      "page": "Pagina {current} di {total}"
+      "page": "Pagina {current} di {total}",
+      "noSalesFound": "Nessuna vendita trovata."
     },
     "payouts": {
       "title": "Pagamenti",
@@ -2660,6 +2666,17 @@
       "conflict": "Si è verificato un conflitto. La risorsa potrebbe essere stata modificata. Aggiorna e riprova.",
       "failed": "L'operazione non è riuscita. Riprova.",
       "servicePackagePublished": "Pacchetto di servizio pubblicato con successo"
+    },
+    "status": {
+      "linkBroken": "Questo link sembra non funzionare. Torna alle tue notifiche.",
+      "accountReady": "Il tuo account venditore è pronto",
+      "listFirstProduct": "Pubblica il tuo primo prodotto",
+      "listFirstService": "Pubblica il tuo primo servizio",
+      "listFirstProductDescription": "Aggiungi il tuo primo prodotto così i clienti potranno scoprirti nel marketplace.",
+      "listFirstServiceDescription": "Aggiungi il tuo primo servizio così i clienti potranno scoprirti nel marketplace.",
+      "goToDashboard": "Vai alla dashboard",
+      "listProduct": "Pubblica prodotto",
+      "listService": "Pubblica servizio"
     }
   },
   "common": {
@@ -2699,7 +2716,9 @@
       "someone": "Qualcuno",
       "customer": "Cliente",
       "attendee": "Partecipante"
-    }
+    },
+    "signIn": "Accedi",
+    "signUp": "Registrati"
   },
   "metadata": {
     "title": "Diaspora Connect Global",

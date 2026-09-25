@@ -7,8 +7,8 @@ import { useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 
 import { ButtonType1 } from '@/components/custom/button';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { useUserStore } from '@/store/useUserStore';
@@ -186,19 +186,19 @@ export default function CircleProjectPage() {
     </div>
   );
 
-  const loading = projectLoading || goalsLoading;
-
-  if (loading && !project) {
+  /*
+   * Both queries feed the same above-the-fold region: `project` is the header
+   * and description, `goals` is the "Overall progress" section directly under
+   * it. Gating on `project` alone let a cache-warm project render immediately
+   * while goals were still in flight — the progress bars then popped into an
+   * already-visible page instead of appearing with it.
+   */
+  if ((projectLoading && !projectData) || (goalsLoading && !goalsData)) {
     return (
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
           {header}
-          <Skeleton className="mb-3 h-6 w-40 rounded-full" />
-          <Skeleton className="mb-3 h-8 w-3/4" />
-          <Skeleton className="mb-2 h-4 w-full" />
-          <Skeleton className="mb-6 h-4 w-2/3" />
-          <Skeleton className="mb-6 h-14 w-full" />
-          <Skeleton className="h-40 w-full" />
+          <PageLoader />
         </div>
       </div>
     );

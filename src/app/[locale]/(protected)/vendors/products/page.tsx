@@ -10,6 +10,7 @@ import { DELETE_PRODUCT, LIST_VENDOR_PRODUCTS, PUBLISH_PRODUCT } from "@/service
 import type { ListVendorProductsResponse } from "@/services/gql/types/vendor";
 import { handleVendorError } from "@/lib/vendor-error-mapper";
 import VendorKycRequiredModal from "@/components/vendors/VendorKycRequiredModal";
+import PageLoader from "@/components/custom/PageLoader";
 
 export default function ProductsPage() {
   const t = useTranslations('vendors.products');
@@ -95,6 +96,10 @@ export default function ProductsPage() {
   const getLocalizedCategory = (category: string): string => {
     return category === 'Men fashion' ? t('menFashion') : t('womenFashion');
   };
+
+  if (loading && !data) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="p-8">

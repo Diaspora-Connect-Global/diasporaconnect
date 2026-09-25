@@ -466,7 +466,9 @@
       "myNetwork": "Mein Netzwerk",
       "myCommunities": "Meine Communities",
       "tagline": "Verbinden · Teilen · Aufbauen",
-      "copyright": "DiaspoPlug © {year}"
+      "copyright": "DiaspoPlug © {year}",
+      "unreadNotificationsLabel": "{count, plural, =1 {1 ungelesene Benachrichtigung} other {# ungelesene Benachrichtigungen}}",
+      "unreadMessagesLabel": "{count, plural, =1 {1 ungelesene Nachricht} other {# ungelesene Nachrichten}}"
     },
     "associations": {
       "discover": "Vereine entdecken",
@@ -509,7 +511,8 @@
       "leaveConfirm": {
         "title": "Verein verlassen?",
         "description": "Sie müssen erneut einen Beitritt beantragen, um Inhalte zu sehen."
-      }
+      },
+      "noneJoined": "Noch keinem Verein beigetreten"
     },
     "joinModal": {
       "communityTitle": "Community beitreten?",
@@ -1569,7 +1572,8 @@
       "not_found": "Dieses Element wurde nicht gefunden.",
       "conflict": "Dieser Vorgang kann im aktuellen Status nicht abgeschlossen werden.",
       "failed": "Operation fehlgeschlagen. Bitte versuchen Sie es erneut."
-    }
+    },
+    "noCommunity": "Keine Community"
   },
   "association": {
     "discovery": {
@@ -2595,7 +2599,8 @@
         "maxRevisions": "Maximale Anzahl erlaubter Überarbeitungen",
         "saveAndAddAnother": "Speichern und weitere Dienstleistung hinzufügen",
         "saveAndPreview": "Speichern und Vorschau"
-      }
+      },
+      "noServicesFound": "Keine Dienstleistungen gefunden"
     },
     "sales": {
       "title": "Verkäufe",
@@ -2615,7 +2620,8 @@
       "actions": "Aktionen",
       "viewOrder": "Bestellung ansehen",
       "rowsPerPage": "Zeilen pro Seite:",
-      "page": "Seite {current} von {total}"
+      "page": "Seite {current} von {total}",
+      "noSalesFound": "Keine Verkäufe gefunden."
     },
     "payouts": {
       "title": "Auszahlungen",
@@ -2660,6 +2666,17 @@
       "conflict": "Es gab einen Konflikt. Die Ressource könnte geändert worden sein. Bitte aktualisieren Sie und versuchen Sie es erneut.",
       "failed": "Der Vorgang ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "servicePackagePublished": "Servicepaket erfolgreich veröffentlicht"
+    },
+    "status": {
+      "linkBroken": "Dieser Link scheint defekt zu sein. Geh zurück zu deinen Benachrichtigungen.",
+      "accountReady": "Dein Verkäuferkonto ist bereit",
+      "listFirstProduct": "Stelle dein erstes Produkt ein",
+      "listFirstService": "Stelle deine erste Dienstleistung ein",
+      "listFirstProductDescription": "Füge dein erstes Produkt hinzu, damit Kunden dich auf dem Marktplatz entdecken können.",
+      "listFirstServiceDescription": "Füge deine erste Dienstleistung hinzu, damit Kunden dich auf dem Marktplatz entdecken können.",
+      "goToDashboard": "Zum Dashboard",
+      "listProduct": "Produkt einstellen",
+      "listService": "Dienstleistung einstellen"
     }
   },
   "common": {
@@ -2699,7 +2716,9 @@
       "someone": "Jemand",
       "customer": "Kunde",
       "attendee": "Teilnehmer"
-    }
+    },
+    "signIn": "Anmelden",
+    "signUp": "Registrieren"
   },
   "metadata": {
     "title": "Diaspora Connect Global",

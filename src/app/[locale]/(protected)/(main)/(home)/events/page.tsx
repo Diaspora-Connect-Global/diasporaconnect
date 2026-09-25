@@ -30,7 +30,7 @@ import {
     type ConfirmPaymentIntentResponse,
     type MyPaymentMethodsResponse,
 } from '@/services/gql/payments';
-import { Loader2 } from 'lucide-react';
+import PageLoader from '@/components/custom/PageLoader';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
@@ -45,16 +45,8 @@ function formatEventDate(iso: string, locale: string) {
     }).format(new Date(iso));
 }
 
-const AttendingComponent = ({ attendingEvents, loading, locale }: { attendingEvents: Event[], loading: boolean, locale: string }) => {
+const AttendingComponent = ({ attendingEvents, locale }: { attendingEvents: Event[], locale: string }) => {
     const t = useTranslations("home.events");
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center p-4">
-                <Loader2 className="w-6 h-6 animate-spin text-text-brand" />
-            </div>
-        );
-    }
 
     return (
         <>
@@ -83,16 +75,8 @@ const AttendingComponent = ({ attendingEvents, loading, locale }: { attendingEve
     );
 };
 
-const SavedComponent = ({ savedEvents, loading, locale }: { savedEvents: Event[], loading: boolean, locale: string }) => {
+const SavedComponent = ({ savedEvents, locale }: { savedEvents: Event[], locale: string }) => {
     const t = useTranslations("home.events");
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center p-4">
-                <Loader2 className="w-6 h-6 animate-spin text-text-brand" />
-            </div>
-        );
-    }
 
     return (
         <>
@@ -415,6 +399,20 @@ export default function Events() {
         [attendingEventsToRender]
     );
 
+    // One gate for both sections (your events + discovery) so the page appears
+    // whole. Only while a query has no data yet: the save/attend mutations
+    // refetch USER_EVENTS, and that must not blank the page again.
+    if (
+        (shouldLoadUserEvents && userEventsLoading && !userEventsData) ||
+        (eventsLoading && !eventsData)
+    ) {
+        return (
+            <div className="lg:w-[60vw] h-app-inner flex">
+                <PageLoader />
+            </div>
+        );
+    }
+
     return (
         <div className="lg:w-[60vw] h-app-inner p-4 overflow-auto scrollbar-hide">
             <div className="mx-auto">
@@ -440,28 +438,23 @@ export default function Events() {
                 {/* Events Content */}
                 <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory">
                     {activeTab === "events" ? (
-                        <AttendingComponent attendingEvents={upcomingAttending} loading={userEventsLoading} locale={locale} />
+                        <AttendingComponent attendingEvents={upcomingAttending} locale={locale} />
                     ) : (
-                        <SavedComponent savedEvents={savedEventsToRender} loading={userEventsLoading} locale={locale} />
+                        <SavedComponent savedEvents={savedEventsToRender} locale={locale} />
                     )}
                 </div>
 
-                {activeTab === "events" && !userEventsLoading && pastAttending.length > 0 && (
+                {activeTab === "events" && pastAttending.length > 0 && (
                     <>
                         <p className="heading-small mt-6 mb-2 text-text-secondary">{t("pastEvents")}</p>
                         <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex flex-row gap-[0.5rem] scroll-smooth snap-x snap-mandatory opacity-70">
-                            <AttendingComponent attendingEvents={pastAttending} loading={false} locale={locale} />
+                            <AttendingComponent attendingEvents={pastAttending} locale={locale} />
                         </div>
                     </>
                 )}
 
                 <p className="heading-small my-4">{t("paidEvents")}</p>
 
-                {eventsLoading ? (
-                    <div className="flex items-center justify-center p-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
-                    </div>
-                ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 w-full">
                         {paidEvents.map((event) => (
                             <PaidEventCard
@@ -483,15 +476,9 @@ export default function Events() {
                             />
                         ))}
                     </div>
-                )}
 
                 <p className="heading-small my-2">{t("moreevents")}</p>
 
-                {eventsLoading ? (
-                    <div className="flex items-center justify-center p-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
-                    </div>
-                ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 w-full">
                         {freeEvents.map((event) => (
                             <EventCard1
@@ -513,7 +500,6 @@ export default function Events() {
                             />
                         ))}
                     </div>
-                )}
             </div>
             <PaidEventsModal ref={modalRef} />
         </div>

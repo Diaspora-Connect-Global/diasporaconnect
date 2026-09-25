@@ -13,8 +13,8 @@ import {
   liveRules,
   versionsForKind,
 } from '@/components/circles/governance';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { CIRCLE, CIRCLE_GOVERNANCE_RULES } from '@/services/gql/circles';
@@ -28,26 +28,6 @@ import type {
   CircleGovernanceRuleHistoryData,
   CircleGovernanceRuleHistoryVariables,
 } from '@/services/gql/types/circles-governance';
-
-function GovernanceSkeleton() {
-  return (
-    <div className="flex flex-col gap-4 py-4">
-      <Skeleton className="h-20 w-full rounded-xl" />
-      <Skeleton className="h-24 w-full rounded-xl" />
-      {[...Array(4)].map((_, index) => (
-        <div key={index} className="flex flex-col gap-2 rounded-xl border border-border-subtle p-4">
-          <Skeleton className="h-5 w-40" />
-          {[...Array(4)].map((__, row) => (
-            <div key={row} className="flex items-center justify-between gap-4">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-3 w-32" />
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 /**
  * The circle's governance rules — its own constitution, in plain language.
@@ -152,7 +132,7 @@ export default function CircleGovernancePage() {
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
           {header}
-          <GovernanceSkeleton />
+          <PageLoader />
         </div>
       </div>
     );

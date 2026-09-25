@@ -26,6 +26,7 @@ import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membe
 import { cn } from '@/lib/utils';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { toCdnUrl } from '@/lib/cdn';
+import PageLoader from '@/components/custom/PageLoader';
 
 interface RequestMembershipPayload {
     id?: string | null;
@@ -204,7 +205,7 @@ export default function Community() {
         }
     );
 
-    const { data: pendingData, refetch: refetchPending } = useQuery<MyPendingRequestsData>(
+    const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = useQuery<MyPendingRequestsData>(
         GET_MY_PENDING_REQUESTS,
         { fetchPolicy: 'cache-and-network' }
     );
@@ -453,7 +454,15 @@ export default function Community() {
         [renderList, joinedCommunityIds, pendingRequestIds, pendingCommunities, visibilityFilter, pricingFilter],
     );
 
-    const anyDiscoverLoading = discoverLoading || searchLoading;
+    // One gate for every query feeding the visible sections (my communities,
+    // pending requests, discover — which stitches DISCOVER + SEARCH). Each
+    // counts only while it has no data yet, so cache-and-network revisits and
+    // post-join refetches render instantly instead of swapping in a loader.
+    const initialLoading =
+        (myCommunitiesLoading && !myCommunitiesData) ||
+        (discoverLoading && !discoverData) ||
+        (searchLoading && !searchData) ||
+        (pendingLoading && !pendingData);
 
     // Renders the rich body of the join confirmation modal: avatar, name,
     // type/member count, access badges, and a truncated description. Only
@@ -516,16 +525,20 @@ export default function Community() {
         );
     };
 
+    if (initialLoading) {
+        return (
+            <div className="lg:w-[60vw] h-app-inner flex">
+                <PageLoader />
+            </div>
+        );
+    }
+
     return (
         <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
             <p className="text-2xl heading-large my-5">{t('myCommunity')}</p>
 
             <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
-                {myCommunitiesLoading ? (
-                    <div className="text-center py-8 text-gray-500">
-                        Loading your communities...
-                    </div>
-                ) : myCommunitiesData?.listUserCommunities?.length ? (
+                {myCommunitiesData?.listUserCommunities?.length ? (
                     myCommunitiesData?.listUserCommunities?.map((community) => (
                         <MyCommunityCard
                             id={community.id}
@@ -618,11 +631,7 @@ export default function Community() {
             </div>
 
             <div className="overflow-auto scrollbar-hide grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-                {anyDiscoverLoading ? (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                        Loading communities...
-                    </div>
-                ) : visibleCommunities.length ? (
+                {visibleCommunities.length ? (
                     visibleCommunities.map((community) => {
                         const isAlreadyJoined = JOINED_STATUSES.has(community.membershipStatus?.toUpperCase() ?? '') || joinedCommunities.has(community.id);
                         const isPendingStatus = community.membershipStatus === 'PENDING' || pendingCommunities.has(community.id);

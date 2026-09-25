@@ -5,8 +5,8 @@ import { useQuery } from '@apollo/client/react';
 import { ArrowLeft, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { CIRCLE, MY_CIRCLE_MEMBERSHIP } from '@/services/gql/circles';
@@ -80,23 +80,6 @@ export interface CircleSettingsScreenProps {
   circleId: string;
 }
 
-function SettingsSkeleton() {
-  return (
-    <div className="space-y-4 py-4">
-      {[0, 1, 2].map((index) => (
-        <div key={index} className="rounded-lg border border-border-subtle p-4 sm:p-5">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="mt-2 h-3 w-64" />
-          <div className="mt-4 space-y-3">
-            <Skeleton className="h-10 w-full rounded-md" />
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
   const t = useTranslations('circles.settings');
   const tCommon = useTranslations('circles.common');
@@ -138,7 +121,6 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
 
   const circle = circleData?.circle ?? null;
   const membership = membershipData?.myCircleMembership ?? null;
-  const loading = circleLoading || membershipLoading;
 
   /*
    * `isLead` and `canPropose` are read straight off the membership check rather
@@ -217,7 +199,16 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
   );
 
   const body = () => {
-    if (loading && !circle) return <SettingsSkeleton />;
+    /*
+     * `circle` (what is configured) and `membership` (what this viewer may
+     * change) both gate the controls below — `permissions` reads both. Gating
+     * on `circle` alone let a cache-warm circle render its panels before
+     * `membership` resolved, so a member briefly saw every control enabled
+     * (or hidden) on the stale default before flipping to the real answer.
+     */
+    if ((circleLoading && !circleData) || (membershipLoading && !membershipData)) {
+      return <PageLoader />;
+    }
 
     if (circleError && !circle) {
       return (

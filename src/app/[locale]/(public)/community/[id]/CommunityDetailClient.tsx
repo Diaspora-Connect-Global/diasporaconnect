@@ -5,7 +5,6 @@ import { formatDateProximity } from '@/macros/time';
 import AboutCommunity from '@/components/cards/community/AboutCommunity';
 import { ButtonType1 } from '@/components/custom/button';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
-import { useAuthStore } from '@/store/useAuthStore';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
@@ -55,6 +54,7 @@ import { splitPostAttachments } from '@/lib/normalizeFeedPost';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { toCdnUrl } from '@/lib/cdn';
+import PageLoader from '@/components/custom/PageLoader';
 
 interface CommunityDetails {
   id: string;
@@ -219,15 +219,6 @@ export default function CommunityDetailPage() {
   const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
   const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
   const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
-
-  const [hydrated, setHydrated] = useState(false);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
-  useEffect(() => {
-    const unsubscribe = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
-    return unsubscribe;
-  }, []);
-  const showSidebar = hydrated && isAuthenticated;
 
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
@@ -598,11 +589,7 @@ export default function CommunityDetailPage() {
   };
 
   if (detailsLoading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center p-4">
-        <p className="text-text-secondary">{t('loading')}</p>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!community) {
@@ -785,7 +772,6 @@ export default function CommunityDetailPage() {
           onShare={handleShare}
           onSendComment={handleSendComment}
           onDeletePost={(id) => setLocalPosts((prev) => prev.filter((p) => p.id !== id))}
-          showSidebar={showSidebar}
         />
         {membershipModals}
       </>

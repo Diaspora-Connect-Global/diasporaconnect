@@ -33,6 +33,7 @@ import { useRouter } from '@/i18n/navigation';
 import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
 import { AttachmentInput } from '@/services/gql/types/postsFeed';
 import { usePostDraft } from '@/hooks/usePostDraft';
+import PageLoader from '@/components/custom/PageLoader';
 import { buildMentionInputsFromText } from '@/components/custom/richTextRenderer';
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
 import { getFirstUrlInText } from '@/lib/urlPreview';
@@ -144,6 +145,10 @@ export default function CreatePostPage() {
   const [showMobileAttachMenu, setShowMobileAttachMenu] = useState(false);
   const [mentionedUsers, setMentionedUsers] = useState<MentionedUser[]>([]);
   const [draftRestored, setDraftRestored] = useState(false);
+  // The stored draft is resolved BEFORE the composer first paints, so the
+  // "Draft restored" banner and the restored text/attachments are there from
+  // the start instead of shoving the composer down a moment later.
+  const [draftChecked, setDraftChecked] = useState(false);
   const [dismissedPreviewUrl, setDismissedPreviewUrl] = useState<string | null>(null);
   const textareaRef = React.useRef<RichTextareaHandle>(null);
   const submittingRef = React.useRef(false);
@@ -195,6 +200,7 @@ export default function CreatePostPage() {
   // Restore draft on mount
   React.useEffect(() => {
     loadDraft().then(draft => {
+      setDraftChecked(true);
       if (!draft) return;
       if (draft.text) setPostContent(draft.text);
       if (draft.visibility) setVisibility(draft.visibility as Visibility);
@@ -211,6 +217,9 @@ export default function CreatePostPage() {
         setAttachments(restored);
       }
       setDraftRestored(true);
+    }).catch(() => {
+      // Draft storage unavailable — start with an empty composer.
+      setDraftChecked(true);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -597,6 +606,14 @@ export default function CreatePostPage() {
     if (charCount > 4000) return 'bg-[#cb3500]';
     return 'bg-surface-brand';
   };
+
+  if (!draftChecked) {
+    return (
+      <div className="lg:w-[60vw] h-app-inner flex mx-auto">
+        <PageLoader />
+      </div>
+    );
+  }
 
   return (
     <div className="lg:w-[60vw] h-app-inner overflow-y-auto scrollbar-hide py-4 flex justify-center mx-auto ">

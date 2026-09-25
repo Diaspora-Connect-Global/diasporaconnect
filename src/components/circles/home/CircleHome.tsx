@@ -9,8 +9,8 @@ import { toast } from 'sonner';
 import { DateSeparator } from '@/components/chats/DateSeparator';
 import { MessageInput } from '@/components/chats/MessageInput';
 import { TypingDots } from '@/components/chats/TypingDots';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
@@ -175,7 +175,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
   const isMember = membershipData?.myCircleMembership?.isMember ?? false;
 
   // ── Chat handle ──────────────────────────────────────────────────────────
-  const { data: chatData } = useQuery<ChatData>(CIRCLE_CHAT, {
+  const { data: chatData, loading: chatLoading } = useQuery<ChatData>(CIRCLE_CHAT, {
     variables: { circleId },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
@@ -185,17 +185,17 @@ export function CircleHome({ circleId }: CircleHomeProps) {
 
   // ── Artefacts ────────────────────────────────────────────────────────────
   const cardVars = { circleId, limit: INLINE_CARD_LIMIT };
-  const { data: motionsData } = useQuery<MotionsData>(CIRCLE_MOTIONS, {
+  const { data: motionsData, loading: motionsLoading } = useQuery<MotionsData>(CIRCLE_MOTIONS, {
     variables: cardVars,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   });
-  const { data: projectsData } = useQuery<ProjectsData>(CIRCLE_PROJECTS, {
+  const { data: projectsData, loading: projectsLoading } = useQuery<ProjectsData>(CIRCLE_PROJECTS, {
     variables: cardVars,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   });
-  const { data: challengesData } = useQuery<ChallengesData>(CIRCLE_CHALLENGES, {
+  const { data: challengesData, loading: challengesLoading } = useQuery<ChallengesData>(CIRCLE_CHALLENGES, {
     variables: cardVars,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
@@ -366,12 +366,28 @@ export function CircleHome({ circleId }: CircleHomeProps) {
   }, [timeline]);
 
   // ── Render ───────────────────────────────────────────────────────────────
-  // Both answers are needed before the screen can say anything true: `circle`
-  // comes back null for an archived circle AND for a non-member, and only the
-  // membership check tells those apart. Deciding early would flash "This circle
-  // is private" at somebody whose circle was merely archived.
-  if ((circleLoading || membershipLoading) && !circle) {
-    return <CircleHomeSkeleton />;
+  // Six independent queries feed the first frame — circle, membership, the chat
+  // handle (which decides whether the composer shows an input or "unavailable"),
+  // and the three artefact lists interleaved into the timeline. They already
+  // fire in parallel (no query depends on another's result), so combining them
+  // into one gate costs no extra round trip — it only changes when the result is
+  // SHOWN. Without this, the header + composer appeared as soon as circle and
+  // membership resolved while motions/projects/challenges (and the chat
+  // availability the composer depends on) kept popping into an already-visible
+  // page. `circle` is also checked on its own below: it comes back null for an
+  // archived circle AND for a non-member, and only the membership check tells
+  // those apart, so deciding early would flash "This circle is private" at
+  // somebody whose circle was merely archived.
+  const criticalLoading =
+    (circleLoading && !circleData) ||
+    (membershipLoading && !membershipData) ||
+    (chatLoading && !chatData) ||
+    (motionsLoading && !motionsData) ||
+    (projectsLoading && !projectsData) ||
+    (challengesLoading && !challengesData);
+
+  if (criticalLoading) {
+    return <PageLoader />;
   }
 
   if (circleError && !circle) {
@@ -450,7 +466,15 @@ export function CircleHome({ circleId }: CircleHomeProps) {
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-4 scrollbar-hide sm:px-4">
           {timeline.length === 0 ? (
             messagesLoading ? (
-              <MessageListSkeleton />
+              /*
+               * Messages are a genuinely second-stage fetch: `conversationId`
+               * only exists once `chat` (one of the six gated queries above)
+               * has resolved, so this is the earliest it can start. It is an
+               * on-demand panel inside an already-revealed page, not part of
+               * first paint, hence `PageLoader` here rather than blocking the
+               * whole screen on a query that cannot start any sooner.
+               */
+              <PageLoader />
             ) : conversationId ? (
               <EmptyState
                 icon={MessageSquare}
@@ -600,52 +624,6 @@ export function CircleHome({ circleId }: CircleHomeProps) {
           currentUserId={currentUserId}
         />
       </aside>
-    </div>
-  );
-}
-
-function MessageListSkeleton() {
-  return (
-    <div className="space-y-4">
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} className={i % 2 === 0 ? 'flex gap-2' : 'flex justify-end gap-2'}>
-          {i % 2 === 0 && <Skeleton className="size-7 shrink-0 rounded-full" />}
-          <Skeleton className="h-14 w-52 rounded-2xl" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function CircleHomeSkeleton() {
-  return (
-    <div className="flex h-app-inner overflow-hidden">
-      <div className={CHAT_COLUMN_CLASS}>
-        {/* Mirrors the real header's shape — avatar left, name over count —
-            so nothing jumps sideways when the circle resolves. */}
-        <div className="shrink-0 border-b border-border-subtle px-4 pt-2">
-          <div className="flex items-center gap-2">
-            <Skeleton className="size-8 shrink-0 rounded-full" />
-            <Skeleton className="size-9 shrink-0 rounded-full" />
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-3 w-20" />
-            </div>
-          </div>
-          <div className="mt-3 flex gap-4 pb-2">
-            <Skeleton className="h-4 flex-1" />
-            <Skeleton className="h-4 flex-1" />
-          </div>
-        </div>
-        <div className="min-h-0 flex-1 px-4 py-4">
-          <MessageListSkeleton />
-        </div>
-      </div>
-
-      <div className={SIDEBAR_CLASS} aria-hidden="true">
-        <Skeleton className="h-36 w-full rounded-2xl" />
-        <Skeleton className="h-56 w-full rounded-2xl" />
-      </div>
     </div>
   );
 }

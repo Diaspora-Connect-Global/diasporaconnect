@@ -10,6 +10,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { circleUserDisplayName, useCircleUsers } from "@/hooks/useCircleUsers";
+import PageLoader from "@/components/custom/PageLoader";
 
 export default function OverviewPage() {
   const t = useTranslations("vendors.orders");
@@ -28,6 +29,13 @@ export default function OverviewPage() {
   const tIdentity = useTranslations("common.identity");
   const { usersById: buyersById } = useCircleUsers(orders.map((o) => o.buyerId));
   const formatMinor = (amount: number) => (amount / 100).toFixed(2);
+
+  // Critical data for this page: the dashboard stats and the pending-orders
+  // table. Gate on both together so the page appears whole, never with 0
+  // stat values or a "Loading orders..." row.
+  if ((dashboardLoading && !dashboardData) || (ordersLoading && !ordersData)) {
+    return <PageLoader />;
+  }
 
   const statsCards = dashboard
     ? [
@@ -159,7 +167,7 @@ export default function OverviewPage() {
               ) : (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-text-secondary">
-                    {ordersLoading ? "Loading orders..." : t("noOrdersFound")}
+                    {t("noOrdersFound")}
                   </td>
                 </tr>
               )}
@@ -167,9 +175,6 @@ export default function OverviewPage() {
           </table>
         </div>
       </div>
-      {dashboardLoading && (
-        <p className="text-sm text-text-secondary mt-4">Loading dashboard...</p>
-      )}
     </div>
   );
 }

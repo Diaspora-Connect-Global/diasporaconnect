@@ -5,7 +5,8 @@ import { formatDateProximity } from '@/macros/time';
 import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
 import { deriveKindDelta, type ReactionKind } from '@/components/reactions/reactionAdapter';
 import { splitPostAttachments } from '@/lib/normalizeFeedPost';
-import { FeedCardSkeleton } from '@/components/feed/FeedCardSkeleton';
+import PageLoader from '@/components/custom/PageLoader';
+import { Spinner } from '@/components/ui/spinner';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
 import { Link } from '@/i18n/navigation';
@@ -215,6 +216,28 @@ function getDimsFor(
   return fn;
 }
 
+/**
+ * Every ranked id resolved from the Apollo cache, in recommender order — or
+ * null when any card is missing (then the network hydration decides).
+ */
+function readCachedCards<T extends { id: string }>(
+  items: { itemId: string }[],
+  read: (id: string) => T | null | undefined,
+): T[] | null {
+  const out: T[] = [];
+  for (const it of items) {
+    let card: T | null | undefined;
+    try {
+      card = read(it.itemId);
+    } catch {
+      card = null;
+    }
+    if (!card?.id) return null;
+    out.push(card);
+  }
+  return out;
+}
+
 export default function Home() {
   const t = useTranslations('community');
   const tFeedback = useTranslations('feedback');
@@ -233,6 +256,10 @@ export default function Home() {
   // virtualised feed rendering the underlying `posts` array is what we
   // resolve against; prev/next just step through it on click.
   const [modalState, setModalState] = useState<{ postId: string; mediaIndex: number } | null>(null);
+  // Whether the page has appeared yet (see the loading gate near the render).
+  // Declared up here because effects that attach to DOM nodes rendered only
+  // after the gate opens must re-run when it does.
+  const [pageShown, setPageShown] = useState(false);
 
   // ─── Discover rails (Phase 2: rec-service-backed) ──────────────────────────
   //
@@ -248,23 +275,30 @@ export default function Home() {
   const [discoverLoading, setDiscoverLoading] = useState(true);
   const [associationsLoading, setAssociationsLoading] = useState(true);
 
-  const { data: recCommunitiesData, refetch: refetchCommunitiesRanked } =
+  const {
+    data: recCommunitiesData,
+    loading: recCommunitiesLoading,
+    refetch: refetchCommunitiesRanked,
+  } =
     useQuery<RecommendedCommunitiesData>(RECOMMENDED_COMMUNITIES, {
       variables: { limit: 20 },
       fetchPolicy: 'cache-and-network',
     });
 
-  const { data: recAssociationsData, refetch: refetchAssociationsRanked } =
+  const {
+    data: recAssociationsData,
+    loading: recAssociationsLoading,
+    refetch: refetchAssociationsRanked,
+  } =
     useQuery<RecommendedAssociationsData>(RECOMMENDED_ASSOCIATIONS, {
       variables: { limit: 20 },
       fetchPolicy: 'cache-and-network',
     });
 
-  // Feed with infinite scroll. Declared before the discover-rail hydration so
-  // those effects can defer their (up-to-40) per-id getCommunity/getAssociation
-  // requests until the feed's critical path is clear — see the `feedLoading`
-  // gate below. On a returning (SWR-cached) visit `feedLoading` is already
-  // false, so the rails hydrate immediately with no added latency.
+  // Feed with infinite scroll. The rail hydration below runs IN PARALLEL with
+  // it (no longer deferred behind `feedLoading`): the page shows one
+  // <PageLoader /> until feed + rails are all ready, so serialising them would
+  // only lengthen that wait.
   const {
     posts,
     loading: feedLoading,
@@ -281,10 +315,6 @@ export default function Home() {
 
   // Hydrate communities by id, preserving the recommender's order.
   useEffect(() => {
-    // Defer the rail fan-out until the feed has painted so its ~20 network-only
-    // getCommunity requests don't contend with the feed's hydration for the
-    // browser's connection pool on first load.
-    if (feedLoading) return;
     const items = recCommunitiesData?.recommendedCommunities?.items;
     if (!items) return;
     if (items.length === 0) {
@@ -292,8 +322,20 @@ export default function Home() {
       setDiscoverLoading(false);
       return;
     }
+    // Revisit: paint straight from the Apollo cache when every card is already
+    // there, then revalidate over the network below (which still corrects a
+    // stale memberCount). Never flips the rail back to "loading".
+    const cached = readCachedCards(items, (id) =>
+      apolloClient.readQuery<GetCommunityQueryData>({
+        query: GET_COMMUNITY,
+        variables: { id },
+      })?.getCommunity,
+    );
+    if (cached) {
+      setCommunities(cached);
+      setDiscoverLoading(false);
+    }
     let cancelled = false;
-    setDiscoverLoading(true);
     void Promise.allSettled(
       items.map((it) =>
         apolloClient.query<GetCommunityQueryData>({
@@ -329,13 +371,10 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [recCommunitiesData, apolloClient, feedLoading]);
+  }, [recCommunitiesData, apolloClient]);
 
   // Hydrate associations by id, preserving the recommender's order.
   useEffect(() => {
-    // Deferred behind the feed's first paint — same rationale as the
-    // communities rail above.
-    if (feedLoading) return;
     const items = recAssociationsData?.recommendedAssociations?.items;
     if (!items) return;
     if (items.length === 0) {
@@ -343,8 +382,18 @@ export default function Home() {
       setAssociationsLoading(false);
       return;
     }
+    // Same cache-first paint as the communities rail above.
+    const cached = readCachedCards(items, (id) =>
+      apolloClient.readQuery<GetAssociationQueryData>({
+        query: GET_ASSOCIATION,
+        variables: { id },
+      })?.getAssociation,
+    );
+    if (cached) {
+      setAssociations(cached);
+      setAssociationsLoading(false);
+    }
     let cancelled = false;
-    setAssociationsLoading(true);
     void Promise.allSettled(
       items.map((it) =>
         apolloClient.query<GetAssociationQueryData>({
@@ -375,7 +424,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [recAssociationsData, apolloClient, feedLoading]);
+  }, [recAssociationsData, apolloClient]);
 
   // ─── Pending join requests ────────────────────────────────────────────────
   //
@@ -384,7 +433,7 @@ export default function Home() {
   // there would just bounce off the backend with "You already have a pending
   // request…". They live in the dedicated "Pending requests" sections on the
   // community/association pages instead.
-  const { data: pendingData, refetch: refetchPending } =
+  const { data: pendingData, loading: pendingLoading, refetch: refetchPending } =
     useQuery<MyPendingRequestsData>(GET_MY_PENDING_REQUESTS, {
       fetchPolicy: 'cache-and-network',
     });
@@ -490,7 +539,7 @@ export default function Home() {
   //   2. a thin feed (few/no personalised posts — including the chrono fallback)
   //   3. the user hasn't dismissed/completed it before (localStorage)
   // The card is only ever rendered at the top of the "You" feed.
-  const { data: interestProfileData } = useQuery<MyInterestProfileData>(
+  const { data: interestProfileData, loading: interestProfileLoading } = useQuery<MyInterestProfileData>(
     MY_INTEREST_PROFILE,
     {
       fetchPolicy: 'cache-and-network',
@@ -978,7 +1027,8 @@ export default function Home() {
       setCanScrollRight,
     );
     return cleanupCommunities;
-  }, [visibleCommunities]);
+    // pageShown: the rail's DOM node only exists once the page gate opens.
+  }, [visibleCommunities, pageShown]);
 
   // Separate effect for the associations rail — keyed on the actual DOM
   // node so Virtuoso remount → callback ref runs → state changes → effect
@@ -1128,6 +1178,30 @@ export default function Home() {
     setModalState({ postId, mediaIndex });
   }, []);
 
+  // ─── Page-level loading gate ──────────────────────────────────────────────
+  // One combined flag for everything above the fold (feed, discover rails,
+  // pending-request filter, cold-start prompt), so the page appears WHOLE
+  // instead of region-by-region. Each part counts only while it has no data
+  // yet — cache-and-network revisits render instantly — and an errored query
+  // stops counting so a failure can never pin the loader.
+  const communitiesPending =
+    discoverLoading &&
+    (recCommunitiesLoading || !!recCommunitiesData?.recommendedCommunities?.items);
+  const associationsPending =
+    associationsLoading &&
+    (recAssociationsLoading || !!recAssociationsData?.recommendedAssociations?.items);
+  const initialLoading =
+    (feedLoading && !hasPosts && !feedError) ||
+    communitiesPending ||
+    associationsPending ||
+    (pendingLoading && !pendingData) ||
+    (viewMode === 'you' && interestProfileLoading && !interestProfileData);
+  // Latched (state declared near the top): once the page has appeared, later
+  // refetches never swap it back for the full-page loader.
+  useEffect(() => {
+    if (!initialLoading) setPageShown(true);
+  }, [initialLoading]);
+
   // Renders the rich body of the join confirmation modal: avatar, name,
   // type/member count, access badges, and a truncated description. Only
   // produces output while the modal is open so the discriminated union
@@ -1195,6 +1269,14 @@ export default function Home() {
     );
   };
 
+  if (!pageShown && initialLoading) {
+    return (
+      <div className="h-app-inner flex overflow-hidden">
+        <PageLoader />
+      </div>
+    );
+  }
+
   return (
     <div className="h-app-inner flex overflow-hidden">
       <PrivacyPolicyModal />
@@ -1204,7 +1286,7 @@ export default function Home() {
         className={FEED_COLUMN_CLASS}
       >
         {/* Discover Section — collapses entirely when the recommender has nothing to show. */}
-        {(discoverLoading || hasCommunities) && (
+        {hasCommunities && (
         <>
         <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
           <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">{t('discover')}</h2>
@@ -1215,19 +1297,8 @@ export default function Home() {
 
         {/* Communities Carousel with Smart Arrows */}
         <div className="relative mb-6">
-          {/* Loading State */}
-          {discoverLoading && (
-            <div className="flex gap-2 overflow-hidden pb-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex-none w-[280px]">
-                  <div className="h-32 bg-surface-subtle rounded-lg animate-pulse" />
-                </div>
-              ))}
-            </div>
-          )}
-
           {/* Communities List */}
-          {!discoverLoading && hasCommunities && (
+          {hasCommunities && (
             <>
               {/* Left Arrow */}
               {canScrollLeft && (
@@ -1289,39 +1360,13 @@ export default function Home() {
         </>
         )}
 
-        {/* Associations rail loading state (W3) — reserve a fixed-height box
-            matching the communities carousel so the associations rail (which
-            otherwise streams in mid-feed) fades in place rather than shoving
-            layout. Independently gated on associationsLoading. The header +
-            row dimensions mirror the communities skeleton above. */}
-        {associationsLoading && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
-              <div className="h-4 w-40 rounded bg-surface-subtle animate-pulse" />
-              <div className="h-4 w-12 rounded bg-surface-subtle animate-pulse" />
-            </div>
-            <div className="flex gap-2 overflow-hidden pb-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex-none w-[280px]">
-                  <div className="h-32 bg-surface-subtle rounded-lg animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Feed Posts */}
         <div className="space-y-2">
-          {/* Feed Loading State — only on initial load. Uses FeedCardSkeleton
-              so the reserved height matches the real cards' dimensions and
-              posts fade in place instead of shoving layout. */}
-          {feedLoading && posts.length === 0 && (
-            <div>
-              <FeedCardSkeleton />
-              <FeedCardSkeleton />
-              <FeedCardSkeleton />
-            </div>
-          )}
+          {/* Feed re-loading after the page is already up (e.g. a You /
+              Following switch with nothing cached yet) — the panel shows the
+              standard PageLoader. The FIRST load is covered by the page-level
+              PageLoader below the hooks. */}
+          {feedLoading && posts.length === 0 && !feedError && <PageLoader />}
 
           {/* Feed Error State */}
           {feedError && (
@@ -1607,10 +1652,9 @@ export default function Home() {
                 );
               })}
               {showLoadingFooter && (
-                <>
-                  <FeedCardSkeleton />
-                  <FeedCardSkeleton />
-                </>
+                <div className="flex justify-center py-4" role="status" aria-label={tCommon('loading')}>
+                  <Spinner className="size-5 text-text-brand" />
+                </div>
               )}
               {/* Infinite-scroll sentinel — observed by the effect near the top. */}
               <div ref={loadMoreRef} className="h-px w-full" />

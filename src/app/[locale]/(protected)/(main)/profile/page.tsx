@@ -7,7 +7,7 @@ import { PersonalDetails } from '@/components/profile/PersonalDetails';
 import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { KYCVerification } from '@/components/profile/KYCVerification';
 import { TrustScore } from '@/components/profile/TrustScore';
-import { ProfileLoadingSkeleton } from "@/components/skeleton/ProfileLoadingSkeleton";
+import PageLoader from "@/components/custom/PageLoader";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, GetProfileResponse, Profile } from "@/services/gql/profile";
 import { toast } from "sonner";
@@ -50,6 +50,7 @@ interface UpdateProfileResponse {
 
 export default function ProfilePage() {
     const tCommon = useTranslations("common");
+    const tFeedback = useTranslations("feedback");
     const router = useRouter();
     const queryRouter = useQueryRouter();
     const searchParams = useSearchParams();
@@ -161,27 +162,27 @@ export default function ProfilePage() {
         // The onSuccess callback will handle updating the profile
     };
 
-    if (loading) {
-        return <ProfileLoadingSkeleton />;
+    if (loading && !data) {
+        return <PageLoader />;
     }
 
     // Missing profile (getProfile.success === false). The layout guard owns the
     // sign-out + redirect; here we just avoid rendering a broken ProfileHeader.
     if (data?.getProfile && !profile) {
-        return <ProfileLoadingSkeleton />;
+        return <PageLoader />;
     }
 
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-app-inner mx-2 gap-4">
                 <p className="text-text-error text-sm">
-                    {error.message || "Failed to load profile. Please try again."}
+                    {tFeedback("error.description")}
                 </p>
                 <button
                     className="text-sm text-text-brand underline cursor-pointer"
                     onClick={() => refetch()}
                 >
-                    Retry
+                    {tFeedback("error.retry")}
                 </button>
             </div>
         );

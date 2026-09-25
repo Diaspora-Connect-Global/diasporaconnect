@@ -53,6 +53,7 @@ import { toCdnUrl } from '@/lib/cdn';
 import { EmbassyCommunityView } from '@/components/community/embassy/EmbassyCommunityView';
 import { associationToEmbassyCommunity } from '@/components/community/embassy/associationAdapter';
 import type { EmbassyFeedPost } from '@/components/community/embassy/types';
+import PageLoader from '@/components/custom/PageLoader';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -627,11 +628,7 @@ export default function AssociationPage() {
     };
 
     if (detailsLoading) {
-        return (
-            <div className="min-h-[60vh] flex items-center justify-center p-4">
-                <p className="text-text-secondary">{t("loading")}</p>
-            </div>
-        );
+        return <PageLoader />;
     }
 
     if (!association) {
@@ -859,7 +856,6 @@ export default function AssociationPage() {
                 onShare={handleShare}
                 onSendComment={handleSendComment}
                 onDeletePost={(id) => setLocalPosts((prev) => prev.filter((p) => p.id !== id))}
-                showSidebar={showSidebar}
             />
             {membershipModals}
         </>

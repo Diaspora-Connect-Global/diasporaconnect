@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { useUserStore } from '@/store/useUserStore';
 import type { Profile } from '@/services/gql/types/profile';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
+import PageLoader from '@/components/custom/PageLoader';
 
 /**
  * Optimistic reaction state for THIS post.
@@ -224,15 +225,16 @@ export default function PostPage() {
   };
 
 
-  if (loading) {
+  // One gate for everything the post card needs above the fold: the post
+  // itself AND — when the payload lacks the author's name — the author profile,
+  // so the card never renders a placeholder name and then swaps it.
+  if (
+    (loading && !data) ||
+    (needsAuthorProfileFetch && authorProfileLoading && !authorProfileData)
+  ) {
     return (
       <div className="h-app-inner flex overflow-hidden">
-        <div className={cn(FEED_COLUMN_POST_PAGE_CLASS, 'items-center justify-center')}>
-          <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
-        </div>
-        <div className="hidden lg:block lg:flex-1 lg:min-w-0 overflow-y-auto py-4">
-          <PeopleYouMayKnow />
-        </div>
+        <PageLoader />
       </div>
     );
   }
@@ -313,8 +315,7 @@ export default function PostPage() {
     const fromPost = user.name?.trim() ?? '';
     const nameFromPostOrResolved =
       bestResolvedName ||
-      (fromPost && fromPost !== 'Unknown' ? fromPost : '') ||
-      (authorProfileLoading && needsAuthorProfileFetch ? 'Loading...' : '');
+      (fromPost && fromPost !== 'Unknown' ? fromPost : '');
     profileData = {
       name: nameFromPostOrResolved || 'Member',
       avatar: (isAuthorCurrentUser && currentUser?.avatarUrl?.trim()) ||
@@ -332,10 +333,7 @@ export default function PostPage() {
       type: 'User',
     };
   } else {
-    const nameFallback =
-      bestResolvedName ||
-      (authorProfileLoading && needsAuthorProfileFetch ? 'Loading...' : '') ||
-      'Member';
+    const nameFallback = bestResolvedName || 'Member';
     profileData = {
       name: nameFallback,
       avatar:

@@ -18,7 +18,7 @@ import {
 } from '@/components/circles/plan';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { ButtonType1 } from '@/components/custom/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import PageLoader from '@/components/custom/PageLoader';
 import { Link, useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { CIRCLE_PLAN_SCREEN } from '@/services/gql/circles-billing';
@@ -160,17 +160,7 @@ export default function CirclePlanPage() {
   );
 
   if (loading && !subscription) {
-    return shell(
-      <div className="flex flex-col gap-4 py-4">
-        <Skeleton className="h-36 w-full rounded-2xl" />
-        <Skeleton className="h-5 w-40" />
-        <div className="grid gap-4 sm:grid-cols-2">
-          {[...Array(4)].map((_, index) => (
-            <Skeleton key={index} className="h-32 w-full rounded-xl" />
-          ))}
-        </div>
-      </div>,
-    );
+    return shell(<PageLoader />);
   }
 
   /*

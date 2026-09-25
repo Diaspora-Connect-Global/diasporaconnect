@@ -25,6 +25,7 @@ import { SYSTEM_SENDER_ID } from "@/services/gql/types/messaging";
 import { computeChatUnread, conversationKind, formatBadgeCount, listedKind } from "@/lib/chatUnread";
 import { CONVERSATION_LIST_VARIABLES } from "@/hooks/useChatUnread";
 import { useAiSummaryPreferences } from "@/hooks/useAiSummaryPreferences";
+import PageLoader from "@/components/custom/PageLoader";
 
 type TabType = 'direct' | 'groups';
 
@@ -363,12 +364,8 @@ export default function ChatSideBar() {
                         </div>
                     )}
                     {activeTab === 'direct' ? (
-                        (loadingConversations || loadingConnections) ? (
-                            <div className="p-2 space-y-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <ChatItemSkeleton key={i} />
-                                ))}
-                            </div>
+                        ((loadingConversations && !conversationsData) || (loadingConnections && !connectionsData)) ? (
+                            <PageLoader />
                         ) : (
                             <DirectMessagesList
                                 chats={filteredDirectMessages}
@@ -427,28 +424,6 @@ function TabButton({ active, onClick, label, notificationCount }: TabButtonProps
                 )}
             </div>
         </button>
-    );
-}
-
-// Skeleton Loader Component
-function ChatItemSkeleton() {
-    return (
-        <div className="flex items-center border-b space-x-3 p-3 animate-pulse">
-            {/* Avatar skeleton */}
-            <div className="w-12 h-12 bg-gray-300 rounded-full flex-shrink-0" />
-
-            {/* Content skeleton */}
-            <div className="flex-1 min-w-0 space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
-            </div>
-
-            {/* Time and badge skeleton */}
-            <div className="flex flex-col items-end space-y-2">
-                <div className="h-3 bg-gray-200 rounded w-12" />
-                <div className="w-5 h-5 bg-gray-200 rounded-full" />
-            </div>
-        </div>
     );
 }
 
@@ -687,21 +662,15 @@ function GroupsList({ searchQuery, activeChat, onChatClick, conversations = [], 
         });
     }, [conversations, setRealConversation]);
 
-    if (loading) {
-        return (
-            <div className="p-2 space-y-1">
-                {[...Array(5)].map((_, i) => (
-                    <ChatItemSkeleton key={i} />
-                ))}
-            </div>
-        );
+    if (loading && !data) {
+        return <PageLoader />;
     }
 
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-text-secondary p-4">
                 <p className="text-center text-red-500">{t('group.groupsNotFound')}</p>
-                <p className="text-sm text-text-tertiary mt-2">{error.message}</p>
+                <p className="text-sm text-text-tertiary mt-2">{tFeedback('error.description')}</p>
             </div>
         );
     }

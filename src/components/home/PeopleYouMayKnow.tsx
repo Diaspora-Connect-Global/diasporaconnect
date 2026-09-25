@@ -8,27 +8,10 @@ import { Link } from "@/i18n/navigation";
 import { useQuery } from "@apollo/client/react";
 import { RECOMMENDED_PEOPLE } from "@/services/gql/postsFeed";
 import type { RecommendedPeopleData } from "@/services/gql/types/recommendation";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useFriendActions } from "@/hooks/friends/useFriendActions";
 import { useState } from "react";
 import { pymkMatchReason } from "@/lib/pymkMatchReason";
 import { toCdnUrl } from "@/lib/cdn";
-
-// Loading skeleton for friend suggestions
-function FriendSuggestionSkeleton() {
-    return (
-        <div className="h-[2.5rem] flex space-x-6 items-center justify-between">
-            <div className="flex items-center gap-[0.5rem]">
-                <Skeleton className="h-[1.5rem] w-[1.5rem] rounded-full" />
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
-                </div>
-            </div>
-            <Skeleton className="h-6 w-16" />
-        </div>
-    );
-}
 
 export function PeopleYouMayKnow() {
     const t = useTranslations('home');
@@ -64,6 +47,12 @@ export function PeopleYouMayKnow() {
         (s) => !requestedIds.has(s.profile.userId),
     );
 
+    // Narrow side rail: a full-page loader (big logo, 60svh) is wrong here and
+    // a skeleton/empty state would flash before the real list. Render nothing
+    // — not even the heading — until the first response lands; refetches keep
+    // showing the previous list because `data` is retained.
+    const showNothingYet = loading && !data;
+
     const handleAddFriend = async (userId: string) => {
         setLoadingUserId(userId);
         setRequestedIds((prev) => new Set(prev).add(userId));
@@ -85,20 +74,14 @@ export function PeopleYouMayKnow() {
         }
     };
 
+    if (showNothingYet) return null;
+
     return (
         <div className="space-y-[3.2rem]"> {/* 32px equivalent */}
             <div className="space-y-[1.2rem]"> {/* 12px equivalent */}
                 <p className="caption-large">{t('peopleYouMayKnow')}</p>
                 <div className="space-y-[1.6rem]"> {/* 16px equivalent */}
-                    {loading ? (
-                        <>
-                            <FriendSuggestionSkeleton />
-                            <FriendSuggestionSkeleton />
-                            <FriendSuggestionSkeleton />
-                            <FriendSuggestionSkeleton />
-                            <FriendSuggestionSkeleton />
-                        </>
-                    ) : suggestions.length === 0 ? (
+                    {suggestions.length === 0 ? (
                         <EmptyState
                             size="sm"
                             icon={UserPlus}

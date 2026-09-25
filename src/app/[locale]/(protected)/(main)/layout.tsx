@@ -10,7 +10,8 @@ import MessageWebSocketProvider from "@/components/provider/MessageWebSocketProv
 import NotificationWebSocketProvider from "@/components/provider/NotificationWebSocketProvider";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useProfileGuard } from "@/hooks/useProfileGuard";
-import { OfflineBanner, IssueReporterButton } from "@/components/feedback";
+import { useSidebarBootReady } from "@/components/home/HomeSidebar";
+import { OfflineBanner, IssueReporterButton, ErrorState } from "@/components/feedback";
 import { useTranslations } from "next-intl";
 
 function PushNotificationRegistrar() {
@@ -18,6 +19,18 @@ function PushNotificationRegistrar() {
   return null;
 }
 
+/**
+ * The authenticated shell's ONE boot gate.
+ *
+ * Shows a single, caption-less `LoadingScreen` until auth has rehydrated, the
+ * profile check has passed AND the sidebar's data is in the Apollo cache — the
+ * profile and sidebar queries are started together (one round-trip, not
+ * profile → then sidebar). Only then do header, sidebar and bottom nav mount,
+ * complete and in their final position, and stay mounted for the session.
+ *
+ * A profile check that keeps failing (network) ends in a retry screen instead
+ * of an endless loader; see `useProfileGuard`.
+ */
 export default function MainLayout({
   children,
 }: {
@@ -28,11 +41,13 @@ export default function MainLayout({
   const hasRedirectedRef = useRef(false);
   const [hydrated, setHydrated] = useState(false);
 
-  const t = useTranslations("common");
+  const tFeedback = useTranslations("feedback.error");
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  const bootEnabled = hydrated && isAuthenticated;
 
-  // Only check for a profile once auth is confirmed and the store is hydrated.
-  const guardStatus = useProfileGuard(hydrated && isAuthenticated);
+  // Both start as soon as auth is confirmed — in parallel.
+  const guard = useProfileGuard(bootEnabled);
+  const sidebarReady = useSidebarBootReady(bootEnabled);
 
   // Wait for Zustand to rehydrate from localStorage before checking auth
   useEffect(() => {
@@ -65,15 +80,23 @@ export default function MainLayout({
     }
   }, [hydrated, isAuthenticated, router, pathname]);
 
-  // Show loading until hydrated and authenticated
-  if (!hydrated || !isAuthenticated) {
-    return <LoadingScreen />;
+  if (bootEnabled && guard.status === "error") {
+    return (
+      <div className="flex h-[100svh] w-full items-center justify-center bg-background px-4">
+        <ErrorState
+          title={tFeedback("title")}
+          description={tFeedback("description")}
+          retryLabel={tFeedback("retry")}
+          onRetry={guard.retry}
+          retrying={guard.retrying}
+        />
+      </div>
+    );
   }
 
-  // Block the app while we verify a profile exists. If it's missing, the guard
-  // signs the user out and redirects to /signin — keep showing loading until then.
-  if (guardStatus !== "ok") {
-    return <LoadingScreen text={t("checkingProfile")} />;
+  // One loader, one look, from first paint until the shell is complete.
+  if (!bootEnabled || guard.status !== "ok" || !sidebarReady) {
+    return <LoadingScreen />;
   }
 
   return (

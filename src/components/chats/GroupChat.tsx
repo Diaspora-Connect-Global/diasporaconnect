@@ -44,6 +44,7 @@ import { ConfirmationModal } from "../custom/confirmationModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AddMembersModal } from "./modals/AddMembersModal";
 import { Loader2 } from "lucide-react";
+import PageLoader from "@/components/custom/PageLoader";
 import { ArrowLeft } from "iconsax-reactjs";
 import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
@@ -255,7 +256,7 @@ export default function GroupChat() {
     const isOwner = group?.ownerId === currentUserId;
     const isAdmin = currentUserMember?.role === MemberRole.ADMIN || isOwner;
 
-    const { conversationId } = useChatConversation({
+    const { conversationId, resolving: resolvingConversation } = useChatConversation({
         chatId: chat?.id ?? null,
         type: 'group',
         currentUserId,
@@ -377,6 +378,7 @@ export default function GroupChat() {
     const {
         refetch: refetchMessages,
         loading: messagesLoading,
+        initialLoading: messagesInitialLoading,
         hasMore: hasOlderMessages,
     } = useChatMessages({ conversationId, limit: messageLimit });
 
@@ -794,12 +796,16 @@ export default function GroupChat() {
         );
     }
 
-    if (loadingGroup || loadingMembers) {
-        return (
-            <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-        );
+    // One loader until the header (group), the member list (role-gated
+    // actions) and the first page of messages are all in, then the whole chat.
+    // `&& !data` keeps a refetch (e.g. after a role change) from blanking it.
+    if (
+        (loadingGroup && !groupData) ||
+        (loadingMembers && !membersData) ||
+        resolvingConversation ||
+        messagesInitialLoading
+    ) {
+        return <PageLoader />;
     }
 
     if (!group) {

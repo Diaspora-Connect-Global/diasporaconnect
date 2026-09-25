@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
 import { LIST_VENDOR_ORDERS } from '@/services/gql/vendor';
 import type { ListVendorOrdersResponse, VendorOrder, OrderStatus } from '@/services/gql/types/vendor';
+import PageLoader from '@/components/custom/PageLoader';
 
 const ESCROW_STATUSES: OrderStatus[] = ['PENDING_PAYMENT', 'PAYMENT_CONFIRMED', 'IN_PROGRESS', 'DELIVERED'];
 const PAID_STATUSES: OrderStatus[] = ['COMPLETED'];
@@ -59,6 +60,10 @@ const SalesDashboard = () => {
   const formatAmount = (amount: number, currency: string) =>
     `${currency} ${(amount / 100).toFixed(2)}`;
 
+  if (loading && !data) {
+    return <PageLoader />;
+  }
+
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
@@ -106,16 +111,10 @@ const SalesDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
-                    Loading…
-                  </td>
-                </tr>
-              ) : filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
-                    No sales found.
+                    {t('noSalesFound')}
                   </td>
                 </tr>
               ) : (

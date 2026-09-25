@@ -36,6 +36,12 @@ interface UseChatConversationParams {
 
 interface UseChatConversationResult {
     conversationId: string | null;
+    /**
+     * True while the conversation id is still being looked up or created.
+     * Goes false once it resolves OR the create attempt fails, so a loader
+     * gated on it can never spin forever.
+     */
+    resolving: boolean;
 }
 
 /**
@@ -55,6 +61,8 @@ export function useChatConversation({
     enabled = true,
 }: UseChatConversationParams): UseChatConversationResult {
     const [conversationId, setConversationId] = useState<string | null>(null);
+    // The (chat, participants) key whose create attempt failed; stops `resolving`.
+    const [failedKey, setFailedKey] = useState<string | null>(null);
 
     const getRealConversation = useChatStore((s) => s.getRealConversation);
     const setRealConversation = useChatStore((s) => s.setRealConversation);
@@ -144,6 +152,8 @@ export function useChatConversation({
                         type: type === "direct" ? "DIRECT" : "GROUP",
                         participantIds: allParticipants,
                     });
+                } else {
+                    setFailedKey(dedupKey);
                 }
             } catch (error: unknown) {
                 const err = error as { graphQLErrors?: Array<{ message?: string }> };
@@ -153,6 +163,7 @@ export function useChatConversation({
                 if (!isDuplicate) {
                     console.error(`Failed to create ${type} conversation:`, error);
                 }
+                setFailedKey(dedupKey);
             } finally {
                 creationInFlightRef.current = null;
             }
@@ -169,5 +180,12 @@ export function useChatConversation({
         createConversation,
     ]);
 
-    return { conversationId };
+    const resolving =
+        !!chatId &&
+        !!currentUserId &&
+        enabled &&
+        !conversationId &&
+        failedKey !== `${chatId}::${participantsKey}`;
+
+    return { conversationId, resolving };
 }

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@apollo/client/react';
+import PageLoader from '@/components/custom/PageLoader';
 import { MY_PAYMENT_INTENTS } from '@/services/gql/payments';
 import type { MyPaymentIntentsResponse, PaymentIntentRecord } from '@/services/gql/types/payments';
 
@@ -51,6 +52,9 @@ export default function TransactionHistory() {
     fetchPolicy: 'cache-and-network',
   });
 
+  // Only a page with nothing to show yet waits; a background refresh of a
+  // page already on screen keeps it visible.
+  const listLoading = loading && !data;
   const intents = data?.myPaymentIntents?.payment_intents ?? [];
   const total = data?.myPaymentIntents?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -141,12 +145,8 @@ export default function TransactionHistory() {
       </div>
 
       <div className="divide-y divide-gray-200">
-        {loading && (
-          <div className="text-center py-12 px-6">
-            <p className="text-base text-gray-400">Loading transactions…</p>
-          </div>
-        )}
-        {!loading && filteredTransactions.length > 0 ? (
+        {listLoading && <PageLoader />}
+        {!listLoading && filteredTransactions.length > 0 ? (
           filteredTransactions.map((tx) => (
             <div key={tx.id} className="grid grid-cols-4 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center">
@@ -168,7 +168,7 @@ export default function TransactionHistory() {
               </div>
             </div>
           ))
-        ) : !loading ? (
+        ) : !listLoading ? (
           <div className="px-6 py-12">
             <EmptyState
               icon={Receipt}

@@ -111,19 +111,17 @@ export function MyCommunityCard2() {
     // Derive the display community from the local `communities` list using the stable id
     const displayCommunity = communities.find(c => c.id === selectedCommunityId) ?? communities[0];
 
-    if (communitiesLoading) {
+    // The boot gate prefetches this list, so this branch is normally never hit.
+    // If it is, reserve the row's exact height (same box, invisible) and show no
+    // text — a "Loading communities…" line that then swaps to a name is the
+    // pop-in the shell must not have.
+    if (communitiesLoading && !communitiesData) {
         return (
-            <div className="w-full">
+            <div className="w-full" aria-hidden>
                 <div className="py-3">
-                    <div className="border p-2 rounded-2xl border-border-disabled flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1 min-w-0 flex-1">
-                            <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Image width={24} height={24} src="/GLOBE.png" alt="Loading" className="rounded-full object-cover" />
-                            </div>
-                            <h1 className="body-large text-text-secondary truncate">
-                                Loading communities...
-                            </h1>
-                        </div>
+                    <div className="invisible border p-2 rounded-2xl flex items-center gap-2">
+                        <div className="w-5 h-5 flex-shrink-0" />
+                        <span className="body-large">&nbsp;</span>
                     </div>
                 </div>
             </div>
@@ -142,7 +140,7 @@ export function MyCommunityCard2() {
                                         <Image width={24} height={24} src="/GLOBE.png" alt="Profile" className="rounded-full object-cover" />
                                     </div>
                                     <h1 className="body-large text-text-secondary truncate">
-                                        {'No community'}
+                                        {t('noCommunity')}
                                     </h1>
                                 </div>
                                 <MoreHorizontalIcon className="w-5 h-5 text-text-secondary flex-shrink-0" />

@@ -8,6 +8,7 @@ import VendorSidebar from "./VendorSideBar";
 import { GET_MY_VENDOR } from "@/services/gql/vendor";
 import type { GetMyVendorResponse } from "@/services/gql/types/vendor";
 import { handleVendorError } from "@/lib/vendor-error-mapper";
+import LoadingScreen from "@/components/custom/LoadingScreen";
 
 export default function VendorLayout({
   children,
@@ -30,12 +31,11 @@ export default function VendorLayout({
     }
   }, [data, error, loading, locale, router]);
 
+  // The vendor workspace has no app shell of its own until this resolves, so it
+  // uses the one boot loader (was untranslated "Loading vendor workspace..."
+  // text). Also covers the moment before the becomeavendor redirect lands.
   if (loading || !data?.getMyVendor) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <p className="text-text-secondary">Loading vendor workspace...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   // Prevent flashing protected vendor pages if redirect has not happened yet.

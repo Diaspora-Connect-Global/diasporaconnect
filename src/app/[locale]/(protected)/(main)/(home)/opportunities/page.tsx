@@ -20,6 +20,7 @@ import type {
   GetSavedOpportunitiesData,
 } from "@/services/gql/types/opportunities";
 import type { Application } from "@/services/gql/types/opportunities";
+import PageLoader from "@/components/custom/PageLoader";
 
 
 
@@ -702,6 +703,26 @@ export default function Opportunities() {
         }
     };
 
+  // First visit: the whole page waits for the active tab's list (the only
+  // data-driven region above the fold). After that a tab switch that still
+  // has to fetch shows the loader inside the tab panel only.
+  const activeTabLoading =
+    activeTab === "applied"
+      ? applicationsLoading && !applicationsData
+      : savedLoading && !savedData;
+  const [pageShown, setPageShown] = useState(false);
+  useEffect(() => {
+    if (!activeTabLoading) setPageShown(true);
+  }, [activeTabLoading]);
+
+  if (!pageShown && activeTabLoading) {
+    return (
+      <div className="lg:w-[50rem] h-app-inner flex">
+        <PageLoader />
+      </div>
+    );
+  }
+
     return (
         <div className="lg:w-[50rem] h-app-inner  p-4 overflow-y-auto scrollbar-hide ">
             {/* 885px equivalent, 64px header height */}
@@ -731,7 +752,7 @@ export default function Opportunities() {
                 <div className="overflow-auto scrollbar-hide flex gap-[0.5rem] ">
                     {activeTab === "applied" ? (
                     applicationsLoading && !applicationsData ? (
-                      <p className="text-text-secondary py-8 text-center">{t("labels.loading")}</p>
+                      <PageLoader />
                     ) : (
                         <AppliedComponent
                             applications={applications}
@@ -741,7 +762,7 @@ export default function Opportunities() {
                     )
                     ) : (
                     savedLoading && !savedData ? (
-                      <p className="text-text-secondary py-8 text-center">{t("labels.loading")}</p>
+                      <PageLoader />
                     ) : (
                         <SavedComponent
                             savedItems={savedItems}

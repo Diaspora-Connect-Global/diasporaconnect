@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 import { Plus, Users } from 'lucide-react';
 
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   DiscoverCircleCard,
   MyCircleCard,
@@ -93,11 +93,16 @@ export default function CirclesPage() {
     ? discoverable
     : discoverable.slice(0, DISCOVER_PREVIEW);
 
-  // `cache-and-network` reports loading on every background refresh, so the
-  // skeletons are gated on there being nothing to show yet — not on `loading`
-  // alone, which would blank a populated list on each revisit.
-  const myCirclesPending = mine.loading && myCircles.length === 0;
-  const discoverPending = discover.loading && discoverable.length === 0;
+  /*
+   * Both sections are above the fold from the first frame, so first paint waits
+   * on both together rather than showing "My circles" while "Discover" is still
+   * a skeleton underneath it. `cache-and-network` reports `loading` on every
+   * background refresh too, so the gate is on there being no data YET, not on
+   * `loading` alone — a revisit with a warm cache must never blank the screen.
+   */
+  if ((mine.loading && !mine.data) || (discover.loading && !discover.data)) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="h-app-inner flex overflow-hidden">
@@ -122,8 +127,6 @@ export default function CirclesPage() {
               void mine.refetch();
             }}
           />
-        ) : myCirclesPending ? (
-          <MyCirclesSkeleton />
         ) : myCircles.length === 0 ? (
           <EmptyState
             icon={Users}
@@ -167,8 +170,6 @@ export default function CirclesPage() {
               void discover.refetch();
             }}
           />
-        ) : discoverPending ? (
-          <DiscoverSkeleton />
         ) : discoverable.length === 0 ? (
           <EmptyState
             size="sm"
@@ -183,55 +184,6 @@ export default function CirclesPage() {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-/**
- * Shaped like `MyCircleCard`: 16:9 banner, name, member count, pill row — laid
- * out on the same grid so the real cards land where the skeletons stood.
- */
-function MyCirclesSkeleton() {
-  return (
-    <div className={CARD_GRID_CLASS}>
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="overflow-hidden rounded-lg border border-border-subtle"
-        >
-          <Skeleton className="aspect-[16/9] w-full rounded-none" />
-          <div className="p-4">
-            <Skeleton className="mb-2 h-5 w-40" />
-            <Skeleton className="mb-3 h-3 w-24" />
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-5 w-12 rounded-full" />
-              <Skeleton className="h-5 w-28 rounded-full" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/** Shaped like `DiscoverCircleCard`: avatar, name, meta line, tagline, CTA. */
-function DiscoverSkeleton() {
-  return (
-    <div className={CARD_GRID_CLASS}>
-      {[0, 1, 2].map((i) => (
-        <div key={i} className="rounded-lg border border-border-subtle p-4">
-          <div className="flex items-start gap-3">
-            <Skeleton className="size-10 shrink-0 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-36" />
-              <Skeleton className="h-3 w-28" />
-            </div>
-          </div>
-          <Skeleton className="mt-3 h-3 w-full" />
-          <Skeleton className="mt-1.5 h-3 w-3/4" />
-          <Skeleton className="mt-4 h-9 w-full rounded-full" />
-        </div>
-      ))}
     </div>
   );
 }

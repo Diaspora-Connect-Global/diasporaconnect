@@ -6,6 +6,7 @@ import { Link2, Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { ButtonType2 } from '@/components/custom/button';
+import PageLoader from '@/components/custom/PageLoader';
 import {
   CIRCLE_INVITE_LINKS,
   MINT_CIRCLE_INVITE_LINK,
@@ -341,7 +342,9 @@ export function InviteLinksPanel({ circleId }: InviteLinksPanelProps) {
 
       <div className="mt-4">
         {loading && links.length === 0 ? (
-          <p className="caption-small text-text-secondary">{t('loading')}</p>
+          // This whole panel mounts only once the toolbar's "Invite to circle"
+          // disclosure is opened, so its data is on-demand, not first paint.
+          <PageLoader />
         ) : error && links.length === 0 ? (
           /*
             Degraded, not fatal: individual invitations sit right above this and

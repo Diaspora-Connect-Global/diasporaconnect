@@ -21,6 +21,12 @@ import RecommendationDataSection from "@/components/settings/RecommendationDataS
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import UsernameSection from "@/components/settings/UsernameSection";
 import AiSummarySettings from "@/components/settings/AiSummarySettings";
+import PageLoader from "@/components/custom/PageLoader";
+import { useQuery } from "@apollo/client/react";
+import { GET_MY_PROFILE, type GetProfileResponse } from "@/services/gql/profile";
+import { MY_ACCOUNT_DELETION_STATUS } from "@/services/gql/account";
+import type { MyAccountDeletionStatusData } from "@/services/gql/types/account";
+import { useAiSummaryPreferences } from "@/hooks/useAiSummaryPreferences";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -31,6 +37,24 @@ export default function SettingsPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // The sections below each load their own data and used to pop in one by one
+  // (username, AI-summary toggles, the deletion banner, the theme picker).
+  // These are the SAME queries with the SAME options, so Apollo shares one
+  // request per query with the sections; the page only watches them to know
+  // when everything is ready, and reveals the whole page at once.
+  const { data: profileData, loading: profileLoading } =
+    useQuery<GetProfileResponse>(GET_MY_PROFILE);
+  const { prefs: aiPrefs, loading: aiPrefsLoading } = useAiSummaryPreferences();
+  const { data: deletionData, loading: deletionLoading } =
+    useQuery<MyAccountDeletionStatusData>(MY_ACCOUNT_DELETION_STATUS, {
+      fetchPolicy: "network-only",
+    });
+  const ready =
+    mounted &&
+    !(profileLoading && !profileData) &&
+    !(aiPrefsLoading && !aiPrefs) &&
+    !(deletionLoading && !deletionData);
 
   // State for notifications
   const [notifications, setNotifications] = useState({
@@ -61,7 +85,14 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col overflow-auto scrollbar-hide h-app-inner bg-background">
+    <>
+    {/* Sections stay mounted (hidden) while loading so their queries run in
+        parallel with, and are shared by, the page's readiness check. */}
+    {!ready && <PageLoader />}
+    <div
+      className={`flex-col overflow-auto scrollbar-hide h-app-inner bg-background ${ready ? "flex" : "hidden"}`}
+      aria-hidden={!ready}
+    >
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
@@ -342,5 +373,6 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

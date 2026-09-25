@@ -20,6 +20,7 @@ import { EmptyState, ErrorState } from '@/components/feedback';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
+import PageLoader from '@/components/custom/PageLoader';
 
 function getProfileData(post: Post) {
   const orgProfile = post.authorProfile?.organizationProfile;
@@ -260,25 +261,8 @@ export default function FeedPage() {
         </div>
 
         <div className="space-y-2">
-          {feedLoading && posts.length === 0 && (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-surface-subtle rounded-lg p-4 animate-pulse">
-                  <div className="flex gap-3 mb-4">
-                    <div className="w-10 h-10 bg-surface-default rounded-full" />
-                    <div className="flex-1">
-                      <div className="h-4 bg-surface-default rounded w-1/3 mb-2" />
-                      <div className="h-3 bg-surface-default rounded w-1/4" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-surface-default rounded w-full" />
-                    <div className="h-4 bg-surface-default rounded w-5/6" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Nothing to show yet → the standard page loader (no skeletons). */}
+          {feedLoading && posts.length === 0 && !feedError && <PageLoader />}
 
           {feedError && (
             <ErrorState

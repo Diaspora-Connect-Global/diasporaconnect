@@ -1,13 +1,15 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import InfoLinks from "../custom/infoLinks";
 import { BodyMedium, BodySmall, LabelMedium, TextBrand, } from "../utils";
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { MyCommunityCard2 } from '../cards/MyCommunityCard2';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
+import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
+import { useChatStore } from '@/store/ChatStore';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
 import { GET_USER_ASSOCIATIONS } from '@/services/gql/associations';
 import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
@@ -70,6 +72,48 @@ interface GetMyGroupsResponse {
         total: number;
         groups: Group[];
     };
+}
+
+/**
+ * Variables the sidebar's groups list is fetched with. The boot gate prefetches
+ * with the SAME document + variables, so the sidebar reads a warm cache on its
+ * first paint instead of popping in "Loading…" text.
+ */
+export const SIDEBAR_GROUPS_VARIABLES = { limit: 10, offset: 0 } as const;
+
+/** Upper bound on how long the boot gate waits for sidebar data. */
+const SIDEBAR_BOOT_TIMEOUT_MS = 8000;
+
+/**
+ * Starts every query the shell sidebar needs (communities, associations, groups,
+ * pending requests) in parallel and reports when they have all settled, so the
+ * boot gate can show the shell once, complete. Errors count as settled — a
+ * failed sidebar list must never hold the whole app behind the loader — and the
+ * wait is capped by a deadline for the same reason.
+ */
+export function useSidebarBootReady(enabled: boolean): boolean {
+    const userId = useUserStore(state => state.user?.userId);
+    const communities = useQuery(LIST_MY_JOINED_COMMUNITIES, { skip: !enabled });
+    const associations = useQuery<GetUserAssociationsResponse>(GET_USER_ASSOCIATIONS, {
+        variables: { userId: userId! },
+        skip: !enabled || !userId,
+    });
+    const groups = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
+        variables: SIDEBAR_GROUPS_VARIABLES,
+        skip: !enabled,
+    });
+    const pending = useQuery<MyPendingRequestsData>(GET_MY_PENDING_REQUESTS, { skip: !enabled });
+
+    const [timedOut, setTimedOut] = useState(false);
+    useEffect(() => {
+        if (!enabled) return;
+        const id = window.setTimeout(() => setTimedOut(true), SIDEBAR_BOOT_TIMEOUT_MS);
+        return () => window.clearTimeout(id);
+    }, [enabled]);
+
+    if (!enabled) return false;
+    if (timedOut) return true;
+    return ![communities, associations, groups, pending].some((q) => q.loading && !q.data);
 }
 
 function Section({ image, title, isOpen, onToggle, defaultAction, children, link }: SectionProps) {
@@ -209,6 +253,7 @@ function SidebarLists() {
     const t = useTranslations('home');
     const tHeader = useTranslations('home.header');
     const tActions = useTranslations('actions');
+    const router = useRouter();
     const userId = useUserStore(state => state.user?.userId);
 
     // Fetch available associations
@@ -228,10 +273,7 @@ function SidebarLists() {
     const { data: groupsData, loading: groupsLoading } = useQuery<GetMyGroupsResponse>(
         GET_MY_GROUPS,
         {
-            variables: {
-                limit: 10,
-                offset: 0
-            }
+            variables: SIDEBAR_GROUPS_VARIABLES
         }
     );
 
@@ -272,20 +314,19 @@ function SidebarLists() {
     const visibleGroups = myGroups.slice(0, PREVIEW_LIMIT);
     const hasMoreGroups = myGroups.length > PREVIEW_LIMIT;
 
+    // In-app navigation only: `window.location.href` hard-reloaded the whole app
+    // (replaying the boot loader) and dropped the locale prefix. The `gid`
+    // deep-link makes the chat page open this group even when /chat is already
+    // mounted (the mobile menu is available on every page).
     const handleGroupClick = (groupId: string) => {
-        // Set active chat in session storage
-        sessionStorage.setItem('activeChat', JSON.stringify({
-            id: groupId,
-            type: 'group'
-        }));
-
-        // Navigate to chat page
-        window.location.href = '/chat?t=groups&ct=group';
+        const target = { id: groupId, type: 'group' as const };
+        useChatStore.getState().setActiveChat(target);
+        sessionStorage.setItem('activeChat', JSON.stringify(target));
+        router.push(`/chat?t=groups&ct=group&gid=${encodeURIComponent(groupId)}`);
     };
 
     const handleAssociationClick = (associationId: string) => {
-        // Navigate to association page
-        window.location.href = `/association/${associationId}`;
+        router.push(`/association/${encodeURIComponent(associationId)}`);
     };
 
     return (
@@ -305,11 +346,9 @@ function SidebarLists() {
                 link="/association"
             >
                 <div className="space-y-1">
-                    {userAssociationsLoading ? (
-                        <BodySmall>
-                            <span className="text-secondary">Loading associations...</span>
-                        </BodySmall>
-                    ) : myAssociations.length > 0 ? (
+                    {/* Data is prefetched by the boot gate; if it is somehow still
+                        loading, render nothing rather than pop-in text. */}
+                    {userAssociationsLoading && !userAssociationsData ? null : myAssociations.length > 0 ? (
                         visibleAssociations.map((association) => (
                             <div key={association.id}>
                                 <CommunityItem
@@ -321,7 +360,7 @@ function SidebarLists() {
                         ))
                     ) : (
                         <BodySmall>
-                            <span className="text-secondary">No associations joined yet</span>
+                            <span className="text-secondary">{t('associations.noneJoined')}</span>
                         </BodySmall>
                     )}
                     {hasMoreAssociations && (
@@ -346,11 +385,7 @@ function SidebarLists() {
                 link="/chat?t=groups"
             >
                 <div className="space-y-2">
-                    {groupsLoading ? (
-                        <BodySmall>
-                            <span className="text-secondary">Loading groups...</span>
-                        </BodySmall>
-                    ) : myGroups.length > 0 ? (
+                    {groupsLoading && !groupsData ? null : myGroups.length > 0 ? (
                         visibleGroups.map((group) => (
                             <div key={group.id}>
                                 <CommunityItem
@@ -363,7 +398,7 @@ function SidebarLists() {
                         ))
                     ) : (
                         <BodySmall>
-                            <span className="text-secondary">No groups yet</span>
+                            <span className="text-secondary">{tActions('noGroups')}</span>
                         </BodySmall>
                     )}
                     {hasMoreGroups && (
@@ -411,7 +446,7 @@ function SidebarLists() {
 export default function HomeSidebar() {
 
     return (
-        <div className='lg:max-w-[20vw] h-app-inner  lg:sticky top-[4rem] overflow-y-auto scrollbar-hide z-50'>
+        <div className='h-app-inner overflow-y-auto scrollbar-hide'>
             <SidebarLists />
 
             <div className="text-center text-xs space-x-2 py-4 mt-6 flex flex-wrap">

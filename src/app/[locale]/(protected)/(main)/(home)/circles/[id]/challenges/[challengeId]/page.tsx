@@ -7,8 +7,8 @@ import { useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 
 import { ButtonType1 } from '@/components/custom/button';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useUserStore } from '@/store/useUserStore';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
@@ -162,14 +162,7 @@ export default function CircleChallengePage() {
       <div className={SHELL_CLASS}>
         <div className={MAIN_COLUMN_CLASS}>
           {header}
-          <Skeleton className="mb-3 h-6 w-40 rounded-full" />
-          <Skeleton className="mb-3 h-8 w-3/4" />
-          <Skeleton className="mb-6 h-4 w-2/3" />
-          <Skeleton className="mb-6 h-24 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-        <div className={SIDE_COLUMN_CLASS}>
-          <Skeleton className="h-72 w-full rounded-2xl" />
+          <PageLoader />
         </div>
       </div>
     );

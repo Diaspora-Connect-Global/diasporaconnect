@@ -7,8 +7,8 @@ import { useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 
 import { ButtonType1 } from '@/components/custom/button';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Link, useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import { useUserStore } from '@/store/useUserStore';
@@ -155,11 +155,7 @@ export default function CircleLeaderboardPage() {
         <div className={CIRCLE_COLUMN_CLASS}>
           <div className={SHELL_CLASS}>
             {header}
-            <Skeleton className="mx-auto mb-6 h-10 w-56 rounded-full" />
-            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
-              <Skeleton className="h-80 w-full rounded-2xl" />
-              <Skeleton className="hidden h-80 w-full rounded-2xl lg:block" />
-            </div>
+            <PageLoader />
           </div>
         </div>
       </div>

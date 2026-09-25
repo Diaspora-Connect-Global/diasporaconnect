@@ -19,6 +19,7 @@ import {
 } from "@/services/gql/events";
 import { useUserStore } from "@/store/useUserStore";
 import { downloadEventTicketPdf } from "@/lib/eventTicketPdf";
+import PageLoader from "@/components/custom/PageLoader";
 
 function formatTicketDate(iso: string, locale: string) {
   return new Date(iso).toLocaleString(locale, {
@@ -58,7 +59,10 @@ export default function EventTicketPage() {
   const tCommon = useTranslations("common");
   const tHomeEvents = useTranslations("home.events");
   const eventId = params.id as string;
-  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  // QR image keyed by the reference it encodes, so "ready" is exact: the
+  // ticket's header shows the QR, and the page waits for it rather than
+  // popping it in after first paint.
+  const [qr, setQr] = useState<{ ref: string; url: string } | null>(null);
   const [generating, setGenerating] = useState(false);
 
   const user = useUserStore((state) => state.user);
@@ -76,6 +80,8 @@ export default function EventTicketPage() {
   }, [user]);
 
   const reference = event?.myRegistrationId || event?.id || "";
+  const qrReady = !reference || qr?.ref === reference;
+  const qrDataUrl = qr?.ref === reference ? qr.url : "";
 
   const primaryTicket = event ? getPrimaryTicket(event) : null;
   const currency = (primaryTicket?.currency || event?.currency || "USD").toUpperCase();
@@ -87,10 +93,11 @@ export default function EventTicketPage() {
     let cancelled = false;
     QRCode.toDataURL(reference, { margin: 0, width: 320, color: { dark: "#0f172a", light: "#ffffff" } })
       .then((url) => {
-        if (!cancelled) setQrDataUrl(url);
+        if (!cancelled) setQr({ ref: reference, url });
       })
       .catch(() => {
-        if (!cancelled) setQrDataUrl("");
+        // Failure still counts as "ready" — the ticket renders without the QR.
+        if (!cancelled) setQr({ ref: reference, url: "" });
       });
     return () => {
       cancelled = true;
@@ -137,10 +144,10 @@ export default function EventTicketPage() {
     return <div className="p-4 text-center text-text-secondary">Invalid event ID.</div>;
   }
 
-  if (loading) {
+  if ((loading && !data) || (event && !qrReady)) {
     return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
+      <div className="h-[calc(100vh-4rem)] lg:w-[60vw] flex">
+        <PageLoader />
       </div>
     );
   }

@@ -15,7 +15,7 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { NavigationTabs } from '@/components/profile/NavigationTabs';
 import { PersonalDetails } from '@/components/profile/PersonalDetails';
 import { TrustScore } from '@/components/profile/TrustScore';
-import LoadingScreen from '@/components/custom/LoadingScreen';
+import PageLoader from '@/components/custom/PageLoader';
 import type { GetProfileResponse } from '@/services/gql/profile';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -60,8 +60,11 @@ export function UserProfileView({ result, loading, error, onRefetch }: UserProfi
         if (isSelf) router.replace('/profile');
     }, [isSelf, router]);
 
-    if (loading || isSelf) {
-        return <LoadingScreen text={'loadingProfile'} />;
+    // `&& !result`: a refetch after a connection action keeps the page on
+    // screen instead of blanking it. Own profile keeps the loader up while the
+    // effect above redirects to /profile.
+    if ((loading && !result) || isSelf) {
+        return <PageLoader />;
     }
 
     // `success` is checked explicitly: the gateway answers an unknown user with

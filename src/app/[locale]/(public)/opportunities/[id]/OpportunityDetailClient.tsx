@@ -10,6 +10,7 @@ import { LIST_OPPORTUNITIES, GET_OPPORTUNITY } from '@/services/gql/opportunitie
 import type { ListOpportunitiesResponse, GetOpportunityData } from '@/services/gql/types/opportunities';
 import type { Opportunity } from '@/services/gql/types/opportunities';
 import { CustomEmploymentComponent } from '@/components/cards/opportunities/CustomEmploymentComponent';
+import PageLoader from '@/components/custom/PageLoader';
 
 const CATEGORY_SLUG_TO_API: Record<string, string> = {
     'employment-career': 'EMPLOYMENT_CAREER',
@@ -38,7 +39,7 @@ export default function OpportunityId() {
 
     const [filteredItems, setFilteredItems] = useState<Opportunity[]>([]);
 
-    const { data: listData } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
+    const { data: listData, loading: listLoading } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
         variables: {
             input: apiCategory
                 ? { category: apiCategory, limit: 50, offset: 0 }
@@ -64,11 +65,7 @@ export default function OpportunityId() {
 
     if (!listConfig) {
         if (singleLoading) {
-            return (
-                <div className="lg:max-w-[60vw] mx-2 py-4 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                </div>
-            );
+            return <PageLoader />;
         }
         if (!singleOpportunity) {
             return (
@@ -94,6 +91,10 @@ export default function OpportunityId() {
                 </div>
             </div>
         );
+    }
+
+    if (listLoading && !listData) {
+        return <PageLoader />;
     }
 
     return (

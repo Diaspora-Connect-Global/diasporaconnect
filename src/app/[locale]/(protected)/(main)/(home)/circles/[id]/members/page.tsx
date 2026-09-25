@@ -15,8 +15,8 @@ import {
   MembersToolbar,
   PastMembersSection,
 } from '@/components/circles/members';
+import PageLoader from '@/components/custom/PageLoader';
 import { ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
 import { useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
@@ -45,24 +45,6 @@ const PAST_MEMBERS_LIMIT = 25;
 
 /** The invite panel the toolbar's button expands, for `aria-controls`. */
 const INVITE_PANEL_ID = 'circle-members-invite-panel';
-
-function MembersSkeleton() {
-  return (
-    <div className="flex flex-col gap-4 py-4">
-      <div className="rounded-xl border border-border-subtle">
-        <Skeleton className="h-12 w-full rounded-t-xl rounded-b-none" />
-        {[...Array(5)].map((_, index) => (
-          <div key={index} className="flex items-center gap-3 px-4 py-3">
-            <Skeleton className="size-8 shrink-0 rounded-full" />
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="ml-auto h-4 w-24" />
-          </div>
-        ))}
-      </div>
-      <Skeleton className="h-16 w-full rounded-xl" />
-    </div>
-  );
-}
 
 /**
  * Circle members — who is here, who used to be, and how to let someone in.
@@ -234,7 +216,7 @@ export default function CircleMembersPage() {
         {header}
 
         {loading && members.length === 0 ? (
-          <MembersSkeleton />
+          <PageLoader />
         ) : error && members.length === 0 ? (
           <div className="flex flex-1 items-center justify-center">
             <ErrorState

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Briefcase, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useLazyQuery, useQuery } from "@apollo/client/react";
 import { EmptyState, ErrorState, NoResults } from "@/components/feedback";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import { ButtonType3 } from "@/components/custom/button";
+import PageLoader from "@/components/custom/PageLoader";
 import {
   GET_MARKETPLACE_SERVICE,
   GET_PRODUCT,
@@ -138,6 +139,16 @@ export default function MarketplaceContainer() {
   const isLoading =
     (activeTab === "products" && productsLoading) ||
     (activeTab === "services" && servicesLoading);
+  // "Nothing to show yet" — the only state that gets a loader. A background
+  // cache-and-network refresh over existing items renders the items as-is.
+  const activeHasData = activeTab === "products" ? !!productsData : !!servicesData;
+  const listingPending = isLoading && !activeHasData;
+  // First visit: the whole page waits for the listing; later tab switches /
+  // searches show the loader inside the listing panel only.
+  const [pageShown, setPageShown] = useState(false);
+  useEffect(() => {
+    if (!listingPending) setPageShown(true);
+  }, [listingPending]);
   const listingError = activeTab === "products" ? productsError : servicesError;
   const refetch = activeTab === "products" ? refetchProducts : refetchServices;
   const hasActiveQuery = searchValue.trim().length > 0;
@@ -269,6 +280,14 @@ export default function MarketplaceContainer() {
     void refetchServices({ input: { query: searchValue || undefined, page: 1, limit: 20 } });
   };
 
+  if (currentView === "home" && !pageShown && listingPending) {
+    return (
+      <div className="h-app-inner flex flex-col px-[10%]">
+        <PageLoader />
+      </div>
+    );
+  }
+
   return (
     <div className="h-app-inner flex flex-col px-[10%]">
       {currentView === "home" && (
@@ -314,11 +333,7 @@ export default function MarketplaceContainer() {
                     ))}
                   </div>
                 )}
-                {isLoading && (
-                  <p className="mt-3 text-sm text-text-secondary">
-                    {t("loading")}
-                  </p>
-                )}
+                {listingPending && <PageLoader />}
                 {!isLoading && listingItems.length === 0 && (
                   <>
                     {listingError ? (

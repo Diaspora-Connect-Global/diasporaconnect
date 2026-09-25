@@ -10,6 +10,7 @@ import { LIST_VENDOR_SERVICE_PACKAGES, PUBLISH_SERVICE_PACKAGE } from "@/service
 import type { ListVendorServicePackagesResponse } from "@/services/gql/types/vendor";
 import { handleVendorError } from "@/lib/vendor-error-mapper";
 import VendorKycRequiredModal from "@/components/vendors/VendorKycRequiredModal";
+import PageLoader from "@/components/custom/PageLoader";
 
 export default function ServicesPage() {
   const t = useTranslations('vendors.services');
@@ -71,6 +72,10 @@ export default function ServicesPage() {
   const getLocalizedCategory = (category: string): string => {
     return category === 'Men fashion' ? t('menFashion') : t('womenFashion');
   };
+
+  if (loading && !data) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="p-8">
@@ -208,7 +213,7 @@ export default function ServicesPage() {
               {!loading && services.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
-                    No services found
+                    {t('noServicesFound')}
                   </td>
                 </tr>
               )}

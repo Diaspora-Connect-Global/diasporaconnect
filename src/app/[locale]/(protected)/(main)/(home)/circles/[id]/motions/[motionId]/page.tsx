@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 
 import {
-  MOTION_CARD_CLASS,
   MotionActionsMenu,
   MotionCard,
   MotionDetails,
@@ -21,8 +20,8 @@ import {
   requiredVotes,
   votesCast,
 } from '@/components/circles/motion';
+import PageLoader from '@/components/custom/PageLoader';
 import { ErrorState } from '@/components/feedback';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from '@/i18n/navigation';
 import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import {
@@ -53,45 +52,6 @@ import { useUserStore } from '@/store/useUserStore';
  * column, so the sidebar keeps its position.
  */
 const MOTION_MEASURE_CLASS = 'mx-auto flex w-full max-w-3xl flex-col gap-4';
-
-function MotionSkeleton() {
-  // The same shell the real cards use, so the skeleton cannot drift away from
-  // the layout it stands in for.
-  const card = MOTION_CARD_CLASS;
-  return (
-    <div className={MOTION_MEASURE_CLASS}>
-      <div className={card}>
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-16 rounded-full" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-        <Skeleton className="mt-4 h-8 w-3/4" />
-        <div className="mt-4 flex items-center gap-3">
-          <Skeleton className="size-9 shrink-0 rounded-full" />
-          <div className="flex flex-col gap-1.5">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-40" />
-          </div>
-        </div>
-        <Skeleton className="mt-4 h-12 w-full" />
-      </div>
-      <div className={card}>
-        <Skeleton className="h-5 w-16" />
-        <div className="mt-3 flex gap-3">
-          <Skeleton className="h-20 flex-1 rounded-xl" />
-          <Skeleton className="h-20 flex-1 rounded-xl" />
-          <Skeleton className="h-20 flex-1 rounded-xl" />
-        </div>
-      </div>
-      <div className={card}>
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="mt-4 h-10 w-full" />
-      </div>
-      <Skeleton className="h-24 w-full rounded-2xl" />
-      <Skeleton className="h-44 w-full rounded-2xl" />
-    </div>
-  );
-}
 
 /**
  * Motion detail — the screen where the product's promise is either kept or not.
@@ -227,9 +187,7 @@ export default function CircleMotionPage() {
       <div className="h-app-inner flex overflow-hidden">
         <div className={CIRCLE_COLUMN_CLASS}>
           {header}
-          <div className="py-4">
-            <MotionSkeleton />
-          </div>
+          <PageLoader />
         </div>
       </div>
     );

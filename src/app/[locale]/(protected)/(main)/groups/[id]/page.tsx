@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 
 import { ButtonType1, ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState } from '@/components/feedback';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -60,7 +61,7 @@ export default function GroupDetailPage() {
         fetchPolicy: 'cache-and-network',
     });
 
-    const { data: membershipData, refetch: refetchMembership } =
+    const { data: membershipData, loading: membershipLoading, refetch: refetchMembership } =
         useQuery<CheckGroupMembershipResponse>(CHECK_GROUP_MEMBERSHIP, {
             variables: { groupId },
             skip: !groupId,
@@ -69,6 +70,7 @@ export default function GroupDetailPage() {
 
     const {
         data: membersData,
+        loading: membersLoading,
         refetch: refetchMembers,
         fetchMore: fetchMoreMembers,
     } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
@@ -191,12 +193,15 @@ export default function GroupDetailPage() {
         }
     };
 
-    if (groupLoading && !group) {
-        return (
-            <div className="lg:w-[60vw] h-app-inner px-4 py-6 overflow-y-auto scrollbar-hide">
-                <div className="text-center py-16 text-gray-500">{t('groups.detail.loading')}</div>
-            </div>
-        );
+    // Membership decides the Join / Request / Leave button and the members
+    // list is above the fold, so all three gate the page together; otherwise
+    // the button flips after the page has appeared.
+    if (
+        (groupLoading && !group) ||
+        (membershipLoading && !membershipData) ||
+        (membersLoading && !membersData)
+    ) {
+        return <PageLoader />;
     }
 
     if (groupError || !group) {

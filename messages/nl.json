@@ -467,7 +467,9 @@
       "myNetwork": "Mijn netwerk",
       "myCommunities": "Mijn community's",
       "tagline": "Verbinden · Delen · Bouwen",
-      "copyright": "DiaspoPlug © {year}"
+      "copyright": "DiaspoPlug © {year}",
+      "unreadNotificationsLabel": "{count, plural, =1 {1 ongelezen melding} other {# ongelezen meldingen}}",
+      "unreadMessagesLabel": "{count, plural, =1 {1 ongelezen bericht} other {# ongelezen berichten}}"
     },
     "associations": {
       "discover": "Verenigingen ontdekken",
@@ -510,7 +512,8 @@
       "leaveConfirm": {
         "title": "Vereniging verlaten?",
         "description": "U moet opnieuw een verzoek indienen om content te bekijken."
-      }
+      },
+      "noneJoined": "Nog geen lid van een vereniging"
     },
     "joinModal": {
       "communityTitle": "Community joinen?",
@@ -1569,7 +1572,8 @@
       "not_found": "Dit item is niet gevonden.",
       "conflict": "Deze bewerking kan in de huidige status niet worden voltooid.",
       "failed": "Bewerking mislukt. Probeer het opnieuw."
-    }
+    },
+    "noCommunity": "Geen gemeenschap"
   },
   "association": {
     "discovery": {
@@ -2197,7 +2201,9 @@
       "someone": "Iemand",
       "customer": "Klant",
       "attendee": "Deelnemer"
-    }
+    },
+    "signIn": "Inloggen",
+    "signUp": "Registreren"
   },
   "metadata": {
     "title": "Diaspora Connect Global",
@@ -2812,7 +2818,8 @@
         "maxRevisions": "Maximum aantal toegestane revisies",
         "saveAndAddAnother": "Opslaan en nog een dienst toevoegen",
         "saveAndPreview": "Opslaan en voorbeeld"
-      }
+      },
+      "noServicesFound": "Geen diensten gevonden"
     },
     "sales": {
       "title": "Verkoop",
@@ -2832,7 +2839,8 @@
       "actions": "Acties",
       "viewOrder": "Bestelling bekijken",
       "rowsPerPage": "Rijen per pagina:",
-      "page": "Pagina {current} van {total}"
+      "page": "Pagina {current} van {total}",
+      "noSalesFound": "Geen verkopen gevonden."
     },
     "payouts": {
       "title": "Uitbetalingen",
@@ -2877,6 +2885,17 @@
       "conflict": "Er is een conflict opgetreden. De resource kan zijn gewijzigd. Vernieuw en probeer opnieuw.",
       "failed": "De bewerking is mislukt. Probeer het opnieuw.",
       "servicePackagePublished": "Servicepakket succesvol gepubliceerd"
+    },
+    "status": {
+      "linkBroken": "Deze link lijkt niet te werken. Ga terug naar je meldingen.",
+      "accountReady": "Je verkopersaccount is klaar",
+      "listFirstProduct": "Plaats je eerste product",
+      "listFirstService": "Plaats je eerste dienst",
+      "listFirstProductDescription": "Voeg je eerste product toe zodat klanten je op de marktplaats kunnen ontdekken.",
+      "listFirstServiceDescription": "Voeg je eerste dienst toe zodat klanten je op de marktplaats kunnen ontdekken.",
+      "goToDashboard": "Naar dashboard",
+      "listProduct": "Product plaatsen",
+      "listService": "Dienst plaatsen"
     }
   },
   "search": {

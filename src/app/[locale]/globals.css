@@ -777,21 +777,23 @@
   }
 }
 
+/* Shell heights use svh (small viewport), not dvh: dvh changes every time the
+   mobile URL bar shows/hides, which resized the whole app mid-scroll. */
 .h-app-inner {
-  height: 84dvh;
+  height: 84svh;
 }
 .h-app-top-down {
-  height: 8dvh;
+  height: 8svh;
 }
 .h-app-down {
-  height: 8dvh;
+  height: 8svh;
 }
 
 @media (min-width: 1024px) {
   .h-app-inner  {
-    height: 92dvh;
+    height: 92svh;
   }
   .h-app-down {
-  height: 0dvh;
-}
+    height: 0;
+  }
 }

@@ -1,20 +1,21 @@
 "use client"
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 export default function VendorReadyPage() {
-    const [accountType, setAccountType] = React.useState<'service' | 'product' | null>(null);
-
-    // Parse URL parameter on mount and store in sessionStorage
-    React.useEffect(() => {
-                sessionStorage.setItem('vendorAccountType', 'product');
-
-      
-            const storedType = sessionStorage.getItem('vendorAccountType');
-            if (storedType === 'service' || storedType === 'product') {
-                setAccountType(storedType);
-            }
-    }, []);
+    const t = useTranslations("vendors.status");
+    // Read synchronously on the first render. This used to happen in a mount
+    // effect, so the first paint was always the "link seems to be broken"
+    // error until the effect ran. Same outcome as before: the flow stores and
+    // then reads "product". Safe on first render: the (main) layout never
+    // renders its children on the server.
+    const [accountType, setAccountType] = React.useState<'service' | 'product' | null>(() => {
+        if (typeof window === 'undefined') return null;
+        sessionStorage.setItem('vendorAccountType', 'product');
+        const storedType = sessionStorage.getItem('vendorAccountType');
+        return storedType === 'service' || storedType === 'product' ? storedType : null;
+    });
 
     const handleChangeAccountType = () => {
         sessionStorage.removeItem('vendorAccountType');
@@ -25,14 +26,13 @@ export default function VendorReadyPage() {
         return (
             <div className="min-h-screen  flex items-center justify-center p-6">
                 <div className="bg-white rounded-lg shadow-sm p-8 max-w-md w-full">
-                    <h1 className="text-2xl font-semibold mb-4">Link seems to be broken go back to notification</h1>                   
+                    <h1 className="text-2xl font-semibold mb-4">{t("linkBroken")}</h1>
                 </div>
             </div>
         );
     }
 
     const isService = accountType === 'service';
-    const itemType = isService ? 'service' : 'product';
 
     return (
         <div className="min-h-screen  p-6">
@@ -56,7 +56,7 @@ export default function VendorReadyPage() {
                             </svg>
                         </div>
                         <h1 className="heading-xsmall text-primary">
-                            Your vendor account is ready
+                            {t("accountReady")}
                         </h1>
                     </div>
                 </div>
@@ -64,20 +64,20 @@ export default function VendorReadyPage() {
                 {/* Main Card */}
                 <div className="py-6">
                     <h2 className="heading-medium text-primary mb-3">
-                        List your first {itemType}
+                        {isService ? t("listFirstService") : t("listFirstProduct")}
                     </h2>
                     <p className="body-large text-secondary mb-8">
-                        Add your first {itemType} so customers can start discovering you on the marketplace.
+                        {isService ? t("listFirstServiceDescription") : t("listFirstProductDescription")}
                     </p>
 
                     <div className="flex items-center justify-between">
                         <ButtonType3
                             onClick={handleChangeAccountType}
                         >
-                            Go to dashboard
+                            {t("goToDashboard")}
                         </ButtonType3>
                         <ButtonType2 size="lg">
-                            List {itemType}
+                            {isService ? t("listService") : t("listProduct")}
                         </ButtonType2>
                     </div>
                 </div>

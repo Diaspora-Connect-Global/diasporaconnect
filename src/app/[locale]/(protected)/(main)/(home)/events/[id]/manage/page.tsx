@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import PageLoader from "@/components/custom/PageLoader";
 import { CircularImageCropper } from "@/lib/imagecropper";
 
 type Tab = 'overview' | 'registrations' | 'attendance' | 'tickets' | 'promoCodes' | 'formBuilder' | 'settings';
@@ -73,7 +74,7 @@ function OverviewTab({ eventId }: { eventId: string }) {
   const { data, loading } = useQuery<GetEventStatsData>(GET_EVENT_STATS, { variables: { eventId } });
   const stats = data?.getEventStats;
 
-  if (loading) return <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-text-brand" /></div>;
+  if (loading && !data) return <PageLoader />;
   if (!stats) return <p className="text-text-secondary text-sm p-4">No stats available.</p>;
 
   const fillRate = stats.totalCapacity > 0
@@ -143,8 +144,8 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
         ))}
       </div>
 
-      {loading ? (
-        <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-text-brand" /></div>
+      {loading && !data ? (
+        <PageLoader />
       ) : !list?.registrations.length ? (
         <p className="text-text-secondary text-sm">No registrations yet.</p>
       ) : (
@@ -208,11 +209,11 @@ function AttendanceTab({ eventId }: { eventId: string }) {
     return null;
   };
 
+  if (loading && !data) return <PageLoader />;
+
   return (
     <div className="space-y-3">
-      {loading ? (
-        <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-text-brand" /></div>
-      ) : !list?.attendance.length ? (
+      {!list?.attendance.length ? (
         <p className="text-text-secondary text-sm">No check-ins yet.</p>
       ) : (
         <>
@@ -313,6 +314,10 @@ function TicketsTab({ eventId }: { eventId: string }) {
 
   const tickets = data?.getEventTickets.tickets ?? [];
 
+  // The header shows a ticket COUNT, so the whole panel waits for the data —
+  // never a fake "0 ticket types" while loading.
+  if (loading && !data) return <PageLoader />;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -338,9 +343,7 @@ function TicketsTab({ eventId }: { eventId: string }) {
         </div>
       )}
 
-      {loading ? (
-        <div className="flex justify-center p-6"><Loader2 className="w-5 h-5 animate-spin text-text-brand" /></div>
-      ) : tickets.length === 0 ? (
+      {tickets.length === 0 ? (
         <p className="text-text-secondary text-sm">No tickets yet.</p>
       ) : (
         <div className="space-y-2">
@@ -427,6 +430,9 @@ function PromoCodesTab({ eventId }: { eventId: string }) {
 
   const codes = data?.eventPromoCodes ?? [];
 
+  // Same as tickets: the header shows a count, so wait for the data.
+  if (loading && !data) return <PageLoader />;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -469,9 +475,7 @@ function PromoCodesTab({ eventId }: { eventId: string }) {
         </div>
       )}
 
-      {loading ? (
-        <div className="flex justify-center p-6"><Loader2 className="w-5 h-5 animate-spin text-text-brand" /></div>
-      ) : codes.length === 0 ? (
+      {codes.length === 0 ? (
         <p className="text-text-secondary text-sm">No promo codes yet.</p>
       ) : (
         <div className="space-y-2">
@@ -517,7 +521,7 @@ function PromoCodesTab({ eventId }: { eventId: string }) {
 
 // ─── Form Builder Tab ─────────────────────────────────────────────────────────
 function FormBuilderTab({ eventId }: { eventId: string }) {
-  const { data } = useQuery<GetEventData>(GET_EVENT, { variables: { id: eventId } });
+  const { data, loading } = useQuery<GetEventData>(GET_EVENT, { variables: { id: eventId } });
   const event = data?.getEvent;
 
   const [fields, setFields] = useState<RegistrationFormField[]>(() => event?.registrationFormFields ?? []);
@@ -564,6 +568,10 @@ function FormBuilderTab({ eventId }: { eventId: string }) {
       },
     });
   };
+
+  // Never render an empty builder that then fills in (GET_EVENT is normally
+  // already cached by the page, so this is rarely visible).
+  if (loading && !data) return <PageLoader />;
 
   return (
     <div className="space-y-4">
@@ -705,7 +713,7 @@ function SettingsTab({ eventId }: { eventId: string }) {
     setEditMode(false);
   };
 
-  if (!event) return <div className="flex justify-center p-6"><Loader2 className="w-5 h-5 animate-spin text-text-brand" /></div>;
+  if (!event) return <PageLoader />;
 
   const statusBadge = {
     draft: 'bg-surface-subtle text-text-secondary',
@@ -873,8 +881,27 @@ export default function EventManagePage() {
   });
   const event = data?.getEvent;
 
+  // The default Overview tab's stats are fetched HERE too, in parallel with the
+  // event, so the page appears whole (header + stats) instead of the stats
+  // query only starting once the tab mounts. OverviewTab then reads the same
+  // query from the Apollo cache.
+  const { data: statsData, loading: statsLoading } = useQuery<GetEventStatsData>(GET_EVENT_STATS, {
+    variables: { eventId },
+    skip: !eventId || activeTab !== 'overview',
+  });
+
   if (!eventId) return <div className="p-4 text-center text-text-secondary">Invalid event.</div>;
-  if (!loading && event?.ownerType === 'user') {
+  if (
+    (loading && !data) ||
+    (activeTab === 'overview' && statsLoading && !statsData)
+  ) {
+    return (
+      <div className="h-[calc(100vh-4rem)] lg:w-[60vw] flex">
+        <PageLoader />
+      </div>
+    );
+  }
+  if (event?.ownerType === 'user') {
     return (
       <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
         <div className="max-w-3xl mx-auto rounded-lg border border-border-subtle p-6 text-center space-y-3">
@@ -899,11 +926,7 @@ export default function EventManagePage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div className="min-w-0">
-            {loading ? (
-              <div className="h-5 w-40 rounded bg-surface-subtle animate-pulse" />
-            ) : (
-              <h1 className="heading-small truncate">{event?.title ?? 'Manage event'}</h1>
-            )}
+            <h1 className="heading-small truncate">{event?.title ?? 'Manage event'}</h1>
           </div>
         </div>
 

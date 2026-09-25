@@ -34,7 +34,8 @@ import {
   type ConfirmPaymentIntentResponse,
   type MyPaymentMethodsResponse,
 } from "@/services/gql/payments";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import PageLoader from "@/components/custom/PageLoader";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useUserStore } from "@/store/useUserStore";
@@ -456,11 +457,7 @@ export default function EventDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-text-brand" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (error || !event) {

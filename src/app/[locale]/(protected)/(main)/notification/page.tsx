@@ -30,6 +30,7 @@ import {
   type EnrichedNotification,
 } from '@/hooks/useEnrichedNotification';
 import { formatDateProximity } from '@/macros/time';
+import PageLoader from '@/components/custom/PageLoader';
 
 type Translator = (key: string, values?: Record<string, string | number>) => string;
 
@@ -1033,6 +1034,12 @@ export default function NotificationPage() {
     router.push(`/${locale}/settings`);
   }, [locale, router]);
 
+  // The header's unread counts and filter badges come from the same query as
+  // the list, so the whole page waits for it rather than showing zeros first.
+  if (isInitialLoading) {
+    return <PageLoader />;
+  }
+
   return (
     <div className="lg:max-w-[63rem] mx-2 lg:mx-auto h-app-inner py-4 flex flex-col">
       <div className="flex-shrink-0">
@@ -1111,9 +1118,7 @@ export default function NotificationPage() {
         </button>
       )}
 
-      {isInitialLoading ? (
-        <div className="text-text-secondary font-medium">{t('loading')}</div>
-      ) : error ? (
+      {error ? (
         <ErrorState
           title={tFeedback('error.title')}
           description={tFeedback('error.description')}

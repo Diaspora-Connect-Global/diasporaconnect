@@ -24,6 +24,7 @@ import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membe
 import { cn } from '@/lib/utils';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { toCdnUrl } from '@/lib/cdn';
+import PageLoader from '@/components/custom/PageLoader';
 
 const PAGE_SIZE = 20;
 
@@ -185,7 +186,7 @@ export default function AssociationsPage() {
     ],
   });
 
-  const { data: pendingData, refetch: refetchPending } = useQuery<MyPendingRequestsData>(
+  const { data: pendingData, loading: pendingLoading, refetch: refetchPending } = useQuery<MyPendingRequestsData>(
     GET_MY_PENDING_REQUESTS,
     { fetchPolicy: 'cache-and-network' },
   );
@@ -381,14 +382,27 @@ export default function AssociationsPage() {
     void refetchPending();
   };
 
+  // One gate for every query feeding the visible sections (my associations,
+  // pending requests, discover). Only while there is no data yet, so a
+  // refetch after join/leave never swaps the page back to the loader.
+  if (
+    (myLoading && !myData) ||
+    (searchLoading && !searchData) ||
+    (pendingLoading && !pendingData)
+  ) {
+    return (
+      <div className="lg:w-[60vw] h-app-inner flex">
+        <PageLoader />
+      </div>
+    );
+  }
+
   return (
     <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
       <p className="heading-small mb-2">{t('myAssociationsTitle')}</p>
 
       <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[18rem]">
-        {myLoading ? (
-          <div className="text-center py-8 text-text-secondary">{t('loading')}</div>
-        ) : activeMyAssociations.length > 0 ? (
+        {activeMyAssociations.length > 0 ? (
           activeMyAssociations.map((assn) => (
             <MyAssociationCard
               key={assn.id}
@@ -491,9 +505,7 @@ export default function AssociationsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-        {searchLoading ? (
-          <div className="col-span-full text-center py-8 text-text-secondary">{t('loading')}</div>
-        ) : visibleDiscover.length > 0 ? (
+        {visibleDiscover.length > 0 ? (
           visibleDiscover.map((assn) => {
             const isInviteOnly = assn.joinPolicy === 'INVITE_ONLY';
             const buttonText = isInviteOnly ? t('badges.inviteOnly') : tActions('join');

@@ -55,7 +55,7 @@ export default function AddProductForm() {
   const [newFeature, setNewFeature] = React.useState<string>("");
   const [sizes, setSizes] = React.useState<string[]>([]);
   const [isKycModalOpen, setIsKycModalOpen] = React.useState(false);
-  const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
+  const { data: vendorData, loading: vendorLoading } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
   const vendorId = vendorData?.getMyVendor?.id;
   const [requestUploadUrl] = useMutation<RequestVendorUploadUrlResponse>(REQUEST_VENDOR_UPLOAD_URL);
   const [createProduct, { loading: creatingProduct }] = useMutation<{ createProduct: string }>(CREATE_PRODUCT);
@@ -470,21 +470,27 @@ export default function AddProductForm() {
 
         {/* Buttons */}
         <div className="flex justify-between pt-6 border-t">
-          <button onClick={handleSaveDraft} className="border px-6 py-2 rounded-lg">
+          <button
+            onClick={handleSaveDraft}
+            disabled={vendorLoading || creatingProduct || publishingProduct}
+            className="border px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {(creatingProduct || publishingProduct) ? "Saving..." : tForm('saveToDraft')}
           </button>
 
           <div className="flex gap-3">
             <button
               onClick={handleSaveAndAddAnother}
-              className="border px-6 py-2 rounded-lg"
+              disabled={vendorLoading || creatingProduct || publishingProduct}
+              className="border px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {tForm('saveAndAnother')}
             </button>
 
             <button
               onClick={handleSaveAndPreview}
-              className="bg-surface-brand text-text-white px-6 py-2 rounded-lg"
+              disabled={vendorLoading || creatingProduct || publishingProduct}
+              className="bg-surface-brand text-text-white px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {tForm('saveAndPreview')}
             </button>

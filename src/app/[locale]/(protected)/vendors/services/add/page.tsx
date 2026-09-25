@@ -54,7 +54,7 @@ const AddServiceFlow = () => {
     { id: 'premium', name: tForm('premium'), price: '0.00', features: '', duration: '', revisions: 0 },
   ]);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
-  const { data: vendorData } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
+  const { data: vendorData, loading: vendorLoading } = useQuery<GetMyVendorResponse>(GET_MY_VENDOR);
   const vendorId = vendorData?.getMyVendor?.id;
   const [createServicePackage, { loading: creatingPackage }] = useMutation<{ createServicePackage: string }>(CREATE_SERVICE_PACKAGE);
   const [addMilestone] = useMutation<{ addMilestone: string }>(ADD_MILESTONE);
@@ -291,7 +291,8 @@ const AddServiceFlow = () => {
                     });
                   }
                 }}
-                className="px-6 py-2.5 border-2 border-border-brand text-text-brand rounded-full font-medium hover:bg-surface-brand-subtle transition-colors"
+                disabled={vendorLoading || creatingPackage}
+                className="px-6 py-2.5 border-2 border-border-brand text-text-brand rounded-full font-medium hover:bg-surface-brand-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {tForm('saveToDraft')}
               </button>
@@ -521,7 +522,8 @@ const AddServiceFlow = () => {
                     });
                   }
                 }}
-                className="px-6 py-2.5 border-2 border-border-brand text-text-brand rounded-full font-medium hover:bg-surface-brand-subtle transition-colors"
+                disabled={vendorLoading || creatingPackage}
+                className="px-6 py-2.5 border-2 border-border-brand text-text-brand rounded-full font-medium hover:bg-surface-brand-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {tForm('saveToDraft')}
               </button>
@@ -547,7 +549,8 @@ const AddServiceFlow = () => {
                     });
                     }
                   }}
-                  className="px-6 py-2.5 bg-surface-disabled text-text-secondary rounded-full font-medium hover:bg-surface-disabled transition-colors"
+                  disabled={vendorLoading || creatingPackage}
+                  className="px-6 py-2.5 bg-surface-disabled text-text-secondary rounded-full font-medium hover:bg-surface-disabled transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {tForm('saveAndAddAnother')}
                 </button>
@@ -573,7 +576,7 @@ const AddServiceFlow = () => {
                     });
                     }
                   }}
-                  disabled={creatingPackage || publishingPackage}
+                  disabled={vendorLoading || creatingPackage || publishingPackage}
                   className="px-8 py-2.5 bg-surface-brand text-text-white rounded-full font-medium disabled:opacity-60"
                 >
                   {tForm('saveAndPreview')}

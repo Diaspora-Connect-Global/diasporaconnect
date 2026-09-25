@@ -22,7 +22,15 @@ import LoadingScreen from '@/components/custom/LoadingScreen';
  * the visitor is authenticated — a crawler or logged-out visitor never pays for
  * it.
  */
-const Home2Feed = dynamic(() => import('./Home2Feed'), { ssr: false });
+// `loading` renders the SAME LoadingScreen while the chunk downloads, so the
+// gate's loader, this one and MainLayout's boot loader read as one continuous
+// loader — previously there was a blank frame between them. The gate is the
+// only hydration check that decides anything here: MainLayout re-checks in its
+// first effect (the store is already hydrated) behind the identical screen.
+const Home2Feed = dynamic(() => import('./Home2Feed'), {
+  ssr: false,
+  loading: () => <LoadingScreen />,
+});
 
 export default function Home2Gate() {
   const router = useRouter();

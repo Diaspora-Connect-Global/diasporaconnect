@@ -33,6 +33,7 @@ import type {
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { isNetworkError } from '@/lib/authErrorMessages';
+import LoadingScreen from '@/components/custom/LoadingScreen';
 
 export interface FormData {
   firstName: string;
@@ -518,7 +519,11 @@ export default function CompleteAccount() {
     }
   };
 
-  if (isOAuth === null) return null;
+  // Keep the same loader the route boundary (loading.tsx) just showed until we
+  // know which flow this is, instead of a blank frame between the two.
+  // (Deriving it synchronously would mismatch hydration: this route is
+  // server-rendered and sessionStorage only exists in the browser.)
+  if (isOAuth === null) return <LoadingScreen />;
 
   return (
     <>

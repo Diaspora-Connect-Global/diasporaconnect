@@ -467,7 +467,9 @@
       "myNetwork": "My Network",
       "myCommunities": "My Communities",
       "tagline": "Connect · Share · Build",
-      "copyright": "DiaspoPlug © {year}"
+      "copyright": "DiaspoPlug © {year}",
+      "unreadNotificationsLabel": "{count, plural, =1 {1 unread notification} other {# unread notifications}}",
+      "unreadMessagesLabel": "{count, plural, =1 {1 unread message} other {# unread messages}}"
     },
     "associations": {
       "discover": "Discover associations",
@@ -510,7 +512,8 @@
       "leaveConfirm": {
         "title": "Leave association?",
         "description": "You will need to request to join again to see content."
-      }
+      },
+      "noneJoined": "No associations joined yet"
     },
     "joinModal": {
       "communityTitle": "Join community?",
@@ -1569,7 +1572,8 @@
       "not_found": "This item was not found.",
       "conflict": "This operation cannot be completed in the current state.",
       "failed": "Operation failed. Please try again."
-    }
+    },
+    "noCommunity": "No community"
   },
   "association": {
     "discovery": {
@@ -2197,7 +2201,9 @@
       "someone": "Someone",
       "customer": "Customer",
       "attendee": "Attendee"
-    }
+    },
+    "signIn": "Sign in",
+    "signUp": "Sign up"
   },
   "metadata": {
     "title": "Diaspora Connect Global",
@@ -2812,7 +2818,8 @@
         "maxRevisions": "Max number of revisions allowed",
         "saveAndAddAnother": "Save and add another service",
         "saveAndPreview": "Save and preview"
-      }
+      },
+      "noServicesFound": "No services found"
     },
     "sales": {
       "title": "Sales",
@@ -2832,7 +2839,8 @@
       "actions": "Actions",
       "viewOrder": "View order",
       "rowsPerPage": "Rows per page:",
-      "page": "Page {current} of {total}"
+      "page": "Page {current} of {total}",
+      "noSalesFound": "No sales found."
     },
     "payouts": {
       "title": "Payouts",
@@ -2877,6 +2885,17 @@
       "conflict": "There was a conflict. The resource may have been modified. Please refresh and try again.",
       "failed": "The operation failed. Please try again.",
       "servicePackagePublished": "Service package published successfully"
+    },
+    "status": {
+      "linkBroken": "This link seems to be broken. Go back to your notifications.",
+      "accountReady": "Your vendor account is ready",
+      "listFirstProduct": "List your first product",
+      "listFirstService": "List your first service",
+      "listFirstProductDescription": "Add your first product so customers can start discovering you on the marketplace.",
+      "listFirstServiceDescription": "Add your first service so customers can start discovering you on the marketplace.",
+      "goToDashboard": "Go to dashboard",
+      "listProduct": "List product",
+      "listService": "List service"
     }
   },
   "search": {

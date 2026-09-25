@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Step1 } from './steps/Step1';
 import { Step2 } from './steps/Step2';
 import { Step3 } from './steps/Step3';
+import LoadingScreen from '@/components/custom/LoadingScreen';
 
 export interface ResetFormData {
     email: string;
@@ -56,7 +57,7 @@ export default function ResetAccount() {
         }
     };
 
-    if (!mounted) return null;
+    if (!mounted) return <LoadingScreen />;
 
     return <>{renderStep()}</>;
 }

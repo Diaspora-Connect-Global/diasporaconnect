@@ -9,6 +9,7 @@ import type { ListVendorOrdersResponse, OrderStatus } from "@/services/gql/types
 import { CONFIRM_ORDER_DELIVERY } from "@/services/gql/marketplace";
 import type { ConfirmOrderDeliveryResponse } from "@/services/gql/types/marketplace";
 import { toast } from "sonner";
+import PageLoader from "@/components/custom/PageLoader";
 
 interface Order {
   id: string;
@@ -169,6 +170,10 @@ export default function OrdersPage() {
   const totalCount = data?.listVendorOrders.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
+  if (loading && !data) {
+    return <PageLoader />;
+  }
+
   return (
     <div className="p-8">
       <h1 className="text-2xl font-semibold text-text-primary mb-6">{t('title')}</h1>
@@ -286,7 +291,7 @@ export default function OrdersPage() {
             ) : (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-text-secondary">
-                  {loading ? "Loading orders..." : t('noOrdersFound')}
+                  {t('noOrdersFound')}
                 </td>
               </tr>
             )}

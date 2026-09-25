@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { useLazyQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
@@ -18,6 +18,7 @@ import {
   Building2, Network, Clock, ChevronRight,
 } from 'lucide-react';
 import { NoResults } from '@/components/feedback';
+import PageLoader from '@/components/custom/PageLoader';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -127,28 +128,6 @@ interface Service {
   base_price?: number;
   currency?: string;
   vendor_id?: string;
-}
-
-// ─── Skeleton ────────────────────────────────────────────────────────────────
-
-function CardSkeleton() {
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-surface-subtle animate-pulse">
-      <div className="w-10 h-10 rounded-full bg-surface-default shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="h-3 bg-surface-default rounded w-2/5" />
-        <div className="h-2 bg-surface-default rounded w-3/5" />
-      </div>
-    </div>
-  );
-}
-
-function SectionSkeleton() {
-  return (
-    <div className="space-y-2">
-      {[1, 2, 3].map((i) => <CardSkeleton key={i} />)}
-    </div>
-  );
 }
 
 // ─── Card Components ──────────────────────────────────────────────────────────
@@ -511,11 +490,16 @@ export default function SearchPage() {
   const runDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fallbackVariantsRef = useRef<string[]>([]);
   const fallbackAttemptRef = useRef(0);
+  // The query|tab the searches were last actually fired for. Until it matches
+  // the current one (the 300 ms debounce window) the results on screen belong
+  // to nothing yet, so the page must not claim "no results".
+  const [ranKey, setRanKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (runDebounceRef.current) clearTimeout(runDebounceRef.current);
     runDebounceRef.current = setTimeout(() => {
       runAll(query, activeTab, pages);
+      setRanKey(`${query}|${activeTab}`);
       setFallbackQuery(null);
       fallbackVariantsRef.current = [];
       fallbackAttemptRef.current = 0;
@@ -605,21 +589,31 @@ export default function SearchPage() {
     return false;
   };
 
+  const exactEmpty =
+    (activeTab === 'all' && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !services.length && !events.length && !opps.length) ||
+    (activeTab === 'people' && !users.length) ||
+    (activeTab === 'groups' && !groups.length) ||
+    (activeTab === 'communities' && !comms.length) ||
+    (activeTab === 'associations' && !assocs.length) ||
+    (activeTab === 'marketplace' && !products.length && !services.length) ||
+    (activeTab === 'events' && !events.length) ||
+    (activeTab === 'opportunities' && !opps.length);
+
+  const fbEmpty =
+    (activeTab === 'all' && !fbUsers.length && !fbGroups.length && !fbComms.length && !fbAssocs.length && !fbProducts.length && !fbServices.length && !fbEvents.length && !fbOpps.length) ||
+    (activeTab === 'people' && !fbUsers.length) ||
+    (activeTab === 'groups' && !fbGroups.length) ||
+    (activeTab === 'communities' && !fbComms.length) ||
+    (activeTab === 'associations' && !fbAssocs.length) ||
+    (activeTab === 'marketplace' && !fbProducts.length && !fbServices.length) ||
+    (activeTab === 'events' && !fbEvents.length) ||
+    (activeTab === 'opportunities' && !fbOpps.length);
+
   // Trigger fallback queries when exact results are empty after loading finishes.
   // Cycles through all generated variants until one returns results.
   useEffect(() => {
     if (!query.trim()) return;
     if (isLoading(activeTab)) return;
-
-    const exactEmpty =
-      (activeTab === 'all' && !users.length && !groups.length && !comms.length && !assocs.length && !products.length && !services.length && !events.length && !opps.length) ||
-      (activeTab === 'people' && !users.length) ||
-      (activeTab === 'groups' && !groups.length) ||
-      (activeTab === 'communities' && !comms.length) ||
-      (activeTab === 'associations' && !assocs.length) ||
-      (activeTab === 'marketplace' && !products.length && !services.length) ||
-      (activeTab === 'events' && !events.length) ||
-      (activeTab === 'opportunities' && !opps.length);
 
     if (!exactEmpty) {
       setFallbackQuery(null);
@@ -635,16 +629,6 @@ export default function SearchPage() {
 
     // Primary empty + fallback already running/ran — check if fallback also empty
     if (isFbLoading(activeTab)) return;
-
-    const fbEmpty =
-      (activeTab === 'all' && !fbUsers.length && !fbGroups.length && !fbComms.length && !fbAssocs.length && !fbProducts.length && !fbServices.length && !fbEvents.length && !fbOpps.length) ||
-      (activeTab === 'people' && !fbUsers.length) ||
-      (activeTab === 'groups' && !fbGroups.length) ||
-      (activeTab === 'communities' && !fbComms.length) ||
-      (activeTab === 'associations' && !fbAssocs.length) ||
-      (activeTab === 'marketplace' && !fbProducts.length && !fbServices.length) ||
-      (activeTab === 'events' && !fbEvents.length) ||
-      (activeTab === 'opportunities' && !fbOpps.length);
 
     if (fbEmpty) {
       const next = fallbackAttemptRef.current + 1;
@@ -671,12 +655,11 @@ export default function SearchPage() {
 
   // ── Section renderer for "All" tab ─────────────────────────────────────────
   function AllSection<T>({
-    tab, title, items, loading, renderItem,
+    tab, title, items, renderItem,
   }: {
-    tab: SearchTab; title: string; items: T[]; loading: boolean;
+    tab: SearchTab; title: string; items: T[];
     renderItem: (item: T) => React.ReactNode;
   }) {
-    if (loading) return <div className="mb-6"><p className="text-text-primary text-sm font-semibold mb-2">{title}</p><SectionSkeleton /></div>;
     if (!items.length) return null;
     return (
       <div className="mb-6">
@@ -718,6 +701,24 @@ export default function SearchPage() {
   };
 
   const loading = isLoading(activeTab);
+
+  // ── One loading gate for the whole result set ─────────────────────────────
+  // The page shows <PageLoader /> until the searches for the current query are
+  // in AND — when they came back empty — the automatic fallback variants have
+  // settled. Only then do all sections render together, so neither a section
+  // popping in nor a "no results" that the fallback then contradicts is ever
+  // shown. Mirrors the effect above: it walks `variants` in order.
+  const fallbackVariants = useMemo(() => generateVariants(query).slice(1), [query]);
+  const fallbackIdx = fallbackQuery ? fallbackVariants.indexOf(fallbackQuery) : -1;
+  const resultsPending =
+    !!query.trim() &&
+    (ranKey !== `${query}|${activeTab}` ||
+      loading ||
+      (exactEmpty &&
+        fallbackVariants.length > 0 &&
+        (fallbackQuery === null ||
+          isFbLoading(activeTab) ||
+          (fbEmpty && fallbackIdx < fallbackVariants.length - 1))));
 
   // ── Tab sidebar / pill ──────────────────────────────────────────────────────
   function TabItem({ tab }: { tab: typeof TABS[number] }) {
@@ -770,8 +771,9 @@ export default function SearchPage() {
             <EmptyQuery recentSearches={recentSearches} onSearch={(q) => { setQuery(q); addRecentSearch(q); }} />
           )}
 
-          {/* Results */}
-          {query.trim() && (
+          {/* Results — nothing renders until the whole result set is ready */}
+          {resultsPending && <PageLoader />}
+          {query.trim() && !resultsPending && (
             <>
               {/* ALL tab */}
               {activeTab === 'all' && (() => {
@@ -792,14 +794,14 @@ export default function SearchPage() {
                       renderNoResults(query)
                     ) : (
                       <>
-                        <AllSection tab="people"        title={t('people')}        items={dUsers}    loading={usersResult.loading}    renderItem={(u) => <PeopleCard      key={u.userId} profile={u}      query={query} />} />
-                        <AllSection tab="opportunities" title={t('opportunities')} items={dOpps}     loading={oppsResult.loading}     renderItem={(o) => <OpportunityCard key={o.id}      opportunity={o} query={query} />} />
-                        <AllSection tab="groups"        title={t('groups')}        items={dGroups}   loading={groupsResult.loading}   renderItem={(g) => <GroupCard       key={g.id}      group={g}       query={query} />} />
-                        <AllSection tab="events"        title={t('events')}        items={dEvents}   loading={eventsResult.loading}   renderItem={(e) => <EventCard       key={e.id}      event={e}       query={query} />} />
-                        <AllSection tab="marketplace"   title={t('marketplace')}   items={dProducts} loading={productsResult.loading} renderItem={(p) => <ProductCard     key={p.id}      product={p}     query={query} />} />
-                        <AllSection tab="marketplace"   title="Services"           items={dServices} loading={servicesResult.loading} renderItem={(s) => <ServiceCard     key={s.id}      service={s}     query={query} />} />
-                        <AllSection tab="communities"   title={t('communities')}   items={dComms}    loading={commsResult.loading}    renderItem={(c) => <CommunityCard   key={c.id}      community={c}   query={query} />} />
-                        <AllSection tab="associations"  title={t('associations')}  items={dAssocs}   loading={assocsResult.loading}   renderItem={(a) => <AssociationCard key={a.id}      association={a} query={query} />} />
+                        <AllSection tab="people"        title={t('people')}        items={dUsers}    renderItem={(u) => <PeopleCard      key={u.userId} profile={u}      query={query} />} />
+                        <AllSection tab="opportunities" title={t('opportunities')} items={dOpps}     renderItem={(o) => <OpportunityCard key={o.id}      opportunity={o} query={query} />} />
+                        <AllSection tab="groups"        title={t('groups')}        items={dGroups}   renderItem={(g) => <GroupCard       key={g.id}      group={g}       query={query} />} />
+                        <AllSection tab="events"        title={t('events')}        items={dEvents}   renderItem={(e) => <EventCard       key={e.id}      event={e}       query={query} />} />
+                        <AllSection tab="marketplace"   title={t('marketplace')}   items={dProducts} renderItem={(p) => <ProductCard     key={p.id}      product={p}     query={query} />} />
+                        <AllSection tab="marketplace"   title="Services"           items={dServices} renderItem={(s) => <ServiceCard     key={s.id}      service={s}     query={query} />} />
+                        <AllSection tab="communities"   title={t('communities')}   items={dComms}    renderItem={(c) => <CommunityCard   key={c.id}      community={c}   query={query} />} />
+                        <AllSection tab="associations"  title={t('associations')}  items={dAssocs}   renderItem={(a) => <AssociationCard key={a.id}      association={a} query={query} />} />
                       </>
                     )}
                   </div>
@@ -812,7 +814,6 @@ export default function SearchPage() {
                 const useFb = !users.length && !!fbUsers.length && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
-                    {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && renderNoResults(query)}
                     {show.map((u) => <PeopleCard key={u.userId} profile={u} query={query} />)}
@@ -824,7 +825,6 @@ export default function SearchPage() {
                 const useFb = !groups.length && !!fbGroups.length && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
-                    {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && renderNoResults(query)}
                     {show.map((g) => <GroupCard key={g.id} group={g} query={query} />)}
@@ -836,7 +836,6 @@ export default function SearchPage() {
                 const useFb = !comms.length && !!fbComms.length && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
-                    {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && renderNoResults(query)}
                     {show.map((c) => <CommunityCard key={c.id} community={c} query={query} />)}
@@ -848,7 +847,6 @@ export default function SearchPage() {
                 const useFb = !assocs.length && !!fbAssocs.length && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
-                    {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && renderNoResults(query)}
                     {show.map((a) => <AssociationCard key={a.id} association={a} query={query} />)}
@@ -861,7 +859,6 @@ export default function SearchPage() {
                 const useFb = !products.length && !services.length && (!!fbProducts.length || !!fbServices.length) && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
-                    {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !showP.length && !showS.length && renderNoResults(query)}
                     {showP.map((p) => <ProductCard key={p.id} product={p} query={query} />)}
@@ -874,7 +871,6 @@ export default function SearchPage() {
                 const useFb = !events.length && !!fbEvents.length && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
-                    {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && renderNoResults(query)}
                     {show.map((e) => <EventCard key={e.id} event={e} query={query} />)}
@@ -886,7 +882,6 @@ export default function SearchPage() {
                 const useFb = !opps.length && !!fbOpps.length && !!fallbackQuery;
                 return (
                   <div className="space-y-1">
-                    {loading && <SectionSkeleton />}
                     {!loading && useFb && fallbackQuery && <FallbackBanner originalQuery={query} fallbackQuery={fallbackQuery} />}
                     {!loading && !show.length && renderNoResults(query)}
                     {show.map((o) => <OpportunityCard key={o.id} opportunity={o} query={query} />)}
