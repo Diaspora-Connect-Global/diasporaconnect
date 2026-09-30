@@ -81,10 +81,19 @@ export function useChatUnread(): ChatUnreadTotals & { loading: boolean } {
     useEffect(() => {
         const unsub = messageService.onMessage((message) => {
             let unknown = false;
+            // A private reply is never a row of its own: its unread counts on
+            // the group chat it lives in (the server folds it in the same way),
+            // unless that private reply is the thing on screen.
+            const viewing = getViewingConversation();
+            const parentId = message.parentConversationId;
+            const target = parentId ? { ...message, conversationId: parentId } : message;
+            const viewingForTarget = parentId
+                ? viewing === message.conversationId ? parentId : null
+                : viewing;
             updateCachedConversations(client.cache, (list) => {
-                const next = applyIncomingMessage(list, message, {
+                const next = applyIncomingMessage(list, target, {
                     currentUserId,
-                    viewingConversationId: getViewingConversation(),
+                    viewingConversationId: viewingForTarget,
                 });
                 if (next === null) {
                     unknown = true;

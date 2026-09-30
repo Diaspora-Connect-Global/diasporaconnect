@@ -1,4 +1,4 @@
-import { ChevronRight, MessageCircle, MoreVertical, X, Camera } from "lucide-react";
+import { ChevronRight, MessageCircle, MoreVertical, X, Camera, Lock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageInput } from "./MessageInput";
 import { MessageAttachments } from "./MessageAttachments";
@@ -73,6 +73,22 @@ import { toast } from "sonner";
 import { UserBadge } from "@/components/custom/userBadge";
 import { mapTrustScoreToTier } from "@/lib/userTier";
 import { toCdnUrl } from "@/lib/cdn";
+import { usePrivateReplies } from "@/hooks/usePrivateReplies";
+import { useEnsureMemberNamesLoaded } from "@/hooks/useEnsureMemberNamesLoaded";
+import dynamic from "next/dynamic";
+import type { PrivateReplyTarget } from "./privateReply/PrivateReplyPanel";
+import type { PickablePerson } from "./privateReply/PeoplePickerDialog";
+import { audienceText, groupByAnchor, totalUnread, type NameOf } from "@/lib/privateReplies";
+
+// Private-reply UI loads on first use: most group-chat visits never open it.
+const PrivateReplyPanel = dynamic(
+    () => import("./privateReply/PrivateReplyPanel").then((m) => m.PrivateReplyPanel),
+    { ssr: false },
+);
+const PrivateRepliesListDialog = dynamic(
+    () => import("./privateReply/PrivateRepliesListDialog").then((m) => m.PrivateRepliesListDialog),
+    { ssr: false },
+);
 
 type ManageableGroupMember = {
     id: string;
@@ -130,6 +146,10 @@ export default function GroupChat() {
     const [selectedMessage, setSelectedMessage] = useState<ApiMessage | null>(null);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+    // Private reply panel (start one, or an open one) and the header list.
+    const [privateTarget, setPrivateTarget] = useState<PrivateReplyTarget | null>(null);
+    const [privateListOpen, setPrivateListOpen] = useState(false);
+    const tPrivate = useTranslations('chat.group.privateReply');
 
     // Modal states
     const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -178,6 +198,12 @@ export default function GroupChat() {
         skip: !chat?.id,
     });
     const [loadingMoreMembers, setLoadingMoreMembers] = useState(false);
+    // Synchronous lock alongside the state above: several consumers (the
+    // group-info sidebar, the private-reply people picker, and the automatic
+    // name-resolution effects) can all call handleLoadMoreMembers in the same
+    // tick, before a state update has re-rendered — a plain state check alone
+    // would let two of them slip through and double-fetch the same page.
+    const loadingMoreMembersRef = useRef(false);
 
     const [leaveGroup] = useMutation<LeaveGroupResponse>(LEAVE_GROUP, {
         refetchQueries: [{ query: GET_MY_GROUPS, variables: { limit: 50, offset: 0 } }],
@@ -209,7 +235,9 @@ export default function GroupChat() {
     });
 
     const group = groupData?.getGroup?.group;
-    const groupMembers = membersData?.getGroupMembers?.members || [];
+    // Memoised so the empty fallback is a stable reference (the private-reply
+    // name/avatar resolvers below are memoised on it).
+    const groupMembers = useMemo(() => membersData?.getGroupMembers?.members || [], [membersData]);
     const groupMembersCount = membersData?.getGroupMembers?.total || 0;
     // Prefer the backend `hasMore` flag; fall back to comparing loaded rows
     // against the reported total for older gateways that omit it.
@@ -217,7 +245,8 @@ export default function GroupChat() {
         membersData?.getGroupMembers?.hasMore ?? groupMembers.length < groupMembersCount;
 
     const handleLoadMoreMembers = async () => {
-        if (loadingMoreMembers || !chat?.id) return;
+        if (loadingMoreMembersRef.current || !chat?.id) return;
+        loadingMoreMembersRef.current = true;
         setLoadingMoreMembers(true);
         try {
             await fetchMoreMembers({
@@ -245,6 +274,7 @@ export default function GroupChat() {
         } catch (err) {
             console.error('Failed to load more group members:', err);
         } finally {
+            loadingMoreMembersRef.current = false;
             setLoadingMoreMembers(false);
         }
     };
@@ -263,6 +293,63 @@ export default function GroupChat() {
         participantIds: groupMembers.map(m => m.userId),
         enabled: groupMembers.length > 0,
     });
+
+    // ── Private replies (a private conversation inside this group chat) ──
+    const {
+        replies: privateReplies,
+        settings: privateReplySettings,
+        available: privateRepliesAvailable,
+        refetch: refetchPrivateReplies,
+    } = usePrivateReplies(conversationId);
+    const privateRepliesByAnchor = useMemo(() => groupByAnchor(privateReplies), [privateReplies]);
+    const privateUnread = useMemo(() => totalUnread(privateReplies), [privateReplies]);
+    // A person as words — a current member's name, or null (shown as "a former member"). Never an id.
+    const privateNameOf: NameOf = useCallback(
+        (userId: string) => {
+            const member = groupMembers.find((m) => m.userId === userId);
+            return member?.profile ? personName(member.profile, '') || null : null;
+        },
+        [groupMembers],
+    );
+    const privateAvatarOf = useCallback(
+        (userId: string) => toCdnUrl(groupMembers.find((m) => m.userId === userId)?.profile?.avatarUrl) || undefined,
+        [groupMembers],
+    );
+    const privatePeople: PickablePerson[] = useMemo(
+        () =>
+            groupMembers
+                .filter((m) => m.userId !== currentUserId)
+                .map((m) => ({
+                    userId: m.userId,
+                    name: personName(m.profile, tIdentity('unknownUser')),
+                    avatarUrl: toCdnUrl(m.profile?.avatarUrl) || undefined,
+                })),
+        [groupMembers, currentUserId, tIdentity],
+    );
+    // A private reply can reference a member outside the group-member pages
+    // loaded so far (any group over 100 people). The gateway has no "profile
+    // by id" batch lookup a regular user can call for just the missing ids,
+    // so the only way to find a name is to page in more members — bounded,
+    // and only while a marker or the header list actually needs one it
+    // doesn't have (see useEnsureMemberNamesLoaded). This covers the message
+    // markers below and the list dialog's "yours" tab, which share this same
+    // `privateReplies` array; the panel and the admin tab resolve their own
+    // ids the same way, since they load from separate queries.
+    const privateReplyMemberIds = useMemo(() => {
+        const ids: (string | null | undefined)[] = [];
+        for (const reply of privateReplies) {
+            ids.push(...reply.memberUserIds, reply.anchor?.senderId);
+        }
+        return ids;
+    }, [privateReplies]);
+    useEnsureMemberNamesLoaded(
+        privateReplyMemberIds,
+        privateNameOf,
+        currentUserId,
+        hasMoreMembers,
+        loadingMoreMembers,
+        handleLoadMoreMembers,
+    );
 
     // Settings → Privacy → "Show AI summaries in my group chats". The digest is
     // a SHARED chat message, so for a user who turned it off it is hidden here,
@@ -334,6 +421,21 @@ export default function GroupChat() {
     });
     const searchParams = useSearchParams();
 
+    // Deep link from a notification: `?ct=group&gid=<group>&pr=<private reply>`
+    // opens that private reply once the feature is known to be available. The
+    // server decides whether the viewer may actually see it.
+    const privateReplyFromUrl = searchParams.get('pr');
+    const openedFromUrlRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (!privateRepliesAvailable || !conversationId || !privateReplyFromUrl) return;
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(privateReplyFromUrl)) return;
+        if (openedFromUrlRef.current === privateReplyFromUrl) return;
+        openedFromUrlRef.current = privateReplyFromUrl;
+        setRepliesSidebarOpen(false);
+        setSidebarOpen(false);
+        setPrivateTarget({ mode: 'open', privateReplyId: privateReplyFromUrl });
+    }, [privateRepliesAvailable, conversationId, privateReplyFromUrl]);
+
     const apiMessages = getApiMessagesByConversation(conversationId || '');
     const mainThreadMessages = useMemo(
         () => apiMessages.filter((m) => !m.replyToId),
@@ -356,6 +458,8 @@ export default function GroupChat() {
     useEffect(() => {
         setRepliesSidebarOpen(false);
         setSidebarOpen(false);
+        setPrivateTarget(null);
+        setPrivateListOpen(false);
     }, [activeChat?.id, activeChat?.type]);
 
     useEffect(() => {
@@ -658,6 +762,7 @@ export default function GroupChat() {
         setRepliesSidebarOpen(true);
         setReplyingTo(message.id);
         setSidebarOpen(false);
+        setPrivateTarget(null);
         if (conversationId && message?.id) {
             replyContextRef.current = { conversationId, replyToId: message.id };
         }
@@ -673,7 +778,27 @@ export default function GroupChat() {
     const handleSideBarToggle = () => {
         setSidebarOpen(!sidebarOpen);
         setRepliesSidebarOpen(false);
+        setPrivateTarget(null);
     };
+
+    // ── Private replies: open the panel (closing the other side panels) ──
+    const openPrivatePanel = (target: PrivateReplyTarget) => {
+        setRepliesSidebarOpen(false);
+        setSelectedMessage(null);
+        setReplyingTo(null);
+        replyContextRef.current = null;
+        setSidebarOpen(false);
+        setPrivateListOpen(false);
+        setPrivateTarget(target);
+    };
+    /** "Reply privately": the person replied to is pre-selected (nobody when it's your own message). */
+    const handleReplyPrivately = (message: ApiMessage) =>
+        openPrivatePanel({
+            mode: 'start',
+            anchor: { id: message.id, senderId: message.senderId, content: message.content, createdAt: message.createdAt },
+            preselected: message.senderId && message.senderId !== currentUserId ? [message.senderId] : [],
+        });
+    const handleOpenPrivateReply = (privateReplyId: string) => openPrivatePanel({ mode: 'open', privateReplyId });
 
     const handleLeaveGroup = async () => {
         setIsLeavingGroup(true);
@@ -821,7 +946,7 @@ export default function GroupChat() {
             <div className="flex flex-row h-full space-x-0 md:space-x-2">
 
                 {/* Main Chat Area */}
-                <div className={`flex-1 min-w-0 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 overflow-hidden ${isMobile && (sidebarOpen || repliesSidebarOpen) ? 'hidden' : 'flex'}`}>
+                <div className={`flex-1 min-w-0 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 overflow-hidden ${isMobile && (sidebarOpen || repliesSidebarOpen || privateTarget) ? 'hidden' : 'flex'}`}>
                     {/* Group Header */}
                     <div className="md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
                         <div className="flex items-center space-x-3">
@@ -842,6 +967,22 @@ export default function GroupChat() {
                                 <h2 className="font-semibold text-text-primary">{group.name}</h2>
                                 <div className="flex items-center space-x-2">
                                     <p className="text-sm text-text-secondary">{t('memberCount', { count: group.memberCount })}</p>
+                                    {privateRepliesAvailable && privateReplySettings && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setPrivateListOpen(true)}
+                                            aria-label={privateUnread > 0 ? tPrivate('listButtonUnread', { count: privateUnread }) : tPrivate('listButton')}
+                                            className="flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs text-text-secondary hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-brand"
+                                        >
+                                            <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+                                            <span className="hidden sm:inline">{tPrivate('listButtonShort')}</span>
+                                            {privateUnread > 0 && (
+                                                <span className="rounded-full bg-surface-brand px-1.5 text-[10px] leading-4 text-text-white" aria-hidden="true">
+                                                    {privateUnread > 99 ? '99+' : privateUnread}
+                                                </span>
+                                            )}
+                                        </button>
+                                    )}
                                     {isConnected && (
                                         <div className="flex items-center space-x-1">
                                             <div className="w-2 h-2 bg-chat-online-dot rounded-full"></div>
@@ -1074,7 +1215,38 @@ export default function GroupChat() {
                                                 >
                                                     <span>{t('reply')}</span>
                                                 </ButtonType3>
+                                                {privateRepliesAvailable && message.status !== 'sending' && (
+                                                    <ButtonType3
+                                                        onClick={() => handleReplyPrivately(message)}
+                                                        className="flex items-center gap-0.5 text-[10px] sm:text-xs p-0 min-w-0 border-0 bg-transparent"
+                                                    >
+                                                        <Lock className="w-3 h-3" aria-hidden="true" />
+                                                        <span>{tPrivate('replyPrivately')}</span>
+                                                    </ButtonType3>
+                                                )}
                                             </div>
+                                            {/* Only the people in a private reply ever receive it, so
+                                                these markers are the viewer's own private replies. */}
+                                            {(privateRepliesByAnchor.get(message.id) ?? []).map((reply) => (
+                                                <button
+                                                    key={reply.id}
+                                                    type="button"
+                                                    onClick={() => handleOpenPrivateReply(reply.id)}
+                                                    className={`mt-1 flex max-w-full items-center gap-1 rounded-full border border-border-subtle bg-surface-hover px-2 py-0.5 text-[10px] sm:text-xs text-text-secondary hover:bg-surface-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-brand ${isMe ? 'ml-auto' : ''}`}
+                                                >
+                                                    <Lock className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                                                    <span className="truncate">
+                                                        {tPrivate('markerLabel', {
+                                                            names: audienceText(reply.memberUserIds, currentUserId, privateNameOf, { you: tPrivate('you'), formerMember: tPrivate('formerMember'), unknown: tIdentity('aMember') }, locale),
+                                                        })}
+                                                    </span>
+                                                    {reply.unreadCount > 0 && (
+                                                        <span className="flex-shrink-0 font-medium text-text-brand">
+                                                            {tPrivate('newCount', { count: reply.unreadCount })}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
                                 );
@@ -1100,7 +1272,7 @@ export default function GroupChat() {
                     </div>
 
                     {/* Main Message Input */}
-                    {!repliesSidebarOpen && (
+                    {!repliesSidebarOpen && !privateTarget && (
                         <div className="flex-shrink-0">
                             <MessageInput
                                 onSendMessage={handleSendMessage}
@@ -1398,7 +1570,50 @@ export default function GroupChat() {
                         </div>
                     </>
                 )}
+
+                {/* Private reply panel — a private conversation inside this group */}
+                {privateTarget && privateReplySettings && conversationId && currentUserId && (
+                    <PrivateReplyPanel
+                        key={privateTarget.mode === 'open' ? privateTarget.privateReplyId : `start-${privateTarget.anchor.id}`}
+                        target={privateTarget}
+                        groupConversationId={conversationId}
+                        currentUserId={currentUserId}
+                        settings={privateReplySettings}
+                        people={privatePeople}
+                        isGroupAdmin={isAdmin}
+                        nameOf={privateNameOf}
+                        avatarOf={privateAvatarOf}
+                        timeZone={userTimeZone}
+                        isMobile={isMobile}
+                        membersHasMore={hasMoreMembers}
+                        membersLoadingMore={loadingMoreMembers}
+                        onLoadMoreMembers={handleLoadMoreMembers}
+                        onClose={() => setPrivateTarget(null)}
+                        onOpened={(id) => setPrivateTarget({ mode: 'open', privateReplyId: id })}
+                        onChanged={refetchPrivateReplies}
+                    />
+                )}
             </div>
+
+            {privateListOpen && privateRepliesAvailable && privateReplySettings && conversationId && currentUserId && (
+                <PrivateRepliesListDialog
+                    open={privateListOpen}
+                    groupConversationId={conversationId}
+                    replies={privateReplies}
+                    settings={privateReplySettings}
+                    currentUserId={currentUserId}
+                    isGroupAdmin={isAdmin}
+                    people={privatePeople}
+                    nameOf={privateNameOf}
+                    avatarOf={privateAvatarOf}
+                    membersHasMore={hasMoreMembers}
+                    membersLoadingMore={loadingMoreMembers}
+                    onLoadMoreMembers={handleLoadMoreMembers}
+                    onOpenReply={handleOpenPrivateReply}
+                    onClose={() => setPrivateListOpen(false)}
+                    onChanged={refetchPrivateReplies}
+                />
+            )}
 
             {/* Confirmation Modals */}
             <ConfirmationModal

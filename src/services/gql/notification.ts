@@ -253,6 +253,9 @@ export function getNotificationPath(
   // specific group when we know its id.
   if (t.startsWith('group.message') || t === 'group.message.received') {
     const gid = pickString(d, ['groupId']);
+    // A private reply opens inside its group chat, in its own panel.
+    const pr = pickString(d, ['privateReplyId']);
+    if (gid && pr) return `/chat?ct=group&gid=${encodeURIComponent(gid)}&pr=${encodeURIComponent(pr)}`;
     return gid ? `/chat?ct=group&gid=${encodeURIComponent(gid)}` : '/chat?ct=group';
   }
   if (t.startsWith('message.')) {

@@ -145,3 +145,27 @@ test('caps the display at 99+', async () => {
     await expect(badges(page).locator('visible=true').first()).toHaveText('99+');
     await page.context().close();
 });
+
+test('a private-reply message counts on its group chat (never a row of its own) with no refetch', async () => {
+    const server = fakeServer([
+        { id: 'grp-1', type: 'GROUP', groupId: 'g-1', unreadCount: 2 },
+    ]);
+    const page = await open(server);
+    const visibleBadge = badges(page).locator('visible=true').first();
+    await expect(visibleBadge).toHaveText('2');
+    expect(server.calls.getConversations).toBe(1);
+
+    // message-service tags a private-reply message with the group it lives in.
+    await page.evaluate(() =>
+        window.__chatUnreadHarness!.emitMessage({
+            conversationId: 'private-reply-1',
+            parentConversationId: 'grp-1',
+            senderId: 'someone-else',
+            messageId: 'pm-1',
+        } as unknown as { conversationId: string; senderId: string; messageId: string }),
+    );
+    await expect(visibleBadge).toHaveText('3');
+    // Routed to the known group row: no "unknown conversation" refetch.
+    expect(server.calls.getConversations).toBe(1);
+    await page.context().close();
+});

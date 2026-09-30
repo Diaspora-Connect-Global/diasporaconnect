@@ -29,6 +29,17 @@ export interface Message {
   replyToId?: string;
   /** File attachments (replaces metadata). */
   attachments?: MessageAttachment[];
+  /**
+   * Set when the message went into a private reply: the group conversation it
+   * lives inside (badge the group, route into its private-reply panel).
+   */
+  parentConversationId?: string;
+}
+
+/** A private reply's members or messages changed (`private_reply:updated`), or you're no longer in it (`private_reply:removed`). */
+export interface PrivateReplyEvent {
+  privateReplyId: string;
+  parentConversationId: string;
 }
 
 // Message payload to send to backend (we send plaintext)
@@ -79,6 +90,8 @@ class MessageService {
   private uploadUrlCallbacks: ((data: MediaUploadResponse) => void)[] = [];
   // Notification events pushed by the API gateway to the user's personal room
   private notificationCallbacks: ((notification: unknown) => void)[] = [];
+  private privateReplyUpdatedCallbacks: ((data: PrivateReplyEvent) => void)[] = [];
+  private privateReplyRemovedCallbacks: ((data: PrivateReplyEvent) => void)[] = [];
   private unreadCountCallbacks: ((data: { count: number }) => void)[] = [];
 
   get isConnected(): boolean {
@@ -154,6 +167,14 @@ class MessageService {
 
     this.socket.on('message:new', (data: Message) => {
       this.messageCallbacks.forEach(cb => cb(data));
+    });
+
+    this.socket.on('private_reply:updated', (data: PrivateReplyEvent) => {
+      this.privateReplyUpdatedCallbacks.forEach(cb => cb(data));
+    });
+
+    this.socket.on('private_reply:removed', (data: PrivateReplyEvent) => {
+      this.privateReplyRemovedCallbacks.forEach(cb => cb(data));
     });
 
     this.socket.on('message:sent', (data: { messageId: string; conversationId: string }) => {
@@ -318,6 +339,20 @@ class MessageService {
     this.messageCallbacks.push(callback);
     return () => {
       this.messageCallbacks = this.messageCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  onPrivateReplyUpdated(callback: (data: PrivateReplyEvent) => void) {
+    this.privateReplyUpdatedCallbacks.push(callback);
+    return () => {
+      this.privateReplyUpdatedCallbacks = this.privateReplyUpdatedCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  onPrivateReplyRemoved(callback: (data: PrivateReplyEvent) => void) {
+    this.privateReplyRemovedCallbacks.push(callback);
+    return () => {
+      this.privateReplyRemovedCallbacks = this.privateReplyRemovedCallbacks.filter(cb => cb !== callback);
     };
   }
 

@@ -64,6 +64,11 @@ const errorLink = new ErrorLink(({ error, operation }) => {
       return;
     }
 
+    // Opt-out for operations that show their own, specific message (e.g. a
+    // private-reply refusal): a generic "Something went wrong" beside it would
+    // contradict it. Logging below still happens.
+    const silent = (operation.getContext() as { silentErrors?: boolean }).silentErrors === true;
+
     // GraphQL errors (validation, business logic errors)
     error.errors.forEach(({ message, locations, path }) => {
       console.error(
@@ -76,7 +81,7 @@ const errorLink = new ErrorLink(({ error, operation }) => {
       );
       
       // Show toast only if not already shown
-      showToastOnce(errorMessage('generic'));
+      if (!silent) showToastOnce(errorMessage('generic'));
     });
   } else if (CombinedProtocolErrors.is(error)) {
     // Protocol errors (malformed requests, etc.)
