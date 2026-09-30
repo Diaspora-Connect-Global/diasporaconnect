@@ -2,6 +2,7 @@
 
 import { Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { ButtonType1, ButtonType2 } from '@/components/custom/button';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { CommunityTypeBadge } from '@/components/cards/CommunityTypeBadge';
@@ -43,6 +44,12 @@ export interface LockedCommunityPreviewProps {
  * What a non-member sees of a gated community/association: identity and ONE
  * action that matches how the entity admits people. Nothing here reads content;
  * the parent must not mount (or must skip) any content query while this shows.
+ *
+ * A PRIVATE entity gets the MINIMAL card: name, imagery, visibility/join-policy
+ * badges (with the price only when joining is paid) and the action — no
+ * description, member count or type badge. The server already withholds those
+ * fields for private entities; the component does not render them even if a
+ * value slipped through.
  */
 export function LockedCommunityPreview(props: LockedCommunityPreviewProps) {
   const {
@@ -53,6 +60,7 @@ export function LockedCommunityPreview(props: LockedCommunityPreviewProps) {
   const tJoin = useTranslations('home.joinModal');
 
   const action = resolveLockedAction(props);
+  const minimal = (props.visibility ?? '').toUpperCase() === 'PRIVATE';
   const hasPrice = props.paymentType && props.paymentType !== 'NONE';
   const access: AccessProfile | undefined = props.visibility
     ? {
@@ -97,7 +105,7 @@ export function LockedCommunityPreview(props: LockedCommunityPreviewProps) {
               <h1 id="locked-community-name" className="text-xl font-semibold text-text-primary break-words">
                 {name}
               </h1>
-              {memberCount != null && (
+              {!minimal && memberCount != null && (
                 <p className="text-sm text-text-secondary">
                   {memberCount === 1 ? tJoin('membersOne') : tJoin('membersOther', { count: memberCount })}
                 </p>
@@ -106,15 +114,23 @@ export function LockedCommunityPreview(props: LockedCommunityPreviewProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-1">
-            {props.communityType && <CommunityTypeBadge communityType={props.communityType} size="card" />}
+            {!minimal && props.communityType && (
+              <CommunityTypeBadge communityType={props.communityType} size="card" />
+            )}
             {access && <AccessBadges access={access} size="card" />}
           </div>
 
-          {description && <p className="text-sm text-text-secondary whitespace-pre-line">{description}</p>}
+          {!minimal && description && (
+            <p className="text-sm text-text-secondary whitespace-pre-line">{description}</p>
+          )}
 
           <p className="flex items-center gap-2 text-sm text-text-secondary">
             <Lock className="size-4 flex-shrink-0" aria-hidden="true" />
-            {t('previewNote')}
+            {minimal
+              ? kind === 'community'
+                ? t('privateNoteCommunity')
+                : t('privateNoteAssociation')
+              : t('previewNote')}
           </p>
 
           <div className="flex flex-col items-start gap-2" data-testid="locked-community-action">
@@ -153,3 +169,48 @@ export function LockedCommunityPreview(props: LockedCommunityPreviewProps) {
 }
 
 export default LockedCommunityPreview;
+
+export interface SignInToViewCommunityProps {
+  kind: 'community' | 'association';
+}
+
+/**
+ * What a signed-OUT visitor sees when a community/association page resolves to
+ * nothing. The server answers a PRIVATE entity exactly like a missing one for
+ * anonymous callers (its existence is not disclosed), so this copy must hold
+ * for both: "it may be private — sign in". Uses the same sign-in / sign-up
+ * links as the public top bar.
+ */
+export function SignInToViewCommunity({ kind }: SignInToViewCommunityProps) {
+  const t = useTranslations('lockedCommunity');
+  const tCommon = useTranslations('common');
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center p-4">
+      <section
+        aria-labelledby="sign-in-to-view-title"
+        data-testid="sign-in-to-view"
+        className="w-full max-w-md rounded-lg border border-border-disabled bg-surface-default p-6 text-center shadow-md"
+      >
+        <Lock className="mx-auto mb-3 size-8 text-text-secondary" aria-hidden="true" />
+        <h1 id="sign-in-to-view-title" className="mb-2 text-xl font-semibold text-text-primary">
+          {kind === 'community' ? t('signInTitleCommunity') : t('signInTitleAssociation')}
+        </h1>
+        <p className="mb-6 text-sm text-text-secondary">{t('signInBody')}</p>
+        <div className="flex justify-center gap-3">
+          <Link
+            href="/signin"
+            className="rounded-full px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-subtle"
+          >
+            {tCommon('signIn')}
+          </Link>
+          <Link
+            href="/signup"
+            className="rounded-full bg-text-brand px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            {tCommon('signUp')}
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}

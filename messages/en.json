@@ -4405,6 +4405,11 @@
     "bannedCommunity": "You can't join this community",
     "bannedAssociation": "You can't join this association",
     "requestTitleCommunity": "Request to join this community?",
-    "requestTitleAssociation": "Request to join this association?"
+    "requestTitleAssociation": "Request to join this association?",
+    "privateNoteCommunity": "This community is private. Only its members can see what's inside.",
+    "privateNoteAssociation": "This association is private. Only its members can see what's inside.",
+    "signInTitleCommunity": "Sign in to view this community",
+    "signInTitleAssociation": "Sign in to view this association",
+    "signInBody": "It may be private. If you're a member, sign in to see it."
   }
 }

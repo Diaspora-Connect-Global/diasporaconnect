@@ -54,7 +54,7 @@ import { EmbassyCommunityView } from '@/components/community/embassy/EmbassyComm
 import { associationToEmbassyCommunity } from '@/components/community/embassy/associationAdapter';
 import type { EmbassyFeedPost } from '@/components/community/embassy/types';
 import PageLoader from '@/components/custom/PageLoader';
-import { LockedCommunityPreview } from '@/components/community/LockedCommunityPreview';
+import { LockedCommunityPreview, SignInToViewCommunity } from '@/components/community/LockedCommunityPreview';
 import { isCommunityContentLockedError } from '@/lib/communityLock';
 
 /* ------------------------------------------------------------------ */
@@ -656,6 +656,12 @@ export default function AssociationPage() {
 
     if (detailsLoading) {
         return <PageLoader />;
+    }
+
+    // A PRIVATE association resolves to nothing for a signed-out visitor (its
+    // existence is not disclosed): offer to sign in rather than "not found".
+    if (!association && hydrated && !isAuthenticated) {
+        return <SignInToViewCommunity kind="association" />;
     }
 
     if (!association) {

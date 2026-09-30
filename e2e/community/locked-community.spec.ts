@@ -27,6 +27,8 @@ type Overrides = Partial<{
     priceAmount: number | null;
     priceCurrency: string | null;
     membershipStatus: string;
+    /** The server resolves the page to null (a PRIVATE entity for a signed-out visitor, or a missing one). */
+    notFound: boolean;
 }>;
 
 function fakeServer(kind: 'community' | 'association', initial: Overrides) {
@@ -38,6 +40,7 @@ function fakeServer(kind: 'community' | 'association', initial: Overrides) {
         priceAmount: null as number | null,
         priceCurrency: null as string | null,
         membershipStatus: 'NOT_MEMBER',
+        notFound: false,
         ...initial,
     };
     const ops: string[] = [];
@@ -74,7 +77,9 @@ function fakeServer(kind: 'community' | 'association', initial: Overrides) {
         ops.push(name);
         let payload: Record<string, unknown>;
         if (name === 'GetCommunityDetails' || name === 'GetAssociationDetails') {
-            payload = { data: detail() };
+            payload = state.notFound
+                ? { data: kind === 'community' ? { getCommunity: null } : { getAssociation: null } }
+                : { data: detail() };
         } else if (name === 'CheckCommunityMembership') {
             payload = { data: { checkCommunityMembership: { __typename: 'MembershipCheck', isMember: !state.isContentLocked, role: null, status: state.membershipStatus } } };
         } else if (name === 'GetMyAssociations') {
@@ -111,14 +116,41 @@ const preview = (p: Page) => p.getByTestId('locked-community-preview');
 /** Buttons INSIDE the preview card (the page also carries unrelated dev-overlay/toaster buttons). */
 const actionButtons = (p: Page) => preview(p).getByRole('button');
 
-test('APPROVAL: preview with a single "Request to join" action', async () => {
-    const server = fakeServer('community', { joinPolicy: 'APPROVAL' });
+test('APPROVAL (public): preview with a single "Request to join" action', async () => {
+    const server = fakeServer('community', { joinPolicy: 'APPROVAL', visibility: 'PUBLIC' });
     const page = await open(server, COMMUNITY);
     await expect(preview(page)).toBeVisible();
     await expect(page.getByRole('heading', { level: 1, name: 'Ghana Union' })).toBeVisible();
     await expect(page.getByText('42 members')).toBeVisible();
     await expect(actionButtons(page)).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'Request to join' })).toBeVisible();
+    await page.context().close();
+});
+
+test('PRIVATE: minimal card — no description, no member count, private note, one action', async () => {
+    // The server withholds description/count for PRIVATE; the fake still sends them
+    // to prove the page would not render them even if one slipped through.
+    const server = fakeServer('community', { joinPolicy: 'APPROVAL', visibility: 'PRIVATE' });
+    const page = await open(server, COMMUNITY);
+    await expect(preview(page)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Ghana Union' })).toBeVisible();
+    await expect(page.getByText("This community is private. Only its members can see what's inside.")).toBeVisible();
+    await expect(preview(page).getByText('A place for Ghanaians abroad.')).toHaveCount(0);
+    await expect(preview(page).getByText('42 members')).toHaveCount(0);
+    await expect(actionButtons(page)).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'Request to join' })).toBeVisible();
+    await page.context().close();
+});
+
+test('signed-out visitor + page resolves to nothing: sign-in prompt, no content operation', async () => {
+    const server = fakeServer('community', { notFound: true });
+    const page = await open(server, COMMUNITY);
+    const prompt = page.getByTestId('sign-in-to-view');
+    await expect(prompt).toBeVisible();
+    await expect(prompt.getByRole('heading', { name: 'Sign in to view this community' })).toBeVisible();
+    await expect(prompt.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', /\/signin$/);
+    await page.waitForTimeout(1000);
+    expect(server.ops.filter((o) => !ALLOWED_WHEN_LOCKED.has(o)), server.ops.join(', ')).toEqual([]);
     await page.context().close();
 });
 

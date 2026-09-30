@@ -4405,6 +4405,11 @@
     "bannedCommunity": "Non può entrare in questa community",
     "bannedAssociation": "Non può entrare in questa associazione",
     "requestTitleCommunity": "Richiedere di entrare in questa comunità?",
-    "requestTitleAssociation": "Richiedere di entrare in questa associazione?"
+    "requestTitleAssociation": "Richiedere di entrare in questa associazione?",
+    "privateNoteCommunity": "Questa comunità è privata. Solo i membri possono vederne i contenuti.",
+    "privateNoteAssociation": "Questa associazione è privata. Solo i membri possono vederne i contenuti.",
+    "signInTitleCommunity": "Acceda per vedere questa comunità",
+    "signInTitleAssociation": "Acceda per vedere questa associazione",
+    "signInBody": "Potrebbe essere privata. Se ne è membro, acceda per vederla."
   }
 }

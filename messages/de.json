@@ -4405,6 +4405,11 @@
     "bannedCommunity": "Dieser Community kann nicht beigetreten werden",
     "bannedAssociation": "Diesem Verein kann nicht beigetreten werden",
     "requestTitleCommunity": "Beitritt zu dieser Community anfragen?",
-    "requestTitleAssociation": "Beitritt zu diesem Verein anfragen?"
+    "requestTitleAssociation": "Beitritt zu diesem Verein anfragen?",
+    "privateNoteCommunity": "Diese Community ist privat. Nur Mitglieder können sehen, was darin geteilt wird.",
+    "privateNoteAssociation": "Dieser Verein ist privat. Nur Mitglieder können sehen, was darin geteilt wird.",
+    "signInTitleCommunity": "Anmelden, um diese Community anzuzeigen",
+    "signInTitleAssociation": "Anmelden, um diesen Verein anzuzeigen",
+    "signInBody": "Möglicherweise ist sie privat. Mitglieder sehen sie nach der Anmeldung."
   }
 }

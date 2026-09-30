@@ -55,7 +55,8 @@ import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { toCdnUrl } from '@/lib/cdn';
 import PageLoader from '@/components/custom/PageLoader';
-import { LockedCommunityPreview } from '@/components/community/LockedCommunityPreview';
+import { LockedCommunityPreview, SignInToViewCommunity } from '@/components/community/LockedCommunityPreview';
+import { useAuthStore } from '@/store/useAuthStore';
 import { isCommunityContentLockedError } from '@/lib/communityLock';
 
 interface CommunityDetails {
@@ -170,6 +171,17 @@ export default function CommunityDetailPage() {
   // key path (e.g. 'community.errors.not_found'), so it must be handed to an
   // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
   const tRoot = useTranslations();
+
+  // A PRIVATE community resolves to nothing for a signed-out visitor (the server
+  // does not disclose that it exists), so "not found" + signed out = offer to
+  // sign in. Auth lives in localStorage: decide only after hydration.
+  const [authHydrated, setAuthHydrated] = useState(false);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  useEffect(() => {
+    const unsubscribe = useAuthStore.persist.onFinishHydration(() => setAuthHydrated(true));
+    if (useAuthStore.persist.hasHydrated()) setAuthHydrated(true);
+    return unsubscribe;
+  }, []);
 
   const {
     data: detailsData,
@@ -618,6 +630,10 @@ export default function CommunityDetailPage() {
 
   if (detailsLoading) {
     return <PageLoader />;
+  }
+
+  if (!community && authHydrated && !isAuthenticated) {
+    return <SignInToViewCommunity kind="community" />;
   }
 
   if (!community) {

@@ -4405,6 +4405,11 @@
     "bannedCommunity": "U kunt niet deelnemen aan deze gemeenschap",
     "bannedAssociation": "U kunt niet deelnemen aan deze vereniging",
     "requestTitleCommunity": "Verzoek om deel te nemen aan deze community?",
-    "requestTitleAssociation": "Verzoek om deel te nemen aan deze vereniging?"
+    "requestTitleAssociation": "Verzoek om deel te nemen aan deze vereniging?",
+    "privateNoteCommunity": "Deze community is privé. Alleen leden kunnen zien wat erin staat.",
+    "privateNoteAssociation": "Deze vereniging is privé. Alleen leden kunnen zien wat erin staat.",
+    "signInTitleCommunity": "Log in om deze community te bekijken",
+    "signInTitleAssociation": "Log in om deze vereniging te bekijken",
+    "signInBody": "Mogelijk is deze privé. Bent u lid, log dan in om deze te bekijken."
   }
 }

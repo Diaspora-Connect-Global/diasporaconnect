@@ -4405,6 +4405,11 @@
     "bannedCommunity": "Vous ne pouvez pas rejoindre cette communauté",
     "bannedAssociation": "Vous ne pouvez pas rejoindre cette association",
     "requestTitleCommunity": "Demander à rejoindre cette communauté ?",
-    "requestTitleAssociation": "Demander à rejoindre cette association ?"
+    "requestTitleAssociation": "Demander à rejoindre cette association ?",
+    "privateNoteCommunity": "Cette communauté est privée. Seuls ses membres peuvent voir son contenu.",
+    "privateNoteAssociation": "Cette association est privée. Seuls ses membres peuvent voir son contenu.",
+    "signInTitleCommunity": "Connectez-vous pour voir cette communauté",
+    "signInTitleAssociation": "Connectez-vous pour voir cette association",
+    "signInBody": "Elle est peut-être privée. Si vous en êtes membre, connectez-vous pour la voir."
   }
 }
