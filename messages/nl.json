@@ -108,7 +108,28 @@
     },
     "twoFactor": {
       "required": "Tweefactorauthenticatie vereist",
-      "enterCode": "Voer uw 6-cijferige verificatiecode in"
+      "enterCode": "Voer uw 6-cijferige verificatiecode in",
+      "title": "Controleer uw e-mail",
+      "description": "We hebben een 6-cijferige code gestuurd naar het e-mailadres van uw account. Voer die in om het inloggen af te ronden.",
+      "codeLabel": "6-cijferige code",
+      "verify": "Bevestigen",
+      "resend": "Nieuwe code versturen",
+      "resendIn": "Nieuwe code over {seconds} s",
+      "codeResent": "We hebben u een nieuwe code gestuurd.",
+      "back": "Terug naar inloggen",
+      "errors": {
+        "codeInvalid": "Deze code klopt niet. Controleer de e-mail en probeer het opnieuw.",
+        "codeExpired": "Deze code is verlopen. Vraag een nieuwe aan.",
+        "sessionExpired": "Uw inlogpoging is verlopen. Log opnieuw in.",
+        "tooManyAttempts": "Te veel pogingen. Wacht 15 minuten en probeer het dan opnieuw.",
+        "resendTooSoon": "We hebben net een code gestuurd. Wacht een minuut voordat u een nieuwe aanvraagt.",
+        "passwordInvalid": "Dit wachtwoord klopt niet.",
+        "reauthRequired": "Bevestig met uw wachtwoord of een code per e-mail.",
+        "alreadyEnabled": "Tweefactorauthenticatie staat al aan.",
+        "notEnabled": "Tweefactorauthenticatie staat al uit.",
+        "deliveryFailed": "We konden de e-mail niet versturen. Probeer het over een minuut opnieuw.",
+        "unavailable": "Tweefactorauthenticatie is momenteel niet beschikbaar. Probeer het opnieuw."
+      }
     },
     "formBanner": {
       "generic": "Something went wrong. Please try again."
@@ -2563,7 +2584,34 @@
       "title": "Beveiliging",
       "twoFactor": {
         "title": "Tweefactorauthenticatie",
-        "description": "Voeg een extra beveiligingslaag toe"
+        "description": "Bij het inloggen vragen we ook om een 6-cijferige code die we naar uw e-mailadres sturen.",
+        "checking": "Controleren…",
+        "loadError": "We konden uw instelling voor tweefactorauthenticatie niet controleren.",
+        "retry": "Opnieuw proberen",
+        "statusOn": "Aan – codes gaan naar uw e-mailadres",
+        "statusOff": "Uit",
+        "enabledToast": "Tweefactorauthenticatie staat aan.",
+        "disabledToast": "Tweefactorauthenticatie staat uit.",
+        "dialog": {
+          "enableTitle": "Tweefactorauthenticatie inschakelen",
+          "disableTitle": "Tweefactorauthenticatie uitschakelen",
+          "enablePasswordBody": "Voer uw wachtwoord in. Daarna sturen we u een 6-cijferige code per e-mail ter bevestiging.",
+          "enableSendBody": "We sturen een 6-cijferige code naar het e-mailadres van uw account. Voer die in om tweefactorauthenticatie in te schakelen.",
+          "disablePasswordBody": "Voer uw wachtwoord in om tweefactorauthenticatie uit te schakelen.",
+          "disableSendBody": "We sturen u een 6-cijferige code per e-mail om te bevestigen dat u het bent.",
+          "codeBody": "Voer de 6-cijferige code in die we u zojuist per e-mail hebben gestuurd.",
+          "passwordLabel": "Wachtwoord",
+          "passwordMissing": "Voer uw wachtwoord in.",
+          "codeLabel": "6-cijferige code",
+          "codeIncomplete": "Voer alle 6 cijfers van de code in.",
+          "codeSent": "We hebben u een 6-cijferige code per e-mail gestuurd.",
+          "sendCode": "Code versturen",
+          "turnOn": "Inschakelen",
+          "turnOff": "Uitschakelen",
+          "useCodeInstead": "Stuur mij in plaats daarvan een code per e-mail",
+          "resend": "Nieuwe code versturen",
+          "cancel": "Annuleren"
+        }
       },
       "changePassword": {
         "title": "Wachtwoord wijzigen",

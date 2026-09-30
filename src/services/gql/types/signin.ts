@@ -120,6 +120,11 @@ export interface LoginResponse {
     sessionId: string;
     expiresIn: number;
     requiresTwoFactor: boolean;
+    /**
+     * Opaque pending-2FA token, set only when `requiresTwoFactor` is true. Sent
+     * back with the emailed code (completeTwoFactorLogin) or to resend it.
+     */
+    twoFactorToken?: string | null;
     avatarUrl?: string;
     user: LoginUser;
     deviceMetadata: DeviceMetadata;

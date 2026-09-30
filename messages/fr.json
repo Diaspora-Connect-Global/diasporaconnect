@@ -108,7 +108,28 @@
     },
     "twoFactor": {
       "required": "Authentification à deux facteurs requise",
-      "enterCode": "Veuillez entrer votre code de vérification à 6 chiffres"
+      "enterCode": "Veuillez entrer votre code de vérification à 6 chiffres",
+      "title": "Consultez vos e-mails",
+      "description": "Nous avons envoyé un code à 6 chiffres à l'adresse e-mail de votre compte. Saisissez-le pour terminer la connexion.",
+      "codeLabel": "Code à 6 chiffres",
+      "verify": "Vérifier",
+      "resend": "Envoyer un nouveau code",
+      "resendIn": "Nouveau code dans {seconds} s",
+      "codeResent": "Nous vous avons envoyé un nouveau code.",
+      "back": "Retour à la connexion",
+      "errors": {
+        "codeInvalid": "Ce code est incorrect. Vérifiez l'e-mail et réessayez.",
+        "codeExpired": "Ce code a expiré. Demandez-en un nouveau.",
+        "sessionExpired": "Votre connexion a expiré. Veuillez vous reconnecter.",
+        "tooManyAttempts": "Trop de tentatives. Patientez 15 minutes, puis réessayez.",
+        "resendTooSoon": "Nous venons d'envoyer un code. Patientez une minute avant d'en demander un autre.",
+        "passwordInvalid": "Ce mot de passe est incorrect.",
+        "reauthRequired": "Confirmez avec votre mot de passe ou un code reçu par e-mail.",
+        "alreadyEnabled": "L'authentification à deux facteurs est déjà activée.",
+        "notEnabled": "L'authentification à deux facteurs est déjà désactivée.",
+        "deliveryFailed": "Nous n'avons pas pu envoyer l'e-mail. Veuillez réessayer dans une minute.",
+        "unavailable": "L'authentification à deux facteurs est momentanément indisponible. Veuillez réessayer."
+      }
     },
     "formBanner": {
       "generic": "Something went wrong. Please try again."
@@ -2259,7 +2280,34 @@
       "title": "Sécurité",
       "twoFactor": {
         "title": "Authentification à deux facteurs",
-        "description": "Ajouter une couche de sécurité supplémentaire"
+        "description": "À la connexion, nous vous demanderons aussi un code à 6 chiffres envoyé à votre adresse e-mail.",
+        "checking": "Vérification…",
+        "loadError": "Impossible de vérifier votre paramètre d'authentification à deux facteurs.",
+        "retry": "Réessayer",
+        "statusOn": "Activée – les codes sont envoyés à votre adresse e-mail",
+        "statusOff": "Désactivée",
+        "enabledToast": "L'authentification à deux facteurs est activée.",
+        "disabledToast": "L'authentification à deux facteurs est désactivée.",
+        "dialog": {
+          "enableTitle": "Activer l'authentification à deux facteurs",
+          "disableTitle": "Désactiver l'authentification à deux facteurs",
+          "enablePasswordBody": "Saisissez votre mot de passe. Nous vous enverrons ensuite par e-mail un code à 6 chiffres pour confirmer.",
+          "enableSendBody": "Nous allons envoyer un code à 6 chiffres à l'adresse e-mail de votre compte. Saisissez-le pour activer l'authentification à deux facteurs.",
+          "disablePasswordBody": "Saisissez votre mot de passe pour désactiver l'authentification à deux facteurs.",
+          "disableSendBody": "Nous allons vous envoyer par e-mail un code à 6 chiffres pour confirmer qu'il s'agit bien de vous.",
+          "codeBody": "Saisissez le code à 6 chiffres que nous venons de vous envoyer par e-mail.",
+          "passwordLabel": "Mot de passe",
+          "passwordMissing": "Veuillez saisir votre mot de passe.",
+          "codeLabel": "Code à 6 chiffres",
+          "codeIncomplete": "Veuillez saisir les 6 chiffres du code.",
+          "codeSent": "Nous vous avons envoyé un code à 6 chiffres par e-mail.",
+          "sendCode": "Envoyer le code",
+          "turnOn": "Activer",
+          "turnOff": "Désactiver",
+          "useCodeInstead": "Recevoir plutôt un code par e-mail",
+          "resend": "Envoyer un nouveau code",
+          "cancel": "Annuler"
+        }
       },
       "changePassword": {
         "title": "Changer le mot de passe",

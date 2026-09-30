@@ -45,12 +45,24 @@ export default function OAuthCallbackPage() {
     }
 
     const requires2fa = params.get('requires2fa') === 'true';
-    const twoFaSessionToken = params.get('twoFaSessionToken');
 
-    // Existing user with 2FA enabled — show 2FA code entry
-    if (requires2fa && twoFaSessionToken) {
-      sessionStorage.setItem('twoFaSessionToken', twoFaSessionToken);
-      router.replace('/signin?oauth2fa=1');
+    // Existing user with 2FA enabled — show 2FA code entry.
+    // The gateway puts the pending-2FA token in the URL FRAGMENT (never sent to
+    // a server, so never in request logs); the query param is only read for a
+    // gateway that predates that change. The sign-in form reads it from
+    // sessionStorage once and removes it; router.replace drops it from the URL.
+    if (requires2fa) {
+      const fromHash =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.hash.replace(/^#/, '')).get('twoFaSessionToken')
+          : null;
+      const twoFaSessionToken = fromHash || params.get('twoFaSessionToken');
+      if (twoFaSessionToken) {
+        sessionStorage.setItem('twoFaSessionToken', twoFaSessionToken);
+        router.replace('/signin?oauth2fa=1');
+      } else {
+        router.replace('/signin');
+      }
       return;
     }
 

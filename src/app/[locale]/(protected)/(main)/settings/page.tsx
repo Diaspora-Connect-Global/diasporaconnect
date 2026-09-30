@@ -20,6 +20,7 @@ import DataExportSection from "@/components/settings/DataExportSection";
 import RecommendationDataSection from "@/components/settings/RecommendationDataSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import UsernameSection from "@/components/settings/UsernameSection";
+import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import AiSummarySettings from "@/components/settings/AiSummarySettings";
 import PageLoader from "@/components/custom/PageLoader";
 import { useQuery } from "@apollo/client/react";
@@ -61,11 +62,6 @@ export default function SettingsPage() {
     email: true,
     sms: false,
     push: true,
-  });
-
-  // State for security
-  const [security, setSecurity] = useState({
-    twoFactor: true,
   });
 
   // State for privacy
@@ -172,22 +168,10 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">
-                    {t("security.twoFactor.title")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("security.twoFactor.description")}
-                  </p>
-                </div>
-                <Switch
-                  checked={security.twoFactor}
-                  onCheckedChange={(checked) =>
-                    setSecurity({ ...security, twoFactor: checked })
-                  }
-                />
-              </div>
+              {/* Real server state — see TwoFactorSection. This used to be
+                  local state initialised to `true`, wired to nothing, so every
+                  user saw 2FA "on" while nothing protected them. */}
+              <TwoFactorSection />
 
               <div className="flex items-center justify-between">
                 <div>

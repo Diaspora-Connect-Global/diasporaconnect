@@ -108,7 +108,28 @@
     },
     "twoFactor": {
       "required": "Autenticazione a due fattori richiesta",
-      "enterCode": "Inserisci il tuo codice di verifica a 6 cifre"
+      "enterCode": "Inserisci il tuo codice di verifica a 6 cifre",
+      "title": "Controlla la tua email",
+      "description": "Abbiamo inviato un codice di 6 cifre all'indirizzo email del tuo account. Inseriscilo per completare l'accesso.",
+      "codeLabel": "Codice di 6 cifre",
+      "verify": "Verifica",
+      "resend": "Invia un nuovo codice",
+      "resendIn": "Nuovo codice tra {seconds} s",
+      "codeResent": "Ti abbiamo inviato un nuovo codice.",
+      "back": "Torna all'accesso",
+      "errors": {
+        "codeInvalid": "Il codice non è corretto. Controlla l'email e riprova.",
+        "codeExpired": "Il codice è scaduto. Richiedine uno nuovo.",
+        "sessionExpired": "L'accesso è scaduto. Accedi di nuovo.",
+        "tooManyAttempts": "Troppi tentativi. Attendi 15 minuti, poi riprova.",
+        "resendTooSoon": "Ti abbiamo appena inviato un codice. Attendi un minuto prima di richiederne un altro.",
+        "passwordInvalid": "La password non è corretta.",
+        "reauthRequired": "Conferma con la tua password o con un codice ricevuto via email.",
+        "alreadyEnabled": "L'autenticazione a due fattori è già attiva.",
+        "notEnabled": "L'autenticazione a due fattori è già disattivata.",
+        "deliveryFailed": "Non siamo riusciti a inviare l'email. Riprova tra un minuto.",
+        "unavailable": "L'autenticazione a due fattori non è disponibile al momento. Riprova."
+      }
     },
     "formBanner": {
       "generic": "Something went wrong. Please try again."
@@ -2259,7 +2280,34 @@
       "title": "Sicurezza",
       "twoFactor": {
         "title": "Autenticazione a due fattori",
-        "description": "Aggiungi un ulteriore livello di sicurezza"
+        "description": "Quando accedi, ti chiederemo anche un codice di 6 cifre inviato alla tua email.",
+        "checking": "Verifica in corso…",
+        "loadError": "Non siamo riusciti a verificare l'impostazione dell'autenticazione a due fattori.",
+        "retry": "Riprova",
+        "statusOn": "Attiva – i codici arrivano alla tua email",
+        "statusOff": "Disattivata",
+        "enabledToast": "L'autenticazione a due fattori è attiva.",
+        "disabledToast": "L'autenticazione a due fattori è disattivata.",
+        "dialog": {
+          "enableTitle": "Attiva l'autenticazione a due fattori",
+          "disableTitle": "Disattiva l'autenticazione a due fattori",
+          "enablePasswordBody": "Inserisci la tua password. Poi ti invieremo via email un codice di 6 cifre per confermare.",
+          "enableSendBody": "Invieremo un codice di 6 cifre all'indirizzo email del tuo account. Inseriscilo per attivare l'autenticazione a due fattori.",
+          "disablePasswordBody": "Inserisci la tua password per disattivare l'autenticazione a due fattori.",
+          "disableSendBody": "Ti invieremo via email un codice di 6 cifre per confermare che sei tu.",
+          "codeBody": "Inserisci il codice di 6 cifre che ti abbiamo appena inviato via email.",
+          "passwordLabel": "Password",
+          "passwordMissing": "Inserisci la tua password.",
+          "codeLabel": "Codice di 6 cifre",
+          "codeIncomplete": "Inserisci tutte e 6 le cifre del codice.",
+          "codeSent": "Ti abbiamo inviato via email un codice di 6 cifre.",
+          "sendCode": "Invia codice",
+          "turnOn": "Attiva",
+          "turnOff": "Disattiva",
+          "useCodeInstead": "Inviami invece un codice via email",
+          "resend": "Invia un nuovo codice",
+          "cancel": "Annulla"
+        }
       },
       "changePassword": {
         "title": "Cambia password",

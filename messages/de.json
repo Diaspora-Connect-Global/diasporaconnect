@@ -108,7 +108,28 @@
     },
     "twoFactor": {
       "required": "Zwei-Faktor-Authentifizierung erforderlich",
-      "enterCode": "Bitte geben Sie Ihren 6-stelligen Verifizierungscode ein"
+      "enterCode": "Bitte geben Sie Ihren 6-stelligen Verifizierungscode ein",
+      "title": "Prüfen Sie Ihre E-Mails",
+      "description": "Wir haben einen 6-stelligen Code an die E-Mail-Adresse Ihres Kontos gesendet. Geben Sie ihn ein, um die Anmeldung abzuschließen.",
+      "codeLabel": "6-stelliger Code",
+      "verify": "Bestätigen",
+      "resend": "Neuen Code senden",
+      "resendIn": "Neuen Code senden in {seconds} s",
+      "codeResent": "Wir haben Ihnen einen neuen Code gesendet.",
+      "back": "Zurück zur Anmeldung",
+      "errors": {
+        "codeInvalid": "Dieser Code ist nicht korrekt. Prüfen Sie die E-Mail und versuchen Sie es erneut.",
+        "codeExpired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+        "sessionExpired": "Ihre Anmeldung ist abgelaufen. Bitte melden Sie sich erneut an.",
+        "tooManyAttempts": "Zu viele Versuche. Warten Sie 15 Minuten und versuchen Sie es dann erneut.",
+        "resendTooSoon": "Wir haben gerade erst einen Code gesendet. Bitte warten Sie eine Minute, bevor Sie einen neuen anfordern.",
+        "passwordInvalid": "Dieses Passwort ist nicht korrekt.",
+        "reauthRequired": "Bestätigen Sie mit Ihrem Passwort oder einem per E-Mail gesendeten Code.",
+        "alreadyEnabled": "Die Zwei-Faktor-Authentifizierung ist bereits aktiviert.",
+        "notEnabled": "Die Zwei-Faktor-Authentifizierung ist bereits deaktiviert.",
+        "deliveryFailed": "Wir konnten die E-Mail nicht senden. Bitte versuchen Sie es in einer Minute erneut.",
+        "unavailable": "Die Zwei-Faktor-Authentifizierung ist gerade nicht verfügbar. Bitte versuchen Sie es erneut."
+      }
     },
     "formBanner": {
       "generic": "Something went wrong. Please try again."
@@ -2259,7 +2280,34 @@
       "title": "Sicherheit",
       "twoFactor": {
         "title": "Zwei-Faktor-Authentifizierung",
-        "description": "Eine zusätzliche Sicherheitsebene hinzufügen"
+        "description": "Bei der Anmeldung fragen wir zusätzlich nach einem 6-stelligen Code, den wir an Ihre E-Mail-Adresse senden.",
+        "checking": "Wird geprüft…",
+        "loadError": "Wir konnten Ihre Einstellung zur Zwei-Faktor-Authentifizierung nicht abrufen.",
+        "retry": "Erneut versuchen",
+        "statusOn": "Ein – Codes gehen an Ihre E-Mail-Adresse",
+        "statusOff": "Aus",
+        "enabledToast": "Die Zwei-Faktor-Authentifizierung ist aktiviert.",
+        "disabledToast": "Die Zwei-Faktor-Authentifizierung ist deaktiviert.",
+        "dialog": {
+          "enableTitle": "Zwei-Faktor-Authentifizierung aktivieren",
+          "disableTitle": "Zwei-Faktor-Authentifizierung deaktivieren",
+          "enablePasswordBody": "Geben Sie Ihr Passwort ein. Anschließend senden wir Ihnen einen 6-stelligen Bestätigungscode per E-Mail.",
+          "enableSendBody": "Wir senden einen 6-stelligen Code an die E-Mail-Adresse Ihres Kontos. Geben Sie ihn ein, um die Zwei-Faktor-Authentifizierung zu aktivieren.",
+          "disablePasswordBody": "Geben Sie Ihr Passwort ein, um die Zwei-Faktor-Authentifizierung zu deaktivieren.",
+          "disableSendBody": "Wir senden Ihnen einen 6-stelligen Code per E-Mail, um zu bestätigen, dass Sie es sind.",
+          "codeBody": "Geben Sie den 6-stelligen Code ein, den wir Ihnen gerade per E-Mail gesendet haben.",
+          "passwordLabel": "Passwort",
+          "passwordMissing": "Bitte geben Sie Ihr Passwort ein.",
+          "codeLabel": "6-stelliger Code",
+          "codeIncomplete": "Bitte geben Sie alle 6 Ziffern des Codes ein.",
+          "codeSent": "Wir haben Ihnen einen 6-stelligen Code per E-Mail gesendet.",
+          "sendCode": "Code senden",
+          "turnOn": "Aktivieren",
+          "turnOff": "Deaktivieren",
+          "useCodeInstead": "Stattdessen einen Code per E-Mail erhalten",
+          "resend": "Neuen Code senden",
+          "cancel": "Abbrechen"
+        }
       },
       "changePassword": {
         "title": "Passwort ändern",

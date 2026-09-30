@@ -108,7 +108,28 @@
     },
     "twoFactor": {
       "required": "Two-Factor Authentication Required",
-      "enterCode": "Please enter your 6-digit verification code"
+      "enterCode": "Please enter your 6-digit verification code",
+      "title": "Check your email",
+      "description": "We sent a 6-digit code to the email address on your account. Enter it to finish signing in.",
+      "codeLabel": "6-digit code",
+      "verify": "Verify",
+      "resend": "Send a new code",
+      "resendIn": "Send a new code in {seconds}s",
+      "codeResent": "We sent you a new code.",
+      "back": "Back to sign in",
+      "errors": {
+        "codeInvalid": "That code isn't right. Check the email and try again.",
+        "codeExpired": "That code has expired. Send a new one.",
+        "sessionExpired": "Your sign-in timed out. Please sign in again.",
+        "tooManyAttempts": "Too many attempts. Wait 15 minutes, then try again.",
+        "resendTooSoon": "We sent a code a moment ago. Wait a minute before asking for another.",
+        "passwordInvalid": "That password isn't right.",
+        "reauthRequired": "Confirm with your password or an emailed code.",
+        "alreadyEnabled": "Two-factor authentication is already on.",
+        "notEnabled": "Two-factor authentication is already off.",
+        "deliveryFailed": "We couldn't send the email. Please try again in a minute.",
+        "unavailable": "Two-factor authentication isn't available right now. Please try again."
+      }
     },
     "formBanner": {
       "generic": "Something went wrong. Please try again."
@@ -2563,7 +2584,34 @@
       "title": "Security",
       "twoFactor": {
         "title": "Two-Factor Authentication",
-        "description": "Add an extra layer of security"
+        "description": "When you sign in, we'll also ask for a 6-digit code sent to your email.",
+        "checking": "Checking…",
+        "loadError": "We couldn't check your two-factor authentication setting.",
+        "retry": "Try again",
+        "statusOn": "On — codes go to your email",
+        "statusOff": "Off",
+        "enabledToast": "Two-factor authentication is on.",
+        "disabledToast": "Two-factor authentication is off.",
+        "dialog": {
+          "enableTitle": "Turn on two-factor authentication",
+          "disableTitle": "Turn off two-factor authentication",
+          "enablePasswordBody": "Enter your password. We'll then email you a 6-digit code to confirm.",
+          "enableSendBody": "We'll email a 6-digit code to the address on your account. Enter it to turn on two-factor authentication.",
+          "disablePasswordBody": "Enter your password to turn off two-factor authentication.",
+          "disableSendBody": "We'll email you a 6-digit code to confirm it's you.",
+          "codeBody": "Enter the 6-digit code we just emailed you.",
+          "passwordLabel": "Password",
+          "passwordMissing": "Enter your password.",
+          "codeLabel": "6-digit code",
+          "codeIncomplete": "Enter all 6 digits of the code.",
+          "codeSent": "We emailed you a 6-digit code.",
+          "sendCode": "Send code",
+          "turnOn": "Turn on",
+          "turnOff": "Turn off",
+          "useCodeInstead": "Email me a code instead",
+          "resend": "Send a new code",
+          "cancel": "Cancel"
+        }
       },
       "changePassword": {
         "title": "Change Password",

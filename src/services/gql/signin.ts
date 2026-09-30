@@ -75,6 +75,7 @@ export const LOGIN_USER = gql`
       sessionId
       expiresIn
       requiresTwoFactor
+      twoFactorToken
       user {
         id
         email
