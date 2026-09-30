@@ -26,6 +26,7 @@ import {
     REQUEST_TO_JOIN_GROUP,
     GroupPrivacy,
     MemberRole,
+    MemberStatus,
     type GetGroupResponse,
     type GetGroupMembersResponse,
     type CheckGroupMembershipResponse,
@@ -68,14 +69,32 @@ export default function GroupDetailPage() {
             fetchPolicy: 'cache-and-network',
         });
 
+    const group = groupData?.getGroup?.group;
+    const membership = membershipData?.checkGroupMembership;
+
+    const isOwner = !!group && !!currentUserId && group.ownerId === currentUserId;
+    const isMember = !!membership?.isMember && membership?.status !== 'PENDING';
+    const isPending = membership?.status === 'PENDING';
+    const isPrivate = group?.privacy === GroupPrivacy.PRIVATE;
+    const isPublic = group?.privacy === GroupPrivacy.PUBLIC;
+    // Only a PUBLIC group shows its members to everyone. Anything else (PRIVATE,
+    // SECRET) keeps the list to its members and owner — the API refuses anyone
+    // else — so don't ask for it; the Members section explains instead.
+    // `isMember` alone is not enough: it is also true for banned / invited rows.
+    const canSeeMembers =
+        !!group &&
+        (isPublic ||
+            isOwner ||
+            (!!membership?.isMember && membership?.status === MemberStatus.ACTIVE));
+
     const {
         data: membersData,
-        loading: membersLoading,
+        error: membersError,
         refetch: refetchMembers,
         fetchMore: fetchMoreMembers,
     } = useQuery<GetGroupMembersResponse>(GET_GROUP_MEMBERS, {
         variables: { groupId, membersLimit: MEMBERS_PAGE_SIZE, membersOffset: 0 },
-        skip: !groupId,
+        skip: !groupId || !canSeeMembers,
         fetchPolicy: 'cache-and-network',
     });
     const [loadingMoreMembers, setLoadingMoreMembers] = useState(false);
@@ -85,8 +104,6 @@ export default function GroupDetailPage() {
     const [requestToJoin, { loading: requestLoading }] =
         useMutation<RequestToJoinGroupResponse>(REQUEST_TO_JOIN_GROUP);
 
-    const group = groupData?.getGroup?.group;
-    const membership = membershipData?.checkGroupMembership;
     const members = useMemo(
         () => membersData?.getGroupMembers?.members ?? [],
         [membersData],
@@ -126,14 +143,13 @@ export default function GroupDetailPage() {
         }
     };
 
-    const isOwner = !!group && !!currentUserId && group.ownerId === currentUserId;
-    const isMember = !!membership?.isMember && membership?.status !== 'PENDING';
-    const isPending = membership?.status === 'PENDING';
-    const isPrivate = group?.privacy === GroupPrivacy.PRIVATE;
-
     const refreshAll = () => {
         void refetchMembership();
-        void refetchMembers();
+        // Apollo runs a refetch even while the query is skipped, so refresh the
+        // list only where joining/leaving here changes a list this viewer can
+        // read: a PUBLIC group. For other groups, the membership refetch above
+        // re-decides `canSeeMembers`, which starts or skips the query itself.
+        if (isPublic) void refetchMembers();
     };
 
     const handleJoin = async () => {
@@ -199,7 +215,10 @@ export default function GroupDetailPage() {
     if (
         (groupLoading && !group) ||
         (membershipLoading && !membershipData) ||
-        (membersLoading && !membersData)
+        // Wait for the list only when it will be fetched. Checking for data
+        // rather than `loading` also covers the render in which the query is
+        // switched on, so "No members yet" never flashes.
+        (canSeeMembers && !membersData && !membersError)
     ) {
         return <PageLoader />;
     }
@@ -300,7 +319,11 @@ export default function GroupDetailPage() {
             <h2 className="heading-medium text-xl my-5">{t('groups.detail.membersTitle')}</h2>
 
             <div className="bg-surface-default rounded-2xl border border-border-subtle p-2">
-                {members.length ? (
+                {!canSeeMembers ? (
+                    <div className="py-8">
+                        <EmptyState size="sm" icon={Lock} title={t('groups.detail.membersHidden')} />
+                    </div>
+                ) : members.length ? (
                     <ul className="flex flex-col divide-y divide-border-subtle">
                         {members.map((m) => {
                             const name = personName(m.profile, tIdentity('unknownUser'));
@@ -347,7 +370,7 @@ export default function GroupDetailPage() {
                 )}
             </div>
 
-            {hasMoreMembers && (
+            {canSeeMembers && hasMoreMembers && (
                 <div className="mt-3 flex justify-center">
                     <ButtonType3
                         onClick={handleLoadMoreMembers}

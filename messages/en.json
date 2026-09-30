@@ -707,6 +707,7 @@
         "loading": "Loading group...",
         "membersTitle": "Members",
         "noMembers": "No members yet.",
+        "membersHidden": "Only members can see who's in this group.",
         "owner": "Owner",
         "requested": "Requested",
         "public": "Public",

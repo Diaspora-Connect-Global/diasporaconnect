@@ -707,6 +707,7 @@
         "loading": "Groep laden...",
         "membersTitle": "Leden",
         "noMembers": "Nog geen leden.",
+        "membersHidden": "Alleen leden kunnen zien wie er in deze groep zit.",
         "owner": "Eigenaar",
         "requested": "Aangevraagd",
         "public": "Openbaar",

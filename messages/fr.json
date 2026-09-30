@@ -706,6 +706,7 @@
         "loading": "Chargement du groupe...",
         "membersTitle": "Membres",
         "noMembers": "Aucun membre pour le moment.",
+        "membersHidden": "Seuls les membres peuvent voir qui fait partie de ce groupe.",
         "owner": "Propriétaire",
         "requested": "Demandé",
         "public": "Public",
