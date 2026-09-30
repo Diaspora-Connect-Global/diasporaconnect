@@ -137,6 +137,7 @@ export const GET_ASSOCIATION_DETAILS = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      isContentLocked
       enabledServices
       associationType {
         id

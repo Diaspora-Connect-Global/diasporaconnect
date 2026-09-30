@@ -4393,5 +4393,18 @@
     "emptyKind": "No one has reacted with {reaction} yet",
     "loadError": "Reactions could not be loaded",
     "retry": "Try again"
+  },
+  "lockedCommunity": {
+    "previewNote": "Only members can see posts, events, members and other content here.",
+    "requestToJoin": "Request to join",
+    "payToJoin": "Pay to join",
+    "inviteOnly": "Invite only — you need an invitation to join",
+    "pendingTitle": "Request pending approval",
+    "pendingHint": "An admin will review your request. You'll get access as soon as it's approved.",
+    "cancelRequest": "Cancel request",
+    "bannedCommunity": "You can't join this community",
+    "bannedAssociation": "You can't join this association",
+    "requestTitleCommunity": "Request to join this community?",
+    "requestTitleAssociation": "Request to join this association?"
   }
 }

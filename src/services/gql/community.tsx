@@ -130,6 +130,7 @@ export const GET_COMMUNITY_DETAILS = gql`
       defaultGroupId
       createdAt
       membershipStatus
+      isContentLocked
       enabledServices
       contactEmail
       contactPhone

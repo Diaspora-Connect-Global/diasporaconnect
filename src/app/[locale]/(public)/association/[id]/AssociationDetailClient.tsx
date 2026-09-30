@@ -54,6 +54,8 @@ import { EmbassyCommunityView } from '@/components/community/embassy/EmbassyComm
 import { associationToEmbassyCommunity } from '@/components/community/embassy/associationAdapter';
 import type { EmbassyFeedPost } from '@/components/community/embassy/types';
 import PageLoader from '@/components/custom/PageLoader';
+import { LockedCommunityPreview } from '@/components/community/LockedCommunityPreview';
+import { isCommunityContentLockedError } from '@/lib/communityLock';
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -72,6 +74,8 @@ interface AssociationDetails {
     priceCurrency?: string | null;
     defaultGroupId?: string | null;
     membershipStatus?: string | null; // ACTIVE | PENDING | SUSPENDED | MEMBER (legacy)
+    /** Server verdict: true → preview only; every content field is null/[]. */
+    isContentLocked?: boolean;
     /**
      * Enabled member-facing service module keys. `null`/absent → all enabled
      * (legacy/non-loaded); `[]` → none enabled. Drives module gating.
@@ -156,7 +160,11 @@ export default function AssociationPage() {
     // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
     const tRoot = useTranslations();
 
-    const { data: detailsData, loading: detailsLoading } = useQuery<GetAssociationDetailsResponse>(
+    const {
+        data: detailsData,
+        loading: detailsLoading,
+        refetch: refetchDetails,
+    } = useQuery<GetAssociationDetailsResponse>(
         GET_ASSOCIATION_DETAILS,
         {
             variables: { associationId },
@@ -172,7 +180,14 @@ export default function AssociationPage() {
         skip: !associationId,
     });
 
-    const { data: feedData, loading: feedLoading } = useQuery<GetFeedResponse>(GET_FEED, {
+    // Members-only content: never fired until the detail query has resolved AND
+    // the server says the content is unlocked (strictly `false` — a missing or
+    // still-loading verdict keeps it off). Every other content query (tabs,
+    // members, events, ...) lives inside EmbassyCommunityView, which is only
+    // mounted in the unlocked branch, so this is the one query owned here.
+    const contentUnlocked = detailsData?.getAssociation?.isContentLocked === false;
+
+    const { data: feedData, loading: feedLoading, error: feedError } = useQuery<GetFeedResponse>(GET_FEED, {
         variables: {
             input: {
                 type: 'ASSOCIATION',
@@ -181,7 +196,16 @@ export default function AssociationPage() {
                 offset: 0,
             },
         },
+        skip: !contentUnlocked,
     });
+
+    // Membership lapsed since the detail was cached: the feed refuses with the
+    // lock code. Re-read the detail so the page flips to the preview.
+    useEffect(() => {
+        if (feedError && isCommunityContentLockedError(feedError)) {
+            void refetchDetails();
+        }
+    }, [feedError, refetchDetails]);
 
     const [requestMembershipMutation, { loading: joinLoading }] = useMutation<{
         requestMembership: {
@@ -560,6 +584,9 @@ export default function AssociationPage() {
 
     const handlePaymentSuccess = (_membershipId: string) => {
         toast.success(t('toasts.youAreNowMember', { name: association?.name ?? '' }));
+        // Membership only becomes ACTIVE after payment; re-read so a locked
+        // preview flips to the full page.
+        void refetchDetails();
     };
 
     const handlePaymentClose = () => setPaymentModalOpen(false);
@@ -661,6 +688,8 @@ export default function AssociationPage() {
     }
 
     const actionLoading = joinLoading || leaveLoading || cancelLoading;
+    // A locked preview is offered 'request to join' for every non-paid policy.
+    const requestFlow = canShowRequestToJoin || (association.isContentLocked === true && !isPaidEntity);
 
     const accessProfile: AccessProfile | undefined = association.visibility
         ? {
@@ -748,9 +777,9 @@ export default function AssociationPage() {
                 open={joinModalOpen}
                 onCancel={() => setJoinModalOpen(false)}
                 onConfirm={handleJoinConfirm}
-                title={canShowRequestToJoin ? 'Request to join association?' : tJoinModal('associationTitle')}
+                title={requestFlow ? tRoot('lockedCommunity.requestTitleAssociation') : tJoinModal('associationTitle')}
                 description=""
-                confirmText={canShowRequestToJoin ? t('actions.requestToJoin') : tActions('join')}
+                confirmText={requestFlow ? t('actions.requestToJoin') : tActions('join')}
                 isLoading={joinLoading}
             >
                 {renderJoinModalContent()}
@@ -778,6 +807,34 @@ export default function AssociationPage() {
             )}
         </>
     );
+
+    // Gated association, viewer not an active member: identity + one join action
+    // and NOTHING else. Returned before `?settings=1` and the tabbed view so no
+    // deep link can mount (and fetch) members-only content.
+    if (association.isContentLocked === true) {
+        return (
+            <>
+                <LockedCommunityPreview
+                    kind="association"
+                    name={association.name}
+                    description={association.description}
+                    avatarUrl={association.avatarUrl}
+                    memberCount={association.memberCount}
+                    visibility={association.visibility}
+                    joinPolicy={association.joinPolicy}
+                    paymentType={association.paymentType}
+                    priceAmount={association.priceAmount}
+                    priceCurrency={association.priceCurrency}
+                    membershipStatus={association.membershipStatus}
+                    onJoinClick={handleJoinClick}
+                    onCancelRequest={handleCancelRequest}
+                    joinLoading={joinLoading}
+                    cancelLoading={cancelLoading}
+                />
+                {membershipModals}
+            </>
+        );
+    }
 
     // Owner-only settings surface (`?settings=1`). Preserves the AccessSettingsForm
     // control plus the AboutAssociation summary and PeopleYouMayKnow rail that the

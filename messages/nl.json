@@ -4393,5 +4393,18 @@
     "emptyKind": "Niemand heeft nog met {reaction} gereageerd",
     "loadError": "Reacties konden niet worden geladen",
     "retry": "Opnieuw proberen"
+  },
+  "lockedCommunity": {
+    "previewNote": "Alleen leden kunnen berichten, evenementen, leden en andere inhoud zien.",
+    "requestToJoin": "Verzoek om deel te nemen",
+    "payToJoin": "Betalen om deel te nemen",
+    "inviteOnly": "Alleen op uitnodiging — u hebt een uitnodiging nodig om deel te nemen",
+    "pendingTitle": "Verzoek in afwachting van goedkeuring",
+    "pendingHint": "Een beheerder beoordeelt uw verzoek. U krijgt toegang zodra het is goedgekeurd.",
+    "cancelRequest": "Verzoek annuleren",
+    "bannedCommunity": "U kunt niet deelnemen aan deze gemeenschap",
+    "bannedAssociation": "U kunt niet deelnemen aan deze vereniging",
+    "requestTitleCommunity": "Verzoek om deel te nemen aan deze community?",
+    "requestTitleAssociation": "Verzoek om deel te nemen aan deze vereniging?"
   }
 }

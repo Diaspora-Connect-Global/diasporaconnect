@@ -4393,5 +4393,18 @@
     "emptyKind": "Noch niemand hat mit {reaction} reagiert",
     "loadError": "Reaktionen konnten nicht geladen werden",
     "retry": "Erneut versuchen"
+  },
+  "lockedCommunity": {
+    "previewNote": "Beiträge, Veranstaltungen, Mitglieder und weitere Inhalte sind nur für Mitglieder sichtbar.",
+    "requestToJoin": "Beitritt anfragen",
+    "payToJoin": "Kostenpflichtig beitreten",
+    "inviteOnly": "Nur auf Einladung – für den Beitritt wird eine Einladung benötigt",
+    "pendingTitle": "Anfrage wartet auf Genehmigung",
+    "pendingHint": "Ein Admin prüft die Anfrage. Der Zugang wird freigeschaltet, sobald sie genehmigt ist.",
+    "cancelRequest": "Anfrage stornieren",
+    "bannedCommunity": "Dieser Community kann nicht beigetreten werden",
+    "bannedAssociation": "Diesem Verein kann nicht beigetreten werden",
+    "requestTitleCommunity": "Beitritt zu dieser Community anfragen?",
+    "requestTitleAssociation": "Beitritt zu diesem Verein anfragen?"
   }
 }

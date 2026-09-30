@@ -4393,5 +4393,18 @@
     "emptyKind": "Nessuno ha ancora reagito con {reaction}",
     "loadError": "Impossibile caricare le reazioni",
     "retry": "Riprova"
+  },
+  "lockedCommunity": {
+    "previewNote": "Solo i membri possono vedere post, eventi, membri e altri contenuti.",
+    "requestToJoin": "Richiedi di entrare",
+    "payToJoin": "Paga per entrare",
+    "inviteOnly": "Solo su invito — per entrare è necessario un invito",
+    "pendingTitle": "Richiesta in attesa di approvazione",
+    "pendingHint": "Un amministratore esaminerà la sua richiesta. Otterrà l'accesso non appena sarà approvata.",
+    "cancelRequest": "Annulla richiesta",
+    "bannedCommunity": "Non può entrare in questa community",
+    "bannedAssociation": "Non può entrare in questa associazione",
+    "requestTitleCommunity": "Richiedere di entrare in questa comunità?",
+    "requestTitleAssociation": "Richiedere di entrare in questa associazione?"
   }
 }

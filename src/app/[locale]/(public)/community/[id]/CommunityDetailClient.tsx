@@ -55,6 +55,8 @@ import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { buildMentionMap, type MentionInputItem } from '@/components/custom/richTextRenderer';
 import { toCdnUrl } from '@/lib/cdn';
 import PageLoader from '@/components/custom/PageLoader';
+import { LockedCommunityPreview } from '@/components/community/LockedCommunityPreview';
+import { isCommunityContentLockedError } from '@/lib/communityLock';
 
 interface CommunityDetails {
   id: string;
@@ -72,6 +74,8 @@ interface CommunityDetails {
   priceCurrency?: string | null;
   defaultGroupId?: string | null;
   membershipStatus?: string | null;
+  /** Server verdict: true → preview only; every content field is null/[]. */
+  isContentLocked?: boolean;
   enabledServices?: string[] | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
@@ -167,7 +171,11 @@ export default function CommunityDetailPage() {
   // UNSCOPED translator or next-intl prefixes the scope and resolves nothing.
   const tRoot = useTranslations();
 
-  const { data: detailsData, loading: detailsLoading } = useQuery<GetCommunityDetailsResponse>(
+  const {
+    data: detailsData,
+    loading: detailsLoading,
+    refetch: refetchDetails,
+  } = useQuery<GetCommunityDetailsResponse>(
     GET_COMMUNITY_DETAILS,
     {
       variables: { communityId },
@@ -184,7 +192,14 @@ export default function CommunityDetailPage() {
     }
   );
 
-  const { data: feedData, loading: feedLoading } = useQuery<GetFeedResponse>(GET_FEED, {
+  // Members-only content: never fired until the detail query has resolved AND
+  // the server says the content is unlocked (strictly `false` — a missing or
+  // still-loading verdict keeps it off). Every other content query on this page
+  // (tabs, members, events, ...) lives inside EmbassyCommunityView, which is
+  // only mounted in the unlocked branch, so this is the one query owned here.
+  const contentUnlocked = detailsData?.getCommunity?.isContentLocked === false;
+
+  const { data: feedData, loading: feedLoading, error: feedError } = useQuery<GetFeedResponse>(GET_FEED, {
     variables: {
       input: {
         type: 'COMMUNITY',
@@ -193,7 +208,17 @@ export default function CommunityDetailPage() {
         offset: 0,
       },
     },
+    skip: !contentUnlocked,
   });
+
+  // Membership lapsed since the detail was cached (removed, banned, expired):
+  // the feed refuses with the lock code. Re-read the detail so the page flips
+  // to the preview instead of showing an empty feed.
+  useEffect(() => {
+    if (feedError && isCommunityContentLockedError(feedError)) {
+      void refetchDetails();
+    }
+  }, [feedError, refetchDetails]);
 
   const [requestMembershipMutation, { loading: joinLoading }] = useMutation(REQUEST_MEMBERSHIP_COMMUNITY, {
     refetchQueries: [
@@ -546,6 +571,9 @@ export default function CommunityDetailPage() {
 
   const handlePaymentSuccess = (_membershipId: string) => {
     toast.success(t('toasts.youAreNowMember', { name: community?.name ?? '' }));
+    // The membership only becomes ACTIVE after payment; re-read so a locked
+    // preview flips to the full page.
+    void refetchDetails();
   };
 
   const handlePaymentClose = () => setPaymentModalOpen(false);
@@ -618,6 +646,9 @@ export default function CommunityDetailPage() {
   }
 
   const actionLoading = joinLoading || leaveLoading || cancelLoading;
+  // A locked preview is offered 'request to join' for every non-paid policy
+  // (APPROVAL / PRIVATE), whatever spelling the policy arrives in.
+  const requestFlow = canShowRequestToJoin || (community.isContentLocked === true && !isPaidEntity);
   const displayMemberCount = community.memberCount ?? 0;
 
   const accessProfile: AccessProfile | undefined =
@@ -709,9 +740,9 @@ export default function CommunityDetailPage() {
         open={joinModalOpen}
         onCancel={() => setJoinModalOpen(false)}
         onConfirm={handleJoinConfirm}
-        title={canShowRequestToJoin ? 'Request to join community?' : tJoinModal('communityTitle')}
+        title={requestFlow ? tRoot('lockedCommunity.requestTitleCommunity') : tJoinModal('communityTitle')}
         description=""
-        confirmText={canShowRequestToJoin ? t('actions.requestToJoin') : tActions('join')}
+        confirmText={requestFlow ? t('actions.requestToJoin') : tActions('join')}
         isLoading={joinLoading}
       >
         {renderJoinModalContent()}
@@ -739,6 +770,36 @@ export default function CommunityDetailPage() {
       )}
     </>
   );
+
+  // Gated community, viewer not an active member: identity + one join action
+  // and NOTHING else. Returned before the tabbed view so neither its tabs nor
+  // a `?tab=` / `?settings=1` deep link can mount (and fetch) any content.
+  if (community.isContentLocked === true) {
+    return (
+      <>
+        <LockedCommunityPreview
+          kind="community"
+          name={community.name}
+          description={community.description}
+          avatarUrl={community.avatarUrl}
+          bannerUrl={community.bannerUrl}
+          memberCount={community.memberCount}
+          visibility={community.visibility}
+          joinPolicy={community.joinPolicy}
+          paymentType={community.paymentType}
+          priceAmount={community.priceAmount}
+          priceCurrency={community.priceCurrency}
+          membershipStatus={community.membershipStatus}
+          communityType={community.communityType}
+          onJoinClick={handleJoinClick}
+          onCancelRequest={handleCancelRequest}
+          joinLoading={joinLoading}
+          cancelLoading={cancelLoading}
+        />
+        {membershipModals}
+      </>
+    );
+  }
 
   // Every community now renders the rich tabbed view. The variant ('embassy' |
   // 'general') only swaps copy/branding; the OLD default UI below is unreachable
