@@ -30,11 +30,14 @@ export const Step5: React.FC<Step5Props> = ({
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
+    // The code is always emailed; SMS is only used when auth-service's
+    // admin-configured OTP channel settings allow it for this user's number
+    // (default: no countries). `otpSmsSent` reflects what was ACTUALLY used
+    // for the initial send, not a guess from the phone number — see
+    // page.tsx's submitFormA, which reads it off the registerUser /
+    // completeOAuthRegistration mutation response.
     const formattedPhone = `${data.countryCode}${data.phoneNumber.replace(/^0/, '')}`;
-    // Note: the OTP is also delivered by email in the background (so the code
-    // still reaches users when the SMS gateway is slow), but the UI intentionally
-    // only references the phone number.
-    const otpDestination = formattedPhone;
+    const smsAlsoSent = Boolean(data.otpSmsSent);
 
     const [value, setValue] = React.useState("");
     const [codeExpirySeconds, setCodeExpirySeconds] = useState<number | null>(null);
@@ -55,13 +58,15 @@ export const Step5: React.FC<Step5Props> = ({
 
     // "Code expires in X:XX" countdown from otp_expires_at (set when OTP is sent)
     useEffect(() => {
-        const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
-        if (!expiresAt) {
+        if (!sessionStorage.getItem(OTP_EXPIRES_AT_KEY)) {
             setCodeExpirySeconds(null);
             setShowResend(true);
             return;
         }
         const updateExpiryCountdown = () => {
+            // Re-read every tick: a resend writes a new expiry while this step is open.
+            const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
+            if (!expiresAt) return;
             const now = Date.now();
             const expirationTime = parseInt(expiresAt, 10);
             const remaining = Math.floor((expirationTime - now) / 1000);
@@ -147,7 +152,11 @@ export const Step5: React.FC<Step5Props> = ({
             stepNumber={5}
             totalSteps={7}
             title={t('confirmVerification.title')}
-            subtitle={t('confirmVerification.description', { phoneNumber: otpDestination })}
+            subtitle={t('confirmVerification.description', {
+                hasPhone: smsAlsoSent ? 'true' : 'other',
+                email: data.otpEmail || '',
+                phoneNumber: formattedPhone,
+            })}
             isNextDisabled={isNextDisabled}
             nextButtonText={tActions('submit')}
             showBackButton={true}

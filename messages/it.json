@@ -157,7 +157,7 @@
     },
     "confirmVerification": {
       "title": "Inserisci il codice di verifica",
-      "description": "Inserisci il codice di verifica che è stato inviato a {phoneNumber}",
+      "description": "{hasPhone, select, true {Inserisci il codice di verifica che è stato inviato alla tua email ({email}) e al tuo telefono ({phoneNumber})} other {Inserisci il codice di verifica che è stato inviato alla tua email ({email})}}",
       "resend": "Rinvia codice",
       "codeExpiresIn": "Il codice scade tra {time}",
       "codeExpired": "Codice scaduto"

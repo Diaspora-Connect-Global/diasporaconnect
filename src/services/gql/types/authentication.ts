@@ -137,6 +137,8 @@ export interface CompleteOAuthRegistrationResponse {
     expiresIn: number;
     verificationMethod: string;
     smsSent: boolean;
+    /** Additive — whether the OTP was (also) emailed. Both can be true. */
+    emailSent?: boolean;
     verificationExpiresAt: string;
     verificationTtlSeconds: number;
     meta: RegistrationMeta;
@@ -264,21 +266,14 @@ export interface RefreshTokenResponse {
 /**
  * Response from resend OTP mutation.
  *
+ * The gateway declares this mutation as returning a plain `String` (a
+ * confirmation message) and reports failure as a GraphQL error, so it takes no
+ * sub-field selection. Selecting fields on it fails validation outright.
+ *
  * @interface ResendRegistrationOtpResponse
- * @property {Object} resendRegistrationOtp - Resend result
- * @property {boolean} resendRegistrationOtp.success - Whether OTP was resent successfully
- * @property {string} resendRegistrationOtp.message - Success or error message
- * @property {string} resendRegistrationOtp.verificationExpiresAt - ISO timestamp when new OTP expires
- * @property {number} resendRegistrationOtp.verificationTtlSeconds - New OTP validity duration
- * @property {boolean} resendRegistrationOtp.smsSent - Whether SMS was successfully sent
+ * @property {string} resendRegistrationOtp - Confirmation message
  */
 export interface ResendRegistrationOtpResponse {
-  resendRegistrationOtp: {
-    success: boolean;
-    message: string;
-    verificationExpiresAt: string;
-    verificationTtlSeconds: number;
-    smsSent: boolean;
-  };
+  resendRegistrationOtp: string;
 }
 

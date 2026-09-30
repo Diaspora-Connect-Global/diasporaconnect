@@ -36,6 +36,7 @@ export const Step1: React.FC<Step1Props> = ({
         sessionStorage.removeItem('accountFormStep');
         sessionStorage.removeItem('oauthRegistration');
         sessionStorage.removeItem('otp_expires_at');
+        sessionStorage.removeItem('otp_ttl_ms');
 
         // Clear auth state (log them out)
         const { clearAuth } = useAuthStore.getState();

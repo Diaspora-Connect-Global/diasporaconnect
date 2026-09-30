@@ -149,6 +149,7 @@ export const COMPLETE_OAUTH_REGISTRATION = gql`
       expiresIn
       verificationMethod
       smsSent
+      emailSent
       verificationExpiresAt
       verificationTtlSeconds
       meta {
@@ -583,12 +584,6 @@ export const REFRESH_TOKEN = gql`
  */
 export const RESEND_REGISTRATION_OTP = gql`
   mutation ResendRegistrationOtp($registrationToken: String!) {
-    resendRegistrationOtp(registrationToken: $registrationToken) {
-      success
-      message
-      verificationExpiresAt
-      verificationTtlSeconds
-      smsSent
-    }
+    resendRegistrationOtp(registrationToken: $registrationToken)
   }
 `;

@@ -157,7 +157,7 @@
     },
     "confirmVerification": {
       "title": "Voer verificatiecode in",
-      "description": "Voer de verificatiecode in die naar {phoneNumber} is verzonden",
+      "description": "{hasPhone, select, true {Voer de verificatiecode in die naar uw e-mail ({email}) en telefoon ({phoneNumber}) is verzonden} other {Voer de verificatiecode in die naar uw e-mail ({email}) is verzonden}}",
       "resend": "Code opnieuw verzenden",
       "codeExpiresIn": "Code verloopt over {time}",
       "codeExpired": "Code verlopen"

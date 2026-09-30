@@ -157,7 +157,7 @@
     },
     "confirmVerification": {
       "title": "Enter verification code",
-      "description": "Enter the verification code that was sent to {phoneNumber}",
+      "description": "{hasPhone, select, true {Enter the verification code that was sent to your email ({email}) and phone ({phoneNumber})} other {Enter the verification code that was sent to your email ({email})}}",
       "resend": "Resend code",
       "codeExpiresIn": "Code expires in {time}",
       "codeExpired": "Code expired"

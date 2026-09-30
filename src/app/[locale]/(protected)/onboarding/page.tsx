@@ -46,6 +46,14 @@ export interface FormData {
   verificationCode: string;
   topics: string[];
   recommendations: string[];
+  /**
+   * Whether the OTP was actually sent by SMS (per auth-service's OTP channel
+   * settings — email is always attempted, SMS only when admin-enabled for
+   * the user's country). Drives Step5's "sent to your email [and phone]" copy.
+   */
+  otpSmsSent?: boolean;
+  /** The email the OTP was sent to, from the mutation response's meta.userEmail. */
+  otpEmail?: string;
 }
 
 export default function CompleteAccount() {
@@ -64,7 +72,8 @@ export default function CompleteAccount() {
     phoneNumber: '',
     verificationCode: '',
     topics: [],
-    recommendations: []
+    recommendations: [],
+    otpSmsSent: false,
   });
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -171,6 +180,7 @@ export default function CompleteAccount() {
         sessionStorage.removeItem('accountFormStep');
         sessionStorage.removeItem('oauthRegistration');
         sessionStorage.removeItem('otp_expires_at');
+        sessionStorage.removeItem('otp_ttl_ms');
 
         // Clear auth state (log them out)
         const { clearAuth } = useAuthStore.getState();
@@ -286,6 +296,7 @@ export default function CompleteAccount() {
     sessionStorage.removeItem('accountFormStep');
     sessionStorage.removeItem('oauthRegistration');
     sessionStorage.removeItem('otp_expires_at');
+    sessionStorage.removeItem('otp_ttl_ms');
 
     // Navigate to home
     router.push('/home');
@@ -334,6 +345,10 @@ export default function CompleteAccount() {
 
         token = data.completeOAuthRegistration.registrationToken;
         verificationExpiresAt = data.completeOAuthRegistration.verificationExpiresAt;
+        updateData({
+          otpSmsSent: Boolean(data.completeOAuthRegistration.smsSent),
+          otpEmail: data.completeOAuthRegistration.meta?.userEmail || undefined,
+        });
       } else {
         const { data } = await registerUser({
           variables: {
@@ -354,6 +369,10 @@ export default function CompleteAccount() {
 
         token = data.registerUser.registrationToken;
         verificationExpiresAt = data.registerUser.verificationExpiresAt;
+        updateData({
+          otpSmsSent: Boolean(data.registerUser.smsSent),
+          otpEmail: data.registerUser.meta?.userEmail || sessionStorage.getItem('signupEmail') || undefined,
+        });
       }
 
       // smsSent is not authoritative here; backend may return false while OTP is sent.
@@ -363,6 +382,9 @@ export default function CompleteAccount() {
       if (verificationExpiresAt) {
         const expirationTime = new Date(verificationExpiresAt).getTime();
         sessionStorage.setItem('otp_expires_at', expirationTime.toString());
+        // Remembered so a resend can restart the countdown: the resend
+        // mutation returns only a confirmation message, not a new expiry.
+        sessionStorage.setItem('otp_ttl_ms', String(Math.max(0, expirationTime - Date.now())));
       }
 
       toast.success(continueToNext ? 'Verification code sent!' : 'Code resent successfully!');
@@ -402,13 +424,16 @@ export default function CompleteAccount() {
         variables: { registrationToken }
       });
 
-      if (!data?.resendRegistrationOtp.success) {
-        throw new Error(data?.resendRegistrationOtp.message || 'Unable to resend verification code.');
+      // A refusal arrives as a GraphQL error (thrown above); success is the
+      // gateway's confirmation string.
+      if (typeof data?.resendRegistrationOtp !== 'string') {
+        throw new Error('Unable to resend verification code.');
       }
 
-      if (data.resendRegistrationOtp.verificationExpiresAt) {
-        const expirationTime = new Date(data.resendRegistrationOtp.verificationExpiresAt).getTime();
-        sessionStorage.setItem('otp_expires_at', expirationTime.toString());
+      // The new code lives as long as the first one did.
+      const ttlMs = Number(sessionStorage.getItem('otp_ttl_ms'));
+      if (ttlMs > 0) {
+        sessionStorage.setItem('otp_expires_at', String(Date.now() + ttlMs));
       }
 
       toast.success('Code resent successfully!');
@@ -428,6 +453,7 @@ export default function CompleteAccount() {
     sessionStorage.removeItem('signupDeviceId');
     sessionStorage.removeItem('registrationToken');
     sessionStorage.removeItem('otp_expires_at');
+    sessionStorage.removeItem('otp_ttl_ms');
     sessionStorage.removeItem('accountFormData');
     sessionStorage.removeItem('accountFormStep');
     sessionStorage.removeItem('oauthRegistration');
@@ -497,6 +523,7 @@ export default function CompleteAccount() {
       sessionStorage.removeItem('signupDeviceId');
       sessionStorage.removeItem('registrationToken');
       sessionStorage.removeItem('otp_expires_at');
+      sessionStorage.removeItem('otp_ttl_ms');
 
       toast.success('Phone number verified successfully!');
       nextStep();
