@@ -22,6 +22,7 @@ import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import UsernameSection from "@/components/settings/UsernameSection";
 import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import AiSummarySettings from "@/components/settings/AiSummarySettings";
+import SearchVisibilitySection from "@/components/settings/SearchVisibilitySection";
 import PageLoader from "@/components/custom/PageLoader";
 import { useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, type GetProfileResponse } from "@/services/gql/profile";
@@ -199,6 +200,9 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-4">
+              {/* Real server state (user-service) — see SearchVisibilitySection. */}
+              <SearchVisibilitySection />
+
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">

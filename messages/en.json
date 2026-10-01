@@ -2621,6 +2621,16 @@
     },
     "privacy": {
       "title": "Privacy",
+      "searchVisibility": {
+        "title": "Show me in search results",
+        "description": "When off, you won’t appear in people search or suggestions. Anyone with a direct link to your profile can still open it.",
+        "checking": "Checking…",
+        "loadError": "We couldn’t load this setting.",
+        "retry": "Try again",
+        "savedOn": "You’ll appear in search results.",
+        "savedOff": "You’re now hidden from search results.",
+        "saveFailed": "Couldn’t save this setting. Please try again."
+      },
       "dataSharing": {
         "title": "Data Sharing",
         "description": "Share usage data to improve services"

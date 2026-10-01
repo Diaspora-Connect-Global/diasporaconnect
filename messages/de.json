@@ -2317,6 +2317,16 @@
     },
     "privacy": {
       "title": "Datenschutz",
+      "searchVisibility": {
+        "title": "Mich in Suchergebnissen anzeigen",
+        "description": "Wenn deaktiviert, erscheinen Sie nicht in der Personensuche und in Vorschlägen. Über einen direkten Link lässt sich Ihr Profil weiterhin öffnen.",
+        "checking": "Wird geprüft…",
+        "loadError": "Diese Einstellung konnte nicht geladen werden.",
+        "retry": "Erneut versuchen",
+        "savedOn": "Sie werden in Suchergebnissen angezeigt.",
+        "savedOff": "Sie werden in Suchergebnissen nicht mehr angezeigt.",
+        "saveFailed": "Die Einstellung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+      },
       "dataSharing": {
         "title": "Datenweitergabe",
         "description": "Nutzungsdaten teilen, um Dienste zu verbessern"

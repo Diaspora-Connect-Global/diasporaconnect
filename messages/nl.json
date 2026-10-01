@@ -2621,6 +2621,16 @@
     },
     "privacy": {
       "title": "Privacy",
+      "searchVisibility": {
+        "title": "Toon mij in zoekresultaten",
+        "description": "Als dit uit staat, verschijn je niet bij het zoeken naar personen of in suggesties. Wie een directe link naar je profiel heeft, kan het nog steeds openen.",
+        "checking": "Controleren…",
+        "loadError": "We konden deze instelling niet laden.",
+        "retry": "Opnieuw proberen",
+        "savedOn": "Je verschijnt in zoekresultaten.",
+        "savedOff": "Je verschijnt niet meer in zoekresultaten.",
+        "saveFailed": "Deze instelling kon niet worden opgeslagen. Probeer het opnieuw."
+      },
       "dataSharing": {
         "title": "Gegevens delen",
         "description": "Gebruiksgegevens delen om services te verbeteren"

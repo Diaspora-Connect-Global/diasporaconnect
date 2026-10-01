@@ -2317,6 +2317,16 @@
     },
     "privacy": {
       "title": "Privacy",
+      "searchVisibility": {
+        "title": "Mostrami nei risultati di ricerca",
+        "description": "Se disattivato, non compari nella ricerca di persone né nei suggerimenti. Chi ha un link diretto al tuo profilo può comunque aprirlo.",
+        "checking": "Verifica in corso…",
+        "loadError": "Non siamo riusciti a caricare questa impostazione.",
+        "retry": "Riprova",
+        "savedOn": "Compari nei risultati di ricerca.",
+        "savedOff": "Non compari più nei risultati di ricerca.",
+        "saveFailed": "Impossibile salvare l’impostazione. Riprova."
+      },
       "dataSharing": {
         "title": "Condivisione dati",
         "description": "Condividi i dati di utilizzo per migliorare i servizi"

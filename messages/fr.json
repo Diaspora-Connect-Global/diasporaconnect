@@ -2317,6 +2317,16 @@
     },
     "privacy": {
       "title": "Confidentialité",
+      "searchVisibility": {
+        "title": "M’afficher dans les résultats de recherche",
+        "description": "Si désactivé, vous n’apparaissez ni dans la recherche de personnes ni dans les suggestions. Un lien direct vers votre profil permet toujours de l’ouvrir.",
+        "checking": "Vérification…",
+        "loadError": "Impossible de charger ce paramètre.",
+        "retry": "Réessayer",
+        "savedOn": "Vous apparaissez dans les résultats de recherche.",
+        "savedOff": "Vous n’apparaissez plus dans les résultats de recherche.",
+        "saveFailed": "Impossible d’enregistrer ce paramètre. Veuillez réessayer."
+      },
       "dataSharing": {
         "title": "Partage de données",
         "description": "Partager les données d'utilisation pour améliorer les services"
