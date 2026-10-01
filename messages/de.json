@@ -1948,6 +1948,17 @@
     "public": "Öffentlich",
     "private": "Privat"
   },
+  "privacyPolicy": {
+    "notifications": {
+      "title": "Bestätigungscodes und Benachrichtigungen",
+      "verificationCodes": "Wenn Sie sich registrieren oder anmelden, senden wir Ihre Bestätigungscodes standardmäßig per E-Mail. Per SMS senden wir sie nur in Ländern, in denen ein Administrator den SMS-Versand aktiviert hat.",
+      "associationLinks": "Wenn ein Verein darum bittet, mit einer Community verknüpft zu werden, werden die Admins dieser Community in der App und per E-Mail benachrichtigt. Wenn die Community die Anfrage annimmt oder ablehnt, werden die Admins des Vereins auf die gleiche Weise benachrichtigt."
+    },
+    "searchVisibility": {
+      "title": "Wer Sie finden kann",
+      "body": "Mit der Einstellung „Mich in Suchergebnissen anzeigen“ in den Einstellungen können Sie sich aus den Suchergebnissen ausblenden. Solange sie deaktiviert ist, finden andere Sie nicht, wenn sie in der App nach Personen suchen oder Personen auswählen, und Sie werden nicht unter „Personen, die Sie kennen könnten“ vorgeschlagen. Wer einen direkten Link zu Ihrem Profil hat, kann es weiterhin öffnen, und Plattform-Administratoren können Ihr Konto weiterhin finden."
+    }
+  },
   "friends": {
     "tabs": {
       "all": "Alle Freunde",

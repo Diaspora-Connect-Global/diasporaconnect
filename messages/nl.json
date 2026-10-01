@@ -1948,6 +1948,17 @@
     "public": "Openbaar",
     "private": "Privé"
   },
+  "privacyPolicy": {
+    "notifications": {
+      "title": "Verificatiecodes en meldingen",
+      "verificationCodes": "Als je je registreert of inlogt, sturen we je verificatiecodes standaard per e-mail. Per sms sturen we ze alleen in landen waar een beheerder verzending per sms heeft ingeschakeld.",
+      "associationLinks": "Als een vereniging vraagt om aan een gemeenschap gekoppeld te worden, krijgen de beheerders van die gemeenschap een melding in de app en per e-mail. Als de gemeenschap het verzoek accepteert of afwijst, krijgen de beheerders van de vereniging op dezelfde manier een melding."
+    },
+    "searchVisibility": {
+      "title": "Wie je kan vinden",
+      "body": "Met de instelling ‘Toon mij in zoekresultaten’ in Instellingen kun je jezelf verbergen in zoekresultaten. Zolang die uit staat, vinden anderen je niet als ze in de app naar personen zoeken of personen kiezen, en word je niet voorgesteld bij ‘Mensen die u misschien kent’. Wie een directe link naar je profiel heeft, kan het nog steeds openen, en platformbeheerders kunnen je account nog steeds vinden."
+    }
+  },
   "friends": {
     "message": "Bericht",
     "addFriend": "Vriend toevoegen",

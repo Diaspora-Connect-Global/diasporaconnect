@@ -1948,6 +1948,17 @@
     "public": "Public",
     "private": "Privé"
   },
+  "privacyPolicy": {
+    "notifications": {
+      "title": "Codes de vérification et notifications",
+      "verificationCodes": "Lorsque vous vous inscrivez ou vous connectez, nous vous envoyons vos codes de vérification par e-mail par défaut. Nous les envoyons par SMS uniquement dans les pays où un administrateur a activé l’envoi par SMS.",
+      "associationLinks": "Lorsqu’une association demande à être liée à une communauté, les administrateurs de cette communauté en sont informés dans l’application et par e-mail. Lorsque la communauté accepte ou refuse la demande, les administrateurs de l’association en sont informés de la même manière."
+    },
+    "searchVisibility": {
+      "title": "Qui peut vous trouver",
+      "body": "Vous pouvez vous masquer des résultats de recherche avec le paramètre « M’afficher dans les résultats de recherche » dans les Paramètres. Tant qu’il est désactivé, les autres personnes ne vous trouvent pas lorsqu’elles recherchent ou sélectionnent des personnes dans l’application, et vous n’êtes pas suggéré dans « Personnes que vous pourriez connaître ». Toute personne disposant d’un lien direct vers votre profil peut toujours l’ouvrir, et les administrateurs de la plateforme peuvent toujours trouver votre compte."
+    }
+  },
   "friends": {
     "tabs": {
       "all": "Tous les amis",

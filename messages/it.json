@@ -1948,6 +1948,17 @@
     "public": "Pubblico",
     "private": "Privato"
   },
+  "privacyPolicy": {
+    "notifications": {
+      "title": "Codici di verifica e notifiche",
+      "verificationCodes": "Quando ti registri o accedi, per impostazione predefinita ti inviamo i codici di verifica via email. Li inviamo via SMS solo nei paesi in cui un amministratore ha attivato l’invio tramite SMS.",
+      "associationLinks": "Quando un’associazione chiede di collegarsi a una community, gli amministratori di quella community ricevono una notifica nell’app e via email. Quando la community accetta o rifiuta la richiesta, gli amministratori dell’associazione ricevono una notifica allo stesso modo."
+    },
+    "searchVisibility": {
+      "title": "Chi può trovarti",
+      "body": "Puoi nasconderti dai risultati di ricerca con l’impostazione “Mostrami nei risultati di ricerca” nelle Impostazioni. Finché è disattivata, le altre persone non ti trovano quando cercano o selezionano persone nell’app, e non vieni suggerito in “Persone che potresti conoscere”. Chi ha un link diretto al tuo profilo può comunque aprirlo, e gli amministratori della piattaforma possono comunque trovare il tuo account."
+    }
+  },
   "friends": {
     "tabs": {
       "all": "Tutti gli amici",

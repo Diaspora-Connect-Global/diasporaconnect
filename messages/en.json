@@ -1948,6 +1948,17 @@
     "public": "Public",
     "private": "Private"
   },
+  "privacyPolicy": {
+    "notifications": {
+      "title": "Verification codes and notifications",
+      "verificationCodes": "When you sign up or sign in, we send your verification codes by email by default. We send them by SMS only in countries where an administrator has turned on SMS delivery.",
+      "associationLinks": "When an association asks to link with a community, that community’s admins are notified in the app and by email. When the community accepts or declines the request, the association’s admins are notified in the same way."
+    },
+    "searchVisibility": {
+      "title": "Who can find you",
+      "body": "You can hide yourself from search results with the “Show me in search results” setting in Settings. While it is off, other people won’t find you when they search for people or pick people in the app, and you won’t be suggested in “People you may know”. Anyone with a direct link to your profile can still open it, and platform administrators can still find your account."
+    }
+  },
   "friends": {
     "message": "Message",
     "addFriend": "Add friend",

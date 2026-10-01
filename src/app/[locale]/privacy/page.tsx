@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { Lock } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import JsonLd from '@/components/seo/JsonLd';
 import { BASE, SITE_NAME, buildAlternates, publicRobots, ogImages } from '@/lib/seo';
 
-const LAST_UPDATED = '2026-03-27';
-const LAST_UPDATED_DISPLAY = 'March 27, 2026';
+const LAST_UPDATED = '2026-10-01';
+const LAST_UPDATED_DISPLAY = 'October 1, 2026';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -42,7 +43,17 @@ const privacyPageSchema = {
   },
 };
 
-const sections = [
+type PolicySection = {
+  id: string;
+  title: string;
+  body: string | null;
+  /** Several short paragraphs (used by the translated sections). */
+  paragraphs?: string[];
+  email?: string;
+  emailLabel?: string;
+};
+
+const sections: PolicySection[] = [
   {
     id: 'collection',
     title: 'Information we collect',
@@ -87,7 +98,27 @@ const sections = [
   },
 ];
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  // The sections added on 2026-10-01 are translated (messages → `privacyPolicy`);
+  // the older sections above are still English-only.
+  const t = await getTranslations({ locale, namespace: 'privacyPolicy' });
+  const notificationsSection: PolicySection = {
+    id: 'codes-and-notifications',
+    title: t('notifications.title'),
+    body: null,
+    paragraphs: [t('notifications.verificationCodes'), t('notifications.associationLinks')],
+  };
+  const searchVisibilitySection: PolicySection = {
+    id: 'search-visibility',
+    title: t('searchVisibility.title'),
+    body: t('searchVisibility.body'),
+  };
+  // After "How we use information" / "Sharing of information" respectively.
+  const allSections: PolicySection[] = sections.flatMap((s) =>
+    s.id === 'use' ? [s, notificationsSection] : s.id === 'sharing' ? [s, searchVisibilitySection] : [s],
+  );
+
   return (
     <>
       <JsonLd schema={privacyPageSchema} />
@@ -120,7 +151,7 @@ export default function PrivacyPage() {
               <div className="sticky top-6">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-text-secondary">Contents</p>
                 <nav className="space-y-1" aria-label="Privacy policy sections">
-                  {sections.map((s, i) => (
+                  {allSections.map((s, i) => (
                     <a key={s.id} href={`#${s.id}`} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-text-secondary hover:bg-surface-subtle hover:text-text-primary transition-colors">
                       <span className="text-xs font-bold text-text-brand w-4">{i + 1}</span>
                       {s.title}
@@ -131,13 +162,20 @@ export default function PrivacyPage() {
             </aside>
 
             <div className="flex-1 min-w-0">
-              {sections.map((s, i) => (
+              {allSections.map((s, i) => (
                 <section key={s.id} id={s.id} className="py-8 border-b border-border-subtle last:border-0">
                   <div className="flex items-start gap-4">
                     <span className="mt-1 flex-shrink-0 text-2xl font-black text-text-brand/20 leading-none w-7">{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <h2 className="text-lg font-bold text-text-primary mb-3">{s.title}</h2>
                       {s.body && <p className="text-sm font-light leading-relaxed text-text-secondary">{s.body}</p>}
+                      {s.paragraphs && (
+                        <div className="space-y-3">
+                          {s.paragraphs.map((text) => (
+                            <p key={text} className="text-sm font-light leading-relaxed text-text-secondary">{text}</p>
+                          ))}
+                        </div>
+                      )}
                       {s.email && (
                         <p className="text-sm font-light leading-relaxed text-text-secondary">
                           {s.emailLabel}{' '}
