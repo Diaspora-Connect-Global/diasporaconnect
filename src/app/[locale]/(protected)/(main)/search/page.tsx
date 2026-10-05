@@ -242,7 +242,7 @@ function AssociationCard({ association, query }: { association: Association; que
 function ProductCard({ product, query }: { product: Product; query: string }) {
   const img = product.images?.[0];
   return (
-    <Link href={`/marketplace/${product.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
+    <Link href="/marketplace" className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       {img ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={img} alt={product.title} className="w-10 h-10 rounded object-cover shrink-0" />
@@ -308,7 +308,7 @@ function OpportunityCard({ opportunity, query }: { opportunity: Opportunity; que
 
 function ServiceCard({ service, query }: { service: Service; query: string }) {
   return (
-    <Link href={`/marketplace/services/${service.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
+    <Link href="/marketplace" className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <div className="w-10 h-10 rounded bg-surface-hover flex items-center justify-center shrink-0">
         <Briefcase className="w-5 h-5 text-text-secondary" />
       </div>

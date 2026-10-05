@@ -101,7 +101,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     {/* Header */}
                     <div className="mt-5">
                         <button 
-                            onClick={() => router.push(`/${currentLang}/vendors/services/new`)}
+                            onClick={() => router.push(`/${currentLang}/vendors/services/add`)}
                             className="w-full px-4 py-2.5 rounded-lg transition-colors flex gap-2 text-text-brand"
                         >
                             <span className="">+</span>

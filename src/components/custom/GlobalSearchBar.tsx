@@ -12,6 +12,7 @@ import { useSearchStore, CachedResult } from '@/store/useSearchStore';
 import { SEARCH_USERS } from '@/services/gql/connection';
 import { SEARCH_OPPORTUNITIES } from '@/services/gql/opportunities';
 import { SEARCH_EVENTS } from '@/services/gql/events';
+import { profileUrl } from '@/lib/profileUrl';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,7 +101,7 @@ function buildRows(uData: any, oData: any, eData: any, locale: string, isFallbac
       label: `${p.firstName} ${p.lastName}`.trim(),
       subtext: p.headline ?? p.sector ?? p.residenceCountry,
       icon: <Users className="w-4 h-4 shrink-0 text-text-secondary" />,
-      href: `/${locale}/profile/${p.userId}`,
+      href: `/${locale}${profileUrl({ username: p.username, userId: p.userId })}`,
       isFallback,
     });
   });
