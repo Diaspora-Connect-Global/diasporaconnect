@@ -123,7 +123,7 @@ export function PeoplePickerDialog({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={t('searchPeople')}
-                    className="w-full rounded-lg border border-border-subtle bg-surface-default px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-brand"
+                    className="w-full rounded-lg border border-border-subtle bg-surface-default px-3 py-2 text-base md:text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-brand"
                 />
 
                 <p className="text-xs text-text-secondary" aria-live="polite">

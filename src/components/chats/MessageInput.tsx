@@ -403,6 +403,9 @@ export function MessageInput({
                         {/* Text Input and Send Button */}
                         <div className="flex items-end gap-1 sm:gap-2 relative w-full">
                             <div className="flex-1 min-w-0 relative">
+                                {/* 16px at every width, never smaller: iOS Safari zooms the
+                                    whole page when a field under 16px gains focus, and stays
+                                    zoomed, so the chat screen ends up bigger than the phone. */}
                                 <textarea
                                     ref={textareaRef}
                                     value={newMessage}
@@ -410,7 +413,7 @@ export function MessageInput({
                                     onKeyPress={handleKeyPress}
                                     placeholder={disabled ? t('cannotSend') : inputPlaceholder}
                                     disabled={disabled}
-                                    className="w-full rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base leading-6 sm:leading-7 focus:outline-none focus:border-text-brand resize-none bg-surface-default disabled:opacity-50 disabled:cursor-not-allowed overflow-y-auto"
+                                    className="w-full rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-base leading-6 sm:leading-7 focus:outline-none focus:border-text-brand resize-none bg-surface-default disabled:opacity-50 disabled:cursor-not-allowed overflow-y-auto"
                                     rows={1}
                                     style={{ wordBreak: 'break-word' }}
                                 />

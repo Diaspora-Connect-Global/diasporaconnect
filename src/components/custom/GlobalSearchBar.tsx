@@ -402,6 +402,8 @@ export default function GlobalSearchBar() {
     }
   };
 
+  // Callers pass `text-base md:text-sm`: 16px on phones, because iOS Safari zooms
+  // the whole page when a field under 16px gains focus and leaves it zoomed.
   const sharedInput = (
     ref: React.RefObject<HTMLInputElement | null>,
     className: string,
@@ -440,7 +442,7 @@ export default function GlobalSearchBar() {
       <div ref={containerRef} className="relative hidden lg:block w-64">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-subtle border border-border-subtle focus-within:border-text-brand transition-colors">
           <Search className="w-4 h-4 shrink-0 text-text-secondary" />
-          {sharedInput(inputRef, 'flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-secondary outline-none', () => setOpen(true))}
+          {sharedInput(inputRef, 'flex-1 bg-transparent text-base md:text-sm text-text-primary placeholder:text-text-secondary outline-none', () => setOpen(true))}
           {inputValue && (
             <button onClick={() => { setInputValue(''); setResultRows([]); inputRef.current?.focus(); }} aria-label="Clear" className="text-text-secondary hover:text-text-primary">
               <X className="w-3.5 h-3.5" />
@@ -469,7 +471,7 @@ export default function GlobalSearchBar() {
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle">
             <div className="flex flex-1 items-center gap-2 px-3 py-2 rounded-lg bg-surface-subtle border border-border-subtle focus-within:border-text-brand transition-colors">
               <Search className="w-4 h-4 shrink-0 text-text-secondary" />
-              {sharedInput(mobileInputRef, 'flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-secondary outline-none')}
+              {sharedInput(mobileInputRef, 'flex-1 bg-transparent text-base md:text-sm text-text-primary placeholder:text-text-secondary outline-none')}
               {inputValue && (
                 <button onClick={() => { setInputValue(''); setResultRows([]); mobileInputRef.current?.focus(); }} aria-label="Clear" className="text-text-secondary hover:text-text-primary">
                   <X className="w-3.5 h-3.5" />
