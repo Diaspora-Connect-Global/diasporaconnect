@@ -2589,7 +2589,13 @@
       "push": {
         "title": "Push Notifications",
         "description": "Receive push notifications on your device"
-      }
+      },
+      "essentialNote": "These switches cover optional notifications such as activity, messages, reminders and digests. Security, account, payment and legal messages are always sent.",
+      "checking": "Checking…",
+      "loadError": "We couldn’t load your notification settings.",
+      "retry": "Try again",
+      "saved": "Notification settings saved.",
+      "saveFailed": "Couldn’t save your notification settings. Please try again."
     },
     "security": {
       "title": "Security",

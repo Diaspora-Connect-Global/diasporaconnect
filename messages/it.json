@@ -2285,7 +2285,13 @@
       "push": {
         "title": "Notifiche push",
         "description": "Ricevi notifiche push sul tuo dispositivo"
-      }
+      },
+      "essentialNote": "Queste opzioni riguardano le notifiche facoltative, come attività, messaggi, promemoria e riepiloghi. I messaggi di sicurezza, relativi all’account e ai pagamenti e le comunicazioni legali vengono sempre inviati.",
+      "checking": "Verifica in corso…",
+      "loadError": "Non siamo riusciti a caricare le impostazioni delle notifiche.",
+      "retry": "Riprova",
+      "saved": "Impostazioni delle notifiche salvate.",
+      "saveFailed": "Impossibile salvare le impostazioni delle notifiche. Riprova."
     },
     "security": {
       "title": "Sicurezza",

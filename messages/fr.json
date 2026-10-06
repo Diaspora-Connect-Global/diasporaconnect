@@ -2285,7 +2285,13 @@
       "push": {
         "title": "Notifications push",
         "description": "Recevoir des notifications push sur votre appareil"
-      }
+      },
+      "essentialNote": "Ces options concernent les notifications facultatives : activité, messages, rappels et résumés. Les messages de sécurité, de compte et de paiement ainsi que les avis juridiques sont toujours envoyés.",
+      "checking": "Vérification…",
+      "loadError": "Impossible de charger vos paramètres de notification.",
+      "retry": "Réessayer",
+      "saved": "Paramètres de notification enregistrés.",
+      "saveFailed": "Impossible d’enregistrer vos paramètres de notification. Veuillez réessayer."
     },
     "security": {
       "title": "Sécurité",

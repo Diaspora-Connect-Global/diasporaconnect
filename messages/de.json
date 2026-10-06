@@ -2285,7 +2285,13 @@
       "push": {
         "title": "Push-Benachrichtigungen",
         "description": "Push-Benachrichtigungen auf Ihrem Gerät erhalten"
-      }
+      },
+      "essentialNote": "Diese Schalter gelten für optionale Benachrichtigungen wie Aktivitäten, Nachrichten, Erinnerungen und Zusammenfassungen. Sicherheits-, Konto- und Zahlungsmitteilungen sowie rechtliche Hinweise werden immer gesendet.",
+      "checking": "Wird geprüft…",
+      "loadError": "Ihre Benachrichtigungseinstellungen konnten nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "saved": "Benachrichtigungseinstellungen gespeichert.",
+      "saveFailed": "Ihre Benachrichtigungseinstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut."
     },
     "security": {
       "title": "Sicherheit",

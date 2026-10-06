@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Bell, Shield, Eye, Globe, Palette } from "lucide-react";
+import { ArrowLeft, Shield, Eye, Globe, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -23,6 +23,7 @@ import UsernameSection from "@/components/settings/UsernameSection";
 import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import AiSummarySettings from "@/components/settings/AiSummarySettings";
 import SearchVisibilitySection from "@/components/settings/SearchVisibilitySection";
+import NotificationPreferencesSection from "@/components/settings/NotificationPreferencesSection";
 import PageLoader from "@/components/custom/PageLoader";
 import { useQuery } from "@apollo/client/react";
 import { GET_MY_PROFILE, type GetProfileResponse } from "@/services/gql/profile";
@@ -58,13 +59,6 @@ export default function SettingsPage() {
     !(aiPrefsLoading && !aiPrefs) &&
     !(deletionLoading && !deletionData);
 
-  // State for notifications
-  const [notifications, setNotifications] = useState({
-    email: true,
-    sms: false,
-    push: true,
-  });
-
   // State for privacy
   const [privacy, setPrivacy] = useState({
     dataSharing: false,
@@ -96,68 +90,11 @@ export default function SettingsPage() {
           {/* Username — identity first: it is the public handle (/@username). */}
           <UsernameSection />
 
-          {/* Notifications Section */}
-          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
-            <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">
-                {t("notifications.title")}
-              </h2>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">
-                    {t("notifications.email.title")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("notifications.email.description")}
-                  </p>
-                </div>
-                <Switch
-                  checked={notifications.email}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, email: checked })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">
-                    {t("notifications.sms.title")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("notifications.sms.description")}
-                  </p>
-                </div>
-                <Switch
-                  checked={notifications.sms}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, sms: checked })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">
-                    {t("notifications.push.title")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("notifications.push.description")}
-                  </p>
-                </div>
-                <Switch
-                  checked={notifications.push}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, push: checked })
-                  }
-                />
-              </div>
-            </div>
-          </div>
+          {/* Notifications — real server state (user-service preferences),
+              honoured by notification-service for optional notifications.
+              Every email footer's "Notification preferences" link opens
+              /settings; anchor: /settings#notifications */}
+          <NotificationPreferencesSection />
 
           {/* Security Section */}
           <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">

@@ -2589,7 +2589,13 @@
       "push": {
         "title": "Pushmeldingen",
         "description": "Pushmeldingen ontvangen op uw apparaat"
-      }
+      },
+      "essentialNote": "Deze schakelaars gelden voor optionele meldingen, zoals activiteit, berichten, herinneringen en overzichten. Berichten over beveiliging, je account en betalingen en juridische kennisgevingen worden altijd verstuurd.",
+      "checking": "Controleren…",
+      "loadError": "We konden je meldingsinstellingen niet laden.",
+      "retry": "Opnieuw proberen",
+      "saved": "Meldingsinstellingen opgeslagen.",
+      "saveFailed": "Je meldingsinstellingen konden niet worden opgeslagen. Probeer het opnieuw."
     },
     "security": {
       "title": "Beveiliging",
