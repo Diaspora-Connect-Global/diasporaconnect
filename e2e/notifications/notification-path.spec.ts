@@ -55,6 +55,11 @@ test.describe('isKnownAppPath', () => {
         '/wallet', '/vendors', '/vendors/payouts', `/vendors/orders/${ID}`, '/marketplace', '/verifykyc',
         '/settings', '/settings#privacy', '/notification', '/feed', '/help', `/circles/${ID}`,
         `/it/community/${ID}?tab=home#top`, '/nl/notification',
+        // The nav sections (Home · Discover · Community · More).
+        '/home', '/discover', '/more', '/fr/discover', '/de/more',
+        // Deep links the More page uses.
+        '/events?tab=saved', '/opportunities?tab=saved', '/marketplace?tab=services', '/profile?posts=saved',
+        '/profile?m=friends&t=3',
     ];
     for (const p of valid) test(`accepts ${p}`, () => expect(isKnownAppPath(p)).toBe(true));
 
@@ -63,7 +68,9 @@ test.describe('isKnownAppPath', () => {
         '/messages', `/messages/${ID}`, `/messages/group/${GID}`, `/groups/${ID}/chat`, `/orders/${ID}`,
         '/payment-methods', '/vendor/payouts', '/vendor/dashboard', '/settings/verification', '/settings/privacy',
         `/cases/${ID}`, `/service-requests/${ID}`, `/communities/${ID}`, `/associations/${ID}`,
-        `/communities/${ID}/calendar`, `/resources/${ID}`, '/calendar', '/discover', `/tickets/${ID}`,
+        `/communities/${ID}/calendar`, `/resources/${ID}`, '/calendar', `/tickets/${ID}`,
+        // Section pages exist, but nothing below them does (yet).
+        '/discover/jobs', '/more/saved',
         `/events/${ID}/stats`, `/events/${ID}/tickets`, `/events/${ID}/attendance`, `/events/${ID}/payment`,
         `/events/${ID}/register`, `/opportunities/${ID}/applications`, '/reset-password', '/forgot-password',
         '/confirm-login', '/help/faq', '/en/en/profile', `/post/`, '/@', '/@a/b',
