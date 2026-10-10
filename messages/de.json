@@ -694,6 +694,11 @@
       "conflict": "Diese Aktion kann aufgrund des aktuellen Status nicht abgeschlossen werden",
       "failed": "Operation fehlgeschlagen. Bitte versuchen Sie es später erneut",
       "unknown_error": "Ein unerwarteter Fehler ist aufgetreten"
+    },
+    "viewFilter": {
+      "label": "Welche Beiträge angezeigt werden",
+      "you": "Für dich",
+      "following": "Gefolgt"
     }
   },
   "community": {
@@ -1595,7 +1600,12 @@
       "conflict": "Dieser Vorgang kann im aktuellen Status nicht abgeschlossen werden.",
       "failed": "Operation fehlgeschlagen. Bitte versuchen Sie es erneut."
     },
-    "noCommunity": "Keine Community"
+    "noCommunity": "Keine Community",
+    "yourCommunities": {
+      "title": "Deine Communitys",
+      "communities": "Communitys",
+      "empty": "Du bist noch keiner Community beigetreten."
+    }
   },
   "association": {
     "discovery": {
@@ -4486,5 +4496,157 @@
     "signInTitleCommunity": "Anmelden, um diese Community anzuzeigen",
     "signInTitleAssociation": "Anmelden, um diesen Verein anzuzeigen",
     "signInBody": "Möglicherweise ist sie privat. Mitglieder sehen sie nach der Anmeldung."
+  },
+  "nav": {
+    "primary": "Hauptnavigation",
+    "logoLabel": "DiaspoPlug-Startseite",
+    "home": "Startseite",
+    "discover": "Entdecken",
+    "community": "Community",
+    "more": "Mehr",
+    "messages": "Nachrichten",
+    "notifications": "Benachrichtigungen"
+  },
+  "more": {
+    "metaTitle": "Mehr",
+    "back": "Zurück",
+    "pageLabel": "Mehr",
+    "hero": {
+      "title": "Alles, was du brauchst, an einem Ort.",
+      "subtitle": "Verwalte deine Anfragen, gespeicherten Inhalte, Zahlungen, Kontakte und mehr – alles in deinem DiaspoPlug-Konto.",
+      "tagline": "Mehr Möglichkeiten. Dasselbe Zuhause."
+    },
+    "sections": {
+      "yourStuff": {
+        "title": "Deine Inhalte",
+        "subtitle": "Deine Anfragen, gespeicherten Inhalte und Tickets."
+      },
+      "work": {
+        "title": "Arbeit & Business",
+        "subtitle": "Lass dein Business wachsen, finde Chancen und verwalte deine Arbeit."
+      },
+      "money": {
+        "title": "Geld & Zahlungen",
+        "subtitle": "Behalte deine Transaktionen und Finanzen im Blick."
+      },
+      "connect": {
+        "title": "Vernetzen & Community",
+        "subtitle": "Knüpfe Kontakte und bleib mit deiner Community verbunden."
+      }
+    },
+    "items": {
+      "requests": {
+        "title": "Meine Anfragen",
+        "subtitle": "Mitgliedschafts- und Kontaktanfragen"
+      },
+      "saved": {
+        "title": "Gespeichert",
+        "subtitle": "Deine gespeicherten Beiträge, Events und Chancen"
+      },
+      "tickets": {
+        "title": "Meine Tickets",
+        "subtitle": "Events, an denen du teilnimmst"
+      },
+      "businesses": {
+        "title": "Unternehmen",
+        "subtitle": "Verwalte dein Unternehmensprofil und deine Einstellungen"
+      },
+      "services": {
+        "title": "Dienstleistungen",
+        "subtitle": "Biete vertrauenswürdige Dienstleistungen an oder finde sie"
+      },
+      "listings": {
+        "title": "Angebote",
+        "subtitle": "Deine Produktangebote"
+      },
+      "applications": {
+        "title": "Bewerbungen",
+        "subtitle": "Verfolge deine Bewerbungen auf Jobs und Chancen"
+      },
+      "payments": {
+        "title": "Zahlungen & Transaktionen",
+        "subtitle": "Deine Wallet, Zahlungen und Transaktionshistorie"
+      },
+      "circles": {
+        "title": "Kreise",
+        "subtitle": "Tritt Kreisen bei und verwalte sie"
+      },
+      "events": {
+        "title": "Events",
+        "subtitle": "Entdecke anstehende Events und nimm teil"
+      },
+      "conversations": {
+        "title": "Unterhaltungen",
+        "subtitle": "Deine Direktnachrichten und Gruppenchats"
+      },
+      "marketplace": {
+        "title": "Marktplatz",
+        "subtitle": "Kaufe und verkaufe Produkte und Dienstleistungen"
+      },
+      "opportunities": {
+        "title": "Chancen",
+        "subtitle": "Chancen, auf die du dich beworben oder die du gespeichert hast"
+      },
+      "createPost": {
+        "title": "Beitrag erstellen",
+        "subtitle": "Teile ein Update mit deinem Netzwerk"
+      }
+    },
+    "sheets": {
+      "close": "Schließen",
+      "requests": {
+        "title": "Meine Anfragen",
+        "description": "Wähle, welche Anfragen du öffnen möchtest.",
+        "membership": "Community-Anfragen",
+        "membershipHint": "Communitys, denen du beitreten möchtest",
+        "associations": "Vereinsanfragen",
+        "associationsHint": "Vereine, denen du beitreten möchtest",
+        "connections": "Kontaktanfragen",
+        "connectionsHint": "Personen, die sich mit dir vernetzen möchten"
+      },
+      "saved": {
+        "title": "Gespeichert",
+        "description": "Wähle, was du öffnen möchtest.",
+        "posts": "Gespeicherte Beiträge",
+        "postsHint": "In deinem Profil",
+        "events": "Gespeicherte Events",
+        "eventsHint": "Unter Events",
+        "opportunities": "Gespeicherte Chancen",
+        "opportunitiesHint": "Unter Chancen"
+      }
+    },
+    "rail": {
+      "label": "Dein Konto",
+      "memberFallback": "DiaspoPlug-Mitglied",
+      "verified": "Verifiziert",
+      "memberSince": "Mitglied seit {year}",
+      "viewProfile": "Profil ansehen",
+      "notifications": "Benachrichtigungen",
+      "messages": "Nachrichten",
+      "savedItems": "Gespeicherte Inhalte",
+      "helpTitle": "Brauchst du Hilfe?",
+      "helpBody": "Nimm Kontakt mit dem DiaspoPlug-Team auf.",
+      "links": {
+        "settings": "Datenschutz- & Sicherheitseinstellungen",
+        "privacy": "Datenschutzrichtlinie",
+        "terms": "Nutzungsbedingungen",
+        "about": "Über DiaspoPlug"
+      }
+    }
+  },
+  "discover": {
+    "metaTitle": "Entdecken",
+    "eyebrow": "Entdecken",
+    "title": "Chancen, Dienstleistungen und vertrauenswürdige Menschen – an einem Ort.",
+    "subtitle": "Finde Chancen, Dienstleistungen und Events aus der DiaspoPlug-Community.",
+    "tagline": "Mehr Chancen. Näher an Zuhause.",
+    "searchLabel": "DiaspoPlug durchsuchen",
+    "searchPlaceholder": "Nach Personen, Dienstleistungen, Events, Chancen suchen …",
+    "searchButton": "Suchen",
+    "categoriesHeading": "Nach Kategorie stöbern",
+    "categories": {
+      "services": "Dienstleistungen",
+      "events": "Events"
+    }
   }
 }

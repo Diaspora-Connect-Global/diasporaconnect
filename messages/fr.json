@@ -694,6 +694,11 @@
       "conflict": "Cette action ne peut pas être complétée en raison de l'état actuel",
       "failed": "L'opération a échoué. Veuillez réessayer plus tard",
       "unknown_error": "Une erreur inattendue s'est produite"
+    },
+    "viewFilter": {
+      "label": "Publications à afficher",
+      "you": "Pour vous",
+      "following": "Abonnements"
     }
   },
   "community": {
@@ -1595,7 +1600,12 @@
       "conflict": "Cette opération ne peut pas être effectuée dans l'état actuel.",
       "failed": "Opération échouée. Veuillez réessayer."
     },
-    "noCommunity": "Aucune communauté"
+    "noCommunity": "Aucune communauté",
+    "yourCommunities": {
+      "title": "Vos communautés",
+      "communities": "Communautés",
+      "empty": "Vous n'avez encore rejoint aucune communauté."
+    }
   },
   "association": {
     "discovery": {
@@ -4486,5 +4496,157 @@
     "signInTitleCommunity": "Connectez-vous pour voir cette communauté",
     "signInTitleAssociation": "Connectez-vous pour voir cette association",
     "signInBody": "Elle est peut-être privée. Si vous en êtes membre, connectez-vous pour la voir."
+  },
+  "nav": {
+    "primary": "Navigation principale",
+    "logoLabel": "Accueil DiaspoPlug",
+    "home": "Accueil",
+    "discover": "Découvrir",
+    "community": "Communauté",
+    "more": "Plus",
+    "messages": "Messages",
+    "notifications": "Notifications"
+  },
+  "more": {
+    "metaTitle": "Plus",
+    "back": "Retour",
+    "pageLabel": "Plus",
+    "hero": {
+      "title": "Tout ce dont vous avez besoin, au même endroit.",
+      "subtitle": "Gérez vos demandes, vos éléments enregistrés, vos paiements, vos relations et plus encore, depuis votre compte DiaspoPlug.",
+      "tagline": "Plus de possibilités. Toujours chez vous."
+    },
+    "sections": {
+      "yourStuff": {
+        "title": "Vos contenus",
+        "subtitle": "Vos demandes, contenus enregistrés et billets."
+      },
+      "work": {
+        "title": "Travail et entreprise",
+        "subtitle": "Développez votre activité, trouvez des opportunités et gérez votre travail."
+      },
+      "money": {
+        "title": "Argent et paiements",
+        "subtitle": "Gérez vos transactions et vos activités financières."
+      },
+      "connect": {
+        "title": "Liens et communauté",
+        "subtitle": "Créez des liens et restez proche de votre communauté."
+      }
+    },
+    "items": {
+      "requests": {
+        "title": "Mes demandes",
+        "subtitle": "Demandes d'adhésion et de mise en relation"
+      },
+      "saved": {
+        "title": "Enregistrés",
+        "subtitle": "Vos publications, événements et opportunités enregistrés"
+      },
+      "tickets": {
+        "title": "Mes billets",
+        "subtitle": "Les événements auxquels vous participez"
+      },
+      "businesses": {
+        "title": "Entreprises",
+        "subtitle": "Gérez le profil et les paramètres de votre entreprise"
+      },
+      "services": {
+        "title": "Services",
+        "subtitle": "Proposez ou trouvez des services de confiance"
+      },
+      "listings": {
+        "title": "Annonces",
+        "subtitle": "Vos annonces de produits"
+      },
+      "applications": {
+        "title": "Candidatures",
+        "subtitle": "Suivez vos candidatures aux offres et opportunités"
+      },
+      "payments": {
+        "title": "Paiements et transactions",
+        "subtitle": "Votre portefeuille, vos paiements et votre historique"
+      },
+      "circles": {
+        "title": "Cercles",
+        "subtitle": "Rejoignez et gérez vos cercles"
+      },
+      "events": {
+        "title": "Événements",
+        "subtitle": "Découvrez et rejoignez les prochains événements"
+      },
+      "conversations": {
+        "title": "Conversations",
+        "subtitle": "Vos messages privés et discussions de groupe"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "subtitle": "Achetez et vendez des produits et des services"
+      },
+      "opportunities": {
+        "title": "Opportunités",
+        "subtitle": "Les opportunités auxquelles vous avez postulé ou que vous avez enregistrées"
+      },
+      "createPost": {
+        "title": "Créer une publication",
+        "subtitle": "Partagez une actualité avec votre réseau"
+      }
+    },
+    "sheets": {
+      "close": "Fermer",
+      "requests": {
+        "title": "Mes demandes",
+        "description": "Choisissez les demandes à afficher.",
+        "membership": "Demandes aux communautés",
+        "membershipHint": "Les communautés que vous avez demandé à rejoindre",
+        "associations": "Demandes aux associations",
+        "associationsHint": "Les associations que vous avez demandé à rejoindre",
+        "connections": "Demandes de mise en relation",
+        "connectionsHint": "Les personnes qui souhaitent entrer en contact avec vous"
+      },
+      "saved": {
+        "title": "Enregistrés",
+        "description": "Choisissez ce que vous voulez ouvrir.",
+        "posts": "Publications enregistrées",
+        "postsHint": "Sur votre profil",
+        "events": "Événements enregistrés",
+        "eventsHint": "Dans Événements",
+        "opportunities": "Opportunités enregistrées",
+        "opportunitiesHint": "Dans Opportunités"
+      }
+    },
+    "rail": {
+      "label": "Votre compte",
+      "memberFallback": "Membre DiaspoPlug",
+      "verified": "Vérifié",
+      "memberSince": "Membre depuis {year}",
+      "viewProfile": "Voir le profil",
+      "notifications": "Notifications",
+      "messages": "Messages",
+      "savedItems": "Éléments enregistrés",
+      "helpTitle": "Besoin d'aide ?",
+      "helpBody": "Contactez l'équipe DiaspoPlug.",
+      "links": {
+        "settings": "Paramètres de confidentialité et de sécurité",
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions d'utilisation",
+        "about": "À propos de DiaspoPlug"
+      }
+    }
+  },
+  "discover": {
+    "metaTitle": "Découvrir",
+    "eyebrow": "Découvrir",
+    "title": "Opportunités, services et personnes de confiance, au même endroit.",
+    "subtitle": "Trouvez des opportunités, des services et des événements de la communauté DiaspoPlug.",
+    "tagline": "Plus d'opportunités. Plus près de chez vous.",
+    "searchLabel": "Rechercher sur DiaspoPlug",
+    "searchPlaceholder": "Rechercher des personnes, services, événements, opportunités…",
+    "searchButton": "Rechercher",
+    "categoriesHeading": "Parcourir par catégorie",
+    "categories": {
+      "services": "Services",
+      "events": "Événements"
+    }
   }
 }

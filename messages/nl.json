@@ -694,6 +694,11 @@
       "conflict": "Deze actie kan niet worden voltooid vanwege de huidige status",
       "failed": "Bewerking mislukt. Probeer het later opnieuw",
       "unknown_error": "Er is een onverwachte fout opgetreden"
+    },
+    "viewFilter": {
+      "label": "Welke berichten je ziet",
+      "you": "Voor jou",
+      "following": "Volgend"
     }
   },
   "community": {
@@ -1595,7 +1600,12 @@
       "conflict": "Deze bewerking kan in de huidige status niet worden voltooid.",
       "failed": "Bewerking mislukt. Probeer het opnieuw."
     },
-    "noCommunity": "Geen gemeenschap"
+    "noCommunity": "Geen gemeenschap",
+    "yourCommunities": {
+      "title": "Jouw gemeenschappen",
+      "communities": "Gemeenschappen",
+      "empty": "Je bent nog geen lid van een gemeenschap."
+    }
   },
   "association": {
     "discovery": {
@@ -4486,5 +4496,157 @@
     "signInTitleCommunity": "Log in om deze community te bekijken",
     "signInTitleAssociation": "Log in om deze vereniging te bekijken",
     "signInBody": "Mogelijk is deze privé. Bent u lid, log dan in om deze te bekijken."
+  },
+  "nav": {
+    "primary": "Hoofdnavigatie",
+    "logoLabel": "DiaspoPlug-startpagina",
+    "home": "Startpagina",
+    "discover": "Ontdekken",
+    "community": "Gemeenschap",
+    "more": "Meer",
+    "messages": "Berichten",
+    "notifications": "Meldingen"
+  },
+  "more": {
+    "metaTitle": "Meer",
+    "back": "Terug",
+    "pageLabel": "Meer",
+    "hero": {
+      "title": "Alles wat je nodig hebt, op één plek.",
+      "subtitle": "Beheer je verzoeken, opgeslagen items, betalingen, connecties en meer — allemaal in je DiaspoPlug-account.",
+      "tagline": "Meer mogelijkheden. Hetzelfde thuis."
+    },
+    "sections": {
+      "yourStuff": {
+        "title": "Jouw spullen",
+        "subtitle": "Je verzoeken, opgeslagen inhoud en tickets."
+      },
+      "work": {
+        "title": "Werk & zakelijk",
+        "subtitle": "Laat je bedrijf groeien, vind kansen en beheer je werk."
+      },
+      "money": {
+        "title": "Geld & betalingen",
+        "subtitle": "Beheer je transacties en financiële activiteiten."
+      },
+      "connect": {
+        "title": "Verbinden & gemeenschap",
+        "subtitle": "Bouw relaties op en blijf betrokken bij je gemeenschap."
+      }
+    },
+    "items": {
+      "requests": {
+        "title": "Mijn verzoeken",
+        "subtitle": "Lidmaatschaps- en connectieverzoeken"
+      },
+      "saved": {
+        "title": "Opgeslagen",
+        "subtitle": "Je opgeslagen berichten, evenementen en kansen"
+      },
+      "tickets": {
+        "title": "Mijn tickets",
+        "subtitle": "Evenementen waar je naartoe gaat"
+      },
+      "businesses": {
+        "title": "Bedrijven",
+        "subtitle": "Beheer je bedrijfsprofiel en instellingen"
+      },
+      "services": {
+        "title": "Diensten",
+        "subtitle": "Bied betrouwbare diensten aan of vind ze"
+      },
+      "listings": {
+        "title": "Advertenties",
+        "subtitle": "Je productadvertenties"
+      },
+      "applications": {
+        "title": "Sollicitaties",
+        "subtitle": "Volg je sollicitaties op banen en kansen"
+      },
+      "payments": {
+        "title": "Betalingen & transacties",
+        "subtitle": "Je wallet, betalingen en transactiegeschiedenis"
+      },
+      "circles": {
+        "title": "Kringen",
+        "subtitle": "Word lid van je kringen en beheer ze"
+      },
+      "events": {
+        "title": "Evenementen",
+        "subtitle": "Ontdek komende evenementen en doe mee"
+      },
+      "conversations": {
+        "title": "Gesprekken",
+        "subtitle": "Je privéberichten en groepschats"
+      },
+      "marketplace": {
+        "title": "Marktplaats",
+        "subtitle": "Koop en verkoop producten en diensten"
+      },
+      "opportunities": {
+        "title": "Kansen",
+        "subtitle": "Kansen waarop je hebt gesolliciteerd of die je hebt opgeslagen"
+      },
+      "createPost": {
+        "title": "Bericht maken",
+        "subtitle": "Deel een update met je netwerk"
+      }
+    },
+    "sheets": {
+      "close": "Sluiten",
+      "requests": {
+        "title": "Mijn verzoeken",
+        "description": "Kies welke verzoeken je wilt openen.",
+        "membership": "Verzoeken aan gemeenschappen",
+        "membershipHint": "Gemeenschappen waarvan je lid wilt worden",
+        "associations": "Verzoeken aan verenigingen",
+        "associationsHint": "Verenigingen waarvan je lid wilt worden",
+        "connections": "Connectieverzoeken",
+        "connectionsHint": "Mensen die met je willen connecten"
+      },
+      "saved": {
+        "title": "Opgeslagen",
+        "description": "Kies wat je wilt openen.",
+        "posts": "Opgeslagen berichten",
+        "postsHint": "Op je profiel",
+        "events": "Opgeslagen evenementen",
+        "eventsHint": "Bij Evenementen",
+        "opportunities": "Opgeslagen kansen",
+        "opportunitiesHint": "Bij Kansen"
+      }
+    },
+    "rail": {
+      "label": "Je account",
+      "memberFallback": "DiaspoPlug-lid",
+      "verified": "Geverifieerd",
+      "memberSince": "Lid sinds {year}",
+      "viewProfile": "Profiel bekijken",
+      "notifications": "Meldingen",
+      "messages": "Berichten",
+      "savedItems": "Opgeslagen items",
+      "helpTitle": "Hulp nodig?",
+      "helpBody": "Neem contact op met het DiaspoPlug-team.",
+      "links": {
+        "settings": "Privacy- en beveiligingsinstellingen",
+        "privacy": "Privacybeleid",
+        "terms": "Servicevoorwaarden",
+        "about": "Over DiaspoPlug"
+      }
+    }
+  },
+  "discover": {
+    "metaTitle": "Ontdekken",
+    "eyebrow": "Ontdekken",
+    "title": "Kansen, diensten en betrouwbare mensen — op één plek.",
+    "subtitle": "Vind kansen, diensten en evenementen uit de DiaspoPlug-gemeenschap.",
+    "tagline": "Meer kansen. Dichter bij huis.",
+    "searchLabel": "Zoeken op DiaspoPlug",
+    "searchPlaceholder": "Zoek naar mensen, diensten, evenementen, kansen…",
+    "searchButton": "Zoeken",
+    "categoriesHeading": "Bladeren per categorie",
+    "categories": {
+      "services": "Diensten",
+      "events": "Evenementen"
+    }
   }
 }

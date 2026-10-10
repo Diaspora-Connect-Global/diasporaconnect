@@ -694,6 +694,11 @@
       "conflict": "Questa azione non può essere completata a causa dello stato attuale",
       "failed": "L'operazione non è riuscita. Riprova più tardi",
       "unknown_error": "Si è verificato un errore imprevisto"
+    },
+    "viewFilter": {
+      "label": "Quali post mostrare",
+      "you": "Per te",
+      "following": "Seguiti"
     }
   },
   "community": {
@@ -1595,7 +1600,12 @@
       "conflict": "Questa operazione non può essere completata nello stato attuale.",
       "failed": "Operazione non riuscita. Riprova."
     },
-    "noCommunity": "Nessuna comunità"
+    "noCommunity": "Nessuna comunità",
+    "yourCommunities": {
+      "title": "Le tue community",
+      "communities": "Community",
+      "empty": "Non sei ancora entrato in nessuna community."
+    }
   },
   "association": {
     "discovery": {
@@ -4486,5 +4496,157 @@
     "signInTitleCommunity": "Acceda per vedere questa comunità",
     "signInTitleAssociation": "Acceda per vedere questa associazione",
     "signInBody": "Potrebbe essere privata. Se ne è membro, acceda per vederla."
+  },
+  "nav": {
+    "primary": "Navigazione principale",
+    "logoLabel": "Home di DiaspoPlug",
+    "home": "Home",
+    "discover": "Scopri",
+    "community": "Community",
+    "more": "Altro",
+    "messages": "Messaggi",
+    "notifications": "Notifiche"
+  },
+  "more": {
+    "metaTitle": "Altro",
+    "back": "Indietro",
+    "pageLabel": "Altro",
+    "hero": {
+      "title": "Tutto ciò che ti serve, in un unico posto.",
+      "subtitle": "Gestisci richieste, elementi salvati, pagamenti, collegamenti e molto altro, tutto dal tuo account DiaspoPlug.",
+      "tagline": "Più possibilità. Sempre a casa."
+    },
+    "sections": {
+      "yourStuff": {
+        "title": "Le tue cose",
+        "subtitle": "Le tue richieste, i contenuti salvati e i biglietti."
+      },
+      "work": {
+        "title": "Lavoro e business",
+        "subtitle": "Fai crescere la tua attività, trova opportunità e gestisci il tuo lavoro."
+      },
+      "money": {
+        "title": "Denaro e pagamenti",
+        "subtitle": "Gestisci le tue transazioni e attività finanziarie."
+      },
+      "connect": {
+        "title": "Relazioni e community",
+        "subtitle": "Costruisci relazioni e resta in contatto con la tua community."
+      }
+    },
+    "items": {
+      "requests": {
+        "title": "Le mie richieste",
+        "subtitle": "Richieste di iscrizione e di collegamento"
+      },
+      "saved": {
+        "title": "Salvati",
+        "subtitle": "I tuoi post, eventi e opportunità salvati"
+      },
+      "tickets": {
+        "title": "I miei biglietti",
+        "subtitle": "Gli eventi a cui partecipi"
+      },
+      "businesses": {
+        "title": "Attività",
+        "subtitle": "Gestisci il profilo e le impostazioni della tua attività"
+      },
+      "services": {
+        "title": "Servizi",
+        "subtitle": "Offri o trova servizi affidabili"
+      },
+      "listings": {
+        "title": "Annunci",
+        "subtitle": "I tuoi annunci di prodotti"
+      },
+      "applications": {
+        "title": "Candidature",
+        "subtitle": "Segui le tue candidature a lavori e opportunità"
+      },
+      "payments": {
+        "title": "Pagamenti e transazioni",
+        "subtitle": "Il tuo portafoglio, i pagamenti e la cronologia delle transazioni"
+      },
+      "circles": {
+        "title": "Cerchie",
+        "subtitle": "Unisciti alle tue cerchie e gestiscile"
+      },
+      "events": {
+        "title": "Eventi",
+        "subtitle": "Scopri i prossimi eventi e partecipa"
+      },
+      "conversations": {
+        "title": "Conversazioni",
+        "subtitle": "I tuoi messaggi diretti e le chat di gruppo"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "subtitle": "Compra e vendi prodotti e servizi"
+      },
+      "opportunities": {
+        "title": "Opportunità",
+        "subtitle": "Le opportunità per cui ti sei candidato o che hai salvato"
+      },
+      "createPost": {
+        "title": "Crea un post",
+        "subtitle": "Condividi un aggiornamento con la tua rete"
+      }
+    },
+    "sheets": {
+      "close": "Chiudi",
+      "requests": {
+        "title": "Le mie richieste",
+        "description": "Scegli quali richieste aprire.",
+        "membership": "Richieste alle community",
+        "membershipHint": "Le community a cui hai chiesto di unirti",
+        "associations": "Richieste alle associazioni",
+        "associationsHint": "Le associazioni a cui hai chiesto di unirti",
+        "connections": "Richieste di collegamento",
+        "connectionsHint": "Le persone che vogliono collegarsi con te"
+      },
+      "saved": {
+        "title": "Salvati",
+        "description": "Scegli cosa aprire.",
+        "posts": "Post salvati",
+        "postsHint": "Sul tuo profilo",
+        "events": "Eventi salvati",
+        "eventsHint": "In Eventi",
+        "opportunities": "Opportunità salvate",
+        "opportunitiesHint": "In Opportunità"
+      }
+    },
+    "rail": {
+      "label": "Il tuo account",
+      "memberFallback": "Membro DiaspoPlug",
+      "verified": "Verificato",
+      "memberSince": "Membro dal {year}",
+      "viewProfile": "Vedi profilo",
+      "notifications": "Notifiche",
+      "messages": "Messaggi",
+      "savedItems": "Elementi salvati",
+      "helpTitle": "Hai bisogno di aiuto?",
+      "helpBody": "Contatta il team di DiaspoPlug.",
+      "links": {
+        "settings": "Impostazioni di privacy e sicurezza",
+        "privacy": "Privacy Policy",
+        "terms": "Termini di servizio",
+        "about": "Informazioni su DiaspoPlug"
+      }
+    }
+  },
+  "discover": {
+    "metaTitle": "Scopri",
+    "eyebrow": "Scopri",
+    "title": "Opportunità, servizi e persone affidabili, in un unico posto.",
+    "subtitle": "Trova opportunità, servizi ed eventi della community DiaspoPlug.",
+    "tagline": "Più opportunità. Più vicino a casa.",
+    "searchLabel": "Cerca su DiaspoPlug",
+    "searchPlaceholder": "Cerca persone, servizi, eventi, opportunità…",
+    "searchButton": "Cerca",
+    "categoriesHeading": "Sfoglia per categoria",
+    "categories": {
+      "services": "Servizi",
+      "events": "Eventi"
+    }
   }
 }

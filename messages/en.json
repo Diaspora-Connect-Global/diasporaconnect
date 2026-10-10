@@ -694,6 +694,11 @@
       "conflict": "This action cannot be completed due to the current state",
       "failed": "Operation failed. Please try again later",
       "unknown_error": "An unexpected error occurred"
+    },
+    "viewFilter": {
+      "label": "Which posts to show",
+      "you": "You",
+      "following": "Following"
     }
   },
   "community": {
@@ -1595,7 +1600,12 @@
       "conflict": "This operation cannot be completed in the current state.",
       "failed": "Operation failed. Please try again."
     },
-    "noCommunity": "No community"
+    "noCommunity": "No community",
+    "yourCommunities": {
+      "title": "Your communities",
+      "communities": "Communities",
+      "empty": "You haven't joined any communities yet."
+    }
   },
   "association": {
     "discovery": {
@@ -4486,5 +4496,157 @@
     "signInTitleCommunity": "Sign in to view this community",
     "signInTitleAssociation": "Sign in to view this association",
     "signInBody": "It may be private. If you're a member, sign in to see it."
+  },
+  "nav": {
+    "primary": "Main navigation",
+    "logoLabel": "DiaspoPlug home",
+    "home": "Home",
+    "discover": "Discover",
+    "community": "Community",
+    "more": "More",
+    "messages": "Messages",
+    "notifications": "Notifications"
+  },
+  "more": {
+    "metaTitle": "More",
+    "back": "Back",
+    "pageLabel": "More",
+    "hero": {
+      "title": "Everything you need, all in one place.",
+      "subtitle": "Manage your requests, saved items, payments, connections and more — all within your DiaspoPlug account.",
+      "tagline": "More possibilities. Same home."
+    },
+    "sections": {
+      "yourStuff": {
+        "title": "Your Stuff",
+        "subtitle": "Your requests, saved content and tickets."
+      },
+      "work": {
+        "title": "Work & Business",
+        "subtitle": "Grow your business, find opportunities and manage your work."
+      },
+      "money": {
+        "title": "Money & Payments",
+        "subtitle": "Handle your transactions and financial activities."
+      },
+      "connect": {
+        "title": "Connect & Community",
+        "subtitle": "Build relationships and stay engaged with your community."
+      }
+    },
+    "items": {
+      "requests": {
+        "title": "My Requests",
+        "subtitle": "Membership and connection requests"
+      },
+      "saved": {
+        "title": "Saved",
+        "subtitle": "Your saved posts, events and opportunities"
+      },
+      "tickets": {
+        "title": "My Tickets",
+        "subtitle": "Events you're attending"
+      },
+      "businesses": {
+        "title": "Businesses",
+        "subtitle": "Manage your business profile and settings"
+      },
+      "services": {
+        "title": "Services",
+        "subtitle": "Offer or find trusted services"
+      },
+      "listings": {
+        "title": "Listings",
+        "subtitle": "Your product listings"
+      },
+      "applications": {
+        "title": "Applications",
+        "subtitle": "Track your job and opportunity applications"
+      },
+      "payments": {
+        "title": "Payments & Transactions",
+        "subtitle": "Your wallet, payments and transaction history"
+      },
+      "circles": {
+        "title": "Circles",
+        "subtitle": "Join and manage your circles"
+      },
+      "events": {
+        "title": "Events",
+        "subtitle": "Discover and join upcoming events"
+      },
+      "conversations": {
+        "title": "Conversations",
+        "subtitle": "Your direct messages and group chats"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "subtitle": "Buy and sell products and services"
+      },
+      "opportunities": {
+        "title": "Opportunities",
+        "subtitle": "Opportunities you applied to or saved"
+      },
+      "createPost": {
+        "title": "Create post",
+        "subtitle": "Share an update with your network"
+      }
+    },
+    "sheets": {
+      "close": "Close",
+      "requests": {
+        "title": "My Requests",
+        "description": "Choose which requests to open.",
+        "membership": "Community requests",
+        "membershipHint": "Communities you've asked to join",
+        "associations": "Association requests",
+        "associationsHint": "Associations you've asked to join",
+        "connections": "Connection requests",
+        "connectionsHint": "People who want to connect with you"
+      },
+      "saved": {
+        "title": "Saved",
+        "description": "Choose what to open.",
+        "posts": "Saved posts",
+        "postsHint": "On your profile",
+        "events": "Saved events",
+        "eventsHint": "In Events",
+        "opportunities": "Saved opportunities",
+        "opportunitiesHint": "In Opportunities"
+      }
+    },
+    "rail": {
+      "label": "Your account",
+      "memberFallback": "DiaspoPlug member",
+      "verified": "Verified",
+      "memberSince": "Member since {year}",
+      "viewProfile": "View profile",
+      "notifications": "Notifications",
+      "messages": "Messages",
+      "savedItems": "Saved items",
+      "helpTitle": "Need help?",
+      "helpBody": "Get in touch with the DiaspoPlug team.",
+      "links": {
+        "settings": "Privacy & security settings",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "about": "About DiaspoPlug"
+      }
+    }
+  },
+  "discover": {
+    "metaTitle": "Discover",
+    "eyebrow": "Discover",
+    "title": "Opportunities, services and trusted people — all in one place.",
+    "subtitle": "Find opportunities, services and events from the DiaspoPlug community.",
+    "tagline": "More opportunities. Closer to home.",
+    "searchLabel": "Search DiaspoPlug",
+    "searchPlaceholder": "Search for people, services, events, opportunities…",
+    "searchButton": "Search",
+    "categoriesHeading": "Browse by category",
+    "categories": {
+      "services": "Services",
+      "events": "Events"
+    }
   }
 }
