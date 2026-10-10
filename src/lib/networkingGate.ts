@@ -29,9 +29,10 @@ export function gateState(input: {
 }): GateState {
   const { loading, refusalKind, status, mine } = input;
   if (refusalKind === 'unavailableYet') return 'unavailableYet';
-  if (loading && !status && !mine) return 'loading';
+  // Wait for BOTH answers: deciding on the status alone would send a joined person to the wizard.
+  if (loading) return 'loading';
   if (status && status.featureAvailable === false) return 'unavailableYet';
-  if (!status && !mine) return refusalKind ? 'error' : loading ? 'loading' : 'error';
+  if (!status && !mine) return 'error';
   const enabled = status?.networkingEnabled ?? mine?.networkingEnabled ?? false;
   if (!enabled) return 'disabled';
   const eligibility = mine?.eligibility ?? status?.eligibility;

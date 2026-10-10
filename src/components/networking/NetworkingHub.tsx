@@ -66,7 +66,7 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
 
   const mineVersion = base.mine?.participation?.version ?? 0;
   useEffect(() => {
-    if (!ready || !base.mine) return;
+    if (!ready) return;
     const d = draftFromParticipation(base.mine);
     setDraft(d);
     setBaseline(JSON.stringify(d));

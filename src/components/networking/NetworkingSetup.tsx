@@ -42,7 +42,7 @@ export default function NetworkingSetup({ eventId }: { eventId: string }) {
   const { suggest, enableAi } = useSuggest(eventId, base.taxonomy, aiConsent);
 
   useEffect(() => {
-    if (canSetUp && base.mine && !draft) setDraft(draftFromParticipation(base.mine));
+    if (canSetUp && !draft) setDraft(draftFromParticipation(base.mine));
   }, [canSetUp, base.mine, draft]);
 
   // Already in: the hub is the place to be.
