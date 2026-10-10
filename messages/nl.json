@@ -4664,7 +4664,9 @@
       "venue": "Locatie",
       "updates": "Nieuws",
       "register": "Inschrijven",
-      "myEvent": "Mijn evenement"
+      "myEvent": "Mijn evenement",
+      "networking": "Netwerken",
+      "circles": "Kringen"
     },
     "empty": {
       "programme": "Nog geen programma. Voeg onderdelen toe via ‘Evenement beheren’.",
@@ -4672,7 +4674,7 @@
       "updates": "Nog geen nieuws. Plaats een bericht via ‘Evenement beheren’; alle ingeschrevenen worden op de hoogte gebracht."
     },
     "overview": {
-      "about": "Over dit evenement",
+      "about": "Over het evenement",
       "noDescription": "De organisatoren hebben nog geen beschrijving toegevoegd.",
       "organisedBy": "Georganiseerd door {name}",
       "tags": "Tags",
@@ -4688,7 +4690,19 @@
       "externalRegistration": "Eigen inschrijfpagina van de organisatoren",
       "free": "Gratis",
       "paid": "Betaald",
-      "perTicket": "{price} per ticket"
+      "perTicket": "{price} per ticket",
+      "format": "Formaat",
+      "access": "Toegang",
+      "accessRegistration": "Registratie vereist",
+      "accessApproval": "Registratie vereist (goedkeuring van de organisator)",
+      "organisedByHeading": "Georganiseerd door",
+      "contactHeading": "Contact voor het evenement",
+      "featuredSpeakers": "Uitgelichte sprekers",
+      "viewAll": "Alles bekijken",
+      "programmeHeading": "Programma van het evenement",
+      "viewProgramme": "Volledig programma bekijken",
+      "joinBannerTitle": "Samen sterker",
+      "joinBannerBody": "Word lid van {name} om na het evenement contact te houden met de leden."
     },
     "programme": {
       "timesIn": "Tijden worden getoond in {zone}.",
@@ -4755,13 +4769,15 @@
         "awaitingPayment": "Open het tabblad ‘Mijn evenement’ om af te ronden.",
         "rejected": "Neem contact op met de organisatoren als u denkt dat dit een vergissing is.",
         "closesOn": "Inschrijven sluit op {date}.",
-        "needsApproval": "De organisatoren keuren elke inschrijving goed."
+        "needsApproval": "De organisatoren keuren elke inschrijving goed.",
+        "confirmed": "Hier vind je de updates over dit evenement en je registratiegegevens."
       },
       "cta": {
         "register": "Inschrijven",
         "joinWaitlist": "Op de wachtlijst",
         "signInToRegister": "Log in om u in te schrijven",
-        "myEvent": "Mijn evenement"
+        "myEvent": "Mijn evenement",
+        "viewDetails": "Registratiegegevens bekijken"
       }
     },
     "organiser": {
@@ -4779,7 +4795,10 @@
       "requestedPay": "Uw verzoek om lid te worden van {name} is gestart. Rond de betaling af op de pagina om het te voltooien.",
       "failedJoin": "We konden uw verzoek om lid te worden van {name} niet verzenden. Uw inschrijving voor het evenement blijft ongewijzigd. U kunt het op deze pagina opnieuw proberen.",
       "notApplicable": "Dit evenement heeft geen organiserende community om lid van te worden.",
-      "notAvailableYet": "Lid worden van de organiserende community via een evenement is nog niet beschikbaar."
+      "notAvailableYet": "Lid worden van de organiserende community via een evenement is nog niet beschikbaar.",
+      "viewCommunity": "Community bekijken",
+      "statusMember": "Status: lid",
+      "statusPending": "Status: aanvraag in behandeling"
     },
     "share": {
       "title": "Dit evenement delen",
@@ -4787,15 +4806,19 @@
       "share": "Delen",
       "copied": "Link gekopieerd",
       "failed": "De link kon niet worden gekopieerd",
-      "qrAlt": "QR-code die deze evenementpagina opent"
+      "qrAlt": "QR-code die deze evenementpagina opent",
+      "sub": "Nodig je vrienden en collega's uit voor dit evenement.",
+      "inviteLink": "Uitnodigingslink ophalen",
+      "qr": "QR-code"
     },
     "similar": {
-      "title": "Vergelijkbare evenementen"
+      "title": "Vergelijkbare evenementen",
+      "viewAll": "Alles bekijken"
     },
     "register": {
       "signInPrompt": "Log in om u voor dit evenement in te schrijven.",
       "signIn": "Inloggen",
-      "attendee": "Uw gegevens",
+      "attendee": "Gegevens van de deelnemer",
       "name": "Naam",
       "email": "E-mail",
       "attendeeNote": "Overgenomen uit uw profiel. Wijzig ze in uw profielinstellingen.",
@@ -4804,7 +4827,9 @@
       "format": {
         "label": "Hoe neemt u deel?",
         "inPerson": "Ter plaatse",
-        "online": "Online"
+        "online": "Online",
+        "sub": "Hoe woon je het evenement bij?",
+        "onlineSub": "Deelnemen via de onlinelink."
       },
       "summary": {
         "title": "Overzicht",
@@ -4819,7 +4844,8 @@
         "failed": "We konden de code niet controleren. Probeer het opnieuw."
       },
       "terms": {
-        "label": "Ik accepteer de voorwaarden van het evenement, de <tos>Gebruiksvoorwaarden</tos> en het <privacy>Privacybeleid</privacy> van DiaspoPlug."
+        "label": "Ik accepteer de voorwaarden van het evenement, de <tos>Gebruiksvoorwaarden</tos> en het <privacy>Privacybeleid</privacy> van DiaspoPlug.",
+        "title": "Voorwaarden"
       },
       "joinOrganiser": {
         "label": "Ook lid worden van {name}",
@@ -4848,8 +4874,23 @@
         "waitlisted": "U staat op de wachtlijst.",
         "waitlistedPos": "U bent nummer {position} op de wachtlijst.",
         "received": "Inschrijving ontvangen.",
-        "paymentNotCompleted": "De betaling is niet voltooid. Uw plaats is gereserveerd, maar pas bevestigd nadat u hebt betaald."
-      }
+        "paymentNotCompleted": "De betaling is niet voltooid. Uw plaats is gereserveerd, maar pas bevestigd nadat u hebt betaald.",
+        "draftSaved": "Je netwerkprofiel is als concept opgeslagen. Er wordt niets gedeeld totdat je meedoet aan netwerken.",
+        "draftUnavailableYet": "Een netwerkprofiel opslaan is nog niet beschikbaar. Je registratie wordt niet beïnvloed.",
+        "draftFailed": "We konden je netwerkprofiel niet opslaan. Je registratie wordt niet beïnvloed. Je kunt het later invullen op de netwerkpagina."
+      },
+      "heading": "Registratie voor het evenement",
+      "headingSub": "Vul het formulier hieronder in om je te registreren voor {title}.",
+      "attendeeSub": "Overgenomen uit je profiel.",
+      "type": {
+        "title": "Soort registratie",
+        "sub": "Kies het soort registratie dat bij je past.",
+        "general": "Registratie"
+      },
+      "quantity": "Aantal tickets",
+      "decrease": "Minder tickets",
+      "increase": "Meer tickets",
+      "backToEvent": "Terug naar het evenement"
     },
     "myEvent": {
       "status": "Uw inschrijving",
@@ -5013,6 +5054,81 @@
         "removed": "Uit het team verwijderd.",
         "unknownPerson": "Onbekende persoon"
       }
+    },
+    "format": {
+      "physical": "Ter plaatse",
+      "physicalSub": "Op de locatie",
+      "virtual": "Online",
+      "virtualSub": "Doe mee vanaf elke plek",
+      "hybrid": "Hybride",
+      "hybridSub": "Ter plaatse en online"
+    },
+    "cta": {
+      "networkingJoin": "Doe mee aan netwerken bij het evenement",
+      "networkingOpen": "Open netwerken bij het evenement",
+      "networkingSub": "Ontmoet mensen en begin waardevolle gesprekken.",
+      "networkingJoinedSub": "Je doet mee. Bekijk wie je kunt ontmoeten.",
+      "networkingPendingSub": "Opent zodra je registratie is bevestigd.",
+      "networkingIneligibleSub": "Netwerken staat niet open voor jouw registratie.",
+      "networkingRegisterSub": "Registreer je voor het evenement om mee te doen.",
+      "connectTitle": "Verbinden op DiaspoPlug",
+      "connectSub": "Stuur een verbindingsverzoek naar deelnemers."
+    },
+    "grow": {
+      "title": "Laat je netwerk groeien",
+      "body": "Evenementen bijwonen is nog maar het begin. Word lid van {name} om de gesprekken gaande te houden."
+    },
+    "registerRail": {
+      "stepsTitle": "Nog maar een paar stappen",
+      "stepsBody": "Rond je registratie af om je plek bij dit evenement te nemen.",
+      "highlights": "Hoogtepunten van het evenement",
+      "qrAlt": "QR-code die de pagina van dit evenement opent",
+      "helpTitle": "Registreren vanaf je telefoon?",
+      "helpBody": "Scan de QR-code of kopieer de link om deze pagina op je mobiele apparaat te openen.",
+      "copyLink": "Link kopiëren",
+      "copied": "Link gekopieerd",
+      "copyFailed": "De link kon niet worden gekopieerd",
+      "viewOnMap": "Bekijk op kaart"
+    },
+    "panels": {
+      "networking": {
+        "title": "Netwerken bij het evenement",
+        "body": "Ontmoet andere deelnemers, vind mensen met dezelfde interesses en begin gesprekken voor, tijdens en na het evenement. Meedoen is jouw keuze en er wordt niets gedeeld totdat je dat doet.",
+        "pending": "Netwerken opent zodra je registratie is bevestigd.",
+        "ineligible": "Netwerken staat niet open voor jouw registratie.",
+        "registerFirst": "Registreer je voor het evenement om aan netwerken mee te doen.",
+        "open": "Netwerken openen",
+        "join": "Doe mee aan netwerken"
+      },
+      "circles": {
+        "title": "Netwerkkringen",
+        "body": "Kleine themagroepen voor deelnemers die dieper willen gaan. Bekijk de kringen op de netwerkpagina en sluit je aan bij wie bij je past.",
+        "pending": "Kringen openen zodra je registratie is bevestigd.",
+        "ineligible": "Kringen staan niet open voor jouw registratie.",
+        "registerFirst": "Registreer je voor het evenement om kringen te joinen.",
+        "open": "Kringen openen",
+        "join": "Kringen bekijken"
+      }
+    }
+  },
+  "eventRegister": {
+    "selectOption": "Kies een optie",
+    "networking": {
+      "title": "Netwerkprofiel",
+      "optional": "Optioneel",
+      "helper": "Optioneel – als concept opgeslagen; er wordt niets gedeeld totdat je meedoet aan netwerken.",
+      "industry": "Branche",
+      "industryPlaceholder": "Kies een branche",
+      "interests": "Interesses",
+      "interestsPlaceholder": "Kies interesses",
+      "offers": "Wat je aanbiedt",
+      "offersPlaceholder": "Kies wat je aanbiedt",
+      "needs": "Wat je zoekt",
+      "needsPlaceholder": "Kies wat je zoekt",
+      "note": "Voeg een notitie toe (optioneel)",
+      "selectedCount": "{count} geselecteerd",
+      "max": "Je kunt maximaal {count} kiezen.",
+      "draftNote": "Na je registratie als concept opgeslagen. Je kunt het later wijzigen in je netwerkprofiel."
     }
   }
 }

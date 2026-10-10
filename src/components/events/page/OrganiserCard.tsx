@@ -169,14 +169,20 @@ export default function OrganiserCard({
     );
   }
 
+  const standingLabel =
+    organiser.standing === 'member' ? t('statusMember') : organiser.standing === 'pending' ? t('statusPending') : null;
   return (
     <section aria-labelledby="organiser-card-title" data-testid="organiser-card" className="space-y-3 rounded-2xl border border-border-subtle bg-surface-default p-4">
-      <h2 id="organiser-card-title" className="flex items-center gap-2 text-base font-semibold text-text-primary">
-        <Building2 className="size-4 text-text-secondary" aria-hidden /> {t('title')}
-      </h2>
-      <Link href={organiser.href} className="block truncate text-sm font-medium text-text-brand hover:underline">
-        {name}
-      </Link>
+      <div className="flex items-start gap-3">
+        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-surface-info text-text-brand"><Building2 className="size-5" aria-hidden /></span>
+        <div className="min-w-0 flex-1">
+          <h2 id="organiser-card-title" className="text-sm font-semibold text-text-primary">{t('title')}</h2>
+          <Link href={organiser.href} className="block truncate text-xs font-medium text-text-brand hover:underline">
+            {name}
+          </Link>
+          {standingLabel && <p className="mt-0.5 text-xs text-text-secondary" data-testid="organiser-standing">{standingLabel}</p>}
+        </div>
+      </div>
       {body}
     </section>
   );

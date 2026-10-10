@@ -212,3 +212,80 @@ test('the rail Join button reports success and the standing it created', async (
     expect(graphql.calls.find((c) => c.name === 'JoinEventOrganiserCommunity')!.variables.eventId).toBe(EVENT_ID);
     await page.context().close();
 });
+
+// ─── Networking draft (section 4) ────────────────────────────────────────────
+
+const NETWORKING_ON = {
+    EventNetworkingStatus: { eventNetworkingStatus: { __typename: 'EventNetworkingStatus', networkingEnabled: true, featureAvailable: true, eligibility: 'NOT_REGISTERED', participationStatus: 'NOT_JOINED' } },
+    EventNetworkingTaxonomy: {
+        eventNetworkingTaxonomy: [
+            { __typename: 'EventNetworkingTaxonomyItem', code: 'industry.fintech', kind: 'INDUSTRY', labelKey: 'networking.taxonomy.industry.fintech', needLabelKey: null, offerLabelKey: null, sortOrder: 10 },
+            { __typename: 'EventNetworkingTaxonomyItem', code: 'interest.investing', kind: 'INTEREST', labelKey: 'networking.taxonomy.interest.investing', needLabelKey: null, offerLabelKey: null, sortOrder: 10 },
+            { __typename: 'EventNetworkingTaxonomyItem', code: 'capability.mentoring', kind: 'CAPABILITY', labelKey: 'networking.taxonomy.capability.mentoring', needLabelKey: 'networking.taxonomy.capability.mentoring.need', offerLabelKey: 'networking.taxonomy.capability.mentoring.offer', sortOrder: 10 },
+        ],
+    },
+};
+
+test('sections are numbered with no gaps and the networking section is hidden when networking is unavailable', async () => {
+    const { page } = await openPage(browser, `/events/${EVENT_ID}?tab=register`, eventPageOverrides());
+    await expect(page.getByTestId('register-tab')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByRole('heading', { name: /^1\. Attendee information/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^2\. Registration type/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^3\. Terms & conditions/ })).toBeVisible();
+    await expect(page.getByTestId('networking-draft-section')).toHaveCount(0);
+    // No fabricated "What's included" list.
+    await expect(page.getByText("What's Included", { exact: false })).toHaveCount(0);
+    await page.context().close();
+});
+
+test('networking profile: optional, saved as a draft AFTER registering, and a refused draft never reads as a failed registration', async () => {
+    let registered = false;
+    const overrides = eventPageOverrides(eventFixture(), {
+        ...NETWORKING_ON,
+        GetEventPage: () => ({ getEvent: eventFixture(registered ? { myRegistrationStatus: 'CONFIRMED', myRegistrationId: 'reg-1' } : {}) }),
+        RegisterForEventM2: () => {
+            registered = true;
+            return REGISTER();
+        },
+        EventNetworkingSaveDraft: { __errors: [{ message: "That isn't available yet.", code: 'EVENT_NETWORKING_FEATURE_UNAVAILABLE' }] },
+    });
+    const { page, graphql } = await openPage(browser, `/events/${EVENT_ID}?tab=register`, overrides);
+    const section = page.getByTestId('networking-draft-section');
+    await expect(section).toBeVisible({ timeout: 90_000 });
+    await expect(section.getByRole('heading', { name: /^3\. Networking profile/ })).toContainText('Optional');
+    await expect(page.getByTestId('networking-draft-note')).toContainText('saved as a draft after you register');
+    await expect(section).toContainText('nothing is shared until you join networking');
+    // Nothing is sent before registering.
+    await section.getByText('Select industry').click();
+    await section.getByLabel('Fintech').check();
+    expect(graphql.calls.some((c) => c.name === 'EventNetworkingSaveDraft')).toBe(false);
+    await page.getByTestId('terms-checkbox').check();
+    await page.getByTestId('register-submit').click();
+    await expect.poll(() => graphql.calls.some((c) => c.name === 'EventNetworkingSaveDraft')).toBe(true);
+    const sent = graphql.calls.find((c) => c.name === 'EventNetworkingSaveDraft')!.variables as { eventId: string; profile: { industries: string[] } };
+    expect(sent.eventId).toBe(EVENT_ID);
+    expect(sent.profile.industries).toEqual(['industry.fintech']);
+    await expect(page.getByTestId('registration-result')).toContainText("You're registered.", { timeout: 30_000 });
+    await expect(page.getByTestId('networking-draft-outcome')).toContainText("isn't available yet");
+    await expect(page.getByTestId('registration-result')).not.toContainText(/couldn't|failed|error/i);
+    await page.context().close();
+});
+
+test('an untouched networking section sends no draft at all', async () => {
+    const { page, graphql } = await openPage(browser, `/events/${EVENT_ID}?tab=register`, eventPageOverrides(eventFixture(), { ...NETWORKING_ON, RegisterForEventM2: REGISTER() }));
+    await page.getByTestId('terms-checkbox').check({ timeout: 90_000 });
+    await page.getByTestId('register-submit').click();
+    await expect.poll(() => graphql.calls.some((c) => c.name === 'RegisterForEventM2')).toBe(true);
+    expect(graphql.calls.some((c) => c.name === 'EventNetworkingSaveDraft')).toBe(false);
+    await page.context().close();
+});
+
+test('the register rail shows the venue and the phone hand-over, and nothing invented', async () => {
+    const { page } = await openPage(browser, `/events/${EVENT_ID}?tab=register`, eventPageOverrides(eventFixture({ tags: [] })));
+    const rail = page.getByTestId('register-rail');
+    await expect(rail).toContainText("You're just a few steps away", { timeout: 90_000 });
+    await expect(rail.getByTestId('register-rail-venue')).toContainText('Berlin Congress Centre');
+    await expect(rail.getByText('Event highlights')).toHaveCount(0);
+    await expect(rail.getByText("What's included", { exact: false })).toHaveCount(0);
+    await page.context().close();
+});

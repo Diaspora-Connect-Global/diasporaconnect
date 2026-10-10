@@ -58,7 +58,9 @@ export default function RegistrationCard({
     state === 'waitlisted' && waitlistPosition ? t('states.waitlistedPos', { position: waitlistPosition }) : t(`states.${state}`, { date: opens });
 
   const hint =
-    state === 'pendingApproval'
+    state === 'confirmed'
+      ? t('hints.confirmed')
+      : state === 'pendingApproval'
       ? t('hints.pendingApproval')
       : state === 'waitlisted'
         ? t('hints.waitlisted')
@@ -90,7 +92,7 @@ export default function RegistrationCard({
         )
       )}
       {REGISTERED_STATES.has(state) && (
-        <ButtonType1 onClick={() => onOpenTab('register')} className="w-full" size="lg">{t('cta.myEvent')}</ButtonType1>
+        <ButtonType1 onClick={() => onOpenTab('register')} className="w-full" size="lg">{state === 'confirmed' ? t('cta.viewDetails') : t('cta.myEvent')}</ButtonType1>
       )}
     </section>
   );

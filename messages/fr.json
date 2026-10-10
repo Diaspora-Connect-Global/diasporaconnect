@@ -4664,7 +4664,9 @@
       "venue": "Lieu",
       "updates": "Actualités",
       "register": "S'inscrire",
-      "myEvent": "Mon événement"
+      "myEvent": "Mon événement",
+      "networking": "Réseautage",
+      "circles": "Cercles"
     },
     "empty": {
       "programme": "Aucun programme pour l'instant. Ajoutez des séances depuis « Gérer l'événement ».",
@@ -4672,7 +4674,7 @@
       "updates": "Aucune actualité pour l'instant. Publiez-en une depuis « Gérer l'événement » : tous les inscrits en sont informés."
     },
     "overview": {
-      "about": "À propos de cet événement",
+      "about": "À propos de l'événement",
       "noDescription": "Les organisateurs n'ont pas encore ajouté de description.",
       "organisedBy": "Organisé par {name}",
       "tags": "Mots-clés",
@@ -4688,7 +4690,19 @@
       "externalRegistration": "Page d'inscription des organisateurs",
       "free": "Gratuit",
       "paid": "Payant",
-      "perTicket": "{price} par billet"
+      "perTicket": "{price} par billet",
+      "format": "Format",
+      "access": "Accès",
+      "accessRegistration": "Inscription requise",
+      "accessApproval": "Inscription requise (approbation de l'organisateur)",
+      "organisedByHeading": "Organisé par",
+      "contactHeading": "Contact de l'événement",
+      "featuredSpeakers": "Intervenants à l'affiche",
+      "viewAll": "Tout voir",
+      "programmeHeading": "Programme de l'événement",
+      "viewProgramme": "Voir le programme complet",
+      "joinBannerTitle": "Plus forts ensemble",
+      "joinBannerBody": "Rejoignez {name} pour rester en contact avec ses membres après l'événement."
     },
     "programme": {
       "timesIn": "Les horaires sont affichés en {zone}.",
@@ -4755,13 +4769,15 @@
         "awaitingPayment": "Ouvrez l'onglet « Mon événement » pour terminer.",
         "rejected": "Contactez les organisateurs si vous pensez qu'il s'agit d'une erreur.",
         "closesOn": "Les inscriptions ferment le {date}.",
-        "needsApproval": "Les organisateurs approuvent chaque inscription."
+        "needsApproval": "Les organisateurs approuvent chaque inscription.",
+        "confirmed": "Vous retrouverez ici les actualités de cet événement et les détails de votre inscription."
       },
       "cta": {
         "register": "S'inscrire",
         "joinWaitlist": "Rejoindre la liste d'attente",
         "signInToRegister": "Connectez-vous pour vous inscrire",
-        "myEvent": "Mon événement"
+        "myEvent": "Mon événement",
+        "viewDetails": "Voir les détails de l'inscription"
       }
     },
     "organiser": {
@@ -4779,7 +4795,10 @@
       "requestedPay": "Votre demande pour rejoindre {name} a été lancée. Finalisez le paiement sur sa page pour la terminer.",
       "failedJoin": "Nous n'avons pas pu envoyer votre demande pour rejoindre {name}. Votre inscription à l'événement n'est pas affectée. Vous pouvez réessayer depuis cette page.",
       "notApplicable": "Cet événement n'a pas de communauté organisatrice à rejoindre.",
-      "notAvailableYet": "Rejoindre la communauté organisatrice depuis un événement n'est pas encore disponible."
+      "notAvailableYet": "Rejoindre la communauté organisatrice depuis un événement n'est pas encore disponible.",
+      "viewCommunity": "Voir la communauté",
+      "statusMember": "Statut : membre",
+      "statusPending": "Statut : demande en attente"
     },
     "share": {
       "title": "Partager cet événement",
@@ -4787,15 +4806,19 @@
       "share": "Partager",
       "copied": "Lien copié",
       "failed": "Impossible de copier le lien",
-      "qrAlt": "Code QR qui ouvre la page de cet événement"
+      "qrAlt": "Code QR qui ouvre la page de cet événement",
+      "sub": "Invitez vos amis et collègues à cet événement.",
+      "inviteLink": "Obtenir le lien d'invitation",
+      "qr": "Code QR"
     },
     "similar": {
-      "title": "Événements similaires"
+      "title": "Événements similaires",
+      "viewAll": "Tout voir"
     },
     "register": {
       "signInPrompt": "Connectez-vous pour vous inscrire à cet événement.",
       "signIn": "Se connecter",
-      "attendee": "Vos informations",
+      "attendee": "Informations du participant",
       "name": "Nom",
       "email": "E-mail",
       "attendeeNote": "Reprises de votre profil. Modifiez-les dans les paramètres de votre profil.",
@@ -4804,7 +4827,9 @@
       "format": {
         "label": "Comment participerez-vous ?",
         "inPerson": "Sur place",
-        "online": "En ligne"
+        "online": "En ligne",
+        "sub": "Comment participerez-vous ?",
+        "onlineSub": "Participation via le lien en ligne."
       },
       "summary": {
         "title": "Récapitulatif",
@@ -4819,7 +4844,8 @@
         "failed": "Nous n'avons pas pu vérifier ce code. Réessayez."
       },
       "terms": {
-        "label": "J'accepte les conditions de l'événement, les <tos>Conditions d'utilisation</tos> et la <privacy>Politique de confidentialité</privacy> de DiaspoPlug."
+        "label": "J'accepte les conditions de l'événement, les <tos>Conditions d'utilisation</tos> et la <privacy>Politique de confidentialité</privacy> de DiaspoPlug.",
+        "title": "Conditions générales"
       },
       "joinOrganiser": {
         "label": "Rejoindre aussi {name}",
@@ -4848,8 +4874,23 @@
         "waitlisted": "Vous êtes sur la liste d'attente.",
         "waitlistedPos": "Vous êtes numéro {position} sur la liste d'attente.",
         "received": "Inscription reçue.",
-        "paymentNotCompleted": "Le paiement n'a pas abouti. Votre place est réservée, mais elle ne sera confirmée qu'après paiement."
-      }
+        "paymentNotCompleted": "Le paiement n'a pas abouti. Votre place est réservée, mais elle ne sera confirmée qu'après paiement.",
+        "draftSaved": "Votre profil de réseautage a été enregistré comme brouillon. Rien n'est partagé tant que vous ne rejoignez pas le réseautage.",
+        "draftUnavailableYet": "L'enregistrement d'un profil de réseautage n'est pas encore disponible. Votre inscription n'est pas affectée.",
+        "draftFailed": "Nous n'avons pas pu enregistrer votre profil de réseautage. Votre inscription n'est pas affectée. Vous pourrez le remplir plus tard sur la page de réseautage."
+      },
+      "heading": "Inscription à l'événement",
+      "headingSub": "Remplissez le formulaire ci-dessous pour vous inscrire à {title}.",
+      "attendeeSub": "Reprises de votre profil.",
+      "type": {
+        "title": "Type d'inscription",
+        "sub": "Choisissez le type d'inscription qui vous convient.",
+        "general": "Inscription"
+      },
+      "quantity": "Nombre de billets",
+      "decrease": "Moins de billets",
+      "increase": "Plus de billets",
+      "backToEvent": "Retour à l'événement"
     },
     "myEvent": {
       "status": "Votre inscription",
@@ -5013,6 +5054,81 @@
         "removed": "Retiré de l'équipe.",
         "unknownPerson": "Personne inconnue"
       }
+    },
+    "format": {
+      "physical": "Sur place",
+      "physicalSub": "Sur le lieu",
+      "virtual": "En ligne",
+      "virtualSub": "Participez de partout",
+      "hybrid": "Hybride",
+      "hybridSub": "Sur place et en ligne"
+    },
+    "cta": {
+      "networkingJoin": "Rejoindre le réseautage de l'événement",
+      "networkingOpen": "Ouvrir le réseautage de l'événement",
+      "networkingSub": "Rencontrez des personnes et engagez des conversations utiles.",
+      "networkingJoinedSub": "Vous avez rejoint. Voyez qui vous pouvez rencontrer.",
+      "networkingPendingSub": "Ouvre dès que votre inscription est confirmée.",
+      "networkingIneligibleSub": "Le réseautage n'est pas ouvert à votre inscription.",
+      "networkingRegisterSub": "Inscrivez-vous à l'événement pour participer.",
+      "connectTitle": "Se connecter sur DiaspoPlug",
+      "connectSub": "Envoyez une demande de connexion aux participants."
+    },
+    "grow": {
+      "title": "Développez votre réseau",
+      "body": "Assister à des événements n'est qu'un début. Rejoignez {name} pour prolonger les conversations."
+    },
+    "registerRail": {
+      "stepsTitle": "Plus que quelques étapes",
+      "stepsBody": "Terminez votre inscription pour réserver votre place à cet événement.",
+      "highlights": "Temps forts de l'événement",
+      "qrAlt": "Code QR qui ouvre la page de cet événement",
+      "helpTitle": "Vous vous inscrivez depuis votre téléphone ?",
+      "helpBody": "Scannez le code QR ou copiez le lien pour ouvrir cette page sur votre mobile.",
+      "copyLink": "Copier le lien",
+      "copied": "Lien copié",
+      "copyFailed": "Impossible de copier le lien",
+      "viewOnMap": "Voir sur la carte"
+    },
+    "panels": {
+      "networking": {
+        "title": "Réseautage de l'événement",
+        "body": "Rencontrez d'autres participants, trouvez des personnes partageant vos centres d'intérêt et engagez des conversations avant, pendant et après l'événement. Rejoindre est votre choix, et rien n'est partagé tant que vous ne l'avez pas fait.",
+        "pending": "Le réseautage ouvre dès que votre inscription est confirmée.",
+        "ineligible": "Le réseautage n'est pas ouvert à votre inscription.",
+        "registerFirst": "Inscrivez-vous à l'événement pour participer au réseautage.",
+        "open": "Ouvrir le réseautage",
+        "join": "Rejoindre le réseautage de l'événement"
+      },
+      "circles": {
+        "title": "Cercles de réseautage",
+        "body": "De petits groupes thématiques pour les participants qui veulent aller plus loin. Parcourez les cercles sur la page de réseautage et rejoignez ceux qui vous conviennent.",
+        "pending": "Les cercles ouvrent dès que votre inscription est confirmée.",
+        "ineligible": "Les cercles ne sont pas ouverts à votre inscription.",
+        "registerFirst": "Inscrivez-vous à l'événement pour rejoindre des cercles.",
+        "open": "Ouvrir les cercles",
+        "join": "Parcourir les cercles"
+      }
+    }
+  },
+  "eventRegister": {
+    "selectOption": "Sélectionner une option",
+    "networking": {
+      "title": "Profil de réseautage",
+      "optional": "Facultatif",
+      "helper": "Facultatif – enregistré comme brouillon ; rien n'est partagé tant que vous ne rejoignez pas le réseautage.",
+      "industry": "Secteur",
+      "industryPlaceholder": "Choisir un secteur",
+      "interests": "Centres d'intérêt",
+      "interestsPlaceholder": "Choisir des centres d'intérêt",
+      "offers": "Ce que vous proposez",
+      "offersPlaceholder": "Choisir ce que vous proposez",
+      "needs": "Ce que vous recherchez",
+      "needsPlaceholder": "Choisir ce que vous recherchez",
+      "note": "Ajouter une note (facultatif)",
+      "selectedCount": "{count} sélectionné(s)",
+      "max": "Vous pouvez en choisir jusqu'à {count}.",
+      "draftNote": "Enregistré comme brouillon après votre inscription. Vous pourrez le modifier plus tard dans votre profil de réseautage."
     }
   }
 }

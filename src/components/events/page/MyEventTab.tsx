@@ -85,6 +85,11 @@ export default function MyEventTab({
             {lastResult.paymentFailed && <p className="mt-1 text-text-warning">{tReg('paymentNotCompleted')}</p>}
           </div>
           {/* Its own notice: a failed join is not a failed registration. */}
+          {lastResult.networkingDraft && (
+            <p role="status" data-testid="networking-draft-outcome" className="rounded-xl bg-surface-subtle p-3 text-sm text-text-primary">
+              {lastResult.networkingDraft === 'saved' ? tReg('draftSaved') : lastResult.networkingDraft === 'unavailableYet' ? tReg('draftUnavailableYet') : tReg('draftFailed')}
+            </p>
+          )}
           {lastResult.join && organiser && <JoinOutcomeNotice outcome={lastResult.join} organiser={organiser} />}
         </div>
       )}

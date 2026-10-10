@@ -4,21 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowLeft, Bookmark, BookmarkCheck, Settings2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import PageLoader from "@/components/custom/PageLoader";
-import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { ButtonType2 } from "@/components/custom/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useAdminOrganisers } from "@/hooks/useAdminOrganisers";
 import {
-  EVENT_PLACEHOLDER_IMAGE,
   IS_EVENT_SAVED,
   SAVE_EVENT,
   UNSAVE_EVENT,
   USER_EVENTS,
-  getEventCoverImage,
   getEventLocationDisplay,
   type IsEventSavedData,
   type SaveEventData,
@@ -40,17 +37,22 @@ import { readMutationOutcome } from "@/lib/mutationOutcome";
 import { eventRefusal } from "@/lib/eventRefusal";
 import { formatInZone } from "@/lib/eventCalendar";
 import { REGISTERED_STATES, deriveRegistrationState } from "@/lib/eventRegistrationState";
-import { ManagerEmpty, OverviewTab, ProgrammeTab, SpeakersTab, UpdatesTab, VenueTab, hasVenueContent } from "@/components/events/page/ContentTabs";
+import { ManagerEmpty, ProgrammeTab, SpeakersTab, UpdatesTab, VenueTab, hasVenueContent } from "@/components/events/page/ContentTabs";
+import { OverviewTab } from "@/components/events/page/OverviewTab";
+import EventHero from "@/components/events/page/EventHero";
+import NetworkingCtas from "@/components/events/page/NetworkingCtas";
+import NetworkingPanel from "@/components/events/page/NetworkingPanels";
+import { useEventNetworking } from "@/components/events/page/useEventNetworking";
 import MyEventTab from "@/components/events/page/MyEventTab";
 import OrganiserCard from "@/components/events/page/OrganiserCard";
 import RegisterTab, { type RegistrationResult } from "@/components/events/page/RegisterTab";
 import RegistrationCard from "@/components/events/page/RegistrationCard";
-import { ShareCard, SimilarEvents } from "@/components/events/page/RailExtras";
+import { GrowNetworkCard, RegisterRail, ShareCard, SimilarEvents } from "@/components/events/page/RailExtras";
 import { useEventPriceLabel } from "@/components/events/page/useEventPriceLabel";
 import { useOrganiser } from "@/components/events/page/useOrganiser";
 
-type TabKey = "overview" | "programme" | "speakers" | "venue" | "updates" | "register";
-const TAB_KEYS: TabKey[] = ["overview", "programme", "speakers", "venue", "updates", "register"];
+type TabKey = "overview" | "programme" | "speakers" | "networking" | "circles" | "venue" | "updates" | "register";
+const TAB_KEYS: TabKey[] = ["overview", "programme", "speakers", "networking", "circles", "venue", "updates", "register"];
 
 const EMPTY: never[] = [];
 
@@ -106,17 +108,19 @@ export default function EventDetailPage() {
 
   const state = event ? deriveRegistrationState(event) : "open";
   const registered = REGISTERED_STATES.has(state);
+  const networking = useEventNetworking(eventId, signedIn && !!event);
   const hasVenue = event ? hasVenueContent(event, venue.data?.eventVenueInfo) : false;
 
   const tabs = useMemo(() => {
     const list: TabKey[] = ["overview"];
     if (sessionList.length > 0 || canManage) list.push("programme");
     if (speakerList.length > 0 || canManage) list.push("speakers");
+    if (networking.available) list.push("networking", "circles");
     if (hasVenue || canManage) list.push("venue");
     if (updateList.length > 0 || canManage) list.push("updates");
     list.push("register");
     return list;
-  }, [sessionList.length, speakerList.length, hasVenue, updateList.length, canManage]);
+  }, [sessionList.length, speakerList.length, hasVenue, updateList.length, canManage, networking.available]);
 
   const requested = search.get("tab") as TabKey | null;
   const active: TabKey = requested && TAB_KEYS.includes(requested) && tabs.includes(requested) ? requested : "overview";
@@ -191,46 +195,15 @@ export default function EventDetailPage() {
           <span className="text-sm font-medium">{t("back")}</span>
         </button>
 
-        <header className="mb-4 overflow-hidden rounded-2xl border border-border-subtle bg-surface-default">
-          <div className="relative h-44 bg-surface-subtle sm:h-60">
-            <ImageWithFallback
-              src={getEventCoverImage(event)}
-              fallbackSrc={EVENT_PLACEHOLDER_IMAGE}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+        <EventHero event={event} canManage={canManage} saved={saved} onToggleSave={toggleSave}>
+          {state === "eventCancelled" && <p role="status" className="w-fit rounded-lg bg-surface-danger p-2 text-sm text-text-danger">{tRail("states.eventCancelled")}</p>}
+          {/* Phones show the rail below the tabs, so the one action that matters sits up here too. */}
+          <div className="lg:hidden">
+            <ButtonType2 onClick={() => openTab("register")} className="w-full" size="lg">
+              {registered ? tRail("cta.myEvent") : state === "full" ? tRail("cta.joinWaitlist") : state === "open" ? tRail("cta.register") : tRail(`states.${state}`, { date: event.registrationOpensAt ? formatInZone(event.registrationOpensAt, locale, event.timezone) : "" })}
+            </ButtonType2>
           </div>
-          <div className="space-y-2 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <h1 className="text-2xl font-bold text-text-primary break-words">{event.title}</h1>
-              <div className="flex shrink-0 items-center gap-1">
-                {canManage && (
-                  <Link href={`/events/${event.id}/manage`} aria-label={t("manageCta")} className="inline-flex size-11 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover" data-testid="manage-link">
-                    <Settings2 className="size-5" aria-hidden />
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={toggleSave}
-                  aria-pressed={saved}
-                  aria-label={saved ? t("unsave") : t("save")}
-                  className="inline-flex size-11 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover"
-                >
-                  {saved ? <BookmarkCheck className="size-5 text-text-brand" aria-hidden /> : <Bookmark className="size-5" aria-hidden />}
-                </button>
-              </div>
-            </div>
-            <p className="font-medium text-text-primary">{formatInZone(event.startAt, locale, event.timezone)}</p>
-            <p className="text-text-secondary">{getEventLocationDisplay(event)}</p>
-            {state === "eventCancelled" && <p role="status" className="rounded-lg bg-surface-danger p-2 text-sm text-text-danger">{tRail("states.eventCancelled")}</p>}
-            {/* Phones show the rail below the tabs, so the one action that matters sits up here too. */}
-            <div className="lg:hidden">
-              <ButtonType2 onClick={() => openTab("register")} className="w-full" size="lg">
-                {registered ? tRail("cta.myEvent") : state === "full" ? tRail("cta.joinWaitlist") : state === "open" ? tRail("cta.register") : tRail(`states.${state}`, { date: event.registrationOpensAt ? formatInZone(event.registrationOpensAt, locale, event.timezone) : "" })}
-              </ButtonType2>
-            </div>
-          </div>
-        </header>
+        </EventHero>
 
         <div className="gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem]">
           <main className="min-w-0 space-y-4">
@@ -257,7 +230,17 @@ export default function EventDetailPage() {
             </div>
 
             <div id="event-tabpanel" role="tabpanel" aria-labelledby={`event-tab-${active}`} tabIndex={0} className="space-y-4 focus:outline-none">
-              {active === "overview" && <OverviewTab event={event} priceLabel={priceLabel} organiserName={organiser?.entity.name} />}
+              {active === "overview" && (
+                <OverviewTab
+                  event={event}
+                  priceLabel={priceLabel}
+                  organiser={organiser}
+                  speakers={speakerList}
+                  sessions={sessionList}
+                  venueInfo={venue.data?.eventVenueInfo}
+                  onOpenTab={openTab}
+                />
+              )}
               {active === "programme" &&
                 (sessionList.length > 0 ? (
                   <ProgrammeTab event={event} sessions={sessionList} speakers={speakerList} />
@@ -266,6 +249,7 @@ export default function EventDetailPage() {
                 ))}
               {active === "speakers" &&
                 (speakerList.length > 0 ? <SpeakersTab speakers={speakerList} /> : <ManagerEmpty eventId={event.id} section="speakers" text={t("empty.speakers")} />)}
+              {(active === "networking" || active === "circles") && <NetworkingPanel eventId={event.id} networking={networking} variant={active} />}
               {active === "venue" && <VenueTab event={event} info={venue.data?.eventVenueInfo} canSeeOnlineLink={state === "confirmed" || canManage} />}
               {active === "updates" &&
                 (updateList.length > 0 ? <UpdatesTab eventId={event.id} /> : <ManagerEmpty eventId={event.id} section="updates" text={t("empty.updates")} />)}
@@ -303,10 +287,18 @@ export default function EventDetailPage() {
           </main>
 
           <aside className="mt-6 space-y-4 lg:mt-0" aria-label={t("railLabel")}>
-            <RegistrationCard event={event} state={state} waitlistPosition={lastResult?.waitlistPosition} signedIn={signedIn} onOpenTab={openTab} />
-            {organiser && <OrganiserCard eventId={event.id} organiser={organiser} signedIn={signedIn} />}
-            <ShareCard eventId={event.id} title={event.title} />
-            <SimilarEvents eventId={event.id} category={event.eventCategory} />
+            {active === "register" && !registered && !lastResult ? (
+              <RegisterRail event={event} state={state} />
+            ) : (
+              <>
+                <RegistrationCard event={event} state={state} waitlistPosition={lastResult?.waitlistPosition} signedIn={signedIn} onOpenTab={openTab} />
+                <NetworkingCtas eventId={event.id} networking={networking} />
+                {organiser && <OrganiserCard eventId={event.id} organiser={organiser} signedIn={signedIn} />}
+                <ShareCard eventId={event.id} title={event.title} />
+                <SimilarEvents eventId={event.id} category={event.eventCategory} />
+                <GrowNetworkCard organiser={organiser} />
+              </>
+            )}
           </aside>
         </div>
       </div>

@@ -139,6 +139,9 @@ test('the right rail: organiser card with the viewer standing, share + QR, simil
     const organiser = page.getByTestId('organiser-card');
     await expect(organiser).toContainText(ORGANISER_NAME, { timeout: 90_000 });
     await expect(organiser.getByRole('button', { name: `Join ${ORGANISER_NAME}` })).toBeVisible();
+    // The QR code is generated only when asked for.
+    await expect(page.getByTestId('event-qr')).toHaveCount(0);
+    await page.getByTestId('share-card').getByRole('button', { name: 'QR code' }).click();
     await expect(page.getByTestId('event-qr')).toBeVisible();
     // Only the future, same-category, other event is listed.
     const list = page.getByTestId('similar-events');
