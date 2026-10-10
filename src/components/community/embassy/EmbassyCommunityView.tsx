@@ -14,7 +14,7 @@ import { EmbassyGroupsTab } from './tabs/EmbassyGroupsTab';
 import { EmbassyRulesTab } from './tabs/EmbassyRulesTab';
 import { ComingSoonTab } from './tabs/ComingSoonTab';
 import { parseEmbassyTab, EMBASSY_TABS } from './tabs';
-import { isTabEnabled } from '@/lib/communityServices';
+import { isEventsOnly, isTabEnabled } from '@/lib/communityServices';
 import { getEmbassyProfile } from './embassyData';
 import { CommunityVariantProvider } from './communityVariant';
 import type { EmbassyViewProps } from './types';
@@ -29,7 +29,10 @@ import type { EmbassyViewProps } from './types';
 export function EmbassyCommunityView(props: EmbassyViewProps) {
   const { community, variant, ownerKind = 'community' } = props;
   const searchParams = useSearchParams();
-  const requestedTab = parseEmbassyTab(searchParams.get('tab'));
+  // An events-only community opens on Events; an explicit `?tab=` (including
+  // the Home tab link, which always sets it) still wins.
+  const rawTab = searchParams.get('tab');
+  const requestedTab = rawTab == null && isEventsOnly(community.enabledServices) ? 'events' : parseEmbassyTab(rawTab);
   // A `?tab=` deep-link (or a stale link after a service is disabled) must never
   // land on a gated tab — fall back to the always-on 'home' feed.
   const activeTab = isTabEnabled(requestedTab, community.enabledServices)

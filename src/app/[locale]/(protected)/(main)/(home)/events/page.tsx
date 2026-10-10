@@ -37,6 +37,8 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { openPaystackMobileMoney } from '@/lib/paystack';
+import { Link } from '@/i18n/navigation';
+import { useAdminOrganisers } from '@/hooks/useAdminOrganisers';
 function formatEventDate(iso: string, locale: string) {
     return new Intl.DateTimeFormat(locale, {
         month: 'short',
@@ -118,6 +120,7 @@ function formatPriceLabel(event: Event) {
 export default function Events() {
     // `?tab=saved` opens the Saved tab directly (linked from the More page).
     const searchParams = useSearchParams();
+    const { organisers } = useAdminOrganisers();
     const [activeTab, setActiveTab] = useState<string>(() =>
         searchParams.get("tab") === "saved" ? "saved" : "events",
     );
@@ -422,7 +425,19 @@ export default function Events() {
     return (
         <div className="lg:w-[60vw] h-app-inner p-4 overflow-auto scrollbar-hide">
             <div className="mx-auto">
-                <p className="heading-small mb-2">{t("yourevents")}</p>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="heading-small">{t("yourevents")}</p>
+                    {/* Only people who administer a community or association can organise events. */}
+                    {organisers.length > 0 && (
+                        <Link
+                            href="/events/create"
+                            data-testid="create-event-link"
+                            className="rounded-full bg-surface-brand px-4 py-2 label-medium text-text-white hover:opacity-90"
+                        >
+                            {t("create")}
+                        </Link>
+                    )}
+                </div>
 
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">

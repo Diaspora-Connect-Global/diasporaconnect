@@ -10,6 +10,10 @@ import { Loader2, ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useUserStore } from "@/store/useUserStore";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { useAdminOrganisers } from "@/hooks/useAdminOrganisers";
+import { eventRefusal } from "@/lib/eventRefusal";
+import PageLoader from "@/components/custom/PageLoader";
 
 const EVENT_CATEGORIES = [
   { value: "Community", label: "Community" },
@@ -147,6 +151,13 @@ function toIsoInTimezone(localDatetimeStr: string, timeZone: string): string {
 export default function CreateEventPage() {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
+  const tCreate = useTranslations("eventPage.create");
+  const tErr = useTranslations("eventPage.errors");
+  // Only communities and associations organise events: the organiser is chosen
+  // from the ones this person administers (never "myself").
+  const { organisers, loading: organisersLoading } = useAdminOrganisers();
+  const [organiserKey, setOrganiserKey] = useState<string>("");
+  const organiser = organisers.find((o) => `${o.kind}:${o.id}` === organiserKey) ?? (organisers.length === 1 ? organisers[0] : undefined);
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState<FormData>(INITIAL);
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
@@ -179,15 +190,16 @@ export default function CreateEventPage() {
 
   const handleCreateDraft = async () => {
     if (!user) { toast.error("Please log in"); return; }
+    if (!organiser) { toast.error(tCreate("chooseOrganiser")); return null; }
     const ticketPrice = form.isPaid ? Math.round(Number(form.ticketPriceStr) * 100) : undefined;
     const capacity = form.capacityType === 'limited' ? Number(form.capacityStr) : undefined;
 
     try {
-      const { data } = await createEvent({
+      const result = await createEvent({
         variables: {
           input: {
-            ownerType: 'user',
-            ownerId: user.userId,
+            ownerType: organiser.kind,
+            ownerId: organiser.id,
             title: form.title.trim(),
             description: form.description.trim(),
             eventCategory: form.eventCategory,
@@ -214,8 +226,12 @@ export default function CreateEventPage() {
           },
         },
       });
-      const id = data?.createEvent?.id;
-      if (!id) throw new Error('No event ID returned');
+      const id = result.data?.createEvent?.id;
+      if (!id) {
+        // errorPolicy 'all': a refusal resolves with data: null, it does not throw.
+        toast.error(tErr(eventRefusal(result).key));
+        return null;
+      }
       setCreatedEventId(id);
       return id;
     } catch (err) {
@@ -253,6 +269,26 @@ export default function CreateEventPage() {
     { label: 'Pricing', num: 3 as Step },
   ];
 
+  if (organisersLoading) {
+    return (
+      <div className="h-[calc(100vh-4rem)] lg:w-[60vw] flex">
+        <PageLoader />
+      </div>
+    );
+  }
+
+  if (organisers.length === 0) {
+    return (
+      <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
+        <div className="max-w-2xl mx-auto rounded-lg border border-border-subtle p-6 space-y-3 text-center" data-testid="no-organiser">
+          <h1 className="heading-small">{tCreate("noOrganiserTitle")}</h1>
+          <p className="text-sm text-text-secondary">{tCreate("noOrganiserBody")}</p>
+          <Link href="/events" className="inline-block text-sm text-text-brand hover:underline">{tCreate("browse")}</Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -262,6 +298,30 @@ export default function CreateEventPage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <h1 className="heading-small">Create Event</h1>
+        </div>
+
+        {/* Organiser: events belong to a community or association the person administers. */}
+        <div className="space-y-1" data-testid="organiser-picker">
+          <label htmlFor="organiser" className="text-sm font-medium text-text-primary">{tCreate("organiserLabel")}</label>
+          <select
+            id="organiser"
+            value={organiser ? `${organiser.kind}:${organiser.id}` : ""}
+            onChange={(e) => setOrganiserKey(e.target.value)}
+            className="w-full min-h-11 rounded-md border-2 border-border-subtle bg-surface-subtle px-3 text-sm text-text-primary focus:outline-none"
+          >
+            {!organiser && <option value="" disabled>{tCreate("organiserPlaceholder")}</option>}
+            {organisers.some((o) => o.kind === "community") && (
+              <optgroup label={tCreate("communities")}>
+                {organisers.filter((o) => o.kind === "community").map((o) => <option key={o.id} value={`community:${o.id}`}>{o.name}</option>)}
+              </optgroup>
+            )}
+            {organisers.some((o) => o.kind === "association") && (
+              <optgroup label={tCreate("associations")}>
+                {organisers.filter((o) => o.kind === "association").map((o) => <option key={o.id} value={`association:${o.id}`}>{o.name}</option>)}
+              </optgroup>
+            )}
+          </select>
+          <p className="text-xs text-text-secondary">{tCreate("organiserHelp")}</p>
         </div>
 
         {/* Step indicator */}
@@ -493,14 +553,14 @@ export default function CreateEventPage() {
               <>
                 <ButtonType3
                   onClick={handleSaveDraft}
-                  disabled={creating || !step3Valid}
+                  disabled={creating || !step3Valid || !organiser}
                   size="lg"
                 >
                   {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save draft'}
                 </ButtonType3>
                 <ButtonType2
                   onClick={handlePublish}
-                  disabled={isPublishing || creating || !step3Valid}
+                  disabled={isPublishing || creating || !step3Valid || !organiser}
                   size="lg"
                   className="flex items-center gap-2"
                 >

@@ -73,6 +73,16 @@ export function isServiceEnabled(
 }
 
 /**
+ * A community / association that exists only to run events: `enabledServices`
+ * is EXACTLY `['events']`. Its public page opens on the Events tab (the Home
+ * feed has nothing for it to show). `null` (legacy / not loaded) and every
+ * other combination are not events-only.
+ */
+export function isEventsOnly(enabledServices?: readonly string[] | null): boolean {
+  return Array.isArray(enabledServices) && enabledServices.length === 1 && enabledServices[0] === 'events';
+}
+
+/**
  * Should a tab be shown?
  * 'home' and 'rules' are always visible. `enabledServices == null` → show all
  * (non-destructive).
