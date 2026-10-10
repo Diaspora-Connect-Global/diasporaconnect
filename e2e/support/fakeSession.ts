@@ -90,10 +90,13 @@ function describe(query: string): { name: string; fields: string[]; isMutation: 
 
 export function fakeGraphql(overrides: Overrides = {}) {
     const ops: string[] = [];
+    /** Every operation with the variables it was sent — for asserting what a click actually sent. */
+    const calls: Array<{ name: string; variables: Record<string, unknown> }> = [];
     async function handle(route: Route) {
         const body = route.request().postDataJSON() as { query?: string; variables?: Record<string, unknown>; operationName?: string };
         const { name, fields } = describe(body?.query ?? '');
         ops.push(body?.operationName ?? name);
+        calls.push({ name: body?.operationName ?? name, variables: body?.variables ?? {} });
         let data: Record<string, unknown>;
         if (name in overrides) {
             const o = overrides[name];
@@ -103,9 +106,18 @@ export function fakeGraphql(overrides: Overrides = {}) {
         } else {
             data = Object.fromEntries(fields.map((f) => [f, null]));
         }
+        // An override may answer with a REFUSAL: `{ __errors: [{ message, code }] }` becomes
+        // `{ data: null, errors: [...] }` with `extensions.code`, exactly what a refused
+        // mutation looks like under Apollo's errorPolicy 'all'.
+        const refusal = (data as { __errors?: Array<{ message: string; code: string }> } | null)?.__errors;
+        if (refusal) {
+            const errors = refusal.map((e) => ({ message: e.message, extensions: { code: e.code } }));
+            await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: null, errors }) });
+            return;
+        }
         await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data }) });
     }
-    return { ops, handle };
+    return { ops, calls, handle };
 }
 
 /** Abort everything that is not the local dev server, then answer GraphQL. */
