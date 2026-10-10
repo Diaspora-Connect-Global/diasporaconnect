@@ -342,10 +342,10 @@ export default function Events() {
         { name: `${tActions("saved")}`, status: "saved" },
     ];
 
-    const attendingEvents = userEventsData?.userEvents.attending ?? [];
-    const savedEvents = userEventsData?.userEvents.saved ?? [];
+    const attendingEvents = userEventsData?.userEvents?.attending ?? [];
+    const savedEvents = userEventsData?.userEvents?.saved ?? [];
     const allEvents = useMemo(
-        () => (eventsData?.listEvents.events ?? []).filter(
+        () => (eventsData?.listEvents?.events ?? []).filter(
             (e) => e.status !== 'completed' && new Date(e.endAt) >= new Date()
         ),
         [eventsData]

@@ -196,13 +196,15 @@ export function SpeakersTab({ speakers }: { speakers: EventSpeaker[] }) {
 
 // ─── Venue ───────────────────────────────────────────────────────────────────
 
-export function hasVenueContent(event: Pick<EventPageEvent, 'locationType' | 'locationDetails'>, info?: EventVenueInfo | null): boolean {
-  const v = getEventVenueLines(event);
-  const base = Boolean(v.venueName) || v.addressLines.length > 0;
-  const extra = Boolean(
+/**
+ * Whether the Venue tab has anything the Overview does not already show. The
+ * venue name and address are on the Overview, so on their own they do not earn
+ * a tab; halls, directions, accessibility, parking or a public contact do.
+ */
+export function hasVenueContent(_event: Pick<EventPageEvent, 'locationType' | 'locationDetails'>, info?: EventVenueInfo | null): boolean {
+  return Boolean(
     info && (info.halls.length || info.directions || info.accessibilityNotes || info.parking || info.contactEmail || info.contactPhone),
   );
-  return base || extra;
 }
 
 export function VenueTab({
