@@ -10,7 +10,6 @@ import MessageWebSocketProvider from "@/components/provider/MessageWebSocketProv
 import NotificationWebSocketProvider from "@/components/provider/NotificationWebSocketProvider";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useProfileGuard } from "@/hooks/useProfileGuard";
-import { useSidebarBootReady } from "@/components/home/HomeSidebar";
 import { OfflineBanner, IssueReporterButton, ErrorState } from "@/components/feedback";
 import { useTranslations } from "next-intl";
 
@@ -22,11 +21,11 @@ function PushNotificationRegistrar() {
 /**
  * The authenticated shell's ONE boot gate.
  *
- * Shows a single, caption-less `LoadingScreen` until auth has rehydrated, the
- * profile check has passed AND the sidebar's data is in the Apollo cache — the
- * profile and sidebar queries are started together (one round-trip, not
- * profile → then sidebar). Only then do header, sidebar and bottom nav mount,
+ * Shows a single, caption-less `LoadingScreen` until auth has rehydrated and the
+ * profile check has passed. Only then do the header and bottom nav mount,
  * complete and in their final position, and stay mounted for the session.
+ * (There is no shell sidebar to prefetch any more: the Community page loads
+ * the lists it shows behind its own page loader.)
  *
  * A profile check that keeps failing (network) ends in a retry screen instead
  * of an endless loader; see `useProfileGuard`.
@@ -45,9 +44,8 @@ export default function MainLayout({
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
   const bootEnabled = hydrated && isAuthenticated;
 
-  // Both start as soon as auth is confirmed — in parallel.
+  // Starts as soon as auth is confirmed.
   const guard = useProfileGuard(bootEnabled);
-  const sidebarReady = useSidebarBootReady(bootEnabled);
 
   // Wait for Zustand to rehydrate from localStorage before checking auth
   useEffect(() => {
@@ -95,7 +93,7 @@ export default function MainLayout({
   }
 
   // One loader, one look, from first paint until the shell is complete.
-  if (!bootEnabled || guard.status !== "ok" || !sidebarReady) {
+  if (!bootEnabled || guard.status !== "ok") {
     return <LoadingScreen />;
   }
 

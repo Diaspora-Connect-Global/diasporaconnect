@@ -439,7 +439,7 @@ export default function GlobalSearchBar() {
   return (
     <>
       {/* ── Desktop (lg+) ── */}
-      <div ref={containerRef} className="relative hidden lg:block w-64">
+      <div ref={containerRef} className="relative hidden lg:block w-44 xl:w-56">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-subtle border border-border-subtle focus-within:border-text-brand transition-colors">
           <Search className="w-4 h-4 shrink-0 text-text-secondary" />
           {sharedInput(inputRef, 'flex-1 bg-transparent text-base md:text-sm text-text-primary placeholder:text-text-secondary outline-none', () => setOpen(true))}
