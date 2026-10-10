@@ -1,6 +1,6 @@
 /**
  * Main feed column on home (`/`), `/feed`, and `/post/[id]`.
- * `flex-1` + `w-full` + `min-w-0` fills width up to `lg:max-w-[40vw]` beside the sidebar.
+ * `flex-1` + `w-full` + `min-w-0` fills width up to `lg:max-w-[40vw]` beside the right rail.
  */
 export const FEED_COLUMN_CLASS =
   'w-full min-w-0 flex-1 lg:max-w-[40vw] overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col';
@@ -15,17 +15,12 @@ export const FEED_COLUMN_POST_PAGE_CLASS =
 /**
  * Circles screens (`/circles` and everything under it).
  *
- * Identical to `FEED_COLUMN_CLASS` except it does NOT cap at `lg:max-w-[40vw]`.
- * The `(home)` shell is `lg:flex items-center justify-center`, so a capped
- * column leaves 20vw sidebar + 40vw content as a 60vw block that the shell
- * CENTRES — which reads as the sidebar sitting in the middle of the page rather
- * than at its edge. The feed pages live with that because their column width is
- * a deliberate reading measure; Circles has no such constraint, so letting
- * `flex-1` take the remaining width pins the sidebar to the side where it
- * belongs.
+ * Identical to `FEED_COLUMN_CLASS` except it does NOT cap at `lg:max-w-[40vw]`:
+ * the feed's 40vw is a deliberate reading measure, Circles has no such
+ * constraint, so `flex-1` takes the whole `(home)` content column.
  *
- * Used by every Circles route so the sidebar does not shift position as you
- * move between them.
+ * Used by every Circles route so the column does not change width as you move
+ * between them.
  */
 export const CIRCLE_COLUMN_CLASS =
   'w-full min-w-0 flex-1 overflow-y-auto scrollbar-hide mx-4 py-4 flex flex-col';

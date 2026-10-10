@@ -1,10 +1,9 @@
 /**
  * Pass-through layout for one circle.
  *
- * Two shells are already applied above this file: `(home)/layout.tsx` supplies
- * the `HomeSidebar` + main-column split, and `circles/layout.tsx` passes it
- * through untouched. Re-declaring either here would mount a second sidebar
- * beside the first.
+ * Two layouts are already applied above this file: `(home)/layout.tsx` supplies
+ * the centred content column, and `circles/layout.tsx` passes it through
+ * untouched. Re-declaring either here would nest a second frame inside it.
  *
  * It exists as the segment's extension point — per-circle `generateMetadata`
  * belongs here, the way `(home)/post/[id]/layout.tsx` fetches a post's OG tags.

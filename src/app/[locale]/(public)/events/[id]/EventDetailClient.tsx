@@ -1,7 +1,6 @@
 "use client";
 
 import EventCard2 from "@/components/cards/events/EventCard2";
-import HomeSidebar from "@/components/home/HomeSidebar";
 import SuggestedEvents from "@/components/events/SuggestedEvents";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useParams, useRouter } from "next/navigation";
@@ -480,15 +479,10 @@ export default function EventDetailPage() {
 
   return (
     <>
-      <div className="lg:flex justify-center min-h-full">
-        {/* LEFT: home sidebar (only when authenticated) */}
-        {sessionToken && (
-          <div className="hidden lg:block lg:sticky lg:w-[20vw] top-[4rem] h-[calc(100vh-4rem)] scrollbar-hide">
-            <HomeSidebar />
-          </div>
-        )}
-
-        {/* MIDDLE: back button + event card */}
+      {/* Centred in the header's 80vw frame: the event card plus, on large
+          screens, suggestions for other events. (No left sidebar any more.) */}
+      <div className="lg:flex justify-center min-h-full lg:mx-auto lg:w-[80vw]">
+        {/* MAIN: back button + event card */}
         <div className="h-[calc(100vh-4rem)] flex-1 min-w-0 lg:max-w-[45rem] overflow-y-auto scrollbar-hide p-4">
           <div className="mx-auto">
             <button

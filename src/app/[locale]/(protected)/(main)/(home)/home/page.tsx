@@ -53,6 +53,7 @@ import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import PrivacyPolicyModal from '@/components/custom/PrivacyPolicyModal';
 import { resolveUserTier } from '@/lib/userTier';
 import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import ViewFilter from '@/components/home/viewFilter';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
@@ -1359,6 +1360,12 @@ export default function Home() {
         </div>
         </>
         )}
+
+        {/* You / Following — lived in the old left sidebar (and the phone
+            drawer); the feed now carries its own switch. */}
+        <div className="mb-3 shrink-0">
+          <ViewFilter />
+        </div>
 
         {/* Feed Posts */}
         <div className="space-y-2">

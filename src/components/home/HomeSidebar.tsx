@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import InfoLinks from "../custom/infoLinks";
 import { BodyMedium, BodySmall, LabelMedium, TextBrand, } from "../utils";
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -8,7 +8,6 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useQuery } from '@apollo/client/react';
-import { LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import { useChatStore } from '@/store/ChatStore';
 import { GET_MY_GROUPS } from '@/services/gql/groups';
 import { GET_USER_ASSOCIATIONS } from '@/services/gql/associations';
@@ -74,47 +73,8 @@ interface GetMyGroupsResponse {
     };
 }
 
-/**
- * Variables the sidebar's groups list is fetched with. The boot gate prefetches
- * with the SAME document + variables, so the sidebar reads a warm cache on its
- * first paint instead of popping in "Loading…" text.
- */
-export const SIDEBAR_GROUPS_VARIABLES = { limit: 10, offset: 0 } as const;
-
-/** Upper bound on how long the boot gate waits for sidebar data. */
-const SIDEBAR_BOOT_TIMEOUT_MS = 8000;
-
-/**
- * Starts every query the shell sidebar needs (communities, associations, groups,
- * pending requests) in parallel and reports when they have all settled, so the
- * boot gate can show the shell once, complete. Errors count as settled — a
- * failed sidebar list must never hold the whole app behind the loader — and the
- * wait is capped by a deadline for the same reason.
- */
-export function useSidebarBootReady(enabled: boolean): boolean {
-    const userId = useUserStore(state => state.user?.userId);
-    const communities = useQuery(LIST_MY_JOINED_COMMUNITIES, { skip: !enabled });
-    const associations = useQuery<GetUserAssociationsResponse>(GET_USER_ASSOCIATIONS, {
-        variables: { userId: userId! },
-        skip: !enabled || !userId,
-    });
-    const groups = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, {
-        variables: SIDEBAR_GROUPS_VARIABLES,
-        skip: !enabled,
-    });
-    const pending = useQuery<MyPendingRequestsData>(GET_MY_PENDING_REQUESTS, { skip: !enabled });
-
-    const [timedOut, setTimedOut] = useState(false);
-    useEffect(() => {
-        if (!enabled) return;
-        const id = window.setTimeout(() => setTimedOut(true), SIDEBAR_BOOT_TIMEOUT_MS);
-        return () => window.clearTimeout(id);
-    }, [enabled]);
-
-    if (!enabled) return false;
-    if (timedOut) return true;
-    return ![communities, associations, groups, pending].some((q) => q.loading && !q.data);
-}
+/** Variables the sidebar's groups list is fetched with. */
+const SIDEBAR_GROUPS_VARIABLES = { limit: 10, offset: 0 } as const;
 
 function Section({ image, title, isOpen, onToggle, defaultAction, children, link }: SectionProps) {
     // If link is provided and no defaultAction or children, treat as a navigable link
@@ -346,8 +306,8 @@ function SidebarLists() {
                 link="/association"
             >
                 <div className="space-y-1">
-                    {/* Data is prefetched by the boot gate; if it is somehow still
-                        loading, render nothing rather than pop-in text. */}
+                    {/* If the list is still loading, render nothing rather
+                        than pop-in text. */}
                     {userAssociationsLoading && !userAssociationsData ? null : myAssociations.length > 0 ? (
                         visibleAssociations.map((association) => (
                             <div key={association.id}>

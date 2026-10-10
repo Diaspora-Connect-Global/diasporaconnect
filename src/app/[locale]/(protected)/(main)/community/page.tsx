@@ -2,8 +2,7 @@
 'use client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import JoinCommunityCard from "@/components/cards/JoinCommunityCard";
-import { MyCommunityCard } from "@/components/cards/MyCommunityCard";
-import { PendingRequestCard } from "@/components/cards/PendingRequestCard";
+import { YourCommunitiesColumn } from "@/components/community/YourCommunitiesColumn";
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { EmptyState } from '@/components/feedback';
 import { Globe } from 'lucide-react';
@@ -18,6 +17,8 @@ import {
     type CommunityVisibility,
 } from '@/services/gql/community';
 import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
+import { GET_USER_ASSOCIATIONS } from '@/services/gql/associations';
+import { useUserStore } from '@/store/useUserStore';
 import { toast } from 'sonner';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
@@ -59,6 +60,10 @@ interface DiscoverCommunity extends Community {
         isEmbassy: boolean;
     };
     memberCount: number;
+}
+
+interface UserAssociationsData {
+    getUserAssociations: Array<{ id: string; name: string; avatarUrl?: string | null }>;
 }
 
 interface ListUserCommunitiesData {
@@ -210,6 +215,14 @@ export default function Community() {
         { fetchPolicy: 'cache-and-network' }
     );
 
+    // Associations the viewer belongs to — listed in the "Your communities"
+    // column (they used to sit in the old left sidebar).
+    const userId = useUserStore((state) => state.user?.userId);
+    const { data: associationsData, loading: associationsLoading } = useQuery<UserAssociationsData>(
+        GET_USER_ASSOCIATIONS,
+        { variables: { userId: userId! }, skip: !userId, fetchPolicy: 'cache-and-network' }
+    );
+
     const [requestJoinCommunity, { loading: joinLoading }] = useMutation<RequestJoinCommunityResponse>(REQUEST_JOIN_COMMUNITY, {
         refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }, { query: GET_MY_PENDING_REQUESTS }],
         awaitRefetchQueries: false,
@@ -234,6 +247,21 @@ export default function Community() {
         () => new Set(pendingCommunityRequests.map((r) => r.entityId)),
         [pendingCommunityRequests],
     );
+
+    // A community/association the viewer has only REQUESTED to join is not
+    // listed as joined: it shows under "Pending requests" instead.
+    const myJoinedCommunities = useMemo(
+        () => (myCommunitiesData?.listUserCommunities ?? []).filter((c) => !pendingRequestIds.has(c.id)),
+        [myCommunitiesData, pendingRequestIds],
+    );
+    const joinedAssociations = useMemo(() => {
+        const pendingAssociationIds = new Set(
+            (pendingData?.getMyPendingRequests ?? [])
+                .filter((r) => r.entityType?.toUpperCase() === 'ASSOCIATION')
+                .map((r) => r.entityId),
+        );
+        return (associationsData?.getUserAssociations ?? []).filter((a) => !pendingAssociationIds.has(a.id));
+    }, [associationsData, pendingData]);
 
     const handleCancelRequest = async (communityId: string) => {
         try {
@@ -462,7 +490,8 @@ export default function Community() {
         (myCommunitiesLoading && !myCommunitiesData) ||
         (discoverLoading && !discoverData) ||
         (searchLoading && !searchData) ||
-        (pendingLoading && !pendingData);
+        (pendingLoading && !pendingData) ||
+        (associationsLoading && !associationsData);
 
     // Renders the rich body of the join confirmation modal: avatar, name,
     // type/member count, access badges, and a truncated description. Only
@@ -527,56 +556,26 @@ export default function Community() {
 
     if (initialLoading) {
         return (
-            <div className="lg:w-[60vw] h-app-inner flex">
+            <div className="h-app-inner flex">
                 <PageLoader />
             </div>
         );
     }
 
     return (
-        <div className="lg:w-[60vw] h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide">
-            <p className="text-2xl heading-large my-5">{t('myCommunity')}</p>
+        <div className="h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide lg:px-0">
+          {/* Phones: "Your communities" stacks above the discovery content.
+              Large screens: it is a sticky left column beside it. */}
+          <div className="lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-6">
+            <YourCommunitiesColumn
+                communities={myJoinedCommunities}
+                pendingRequests={pendingCommunityRequests}
+                associations={joinedAssociations}
+                onCancelRequest={handleCancelRequest}
+                cancelling={cancelLoading}
+            />
 
-            <div className="bg-surface-default rounded-md p-6 overflow-auto scrollbar-hide max-h-[300px]">
-                {myCommunitiesData?.listUserCommunities?.length ? (
-                    myCommunitiesData?.listUserCommunities?.map((community) => (
-                        <MyCommunityCard
-                            id={community.id}
-                            key={community.id}
-                            title={community.name}
-                            description={community.description || ''}
-                            avatarUrl={toCdnUrl(community.avatarUrl)}
-                            communityType={community.communityType}
-                        />
-                    ))
-                ) : (
-                    <div className="text-center py-8 text-gray-500">
-                        You haven&apos;t joined any communities yet.
-                    </div>
-                )}
-            </div>
-
-            {pendingCommunityRequests.length > 0 && (
-                <>
-                    <p className="text-2xl heading-medium my-5">{t('pendingRequestsTitle')}</p>
-                    <div className="bg-surface-default rounded-md p-2 sm:p-4 overflow-auto scrollbar-hide max-h-[300px]">
-                        {pendingCommunityRequests.map((req) => (
-                            <PendingRequestCard
-                                key={req.id}
-                                name={req.entityName}
-                                href={`/community/${req.entityId}`}
-                                pendingLabel={t('pendingBadge')}
-                                cancelLabel={t('actions.cancelRequest')}
-                                confirmTitle={t('cancelRequestTitle')}
-                                confirmDescription={t('cancelRequestConfirm', { name: req.entityName })}
-                                onCancel={() => handleCancelRequest(req.entityId)}
-                                cancelling={cancelLoading}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
-
+            <div className="min-w-0">
             <p className="text-2xl heading-medium my-5">{t('discoverMore')}</p>
 
             <div
@@ -667,6 +666,8 @@ export default function Community() {
                     </div>
                 )}
             </div>
+            </div>
+          </div>
 
             <ConfirmationModal
                 open={joinModal.open}

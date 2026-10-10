@@ -5,6 +5,7 @@ import { formatDateProximity } from '@/macros/time';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
   GET_USER_POSTS,
   GET_SAVED_POSTS,
@@ -90,7 +91,12 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
   const tRoot = useTranslations();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<TabId>('myPosts');
+  // `?posts=saved` opens your saved posts directly (linked from the More page).
+  // Only on your own profile: nobody else's saved posts are ever shown.
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<TabId>(() =>
+    isOwnProfile && searchParams.get('posts') === 'saved' ? 'saved' : 'myPosts',
+  );
   const [reactionPatches, setReactionPatches] = useState<Record<string, ReactionPatch>>({});
 
   // Navigate to the post detail page unless the click originated from an

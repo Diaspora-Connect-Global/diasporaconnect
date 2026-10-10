@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Calendar, Search, ChevronRight, ExternalLink, Mail, ChevronDown, Briefcase, Bookmark, type LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { ButtonType3 } from "@/components/custom/button";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { opportunities } from "./data";
@@ -602,7 +603,11 @@ const SavedComponent = ({
 };
 
 export default function Opportunities() {
-    const [activeTab, setActiveTab] = useState<string>("applied");
+    // `?tab=saved` opens the Saved tab directly (linked from the More page).
+    const searchParams = useSearchParams();
+    const [activeTab, setActiveTab] = useState<string>(() =>
+        searchParams.get("tab") === "saved" ? "saved" : "applied",
+    );
   const [prefetchInactiveTab, setPrefetchInactiveTab] = useState(false);
     const tActions = useTranslations("actions")
 

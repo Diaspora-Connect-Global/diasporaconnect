@@ -1,4 +1,6 @@
 "use client";
+
+import { useSearchParams } from "next/navigation";
 import EventCard1 from "@/components/cards/events/EventCard1";
 import EventCardSmall from "@/components/cards/events/EventCardSmall";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -114,7 +116,11 @@ function formatPriceLabel(event: Event) {
 }
 
 export default function Events() {
-    const [activeTab, setActiveTab] = useState<string>("events");
+    // `?tab=saved` opens the Saved tab directly (linked from the More page).
+    const searchParams = useSearchParams();
+    const [activeTab, setActiveTab] = useState<string>(() =>
+        searchParams.get("tab") === "saved" ? "saved" : "events",
+    );
     const [optimisticSavedState, setOptimisticSavedState] = useState<Record<string, boolean>>({});
     const [optimisticAttendingState, setOptimisticAttendingState] = useState<Record<string, boolean>>({});
     const [registrationIdsByEvent, setRegistrationIdsByEvent] = useState<Record<string, string>>({});

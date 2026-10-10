@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Briefcase, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -97,7 +99,11 @@ export default function MarketplaceContainer() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
-  const [activeTab, setActiveTab] = useState<MarketplaceTab>("products");
+  // `?tab=services` opens the Services tab directly (linked from More/Discover).
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<MarketplaceTab>(() =>
+    searchParams.get("tab") === "services" ? "services" : "products",
+  );
   const [searchValue, setSearchValue] = useState("");
   const [removeCartItemModalOpen, setRemoveCartItemModalOpen] = useState(false);
   const [cartItemIdToRemove, setCartItemIdToRemove] = useState<string | null>(null);
