@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 
 import { errorMessage } from '@/lib/client-error-messages';
 import { useAuthStore } from '@/store/useAuthStore';
+import { purgeNetworkingCache, stripNetworkingFromPersisted } from '@/lib/networkingCache';
 
 /* ------------------------------------------------------------------ */
 /* Track shown toasts to prevent duplicates */
@@ -203,6 +204,8 @@ if (typeof window !== 'undefined') {
       // Cap persisted payload (~2MB) so a large cache can't bloat localStorage.
       maxSize: 2 * 1024 * 1024,
       key: 'diaspoplug-apollo-cache',
+      // Event networking is personal, per-event data: never persist it.
+      persistenceMapper: async (data: string) => stripNetworkingFromPersisted(data),
     });
   } catch {
     // Non-fatal: app boots fine with an empty in-memory cache.
@@ -231,5 +234,12 @@ const gqlClient = new ApolloClient({
     },
   },
 });
+
+/* Sign-out (tokens go from present to absent): drop any networking data from memory. */
+if (typeof window !== 'undefined') {
+  useAuthStore.subscribe((state, prev) => {
+    if (prev.tokens && !state.tokens) purgeNetworkingCache(cache);
+  });
+}
 
 export default gqlClient;
