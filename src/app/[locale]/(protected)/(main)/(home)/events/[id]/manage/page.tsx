@@ -36,18 +36,21 @@ import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import { TextInput, TextArea, Select } from "@/components/custom/input";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { ApprovalsManageTab, StaffManageTab } from "@/components/events/manage/PeopleManageTabs";
+import { ProgrammeManageTab, SpeakersManageTab, UpdatesManageTab } from "@/components/events/manage/ContentManageTabs";
 import { circleUserDisplayName, useCircleUsers } from "@/hooks/useCircleUsers";
 import {
   Loader2, ChevronLeft, Users, TicketIcon, Tag, BarChart2,
   ClipboardList, Settings, Plus, Trash2, PauseCircle,
-  CheckSquare, Edit2, QrCode, ImageIcon,
+  CheckSquare, Edit2, QrCode, ImageIcon, CalendarDays, Mic, Megaphone, UserCheck, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import PageLoader from "@/components/custom/PageLoader";
 import { CircularImageCropper } from "@/lib/imagecropper";
 
-type Tab = 'overview' | 'registrations' | 'attendance' | 'tickets' | 'promoCodes' | 'formBuilder' | 'settings';
+type Tab = 'overview' | 'registrations' | 'attendance' | 'tickets' | 'promoCodes' | 'formBuilder' | 'settings'
+  | 'approvals' | 'programme' | 'speakers' | 'updates' | 'staff';
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <BarChart2 className="w-4 h-4" /> },
@@ -58,6 +61,16 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'formBuilder', label: 'Reg. Form', icon: <ClipboardList className="w-4 h-4" /> },
   { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
 ];
+
+/** Tabs for events run by a community or association (programme, people, updates). Labels are translated. */
+const ORGANISER_TABS: { id: Tab; icon: React.ReactNode }[] = [
+  { id: 'approvals', icon: <UserCheck className="w-4 h-4" /> },
+  { id: 'programme', icon: <CalendarDays className="w-4 h-4" /> },
+  { id: 'speakers', icon: <Mic className="w-4 h-4" /> },
+  { id: 'updates', icon: <Megaphone className="w-4 h-4" /> },
+  { id: 'staff', icon: <ShieldCheck className="w-4 h-4" /> },
+];
+const ALL_TAB_IDS = new Set<string>([...TABS.map((x) => x.id), ...ORGANISER_TABS.map((x) => x.id)]);
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -873,7 +886,13 @@ function SettingsTab({ eventId }: { eventId: string }) {
 export default function EventManagePage() {
   const params = useParams();
   const eventId = params.id as string;
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const tManage = useTranslations('eventPage.manage');
+  // `?tab=` deep-links from the event page's empty states. Read once from the URL
+  // (no useSearchParams, which would force a Suspense boundary on the whole page).
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const requested = typeof window === 'undefined' ? '' : (new URLSearchParams(window.location.search).get('tab') ?? '');
+    return ALL_TAB_IDS.has(requested) ? (requested as Tab) : 'overview';
+  });
 
   const { data, loading } = useQuery<GetEventData>(GET_EVENT, {
     variables: { id: eventId },
@@ -904,18 +923,19 @@ export default function EventManagePage() {
   if (event?.ownerType === 'user') {
     return (
       <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
-        <div className="max-w-3xl mx-auto rounded-lg border border-border-subtle p-6 text-center space-y-3">
-          <h1 className="heading-small">Event management unavailable</h1>
-          <p className="text-sm text-text-secondary">Users are not allowed to manage events.</p>
+        <div className="max-w-3xl mx-auto rounded-lg border border-border-subtle p-6 text-center space-y-3" data-testid="legacy-readonly">
+          <h1 className="heading-small">{tManage('readOnlyTitle')}</h1>
+          <p className="text-sm text-text-secondary">{tManage('readOnlyBody')}</p>
           <div>
             <Link href={`/events/${eventId}`} prefetch={false} className="text-sm text-text-brand hover:underline">
-              Back to event
+              {tManage('backToEvent')}
             </Link>
           </div>
         </div>
       </div>
     );
   }
+  const isOrganiserEvent = event?.ownerType === 'community' || event?.ownerType === 'association';
 
   return (
     <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
@@ -932,9 +952,12 @@ export default function EventManagePage() {
 
         {/* Tabs */}
         <div className="flex gap-1 overflow-x-auto scrollbar-hide border-b border-border-subtle pb-0">
-          {TABS.map((tab) => (
+          {[...TABS.map((x) => ({ ...x, label: x.label })), ...(isOrganiserEvent ? ORGANISER_TABS.map((x) => ({ ...x, label: tManage(`tabs.${x.id}`) })) : [])].map((tab) => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              data-tab={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-2 text-sm whitespace-nowrap border-b-2 transition-colors
                 ${activeTab === tab.id
@@ -956,6 +979,11 @@ export default function EventManagePage() {
           {activeTab === 'promoCodes' && <PromoCodesTab eventId={eventId} />}
           {activeTab === 'formBuilder' && <FormBuilderTab eventId={eventId} />}
           {activeTab === 'settings' && <SettingsTab eventId={eventId} />}
+          {isOrganiserEvent && activeTab === 'approvals' && <ApprovalsManageTab eventId={eventId} />}
+          {isOrganiserEvent && activeTab === 'programme' && <ProgrammeManageTab eventId={eventId} timezone={event?.timezone} />}
+          {isOrganiserEvent && activeTab === 'speakers' && <SpeakersManageTab eventId={eventId} />}
+          {isOrganiserEvent && activeTab === 'updates' && <UpdatesManageTab eventId={eventId} />}
+          {isOrganiserEvent && activeTab === 'staff' && <StaffManageTab eventId={eventId} />}
         </div>
       </div>
     </div>
