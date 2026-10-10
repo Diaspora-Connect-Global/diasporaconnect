@@ -4648,5 +4648,371 @@
       "services": "Diensten",
       "events": "Evenementen"
     }
+  },
+  "eventPage": {
+    "back": "Terug",
+    "notFound": "Dit evenement is niet gevonden. Het is mogelijk verwijderd.",
+    "tabsLabel": "Onderdelen van het evenement",
+    "railLabel": "Inschrijving en delen",
+    "save": "Evenement opslaan",
+    "unsave": "Verwijderen uit opgeslagen evenementen",
+    "manageCta": "Evenement beheren",
+    "tabs": {
+      "overview": "Overzicht",
+      "programme": "Programma",
+      "speakers": "Sprekers",
+      "venue": "Locatie",
+      "updates": "Nieuws",
+      "register": "Inschrijven",
+      "myEvent": "Mijn evenement"
+    },
+    "empty": {
+      "programme": "Nog geen programma. Voeg onderdelen toe via ‘Evenement beheren’.",
+      "speakers": "Nog geen sprekers. Voeg ze toe via ‘Evenement beheren’.",
+      "updates": "Nog geen nieuws. Plaats een bericht via ‘Evenement beheren’; alle ingeschrevenen worden op de hoogte gebracht."
+    },
+    "overview": {
+      "about": "Over dit evenement",
+      "noDescription": "De organisatoren hebben nog geen beschrijving toegevoegd.",
+      "organisedBy": "Georganiseerd door {name}",
+      "tags": "Tags",
+      "facts": "Details",
+      "date": "Datum en tijd",
+      "location": "Locatie",
+      "price": "Prijs",
+      "capacity": "Plaatsen",
+      "spotsLeft": "{count, plural, one {# plaats over} other {# plaatsen over}}",
+      "category": "Categorie",
+      "timesIn": "Tijden worden getoond in {zone}, de tijdzone van het evenement.",
+      "differsFromYou": "Uw apparaat staat op een andere tijdzone.",
+      "externalRegistration": "Eigen inschrijfpagina van de organisatoren",
+      "free": "Gratis",
+      "paid": "Betaald",
+      "perTicket": "{price} per ticket"
+    },
+    "programme": {
+      "timesIn": "Tijden worden getoond in {zone}.",
+      "room": "Zaal: {room}",
+      "with": "Met {names}",
+      "types": {
+        "KEYNOTE": "Keynote",
+        "TALK": "Lezing",
+        "PANEL": "Paneldiscussie",
+        "WORKSHOP": "Workshop",
+        "BREAK": "Pauze",
+        "NETWORKING": "Netwerken",
+        "MEAL": "Maaltijd",
+        "PERFORMANCE": "Optreden",
+        "OTHER": "Onderdeel"
+      }
+    },
+    "speakers": {
+      "photoAlt": "Foto van {name}",
+      "viewProfile": "Profiel bekijken",
+      "roles": {
+        "KEYNOTE": "Keynotespreker",
+        "PANELIST": "Panellid",
+        "MODERATOR": "Moderator",
+        "SPEAKER": "Spreker",
+        "HOST": "Gastheer of gastvrouw"
+      }
+    },
+    "venue": {
+      "where": "Waar",
+      "openMap": "Openen in Kaarten",
+      "online": "Online",
+      "joinOnline": "Online deelnemen",
+      "onlineAfterConfirmed": "De online link wordt getoond zodra uw inschrijving is bevestigd.",
+      "halls": "Zalen en ruimtes",
+      "directions": "Route",
+      "accessibility": "Toegankelijkheid",
+      "parking": "Parkeren",
+      "contact": "Contact met de organisatoren"
+    },
+    "updates": {
+      "postedOn": "Geplaatst op {date}",
+      "loadMore": "Meer laden"
+    },
+    "rail": {
+      "title": "Uw inschrijving",
+      "states": {
+        "open": "Inschrijven is mogelijk.",
+        "confirmed": "U bent ingeschreven.",
+        "awaitingPayment": "Uw plaats is gereserveerd. Rond de betaling af om hem te bevestigen.",
+        "pendingApproval": "Wacht op goedkeuring van de organisatoren.",
+        "waitlisted": "U staat op de wachtlijst.",
+        "waitlistedPos": "U bent nummer {position} op de wachtlijst.",
+        "rejected": "De organisatoren hebben uw inschrijving niet goedgekeurd.",
+        "eventCancelled": "Dit evenement is geannuleerd.",
+        "ended": "Dit evenement is afgelopen.",
+        "notYetOpen": "Inschrijven opent op {date}.",
+        "closed": "Inschrijven is gesloten.",
+        "full": "Dit evenement is vol. U kunt zich op de wachtlijst zetten."
+      },
+      "hints": {
+        "pendingApproval": "U hoort van ons zodra de organisatoren hebben besloten.",
+        "waitlisted": "U hoort van ons als er een plaats vrijkomt.",
+        "awaitingPayment": "Open het tabblad ‘Mijn evenement’ om af te ronden.",
+        "rejected": "Neem contact op met de organisatoren als u denkt dat dit een vergissing is.",
+        "closesOn": "Inschrijven sluit op {date}.",
+        "needsApproval": "De organisatoren keuren elke inschrijving goed."
+      },
+      "cta": {
+        "register": "Inschrijven",
+        "joinWaitlist": "Op de wachtlijst",
+        "signInToRegister": "Log in om u in te schrijven",
+        "myEvent": "Mijn evenement"
+      }
+    },
+    "organiser": {
+      "title": "Organiserende community",
+      "member": "U bent lid van {name}.",
+      "pending": "Uw verzoek om lid te worden van {name} is in behandeling.",
+      "join": "Lid worden van {name}",
+      "request": "Verzoek om lid te worden van {name}",
+      "sending": "Verzenden…",
+      "paid": "{name} is een betaalde community.",
+      "inviteOnly": "{name} is alleen op uitnodiging toegankelijk.",
+      "openCommunity": "{name} openen",
+      "joinedNow": "U bent lid geworden van {name}.",
+      "requestedNow": "Uw verzoek om lid te worden van {name} is verzonden.",
+      "requestedPay": "Uw verzoek om lid te worden van {name} is gestart. Rond de betaling af op de pagina om het te voltooien.",
+      "failedJoin": "We konden uw verzoek om lid te worden van {name} niet verzenden. Uw inschrijving voor het evenement blijft ongewijzigd. U kunt het op deze pagina opnieuw proberen.",
+      "notApplicable": "Dit evenement heeft geen organiserende community om lid van te worden.",
+      "notAvailableYet": "Lid worden van de organiserende community via een evenement is nog niet beschikbaar."
+    },
+    "share": {
+      "title": "Dit evenement delen",
+      "copy": "Link kopiëren",
+      "share": "Delen",
+      "copied": "Link gekopieerd",
+      "failed": "De link kon niet worden gekopieerd",
+      "qrAlt": "QR-code die deze evenementpagina opent"
+    },
+    "similar": {
+      "title": "Vergelijkbare evenementen"
+    },
+    "register": {
+      "signInPrompt": "Log in om u voor dit evenement in te schrijven.",
+      "signIn": "Inloggen",
+      "attendee": "Uw gegevens",
+      "name": "Naam",
+      "email": "E-mail",
+      "attendeeNote": "Overgenomen uit uw profiel. Wijzig ze in uw profielinstellingen.",
+      "ticketTypes": "Tickettype",
+      "soldOut": "uitverkocht",
+      "format": {
+        "label": "Hoe neemt u deel?",
+        "inPerson": "Ter plaatse",
+        "online": "Online"
+      },
+      "summary": {
+        "title": "Overzicht",
+        "discount": "Korting ({code})"
+      },
+      "promo": {
+        "label": "Promotiecode",
+        "apply": "Toepassen",
+        "remove": "Promotiecode verwijderen",
+        "applied": "Code {code} toegepast",
+        "invalid": "Deze code kan niet voor dit evenement worden gebruikt.",
+        "failed": "We konden de code niet controleren. Probeer het opnieuw."
+      },
+      "terms": {
+        "label": "Ik accepteer de voorwaarden van het evenement, de <tos>Gebruiksvoorwaarden</tos> en het <privacy>Privacybeleid</privacy> van DiaspoPlug."
+      },
+      "joinOrganiser": {
+        "label": "Ook lid worden van {name}",
+        "labelRequest": "Ook verzoeken om lid te worden van {name}",
+        "note": "Optioneel. Inschrijven voor het evenement maakt u nooit automatisch lid."
+      },
+      "missing": {
+        "intro": "Nog nodig:",
+        "quantity": "minstens één ticket",
+        "form": "de verplichte gegevens",
+        "format": "hoe u deelneemt",
+        "payment": "een betaalmethode",
+        "terms": "uw akkoord met de voorwaarden"
+      },
+      "submit": {
+        "waitlist": "Op de wachtlijst",
+        "requestApproval": "Inschrijving aanvragen",
+        "paid": "Betalen en inschrijven",
+        "free": "Inschrijven"
+      },
+      "fullNote": "Dit evenement is vol. Als u zich inschrijft, komt u op de wachtlijst.",
+      "approvalNote": "De organisatoren keuren elke inschrijving goed. U hoort van ons zodra ze hebben besloten.",
+      "result": {
+        "confirmed": "U bent ingeschreven.",
+        "pendingApproval": "Inschrijving ontvangen. De organisatoren beoordelen haar.",
+        "waitlisted": "U staat op de wachtlijst.",
+        "waitlistedPos": "U bent nummer {position} op de wachtlijst.",
+        "received": "Inschrijving ontvangen.",
+        "paymentNotCompleted": "De betaling is niet voltooid. Uw plaats is gereserveerd, maar pas bevestigd nadat u hebt betaald."
+      }
+    },
+    "myEvent": {
+      "status": "Uw inschrijving",
+      "ticket": "Ticket bekijken",
+      "googleCalendar": "Google Agenda",
+      "icsFile": ".ics downloaden",
+      "cancel": "Inschrijving annuleren",
+      "cancelTitle": "Uw inschrijving annuleren?",
+      "cancelBody": "U geeft uw plaats op. U kunt zich later opnieuw inschrijven als er nog plaats is.",
+      "cancelConfirm": "Inschrijving annuleren",
+      "keep": "Mijn plaats behouden",
+      "cancelled": "Uw inschrijving is geannuleerd."
+    },
+    "errors": {
+      "featureUnavailable": "Dit is nog niet beschikbaar.",
+      "unavailable": "Evenementen zijn tijdelijk niet beschikbaar. Probeer het over een moment opnieuw.",
+      "notFound": "We konden dat niet vinden.",
+      "invalid": "Dat verzoek was niet geldig. Controleer de gegevens en probeer het opnieuw.",
+      "rateLimited": "U doet dat te vaak. Wacht even en probeer het opnieuw.",
+      "conflict": "Dat kan in de huidige situatie niet.",
+      "alreadyRegistered": "U bent al ingeschreven voor dit evenement.",
+      "windowClosed": "Inschrijven voor dit evenement is gesloten.",
+      "windowNotYetOpen": "Inschrijven voor dit evenement is nog niet geopend.",
+      "notOpen": "Dit evenement staat niet open voor inschrijving.",
+      "invalidPromoCode": "Deze promotiecode kan niet worden gebruikt.",
+      "invalidInviteCode": "Deze uitnodigingscode is niet geldig.",
+      "termsRequired": "Accepteer de voorwaarden om u in te schrijven.",
+      "attendanceFormat": "Kies of u ter plaatse of online deelneemt.",
+      "formIncomplete": "Vul de verplichte inschrijfgegevens in.",
+      "invalidQuantity": "Kies een geldig aantal tickets.",
+      "ticketUnavailable": "Dit ticket is niet meer beschikbaar.",
+      "paymentUnavailable": "Betalen is op dit moment niet mogelijk. Probeer het later opnieuw.",
+      "invalidWindow": "Inschrijven moet sluiten nadat het opent.",
+      "staffInvalid": "Deze persoon kan niet aan het team worden toegevoegd.",
+      "speakerNotInEvent": "Een van de gekozen sprekers hoort niet bij dit evenement.",
+      "organiserRequired": "Evenementen moeten door een community of vereniging worden georganiseerd.",
+      "organiserNotAdmin": "U kunt alleen evenementen maken voor communities of verenigingen die u beheert.",
+      "refused": "Dit is op dit moment niet beschikbaar.",
+      "failed": "Er is iets misgegaan. Probeer het opnieuw."
+    },
+    "ticket": {
+      "registration": "Inschrijving",
+      "confirmed": "Bevestigd",
+      "googleCalendar": "Toevoegen aan Google Agenda",
+      "icsFile": "Agendabestand downloaden",
+      "timesIn": "Tijden in {zone}",
+      "notConfirmed": "Uw ticket is beschikbaar zodra uw inschrijving is bevestigd.",
+      "backToEvent": "Terug naar het evenement"
+    },
+    "create": {
+      "organiserLabel": "Georganiseerd door",
+      "organiserPlaceholder": "Kies een community of vereniging",
+      "organiserHelp": "Evenementen worden georganiseerd door communities en verenigingen. Kies degene waarvoor dit evenement is.",
+      "communities": "Communities",
+      "associations": "Verenigingen",
+      "chooseOrganiser": "Kies welke community of vereniging dit evenement organiseert.",
+      "noOrganiserTitle": "U kunt nog geen evenementen maken",
+      "noOrganiserBody": "Evenementen worden gemaakt door de beheerders van een community of vereniging. Vraag een beheerder u daartoe te benoemen, of open een community of vereniging die u leidt.",
+      "browse": "Evenementen bekijken"
+    },
+    "manage": {
+      "readOnlyTitle": "Dit evenement is alleen-lezen",
+      "readOnlyBody": "Het is gemaakt door een particulier, voordat evenementen naar communities en verenigingen verhuisden. U kunt het bekijken, maar hier niet bewerken of beheren.",
+      "backToEvent": "Terug naar het evenement",
+      "tabs": {
+        "approvals": "Goedkeuringen",
+        "programme": "Programma",
+        "speakers": "Sprekers",
+        "updates": "Nieuws",
+        "staff": "Team"
+      },
+      "common": {
+        "save": "Opslaan",
+        "saving": "Opslaan…",
+        "saved": "Opgeslagen",
+        "cancel": "Annuleren",
+        "delete": "Verwijderen",
+        "deleted": "Verwijderd",
+        "edit": "Bewerken",
+        "remove": "Verwijderen"
+      },
+      "programme": {
+        "intro": "Tijden staan in de tijdzone van het evenement ({zone}).",
+        "add": "Onderdeel toevoegen",
+        "title": "Titel",
+        "start": "Begint",
+        "end": "Eindigt",
+        "room": "Zaal (optioneel)",
+        "type": "Soort",
+        "description": "Beschrijving (optioneel)",
+        "speakers": "Sprekers",
+        "empty": "Nog geen onderdelen.",
+        "deleteTitle": "Dit onderdeel verwijderen?",
+        "deleteBody": "‘{title}’ wordt uit het programma verwijderd."
+      },
+      "speakers": {
+        "add": "Spreker toevoegen",
+        "name": "Naam",
+        "role": "Rol",
+        "jobTitle": "Functie (optioneel)",
+        "organization": "Organisatie (optioneel)",
+        "photoUrl": "Link naar foto (optioneel)",
+        "photoHint": "Een link die met https:// begint",
+        "photoInvalid": "De link naar de foto moet met https:// beginnen",
+        "bio": "Biografie (optioneel)",
+        "empty": "Nog geen sprekers.",
+        "deleteTitle": "Deze spreker verwijderen?",
+        "deleteBody": "{name} wordt van het evenement verwijderd."
+      },
+      "updates": {
+        "title": "Titel",
+        "message": "Bericht",
+        "notifyNote": "Iedereen die voor het evenement is ingeschreven, krijgt een melding zodra u publiceert.",
+        "publish": "Bericht publiceren",
+        "publishing": "Publiceren…",
+        "published": "Bericht gepubliceerd",
+        "empty": "Nog geen nieuws.",
+        "deleteTitle": "Dit bericht verwijderen?",
+        "deleteBody": "‘{title}’ wordt van de evenementpagina verwijderd."
+      },
+      "approvals": {
+        "requireApproval": "Inschrijvingen goedkeuren voordat ze een plaats krijgen",
+        "requireApprovalHint": "Nieuwe inschrijvingen wachten hier tot u ze goedkeurt. Wie al is ingeschreven, blijft ongewijzigd.",
+        "approvalOn": "Nieuwe inschrijvingen moeten nu worden goedgekeurd.",
+        "approvalOff": "Nieuwe inschrijvingen hoeven niet meer te worden goedgekeurd.",
+        "waiting": "{count, plural, one {# inschrijving wacht} other {# inschrijvingen wachten}}",
+        "empty": "Er wachten geen inschrijvingen op goedkeuring.",
+        "requestedOn": "Aangevraagd op {date}",
+        "tickets": "{count, plural, one {# ticket} other {# tickets}}",
+        "approve": "Goedkeuren",
+        "reject": "Afwijzen",
+        "approved": "Inschrijving goedgekeurd.",
+        "approvedWaitlisted": "Het evenement is vol, dus deze persoon is op de wachtlijst gezet.",
+        "rejected": "Inschrijving afgewezen.",
+        "rejectTitle": "{name} afwijzen?",
+        "rejectBody": "De persoon hoort dat de inschrijving niet is goedgekeurd. De reden blijft alleen voor organisatoren zichtbaar.",
+        "reason": "Reden (optioneel)",
+        "reasonHint": "{count} / {max} tekens. Alleen organisatoren zien dit."
+      },
+      "staff": {
+        "intro": "Het team helpt u dit evenement te organiseren. Alleen personen met een account kunnen worden toegevoegd.",
+        "roles": {
+          "EVENT_MANAGER": "Evenementbeheerder",
+          "NETWORKING_MANAGER": "Netwerkbeheerder"
+        },
+        "roleHelp": {
+          "EVENT_MANAGER": "keurt inschrijvingen goed en bewerkt het evenement",
+          "NETWORKING_MANAGER": "regelt het netwerkgedeelte van het evenement"
+        },
+        "addTitle": "Persoon toevoegen",
+        "search": "Zoek een persoon op naam of gebruikersnaam",
+        "searchPlaceholder": "Begin met het typen van een naam",
+        "role": "Rol",
+        "searching": "Zoeken…",
+        "noResults": "Niemand gevonden.",
+        "add": "Toevoegen",
+        "added": "Aan het team toegevoegd.",
+        "empty": "Nog geen team.",
+        "removeTitle": "Uit het team verwijderen?",
+        "removeBody": "{name} kan niet meer meehelpen bij dit evenement.",
+        "removed": "Uit het team verwijderd.",
+        "unknownPerson": "Onbekende persoon"
+      }
+    }
   }
 }

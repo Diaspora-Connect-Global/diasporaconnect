@@ -4648,5 +4648,371 @@
       "services": "Services",
       "events": "Events"
     }
+  },
+  "eventPage": {
+    "back": "Back",
+    "notFound": "This event could not be found. It may have been removed.",
+    "tabsLabel": "Event sections",
+    "railLabel": "Registration and sharing",
+    "save": "Save event",
+    "unsave": "Remove from saved events",
+    "manageCta": "Manage event",
+    "tabs": {
+      "overview": "Overview",
+      "programme": "Programme",
+      "speakers": "Speakers",
+      "venue": "Venue",
+      "updates": "Updates",
+      "register": "Register",
+      "myEvent": "My event"
+    },
+    "empty": {
+      "programme": "No programme yet. Add sessions from Manage event.",
+      "speakers": "No speakers yet. Add them from Manage event.",
+      "updates": "No updates yet. Post one from Manage event and everyone registered is told."
+    },
+    "overview": {
+      "about": "About this event",
+      "noDescription": "The organiser has not added a description yet.",
+      "organisedBy": "Organised by {name}",
+      "tags": "Tags",
+      "facts": "Details",
+      "date": "Date and time",
+      "location": "Location",
+      "price": "Price",
+      "capacity": "Places",
+      "spotsLeft": "{count, plural, one {# place left} other {# places left}}",
+      "category": "Category",
+      "timesIn": "Times are shown in {zone}, the event's timezone.",
+      "differsFromYou": "Your device is set to a different timezone.",
+      "externalRegistration": "Organiser's own registration page",
+      "free": "Free",
+      "paid": "Paid",
+      "perTicket": "{price} per ticket"
+    },
+    "programme": {
+      "timesIn": "Times are shown in {zone}.",
+      "room": "Room: {room}",
+      "with": "With {names}",
+      "types": {
+        "KEYNOTE": "Keynote",
+        "TALK": "Talk",
+        "PANEL": "Panel",
+        "WORKSHOP": "Workshop",
+        "BREAK": "Break",
+        "NETWORKING": "Networking",
+        "MEAL": "Meal",
+        "PERFORMANCE": "Performance",
+        "OTHER": "Session"
+      }
+    },
+    "speakers": {
+      "photoAlt": "Photo of {name}",
+      "viewProfile": "View profile",
+      "roles": {
+        "KEYNOTE": "Keynote speaker",
+        "PANELIST": "Panelist",
+        "MODERATOR": "Moderator",
+        "SPEAKER": "Speaker",
+        "HOST": "Host"
+      }
+    },
+    "venue": {
+      "where": "Where",
+      "openMap": "Open in Maps",
+      "online": "Online",
+      "joinOnline": "Join online",
+      "onlineAfterConfirmed": "The online link is shown once your registration is confirmed.",
+      "halls": "Halls and rooms",
+      "directions": "Getting there",
+      "accessibility": "Accessibility",
+      "parking": "Parking",
+      "contact": "Contact the organiser"
+    },
+    "updates": {
+      "postedOn": "Posted {date}",
+      "loadMore": "Load more"
+    },
+    "rail": {
+      "title": "Your registration",
+      "states": {
+        "open": "Registration is open.",
+        "confirmed": "You're registered.",
+        "awaitingPayment": "Your place is saved. Complete payment to confirm it.",
+        "pendingApproval": "Waiting for the organiser's approval.",
+        "waitlisted": "You're on the waitlist.",
+        "waitlistedPos": "You're number {position} on the waitlist.",
+        "rejected": "The organiser did not approve your registration.",
+        "eventCancelled": "This event was cancelled.",
+        "ended": "This event has ended.",
+        "notYetOpen": "Registration opens {date}.",
+        "closed": "Registration is closed.",
+        "full": "This event is full. You can join the waitlist."
+      },
+      "hints": {
+        "pendingApproval": "You'll be notified when the organiser decides.",
+        "waitlisted": "You'll be notified if a place opens up.",
+        "awaitingPayment": "Open the My event tab to finish.",
+        "rejected": "You can contact the organiser if you think this is a mistake.",
+        "closesOn": "Registration closes {date}.",
+        "needsApproval": "The organiser approves each registration."
+      },
+      "cta": {
+        "register": "Register",
+        "joinWaitlist": "Join the waitlist",
+        "signInToRegister": "Sign in to register",
+        "myEvent": "My event"
+      }
+    },
+    "organiser": {
+      "title": "Organiser community",
+      "member": "You're a member of {name}.",
+      "pending": "Your request to join {name} is waiting.",
+      "join": "Join {name}",
+      "request": "Request to join {name}",
+      "sending": "Sending…",
+      "paid": "{name} is a paid community.",
+      "inviteOnly": "{name} is invitation only.",
+      "openCommunity": "Open {name}",
+      "joinedNow": "You joined {name}.",
+      "requestedNow": "Your request to join {name} was sent.",
+      "requestedPay": "Your request to join {name} was started. Finish payment on its page to complete it.",
+      "failedJoin": "We couldn't send your request to join {name}. Your event registration is not affected. You can try again from this page.",
+      "notApplicable": "This event has no organiser community to join.",
+      "notAvailableYet": "Joining the organiser community from an event isn't available yet."
+    },
+    "share": {
+      "title": "Share this event",
+      "copy": "Copy link",
+      "share": "Share",
+      "copied": "Link copied",
+      "failed": "Could not copy the link",
+      "qrAlt": "QR code that opens this event page"
+    },
+    "similar": {
+      "title": "Similar events"
+    },
+    "register": {
+      "signInPrompt": "Sign in to register for this event.",
+      "signIn": "Sign in",
+      "attendee": "Your details",
+      "name": "Name",
+      "email": "Email",
+      "attendeeNote": "Taken from your profile. Change them in your profile settings.",
+      "ticketTypes": "Ticket type",
+      "soldOut": "sold out",
+      "format": {
+        "label": "How will you attend?",
+        "inPerson": "In person",
+        "online": "Online"
+      },
+      "summary": {
+        "title": "Summary",
+        "discount": "Discount ({code})"
+      },
+      "promo": {
+        "label": "Promo code",
+        "apply": "Apply",
+        "remove": "Remove promo code",
+        "applied": "Code {code} applied",
+        "invalid": "That code can't be used for this event.",
+        "failed": "We couldn't check that code. Try again."
+      },
+      "terms": {
+        "label": "I accept the event terms, the DiaspoPlug <tos>Terms of Service</tos> and <privacy>Privacy Policy</privacy>."
+      },
+      "joinOrganiser": {
+        "label": "Also join {name}",
+        "labelRequest": "Also request to join {name}",
+        "note": "Optional. Registering for the event never makes you a member."
+      },
+      "missing": {
+        "intro": "Still needed:",
+        "quantity": "at least one ticket",
+        "form": "the required details",
+        "format": "how you will attend",
+        "payment": "a payment method",
+        "terms": "your acceptance of the terms"
+      },
+      "submit": {
+        "waitlist": "Join the waitlist",
+        "requestApproval": "Request to register",
+        "paid": "Pay and register",
+        "free": "Register"
+      },
+      "fullNote": "This event is full. Registering puts you on the waitlist.",
+      "approvalNote": "The organiser approves each registration. You'll be told when they decide.",
+      "result": {
+        "confirmed": "You're registered.",
+        "pendingApproval": "Registration received. The organiser will review it.",
+        "waitlisted": "You're on the waitlist.",
+        "waitlistedPos": "You're number {position} on the waitlist.",
+        "received": "Registration received.",
+        "paymentNotCompleted": "Payment was not completed. Your place is saved, but it isn't confirmed until you pay."
+      }
+    },
+    "myEvent": {
+      "status": "Your registration",
+      "ticket": "View ticket",
+      "googleCalendar": "Google Calendar",
+      "icsFile": "Download .ics",
+      "cancel": "Cancel registration",
+      "cancelTitle": "Cancel your registration?",
+      "cancelBody": "You'll give up your place. You can register again later if the event still has room.",
+      "cancelConfirm": "Cancel registration",
+      "keep": "Keep my place",
+      "cancelled": "Your registration was cancelled."
+    },
+    "errors": {
+      "featureUnavailable": "This isn't available yet.",
+      "unavailable": "Events are temporarily unavailable. Please try again in a moment.",
+      "notFound": "We couldn't find that.",
+      "invalid": "That request wasn't valid. Check the details and try again.",
+      "rateLimited": "You're doing that too often. Please wait a little and try again.",
+      "conflict": "That can't be done in the current state.",
+      "alreadyRegistered": "You're already registered for this event.",
+      "windowClosed": "Registration for this event has closed.",
+      "windowNotYetOpen": "Registration for this event hasn't opened yet.",
+      "notOpen": "This event isn't open for registration.",
+      "invalidPromoCode": "That promo code can't be used.",
+      "invalidInviteCode": "That invitation code isn't valid.",
+      "termsRequired": "Accept the terms to register.",
+      "attendanceFormat": "Choose whether you will attend in person or online.",
+      "formIncomplete": "Fill in the required registration details.",
+      "invalidQuantity": "Choose a valid number of tickets.",
+      "ticketUnavailable": "That ticket is no longer available.",
+      "paymentUnavailable": "Payment isn't available right now. Please try again later.",
+      "invalidWindow": "Registration must close after it opens.",
+      "staffInvalid": "That person can't be added to the staff.",
+      "speakerNotInEvent": "One of the chosen speakers doesn't belong to this event.",
+      "organiserRequired": "Events must be organised by a community or association.",
+      "organiserNotAdmin": "You can only create events for communities or associations you administer.",
+      "refused": "That isn't available right now.",
+      "failed": "Something went wrong. Please try again."
+    },
+    "ticket": {
+      "registration": "Registration",
+      "confirmed": "Confirmed",
+      "googleCalendar": "Add to Google Calendar",
+      "icsFile": "Download calendar file",
+      "timesIn": "Times in {zone}",
+      "notConfirmed": "Your ticket is available once your registration is confirmed.",
+      "backToEvent": "Back to the event"
+    },
+    "create": {
+      "organiserLabel": "Organised by",
+      "organiserPlaceholder": "Choose a community or association",
+      "organiserHelp": "Events are run by communities and associations. Choose the one this event is for.",
+      "communities": "Communities",
+      "associations": "Associations",
+      "chooseOrganiser": "Choose which community or association organises this event.",
+      "noOrganiserTitle": "You can't create events yet",
+      "noOrganiserBody": "Events are created by the admins of a community or association. Ask an admin to make you one, or open a community or association you run.",
+      "browse": "Browse events"
+    },
+    "manage": {
+      "readOnlyTitle": "This event is read-only",
+      "readOnlyBody": "It was created by an individual, before events moved to communities and associations. You can still view it, but it can't be edited or managed here.",
+      "backToEvent": "Back to the event",
+      "tabs": {
+        "approvals": "Approvals",
+        "programme": "Programme",
+        "speakers": "Speakers",
+        "updates": "Updates",
+        "staff": "Staff"
+      },
+      "common": {
+        "save": "Save",
+        "saving": "Saving…",
+        "saved": "Saved",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleted": "Deleted",
+        "edit": "Edit",
+        "remove": "Remove"
+      },
+      "programme": {
+        "intro": "Times are in the event's timezone ({zone}).",
+        "add": "Add session",
+        "title": "Title",
+        "start": "Starts",
+        "end": "Ends",
+        "room": "Room (optional)",
+        "type": "Type",
+        "description": "Description (optional)",
+        "speakers": "Speakers",
+        "empty": "No sessions yet.",
+        "deleteTitle": "Delete this session?",
+        "deleteBody": "“{title}” will be removed from the programme."
+      },
+      "speakers": {
+        "add": "Add speaker",
+        "name": "Name",
+        "role": "Role",
+        "jobTitle": "Job title (optional)",
+        "organization": "Organisation (optional)",
+        "photoUrl": "Photo link (optional)",
+        "photoHint": "A link starting with https://",
+        "photoInvalid": "The photo link must start with https://",
+        "bio": "Bio (optional)",
+        "empty": "No speakers yet.",
+        "deleteTitle": "Delete this speaker?",
+        "deleteBody": "{name} will be removed from the event."
+      },
+      "updates": {
+        "title": "Title",
+        "message": "Message",
+        "notifyNote": "Everyone registered for the event is notified when you publish.",
+        "publish": "Publish update",
+        "publishing": "Publishing…",
+        "published": "Update published",
+        "empty": "No updates yet.",
+        "deleteTitle": "Delete this update?",
+        "deleteBody": "“{title}” will be removed from the event page."
+      },
+      "approvals": {
+        "requireApproval": "Approve registrations before they get a place",
+        "requireApprovalHint": "New registrations wait here until you approve them. It doesn't change people who are already registered.",
+        "approvalOn": "New registrations now need approval.",
+        "approvalOff": "New registrations no longer need approval.",
+        "waiting": "{count, plural, one {# registration waiting} other {# registrations waiting}}",
+        "empty": "No registrations are waiting for approval.",
+        "requestedOn": "Requested {date}",
+        "tickets": "{count, plural, one {# ticket} other {# tickets}}",
+        "approve": "Approve",
+        "reject": "Reject",
+        "approved": "Registration approved.",
+        "approvedWaitlisted": "The event is full, so this person was added to the waitlist.",
+        "rejected": "Registration rejected.",
+        "rejectTitle": "Reject {name}?",
+        "rejectBody": "They are told their registration wasn't approved. The reason is only kept for organisers.",
+        "reason": "Reason (optional)",
+        "reasonHint": "{count} / {max} characters. Only organisers see this."
+      },
+      "staff": {
+        "intro": "Staff help you run this event. Only people with an account can be added.",
+        "roles": {
+          "EVENT_MANAGER": "Event manager",
+          "NETWORKING_MANAGER": "Networking manager"
+        },
+        "roleHelp": {
+          "EVENT_MANAGER": "approves registrations and edits the event",
+          "NETWORKING_MANAGER": "runs the networking side of the event"
+        },
+        "addTitle": "Add a person",
+        "search": "Find a person by name or username",
+        "searchPlaceholder": "Start typing a name",
+        "role": "Role",
+        "searching": "Searching…",
+        "noResults": "No one found.",
+        "add": "Add",
+        "added": "Added to the staff.",
+        "empty": "No staff yet.",
+        "removeTitle": "Remove from staff?",
+        "removeBody": "{name} will no longer be able to help run this event.",
+        "removed": "Removed from the staff.",
+        "unknownPerson": "Unknown person"
+      }
+    }
   }
 }

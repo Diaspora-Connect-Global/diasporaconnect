@@ -4648,5 +4648,371 @@
       "services": "Services",
       "events": "Événements"
     }
+  },
+  "eventPage": {
+    "back": "Retour",
+    "notFound": "Cet événement est introuvable. Il a peut-être été supprimé.",
+    "tabsLabel": "Sections de l'événement",
+    "railLabel": "Inscription et partage",
+    "save": "Enregistrer l'événement",
+    "unsave": "Retirer des événements enregistrés",
+    "manageCta": "Gérer l'événement",
+    "tabs": {
+      "overview": "Aperçu",
+      "programme": "Programme",
+      "speakers": "Intervenants",
+      "venue": "Lieu",
+      "updates": "Actualités",
+      "register": "S'inscrire",
+      "myEvent": "Mon événement"
+    },
+    "empty": {
+      "programme": "Aucun programme pour l'instant. Ajoutez des séances depuis « Gérer l'événement ».",
+      "speakers": "Aucun intervenant pour l'instant. Ajoutez-en depuis « Gérer l'événement ».",
+      "updates": "Aucune actualité pour l'instant. Publiez-en une depuis « Gérer l'événement » : tous les inscrits en sont informés."
+    },
+    "overview": {
+      "about": "À propos de cet événement",
+      "noDescription": "Les organisateurs n'ont pas encore ajouté de description.",
+      "organisedBy": "Organisé par {name}",
+      "tags": "Mots-clés",
+      "facts": "Détails",
+      "date": "Date et heure",
+      "location": "Lieu",
+      "price": "Prix",
+      "capacity": "Places",
+      "spotsLeft": "{count, plural, one {# place restante} other {# places restantes}}",
+      "category": "Catégorie",
+      "timesIn": "Les horaires sont affichés en {zone}, le fuseau horaire de l'événement.",
+      "differsFromYou": "Votre appareil est réglé sur un autre fuseau horaire.",
+      "externalRegistration": "Page d'inscription des organisateurs",
+      "free": "Gratuit",
+      "paid": "Payant",
+      "perTicket": "{price} par billet"
+    },
+    "programme": {
+      "timesIn": "Les horaires sont affichés en {zone}.",
+      "room": "Salle : {room}",
+      "with": "Avec {names}",
+      "types": {
+        "KEYNOTE": "Conférence principale",
+        "TALK": "Exposé",
+        "PANEL": "Table ronde",
+        "WORKSHOP": "Atelier",
+        "BREAK": "Pause",
+        "NETWORKING": "Réseautage",
+        "MEAL": "Repas",
+        "PERFORMANCE": "Spectacle",
+        "OTHER": "Séance"
+      }
+    },
+    "speakers": {
+      "photoAlt": "Photo de {name}",
+      "viewProfile": "Voir le profil",
+      "roles": {
+        "KEYNOTE": "Orateur principal",
+        "PANELIST": "Panéliste",
+        "MODERATOR": "Modérateur",
+        "SPEAKER": "Intervenant",
+        "HOST": "Animateur"
+      }
+    },
+    "venue": {
+      "where": "Où",
+      "openMap": "Ouvrir dans Plans",
+      "online": "En ligne",
+      "joinOnline": "Participer en ligne",
+      "onlineAfterConfirmed": "Le lien en ligne s'affiche une fois votre inscription confirmée.",
+      "halls": "Salles",
+      "directions": "Comment s'y rendre",
+      "accessibility": "Accessibilité",
+      "parking": "Stationnement",
+      "contact": "Contacter les organisateurs"
+    },
+    "updates": {
+      "postedOn": "Publié le {date}",
+      "loadMore": "Charger plus"
+    },
+    "rail": {
+      "title": "Votre inscription",
+      "states": {
+        "open": "Les inscriptions sont ouvertes.",
+        "confirmed": "Vous êtes inscrit.",
+        "awaitingPayment": "Votre place est réservée. Finalisez le paiement pour la confirmer.",
+        "pendingApproval": "En attente de l'approbation des organisateurs.",
+        "waitlisted": "Vous êtes sur la liste d'attente.",
+        "waitlistedPos": "Vous êtes numéro {position} sur la liste d'attente.",
+        "rejected": "Les organisateurs n'ont pas approuvé votre inscription.",
+        "eventCancelled": "Cet événement a été annulé.",
+        "ended": "Cet événement est terminé.",
+        "notYetOpen": "Les inscriptions ouvrent le {date}.",
+        "closed": "Les inscriptions sont closes.",
+        "full": "Cet événement est complet. Vous pouvez rejoindre la liste d'attente."
+      },
+      "hints": {
+        "pendingApproval": "Vous serez averti dès que les organisateurs auront décidé.",
+        "waitlisted": "Vous serez averti si une place se libère.",
+        "awaitingPayment": "Ouvrez l'onglet « Mon événement » pour terminer.",
+        "rejected": "Contactez les organisateurs si vous pensez qu'il s'agit d'une erreur.",
+        "closesOn": "Les inscriptions ferment le {date}.",
+        "needsApproval": "Les organisateurs approuvent chaque inscription."
+      },
+      "cta": {
+        "register": "S'inscrire",
+        "joinWaitlist": "Rejoindre la liste d'attente",
+        "signInToRegister": "Connectez-vous pour vous inscrire",
+        "myEvent": "Mon événement"
+      }
+    },
+    "organiser": {
+      "title": "Communauté organisatrice",
+      "member": "Vous êtes membre de {name}.",
+      "pending": "Votre demande pour rejoindre {name} est en attente.",
+      "join": "Rejoindre {name}",
+      "request": "Demander à rejoindre {name}",
+      "sending": "Envoi…",
+      "paid": "{name} est une communauté payante.",
+      "inviteOnly": "{name} est accessible sur invitation uniquement.",
+      "openCommunity": "Ouvrir {name}",
+      "joinedNow": "Vous avez rejoint {name}.",
+      "requestedNow": "Votre demande pour rejoindre {name} a été envoyée.",
+      "requestedPay": "Votre demande pour rejoindre {name} a été lancée. Finalisez le paiement sur sa page pour la terminer.",
+      "failedJoin": "Nous n'avons pas pu envoyer votre demande pour rejoindre {name}. Votre inscription à l'événement n'est pas affectée. Vous pouvez réessayer depuis cette page.",
+      "notApplicable": "Cet événement n'a pas de communauté organisatrice à rejoindre.",
+      "notAvailableYet": "Rejoindre la communauté organisatrice depuis un événement n'est pas encore disponible."
+    },
+    "share": {
+      "title": "Partager cet événement",
+      "copy": "Copier le lien",
+      "share": "Partager",
+      "copied": "Lien copié",
+      "failed": "Impossible de copier le lien",
+      "qrAlt": "Code QR qui ouvre la page de cet événement"
+    },
+    "similar": {
+      "title": "Événements similaires"
+    },
+    "register": {
+      "signInPrompt": "Connectez-vous pour vous inscrire à cet événement.",
+      "signIn": "Se connecter",
+      "attendee": "Vos informations",
+      "name": "Nom",
+      "email": "E-mail",
+      "attendeeNote": "Reprises de votre profil. Modifiez-les dans les paramètres de votre profil.",
+      "ticketTypes": "Type de billet",
+      "soldOut": "épuisé",
+      "format": {
+        "label": "Comment participerez-vous ?",
+        "inPerson": "Sur place",
+        "online": "En ligne"
+      },
+      "summary": {
+        "title": "Récapitulatif",
+        "discount": "Réduction ({code})"
+      },
+      "promo": {
+        "label": "Code promo",
+        "apply": "Appliquer",
+        "remove": "Retirer le code promo",
+        "applied": "Code {code} appliqué",
+        "invalid": "Ce code ne peut pas être utilisé pour cet événement.",
+        "failed": "Nous n'avons pas pu vérifier ce code. Réessayez."
+      },
+      "terms": {
+        "label": "J'accepte les conditions de l'événement, les <tos>Conditions d'utilisation</tos> et la <privacy>Politique de confidentialité</privacy> de DiaspoPlug."
+      },
+      "joinOrganiser": {
+        "label": "Rejoindre aussi {name}",
+        "labelRequest": "Demander aussi à rejoindre {name}",
+        "note": "Facultatif. S'inscrire à l'événement ne fait jamais de vous un membre."
+      },
+      "missing": {
+        "intro": "Encore nécessaire :",
+        "quantity": "au moins un billet",
+        "form": "les informations obligatoires",
+        "format": "comment vous participerez",
+        "payment": "un moyen de paiement",
+        "terms": "votre acceptation des conditions"
+      },
+      "submit": {
+        "waitlist": "Rejoindre la liste d'attente",
+        "requestApproval": "Demander l'inscription",
+        "paid": "Payer et s'inscrire",
+        "free": "S'inscrire"
+      },
+      "fullNote": "Cet événement est complet. En vous inscrivant, vous serez placé sur la liste d'attente.",
+      "approvalNote": "Les organisateurs approuvent chaque inscription. Vous serez informé de leur décision.",
+      "result": {
+        "confirmed": "Vous êtes inscrit.",
+        "pendingApproval": "Inscription reçue. Les organisateurs vont l'examiner.",
+        "waitlisted": "Vous êtes sur la liste d'attente.",
+        "waitlistedPos": "Vous êtes numéro {position} sur la liste d'attente.",
+        "received": "Inscription reçue.",
+        "paymentNotCompleted": "Le paiement n'a pas abouti. Votre place est réservée, mais elle ne sera confirmée qu'après paiement."
+      }
+    },
+    "myEvent": {
+      "status": "Votre inscription",
+      "ticket": "Voir le billet",
+      "googleCalendar": "Google Agenda",
+      "icsFile": "Télécharger le .ics",
+      "cancel": "Annuler l'inscription",
+      "cancelTitle": "Annuler votre inscription ?",
+      "cancelBody": "Vous abandonnerez votre place. Vous pourrez vous réinscrire plus tard s'il reste de la place.",
+      "cancelConfirm": "Annuler l'inscription",
+      "keep": "Garder ma place",
+      "cancelled": "Votre inscription a été annulée."
+    },
+    "errors": {
+      "featureUnavailable": "Ce n'est pas encore disponible.",
+      "unavailable": "Les événements sont temporairement indisponibles. Veuillez réessayer dans un instant.",
+      "notFound": "Nous n'avons pas trouvé cela.",
+      "invalid": "Cette demande n'était pas valide. Vérifiez les informations et réessayez.",
+      "rateLimited": "Vous faites cela trop souvent. Veuillez patienter un peu et réessayer.",
+      "conflict": "Cette action est impossible dans l'état actuel.",
+      "alreadyRegistered": "Vous êtes déjà inscrit à cet événement.",
+      "windowClosed": "Les inscriptions à cet événement sont closes.",
+      "windowNotYetOpen": "Les inscriptions à cet événement ne sont pas encore ouvertes.",
+      "notOpen": "Cet événement n'est pas ouvert aux inscriptions.",
+      "invalidPromoCode": "Ce code promo ne peut pas être utilisé.",
+      "invalidInviteCode": "Ce code d'invitation n'est pas valide.",
+      "termsRequired": "Acceptez les conditions pour vous inscrire.",
+      "attendanceFormat": "Choisissez si vous participerez sur place ou en ligne.",
+      "formIncomplete": "Renseignez les informations d'inscription obligatoires.",
+      "invalidQuantity": "Choisissez un nombre de billets valide.",
+      "ticketUnavailable": "Ce billet n'est plus disponible.",
+      "paymentUnavailable": "Le paiement n'est pas disponible pour le moment. Veuillez réessayer plus tard.",
+      "invalidWindow": "Les inscriptions doivent fermer après leur ouverture.",
+      "staffInvalid": "Cette personne ne peut pas être ajoutée à l'équipe.",
+      "speakerNotInEvent": "Un des intervenants choisis n'appartient pas à cet événement.",
+      "organiserRequired": "Les événements doivent être organisés par une communauté ou une association.",
+      "organiserNotAdmin": "Vous ne pouvez créer des événements que pour les communautés ou associations que vous administrez.",
+      "refused": "Ce n'est pas disponible pour le moment.",
+      "failed": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "ticket": {
+      "registration": "Inscription",
+      "confirmed": "Confirmée",
+      "googleCalendar": "Ajouter à Google Agenda",
+      "icsFile": "Télécharger le fichier agenda",
+      "timesIn": "Horaires en {zone}",
+      "notConfirmed": "Votre billet est disponible une fois votre inscription confirmée.",
+      "backToEvent": "Retour à l'événement"
+    },
+    "create": {
+      "organiserLabel": "Organisé par",
+      "organiserPlaceholder": "Choisir une communauté ou une association",
+      "organiserHelp": "Les événements sont organisés par des communautés et des associations. Choisissez celle pour laquelle cet événement est créé.",
+      "communities": "Communautés",
+      "associations": "Associations",
+      "chooseOrganiser": "Choisissez la communauté ou l'association qui organise cet événement.",
+      "noOrganiserTitle": "Vous ne pouvez pas encore créer d'événements",
+      "noOrganiserBody": "Les événements sont créés par les administrateurs d'une communauté ou d'une association. Demandez à un administrateur de vous nommer, ou ouvrez une communauté ou une association que vous dirigez.",
+      "browse": "Parcourir les événements"
+    },
+    "manage": {
+      "readOnlyTitle": "Cet événement est en lecture seule",
+      "readOnlyBody": "Il a été créé par un particulier, avant que les événements passent aux communautés et aux associations. Vous pouvez le consulter, mais pas le modifier ni le gérer ici.",
+      "backToEvent": "Retour à l'événement",
+      "tabs": {
+        "approvals": "Approbations",
+        "programme": "Programme",
+        "speakers": "Intervenants",
+        "updates": "Actualités",
+        "staff": "Équipe"
+      },
+      "common": {
+        "save": "Enregistrer",
+        "saving": "Enregistrement…",
+        "saved": "Enregistré",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "deleted": "Supprimé",
+        "edit": "Modifier",
+        "remove": "Retirer"
+      },
+      "programme": {
+        "intro": "Les horaires sont dans le fuseau horaire de l'événement ({zone}).",
+        "add": "Ajouter une séance",
+        "title": "Titre",
+        "start": "Début",
+        "end": "Fin",
+        "room": "Salle (facultatif)",
+        "type": "Type",
+        "description": "Description (facultatif)",
+        "speakers": "Intervenants",
+        "empty": "Aucune séance pour l'instant.",
+        "deleteTitle": "Supprimer cette séance ?",
+        "deleteBody": "« {title} » sera retirée du programme."
+      },
+      "speakers": {
+        "add": "Ajouter un intervenant",
+        "name": "Nom",
+        "role": "Rôle",
+        "jobTitle": "Fonction (facultatif)",
+        "organization": "Organisation (facultatif)",
+        "photoUrl": "Lien de la photo (facultatif)",
+        "photoHint": "Un lien commençant par https://",
+        "photoInvalid": "Le lien de la photo doit commencer par https://",
+        "bio": "Biographie (facultatif)",
+        "empty": "Aucun intervenant pour l'instant.",
+        "deleteTitle": "Supprimer cet intervenant ?",
+        "deleteBody": "{name} sera retiré de l'événement."
+      },
+      "updates": {
+        "title": "Titre",
+        "message": "Message",
+        "notifyNote": "Tous les inscrits à l'événement sont avertis à la publication.",
+        "publish": "Publier l'actualité",
+        "publishing": "Publication…",
+        "published": "Actualité publiée",
+        "empty": "Aucune actualité pour l'instant.",
+        "deleteTitle": "Supprimer cette actualité ?",
+        "deleteBody": "« {title} » sera retirée de la page de l'événement."
+      },
+      "approvals": {
+        "requireApproval": "Approuver les inscriptions avant d'attribuer une place",
+        "requireApprovalHint": "Les nouvelles inscriptions attendent ici votre approbation. Les personnes déjà inscrites ne sont pas concernées.",
+        "approvalOn": "Les nouvelles inscriptions doivent désormais être approuvées.",
+        "approvalOff": "Les nouvelles inscriptions n'ont plus besoin d'approbation.",
+        "waiting": "{count, plural, one {# inscription en attente} other {# inscriptions en attente}}",
+        "empty": "Aucune inscription n'attend d'approbation.",
+        "requestedOn": "Demandée le {date}",
+        "tickets": "{count, plural, one {# billet} other {# billets}}",
+        "approve": "Approuver",
+        "reject": "Refuser",
+        "approved": "Inscription approuvée.",
+        "approvedWaitlisted": "L'événement est complet : cette personne a été ajoutée à la liste d'attente.",
+        "rejected": "Inscription refusée.",
+        "rejectTitle": "Refuser {name} ?",
+        "rejectBody": "La personne est informée que son inscription n'a pas été approuvée. Le motif n'est conservé que pour les organisateurs.",
+        "reason": "Motif (facultatif)",
+        "reasonHint": "{count} / {max} caractères. Seuls les organisateurs le voient."
+      },
+      "staff": {
+        "intro": "L'équipe vous aide à organiser cet événement. Seules les personnes ayant un compte peuvent être ajoutées.",
+        "roles": {
+          "EVENT_MANAGER": "Responsable de l'événement",
+          "NETWORKING_MANAGER": "Responsable du réseautage"
+        },
+        "roleHelp": {
+          "EVENT_MANAGER": "approuve les inscriptions et modifie l'événement",
+          "NETWORKING_MANAGER": "gère le volet réseautage de l'événement"
+        },
+        "addTitle": "Ajouter une personne",
+        "search": "Trouver une personne par nom ou nom d'utilisateur",
+        "searchPlaceholder": "Commencez à saisir un nom",
+        "role": "Rôle",
+        "searching": "Recherche…",
+        "noResults": "Aucune personne trouvée.",
+        "add": "Ajouter",
+        "added": "Ajouté à l'équipe.",
+        "empty": "Aucun membre d'équipe pour l'instant.",
+        "removeTitle": "Retirer de l'équipe ?",
+        "removeBody": "{name} ne pourra plus aider à organiser cet événement.",
+        "removed": "Retiré de l'équipe.",
+        "unknownPerson": "Personne inconnue"
+      }
+    }
   }
 }
