@@ -1,536 +1,315 @@
 "use client";
 
-import EventCard2 from "@/components/cards/events/EventCard2";
-import SuggestedEvents from "@/components/events/SuggestedEvents";
-import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useApolloClient, useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { useLocale, useTranslations } from "next-intl";
+import { ArrowLeft, Bookmark, BookmarkCheck, Settings2 } from "lucide-react";
+import { toast } from "sonner";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import PageLoader from "@/components/custom/PageLoader";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+import { ButtonType2 } from "@/components/custom/button";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useAdminOrganisers } from "@/hooks/useAdminOrganisers";
 import {
-  GET_EVENT,
+  EVENT_PLACEHOLDER_IMAGE,
   IS_EVENT_SAVED,
-  USER_EVENTS,
-  REGISTER_EVENT,
-  CANCEL_REGISTRATION,
   SAVE_EVENT,
   UNSAVE_EVENT,
-  type Event,
-  type GetEventData,
+  USER_EVENTS,
+  getEventCoverImage,
+  getEventLocationDisplay,
   type IsEventSavedData,
-  type UserEventsData,
-  type RegisterEventData,
-  type CancelRegistrationData,
   type SaveEventData,
   type UnsaveEventData,
-  getEventLocationDisplay,
-  getEventVenueLines,
-  getEventCoverImage,
-  isEventSoldOut,
 } from "@/services/gql/events";
 import {
-  CONFIRM_PAYMENT_INTENT,
-  MY_PAYMENT_METHODS,
-  type ConfirmPaymentIntentResponse,
-  type MyPaymentMethodsResponse,
-} from "@/services/gql/payments";
-import { ArrowLeft } from "lucide-react";
-import PageLoader from "@/components/custom/PageLoader";
-import { toast } from "sonner";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useUserStore } from "@/store/useUserStore";
-import { useLocale, useTranslations } from "next-intl";
-import { CONVERT_CURRENCY } from "@/services/gql/marketplace";
-import { openPaystackMobileMoney } from "@/lib/paystack";
-import { formatAmountWithCurrency } from "@/lib/displayCurrency";
-import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
-import { readMutationOutcome, refusalMessageKey } from "@/lib/mutationOutcome";
+  EVENT_PROGRAMME,
+  EVENT_SPEAKERS,
+  EVENT_UPDATES,
+  EVENT_VENUE_INFO,
+  GET_EVENT_PAGE,
+  type EventProgrammeData,
+  type EventSpeakersData,
+  type EventUpdatesData,
+  type EventVenueInfoData,
+  type GetEventPageData,
+} from "@/services/gql/eventsM2";
+import { readMutationOutcome } from "@/lib/mutationOutcome";
+import { eventRefusal } from "@/lib/eventRefusal";
+import { formatInZone } from "@/lib/eventCalendar";
+import { REGISTERED_STATES, deriveRegistrationState } from "@/lib/eventRegistrationState";
+import { ManagerEmpty, OverviewTab, ProgrammeTab, SpeakersTab, UpdatesTab, VenueTab, hasVenueContent } from "@/components/events/page/ContentTabs";
+import MyEventTab from "@/components/events/page/MyEventTab";
+import OrganiserCard from "@/components/events/page/OrganiserCard";
+import RegisterTab, { type RegistrationResult } from "@/components/events/page/RegisterTab";
+import RegistrationCard from "@/components/events/page/RegistrationCard";
+import { ShareCard, SimilarEvents } from "@/components/events/page/RailExtras";
+import { useEventPriceLabel } from "@/components/events/page/useEventPriceLabel";
+import { useOrganiser } from "@/components/events/page/useOrganiser";
 
-function formatEventDate(iso: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(iso));
-}
+type TabKey = "overview" | "programme" | "speakers" | "venue" | "updates" | "register";
+const TAB_KEYS: TabKey[] = ["overview", "programme", "speakers", "venue", "updates", "register"];
 
-/** Start → end. Single-day events show one date with a time range; multi-day shows both dates. */
-function formatEventDateRange(startIso: string, endIso: string | undefined, locale: string) {
-  const start = formatEventDate(startIso, locale);
-  if (!endIso) return start;
-  const startDate = new Date(startIso);
-  const endDate = new Date(endIso);
-  const sameDay = startDate.toDateString() === endDate.toDateString();
-  if (sameDay) {
-    const endTime = new Intl.DateTimeFormat(locale, {
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(endDate);
-    return `${start} – ${endTime}`;
-  }
-  return `${start} – ${formatEventDate(endIso, locale)}`;
-}
-
-function formatPriceLabel(event: Event) {
-  if (!event.isPaid) return "Free";
-  const ticket = event.tickets?.find((t) => (t?.priceInCents ?? 0) > 0) ?? event.tickets?.[0];
-  const cents = ticket?.priceInCents;
-  if (cents == null || cents <= 0) return "Paid";
-  const currency = ticket?.currency || event.currency || "GHS";
-  return `${currency} ${(cents / 100).toFixed(2)}/ticket`;
-}
-
-type ConvertCurrencyData = {
-  convertCurrency: {
-    success: boolean;
-    converted_amount: number;
-    to_currency: string;
-  };
-};
+const EMPTY: never[] = [];
 
 export default function EventDetailPage() {
-  const apolloClient = useApolloClient();
   const params = useParams();
-  const router = useRouter();
   const eventId = params.id as string;
-  const modalRef = useRef<PaidEventsModalRef>(null);
-  const locale = useLocale();
+  const t = useTranslations("eventPage");
+  const tRail = useTranslations("eventPage.rail");
   const tEvents = useTranslations("home.events");
-  const t = useTranslations();
-  const [registrationId, setRegistrationId] = useState<string | null>(null);
-  const [optimisticRegistered, setOptimisticRegistered] = useState<boolean | null>(null);
-  const [optimisticSaved, setOptimisticSaved] = useState<boolean | null>(null);
-  const { currency: preferredDisplayCurrency } = useDisplayCurrency();
-  const [convertedPriceLabel, setConvertedPriceLabel] = useState<string | null>(null);
-  const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
-  const userEmail = useUserStore((s) => s.user?.email);
-  // `useAuthStore.persist` is undefined during SSR, so guard it — calling
-  // `.hasHydrated()` unguarded in render throws and 500s this page on hard
-  // refresh. On the server the store is never hydrated, so `false` is correct.
-  const isAuthHydrated = useAuthStore.persist?.hasHydrated() ?? false;
-  const shouldLoadUserEventState = isAuthHydrated && !!sessionToken;
+  const tErr = useTranslations("eventPage.errors");
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const search = useSearchParams();
 
-  const { data, loading, error } = useQuery<GetEventData>(GET_EVENT, {
+  const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
+  // Signed-in state is only trusted after mount, so the server render and the first
+  // client render agree (the store reads localStorage); the token selector then
+  // re-renders this page as soon as it is there.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const signedIn = mounted && !!sessionToken;
+
+  const { data, loading, error, refetch } = useQuery<GetEventPageData>(GET_EVENT_PAGE, {
     variables: { id: eventId },
     skip: !eventId,
   });
-  const { data: savedData } = useQuery<IsEventSavedData>(IS_EVENT_SAVED, {
-    variables: { eventId },
-    skip: !eventId || !shouldLoadUserEventState,
-  });
-  const saved = optimisticSaved ?? (savedData?.isEventSaved ?? false);
-
-  // The event query's `isRegistered` flag isn't always populated, so cross-check
-  // the user's attending list (the same source the events list page trusts) to
-  // reliably detect registration.
-  const { data: userEventsData } = useQuery<UserEventsData>(USER_EVENTS, {
-    skip: !shouldLoadUserEventState,
-    fetchPolicy: "cache-and-network",
-  });
-  const attendingEventIds = useMemo(
-    () => new Set((userEventsData?.userEvents?.attending ?? []).map((e) => e.id)),
-    [userEventsData]
-  );
-
-  const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
-    refetchQueries: [
-      { query: GET_EVENT, variables: { id: eventId } },
-      { query: IS_EVENT_SAVED, variables: { eventId } },
-      { query: USER_EVENTS },
-    ],
-    awaitRefetchQueries: true,
-  });
-  const [confirmPaymentIntent] = useMutation<ConfirmPaymentIntentResponse>(CONFIRM_PAYMENT_INTENT);
-  const [fetchMyPaymentMethods] = useLazyQuery<MyPaymentMethodsResponse>(MY_PAYMENT_METHODS, {
-    fetchPolicy: 'network-only',
-  });
-  const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, {
-    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }, { query: USER_EVENTS }],
-    awaitRefetchQueries: true,
-  });
-  const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, {
-    refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }, { query: USER_EVENTS }],
-    awaitRefetchQueries: true,
-  });
-  const [cancelRegistration] = useMutation<CancelRegistrationData>(CANCEL_REGISTRATION, {
-    refetchQueries: [{ query: GET_EVENT, variables: { id: eventId } }, { query: USER_EVENTS }],
-    awaitRefetchQueries: true,
-  });
-
   const event = data?.getEvent ?? null;
 
-  // Seed registrationId from server if the user is already registered
-  useEffect(() => {
-    if (event?.myRegistrationId && !registrationId) {
-      setRegistrationId(event.myRegistrationId);
-    }
-  }, [event?.myRegistrationId]);
+  const { organiser } = useOrganiser(event?.ownerType, event?.ownerId);
+  const { administers } = useAdminOrganisers();
+  const canManage = administers(event?.ownerType, event?.ownerId);
 
-  useEffect(() => {
-    let cancelled = false;
+  // Public reads that decide which tabs exist. Cheap, and only after the event is known.
+  const skip = !event;
+  const programme = useQuery<EventProgrammeData>(EVENT_PROGRAMME, { variables: { eventId }, skip });
+  const speakers = useQuery<EventSpeakersData>(EVENT_SPEAKERS, { variables: { eventId }, skip });
+  const venue = useQuery<EventVenueInfoData>(EVENT_VENUE_INFO, { variables: { eventId }, skip });
+  const updates = useQuery<EventUpdatesData>(EVENT_UPDATES, { variables: { eventId, pageSize: 10 }, skip });
+  const sessionList = programme.data?.eventProgramme ?? EMPTY;
+  const speakerList = speakers.data?.eventSpeakers ?? EMPTY;
+  const updateList = updates.data?.eventUpdates?.updates ?? EMPTY;
 
-    const computeLabel = async () => {
-      if (!event) {
-        if (!cancelled) setConvertedPriceLabel(null);
-        return;
-      }
+  const { data: savedData } = useQuery<IsEventSavedData>(IS_EVENT_SAVED, { variables: { eventId }, skip: !eventId || !signedIn });
+  const [optimisticSaved, setOptimisticSaved] = useState<boolean | null>(null);
+  const saved = optimisticSaved ?? savedData?.isEventSaved ?? false;
+  const [saveEvent] = useMutation<SaveEventData>(SAVE_EVENT, { refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }, { query: USER_EVENTS }], awaitRefetchQueries: true });
+  const [unsaveEvent] = useMutation<UnsaveEventData>(UNSAVE_EVENT, { refetchQueries: [{ query: IS_EVENT_SAVED, variables: { eventId } }, { query: USER_EVENTS }], awaitRefetchQueries: true });
 
-      const fallbackLabel = formatPriceLabel(event);
-      if (!event.isPaid) {
-        if (!cancelled) setConvertedPriceLabel(fallbackLabel);
-        return;
-      }
+  const [lastResult, setLastResult] = useState<RegistrationResult | null>(null);
+  const priceLabel = useEventPriceLabel(event);
+  const tablistRef = useRef<HTMLDivElement>(null);
 
-      const ticket = event.tickets?.find((t) => (t?.priceInCents ?? 0) > 0) ?? event.tickets?.[0];
-      const cents = ticket?.priceInCents;
-      if (cents == null || cents <= 0) {
-        if (!cancelled) setConvertedPriceLabel("Paid");
-        return;
-      }
+  const state = event ? deriveRegistrationState(event) : "open";
+  const registered = REGISTERED_STATES.has(state);
+  const hasVenue = event ? hasVenueContent(event, venue.data?.eventVenueInfo) : false;
 
-      const fromCurrency = (ticket?.currency ?? event.currency ?? "USD").toUpperCase();
-      if (fromCurrency === preferredDisplayCurrency) {
-        const amount = cents / 100;
-        if (!cancelled) {
-          setConvertedPriceLabel(`${formatAmountWithCurrency(amount, preferredDisplayCurrency, locale)}/ticket`);
-        }
-        return;
-      }
+  const tabs = useMemo(() => {
+    const list: TabKey[] = ["overview"];
+    if (sessionList.length > 0 || canManage) list.push("programme");
+    if (speakerList.length > 0 || canManage) list.push("speakers");
+    if (hasVenue || canManage) list.push("venue");
+    if (updateList.length > 0 || canManage) list.push("updates");
+    list.push("register");
+    return list;
+  }, [sessionList.length, speakerList.length, hasVenue, updateList.length, canManage]);
 
-      try {
-        const { data } = await apolloClient.query<ConvertCurrencyData>({
-          query: CONVERT_CURRENCY,
-          variables: {
-            // convertCurrency now speaks integer minor units in AND out.
-            amount: cents,
-            from_currency: fromCurrency,
-            to_currency: preferredDisplayCurrency,
-          },
-          fetchPolicy: 'no-cache',
-        });
+  const requested = search.get("tab") as TabKey | null;
+  const active: TabKey = requested && TAB_KEYS.includes(requested) && tabs.includes(requested) ? requested : "overview";
 
-        const result = data?.convertCurrency;
-        if (!result?.success || typeof result.converted_amount !== 'number') {
-          if (!cancelled) setConvertedPriceLabel(fallbackLabel);
-          return;
-        }
+  const openTab = useCallback(
+    (tab: TabKey) => {
+      const next = new URLSearchParams(search.toString());
+      if (tab === "overview") next.delete("tab");
+      else next.set("tab", tab);
+      const qs = next.toString();
+      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+    },
+    [router, pathname, search],
+  );
 
-        if (!cancelled) {
-          setConvertedPriceLabel(
-            `${formatAmountWithCurrency(result.converted_amount / 100, preferredDisplayCurrency, locale)}/ticket`
-          );
-        }
-      } catch {
-        if (!cancelled) setConvertedPriceLabel(fallbackLabel);
-      }
-    };
-
-    void computeLabel();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [event, apolloClient, locale, preferredDisplayCurrency]);
-
-  const parsePaymentIntentIdFromClientSecret = (clientSecret?: string | null): string | null => {
-    if (!clientSecret) return null;
-    const marker = '_secret_';
-    const index = clientSecret.indexOf(marker);
-    if (index <= 0) return null;
-    return clientSecret.slice(0, index);
+  const onTabKey = (e: React.KeyboardEvent, i: number) => {
+    const move = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!move) return;
+    e.preventDefault();
+    const next = tabs[(i + move + tabs.length) % tabs.length];
+    openTab(next);
+    requestAnimationFrame(() => tablistRef.current?.querySelector<HTMLElement>(`[data-tab="${next}"]`)?.focus());
   };
 
-  const getPrimaryStripeCardPaymentMethodId = async (): Promise<string | null> => {
-    const { data } = await fetchMyPaymentMethods();
-    const methods = data?.myPaymentMethods?.payment_methods ?? [];
-    const stripeCards = methods.filter((m) => m.provider === 'STRIPE' && m.type === 'card');
-    const primary = stripeCards.find((m) => Boolean(m.is_primary));
-    return (primary ?? stripeCards[0])?.id ?? null;
-  };
-
-  const handleAttend = async () => {
-    if (!eventId) return;
-    const primaryTicket = event?.tickets?.[0];
-    modalRef.current?.open({
-      onPaymentSuccess: async ({ ticketId, quantity, promoCode, formResponsesJson, paymentMethod, totalAmount }) => {
-        const result = await registerForEvent({
-          variables: {
-            input: {
-              eventId,
-              ticketId: event?.isPaid ? ticketId : undefined,
-              quantity,
-              promoCode: promoCode || undefined,
-              formResponsesJson: formResponsesJson || undefined,
-            },
-          },
-        });
-        const registerOutcome = readMutationOutcome(result, d => d.registerForEvent);
-        if (!registerOutcome.ok) {
-          toast.error(t(refusalMessageKey(registerOutcome.message, 'events.errors')));
-          return;
-        }
-        const waitlistPosition = result.data?.registerForEvent?.waitlistPosition ?? null;
-        if (waitlistPosition != null) {
-          return { waitlistPosition };
-        }
-
-        const nextRegistrationId = result.data?.registerForEvent?.registrationId;
-        if (nextRegistrationId) {
-          setRegistrationId(nextRegistrationId);
-        }
-
-        const paymentIntentClientSecret = result.data?.registerForEvent?.paymentIntentClientSecret;
-        if (paymentIntentClientSecret) {
-          const paymentIntentId = parsePaymentIntentIdFromClientSecret(paymentIntentClientSecret);
-          if (!paymentIntentId) {
-            toast.error('Unable to resolve payment intent for this event payment.');
-            return;
-          }
-
-          if (paymentMethod === 'mobile') {
-            if (!userEmail) {
-              toast.error('Email is required for mobile money checkout.');
-              return;
-            }
-            const amountInPesewas = Math.round((totalAmount ?? 0) * 100);
-            const { reference } = await openPaystackMobileMoney({
-              email: userEmail,
-              amountInPesewas,
-              currency: event?.currency ?? 'GHS',
-            });
-            const result = await confirmPaymentIntent({
-              variables: {
-                input: {
-                  payment_intent_id: paymentIntentId,
-                  payment_method_id: reference,
-                  provider: 'PAYSTACK',
-                },
-              },
-            });
-            const outcome = readMutationOutcome(result, d => d.confirmPaymentIntent);
-            if (!outcome.ok) {
-              toast.error(t(refusalMessageKey(outcome.message, 'events.errors')));
-              return;
-            }
-          } else {
-            const stripePaymentMethodId = await getPrimaryStripeCardPaymentMethodId();
-            if (!stripePaymentMethodId) {
-              toast.error('No Stripe card found. Please save a card first.');
-              return;
-            }
-            const result = await confirmPaymentIntent({
-              variables: {
-                input: {
-                  payment_intent_id: paymentIntentId,
-                  payment_method_id: stripePaymentMethodId,
-                  provider: 'STRIPE',
-                },
-              },
-            });
-            const outcome = readMutationOutcome(result, d => d.confirmPaymentIntent);
-            if (!outcome.ok) {
-              toast.error(t(refusalMessageKey(outcome.message, 'events.errors')));
-              return;
-            }
-          }
-        }
-
-        setOptimisticRegistered(true);
-        toast.success("Successfully registered for event");
-      },
-      event: event
-        ? {
-            id: event.id,
-            title: event.title,
-            startAt: event.startAt,
-            isPaid: event.isPaid,
-            currency: event.currency ?? undefined,
-            ticketId: primaryTicket?.id,
-            ticketName: primaryTicket?.name,
-            ticketDescription: primaryTicket?.description ?? undefined,
-            ticketPriceInCents: primaryTicket?.priceInCents ?? 0,
-            registrationFormFields: event.registrationFormFields ?? undefined,
-          }
-        : undefined,
-    });
-  };
-
-  const handleSave = async () => {
-    if (!eventId) return;
-    if (!sessionToken) {
-      toast.error("Please sign in to save events");
-      return;
-    }
-
-    const nextSavedState = !saved;
-    setOptimisticSaved(nextSavedState);
-
-    try {
-      if (saved) {
-        const result = await unsaveEvent({ variables: { eventId } });
-        const outcome = readMutationOutcome(result, d => d.unsaveEvent);
-        if (!outcome.ok) {
-          setOptimisticSaved(null);
-          toast.error(t(refusalMessageKey(outcome.message, 'events.errors')));
-          return;
-        }
-        setOptimisticSaved(null);
-        toast.success(tEvents("eventRemovedFromSaved"));
-      } else {
-        const result = await saveEvent({ variables: { eventId } });
-        const outcome = readMutationOutcome(result, d => d.saveEvent?.id);
-        if (!outcome.ok) {
-          setOptimisticSaved(null);
-          toast.error(t(refusalMessageKey(outcome.message, 'events.errors')));
-          return;
-        }
-        setOptimisticSaved(null);
-        toast.success(tEvents("eventSaved"));
-      }
-    } catch {
-      setOptimisticSaved(null);
+  const toggleSave = async () => {
+    if (!signedIn) {
       toast.error(tEvents("saveFailed"));
-    }
-  };
-
-  const handleCancelAttend = async () => {
-    if (!registrationId) {
-      toast.error(tEvents("cancelAttendanceUnavailable"));
       return;
     }
-
-    setOptimisticRegistered(false);
+    setOptimisticSaved(!saved);
     try {
-      const result = await cancelRegistration({ variables: { registrationId } });
-      const outcome = readMutationOutcome(result, d => d.cancelRegistration);
-      if (!outcome.ok) {
-        setOptimisticRegistered(true);
-        toast.error(t(refusalMessageKey(outcome.message, 'events.errors')));
-        return;
-      }
-      setRegistrationId(null);
-      toast.success(tEvents("attendanceCancelled"));
+      const result = saved ? await unsaveEvent({ variables: { eventId } }) : await saveEvent({ variables: { eventId } });
+      const outcome = saved ? readMutationOutcome(result, (d) => d.unsaveEvent) : readMutationOutcome(result, (d) => d.saveEvent?.id);
+      if (!outcome.ok) toast.error(tErr(eventRefusal(result).key));
+      else toast.success(saved ? tEvents("eventRemovedFromSaved") : tEvents("eventSaved"));
     } catch {
-      setOptimisticRegistered(true);
-      toast.error(tEvents("cancelAttendanceFailed"));
+      toast.error(tEvents("saveFailed"));
+    } finally {
+      setOptimisticSaved(null);
     }
   };
 
-  const handleDownloadTicket = () => {
-    router.push(`/${locale}/events/${eventId}/ticket`);
+  if (!eventId) return <div className="p-4 text-center text-text-secondary">{t("notFound")}</div>;
+  if (loading && !data) return <PageLoader />;
+  if (error || !event) return <div className="p-4 text-center text-text-secondary">{t("notFound")}</div>;
+
+  const calendar = {
+    uid: event.id,
+    title: event.title,
+    description: event.description,
+    location: getEventLocationDisplay(event),
+    startIso: event.startAt,
+    endIso: event.endAt,
+    url: typeof window !== "undefined" ? `${window.location.origin}/${locale}/events/${event.id}` : null,
   };
 
-  const handleShare = async () => {
-    if (typeof window === "undefined") return;
-    const url = `${window.location.origin}/${locale}/events/${eventId}`;
-    const title = event?.title ?? "Event";
-    const shareData = {
-      title,
-      text: event?.title ? `Check out "${event.title}" on Diaspoplug` : "Check out this event on Diaspoplug",
-      url,
-    };
-
-    // Native share sheet on mobile / supported browsers.
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch {
-        // User cancelled or share failed — fall through to clipboard copy.
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success(tEvents("linkCopied"));
-    } catch {
-      toast.error(tEvents("shareFailed"));
-    }
+  const refresh = async () => {
+    await refetch();
   };
 
-  if (!eventId) {
-    return (
-      <div className="p-4 text-center text-text-secondary">Invalid event ID.</div>
-    );
-  }
-
-  if (loading) {
-    return <PageLoader />;
-  }
-
-  if (error || !event) {
-    return (
-      <div className="p-4 text-center text-text-secondary">
-        Event not found or failed to load.
-      </div>
-    );
-  }
-
-  const dateStr = formatEventDateRange(event.startAt, event.endAt, locale);
-  const locationStr = getEventLocationDisplay(event);
-  const venue = getEventVenueLines(event);
-  const priceStr = convertedPriceLabel ?? formatPriceLabel(event);
-  const isRegistered =
-    optimisticRegistered ??
-    (event.isRegistered ||
-      Boolean(event.myRegistrationId) ||
-      attendingEventIds.has(event.id));
+  const tabLabel = (k: TabKey) => (k === "register" ? (registered || lastResult ? t("tabs.myEvent") : t("tabs.register")) : t(`tabs.${k}`));
 
   return (
-    <>
-      {/* Centred in the header's 80vw frame: the event card plus, on large
-          screens, suggestions for other events. (No left sidebar any more.) */}
-      <div className="lg:flex justify-center min-h-full lg:mx-auto lg:w-[80vw]">
-        {/* MAIN: back button + event card */}
-        <div className="h-[calc(100vh-4rem)] flex-1 min-w-0 lg:max-w-[45rem] overflow-y-auto scrollbar-hide p-4">
-          <div className="mx-auto">
-            <button
-              onClick={() => {
-                if (typeof window !== "undefined" && window.history.length > 1) {
-                  router.back();
-                  return;
-                }
-                router.push(`/${locale}/events`);
-              }}
-              className="mb-4 inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
-              aria-label="Go back"
-            >
-              <ArrowLeft size={18} />
-              <span className="font-medium text-sm">Back</span>
-            </button>
-            <EventCard2
-              title={event.title}
-              date={dateStr}
-              location={locationStr}
-              attendees={event.registrationCount ?? 0}
-              imageUrl={getEventCoverImage(event)}
-              description={event.description}
-              priceLabel={priceStr}
-              visibility={event.visibility}
-              venueName={venue.venueName}
-              addressLines={venue.addressLines}
-              virtualLink={venue.virtualLink}
-              platform={venue.platform}
-              registrationLink={event.registrationLink}
-              isSoldOut={isEventSoldOut(event)}
-              isRegistered={isRegistered}
-              isSaved={saved}
-              onBuyClick={handleAttend}
-              onSaveClick={handleSave}
-              onCancelAttend={handleCancelAttend}
-              onDownloadTicket={handleDownloadTicket}
-              onShare={handleShare}
+    <div className="h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hide">
+      <div className="mx-auto w-full px-4 pb-24 pt-4 lg:w-[80vw] lg:pb-8">
+        <button
+          type="button"
+          onClick={() => (window.history.length > 1 ? router.back() : router.push("/events"))}
+          className="mb-3 inline-flex min-h-11 items-center gap-2 text-text-secondary hover:text-text-primary"
+        >
+          <ArrowLeft size={18} aria-hidden />
+          <span className="text-sm font-medium">{t("back")}</span>
+        </button>
+
+        <header className="mb-4 overflow-hidden rounded-2xl border border-border-subtle bg-surface-default">
+          <div className="relative h-44 bg-surface-subtle sm:h-60">
+            <ImageWithFallback
+              src={getEventCoverImage(event)}
+              fallbackSrc={EVENT_PLACEHOLDER_IMAGE}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
-        </div>
+          <div className="space-y-2 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-2xl font-bold text-text-primary break-words">{event.title}</h1>
+              <div className="flex shrink-0 items-center gap-1">
+                {canManage && (
+                  <Link href={`/events/${event.id}/manage`} aria-label={t("manageCta")} className="inline-flex size-11 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover" data-testid="manage-link">
+                    <Settings2 className="size-5" aria-hidden />
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={toggleSave}
+                  aria-pressed={saved}
+                  aria-label={saved ? t("unsave") : t("save")}
+                  className="inline-flex size-11 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover"
+                >
+                  {saved ? <BookmarkCheck className="size-5 text-text-brand" aria-hidden /> : <Bookmark className="size-5" aria-hidden />}
+                </button>
+              </div>
+            </div>
+            <p className="font-medium text-text-primary">{formatInZone(event.startAt, locale, event.timezone)}</p>
+            <p className="text-text-secondary">{getEventLocationDisplay(event)}</p>
+            {state === "eventCancelled" && <p role="status" className="rounded-lg bg-surface-danger p-2 text-sm text-text-danger">{tRail("states.eventCancelled")}</p>}
+            {/* Phones show the rail below the tabs, so the one action that matters sits up here too. */}
+            <div className="lg:hidden">
+              <ButtonType2 onClick={() => openTab("register")} className="w-full" size="lg">
+                {registered ? tRail("cta.myEvent") : state === "full" ? tRail("cta.joinWaitlist") : state === "open" ? tRail("cta.register") : tRail(`states.${state}`, { date: event.registrationOpensAt ? formatInZone(event.registrationOpensAt, locale, event.timezone) : "" })}
+              </ButtonType2>
+            </div>
+          </div>
+        </header>
 
-        {/* RIGHT: suggestions for other events */}
-        <div className="hidden lg:block lg:w-[22vw] h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hide p-4">
-          <SuggestedEvents currentEventId={eventId} />
+        <div className="gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <main className="min-w-0 space-y-4">
+            <div ref={tablistRef} role="tablist" aria-label={t("tabsLabel")} className="flex gap-1 overflow-x-auto border-b border-border-subtle scrollbar-hide">
+              {tabs.map((k, i) => (
+                <button
+                  key={k}
+                  id={`event-tab-${k}`}
+                  data-tab={k}
+                  role="tab"
+                  type="button"
+                  aria-selected={active === k}
+                  aria-controls="event-tabpanel"
+                  tabIndex={active === k ? 0 : -1}
+                  onClick={() => openTab(k)}
+                  onKeyDown={(e) => onTabKey(e, i)}
+                  className={`min-h-11 whitespace-nowrap border-b-2 px-3 text-sm transition-colors ${
+                    active === k ? "border-border-brand font-medium text-text-brand" : "border-transparent text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  {tabLabel(k)}
+                </button>
+              ))}
+            </div>
+
+            <div id="event-tabpanel" role="tabpanel" aria-labelledby={`event-tab-${active}`} tabIndex={0} className="space-y-4 focus:outline-none">
+              {active === "overview" && <OverviewTab event={event} priceLabel={priceLabel} organiserName={organiser?.entity.name} />}
+              {active === "programme" &&
+                (sessionList.length > 0 ? (
+                  <ProgrammeTab event={event} sessions={sessionList} speakers={speakerList} />
+                ) : (
+                  <ManagerEmpty eventId={event.id} section="programme" text={t("empty.programme")} />
+                ))}
+              {active === "speakers" &&
+                (speakerList.length > 0 ? <SpeakersTab speakers={speakerList} /> : <ManagerEmpty eventId={event.id} section="speakers" text={t("empty.speakers")} />)}
+              {active === "venue" && <VenueTab event={event} info={venue.data?.eventVenueInfo} canSeeOnlineLink={state === "confirmed" || canManage} />}
+              {active === "updates" &&
+                (updateList.length > 0 ? <UpdatesTab eventId={event.id} /> : <ManagerEmpty eventId={event.id} section="updates" text={t("empty.updates")} />)}
+              {active === "register" &&
+                (registered || lastResult ? (
+                  <MyEventTab
+                    event={event}
+                    state={state}
+                    organiser={organiser}
+                    lastResult={lastResult}
+                    calendar={calendar}
+                    onChanged={async () => {
+                      setLastResult(null);
+                      await refresh();
+                    }}
+                  />
+                ) : state === "rejected" ? (
+                  <div className="rounded-2xl border border-border-subtle bg-surface-default p-6" data-testid="register-unavailable">
+                    <p className="font-medium text-text-primary">{tRail("states.rejected")}</p>
+                    <p className="text-sm text-text-secondary">{tRail("hints.rejected")}</p>
+                  </div>
+                ) : (
+                  <RegisterTab
+                    event={event}
+                    organiser={organiser}
+                    state={state}
+                    signedIn={signedIn}
+                    onDone={async (r) => {
+                      setLastResult(r);
+                      await refresh();
+                    }}
+                  />
+                ))}
+            </div>
+          </main>
+
+          <aside className="mt-6 space-y-4 lg:mt-0" aria-label={t("railLabel")}>
+            <RegistrationCard event={event} state={state} waitlistPosition={lastResult?.waitlistPosition} signedIn={signedIn} onOpenTab={openTab} />
+            {organiser && <OrganiserCard eventId={event.id} organiser={organiser} signedIn={signedIn} />}
+            <ShareCard eventId={event.id} title={event.title} />
+            <SimilarEvents eventId={event.id} category={event.eventCategory} />
+          </aside>
         </div>
       </div>
-      <PaidEventsModal ref={modalRef} />
-    </>
+    </div>
   );
 }

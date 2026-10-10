@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import JsonLd from '@/components/seo/JsonLd';
 import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages, twitterImages } from '@/lib/seo';
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
@@ -154,7 +155,10 @@ export default async function EventPublicPage({
   return (
     <>
       {seo}
-      <EventDetailClient />
+      {/* `?tab=` is read on the client, which needs a Suspense boundary. */}
+      <Suspense fallback={null}>
+        <EventDetailClient />
+      </Suspense>
     </>
   );
 }
