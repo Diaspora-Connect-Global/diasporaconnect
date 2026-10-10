@@ -80,12 +80,8 @@ export async function downloadEventTicketPdf(data: EventTicketPdfData): Promise<
   doc.setFontSize(10);
   doc.text("Event Ticket & Receipt", margin, 60);
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("BOOKING REFERENCE", pageW - margin, 42, { align: "right" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text(reference, pageW - margin, 60, { align: "right" });
+  // The booking reference is an internal id: it is encoded in the QR for check-in
+  // and never printed.
 
   let y = 128;
 
@@ -206,7 +202,6 @@ export async function downloadEventTicketPdf(data: EventTicketPdfData): Promise<
   doc.setFontSize(9);
   doc.setTextColor(MUTED);
   doc.text(`Issued ${data.issuedAt}`, margin, fy);
-  doc.text(`Ticket ID: ${reference}`, pageW - margin, fy, { align: "right" });
   fy += 14;
   doc.text(
     "Present this ticket (printed or on your phone) at entry. This document is your proof of registration and receipt.",

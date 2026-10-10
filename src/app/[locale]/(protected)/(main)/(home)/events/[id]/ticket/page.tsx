@@ -11,12 +11,13 @@ import { ButtonType2 } from "@/components/custom/button";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  GET_EVENT,
-  type GetEventData,
   type Event,
   getEventLocationDisplay,
   getEventVenueLines,
 } from "@/services/gql/events";
+import { GET_EVENT_PAGE, type GetEventPageData } from "@/services/gql/eventsM2";
+import { buildGoogleCalendarUrl, downloadIcs, timezoneLabel } from "@/lib/eventCalendar";
+import { deriveRegistrationState } from "@/lib/eventRegistrationState";
 import { useUserStore } from "@/store/useUserStore";
 import { downloadEventTicketPdf } from "@/lib/eventTicketPdf";
 import PageLoader from "@/components/custom/PageLoader";
@@ -67,12 +68,14 @@ export default function EventTicketPage() {
 
   const user = useUserStore((state) => state.user);
 
-  const { data, loading, error } = useQuery<GetEventData>(GET_EVENT, {
+  const tTicket = useTranslations("eventPage.ticket");
+  const { data, loading, error } = useQuery<GetEventPageData>(GET_EVENT_PAGE, {
     variables: { id: eventId },
     skip: !eventId,
   });
 
   const event = data?.getEvent ?? null;
+  const regState = event ? deriveRegistrationState(event) : null;
 
   const holderName = useMemo(() => {
     if (!user) return "Guest User";
@@ -160,6 +163,28 @@ export default function EventTicketPage() {
     );
   }
 
+  if (regState !== "confirmed") {
+    return (
+      <div className="h-[calc(100vh-4rem)] lg:w-[60vw] overflow-y-auto scrollbar-hide p-4">
+        <div className="max-w-2xl mx-auto rounded-lg border border-border-subtle p-6 text-center space-y-3" data-testid="ticket-unavailable">
+          <p className="text-text-primary">{tTicket("notConfirmed")}</p>
+          <Link href={`/events/${event.id}?tab=register`} className="text-surface-brand hover:underline">
+            {tTicket("backToEvent")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const calendar = {
+    uid: event.id,
+    title: event.title,
+    description: event.description,
+    location: getEventLocationDisplay(event),
+    startIso: event.startAt,
+    endIso: event.endAt,
+    url: typeof window !== "undefined" ? `${window.location.origin}/${locale}/events/${event.id}` : null,
+  };
   const venue = getEventVenueLines(event);
   const venueLines = [
     venue.venueName,
@@ -222,7 +247,11 @@ export default function EventTicketPage() {
                 <p className="label-large text-text-primary">
                   {formatDateRange(event.startAt, event.endAt, locale)}
                 </p>
-                {event.timezone && <p className="text-sm text-text-secondary">{event.timezone}</p>}
+                {event.timezone && (
+                  <p className="text-sm text-text-secondary">
+                    {tTicket("timesIn", { zone: timezoneLabel(event.startAt, locale, event.timezone) || event.timezone })}
+                  </p>
+                )}
               </div>
               <div className="rounded-lg border border-border-subtle p-4">
                 <p className="text-sm text-text-secondary mb-1">Location</p>
@@ -265,14 +294,27 @@ export default function EventTicketPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-lg border border-border-subtle p-4">
-                <p className="text-sm text-text-secondary mb-1">Booking Reference</p>
-                <p className="label-large text-text-primary break-all">{reference}</p>
+            <div className="mt-4 rounded-lg border border-border-subtle p-4 space-y-3">
+              <div>
+                <p className="text-sm text-text-secondary mb-1">{tTicket("registration")}</p>
+                <p className="label-large text-text-primary" data-testid="ticket-status">{tTicket("confirmed")}</p>
               </div>
-              <div className="rounded-lg border border-border-subtle p-4">
-                <p className="text-sm text-text-secondary mb-1">Event ID</p>
-                <p className="label-large text-text-primary break-all">{event.id}</p>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={buildGoogleCalendarUrl(calendar)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-full border border-border-subtle px-4 py-2 text-sm text-text-primary hover:bg-surface-hover"
+                >
+                  {tTicket("googleCalendar")}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => downloadIcs(calendar)}
+                  className="inline-flex items-center rounded-full border border-border-subtle px-4 py-2 text-sm text-text-primary hover:bg-surface-hover"
+                >
+                  {tTicket("icsFile")}
+                </button>
               </div>
             </div>
 
