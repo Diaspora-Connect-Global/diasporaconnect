@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, Bookmark, Star, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { SafetyMenu } from './InterestParts';
 import { Chip, PersonAvatar, SectionCard, TierBadge, focusRing } from './primitives';
 import { ChipRow, ReasonLines } from './PersonParts';
 import { NetworkingHeader, NetworkingTabs, type NetworkingEventContext } from './NetworkingShell';
@@ -32,6 +33,8 @@ export default function PersonView({
   onPass,
   onSkip,
   onInterested,
+  eventId,
+  onBlocked,
 }: {
   event: NetworkingEventContext;
   features: { interests: boolean; circles: boolean };
@@ -42,6 +45,9 @@ export default function PersonView({
   onPass: () => void;
   onSkip: () => void;
   onInterested?: () => void;
+  eventId?: string;
+  /** Present only while the interests backend is released: shows Block / Report. */
+  onBlocked?: () => void;
 }) {
   const t = useTranslations('networking.person');
   const ta = useTranslations('networking.actions');
@@ -62,7 +68,10 @@ export default function PersonView({
         <div className="flex flex-wrap items-start gap-5">
           <PersonAvatar name={person.displayName} url={person.avatarUrl} className="size-24 text-2xl" />
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-bold text-text-primary">{person.displayName}</h1>
+            <div className="flex items-start justify-between gap-2">
+              <h1 className="text-2xl font-bold text-text-primary">{person.displayName}</h1>
+              {onBlocked && !person.isSelf && <SafetyMenu eventId={eventId ?? event.id} handle={person.handle} name={person.displayName} onBlocked={onBlocked} className="-mr-2 -mt-1 shrink-0" />}
+            </div>
             <p className="text-sm text-muted-foreground">{[person.headline, person.organization].filter(Boolean).join(' · ')}</p>
             {person.locationLabel && <p className="mt-1 text-xs text-muted-foreground">{person.locationLabel}</p>}
             <div className="mt-2 flex flex-wrap gap-2">

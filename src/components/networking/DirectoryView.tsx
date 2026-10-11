@@ -35,6 +35,7 @@ export default function DirectoryView({
   loading,
   onLoadMore,
   actionsFor,
+  onBlocked,
   focusField,
 }: {
   eventId: string;
@@ -48,6 +49,7 @@ export default function DirectoryView({
   loading: boolean;
   onLoadMore: () => void;
   actionsFor?: (card: NetworkingCard) => CardActionHandlers | undefined;
+  onBlocked?: (handle: string) => void;
   focusField?: FilterField | null;
 }) {
   const t = useTranslations('networking.directory');
@@ -84,7 +86,7 @@ export default function DirectoryView({
         <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
           {visible.map((c) => (
             <li key={c.handle}>
-              <PersonCard eventId={eventId} card={c} me={me} labelOf={labelOf} actions={actionsFor?.(c)} />
+              <PersonCard eventId={eventId} card={c} me={me} labelOf={labelOf} actions={actionsFor?.(c)} onBlocked={onBlocked} />
             </li>
           ))}
         </ul>

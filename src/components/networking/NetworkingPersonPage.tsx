@@ -9,8 +9,9 @@ import PageLoader from '@/components/custom/PageLoader';
 import PageFrame from './PageFrame';
 import GateMessage from './GateMessage';
 import PersonView, { PersonNotFound } from './PersonView';
+import { RevealConfirmDialog } from './InterestParts';
 import { NetworkingHeader } from './NetworkingShell';
-import { useDecide, useExpressInterest, useNetworkingBase } from './useNetworking';
+import { useDecide, useInterestFlow, useNetworkingBase } from './useNetworking';
 import { hasFailure, networkingRefusal } from '@/lib/networkingRefusal';
 import { NETWORKING_FEATURES } from '@/lib/networkingFeatures';
 import { NETWORKING_CONTEXT, NETWORKING_PERSON, type NetworkingPerson } from '@/services/gql/networking';
@@ -22,7 +23,7 @@ export default function NetworkingPersonPage({ eventId, handle }: { eventId: str
   const features = NETWORKING_FEATURES;
   const ready = base.gate === 'ready' || base.gate === 'paused';
   const decide = useDecide(eventId);
-  const interest = useExpressInterest(eventId);
+  const flow = useInterestFlow(eventId, base.mine?.participation?.visibility);
   const [busy, setBusy] = useState(false);
   const q = useQuery<{ eventNetworkingPerson: NetworkingPerson | null }>(NETWORKING_PERSON, { variables: { eventId, handle }, skip: !ready || !handle, ...NETWORKING_CONTEXT });
 
@@ -47,18 +48,19 @@ export default function NetworkingPersonPage({ eventId, handle }: { eventId: str
     );
   }
 
-  const act = (fn: () => Promise<boolean>, message: string) => async () => {
+  const act = (fn: () => Promise<boolean>, message?: string) => async () => {
     setBusy(true);
     const ok = await fn();
     setBusy(false);
     if (ok) {
-      toast.success(message);
+      if (message) toast.success(message);
       router.push(`/events/${eventId}/networking/recommended`);
     }
   };
 
   return (
     <PageFrame>
+      <RevealConfirmDialog open={Boolean(flow.pending)} name={flow.pending?.name} sending={flow.sending} onConfirm={() => void flow.confirm()} onCancel={flow.cancel} />
       <PersonView
         event={base.context}
         features={features}
@@ -68,7 +70,9 @@ export default function NetworkingPersonPage({ eventId, handle }: { eventId: str
         busy={busy}
         onPass={act(() => decide(person.handle, 'PASS'), t('person.passed'))}
         onSkip={act(() => decide(person.handle, 'SKIP'), t('person.saved'))}
-        onInterested={features.interests ? act(() => interest(person.handle), t('person.interestSent')) : undefined}
+        eventId={eventId}
+        onBlocked={features.interests ? () => router.push(`/events/${eventId}/networking?tab=people`) : undefined}
+        onInterested={features.interests ? act(() => flow.express(person.handle, 'PERSON', person.displayName ?? '')) : undefined}
       />
     </PageFrame>
   );

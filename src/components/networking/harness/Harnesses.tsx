@@ -12,7 +12,9 @@ import SetupWizard from '../SetupWizard';
 import RecommendedView from '../RecommendedView';
 import PersonView, { PersonNotFound } from '../PersonView';
 import DirectoryView from '../DirectoryView';
-import InterestsPanel from '../InterestsPanel';
+import { InterestedInYouPanel, MatchesPanel, MyInterestsPanel } from '../InterestsPanel';
+import type { InterestEntry } from '@/services/gql/networking';
+import type { Paged } from '../useNetworking';
 import GateMessage from '../GateMessage';
 import { NetworkingHeader, NetworkingTabs, type NetworkingTab } from '../NetworkingShell';
 import { CirclesDiscovery, CircleRoom } from '../CirclesParts';
@@ -20,6 +22,10 @@ import { draftFromParticipation, emptyDraft, type NetworkingDraft, type SuggestF
 import { eventDays } from '@/lib/networkingAvailability';
 import { CARDS, CIRCLES, CIRCLE_DETAIL, CIRCLE_MESSAGES, EVENT, ME, TAXONOMY } from './fixtures';
 import type { DirectoryFilter, MyParticipation, NetworkingCard } from '@/services/gql/networking';
+
+function fakePaged<T extends { handle: string }>(items: T[]): Paged<T> {
+  return { items, loading: false, hasMore: false, refusal: null, reviewingSkipped: false, refreshing: false, loaded: true, loadMore: () => {}, reload: () => {}, remove: () => {} };
+}
 
 const ALL_ON = { interests: true, circles: true };
 
@@ -66,8 +72,12 @@ export function HubHarness() {
   const tabContent =
     tab === 'people' ? (
       <DirectoryView eventId={EVENT.id} cards={cards} me={ME} labelOf={labelOf} taxonomy={TAXONOMY} filter={filter} onFilter={setFilter} hasMore={false} loading={false} onLoadMore={() => {}} />
-    ) : tab === 'interested' || tab === 'matches' || tab === 'interests' ? (
-      <InterestsPanel kind={tab} eventId={EVENT.id} cards={interestCards} me={ME} labelOf={labelOf} loading={false} hasMore={false} onLoadMore={() => {}} actionsFor={tab === 'interested' ? () => ({ onPass: () => toast('Not for me'), onInterested: () => toast('Interested') }) : undefined} />
+    ) : tab === 'interested' ? (
+      <InterestedInYouPanel eventId={EVENT.id} me={ME} labelOf={labelOf} cards={interestCards} loading={false} hasMore={false} onLoadMore={() => {}} onRemove={() => {}} />
+    ) : tab === 'matches' ? (
+      <MatchesPanel eventId={EVENT.id} me={ME} labelOf={labelOf} paged={fakePaged(interestCards.map((card) => ({ handle: card.handle, card, matchedAt: null })))} />
+    ) : tab === 'interests' ? (
+      <MyInterestsPanel eventId={EVENT.id} me={ME} labelOf={labelOf} paged={fakePaged<InterestEntry>(interestCards.map((card, i) => ({ handle: card.handle, card, status: (['PENDING', 'MUTUAL', 'EXPIRED'] as const)[i % 3], personAvailable: true })))} />
     ) : tab === 'circles' ? (
       <CirclesDiscovery eventId={EVENT.id} circles={CIRCLES} interestsLabels={draft.interests.map(labelOf)} />
     ) : null;
@@ -115,7 +125,7 @@ export function DeckHarness() {
       <RecommendedView
         event={EVENT} features={ALL_ON} completeness={68} mode={mode} onMode={setMode} onReconsider={() => toast('Reconsidered (fixture)')}
         eventId={EVENT.id} cards={CARDS} me={ME} labelOf={labelOf} hasMore={false} loading={false}
-        onDecide={async () => true} onInterested={withInterest ? async () => true : undefined}
+        onDecide={async () => true} onInterested={withInterest ? async () => true : undefined} onBlocked={() => {}}
       />
     </PageFrame>
   );
@@ -128,7 +138,7 @@ export function PersonHarness() {
   return (
     <PageFrame shell={false}>
       <Banner />
-      <PersonView event={EVENT} features={ALL_ON} person={CARDS[0]} me={ME} labelOf={labelOf} onPass={() => toast('Pass')} onSkip={() => toast('Skip')} onInterested={() => toast('Interested')} />
+      <PersonView event={EVENT} features={ALL_ON} person={CARDS[0]} me={ME} labelOf={labelOf} onPass={() => toast('Pass')} onSkip={() => toast('Skip')} onInterested={() => toast('Interested')} onBlocked={() => {}} />
     </PageFrame>
   );
 }

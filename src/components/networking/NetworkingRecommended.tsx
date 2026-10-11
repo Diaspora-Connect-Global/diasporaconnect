@@ -11,7 +11,8 @@ import GateMessage from './GateMessage';
 import RecommendedView from './RecommendedView';
 import { NetworkingHeader } from './NetworkingShell';
 import { InlineNotice } from './primitives';
-import { useDecide, useExpressInterest, useNetworkingBase, usePagedCards, useReportRefusal } from './useNetworking';
+import { RevealConfirmDialog } from './InterestParts';
+import { useDecide, useInterestFlow, useNetworkingBase, usePagedCards, useReportRefusal } from './useNetworking';
 import { hasFailure } from '@/lib/networkingRefusal';
 import { NETWORKING_FEATURES } from '@/lib/networkingFeatures';
 import { NETWORKING_DECK, NETWORKING_MUTATION, NETWORKING_RECONSIDER_PASSED, NETWORKING_REVIEW_LATER } from '@/services/gql/networking';
@@ -25,7 +26,7 @@ export default function NetworkingRecommended({ eventId }: { eventId: string }) 
   const ready = base.gate === 'ready' || base.gate === 'paused';
   const [mode, setMode] = useState<'deck' | 'saved'>('deck');
   const decide = useDecide(eventId);
-  const interest = useExpressInterest(eventId);
+  const flow = useInterestFlow(eventId, base.mine?.participation?.visibility);
   const [reconsider] = useMutation(NETWORKING_RECONSIDER_PASSED, NETWORKING_MUTATION);
 
   const deck = usePagedCards(NETWORKING_DECK, 'eventNetworkingDeck', { eventId }, ready && mode === 'deck', 10);
@@ -44,6 +45,7 @@ export default function NetworkingRecommended({ eventId }: { eventId: string }) 
 
   return (
     <PageFrame>
+      <RevealConfirmDialog open={Boolean(flow.pending)} name={flow.pending?.name} sending={flow.sending} onConfirm={() => void flow.confirm()} onCancel={flow.cancel} />
       {base.gate === 'paused' && <InlineNotice tone="warning" testId="paused-banner">{t('hub.pausedBanner')}</InlineNotice>}
       {q.refusal && q.refusal.kind !== 'notFound' && <InlineNotice tone="warning" testId="deck-refusal">{t(`errors.${q.refusal.key}`)}</InlineNotice>}
       <RecommendedView
@@ -66,7 +68,8 @@ export default function NetworkingRecommended({ eventId }: { eventId: string }) 
         refreshing={q.refreshing}
         reviewingSkipped={q.reviewingSkipped}
         onDecide={decide}
-        onInterested={features.interests ? interest : undefined}
+        onInterested={features.interests ? (h) => flow.express(h, mode === 'saved' ? 'REVIEW_LATER' : 'DECK', q.cards.find((c) => c.handle === h)?.displayName ?? '') : undefined}
+        onBlocked={features.interests ? q.remove : undefined}
         onNeedMore={q.loadMore}
       />
     </PageFrame>

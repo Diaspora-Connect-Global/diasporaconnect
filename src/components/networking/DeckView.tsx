@@ -6,6 +6,7 @@ import { Bookmark, Loader2, MapPin, Star, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Chip, InlineNotice, PersonAvatar, TierBadge, focusRing } from './primitives';
 import { ChipRow, ReasonLines } from './PersonParts';
+import { SafetyMenu } from './InterestParts';
 import PersonCard, { personHref } from './PersonCard';
 import { sharedCodes } from '@/lib/networkingReasons';
 import type { LabelFn } from '@/lib/networkingTaxonomy';
@@ -40,6 +41,8 @@ export interface DeckProps {
   /** Only passed while the interests backend is released. */
   onInterested?: (handle: string) => Promise<boolean>;
   onNeedMore?: () => void;
+  /** Present only while the interests backend is released: shows Block / Report on each person. */
+  onBlocked?: (handle: string) => void;
 }
 
 /**
@@ -47,7 +50,7 @@ export interface DeckProps {
  * touch, unless the person prefers reduced motion) a horizontal swipe are
  * shortcuts to the same actions. Nothing moves on its own.
  */
-export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading, refreshing, reviewingSkipped, onDecide, onInterested, onNeedMore }: DeckProps) {
+export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading, refreshing, reviewingSkipped, onDecide, onInterested, onNeedMore, onBlocked }: DeckProps) {
   const t = useTranslations('networking.deck');
   const ta = useTranslations('networking.actions');
   const [done, setDone] = useState<Set<string>>(new Set());
@@ -98,6 +101,14 @@ export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading
       }
     },
     [busy, cards, onInterested, t],
+  );
+
+  const blocked = useCallback(
+    (handle: string) => {
+      setDone((d) => new Set(d).add(handle));
+      onBlocked?.(handle);
+    },
+    [onBlocked],
   );
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -180,9 +191,12 @@ export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading
             </div>
             <div className="min-w-0 space-y-4">
               <div>
+                <div className="flex items-start justify-between gap-2">
                 <h2 className="text-2xl font-bold text-text-primary">
                   <Link href={personHref(eventId, current.handle)} className={`hover:underline ${focusRing}`}>{current.displayName}</Link>
                 </h2>
+                {onBlocked && <SafetyMenu eventId={eventId} handle={current.handle} name={current.displayName} onBlocked={blocked} className="-mr-2 -mt-1 shrink-0" />}
+                </div>
                 <p className="text-sm text-muted-foreground">{[current.headline, current.organization].filter(Boolean).join(' · ')}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {current.locationLabel && <Chip><MapPin className="mr-1 size-3" aria-hidden />{current.locationLabel}</Chip>}
@@ -248,6 +262,7 @@ export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading
                   me={me}
                   labelOf={labelOf}
                   actions={{ busy, onPass: (h) => void decide(h, 'PASS'), onInterested: onInterested ? (h) => void interested(h) : undefined }}
+                  onBlocked={onBlocked ? blocked : undefined}
                 />
               </li>
             ))}

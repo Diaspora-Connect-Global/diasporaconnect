@@ -10,11 +10,12 @@ import PageFrame from './PageFrame';
 import HubView from './HubView';
 import GateMessage from './GateMessage';
 import DirectoryView, { isValidFilterField, type FilterField } from './DirectoryView';
-import InterestsPanel from './InterestsPanel';
+import { InterestedInYouPanel, MatchesPanel, MyInterestsPanel } from './InterestsPanel';
+import { RevealConfirmDialog } from './InterestParts';
 import { CirclesDiscovery } from './CirclesParts';
 import { NetworkingHeader, type NetworkingTab } from './NetworkingShell';
 import { draftFromParticipation, preferencesInput, profileInput, type NetworkingDraft } from './draft';
-import { useDecide, useExpressInterest, useNetworkingBase, usePagedCards, useReportRefusal, useSuggest } from './useNetworking';
+import { useDecide, useInterestFlow, useMatches, useNetworkingBase, usePagedCards, useReportRefusal, useSentInterests, useSuggest } from './useNetworking';
 import { eventDays } from '@/lib/networkingAvailability';
 import { hasFailure } from '@/lib/networkingRefusal';
 import { NETWORKING_FEATURES } from '@/lib/networkingFeatures';
@@ -26,14 +27,11 @@ import {
   NETWORKING_DECK,
   NETWORKING_DIRECTORY,
   NETWORKING_INTERESTED_IN_ME,
-  NETWORKING_MY_INTERESTS,
-  NETWORKING_MY_MATCHES,
   NETWORKING_PAUSE,
   NETWORKING_RESUME,
   NETWORKING_SET_AVAILABILITY,
   NETWORKING_SET_VISIBILITY,
   NETWORKING_UPDATE_PROFILE,
-  NETWORKING_WITHDRAW_INTEREST,
   type CircleSummary,
   type DirectoryFilter,
 } from '@/services/gql/networking';
@@ -93,14 +91,13 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
   const deck = usePagedCards(NETWORKING_DECK, 'eventNetworkingDeck', { eventId }, ready && tab === 'discover', 4);
   const directory = usePagedCards(NETWORKING_DIRECTORY, 'eventNetworkingDirectory', { eventId, filters: filter }, ready && tab === 'people', 12);
   const inbound = usePagedCards(NETWORKING_INTERESTED_IN_ME, 'eventNetworkingInterestedInMe', { eventId }, ready && features.interests && tab === 'interested');
-  const matches = usePagedCards(NETWORKING_MY_MATCHES, 'eventNetworkingMyMatches', { eventId }, ready && features.interests && tab === 'matches');
-  const outbound = usePagedCards(NETWORKING_MY_INTERESTS, 'eventNetworkingMyInterests', { eventId }, ready && features.interests && tab === 'interests');
+  const matches = useMatches(eventId, ready && features.interests && tab === 'matches');
+  const outbound = useSentInterests(eventId, ready && features.interests && tab === 'interests');
   const circlesQ = useQuery<{ networkingCircles: CircleSummary[] | null }>(NETWORKING_CIRCLES, { variables: { eventId }, skip: !(ready && features.circles && tab === 'circles'), ...NETWORKING_CONTEXT });
   const [joinCircle, joinState] = useMutation(NETWORKING_CIRCLE_JOIN, NETWORKING_MUTATION);
 
   const decide = useDecide(eventId);
-  const interest = useExpressInterest(eventId);
-  const [withdrawInterest] = useMutation(NETWORKING_WITHDRAW_INTEREST, NETWORKING_MUTATION);
+  const flow = useInterestFlow(eventId, base.mine?.participation?.visibility);
 
   if (base.gate === 'loading' || base.gate === 'needsSetup' || (ready && !draft)) return <PageLoader />;
   if (!ready) {
@@ -148,9 +145,10 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
   const onDecide = async (handle: string, d: 'PASS' | 'SKIP') => {
     if (await decide(handle, d)) deck.remove(handle);
   };
+  const nameOf = (handle: string, list: Array<{ handle: string; displayName?: string | null }>) => list.find((c) => c.handle === handle)?.displayName ?? '';
   const interestAction = features.interests
     ? async (handle: string) => {
-        if (await interest(handle)) deck.remove(handle);
+        if (await flow.express(handle, 'DECK', nameOf(handle, deck.cards))) deck.remove(handle);
       }
     : undefined;
 
@@ -171,32 +169,16 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
         actionsFor={(c) => ({
           onPass: (h) => void decide(h, 'PASS').then((ok) => ok && directory.remove(h)),
           onSkip: (h) => void decide(h, 'SKIP').then((ok) => ok && directory.remove(h)),
-          onInterested: features.interests ? (h) => void interest(h) : undefined,
+          onInterested: features.interests ? (h) => void flow.express(h, 'DIRECTORY', c.displayName ?? '') : undefined,
         })}
+        onBlocked={features.interests ? directory.remove : undefined}
       />
-    ) : tab === 'interested' || tab === 'matches' || tab === 'interests' ? (
-      (() => {
-        const q = tab === 'interested' ? inbound : tab === 'matches' ? matches : outbound;
-        return (
-          <InterestsPanel
-            kind={tab}
-            eventId={eventId}
-            cards={q.cards}
-            me={base.me}
-            labelOf={base.labelOf}
-            loading={q.loading}
-            hasMore={q.hasMore}
-            onLoadMore={q.loadMore}
-            actionsFor={(c) =>
-              tab === 'interested'
-                ? { onPass: (h) => void decide(h, 'PASS').then((ok) => ok && q.remove(h)), onInterested: (h) => void interest(h).then((ok) => ok && q.reload()) }
-                : tab === 'interests'
-                  ? { onPass: (h) => void withdrawInterest({ variables: { eventId, handle: h } }).then((r) => (hasFailure(r) ? report(r) : q.remove(h))) }
-                  : undefined
-            }
-          />
-        );
-      })()
+    ) : tab === 'interested' ? (
+      <InterestedInYouPanel eventId={eventId} me={base.me} labelOf={base.labelOf} cards={inbound.cards} loading={inbound.loading} hasMore={inbound.hasMore} onLoadMore={inbound.loadMore} onRemove={inbound.remove} />
+    ) : tab === 'matches' ? (
+      <MatchesPanel eventId={eventId} me={base.me} labelOf={base.labelOf} paged={matches} />
+    ) : tab === 'interests' ? (
+      <MyInterestsPanel eventId={eventId} me={base.me} labelOf={base.labelOf} paged={outbound} />
     ) : tab === 'circles' ? (
       <CirclesDiscovery
         eventId={eventId}
@@ -213,6 +195,7 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
 
   return (
     <PageFrame>
+      <RevealConfirmDialog open={Boolean(flow.pending)} name={flow.pending?.name} sending={flow.sending} onConfirm={() => void flow.confirm()} onCancel={flow.cancel} />
       <HubView
         event={base.context}
         tab={tab}
@@ -238,6 +221,7 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
         dirty={dirty}
         deckCards={deck.cards}
         deckLoading={deck.loading || !deck.loaded}
+        onDeckBlocked={features.interests ? deck.remove : undefined}
         deckActions={() => ({ onPass: (h) => void onDecide(h, 'PASS'), onSkip: (h) => void onDecide(h, 'SKIP'), onInterested: interestAction })}
       />
     </PageFrame>

@@ -11,7 +11,7 @@
  */
 
 /** Interested / Interested in you / My matches / My interests (gateway: `eventNetworkingExpressInterest` …). */
-export const INTERESTS_UI_ENABLED = false;
+export const INTERESTS_UI_ENABLED = true;
 
 /** Networking Circles discovery and rooms (gateway: `networkingCircles` …). */
 export const CIRCLES_UI_ENABLED = false;

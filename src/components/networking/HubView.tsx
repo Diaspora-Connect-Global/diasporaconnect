@@ -41,6 +41,7 @@ export interface HubViewProps {
   deckCards: NetworkingCard[];
   deckLoading: boolean;
   deckActions: (card: NetworkingCard) => CardActionHandlers;
+  onDeckBlocked?: (handle: string) => void;
 }
 
 /** The Discover tab (mockup: goals editor + "People you may want to meet" + rail). */
@@ -89,7 +90,7 @@ export default function HubView(p: HubViewProps) {
           <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4" data-testid="deck-preview">
             {p.deckCards.map((c) => (
               <li key={c.handle}>
-                <PersonCard eventId={eventId} card={c} me={p.me} labelOf={p.labelOf} actions={p.deckActions(c)} />
+                <PersonCard eventId={eventId} card={c} me={p.me} labelOf={p.labelOf} actions={p.deckActions(c)} onBlocked={p.onDeckBlocked} />
               </li>
             ))}
           </ul>

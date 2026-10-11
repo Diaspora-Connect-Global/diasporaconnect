@@ -1,10 +1,12 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Bookmark, Star, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { PersonAvatar, TierBadge, focusRing } from './primitives';
 import { ChipRow, ReasonLines, Subline } from './PersonParts';
+import { SafetyMenu } from './InterestParts';
 import type { LabelFn } from '@/lib/networkingTaxonomy';
 import type { NetworkingCard, ProfileFields } from '@/services/gql/networking';
 
@@ -53,24 +55,31 @@ export default function PersonCard({
   me,
   labelOf,
   actions,
+  footer,
+  onBlocked,
 }: {
   eventId: string;
   card: NetworkingCard;
   me: ProfileFields | null;
   labelOf: LabelFn;
   actions?: CardActionHandlers;
+  /** Extra controls (inbox / matches / sent-interest lists) shown above the profile link. */
+  footer?: ReactNode;
+  /** When present the card shows the Block / Report overflow menu; called after a block so the list can drop the card. */
+  onBlocked?: (handle: string) => void;
 }) {
   const t = useTranslations('networking.actions');
   return (
     <article data-testid="person-card" data-handle={card.handle} aria-label={card.displayName ?? undefined} className="flex h-full min-w-0 flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-default p-4">
       <div className="flex items-start gap-3">
         <PersonAvatar name={card.displayName} url={card.avatarUrl} className="size-14" />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3 className="truncate text-base font-semibold text-text-primary">
             <Link href={personHref(eventId, card.handle)} className={`hover:underline ${focusRing}`}>{card.displayName}</Link>
           </h3>
           <Subline card={card} />
         </div>
+        {onBlocked && !card.isSelf && <SafetyMenu eventId={eventId} handle={card.handle} name={card.displayName} onBlocked={onBlocked} className="-mr-2 -mt-2 shrink-0" />}
       </div>
       <TierBadge tier={card.tier} mutualFit={card.mutualFit} />
       <ReasonLines card={card} me={me} labelOf={labelOf} limit={2} />
@@ -82,6 +91,7 @@ export default function PersonCard({
       )}
       <div className="mt-auto space-y-2 pt-1">
         {actions && <CardButtons card={card} actions={actions} size="sm" />}
+        {footer}
         <Link href={personHref(eventId, card.handle)} className={`inline-flex min-h-6 text-sm font-medium text-text-brand hover:underline ${focusRing}`}>{t('view')}</Link>
       </div>
     </article>
