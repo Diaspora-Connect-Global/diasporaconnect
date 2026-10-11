@@ -12,7 +12,7 @@ import GateMessage from './GateMessage';
 import DirectoryView, { isValidFilterField, type FilterField } from './DirectoryView';
 import InterestsPanel from './InterestsPanel';
 import { CirclesDiscovery } from './CirclesParts';
-import { NetworkingHeader, NetworkingTabs, type NetworkingTab } from './NetworkingShell';
+import { NetworkingHeader, type NetworkingTab } from './NetworkingShell';
 import { draftFromParticipation, preferencesInput, profileInput, type NetworkingDraft } from './draft';
 import { useDecide, useExpressInterest, useNetworkingBase, usePagedCards, useReportRefusal, useSuggest } from './useNetworking';
 import { eventDays } from '@/lib/networkingAvailability';

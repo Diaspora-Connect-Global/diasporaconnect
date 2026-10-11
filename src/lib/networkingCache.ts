@@ -18,13 +18,14 @@ function isNetworkingKey(key: string): boolean {
 }
 
 /**
- * `persistenceMapper` for apollo3-cache-persist: receives the serialised cache,
+ * `persistenceMapper` for apollo3-cache-persist: receives the cache (serialised or not),
  * returns it without networking entries. Fails open on a parse error by
  * returning an empty cache (better to persist nothing than personal data).
  */
-export function stripNetworkingFromPersisted(serialised: string): string {
+export function stripNetworkingFromPersisted<T extends string | object>(persisted: T): T {
+  const wasString = typeof persisted === 'string';
   try {
-    const data = JSON.parse(serialised) as Record<string, Record<string, unknown> | unknown>;
+    const data = (wasString ? JSON.parse(persisted as string) : persisted) as Record<string, Record<string, unknown> | unknown>;
     for (const key of Object.keys(data)) {
       if (isNetworkingKey(key)) {
         delete data[key];
@@ -40,9 +41,9 @@ export function stripNetworkingFromPersisted(serialised: string): string {
         if (typeof tn === 'string' && isNetworkingKey(tn)) delete data[key];
       }
     }
-    return JSON.stringify(data);
+    return (wasString ? JSON.stringify(data) : data) as T;
   } catch {
-    return '{}';
+    return (wasString ? '{}' : {}) as T;
   }
 }
 
