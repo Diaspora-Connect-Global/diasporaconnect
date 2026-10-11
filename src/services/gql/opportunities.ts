@@ -185,12 +185,12 @@ export const GET_OPPORTUNITY_FEED = gql`
 
 export const GET_APPLICATION = gql`
   query GetApplication($applicationId: String!) {
-    getApplication(applicationId: $applicationId) {
+    getApplication(id: $applicationId) {
       id
       opportunityId
       applicantId
       status
-      resumeFileRef { path filename mimeType sizeBytes }
+      applicationFiles { path filename mimeType sizeBytes }
       coverLetter
       customAnswers
       reviewNotes
@@ -219,7 +219,6 @@ export const GET_APPLICATION = gql`
         city
         countryOfOrigin
         residenceCountry
-        role
       }
     }
   }
@@ -262,7 +261,7 @@ export const GET_APPLICATIONS = gql`
         updatedAt
         reviewNotes
         coverLetter
-        resumeFileRef { path filename mimeType sizeBytes }
+        applicationFiles { path filename mimeType sizeBytes }
         applicantProfile {
           userId
           firstName
@@ -276,7 +275,6 @@ export const GET_APPLICATIONS = gql`
           city
           countryOfOrigin
           residenceCountry
-          role
         }
         opportunity {
           id
@@ -305,7 +303,7 @@ export const SUBMIT_APPLICATION = gql`
 
 export const WITHDRAW_APPLICATION = gql`
   mutation WithdrawApplication($applicationId: String!) {
-    withdrawApplication(applicationId: $applicationId)
+    withdrawApplication(id: $applicationId)
   }
 `;
 
