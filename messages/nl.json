@@ -5342,5 +5342,571 @@
       "createBody": "Start een discussie, deel een kans of stel een vraag.",
       "createCta": "Bericht maken"
     }
+  },
+  "networking": {
+    "picker": {
+      "maxReached": "Maximum van {max} bereikt",
+      "suggest": "Suggesties op basis van mijn tekst",
+      "remove": "{label} verwijderen",
+      "empty": "Nog niets gekozen. Kies uit de lijst."
+    },
+    "suggest": {
+      "titleAi": "AI-suggesties",
+      "titleOffline": "Suggesties",
+      "dismiss": "Suggesties verbergen",
+      "none": "Geen verdere suggesties voor deze tekst.",
+      "listLabel": "Voorgestelde waarden. Selecteer er een om toe te voegen.",
+      "enableAi": "AI-hulp aanzetten voor slimmere suggesties"
+    },
+    "goals": {
+      "title": "Jouw netwerkdoelen",
+      "subtitle": "Vertel ons wat je zoekt en wat je kunt bieden. Daarmee vinden we de juiste mensen bij dit evenement.",
+      "needs": "Wat je zoekt",
+      "needsPlaceholder": "Voeg toe wat je zoekt…",
+      "offers": "Wat je kunt bieden",
+      "offersPlaceholder": "Voeg toe wat je kunt bieden…",
+      "aiOn": "AI-hulp staat aan. Alleen de tekst die je in een suggestieveld typt wordt verzonden.",
+      "aiOff": "Suggesties gebruiken een eenvoudige trefwoordenmatch op je apparaat. AI-hulp staat uit.",
+      "more": {
+        "roles": "Jouw rol",
+        "interests": "Interesses",
+        "industries": "Sectoren",
+        "markets": "Markten",
+        "languages": "Talen"
+      },
+      "morePlaceholder": {
+        "roles": "Voeg een rol toe…",
+        "interests": "Voeg een interesse toe…",
+        "industries": "Voeg een sector toe…",
+        "markets": "Voeg een markt toe…",
+        "languages": "Voeg een taal toe…"
+      },
+      "hintChip": "Tip",
+      "hint": "Voeg minstens één ding toe dat je zoekt of kunt bieden voor betere matches."
+    },
+    "meet": {
+      "formatLegend": "Hoe wil je elkaar ontmoeten?",
+      "format": {
+        "IN_PERSON": "Persoonlijk",
+        "ONLINE": "Online",
+        "EITHER": "Maakt niet uit"
+      },
+      "openToMeetings": "Ik sta open voor ontmoetingen",
+      "openToMeetingsHint": "Zet dit uit als je voorlopig alleen wilt rondkijken."
+    },
+    "availability": {
+      "noDays": "Dit evenement heeft nog geen data om uit te kiezen.",
+      "legend": "Wanneer ben je beschikbaar?",
+      "zoneNote": "Tijden gelden in de tijdzone van het evenement ({zone}).",
+      "part": {
+        "morning": "Ochtend",
+        "afternoon": "Middag",
+        "evening": "Avond"
+      }
+    },
+    "about": {
+      "headline": "Kopregel",
+      "headlinePlaceholder": "bijv. Oprichter en CEO",
+      "organization": "Organisatie",
+      "location": "Locatie",
+      "locationPlaceholder": "bijv. Accra, Ghana",
+      "intro": "Korte introductie",
+      "introPlaceholder": "Vertel kort iets over jezelf.",
+      "introHint": "Andere deelnemers zien dit op je profiel. Vermeld geen contactgegevens.",
+      "needsNote": "Meer over wat je zoekt",
+      "offersNote": "Meer over wat je kunt bieden"
+    },
+    "visibility": {
+      "legend": "Wie kan je vinden?",
+      "mode": {
+        "RECOMMENDED": {
+          "title": "Alleen aanbevolen mensen",
+          "hint": "Getoond aan deelnemers die goed bij je passen."
+        },
+        "OPEN": {
+          "title": "Iedereen bij het evenement",
+          "hint": "Elke deelnemer die meedoet aan netwerken kan je vinden."
+        },
+        "LIMITED": {
+          "title": "Beperkt",
+          "hint": "Alleen mensen met wie je al contact had kunnen je bereiken."
+        },
+        "HIDDEN": {
+          "title": "Verborgen",
+          "hint": "Je wordt aan niemand getoond."
+        }
+      },
+      "hiddenWarning": "Zolang je verborgen bent, toont het sturen van interesse aan iemand je profiel.",
+      "fieldsLegend": "Wat anderen kunnen zien",
+      "fieldsHint": "Je naam en kopregel zijn altijd zichtbaar. Kies wat verder zichtbaar is.",
+      "flag": {
+        "organization": "Organisatie",
+        "location": "Locatie",
+        "availability": "Beschikbaarheid",
+        "needsNote": "Notities over wat ik zoek",
+        "offersNote": "Notities over wat ik bied"
+      },
+      "acceptsInterests": "Laat mensen interesse in mij tonen",
+      "acceptsInterestsHint": "Zet uit om geen nieuwe interesses meer te ontvangen.",
+      "inCircleDiscovery": "Toon mij bij het ontdekken van kringen"
+    },
+    "cards": {
+      "meetTitle": "Hoe wil je elkaar ontmoeten?",
+      "format": {
+        "IN_PERSON": "Persoonlijk",
+        "ONLINE": "Online",
+        "EITHER": "Persoonlijk of online"
+      },
+      "meetingsOff": "geen ontmoetingen",
+      "availabilityTitle": "Wanneer ben je beschikbaar?",
+      "slots": "{count, plural, one {# tijdslot} other {# tijdsloten}}",
+      "noneSet": "Niet ingesteld",
+      "locationTitle": "Locatie en over jou",
+      "visibilityTitle": "Zichtbaarheid",
+      "visibility": {
+        "RECOMMENDED": "Alleen aanbevolen mensen",
+        "OPEN": "Iedereen bij het evenement",
+        "LIMITED": "Beperkt",
+        "HIDDEN": "Verborgen"
+      }
+    },
+    "header": {
+      "backToEvent": "Terug naar het evenement",
+      "title": "Netwerken",
+      "subtitle": "Vind de juiste mensen, leg waardevolle contacten en ontdek nieuwe kansen bij {event}.",
+      "when": "Wanneer",
+      "where": "Waar"
+    },
+    "tabs": {
+      "label": "Onderdelen van netwerken",
+      "discover": "Ontdekken",
+      "recommended": "Aanbevolen",
+      "people": "Mensen",
+      "interested": "Geïnteresseerd in jou",
+      "matches": "Mijn matches",
+      "interests": "Mijn interesses",
+      "circles": "Kringen"
+    },
+    "tier": {
+      "DIRECT_OPPORTUNITY": "Directe kans",
+      "STRONG_FIT": "Sterke match",
+      "SHARED_INTERESTS": "Gedeelde interesses",
+      "BROADER_COMPATIBILITY": "Bredere overeenkomst",
+      "mutualFit": "Wederzijds passend",
+      "DIRECT_OPPORTUNITYHint": "Deze persoon biedt iets aan waar jij naar zoekt.",
+      "STRONG_FITHint": "Jij biedt iets wat zij nodig hebben, of jullie vaardigheden liggen dicht bij elkaar.",
+      "SHARED_INTERESTSHint": "Jullie delen interesses, sectoren of markten.",
+      "BROADER_COMPATIBILITYHint": "Jullie delen een taal en een manier van ontmoeten."
+    },
+    "reasons": {
+      "someone": "Deze persoon",
+      "OFFERS_WHAT_YOU_NEED": "{name} biedt {labels} aan, waar jij naar zoekt.",
+      "OFFERS_WHAT_YOU_NEED_GENERIC": "{name} biedt iets aan waar jij naar zoekt.",
+      "NEEDS_WHAT_YOU_OFFER": "{name} zoekt {labels}, wat jij kunt bieden.",
+      "NEEDS_WHAT_YOU_OFFER_GENERIC": "{name} zoekt iets wat jij kunt bieden.",
+      "RELATED_CAPABILITY": "Jouw vaardigheden en die van {name} liggen dicht bij elkaar ({labels}).",
+      "RELATED_CAPABILITY_GENERIC": "Jouw vaardigheden en die van {name} liggen dicht bij elkaar.",
+      "SHARED_INTEREST": "Jullie zijn allebei geïnteresseerd in {labels}.",
+      "SHARED_INTEREST_GENERIC": "Je deelt interesses met {name}.",
+      "SHARED_INDUSTRY": "Jullie werken allebei in {labels}.",
+      "SHARED_INDUSTRY_GENERIC": "Je werkt in dezelfde sector als {name}.",
+      "SHARED_MARKET": "Jullie richten je allebei op {labels}.",
+      "SHARED_MARKET_GENERIC": "Je deelt een marktfocus met {name}.",
+      "SHARED_LANGUAGE": "Jullie spreken allebei {labels}.",
+      "SHARED_LANGUAGE_GENERIC": "Je deelt een taal met {name}.",
+      "COMPATIBLE_FORMAT_GENERIC": "Jullie willen elkaar allebei op dezelfde manier ontmoeten.",
+      "AVAILABILITY_OVERLAP_GENERIC": "Jullie zijn allebei op vergelijkbare tijden beschikbaar."
+    },
+    "person": {
+      "more": "+{count} meer",
+      "previouslyConnected": "Al eerder verbonden",
+      "notFoundTitle": "We konden deze persoon niet vinden",
+      "notFoundBody": "Misschien doet deze persoon niet mee aan netwerken, of de link is verouderd.",
+      "backToPeople": "Terug naar mensen",
+      "whyYouMatch": "Waarom jullie matchen",
+      "shared": "Gedeeld met jou",
+      "group": {
+        "roles": "Rol",
+        "interests": "Interesses",
+        "industries": "Sectoren",
+        "markets": "Markten",
+        "languages": "Talen"
+      },
+      "visibilityMode": {
+        "RECOMMENDED": "Alleen aanbevolen mensen",
+        "OPEN": "Iedereen bij het evenement",
+        "LIMITED": "Beperkt",
+        "HIDDEN": "Verborgen"
+      },
+      "passed": "Klaar. Je ziet deze persoon voorlopig niet meer.",
+      "saved": "Bewaard voor later.",
+      "interestSent": "Interesse verstuurd."
+    },
+    "actions": {
+      "pass": "Niet voor mij",
+      "skip": "Overslaan",
+      "skipLong": "Bewaren voor later",
+      "interested": "Geïnteresseerd",
+      "view": "Profiel bekijken",
+      "lookingFor": "Zoekt",
+      "canOffer": "Kan bieden",
+      "format": {
+        "IN_PERSON": "Persoonlijk",
+        "ONLINE": "Online",
+        "EITHER": "Persoonlijk of online"
+      }
+    },
+    "deck": {
+      "refreshing": "We zoeken mensen voor je. Kom zo terug.",
+      "reviewingSkipped": "Je hebt voorlopig alle nieuwe mensen gezien. Dit zijn mensen die je voor later hebt bewaard.",
+      "loading": "Laden",
+      "emptyTitle": "Je hebt voorlopig iedereen gezien",
+      "emptyBody": "Nieuwe mensen verschijnen zodra er meer deelnemers bijkomen. Je kunt ook alle deelnemers doorbladeren.",
+      "browsePeople": "Mensen doorbladeren",
+      "roleDescription": "aanbevolen persoon",
+      "groupLabel": "Aanbevolen persoon: {name}",
+      "whyYouMatch": "Waarom jullie matchen",
+      "sharedInterests": "Gedeelde interesses",
+      "alsoLike": "Mensen die je ook leuk kunt vinden",
+      "position": "{position} van {total}",
+      "keys": "Toetsenbord: pijl links is Niet voor mij, pijl omlaag is Bewaren voor later.",
+      "keysWithInterest": "Toetsenbord: pijl links is Niet voor mij, pijl omlaag is Bewaren voor later, pijl rechts is Geïnteresseerd.",
+      "live": {
+        "current": "{name}, {position} van {total}",
+        "passed": "{name} verwijderd uit je aanbevelingen.",
+        "saved": "{name} bewaard voor later.",
+        "interested": "Interesse verstuurd naar {name}."
+      },
+      "pageTitle": "Aanbevolen voor jou",
+      "sourceLabel": "Welke mensen worden getoond",
+      "source": {
+        "deck": "Aanbevolen",
+        "saved": "Bewaard voor later"
+      },
+      "notReadyTitle": "Nog niet klaar om te beslissen?",
+      "notReadyBody": "Bewaar mensen voor later, of haal mensen terug die je hebt afgewezen.",
+      "viewSaved": "Bewaarde mensen bekijken",
+      "reconsider": "Afgewezen mensen opnieuw bekijken",
+      "reconsidered": "Klaar. Afgewezen mensen kunnen weer verschijnen.",
+      "rail": "Hulpmiddelen voor aanbevelingen"
+    },
+    "rail": {
+      "progressTitle": "Jouw voortgang",
+      "complete": "Profiel compleet",
+      "keepGoing": "Ga zo door",
+      "progressHint": "Een completer profiel helpt ons betere mensen voor je te vinden.",
+      "improve": "Je profiel verbeteren",
+      "quickActions": "Snelle acties",
+      "viewPeople": "Iedereen doorbladeren",
+      "viewPeopleHint": "Alle deelnemers van dit evenement",
+      "viewRecommended": "Aanbevolen mensen",
+      "viewRecommendedHint": "Eén persoon tegelijk",
+      "myInterests": "Mijn interesses",
+      "myInterestsHint": "Mensen in wie je interesse hebt getoond",
+      "myMatches": "Mijn matches",
+      "myMatchesHint": "Mensen die ook in jou geïnteresseerd zijn",
+      "circles": "Kringen",
+      "circlesHint": "Kleine groepsgesprekken",
+      "pausedTitle": "Netwerken is gepauzeerd",
+      "pausedBody": "Je bent verborgen in het ontdekken. Je matches en afspraken blijven.",
+      "pauseTitle": "Nu even niet zichtbaar willen zijn?",
+      "pauseBody": "Je kunt je zichtbaarheid altijd pauzeren en later hervatten.",
+      "resume": "Netwerken hervatten",
+      "pause": "Netwerken pauzeren",
+      "quickFilters": "Snelfilters",
+      "filterIndustry": "Sector",
+      "filterMarket": "Markt",
+      "filterLanguage": "Taal",
+      "filterLookingFor": "Zoekt",
+      "smartTitle": "Slim matchen",
+      "smartBody": "We vinden mensen die passen bij je doelen, interesses en wat je kunt bieden.",
+      "howItWorks": "Hoe het werkt",
+      "noPercent": "We tonen waarom jullie matchen, geen score.",
+      "manageTitle": "Beter vindbaar willen zijn?",
+      "manageBody": "Werk je netwerkvoorkeuren bij voor betere kansen op contact.",
+      "managePrefs": "Voorkeuren beheren"
+    },
+    "directory": {
+      "filters": "Filters",
+      "field": {
+        "needs": "Zoekt",
+        "offers": "Kan bieden",
+        "industries": "Sector",
+        "markets": "Markt",
+        "interests": "Interesses",
+        "roles": "Rol",
+        "languages": "Taal"
+      },
+      "pick": "Kiezen…",
+      "reset": "Filters wissen",
+      "emptyFiltered": "Niemand past bij deze filters. Haal er een weg.",
+      "empty": "Hier is nog niemand anders zichtbaar.",
+      "loading": "Mensen laden",
+      "loadMore": "Meer mensen tonen"
+    },
+    "interestsPanel": {
+      "interested": {
+        "intro": "Mensen die interesse in jou hebben getoond.",
+        "empty": "Nog niemand. Interesses verschijnen hier zodra ze binnenkomen."
+      },
+      "matches": {
+        "intro": "Mensen die ook in jou geïnteresseerd zijn.",
+        "empty": "Nog geen matches."
+      },
+      "interests": {
+        "intro": "Mensen in wie je interesse hebt getoond. Zij horen het pas als jullie allebei interesse hebben.",
+        "empty": "Je hebt nog in niemand interesse getoond."
+      },
+      "loading": "Laden",
+      "loadMore": "Meer tonen"
+    },
+    "circles": {
+      "viewsLabel": "Weergaven van kringen",
+      "view": {
+        "recommended": "Aanbevolen",
+        "mine": "Mijn kringen",
+        "all": "Alle kringen"
+      },
+      "whyTitle": "Waarom je deze kringen ziet",
+      "whyBody": "Op basis van je doelen, interesses en waar vergelijkbare mensen zich bij aansluiten.",
+      "empty": "Er zijn hier nog geen kringen.",
+      "seats": "{count}/{max}",
+      "members": "{count, plural, one {# lid} other {# leden}}",
+      "hostedBy": "Gehost door",
+      "whyThis": "Aanbevolen voor jou",
+      "open": "Kring openen",
+      "requested": "Verzoek verstuurd",
+      "waitlisted": "Op de wachtlijst",
+      "waitlist": "Op de wachtlijst plaatsen",
+      "request": "Verzoek om deel te nemen",
+      "join": "Deelnemen aan kring",
+      "inviteOnly": "Alleen op uitnodiging",
+      "details": "Details bekijken",
+      "backToCircles": "Terug naar kringen",
+      "joined": "Deelgenomen",
+      "roomTabs": "Onderdelen van de kring",
+      "tab": {
+        "conversation": "Gesprek",
+        "members": "Leden",
+        "membersCount": "Leden ({count})",
+        "resources": "Bronnen",
+        "details": "Details"
+      },
+      "welcome": "Welkom in de kring. Een gerichte ruimte om je doelen te delen, kansen te verkennen en contacten te leggen.",
+      "conversation": "Gesprek",
+      "host": "Host",
+      "noMessages": "Nog geen berichten. Zeg hallo.",
+      "messageLabel": "Schrijf een bericht",
+      "messagePlaceholder": "Typ een bericht…",
+      "send": "Bericht versturen",
+      "noAttachments": "Bestanden deel je bij Bronnen, niet in de chat.",
+      "you": "Jij",
+      "noResources": "Er zijn nog geen bronnen gedeeld.",
+      "agenda": "Agenda",
+      "focusAreas": "Aandachtsgebieden",
+      "inThisCircle": "Je zit in deze kring",
+      "inThisCircleBody": "Je maakt deel uit van {title}. Geniet van het gesprek en leg waardevolle contacten.",
+      "leaveConfirmTitle": "Deze kring verlaten?",
+      "leave": "Kring verlaten",
+      "cancel": "Annuleren"
+    },
+    "hub": {
+      "pausedBanner": "Netwerken is gepauzeerd: andere deelnemers kunnen je niet vinden. Hervat het via het zijpaneel.",
+      "goalsRegion": "Jouw netwerkdoelen en voorkeuren",
+      "preferencePanel": "Voorkeuren",
+      "save": "Opslaan en bijwerken",
+      "saved": "Je netwerkprofiel is opgeslagen.",
+      "peopleTitle": "Mensen die je misschien wilt ontmoeten",
+      "peopleSubtitle": "Op basis van je doelen, interesses en wat anderen bij dit evenement zoeken.",
+      "viewAll": "Alles bekijken",
+      "loading": "Laden",
+      "peopleEmpty": "Nog geen aanbevelingen. Ze verschijnen zodra er meer mensen meedoen en je je profiel aanvult.",
+      "rail": "Hulpmiddelen voor netwerken"
+    },
+    "wizard": {
+      "progress": "Voortgang van de installatie",
+      "pageTitle": "Meedoen aan netwerken",
+      "steps": {
+        "intro": "Welkom",
+        "profile": "Uit je profiel",
+        "goals": "Je doelen",
+        "meet": "Ontmoeten",
+        "visibility": "Zichtbaarheid",
+        "review": "Controle"
+      },
+      "title": {
+        "intro": "Ontmoet de juiste mensen bij dit evenement",
+        "profile": "Wat we al weten",
+        "goals": "Waarvoor ben je hier?",
+        "meet": "Hoe en wanneer wil je elkaar ontmoeten?",
+        "visibility": "Wie kan je zien?",
+        "review": "Controleren en meedoen"
+      },
+      "lead": {
+        "intro": "Netwerken is optioneel. Jij kiest wat je deelt en kunt altijd pauzeren of stoppen.",
+        "profile": "Gegevens uit je DiaspoPlug-profiel die je hier kunt hergebruiken. Er wordt niets toegevoegd tenzij je dat kiest.",
+        "goals": "Kies wat je zoekt en wat je kunt bieden. Hierop is het matchen gebaseerd.",
+        "meet": "Vertel hoe je het liefst afspreekt en wanneer je tijd hebt.",
+        "visibility": "Kies wie je kan vinden en welke gegevens ze zien.",
+        "review": "Controleer alles en doe dan mee. Je kunt daarna alles aanpassen."
+      },
+      "intro": {
+        "what": "We gebruiken je antwoorden om mensen bij dit evenement voor te stellen die bij je doelen passen.",
+        "who": "Alleen deelnemers die meedoen aan netwerken zien wat je deelt.",
+        "control": "Je kunt altijd pauzeren, wijzigen wat zichtbaar is of je terugtrekken.",
+        "ai": "AI-hulp is optioneel en staat standaard uit. Je kunt het later aanzetten wanneer je je doelen schrijft.",
+        "consent": "Ik ga ermee akkoord mijn netwerkprofiel te delen met andere deelnemers van dit evenement, zoals hierboven beschreven."
+      },
+      "profile": {
+        "fromProfile": "Uit je profiel",
+        "nothing": "We vonden niets in je profiel dat past bij de keuzes van dit evenement.",
+        "separate": "Deze komen uit je profiel. Suggesties die je later opvraagt worden apart getoond.",
+        "useDetails": "Mijn kopregel, organisatie, locatie en bio gebruiken",
+        "unavailable": "Sommige gegevens, zoals talen, zijn niet beschikbaar vanuit je profiel. Je kunt ze zelf toevoegen."
+      },
+      "review": {
+        "needs": "Zoekt",
+        "offers": "Kan bieden",
+        "interests": "Interesses",
+        "industries": "Sectoren",
+        "none": "Niets gekozen",
+        "visibility": "Zichtbaarheid",
+        "consentMissing": "Ga terug naar de eerste stap en ga akkoord met het delen van je profiel voordat je meedoet."
+      },
+      "saveLater": "Opslaan en later afmaken",
+      "back": "Terug",
+      "next": "Volgende",
+      "join": "Meedoen aan netwerken",
+      "draftSaved": "Opgeslagen. Je kunt de installatie later afronden.",
+      "joined": "Je doet nu mee aan netwerken."
+    },
+    "gate": {
+      "retry": "Opnieuw proberen",
+      "backToEvent": "Terug naar het evenement",
+      "unavailableYet": {
+        "title": "Netwerken is nog niet beschikbaar",
+        "body": "Deze functie is nog niet voor jou vrijgegeven. Kom snel terug."
+      },
+      "error": {
+        "title": "Er ging iets mis",
+        "body": "We konden netwerken nu niet laden. Probeer het opnieuw."
+      },
+      "disabled": {
+        "title": "Netwerken is niet geopend voor dit evenement",
+        "body": "De organisator heeft netwerken voor dit evenement niet aangezet."
+      },
+      "notOpenYet": {
+        "title": "Netwerken opent binnenkort",
+        "body": "Netwerken voor dit evenement is nog niet geopend. Kom later terug."
+      },
+      "closed": {
+        "title": "Netwerken is gesloten",
+        "body": "Het netwerkvenster voor dit evenement is afgelopen."
+      },
+      "notEligible": {
+        "title": "Registreer om mee te doen",
+        "body": "Netwerken is voor deelnemers met een bevestigde registratie."
+      },
+      "needsSetup": {
+        "title": "Stel je netwerkprofiel in",
+        "body": "Doe mee aan netwerken om mensen te zien die je misschien wilt ontmoeten.",
+        "cta": "Netwerken instellen"
+      },
+      "withdrawn": {
+        "title": "Je hebt netwerken verlaten",
+        "body": "Je netwerkprofiel wordt niet meer getoond. Je kunt altijd opnieuw meedoen.",
+        "cta": "Opnieuw meedoen"
+      },
+      "revoked": {
+        "title": "Netwerken is niet beschikbaar voor jou",
+        "body": "Je toegang tot netwerken bij dit evenement is beëindigd."
+      }
+    },
+    "errors": {
+      "featureUnavailable": "Dit is nog niet beschikbaar.",
+      "unavailable": "Netwerken is tijdelijk niet beschikbaar. Probeer het zo opnieuw.",
+      "notFound": "We konden dat niet vinden.",
+      "invalid": "Dat zag er niet goed uit. Controleer het en probeer opnieuw.",
+      "rateLimited": "Je doet dat te vaak. Wacht even.",
+      "consentRequired": "Zet eerst AI-hulp aan.",
+      "conflict": "Dit is veranderd terwijl je bewerkte. Laad opnieuw en probeer het nog eens.",
+      "notEligible": "Alleen deelnemers met een bevestigde registratie kunnen meedoen.",
+      "closed": "Netwerken is nu niet geopend.",
+      "notParticipant": "Doe eerst mee aan netwerken.",
+      "refused": "Dat kan nu niet.",
+      "generic": "Er ging iets mis. Probeer het opnieuw."
+    },
+    "tax": {
+      "role_founder": "Oprichter",
+      "role_investor": "Investeerder",
+      "role_business_owner": "Ondernemer",
+      "role_professional": "Professional",
+      "role_public_sector": "Publieke sector",
+      "role_researcher": "Onderzoeker",
+      "role_student": "Student",
+      "role_service_provider": "Dienstverlener",
+      "role_nonprofit": "Non-profit",
+      "role_other": "Overig",
+      "interest_african_startups": "Afrikaanse startups",
+      "interest_fintech": "Fintech",
+      "interest_agritech": "Agritech",
+      "interest_real_estate": "Vastgoed",
+      "interest_investment": "Investeren",
+      "interest_govtech": "Govtech",
+      "interest_digital_transformation": "Digitale transformatie",
+      "interest_international_trade": "Internationale handel",
+      "interest_healthcare_innovation": "Innovatie in de zorg",
+      "interest_creative_industries": "Creatieve sector",
+      "interest_employment": "Werkgelegenheid",
+      "interest_partnerships": "Partnerschappen",
+      "interest_mentorship": "Mentorschap",
+      "interest_research_collaboration": "Onderzoekssamenwerking",
+      "interest_other": "Overig",
+      "capability_investment": "Investeringen",
+      "capability_funding": "Financiering",
+      "capability_partnerships": "Partnerschappen",
+      "capability_technology": "Technologie",
+      "capability_distribution": "Distributie",
+      "capability_market_access": "Markttoegang",
+      "capability_customers": "Klanten",
+      "capability_suppliers": "Leveranciers",
+      "capability_talent": "Talent",
+      "capability_mentorship": "Mentorschap",
+      "capability_expertise": "Expertise",
+      "capability_institutional": "Institutionele contacten",
+      "capability_research": "Onderzoek",
+      "capability_introductions": "Introducties",
+      "capability_knowledge_exchange": "Kennisuitwisseling",
+      "capability_other": "Overig",
+      "industry_agriculture": "Landbouw",
+      "industry_financial_services": "Financiële diensten",
+      "industry_technology": "Technologie",
+      "industry_healthcare": "Zorg",
+      "industry_education": "Onderwijs",
+      "industry_real_estate_construction": "Vastgoed en bouw",
+      "industry_energy_utilities": "Energie en nutsbedrijven",
+      "industry_manufacturing": "Maakindustrie",
+      "industry_trade_logistics": "Handel en logistiek",
+      "industry_media_creative": "Media en creatief",
+      "industry_tourism_hospitality": "Toerisme en horeca",
+      "industry_public_sector": "Publieke sector",
+      "industry_nonprofit_development": "Non-profit en ontwikkeling",
+      "industry_professional_services": "Zakelijke dienstverlening",
+      "industry_retail_consumer": "Detailhandel en consumentengoederen",
+      "industry_telecommunications": "Telecommunicatie",
+      "industry_other": "Overig",
+      "market_europe": "Europa",
+      "market_uk_ireland": "Verenigd Koninkrijk en Ierland",
+      "market_west_africa": "West-Afrika",
+      "market_east_africa": "Oost-Afrika",
+      "market_southern_africa": "Zuidelijk Afrika",
+      "market_north_africa": "Noord-Afrika",
+      "market_central_africa": "Centraal-Afrika",
+      "market_north_america": "Noord-Amerika",
+      "market_middle_east": "Midden-Oosten",
+      "market_asia_pacific": "Azië-Pacific",
+      "market_latin_america_caribbean": "Latijns-Amerika en Caraïben",
+      "market_global": "Wereldwijd"
+    }
   }
 }

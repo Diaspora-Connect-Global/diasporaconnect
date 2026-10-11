@@ -5342,5 +5342,571 @@
       "createBody": "Avvia una discussione, condividi un’opportunità o fai una domanda.",
       "createCta": "Crea post"
     }
+  },
+  "networking": {
+    "picker": {
+      "maxReached": "Raggiunto il massimo di {max}",
+      "suggest": "Suggerimenti dal testo scritto",
+      "remove": "Rimuovi {label}",
+      "empty": "Nessuna scelta per ora. Scegli dall'elenco."
+    },
+    "suggest": {
+      "titleAi": "Suggerimenti dell'IA",
+      "titleOffline": "Suggerimenti",
+      "dismiss": "Nascondi i suggerimenti",
+      "none": "Nessun altro suggerimento per questo testo.",
+      "listLabel": "Valori suggeriti. Selezionane uno per aggiungerlo.",
+      "enableAi": "Attiva l'assistenza IA per suggerimenti migliori"
+    },
+    "goals": {
+      "title": "I tuoi obiettivi di networking",
+      "subtitle": "Dicci cosa cerchi e cosa puoi offrire. Lo usiamo per trovare le persone giuste a questo evento.",
+      "needs": "Cosa cerchi",
+      "needsPlaceholder": "Aggiungi cosa cerchi…",
+      "offers": "Cosa puoi offrire",
+      "offersPlaceholder": "Aggiungi cosa puoi offrire…",
+      "aiOn": "L'assistenza IA è attiva. Viene inviato solo il testo che scrivi in un campo di suggerimento.",
+      "aiOff": "I suggerimenti usano un semplice confronto di parole chiave sul tuo dispositivo. L'assistenza IA è disattivata.",
+      "more": {
+        "roles": "Il tuo ruolo",
+        "interests": "Interessi",
+        "industries": "Settori",
+        "markets": "Mercati",
+        "languages": "Lingue"
+      },
+      "morePlaceholder": {
+        "roles": "Aggiungi un ruolo…",
+        "interests": "Aggiungi un interesse…",
+        "industries": "Aggiungi un settore…",
+        "markets": "Aggiungi un mercato…",
+        "languages": "Aggiungi una lingua…"
+      },
+      "hintChip": "Suggerimento",
+      "hint": "Aggiungi almeno una cosa che cerchi o che puoi offrire per ottenere abbinamenti migliori."
+    },
+    "meet": {
+      "formatLegend": "Come vuoi incontrarti?",
+      "format": {
+        "IN_PERSON": "Di persona",
+        "ONLINE": "Online",
+        "EITHER": "Indifferente"
+      },
+      "openToMeetings": "Sono aperto/a agli incontri",
+      "openToMeetingsHint": "Disattiva se per ora vuoi solo sfogliare."
+    },
+    "availability": {
+      "noDays": "Questo evento non ha ancora date tra cui scegliere.",
+      "legend": "Quando sei disponibile?",
+      "zoneNote": "Gli orari sono nel fuso orario dell'evento ({zone}).",
+      "part": {
+        "morning": "Mattina",
+        "afternoon": "Pomeriggio",
+        "evening": "Sera"
+      }
+    },
+    "about": {
+      "headline": "Titolo",
+      "headlinePlaceholder": "es. Fondatrice e CEO",
+      "organization": "Organizzazione",
+      "location": "Luogo",
+      "locationPlaceholder": "es. Accra, Ghana",
+      "intro": "Breve presentazione",
+      "introPlaceholder": "Scrivi due parole su di te.",
+      "introHint": "Gli altri partecipanti la vedono sul tuo profilo. Non inserire recapiti.",
+      "needsNote": "Di più su cosa cerchi",
+      "offersNote": "Di più su cosa puoi offrire"
+    },
+    "visibility": {
+      "legend": "Chi può trovarti?",
+      "mode": {
+        "RECOMMENDED": {
+          "title": "Solo persone consigliate",
+          "hint": "Mostrato ai partecipanti che sono adatti a te."
+        },
+        "OPEN": {
+          "title": "Tutti all'evento",
+          "hint": "Ogni partecipante iscritto al networking può trovarti."
+        },
+        "LIMITED": {
+          "title": "Limitata",
+          "hint": "Solo le persone con cui hai già interagito possono contattarti."
+        },
+        "HIDDEN": {
+          "title": "Nascosta",
+          "hint": "Non vieni mostrato/a a nessuno."
+        }
+      },
+      "hiddenWarning": "Finché sei nascosto/a, inviare un interesse a qualcuno gli mostra il tuo profilo.",
+      "fieldsLegend": "Cosa possono vedere gli altri",
+      "fieldsHint": "Nome e titolo sono sempre visibili. Scegli cos'altro mostrare.",
+      "flag": {
+        "organization": "Organizzazione",
+        "location": "Luogo",
+        "availability": "Disponibilità",
+        "needsNote": "Note su cosa cerco",
+        "offersNote": "Note su cosa offro"
+      },
+      "acceptsInterests": "Consenti agli altri di mostrarmi interesse",
+      "acceptsInterestsHint": "Disattiva per non ricevere nuovi interessi.",
+      "inCircleDiscovery": "Mostrami nella ricerca dei cerchi"
+    },
+    "cards": {
+      "meetTitle": "Come vuoi incontrarti?",
+      "format": {
+        "IN_PERSON": "Di persona",
+        "ONLINE": "Online",
+        "EITHER": "Di persona o online"
+      },
+      "meetingsOff": "nessun incontro",
+      "availabilityTitle": "Quando sei disponibile?",
+      "slots": "{count, plural, one {# fascia oraria} other {# fasce orarie}}",
+      "noneSet": "Non impostato",
+      "locationTitle": "Luogo e presentazione",
+      "visibilityTitle": "Visibilità",
+      "visibility": {
+        "RECOMMENDED": "Solo persone consigliate",
+        "OPEN": "Tutti all'evento",
+        "LIMITED": "Limitata",
+        "HIDDEN": "Nascosta"
+      }
+    },
+    "header": {
+      "backToEvent": "Torna all'evento",
+      "title": "Networking",
+      "subtitle": "Trova le persone giuste, crea contatti significativi e scopri nuove opportunità a {event}.",
+      "when": "Quando",
+      "where": "Dove"
+    },
+    "tabs": {
+      "label": "Sezioni del networking",
+      "discover": "Scopri",
+      "recommended": "Consigliati",
+      "people": "Persone",
+      "interested": "Interessati a te",
+      "matches": "I miei abbinamenti",
+      "interests": "I miei interessi",
+      "circles": "Cerchi"
+    },
+    "tier": {
+      "DIRECT_OPPORTUNITY": "Opportunità diretta",
+      "STRONG_FIT": "Forte affinità",
+      "SHARED_INTERESTS": "Interessi in comune",
+      "BROADER_COMPATIBILITY": "Compatibilità generale",
+      "mutualFit": "Affinità reciproca",
+      "DIRECT_OPPORTUNITYHint": "Questa persona offre qualcosa che cerchi.",
+      "STRONG_FITHint": "Offri ciò di cui ha bisogno, oppure le vostre competenze sono affini.",
+      "SHARED_INTERESTSHint": "Condividete interessi, settori o mercati.",
+      "BROADER_COMPATIBILITYHint": "Condividete una lingua e un modo di incontrarvi."
+    },
+    "reasons": {
+      "someone": "Questa persona",
+      "OFFERS_WHAT_YOU_NEED": "{name} offre {labels}, che è ciò che cerchi.",
+      "OFFERS_WHAT_YOU_NEED_GENERIC": "{name} offre qualcosa che cerchi.",
+      "NEEDS_WHAT_YOU_OFFER": "{name} cerca {labels}, che puoi offrire.",
+      "NEEDS_WHAT_YOU_OFFER_GENERIC": "{name} cerca qualcosa che puoi offrire.",
+      "RELATED_CAPABILITY": "Le tue competenze e quelle di {name} sono affini ({labels}).",
+      "RELATED_CAPABILITY_GENERIC": "Le tue competenze e quelle di {name} sono affini.",
+      "SHARED_INTEREST": "Siete entrambi interessati a {labels}.",
+      "SHARED_INTEREST_GENERIC": "Condividi interessi con {name}.",
+      "SHARED_INDUSTRY": "Lavorate entrambi in {labels}.",
+      "SHARED_INDUSTRY_GENERIC": "Lavori nello stesso settore di {name}.",
+      "SHARED_MARKET": "Puntate entrambi su {labels}.",
+      "SHARED_MARKET_GENERIC": "Condividi un mercato di riferimento con {name}.",
+      "SHARED_LANGUAGE": "Parlate entrambi {labels}.",
+      "SHARED_LANGUAGE_GENERIC": "Condividi una lingua con {name}.",
+      "COMPATIBLE_FORMAT_GENERIC": "Volete entrambi incontrarvi nello stesso modo.",
+      "AVAILABILITY_OVERLAP_GENERIC": "Siete entrambi disponibili in orari simili."
+    },
+    "person": {
+      "more": "+{count} altri",
+      "previouslyConnected": "Già in contatto",
+      "notFoundTitle": "Non abbiamo trovato questa persona",
+      "notFoundBody": "Potrebbe non partecipare al networking, oppure il link non è più valido.",
+      "backToPeople": "Torna alle persone",
+      "whyYouMatch": "Perché siete in sintonia",
+      "shared": "In comune con te",
+      "group": {
+        "roles": "Ruolo",
+        "interests": "Interessi",
+        "industries": "Settori",
+        "markets": "Mercati",
+        "languages": "Lingue"
+      },
+      "visibilityMode": {
+        "RECOMMENDED": "Solo persone consigliate",
+        "OPEN": "Tutti all'evento",
+        "LIMITED": "Limitata",
+        "HIDDEN": "Nascosta"
+      },
+      "passed": "Fatto. Per ora non vedrai più questa persona.",
+      "saved": "Salvato per dopo.",
+      "interestSent": "Interesse inviato."
+    },
+    "actions": {
+      "pass": "Non per me",
+      "skip": "Salta",
+      "skipLong": "Salva per dopo",
+      "interested": "Interessato/a",
+      "view": "Vedi profilo",
+      "lookingFor": "Cerca",
+      "canOffer": "Può offrire",
+      "format": {
+        "IN_PERSON": "Di persona",
+        "ONLINE": "Online",
+        "EITHER": "Di persona o online"
+      }
+    },
+    "deck": {
+      "refreshing": "Stiamo cercando persone per te. Ricontrolla tra poco.",
+      "reviewingSkipped": "Per ora hai visto tutte le persone nuove. Queste sono le persone che hai salvato per dopo.",
+      "loading": "Caricamento",
+      "emptyTitle": "Per ora hai visto tutti",
+      "emptyBody": "Nuove persone compaiono man mano che si iscrivono altri partecipanti. Puoi anche sfogliare tutti i partecipanti.",
+      "browsePeople": "Sfoglia le persone",
+      "roleDescription": "persona consigliata",
+      "groupLabel": "Persona consigliata: {name}",
+      "whyYouMatch": "Perché siete in sintonia",
+      "sharedInterests": "Interessi in comune",
+      "alsoLike": "Persone che potrebbero piacerti",
+      "position": "{position} di {total}",
+      "keys": "Tastiera: freccia sinistra = Non per me, freccia giù = Salva per dopo.",
+      "keysWithInterest": "Tastiera: freccia sinistra = Non per me, freccia giù = Salva per dopo, freccia destra = Interessato/a.",
+      "live": {
+        "current": "{name}, {position} di {total}",
+        "passed": "{name} rimosso/a dai consigliati.",
+        "saved": "{name} salvato/a per dopo.",
+        "interested": "Interesse inviato a {name}."
+      },
+      "pageTitle": "Consigliati per te",
+      "sourceLabel": "Quali persone mostrare",
+      "source": {
+        "deck": "Consigliati",
+        "saved": "Salvati per dopo"
+      },
+      "notReadyTitle": "Non sei pronto/a a decidere?",
+      "notReadyBody": "Salva le persone per dopo, o richiama quelle che hai scartato.",
+      "viewSaved": "Vedi le persone salvate",
+      "reconsider": "Riconsidera le persone scartate",
+      "reconsidered": "Fatto. Le persone scartate possono ricomparire.",
+      "rail": "Strumenti di raccomandazione"
+    },
+    "rail": {
+      "progressTitle": "I tuoi progressi",
+      "complete": "Profilo completo",
+      "keepGoing": "Continua così",
+      "progressHint": "Un profilo più completo ci aiuta a trovarti persone migliori.",
+      "improve": "Migliora il tuo profilo",
+      "quickActions": "Azioni rapide",
+      "viewPeople": "Sfoglia tutti",
+      "viewPeopleHint": "Tutti i partecipanti di questo evento",
+      "viewRecommended": "Persone consigliate",
+      "viewRecommendedHint": "Una persona alla volta",
+      "myInterests": "I miei interessi",
+      "myInterestsHint": "Le persone a cui hai mostrato interesse",
+      "myMatches": "I miei abbinamenti",
+      "myMatchesHint": "Le persone interessate anche a te",
+      "circles": "Cerchi",
+      "circlesHint": "Piccole conversazioni di gruppo",
+      "pausedTitle": "Il networking è in pausa",
+      "pausedBody": "Sei nascosto/a dalla scoperta. Abbinamenti e incontri restano.",
+      "pauseTitle": "Non vuoi essere visibile adesso?",
+      "pauseBody": "Puoi mettere in pausa la tua visibilità in qualsiasi momento e riprenderla dopo.",
+      "resume": "Riprendi il networking",
+      "pause": "Metti in pausa il networking",
+      "quickFilters": "Filtri rapidi",
+      "filterIndustry": "Settore",
+      "filterMarket": "Mercato",
+      "filterLanguage": "Lingua",
+      "filterLookingFor": "Cerca",
+      "smartTitle": "Abbinamento intelligente",
+      "smartBody": "Troviamo persone in linea con i tuoi obiettivi, i tuoi interessi e ciò che puoi offrire.",
+      "howItWorks": "Come funziona",
+      "noPercent": "Mostriamo perché siete in sintonia, non un punteggio.",
+      "manageTitle": "Vuoi essere più visibile?",
+      "manageBody": "Aggiorna le preferenze di networking per avere più occasioni di contatto.",
+      "managePrefs": "Gestisci le preferenze"
+    },
+    "directory": {
+      "filters": "Filtri",
+      "field": {
+        "needs": "Cerca",
+        "offers": "Può offrire",
+        "industries": "Settore",
+        "markets": "Mercato",
+        "interests": "Interessi",
+        "roles": "Ruolo",
+        "languages": "Lingua"
+      },
+      "pick": "Scegli…",
+      "reset": "Reimposta i filtri",
+      "emptyFiltered": "Nessuno corrisponde a questi filtri. Prova a toglierne uno.",
+      "empty": "Qui non è ancora visibile nessun altro.",
+      "loading": "Caricamento delle persone",
+      "loadMore": "Mostra altre persone"
+    },
+    "interestsPanel": {
+      "interested": {
+        "intro": "Le persone che hanno mostrato interesse per te.",
+        "empty": "Ancora nessuno. Gli interessi compaiono qui quando arrivano."
+      },
+      "matches": {
+        "intro": "Le persone interessate anche a te.",
+        "empty": "Ancora nessun abbinamento."
+      },
+      "interests": {
+        "intro": "Le persone a cui hai mostrato interesse. Lo sanno solo se l'interesse è reciproco.",
+        "empty": "Non hai ancora mostrato interesse per nessuno."
+      },
+      "loading": "Caricamento",
+      "loadMore": "Mostra altro"
+    },
+    "circles": {
+      "viewsLabel": "Viste dei cerchi",
+      "view": {
+        "recommended": "Consigliati",
+        "mine": "I miei cerchi",
+        "all": "Tutti i cerchi"
+      },
+      "whyTitle": "Perché vedi questi cerchi",
+      "whyBody": "In base ai tuoi obiettivi, ai tuoi interessi e a ciò a cui si uniscono persone simili.",
+      "empty": "Nessun cerchio da mostrare per ora.",
+      "seats": "{count}/{max}",
+      "members": "{count, plural, one {# membro} other {# membri}}",
+      "hostedBy": "Ospitato da",
+      "whyThis": "Consigliato per te",
+      "open": "Apri il cerchio",
+      "requested": "Richiesta inviata",
+      "waitlisted": "In lista d'attesa",
+      "waitlist": "Unisciti alla lista d'attesa",
+      "request": "Richiedi di unirti",
+      "join": "Unisciti al cerchio",
+      "inviteOnly": "Solo su invito",
+      "details": "Vedi dettagli",
+      "backToCircles": "Torna ai cerchi",
+      "joined": "Iscritto/a",
+      "roomTabs": "Sezioni del cerchio",
+      "tab": {
+        "conversation": "Conversazione",
+        "members": "Membri",
+        "membersCount": "Membri ({count})",
+        "resources": "Risorse",
+        "details": "Dettagli"
+      },
+      "welcome": "Benvenuto/a nel cerchio. Uno spazio mirato per condividere i tuoi obiettivi, esplorare opportunità e creare contatti.",
+      "conversation": "Conversazione",
+      "host": "Host",
+      "noMessages": "Ancora nessun messaggio. Saluta.",
+      "messageLabel": "Scrivi un messaggio",
+      "messagePlaceholder": "Scrivi un messaggio…",
+      "send": "Invia messaggio",
+      "noAttachments": "I file si condividono in Risorse, non in chat.",
+      "you": "Tu",
+      "noResources": "Nessuna risorsa condivisa per ora.",
+      "agenda": "Programma",
+      "focusAreas": "Aree di interesse",
+      "inThisCircle": "Sei in questo cerchio",
+      "inThisCircleBody": "Fai parte di {title}. Goditi la conversazione e crea contatti significativi.",
+      "leaveConfirmTitle": "Lasciare questo cerchio?",
+      "leave": "Lascia il cerchio",
+      "cancel": "Annulla"
+    },
+    "hub": {
+      "pausedBanner": "Il networking è in pausa: gli altri partecipanti non possono trovarti. Riprendilo dal pannello laterale.",
+      "goalsRegion": "I tuoi obiettivi e le tue preferenze di networking",
+      "preferencePanel": "Preferenze",
+      "save": "Salva e aggiorna",
+      "saved": "Il tuo profilo di networking è stato salvato.",
+      "peopleTitle": "Persone che potresti voler incontrare",
+      "peopleSubtitle": "In base ai tuoi obiettivi, ai tuoi interessi e a ciò che gli altri cercano a questo evento.",
+      "viewAll": "Vedi tutti",
+      "loading": "Caricamento",
+      "peopleEmpty": "Ancora nessun consiglio. Compaiono quando si iscrivono altre persone e quando completi il profilo.",
+      "rail": "Strumenti di networking"
+    },
+    "wizard": {
+      "progress": "Avanzamento della configurazione",
+      "pageTitle": "Unisciti al networking",
+      "steps": {
+        "intro": "Benvenuto",
+        "profile": "Dal tuo profilo",
+        "goals": "I tuoi obiettivi",
+        "meet": "Incontri",
+        "visibility": "Visibilità",
+        "review": "Riepilogo"
+      },
+      "title": {
+        "intro": "Incontra le persone giuste a questo evento",
+        "profile": "Quello che sappiamo già",
+        "goals": "Perché sei qui?",
+        "meet": "Come e quando vuoi incontrarti?",
+        "visibility": "Chi può vederti?",
+        "review": "Controlla e unisciti"
+      },
+      "lead": {
+        "intro": "Il networking è facoltativo. Scegli tu cosa condividere e puoi fare una pausa o uscire in qualsiasi momento.",
+        "profile": "Informazioni del tuo profilo DiaspoPlug che puoi riutilizzare qui. Non viene aggiunto nulla senza la tua scelta.",
+        "goals": "Scegli cosa cerchi e cosa puoi offrire. È ciò che usa l'abbinamento.",
+        "meet": "Indica come preferisci incontrarti e quando sei libero/a.",
+        "visibility": "Scegli chi può trovarti e quali dettagli vede.",
+        "review": "Controlla tutto, poi unisciti. Potrai modificare ogni cosa in seguito."
+      },
+      "intro": {
+        "what": "Usiamo le tue risposte per suggerirti persone a questo evento in linea con i tuoi obiettivi.",
+        "who": "Solo i partecipanti iscritti al networking vedono ciò che scegli di condividere.",
+        "control": "Puoi fare una pausa, cambiare ciò che è visibile o ritirarti in qualsiasi momento.",
+        "ai": "L'assistenza IA è facoltativa e disattivata per impostazione predefinita. Potrai attivarla più tardi mentre scrivi i tuoi obiettivi.",
+        "consent": "Accetto di condividere il mio profilo di networking con gli altri partecipanti di questo evento, come descritto sopra."
+      },
+      "profile": {
+        "fromProfile": "Dal tuo profilo",
+        "nothing": "Non abbiamo trovato nel tuo profilo nulla che corrisponda alle scelte di questo evento.",
+        "separate": "Questi vengono dal tuo profilo. I suggerimenti che chiederai più tardi sono mostrati a parte.",
+        "useDetails": "Usa titolo, organizzazione, luogo e bio del mio profilo",
+        "unavailable": "Alcuni dati, come le lingue, non sono disponibili dal tuo profilo. Puoi aggiungerli tu."
+      },
+      "review": {
+        "needs": "Cerca",
+        "offers": "Può offrire",
+        "interests": "Interessi",
+        "industries": "Settori",
+        "none": "Nessuna scelta",
+        "visibility": "Visibilità",
+        "consentMissing": "Torna al primo passaggio e accetta di condividere il profilo prima di unirti."
+      },
+      "saveLater": "Salva e finisci dopo",
+      "back": "Indietro",
+      "next": "Avanti",
+      "join": "Unisciti al networking",
+      "draftSaved": "Salvato. Potrai finire la configurazione più tardi.",
+      "joined": "Ora partecipi al networking."
+    },
+    "gate": {
+      "retry": "Riprova",
+      "backToEvent": "Torna all'evento",
+      "unavailableYet": {
+        "title": "Il networking non è ancora disponibile",
+        "body": "Questa funzione non è ancora stata attivata per te. Riprova presto."
+      },
+      "error": {
+        "title": "Qualcosa è andato storto",
+        "body": "Non siamo riusciti a caricare il networking. Riprova."
+      },
+      "disabled": {
+        "title": "Il networking non è aperto per questo evento",
+        "body": "L'organizzatore non ha attivato il networking per questo evento."
+      },
+      "notOpenYet": {
+        "title": "Il networking apre presto",
+        "body": "Il networking di questo evento non è ancora aperto. Torna più tardi."
+      },
+      "closed": {
+        "title": "Il networking è chiuso",
+        "body": "La finestra di networking di questo evento è terminata."
+      },
+      "notEligible": {
+        "title": "Iscriviti per partecipare",
+        "body": "Il networking è riservato ai partecipanti con iscrizione confermata."
+      },
+      "needsSetup": {
+        "title": "Configura il tuo profilo di networking",
+        "body": "Unisciti al networking per vedere le persone che potresti voler incontrare.",
+        "cta": "Configura il networking"
+      },
+      "withdrawn": {
+        "title": "Hai lasciato il networking",
+        "body": "Il tuo profilo di networking non è più mostrato. Puoi unirti di nuovo in qualsiasi momento.",
+        "cta": "Unisciti di nuovo"
+      },
+      "revoked": {
+        "title": "Il networking non è disponibile per te",
+        "body": "Il tuo accesso al networking di questo evento è terminato."
+      }
+    },
+    "errors": {
+      "featureUnavailable": "Non è ancora disponibile.",
+      "unavailable": "Il networking è temporaneamente non disponibile. Riprova tra un momento.",
+      "notFound": "Non abbiamo trovato quello che cerchi.",
+      "invalid": "Non sembrava corretto. Controlla e riprova.",
+      "rateLimited": "Lo stai facendo troppo spesso. Attendi un po'.",
+      "consentRequired": "Attiva prima l'assistenza IA.",
+      "conflict": "È cambiato mentre modificavi. Ricarica e riprova.",
+      "notEligible": "Possono partecipare solo i partecipanti con iscrizione confermata.",
+      "closed": "Il networking non è aperto in questo momento.",
+      "notParticipant": "Unisciti prima al networking.",
+      "refused": "Al momento non è possibile.",
+      "generic": "Qualcosa è andato storto. Riprova."
+    },
+    "tax": {
+      "role_founder": "Fondatore/fondatrice",
+      "role_investor": "Investitore/investitrice",
+      "role_business_owner": "Imprenditore/imprenditrice",
+      "role_professional": "Professionista",
+      "role_public_sector": "Settore pubblico",
+      "role_researcher": "Ricercatore/ricercatrice",
+      "role_student": "Studente/studentessa",
+      "role_service_provider": "Fornitore di servizi",
+      "role_nonprofit": "Non profit",
+      "role_other": "Altro",
+      "interest_african_startups": "Startup africane",
+      "interest_fintech": "Fintech",
+      "interest_agritech": "Agritech",
+      "interest_real_estate": "Immobiliare",
+      "interest_investment": "Investimenti",
+      "interest_govtech": "Govtech",
+      "interest_digital_transformation": "Trasformazione digitale",
+      "interest_international_trade": "Commercio internazionale",
+      "interest_healthcare_innovation": "Innovazione sanitaria",
+      "interest_creative_industries": "Industrie creative",
+      "interest_employment": "Occupazione",
+      "interest_partnerships": "Partnership",
+      "interest_mentorship": "Mentoring",
+      "interest_research_collaboration": "Collaborazione di ricerca",
+      "interest_other": "Altro",
+      "capability_investment": "Investimenti",
+      "capability_funding": "Finanziamenti",
+      "capability_partnerships": "Partnership",
+      "capability_technology": "Tecnologia",
+      "capability_distribution": "Distribuzione",
+      "capability_market_access": "Accesso al mercato",
+      "capability_customers": "Clienti",
+      "capability_suppliers": "Fornitori",
+      "capability_talent": "Talenti",
+      "capability_mentorship": "Mentoring",
+      "capability_expertise": "Competenze",
+      "capability_institutional": "Contatti istituzionali",
+      "capability_research": "Ricerca",
+      "capability_introductions": "Presentazioni",
+      "capability_knowledge_exchange": "Scambio di conoscenze",
+      "capability_other": "Altro",
+      "industry_agriculture": "Agricoltura",
+      "industry_financial_services": "Servizi finanziari",
+      "industry_technology": "Tecnologia",
+      "industry_healthcare": "Sanità",
+      "industry_education": "Istruzione",
+      "industry_real_estate_construction": "Immobiliare e costruzioni",
+      "industry_energy_utilities": "Energia e servizi di pubblica utilità",
+      "industry_manufacturing": "Manifattura",
+      "industry_trade_logistics": "Commercio e logistica",
+      "industry_media_creative": "Media e creatività",
+      "industry_tourism_hospitality": "Turismo e ospitalità",
+      "industry_public_sector": "Settore pubblico",
+      "industry_nonprofit_development": "Non profit e sviluppo",
+      "industry_professional_services": "Servizi professionali",
+      "industry_retail_consumer": "Retail e beni di consumo",
+      "industry_telecommunications": "Telecomunicazioni",
+      "industry_other": "Altro",
+      "market_europe": "Europa",
+      "market_uk_ireland": "Regno Unito e Irlanda",
+      "market_west_africa": "Africa occidentale",
+      "market_east_africa": "Africa orientale",
+      "market_southern_africa": "Africa meridionale",
+      "market_north_africa": "Africa settentrionale",
+      "market_central_africa": "Africa centrale",
+      "market_north_america": "Nord America",
+      "market_middle_east": "Medio Oriente",
+      "market_asia_pacific": "Asia-Pacifico",
+      "market_latin_america_caribbean": "America Latina e Caraibi",
+      "market_global": "Globale"
+    }
   }
 }
