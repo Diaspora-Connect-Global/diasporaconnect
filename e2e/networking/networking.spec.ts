@@ -109,15 +109,14 @@ test('hub: goals editor, people to meet with tier labels and reasons; no percent
     await page.context().close();
 });
 
-test('features off: no interests or circles tabs, no Interested button, and those queries never run', async () => {
+test('circles stay off: no circles tab and no circle query runs; the interests tabs are there', async () => {
     const { page, graphql } = await openPage(browser, `${BASE}?tab=circles`, networkingOverrides());
     await expect(page.getByTestId('goals-editor')).toBeVisible(READY);
     await expect(page.getByTestId('tab-circles')).toHaveCount(0);
-    await expect(page.getByTestId('tab-interested')).toHaveCount(0);
-    await expect(page.getByTestId('tab-matches')).toHaveCount(0);
-    await expect(page.getByTestId('tab-interests')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Interested', exact: true })).toHaveCount(0);
-    expect(graphql.calls.filter((c) => /Circle|Interest|Matches/.test(c.name))).toEqual([]);
+    await expect(page.getByTestId('tab-interested')).toBeVisible();
+    await expect(page.getByTestId('tab-matches')).toBeVisible();
+    await expect(page.getByTestId('tab-interests')).toBeVisible();
+    expect(graphql.calls.filter((c) => /Circle/.test(c.name))).toEqual([]);
     await page.context().close();
 });
 
@@ -131,7 +130,7 @@ test('hub: pause is one click and does not need a refresh', async () => {
 test('deck: Not for me and Save for later send PASS and SKIP and move on', async () => {
     const { page, graphql } = await openPage(browser, `${BASE}/recommended`, networkingOverrides({ NetworkingDecide: { eventNetworkingDecide: { __typename: 'EventNetworkingDecisionResult', decision: 'PASS', decidedAt: null } } }));
     await expect(page.getByTestId('deck-card')).toHaveAttribute('data-handle', 'h-david-71c', READY);
-    await expect(page.getByTestId('deck-interested')).toHaveCount(0);
+    await expect(page.getByTestId('deck-interested')).toBeVisible();
     await page.getByTestId('deck-pass').click();
     await expect(page.getByTestId('deck-card')).toHaveAttribute('data-handle', 'h-sarah-a02');
     await page.getByTestId('deck-skip').click();
@@ -203,6 +202,8 @@ const HARNESS: Array<[string, string]> = [
     ['gate?state=unavailableYet', 'gate'],
     ['hub?tab=people', 'directory'],
     ['hub?tab=interested', 'panel-interested'],
+    ['hub?tab=matches', 'panel-matches'],
+    ['hub?tab=interests', 'panel-interests'],
 ];
 
 for (const [path, testId] of HARNESS) {
