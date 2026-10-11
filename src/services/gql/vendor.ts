@@ -113,8 +113,6 @@ export const GET_VENDOR_DASHBOARD = gql`
       totalRatings
       completedOrders
       status
-      ownerTrustScore
-      ownerTrustTier
     }
   }
 `;
@@ -131,8 +129,6 @@ export const GET_VENDOR_ELIGIBILITY = gql`
       payoutAccountCount
       verifiedPayoutAccounts
       activeSuspensionCount
-      kycStatus
-      kycLevel
     }
   }
 `;
@@ -247,13 +243,17 @@ export const LIST_VENDOR_ORDERS = gql`
 export const MY_PAYOUT_ACCOUNTS = gql`
   query MyPayoutAccounts {
     myPayoutAccounts {
-      id
-      provider
-      currency
-      isDefault
-      isVerified
-      createdAt
-      verifiedAt
+      success
+      payout_accounts {
+        id
+        provider
+        account_type
+        currency
+        account_identifier
+        is_primary
+        is_verified
+        account_holder_name
+      }
     }
   }
 `;
@@ -307,7 +307,7 @@ export const CREATE_PRODUCT = gql`
     $vendorId: String!
     $title: String!
     $description: String!
-    $price: Float!
+    $price: Int!
     $currency: String!
     $inventoryCount: Int!
     $productType: String!
@@ -338,7 +338,7 @@ export const UPDATE_PRODUCT = gql`
     $productId: String!
     $title: String!
     $description: String!
-    $price: Float!
+    $price: Int!
     $inventoryCount: Int!
     $images: [String!]
     $tags: [String!]
@@ -375,7 +375,7 @@ export const CREATE_SERVICE_PACKAGE = gql`
     $vendorId: String!
     $title: String!
     $description: String!
-    $basePrice: Float!
+    $basePrice: Int!
     $currency: String!
     $estimatedDuration: Int!
     $benefits: [String!]
@@ -399,9 +399,9 @@ export const ADD_MILESTONE = gql`
     $title: String!
     $description: String!
     $percentageOfTotal: Float!
-    $estimatedDays: Int!
+    $estimatedDays: Float!
     $deliverables: [String!]!
-    $order: Int!
+    $order: Float!
   ) {
     addMilestone(
       packageId: $packageId
@@ -426,7 +426,7 @@ export const PUBLISH_SERVICE_PACKAGE = gql`
 export const REQUEST_PAYOUT = gql`
   mutation RequestPayout(
     $vendorId: String!
-    $amount: Float!
+    $amount: Int!
     $currency: String!
   ) {
     requestPayout(vendorId: $vendorId, amount: $amount, currency: $currency)
@@ -435,23 +435,34 @@ export const REQUEST_PAYOUT = gql`
 
 /** Payment module: add payout account. Auth: Yes. */
 export const CREATE_PAYOUT_ACCOUNT = gql`
-  mutation CreatePayoutAccount($type: String!, $currency: String!) {
-    createPayoutAccount(type: $type, currency: $currency) {
-      id
-      provider
-      currency
-      isDefault
-      isVerified
-      createdAt
-      verifiedAt
+  mutation CreatePayoutAccount($input: CreatePayoutAccountInput!) {
+    createPayoutAccount(input: $input) {
+      success
+      message
+      payout_account {
+        id
+        provider
+        account_type
+        account_identifier
+        is_primary
+      }
     }
   }
 `;
 
 /** Payment module: set primary payout account. Auth: Yes. */
 export const SET_PRIMARY_PAYOUT_ACCOUNT = gql`
-  mutation SetPrimaryPayoutAccount($accountId: String!) {
-    setPrimaryPayoutAccount(accountId: $accountId)
+  mutation SetPrimaryPayoutAccount($payout_account_id: ID!) {
+    setPrimaryPayoutAccount(payout_account_id: $payout_account_id) {
+      success
+      message
+      payout_account {
+        id
+        provider
+        account_type
+        is_primary
+      }
+    }
   }
 `;
 
