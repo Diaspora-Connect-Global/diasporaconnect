@@ -237,10 +237,11 @@ export const LEAVE_ASSOCIATION = gql`
    ============================================================================ */
 
 export const ACCEPT_MEMBERSHIP_INVITATION = gql`
-  mutation AcceptMembershipInvitation($input: AcceptMembershipInvitationInput!) {
-    acceptMembershipInvitation(input: $input) {
+  mutation AcceptMembershipInvitation($input: AcceptInvitationInput!) {
+    acceptInvitation(input: $input) {
       success
       message
+      acceptedAt
     }
   }
 `;
@@ -255,18 +256,17 @@ export const REJECT_MEMBERSHIP = gql`
 `;
 
 /* ============================================================================
-   8. CHECK MEMBERSHIP STATUS — getMyMemberships
+   8. CHECK MEMBERSHIP STATUS — myMembership (single entity; there is no "list all my memberships" operation)
    ============================================================================ */
 
 export const GET_MY_MEMBERSHIPS = gql`
-  query GetMyMemberships($entityType: String!) {
-    getMyMemberships(entityType: $entityType) {
-      memberships {
-        entityId
-        status
-        role
-        joinedAt
-      }
+  query GetMyMemberships($entityId: ID!, $entityType: String) {
+    myMembership(entityId: $entityId, entityType: $entityType) {
+      id
+      status
+      expiresAt
+      hasActiveSubscription
+      entityName
     }
   }
 `;
