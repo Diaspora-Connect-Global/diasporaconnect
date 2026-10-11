@@ -17,7 +17,7 @@ import type { NetworkingCard, NetworkingVisibility, ProfileFields, TaxonomyItem 
 export interface HubViewProps {
   event: NetworkingEventContext;
   tab: NetworkingTab;
-  features: { interests: boolean; circles: boolean };
+  features: { interests: boolean; circles: boolean; meetings?: boolean };
   /** Content of every tab except Discover (People, interest lists, Circles). */
   tabContent?: React.ReactNode;
   draft: NetworkingDraft;
@@ -102,12 +102,12 @@ export default function HubView(p: HubViewProps) {
   return (
     <>
       <NetworkingHeader event={p.event} />
-      <NetworkingTabs eventId={eventId} active={p.tab} interests={p.features.interests} circles={p.features.circles} />
+      <NetworkingTabs eventId={eventId} active={p.tab} interests={p.features.interests} circles={p.features.circles} meetings={p.features.meetings} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0 space-y-5">{p.tab === 'discover' ? discover : p.tabContent}</div>
         <aside className="space-y-4" aria-label={t('rail')}>
           <CompletenessCard value={p.completeness} eventId={eventId} />
-          <QuickActionsCard eventId={eventId} interests={p.features.interests} circles={p.features.circles} />
+          <QuickActionsCard eventId={eventId} interests={p.features.interests} circles={p.features.circles} meetings={p.features.meetings} />
           <VisibilityPrompt paused={p.paused} busy={p.pauseBusy} onTogglePause={p.onTogglePause} />
         </aside>
       </div>

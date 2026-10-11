@@ -13,12 +13,16 @@ import DirectoryView, { isValidFilterField, type FilterField } from './Directory
 import { InterestedInYouPanel, MatchesPanel, MyInterestsPanel } from './InterestsPanel';
 import { RevealConfirmDialog } from './InterestParts';
 import { CirclesDiscovery } from './CirclesParts';
+import MeetingsPanel from './meetings/MeetingsPanel';
+import MeetingRequestButton from './meetings/MeetingRequestButton';
+import { useMeetingsApi, useMyMeetings } from './meetings/useMeetings';
 import { NetworkingHeader, type NetworkingTab } from './NetworkingShell';
 import { draftFromParticipation, preferencesInput, profileInput, type NetworkingDraft } from './draft';
 import { useDecide, useInterestFlow, useMatches, useNetworkingBase, usePagedCards, useReportRefusal, useSentInterests, useSuggest } from './useNetworking';
 import { eventDays } from '@/lib/networkingAvailability';
 import { hasFailure } from '@/lib/networkingRefusal';
 import { NETWORKING_FEATURES } from '@/lib/networkingFeatures';
+import { MEETING_FILTERS, type MeetingFilter } from '@/services/gql/networkingMeetings';
 import {
   NETWORKING_CIRCLES,
   NETWORKING_CIRCLE_JOIN,
@@ -36,11 +40,12 @@ import {
   type DirectoryFilter,
 } from '@/services/gql/networking';
 
-const TABS: NetworkingTab[] = ['discover', 'people', 'interested', 'matches', 'interests', 'circles'];
+const TABS: NetworkingTab[] = ['discover', 'people', 'interested', 'matches', 'interests', 'meetings', 'circles'];
 
-function parseTab(raw: string | null, f: { interests: boolean; circles: boolean }): NetworkingTab {
+function parseTab(raw: string | null, f: { interests: boolean; circles: boolean; meetings: boolean }): NetworkingTab {
   const tab = (TABS as string[]).includes(raw ?? '') ? (raw as NetworkingTab) : 'discover';
   if ((tab === 'interested' || tab === 'matches' || tab === 'interests') && !f.interests) return 'discover';
+  if (tab === 'meetings' && !f.meetings) return 'discover';
   if (tab === 'circles' && !f.circles) return 'discover';
   return tab;
 }
@@ -61,6 +66,8 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
   const [baseline, setBaseline] = useState('');
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<DirectoryFilter>({});
+  const rawFilter = (search.get('f') ?? '').toUpperCase();
+  const [meetingFilter, setMeetingFilter] = useState<MeetingFilter>((MEETING_FILTERS as string[]).includes(rawFilter) ? (rawFilter as MeetingFilter) : 'PENDING');
 
   const mineVersion = base.mine?.participation?.version ?? 0;
   useEffect(() => {
@@ -95,6 +102,9 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
   const outbound = useSentInterests(eventId, ready && features.interests && tab === 'interests');
   const circlesQ = useQuery<{ networkingCircles: CircleSummary[] | null }>(NETWORKING_CIRCLES, { variables: { eventId }, skip: !(ready && features.circles && tab === 'circles'), ...NETWORKING_CONTEXT });
   const [joinCircle, joinState] = useMutation(NETWORKING_CIRCLE_JOIN, NETWORKING_MUTATION);
+
+  const meetingsApi = useMeetingsApi(eventId);
+  const meetingsList = useMyMeetings(eventId, meetingFilter, ready && features.meetings && tab === 'meetings');
 
   const decide = useDecide(eventId);
   const flow = useInterestFlow(eventId, base.mine?.participation?.visibility);
@@ -176,9 +186,31 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
     ) : tab === 'interested' ? (
       <InterestedInYouPanel eventId={eventId} me={base.me} labelOf={base.labelOf} cards={inbound.cards} loading={inbound.loading} hasMore={inbound.hasMore} onLoadMore={inbound.loadMore} onRemove={inbound.remove} />
     ) : tab === 'matches' ? (
-      <MatchesPanel eventId={eventId} me={base.me} labelOf={base.labelOf} paged={matches} />
+      <MatchesPanel
+        eventId={eventId}
+        me={base.me}
+        labelOf={base.labelOf}
+        paged={matches}
+        meetingAction={features.meetings ? (card) => <MeetingRequestButton person={card} api={meetingsApi} hiddenSender={base.mine?.participation?.visibility === 'HIDDEN'} variant="quiet" /> : undefined}
+      />
     ) : tab === 'interests' ? (
       <MyInterestsPanel eventId={eventId} me={base.me} labelOf={base.labelOf} paged={outbound} />
+    ) : tab === 'meetings' ? (
+      <MeetingsPanel
+        eventId={eventId}
+        eventTitle={base.context.title}
+        filter={meetingFilter}
+        onFilter={setMeetingFilter}
+        counts={meetingsList.counts}
+        meetings={meetingsList.meetings}
+        loading={meetingsList.loading}
+        loaded={meetingsList.loaded}
+        hasMore={meetingsList.hasMore}
+        failureKey={meetingsList.failureKey}
+        onLoadMore={meetingsList.loadMore}
+        onChanged={meetingsList.reload}
+        api={meetingsApi}
+      />
     ) : tab === 'circles' ? (
       <CirclesDiscovery
         eventId={eventId}

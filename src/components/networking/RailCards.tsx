@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ChevronRight, Eye, Filter, Lightbulb, Users, Heart, Handshake, CircleDot, Settings2, UserSearch } from 'lucide-react';
+import { ChevronRight, Eye, Filter, Lightbulb, Users, Heart, Handshake, CircleDot, CalendarClock, CalendarDays, Settings2, UserSearch } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { CompletenessRing, focusRing } from './primitives';
 import { tabHref } from './NetworkingShell';
@@ -42,7 +42,7 @@ function RowLink({ href, icon, title, hint }: { href: string; icon: React.ReactN
   );
 }
 
-export function QuickActionsCard({ eventId, interests, circles }: { eventId: string; interests: boolean; circles: boolean }) {
+export function QuickActionsCard({ eventId, interests, circles, meetings = false }: { eventId: string; interests: boolean; circles: boolean; meetings?: boolean }) {
   const t = useTranslations('networking.rail');
   return (
     <section aria-labelledby="rail-actions" className={card} data-testid="rail-actions">
@@ -52,6 +52,8 @@ export function QuickActionsCard({ eventId, interests, circles }: { eventId: str
         <RowLink href={tabHref(eventId, 'recommended')} icon={<UserSearch className="size-4" aria-hidden />} title={t('viewRecommended')} hint={t('viewRecommendedHint')} />
         {interests && <RowLink href={tabHref(eventId, 'interests')} icon={<Heart className="size-4" aria-hidden />} title={t('myInterests')} hint={t('myInterestsHint')} />}
         {interests && <RowLink href={tabHref(eventId, 'matches')} icon={<Handshake className="size-4" aria-hidden />} title={t('myMatches')} hint={t('myMatchesHint')} />}
+        {meetings && <RowLink href={tabHref(eventId, 'meetings')} icon={<CalendarClock className="size-4" aria-hidden />} title={t('myMeetings')} hint={t('myMeetingsHint')} />}
+        {meetings && <RowLink href={`/events/${eventId}/schedule`} icon={<CalendarDays className="size-4" aria-hidden />} title={t('mySchedule')} hint={t('myScheduleHint')} />}
         {circles && <RowLink href={tabHref(eventId, 'circles')} icon={<CircleDot className="size-4" aria-hidden />} title={t('circles')} hint={t('circlesHint')} />}
       </ul>
     </section>

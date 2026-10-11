@@ -9,7 +9,7 @@ import { focusRing } from './primitives';
 
 export interface RecommendedViewProps extends DeckProps {
   event: NetworkingEventContext;
-  features: { interests: boolean; circles: boolean };
+  features: { interests: boolean; circles: boolean; meetings?: boolean };
   completeness: number;
   mode: 'deck' | 'saved';
   onMode: (m: 'deck' | 'saved') => void;
@@ -22,7 +22,7 @@ export default function RecommendedView({ event, features, completeness, mode, o
   return (
     <>
       <NetworkingHeader event={event} title={t('pageTitle')} />
-      <NetworkingTabs eventId={event.id} active="recommended" interests={features.interests} circles={features.circles} />
+      <NetworkingTabs eventId={event.id} active="recommended" interests={features.interests} circles={features.circles} meetings={features.meetings} />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0 space-y-5">
           <div role="group" aria-label={t('sourceLabel')} className="inline-flex rounded-full border border-border-subtle bg-surface-default p-1">

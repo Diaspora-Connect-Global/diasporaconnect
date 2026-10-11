@@ -11,6 +11,8 @@ import GateMessage from './GateMessage';
 import PersonView, { PersonNotFound } from './PersonView';
 import { RevealConfirmDialog } from './InterestParts';
 import { NetworkingHeader } from './NetworkingShell';
+import MeetingRequestButton from './meetings/MeetingRequestButton';
+import { useMeetingsApi } from './meetings/useMeetings';
 import { useDecide, useInterestFlow, useNetworkingBase } from './useNetworking';
 import { hasFailure, networkingRefusal } from '@/lib/networkingRefusal';
 import { NETWORKING_FEATURES } from '@/lib/networkingFeatures';
@@ -22,6 +24,7 @@ export default function NetworkingPersonPage({ eventId, handle }: { eventId: str
   const base = useNetworkingBase(eventId);
   const features = NETWORKING_FEATURES;
   const ready = base.gate === 'ready' || base.gate === 'paused';
+  const meetingsApi = useMeetingsApi(eventId);
   const decide = useDecide(eventId);
   const flow = useInterestFlow(eventId, base.mine?.participation?.visibility);
   const [busy, setBusy] = useState(false);
@@ -73,6 +76,11 @@ export default function NetworkingPersonPage({ eventId, handle }: { eventId: str
         eventId={eventId}
         onBlocked={features.interests ? () => router.push(`/events/${eventId}/networking?tab=people`) : undefined}
         onInterested={features.interests ? act(() => flow.express(person.handle, 'PERSON', person.displayName ?? '')) : undefined}
+        meetingAction={
+          features.meetings && !person.isSelf ? (
+            <MeetingRequestButton person={person} api={meetingsApi} hiddenSender={base.mine?.participation?.visibility === 'HIDDEN'} variant="quiet" />
+          ) : undefined
+        }
       />
     </PageFrame>
   );

@@ -81,7 +81,7 @@ export function InterestedInYouPanel({ eventId, me, labelOf, cards, loading, has
 }
 
 /** "My matches": Connect (already-connected is said plainly) and Message via the person's profile. */
-export function MatchesPanel({ eventId, me, labelOf, paged }: Common & { paged: Paged<MatchItem> }) {
+export function MatchesPanel({ eventId, me, labelOf, paged, meetingAction }: Common & { paged: Paged<MatchItem>; meetingAction?: (card: NetworkingCard) => React.ReactNode }) {
   const t = useTranslations('networking.interestsPanel');
   const connect = useConnect(eventId);
   const [busy, setBusy] = useState<string | null>(null);
@@ -126,6 +126,7 @@ export function MatchesPanel({ eventId, me, labelOf, paged }: Common & { paged: 
                   {username && (
                     <Link href={profileUrl({ username })} className={quiet} data-testid="match-message"><MessageCircle className="size-4" aria-hidden />{t('matches.message')}</Link>
                   )}
+                  {meetingAction?.(card)}
                 </div>
               }
             />

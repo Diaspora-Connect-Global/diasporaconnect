@@ -35,9 +35,10 @@ export default function PersonView({
   onInterested,
   eventId,
   onBlocked,
+  meetingAction,
 }: {
   event: NetworkingEventContext;
-  features: { interests: boolean; circles: boolean };
+  features: { interests: boolean; circles: boolean; meetings?: boolean };
   person: NetworkingPerson;
   me: ProfileFields | null;
   labelOf: LabelFn;
@@ -48,6 +49,8 @@ export default function PersonView({
   eventId?: string;
   /** Present only while the interests backend is released: shows Block / Report. */
   onBlocked?: () => void;
+  /** The "Request a meeting" control; present only while the meetings UI is released. */
+  meetingAction?: React.ReactNode;
 }) {
   const t = useTranslations('networking.person');
   const ta = useTranslations('networking.actions');
@@ -62,7 +65,7 @@ export default function PersonView({
   return (
     <>
       <NetworkingHeader event={event} />
-      <NetworkingTabs eventId={event.id} active="people" interests={features.interests} circles={features.circles} />
+      <NetworkingTabs eventId={event.id} active="people" interests={features.interests} circles={features.circles} meetings={features.meetings} />
       <Link href={`/events/${event.id}/networking?tab=people`} className={`inline-flex min-h-6 items-center gap-2 text-sm font-medium text-text-primary hover:text-text-brand ${focusRing}`}><ArrowLeft className="size-4" aria-hidden />{t('backToPeople')}</Link>
       <article data-testid="person-view" className="rounded-2xl border border-border-subtle bg-surface-default p-5 sm:p-7">
         <div className="flex flex-wrap items-start gap-5">
@@ -107,6 +110,7 @@ export default function PersonView({
             <button type="button" disabled={busy} onClick={onPass} className={`${big} border-border-danger text-text-danger hover:bg-surface-danger`}><X className="size-5" aria-hidden />{ta('pass')}</button>
             <button type="button" disabled={busy} onClick={onSkip} className={`${big} border-border-subtle text-text-primary hover:bg-surface-subtle`}><Bookmark className="size-5" aria-hidden />{ta('skipLong')}</button>
             {onInterested && <button type="button" disabled={busy} onClick={onInterested} className={`${big} border-border-brand bg-surface-brand text-text-white`}><Star className="size-5" aria-hidden />{ta('interested')}</button>}
+            {meetingAction}
           </div>
         )}
       </article>

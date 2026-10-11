@@ -1,8 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ChevronRight, UserPlus, UsersRound } from 'lucide-react';
+import { CalendarDays, ChevronRight, UserPlus, UsersRound } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { NETWORKING_FEATURES } from '@/lib/networkingFeatures';
 import type { EventNetworkingView } from './useEventNetworking';
 
 /**
@@ -52,6 +53,20 @@ export default function NetworkingCtas({ eventId, networking }: { eventId: strin
         </span>
         <ChevronRight className="size-4 shrink-0 text-text-secondary" aria-hidden />
       </Link>
+      {NETWORKING_FEATURES.meetings && joined && (
+        <Link
+          href={`/events/${eventId}/schedule`}
+          data-testid="cta-schedule"
+          className="flex min-h-16 items-center gap-3 rounded-2xl border border-border-subtle bg-surface-default p-4 hover:border-border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+        >
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-surface-info text-text-brand"><CalendarDays className="size-5" aria-hidden /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-text-primary">{t('scheduleTitle')}</span>
+            <span className="block text-xs text-text-secondary">{t('scheduleSub')}</span>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-text-secondary" aria-hidden />
+        </Link>
+      )}
     </div>
   );
 }

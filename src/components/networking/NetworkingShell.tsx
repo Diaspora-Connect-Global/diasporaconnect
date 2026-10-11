@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { formatInZone } from '@/lib/eventCalendar';
 import { focusRing } from './primitives';
 
-export type NetworkingTab = 'discover' | 'recommended' | 'people' | 'interested' | 'matches' | 'interests' | 'circles';
+export type NetworkingTab = 'discover' | 'recommended' | 'people' | 'interested' | 'matches' | 'interests' | 'meetings' | 'circles';
 
 export interface NetworkingEventContext {
   id: string;
@@ -65,10 +65,11 @@ export function NetworkingHeader({ event, title }: { event: NetworkingEventConte
   );
 }
 
-export function NetworkingTabs({ eventId, active, interests, circles }: { eventId: string; active: NetworkingTab; interests: boolean; circles: boolean }) {
+export function NetworkingTabs({ eventId, active, interests, circles, meetings = false }: { eventId: string; active: NetworkingTab; interests: boolean; circles: boolean; meetings?: boolean }) {
   const t = useTranslations('networking.tabs');
   const tabs: NetworkingTab[] = ['discover', 'recommended', 'people'];
   if (interests) tabs.push('interested', 'matches', 'interests');
+  if (meetings) tabs.push('meetings');
   if (circles) tabs.push('circles');
   return (
     <nav aria-label={t('label')} className="overflow-x-auto rounded-2xl border border-border-subtle bg-surface-default">

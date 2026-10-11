@@ -36,6 +36,7 @@ import { ConfirmationModal } from "@/components/custom/confirmationModal";
 import { TextInput, TextArea, Select } from "@/components/custom/input";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import MeetingSettingsSection from "@/components/networking/meetings/MeetingSettingsSection";
 import { ApprovalsManageTab, StaffManageTab } from "@/components/events/manage/PeopleManageTabs";
 import { ProgrammeManageTab, SpeakersManageTab, UpdatesManageTab } from "@/components/events/manage/ContentManageTabs";
 import { circleUserDisplayName, useCircleUsers } from "@/hooks/useCircleUsers";
@@ -833,6 +834,9 @@ function SettingsTab({ eventId }: { eventId: string }) {
           )}
         </div>
       </div>
+
+      {/* Networking meetings (organiser settings; absent until MEETINGS_UI_ENABLED) */}
+      <MeetingSettingsSection eventId={eventId} />
 
       {/* Danger zone */}
       <div className="rounded-lg border border-text-danger/30 p-4 space-y-3">

@@ -20,6 +20,9 @@ import { NetworkingHeader, NetworkingTabs, type NetworkingTab } from '../Network
 import { CirclesDiscovery, CircleRoom } from '../CirclesParts';
 import { draftFromParticipation, emptyDraft, type NetworkingDraft, type SuggestFn } from '../draft';
 import { eventDays } from '@/lib/networkingAvailability';
+import MeetingsPanel from '../meetings/MeetingsPanel';
+import MeetingRequestButton from '../meetings/MeetingRequestButton';
+import { fakeMeetingsApi, fixtureList, fixtureMeeting } from '../meetings/harness/fixtures';
 import { CARDS, CIRCLES, CIRCLE_DETAIL, CIRCLE_MESSAGES, EVENT, ME, TAXONOMY } from './fixtures';
 import type { DirectoryFilter, MyParticipation, NetworkingCard } from '@/services/gql/networking';
 
@@ -27,7 +30,8 @@ function fakePaged<T extends { handle: string }>(items: T[]): Paged<T> {
   return { items, loading: false, hasMore: false, refusal: null, reviewingSkipped: false, refreshing: false, loaded: true, loadMore: () => {}, reload: () => {}, remove: () => {} };
 }
 
-const ALL_ON = { interests: true, circles: true };
+const ALL_ON = { interests: true, circles: true, meetings: true };
+const fixtureApi = fakeMeetingsApi({ initial: fixtureMeeting('requested-in') });
 
 function useLabeler() {
   const t = useTranslations('networking');
@@ -75,9 +79,11 @@ export function HubHarness() {
     ) : tab === 'interested' ? (
       <InterestedInYouPanel eventId={EVENT.id} me={ME} labelOf={labelOf} cards={interestCards} loading={false} hasMore={false} onLoadMore={() => {}} onRemove={() => {}} />
     ) : tab === 'matches' ? (
-      <MatchesPanel eventId={EVENT.id} me={ME} labelOf={labelOf} paged={fakePaged(interestCards.map((card) => ({ handle: card.handle, card, matchedAt: null })))} />
+      <MatchesPanel eventId={EVENT.id} me={ME} labelOf={labelOf} paged={fakePaged(interestCards.map((card) => ({ handle: card.handle, card, matchedAt: null })))} meetingAction={(card) => <MeetingRequestButton person={card} api={fixtureApi} hiddenSender={false} variant="quiet" />} />
     ) : tab === 'interests' ? (
       <MyInterestsPanel eventId={EVENT.id} me={ME} labelOf={labelOf} paged={fakePaged<InterestEntry>(interestCards.map((card, i) => ({ handle: card.handle, card, status: (['PENDING', 'MUTUAL', 'EXPIRED'] as const)[i % 3], personAvailable: true })))} />
+    ) : tab === 'meetings' ? (
+      <MeetingsPanel eventId={EVENT.id} eventTitle={EVENT.title} filter="PENDING" onFilter={() => {}} counts={{ pending: 2, upcoming: 1, alternatives: 2, completed: 1, cancelled: 1, awaitingMe: 1 }} meetings={fixtureList().filter((m) => m.status === 'REQUESTED')} loading={false} loaded hasMore={false} failureKey={null} onLoadMore={() => {}} onChanged={() => {}} api={fixtureApi} />
     ) : tab === 'circles' ? (
       <CirclesDiscovery eventId={EVENT.id} circles={CIRCLES} interestsLabels={draft.interests.map(labelOf)} />
     ) : null;
@@ -138,7 +144,7 @@ export function PersonHarness() {
   return (
     <PageFrame shell={false}>
       <Banner />
-      <PersonView event={EVENT} features={ALL_ON} person={CARDS[0]} me={ME} labelOf={labelOf} onPass={() => toast('Pass')} onSkip={() => toast('Skip')} onInterested={() => toast('Interested')} onBlocked={() => {}} />
+      <PersonView event={EVENT} features={ALL_ON} person={CARDS[0]} me={ME} labelOf={labelOf} onPass={() => toast('Pass')} onSkip={() => toast('Skip')} onInterested={() => toast('Interested')} onBlocked={() => {}} meetingAction={<MeetingRequestButton person={CARDS[0]} api={fixtureApi} hiddenSender={false} variant="quiet" />} />
     </PageFrame>
   );
 }
