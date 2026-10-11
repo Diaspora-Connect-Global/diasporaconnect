@@ -17,7 +17,7 @@ export function CompletenessCard({ value, eventId }: { value: number; eventId: s
         <CompletenessRing value={value} />
         <div>
           <p className="text-sm font-medium text-text-primary">{value >= 100 ? t('complete') : t('keepGoing')}</p>
-          <p className="text-xs text-text-secondary">{t('progressHint')}</p>
+          <p className="text-xs text-muted-foreground">{t('progressHint')}</p>
         </div>
       </div>
       {value < 100 && (
@@ -34,9 +34,9 @@ function RowLink({ href, icon, title, hint }: { href: string; icon: React.ReactN
         <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-brand-subtle text-text-brand">{icon}</span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-medium text-text-primary">{title}</span>
-          {hint && <span className="block text-xs text-text-secondary">{hint}</span>}
+          {hint && <span className="block text-xs text-muted-foreground">{hint}</span>}
         </span>
-        <ChevronRight className="size-4 text-text-tertiary" aria-hidden />
+        <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
       </Link>
     </li>
   );
@@ -67,7 +67,7 @@ export function VisibilityPrompt({ paused, busy, onTogglePause }: { paused: bool
         <Eye className="mt-0.5 size-5 shrink-0 text-text-brand" aria-hidden />
         <div>
           <h2 id="rail-visibility" className="text-sm font-semibold text-text-primary">{paused ? t('pausedTitle') : t('pauseTitle')}</h2>
-          <p className="mt-1 text-xs text-text-secondary">{paused ? t('pausedBody') : t('pauseBody')}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{paused ? t('pausedBody') : t('pauseBody')}</p>
           <button type="button" disabled={busy} onClick={onTogglePause} data-testid="toggle-pause" className={`mt-3 inline-flex min-h-9 items-center rounded-full border border-border-brand bg-surface-default px-4 text-sm font-medium text-text-brand disabled:opacity-50 ${focusRing}`}>
             {paused ? t('resume') : t('pause')}
           </button>
@@ -104,18 +104,18 @@ export function SmartMatchingCard() {
   return (
     <section aria-labelledby="rail-smart" className={card}>
       <h2 id="rail-smart" className="flex items-center gap-2 text-base font-semibold text-text-primary"><Lightbulb className="size-4 text-text-brand" aria-hidden />{t('smartTitle')}</h2>
-      <p className="mt-1 text-sm text-text-secondary">{t('smartBody')}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{t('smartBody')}</p>
       <details className="mt-3 text-sm">
         <summary className={`min-h-6 cursor-pointer font-medium text-text-brand ${focusRing}`}>{t('howItWorks')}</summary>
         <dl className="mt-2 space-y-2">
           {(['DIRECT_OPPORTUNITY', 'STRONG_FIT', 'SHARED_INTERESTS', 'BROADER_COMPATIBILITY'] as const).map((k) => (
             <div key={k}>
               <dt className="font-medium text-text-primary">{tt(k)}</dt>
-              <dd className="text-xs text-text-secondary">{tt(`${k}Hint`)}</dd>
+              <dd className="text-xs text-muted-foreground">{tt(`${k}Hint`)}</dd>
             </div>
           ))}
         </dl>
-        <p className="mt-2 text-xs text-text-tertiary">{t('noPercent')}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t('noPercent')}</p>
       </details>
     </section>
   );
@@ -129,7 +129,7 @@ export function ManagePreferencesCard({ eventId }: { eventId: string }) {
         <Settings2 className="mt-0.5 size-5 shrink-0 text-text-brand" aria-hidden />
         <div>
           <h2 id="rail-manage" className="text-sm font-semibold text-text-primary">{t('manageTitle')}</h2>
-          <p className="mt-1 text-xs text-text-secondary">{t('manageBody')}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t('manageBody')}</p>
           <Link href={`/events/${eventId}/networking`} className={`mt-3 inline-flex min-h-9 items-center rounded-full border border-border-brand px-4 text-sm font-medium text-text-brand ${focusRing}`}>{t('managePrefs')}</Link>
         </div>
       </div>

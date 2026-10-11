@@ -16,7 +16,7 @@ export function ReasonLines({ card, me, labelOf, limit = 2, iconless = false }: 
   return (
     <ul data-testid="reasons" className="space-y-1">
       {lines.map((l) => (
-        <li key={l.code} className="text-sm leading-snug text-text-secondary">
+        <li key={l.code} className="text-sm leading-snug text-muted-foreground">
           {!iconless && <span aria-hidden className="mr-1.5 text-text-brand">•</span>}
           {t(l.key, { name, labels: l.codes.map(labelOf).join(', ') })}
         </li>
@@ -43,9 +43,9 @@ export function Subline({ card }: { card: NetworkingCard }) {
   const parts = [card.headline, card.organization].filter(Boolean).join(' · ');
   return (
     <>
-      {parts && <p className="text-sm text-text-secondary">{parts}</p>}
+      {parts && <p className="text-sm text-muted-foreground">{parts}</p>}
       {card.locationLabel && (
-        <p className="mt-0.5 flex items-center gap-1 text-xs text-text-tertiary">
+        <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="size-3" aria-hidden />
           {card.locationLabel}
         </p>

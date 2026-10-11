@@ -143,7 +143,7 @@ export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading
           {loading ? <Loader2 className="mx-auto size-6 animate-spin text-text-brand" aria-label={t('loading')} /> : (
             <>
               <h2 className="text-lg font-semibold text-text-primary">{t('emptyTitle')}</h2>
-              <p className="mt-1 text-sm text-text-secondary">{t('emptyBody')}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t('emptyBody')}</p>
               <Link href={`/events/${eventId}/networking?tab=people`} className={`mt-4 inline-flex min-h-11 items-center rounded-full border border-border-brand px-5 text-sm font-medium text-text-brand ${focusRing}`}>{t('browsePeople')}</Link>
             </>
           )}
@@ -183,7 +183,7 @@ export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading
                 <h2 className="text-2xl font-bold text-text-primary">
                   <Link href={personHref(eventId, current.handle)} className={`hover:underline ${focusRing}`}>{current.displayName}</Link>
                 </h2>
-                <p className="text-sm text-text-secondary">{[current.headline, current.organization].filter(Boolean).join(' · ')}</p>
+                <p className="text-sm text-muted-foreground">{[current.headline, current.organization].filter(Boolean).join(' · ')}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {current.locationLabel && <Chip><MapPin className="mr-1 size-3" aria-hidden />{current.locationLabel}</Chip>}
                   <TierBadge tier={current.tier} mutualFit={current.mutualFit} />
@@ -229,17 +229,17 @@ export default function DeckView({ eventId, cards, me, labelOf, hasMore, loading
               </button>
             )}
           </div>
-          <p className="mt-3 text-center text-xs text-text-secondary" data-testid="deck-position">
+          <p className="mt-3 text-center text-xs text-muted-foreground" data-testid="deck-position">
             {t('position', { position, total: hasMore ? `${total}+` : total })}
           </p>
-          <p className="mt-1 text-center text-xs text-text-tertiary">{onInterested ? t('keysWithInterest') : t('keys')}</p>
+          <p className="mt-1 text-center text-xs text-muted-foreground">{onInterested ? t('keysWithInterest') : t('keys')}</p>
         </section>
       )}
 
       {also.length > 0 && (
         <section aria-labelledby="also-like" className="rounded-2xl border border-border-subtle bg-surface-default p-4 sm:p-5">
           <h2 id="also-like" className="text-lg font-semibold text-text-primary">{t('alsoLike')}</h2>
-          <ul className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
             {also.map((c) => (
               <li key={c.handle}>
                 <PersonCard

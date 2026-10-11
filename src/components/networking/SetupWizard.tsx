@@ -79,7 +79,7 @@ export default function SetupWizard(p: WizardProps) {
       <nav aria-label={t('progress')}>
         <ol className="flex flex-wrap gap-2">
           {STEPS.map((s, i) => (
-            <li key={s} aria-current={i === step ? 'step' : undefined} className={`flex min-h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium ${i === step ? 'bg-surface-brand text-text-white' : i < step ? 'bg-surface-success text-text-success' : 'bg-surface-subtle text-text-secondary'}`}>
+            <li key={s} aria-current={i === step ? 'step' : undefined} className={`flex min-h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium ${i === step ? 'bg-surface-brand text-text-white' : i < step ? 'bg-surface-success text-text-success' : 'bg-surface-subtle text-muted-foreground'}`}>
               {i < step ? <Check className="size-3" aria-hidden /> : <span aria-hidden>{i + 1}</span>}
               <span className={i === step ? '' : 'hidden sm:inline'}>{t(`steps.${s}`)}</span>
             </li>
@@ -89,7 +89,7 @@ export default function SetupWizard(p: WizardProps) {
 
       <section className="rounded-2xl border border-border-subtle bg-surface-default p-4 sm:p-6" aria-labelledby="wizard-step-title">
         <h2 id="wizard-step-title" className="text-xl font-semibold text-text-primary">{t(`title.${id}`)}</h2>
-        <p className="mt-1 text-sm text-text-secondary">{t(`lead.${id}`)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t(`lead.${id}`)}</p>
 
         <div className="mt-5 space-y-5">
           {id === 'intro' && (
@@ -111,7 +111,7 @@ export default function SetupWizard(p: WizardProps) {
               <div data-testid="from-profile">
                 <h3 className="text-sm font-semibold text-text-primary">{t('profile.fromProfile')}</h3>
                 {usableCodes.length === 0 ? (
-                  <p className="mt-1 text-sm text-text-secondary">{t('profile.nothing')}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t('profile.nothing')}</p>
                 ) : (
                   <ul className="mt-2 flex flex-wrap gap-2">
                     {usableCodes.map((c) => {
@@ -126,12 +126,12 @@ export default function SetupWizard(p: WizardProps) {
                     })}
                   </ul>
                 )}
-                <p className="mt-2 text-xs text-text-tertiary">{t('profile.separate')}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{t('profile.separate')}</p>
               </div>
               {(p.prefill?.headline || p.prefill?.organization || p.prefill?.locationLabel || p.prefill?.intro) && (
                 <button type="button" onClick={useProfileDetails} className={secondary}>{t('profile.useDetails')}</button>
               )}
-              {(p.prefill?.unavailableFields?.length ?? 0) > 0 && <p className="text-xs text-text-tertiary">{t('profile.unavailable')}</p>}
+              {(p.prefill?.unavailableFields?.length ?? 0) > 0 && <p className="text-xs text-muted-foreground">{t('profile.unavailable')}</p>}
             </>
           )}
 
@@ -155,7 +155,7 @@ export default function SetupWizard(p: WizardProps) {
                 {([['needs', d.needs], ['offers', d.offers], ['interests', d.interests], ['industries', d.industries]] as const).map(([k, list]) => (
                   <div key={k}>
                     <dt className="font-semibold text-text-primary">{t(`review.${k}`)}</dt>
-                    <dd className="mt-1">{list.length > 0 ? <ChipRow codes={[...list]} labelOf={p.labelOf} max={8} /> : <span className="text-text-tertiary">{t('review.none')}</span>}</dd>
+                    <dd className="mt-1">{list.length > 0 ? <ChipRow codes={[...list]} labelOf={p.labelOf} max={8} /> : <span className="text-muted-foreground">{t('review.none')}</span>}</dd>
                   </div>
                 ))}
                 <div>

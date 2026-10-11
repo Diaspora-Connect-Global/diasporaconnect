@@ -8,7 +8,7 @@ import type { NetworkingTier } from '@/services/gql/networking';
 /** A static chip (taxonomy label, shared interest). */
 export function Chip({ children, tone = 'default', className = '' }: { children: React.ReactNode; tone?: 'default' | 'brand' | 'success'; className?: string }) {
   const tones = {
-    default: 'bg-surface-subtle text-text-secondary border-border-subtle',
+    default: 'bg-surface-subtle text-muted-foreground border-border-subtle',
     brand: 'bg-surface-brand-subtle text-text-brand border-border-brand/30',
     success: 'bg-surface-success text-text-success border-border-success/30',
   } as const;
@@ -87,7 +87,7 @@ export function SectionCard({
         {icon && <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-brand-subtle text-text-brand">{icon}</div>}
         <div className="min-w-0 flex-1">
           <h2 id={hid} className="text-base font-semibold text-text-primary sm:text-lg">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-sm text-text-secondary">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
         </div>
         {action}
       </div>

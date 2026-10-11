@@ -42,7 +42,7 @@ export function NetworkingHeader({ event, title }: { event: NetworkingEventConte
         <span className="truncate" data-testid="event-title">{event.title}</span>
       </p>
       <h1 className="mt-3 text-2xl font-bold text-text-primary sm:text-3xl">{title ?? t('title')}</h1>
-      <p className="mt-2 max-w-xl text-sm text-text-secondary">{t('subtitle', { event: event.title })}</p>
+      <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t('subtitle', { event: event.title })}</p>
       {(when || event.venue) && (
         <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-primary">
           {when && (
@@ -81,7 +81,7 @@ export function NetworkingTabs({ eventId, active, interests, circles }: { eventI
                 href={tabHref(eventId, tab)}
                 aria-current={on ? 'page' : undefined}
                 data-testid={`tab-${tab}`}
-                className={`inline-flex min-h-11 items-center border-b-2 px-4 text-sm font-medium ${on ? 'border-border-brand text-text-brand' : 'border-transparent text-text-secondary hover:text-text-primary'} ${focusRing}`}
+                className={`inline-flex min-h-11 items-center border-b-2 px-4 text-sm font-medium ${on ? 'border-border-brand text-text-brand' : 'border-transparent text-muted-foreground hover:text-text-primary'} ${focusRing}`}
               >
                 {t(tab)}
               </Link>

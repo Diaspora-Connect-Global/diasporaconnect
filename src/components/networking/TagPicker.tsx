@@ -64,7 +64,7 @@ export default function TagPicker({
       <label htmlFor={inputId} className="text-sm font-semibold text-text-primary">{label}</label>
       <div className="relative">
         <div className="flex items-center gap-2 rounded-xl border-2 border-border-subtle bg-surface-subtle px-3 focus-within:border-border-brand">
-          <Search className="size-4 shrink-0 text-text-secondary" aria-hidden />
+          <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           <input
             id={inputId}
             type="text"
@@ -86,7 +86,7 @@ export default function TagPicker({
                 if (options[0]) add(options[0].code);
               }
             }}
-            className="min-h-11 flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-tertiary"
+            className="min-h-11 flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-muted-foreground"
           />
           {onSuggest && (
             <button
@@ -125,7 +125,7 @@ export default function TagPicker({
           </li>
         ))}
       </ul>
-      {value.length === 0 && <p className="text-xs text-text-tertiary">{t('empty')}</p>}
+      {value.length === 0 && <p className="text-xs text-muted-foreground">{t('empty')}</p>}
     </div>
   );
 }

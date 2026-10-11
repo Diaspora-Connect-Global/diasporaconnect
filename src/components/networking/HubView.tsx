@@ -84,9 +84,9 @@ export default function HubView(p: HubViewProps) {
         {p.deckLoading && p.deckCards.length === 0 ? (
           <Loader2 className="mx-auto size-5 animate-spin text-text-brand" aria-label={t('loading')} />
         ) : p.deckCards.length === 0 ? (
-          <p data-testid="deck-preview-empty" className="text-sm text-text-secondary">{t('peopleEmpty')}</p>
+          <p data-testid="deck-preview-empty" className="text-sm text-muted-foreground">{t('peopleEmpty')}</p>
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-testid="deck-preview">
+          <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4" data-testid="deck-preview">
             {p.deckCards.map((c) => (
               <li key={c.handle}>
                 <PersonCard eventId={eventId} card={c} me={p.me} labelOf={p.labelOf} actions={p.deckActions(c)} />

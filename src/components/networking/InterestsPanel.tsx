@@ -37,9 +37,9 @@ export default function InterestsPanel({
   const t = useTranslations('networking.interestsPanel');
   return (
     <div data-testid={`panel-${kind}`} className="space-y-4">
-      <p className="text-sm text-text-secondary">{t(`${kind}.intro`)}</p>
+      <p className="text-sm text-muted-foreground">{t(`${kind}.intro`)}</p>
       {cards.length === 0 && !loading ? (
-        <p className="rounded-2xl border border-dashed border-border-subtle bg-surface-default p-8 text-center text-sm text-text-secondary">{t(`${kind}.empty`)}</p>
+        <p className="rounded-2xl border border-dashed border-border-subtle bg-surface-default p-8 text-center text-sm text-muted-foreground">{t(`${kind}.empty`)}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {cards.map((c) => (

@@ -79,9 +79,9 @@ export default function DirectoryView({
       </details>
 
       {visible.length === 0 && !loading ? (
-        <p data-testid="directory-empty" className="rounded-2xl border border-dashed border-border-subtle bg-surface-default p-8 text-center text-sm text-text-secondary">{active > 0 ? t('emptyFiltered') : t('empty')}</p>
+        <p data-testid="directory-empty" className="rounded-2xl border border-dashed border-border-subtle bg-surface-default p-8 text-center text-sm text-muted-foreground">{active > 0 ? t('emptyFiltered') : t('empty')}</p>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
           {visible.map((c) => (
             <li key={c.handle}>
               <PersonCard eventId={eventId} card={c} me={me} labelOf={labelOf} actions={actionsFor?.(c)} />

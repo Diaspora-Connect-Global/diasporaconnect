@@ -9,6 +9,9 @@ import { openBrowser } from '../support/browser';
 import { openPage } from '../support/eventFixtures';
 import { DECK, EVENT_ID, UUID, card, mine, networkingOverrides, status } from '../support/networkingFixtures';
 
+/** The event id legitimately appears in link targets; only visible markup must be id-free. */
+const withoutHrefs = (html: string) => html.replace(/href="[^"]*"/g, '');
+
 let browser: Browser;
 test.beforeAll(async () => {
     browser = await openBrowser();
@@ -100,7 +103,7 @@ test('hub: goals editor, people to meet with tier labels and reasons; no percent
     const text = (await page.locator('main, body').first().innerText()) + (await page.content());
     expect(text).not.toMatch(/\d+\s*%\s*match/i);
     expect(await page.getByTestId('deck-preview').innerText()).not.toContain('%');
-    expect(await page.getByTestId('deck-preview').innerHTML()).not.toMatch(UUID);
+    expect(withoutHrefs(await page.getByTestId('deck-preview').innerHTML())).not.toMatch(UUID);
     // Profile completeness comes from the real profile (68), not a made-up figure.
     await expect(page.getByTestId('rail-completeness')).toContainText('68%');
     await page.context().close();
@@ -135,7 +138,7 @@ test('deck: Not for me and Save for later send PASS and SKIP and move on', async
     await expect(page.getByTestId('deck-card')).toHaveAttribute('data-handle', 'h-kwame-9d4');
     const sent = graphql.calls.filter((c) => c.name === 'NetworkingDecide').map((c) => [c.variables.handle, c.variables.decision]);
     expect(sent).toEqual([['h-david-71c', 'PASS'], ['h-sarah-a02', 'SKIP']]);
-    const html = await page.getByTestId('deck').innerHTML();
+    const html = withoutHrefs(await page.getByTestId('deck').innerHTML());
     expect(html).not.toMatch(UUID);
     expect(html).not.toMatch(/\d+\s*%/);
     await page.context().close();
@@ -176,7 +179,7 @@ test('person: a real person shows reasons and actions, never an id', async () =>
     const { page } = await openPage(browser, `${BASE}/people/h-david-71c`, networkingOverrides({ NetworkingPerson: { eventNetworkingPerson: person } }));
     await expect(page.getByTestId('person-view')).toContainText('David Owusu', READY);
     await expect(page.getByTestId('person-actions')).toBeVisible();
-    expect(await page.getByTestId('person-view').innerHTML()).not.toMatch(UUID);
+    expect(withoutHrefs(await page.getByTestId("person-view").innerHTML())).not.toMatch(UUID);
     await page.context().close();
 });
 

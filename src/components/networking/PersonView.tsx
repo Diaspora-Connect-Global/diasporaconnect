@@ -16,7 +16,7 @@ export function PersonNotFound({ eventId }: { eventId: string }) {
   return (
     <section data-testid="person-not-found" className="mx-auto max-w-xl rounded-2xl border border-border-subtle bg-surface-default p-8 text-center">
       <h1 className="text-xl font-semibold text-text-primary">{t('notFoundTitle')}</h1>
-      <p className="mt-2 text-sm text-text-secondary">{t('notFoundBody')}</p>
+      <p className="mt-2 text-sm text-muted-foreground">{t('notFoundBody')}</p>
       <Link href={`/events/${eventId}/networking?tab=people`} className={`mt-5 inline-flex min-h-11 items-center rounded-full border border-border-brand px-6 text-sm font-medium text-text-brand ${focusRing}`}>{t('backToPeople')}</Link>
     </section>
   );
@@ -63,8 +63,8 @@ export default function PersonView({
           <PersonAvatar name={person.displayName} url={person.avatarUrl} className="size-24 text-2xl" />
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold text-text-primary">{person.displayName}</h1>
-            <p className="text-sm text-text-secondary">{[person.headline, person.organization].filter(Boolean).join(' · ')}</p>
-            {person.locationLabel && <p className="mt-1 text-xs text-text-tertiary">{person.locationLabel}</p>}
+            <p className="text-sm text-muted-foreground">{[person.headline, person.organization].filter(Boolean).join(' · ')}</p>
+            {person.locationLabel && <p className="mt-1 text-xs text-muted-foreground">{person.locationLabel}</p>}
             <div className="mt-2 flex flex-wrap gap-2">
               <TierBadge tier={person.tier} mutualFit={person.mutualFit} />
               {person.connectionStatus === 'CONNECTED' && <Chip tone="success">{t('previouslyConnected')}</Chip>}
@@ -76,8 +76,8 @@ export default function PersonView({
         {person.intro && <p className="mt-5 whitespace-pre-wrap text-sm text-text-primary">{person.intro}</p>}
 
         <div className="mt-5 grid gap-5 md:grid-cols-2">
-          <div><h2 className="mb-1 text-sm font-semibold text-text-primary">{ta('lookingFor')}</h2><ChipRow codes={person.needs} labelOf={labelOf} max={12} tone="brand" />{person.needsNote && <p className="mt-2 text-sm text-text-secondary">{person.needsNote}</p>}</div>
-          <div><h2 className="mb-1 text-sm font-semibold text-text-primary">{ta('canOffer')}</h2><ChipRow codes={person.offers} labelOf={labelOf} max={12} tone="brand" />{person.offersNote && <p className="mt-2 text-sm text-text-secondary">{person.offersNote}</p>}</div>
+          <div><h2 className="mb-1 text-sm font-semibold text-text-primary">{ta('lookingFor')}</h2><ChipRow codes={person.needs} labelOf={labelOf} max={12} tone="brand" />{person.needsNote && <p className="mt-2 text-sm text-muted-foreground">{person.needsNote}</p>}</div>
+          <div><h2 className="mb-1 text-sm font-semibold text-text-primary">{ta('canOffer')}</h2><ChipRow codes={person.offers} labelOf={labelOf} max={12} tone="brand" />{person.offersNote && <p className="mt-2 text-sm text-muted-foreground">{person.offersNote}</p>}</div>
         </div>
 
         {(person.reasons?.length ?? 0) > 0 && (

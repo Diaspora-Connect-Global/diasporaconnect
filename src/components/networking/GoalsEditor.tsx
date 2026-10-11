@@ -49,7 +49,7 @@ function SuggestionStrip({
         </button>
       </div>
       {codes.length === 0 ? (
-        <p className="mt-2 text-sm text-text-secondary">{t('none')}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('none')}</p>
       ) : (
         <ul className="mt-2 flex flex-wrap gap-2" aria-label={t('listLabel')}>
           {codes.map((c) => (
@@ -133,7 +133,7 @@ export default function GoalsEditor({
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-brand-subtle text-text-brand"><Briefcase className="size-5" aria-hidden /></div>
         <div>
           <h2 className="text-base font-semibold text-text-primary sm:text-lg">{t('title')}</h2>
-          <p className="text-sm text-text-secondary">{t('subtitle')}</p>
+          <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
       </div>
       <div className="grid gap-5 md:grid-cols-2 md:gap-6">
@@ -147,7 +147,7 @@ export default function GoalsEditor({
         </div>
       </div>
       {!suggest ? null : (
-        <p className="text-xs text-text-tertiary">{aiConsent ? t('aiOn') : t('aiOff')}</p>
+        <p className="text-xs text-muted-foreground">{aiConsent ? t('aiOn') : t('aiOff')}</p>
       )}
       {extended && (
         <div className="grid gap-5 md:grid-cols-2 md:gap-6">
@@ -170,7 +170,7 @@ export default function GoalsEditor({
         </div>
       )}
       {draft.needs.length + draft.offers.length === 0 && (
-        <p className="text-xs text-text-tertiary"><Chip>{t('hintChip')}</Chip> {t('hint')}</p>
+        <p className="text-xs text-muted-foreground"><Chip>{t('hintChip')}</Chip> {t('hint')}</p>
       )}
     </div>
   );

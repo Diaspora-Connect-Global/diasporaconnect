@@ -16,7 +16,7 @@ function RadioCard({ name, value, checked, onChange, title, hint, disabled }: { 
       <input type="radio" name={name} value={value} checked={checked} onChange={onChange} disabled={disabled} className="mt-1 size-4 accent-[var(--text-brand)]" />
       <span>
         <span className="block text-sm font-semibold text-text-primary">{title}</span>
-        {hint && <span className="block text-xs text-text-secondary">{hint}</span>}
+        {hint && <span className="block text-xs text-muted-foreground">{hint}</span>}
       </span>
     </label>
   );
@@ -27,7 +27,7 @@ function SwitchRow({ id, label, hint, checked, onChange }: { id: string; label: 
     <label htmlFor={id} className="flex min-h-11 cursor-pointer items-center justify-between gap-4 py-1">
       <span>
         <span className="block text-sm text-text-primary">{label}</span>
-        {hint && <span className="block text-xs text-text-secondary">{hint}</span>}
+        {hint && <span className="block text-xs text-muted-foreground">{hint}</span>}
       </span>
       <input id={id} type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} className="size-5 shrink-0 accent-[var(--text-brand)]" />
     </label>
@@ -81,11 +81,11 @@ export function AvailabilityEditor({
       return day;
     }
   };
-  if (days.length === 0) return <p className="text-sm text-text-secondary">{t('noDays')}</p>;
+  if (days.length === 0) return <p className="text-sm text-muted-foreground">{t('noDays')}</p>;
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm font-semibold text-text-primary">{t('legend')}</legend>
-      <p className="text-xs text-text-secondary">{t('zoneNote', { zone: timeZone })}</p>
+      <p className="text-xs text-muted-foreground">{t('zoneNote', { zone: timeZone })}</p>
       <div className="space-y-2">
         {days.map((day) => (
           <div key={day} className="flex flex-wrap items-center gap-2">
@@ -131,7 +131,7 @@ export function AboutEditor({ draft, onChange }: { draft: NetworkingDraft; onCha
       <div className="space-y-1 md:col-span-2">
         <label htmlFor="nw-intro" className="text-sm font-semibold text-text-primary">{t('intro')}</label>
         <textarea id="nw-intro" rows={3} maxLength={500} className={`${inputClass} py-2`} value={draft.intro} onChange={(e) => onChange({ ...draft, intro: e.target.value })} placeholder={t('introPlaceholder')} />
-        <p className="text-xs text-text-secondary">{t('introHint')}</p>
+        <p className="text-xs text-muted-foreground">{t('introHint')}</p>
       </div>
       <div className="space-y-1">
         <label htmlFor="nw-needs-note" className="text-sm font-semibold text-text-primary">{t('needsNote')}</label>
@@ -172,7 +172,7 @@ export function VisibilityEditor({
       </fieldset>
       <fieldset className="space-y-1">
         <legend className="text-sm font-semibold text-text-primary">{t('fieldsLegend')}</legend>
-        <p className="text-xs text-text-secondary">{t('fieldsHint')}</p>
+        <p className="text-xs text-muted-foreground">{t('fieldsHint')}</p>
         {FLAG_KEYS.map((k) => (
           <SwitchRow key={k} id={`flag-${k}`} label={t(`flag.${k}`)} checked={draft.fieldFlags[k]} onChange={(v) => onChange({ ...draft, fieldFlags: { ...draft.fieldFlags, [k]: v } })} />
         ))}
@@ -210,7 +210,7 @@ export function PreferenceSummaryCards({ draft, active, onOpen }: { draft: Netwo
             <span className="text-text-brand">{it.icon}</span>
             <span className="min-w-0">
               <span className="block text-sm font-semibold text-text-primary">{it.title}</span>
-              <span className="block truncate text-xs text-text-secondary">{it.summary}</span>
+              <span className="block truncate text-xs text-muted-foreground">{it.summary}</span>
             </span>
           </button>
         </li>

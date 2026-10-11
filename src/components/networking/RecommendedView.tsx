@@ -35,7 +35,7 @@ export default function RecommendedView({ event, features, completeness, mode, o
             <Bookmark className="size-6 text-text-brand" aria-hidden />
             <div className="min-w-0 flex-1">
               <h2 className="text-sm font-semibold text-text-primary">{t('notReadyTitle')}</h2>
-              <p className="text-xs text-text-secondary">{t('notReadyBody')}</p>
+              <p className="text-xs text-muted-foreground">{t('notReadyBody')}</p>
             </div>
             <button type="button" onClick={() => onMode('saved')} className={`min-h-11 rounded-full border border-border-brand bg-surface-default px-5 text-sm font-medium text-text-brand ${focusRing}`}>{t('viewSaved')}</button>
             <button type="button" onClick={onReconsider} data-testid="reconsider" className={`min-h-11 rounded-full border border-border-subtle bg-surface-default px-5 text-sm text-text-primary ${focusRing}`}>{t('reconsider')}</button>
