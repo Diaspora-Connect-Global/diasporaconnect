@@ -270,21 +270,13 @@ export const GET_MY_MEMBERSHIPS_COMMUNITY = gql`
    ============================================================================ */
 
 export const GET_MY_COMMUNITIES = gql`
-  query GetMyCommunities($page: Int, $limit: Int) {
-    getMyCommunities(page: $page, limit: $limit) {
-      communities {
-        id
-        name
-        avatarUrl
-        memberCount
-        defaultGroupId
-        myMembership {
-          status
-          role
-          joinedAt
-        }
-      }
-      total
+  query GetMyCommunities($userId: ID!) {
+    getUserCommunities(userId: $userId) {
+      id
+      name
+      avatarUrl
+      description
+      visibility
     }
   }
 `;
