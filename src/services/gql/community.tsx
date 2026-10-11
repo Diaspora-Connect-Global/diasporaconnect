@@ -266,25 +266,20 @@ export const GET_MY_MEMBERSHIPS_COMMUNITY = gql`
 `;
 
 /* ============================================================================
-   8. MY COMMUNITIES (with myMembership)
-   ============================================================================ */
+   8. MY COMMUNITIES (with my role)
+   ============================================================================
+   The gateway has no "my communities with myMembership" query (the old
+   `getMyCommunities` does not exist). The role comes from two real queries:
+   `listUserCommunities` (LIST_MY_JOINED_COMMUNITIES, above) for the ids, then
+   `batchCheckMembership` for the viewer's status + role in each, returned in
+   the order of the ids sent. */
 
-export const GET_MY_COMMUNITIES = gql`
-  query GetMyCommunities($page: Int, $limit: Int) {
-    getMyCommunities(page: $page, limit: $limit) {
-      communities {
-        id
-        name
-        avatarUrl
-        memberCount
-        defaultGroupId
-        myMembership {
-          status
-          role
-          joinedAt
-        }
-      }
-      total
+export const BATCH_CHECK_COMMUNITY_MEMBERSHIP = gql`
+  query BatchCheckCommunityMembership($communityIds: [ID!]!) {
+    batchCheckMembership(communityIds: $communityIds) {
+      isMember
+      status
+      role
     }
   }
 `;

@@ -8,7 +8,7 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { COMMUNITY_OVERRIDES, SHELL_OVERRIDES } from '../support/fakeSession';
-import { EVENT_ID, OWNER_ID, ORGANISER_NAME, eventFixture, openPage, type Overrides } from '../support/eventFixtures';
+import { EVENT_ID, OWNER_ID, ORGANISER_NAME, eventFixture, myCommunities, openPage, type Overrides } from '../support/eventFixtures';
 
 let browser: Browser;
 test.beforeAll(async () => {
@@ -23,13 +23,7 @@ const membership = (role: string, status = 'ACTIVE') => ({ __typename: 'Membersh
 
 const myEntities = (communities: Array<[string, string, string]>, associations: Array<[string, string, string]> = []): Overrides => ({
     ...SHELL_OVERRIDES,
-    GetMyCommunities: {
-        getMyCommunities: {
-            __typename: 'MyCommunities',
-            total: communities.length,
-            communities: communities.map(([id, name, role]) => ({ __typename: 'Community', id, name, avatarUrl: null, memberCount: 5, defaultGroupId: null, myMembership: membership(role) })),
-        },
-    },
+    ...myCommunities(communities),
     GetMyAssociations: {
         getMyAssociations: {
             __typename: 'MyAssociations',
@@ -190,7 +184,7 @@ test('approvals: pending people are listed by name, approve and reject send the 
         GetEvent: manageEvent({ requiresApproval: true }),
         GetEventPage: manageEvent({ requiresApproval: true }),
         PendingApprovalRegistrations: () => ({ getEventRegistrations: { __typename: 'EventRegistrationListResponse', total: pending.length, registrations: pending } }),
-        GetUserProfile: (v) => (v.userId === U1 ? profile(U1, 'Kofi', 'Mensah') : profile(U2, 'Efua', 'Boateng')),
+        GetUserProfile: (v: Record<string, unknown>) => (v.userId === U1 ? profile(U1, 'Kofi', 'Mensah') : profile(U2, 'Efua', 'Boateng')),
         ApproveEventRegistration: () => {
             pending = pending.filter((r) => r.id !== 'rg-1');
             return { approveEventRegistration: { __typename: 'EventRegistrationGQL', id: 'rg-1', status: 'confirmed', registrationStatus: 'CONFIRMED', waitlistPosition: null } };

@@ -68,31 +68,30 @@ export function organiserFixture(over: Record<string, unknown> = {}) {
     };
 }
 
-/** The viewer administers the organiser community (so they are a manager of its events). */
-export const ADMIN_OF_ORGANISER = {
-    GetMyCommunities: {
-        getMyCommunities: {
-            __typename: 'MyCommunities',
-            total: 1,
-            communities: [
-                { __typename: 'Community', id: OWNER_ID, name: ORGANISER_NAME, avatarUrl: null, memberCount: 9, defaultGroupId: null, myMembership: { __typename: 'Membership', status: 'ACTIVE', role: 'COMMUNITY_ADMIN', joinedAt: '2026-01-01T00:00:00.000Z' } },
-            ],
+/**
+ * What the viewer's communities look like on the REAL gateway: `listUserCommunities`
+ * (ids + names) and `batchCheckMembership` (status + role, in the order of the ids
+ * sent). There is no `getMyCommunities` field; see scripts/validate-graphql-against-gateway.mjs.
+ */
+export function myCommunities(rows: Array<[id: string, name: string, role: string]>, status = 'ACTIVE'): Record<string, unknown> {
+    return {
+        ListMyJoinedCommunities: {
+            listUserCommunities: rows.map(([id, name]) => ({ __typename: 'UserCommunity', id, name, avatarUrl: null, communityType: null })),
         },
-    },
-};
+        BatchCheckCommunityMembership: (variables: Record<string, unknown>) => ({
+            batchCheckMembership: ((variables.communityIds as string[] | undefined) ?? []).map((id) => {
+                const role = rows.find(([rid]) => rid === id)?.[2] ?? 'MEMBER';
+                return { __typename: 'MembershipStatus', isMember: true, status, role };
+            }),
+        }),
+    };
+}
+
+/** The viewer administers the organiser community (so they are a manager of its events). */
+export const ADMIN_OF_ORGANISER = myCommunities([[OWNER_ID, ORGANISER_NAME, 'COMMUNITY_ADMIN']]);
 
 /** The viewer is only an ordinary member somewhere. */
-export const MEMBER_ONLY = {
-    GetMyCommunities: {
-        getMyCommunities: {
-            __typename: 'MyCommunities',
-            total: 1,
-            communities: [
-                { __typename: 'Community', id: OWNER_ID, name: ORGANISER_NAME, avatarUrl: null, memberCount: 9, defaultGroupId: null, myMembership: { __typename: 'Membership', status: 'ACTIVE', role: 'MEMBER', joinedAt: '2026-01-01T00:00:00.000Z' } },
-            ],
-        },
-    },
-};
+export const MEMBER_ONLY = myCommunities([[OWNER_ID, ORGANISER_NAME, 'MEMBER']]);
 
 export const SESSIONS = [
     { __typename: 'EventProgrammeSession', id: 's1', title: 'Opening keynote', description: null, startAt: '2030-11-20T09:30:00.000Z', endAt: '2030-11-20T10:15:00.000Z', timezone: 'Europe/Berlin', room: 'Hall A', sessionType: 'KEYNOTE', speakerIds: ['sp1'], sortOrder: 0 },
@@ -130,7 +129,7 @@ export function eventPageOverrides(event = eventFixture(), more: Overrides = {})
         EventVenueInfo: { eventVenueInfo: null },
         IsEventSaved: { isEventSaved: false },
         GetEventOrganiserCommunity: { getCommunity: organiserFixture() },
-        GetMyCommunities: { getMyCommunities: { __typename: 'MyCommunities', total: 0, communities: [] } },
+        ...myCommunities([]),
         GetMyAssociations: { getMyAssociations: { __typename: 'MyAssociations', total: 0, associations: [] } },
         SimilarEvents: { searchEvents: { __typename: 'EventListResponse', events: [] } },
         ...more,
