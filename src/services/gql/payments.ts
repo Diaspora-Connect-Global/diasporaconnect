@@ -62,29 +62,13 @@ export const MY_PAYMENT_METHODS = gql`
 
 export const ADD_PAYMENT_METHOD = gql`
   mutation AddPaymentMethod($input: AddPaymentMethodInput!) {
-    addPaymentMethod(input: $input) {
-      success
-      message
-      payment_method {
-        id
-        provider
-        type
-        last4
-        brand
-        expiry_month
-        expiry_year
-        is_primary
-      }
-    }
+    addPaymentMethod(input: $input)
   }
 `;
 
 export const REMOVE_PAYMENT_METHOD = gql`
   mutation RemovePaymentMethod($payment_method_id: ID!) {
-    removePaymentMethod(payment_method_id: $payment_method_id) {
-      success
-      message
-    }
+    removePaymentMethod(payment_method_id: $payment_method_id)
   }
 `;
 
@@ -151,7 +135,7 @@ export const GET_PAYMENT_INTENT = gql`
 `;
 
 export const MY_PAYMENT_INTENTS = gql`
-  query MyPaymentIntents($page: Int, $limit: Int) {
+  query MyPaymentIntents($page: Float = 1, $limit: Float = 20) {
     myPaymentIntents(page: $page, limit: $limit) {
       success
       payment_intents {
@@ -174,7 +158,9 @@ export const GET_ESCROW_BY_PAYMENT_INTENT = gql`
       escrow {
         id
         status
-        amount
+        total_amount
+        released_amount
+        remaining_amount
         currency
         payment_intent_id
       }
@@ -219,7 +205,7 @@ export const OPEN_DISPUTE = gql`
 `;
 
 export const MY_DISPUTES = gql`
-  query MyDisputes($page: Int, $limit: Int) {
+  query MyDisputes($page: Float = 1, $limit: Float = 20) {
     myDisputes(page: $page, limit: $limit) {
       success
       disputes {
@@ -247,9 +233,10 @@ export const MY_PAYOUT_ACCOUNTS = gql`
         provider
         account_type
         currency
-        last4
+        account_identifier
         is_primary
-        account_name
+        is_verified
+        account_holder_name
       }
     }
   }
@@ -264,7 +251,7 @@ export const CREATE_PAYOUT_ACCOUNT = gql`
         id
         provider
         account_type
-        last4
+        account_identifier
         is_primary
       }
     }

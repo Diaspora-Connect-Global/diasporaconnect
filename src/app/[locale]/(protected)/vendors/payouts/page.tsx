@@ -329,7 +329,7 @@ const PayoutsDashboard = () => {
                       {account.provider} · {account.currency}
                     </p>
                     <p className="text-xs text-text-secondary">
-                      {account.last4 ? `····${account.last4}` : account.account_name ?? ''}
+                      {account.account_identifier ? `····${account.account_identifier.slice(-4)}` : account.account_holder_name ?? ''}
                       {account.is_primary ? ' · Primary' : ''}
                     </p>
                   </div>
