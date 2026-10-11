@@ -5646,16 +5646,35 @@
     },
     "interestsPanel": {
       "interested": {
-        "intro": "Le persone che hanno mostrato interesse per te.",
-        "empty": "Ancora nessuno. Gli interessi compaiono qui quando arrivano."
+        "intro": "Persone che hanno mostrato interesse per te. Accetta per fare match.",
+        "empty": "Nessuno per ora. Gli interessi appaiono qui quando arrivano.",
+        "accept": "Accetta",
+        "notNow": "Non ora",
+        "accepted": "È un match con {name}!",
+        "dismissed": "Va bene. Questa persona non verrà più mostrata qui."
       },
       "matches": {
-        "intro": "Le persone interessate anche a te.",
-        "empty": "Ancora nessun abbinamento."
+        "intro": "Persone interessate anche a te.",
+        "empty": "Ancora nessun match.",
+        "connect": "Connettiti",
+        "connected": "Connessi",
+        "alreadyConnected": "Già connessi",
+        "nowConnected": "Ora siete connessi.",
+        "requested": "Richiesta inviata",
+        "requestSent": "Richiesta di connessione inviata.",
+        "message": "Messaggio"
       },
       "interests": {
-        "intro": "Le persone a cui hai mostrato interesse. Lo sanno solo se l'interesse è reciproco.",
-        "empty": "Non hai ancora mostrato interesse per nessuno."
+        "intro": "Persone per cui hai mostrato interesse. Ti avvisiamo se diventa un match.",
+        "empty": "Non hai ancora mostrato interesse per nessuno.",
+        "status": {
+          "PENDING": "In attesa",
+          "MUTUAL": "Reciproco",
+          "EXPIRED": "Scaduto"
+        },
+        "withdraw": "Ritira",
+        "withdrawn": "Interesse ritirato.",
+        "unavailable": "Questa persona non è più disponibile."
       },
       "loading": "Caricamento",
       "loadMore": "Mostra altro"
@@ -5834,7 +5853,13 @@
       "closed": "Il networking non è aperto in questo momento.",
       "notParticipant": "Unisciti prima al networking.",
       "refused": "Al momento non è possibile.",
-      "generic": "Qualcosa è andato storto. Riprova."
+      "generic": "Qualcosa è andato storto. Riprova.",
+      "revealConfirmation": "Conferma che questa persona può vedere il tuo profilo, poi riprova.",
+      "interestsPaused": "Questa persona non accetta nuovi interessi al momento.",
+      "interestLimit": "Hai raggiunto il limite giornaliero di interessi. Riprova domani.",
+      "connectCooldown": "Non puoi ancora inviare un'altra richiesta a questa persona.",
+      "connectionLimit": "Per ora hai raggiunto il limite di richieste di connessione.",
+      "connectRefused": "Non è stato possibile creare questa connessione."
     },
     "tax": {
       "role_founder": "Fondatore/fondatrice",
@@ -5907,6 +5932,45 @@
       "market_asia_pacific": "Asia-Pacifico",
       "market_latin_america_caribbean": "America Latina e Caraibi",
       "market_global": "Globale"
+    },
+    "interest": {
+      "sent": "Interesse inviato.",
+      "matched": "È un match! Ora potete connettervi.",
+      "confirmTitle": "Mostrare il tuo profilo a questa persona?",
+      "confirmBody": "Inviare un interesse rivela il tuo profilo a questa persona.",
+      "confirmDetail": "Sei nascosto agli altri partecipanti. Se continui, questa persona potrà vedere il tuo profilo.",
+      "confirmDetailNamed": "Sei nascosto agli altri partecipanti. Se continui, {name} potrà vedere il tuo profilo.",
+      "confirmSend": "Rivela il profilo e invia",
+      "cancel": "Annulla"
+    },
+    "safety": {
+      "thisPerson": "questa persona",
+      "menuLabel": "Altre opzioni per {name}",
+      "report": "Segnala",
+      "block": "Blocca",
+      "blockTitle": "Bloccare {name}?",
+      "blockBody": "Non vi vedrete più qui e ogni interesse o match tra voi viene rimosso. La persona non viene avvisata.",
+      "blockConfirm": "Blocca",
+      "blocked": "{name} è bloccato/a.",
+      "cancel": "Annulla",
+      "reportTitle": "Segnala {name}",
+      "reportBody": "Racconta a chi organizza questo evento cosa non va. I messaggi privati non vengono condivisi.",
+      "reasonLabel": "Qual è il problema?",
+      "reason": {
+        "SPAM": "Spam",
+        "HARASSMENT": "Molestie",
+        "INAPPROPRIATE": "Contenuto inappropriato",
+        "FAKE_PROFILE": "Profilo falso",
+        "SAFETY": "Problema di sicurezza",
+        "OTHER": "Altro"
+      },
+      "detailsLabel": "Dettagli (facoltativo)",
+      "detailsHint": "{count} di {max} caratteri",
+      "submit": "Invia segnalazione",
+      "sentTitle": "Segnalazione inviata",
+      "sentBody": "Grazie. Chi organizza l'evento la esaminerà.",
+      "caseRef": "Il tuo riferimento: {number}",
+      "close": "Chiudi"
     }
   }
 }

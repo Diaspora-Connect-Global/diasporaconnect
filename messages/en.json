@@ -5646,16 +5646,35 @@
     },
     "interestsPanel": {
       "interested": {
-        "intro": "People who have shown interest in you.",
-        "empty": "No one yet. Interests appear here when they arrive."
+        "intro": "People who have shown interest in you. Accept to match with them.",
+        "empty": "No one yet. Interests appear here when they arrive.",
+        "accept": "Accept",
+        "notNow": "Not now",
+        "accepted": "It's a match with {name}!",
+        "dismissed": "Okay. This person won't be shown here again."
       },
       "matches": {
         "intro": "People who are interested in you too.",
-        "empty": "No matches yet."
+        "empty": "No matches yet.",
+        "connect": "Connect",
+        "connected": "Connected",
+        "alreadyConnected": "Already connected",
+        "nowConnected": "You are now connected.",
+        "requested": "Request sent",
+        "requestSent": "Connection request sent.",
+        "message": "Message"
       },
       "interests": {
-        "intro": "People you have shown interest in. They are only told when you both match.",
-        "empty": "You have not shown interest in anyone yet."
+        "intro": "People you have shown interest in. You hear back when it becomes a match.",
+        "empty": "You have not shown interest in anyone yet.",
+        "status": {
+          "PENDING": "Pending",
+          "MUTUAL": "Mutual",
+          "EXPIRED": "Expired"
+        },
+        "withdraw": "Withdraw",
+        "withdrawn": "Interest withdrawn.",
+        "unavailable": "This person is no longer available."
       },
       "loading": "Loading",
       "loadMore": "Show more"
@@ -5834,7 +5853,13 @@
       "closed": "Networking is not open right now.",
       "notParticipant": "Join networking first.",
       "refused": "That is not possible right now.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "revealConfirmation": "Please confirm that this person may see your profile, then try again.",
+      "interestsPaused": "This person is not taking new interests right now.",
+      "interestLimit": "You have reached the daily limit for interests. Try again tomorrow.",
+      "connectCooldown": "You can't send another connection request to this person yet.",
+      "connectionLimit": "You have reached your connection request limit for now.",
+      "connectRefused": "That connection could not be made."
     },
     "tax": {
       "role_founder": "Founder",
@@ -5907,6 +5932,45 @@
       "market_asia_pacific": "Asia-Pacific",
       "market_latin_america_caribbean": "Latin America and Caribbean",
       "market_global": "Global"
+    },
+    "interest": {
+      "sent": "Interest sent.",
+      "matched": "It's a match! You can now connect.",
+      "confirmTitle": "Show your profile to this person?",
+      "confirmBody": "Sending an interest reveals your profile to this person.",
+      "confirmDetail": "You are hidden from other attendees. If you continue, this person will be able to see your profile.",
+      "confirmDetailNamed": "You are hidden from other attendees. If you continue, {name} will be able to see your profile.",
+      "confirmSend": "Reveal and send interest",
+      "cancel": "Cancel"
+    },
+    "safety": {
+      "thisPerson": "this person",
+      "menuLabel": "More options for {name}",
+      "report": "Report",
+      "block": "Block",
+      "blockTitle": "Block {name}?",
+      "blockBody": "You will no longer see each other here, and any interest or match between you is removed. They are not told.",
+      "blockConfirm": "Block",
+      "blocked": "{name} is blocked.",
+      "cancel": "Cancel",
+      "reportTitle": "Report {name}",
+      "reportBody": "Tell the people who run this event what is wrong. Private messages are not shared.",
+      "reasonLabel": "What is the problem?",
+      "reason": {
+        "SPAM": "Spam",
+        "HARASSMENT": "Harassment",
+        "INAPPROPRIATE": "Inappropriate content",
+        "FAKE_PROFILE": "Fake profile",
+        "SAFETY": "Safety concern",
+        "OTHER": "Something else"
+      },
+      "detailsLabel": "Details (optional)",
+      "detailsHint": "{count} of {max} characters",
+      "submit": "Send report",
+      "sentTitle": "Report sent",
+      "sentBody": "Thank you. The people who run this event will look into it.",
+      "caseRef": "Your reference: {number}",
+      "close": "Close"
     }
   }
 }

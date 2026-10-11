@@ -5646,16 +5646,35 @@
     },
     "interestsPanel": {
       "interested": {
-        "intro": "Mensen die interesse in jou hebben getoond.",
-        "empty": "Nog niemand. Interesses verschijnen hier zodra ze binnenkomen."
+        "intro": "Mensen die interesse in jou hebben getoond. Accepteer om een match te maken.",
+        "empty": "Nog niemand. Interesses verschijnen hier zodra ze binnenkomen.",
+        "accept": "Accepteren",
+        "notNow": "Nu niet",
+        "accepted": "Het is een match met {name}!",
+        "dismissed": "Prima. Deze persoon wordt hier niet meer getoond."
       },
       "matches": {
         "intro": "Mensen die ook in jou geïnteresseerd zijn.",
-        "empty": "Nog geen matches."
+        "empty": "Nog geen matches.",
+        "connect": "Verbinden",
+        "connected": "Verbonden",
+        "alreadyConnected": "Al verbonden",
+        "nowConnected": "Jullie zijn nu verbonden.",
+        "requested": "Verzoek verstuurd",
+        "requestSent": "Verbindingsverzoek verstuurd.",
+        "message": "Bericht"
       },
       "interests": {
-        "intro": "Mensen in wie je interesse hebt getoond. Zij horen het pas als jullie allebei interesse hebben.",
-        "empty": "Je hebt nog in niemand interesse getoond."
+        "intro": "Mensen bij wie je interesse hebt getoond. Je hoort het als het een match wordt.",
+        "empty": "Je hebt nog bij niemand interesse getoond.",
+        "status": {
+          "PENDING": "In afwachting",
+          "MUTUAL": "Wederzijds",
+          "EXPIRED": "Verlopen"
+        },
+        "withdraw": "Intrekken",
+        "withdrawn": "Interesse ingetrokken.",
+        "unavailable": "Deze persoon is niet meer beschikbaar."
       },
       "loading": "Laden",
       "loadMore": "Meer tonen"
@@ -5834,7 +5853,13 @@
       "closed": "Netwerken is nu niet geopend.",
       "notParticipant": "Doe eerst mee aan netwerken.",
       "refused": "Dat kan nu niet.",
-      "generic": "Er ging iets mis. Probeer het opnieuw."
+      "generic": "Er ging iets mis. Probeer het opnieuw.",
+      "revealConfirmation": "Bevestig dat deze persoon je profiel mag zien en probeer het opnieuw.",
+      "interestsPaused": "Deze persoon neemt op dit moment geen nieuwe interesses aan.",
+      "interestLimit": "Je hebt de dagelijkse limiet voor interesses bereikt. Probeer het morgen opnieuw.",
+      "connectCooldown": "Je kunt deze persoon nog geen nieuw verzoek sturen.",
+      "connectionLimit": "Je hebt je limiet voor verbindingsverzoeken voor nu bereikt.",
+      "connectRefused": "Die verbinding kon niet worden gemaakt."
     },
     "tax": {
       "role_founder": "Oprichter",
@@ -5907,6 +5932,45 @@
       "market_asia_pacific": "Azië-Pacific",
       "market_latin_america_caribbean": "Latijns-Amerika en Caraïben",
       "market_global": "Wereldwijd"
+    },
+    "interest": {
+      "sent": "Interesse verstuurd.",
+      "matched": "Het is een match! Jullie kunnen nu verbinding maken.",
+      "confirmTitle": "Je profiel aan deze persoon tonen?",
+      "confirmBody": "Als je interesse verstuurt, wordt je profiel zichtbaar voor deze persoon.",
+      "confirmDetail": "Je bent verborgen voor andere deelnemers. Als je doorgaat, kan deze persoon je profiel zien.",
+      "confirmDetailNamed": "Je bent verborgen voor andere deelnemers. Als je doorgaat, kan {name} je profiel zien.",
+      "confirmSend": "Profiel tonen en versturen",
+      "cancel": "Annuleren"
+    },
+    "safety": {
+      "thisPerson": "deze persoon",
+      "menuLabel": "Meer opties voor {name}",
+      "report": "Melden",
+      "block": "Blokkeren",
+      "blockTitle": "{name} blokkeren?",
+      "blockBody": "Jullie zien elkaar hier niet meer en elke interesse of match tussen jullie wordt verwijderd. De persoon krijgt hier geen bericht van.",
+      "blockConfirm": "Blokkeren",
+      "blocked": "{name} is geblokkeerd.",
+      "cancel": "Annuleren",
+      "reportTitle": "{name} melden",
+      "reportBody": "Vertel de organisatoren van dit evenement wat er mis is. Privéberichten worden niet gedeeld.",
+      "reasonLabel": "Wat is het probleem?",
+      "reason": {
+        "SPAM": "Spam",
+        "HARASSMENT": "Intimidatie",
+        "INAPPROPRIATE": "Ongepaste inhoud",
+        "FAKE_PROFILE": "Nepprofiel",
+        "SAFETY": "Veiligheidszorg",
+        "OTHER": "Iets anders"
+      },
+      "detailsLabel": "Details (optioneel)",
+      "detailsHint": "{count} van {max} tekens",
+      "submit": "Melding versturen",
+      "sentTitle": "Melding verstuurd",
+      "sentBody": "Bedankt. De organisatoren van dit evenement gaan ermee aan de slag.",
+      "caseRef": "Jouw referentie: {number}",
+      "close": "Sluiten"
     }
   }
 }

@@ -5646,16 +5646,35 @@
     },
     "interestsPanel": {
       "interested": {
-        "intro": "Les personnes qui ont montré de l'intérêt pour vous.",
-        "empty": "Personne pour l'instant. Les intérêts apparaissent ici à leur arrivée."
+        "intro": "Les personnes qui ont montré de l'intérêt pour vous. Acceptez pour faire un match.",
+        "empty": "Personne pour le moment. Les intérêts apparaissent ici dès leur arrivée.",
+        "accept": "Accepter",
+        "notNow": "Pas maintenant",
+        "accepted": "C'est un match avec {name} !",
+        "dismissed": "D'accord. Cette personne ne sera plus affichée ici."
       },
       "matches": {
-        "intro": "Les personnes également intéressées par vous.",
-        "empty": "Pas encore de correspondances."
+        "intro": "Les personnes qui s'intéressent aussi à vous.",
+        "empty": "Aucun match pour le moment.",
+        "connect": "Se connecter",
+        "connected": "Connecté(e)",
+        "alreadyConnected": "Déjà connecté(e)",
+        "nowConnected": "Vous êtes maintenant connectés.",
+        "requested": "Demande envoyée",
+        "requestSent": "Demande de connexion envoyée.",
+        "message": "Message"
       },
       "interests": {
-        "intro": "Les personnes qui vous intéressent. Elles ne sont prévenues que si l'intérêt est réciproque.",
-        "empty": "Vous n'avez encore montré d'intérêt pour personne."
+        "intro": "Les personnes pour qui vous avez montré de l'intérêt. Vous êtes prévenu(e) si cela devient un match.",
+        "empty": "Vous n'avez encore montré d'intérêt pour personne.",
+        "status": {
+          "PENDING": "En attente",
+          "MUTUAL": "Réciproque",
+          "EXPIRED": "Expiré"
+        },
+        "withdraw": "Retirer",
+        "withdrawn": "Intérêt retiré.",
+        "unavailable": "Cette personne n'est plus disponible."
       },
       "loading": "Chargement",
       "loadMore": "Afficher plus"
@@ -5834,7 +5853,13 @@
       "closed": "Le réseautage n'est pas ouvert actuellement.",
       "notParticipant": "Rejoignez d'abord le réseautage.",
       "refused": "Ce n'est pas possible pour le moment.",
-      "generic": "Un problème est survenu. Veuillez réessayer."
+      "generic": "Un problème est survenu. Veuillez réessayer.",
+      "revealConfirmation": "Veuillez confirmer que cette personne peut voir votre profil, puis réessayez.",
+      "interestsPaused": "Cette personne ne reçoit pas de nouveaux intérêts pour le moment.",
+      "interestLimit": "Vous avez atteint la limite quotidienne d'intérêts. Réessayez demain.",
+      "connectCooldown": "Vous ne pouvez pas encore renvoyer une demande à cette personne.",
+      "connectionLimit": "Vous avez atteint votre limite de demandes de connexion pour le moment.",
+      "connectRefused": "Cette connexion n'a pas pu être établie."
     },
     "tax": {
       "role_founder": "Fondateur / fondatrice",
@@ -5907,6 +5932,45 @@
       "market_asia_pacific": "Asie-Pacifique",
       "market_latin_america_caribbean": "Amérique latine et Caraïbes",
       "market_global": "International"
+    },
+    "interest": {
+      "sent": "Intérêt envoyé.",
+      "matched": "C'est un match ! Vous pouvez maintenant vous connecter.",
+      "confirmTitle": "Montrer votre profil à cette personne ?",
+      "confirmBody": "Envoyer un intérêt révèle votre profil à cette personne.",
+      "confirmDetail": "Vous êtes masqué(e) aux autres participants. Si vous continuez, cette personne pourra voir votre profil.",
+      "confirmDetailNamed": "Vous êtes masqué(e) aux autres participants. Si vous continuez, {name} pourra voir votre profil.",
+      "confirmSend": "Révéler mon profil et envoyer",
+      "cancel": "Annuler"
+    },
+    "safety": {
+      "thisPerson": "cette personne",
+      "menuLabel": "Plus d'options pour {name}",
+      "report": "Signaler",
+      "block": "Bloquer",
+      "blockTitle": "Bloquer {name} ?",
+      "blockBody": "Vous ne vous verrez plus ici, et tout intérêt ou match entre vous est supprimé. La personne n'en est pas informée.",
+      "blockConfirm": "Bloquer",
+      "blocked": "{name} est bloqué(e).",
+      "cancel": "Annuler",
+      "reportTitle": "Signaler {name}",
+      "reportBody": "Dites aux organisateurs de cet événement ce qui ne va pas. Les messages privés ne sont pas partagés.",
+      "reasonLabel": "Quel est le problème ?",
+      "reason": {
+        "SPAM": "Spam",
+        "HARASSMENT": "Harcèlement",
+        "INAPPROPRIATE": "Contenu inapproprié",
+        "FAKE_PROFILE": "Faux profil",
+        "SAFETY": "Problème de sécurité",
+        "OTHER": "Autre chose"
+      },
+      "detailsLabel": "Détails (facultatif)",
+      "detailsHint": "{count} sur {max} caractères",
+      "submit": "Envoyer le signalement",
+      "sentTitle": "Signalement envoyé",
+      "sentBody": "Merci. Les organisateurs de cet événement vont l'examiner.",
+      "caseRef": "Votre référence : {number}",
+      "close": "Fermer"
     }
   }
 }

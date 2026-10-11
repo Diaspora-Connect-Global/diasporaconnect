@@ -5646,16 +5646,35 @@
     },
     "interestsPanel": {
       "interested": {
-        "intro": "Personen, die Interesse an dir gezeigt haben.",
-        "empty": "Noch niemand. Interessen erscheinen hier, sobald sie eintreffen."
+        "intro": "Personen, die Interesse an dir gezeigt haben. Nimm an, um ein Match zu bilden.",
+        "empty": "Noch niemand. Interessen erscheinen hier, sobald sie eintreffen.",
+        "accept": "Annehmen",
+        "notNow": "Jetzt nicht",
+        "accepted": "Es passt mit {name}!",
+        "dismissed": "Okay. Diese Person wird hier nicht mehr angezeigt."
       },
       "matches": {
         "intro": "Personen, die ebenfalls an dir interessiert sind.",
-        "empty": "Noch keine Matches."
+        "empty": "Noch keine Matches.",
+        "connect": "Vernetzen",
+        "connected": "Vernetzt",
+        "alreadyConnected": "Bereits vernetzt",
+        "nowConnected": "Ihr seid jetzt vernetzt.",
+        "requested": "Anfrage gesendet",
+        "requestSent": "Vernetzungsanfrage gesendet.",
+        "message": "Nachricht"
       },
       "interests": {
-        "intro": "Personen, an denen du Interesse gezeigt hast. Sie erfahren es erst, wenn ihr beide Interesse habt.",
-        "empty": "Du hast noch an niemandem Interesse gezeigt."
+        "intro": "Personen, an denen du Interesse gezeigt hast. Du erfährst es, wenn daraus ein Match wird.",
+        "empty": "Du hast noch bei niemandem Interesse gezeigt.",
+        "status": {
+          "PENDING": "Ausstehend",
+          "MUTUAL": "Gegenseitig",
+          "EXPIRED": "Abgelaufen"
+        },
+        "withdraw": "Zurückziehen",
+        "withdrawn": "Interesse zurückgezogen.",
+        "unavailable": "Diese Person ist nicht mehr verfügbar."
       },
       "loading": "Wird geladen",
       "loadMore": "Mehr anzeigen"
@@ -5834,7 +5853,13 @@
       "closed": "Networking ist gerade nicht geöffnet.",
       "notParticipant": "Tritt zuerst dem Networking bei.",
       "refused": "Das ist gerade nicht möglich.",
-      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "revealConfirmation": "Bitte bestätige, dass diese Person dein Profil sehen darf, und versuche es dann erneut.",
+      "interestsPaused": "Diese Person nimmt gerade keine neuen Interessen entgegen.",
+      "interestLimit": "Du hast das Tageslimit für Interessen erreicht. Versuche es morgen erneut.",
+      "connectCooldown": "Du kannst dieser Person noch keine weitere Anfrage senden.",
+      "connectionLimit": "Du hast dein Limit für Vernetzungsanfragen vorerst erreicht.",
+      "connectRefused": "Diese Vernetzung war nicht möglich."
     },
     "tax": {
       "role_founder": "Gründer:in",
@@ -5907,6 +5932,45 @@
       "market_asia_pacific": "Asien-Pazifik",
       "market_latin_america_caribbean": "Lateinamerika und Karibik",
       "market_global": "Weltweit"
+    },
+    "interest": {
+      "sent": "Interesse gesendet.",
+      "matched": "Es passt! Ihr könnt euch jetzt vernetzen.",
+      "confirmTitle": "Dein Profil für diese Person sichtbar machen?",
+      "confirmBody": "Wenn du Interesse sendest, wird dein Profil für diese Person sichtbar.",
+      "confirmDetail": "Du bist für andere Teilnehmende verborgen. Wenn du fortfährst, kann diese Person dein Profil sehen.",
+      "confirmDetailNamed": "Du bist für andere Teilnehmende verborgen. Wenn du fortfährst, kann {name} dein Profil sehen.",
+      "confirmSend": "Profil zeigen und Interesse senden",
+      "cancel": "Abbrechen"
+    },
+    "safety": {
+      "thisPerson": "diese Person",
+      "menuLabel": "Weitere Optionen für {name}",
+      "report": "Melden",
+      "block": "Blockieren",
+      "blockTitle": "{name} blockieren?",
+      "blockBody": "Ihr seht euch hier nicht mehr, und Interessen oder Matches zwischen euch werden entfernt. Die Person erfährt nichts davon.",
+      "blockConfirm": "Blockieren",
+      "blocked": "{name} ist blockiert.",
+      "cancel": "Abbrechen",
+      "reportTitle": "{name} melden",
+      "reportBody": "Teile den Veranstaltenden mit, was nicht stimmt. Private Nachrichten werden nicht weitergegeben.",
+      "reasonLabel": "Was ist das Problem?",
+      "reason": {
+        "SPAM": "Spam",
+        "HARASSMENT": "Belästigung",
+        "INAPPROPRIATE": "Unangemessene Inhalte",
+        "FAKE_PROFILE": "Gefälschtes Profil",
+        "SAFETY": "Sicherheitsbedenken",
+        "OTHER": "Etwas anderes"
+      },
+      "detailsLabel": "Details (optional)",
+      "detailsHint": "{count} von {max} Zeichen",
+      "submit": "Meldung senden",
+      "sentTitle": "Meldung gesendet",
+      "sentBody": "Danke. Die Veranstaltenden kümmern sich darum.",
+      "caseRef": "Deine Referenz: {number}",
+      "close": "Schließen"
     }
   }
 }
