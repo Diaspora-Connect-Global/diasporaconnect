@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "validate:graphql": "node scripts/validate-graphql-against-gateway.mjs",
     "predev": "node scripts/copy-pdf-worker.mjs",
     "dev": "concurrently --raw \"next dev --turbopack\" ",
     "dev1": "next dev --turbopack",
