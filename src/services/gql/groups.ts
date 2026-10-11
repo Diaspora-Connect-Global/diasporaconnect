@@ -469,7 +469,7 @@ export const ADD_MEMBER = gql`
  * ```
  */
 export const TRANSFER_GROUP_OWNERSHIP = gql`
-  mutation TransferGroupOwnership($input: TransferGroupOwnershipInput!) {
+  mutation TransferGroupOwnership($input: GroupTransferOwnershipInput!) {
     transferGroupOwnership(input: $input) {
       success
       message
