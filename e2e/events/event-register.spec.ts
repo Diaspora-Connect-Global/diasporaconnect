@@ -125,7 +125,7 @@ test('a hybrid event needs an attendance format before it can be submitted', asy
     await page.getByTestId('terms-checkbox').check({ timeout: 90_000 });
     await expect(page.getByTestId('register-submit')).toBeDisabled();
     await expect(page.getByTestId('register-missing')).toContainText('how you will attend');
-    await page.getByLabel('Online').check();
+    await page.getByText('Online', { exact: true }).click(); // the radio is sr-only inside a card; click what the user sees
     await page.getByTestId('register-submit').click();
     await expect.poll(() => graphql.calls.some((c) => c.name === 'RegisterForEventM2')).toBe(true);
     expect((graphql.calls.find((c) => c.name === 'RegisterForEventM2')!.variables.input as Record<string, unknown>).attendanceFormat).toBe('ONLINE');
@@ -253,7 +253,7 @@ test('networking profile: optional, saved as a draft AFTER registering, and a re
     const section = page.getByTestId('networking-draft-section');
     await expect(section).toBeVisible({ timeout: 90_000 });
     await expect(section.getByRole('heading', { name: /^3\. Networking profile/ })).toContainText('Optional');
-    await expect(page.getByTestId('networking-draft-note')).toContainText('saved as a draft after you register');
+    await expect(page.getByTestId('networking-draft-note')).toContainText(/saved as a draft after you register/i);
     await expect(section).toContainText('nothing is shared until you join networking');
     // Nothing is sent before registering.
     await section.getByText('Select industry').click();

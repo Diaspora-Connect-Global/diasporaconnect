@@ -220,7 +220,7 @@ export default function EventDetailPage() {
                   tabIndex={active === k ? 0 : -1}
                   onClick={() => openTab(k)}
                   onKeyDown={(e) => onTabKey(e, i)}
-                  className={`min-h-11 whitespace-nowrap border-b-2 px-3 text-sm transition-colors ${
+                  className={`min-h-11 whitespace-nowrap border-b-2 px-2.5 text-sm transition-colors ${
                     active === k ? "border-border-brand font-medium text-text-brand" : "border-transparent text-text-secondary hover:text-text-primary"
                   }`}
                 >

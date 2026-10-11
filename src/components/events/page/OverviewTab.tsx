@@ -119,7 +119,7 @@ export function OverviewTab({
 
       <section aria-labelledby="ov-facts" className={CARD}>
         <h2 id="ov-facts" className="text-lg font-bold text-text-primary">{t('facts')}</h2>
-        <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
           {tiles.map(({ key, icon: Icon, label, lines }) => (
             <div key={key} data-testid={`fact-${key}`} className="flex items-start gap-3 rounded-xl border border-border-subtle p-3">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-info text-text-brand"><Icon className="size-5" strokeWidth={1.75} aria-hidden /></span>
