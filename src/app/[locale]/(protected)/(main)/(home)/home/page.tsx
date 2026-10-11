@@ -2,13 +2,18 @@
 
 import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVariant2';
 import { formatDateProximity } from '@/macros/time';
-import FeedCardWithReply from '@/components/cards/FeedCardWithReply';
-import { deriveKindDelta, type ReactionKind } from '@/components/reactions/reactionAdapter';
-import { splitPostAttachments } from '@/lib/normalizeFeedPost';
+import { FeedPostCard } from '@/components/feed/FeedPostCard';
+import { getProfileData } from '@/components/feed/feedPostHelpers';
+import { usePostEngagementHandlers } from '@/hooks/usePostEngagementHandlers';
 import PageLoader from '@/components/custom/PageLoader';
 import { Spinner } from '@/components/ui/spinner';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
-import { PeopleYouMayKnow } from '@/components/home/PeopleYouMayKnow';
+import { HomeHero } from '@/components/home/HomeHero';
+import { YourActivity } from '@/components/home/YourActivity';
+import { LatestListings } from '@/components/home/LatestListings';
+import { CommunityPosts } from '@/components/home/HomeCommunityPosts';
+import { HomeRail } from '@/components/home/HomeRail';
+import { GET_MY_PROFILE, type GetProfileResponse } from '@/services/gql/profile';
 import { Link } from '@/i18n/navigation';
 import { REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, GET_COMMUNITY } from '@/services/gql/community';
 import {
@@ -17,15 +22,9 @@ import {
   REQUEST_JOIN_ASSOCIATION,
 } from '@/services/gql/associations';
 import {
-  ADD_ENGAGEMENT,
-  REMOVE_ENGAGEMENT,
-  CREATE_COMMENT,
   RECOMMENDED_COMMUNITIES,
   RECOMMENDED_ASSOCIATIONS,
   MY_INTEREST_PROFILE,
-  AddEngagementData,
-  RemoveEngagementData,
-  CreateCommentData
 } from '@/services/gql/postsFeed';
 import type {
   RecommendedCommunitiesData,
@@ -40,19 +39,15 @@ import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/
 import { useApolloClient } from '@apollo/client/react';
 import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useFeed } from '@/hooks/useFeed';
-import { ImpressionTracker } from '@/components/feed/ImpressionTracker';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ChevronLeftIcon, ChevronRightIcon, Compass, Users, SquarePen } from 'lucide-react';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import { ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import PrivacyPolicyModal from '@/components/custom/PrivacyPolicyModal';
-import { resolveUserTier } from '@/lib/userTier';
-import { FEED_COLUMN_CLASS } from '@/lib/feedColumnLayout';
 import ViewFilter from '@/components/home/viewFilter';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
 import AccessBadges from '@/components/cards/AccessBadges';
@@ -172,51 +167,6 @@ type FeedItem =
 
 const ASSOCIATIONS_RAIL_INDEX = 3;
 
-// Per-post `blurFor` lookup cache. `post.blurByUrl` is precomputed once in
-// `normalizeFeedPost` and keeps a stable reference for the life of the post
-// object, so caching the bound lookup against it yields a reference-stable
-// `blurFor` function across home-page re-renders — which preserves the
-// FeedCardWithReply React.memo (a fresh closure per render would defeat it).
-const EMPTY_BLUR_MAP: Record<string, string> = {};
-const blurForCache = new WeakMap<
-  Record<string, string>,
-  (url: string) => string | undefined
->();
-function getBlurFor(
-  blurByUrl: Record<string, string> | undefined,
-): (url: string) => string | undefined {
-  const map = blurByUrl ?? EMPTY_BLUR_MAP;
-  let fn = blurForCache.get(map);
-  if (!fn) {
-    fn = (url: string) => map[url];
-    blurForCache.set(map, fn);
-  }
-  return fn;
-}
-
-// Per-post `dimsFor` lookup cache. Mirrors `getBlurFor` above: `post.dimsByUrl`
-// is precomputed once in `normalizeFeedPost` and keeps a stable reference for
-// the life of the post object, so caching the bound lookup against it yields a
-// reference-stable `dimsFor` function per post across home-page re-renders —
-// which preserves the FeedCardWithReply React.memo (a fresh closure per render
-// would defeat it).
-const EMPTY_DIMS_MAP: Record<string, { width?: number; height?: number }> = {};
-const dimsForCache = new WeakMap<
-  Record<string, { width?: number; height?: number }>,
-  (url: string) => { width?: number; height?: number } | undefined
->();
-function getDimsFor(
-  dimsByUrl: Record<string, { width?: number; height?: number }> | undefined,
-): (url: string) => { width?: number; height?: number } | undefined {
-  const map = dimsByUrl ?? EMPTY_DIMS_MAP;
-  let fn = dimsForCache.get(map);
-  if (!fn) {
-    fn = (url: string) => map[url];
-    dimsForCache.set(map, fn);
-  }
-  return fn;
-}
-
 /**
  * Every ranked id resolved from the Apollo cache, in recommender order — or
  * null when any card is missing (then the network hydration decides).
@@ -245,13 +195,12 @@ export default function Home() {
   const tCommon = useTranslations('common');
   const tJoinModal = useTranslations('home.joinModal');
   const tHome = useTranslations('home');
+  const tHomePage = useTranslations('homePage');
   const tActions = useTranslations('actions');
-  // Root-scoped on purpose: `refusalMessageKey` returns a FULLY QUALIFIED
-  // key ('feed.errors.not_found'). Handing that to a translator already
-  // scoped to 'feed.errors' would look up 'feed.errors.feed.errors.…' and
-  // render the raw key instead of the message.
-  const tRoot = useTranslations();
   const [viewMode, setViewMode] = useState<FeedViewMode>('you');
+  // Already in the cache: the shell's boot gate loaded the profile before this page mounted.
+  const { data: profileData } = useQuery<GetProfileResponse>(GET_MY_PROFILE, { fetchPolicy: 'cache-first' });
+  const profile = profileData?.getProfile?.profile ?? null;
   // Track the open media modal by postId rather than postIndex so the
   // open-media handler can be wired as a stable `useCallback`. With
   // virtualised feed rendering the underlying `posts` array is what we
@@ -595,9 +544,6 @@ export default function Home() {
   }, []);
 
   // Mutations
-  const [addEngagement] = useMutation<AddEngagementData>(ADD_ENGAGEMENT);
-  const [removeEngagement] = useMutation<RemoveEngagementData>(REMOVE_ENGAGEMENT);
-  const [createComment] = useMutation<CreateCommentData>(CREATE_COMMENT);
   // Engagement signals are recorded via the post-feed Kafka pipeline (LIKE /
   // UNLIKE / SAVE / UNSAVE / SHARE / COMMENT). VIEW + DWELL still go through
   // the direct recordInteraction gRPC path via <ImpressionTracker>, which
@@ -812,153 +758,7 @@ export default function Home() {
   // ImpressionTracker (VIEW + DWELL) and by future CLICK_THROUGH wiring —
   // those signals don't have a post-feed source.
 
-  // Wrapped in useCallback so the references stay stable across home-page
-  // re-renders. The cards are memoised — if these handlers churned on every
-  // render every visible card would re-render too, which was the main cause
-  // of stutter at the `loadMore` boundary.
-  // Apollo is configured with `errorPolicy: 'all'`, so a REFUSED mutation
-  // RESOLVES with `data: null` instead of throwing — the try/catch below
-  // never fires for a server refusal, only for a transport failure. Every
-  // optimistic engagement therefore has to be gated on
-  // `readMutationOutcome` or a refused reaction would sit on screen looking
-  // successful forever. The rollback re-runs the inverse delta, which the
-  // card picks up through its prop-sync effects.
-  const handleReact = useCallback(
-    async (
-      postId: string,
-      op: 'add' | 'remove',
-      reaction: ReactionKind | null,
-      delta: number,
-      // Deliberately NOT defaulted. A default made every call site compile
-      // while silently rolling back to the wrong reaction, which is exactly
-      // the kind of omission tsc should be catching for us.
-      previousReaction: ReactionKind | null,
-    ) => {
-      const adding = op === 'add';
-      // `delta` comes from the card, which knows the BEFORE state. A SWITCH
-      // (Happy→Sad) sends 0: the server updates the row in place rather than
-      // inserting a second one, so the total must not move.
-      // What hasLiked was BEFORE this change, derived from the transition:
-      //   remove            -> was reacted
-      //   add with delta 0  -> a switch, so was already reacted
-      //   add with delta 1  -> a first reaction, so was not
-      const wasReacted = !adding || delta === 0;
-
-      // A SWITCH moves one reaction between buckets: the old kind loses a
-      // count, the new kind gains one, and the TOTAL does not move.
-      //
-      // `previousReaction` is null for a pre-migration untyped like, which
-      // belongs to no bucket — so nothing is decremented and the untyped
-      // remainder simply shrinks by one on its own. That is correct.
-      const kindDelta = deriveKindDelta(previousReaction, reaction, adding);
-
-      const toCountsDelta = (d: typeof kindDelta) => ({
-        ...(d.HAPPY !== undefined ? { happy: d.HAPPY } : {}),
-        ...(d.HOPEFUL !== undefined ? { hopeful: d.HOPEFUL } : {}),
-        ...(d.SAD !== undefined ? { sad: d.SAD } : {}),
-      });
-      const invert = (d: typeof kindDelta) =>
-        Object.fromEntries(Object.entries(d).map(([k, v]) => [k, -v])) as typeof kindDelta;
-
-      // `myReaction` and the per-kind counts travel WITH `hasLiked`, forwards
-      // and on rollback. Updating one without the others tells the card "you
-      // reacted" while leaving it to guess which — and it guesses Happy — or
-      // leaves the old kind sitting in the breakdown beside the new one.
-      updatePostCounts(postId, {
-        likes: delta,
-        hasLiked: adding,
-        myReaction: adding ? reaction : null,
-        ...toCountsDelta(kindDelta),
-      });
-      const rollback = () =>
-        updatePostCounts(postId, {
-          likes: -delta,
-          hasLiked: wasReacted,
-          myReaction: previousReaction,
-          ...toCountsDelta(invert(kindDelta)),
-        });
-
-      try {
-        const result = adding
-          ? await addEngagement({
-              variables: {
-                // reactionType is sent EXPLICITLY. Omitting it stores NULL —
-                // an untyped like, indistinguishable from a pre-migration row.
-                input: { postId, engagementType: 'LIKE', reactionType: reaction ?? 'HAPPY' },
-              },
-            })
-          : await removeEngagement({ variables: { input: { postId, engagementType: 'LIKE' } } });
-        const outcome = readMutationOutcome(result, (d) =>
-          adding ? d?.addEngagement : d?.removeEngagement,
-        );
-        if (!outcome.ok) {
-          rollback();
-          toast.error(tRoot(refusalMessageKey(outcome.message, 'feed.errors')));
-        }
-      } catch (err) {
-        rollback();
-        console.error(`Failed to ${adding ? 'react to' : 'un-react'} post:`, err);
-        toast.error(tRoot('feed.errors.failed'));
-      }
-    },
-    [addEngagement, removeEngagement, updatePostCounts, tRoot],
-  );
-
-  const handleSave = useCallback(async (postId: string, saved: boolean) => {
-    updatePostCounts(postId, { saves: saved ? 1 : -1, hasSaved: saved });
-    try {
-      if (saved) {
-        await addEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
-      } else {
-        await removeEngagement({ variables: { input: { postId, engagementType: 'SAVE' } } });
-      }
-    } catch (err) {
-      updatePostCounts(postId, { saves: saved ? -1 : 1, hasSaved: !saved });
-      console.error(`Failed to ${saved ? 'save' : 'unsave'} post:`, err);
-      toast.error(`Failed to ${saved ? 'save' : 'unsave'} post`);
-    }
-  }, [addEngagement, removeEngagement, updatePostCounts]);
-
-  const handleShare = useCallback(async (postId: string) => {
-    updatePostCounts(postId, { shares: 1 });
-    try {
-      await addEngagement({ variables: { input: { postId, engagementType: 'SHARE' } } });
-    } catch (err) {
-      updatePostCounts(postId, { shares: -1 });
-      console.error('Failed to share post:', err);
-      toast.error('Failed to share post');
-    }
-  }, [addEngagement, updatePostCounts]);
-
-  // Handle new comment (or reply when parentId is set)
-  const handleSendComment = useCallback(async (postId: string, content: string, parentId?: string, mentions?: import('@/components/custom/richTextRenderer').MentionInputItem[]) => {
-    if (!content.trim()) return;
-
-    updatePostCounts(postId, { comments: 1 });
-    try {
-      await createComment({
-        variables: {
-          input: {
-            postId,
-            text: content,
-            idempotencyKey: crypto.randomUUID(),
-            ...(parentId ? { parentId } : {}),
-            ...(mentions?.length ? { mentions } : {}),
-          }
-        }
-      });
-      // The post.comment.created Kafka event published by the
-      // CreateCommentHandler is the canonical signal — no client-side
-      // dual-fire needed (removed to avoid double-counting).
-
-      toast.success('Comment posted!');
-    } catch (err) {
-      updatePostCounts(postId, { comments: -1 });
-      console.error('Failed to post comment:', err);
-      toast.error('Failed to post comment');
-      throw err;
-    }
-  }, [createComment, updatePostCounts]);
+  const { handleReact, handleSave, handleShare, handleSendComment } = usePostEngagementHandlers(updatePostCounts);
 
   // --- Horizontal Scroll with Smart Buttons ---
   // One ref-set per rail (communities + associations) so each rail has
@@ -1080,67 +880,6 @@ export default function Home() {
 
   // Helper function to get profile data based on author type
   // Updated to handle uppercase author types from API
-  const getProfileData = (post: ApiPost) => {
-    const orgProfile = post.authorProfile?.organizationProfile;
-    if (post.authorType === 'COMMUNITY' && orgProfile) {
-      return {
-        name: orgProfile.name,
-        avatar: orgProfile.logo || '/GLOBE.png',
-        tier: undefined,
-        isVerified: orgProfile.isVerified,
-        isVip: false,
-        type: 'Community' as const,
-      };
-    }
-    if (post.authorType === 'ASSOCIATION' && orgProfile) {
-      return {
-        name: orgProfile.name,
-        avatar: orgProfile.logo || '/GLOBE.png',
-        tier: undefined,
-        isVerified: orgProfile.isVerified,
-        isVip: false,
-        type: 'Association' as const,
-      };
-    }
-    // Handle organization posts (authorType === 'ORG')
-    if (post.authorType === 'ORG' && orgProfile) {
-      return {
-        name: orgProfile.name,
-        avatar: orgProfile.logo || '/GLOBE.png',
-        tier: undefined,
-        isVerified: orgProfile.isVerified,
-        isVip: false,
-        type: 'Organization' as const
-      };
-    }
-    // Handle user posts (authorType === 'USER')
-    else if (post.authorType === 'USER' && post.authorProfile?.userProfile) {
-      return {
-        name: post.authorProfile.userProfile.name,
-        avatar: post.authorProfile.userProfile.avatar || '/PROFILE.png',
-        tier: resolveUserTier({
-          tier: (post.authorProfile.userProfile as { tier?: string }).tier,
-          verificationTier: post.authorProfile.userProfile.verificationTier,
-        }),
-        isVerified: post.authorProfile.userProfile.verificationTier !== 'unverified' && 
-                    post.authorProfile.userProfile.verificationTier !== 'NONE',
-        isVip: post.authorProfile.userProfile.isVip,
-        type: 'User' as const
-      };
-    }
-    
-    // Fallback for unknown or missing data
-    return {
-      name: 'Unknown User',
-      avatar: '/PROFILE.png',
-      tier: undefined,
-      isVerified: false,
-      isVip: false,
-      type: 'User' as const
-    };
-  };
-
-
   const getPostMedia = (post: ApiPost): ModalMediaItem[] => [
     ...(post.attachments ?? [])
       .filter(a => a.mimeType?.startsWith('image/') || String(a.type ?? '').toUpperCase() === 'IMAGE')
@@ -1284,8 +1023,19 @@ export default function Home() {
       {/* Main Feed - Independent Scroll */}
       <div
         ref={setFeedScrollRef}
-        className={FEED_COLUMN_CLASS}
+        className="flex min-w-0 w-full flex-1 flex-col gap-5 overflow-y-auto scrollbar-hide px-4 py-4 lg:pl-0 lg:pr-6"
       >
+        <HomeHero firstName={profile?.firstName} city={profile?.city} countryCode={profile?.residenceCountry || profile?.countryOfOrigin} />
+        <YourActivity />
+        <LatestListings />
+        <CommunityPosts />
+        {/* Phones: the rail's cards stack under the sections (the rail itself is desktop-only). */}
+        <div className="lg:hidden">
+          <HomeRail idPrefix="mobile" />
+        </div>
+        <h2 id="home-feed-title" className="-mb-2 text-lg font-bold text-text-primary">
+          {tHomePage('feed.title')}
+        </h2>
         {/* Discover Section — collapses entirely when the recommender has nothing to show. */}
         {hasCommunities && (
         <>
@@ -1567,95 +1317,19 @@ export default function Home() {
                   );
                 }
 
-                const post = item.post;
-                const profileData = getProfileData(post);
-                // LQIP blur-up lookup: precomputed in normalizeFeedPost as
-                // `post.blurByUrl`; getBlurFor returns a reference-stable
-                // function per post so the card's React.memo isn't defeated.
-                const blurFor = getBlurFor(post.blurByUrl);
-                const dimsFor = getDimsFor(post.dimsByUrl);
                 return (
-                  <ImpressionTracker
-                    key={post.id}
-                    itemId={post.id}
-                    itemType="POST"
-                    source={post.__source}
-                    score={post.__score}
+                  <FeedPostCard
+                    key={item.post.id}
+                    post={item.post}
+                    index={_index}
                     surface={isRecommendedArm ? 'home_feed' : 'community_feed'}
-                    className="mb-2"
-                  >
-                    <div id={`feed-post-${post.id}`} className="feed-card-cv">
-                      <FeedCardWithReply
-                        postId={post.id}
-                        aiCategory={post.categories?.[0]}
-                        profileImage={profileData.avatar}
-                        profileName={profileData.name}
-                        authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
-                        authorEntityId={post.authorId}
-                        authorEntityType={post.authorType}
-                        profileTier={profileData.tier}
-                        category={profileData.type}
-                        postDate={formatDateProximity(post.createdAt)}
-                        createdAt={post.createdAt}
-                        visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
-                        content={post.text}
-                        mentionMap={getPostMentionMap(post)}
-                        images={post.attachments
-                          ?.filter(
-                            (a) =>
-                              a.mimeType?.startsWith('image/') ||
-                              String(a.type ?? '').toUpperCase() === 'IMAGE'
-                          )
-                          .map((a) => a.url || '')
-                          .filter(Boolean) || []}
-                        blurFor={blurFor}
-                        dimsFor={dimsFor}
-                        priorityFirstImage={_index === 0}
-                        videos={post.attachments
-                          ?.filter(
-                            (a) =>
-                              a.mimeType?.startsWith('video/') ||
-                              String(a.type ?? '').toUpperCase() === 'VIDEO'
-                          )
-                          .map((a) => a.url || '')
-                          .filter(Boolean) || []}
-                        documents={splitPostAttachments(post.attachments).documents}
-                        likes={post.engagementCounts.likes}
-                        comments={post.engagementCounts.comments}
-                        shares={post.engagementCounts.shares}
-                        // Per-reaction counts drive WHICH glyphs the cluster shows.
-                        // Undefined until every field is present — a partial object
-                        // would render a cluster asserting reactions we did not
-                        // actually measure. The total stays `likes`, which counts
-                        // untyped legacy rows the three flavours cannot account for.
-                        reactionBreakdown={
-                          post.engagementCounts.happy !== undefined &&
-                          post.engagementCounts.hopeful !== undefined &&
-                          post.engagementCounts.sad !== undefined
-                            ? {
-                                HAPPY: post.engagementCounts.happy,
-                                HOPEFUL: post.engagementCounts.hopeful,
-                                SAD: post.engagementCounts.sad,
-                              }
-                            : undefined
-                        }
-                        onReact={handleReact}
-                        onShare={handleShare}
-                        onSave={handleSave}
-                        onSendComment={handleSendComment}
-                        onDelete={removePost}
-                        joinButton={false}
-                        isLiked={post.userEngagement.hasLiked}
-                        // WHICH reaction the server recorded. Without this the
-                        // card sees only hasLiked and assumes Happy — which is
-                        // why a stored Hopeful or Sad came back as a heart.
-                        serverReaction={post.userEngagement.myReaction ?? null}
-                        isSaved={post.userEngagement.hasSaved}
-                        isShared={post.userEngagement.hasShared}
-                        onOpenMedia={handleOpenMedia}
-                      />
-                    </div>
-                  </ImpressionTracker>
+                    handleReact={handleReact}
+                    handleShare={handleShare}
+                    handleSave={handleSave}
+                    handleSendComment={handleSendComment}
+                    removePost={removePost}
+                    handleOpenMedia={handleOpenMedia}
+                  />
                 );
               })}
               {showLoadingFooter && (
@@ -1671,8 +1345,8 @@ export default function Home() {
       </div>
 
       {/* Sidebar - Independent Scroll */}
-      <div className="hidden lg:block min-w-0 overflow-y-auto py-4">
-        <PeopleYouMayKnow />
+      <div className="hidden w-[22rem] shrink-0 overflow-y-auto scrollbar-hide py-4 lg:block xl:w-[24rem]">
+        <HomeRail idPrefix="desktop" />
       </div>
 
       <ConfirmationModal

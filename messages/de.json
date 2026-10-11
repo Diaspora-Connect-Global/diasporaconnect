@@ -4645,9 +4645,58 @@
     "searchButton": "Suchen",
     "categoriesHeading": "Nach Kategorie stöbern",
     "categories": {
-      "services": "Dienstleistungen",
-      "events": "Events"
-    }
+      "services": "Dienste",
+      "events": "Veranstaltungen",
+      "products": "Produkte",
+      "jobs": "Jobs",
+      "investments": "Investitionen",
+      "realEstate": "Immobilien"
+    },
+    "sections": {
+      "jobs": {
+        "title": "Neueste Jobs",
+        "subtitle": "Kürzlich veröffentlichte Stellenangebote."
+      },
+      "services": {
+        "title": "Dienste",
+        "subtitle": "Von der Plattform hervorgehobene Dienste."
+      },
+      "investments": {
+        "title": "Neueste Investitionen",
+        "subtitle": "Kürzlich veröffentlichte Investitionsmöglichkeiten."
+      },
+      "realEstate": {
+        "title": "Immobilien & Infrastruktur",
+        "subtitle": "Kürzlich veröffentlichte Chancen in dieser Kategorie."
+      },
+      "products": {
+        "title": "Ausgewählte Produkte",
+        "subtitle": "Von der Plattform hervorgehobene Produkte."
+      },
+      "events": {
+        "title": "Kommende Veranstaltungen",
+        "subtitle": "Veranstaltungen, die noch bevorstehen."
+      },
+      "community": {
+        "title": "Aus der Community",
+        "subtitle": "Sieh, worüber Menschen in deinen Communities sprechen."
+      }
+    },
+    "refine": {
+      "title": "Suche verfeinern",
+      "clearAll": "Alle löschen",
+      "category": "Kategorie",
+      "location": "Ort",
+      "locationPlaceholder": "Stadt oder Land",
+      "sortBy": "Chancen sortieren nach",
+      "sort": {
+        "newest": "Neueste",
+        "closing": "Bald endend",
+        "applications": "Meiste Bewerbungen"
+      }
+    },
+    "noResults": "Zu diesen Filtern gibt es noch nichts.",
+    "searchEverything": "Alles nach „{query}“ durchsuchen"
   },
   "eventPage": {
     "back": "Zurück",
@@ -5013,6 +5062,169 @@
         "removed": "Aus dem Team entfernt.",
         "unknownPerson": "Unbekannte Person"
       }
+    }
+  },
+  "redesign": {
+    "viewAll": "Alle anzeigen",
+    "remote": "Remote",
+    "closes": "Endet am {date}",
+    "priceFrom": "Ab {price}",
+    "kinds": {
+      "opportunity": "Gelegenheit",
+      "realEstate": "Immobilien",
+      "product": "Produkt",
+      "service": "Dienstleistung",
+      "event": "Veranstaltung"
+    },
+    "opportunityTypes": {
+      "EMPLOYMENT": "Stelle",
+      "SCHOLARSHIP": "Stipendium",
+      "INVESTMENT": "Investition",
+      "FELLOWSHIP": "Fellowship",
+      "INITIATIVE": "Initiative",
+      "GRANT": "Förderung",
+      "PROGRAM": "Programm",
+      "VOLUNTEER": "Ehrenamt",
+      "CONTRACT": "Auftrag"
+    },
+    "postMeta": {
+      "reactions": "{count, plural, one {# Reaktion} other {# Reaktionen}}",
+      "comments": "{count, plural, one {# Kommentar} other {# Kommentare}}",
+      "openPost": "Beitrag öffnen",
+      "unknownAuthor": "Ein Mitglied",
+      "photoCount": "{count, plural, one {# Foto} other {# Fotos}}"
+    },
+    "communityPosts": {
+      "title": "Aus deiner Community",
+      "subtitle": "Neue Beiträge aus den Communities, zu denen du gehörst.",
+      "viewCommunity": "Community ansehen"
+    }
+  },
+  "homePage": {
+    "greeting": {
+      "morning": "Guten Morgen,",
+      "afternoon": "Guten Tag,",
+      "evening": "Guten Abend,"
+    },
+    "heroSubtitle": "Deine Verbindung zu echten Chancen, vertrauenswürdigen Diensten und einem stärkeren Afrika.",
+    "heroCta": "Chancen entdecken",
+    "activity": {
+      "title": "Deine Aktivität",
+      "event": "Veranstaltung, für die du angemeldet bist",
+      "registered": "Angemeldet · {date}",
+      "request": "Serviceanfrage",
+      "requestSubtitle": "Anfrage {number}",
+      "requestStatus": {
+        "pending": "Eingereicht",
+        "review": "In Prüfung",
+        "approved": "Genehmigt",
+        "completed": "Abgeschlossen",
+        "rejected": "Abgelehnt oder storniert"
+      },
+      "kyc": "Identitätsprüfung",
+      "kycSubtitle": "Optional — schaltet höhere Limits frei",
+      "kycStatus": {
+        "verified": "Verifiziert",
+        "review": "In Prüfung",
+        "rejected": "Nicht genehmigt — du kannst es erneut versuchen",
+        "expired": "Abgelaufen"
+      },
+      "vendor": "Dein Anbieterprofil",
+      "vendorStatus": {
+        "REGISTERED": "Registriert",
+        "AWAITING_KYC": "Wartet auf Verifizierung",
+        "KYC_UNDER_REVIEW": "Verifizierung in Prüfung",
+        "VERIFIED": "Verifiziert",
+        "ACTIVE": "Aktiv",
+        "SUSPENDED": "Gesperrt",
+        "BANNED": "Nicht verfügbar"
+      }
+    },
+    "latest": {
+      "title": "Neu auf DiaspoPlug",
+      "subtitle": "Die neuesten Chancen und die von der Plattform hervorgehobenen Angebote."
+    },
+    "feed": {
+      "title": "Dein Feed"
+    },
+    "rail": {
+      "ctaTitle": "Du bist Teil von etwas Größerem",
+      "ctaBody": "Tritt einer Community bei, finde Chancen und erledige Dinge — gemeinsam.",
+      "quickActions": "Schnellaktionen",
+      "getDone": "Etwas erledigen lassen",
+      "getDoneHint": "Eine Anfrage an eine Community oder Organisation senden",
+      "findOpps": "Chancen finden",
+      "findOppsHint": "Jobs, Investitionen und mehr",
+      "exploreServices": "Dienste entdecken",
+      "exploreServicesHint": "Angebote von Anbietern auf DiaspoPlug",
+      "connect": "Mit Menschen vernetzen",
+      "connectHint": "Circles, Veranstaltungen und Communities",
+      "upcoming": "Demnächst",
+      "circles": "Deine Circles",
+      "members": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
+      "promoTitle": "Bring deine Ideen in Afrika zum Leben",
+      "promoBody": "Investieren, aufbauen, wachsen — mit Menschen, denen du vertrauen kannst."
+    }
+  },
+  "communityPage": {
+    "heroTitle": "Community",
+    "heroSubtitle": "Vernetze dich, teile, unterstütze und wachse mit einer Community, die deinen Weg versteht.",
+    "tagline": "Echte Menschen. Gemeinsame Ziele. Gemeinsam stärker.",
+    "searchPlaceholder": "Nach Personen, Gruppen oder Diskussionen suchen …",
+    "searchLabel": "Community durchsuchen",
+    "searchButton": "Suchen",
+    "navLabel": "Community-Navigation",
+    "nav": {
+      "home": "Start",
+      "people": "Personen entdecken",
+      "circles": "Gruppen & Circles",
+      "events": "Veranstaltungen"
+    },
+    "promo": {
+      "title": "Gemeinsam stärker in der Diaspora.",
+      "body": "Gründe mit Freunden einen Circle und arbeitet auf gemeinsame Ziele hin.",
+      "cta": "Circles entdecken"
+    },
+    "groups": {
+      "title": "Gruppen zum Beitreten",
+      "subtitle": "Gruppen, denen du noch nicht beigetreten bist.",
+      "members": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
+      "join": "Beitreten",
+      "request": "Beitritt anfragen",
+      "open": "Gruppe ansehen",
+      "joinedToast": "Du bist der Gruppe beigetreten.",
+      "requestedToast": "Deine Anfrage wurde gesendet.",
+      "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut."
+    },
+    "composer": {
+      "prompt": "Teile ein Update, stelle eine Frage oder starte eine Diskussion …",
+      "post": "Beitrag",
+      "photo": "Foto hinzufügen"
+    },
+    "tabs": {
+      "label": "Feed",
+      "forYou": "Für dich",
+      "latest": "Neueste",
+      "following": "Folge ich"
+    },
+    "feed": {
+      "empty": "Hier gibt es noch keine Beiträge.",
+      "error": "Der Feed konnte nicht geladen werden.",
+      "retry": "Erneut versuchen"
+    },
+    "more": {
+      "title": "Communities zum Beitreten"
+    },
+    "rail": {
+      "people": "Vorgeschlagene Personen",
+      "connect": "Vernetzen",
+      "sentLabel": "Anfrage gesendet",
+      "topics": "Beliebte Themen",
+      "topicUses": "{count, plural, one {# Beitrag} other {# Beiträge}}",
+      "events": "Kommende Veranstaltungen",
+      "createTitle": "Du möchtest etwas teilen?",
+      "createBody": "Starte eine Diskussion, teile eine Chance oder stelle eine Frage.",
+      "createCta": "Beitrag erstellen"
     }
   }
 }

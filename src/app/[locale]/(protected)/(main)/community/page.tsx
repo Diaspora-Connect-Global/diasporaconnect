@@ -28,6 +28,16 @@ import { cn } from '@/lib/utils';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { toCdnUrl } from '@/lib/cdn';
 import PageLoader from '@/components/custom/PageLoader';
+import { Search } from 'lucide-react';
+import { useRouter as useIntlRouter } from '@/i18n/navigation';
+import { PageHero } from '@/components/redesign/PageHero';
+import { REDESIGN_IMAGES } from '@/lib/redesignImages';
+import { CommunityLeftNav, CommunityPromo } from '@/components/community/redesign/CommunityLeftNav';
+import { FeaturedGroups } from '@/components/community/redesign/FeaturedGroups';
+import { CommunityComposer } from '@/components/community/redesign/CommunityComposer';
+import { CommunityFeed } from '@/components/community/redesign/CommunityFeed';
+import { CommunityRail } from '@/components/community/redesign/CommunityRail';
+import { GET_MY_PROFILE, type GetProfileResponse } from '@/services/gql/profile';
 
 interface RequestMembershipPayload {
     id?: string | null;
@@ -140,10 +150,21 @@ export default function Community() {
     const tDiscovery = useTranslations('community.discovery');
     const tActions = useTranslations('actions');
     const tJoinModal = useTranslations('home.joinModal');
+    const tPage = useTranslations('communityPage');
+    const intlRouter = useIntlRouter();
+    const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
+    const [searchText, setSearchText] = useState('');
+    const { data: profileData } = useQuery<GetProfileResponse>(GET_MY_PROFILE, { fetchPolicy: 'cache-first' });
 
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+
+    const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const q = searchText.trim();
+        if (q) intlRouter.push(`/search?q=${encodeURIComponent(q)}`);
+    };
 
     const visibilityFilter = readVisibility(searchParams.get('visibility'));
     const pricingFilter = readPricing(searchParams.get('pricing'));
@@ -563,22 +584,39 @@ export default function Community() {
     }
 
     return (
-        <div className="h-app-inner px-4 py-2 overflow-y-auto scrollbar-hide lg:px-0">
-          {/* Phones: "Your communities" stacks above the discovery content.
-              Large screens: it is a sticky left column beside it. */}
-          <div className="lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-6">
-            <YourCommunitiesColumn
-                communities={myJoinedCommunities}
-                pendingRequests={pendingCommunityRequests}
-                associations={joinedAssociations}
-                onCancelRequest={handleCancelRequest}
-                cancelling={cancelLoading}
-            />
+        <div ref={setScrollEl} className="h-app-inner overflow-y-auto scrollbar-hide px-4 py-4 lg:px-0">
+          <div className="space-y-5">
+            <PageHero id="community-title" title={tPage('heroTitle')} subtitle={tPage('heroSubtitle')} image={REDESIGN_IMAGES.communityHero} tagline={tPage('tagline')} priority>
+                <form role="search" onSubmit={onSearchSubmit} className="flex max-w-md items-center gap-2 rounded-full border border-border-subtle bg-surface-default p-1.5 pl-4 shadow-sm focus-within:border-border-brand">
+                    <label htmlFor="community-search" className="sr-only">{tPage('searchLabel')}</label>
+                    <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <input id="community-search" type="search" value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder={tPage('searchPlaceholder')} autoComplete="off" enterKeyHint="search" maxLength={200} className="min-w-0 flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-muted-foreground md:text-sm" />
+                    <button type="submit" className="shrink-0 rounded-full bg-surface-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2">{tPage('searchButton')}</button>
+                </form>
+            </PageHero>
 
-            <div className="min-w-0">
-            <p className="text-2xl heading-medium my-5">{t('discoverMore')}</p>
+            {/* Phones: one column (nav, your communities, then the content, then the rail). Large screens: three columns. */}
+            <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)_20rem] xl:grid-cols-[17rem_minmax(0,1fr)_21rem]">
+              <div className="min-w-0 space-y-4 lg:self-start">
+                <CommunityLeftNav />
+                <YourCommunitiesColumn
+                    communities={myJoinedCommunities}
+                    pendingRequests={pendingCommunityRequests}
+                    associations={joinedAssociations}
+                    onCancelRequest={handleCancelRequest}
+                    cancelling={cancelLoading}
+                />
+                <CommunityPromo />
+              </div>
 
-            <div
+              <div className="min-w-0 space-y-5">
+                <FeaturedGroups />
+                <CommunityComposer avatarUrl={profileData?.getProfile?.profile?.avatarUrl} />
+                <CommunityFeed scrollRoot={scrollEl} />
+                <section aria-labelledby="community-join-title" className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
+                  <h2 id="community-join-title" className="mb-3 text-lg font-bold text-text-primary">{tPage('more.title')}</h2>
+
+                  <div
                 className="flex flex-wrap items-center gap-2 mb-4"
                 role="group"
                 aria-label={tDiscovery('filtersLabel')}
@@ -666,6 +704,12 @@ export default function Community() {
                     </div>
                 )}
             </div>
+                </section>
+              </div>
+
+              <div className="min-w-0 lg:self-start">
+                <CommunityRail />
+              </div>
             </div>
           </div>
 

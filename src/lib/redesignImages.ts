@@ -13,4 +13,8 @@ export const REDESIGN_IMAGES = {
   moreHero: { src: '/images/redesign/independence-arch-wide.webp', width: 1280, height: 902 },
   /** Independence Arch star close-up — Discover hero. */
   discoverHero: { src: '/images/redesign/independence-arch-star.webp', width: 1280, height: 854 },
+  /** Home hero (the same Independence Arch photo as the More page, darkened for white text). */
+  homeHero: { src: '/images/redesign/independence-arch-wide.webp', width: 1280, height: 902 },
+  /** Community hero. */
+  communityHero: { src: '/images/redesign/independence-arch-wide.webp', width: 1280, height: 902 },
 } as const satisfies Record<string, RedesignImage>;

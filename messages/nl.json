@@ -4646,8 +4646,57 @@
     "categoriesHeading": "Bladeren per categorie",
     "categories": {
       "services": "Diensten",
-      "events": "Evenementen"
-    }
+      "events": "Evenementen",
+      "products": "Producten",
+      "jobs": "Banen",
+      "investments": "Investeringen",
+      "realEstate": "Vastgoed"
+    },
+    "sections": {
+      "jobs": {
+        "title": "Nieuwste banen",
+        "subtitle": "Recent geplaatste vacatures."
+      },
+      "services": {
+        "title": "Diensten",
+        "subtitle": "Diensten die het platform uitlicht."
+      },
+      "investments": {
+        "title": "Nieuwste investeringen",
+        "subtitle": "Recent geplaatste investeringskansen."
+      },
+      "realEstate": {
+        "title": "Vastgoed en infrastructuur",
+        "subtitle": "Recent geplaatste kansen in deze categorie."
+      },
+      "products": {
+        "title": "Uitgelichte producten",
+        "subtitle": "Producten die het platform uitlicht."
+      },
+      "events": {
+        "title": "Aankomende evenementen",
+        "subtitle": "Evenementen die nog moeten plaatsvinden."
+      },
+      "community": {
+        "title": "Uit de community",
+        "subtitle": "Zie waar mensen in je communities over praten."
+      }
+    },
+    "refine": {
+      "title": "Verfijn je zoekopdracht",
+      "clearAll": "Alles wissen",
+      "category": "Categorie",
+      "location": "Locatie",
+      "locationPlaceholder": "Stad of land",
+      "sortBy": "Kansen sorteren op",
+      "sort": {
+        "newest": "Nieuwste",
+        "closing": "Sluit binnenkort",
+        "applications": "Meeste aanmeldingen"
+      }
+    },
+    "noResults": "Er is nog niets dat bij deze filters past.",
+    "searchEverything": "Alles doorzoeken op “{query}”"
   },
   "eventPage": {
     "back": "Terug",
@@ -5013,6 +5062,169 @@
         "removed": "Uit het team verwijderd.",
         "unknownPerson": "Onbekende persoon"
       }
+    }
+  },
+  "redesign": {
+    "viewAll": "Alles bekijken",
+    "remote": "Op afstand",
+    "closes": "Sluit op {date}",
+    "priceFrom": "Vanaf {price}",
+    "kinds": {
+      "opportunity": "Kans",
+      "realEstate": "Vastgoed",
+      "product": "Product",
+      "service": "Dienst",
+      "event": "Evenement"
+    },
+    "opportunityTypes": {
+      "EMPLOYMENT": "Baan",
+      "SCHOLARSHIP": "Beurs",
+      "INVESTMENT": "Investering",
+      "FELLOWSHIP": "Fellowship",
+      "INITIATIVE": "Initiatief",
+      "GRANT": "Subsidie",
+      "PROGRAM": "Programma",
+      "VOLUNTEER": "Vrijwilligerswerk",
+      "CONTRACT": "Opdracht"
+    },
+    "postMeta": {
+      "reactions": "{count, plural, one {# reactie} other {# reacties}}",
+      "comments": "{count, plural, one {# reactie} other {# reacties}}",
+      "openPost": "Bericht openen",
+      "unknownAuthor": "Een lid",
+      "photoCount": "{count, plural, one {# foto} other {# foto's}}"
+    },
+    "communityPosts": {
+      "title": "Uit je community",
+      "subtitle": "Recente berichten uit de communities waartoe je behoort.",
+      "viewCommunity": "Community bekijken"
+    }
+  },
+  "homePage": {
+    "greeting": {
+      "morning": "Goedemorgen,",
+      "afternoon": "Goedemiddag,",
+      "evening": "Goedenavond,"
+    },
+    "heroSubtitle": "Jouw verbinding met echte kansen, betrouwbare diensten en een sterker Afrika.",
+    "heroCta": "Ontdek kansen",
+    "activity": {
+      "title": "Jouw activiteit",
+      "event": "Evenement waarvoor je bent aangemeld",
+      "registered": "Aangemeld · {date}",
+      "request": "Serviceaanvraag",
+      "requestSubtitle": "Aanvraag {number}",
+      "requestStatus": {
+        "pending": "Ingediend",
+        "review": "In behandeling",
+        "approved": "Goedgekeurd",
+        "completed": "Afgerond",
+        "rejected": "Afgewezen of geannuleerd"
+      },
+      "kyc": "Identiteitsverificatie",
+      "kycSubtitle": "Optioneel — ontgrendelt hogere limieten",
+      "kycStatus": {
+        "verified": "Geverifieerd",
+        "review": "In behandeling",
+        "rejected": "Niet goedgekeurd — je kunt het opnieuw proberen",
+        "expired": "Verlopen"
+      },
+      "vendor": "Je verkopersprofiel",
+      "vendorStatus": {
+        "REGISTERED": "Geregistreerd",
+        "AWAITING_KYC": "Wacht op verificatie",
+        "KYC_UNDER_REVIEW": "Verificatie in behandeling",
+        "VERIFIED": "Geverifieerd",
+        "ACTIVE": "Actief",
+        "SUSPENDED": "Geschorst",
+        "BANNED": "Niet beschikbaar"
+      }
+    },
+    "latest": {
+      "title": "Nieuw op DiaspoPlug",
+      "subtitle": "De nieuwste kansen en de aanbiedingen die het platform uitlicht."
+    },
+    "feed": {
+      "title": "Je feed"
+    },
+    "rail": {
+      "ctaTitle": "Je maakt deel uit van iets groters",
+      "ctaBody": "Word lid van een community, vind kansen en regel dingen — samen.",
+      "quickActions": "Snelle acties",
+      "getDone": "Iets geregeld krijgen",
+      "getDoneHint": "Stuur een aanvraag naar een community of organisatie",
+      "findOpps": "Kansen vinden",
+      "findOppsHint": "Banen, investeringen en meer",
+      "exploreServices": "Diensten ontdekken",
+      "exploreServicesHint": "Aanbod van aanbieders op DiaspoPlug",
+      "connect": "Maak contact met mensen",
+      "connectHint": "Circles, evenementen en communities",
+      "upcoming": "Binnenkort",
+      "circles": "Je circles",
+      "members": "{count, plural, one {# lid} other {# leden}}",
+      "promoTitle": "Breng je ideeën tot leven in Afrika",
+      "promoBody": "Investeer, bouw, groei — met mensen die je kunt vertrouwen."
+    }
+  },
+  "communityPage": {
+    "heroTitle": "Community",
+    "heroSubtitle": "Verbind, deel, steun en groei met een community die jouw reis begrijpt.",
+    "tagline": "Echte mensen. Gedeelde doelen. Samen sterker.",
+    "searchPlaceholder": "Zoek mensen, groepen of discussies…",
+    "searchLabel": "Doorzoek de community",
+    "searchButton": "Zoeken",
+    "navLabel": "Community-navigatie",
+    "nav": {
+      "home": "Home",
+      "people": "Mensen ontdekken",
+      "circles": "Groepen & circles",
+      "events": "Evenementen"
+    },
+    "promo": {
+      "title": "Samen sterker in de diaspora.",
+      "body": "Start een circle met vrienden en werk aan gedeelde doelen.",
+      "cta": "Ontdek circles"
+    },
+    "groups": {
+      "title": "Groepen om lid van te worden",
+      "subtitle": "Groepen waar je nog geen lid van bent.",
+      "members": "{count, plural, one {# lid} other {# leden}}",
+      "join": "Word lid",
+      "request": "Verzoek om lid te worden",
+      "open": "Groep bekijken",
+      "joinedToast": "Je bent lid geworden van de groep.",
+      "requestedToast": "Je verzoek is verstuurd.",
+      "failedToast": "Dat is niet gelukt. Probeer het opnieuw."
+    },
+    "composer": {
+      "prompt": "Deel een update, stel een vraag of start een discussie…",
+      "post": "Bericht",
+      "photo": "Foto toevoegen"
+    },
+    "tabs": {
+      "label": "Feed",
+      "forYou": "Voor jou",
+      "latest": "Nieuwste",
+      "following": "Volgend"
+    },
+    "feed": {
+      "empty": "Hier zijn nog geen berichten.",
+      "error": "De feed kon niet worden geladen.",
+      "retry": "Opnieuw proberen"
+    },
+    "more": {
+      "title": "Communities om lid van te worden"
+    },
+    "rail": {
+      "people": "Voorgestelde mensen",
+      "connect": "Verbinden",
+      "sentLabel": "Verzoek verstuurd",
+      "topics": "Trending onderwerpen",
+      "topicUses": "{count, plural, one {# bericht} other {# berichten}}",
+      "events": "Aankomende evenementen",
+      "createTitle": "Iets te delen?",
+      "createBody": "Start een discussie, deel een kans of stel een vraag.",
+      "createCta": "Bericht maken"
     }
   }
 }

@@ -4646,8 +4646,57 @@
     "categoriesHeading": "Sfoglia per categoria",
     "categories": {
       "services": "Servizi",
-      "events": "Eventi"
-    }
+      "events": "Eventi",
+      "products": "Prodotti",
+      "jobs": "Lavoro",
+      "investments": "Investimenti",
+      "realEstate": "Immobiliare"
+    },
+    "sections": {
+      "jobs": {
+        "title": "Ultimi lavori",
+        "subtitle": "Opportunità di lavoro pubblicate di recente."
+      },
+      "services": {
+        "title": "Servizi",
+        "subtitle": "Servizi in evidenza sulla piattaforma."
+      },
+      "investments": {
+        "title": "Ultimi investimenti",
+        "subtitle": "Opportunità di investimento pubblicate di recente."
+      },
+      "realEstate": {
+        "title": "Immobiliare e infrastrutture",
+        "subtitle": "Opportunità recenti in questa categoria."
+      },
+      "products": {
+        "title": "Prodotti in evidenza",
+        "subtitle": "Prodotti in evidenza sulla piattaforma."
+      },
+      "events": {
+        "title": "Prossimi eventi",
+        "subtitle": "Eventi che devono ancora svolgersi."
+      },
+      "community": {
+        "title": "Dalla community",
+        "subtitle": "Scopri di cosa parlano le persone nelle tue community."
+      }
+    },
+    "refine": {
+      "title": "Affina la ricerca",
+      "clearAll": "Cancella tutto",
+      "category": "Categoria",
+      "location": "Luogo",
+      "locationPlaceholder": "Città o paese",
+      "sortBy": "Ordina le opportunità per",
+      "sort": {
+        "newest": "Più recenti",
+        "closing": "In scadenza",
+        "applications": "Più candidature"
+      }
+    },
+    "noResults": "Ancora nulla corrisponde a questi filtri.",
+    "searchEverything": "Cerca ovunque “{query}”"
   },
   "eventPage": {
     "back": "Indietro",
@@ -5013,6 +5062,169 @@
         "removed": "Rimosso dallo staff.",
         "unknownPerson": "Persona sconosciuta"
       }
+    }
+  },
+  "redesign": {
+    "viewAll": "Vedi tutto",
+    "remote": "Da remoto",
+    "closes": "Scade il {date}",
+    "priceFrom": "Da {price}",
+    "kinds": {
+      "opportunity": "Opportunità",
+      "realEstate": "Immobiliare",
+      "product": "Prodotto",
+      "service": "Servizio",
+      "event": "Evento"
+    },
+    "opportunityTypes": {
+      "EMPLOYMENT": "Lavoro",
+      "SCHOLARSHIP": "Borsa di studio",
+      "INVESTMENT": "Investimento",
+      "FELLOWSHIP": "Fellowship",
+      "INITIATIVE": "Iniziativa",
+      "GRANT": "Finanziamento",
+      "PROGRAM": "Programma",
+      "VOLUNTEER": "Volontariato",
+      "CONTRACT": "Contratto"
+    },
+    "postMeta": {
+      "reactions": "{count, plural, one {# reazione} other {# reazioni}}",
+      "comments": "{count, plural, one {# commento} other {# commenti}}",
+      "openPost": "Apri il post",
+      "unknownAuthor": "Un membro",
+      "photoCount": "{count, plural, one {# foto} other {# foto}}"
+    },
+    "communityPosts": {
+      "title": "Dalla tua community",
+      "subtitle": "Post recenti dalle community di cui fai parte.",
+      "viewCommunity": "Vai alla community"
+    }
+  },
+  "homePage": {
+    "greeting": {
+      "morning": "Buongiorno,",
+      "afternoon": "Buon pomeriggio,",
+      "evening": "Buonasera,"
+    },
+    "heroSubtitle": "Il tuo legame con opportunità concrete, servizi affidabili e un’Africa più forte.",
+    "heroCta": "Esplora le opportunità",
+    "activity": {
+      "title": "La tua attività",
+      "event": "Evento a cui sei iscritto",
+      "registered": "Iscritto · {date}",
+      "request": "Richiesta di servizio",
+      "requestSubtitle": "Richiesta {number}",
+      "requestStatus": {
+        "pending": "Inviata",
+        "review": "In revisione",
+        "approved": "Approvata",
+        "completed": "Completata",
+        "rejected": "Rifiutata o annullata"
+      },
+      "kyc": "Verifica dell’identità",
+      "kycSubtitle": "Facoltativa — sblocca limiti più alti",
+      "kycStatus": {
+        "verified": "Verificata",
+        "review": "In revisione",
+        "rejected": "Non approvata — puoi riprovare",
+        "expired": "Scaduta"
+      },
+      "vendor": "Il tuo profilo venditore",
+      "vendorStatus": {
+        "REGISTERED": "Registrato",
+        "AWAITING_KYC": "In attesa di verifica",
+        "KYC_UNDER_REVIEW": "Verifica in corso",
+        "VERIFIED": "Verificato",
+        "ACTIVE": "Attivo",
+        "SUSPENDED": "Sospeso",
+        "BANNED": "Non disponibile"
+      }
+    },
+    "latest": {
+      "title": "Le novità su DiaspoPlug",
+      "subtitle": "Le opportunità più recenti e gli annunci in evidenza sulla piattaforma."
+    },
+    "feed": {
+      "title": "Il tuo feed"
+    },
+    "rail": {
+      "ctaTitle": "Fai parte di qualcosa di più grande",
+      "ctaBody": "Unisciti a una community, accedi alle opportunità e porta a termine le cose — insieme.",
+      "quickActions": "Azioni rapide",
+      "getDone": "Fai sbrigare qualcosa",
+      "getDoneHint": "Invia una richiesta a una community o organizzazione",
+      "findOpps": "Trova opportunità",
+      "findOppsHint": "Lavori, investimenti e altro",
+      "exploreServices": "Esplora i servizi",
+      "exploreServicesHint": "Offerte dei fornitori su DiaspoPlug",
+      "connect": "Entra in contatto con le persone",
+      "connectHint": "Cerchie, eventi e community",
+      "upcoming": "In arrivo",
+      "circles": "Le tue cerchie",
+      "members": "{count, plural, one {# membro} other {# membri}}",
+      "promoTitle": "Dai vita alle tue idee in Africa",
+      "promoBody": "Investi, costruisci, cresci — con persone di cui ti puoi fidare."
+    }
+  },
+  "communityPage": {
+    "heroTitle": "Community",
+    "heroSubtitle": "Connettiti, condividi, sostieni e cresci con una community che capisce il tuo percorso.",
+    "tagline": "Persone vere. Obiettivi condivisi. Più forti insieme.",
+    "searchPlaceholder": "Cerca persone, gruppi o discussioni…",
+    "searchLabel": "Cerca nella community",
+    "searchButton": "Cerca",
+    "navLabel": "Navigazione community",
+    "nav": {
+      "home": "Home",
+      "people": "Scopri persone",
+      "circles": "Gruppi e cerchie",
+      "events": "Eventi"
+    },
+    "promo": {
+      "title": "Più forti insieme nella diaspora.",
+      "body": "Crea una cerchia con gli amici e lavorate a obiettivi condivisi.",
+      "cta": "Esplora le cerchie"
+    },
+    "groups": {
+      "title": "Gruppi a cui unirti",
+      "subtitle": "Gruppi a cui non ti sei ancora unito.",
+      "members": "{count, plural, one {# membro} other {# membri}}",
+      "join": "Unisciti",
+      "request": "Richiedi di unirti",
+      "open": "Vedi gruppo",
+      "joinedToast": "Ti sei unito al gruppo.",
+      "requestedToast": "La tua richiesta è stata inviata.",
+      "failedToast": "Non è stato possibile. Riprova."
+    },
+    "composer": {
+      "prompt": "Condividi un aggiornamento, fai una domanda o avvia una discussione…",
+      "post": "Post",
+      "photo": "Aggiungi foto"
+    },
+    "tabs": {
+      "label": "Feed",
+      "forYou": "Per te",
+      "latest": "Ultimi",
+      "following": "Seguiti"
+    },
+    "feed": {
+      "empty": "Ancora nessun post qui.",
+      "error": "Impossibile caricare il feed.",
+      "retry": "Riprova"
+    },
+    "more": {
+      "title": "Community a cui unirti"
+    },
+    "rail": {
+      "people": "Persone suggerite",
+      "connect": "Connettiti",
+      "sentLabel": "Richiesta inviata",
+      "topics": "Argomenti di tendenza",
+      "topicUses": "{count, plural, one {# post} other {# post}}",
+      "events": "Prossimi eventi",
+      "createTitle": "Hai qualcosa da condividere?",
+      "createBody": "Avvia una discussione, condividi un’opportunità o fai una domanda.",
+      "createCta": "Crea post"
     }
   }
 }

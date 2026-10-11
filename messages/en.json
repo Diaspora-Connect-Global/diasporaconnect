@@ -4646,8 +4646,57 @@
     "categoriesHeading": "Browse by category",
     "categories": {
       "services": "Services",
-      "events": "Events"
-    }
+      "events": "Events",
+      "products": "Products",
+      "jobs": "Jobs",
+      "investments": "Investments",
+      "realEstate": "Real estate"
+    },
+    "sections": {
+      "jobs": {
+        "title": "Newest jobs",
+        "subtitle": "Recently posted employment opportunities."
+      },
+      "services": {
+        "title": "Services",
+        "subtitle": "Services the platform features."
+      },
+      "investments": {
+        "title": "Newest investments",
+        "subtitle": "Recently posted investment opportunities."
+      },
+      "realEstate": {
+        "title": "Real estate & infrastructure",
+        "subtitle": "Recently posted opportunities in this category."
+      },
+      "products": {
+        "title": "Featured products",
+        "subtitle": "Products the platform features."
+      },
+      "events": {
+        "title": "Upcoming events",
+        "subtitle": "Events that have not happened yet."
+      },
+      "community": {
+        "title": "From the community",
+        "subtitle": "See what people in your communities are talking about."
+      }
+    },
+    "refine": {
+      "title": "Refine your search",
+      "clearAll": "Clear all",
+      "category": "Category",
+      "location": "Location",
+      "locationPlaceholder": "City or country",
+      "sortBy": "Sort opportunities by",
+      "sort": {
+        "newest": "Newest",
+        "closing": "Closing soon",
+        "applications": "Most applications"
+      }
+    },
+    "noResults": "Nothing matches these filters yet.",
+    "searchEverything": "Search everything for “{query}”"
   },
   "eventPage": {
     "back": "Back",
@@ -5013,6 +5062,169 @@
         "removed": "Removed from the staff.",
         "unknownPerson": "Unknown person"
       }
+    }
+  },
+  "redesign": {
+    "viewAll": "View all",
+    "remote": "Remote",
+    "closes": "Closes {date}",
+    "priceFrom": "From {price}",
+    "kinds": {
+      "opportunity": "Opportunity",
+      "realEstate": "Real estate",
+      "product": "Product",
+      "service": "Service",
+      "event": "Event"
+    },
+    "opportunityTypes": {
+      "EMPLOYMENT": "Job",
+      "SCHOLARSHIP": "Scholarship",
+      "INVESTMENT": "Investment",
+      "FELLOWSHIP": "Fellowship",
+      "INITIATIVE": "Initiative",
+      "GRANT": "Grant",
+      "PROGRAM": "Programme",
+      "VOLUNTEER": "Volunteering",
+      "CONTRACT": "Contract"
+    },
+    "postMeta": {
+      "reactions": "{count, plural, one {# reaction} other {# reactions}}",
+      "comments": "{count, plural, one {# comment} other {# comments}}",
+      "openPost": "Open post",
+      "unknownAuthor": "A member",
+      "photoCount": "{count, plural, one {# photo} other {# photos}}"
+    },
+    "communityPosts": {
+      "title": "From your community",
+      "subtitle": "Recent posts from the communities you belong to.",
+      "viewCommunity": "View community"
+    }
+  },
+  "homePage": {
+    "greeting": {
+      "morning": "Good morning,",
+      "afternoon": "Good afternoon,",
+      "evening": "Good evening,"
+    },
+    "heroSubtitle": "Your connection to real opportunities, trusted services and a stronger Africa.",
+    "heroCta": "Explore opportunities",
+    "activity": {
+      "title": "Your activity",
+      "event": "Event you registered for",
+      "registered": "Registered · {date}",
+      "request": "Service request",
+      "requestSubtitle": "Request {number}",
+      "requestStatus": {
+        "pending": "Submitted",
+        "review": "Under review",
+        "approved": "Approved",
+        "completed": "Completed",
+        "rejected": "Rejected or cancelled"
+      },
+      "kyc": "Identity verification",
+      "kycSubtitle": "Optional — unlocks higher limits",
+      "kycStatus": {
+        "verified": "Verified",
+        "review": "Under review",
+        "rejected": "Not approved — you can try again",
+        "expired": "Expired"
+      },
+      "vendor": "Your vendor profile",
+      "vendorStatus": {
+        "REGISTERED": "Registered",
+        "AWAITING_KYC": "Awaiting verification",
+        "KYC_UNDER_REVIEW": "Verification under review",
+        "VERIFIED": "Verified",
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "BANNED": "Unavailable"
+      }
+    },
+    "latest": {
+      "title": "Latest on DiaspoPlug",
+      "subtitle": "The newest opportunities and the listings the platform features."
+    },
+    "feed": {
+      "title": "Your feed"
+    },
+    "rail": {
+      "ctaTitle": "You’re part of something bigger",
+      "ctaBody": "Join a community, access opportunities and get things done — together.",
+      "quickActions": "Quick actions",
+      "getDone": "Get something done",
+      "getDoneHint": "Send a request to a community or organisation",
+      "findOpps": "Find opportunities",
+      "findOppsHint": "Jobs, investments and more",
+      "exploreServices": "Explore services",
+      "exploreServicesHint": "Offers from providers on DiaspoPlug",
+      "connect": "Connect with people",
+      "connectHint": "Circles, events and communities",
+      "upcoming": "Upcoming",
+      "circles": "Your circles",
+      "members": "{count, plural, one {# member} other {# members}}",
+      "promoTitle": "Bring your ideas to life in Africa",
+      "promoBody": "Invest, build, grow — with people you can trust."
+    }
+  },
+  "communityPage": {
+    "heroTitle": "Community",
+    "heroSubtitle": "Connect, share, support and grow with a community that understands your journey.",
+    "tagline": "Real people. Shared goals. Stronger together.",
+    "searchPlaceholder": "Search for people, groups or discussions…",
+    "searchLabel": "Search the community",
+    "searchButton": "Search",
+    "navLabel": "Community navigation",
+    "nav": {
+      "home": "Home",
+      "people": "Discover people",
+      "circles": "Groups & circles",
+      "events": "Events"
+    },
+    "promo": {
+      "title": "Stronger together in the diaspora.",
+      "body": "Start a circle with friends and work toward shared goals.",
+      "cta": "Explore circles"
+    },
+    "groups": {
+      "title": "Groups to join",
+      "subtitle": "Groups you have not joined yet.",
+      "members": "{count, plural, one {# member} other {# members}}",
+      "join": "Join",
+      "request": "Request to join",
+      "open": "View group",
+      "joinedToast": "You joined the group.",
+      "requestedToast": "Your request was sent.",
+      "failedToast": "We could not do that. Please try again."
+    },
+    "composer": {
+      "prompt": "Share an update, ask a question or start a discussion…",
+      "post": "Post",
+      "photo": "Add photo"
+    },
+    "tabs": {
+      "label": "Feed",
+      "forYou": "For you",
+      "latest": "Latest",
+      "following": "Following"
+    },
+    "feed": {
+      "empty": "No posts here yet.",
+      "error": "We could not load the feed.",
+      "retry": "Try again"
+    },
+    "more": {
+      "title": "Communities to join"
+    },
+    "rail": {
+      "people": "Suggested people",
+      "connect": "Connect",
+      "sentLabel": "Request sent",
+      "topics": "Trending topics",
+      "topicUses": "{count, plural, one {# post} other {# posts}}",
+      "events": "Upcoming events",
+      "createTitle": "Have something to share?",
+      "createBody": "Start a discussion, share an opportunity or ask a question.",
+      "createCta": "Create post"
     }
   }
 }

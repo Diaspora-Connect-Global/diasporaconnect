@@ -4646,8 +4646,57 @@
     "categoriesHeading": "Parcourir par catégorie",
     "categories": {
       "services": "Services",
-      "events": "Événements"
-    }
+      "events": "Événements",
+      "products": "Produits",
+      "jobs": "Emplois",
+      "investments": "Investissements",
+      "realEstate": "Immobilier"
+    },
+    "sections": {
+      "jobs": {
+        "title": "Derniers emplois",
+        "subtitle": "Offres d’emploi publiées récemment."
+      },
+      "services": {
+        "title": "Services",
+        "subtitle": "Services mis en avant par la plateforme."
+      },
+      "investments": {
+        "title": "Derniers investissements",
+        "subtitle": "Opportunités d’investissement publiées récemment."
+      },
+      "realEstate": {
+        "title": "Immobilier et infrastructures",
+        "subtitle": "Opportunités récentes dans cette catégorie."
+      },
+      "products": {
+        "title": "Produits en vedette",
+        "subtitle": "Produits mis en avant par la plateforme."
+      },
+      "events": {
+        "title": "Événements à venir",
+        "subtitle": "Événements qui n’ont pas encore eu lieu."
+      },
+      "community": {
+        "title": "De la communauté",
+        "subtitle": "Voyez de quoi parlent les membres de vos communautés."
+      }
+    },
+    "refine": {
+      "title": "Affiner votre recherche",
+      "clearAll": "Tout effacer",
+      "category": "Catégorie",
+      "location": "Lieu",
+      "locationPlaceholder": "Ville ou pays",
+      "sortBy": "Trier les opportunités par",
+      "sort": {
+        "newest": "Plus récentes",
+        "closing": "Bientôt clôturées",
+        "applications": "Plus de candidatures"
+      }
+    },
+    "noResults": "Rien ne correspond encore à ces filtres.",
+    "searchEverything": "Tout rechercher pour « {query} »"
   },
   "eventPage": {
     "back": "Retour",
@@ -5013,6 +5062,169 @@
         "removed": "Retiré de l'équipe.",
         "unknownPerson": "Personne inconnue"
       }
+    }
+  },
+  "redesign": {
+    "viewAll": "Tout voir",
+    "remote": "À distance",
+    "closes": "Se termine le {date}",
+    "priceFrom": "À partir de {price}",
+    "kinds": {
+      "opportunity": "Opportunité",
+      "realEstate": "Immobilier",
+      "product": "Produit",
+      "service": "Service",
+      "event": "Événement"
+    },
+    "opportunityTypes": {
+      "EMPLOYMENT": "Emploi",
+      "SCHOLARSHIP": "Bourse",
+      "INVESTMENT": "Investissement",
+      "FELLOWSHIP": "Fellowship",
+      "INITIATIVE": "Initiative",
+      "GRANT": "Subvention",
+      "PROGRAM": "Programme",
+      "VOLUNTEER": "Bénévolat",
+      "CONTRACT": "Contrat"
+    },
+    "postMeta": {
+      "reactions": "{count, plural, one {# réaction} other {# réactions}}",
+      "comments": "{count, plural, one {# commentaire} other {# commentaires}}",
+      "openPost": "Ouvrir la publication",
+      "unknownAuthor": "Un membre",
+      "photoCount": "{count, plural, one {# photo} other {# photos}}"
+    },
+    "communityPosts": {
+      "title": "De votre communauté",
+      "subtitle": "Publications récentes des communautés dont vous faites partie.",
+      "viewCommunity": "Voir la communauté"
+    }
+  },
+  "homePage": {
+    "greeting": {
+      "morning": "Bonjour,",
+      "afternoon": "Bonjour,",
+      "evening": "Bonsoir,"
+    },
+    "heroSubtitle": "Votre lien avec de vraies opportunités, des services de confiance et une Afrique plus forte.",
+    "heroCta": "Découvrir les opportunités",
+    "activity": {
+      "title": "Votre activité",
+      "event": "Événement auquel vous êtes inscrit",
+      "registered": "Inscrit · {date}",
+      "request": "Demande de service",
+      "requestSubtitle": "Demande {number}",
+      "requestStatus": {
+        "pending": "Soumise",
+        "review": "En cours d’examen",
+        "approved": "Approuvée",
+        "completed": "Terminée",
+        "rejected": "Refusée ou annulée"
+      },
+      "kyc": "Vérification d’identité",
+      "kycSubtitle": "Facultatif — débloque des plafonds plus élevés",
+      "kycStatus": {
+        "verified": "Vérifiée",
+        "review": "En cours d’examen",
+        "rejected": "Non approuvée — vous pouvez réessayer",
+        "expired": "Expirée"
+      },
+      "vendor": "Votre profil vendeur",
+      "vendorStatus": {
+        "REGISTERED": "Enregistré",
+        "AWAITING_KYC": "En attente de vérification",
+        "KYC_UNDER_REVIEW": "Vérification en cours",
+        "VERIFIED": "Vérifié",
+        "ACTIVE": "Actif",
+        "SUSPENDED": "Suspendu",
+        "BANNED": "Indisponible"
+      }
+    },
+    "latest": {
+      "title": "Les nouveautés de DiaspoPlug",
+      "subtitle": "Les opportunités les plus récentes et les annonces mises en avant par la plateforme."
+    },
+    "feed": {
+      "title": "Votre fil"
+    },
+    "rail": {
+      "ctaTitle": "Vous faites partie de quelque chose de plus grand",
+      "ctaBody": "Rejoignez une communauté, accédez à des opportunités et avancez — ensemble.",
+      "quickActions": "Actions rapides",
+      "getDone": "Faire avancer un dossier",
+      "getDoneHint": "Envoyer une demande à une communauté ou organisation",
+      "findOpps": "Trouver des opportunités",
+      "findOppsHint": "Emplois, investissements et plus",
+      "exploreServices": "Explorer les services",
+      "exploreServicesHint": "Offres des prestataires sur DiaspoPlug",
+      "connect": "Entrer en contact",
+      "connectHint": "Cercles, événements et communautés",
+      "upcoming": "À venir",
+      "circles": "Vos cercles",
+      "members": "{count, plural, one {# membre} other {# membres}}",
+      "promoTitle": "Donnez vie à vos idées en Afrique",
+      "promoBody": "Investissez, construisez, grandissez — avec des personnes de confiance."
+    }
+  },
+  "communityPage": {
+    "heroTitle": "Communauté",
+    "heroSubtitle": "Échangez, partagez, soutenez et grandissez avec une communauté qui comprend votre parcours.",
+    "tagline": "De vraies personnes. Des objectifs communs. Plus forts ensemble.",
+    "searchPlaceholder": "Rechercher des personnes, groupes ou discussions…",
+    "searchLabel": "Rechercher dans la communauté",
+    "searchButton": "Rechercher",
+    "navLabel": "Navigation de la communauté",
+    "nav": {
+      "home": "Accueil",
+      "people": "Découvrir des personnes",
+      "circles": "Groupes et cercles",
+      "events": "Événements"
+    },
+    "promo": {
+      "title": "Plus forts ensemble dans la diaspora.",
+      "body": "Créez un cercle entre amis et travaillez vers des objectifs communs.",
+      "cta": "Découvrir les cercles"
+    },
+    "groups": {
+      "title": "Groupes à rejoindre",
+      "subtitle": "Groupes que vous n’avez pas encore rejoints.",
+      "members": "{count, plural, one {# membre} other {# membres}}",
+      "join": "Rejoindre",
+      "request": "Demander à rejoindre",
+      "open": "Voir le groupe",
+      "joinedToast": "Vous avez rejoint le groupe.",
+      "requestedToast": "Votre demande a été envoyée.",
+      "failedToast": "Impossible de le faire. Veuillez réessayer."
+    },
+    "composer": {
+      "prompt": "Partagez une actualité, posez une question ou lancez une discussion…",
+      "post": "Publication",
+      "photo": "Ajouter une photo"
+    },
+    "tabs": {
+      "label": "Fil",
+      "forYou": "Pour vous",
+      "latest": "Récents",
+      "following": "Abonnements"
+    },
+    "feed": {
+      "empty": "Aucune publication pour l’instant.",
+      "error": "Impossible de charger le fil.",
+      "retry": "Réessayer"
+    },
+    "more": {
+      "title": "Communautés à rejoindre"
+    },
+    "rail": {
+      "people": "Personnes suggérées",
+      "connect": "Se connecter",
+      "sentLabel": "Demande envoyée",
+      "topics": "Sujets tendance",
+      "topicUses": "{count, plural, one {# publication} other {# publications}}",
+      "events": "Événements à venir",
+      "createTitle": "Quelque chose à partager ?",
+      "createBody": "Lancez une discussion, partagez une opportunité ou posez une question.",
+      "createCta": "Créer une publication"
     }
   }
 }
