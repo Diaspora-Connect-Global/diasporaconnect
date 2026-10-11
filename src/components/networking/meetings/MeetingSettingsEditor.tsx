@@ -102,8 +102,8 @@ export default function MeetingSettingsEditor({
         <legend className="mb-1 text-sm font-semibold text-text-primary">{t('durationsLegend')}</legend>
         <div className="flex flex-wrap gap-2">
           {choices.map((d) => (
-            <label key={d} className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-border-subtle px-4 text-sm has-[:checked]:border-border-brand has-[:checked]:bg-surface-brand-subtle has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-text-brand">
-              <input type="checkbox" className="sr-only" checked={durations.includes(d)} onChange={(e) => setDurations(e.target.checked ? [...durations, d] : durations.filter((x) => x !== d))} data-testid="duration-check" />
+            <label key={d} className="relative inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-border-subtle px-4 text-sm has-[:checked]:border-border-brand has-[:checked]:bg-surface-brand-subtle has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-text-brand">
+              <input type="checkbox" className="absolute inset-0 size-full cursor-pointer opacity-0" checked={durations.includes(d)} onChange={(e) => setDurations(e.target.checked ? [...durations, d] : durations.filter((x) => x !== d))} data-testid="duration-check" />
               {t('minutes', { count: d })}
             </label>
           ))}

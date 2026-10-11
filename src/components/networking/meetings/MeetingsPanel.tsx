@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
-import { PersonAvatar, InlineNotice } from '../primitives';
-import { SlotText, StatusChip, btnQuiet } from './parts';
+import { PersonAvatar } from '../primitives';
+import { QuietNote, SlotText, StatusChip, btnQuiet } from './parts';
 import MeetingDetailDialog from './MeetingDetailDialog';
 import type { MeetingsApi } from './useMeetings';
 import { MEETING_FILTERS, type Meeting, type MeetingCounts, type MeetingFilter } from '@/services/gql/networkingMeetings';
@@ -53,7 +53,7 @@ export default function MeetingsPanel({
   return (
     <div data-testid="panel-meetings" className="space-y-4">
       <p className="text-sm text-muted-foreground">{t('panel.intro')}</p>
-      {counts && counts.awaitingMe > 0 && <InlineNotice tone="info" testId="awaiting-me">{t('panel.awaitingMe', { count: counts.awaitingMe })}</InlineNotice>}
+      {counts && counts.awaitingMe > 0 && <QuietNote testId="awaiting-me">{t('panel.awaitingMe', { count: counts.awaitingMe })}</QuietNote>}
       <div role="group" aria-label={t('panel.filters')} className="flex flex-wrap gap-2">
         {MEETING_FILTERS.map((f) => {
           const n = counts?.[COUNT_KEY[f]];

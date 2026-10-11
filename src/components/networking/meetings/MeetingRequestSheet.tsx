@@ -4,8 +4,8 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CalendarClock, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { PersonAvatar, InlineNotice } from '../primitives';
-import { SlotPicker, SlotText, ZoneNote, btnPrimary, btnQuiet, fieldClass } from './parts';
+import { PersonAvatar } from '../primitives';
+import { QuietNote, SlotPicker, SlotText, ZoneNote, btnPrimary, btnQuiet, fieldClass } from './parts';
 import { isHttpsUrl } from '@/lib/meetingTime';
 import type { MeetingsApi } from './useMeetings';
 import {
@@ -220,8 +220,8 @@ export default function MeetingRequestSheet({
                     <div role="radiogroup" aria-labelledby={ids.duration} className="flex flex-wrap gap-2" data-testid="duration-choice">
                       <span id={ids.duration} className="sr-only">{t('request.durationLegend')}</span>
                       {suggestions.allowedDurations.map((d) => (
-                        <label key={d} className={`inline-flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-sm font-medium has-[:checked]:border-border-brand has-[:checked]:bg-surface-brand-subtle has-[:checked]:text-text-brand has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-text-brand border-border-subtle text-text-primary`}>
-                          <input type="radio" name={ids.duration} className="sr-only" checked={duration === d} onChange={() => pickDuration(d)} data-testid="duration-option" value={d} />
+                        <label key={d} className="relative inline-flex min-h-11 cursor-pointer items-center rounded-full border border-border-subtle px-4 text-sm font-medium text-text-primary has-[:checked]:border-border-brand has-[:checked]:bg-surface-brand-subtle has-[:checked]:text-text-brand has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-text-brand">
+                          <input type="radio" name={ids.duration} className="absolute inset-0 size-full cursor-pointer opacity-0" checked={duration === d} onChange={() => pickDuration(d)} data-testid="duration-option" value={d} />
                           {t('request.minutes', { count: d })}
                         </label>
                       ))}
@@ -234,8 +234,8 @@ export default function MeetingRequestSheet({
                     <legend className="mb-1 text-sm font-semibold text-text-primary">{t('request.formatLegend')}</legend>
                     <div className="flex flex-wrap gap-2" data-testid="format-choice">
                       {suggestions.allowedFormats.map((f) => (
-                        <label key={f} className="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-border-subtle px-4 text-sm font-medium text-text-primary has-[:checked]:border-border-brand has-[:checked]:bg-surface-brand-subtle has-[:checked]:text-text-brand has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-text-brand">
-                          <input type="radio" name={ids.format} className="sr-only" checked={format === f} onChange={() => { setFormat(f); }} data-testid="format-option" value={f} />
+                        <label key={f} className="relative inline-flex min-h-11 cursor-pointer items-center rounded-full border border-border-subtle px-4 text-sm font-medium text-text-primary has-[:checked]:border-border-brand has-[:checked]:bg-surface-brand-subtle has-[:checked]:text-text-brand has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-text-brand">
+                          <input type="radio" name={ids.format} className="absolute inset-0 size-full cursor-pointer opacity-0" checked={format === f} onChange={() => { setFormat(f); }} data-testid="format-option" value={f} />
                           {t(`format.${f}`)}
                         </label>
                       ))}
@@ -324,7 +324,7 @@ export default function MeetingRequestSheet({
                 </DialogFooter>
               </form>
             )}
-            <InlineNotice tone="info">{t('request.neverConnects')}</InlineNotice>
+            <QuietNote>{t('request.neverConnects')}</QuietNote>
           </>
         )}
       </DialogContent>

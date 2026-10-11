@@ -13,6 +13,11 @@ export const btnQuiet = `inline-flex min-h-11 items-center justify-center gap-1.
 export const btnDanger = `inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-border-danger px-5 text-sm font-medium text-text-danger hover:bg-surface-danger disabled:opacity-50 ${focusRing}`;
 export const fieldClass = `w-full rounded-xl border border-border-subtle bg-surface-default px-3 py-2 text-sm text-text-primary ${focusRing}`;
 
+/** A calm explanatory note (not an alert). */
+export function QuietNote({ children, testId }: { children: React.ReactNode; testId?: string }) {
+  return <p role="note" data-testid={testId} className="rounded-xl bg-surface-subtle px-4 py-3 text-sm text-text-primary">{children}</p>;
+}
+
 const noopSubscribe = () => () => {};
 /** False on the server and during hydration, true afterwards: for anything that depends on the viewer's own zone. */
 export function useIsClient(): boolean {

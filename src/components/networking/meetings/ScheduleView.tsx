@@ -5,9 +5,9 @@ import { useLocale, useTranslations } from 'next-intl';
 import { CalendarDays, Handshake, Loader2, Mic, UsersRound } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { formatDayHeading } from '@/lib/eventCalendar';
-import { InlineNotice, focusRing } from '../primitives';
+import { focusRing } from '../primitives';
 import { NetworkingHeader, type NetworkingEventContext } from '../NetworkingShell';
-import { StatusChip, ZoneNote, btnQuiet } from './parts';
+import { QuietNote, StatusChip, ZoneNote, btnQuiet } from './parts';
 import MeetingDetailDialog from './MeetingDetailDialog';
 import type { MeetingsApi } from './useMeetings';
 import { slotRange } from '@/lib/meetingTime';
@@ -50,7 +50,7 @@ export default function ScheduleView({
         <ZoneNote timezone={tz} atIso={items[0]?.slot?.startAt} />
         <Link href={`/events/${event.id}/networking?tab=meetings`} className={`inline-flex min-h-11 items-center rounded-full border border-border-brand px-5 text-sm font-medium text-text-brand ${focusRing}`} data-testid="schedule-to-meetings">{t('schedule.toMeetings')}</Link>
       </div>
-      {schedule && !schedule.circleSessionsAvailable && <InlineNotice tone="info" testId="circle-note">{t('schedule.circleNote')}</InlineNotice>}
+      {schedule && !schedule.circleSessionsAvailable && <QuietNote testId="circle-note">{t('schedule.circleNote')}</QuietNote>}
       {failureKey ? (
         <p role="alert" className="rounded-2xl border border-border-danger bg-surface-danger p-4 text-sm text-text-primary">{te(failureKey)}</p>
       ) : loading && !schedule ? (
