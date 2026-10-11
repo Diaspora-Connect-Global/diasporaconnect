@@ -8,8 +8,8 @@ import { gql } from '@apollo/client';
  * resume, withdraw, recordAiConsent, suggestProfile.
  * M4 deck (gateway branch `feat/en-m4-gateway`, PENDING deploy): deck,
  * decide, reviewLater, reconsiderPassed, directory, person.
- * PLANNED (no backend yet, gated by `networkingFeatures.ts`): interests,
- * matches, connect, report, circles.
+ * Interests / matches / connect / block / report (gateway M4-A2) are gated by
+ * `networkingFeatures.ts`. PLANNED (no backend yet): circles.
  *
  * Networking data is personal and per-event: every networking QUERY is
  * `no-cache` (never written to the Apollo cache, so never persisted), and
@@ -342,19 +342,40 @@ export const NETWORKING_RECONSIDER_PASSED = gql`
   }
 `;
 
-/* ------------------- PLANNED: interests & matches (PENDING) ------------------- */
-/* Not deployed. Names are the planned ones; the shapes are provisional. */
+/* ------------------- Interests, matches, Connect, block, report ------------------- */
+/* Gateway: api-gateway `event-networking` (M4-A2). The sender can only ever read
+ * PENDING / MUTUAL / EXPIRED: there is deliberately no "declined" state. */
 
+export type SentInterestStatus = 'PENDING' | 'MUTUAL' | 'EXPIRED';
+export type InterestSource = 'DECK' | 'DIRECTORY' | 'PERSON' | 'INBOX' | 'REVIEW_LATER' | 'MATCHES' | 'OTHER';
+export type ReportReason = 'SPAM' | 'HARASSMENT' | 'INAPPROPRIATE' | 'FAKE_PROFILE' | 'SAFETY' | 'OTHER';
+export const REPORT_REASONS: ReportReason[] = ['SPAM', 'HARASSMENT', 'INAPPROPRIATE', 'FAKE_PROFILE', 'SAFETY', 'OTHER'];
+export const REPORT_DETAILS_MAX = 1000;
+
+/** An interest the viewer sent. `card` is null when the person can no longer be shown. */
 export interface InterestEntry {
   handle: string;
-  card: NetworkingCard;
+  card?: NetworkingCard | null;
+  status: SentInterestStatus;
   note?: string | null;
-  createdAt?: string | null;
+  sentAt?: string | null;
+  expiresAt?: string | null;
+  personAvailable: boolean;
 }
 
+export interface MatchEntry {
+  card: NetworkingCard;
+  matchedAt?: string | null;
+}
+
+export interface ExpressInterestResult { success: boolean; matched: boolean; profileRevealed: boolean }
+export interface RespondResult { success: boolean; matched: boolean }
+export interface ConnectResult { success: boolean; connectionStatus?: ConnectionStatus | null; preExisting: boolean }
+export interface ReportResult { success: boolean; caseNumber?: string | null }
+
 export const NETWORKING_EXPRESS_INTEREST = gql`
-  mutation NetworkingExpressInterest($eventId: ID!, $handle: String!, $note: String) {
-    eventNetworkingExpressInterest(eventId: $eventId, handle: $handle, note: $note) { success matched }
+  mutation NetworkingExpressInterest($eventId: ID!, $handle: String!, $note: String, $source: EventNetworkingInterestSource, $acknowledgeProfileReveal: Boolean) {
+    eventNetworkingExpressInterest(eventId: $eventId, handle: $handle, note: $note, source: $source, acknowledgeProfileReveal: $acknowledgeProfileReveal) { success matched profileRevealed }
   }
 `;
 
@@ -373,7 +394,7 @@ export const NETWORKING_WITHDRAW_INTEREST = gql`
 export const NETWORKING_INTERESTED_IN_ME = gql`
   query NetworkingInterestedInMe($eventId: ID!, $cursor: String, $limit: Int) {
     eventNetworkingInterestedInMe(eventId: $eventId, cursor: $cursor, limit: $limit) {
-      nextCursor
+      nextCursor total
       cards { ${CARD} }
     }
   }
@@ -382,8 +403,8 @@ export const NETWORKING_INTERESTED_IN_ME = gql`
 export const NETWORKING_MY_INTERESTS = gql`
   query NetworkingMyInterests($eventId: ID!, $cursor: String, $limit: Int) {
     eventNetworkingMyInterests(eventId: $eventId, cursor: $cursor, limit: $limit) {
-      nextCursor
-      cards { ${CARD} }
+      nextCursor pendingCount
+      interests { handle status note sentAt expiresAt personAvailable card { ${CARD} } }
     }
   }
 `;
@@ -391,15 +412,27 @@ export const NETWORKING_MY_INTERESTS = gql`
 export const NETWORKING_MY_MATCHES = gql`
   query NetworkingMyMatches($eventId: ID!, $cursor: String, $limit: Int) {
     eventNetworkingMyMatches(eventId: $eventId, cursor: $cursor, limit: $limit) {
-      nextCursor
-      cards { ${CARD} }
+      nextCursor total
+      matches { matchedAt card { ${CARD} } }
     }
   }
 `;
 
 export const NETWORKING_CONNECT = gql`
   mutation NetworkingConnect($eventId: ID!, $handle: String!) {
-    eventNetworkingConnect(eventId: $eventId, handle: $handle) { success }
+    eventNetworkingConnect(eventId: $eventId, handle: $handle) { success connectionStatus preExisting }
+  }
+`;
+
+export const NETWORKING_BLOCK = gql`
+  mutation NetworkingBlock($eventId: ID!, $handle: String!) {
+    eventNetworkingBlock(eventId: $eventId, handle: $handle) { success }
+  }
+`;
+
+export const NETWORKING_REPORT = gql`
+  mutation NetworkingReport($eventId: ID!, $handle: String!, $reason: EventNetworkingReportReason!, $details: String) {
+    eventNetworkingReport(eventId: $eventId, handle: $handle, reason: $reason, details: $details) { success caseNumber }
   }
 `;
 

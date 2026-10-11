@@ -38,6 +38,12 @@ const KEY_BY_CODE: Readonly<Record<string, string>> = {
   EVENT_NETWORKING_NOT_OPEN: 'closed',
   EVENT_NETWORKING_NOT_PARTICIPANT: 'notParticipant',
   EVENT_NETWORKING_REFUSED: 'refused',
+  EVENT_NETWORKING_REVEAL_CONFIRMATION_REQUIRED: 'revealConfirmation',
+  EVENT_NETWORKING_INTERESTS_PAUSED: 'interestsPaused',
+  EVENT_NETWORKING_INTEREST_LIMIT_REACHED: 'interestLimit',
+  EVENT_NETWORKING_CONNECT_COOLDOWN: 'connectCooldown',
+  EVENT_NETWORKING_CONNECTION_LIMIT_REACHED: 'connectionLimit',
+  EVENT_NETWORKING_CONNECT_REFUSED: 'connectRefused',
 };
 
 const NOT_FOUND_KEYS = new Set(['notFound']);
