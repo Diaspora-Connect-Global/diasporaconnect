@@ -420,7 +420,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
     const [submitApplication, { loading: submitting }] = useMutation<SubmitApplicationData>(SUBMIT_APPLICATION, {
         refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } }],
     });
-    const [withdrawApplication, { loading: withdrawing }] = useMutation(WITHDRAW_APPLICATION, {
+    const [withdrawApplication, { loading: withdrawing }] = useMutation<{ withdrawApplication: boolean }>(WITHDRAW_APPLICATION, {
         refetchQueries: [
             { query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } },
             { query: GET_OPPORTUNITY, variables: { id: item.id } },
