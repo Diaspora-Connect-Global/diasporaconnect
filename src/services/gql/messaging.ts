@@ -154,21 +154,10 @@ export const GET_MESSAGES = gql`
   }
 `;
 
-export const GET_CONVERSATION_DETAILS = gql`
-  query GetConversationDetails($conversationId: ID!) {
-    getConversation(conversationId: $conversationId) {
-      id
-      type
-      groupId
-      participantIds
-      participantCount
-      createdAt
-      updatedAt
-      lastMessageAt
-      isActive
-    }
-  }
-`;
+/*
+ * GET_CONVERSATION_DETAILS was removed: the gateway has no `getConversation`
+ * query (only the list `getConversations`). Look the conversation up in that list.
+ */
 
 // ============================================================================
 // MUTATIONS — Flat arguments matching the actual API

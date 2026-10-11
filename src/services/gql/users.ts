@@ -27,7 +27,7 @@ export type {
  * ```
  */
 export const GET_BLOCKED_USERS = gql`
-  query GetBlockedUsers($limit: Int) {
+  query GetBlockedUsers($limit: Float) {
     getBlockedUsers(limit: $limit) {
       users {
         id
@@ -65,7 +65,7 @@ export const GET_BLOCKED_USERS = gql`
  * ```
  */
 export const IS_USER_BLOCKED = gql`
-  query IsUserBlocked($userId: ID!) {
+  query IsUserBlocked($userId: String!) {
     isUserBlocked(userId: $userId) {
       isBlocked
     }

@@ -692,7 +692,6 @@ export const PUBLISH_EVENT = gql`
     publishEvent(id: $id) {
       id
       status
-      publishedAt
     }
   }
 `;
@@ -711,7 +710,6 @@ export const CANCEL_EVENT = gql`
     cancelEvent(id: $id, reason: $reason) {
       id
       status
-      cancelledAt
     }
   }
 `;

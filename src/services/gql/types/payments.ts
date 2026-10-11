@@ -70,17 +70,21 @@ export interface PayoutAccountRecord {
   provider: PaymentProvider;
   account_type: "BANK_ACCOUNT" | "MOBILE_MONEY" | string;
   currency: string;
-  last4?: string | null;
+  /** The account / mobile number the user entered. Display only its last 4 characters. */
+  account_identifier?: string | null;
   is_primary?: boolean | null;
-  account_name?: string | null;
-  mobile_number?: string | null;
+  is_verified?: boolean | null;
+  account_holder_name?: string | null;
   created_at?: string | null;
 }
 
 export interface EscrowRecord {
   id: string;
   status?: string | null;
-  amount?: number | null;
+  /** Integer minor units. */
+  total_amount?: number | null;
+  released_amount?: number | null;
+  remaining_amount?: number | null;
   currency?: string | null;
   payment_intent_id?: string | null;
 }
@@ -227,11 +231,12 @@ export interface SetPrimaryPayoutAccountPayload {
 }
 
 export interface AddPaymentMethodResponse {
-  addPaymentMethod: AddPaymentMethodPayload;
+  /** The gateway returns a bare Boolean (no selection set). */
+  addPaymentMethod: boolean;
 }
 
 export interface RemovePaymentMethodResponse {
-  removePaymentMethod: RemovePaymentMethodPayload;
+  removePaymentMethod: boolean;
 }
 
 export interface MyPaymentMethodsResponse {

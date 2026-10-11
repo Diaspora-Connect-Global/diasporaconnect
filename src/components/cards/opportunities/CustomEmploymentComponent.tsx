@@ -420,7 +420,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
     const [submitApplication, { loading: submitting }] = useMutation<SubmitApplicationData>(SUBMIT_APPLICATION, {
         refetchQueries: [{ query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } }],
     });
-    const [withdrawApplication, { loading: withdrawing }] = useMutation(WITHDRAW_APPLICATION, {
+    const [withdrawApplication, { loading: withdrawing }] = useMutation<{ withdrawApplication: boolean }>(WITHDRAW_APPLICATION, {
         refetchQueries: [
             { query: GET_USER_APPLICATIONS, variables: { limit: 50, offset: 0 } },
             { query: GET_OPPORTUNITY, variables: { id: item.id } },
@@ -905,7 +905,12 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                                     e.stopPropagation();
                                                     if (withdrawing) return;
                                                     try {
-                                                        await withdrawApplication({ variables: { applicationId } });
+                                                        const result = await withdrawApplication({ variables: { applicationId } });
+                                                        // errorPolicy 'all': a refusal resolves with data: null / false.
+                                                        if (!result?.data?.withdrawApplication) {
+                                                            toast.error(t("toasts.withdrawError"));
+                                                            return;
+                                                        }
                                                         toast.success(t("toasts.withdrawSuccess"));
                                                     } catch {
                                                         toast.error(t("toasts.withdrawError"));
