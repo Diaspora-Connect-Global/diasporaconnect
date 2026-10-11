@@ -16,12 +16,22 @@ export const INTERESTS_UI_ENABLED = true;
 /** Networking Circles discovery and rooms (gateway: `networkingCircles` …). */
 export const CIRCLES_UI_ENABLED = false;
 
+/**
+ * Meetings: request sheet, meeting detail, the Meetings tab, My schedule
+ * (`/events/[id]/schedule`) and the organiser meeting settings (gateway:
+ * `eventNetworkingRequestMeeting` … M5, NOT deployed). While false no meeting
+ * operation is ever sent and every meeting entry point is absent.
+ */
+export const MEETINGS_UI_ENABLED = false;
+
 export interface NetworkingFeatureFlags {
   interests: boolean;
   circles: boolean;
+  meetings: boolean;
 }
 
 export const NETWORKING_FEATURES: NetworkingFeatureFlags = {
   interests: INTERESTS_UI_ENABLED,
   circles: CIRCLES_UI_ENABLED,
+  meetings: MEETINGS_UI_ENABLED,
 };

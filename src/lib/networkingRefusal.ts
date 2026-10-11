@@ -44,9 +44,14 @@ const KEY_BY_CODE: Readonly<Record<string, string>> = {
   EVENT_NETWORKING_CONNECT_COOLDOWN: 'connectCooldown',
   EVENT_NETWORKING_CONNECTION_LIMIT_REACHED: 'connectionLimit',
   EVENT_NETWORKING_CONNECT_REFUSED: 'connectRefused',
+  EVENT_NETWORKING_SLOT_TAKEN: 'slotTaken',
+  EVENT_NETWORKING_SLOT_UNAVAILABLE: 'slotUnavailable',
+  EVENT_NETWORKING_MEETING_POINT_UNAVAILABLE: 'pointUnavailable',
+  EVENT_NETWORKING_MEETINGS_NOT_ACCEPTED: 'meetingsNotAccepted',
+  EVENT_NETWORKING_MEETING_NOT_FOUND: 'meetingNotFound',
 };
 
-const NOT_FOUND_KEYS = new Set(['notFound']);
+const NOT_FOUND_KEYS = new Set(['notFound', 'meetingNotFound']);
 
 export function networkingRefusal(source: unknown): NetworkingRefusal {
   const code = eventCodeOf(source);

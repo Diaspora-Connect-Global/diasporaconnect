@@ -1,0 +1,398 @@
+# Printed from the built api-gateway schema: every type and operation added by the M5 meetings module.
+# Regenerate: WRITE_MEETINGS_SDL=1 npx jest src/event-networking/event-networking-meeting.spec.ts
+
+type Query {
+  """
+  Meeting policy, windows and meeting points of an event. Organisers only; anyone else sees EVENT_NETWORKING_EVENT_NOT_FOUND.
+  """
+  eventNetworkingMeetingSettings(eventId: ID!): EventNetworkingMeetingSettings!
+
+  """
+  Times both you and the other person can make, in the organiser's windows. Refuses exactly like a request would.
+  """
+  eventNetworkingSuggestMeetingSlots(eventId: ID!, handle: String!, durationMinutes: Int!, fromAt: String, toAt: String, meetingPointId: ID, limit: Int): EventNetworkingMeetingSlotSuggestions!
+
+  """Your meetings in one tab, soonest first, with the count of every tab."""
+  eventNetworkingMyMeetings(eventId: ID!, filter: EventNetworkingMeetingFilter, cursor: String, limit: Int): EventNetworkingMeetingPage!
+
+  """
+  One of your meetings. A meeting that is not yours is EVENT_NETWORKING_MEETING_NOT_FOUND.
+  """
+  eventNetworkingMeeting(eventId: ID!, meetingId: ID!): EventNetworkingMeeting!
+
+  """
+  Your confirmed meetings, the event programme and circle sessions in time order. circleSessionsAvailable=false means circle sessions are missing from the list, not that there are none.
+  """
+  eventNetworkingMySchedule(eventId: ID!): EventNetworkingMeetingSchedule!
+}
+
+type EventNetworkingMeetingSettings {
+  eventId: ID!
+  meetingPolicy: EventNetworkingMeetingPolicy!
+
+  """Minutes, ascending."""
+  meetingDurations: [Int!]!
+
+  """Empty = the whole event."""
+  meetingWindows: [EventNetworkingMeetingWindow!]!
+  maxMeetingsPerPerson: Int!
+  maxPendingRequests: Int!
+  meetingPoints: [EventNetworkingMeetingPoint!]!
+
+  """The event IANA timezone."""
+  timezone: String!
+
+  """Send back as expectedVersion on update."""
+  version: Int!
+  allowedFormats: [EventNetworkingMeetingFormat!]!
+  slotStepMinutes: Int!
+}
+
+"""
+Who may request a meeting with whom: only matches, any participant, or nobody.
+"""
+enum EventNetworkingMeetingPolicy {
+  MUTUAL_ONLY
+  ANY_PARTICIPANT
+  DISABLED
+}
+
+"""An organiser meeting window in event-local wall-clock time."""
+type EventNetworkingMeetingWindow {
+  """YYYY-MM-DD, event-local."""
+  date: String!
+
+  """HH:MM, 24 h."""
+  startTime: String!
+  endTime: String!
+
+  """The resolved instant (RFC 3339)."""
+  startAt: String
+  endAt: String
+}
+
+type EventNetworkingMeetingPoint {
+  id: ID!
+  name: String!
+  directions: String
+  capacityPerSlot: Int!
+  active: Boolean!
+  sortOrder: Int!
+}
+
+enum EventNetworkingMeetingFormat {
+  IN_PERSON
+  ONLINE
+}
+
+type EventNetworkingMeetingSlotSuggestions {
+  slots: [EventNetworkingMeetingSlot!]!
+  timezone: String!
+  allowedDurations: [Int!]!
+  allowedFormats: [EventNetworkingMeetingFormat!]!
+
+  """Active points (IN_PERSON meetings only)."""
+  meetingPointOptions: [EventNetworkingMeetingPoint!]!
+
+  """Purposes a request accepts."""
+  purposes: [EventNetworkingMeetingPurpose!]!
+}
+
+"""
+A time slot. startAt / endAt are UTC instants; the local* fields are the event-timezone wall clock.
+"""
+type EventNetworkingMeetingSlot {
+  startAt: String!
+  endAt: String!
+
+  """YYYY-MM-DD in the event timezone."""
+  localDate: String!
+
+  """HH:MM in the event timezone."""
+  localStart: String!
+  localEnd: String!
+
+  """UTC offset in force at startAt, e.g. +01:00 (DST-aware)."""
+  utcOffset: String!
+}
+
+enum EventNetworkingMeetingPurpose {
+  PARTNERSHIP
+  INVESTMENT
+  MENTORSHIP
+  HIRING
+  COLLABORATION
+  KNOWLEDGE_EXCHANGE
+  BUSINESS_DEVELOPMENT
+  INTRODUCTION
+  OTHER
+}
+
+type EventNetworkingMeetingPage {
+  meetings: [EventNetworkingMeeting!]!
+
+  """Null = nothing more."""
+  nextCursor: String
+  counts: EventNetworkingMeetingCounts
+}
+
+type EventNetworkingMeeting {
+  meetingId: ID!
+  eventId: ID!
+  status: EventNetworkingMeetingStatus!
+  role: EventNetworkingMeetingRole!
+
+  """The caller is the one who must answer."""
+  awaitingMe: Boolean!
+  counterpart: EventNetworkingMeetingCounterpart
+
+  """The current time (during a reschedule: the held original)."""
+  slot: EventNetworkingMeetingSlot
+  durationMinutes: Int!
+  timezone: String!
+  format: EventNetworkingMeetingFormat
+  meetingPoint: EventNetworkingMeetingPoint
+
+  """Only ever returned to the two participants."""
+  onlineUrl: String
+  purpose: EventNetworkingMeetingPurpose
+
+  """The requester's note; both participants see it."""
+  note: String
+  openProposals: [EventNetworkingMeetingProposal!]!
+
+  """The time before the last reschedule."""
+  previousSlot: EventNetworkingMeetingSlot
+  rescheduleCount: Int!
+  cancelledBy: EventNetworkingMeetingCancelledBy
+  cancelReason: EventNetworkingMeetingCancelReason
+  expiresAt: String
+  createdAt: String
+  confirmedAt: String
+  cancelledAt: String
+  canAccept: Boolean!
+  canDecline: Boolean!
+  canPropose: Boolean!
+  canCancel: Boolean!
+  canReschedule: Boolean!
+  version: Int!
+  updatedAt: String
+}
+
+enum EventNetworkingMeetingStatus {
+  REQUESTED
+  ALT_PROPOSED
+  CONFIRMED
+  RESCHEDULE_PROPOSED
+  DECLINED
+  CANCELLED
+  EXPIRED
+  COMPLETED
+}
+
+"""The caller's own role in the meeting."""
+enum EventNetworkingMeetingRole {
+  REQUESTER
+  RECIPIENT
+}
+
+"""The other person: handle and card fields only."""
+type EventNetworkingMeetingCounterpart {
+  handle: String!
+  displayName: String
+  avatarUrl: String
+  username: String
+  headline: String
+
+  """Their participation is still active."""
+  available: Boolean!
+}
+
+type EventNetworkingMeetingProposal {
+  slot: EventNetworkingMeetingSlot!
+  kind: EventNetworkingMeetingProposalKind!
+  proposedByMe: Boolean!
+}
+
+enum EventNetworkingMeetingProposalKind {
+  ALTERNATIVE
+  RESCHEDULE
+}
+
+enum EventNetworkingMeetingCancelledBy {
+  ME
+  COUNTERPART
+  SYSTEM
+}
+
+enum EventNetworkingMeetingCancelReason {
+  BY_PARTICIPANT
+  MATCH_DISSOLVED
+  BLOCKED
+  PARTICIPATION_ENDED
+}
+
+type EventNetworkingMeetingCounts {
+  pending: Int!
+  upcoming: Int!
+  alternatives: Int!
+  completed: Int!
+  cancelled: Int!
+  awaitingMe: Int!
+}
+
+enum EventNetworkingMeetingFilter {
+  PENDING
+  UPCOMING
+  ALTERNATIVES
+  COMPLETED
+  CANCELLED
+}
+
+type EventNetworkingMeetingSchedule {
+  """Chronological."""
+  items: [EventNetworkingMeetingScheduleItem!]!
+  timezone: String!
+
+  """False = circle sessions are missing from this list (not "none")."""
+  circleSessionsAvailable: Boolean!
+}
+
+type EventNetworkingMeetingScheduleItem {
+  kind: EventNetworkingMeetingScheduleKind!
+  slot: EventNetworkingMeetingSlot
+
+  """SESSION: programme title; CIRCLE_SESSION: circle name."""
+  title: String
+
+  """SESSION: room; MEETING: meeting point name."""
+  location: String
+
+  """MEETING only."""
+  status: EventNetworkingMeetingStatus
+
+  """MEETING only."""
+  meeting: EventNetworkingMeeting
+
+  """SESSION only (programme session id)."""
+  sessionId: String
+  sessionType: String
+
+  """CIRCLE_SESSION only."""
+  circleId: String
+}
+
+enum EventNetworkingMeetingScheduleKind {
+  MEETING
+  SESSION
+  CIRCLE_SESSION
+}
+
+type Mutation {
+  eventNetworkingUpdateMeetingSettings(input: EventNetworkingMeetingSettingsInput!): EventNetworkingMeetingSettings!
+
+  """
+  Ask a person for a meeting at one of the suggested times. If you are hidden and not matched, pass acknowledgeProfileReveal: they will see your profile. Never creates a connection.
+  """
+  eventNetworkingRequestMeeting(input: EventNetworkingMeetingRequestInput!): EventNetworkingMeeting!
+
+  """
+  Answer a request, an alternative or a reschedule proposal: ACCEPT (pass startAt when several times are open), DECLINE, or PROPOSE_ALTERNATIVE with 1..3 starts. DECLINE is never blocked by the release gate.
+  """
+  eventNetworkingRespondToMeeting(input: EventNetworkingMeetingRespondInput!): EventNetworkingMeeting!
+
+  """
+  Cancel a meeting (the other person is told neutrally). The release gate never applies. `reason` is accepted for forward compatibility and is NOT stored or sent.
+  """
+  eventNetworkingCancelMeeting(eventId: ID!, meetingId: ID!, reason: String): EventNetworkingMeeting!
+
+  """
+  Propose 1..3 new times for a confirmed meeting. The original time stays held until the other person accepts one. They answer with eventNetworkingRespondToMeeting (ACCEPT with startAt, or DECLINE to keep the original).
+  """
+  eventNetworkingProposeReschedule(eventId: ID!, meetingId: ID!, proposedStarts: [String!]!): EventNetworkingMeeting!
+}
+
+"""
+Only the fields present change. A present list REPLACES the stored one (an empty windows list = the whole event).
+"""
+input EventNetworkingMeetingSettingsInput {
+  eventId: ID!
+  meetingPolicy: EventNetworkingMeetingPolicy
+  meetingDurations: [Int!]
+  meetingWindows: [EventNetworkingMeetingWindowInput!]
+  maxMeetingsPerPerson: Int
+  maxPendingRequests: Int
+
+  """Active points not listed are deactivated, never deleted."""
+  meetingPoints: [EventNetworkingMeetingPointInput!]
+
+  """Optimistic concurrency: EVENT_NETWORKING_CONFLICT on mismatch."""
+  expectedVersion: Int
+}
+
+input EventNetworkingMeetingWindowInput {
+  date: String!
+  startTime: String!
+  endTime: String!
+}
+
+"""No id = create; an existing id = update."""
+input EventNetworkingMeetingPointInput {
+  id: ID
+  name: String!
+  directions: String
+
+  """1..500"""
+  capacityPerSlot: Int!
+  sortOrder: Int
+}
+
+input EventNetworkingMeetingRequestInput {
+  eventId: ID!
+
+  """The other person's handle."""
+  handle: String!
+
+  """One of the suggested slot starts (RFC 3339)."""
+  startAt: String!
+  durationMinutes: Int!
+  format: EventNetworkingMeetingFormat!
+
+  """IN_PERSON only."""
+  meetingPointId: ID
+  purpose: EventNetworkingMeetingPurpose!
+
+  """Up to 280 characters; both participants see it."""
+  note: String
+
+  """ONLINE only, https:// only; shown to the two participants only."""
+  onlineUrl: String
+
+  """
+  A hidden caller with no match must confirm the other person will see their profile.
+  """
+  acknowledgeProfileReveal: Boolean
+}
+
+input EventNetworkingMeetingRespondInput {
+  eventId: ID!
+  meetingId: ID!
+  action: EventNetworkingMeetingAction!
+
+  """PROPOSE_ALTERNATIVE: 1..3 slot starts."""
+  proposedStarts: [String!]
+
+  """
+  ACCEPT of a proposal / reschedule: the chosen start ("" or absent when exactly one is open).
+  """
+  startAt: String
+
+  """ACCEPT of an ONLINE meeting: optional https:// link."""
+  onlineUrl: String
+}
+
+enum EventNetworkingMeetingAction {
+  ACCEPT
+  DECLINE
+  PROPOSE_ALTERNATIVE
+}
