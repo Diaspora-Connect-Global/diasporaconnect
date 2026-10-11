@@ -4713,7 +4713,9 @@
       "venue": "Venue",
       "updates": "Updates",
       "register": "Register",
-      "myEvent": "My event"
+      "myEvent": "My event",
+      "networking": "Networking",
+      "circles": "Circles"
     },
     "empty": {
       "programme": "No programme yet. Add sessions from Manage event.",
@@ -4721,7 +4723,7 @@
       "updates": "No updates yet. Post one from Manage event and everyone registered is told."
     },
     "overview": {
-      "about": "About this event",
+      "about": "About the event",
       "noDescription": "The organiser has not added a description yet.",
       "organisedBy": "Organised by {name}",
       "tags": "Tags",
@@ -4737,7 +4739,19 @@
       "externalRegistration": "Organiser's own registration page",
       "free": "Free",
       "paid": "Paid",
-      "perTicket": "{price} per ticket"
+      "perTicket": "{price} per ticket",
+      "format": "Format",
+      "access": "Access",
+      "accessRegistration": "Registration required",
+      "accessApproval": "Registration required (organiser approval)",
+      "organisedByHeading": "Organised by",
+      "contactHeading": "Event contact",
+      "featuredSpeakers": "Featured speakers",
+      "viewAll": "View all",
+      "programmeHeading": "Event programme",
+      "viewProgramme": "View full programme",
+      "joinBannerTitle": "Stronger together",
+      "joinBannerBody": "Join {name} to stay in touch with its members after the event."
     },
     "programme": {
       "timesIn": "Times are shown in {zone}.",
@@ -4804,13 +4818,15 @@
         "awaitingPayment": "Open the My event tab to finish.",
         "rejected": "You can contact the organiser if you think this is a mistake.",
         "closesOn": "Registration closes {date}.",
-        "needsApproval": "The organiser approves each registration."
+        "needsApproval": "The organiser approves each registration.",
+        "confirmed": "You'll find this event's updates and your registration details here."
       },
       "cta": {
         "register": "Register",
         "joinWaitlist": "Join the waitlist",
         "signInToRegister": "Sign in to register",
-        "myEvent": "My event"
+        "myEvent": "My event",
+        "viewDetails": "View registration details"
       }
     },
     "organiser": {
@@ -4828,7 +4844,10 @@
       "requestedPay": "Your request to join {name} was started. Finish payment on its page to complete it.",
       "failedJoin": "We couldn't send your request to join {name}. Your event registration is not affected. You can try again from this page.",
       "notApplicable": "This event has no organiser community to join.",
-      "notAvailableYet": "Joining the organiser community from an event isn't available yet."
+      "notAvailableYet": "Joining the organiser community from an event isn't available yet.",
+      "viewCommunity": "View community",
+      "statusMember": "Status: member",
+      "statusPending": "Status: request pending"
     },
     "share": {
       "title": "Share this event",
@@ -4836,15 +4855,19 @@
       "share": "Share",
       "copied": "Link copied",
       "failed": "Could not copy the link",
-      "qrAlt": "QR code that opens this event page"
+      "qrAlt": "QR code that opens this event page",
+      "sub": "Invite your friends and colleagues to this event.",
+      "inviteLink": "Get invite link",
+      "qr": "QR code"
     },
     "similar": {
-      "title": "Similar events"
+      "title": "Similar events",
+      "viewAll": "View all"
     },
     "register": {
       "signInPrompt": "Sign in to register for this event.",
       "signIn": "Sign in",
-      "attendee": "Your details",
+      "attendee": "Attendee information",
       "name": "Name",
       "email": "Email",
       "attendeeNote": "Taken from your profile. Change them in your profile settings.",
@@ -4853,7 +4876,9 @@
       "format": {
         "label": "How will you attend?",
         "inPerson": "In person",
-        "online": "Online"
+        "online": "Online",
+        "sub": "How will you be attending?",
+        "onlineSub": "Join through the online link."
       },
       "summary": {
         "title": "Summary",
@@ -4868,7 +4893,8 @@
         "failed": "We couldn't check that code. Try again."
       },
       "terms": {
-        "label": "I accept the event terms, the DiaspoPlug <tos>Terms of Service</tos> and <privacy>Privacy Policy</privacy>."
+        "label": "I accept the event terms, the DiaspoPlug <tos>Terms of Service</tos> and <privacy>Privacy Policy</privacy>.",
+        "title": "Terms & conditions"
       },
       "joinOrganiser": {
         "label": "Also join {name}",
@@ -4897,8 +4923,23 @@
         "waitlisted": "You're on the waitlist.",
         "waitlistedPos": "You're number {position} on the waitlist.",
         "received": "Registration received.",
-        "paymentNotCompleted": "Payment was not completed. Your place is saved, but it isn't confirmed until you pay."
-      }
+        "paymentNotCompleted": "Payment was not completed. Your place is saved, but it isn't confirmed until you pay.",
+        "draftSaved": "Your networking profile was saved as a draft. Nothing is shared until you join networking.",
+        "draftUnavailableYet": "Saving a networking profile isn't available yet. Your registration is not affected.",
+        "draftFailed": "We couldn't save your networking profile. Your registration is not affected. You can fill it in later on the networking page."
+      },
+      "heading": "Event registration",
+      "headingSub": "Complete the form below to register for {title}.",
+      "attendeeSub": "Taken from your profile.",
+      "type": {
+        "title": "Registration type",
+        "sub": "Select the type of registration that fits you.",
+        "general": "Registration"
+      },
+      "quantity": "Number of tickets",
+      "decrease": "Fewer tickets",
+      "increase": "More tickets",
+      "backToEvent": "Back to event"
     },
     "myEvent": {
       "status": "Your registration",
@@ -5062,6 +5103,81 @@
         "removed": "Removed from the staff.",
         "unknownPerson": "Unknown person"
       }
+    },
+    "format": {
+      "physical": "In person",
+      "physicalSub": "At the venue",
+      "virtual": "Online",
+      "virtualSub": "Join from anywhere",
+      "hybrid": "Hybrid",
+      "hybridSub": "In-person & online"
+    },
+    "cta": {
+      "networkingJoin": "Join Event Networking",
+      "networkingOpen": "Open Event Networking",
+      "networkingSub": "Meet people and start meaningful conversations.",
+      "networkingJoinedSub": "You've joined. See who you can meet.",
+      "networkingPendingSub": "Opens once your registration is confirmed.",
+      "networkingIneligibleSub": "Networking isn't open to your registration.",
+      "networkingRegisterSub": "Register for the event to take part.",
+      "connectTitle": "Connect on DiaspoPlug",
+      "connectSub": "Send a connection request to attendees."
+    },
+    "grow": {
+      "title": "Grow your network",
+      "body": "Attending events is just the beginning. Join {name} to keep the conversations going."
+    },
+    "registerRail": {
+      "stepsTitle": "You're just a few steps away",
+      "stepsBody": "Complete your registration to take your place at this event.",
+      "highlights": "Event highlights",
+      "qrAlt": "QR code that opens this event page",
+      "helpTitle": "Registering from your phone?",
+      "helpBody": "Scan the QR code or copy the link to open this page on your mobile device.",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "copyFailed": "Could not copy the link",
+      "viewOnMap": "View on map"
+    },
+    "panels": {
+      "networking": {
+        "title": "Event networking",
+        "body": "Meet other attendees, find people with shared interests and start conversations before, during and after the event. Joining is your choice, and nothing is shared until you do.",
+        "pending": "Networking opens once your registration is confirmed.",
+        "ineligible": "Networking isn't open to your registration.",
+        "registerFirst": "Register for the event to take part in networking.",
+        "open": "Open networking",
+        "join": "Join event networking"
+      },
+      "circles": {
+        "title": "Networking circles",
+        "body": "Small topic groups for attendees who want to go deeper. Browse the circles on the networking page and join the ones that fit.",
+        "pending": "Circles open once your registration is confirmed.",
+        "ineligible": "Circles aren't open to your registration.",
+        "registerFirst": "Register for the event to join circles.",
+        "open": "Open circles",
+        "join": "Browse circles"
+      }
+    }
+  },
+  "eventRegister": {
+    "selectOption": "Select an option",
+    "networking": {
+      "title": "Networking profile",
+      "optional": "Optional",
+      "helper": "Optional — saved as a draft; nothing is shared until you join networking.",
+      "industry": "Industry",
+      "industryPlaceholder": "Select industry",
+      "interests": "Interests",
+      "interestsPlaceholder": "Select interests",
+      "offers": "What you offer",
+      "offersPlaceholder": "Select what you offer",
+      "needs": "What you're looking for",
+      "needsPlaceholder": "Select what you're looking for",
+      "note": "Add a note (optional)",
+      "selectedCount": "{count} selected",
+      "max": "You can choose up to {count}.",
+      "draftNote": "Saved as a draft after you register. You can change it later in your networking profile."
     }
   },
   "redesign": {

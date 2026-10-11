@@ -4713,7 +4713,9 @@
       "venue": "Veranstaltungsort",
       "updates": "Neuigkeiten",
       "register": "Anmelden",
-      "myEvent": "Meine Veranstaltung"
+      "myEvent": "Meine Veranstaltung",
+      "networking": "Networking",
+      "circles": "Circles"
     },
     "empty": {
       "programme": "Noch kein Programm. Fügen Sie unter „Veranstaltung verwalten“ Programmpunkte hinzu.",
@@ -4721,7 +4723,7 @@
       "updates": "Noch keine Neuigkeiten. Veröffentlichen Sie eine unter „Veranstaltung verwalten“ – alle Angemeldeten werden benachrichtigt."
     },
     "overview": {
-      "about": "Über diese Veranstaltung",
+      "about": "Über die Veranstaltung",
       "noDescription": "Die Organisator:innen haben noch keine Beschreibung hinzugefügt.",
       "organisedBy": "Organisiert von {name}",
       "tags": "Schlagwörter",
@@ -4737,7 +4739,19 @@
       "externalRegistration": "Eigene Anmeldeseite der Organisator:innen",
       "free": "Kostenlos",
       "paid": "Kostenpflichtig",
-      "perTicket": "{price} pro Ticket"
+      "perTicket": "{price} pro Ticket",
+      "format": "Format",
+      "access": "Zugang",
+      "accessRegistration": "Anmeldung erforderlich",
+      "accessApproval": "Anmeldung erforderlich (Genehmigung durch den Veranstalter)",
+      "organisedByHeading": "Veranstaltet von",
+      "contactHeading": "Kontakt zur Veranstaltung",
+      "featuredSpeakers": "Ausgewählte Referenten",
+      "viewAll": "Alle anzeigen",
+      "programmeHeading": "Veranstaltungsprogramm",
+      "viewProgramme": "Gesamtes Programm ansehen",
+      "joinBannerTitle": "Gemeinsam stärker",
+      "joinBannerBody": "Tritt {name} bei, um nach der Veranstaltung mit den Mitgliedern in Kontakt zu bleiben."
     },
     "programme": {
       "timesIn": "Die Zeiten gelten in {zone}.",
@@ -4804,13 +4818,15 @@
         "awaitingPayment": "Öffnen Sie den Tab „Meine Veranstaltung“, um fortzufahren.",
         "rejected": "Wenn Sie das für einen Fehler halten, kontaktieren Sie die Organisator:innen.",
         "closesOn": "Die Anmeldung schließt am {date}.",
-        "needsApproval": "Die Organisator:innen genehmigen jede Anmeldung."
+        "needsApproval": "Die Organisator:innen genehmigen jede Anmeldung.",
+        "confirmed": "Hier findest du die Neuigkeiten zu dieser Veranstaltung und deine Anmeldedetails."
       },
       "cta": {
         "register": "Anmelden",
         "joinWaitlist": "Auf die Warteliste",
         "signInToRegister": "Zum Anmelden einloggen",
-        "myEvent": "Meine Veranstaltung"
+        "myEvent": "Meine Veranstaltung",
+        "viewDetails": "Anmeldedetails ansehen"
       }
     },
     "organiser": {
@@ -4828,7 +4844,10 @@
       "requestedPay": "Ihre Beitrittsanfrage an {name} wurde gestartet. Schließen Sie die Zahlung auf der Seite ab, um den Beitritt zu vollenden.",
       "failedJoin": "Wir konnten Ihre Beitrittsanfrage an {name} nicht senden. Ihre Anmeldung zur Veranstaltung ist davon nicht betroffen. Sie können es auf dieser Seite erneut versuchen.",
       "notApplicable": "Diese Veranstaltung hat keine Organisator-Community zum Beitreten.",
-      "notAvailableYet": "Der Beitritt zur Organisator-Community über eine Veranstaltung ist noch nicht verfügbar."
+      "notAvailableYet": "Der Beitritt zur Organisator-Community über eine Veranstaltung ist noch nicht verfügbar.",
+      "viewCommunity": "Community ansehen",
+      "statusMember": "Status: Mitglied",
+      "statusPending": "Status: Anfrage ausstehend"
     },
     "share": {
       "title": "Veranstaltung teilen",
@@ -4836,15 +4855,19 @@
       "share": "Teilen",
       "copied": "Link kopiert",
       "failed": "Der Link konnte nicht kopiert werden",
-      "qrAlt": "QR-Code, der diese Veranstaltungsseite öffnet"
+      "qrAlt": "QR-Code, der diese Veranstaltungsseite öffnet",
+      "sub": "Lade Freunde und Kollegen zu dieser Veranstaltung ein.",
+      "inviteLink": "Einladungslink holen",
+      "qr": "QR-Code"
     },
     "similar": {
-      "title": "Ähnliche Veranstaltungen"
+      "title": "Ähnliche Veranstaltungen",
+      "viewAll": "Alle anzeigen"
     },
     "register": {
       "signInPrompt": "Melden Sie sich an, um sich für diese Veranstaltung zu registrieren.",
       "signIn": "Einloggen",
-      "attendee": "Ihre Angaben",
+      "attendee": "Angaben zur Person",
       "name": "Name",
       "email": "E-Mail",
       "attendeeNote": "Aus Ihrem Profil übernommen. Ändern Sie sie in Ihren Profileinstellungen.",
@@ -4853,7 +4876,9 @@
       "format": {
         "label": "Wie nehmen Sie teil?",
         "inPerson": "Vor Ort",
-        "online": "Online"
+        "online": "Online",
+        "sub": "Wie nimmst du teil?",
+        "onlineSub": "Teilnahme über den Online-Link."
       },
       "summary": {
         "title": "Zusammenfassung",
@@ -4868,7 +4893,8 @@
         "failed": "Wir konnten den Code nicht prüfen. Versuchen Sie es erneut."
       },
       "terms": {
-        "label": "Ich akzeptiere die Veranstaltungsbedingungen, die <tos>Nutzungsbedingungen</tos> und die <privacy>Datenschutzerklärung</privacy> von DiaspoPlug."
+        "label": "Ich akzeptiere die Veranstaltungsbedingungen, die <tos>Nutzungsbedingungen</tos> und die <privacy>Datenschutzerklärung</privacy> von DiaspoPlug.",
+        "title": "Teilnahmebedingungen"
       },
       "joinOrganiser": {
         "label": "Auch {name} beitreten",
@@ -4897,8 +4923,23 @@
         "waitlisted": "Sie stehen auf der Warteliste.",
         "waitlistedPos": "Sie sind Nummer {position} auf der Warteliste.",
         "received": "Anmeldung eingegangen.",
-        "paymentNotCompleted": "Die Zahlung wurde nicht abgeschlossen. Ihr Platz ist reserviert, aber erst nach der Zahlung bestätigt."
-      }
+        "paymentNotCompleted": "Die Zahlung wurde nicht abgeschlossen. Ihr Platz ist reserviert, aber erst nach der Zahlung bestätigt.",
+        "draftSaved": "Dein Networking-Profil wurde als Entwurf gespeichert. Es wird nichts geteilt, bis du dem Networking beitrittst.",
+        "draftUnavailableYet": "Das Speichern eines Networking-Profils ist noch nicht verfügbar. Deine Anmeldung ist davon nicht betroffen.",
+        "draftFailed": "Dein Networking-Profil konnte nicht gespeichert werden. Deine Anmeldung ist davon nicht betroffen. Du kannst es später auf der Networking-Seite ausfüllen."
+      },
+      "heading": "Veranstaltungsanmeldung",
+      "headingSub": "Fülle das Formular aus, um dich für {title} anzumelden.",
+      "attendeeSub": "Aus deinem Profil übernommen.",
+      "type": {
+        "title": "Anmeldeart",
+        "sub": "Wähle die Anmeldeart, die zu dir passt.",
+        "general": "Anmeldung"
+      },
+      "quantity": "Anzahl der Tickets",
+      "decrease": "Weniger Tickets",
+      "increase": "Mehr Tickets",
+      "backToEvent": "Zurück zur Veranstaltung"
     },
     "myEvent": {
       "status": "Ihre Anmeldung",
@@ -5062,6 +5103,81 @@
         "removed": "Aus dem Team entfernt.",
         "unknownPerson": "Unbekannte Person"
       }
+    },
+    "format": {
+      "physical": "Vor Ort",
+      "physicalSub": "Am Veranstaltungsort",
+      "virtual": "Online",
+      "virtualSub": "Von überall teilnehmen",
+      "hybrid": "Hybrid",
+      "hybridSub": "Vor Ort und online"
+    },
+    "cta": {
+      "networkingJoin": "Event-Networking beitreten",
+      "networkingOpen": "Event-Networking öffnen",
+      "networkingSub": "Lerne Menschen kennen und führe wertvolle Gespräche.",
+      "networkingJoinedSub": "Du bist dabei. Sieh, wen du treffen kannst.",
+      "networkingPendingSub": "Öffnet, sobald deine Anmeldung bestätigt ist.",
+      "networkingIneligibleSub": "Networking steht für deine Anmeldung nicht offen.",
+      "networkingRegisterSub": "Melde dich zur Veranstaltung an, um teilzunehmen.",
+      "connectTitle": "Auf DiaspoPlug vernetzen",
+      "connectSub": "Sende Teilnehmenden eine Kontaktanfrage."
+    },
+    "grow": {
+      "title": "Erweitere dein Netzwerk",
+      "body": "Veranstaltungen zu besuchen ist nur der Anfang. Tritt {name} bei, damit die Gespräche weitergehen."
+    },
+    "registerRail": {
+      "stepsTitle": "Nur noch wenige Schritte",
+      "stepsBody": "Schließe deine Anmeldung ab, um dir deinen Platz zu sichern.",
+      "highlights": "Highlights der Veranstaltung",
+      "qrAlt": "QR-Code, der diese Veranstaltungsseite öffnet",
+      "helpTitle": "Anmeldung vom Smartphone?",
+      "helpBody": "Scanne den QR-Code oder kopiere den Link, um diese Seite auf deinem Mobilgerät zu öffnen.",
+      "copyLink": "Link kopieren",
+      "copied": "Link kopiert",
+      "copyFailed": "Der Link konnte nicht kopiert werden",
+      "viewOnMap": "Auf Karte ansehen"
+    },
+    "panels": {
+      "networking": {
+        "title": "Event-Networking",
+        "body": "Lerne andere Teilnehmende kennen, finde Menschen mit gemeinsamen Interessen und starte Gespräche vor, während und nach der Veranstaltung. Die Teilnahme ist deine Entscheidung, und bis dahin wird nichts geteilt.",
+        "pending": "Networking öffnet, sobald deine Anmeldung bestätigt ist.",
+        "ineligible": "Networking steht für deine Anmeldung nicht offen.",
+        "registerFirst": "Melde dich zur Veranstaltung an, um am Networking teilzunehmen.",
+        "open": "Networking öffnen",
+        "join": "Event-Networking beitreten"
+      },
+      "circles": {
+        "title": "Networking-Circles",
+        "body": "Kleine Themengruppen für Teilnehmende, die tiefer einsteigen möchten. Stöbere auf der Networking-Seite in den Circles und tritt passenden bei.",
+        "pending": "Circles öffnen, sobald deine Anmeldung bestätigt ist.",
+        "ineligible": "Circles stehen für deine Anmeldung nicht offen.",
+        "registerFirst": "Melde dich zur Veranstaltung an, um Circles beizutreten.",
+        "open": "Circles öffnen",
+        "join": "Circles durchsuchen"
+      }
+    }
+  },
+  "eventRegister": {
+    "selectOption": "Option wählen",
+    "networking": {
+      "title": "Networking-Profil",
+      "optional": "Optional",
+      "helper": "Optional – als Entwurf gespeichert; es wird nichts geteilt, bis du dem Networking beitrittst.",
+      "industry": "Branche",
+      "industryPlaceholder": "Branche wählen",
+      "interests": "Interessen",
+      "interestsPlaceholder": "Interessen wählen",
+      "offers": "Was du anbietest",
+      "offersPlaceholder": "Wähle, was du anbietest",
+      "needs": "Wonach du suchst",
+      "needsPlaceholder": "Wähle, wonach du suchst",
+      "note": "Notiz hinzufügen (optional)",
+      "selectedCount": "{count} ausgewählt",
+      "max": "Du kannst bis zu {count} auswählen.",
+      "draftNote": "Wird nach der Anmeldung als Entwurf gespeichert. Du kannst ihn später in deinem Networking-Profil ändern."
     }
   },
   "redesign": {
