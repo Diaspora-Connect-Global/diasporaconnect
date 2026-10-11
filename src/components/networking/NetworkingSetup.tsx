@@ -108,7 +108,7 @@ export default function NetworkingSetup({ eventId }: { eventId: string }) {
         prefill={prefillQ.data?.eventNetworkingPrefill ?? null}
         allowedVisibility={base.mine?.allowedVisibilityModes ?? []}
         aiConsent={aiConsent}
-        onEnableAi={() => void enableAi().then((ok) => ok && base.refetchMine())}
+        onEnableAi={() => void enableAi().then(async (ok) => { if (ok) await base.refetchMine(); })}
         suggest={suggest}
         days={days}
         timeZone={timeZone}

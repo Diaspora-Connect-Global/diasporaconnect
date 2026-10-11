@@ -172,7 +172,7 @@ test('person: every unavailable case shows the same not-found screen', async () 
 });
 
 test('person: a real person shows reasons and actions, never an id', async () => {
-    const person = { __typename: 'EventNetworkingPerson', ...card('h-david-71c', 'David Owusu'), intro: 'Investing in fintech.', needsNote: null, offersNote: null };
+    const person = { ...card('h-david-71c', 'David Owusu'), __typename: 'EventNetworkingPerson', intro: 'Investing in fintech.', needsNote: null, offersNote: null };
     const { page } = await openPage(browser, `${BASE}/people/h-david-71c`, networkingOverrides({ NetworkingPerson: { eventNetworkingPerson: person } }));
     await expect(page.getByTestId('person-view')).toContainText('David Owusu', READY);
     await expect(page.getByTestId('person-actions')).toBeVisible();

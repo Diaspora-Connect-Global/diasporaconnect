@@ -224,7 +224,7 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
         labelOf={base.labelOf}
         suggest={suggest}
         aiConsent={aiConsent}
-        onEnableAi={() => void enableAi().then((ok) => ok && base.refetchMine())}
+        onEnableAi={() => void enableAi().then(async (ok) => { if (ok) await base.refetchMine(); })}
         days={days}
         timeZone={timeZone}
         allowedVisibility={base.mine?.allowedVisibilityModes ?? []}
