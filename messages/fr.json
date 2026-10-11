@@ -5121,7 +5121,9 @@
       "networkingIneligibleSub": "Le réseautage n'est pas ouvert à votre inscription.",
       "networkingRegisterSub": "Inscrivez-vous à l'événement pour participer.",
       "connectTitle": "Se connecter sur DiaspoPlug",
-      "connectSub": "Envoyez une demande de connexion aux participants."
+      "connectSub": "Envoyez une demande de connexion aux participants.",
+      "scheduleTitle": "Mon programme",
+      "scheduleSub": "Vos rendez-vous et sessions au même endroit."
     },
     "grow": {
       "title": "Développez votre réseau",
@@ -5485,7 +5487,8 @@
       "interested": "Intéressés par vous",
       "matches": "Mes correspondances",
       "interests": "Mes intérêts",
-      "circles": "Cercles"
+      "circles": "Cercles",
+      "meetings": "Rendez-vous"
     },
     "tier": {
       "DIRECT_OPPORTUNITY": "Opportunité directe",
@@ -5624,7 +5627,11 @@
       "noPercent": "Nous montrons pourquoi vous correspondez, pas un score.",
       "manageTitle": "Envie d'être plus visible ?",
       "manageBody": "Mettez à jour vos préférences de réseautage pour de meilleures occasions de contact.",
-      "managePrefs": "Gérer les préférences"
+      "managePrefs": "Gérer les préférences",
+      "myMeetings": "Mes rendez-vous",
+      "myMeetingsHint": "Demandes, rendez-vous à venir et passés.",
+      "mySchedule": "Mon programme",
+      "myScheduleHint": "Rendez-vous et sessions, jour par jour."
     },
     "directory": {
       "filters": "Filtres",
@@ -5859,7 +5866,12 @@
       "interestLimit": "Vous avez atteint la limite quotidienne d'intérêts. Réessayez demain.",
       "connectCooldown": "Vous ne pouvez pas encore renvoyer une demande à cette personne.",
       "connectionLimit": "Vous avez atteint votre limite de demandes de connexion pour le moment.",
-      "connectRefused": "Cette connexion n'a pas pu être établie."
+      "connectRefused": "Cette connexion n'a pas pu être établie.",
+      "slotTaken": "Ce créneau vient d'être pris. Choisissez-en un autre.",
+      "slotUnavailable": "Ce créneau n'est plus disponible. Choisissez-en un autre.",
+      "pointUnavailable": "Ce lieu de rendez-vous est complet à cette heure. Choisissez un autre lieu ou un autre créneau.",
+      "meetingsNotAccepted": "Cette personne n'accepte pas de demandes de rendez-vous pour le moment.",
+      "meetingNotFound": "Ce rendez-vous est introuvable."
     },
     "tax": {
       "role_founder": "Fondateur / fondatrice",
@@ -5971,6 +5983,217 @@
       "sentBody": "Merci. Les organisateurs de cet événement vont l'examiner.",
       "caseRef": "Votre référence : {number}",
       "close": "Fermer"
+    },
+    "meetings": {
+      "thisPerson": "cette personne",
+      "yourTime": "Votre heure locale : {time}",
+      "zoneNote": "Les heures sont affichées à l'heure de l'événement : {zone} ({short}).",
+      "status": {
+        "REQUESTED": "En attente de réponse",
+        "ALT_PROPOSED": "Autres créneaux proposés",
+        "CONFIRMED": "Confirmé",
+        "RESCHEDULE_PROPOSED": "Nouveau créneau proposé",
+        "DECLINED": "Refusé",
+        "CANCELLED": "Annulé",
+        "EXPIRED": "Expiré",
+        "COMPLETED": "Terminé",
+        "awaitingMe": "Attend votre réponse"
+      },
+      "format": {
+        "IN_PERSON": "En personne",
+        "ONLINE": "En ligne"
+      },
+      "purpose": {
+        "PARTNERSHIP": "Partenariat",
+        "INVESTMENT": "Investissement",
+        "MENTORSHIP": "Mentorat",
+        "HIRING": "Recrutement",
+        "COLLABORATION": "Collaboration",
+        "KNOWLEDGE_EXCHANGE": "Échange de connaissances",
+        "BUSINESS_DEVELOPMENT": "Développement commercial",
+        "INTRODUCTION": "Présentation",
+        "OTHER": "Autre chose"
+      },
+      "request": {
+        "button": "Demander un rendez-vous",
+        "title": "Demander un rendez-vous à {name}",
+        "intro": "Choisissez un créneau qui convient à tous les deux. {name} sera invité(e) à confirmer.",
+        "sentTitle": "Demande envoyée",
+        "sentBody": "{name} sera invité(e) à confirmer. Vous verrez la réponse dans Rendez-vous.",
+        "close": "Fermer",
+        "retry": "Afficher à nouveau les créneaux",
+        "durationLegend": "Quelle durée ?",
+        "minutes": "{count} min",
+        "formatLegend": "Format",
+        "pointLegend": "Lieu du rendez-vous",
+        "pointNone": "Pas de préférence",
+        "pointCapacity": "Jusqu'à {count} rendez-vous en même temps",
+        "loadingSlots": "Recherche de créneaux qui conviennent à tous les deux",
+        "noSlots": "Aucun créneau commun n'est libre pour cette durée ou ce lieu. Essayez une autre durée ou un autre lieu.",
+        "timeLegend": "Choisir un créneau",
+        "chooseTime": "Choisissez d'abord un créneau.",
+        "urlLabel": "Lien de la réunion (facultatif)",
+        "urlInvalid": "Utilisez un lien qui commence par https://",
+        "urlHint": "Commence par https://. Seuls vous et {name} pouvez le voir.",
+        "purposeLabel": "De quoi s'agit-il ?",
+        "purposePlaceholder": "Choisir un sujet",
+        "choosePurpose": "Choisissez le sujet du rendez-vous.",
+        "noteLabel": "Ajouter un message (facultatif)",
+        "noteHint": "{count} caractères sur {max}. {name} verra ce message.",
+        "revealTitle": "Votre profil sera visible",
+        "revealLabel": "Je comprends que {name} verra mon profil s'il ou elle ouvre cette demande.",
+        "cancel": "Annuler",
+        "send": "Envoyer la demande",
+        "sending": "Envoi en cours",
+        "neverConnects": "Une demande de rendez-vous ne crée pas de connexion. Vous pourrez vous connecter ensuite si vous le souhaitez tous les deux."
+      },
+      "detail": {
+        "title": "Rendez-vous",
+        "unavailable": "Ne participe plus au réseautage.",
+        "currentTime": "Créneau actuel",
+        "time": "Heure",
+        "duration": "{count} minutes",
+        "format": "Format",
+        "place": "Lieu",
+        "link": "Lien de la réunion",
+        "opensNewTab": "(s'ouvre dans un nouvel onglet)",
+        "purpose": "Sujet",
+        "note": "Message",
+        "rescheduleLegend": "{name} propose un nouveau créneau",
+        "altLegend": "{name} propose d'autres créneaux",
+        "pickOne": "Choisissez l'un des créneaux proposés",
+        "yourProposals": "Créneaux que vous avez proposés",
+        "waitingFor": "En attente de la réponse de {name}.",
+        "expired": "Cette demande a expiré sans réponse.",
+        "declined": "Cette demande a été refusée.",
+        "cancelledByMe": "Vous avez annulé ce rendez-vous.",
+        "cancelledByThem": "{name} a annulé ce rendez-vous.",
+        "cancelReason": {
+          "BY_PARTICIPANT": "Ce rendez-vous a été annulé.",
+          "MATCH_DISSOLVED": "Cette demande n'est plus ouverte.",
+          "BLOCKED": "Ce rendez-vous n'est plus disponible.",
+          "PARTICIPATION_ENDED": "Ce rendez-vous a pris fin car quelqu'un ne participe plus au réseautage."
+        },
+        "addLink": "Ajouter un lien de réunion (facultatif)",
+        "addLinkHint": "Commence par https://. Seuls vous et {name} pouvez le voir.",
+        "acceptChosen": "Accepter ce créneau",
+        "accept": "Accepter",
+        "keepOriginal": "Garder le créneau d'origine",
+        "decline": "Refuser",
+        "propose": "Proposer d'autres créneaux",
+        "reschedule": "Reporter",
+        "cancel": "Annuler le rendez-vous",
+        "addGoogle": "Ajouter à Google Agenda",
+        "addIcs": "Télécharger le fichier d'agenda",
+        "message": "Écrire à {name}"
+      },
+      "calendar": {
+        "title": "Rendez-vous avec {name} ({event})"
+      },
+      "announce": {
+        "accepted": "Rendez-vous confirmé.",
+        "kept": "Le créneau d'origine est conservé.",
+        "declined": "Demande refusée.",
+        "proposed": "Autres créneaux envoyés.",
+        "rescheduleSent": "Nouveaux créneaux envoyés. Le créneau d'origine reste valable jusqu'à la réponse.",
+        "cancelled": "Rendez-vous annulé."
+      },
+      "cancelDialog": {
+        "title": "Annuler ce rendez-vous ?",
+        "bodyConfirmed": "{name} sera informé(e) de l'annulation. Le créneau redevient libre pour vous deux.",
+        "bodyPending": "La demande envoyée à {name} sera retirée.",
+        "keep": "Garder le rendez-vous",
+        "confirm": "Oui, annuler"
+      },
+      "propose": {
+        "count": "{count} sur {max} choisis",
+        "title": "Proposer d'autres créneaux à {name}",
+        "rescheduleTitle": "Proposer un nouveau créneau à {name}",
+        "legend": "Choisissez jusqu'à {max} créneaux",
+        "close": "Fermer",
+        "send": "Envoyer {count} créneaux"
+      },
+      "panel": {
+        "intro": "Vos demandes de rendez-vous et rendez-vous pour cet événement.",
+        "awaitingMe": "{count} en attente de votre réponse.",
+        "filters": "Listes de rendez-vous",
+        "filter": {
+          "PENDING": "En attente",
+          "UPCOMING": "À venir",
+          "ALTERNATIVES": "Autres créneaux",
+          "COMPLETED": "Terminés",
+          "CANCELLED": "Annulés"
+        },
+        "empty": {
+          "PENDING": "Aucune demande en attente. Demandez un rendez-vous depuis une correspondance ou un profil.",
+          "UPCOMING": "Aucun rendez-vous à venir pour le moment.",
+          "ALTERNATIVES": "Personne n'a proposé d'autres créneaux.",
+          "COMPLETED": "Aucun rendez-vous terminé pour le moment.",
+          "CANCELLED": "Rien d'annulé, de refusé ou d'expiré."
+        },
+        "view": "Voir",
+        "loading": "Chargement",
+        "loadMore": "Charger plus"
+      },
+      "schedule": {
+        "title": "Mon programme",
+        "toMeetings": "Ouvrir mes rendez-vous",
+        "circleNote": "Les sessions de cercle ne sont pas encore affichées ici. Vos rendez-vous et le programme sont complets.",
+        "empty": "Rien n'est encore planifié. Les rendez-vous confirmés et les sessions du programme apparaissent ici.",
+        "meetingWith": "Rendez-vous avec {name}",
+        "kind": {
+          "MEETING": "Rendez-vous",
+          "SESSION": "Programme",
+          "CIRCLE_SESSION": "Session de cercle"
+        }
+      },
+      "settings": {
+        "title": "Rendez-vous de réseautage",
+        "intro": "Choisissez qui peut demander des rendez-vous, quand, pour quelle durée et où.",
+        "loading": "Chargement",
+        "policyLegend": "Qui peut demander un rendez-vous",
+        "policy": {
+          "MUTUAL_ONLY": {
+            "label": "Correspondances uniquement",
+            "hint": "Un rendez-vous peut être demandé une fois que les deux personnes ont montré leur intérêt."
+          },
+          "ANY_PARTICIPANT": {
+            "label": "Tout participant",
+            "hint": "Tout participant au réseautage peut demander un rendez-vous à toute personne qu'il voit."
+          },
+          "DISABLED": {
+            "label": "Désactivé",
+            "hint": "Aucune nouvelle demande de rendez-vous. Les rendez-vous existants peuvent encore être annulés."
+          }
+        },
+        "durationsLegend": "Durées des rendez-vous",
+        "minutes": "{count} min",
+        "durationsNeeded": "Choisissez au moins une durée.",
+        "windowsLegend": "Plages de rendez-vous",
+        "windowsHint": "Heures à l'heure de l'événement ({zone}). Sans plage, les rendez-vous sont possibles à tout moment pendant l'événement.",
+        "windowsWholeEvent": "Aucune plage définie : tout l'événement est ouvert aux rendez-vous.",
+        "date": "Date",
+        "from": "De",
+        "to": "À",
+        "removeWindow": "Supprimer la plage {n}",
+        "remove": "Supprimer",
+        "windowInvalid": "Chaque plage nécessite une date et une heure de fin postérieure au début.",
+        "addWindow": "Ajouter une plage",
+        "pointsLegend": "Lieux de rendez-vous",
+        "pointsHint": "Les lieux supprimés sont désactivés, pas effacés. La capacité est le nombre de rendez-vous possibles en même temps.",
+        "pointName": "Nom",
+        "pointDirections": "Indications (facultatif)",
+        "pointCapacity": "Capacité par créneau",
+        "removePoint": "Supprimer {name}",
+        "pointInvalid": "Chaque lieu nécessite un nom et une capacité de 1 à {max}.",
+        "addPoint": "Ajouter un lieu",
+        "capsLegend": "Limites par personne",
+        "maxMeetings": "Nombre maximal de rendez-vous par personne",
+        "maxPending": "Nombre maximal de demandes ouvertes par personne",
+        "capsInvalid": "Les limites doivent être des nombres entiers à partir de 1.",
+        "saved": "Paramètres des rendez-vous enregistrés.",
+        "save": "Enregistrer les paramètres"
+      }
     }
   }
 }

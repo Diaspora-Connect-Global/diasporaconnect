@@ -5121,7 +5121,9 @@
       "networkingIneligibleSub": "Networking steht für deine Anmeldung nicht offen.",
       "networkingRegisterSub": "Melde dich zur Veranstaltung an, um teilzunehmen.",
       "connectTitle": "Auf DiaspoPlug vernetzen",
-      "connectSub": "Sende Teilnehmenden eine Kontaktanfrage."
+      "connectSub": "Sende Teilnehmenden eine Kontaktanfrage.",
+      "scheduleTitle": "Mein Zeitplan",
+      "scheduleSub": "Deine Treffen und Sessions an einem Ort."
     },
     "grow": {
       "title": "Erweitere dein Netzwerk",
@@ -5485,7 +5487,8 @@
       "interested": "Interessiert an dir",
       "matches": "Meine Matches",
       "interests": "Meine Interessen",
-      "circles": "Circles"
+      "circles": "Circles",
+      "meetings": "Treffen"
     },
     "tier": {
       "DIRECT_OPPORTUNITY": "Direkte Chance",
@@ -5624,7 +5627,11 @@
       "noPercent": "Wir zeigen, warum ihr zusammenpasst, keine Punktzahl.",
       "manageTitle": "Besser gefunden werden?",
       "manageBody": "Aktualisiere deine Networking-Einstellungen für bessere Kontaktchancen.",
-      "managePrefs": "Einstellungen verwalten"
+      "managePrefs": "Einstellungen verwalten",
+      "myMeetings": "Meine Treffen",
+      "myMeetingsHint": "Anfragen, anstehende und vergangene Treffen.",
+      "mySchedule": "Mein Zeitplan",
+      "myScheduleHint": "Treffen und Sessions, Tag für Tag."
     },
     "directory": {
       "filters": "Filter",
@@ -5859,7 +5866,12 @@
       "interestLimit": "Du hast das Tageslimit für Interessen erreicht. Versuche es morgen erneut.",
       "connectCooldown": "Du kannst dieser Person noch keine weitere Anfrage senden.",
       "connectionLimit": "Du hast dein Limit für Vernetzungsanfragen vorerst erreicht.",
-      "connectRefused": "Diese Vernetzung war nicht möglich."
+      "connectRefused": "Diese Vernetzung war nicht möglich.",
+      "slotTaken": "Dieser Termin wurde gerade vergeben. Bitte wähle einen anderen.",
+      "slotUnavailable": "Dieser Termin ist nicht mehr verfügbar. Bitte wähle einen anderen.",
+      "pointUnavailable": "Dieser Treffpunkt ist zu dieser Zeit voll. Wähle einen anderen Ort oder eine andere Zeit.",
+      "meetingsNotAccepted": "Diese Person nimmt gerade keine Treffenanfragen an.",
+      "meetingNotFound": "Dieses Treffen wurde nicht gefunden."
     },
     "tax": {
       "role_founder": "Gründer:in",
@@ -5971,6 +5983,217 @@
       "sentBody": "Danke. Die Veranstaltenden kümmern sich darum.",
       "caseRef": "Deine Referenz: {number}",
       "close": "Schließen"
+    },
+    "meetings": {
+      "thisPerson": "diese Person",
+      "yourTime": "Deine Ortszeit: {time}",
+      "zoneNote": "Zeiten in Veranstaltungszeit: {zone} ({short}).",
+      "status": {
+        "REQUESTED": "Wartet auf Antwort",
+        "ALT_PROPOSED": "Andere Zeiten vorgeschlagen",
+        "CONFIRMED": "Bestätigt",
+        "RESCHEDULE_PROPOSED": "Neue Zeit vorgeschlagen",
+        "DECLINED": "Abgelehnt",
+        "CANCELLED": "Abgesagt",
+        "EXPIRED": "Abgelaufen",
+        "COMPLETED": "Abgeschlossen",
+        "awaitingMe": "Wartet auf deine Antwort"
+      },
+      "format": {
+        "IN_PERSON": "Vor Ort",
+        "ONLINE": "Online"
+      },
+      "purpose": {
+        "PARTNERSHIP": "Partnerschaft",
+        "INVESTMENT": "Investition",
+        "MENTORSHIP": "Mentoring",
+        "HIRING": "Personalsuche",
+        "COLLABORATION": "Zusammenarbeit",
+        "KNOWLEDGE_EXCHANGE": "Wissensaustausch",
+        "BUSINESS_DEVELOPMENT": "Geschäftsentwicklung",
+        "INTRODUCTION": "Kennenlernen",
+        "OTHER": "Etwas anderes"
+      },
+      "request": {
+        "button": "Treffen anfragen",
+        "title": "Treffen mit {name} anfragen",
+        "intro": "Wähle eine Zeit, die für euch beide passt. {name} wird um Bestätigung gebeten.",
+        "sentTitle": "Anfrage gesendet",
+        "sentBody": "{name} wird um Bestätigung gebeten. Die Antwort siehst du unter Treffen.",
+        "close": "Schließen",
+        "retry": "Zeiten erneut anzeigen",
+        "durationLegend": "Wie lange?",
+        "minutes": "{count} Min.",
+        "formatLegend": "Format",
+        "pointLegend": "Treffpunkt",
+        "pointNone": "Keine Präferenz",
+        "pointCapacity": "Bis zu {count} Treffen gleichzeitig",
+        "loadingSlots": "Zeiten werden gesucht, die für euch beide passen",
+        "noSlots": "Für diese Dauer oder diesen Ort sind keine gemeinsamen Zeiten frei. Versuche eine andere Dauer oder einen anderen Ort.",
+        "timeLegend": "Zeit wählen",
+        "chooseTime": "Bitte wähle zuerst eine Zeit.",
+        "urlLabel": "Meeting-Link (optional)",
+        "urlInvalid": "Verwende einen Link, der mit https:// beginnt",
+        "urlHint": "Beginnt mit https://. Nur du und {name} können ihn sehen.",
+        "purposeLabel": "Worum geht es?",
+        "purposePlaceholder": "Thema wählen",
+        "choosePurpose": "Wähle, worum es bei dem Treffen geht.",
+        "noteLabel": "Nachricht hinzufügen (optional)",
+        "noteHint": "{count} von {max} Zeichen. {name} sieht diese Nachricht.",
+        "revealTitle": "Dein Profil wird sichtbar",
+        "revealLabel": "Ich verstehe, dass {name} mein Profil sieht, wenn die Anfrage geöffnet wird.",
+        "cancel": "Abbrechen",
+        "send": "Anfrage senden",
+        "sending": "Wird gesendet",
+        "neverConnects": "Eine Treffenanfrage verbindet euch nicht. Danach könnt ihr euch vernetzen, wenn ihr beide möchtet."
+      },
+      "detail": {
+        "title": "Treffen",
+        "unavailable": "Nimmt nicht mehr am Networking teil.",
+        "currentTime": "Aktuelle Zeit",
+        "time": "Zeit",
+        "duration": "{count} Minuten",
+        "format": "Format",
+        "place": "Ort",
+        "link": "Meeting-Link",
+        "opensNewTab": "(öffnet in neuem Tab)",
+        "purpose": "Thema",
+        "note": "Nachricht",
+        "rescheduleLegend": "{name} schlägt eine neue Zeit vor",
+        "altLegend": "{name} schlägt andere Zeiten vor",
+        "pickOne": "Wähle eine der vorgeschlagenen Zeiten",
+        "yourProposals": "Von dir vorgeschlagene Zeiten",
+        "waitingFor": "Warten auf die Antwort von {name}.",
+        "expired": "Diese Anfrage ist ohne Antwort abgelaufen.",
+        "declined": "Diese Anfrage wurde abgelehnt.",
+        "cancelledByMe": "Du hast dieses Treffen abgesagt.",
+        "cancelledByThem": "{name} hat dieses Treffen abgesagt.",
+        "cancelReason": {
+          "BY_PARTICIPANT": "Dieses Treffen wurde abgesagt.",
+          "MATCH_DISSOLVED": "Diese Anfrage ist nicht mehr offen.",
+          "BLOCKED": "Dieses Treffen ist nicht mehr verfügbar.",
+          "PARTICIPATION_ENDED": "Dieses Treffen endete, weil jemand nicht mehr am Networking teilnimmt."
+        },
+        "addLink": "Meeting-Link hinzufügen (optional)",
+        "addLinkHint": "Beginnt mit https://. Nur du und {name} können ihn sehen.",
+        "acceptChosen": "Diese Zeit annehmen",
+        "accept": "Annehmen",
+        "keepOriginal": "Ursprüngliche Zeit beibehalten",
+        "decline": "Ablehnen",
+        "propose": "Andere Zeiten vorschlagen",
+        "reschedule": "Verschieben",
+        "cancel": "Treffen absagen",
+        "addGoogle": "Zu Google Kalender hinzufügen",
+        "addIcs": "Kalenderdatei herunterladen",
+        "message": "{name} schreiben"
+      },
+      "calendar": {
+        "title": "Treffen mit {name} ({event})"
+      },
+      "announce": {
+        "accepted": "Treffen bestätigt.",
+        "kept": "Die ursprüngliche Zeit bleibt.",
+        "declined": "Anfrage abgelehnt.",
+        "proposed": "Andere Zeiten gesendet.",
+        "rescheduleSent": "Neue Zeiten gesendet. Die ursprüngliche Zeit bleibt bis zur Antwort.",
+        "cancelled": "Treffen abgesagt."
+      },
+      "cancelDialog": {
+        "title": "Dieses Treffen absagen?",
+        "bodyConfirmed": "{name} erfährt, dass das Treffen abgesagt ist. Die Zeit wird für euch beide wieder frei.",
+        "bodyPending": "Die Anfrage an {name} wird zurückgezogen.",
+        "keep": "Treffen behalten",
+        "confirm": "Ja, absagen"
+      },
+      "propose": {
+        "count": "{count} von {max} gewählt",
+        "title": "{name} andere Zeiten vorschlagen",
+        "rescheduleTitle": "{name} eine neue Zeit vorschlagen",
+        "legend": "Wähle bis zu {max} Zeiten",
+        "close": "Schließen",
+        "send": "{count} Zeiten senden"
+      },
+      "panel": {
+        "intro": "Deine Treffenanfragen und Treffen für diese Veranstaltung.",
+        "awaitingMe": "{count} warten auf deine Antwort.",
+        "filters": "Treffenlisten",
+        "filter": {
+          "PENDING": "Offen",
+          "UPCOMING": "Anstehend",
+          "ALTERNATIVES": "Andere Zeiten",
+          "COMPLETED": "Abgeschlossen",
+          "CANCELLED": "Abgesagt"
+        },
+        "empty": {
+          "PENDING": "Keine offenen Anfragen. Frage ein Treffen über einen Match oder ein Profil an.",
+          "UPCOMING": "Noch keine anstehenden Treffen.",
+          "ALTERNATIVES": "Niemand hat andere Zeiten vorgeschlagen.",
+          "COMPLETED": "Noch keine abgeschlossenen Treffen.",
+          "CANCELLED": "Nichts abgesagt, abgelehnt oder abgelaufen."
+        },
+        "view": "Ansehen",
+        "loading": "Wird geladen",
+        "loadMore": "Mehr laden"
+      },
+      "schedule": {
+        "title": "Mein Zeitplan",
+        "toMeetings": "Meine Treffen öffnen",
+        "circleNote": "Circle-Sessions werden hier noch nicht angezeigt. Deine Treffen und das Programm sind vollständig.",
+        "empty": "Noch nichts geplant. Bestätigte Treffen und Programm-Sessions erscheinen hier.",
+        "meetingWith": "Treffen mit {name}",
+        "kind": {
+          "MEETING": "Treffen",
+          "SESSION": "Programm",
+          "CIRCLE_SESSION": "Circle-Session"
+        }
+      },
+      "settings": {
+        "title": "Networking-Treffen",
+        "intro": "Lege fest, wer Treffen anfragen kann, wann, wie lange und wo.",
+        "loading": "Wird geladen",
+        "policyLegend": "Wer ein Treffen anfragen kann",
+        "policy": {
+          "MUTUAL_ONLY": {
+            "label": "Nur Matches",
+            "hint": "Treffen können angefragt werden, nachdem beide Interesse gezeigt haben."
+          },
+          "ANY_PARTICIPANT": {
+            "label": "Alle Teilnehmenden",
+            "hint": "Alle Networking-Teilnehmenden können ein Treffen mit jeder sichtbaren Person anfragen."
+          },
+          "DISABLED": {
+            "label": "Deaktiviert",
+            "hint": "Keine neuen Treffenanfragen. Bestehende Treffen können weiterhin abgesagt werden."
+          }
+        },
+        "durationsLegend": "Dauer der Treffen",
+        "minutes": "{count} Min.",
+        "durationsNeeded": "Wähle mindestens eine Dauer.",
+        "windowsLegend": "Zeitfenster für Treffen",
+        "windowsHint": "Zeiten in Veranstaltungszeit ({zone}). Ohne Zeitfenster sind Treffen jederzeit während der Veranstaltung möglich.",
+        "windowsWholeEvent": "Keine Zeitfenster: Die gesamte Veranstaltung ist für Treffen offen.",
+        "date": "Datum",
+        "from": "Von",
+        "to": "Bis",
+        "removeWindow": "Zeitfenster {n} entfernen",
+        "remove": "Entfernen",
+        "windowInvalid": "Jedes Zeitfenster braucht ein Datum und eine Endzeit nach der Startzeit.",
+        "addWindow": "Zeitfenster hinzufügen",
+        "pointsLegend": "Treffpunkte",
+        "pointsHint": "Entfernte Orte werden deaktiviert, nicht gelöscht. Kapazität ist die Zahl der Treffen, die dort gleichzeitig stattfinden können.",
+        "pointName": "Name",
+        "pointDirections": "Wegbeschreibung (optional)",
+        "pointCapacity": "Kapazität pro Zeit",
+        "removePoint": "{name} entfernen",
+        "pointInvalid": "Jeder Ort braucht einen Namen und eine Kapazität von 1 bis {max}.",
+        "addPoint": "Ort hinzufügen",
+        "capsLegend": "Grenzen pro Person",
+        "maxMeetings": "Höchstzahl Treffen pro Person",
+        "maxPending": "Höchstzahl offener Anfragen pro Person",
+        "capsInvalid": "Grenzen müssen ganze Zahlen ab 1 sein.",
+        "saved": "Treffen-Einstellungen gespeichert.",
+        "save": "Treffen-Einstellungen speichern"
+      }
     }
   }
 }

@@ -5121,7 +5121,9 @@
       "networkingIneligibleSub": "Il networking non è aperto alla tua iscrizione.",
       "networkingRegisterSub": "Iscriviti all'evento per partecipare.",
       "connectTitle": "Connettiti su DiaspoPlug",
-      "connectSub": "Invia una richiesta di connessione ai partecipanti."
+      "connectSub": "Invia una richiesta di connessione ai partecipanti.",
+      "scheduleTitle": "Il mio programma",
+      "scheduleSub": "I tuoi incontri e le tue sessioni in un posto solo."
     },
     "grow": {
       "title": "Fai crescere la tua rete",
@@ -5485,7 +5487,8 @@
       "interested": "Interessati a te",
       "matches": "I miei abbinamenti",
       "interests": "I miei interessi",
-      "circles": "Cerchi"
+      "circles": "Cerchi",
+      "meetings": "Incontri"
     },
     "tier": {
       "DIRECT_OPPORTUNITY": "Opportunità diretta",
@@ -5624,7 +5627,11 @@
       "noPercent": "Mostriamo perché siete in sintonia, non un punteggio.",
       "manageTitle": "Vuoi essere più visibile?",
       "manageBody": "Aggiorna le preferenze di networking per avere più occasioni di contatto.",
-      "managePrefs": "Gestisci le preferenze"
+      "managePrefs": "Gestisci le preferenze",
+      "myMeetings": "I miei incontri",
+      "myMeetingsHint": "Richieste, incontri futuri e passati.",
+      "mySchedule": "Il mio programma",
+      "myScheduleHint": "Incontri e sessioni, giorno per giorno."
     },
     "directory": {
       "filters": "Filtri",
@@ -5859,7 +5866,12 @@
       "interestLimit": "Hai raggiunto il limite giornaliero di interessi. Riprova domani.",
       "connectCooldown": "Non puoi ancora inviare un'altra richiesta a questa persona.",
       "connectionLimit": "Per ora hai raggiunto il limite di richieste di connessione.",
-      "connectRefused": "Non è stato possibile creare questa connessione."
+      "connectRefused": "Non è stato possibile creare questa connessione.",
+      "slotTaken": "Quell'orario è appena stato preso. Scegline un altro.",
+      "slotUnavailable": "Quell'orario non è più disponibile. Scegline un altro.",
+      "pointUnavailable": "Questo luogo d'incontro è pieno a quell'ora. Scegli un altro luogo o un altro orario.",
+      "meetingsNotAccepted": "Questa persona al momento non accetta richieste di incontro.",
+      "meetingNotFound": "Non abbiamo trovato questo incontro."
     },
     "tax": {
       "role_founder": "Fondatore/fondatrice",
@@ -5971,6 +5983,217 @@
       "sentBody": "Grazie. Chi organizza l'evento la esaminerà.",
       "caseRef": "Il tuo riferimento: {number}",
       "close": "Chiudi"
+    },
+    "meetings": {
+      "thisPerson": "questa persona",
+      "yourTime": "Il tuo orario locale: {time}",
+      "zoneNote": "Gli orari sono mostrati nel fuso dell'evento: {zone} ({short}).",
+      "status": {
+        "REQUESTED": "In attesa di risposta",
+        "ALT_PROPOSED": "Altri orari proposti",
+        "CONFIRMED": "Confermato",
+        "RESCHEDULE_PROPOSED": "Nuovo orario proposto",
+        "DECLINED": "Rifiutato",
+        "CANCELLED": "Annullato",
+        "EXPIRED": "Scaduto",
+        "COMPLETED": "Concluso",
+        "awaitingMe": "Attende la tua risposta"
+      },
+      "format": {
+        "IN_PERSON": "Di persona",
+        "ONLINE": "Online"
+      },
+      "purpose": {
+        "PARTNERSHIP": "Partnership",
+        "INVESTMENT": "Investimento",
+        "MENTORSHIP": "Mentoring",
+        "HIRING": "Assunzioni",
+        "COLLABORATION": "Collaborazione",
+        "KNOWLEDGE_EXCHANGE": "Scambio di conoscenze",
+        "BUSINESS_DEVELOPMENT": "Sviluppo commerciale",
+        "INTRODUCTION": "Presentazione",
+        "OTHER": "Altro"
+      },
+      "request": {
+        "button": "Richiedi un incontro",
+        "title": "Richiedi un incontro con {name}",
+        "intro": "Scegli un orario adatto a entrambi. {name} dovrà confermare.",
+        "sentTitle": "Richiesta inviata",
+        "sentBody": "{name} dovrà confermare. Vedrai la risposta in Incontri.",
+        "close": "Chiudi",
+        "retry": "Mostra di nuovo gli orari",
+        "durationLegend": "Quanto dura?",
+        "minutes": "{count} min",
+        "formatLegend": "Formato",
+        "pointLegend": "Luogo dell'incontro",
+        "pointNone": "Nessuna preferenza",
+        "pointCapacity": "Fino a {count} incontri contemporaneamente",
+        "loadingSlots": "Ricerca di orari adatti a entrambi",
+        "noSlots": "Nessun orario comune libero per questa durata o questo luogo. Prova un'altra durata o un altro luogo.",
+        "timeLegend": "Scegli un orario",
+        "chooseTime": "Scegli prima un orario.",
+        "urlLabel": "Link della riunione (facoltativo)",
+        "urlInvalid": "Usa un link che inizia con https://",
+        "urlHint": "Inizia con https://. Solo tu e {name} potete vederlo.",
+        "purposeLabel": "Di cosa si tratta?",
+        "purposePlaceholder": "Scegli un argomento",
+        "choosePurpose": "Scegli l'argomento dell'incontro.",
+        "noteLabel": "Aggiungi un messaggio (facoltativo)",
+        "noteHint": "{count} caratteri su {max}. {name} vedrà questo messaggio.",
+        "revealTitle": "Il tuo profilo sarà visibile",
+        "revealLabel": "Capisco che {name} vedrà il mio profilo se apre questa richiesta.",
+        "cancel": "Annulla",
+        "send": "Invia richiesta",
+        "sending": "Invio in corso",
+        "neverConnects": "Una richiesta di incontro non crea una connessione. Potrete connettervi dopo, se lo volete entrambi."
+      },
+      "detail": {
+        "title": "Incontro",
+        "unavailable": "Non partecipa più al networking.",
+        "currentTime": "Orario attuale",
+        "time": "Orario",
+        "duration": "{count} minuti",
+        "format": "Formato",
+        "place": "Luogo",
+        "link": "Link della riunione",
+        "opensNewTab": "(si apre in una nuova scheda)",
+        "purpose": "Argomento",
+        "note": "Messaggio",
+        "rescheduleLegend": "{name} propone un nuovo orario",
+        "altLegend": "{name} propone altri orari",
+        "pickOne": "Scegli uno degli orari proposti",
+        "yourProposals": "Orari che hai proposto",
+        "waitingFor": "In attesa della risposta di {name}.",
+        "expired": "Questa richiesta è scaduta senza risposta.",
+        "declined": "Questa richiesta è stata rifiutata.",
+        "cancelledByMe": "Hai annullato questo incontro.",
+        "cancelledByThem": "{name} ha annullato questo incontro.",
+        "cancelReason": {
+          "BY_PARTICIPANT": "Questo incontro è stato annullato.",
+          "MATCH_DISSOLVED": "Questa richiesta non è più aperta.",
+          "BLOCKED": "Questo incontro non è più disponibile.",
+          "PARTICIPATION_ENDED": "Questo incontro è terminato perché qualcuno non partecipa più al networking."
+        },
+        "addLink": "Aggiungi un link alla riunione (facoltativo)",
+        "addLinkHint": "Inizia con https://. Solo tu e {name} potete vederlo.",
+        "acceptChosen": "Accetta questo orario",
+        "accept": "Accetta",
+        "keepOriginal": "Mantieni l'orario originale",
+        "decline": "Rifiuta",
+        "propose": "Proponi altri orari",
+        "reschedule": "Riprogramma",
+        "cancel": "Annulla incontro",
+        "addGoogle": "Aggiungi a Google Calendar",
+        "addIcs": "Scarica il file del calendario",
+        "message": "Scrivi a {name}"
+      },
+      "calendar": {
+        "title": "Incontro con {name} ({event})"
+      },
+      "announce": {
+        "accepted": "Incontro confermato.",
+        "kept": "L'orario originale resta.",
+        "declined": "Richiesta rifiutata.",
+        "proposed": "Altri orari inviati.",
+        "rescheduleSent": "Nuovi orari inviati. L'orario originale resta fino alla risposta.",
+        "cancelled": "Incontro annullato."
+      },
+      "cancelDialog": {
+        "title": "Annullare questo incontro?",
+        "bodyConfirmed": "{name} sarà informato/a dell'annullamento. L'orario torna libero per entrambi.",
+        "bodyPending": "La richiesta a {name} sarà ritirata.",
+        "keep": "Mantieni l'incontro",
+        "confirm": "Sì, annulla"
+      },
+      "propose": {
+        "count": "{count} di {max} scelti",
+        "title": "Proponi altri orari a {name}",
+        "rescheduleTitle": "Proponi un nuovo orario a {name}",
+        "legend": "Scegli fino a {max} orari",
+        "close": "Chiudi",
+        "send": "Invia {count} orari"
+      },
+      "panel": {
+        "intro": "Le tue richieste di incontro e i tuoi incontri per questo evento.",
+        "awaitingMe": "{count} in attesa della tua risposta.",
+        "filters": "Elenchi di incontri",
+        "filter": {
+          "PENDING": "In attesa",
+          "UPCOMING": "Futuri",
+          "ALTERNATIVES": "Altri orari",
+          "COMPLETED": "Conclusi",
+          "CANCELLED": "Annullati"
+        },
+        "empty": {
+          "PENDING": "Nessuna richiesta in attesa. Richiedi un incontro da una corrispondenza o da un profilo.",
+          "UPCOMING": "Nessun incontro futuro per ora.",
+          "ALTERNATIVES": "Nessuno ha proposto altri orari.",
+          "COMPLETED": "Nessun incontro concluso per ora.",
+          "CANCELLED": "Niente di annullato, rifiutato o scaduto."
+        },
+        "view": "Vedi",
+        "loading": "Caricamento",
+        "loadMore": "Carica altro"
+      },
+      "schedule": {
+        "title": "Il mio programma",
+        "toMeetings": "Apri i miei incontri",
+        "circleNote": "Le sessioni dei circle non sono ancora mostrate qui. I tuoi incontri e il programma sono completi.",
+        "empty": "Non c'è ancora nulla in programma. Gli incontri confermati e le sessioni del programma compaiono qui.",
+        "meetingWith": "Incontro con {name}",
+        "kind": {
+          "MEETING": "Incontro",
+          "SESSION": "Programma",
+          "CIRCLE_SESSION": "Sessione del circle"
+        }
+      },
+      "settings": {
+        "title": "Incontri di networking",
+        "intro": "Scegli chi può richiedere incontri, quando, per quanto tempo e dove.",
+        "loading": "Caricamento",
+        "policyLegend": "Chi può richiedere un incontro",
+        "policy": {
+          "MUTUAL_ONLY": {
+            "label": "Solo corrispondenze",
+            "hint": "Si può richiedere un incontro dopo che entrambi hanno mostrato interesse."
+          },
+          "ANY_PARTICIPANT": {
+            "label": "Qualsiasi partecipante",
+            "hint": "Ogni partecipante al networking può richiedere un incontro a chiunque veda."
+          },
+          "DISABLED": {
+            "label": "Disattivato",
+            "hint": "Nessuna nuova richiesta di incontro. Gli incontri esistenti possono ancora essere annullati."
+          }
+        },
+        "durationsLegend": "Durata degli incontri",
+        "minutes": "{count} min",
+        "durationsNeeded": "Scegli almeno una durata.",
+        "windowsLegend": "Fasce orarie per gli incontri",
+        "windowsHint": "Orari nel fuso dell'evento ({zone}). Senza fasce, gli incontri sono possibili in qualsiasi momento dell'evento.",
+        "windowsWholeEvent": "Nessuna fascia impostata: tutto l'evento è aperto agli incontri.",
+        "date": "Data",
+        "from": "Dalle",
+        "to": "Alle",
+        "removeWindow": "Rimuovi la fascia {n}",
+        "remove": "Rimuovi",
+        "windowInvalid": "Ogni fascia richiede una data e un'ora di fine successiva all'inizio.",
+        "addWindow": "Aggiungi una fascia",
+        "pointsLegend": "Luoghi d'incontro",
+        "pointsHint": "I luoghi rimossi vengono disattivati, non eliminati. La capacità è il numero di incontri possibili nello stesso momento.",
+        "pointName": "Nome",
+        "pointDirections": "Indicazioni (facoltativo)",
+        "pointCapacity": "Capacità per orario",
+        "removePoint": "Rimuovi {name}",
+        "pointInvalid": "Ogni luogo richiede un nome e una capacità da 1 a {max}.",
+        "addPoint": "Aggiungi un luogo",
+        "capsLegend": "Limiti per persona",
+        "maxMeetings": "Massimo di incontri per persona",
+        "maxPending": "Massimo di richieste aperte per persona",
+        "capsInvalid": "I limiti devono essere numeri interi da 1 in su.",
+        "saved": "Impostazioni degli incontri salvate.",
+        "save": "Salva le impostazioni"
+      }
     }
   }
 }

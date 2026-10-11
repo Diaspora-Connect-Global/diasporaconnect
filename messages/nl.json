@@ -5121,7 +5121,9 @@
       "networkingIneligibleSub": "Netwerken staat niet open voor jouw registratie.",
       "networkingRegisterSub": "Registreer je voor het evenement om mee te doen.",
       "connectTitle": "Verbinden op DiaspoPlug",
-      "connectSub": "Stuur een verbindingsverzoek naar deelnemers."
+      "connectSub": "Stuur een verbindingsverzoek naar deelnemers.",
+      "scheduleTitle": "Mijn programma",
+      "scheduleSub": "Je afspraken en sessies op één plek."
     },
     "grow": {
       "title": "Laat je netwerk groeien",
@@ -5485,7 +5487,8 @@
       "interested": "Geïnteresseerd in jou",
       "matches": "Mijn matches",
       "interests": "Mijn interesses",
-      "circles": "Kringen"
+      "circles": "Kringen",
+      "meetings": "Afspraken"
     },
     "tier": {
       "DIRECT_OPPORTUNITY": "Directe kans",
@@ -5624,7 +5627,11 @@
       "noPercent": "We tonen waarom jullie matchen, geen score.",
       "manageTitle": "Beter vindbaar willen zijn?",
       "manageBody": "Werk je netwerkvoorkeuren bij voor betere kansen op contact.",
-      "managePrefs": "Voorkeuren beheren"
+      "managePrefs": "Voorkeuren beheren",
+      "myMeetings": "Mijn afspraken",
+      "myMeetingsHint": "Verzoeken, komende en afgelopen afspraken.",
+      "mySchedule": "Mijn programma",
+      "myScheduleHint": "Afspraken en sessies, dag voor dag."
     },
     "directory": {
       "filters": "Filters",
@@ -5859,7 +5866,12 @@
       "interestLimit": "Je hebt de dagelijkse limiet voor interesses bereikt. Probeer het morgen opnieuw.",
       "connectCooldown": "Je kunt deze persoon nog geen nieuw verzoek sturen.",
       "connectionLimit": "Je hebt je limiet voor verbindingsverzoeken voor nu bereikt.",
-      "connectRefused": "Die verbinding kon niet worden gemaakt."
+      "connectRefused": "Die verbinding kon niet worden gemaakt.",
+      "slotTaken": "Dat tijdstip is net bezet. Kies een ander tijdstip.",
+      "slotUnavailable": "Dat tijdstip is niet meer beschikbaar. Kies een ander tijdstip.",
+      "pointUnavailable": "Deze ontmoetingsplek is op dat tijdstip vol. Kies een andere plek of tijd.",
+      "meetingsNotAccepted": "Deze persoon accepteert momenteel geen afspraakverzoeken.",
+      "meetingNotFound": "We konden deze afspraak niet vinden."
     },
     "tax": {
       "role_founder": "Oprichter",
@@ -5971,6 +5983,217 @@
       "sentBody": "Bedankt. De organisatoren van dit evenement gaan ermee aan de slag.",
       "caseRef": "Jouw referentie: {number}",
       "close": "Sluiten"
+    },
+    "meetings": {
+      "thisPerson": "deze persoon",
+      "yourTime": "Jouw lokale tijd: {time}",
+      "zoneNote": "Tijden staan in de tijd van het evenement: {zone} ({short}).",
+      "status": {
+        "REQUESTED": "Wacht op antwoord",
+        "ALT_PROPOSED": "Andere tijden voorgesteld",
+        "CONFIRMED": "Bevestigd",
+        "RESCHEDULE_PROPOSED": "Nieuwe tijd voorgesteld",
+        "DECLINED": "Afgewezen",
+        "CANCELLED": "Geannuleerd",
+        "EXPIRED": "Verlopen",
+        "COMPLETED": "Afgerond",
+        "awaitingMe": "Wacht op jouw antwoord"
+      },
+      "format": {
+        "IN_PERSON": "Persoonlijk",
+        "ONLINE": "Online"
+      },
+      "purpose": {
+        "PARTNERSHIP": "Partnerschap",
+        "INVESTMENT": "Investering",
+        "MENTORSHIP": "Mentorschap",
+        "HIRING": "Werving",
+        "COLLABORATION": "Samenwerking",
+        "KNOWLEDGE_EXCHANGE": "Kennisuitwisseling",
+        "BUSINESS_DEVELOPMENT": "Zakelijke ontwikkeling",
+        "INTRODUCTION": "Kennismaking",
+        "OTHER": "Iets anders"
+      },
+      "request": {
+        "button": "Afspraak aanvragen",
+        "title": "Afspraak aanvragen met {name}",
+        "intro": "Kies een tijd die jullie allebei past. {name} wordt gevraagd te bevestigen.",
+        "sentTitle": "Verzoek verstuurd",
+        "sentBody": "{name} wordt gevraagd te bevestigen. Het antwoord zie je onder Afspraken.",
+        "close": "Sluiten",
+        "retry": "Tijden opnieuw tonen",
+        "durationLegend": "Hoe lang?",
+        "minutes": "{count} min",
+        "formatLegend": "Vorm",
+        "pointLegend": "Ontmoetingsplek",
+        "pointNone": "Geen voorkeur",
+        "pointCapacity": "Tot {count} afspraken tegelijk",
+        "loadingSlots": "Tijden zoeken die jullie allebei passen",
+        "noSlots": "Er zijn geen gedeelde tijden vrij voor deze duur of plek. Probeer een andere duur of plek.",
+        "timeLegend": "Kies een tijd",
+        "chooseTime": "Kies eerst een tijd.",
+        "urlLabel": "Vergaderlink (optioneel)",
+        "urlInvalid": "Gebruik een link die met https:// begint",
+        "urlHint": "Begint met https://. Alleen jij en {name} kunnen hem zien.",
+        "purposeLabel": "Waar gaat het over?",
+        "purposePlaceholder": "Kies een onderwerp",
+        "choosePurpose": "Kies waar de afspraak over gaat.",
+        "noteLabel": "Bericht toevoegen (optioneel)",
+        "noteHint": "{count} van {max} tekens. {name} ziet dit bericht.",
+        "revealTitle": "Je profiel wordt zichtbaar",
+        "revealLabel": "Ik begrijp dat {name} mijn profiel ziet als dit verzoek wordt geopend.",
+        "cancel": "Annuleren",
+        "send": "Verzoek versturen",
+        "sending": "Bezig met versturen",
+        "neverConnects": "Een afspraakverzoek maakt geen verbinding. Daarna kunnen jullie verbinden als jullie dat allebei willen."
+      },
+      "detail": {
+        "title": "Afspraak",
+        "unavailable": "Doet niet meer mee aan netwerken.",
+        "currentTime": "Huidige tijd",
+        "time": "Tijd",
+        "duration": "{count} minuten",
+        "format": "Vorm",
+        "place": "Plek",
+        "link": "Vergaderlink",
+        "opensNewTab": "(opent in een nieuw tabblad)",
+        "purpose": "Onderwerp",
+        "note": "Bericht",
+        "rescheduleLegend": "{name} stelt een nieuwe tijd voor",
+        "altLegend": "{name} stelt andere tijden voor",
+        "pickOne": "Kies een van de voorgestelde tijden",
+        "yourProposals": "Tijden die je hebt voorgesteld",
+        "waitingFor": "Wachten op antwoord van {name}.",
+        "expired": "Dit verzoek is zonder antwoord verlopen.",
+        "declined": "Dit verzoek is afgewezen.",
+        "cancelledByMe": "Je hebt deze afspraak geannuleerd.",
+        "cancelledByThem": "{name} heeft deze afspraak geannuleerd.",
+        "cancelReason": {
+          "BY_PARTICIPANT": "Deze afspraak is geannuleerd.",
+          "MATCH_DISSOLVED": "Dit verzoek staat niet meer open.",
+          "BLOCKED": "Deze afspraak is niet meer beschikbaar.",
+          "PARTICIPATION_ENDED": "Deze afspraak is beëindigd omdat iemand niet meer meedoet aan netwerken."
+        },
+        "addLink": "Vergaderlink toevoegen (optioneel)",
+        "addLinkHint": "Begint met https://. Alleen jij en {name} kunnen hem zien.",
+        "acceptChosen": "Deze tijd accepteren",
+        "accept": "Accepteren",
+        "keepOriginal": "Oorspronkelijke tijd behouden",
+        "decline": "Afwijzen",
+        "propose": "Andere tijden voorstellen",
+        "reschedule": "Verplaatsen",
+        "cancel": "Afspraak annuleren",
+        "addGoogle": "Toevoegen aan Google Agenda",
+        "addIcs": "Agendabestand downloaden",
+        "message": "Bericht aan {name}"
+      },
+      "calendar": {
+        "title": "Afspraak met {name} ({event})"
+      },
+      "announce": {
+        "accepted": "Afspraak bevestigd.",
+        "kept": "De oorspronkelijke tijd blijft.",
+        "declined": "Verzoek afgewezen.",
+        "proposed": "Andere tijden verstuurd.",
+        "rescheduleSent": "Nieuwe tijden verstuurd. De oorspronkelijke tijd blijft tot er antwoord is.",
+        "cancelled": "Afspraak geannuleerd."
+      },
+      "cancelDialog": {
+        "title": "Deze afspraak annuleren?",
+        "bodyConfirmed": "{name} hoort dat de afspraak is geannuleerd. De tijd komt voor jullie beiden weer vrij.",
+        "bodyPending": "Het verzoek aan {name} wordt ingetrokken.",
+        "keep": "Afspraak behouden",
+        "confirm": "Ja, annuleren"
+      },
+      "propose": {
+        "count": "{count} van {max} gekozen",
+        "title": "Andere tijden voorstellen aan {name}",
+        "rescheduleTitle": "Een nieuwe tijd voorstellen aan {name}",
+        "legend": "Kies maximaal {max} tijden",
+        "close": "Sluiten",
+        "send": "{count} tijden versturen"
+      },
+      "panel": {
+        "intro": "Je afspraakverzoeken en afspraken voor dit evenement.",
+        "awaitingMe": "{count} wachten op jouw antwoord.",
+        "filters": "Afsprakenlijsten",
+        "filter": {
+          "PENDING": "Openstaand",
+          "UPCOMING": "Komend",
+          "ALTERNATIVES": "Andere tijden",
+          "COMPLETED": "Afgerond",
+          "CANCELLED": "Geannuleerd"
+        },
+        "empty": {
+          "PENDING": "Geen openstaande verzoeken. Vraag een afspraak aan via een match of profiel.",
+          "UPCOMING": "Nog geen komende afspraken.",
+          "ALTERNATIVES": "Niemand heeft andere tijden voorgesteld.",
+          "COMPLETED": "Nog geen afgeronde afspraken.",
+          "CANCELLED": "Niets geannuleerd, afgewezen of verlopen."
+        },
+        "view": "Bekijken",
+        "loading": "Laden",
+        "loadMore": "Meer laden"
+      },
+      "schedule": {
+        "title": "Mijn programma",
+        "toMeetings": "Mijn afspraken openen",
+        "circleNote": "Circle-sessies worden hier nog niet getoond. Je afspraken en het programma zijn compleet.",
+        "empty": "Er staat nog niets gepland. Bevestigde afspraken en programmasessies verschijnen hier.",
+        "meetingWith": "Afspraak met {name}",
+        "kind": {
+          "MEETING": "Afspraak",
+          "SESSION": "Programma",
+          "CIRCLE_SESSION": "Circle-sessie"
+        }
+      },
+      "settings": {
+        "title": "Netwerkafspraken",
+        "intro": "Kies wie afspraken kan aanvragen, wanneer, hoe lang en waar.",
+        "loading": "Laden",
+        "policyLegend": "Wie een afspraak kan aanvragen",
+        "policy": {
+          "MUTUAL_ONLY": {
+            "label": "Alleen matches",
+            "hint": "Een afspraak kan worden aangevraagd nadat beiden interesse hebben getoond."
+          },
+          "ANY_PARTICIPANT": {
+            "label": "Elke deelnemer",
+            "hint": "Elke netwerkdeelnemer kan een afspraak aanvragen met iedereen die zichtbaar is."
+          },
+          "DISABLED": {
+            "label": "Uitgeschakeld",
+            "hint": "Geen nieuwe afspraakverzoeken. Bestaande afspraken kunnen nog worden geannuleerd."
+          }
+        },
+        "durationsLegend": "Duur van afspraken",
+        "minutes": "{count} min",
+        "durationsNeeded": "Kies minstens één duur.",
+        "windowsLegend": "Tijdvensters voor afspraken",
+        "windowsHint": "Tijden in de tijd van het evenement ({zone}). Zonder vensters zijn afspraken op elk moment van het evenement mogelijk.",
+        "windowsWholeEvent": "Geen vensters ingesteld: het hele evenement is open voor afspraken.",
+        "date": "Datum",
+        "from": "Van",
+        "to": "Tot",
+        "removeWindow": "Venster {n} verwijderen",
+        "remove": "Verwijderen",
+        "windowInvalid": "Elk venster heeft een datum nodig en een eindtijd na de starttijd.",
+        "addWindow": "Venster toevoegen",
+        "pointsLegend": "Ontmoetingsplekken",
+        "pointsHint": "Verwijderde plekken worden uitgeschakeld, niet gewist. Capaciteit is het aantal afspraken dat er tegelijk kan plaatsvinden.",
+        "pointName": "Naam",
+        "pointDirections": "Routebeschrijving (optioneel)",
+        "pointCapacity": "Capaciteit per tijdstip",
+        "removePoint": "{name} verwijderen",
+        "pointInvalid": "Elke plek heeft een naam en een capaciteit van 1 tot {max} nodig.",
+        "addPoint": "Plek toevoegen",
+        "capsLegend": "Limieten per persoon",
+        "maxMeetings": "Maximaal aantal afspraken per persoon",
+        "maxPending": "Maximaal aantal openstaande verzoeken per persoon",
+        "capsInvalid": "Limieten moeten hele getallen vanaf 1 zijn.",
+        "saved": "Afspraakinstellingen opgeslagen.",
+        "save": "Afspraakinstellingen opslaan"
+      }
     }
   }
 }

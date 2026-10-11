@@ -5121,7 +5121,9 @@
       "networkingIneligibleSub": "Networking isn't open to your registration.",
       "networkingRegisterSub": "Register for the event to take part.",
       "connectTitle": "Connect on DiaspoPlug",
-      "connectSub": "Send a connection request to attendees."
+      "connectSub": "Send a connection request to attendees.",
+      "scheduleTitle": "My schedule",
+      "scheduleSub": "Your meetings and sessions in one place."
     },
     "grow": {
       "title": "Grow your network",
@@ -5485,7 +5487,8 @@
       "interested": "Interested in you",
       "matches": "My matches",
       "interests": "My interests",
-      "circles": "Circles"
+      "circles": "Circles",
+      "meetings": "Meetings"
     },
     "tier": {
       "DIRECT_OPPORTUNITY": "Direct opportunity",
@@ -5624,7 +5627,11 @@
       "noPercent": "We show why you match, not a score.",
       "manageTitle": "Want to be more discoverable?",
       "manageBody": "Update your networking preferences to get better connection opportunities.",
-      "managePrefs": "Manage preferences"
+      "managePrefs": "Manage preferences",
+      "myMeetings": "My meetings",
+      "myMeetingsHint": "Requests, upcoming and past meetings.",
+      "mySchedule": "My schedule",
+      "myScheduleHint": "Meetings and sessions, day by day."
     },
     "directory": {
       "filters": "Filters",
@@ -5859,7 +5866,12 @@
       "interestLimit": "You have reached the daily limit for interests. Try again tomorrow.",
       "connectCooldown": "You can't send another connection request to this person yet.",
       "connectionLimit": "You have reached your connection request limit for now.",
-      "connectRefused": "That connection could not be made."
+      "connectRefused": "That connection could not be made.",
+      "slotTaken": "That time was just taken. Please pick another time.",
+      "slotUnavailable": "That time is no longer available. Please pick another time.",
+      "pointUnavailable": "That meeting place is full at this time. Pick another place or time.",
+      "meetingsNotAccepted": "This person is not taking meeting requests right now.",
+      "meetingNotFound": "We could not find that meeting."
     },
     "tax": {
       "role_founder": "Founder",
@@ -5971,6 +5983,217 @@
       "sentBody": "Thank you. The people who run this event will look into it.",
       "caseRef": "Your reference: {number}",
       "close": "Close"
+    },
+    "meetings": {
+      "thisPerson": "this person",
+      "yourTime": "Your local time: {time}",
+      "zoneNote": "Times are shown in event time: {zone} ({short}).",
+      "status": {
+        "REQUESTED": "Waiting for a reply",
+        "ALT_PROPOSED": "Other times proposed",
+        "CONFIRMED": "Confirmed",
+        "RESCHEDULE_PROPOSED": "New time proposed",
+        "DECLINED": "Declined",
+        "CANCELLED": "Cancelled",
+        "EXPIRED": "Expired",
+        "COMPLETED": "Completed",
+        "awaitingMe": "Needs your reply"
+      },
+      "format": {
+        "IN_PERSON": "In person",
+        "ONLINE": "Online"
+      },
+      "purpose": {
+        "PARTNERSHIP": "Partnership",
+        "INVESTMENT": "Investment",
+        "MENTORSHIP": "Mentorship",
+        "HIRING": "Hiring",
+        "COLLABORATION": "Collaboration",
+        "KNOWLEDGE_EXCHANGE": "Knowledge exchange",
+        "BUSINESS_DEVELOPMENT": "Business development",
+        "INTRODUCTION": "Introduction",
+        "OTHER": "Something else"
+      },
+      "request": {
+        "button": "Request a meeting",
+        "title": "Request a meeting with {name}",
+        "intro": "Pick a time you can both make. {name} is asked to confirm.",
+        "sentTitle": "Request sent",
+        "sentBody": "{name} will be asked to confirm. You will see the answer under Meetings.",
+        "close": "Close",
+        "retry": "Show times again",
+        "durationLegend": "How long?",
+        "minutes": "{count} min",
+        "formatLegend": "Format",
+        "pointLegend": "Meeting place",
+        "pointNone": "No preference",
+        "pointCapacity": "Up to {count} meetings at the same time",
+        "loadingSlots": "Looking for times you can both make",
+        "noSlots": "No shared times are open for this length or place. Try a different length or place.",
+        "timeLegend": "Choose a time",
+        "chooseTime": "Choose a time first.",
+        "urlLabel": "Meeting link (optional)",
+        "urlInvalid": "Use a link that starts with https://",
+        "urlHint": "Starts with https://. Only you and {name} can see it.",
+        "purposeLabel": "What is it about?",
+        "purposePlaceholder": "Choose a topic",
+        "choosePurpose": "Choose what the meeting is about.",
+        "noteLabel": "Add a note (optional)",
+        "noteHint": "{count} of {max} characters. {name} will see this note.",
+        "revealTitle": "Your profile will be visible",
+        "revealLabel": "I understand that {name} will see my profile if they open this request.",
+        "cancel": "Cancel",
+        "send": "Send request",
+        "sending": "Sending",
+        "neverConnects": "A meeting request does not connect you. You can connect afterwards if you both want to."
+      },
+      "detail": {
+        "title": "Meeting",
+        "unavailable": "No longer taking part in networking.",
+        "currentTime": "Current time",
+        "time": "Time",
+        "duration": "{count} minutes",
+        "format": "Format",
+        "place": "Place",
+        "link": "Meeting link",
+        "opensNewTab": "(opens in a new tab)",
+        "purpose": "About",
+        "note": "Note",
+        "rescheduleLegend": "{name} proposes a new time",
+        "altLegend": "{name} proposes other times",
+        "pickOne": "Choose one of the proposed times",
+        "yourProposals": "Times you proposed",
+        "waitingFor": "Waiting for {name} to answer.",
+        "expired": "This request expired without an answer.",
+        "declined": "This request was declined.",
+        "cancelledByMe": "You cancelled this meeting.",
+        "cancelledByThem": "{name} cancelled this meeting.",
+        "cancelReason": {
+          "BY_PARTICIPANT": "This meeting was cancelled.",
+          "MATCH_DISSOLVED": "This request is no longer open.",
+          "BLOCKED": "This meeting is no longer available.",
+          "PARTICIPATION_ENDED": "This meeting ended because someone stopped taking part in networking."
+        },
+        "addLink": "Add a meeting link (optional)",
+        "addLinkHint": "Starts with https://. Only you and {name} can see it.",
+        "acceptChosen": "Accept this time",
+        "accept": "Accept",
+        "keepOriginal": "Keep the original time",
+        "decline": "Decline",
+        "propose": "Propose other times",
+        "reschedule": "Reschedule",
+        "cancel": "Cancel meeting",
+        "addGoogle": "Add to Google Calendar",
+        "addIcs": "Download calendar file",
+        "message": "Message {name}"
+      },
+      "calendar": {
+        "title": "Meeting with {name} ({event})"
+      },
+      "announce": {
+        "accepted": "Meeting confirmed.",
+        "kept": "The original time stays.",
+        "declined": "Request declined.",
+        "proposed": "Other times sent.",
+        "rescheduleSent": "New times sent. The original time stays until they answer.",
+        "cancelled": "Meeting cancelled."
+      },
+      "cancelDialog": {
+        "title": "Cancel this meeting?",
+        "bodyConfirmed": "{name} will be told that the meeting is cancelled. The time becomes free for both of you.",
+        "bodyPending": "The request to {name} will be withdrawn.",
+        "keep": "Keep meeting",
+        "confirm": "Yes, cancel"
+      },
+      "propose": {
+        "count": "{count} of {max} chosen",
+        "title": "Propose other times to {name}",
+        "rescheduleTitle": "Propose a new time to {name}",
+        "legend": "Choose up to {max} times",
+        "close": "Close",
+        "send": "Send {count} times"
+      },
+      "panel": {
+        "intro": "Your meeting requests and meetings for this event.",
+        "awaitingMe": "{count} waiting for your reply.",
+        "filters": "Meeting lists",
+        "filter": {
+          "PENDING": "Pending",
+          "UPCOMING": "Upcoming",
+          "ALTERNATIVES": "Alternative times",
+          "COMPLETED": "Completed",
+          "CANCELLED": "Cancelled"
+        },
+        "empty": {
+          "PENDING": "No pending requests. Request a meeting from a match or a profile.",
+          "UPCOMING": "No upcoming meetings yet.",
+          "ALTERNATIVES": "No one has proposed other times.",
+          "COMPLETED": "No completed meetings yet.",
+          "CANCELLED": "Nothing cancelled, declined or expired."
+        },
+        "view": "View",
+        "loading": "Loading",
+        "loadMore": "Load more"
+      },
+      "schedule": {
+        "title": "My schedule",
+        "toMeetings": "Open my meetings",
+        "circleNote": "Circle sessions are not shown here yet. Your meetings and the programme are complete.",
+        "empty": "Nothing is scheduled yet. Confirmed meetings and programme sessions appear here.",
+        "meetingWith": "Meeting with {name}",
+        "kind": {
+          "MEETING": "Meeting",
+          "SESSION": "Programme",
+          "CIRCLE_SESSION": "Circle session"
+        }
+      },
+      "settings": {
+        "title": "Networking meetings",
+        "intro": "Choose who can request meetings, when, for how long and where.",
+        "loading": "Loading",
+        "policyLegend": "Who can request a meeting",
+        "policy": {
+          "MUTUAL_ONLY": {
+            "label": "Matches only",
+            "hint": "People can request a meeting after both have shown interest."
+          },
+          "ANY_PARTICIPANT": {
+            "label": "Any participant",
+            "hint": "Any networking participant can request a meeting with anyone they can see."
+          },
+          "DISABLED": {
+            "label": "Disabled",
+            "hint": "No new meeting requests. Existing meetings can still be cancelled."
+          }
+        },
+        "durationsLegend": "Meeting lengths",
+        "minutes": "{count} min",
+        "durationsNeeded": "Choose at least one length.",
+        "windowsLegend": "Meeting windows",
+        "windowsHint": "Times are in event time ({zone}). With no windows, meetings can happen any time during the event.",
+        "windowsWholeEvent": "No windows set: the whole event is open for meetings.",
+        "date": "Date",
+        "from": "From",
+        "to": "To",
+        "removeWindow": "Remove window {n}",
+        "remove": "Remove",
+        "windowInvalid": "Each window needs a date and an end time after its start time.",
+        "addWindow": "Add a window",
+        "pointsLegend": "Meeting places",
+        "pointsHint": "Places you remove are switched off, not deleted. Capacity is how many meetings can happen there at the same time.",
+        "pointName": "Name",
+        "pointDirections": "Directions (optional)",
+        "pointCapacity": "Capacity per time",
+        "removePoint": "Remove {name}",
+        "pointInvalid": "Each place needs a name and a capacity from 1 to {max}.",
+        "addPoint": "Add a place",
+        "capsLegend": "Limits per person",
+        "maxMeetings": "Most meetings per person",
+        "maxPending": "Most open requests per person",
+        "capsInvalid": "Limits must be whole numbers of 1 or more.",
+        "saved": "Meeting settings saved.",
+        "save": "Save meeting settings"
+      }
     }
   }
 }
