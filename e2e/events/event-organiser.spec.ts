@@ -184,7 +184,7 @@ test('approvals: pending people are listed by name, approve and reject send the 
         GetEvent: manageEvent({ requiresApproval: true }),
         GetEventPage: manageEvent({ requiresApproval: true }),
         PendingApprovalRegistrations: () => ({ getEventRegistrations: { __typename: 'EventRegistrationListResponse', total: pending.length, registrations: pending } }),
-        GetUserProfile: (v) => (v.userId === U1 ? profile(U1, 'Kofi', 'Mensah') : profile(U2, 'Efua', 'Boateng')),
+        GetUserProfile: (v: Record<string, unknown>) => (v.userId === U1 ? profile(U1, 'Kofi', 'Mensah') : profile(U2, 'Efua', 'Boateng')),
         ApproveEventRegistration: () => {
             pending = pending.filter((r) => r.id !== 'rg-1');
             return { approveEventRegistration: { __typename: 'EventRegistrationGQL', id: 'rg-1', status: 'confirmed', registrationStatus: 'CONFIRMED', waitlistPosition: null } };
