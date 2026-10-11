@@ -92,7 +92,7 @@ export const SEARCH_PRODUCTS = gql`
 `;
 
 export const GET_FEATURED_PRODUCTS = gql`
-  query GetFeaturedProducts($page: Int, $limit: Int) {
+  query GetFeaturedProducts($page: Float = 1, $limit: Float = 20) {
     getFeaturedProducts(page: $page, limit: $limit) {
       success
       products {
@@ -120,7 +120,7 @@ export const GET_FEATURED_PRODUCTS = gql`
 `;
 
 export const GET_VENDOR_PRODUCTS = gql`
-  query GetVendorProducts($vendor_id: ID!, $page: Int, $limit: Int) {
+  query GetVendorProducts($vendor_id: ID!, $page: Float = 1, $limit: Float = 20) {
     getVendorProducts(vendor_id: $vendor_id, page: $page, limit: $limit) {
       success
       products {
@@ -148,7 +148,7 @@ export const GET_VENDOR_PRODUCTS = gql`
 `;
 
 export const GET_RELATED_PRODUCTS = gql`
-  query GetRelatedProducts($product_id: ID!, $limit: Int) {
+  query GetRelatedProducts($product_id: ID!, $limit: Float = 8) {
     getRelatedProducts(product_id: $product_id, limit: $limit) {
       success
       products {
@@ -176,7 +176,7 @@ export const GET_RELATED_PRODUCTS = gql`
 `;
 
 export const GET_RECOMMENDED_PRODUCTS = gql`
-  query GetRecommendedProducts($limit: Int) {
+  query GetRecommendedProducts($limit: Float = 20) {
     getRecommendedProducts(limit: $limit) {
       success
       products {
@@ -248,7 +248,7 @@ export const SEARCH_MARKETPLACE_SERVICES = gql`
 `;
 
 export const GET_FEATURED_MARKETPLACE_SERVICES = gql`
-  query GetFeaturedMarketplaceServices($page: Int, $limit: Int) {
+  query GetFeaturedMarketplaceServices($page: Float = 1, $limit: Float = 20) {
     getFeaturedMarketplaceServices(page: $page, limit: $limit) {
       success
       services {
@@ -271,7 +271,7 @@ export const GET_FEATURED_MARKETPLACE_SERVICES = gql`
 `;
 
 export const GET_VENDOR_MARKETPLACE_SERVICES = gql`
-  query GetVendorMarketplaceServices($vendor_id: ID!, $page: Int, $limit: Int) {
+  query GetVendorMarketplaceServices($vendor_id: ID!, $page: Float = 1, $limit: Float = 20) {
     getVendorMarketplaceServices(vendor_id: $vendor_id, page: $page, limit: $limit) {
       success
       services {
@@ -321,7 +321,7 @@ export const GET_MARKETPLACE_ORDER = gql`
 `;
 
 export const MY_ORDERS = gql`
-  query MyOrders($status: String, $page: Int, $limit: Int) {
+  query MyOrders($status: String, $page: Float = 1, $limit: Float = 20) {
     myOrders(status: $status, page: $page, limit: $limit) {
       success
       orders {
@@ -365,7 +365,7 @@ export const MY_ORDER_STATS = gql`
 `;
 
 export const CONVERT_CURRENCY = gql`
-  query ConvertCurrency($amount: Float!, $from_currency: String!, $to_currency: String!) {
+  query ConvertCurrency($amount: Int!, $from_currency: String!, $to_currency: String!) {
     convertCurrency(
       amount: $amount
       from_currency: $from_currency
