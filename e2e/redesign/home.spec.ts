@@ -16,7 +16,7 @@ test.afterAll(async () => {
     await browser?.close();
 });
 
-const registered = { userEvents: { __typename: 'UserEvents', attending: [eventFixture({ id: 'evt-reg', title: 'Networking Mixer', startAt: FUTURE, endAt: FUTURE, isRegistered: true })], saved: [] } };
+const registered = { UserEvents: { userEvents: { __typename: 'UserEvents', attending: [eventFixture({ id: 'evt-reg', title: 'Networking Mixer', startAt: FUTURE, endAt: FUTURE, isRegistered: true })], saved: [] } } };
 
 test('greets the person by first name with a time-of-day greeting and shows their place', async () => {
     const { page } = await open(browser, '/home');

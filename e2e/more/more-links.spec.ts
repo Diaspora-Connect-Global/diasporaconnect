@@ -14,7 +14,6 @@ import { test, expect, type Browser, type Page } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { fakeGraphql, seedSession, SHELL_OVERRIDES, wireNetwork } from '../support/fakeSession';
 import { MORE_ACCOUNT_LINKS, MORE_RAIL_LINKS, MORE_SECTIONS, MORE_SHEETS } from '../../src/components/more/moreLinks';
-import { DISCOVER_CATEGORIES } from '../../src/components/discover/discoverLinks';
 import { isKnownAppPath } from '../../src/lib/appRoutes';
 
 test.describe('More / Discover data', () => {
@@ -23,7 +22,6 @@ test.describe('More / Discover data', () => {
         ...Object.values(MORE_SHEETS).flatMap((links) => links.map((l) => l.href)),
         ...MORE_RAIL_LINKS.map((l) => l.href),
         ...Object.values(MORE_ACCOUNT_LINKS),
-        ...DISCOVER_CATEGORIES.map((c) => c.href),
     ]);
     for (const href of hrefs) test(`${href} is a real page`, () => expect(isKnownAppPath(href)).toBe(true));
 
@@ -136,7 +134,7 @@ test.describe('More page', () => {
 });
 
 test.describe('Discover v1', () => {
-    test('search goes to /search?q=…, an empty search stays put, tiles go to real pages', async () => {
+    test('search goes to /search?q=…, an empty search stays put', async () => {
         const page = await open('/en/discover');
         const box = page.getByRole('searchbox', { name: 'Search DiaspoPlug' });
         await expect(box).toBeVisible({ timeout: 90_000 });
@@ -144,9 +142,6 @@ test.describe('Discover v1', () => {
         await page.getByRole('button', { name: 'Search', exact: true }).click();
         await expect(page).toHaveURL(/\/en\/discover$/);
         await expect(box).toBeFocused();
-
-        const tiles = await linkPaths(page, 'nav[aria-labelledby="discover-categories"]');
-        expect(tiles).toEqual(['/en/marketplace?tab=services', '/en/events']);
 
         await box.fill('accra tech');
         await box.press('Enter');

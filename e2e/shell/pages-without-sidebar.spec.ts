@@ -77,7 +77,8 @@ for (const route of homeRoutes()) {
         await expect(page.locator('aside').filter({ hasText: 'Group chats' })).toHaveCount(0);
 
         const box = (await contentFrame(page))!;
-        expect(Math.round(box.width)).toBe(768); // 60vw of 1280, the width pages were laid out for
+        // 60vw of 1280 is the width most pages were laid out for; the redesigned Home (like Community) takes the header's full 80vw frame.
+        expect(Math.round(box.width)).toBe(route === '/home' ? 1024 : 768);
         expect(Math.abs(box.x - (1280 - box.x - box.width))).toBeLessThanOrEqual(1);
         test.info().annotations.push({ type: 'page errors (desktop)', description: errors.join(' | ') || 'none' });
         await page.context().close();
@@ -118,7 +119,7 @@ test('/community: "Your communities" lists memberships, pending requests and ass
 
     // Beside the discovery content on desktop…
     const c = (await column.boundingBox())!;
-    const discover = (await page.getByText('Discover more communities').boundingBox())!;
+    const discover = (await page.getByTestId('community-feed').boundingBox())!;
     expect(discover.x).toBeGreaterThan(c.x + c.width);
     // …and the page uses the header's full 80vw frame.
     const frame = (await contentFrame(page))!;
@@ -129,7 +130,7 @@ test('/community: "Your communities" lists memberships, pending requests and ass
     const phone = await open('/community', { width: 360, height: 740 });
     const pc = phone.page.getByTestId('your-communities');
     await expect(pc.getByRole('heading', { name: 'Your communities' })).toBeVisible({ timeout: 90_000 });
-    const pd = (await phone.page.getByText('Discover more communities').boundingBox())!;
+    const pd = (await phone.page.getByTestId('community-feed').boundingBox())!;
     const pcb = (await pc.boundingBox())!;
     expect(pd.y).toBeGreaterThan(pcb.y + pcb.height - 1);
     const size = await phone.page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth }));
