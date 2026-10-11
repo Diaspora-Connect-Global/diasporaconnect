@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@apollo/client/react';
-import { GET_MY_COMMUNITIES } from '@/services/gql/community';
+import { BATCH_CHECK_COMMUNITY_MEMBERSHIP, LIST_MY_JOINED_COMMUNITIES } from '@/services/gql/community';
 import { GET_MY_ASSOCIATIONS } from '@/services/gql/associations';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -12,8 +12,10 @@ import { useAuthStore } from '@/store/useAuthStore';
  * this list drives the organiser picker on /events/create, the "Create event"
  * entry point and the Manage links.
  *
- * Both queries are the same ones the Community page already runs (cache hits
- * there); 100 is far above how many entities one person administers.
+ * Communities: `listUserCommunities` (the Community page's own query, a cache
+ * hit there) for the ids, then `batchCheckMembership` for the viewer's status
+ * and role in each. Associations: `getMyAssociations`, which carries
+ * `myMembership`. 100 is far above how many entities one person administers.
  */
 export interface AdminOrganiser {
   id: string;
@@ -42,10 +44,15 @@ export function useAdminOrganisers(): {
   administers: (ownerType?: string | null, ownerId?: string | null) => boolean;
 } {
   const signedIn = Boolean(useAuthStore((s) => s.tokens?.sessionToken));
-  const communities = useQuery<{ getMyCommunities?: { communities?: MyEntityRow[] | null } | null }>(GET_MY_COMMUNITIES, {
-    variables: { page: 1, limit: 100 },
-    skip: !signedIn,
-  });
+  const joined = useQuery<{ listUserCommunities?: Array<{ id: string; name: string; avatarUrl?: string | null }> | null }>(
+    LIST_MY_JOINED_COMMUNITIES,
+    { skip: !signedIn },
+  );
+  const joinedRows = useMemo(() => (joined.data?.listUserCommunities ?? []).slice(0, 100), [joined.data]);
+  const roles = useQuery<{ batchCheckMembership?: Array<{ status?: string | null; role?: string | null }> | null }>(
+    BATCH_CHECK_COMMUNITY_MEMBERSHIP,
+    { variables: { communityIds: joinedRows.map((c) => c.id) }, skip: !signedIn || joinedRows.length === 0 },
+  );
   const associations = useQuery<{ getMyAssociations?: { associations?: MyEntityRow[] | null } | null }>(GET_MY_ASSOCIATIONS, {
     variables: { page: 1, limit: 100 },
     skip: !signedIn,
@@ -53,14 +60,19 @@ export function useAdminOrganisers(): {
 
   const organisers = useMemo<AdminOrganiser[]>(() => {
     const rows: AdminOrganiser[] = [];
-    for (const c of communities.data?.getMyCommunities?.communities ?? []) {
-      if (isAdminMembership(c.myMembership)) rows.push({ id: c.id, name: c.name, avatarUrl: c.avatarUrl, kind: 'community' });
+    // batchCheckMembership answers in the order of the ids sent; a length
+    // mismatch means we cannot tell whose role is whose, so trust none of it.
+    const checks = roles.data?.batchCheckMembership ?? [];
+    if (checks.length === joinedRows.length) {
+      joinedRows.forEach((c, i) => {
+        if (isAdminMembership(checks[i])) rows.push({ id: c.id, name: c.name, avatarUrl: c.avatarUrl, kind: 'community' });
+      });
     }
     for (const a of associations.data?.getMyAssociations?.associations ?? []) {
       if (isAdminMembership(a.myMembership)) rows.push({ id: a.id, name: a.name, avatarUrl: a.avatarUrl, kind: 'association' });
     }
     return rows.sort((a, b) => a.name.localeCompare(b.name));
-  }, [communities.data, associations.data]);
+  }, [joinedRows, roles.data, associations.data]);
 
   const administers = useMemo(
     () => (ownerType?: string | null, ownerId?: string | null) => {
@@ -70,5 +82,5 @@ export function useAdminOrganisers(): {
     [organisers],
   );
 
-  return { organisers, loading: signedIn && (communities.loading || associations.loading) && organisers.length === 0, administers };
+  return { organisers, loading: signedIn && (joined.loading || roles.loading || associations.loading) && organisers.length === 0, administers };
 }
