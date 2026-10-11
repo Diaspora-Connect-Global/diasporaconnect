@@ -905,7 +905,12 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                                     e.stopPropagation();
                                                     if (withdrawing) return;
                                                     try {
-                                                        await withdrawApplication({ variables: { applicationId } });
+                                                        const result = await withdrawApplication({ variables: { applicationId } });
+                                                        // errorPolicy 'all': a refusal resolves with data: null / false.
+                                                        if (!result?.data?.withdrawApplication) {
+                                                            toast.error(t("toasts.withdrawError"));
+                                                            return;
+                                                        }
                                                         toast.success(t("toasts.withdrawSuccess"));
                                                     } catch {
                                                         toast.error(t("toasts.withdrawError"));

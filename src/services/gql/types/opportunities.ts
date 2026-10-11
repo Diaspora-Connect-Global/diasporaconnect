@@ -270,7 +270,7 @@ export interface Application {
   opportunityId?: string;
   applicantId?: string;
   status: ApplicationStatusEnum | string;
-  resumeFileRef?: FileRefType | null;
+  applicationFiles?: FileRefType[] | null;
   coverLetter?: string | null;
   customAnswers?: string | null;
   reviewNotes?: string | null;
