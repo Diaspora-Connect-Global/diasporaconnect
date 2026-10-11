@@ -389,7 +389,7 @@ export const EDIT_POST = gql`
  *   'EVERYONE' | 'FRIENDS' | 'ONLY_ME' | 'COMMUNITY' | 'ASSOCIATION'
  */
 export const UPDATE_POST_VISIBILITY = gql`
-  mutation UpdatePostVisibility($postId: ID!, $visibility: String!) {
+  mutation UpdatePostVisibility($postId: String!, $visibility: String!) {
     updatePostVisibility(postId: $postId, visibility: $visibility) {
       id
       visibility
@@ -511,60 +511,11 @@ export const DELETE_COMMENT = gql`
 // PROFILE POST QUERIES
 // ============================================================================
 
-/**
- * Get posts filtered by engagement type for the current user's profile.
- * type: 'liked' | 'saved' | 'commented'
+/*
+ * GET_USER_ENGAGED_POSTS was removed: the gateway has no `engagedPosts` query.
+ * Use GET_SAVED_POSTS (`savedPosts`) and GET_LIKED_POSTS (`likedPosts`) below.
+ * There is no gateway query for "posts I commented on" (backend gap).
  */
-export const GET_USER_ENGAGED_POSTS = gql`
-  query GetUserEngagedPosts($input: GetEngagedPostsInput!) {
-    engagedPosts(input: $input) {
-      total
-      posts {
-        id
-        text
-        authorId
-        authorType
-        authorProfile {
-          organizationProfile {
-            name
-          }
-          userProfile {
-            name
-            avatar
-            isVip
-            verificationTier
-            trustScore
-          }
-        }
-        createdAt
-        attachments {
-          id
-          objectKey
-          url
-          type
-          mimeType
-        }
-        engagementCounts {
-          likes
-          comments
-          shares
-          saves
-          happy
-          hopeful
-          sad
-        }
-        userEngagement {
-          hasLiked
-          hasSaved
-          hasShared
-          myReaction
-        }
-        categories
-        aiTopics
-      }
-    }
-  }
-`;
 
 export const GET_USER_POSTS = gql`
   query GetUserPosts($authorId: String, $authorType: String = "USER", $limit: Int = 20, $offset: Int = 0) {
