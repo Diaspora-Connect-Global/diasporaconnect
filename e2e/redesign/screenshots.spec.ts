@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { openBrowser } from '../support/browser';
 import { eventFixture } from '../support/eventFixtures';
-import { FUTURE, open } from './fixtures';
+import { FUTURE, POSTS, open } from './fixtures';
 
 test.skip(process.env.REDESIGN_SCREENSHOTS !== '1', 'set REDESIGN_SCREENSHOTS=1 to capture');
 const OUT = path.join(process.cwd(), '.artifacts/redesign-screenshots');
@@ -20,9 +20,11 @@ test.afterAll(async () => {
 });
 
 const group = (id: string, name: string) => ({ __typename: 'Group', id, name, description: 'Connect, learn and grow together.', privacy: 'PUBLIC', memberCount: 87, avatarUrl: null });
+const img = (src: string) => ({ __typename: 'Attachment', id: src, type: 'IMAGE', mimeType: 'image/webp', url: src, size: 1, width: 720, height: 480 });
 const DATA = {
+    GetPostsByIds: (v: Record<string, unknown>) => ({ postsByIds: POSTS.filter((p) => ((v.ids as string[]) ?? []).includes(p.id)).map((p, i) => (i === 0 ? { ...p, attachments: [img('/images/redesign/cat-property.webp'), img('/images/redesign/cat-service.webp')] } : p)) }),
     userEvents: undefined,
-    UserEvents: { userEvents: { __typename: 'UserEvents', attending: [eventFixture({ id: 'evt-reg', title: 'Networking Mixer', startAt: FUTURE, endAt: FUTURE, isRegistered: true })], saved: [] } },
+    UserEvents: { userEvents: { __typename: 'UserEvents', attending: [eventFixture({ id: 'evt-reg', title: 'Networking Mixer', startAt: FUTURE, endAt: FUTURE, isRegistered: true, coverImageUrl: '/images/redesign/cat-event.webp' })], saved: [] } },
     MyServiceRequests: { myServiceRequests: [{ __typename: 'ServiceRequest', id: 'sr-1', requestNumber: 'DP-2026-0042', requestTypeId: 't', category: 'Passport', status: 'UNDER_REVIEW', ownerType: 'COMMUNITY', ownerEntityId: 'c1', submittedAt: '2026-10-01T00:00:00Z', updatedAt: '2026-10-02T00:00:00Z' }] },
     GetMyKYCStatus: { getMyKYCStatus: { __typename: 'KYCStatus', status: 'APPROVED', kycLevel: 1, profileId: null } },
     MyCircles: { myCircles: ['Accra Tech Hub', 'Ghana Real Estate', 'Diaspora Investors'].map((name, i) => ({ __typename: 'Circle', id: `cir-${i}`, circleNumber: i, name, handle: `c${i}`, tagline: null, description: null, avatarUrl: null, bannerUrl: null, brandJson: null, discoverable: true, joinMode: 'REQUEST', status: 'ACTIVE', founderUserId: 'x', chatConversationId: null, memberCount: 12 + i, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', archivedAt: null })) },

@@ -7,6 +7,7 @@ import { test, expect, type Browser } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { eventFixture } from '../support/eventFixtures';
 import { ALL, FUTURE, UUID, open } from './fixtures';
+import { ME_PROFILE } from '../support/fakeSession';
 
 let browser: Browser;
 test.beforeAll(async () => {
@@ -21,9 +22,23 @@ const registered = { UserEvents: { userEvents: { __typename: 'UserEvents', atten
 test('greets the person by first name with a time-of-day greeting and shows their place', async () => {
     const { page } = await open(browser, '/home');
     const hero = page.locator('#home-hero-title');
-    await expect(hero).toHaveText('Ama', { timeout: 90_000 });
+    await expect(hero).toContainText('Ama', { timeout: 90_000 });
+    await expect(hero).toContainText('👋');
     await expect(page.getByText(/^Good (morning|afternoon|evening),$/)).toBeVisible();
     await expect(page.getByText('Berlin, Germany')).toBeVisible();
+    await expect(page.getByText('Your connection to real opportunities, trusted services and a stronger Africa.')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Explore opportunities/ }).first()).toBeVisible();
+    await page.context().close();
+});
+
+test('the hero always renders with real height, and falls back to the bare greeting without a name or place', async () => {
+    const { page } = await open(browser, '/home', { GetMyProfile: { getProfile: { __typename: 'ProfileResponse', success: true, message: 'ok', profile: { ...ME_PROFILE, firstName: null, lastName: null, city: null, residenceCountry: null, countryOfOrigin: null } } } });
+    const hero = page.locator('#home-hero-title');
+    await expect(hero).toHaveText(/^Good (morning|afternoon|evening)$/, { timeout: 90_000 });
+    // Regression: the hero (overflow-hidden) used to be flex-shrunk to a hairline inside the scrolling column.
+    const box = await page.locator('section[aria-labelledby="home-hero-title"]').boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThan(150);
+    await expect(page.getByText(/,\s*Germany$/)).toHaveCount(0);
     await page.context().close();
 });
 
@@ -60,6 +75,14 @@ test('latest listings are labelled by what they are, and "From your community" s
     await expect(posts).toBeVisible();
     await expect(posts.getByTestId('community-post-preview')).toHaveCount(3);
     await expect(posts).toContainText('Kofi Mensah');
+    // The action row uses Happy / Hopeful / Sad, never "Like", plus the real comment count and Share.
+    const row = posts.getByTestId('post-reaction-row').first();
+    for (const k of ['Happy', 'Hopeful', 'Sad']) await expect(row.getByRole('button', { name: k })).toBeVisible();
+    await expect(posts.getByRole('button', { name: /^Like$/ })).toHaveCount(0);
+    await expect(row.getByRole('button', { name: /Share/ })).toBeVisible();
+    // Every listing card has a photo on top (its own, or a category placeholder).
+    const cards = page.getByTestId('latest-card');
+    for (let i = 0; i < 4; i += 1) await expect(cards.nth(i).locator('img').first()).toHaveAttribute('src', /.+/);
     await page.context().close();
 });
 

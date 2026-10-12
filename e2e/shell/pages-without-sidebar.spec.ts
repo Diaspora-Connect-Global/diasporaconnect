@@ -77,8 +77,8 @@ for (const route of homeRoutes()) {
         await expect(page.locator('aside').filter({ hasText: 'Group chats' })).toHaveCount(0);
 
         const box = (await contentFrame(page))!;
-        // 60vw of 1280 is the width most pages were laid out for; the redesigned Home (like Community) takes the header's full 80vw frame.
-        expect(Math.round(box.width)).toBe(route === '/home' ? 1024 : 768);
+        // 60vw of 1280 is the width most pages were laid out for; the redesigned Home takes a wider frame, min(92vw, 1400px), that the header matches.
+        expect(Math.round(box.width)).toBe(route === '/home' ? 1178 : 768);
         expect(Math.abs(box.x - (1280 - box.x - box.width))).toBeLessThanOrEqual(1);
         test.info().annotations.push({ type: 'page errors (desktop)', description: errors.join(' | ') || 'none' });
         await page.context().close();
