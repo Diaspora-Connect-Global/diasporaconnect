@@ -5316,7 +5316,8 @@
       "open": "Groep bekijken",
       "joinedToast": "Je bent lid geworden van de groep.",
       "requestedToast": "Je verzoek is verstuurd.",
-      "failedToast": "Dat is niet gelukt. Probeer het opnieuw."
+      "failedToast": "Dat is niet gelukt. Probeer het opnieuw.",
+      "requestShort": "Aanvragen"
     },
     "composer": {
       "prompt": "Deel een update, stel een vraag of start een discussie…",
@@ -6199,5 +6200,15 @@
         "save": "Afspraakinstellingen opslaan"
       }
     }
+  },
+  "homeLeft": {
+    "label": "Je communities en groepen",
+    "yourCommunities": "Je communities",
+    "viewAll": "Alles bekijken",
+    "joinMore": "Meer communities joinen",
+    "featuredGroups": "Uitgelichte groepen",
+    "connectTitle": "Bouw sterkere verbindingen.",
+    "connectBody": "Sluit je aan bij een community die je doelen steunt, deel je verhaal en maak deel uit van iets groters.",
+    "connectCta": "Communities ontdekken"
   }
 }

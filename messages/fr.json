@@ -5316,7 +5316,8 @@
       "open": "Voir le groupe",
       "joinedToast": "Vous avez rejoint le groupe.",
       "requestedToast": "Votre demande a été envoyée.",
-      "failedToast": "Impossible de le faire. Veuillez réessayer."
+      "failedToast": "Impossible de le faire. Veuillez réessayer.",
+      "requestShort": "Demander"
     },
     "composer": {
       "prompt": "Partagez une actualité, posez une question ou lancez une discussion…",
@@ -6199,5 +6200,15 @@
         "save": "Enregistrer les paramètres"
       }
     }
+  },
+  "homeLeft": {
+    "label": "Vos communautés et groupes",
+    "yourCommunities": "Vos communautés",
+    "viewAll": "Tout voir",
+    "joinMore": "Rejoindre d'autres communautés",
+    "featuredGroups": "Groupes à la une",
+    "connectTitle": "Créez des liens plus forts.",
+    "connectBody": "Rejoignez une communauté qui soutient vos objectifs, partagez votre histoire et faites partie de quelque chose de plus grand.",
+    "connectCta": "Découvrir les communautés"
   }
 }

@@ -5316,7 +5316,8 @@
       "open": "Gruppe ansehen",
       "joinedToast": "Du bist der Gruppe beigetreten.",
       "requestedToast": "Deine Anfrage wurde gesendet.",
-      "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut."
+      "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut.",
+      "requestShort": "Anfragen"
     },
     "composer": {
       "prompt": "Teile ein Update, stelle eine Frage oder starte eine Diskussion …",
@@ -6199,5 +6200,15 @@
         "save": "Treffen-Einstellungen speichern"
       }
     }
+  },
+  "homeLeft": {
+    "label": "Deine Communities und Gruppen",
+    "yourCommunities": "Deine Communities",
+    "viewAll": "Alle ansehen",
+    "joinMore": "Weitere Communities beitreten",
+    "featuredGroups": "Empfohlene Gruppen",
+    "connectTitle": "Stärkere Verbindungen aufbauen.",
+    "connectBody": "Tritt einer Community bei, die deine Ziele unterstützt, teile deine Geschichte und werde Teil von etwas Größerem.",
+    "connectCta": "Communities entdecken"
   }
 }

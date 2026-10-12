@@ -13,6 +13,7 @@ import { YourActivity } from '@/components/home/YourActivity';
 import { LatestListings } from '@/components/home/LatestListings';
 import { CommunityPosts } from '@/components/home/HomeCommunityPosts';
 import { HomeRail } from '@/components/home/HomeRail';
+import { HomeLeftColumn } from '@/components/home/HomeLeftColumn';
 import { GET_MY_PROFILE, type GetProfileResponse } from '@/services/gql/profile';
 import { Link } from '@/i18n/navigation';
 import { REQUEST_JOIN_COMMUNITY, LIST_MY_JOINED_COMMUNITIES, GET_COMMUNITY } from '@/services/gql/community';
@@ -1020,6 +1021,7 @@ export default function Home() {
   return (
     <div className="h-app-inner flex overflow-hidden">
       <PrivacyPolicyModal />
+      <HomeLeftColumn />
       {/* Main Feed - Independent Scroll */}
       <div
         ref={setFeedScrollRef}

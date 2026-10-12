@@ -5316,7 +5316,8 @@
       "open": "View group",
       "joinedToast": "You joined the group.",
       "requestedToast": "Your request was sent.",
-      "failedToast": "We could not do that. Please try again."
+      "failedToast": "We could not do that. Please try again.",
+      "requestShort": "Request"
     },
     "composer": {
       "prompt": "Share an update, ask a question or start a discussion…",
@@ -6199,5 +6200,15 @@
         "save": "Save meeting settings"
       }
     }
+  },
+  "homeLeft": {
+    "label": "Your communities and groups",
+    "yourCommunities": "Your Communities",
+    "viewAll": "View all",
+    "joinMore": "Join more communities",
+    "featuredGroups": "Featured Groups",
+    "connectTitle": "Build stronger connections.",
+    "connectBody": "Join a community that supports your goals, share your story and be part of something bigger.",
+    "connectCta": "Explore Communities"
   }
 }

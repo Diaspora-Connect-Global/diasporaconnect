@@ -5316,7 +5316,8 @@
       "open": "Vedi gruppo",
       "joinedToast": "Ti sei unito al gruppo.",
       "requestedToast": "La tua richiesta è stata inviata.",
-      "failedToast": "Non è stato possibile. Riprova."
+      "failedToast": "Non è stato possibile. Riprova.",
+      "requestShort": "Richiedi"
     },
     "composer": {
       "prompt": "Condividi un aggiornamento, fai una domanda o avvia una discussione…",
@@ -6199,5 +6200,15 @@
         "save": "Salva le impostazioni"
       }
     }
+  },
+  "homeLeft": {
+    "label": "Le tue community e i tuoi gruppi",
+    "yourCommunities": "Le tue community",
+    "viewAll": "Vedi tutto",
+    "joinMore": "Unisciti ad altre community",
+    "featuredGroups": "Gruppi in evidenza",
+    "connectTitle": "Costruisci legami più forti.",
+    "connectBody": "Unisciti a una community che sostiene i tuoi obiettivi, condividi la tua storia e fai parte di qualcosa di più grande.",
+    "connectCta": "Esplora le community"
   }
 }
