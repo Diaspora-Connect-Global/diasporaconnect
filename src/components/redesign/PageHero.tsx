@@ -36,7 +36,7 @@ export function PageHero({
   return (
     <section
       aria-labelledby={id}
-      className={`relative overflow-hidden rounded-2xl border border-border-subtle ${photo ? 'bg-slate-900' : 'bg-gradient-to-r from-surface-info via-surface-brand-subtle to-surface-default'}`}
+      className={`relative shrink-0 overflow-hidden rounded-2xl border border-border-subtle ${photo ? 'min-h-[188px] bg-slate-900 shadow-sm sm:min-h-[216px]' : 'bg-gradient-to-r from-surface-info via-surface-brand-subtle to-surface-default'}`}
     >
       {photo && (
         <Image
@@ -48,12 +48,12 @@ export function PageHero({
           className="object-cover object-[60%_40%]"
         />
       )}
-      {photo && <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-900/35 to-transparent" />}
-      <div className={`relative z-10 p-5 sm:max-w-[64%] sm:p-8 ${photo ? 'text-white' : 'text-text-primary'}`}>
+      {photo && <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-900/25 to-transparent" />}
+      <div className={`relative z-10 p-5 sm:max-w-[64%] sm:px-9 sm:py-8 ${photo ? 'text-white' : 'text-text-primary'}`}>
         {eyebrow && (
           <p className={`text-xs font-semibold uppercase tracking-wider ${photo ? 'text-white/90' : 'text-text-primary'}`}>{eyebrow}</p>
         )}
-        <h1 id={id} className="mt-1.5 text-2xl font-bold leading-tight sm:text-4xl">
+        <h1 id={id} className={`mt-1.5 font-bold leading-tight ${photo ? 'text-3xl sm:text-5xl' : 'text-2xl sm:text-4xl'}`}>
           {title}
         </h1>
         {subtitle && (

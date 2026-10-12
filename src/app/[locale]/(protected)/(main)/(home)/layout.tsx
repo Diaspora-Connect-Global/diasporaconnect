@@ -12,10 +12,10 @@ import { usePathname } from '@/i18n/navigation';
  * proportions, and nothing slides when a page swaps its loader for content.
  *
  * Home (`/home`) is the exception: its redesign is a main column plus a right
- * rail, so it takes the header's full 80vw frame, like Community.
+ * rail, so it takes a wider frame (92vw, at most 1400px) that the header matches on that page, so the main column has room for three activity cards and four listing cards.
  */
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const wide = pathname === '/home' || pathname === '/';
-  return <div className={`h-app-inner min-w-0 lg:mx-auto ${wide ? 'lg:w-[80vw]' : 'lg:w-[60vw]'}`}>{children}</div>;
+  return <div className={`h-app-inner min-w-0 lg:mx-auto ${wide ? 'lg:w-[min(92vw,1400px)]' : 'lg:w-[60vw]'}`}>{children}</div>;
 }

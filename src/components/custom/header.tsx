@@ -106,6 +106,8 @@ export default function Header({ children }: { children: React.ReactNode }) {
 
   const activeSection = getActiveNavKey(pathname);
   const firstSegment = stripLocale(pathname).split('/')[1] ?? '';
+  // Home is the one page that uses the wide frame (main column + rail); see (home)/layout.tsx.
+  const wideFrame = stripLocale(pathname) === '/home' || stripLocale(pathname) === '/';
 
   const counts = useMemo(
     () => ({ notifications: unreadNotificationCount, messages: totalChatUnreadCount }),
@@ -123,10 +125,16 @@ export default function Header({ children }: { children: React.ReactNode }) {
             apart from the page's. The content frame (`lg:max-w-[80vw]`) is the
             same one the pages below use, so the logo lines up with content. */}
         <header className="sticky top-0 z-50 h-app-top-down w-full border-b border-border-subtle bg-surface-default">
-          <div className="mx-auto flex h-full items-stretch gap-2 px-3 sm:px-4 lg:grid lg:max-w-[80vw] lg:grid-cols-[1fr_auto_1fr] lg:px-0">
+          <div className={`mx-auto flex h-full items-stretch gap-2 px-3 sm:px-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-0 ${wideFrame ? 'lg:max-w-[min(92vw,1400px)]' : 'lg:max-w-[80vw]'}`}>
             <div className="flex min-w-0 items-center">
               <Link href="/home" prefetch={false} aria-label={t('logoLabel')} className={`rounded-md ${FOCUS_RING}`}>
-                <Image src="/LOGO.svg" alt="" width={160} height={40} priority className="h-9 w-auto object-contain lg:h-10" />
+                <span className="flex items-center gap-2.5">
+                  <Image src="/LOGO.svg" alt="" width={160} height={40} priority className="h-9 w-auto object-contain lg:h-10" />
+                  <span className="hidden leading-tight xl:block" data-testid="header-wordmark">
+                    <span className="block text-xl font-bold tracking-tight text-text-primary">DiaspoPlug</span>
+                    <span className="block text-[11px] text-muted-foreground">{t('tagline')}</span>
+                  </span>
+                </span>
               </Link>
             </div>
 

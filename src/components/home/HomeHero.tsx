@@ -30,7 +30,7 @@ export function HomeHero({ firstName, city, countryCode }: { firstName?: string 
       priority
       image={REDESIGN_IMAGES.homeHero}
       eyebrow={name ? t(`greeting.${greeting}`) : undefined}
-      title={name || t(`greeting.${greeting}`).replace(/,$/, '')}
+      title={name ? <>{name} <span aria-hidden>👋</span></> : t(`greeting.${greeting}`).replace(/,$/, '')}
       subtitle={t('heroSubtitle')}
       chip={place || undefined}
     >
