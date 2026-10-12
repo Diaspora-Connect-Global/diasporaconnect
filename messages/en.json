@@ -755,7 +755,18 @@
           "ADMIN": "Admin",
           "MODERATOR": "Moderator",
           "MEMBER": "Member"
-        }
+        },
+        "backToCommunity": "Community",
+        "openChat": "Open group chat",
+        "youOwn": "You own this group",
+        "about": "About",
+        "info": "Group info",
+        "memberCount": "{count, plural, one {# member} other {# members}}",
+        "capacity": "{count} of {max} members",
+        "since": "Since {date}",
+        "createdOn": "Created on {date}",
+        "publicHint": "Anyone can see who's in this group and join.",
+        "privateHint": "Only members can see who's in it. Joining needs approval."
       }
     },
     "viewCommunity": "View community",

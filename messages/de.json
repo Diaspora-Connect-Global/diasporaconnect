@@ -754,7 +754,18 @@
           "ADMIN": "Admin",
           "MODERATOR": "Moderator",
           "MEMBER": "Mitglied"
-        }
+        },
+        "backToCommunity": "Community",
+        "openChat": "Gruppenchat öffnen",
+        "youOwn": "Diese Gruppe gehört dir",
+        "about": "Über die Gruppe",
+        "info": "Gruppeninfo",
+        "memberCount": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
+        "capacity": "{count} von {max} Mitgliedern",
+        "since": "Seit {date}",
+        "createdOn": "Erstellt am {date}",
+        "publicHint": "Alle können sehen, wer in dieser Gruppe ist, und beitreten.",
+        "privateHint": "Nur Mitglieder sehen, wer dabei ist. Der Beitritt muss genehmigt werden."
       }
     },
     "viewCommunity": "Community anzeigen",

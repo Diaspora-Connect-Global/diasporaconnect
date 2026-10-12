@@ -168,6 +168,41 @@ export const GET_GROUP_MEMBERS = gql`
 `;
 
 /**
+ * The group page's roster: GET_GROUP_MEMBERS plus each member's `occupation`
+ * for the member cards. A separate document so the chat's member paging
+ * (GroupChat, AddMembersModal, useEnsureMemberNamesLoaded) keeps its own,
+ * unchanged selection.
+ */
+export const GET_GROUP_PAGE_MEMBERS = gql`
+  query GetGroupPageMembers($groupId: ID!, $membersLimit: Int, $membersOffset: Int) {
+    getGroupMembers(groupId: $groupId, limit: $membersLimit, offset: $membersOffset) {
+      success
+      message
+      total
+      hasMore
+      members {
+        id
+        groupId
+        userId
+        role
+        status
+        joinedAt
+        createdAt
+        profile {
+          avatarUrl
+          firstName
+          lastName
+          residenceCountry
+          city
+          occupation
+          trustScore
+        }
+      }
+    }
+  }
+`;
+
+/**
  * Check if the current user is a member of a group.
  * 
  * @example

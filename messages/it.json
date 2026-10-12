@@ -754,7 +754,18 @@
           "ADMIN": "Admin",
           "MODERATOR": "Moderatore",
           "MEMBER": "Membro"
-        }
+        },
+        "backToCommunity": "Community",
+        "openChat": "Apri la chat del gruppo",
+        "youOwn": "Questo gruppo è tuo",
+        "about": "Informazioni",
+        "info": "Info sul gruppo",
+        "memberCount": "{count, plural, one {# membro} other {# membri}}",
+        "capacity": "{count} membri su {max}",
+        "since": "Dal {date}",
+        "createdOn": "Creato il {date}",
+        "publicHint": "Chiunque può vedere chi fa parte del gruppo e unirsi.",
+        "privateHint": "Solo i membri vedono chi ne fa parte. L’adesione va approvata."
       }
     },
     "viewCommunity": "Vedi community",

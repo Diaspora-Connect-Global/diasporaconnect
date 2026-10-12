@@ -114,7 +114,8 @@ export interface Group {
  * @property {string} createdAt - ISO timestamp when membership was created
  */
 export interface GroupMember {
-  profile: Profile;
+  /** The roster's profile summary; `occupation` is selected by GET_GROUP_MEMBERS only. */
+  profile: Profile & { occupation?: string | null };
   id: string;
   groupId: string;
   userId: string;

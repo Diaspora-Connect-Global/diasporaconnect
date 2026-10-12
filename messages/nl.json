@@ -755,7 +755,18 @@
           "ADMIN": "Beheerder",
           "MODERATOR": "Moderator",
           "MEMBER": "Lid"
-        }
+        },
+        "backToCommunity": "Gemeenschap",
+        "openChat": "Groepschat openen",
+        "youOwn": "Je bent eigenaar van deze groep",
+        "about": "Over",
+        "info": "Groepsinfo",
+        "memberCount": "{count, plural, one {# lid} other {# leden}}",
+        "capacity": "{count} van {max} leden",
+        "since": "Sinds {date}",
+        "createdOn": "Aangemaakt op {date}",
+        "publicHint": "Iedereen kan zien wie in deze groep zit en lid worden.",
+        "privateHint": "Alleen leden zien wie erin zit. Lid worden moet worden goedgekeurd."
       }
     },
     "viewCommunity": "Gemeenschap bekijken",
