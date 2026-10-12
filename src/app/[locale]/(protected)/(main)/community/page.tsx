@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { useQuery, useMutation } from '@apollo/client/react';
-import JoinCommunityCard from "@/components/cards/JoinCommunityCard";
 import { YourCommunitiesColumn } from "@/components/community/YourCommunitiesColumn";
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
-import { EmptyState } from '@/components/feedback';
-import { Globe } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
     DISCOVER_COMMUNITIES,
@@ -20,11 +17,9 @@ import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/
 import { GET_USER_ASSOCIATIONS } from '@/services/gql/associations';
 import { useUserStore } from '@/store/useUserStore';
 import { toast } from 'sonner';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { MembershipPaymentModal } from './_components/MembershipPaymentModal';
-import { toJoinPolicy, type AccessProfile, type Visibility } from '@/types/membership';
-import { cn } from '@/lib/utils';
+import { toJoinPolicy, type AccessProfile } from '@/types/membership';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { toCdnUrl } from '@/lib/cdn';
 import PageLoader from '@/components/custom/PageLoader';
@@ -37,6 +32,7 @@ import { FeaturedGroups } from '@/components/community/redesign/FeaturedGroups';
 import { CommunityComposer } from '@/components/community/redesign/CommunityComposer';
 import { CommunityFeed } from '@/components/community/redesign/CommunityFeed';
 import { CommunityRail } from '@/components/community/redesign/CommunityRail';
+import { CommunitiesToJoin } from '@/components/community/redesign/CommunitiesToJoin';
 import { GET_MY_PROFILE, type GetProfileResponse } from '@/services/gql/profile';
 
 interface RequestMembershipPayload {
@@ -112,42 +108,8 @@ interface SearchCommunitiesData {
 
 const JOINED_STATUSES = new Set(['ACTIVE', 'MEMBER', 'JOINED', 'APPROVED']);
 
-type VisibilityFilter = 'ALL' | Visibility;
-type PricingFilter = 'ALL' | 'FREE' | 'PAID';
-
-const VISIBILITY_OPTIONS: VisibilityFilter[] = ['ALL', 'PUBLIC', 'PRIVATE'];
-const PRICING_OPTIONS: PricingFilter[] = ['ALL', 'FREE', 'PAID'];
-
-function readVisibility(param: string | null): VisibilityFilter {
-    const upper = (param ?? 'ALL').toUpperCase();
-    return upper === 'PUBLIC' || upper === 'PRIVATE' ? upper : 'ALL';
-}
-
-function readPricing(param: string | null): PricingFilter {
-    const upper = (param ?? 'ALL').toUpperCase();
-    return upper === 'FREE' || upper === 'PAID' ? upper : 'ALL';
-}
-
-function communityToAccess(c: SearchCommunityItem): AccessProfile | null {
-    if (!c.visibility) return null;
-    const paymentType = c.paymentType ?? 'NONE';
-    return {
-        visibility: c.visibility,
-        joinPolicy: toJoinPolicy(c.joinPolicy),
-        paymentType,
-        price:
-            paymentType !== 'NONE' && c.priceAmount
-                ? {
-                      amountInCents: c.priceAmount,
-                      currency: c.priceCurrency ?? 'GHS',
-                  }
-                : undefined,
-    };
-}
-
 export default function Community() {
     const t = useTranslations('community');
-    const tDiscovery = useTranslations('community.discovery');
     const tActions = useTranslations('actions');
     const tJoinModal = useTranslations('home.joinModal');
     const tPage = useTranslations('communityPage');
@@ -156,32 +118,11 @@ export default function Community() {
     const [searchText, setSearchText] = useState('');
     const { data: profileData } = useQuery<GetProfileResponse>(GET_MY_PROFILE, { fetchPolicy: 'cache-first' });
 
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-
     const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const q = searchText.trim();
         if (q) intlRouter.push(`/search?q=${encodeURIComponent(q)}`);
     };
-
-    const visibilityFilter = readVisibility(searchParams.get('visibility'));
-    const pricingFilter = readPricing(searchParams.get('pricing'));
-
-    const updateFilter = useCallback(
-        (key: 'visibility' | 'pricing', value: string) => {
-            const params = new URLSearchParams(Array.from(searchParams.entries()));
-            if (value === 'ALL') {
-                params.delete(key);
-            } else {
-                params.set(key, value);
-            }
-            const query = params.toString();
-            router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-        },
-        [pathname, router, searchParams],
-    );
 
     const [joinedCommunities, setJoinedCommunities] = useState<Set<string>>(new Set());
     // Communities the viewer has just requested to join (APPROVAL/REQUEST policy)
@@ -489,18 +430,8 @@ export default function Community() {
                         !JOINED_STATUSES.has(c.membershipStatus?.toUpperCase() ?? '') &&
                         !pendingRequestIds.has(c.id) &&
                         !pendingCommunities.has(c.id),
-                )
-                .filter((c) =>
-                    visibilityFilter === 'ALL'
-                        ? true
-                        : c.visibility === visibilityFilter,
-                )
-                .filter((c) => {
-                    if (pricingFilter === 'ALL') return true;
-                    const isPaid = !!c.paymentType && c.paymentType !== 'NONE';
-                    return pricingFilter === 'PAID' ? isPaid : !isPaid;
-                }),
-        [renderList, joinedCommunityIds, pendingRequestIds, pendingCommunities, visibilityFilter, pricingFilter],
+                ),
+        [renderList, joinedCommunityIds, pendingRequestIds, pendingCommunities],
     );
 
     // One gate for every query feeding the visible sections (my communities,
@@ -613,102 +544,20 @@ export default function Community() {
                 <FeaturedGroups />
                 <CommunityComposer avatarUrl={profileData?.getProfile?.profile?.avatarUrl} />
                 <CommunityFeed scrollRoot={scrollEl} />
-                <section aria-labelledby="community-join-title" className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
-                  <h2 id="community-join-title" className="mb-3 text-lg font-bold text-text-primary">{tPage('more.title')}</h2>
-
-                  <div
-                className="flex flex-wrap items-center gap-2 mb-4"
-                role="group"
-                aria-label={tDiscovery('filtersLabel')}
-            >
-                <span className="text-sm text-text-secondary mr-1">
-                    {tDiscovery('visibilityLabel')}
-                </span>
-                {VISIBILITY_OPTIONS.map((v) => {
-                    const active = visibilityFilter === v;
-                    return (
-                        <button
-                            key={`visibility-${v}`}
-                            type="button"
-                            onClick={() => updateFilter('visibility', v)}
-                            aria-pressed={active}
-                            className={cn(
-                                'rounded-full border px-3 py-1 text-xs transition-colors',
-                                active
-                                    ? 'bg-surface-brand text-text-on-brand border-transparent'
-                                    : 'bg-surface-default text-text-secondary border-border-subtle hover:bg-surface-hover',
-                            )}
-                        >
-                            {tDiscovery(`visibility.${v.toLowerCase()}`)}
-                        </button>
-                    );
-                })}
-                <span className="text-sm text-text-secondary mx-1">
-                    {tDiscovery('pricingLabel')}
-                </span>
-                {PRICING_OPTIONS.map((p) => {
-                    const active = pricingFilter === p;
-                    return (
-                        <button
-                            key={`pricing-${p}`}
-                            type="button"
-                            onClick={() => updateFilter('pricing', p)}
-                            aria-pressed={active}
-                            className={cn(
-                                'rounded-full border px-3 py-1 text-xs transition-colors',
-                                active
-                                    ? 'bg-surface-brand text-text-on-brand border-transparent'
-                                    : 'bg-surface-default text-text-secondary border-border-subtle hover:bg-surface-hover',
-                            )}
-                        >
-                            {tDiscovery(`pricing.${p.toLowerCase()}`)}
-                        </button>
-                    );
-                })}
-            </div>
-
-            <div className="overflow-auto scrollbar-hide grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-                {visibleCommunities.length ? (
-                    visibleCommunities.map((community) => {
-                        const isAlreadyJoined = JOINED_STATUSES.has(community.membershipStatus?.toUpperCase() ?? '') || joinedCommunities.has(community.id);
-                        const isPendingStatus = community.membershipStatus === 'PENDING' || pendingCommunities.has(community.id);
-                        const access = communityToAccess(community);
-                        return (
-                            <JoinCommunityCard
-                                key={community.id}
-                                title={community.name}
-                                members={community.memberCount ?? 0}
-                                onButtonClick={() => handleJoinClick(community)}
-                                buttonText={
-                                    isAlreadyJoined
-                                        ? tActions('joined')
-                                        : isPendingStatus
-                                            ? tActions('pending')
-                                            : tActions('join')
-                                }
-                                description={community.description || ''}
-                                avatarUrl={community.avatarUrl}
-                                isDisabled={isAlreadyJoined || isPendingStatus}
-                                access={access ?? undefined}
-                                communityType={community.communityType}
-                            />
-                        );
-                    })
-                ) : (
-                    <div className="col-span-full">
-                        <EmptyState
-                            size="md"
-                            icon={Globe}
-                            title={tDiscovery('emptyFiltered')}
-                        />
-                    </div>
-                )}
-            </div>
-                </section>
               </div>
 
               <div className="min-w-0 lg:self-start">
-                <CommunityRail />
+                <CommunityRail
+                  communities={
+                    <CommunitiesToJoin
+                      communities={visibleCommunities}
+                      onJoin={(c) => {
+                        const entity = visibleCommunities.find((x) => x.id === c.id);
+                        if (entity) handleJoinClick(entity);
+                      }}
+                    />
+                  }
+                />
               </div>
             </div>
           </div>

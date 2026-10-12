@@ -1,7 +1,7 @@
 /** The redesigned Community: hero, left nav, groups to join, composer, feed tabs with reactions, right rail. */
 import { test, expect, type Browser } from '@playwright/test';
 import { openBrowser } from '../support/browser';
-import { UUID, event, FUTURE, open } from './fixtures';
+import { UUID, event, FUTURE, open, post } from './fixtures';
 
 let browser: Browser;
 test.beforeAll(async () => {
@@ -78,10 +78,67 @@ test('right rail: suggested people (Connect), trending topics, upcoming events, 
     await page.context().close();
 });
 
+const community = (id: string, name: string, memberCount: number) => ({
+    __typename: 'Community', id, name, description: 'A community', avatarUrl: null, bannerUrl: null, memberCount,
+    visibility: 'PUBLIC', joinPolicy: 'OPEN', membershipStatus: null, communityType: null,
+});
+const TO_JOIN = {
+    DiscoverCommunities: { discoverCommunities: { __typename: 'DiscoverCommunitiesResponse', total: 2, communities: [community('00000000-0000-4000-8000-0000000c0001', 'Ghana Union Berlin', 12), community('00000000-0000-4000-8000-0000000c0009', 'Lagos Founders Circle', 34)] } },
+};
+
+test('no communities grid in the middle column; communities to join sit in the right rail', async () => {
+    const { page } = await open(browser, '/community', { ...DATA, ...TO_JOIN }, { width: 1280, height: 900 });
+    const join = page.getByTestId('community-rail').getByTestId('community-join');
+    await expect(join).toContainText('Lagos Founders Circle', { timeout: 90_000 });
+    await expect(join).toContainText('34 members');
+    // Already a member → not offered.
+    await expect(join).not.toContainText('Ghana Union Berlin');
+    // The old grid and its Visibility / Pricing chips are gone.
+    await expect(page.getByText('Visibility', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Pricing', { exact: true })).toHaveCount(0);
+    const feed = (await page.getByTestId('community-feed').boundingBox())!;
+    const rail = (await join.boundingBox())!;
+    expect(rail.x).toBeGreaterThan(feed.x + feed.width - 1);
+    // Joining still goes through the page's confirmation flow.
+    await join.getByRole('button', { name: 'Join: Lagos Founders Circle' }).click();
+    await expect(page.getByRole('dialog')).toContainText('Lagos Founders Circle');
+    await page.context().close();
+});
+
+test('"All posts" filter narrows the feed to one category and selects Latest; For you clears it', async () => {
+    const asked: string[] = [];
+    const byCategory = (v: Record<string, unknown>) => {
+        const category = ((v.input ?? {}) as { category?: string }).category ?? '';
+        asked.push(category);
+        const posts = category === 'Business' ? [post('00000000-0000-4000-8000-0000000b0101', 'Export partners wanted for shea butter.')] : [];
+        return { postsByCategory: { __typename: 'PostsByCategoryResponse', posts, total: posts.length, hasMore: false } };
+    };
+    const { page } = await open(browser, '/community', { ...DATA, GetPostsByCategory: byCategory });
+    const filter = page.getByLabel('Filter posts');
+    await expect(filter).toBeVisible({ timeout: 90_000 });
+    await expect(filter).toHaveValue('');
+    expect((await filter.locator('option').first().textContent())?.trim()).toBe('All posts');
+    await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3);
+
+    await filter.selectOption('Business');
+    await expect(page.getByRole('tab', { name: 'Latest' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('[id^="feed-post-"]')).toHaveCount(1);
+    await expect(page.getByTestId('community-feed')).toContainText('Export partners wanted');
+    expect(asked).toContain('Business');
+
+    await filter.selectOption('Sports');
+    await expect(page.getByTestId('community-feed')).toContainText('No Sports posts yet.');
+
+    await page.getByRole('tab', { name: 'For you' }).click();
+    await expect(filter).toHaveValue('');
+    await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3);
+    await page.context().close();
+});
+
 test('rail cards hide when their data is empty or null', async () => {
     const { page, errors } = await open(browser, '/community', { RecommendedPeople: {}, GetTrendingHashtags: { trendingHashtags: null }, ListEvents: { listEvents: null } });
     await expect(page.getByTestId('community-rail')).toBeVisible({ timeout: 90_000 });
-    for (const id of ['community-people', 'community-topics', 'community-events']) await expect(page.getByTestId(id)).toHaveCount(0);
+    for (const id of ['community-people', 'community-topics', 'community-events', 'community-join']) await expect(page.getByTestId(id)).toHaveCount(0);
     expect(errors).toEqual([]);
     void event; void FUTURE;
     await page.context().close();

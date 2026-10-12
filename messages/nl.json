@@ -4462,7 +4462,6 @@
     "hopeful": "Hoop",
     "sad": "Medeleven",
     "react": "Reageer",
-    "moreReactions": "Meer reacties",
     "yourReaction": "Jouw reactie: {reaction}. Activeer om te verwijderen",
     "choose": "Kies een reactie",
     "total": "Totaal",
@@ -5351,6 +5350,11 @@
       "createTitle": "Iets te delen?",
       "createBody": "Start een discussie, deel een kans of stel een vraag.",
       "createCta": "Bericht maken"
+    },
+    "filter": {
+      "label": "Berichten filteren",
+      "all": "Alle berichten",
+      "empty": "Nog geen berichten over {category}."
     }
   },
   "networking": {

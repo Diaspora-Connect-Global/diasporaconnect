@@ -4462,7 +4462,6 @@
     "hopeful": "Hopeful",
     "sad": "Sad",
     "react": "React",
-    "moreReactions": "More reactions",
     "yourReaction": "Your reaction: {reaction}. Activate to remove",
     "choose": "Choose a reaction",
     "total": "Total",
@@ -5351,6 +5350,11 @@
       "createTitle": "Have something to share?",
       "createBody": "Start a discussion, share an opportunity or ask a question.",
       "createCta": "Create post"
+    },
+    "filter": {
+      "label": "Filter posts",
+      "all": "All posts",
+      "empty": "No {category} posts yet."
     }
   },
   "networking": {

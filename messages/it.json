@@ -4462,7 +4462,6 @@
     "hopeful": "Speranza",
     "sad": "Partecipazione",
     "react": "Reagisci",
-    "moreReactions": "Altre reazioni",
     "yourReaction": "La tua reazione: {reaction}. Attiva per rimuoverla",
     "choose": "Scegli una reazione",
     "total": "Totale",
@@ -5351,6 +5350,11 @@
       "createTitle": "Hai qualcosa da condividere?",
       "createBody": "Avvia una discussione, condividi un’opportunità o fai una domanda.",
       "createCta": "Crea post"
+    },
+    "filter": {
+      "label": "Filtra i post",
+      "all": "Tutti i post",
+      "empty": "Nessun post in {category} per ora."
     }
   },
   "networking": {

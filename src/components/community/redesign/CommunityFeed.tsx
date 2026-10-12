@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Newspaper } from 'lucide-react';
+import { ChevronDown, Newspaper } from 'lucide-react';
 import { useRouter } from '@/i18n/navigation';
 import { useFeed } from '@/hooks/useFeed';
 import { usePostEngagementHandlers } from '@/hooks/usePostEngagementHandlers';
@@ -15,16 +15,45 @@ type Tab = 'forYou' | 'latest' | 'following';
 const TABS: Tab[] = ['forYou', 'latest', 'following'];
 
 /**
+ * The post categories ai-service assigns (its default taxonomy, minus "Other").
+ * Labels come from the shared `categoryBadge` messages, so they read the same
+ * as the badge on each post.
+ */
+const CATEGORIES = [
+  'Business', 'Community', 'Culture', 'Diaspora', 'Education', 'Entertainment', 'Family', 'Finance', 'Food', 'Health',
+  'Jobs', 'Lifestyle', 'News', 'Personal', 'Politics', 'Religion', 'Sports', 'Tech', 'Travel',
+] as const;
+
+/**
  * Feed tabs (For you / Latest / Following) over the same post cards Home uses,
  * so the Happy / Hopeful / Sad reactions are identical. `scrollRoot` is the
  * page's scroll container, which drives infinite scroll.
+ *
+ * The "All posts" filter narrows the feed to one category. A category feed is
+ * newest-first, so picking one selects Latest; For you / Following clear it.
  */
 export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
   const t = useTranslations('communityPage');
+  const tCategory = useTranslations('categoryBadge');
   const tFeedback = useTranslations('feedback');
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>('forYou');
-  const feed = useFeed(tab === 'latest' ? { feedType: 'ALL' } : { mode: tab === 'following' ? 'following' : 'you' });
+  const [tab, setTabState] = useState<Tab>('forYou');
+  const [category, setCategory] = useState('');
+  const setTab = (next: Tab) => {
+    setTabState(next);
+    if (next !== 'latest') setCategory('');
+  };
+  const chooseCategory = (next: string) => {
+    setCategory(next);
+    if (next) setTabState('latest');
+  };
+  const categoryOptions = useMemo(
+    () => CATEGORIES.map((c) => ({ value: c, label: tCategory(c) })).sort((a, b) => a.label.localeCompare(b.label)),
+    [tCategory],
+  );
+  const feed = useFeed(
+    category ? { category } : tab === 'latest' ? { feedType: 'ALL' } : { mode: tab === 'following' ? 'following' : 'you' },
+  );
   const { posts, loading, loadingMore, error, refetch, hasMore, loadMore, updatePostCounts, removePost } = feed;
   const handlers = usePostEngagementHandlers(updatePostCounts);
   const sentinel = useRef<HTMLDivElement | null>(null);
@@ -52,7 +81,8 @@ export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
 
   return (
     <section aria-label={t('tabs.label')} data-testid="community-feed">
-      <div role="tablist" aria-label={t('tabs.label')} className="mb-3 flex gap-6 border-b border-border-subtle">
+      <div className="mb-3 flex items-end justify-between gap-3 border-b border-border-subtle">
+      <div role="tablist" aria-label={t('tabs.label')} className="flex gap-6">
         {TABS.map((k, i) => (
           <button
             key={k}
@@ -69,10 +99,29 @@ export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
           </button>
         ))}
       </div>
+        <div className="relative mb-2 shrink-0">
+          <label htmlFor="community-feed-filter" className="sr-only">{t('filter.label')}</label>
+          <select
+            id="community-feed-filter"
+            data-testid="community-feed-filter"
+            value={category}
+            onChange={(e) => chooseCategory(e.target.value)}
+            className="h-8 cursor-pointer appearance-none rounded-full border border-border-subtle bg-surface-default py-1 pl-3 pr-8 text-base font-medium text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand md:text-xs"
+          >
+            <option value="">{t('filter.all')}</option>
+            {categoryOptions.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-text-secondary" aria-hidden />
+        </div>
+      </div>
       <div role="tabpanel" className="space-y-2">
         {loading && posts.length === 0 && !error && <PageLoader />}
         {error && <ErrorState title={tFeedback('error.title')} description={t('feed.error')} retryLabel={t('feed.retry')} onRetry={() => refetch()} />}
-        {!loading && !error && posts.length === 0 && <EmptyState icon={Newspaper} title={t('feed.empty')} />}
+        {!loading && !error && posts.length === 0 && (
+          <EmptyState icon={Newspaper} title={category ? t('filter.empty', { category: tCategory(category) }) : t('feed.empty')} />
+        )}
         {posts.map((post, i) => (
           <FeedPostCard
             key={post.id}

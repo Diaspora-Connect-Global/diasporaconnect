@@ -128,14 +128,18 @@ function UpcomingEvents() {
   );
 }
 
-/** Community right rail. Each card queries for itself and renders nothing when its source is empty. */
-export function CommunityRail() {
+/**
+ * Community right rail. Each card queries for itself and renders nothing when its source is empty.
+ * `communities` is the page's "Communities to join" card (the page owns the join flow).
+ */
+export function CommunityRail({ communities }: { communities?: React.ReactNode } = {}) {
   const t = useTranslations('communityPage.rail');
   return (
     <div className="space-y-4" data-testid="community-rail">
       <SuggestedPeople />
       <TrendingTopics />
       <UpcomingEvents />
+      {communities}
       <section className="rounded-2xl border border-border-subtle bg-surface-brand-subtle p-4 shadow-sm">
         <h2 className="text-sm font-bold text-text-primary">{t('createTitle')}</h2>
         <p className="mt-1 text-xs text-muted-foreground">{t('createBody')}</p>

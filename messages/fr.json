@@ -4462,7 +4462,6 @@
     "hopeful": "Espoir",
     "sad": "Compassion",
     "react": "Réagir",
-    "moreReactions": "Plus de réactions",
     "yourReaction": "Votre réaction : {reaction}. Activer pour la retirer",
     "choose": "Choisir une réaction",
     "total": "Total",
@@ -5351,6 +5350,11 @@
       "createTitle": "Quelque chose à partager ?",
       "createBody": "Lancez une discussion, partagez une opportunité ou posez une question.",
       "createCta": "Créer une publication"
+    },
+    "filter": {
+      "label": "Filtrer les publications",
+      "all": "Toutes les publications",
+      "empty": "Aucune publication dans {category} pour le moment."
     }
   },
   "networking": {
