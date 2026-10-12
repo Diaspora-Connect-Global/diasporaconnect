@@ -56,7 +56,7 @@ import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
 import ReactionBar2 from '@/components/reactions/ReactionBar2';
-import ReactionRail from '@/components/reactions/ReactionRail';
+import ReactionButton from '@/components/reactions/ReactionButton';
 import {
     DEFAULT_REACTION,
     type SessionReactionPick,
@@ -1568,20 +1568,9 @@ function FeedCard2Inner({
     /* --------------------------------------------------------------- */
     return (
         <>
-            {/* `relative` is load-bearing: ReactionBar2 pins an invisible
-                anchor to this card's right border so the reaction rail can
-                straddle the edge beside the post content, instead of hanging
-                off the counts row at the bottom. No `overflow-hidden` here —
-                and the rail is portalled to <body> anyway, so it cannot be
-                clipped by the card or by `.feed-card-cv` paint containment. */}
+            {/* The reaction picker is portalled to <body>, so neither the card
+                nor `.feed-card-cv` paint containment can clip it. */}
             <div className="relative w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
-                {/* ALWAYS-VISIBLE reaction rail, pinned to the card's right edge.
-                    Not a menu: the three reactions are permanent chrome, so a
-                    reader sees them without discovering a control first. It sits
-                    just inside the edge because `.feed-card-cv` sets
-                    content-visibility, whose paint containment would silently
-                    clip anything hanging outside the card. */}
-                <ReactionRail selected={selectedReaction} onSelect={handleSelectReaction} />
                 {/* AI category pill — only rendered when the post has been
                     classified. Sits at the top-left of the card, inside the
                     surface so it scrolls with the card content. */}
@@ -1686,7 +1675,6 @@ function FeedCard2Inner({
                     commentCount={displayedCommentCount}
                     shareCount={shareCount}
                     saveCount={saveCount}
-                    onSelectReaction={handleSelectReaction}
                     onOpenComments={toggleComments}
                     onShare={handleShare}
                     onSave={handleSave}
@@ -1695,14 +1683,10 @@ function FeedCard2Inner({
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[1rem]">
-                        {/* NO Like button here, deliberately.
-                            Reacting happens in the rail above: the cluster opens
-                            it, and the three reactions live there. A second
-                            control doing the same thing — and only ever able to
-                            express HAPPY — would be both redundant and a lesser
-                            version of the rail, since it cannot reach Hopeful or
-                            Sad. `handleLike` is still used by the double-tap
-                            gesture and the rail's own HAPPY path. */}
+                        {/* ONE reaction button: hover (desktop) or press-and-hold
+                            (touch) opens Happy / Hopeful / Sad; a plain click or
+                            tap toggles Happy, which IS the Like. */}
+                        <ReactionButton selected={selectedReaction} onSelect={handleSelectReaction} />
                         <button
                             className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"
                             onClick={toggleCommentInput}

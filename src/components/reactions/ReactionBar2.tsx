@@ -52,19 +52,12 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Bookmark } from 'lucide-react';
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCount } from '@/macros/formatCount';
 import {
     REACTION_LABEL_KEY,
     REACTION_ORDER,
     reactionIcon,
-    SELECTED_DISC,
     type ReactionBreakdown,
     type ReactionKind,
 } from '@/components/reactions/reactionAdapter';
@@ -247,8 +240,6 @@ interface ReactionBar2Props {
     shareCount: number;
     /** REAL: `engagementCounts.saves`. */
     saveCount: number;
-    /** Pass null to clear the reaction. */
-    onSelectReaction: (kind: ReactionKind | null) => void;
     onOpenComments: () => void;
     onShare: () => void;
     onSave: () => void;
@@ -263,13 +254,11 @@ function ReactionBar2Inner({
     commentCount,
     shareCount,
     saveCount,
-    onSelectReaction,
     onOpenComments,
     onShare,
     onSave,
 }: ReactionBar2Props) {
     const t = useTranslations('reactions');
-    const [open, setOpen] = useState(false);
     const clusterButtonRef = useRef<HTMLButtonElement>(null);
 
     // The "who reacted" panel. `sheetMounted` latches TRUE on the first open
@@ -389,8 +378,8 @@ function ReactionBar2Inner({
 
     // A post with NO reactions shows nothing — not a heart beside a 0. The
     // cluster used to render unconditionally because it WAS the control that
-    // opened the rail; the rail is now permanent chrome on the card, so hiding
-    // an empty summary costs nothing. `selected` is OR-ed in so a first tap
+    // opened the rail; the ReactionButton in the action bar is now the control,
+    // so hiding an empty summary costs nothing. `selected` is OR-ed in so a first tap
     // shows immediately, before the server count lands.
     const hasAnyReaction = displayTotal > 0 || selected !== null;
 
@@ -409,11 +398,6 @@ function ReactionBar2Inner({
     const triggerLabel = postId
         ? t('viewReactors', { count: displayTotal })
         : t('reactionCount', { count: displayTotal });
-
-    const handlePick = (kind: ReactionKind) => {
-        // Picking the already-selected reaction clears it.
-        onSelectReaction(selected === kind ? null : kind);
-    };
 
     const handleClusterKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -441,29 +425,7 @@ function ReactionBar2Inner({
 
     return (
         <div className="flex items-center gap-[1rem] mb-[1rem] pb-[1rem] border-b-[0.01rem] border-border-subtle flex-wrap">
-            <DropdownMenu open={open} onOpenChange={setOpen}>
-                {/* ── THE EDGE ANCHOR ──────────────────────────────────────
-                     Radix anchors a menu to its Trigger and `DropdownMenu`
-                     exposes no separate Anchor part, so the Trigger IS this
-                     invisible zero-size marker pinned to the CARD's right
-                     border, level with the post content. The visible cluster
-                     below drives `open` itself.
-
-                     Without this the rail would hang off the counts row at
-                     the bottom of the card, which is where the trigger
-                     actually lives — not beside the content where the design
-                     puts it. `absolute` resolves against the card root
-                     (both FeedCard2 and FeedCardWithReply mark it `relative`), so this element must not
-                     sit inside any positioned element of its own or it would
-                     anchor to that instead. ── */}
-                <DropdownMenuTrigger asChild>
-                    <span
-                        aria-hidden="true"
-                        tabIndex={-1}
-                        className="pointer-events-none absolute right-0 top-[3.5rem] block h-0 w-0"
-                    />
-                </DropdownMenuTrigger>
-
+            <>
                 {/* ── Cluster + total. The visible control.
                      The three glyphs are uniform and unlabelled, so the NAMES
                      live in a tooltip on this one button. Not per-glyph: the
@@ -602,120 +564,7 @@ function ReactionBar2Inner({
                 </Tooltip>
                 )}
 
-                {/* ── THE RAIL ─────────────────────────────────────────────
-                     A vertical rounded pill, taller than wide, straddling the
-                     card's right border beside the content. `side="right"`
-                     from the edge anchor puts its left edge ON the border;
-                     the negative sideOffset pulls it back by half its own
-                     (fixed) width so it sits half in, half out.
-
-                     The width is FIXED rather than content-sized precisely so
-                     that offset is exact in every locale — a German label is
-                     far wider than an English one, and a content-sized rail
-                     would straddle by a different amount in each language.
-
-                     Collision handling is left ON: on a narrow viewport where
-                     half a rail would fall off-screen, Radix shifts or flips
-                     it inward. Being usable beats being pixel-perfect.
-
-                     prefers-reduced-motion: `animate-none!` — Tailwind v4's
-                     important suffix, same as the tooltip. The bare form
-                     would lose to `data-[state=open]:animate-in` on
-                     specificity, and matching the qualifier only ties it,
-                     leaving the outcome to Tailwind's emit order. Important
-                     settles it outright: the rail appears without sliding. ── */}
-                <DropdownMenuContent
-                    side="right"
-                    align="start"
-                    sideOffset={-24}
-                    collisionPadding={8}
-                    aria-label={t('choose')}
-                    onCloseAutoFocus={(e) => {
-                        // Radix would return focus to the Trigger, which here
-                        // is the invisible edge anchor. Send it to the visible
-                        // cluster the user actually operated.
-                        e.preventDefault();
-                        clusterButtonRef.current?.focus();
-                    }}
-                    onInteractOutside={(e) => {
-                        // The cluster lives outside the rail, so clicking it
-                        // to close would otherwise fire dismiss-on-outside AND
-                        // the button's own toggle — closing then reopening.
-                        // Let the button own that interaction.
-                        if (clusterButtonRef.current?.contains(e.target as Node)) {
-                            e.preventDefault();
-                        }
-                    }}
-                    className="flex w-[3rem] flex-col items-center gap-[0.25rem] rounded-full border-border-subtle bg-surface-default p-[0.5rem] shadow-lg motion-reduce:animate-none! motion-reduce:transition-none!"
-                >
-                    {/* Radio semantics: exactly one may be selected. Built on
-                        the Radix primitive rather than the shared ui wrapper
-                        because that wrapper reserves `pl-8` for an indicator
-                        dot, which would break the pill. */}
-                    <DropdownMenuPrimitive.RadioGroup value={selected ?? ''}>
-                        {REACTION_ORDER.map((kind) => {
-                            const isOn = selected === kind;
-                            const Icon = reactionIcon(kind, isOn);
-                            const label = t(REACTION_LABEL_KEY[kind]);
-                            const count = counts[kind];
-                            // Only the SELECTED item needs an explicit name: it
-                            // has to announce that activating again removes the
-                            // reaction, which no visible text says. Unselected
-                            // items are named by their own content.
-                            const selectedName = breakdown
-                                ? t('optionSelectedWithCount', { reaction: label, count })
-                                : t('optionSelected', { reaction: label });
-                            return (
-                                <DropdownMenuPrimitive.RadioItem
-                                    key={kind}
-                                    value={kind}
-                                    // aria-label ONLY on the selected item, and no
-                                    // `title`: an unselected item's title would
-                                    // repeat its own visible caption, and on the
-                                    // selected one it was byte-identical to the
-                                    // aria-label — name and description the same
-                                    // string is the classic double-announcement.
-                                    // The rail is glyphs only, so there is no
-                                    // visible text to name an item. EVERY item
-                                    // therefore needs an explicit name — before,
-                                    // unselected items were named by their own
-                                    // caption, and dropping the caption without
-                                    // this would leave them announced as blank.
-                                    aria-label={isOn ? selectedName : label}
-                                    // preventDefault KEEPS THE RAIL OPEN after a
-                                    // pick, so a second tap can change or remove
-                                    // without reopening. Escape, a click outside
-                                    // or Tab still dismiss it, so it is not a
-                                    // focus trap.
-                                    onSelect={(e) => {
-                                        e.preventDefault();
-                                        handlePick(kind);
-                                    }}
-                                    className="flex cursor-pointer select-none items-center justify-center rounded-full p-[0.125rem] outline-none transition-colors data-[highlighted]:bg-surface-alt data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                                >
-                                    {/* Selected = solid red disc, glyph knocked
-                                        out in white. The box keeps its size
-                                        either way so picking never nudges the
-                                        layout. Outline vs filled still tracks
-                                        selection, so it is not carried by
-                                        colour alone. */}
-                                    <span
-                                        className={`flex h-[1.75rem] w-[1.75rem] items-center justify-center rounded-full transition-colors ${
-                                            isOn ? SELECTED_DISC : ''
-                                        }`}
-                                    >
-                                        <Icon
-                                            className={`w-[1.125rem] h-[1.125rem] shrink-0 ${
-                                                isOn ? 'text-white' : 'text-text-secondary'
-                                            }`}
-                                        />
-                                    </span>
-                                </DropdownMenuPrimitive.RadioItem>
-                            );
-                        })}
-                    </DropdownMenuPrimitive.RadioGroup>
-                </DropdownMenuContent>
-            </DropdownMenu>
+            </>
 
             {/* ── The remaining real counts, same row, same rhythm. ── */}
             {commentCount > 0 && (

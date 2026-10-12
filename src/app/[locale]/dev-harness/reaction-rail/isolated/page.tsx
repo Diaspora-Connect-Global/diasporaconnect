@@ -1,59 +1,49 @@
 'use client';
 
 /**
- * ReactionRail harness — the rail on its own, in a card-shaped box.
- *
- * The CONTROL for the other two harnesses. It reproduces only what the rail
- * itself depends on:
- *   .feed-card-cv   content-visibility: auto  =>  contain: layout style paint
- *     └ div.relative … my-[0.5rem]            the rail's offsetParent
- *         └ <ReactionRail/>
- *
- * `clampToCard()` measures `rail.offsetParent`, so which element that resolves
- * to is load-bearing: containment on `.feed-card-cv` makes it a containing
- * block for absolutely-positioned descendants without making it the
- * `offsetParent`, and this page is where that stays honest.
- *
- * When a drag fails here AND in `feed-card`, the rail is at fault. When it
- * fails only there, the surrounding feed is.
+ * ReactionButton harness — the shared reaction button on its own, in a
+ * card-shaped box with Comment / Share beside it (the real action-bar layout),
+ * inside `.feed-card-cv` paint containment. Nothing is sent to a server: each
+ * card keeps the choice in local state and logs every write it would make.
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import ReactionRail from '@/components/reactions/ReactionRail';
+import ReactionButton from '@/components/reactions/ReactionButton';
 import type { ReactionKind } from '@/components/reactions/reactionAdapter';
 
 function HarnessCard({ index }: { index: number }) {
     const [selected, setSelected] = useState<ReactionKind | null>(null);
-    const onSelect = useCallback((kind: ReactionKind | null) => setSelected(kind), []);
+    const [log, setLog] = useState<string[]>([]);
+    const onSelect = useCallback((kind: ReactionKind | null) => {
+        setLog((l) => [...l, kind ?? 'none']);
+        setSelected(kind);
+    }, []);
 
     return (
         <div className="feed-card-cv" id={`feed-post-${index}`}>
             <div
                 data-testid={`card-${index}`}
-                className="relative w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]"
-                style={{ minHeight: 480 }}
+                className="relative my-[0.5rem] flex min-h-[200px] w-full flex-col rounded-lg border border-border-subtle bg-surface-default p-[1rem]"
             >
-                <ReactionRail selected={selected} onSelect={onSelect} />
+                <p>Card body {index}</p>
                 <p data-testid={`selected-${index}`}>selected: {selected ?? 'none'}</p>
-                <p style={{ height: 380 }}>Card body {index}</p>
+                <p data-testid={`log-${index}`}>writes: {log.join(',')}</p>
+                <div className="mt-auto flex items-center gap-[1rem]">
+                    <ReactionButton selected={selected} onSelect={onSelect} />
+                    <button type="button" className="text-sm">Comment</button>
+                    <button type="button" className="text-sm">Share</button>
+                </div>
             </div>
         </div>
     );
 }
 
-export default function ReactionRailIsolatedHarness() {
-    // The suite waits on this before touching anything: before hydration the
-    // rail is inert markup, and "the drag did nothing" would then say nothing
-    // about the component.
+export default function ReactionButtonHarness() {
     const [hydrated, setHydrated] = useState(false);
     useEffect(() => setHydrated(true), []);
-
     return (
-        <main
-            style={{ maxWidth: 640, margin: '0 auto', padding: 16 }}
-            data-hydrated={hydrated ? 'yes' : 'no'}
-        >
-            <h1>ReactionRail — isolated</h1>
+        <main style={{ maxWidth: 640, margin: '0 auto', padding: 16 }} data-hydrated={hydrated ? 'yes' : 'no'}>
+            <h1>ReactionButton — isolated</h1>
             {[0, 1, 2, 3, 4, 5].map((i) => (
                 <HarnessCard key={i} index={i} />
             ))}

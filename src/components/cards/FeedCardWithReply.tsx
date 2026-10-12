@@ -35,7 +35,7 @@ import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
 import type { PostDocument } from '@/lib/normalizeFeedPost';
 import ReactionBar2 from '@/components/reactions/ReactionBar2';
-import ReactionRail from '@/components/reactions/ReactionRail';
+import ReactionButton from '@/components/reactions/ReactionButton';
 import {
     DEFAULT_REACTION,
     planReactionWrite,
@@ -1618,27 +1618,9 @@ function FeedCardWithReplyInner({
     /* --------------------------------------------------------------- */
     return (
         <>
-            {/* `relative` is load-bearing for the reaction rail, twice over.
-                The rail is absolutely positioned and clamps its drag to
-                `offsetParent`, which `position` alone decides — so this element
-                is both what it hangs off and what bounds it. And the cards on
-                several of these routes are wrapped in `.feed-card-cv`
-                (`content-visibility: auto`), whose implied PAINT CONTAINMENT
-                clips to the padding box: a rail that escaped this box would
-                simply not be painted, with no error and nothing in the DOM to
-                explain it. This padding box sits strictly inside that clip box,
-                so clamping to it is conservative in the safe direction.
-                No `overflow-hidden` here, and ReactionBar2 also pins an
-                invisible anchor to this border for its own edge menu. */}
+            {/* The reaction picker is portalled to <body>, so neither the card nor
+                `.feed-card-cv` paint containment can clip it. */}
             <div className="relative w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
-                {/* ALWAYS-VISIBLE reaction rail, pinned to the card's right
-                    edge — but ONLY for a caller that can persist a reaction
-                    (see `reactionsEnabled`). Not a menu: the three reactions
-                    are permanent chrome, so a reader sees them without having
-                    to discover a control first. */}
-                {reactionsEnabled && (
-                    <ReactionRail selected={selectedReaction} onSelect={handleSelectReaction} />
-                )}
                 {/* AI category pill — only rendered when the post has been
                     classified. Sits at the top-left of the card, inside the
                     surface so it scrolls with the card content. */}
@@ -1757,8 +1739,7 @@ function FeedCardWithReplyInner({
                         commentCount={displayedCommentCount}
                         shareCount={shareCount}
                         saveCount={0}
-                        onSelectReaction={handleSelectReaction}
-                        onOpenComments={toggleComments}
+                            onOpenComments={toggleComments}
                         onShare={handleShare}
                         onSave={handleSave}
                     />
@@ -1805,19 +1786,13 @@ function FeedCardWithReplyInner({
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[1rem]">
-                        {/* NO Like button on a reaction-aware card, deliberately.
-                            Reacting happens in the rail: a second control doing
-                            the same job — and only ever able to express HAPPY —
-                            would be both redundant and a strictly lesser version
-                            of it, since it cannot reach Hopeful or Sad, and two
-                            controls disagreeing about what you picked is worse
-                            than one.
-
-                            `handleLike` is NOT dead: the image hover overlay and
-                            both media-modal bars still call it, and on this card
-                            it now routes through the same selection path as the
-                            rail. A legacy caller keeps the button exactly where
-                            it has always been. */}
+                        {/* Reaction-aware cards get ONE reaction button (hover / press-and-hold
+                            opens Happy / Hopeful / Sad; click toggles Happy). `handleLike`
+                            still serves the image overlay and media-modal bars. A legacy
+                            caller keeps the plain Like button below. */}
+                        {reactionsEnabled && (
+                            <ReactionButton selected={selectedReaction} onSelect={handleSelectReaction} />
+                        )}
                         {!reactionsEnabled && (
                             <button
                                 className="inline-flex flex-row lg:flex-row items-center gap-[0.5rem] text-sm body-small text-text-secondary hover:text-text-primary min-w-[3.75rem] max-lg:flex-col max-lg:gap-[0.25rem] max-lg:min-w-0"

@@ -77,7 +77,9 @@ test('latest listings are labelled by what they are, and "From your community" s
     await expect(posts).toContainText('Kofi Mensah');
     // The action row uses Happy / Hopeful / Sad, never "Like", plus the real comment count and Share.
     const row = posts.getByTestId('post-reaction-row').first();
-    for (const k of ['Happy', 'Hopeful', 'Sad']) await expect(row.getByRole('button', { name: k })).toBeVisible();
+    await expect(row.getByTestId('reaction-button')).toHaveAccessibleName('React');
+    await row.getByTestId('reaction-button').hover();
+    for (const k of ['Happy', 'Hopeful', 'Sad']) await expect(page.getByTestId('reaction-picker').getByRole('button', { name: k })).toBeVisible();
     await expect(posts.getByRole('button', { name: /^Like$/ })).toHaveCount(0);
     await expect(row.getByRole('button', { name: /Share/ })).toBeVisible();
     // Every listing card has a photo on top (its own, or a category placeholder).
@@ -120,7 +122,7 @@ test('the full feed is still below, with Happy / Hopeful / Sad reactions on its 
     await expect(page.getByText('Free legal consultation for the next three days.').first()).toBeVisible();
     // The reaction control keeps its design: no "Like" button anywhere on the cards.
     await expect(page.locator('[id^="feed-post-"]').getByRole('button', { name: /^Like$/ })).toHaveCount(0);
-    await expect(page.locator('[id^="feed-post-"]').first().getByRole('button', { name: /React|Happy|Hopeful|Sad/ }).first()).toBeVisible();
+    await expect(page.locator('[id^="feed-post-"]').first().getByTestId('reaction-button').first()).toBeVisible();
     await page.context().close();
 });
 
