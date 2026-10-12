@@ -13,7 +13,7 @@ import { GET_MY_KYC_STATUS } from '@/services/gql/kyc';
 import { GET_MY_VENDOR } from '@/services/gql/vendor';
 import type { GetMyKycStatusResponse } from '@/services/gql/types/kyc';
 import { statusBucket } from '@/components/community/embassy/tabs/requestStatus';
-import { getEventLocationDisplay } from '@/services/gql/events';
+import { getEventCoverImage, getEventLocationDisplay } from '@/services/gql/events';
 import type { MoreTone } from '@/components/more/moreLinks';
 
 const SILENT = { context: { silentErrors: true } } as const;
@@ -70,6 +70,7 @@ export function YourActivity() {
             subtitle={getEventLocationDisplay(event)}
             status={t('registered', { date: format.dateTime(new Date(event.startAt), { dateStyle: 'medium', timeStyle: 'short' }) })}
             statusTone="danger"
+            image={event.coverImageUrl?.trim() ? getEventCoverImage(event) : null}
           />
         ),
       });
@@ -141,7 +142,7 @@ export function YourActivity() {
   return (
     <Section labelledBy="home-activity-title" testId="home-activity">
       <SectionHeader id="home-activity-title" title={t('title')} />
-      <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((i) => (
           <li key={i.key} className="min-w-0">
             {i.node}

@@ -1,13 +1,14 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import { ArrowRight, Briefcase, CalendarDays, ChevronRight, Compass, Users, UsersRound } from 'lucide-react';
+import { ArrowRight, Briefcase, ChevronRight, Compass, Users, UsersRound } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { QuickActionRow } from '@/components/redesign/QuickActionRow';
 import { RailCard } from '@/components/redesign/RailCard';
 import { useUpcomingRegistrations } from '@/hooks/redesign/useUpcomingRegistrations';
 import { useMyCirclesPreview } from '@/hooks/redesign/useMyCirclesPreview';
-import { getEventLocationDisplay } from '@/services/gql/events';
+import { getEventCoverImage, getEventLocationDisplay } from '@/services/gql/events';
+import { CATEGORY_PHOTOS, circleCoverPlaceholder } from '@/lib/redesignImages';
 import { toCdnUrl } from '@/lib/cdn';
 
 /**
@@ -55,9 +56,8 @@ export function HomeRail({ idPrefix }: { idPrefix: string }) {
             {events.map((e) => (
               <li key={e.id}>
                 <Link href={`/events/${encodeURIComponent(e.id)}`} prefetch={false} className="group flex items-center gap-3 rounded-lg p-1.5 hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-surface-danger text-text-danger">
-                    <CalendarDays className="size-5" aria-hidden />
-                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={e.coverImageUrl?.trim() ? getEventCoverImage(e) : CATEGORY_PHOTOS.event.src} alt="" width={56} height={44} loading="lazy" decoding="async" className="h-11 w-14 shrink-0 rounded-lg object-cover" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-text-primary">{e.title}</span>
                     <span className="block truncate text-xs text-muted-foreground">
@@ -77,16 +77,13 @@ export function HomeRail({ idPrefix }: { idPrefix: string }) {
           <ul className="grid grid-cols-3 gap-2">
             {circles.map((c) => {
               const img = c.bannerUrl || c.avatarUrl;
+              const cover = img ? toCdnUrl(img) : circleCoverPlaceholder(c.id).src;
               return (
                 <li key={c.id} className="min-w-0">
                   <Link href={`/circles/${encodeURIComponent(c.id)}`} prefetch={false} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
-                    <span className="grid aspect-[4/3] w-full place-items-center overflow-hidden rounded-lg bg-surface-brand-subtle text-lg font-bold text-text-brand">
-                      {img ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={toCdnUrl(img)} alt="" width={160} height={120} loading="lazy" className="size-full object-cover" />
-                      ) : (
-                        <span aria-hidden>{c.name.trim().charAt(0).toUpperCase()}</span>
-                      )}
+                    <span className="block aspect-[4/3] w-full overflow-hidden rounded-lg bg-surface-subtle">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={cover} alt="" width={160} height={120} loading="lazy" decoding="async" className="size-full object-cover" />
                     </span>
                     <span className="mt-1 block truncate text-xs font-semibold text-text-primary">{c.name}</span>
                     {typeof c.memberCount === 'number' && c.memberCount > 0 && (
@@ -100,7 +97,7 @@ export function HomeRail({ idPrefix }: { idPrefix: string }) {
         </RailCard>
       )}
 
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-800 p-5 text-white shadow-sm">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-800 p-5 sm:p-6 text-white shadow-sm">
         <h2 className="text-base font-bold">{t('promoTitle')}</h2>
         <p className="mt-1.5 text-sm text-white/80">{t('promoBody')}</p>
         <Link

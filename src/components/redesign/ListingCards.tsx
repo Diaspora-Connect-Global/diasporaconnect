@@ -4,6 +4,8 @@ import type { LucideIcon } from 'lucide-react';
 import { Briefcase, Building2, CalendarDays, GraduationCap, HandHeart, Landmark, MapPin, Package, TrendingUp, Wrench } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { MediaCard } from './MediaCard';
+import { OpportunityBookmark } from './OpportunityBookmark';
+import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { toCdnUrl } from '@/lib/cdn';
 import { formatMoney } from '@/types/money';
 import { getEventCoverImage, getEventLocationDisplay, type Event } from '@/services/gql/events';
@@ -33,6 +35,8 @@ export function OpportunityCard({ item, testId }: { item: OpportunityItem; testI
       testId={testId}
       href={`/opportunities/${encodeURIComponent(item.id)}`}
       fallbackIcon={look.icon}
+      fallbackPhoto={(isRealEstate ? CATEGORY_PHOTOS.property : item.type === 'INVESTMENT' || item.type === 'GRANT' ? CATEGORY_PHOTOS.investment : CATEGORY_PHOTOS.job).src}
+      action={<OpportunityBookmark id={item.id} saved={!!item.isSavedByCurrentUser} />}
       tone={look.tone}
       tag={tag}
       title={item.title}
@@ -63,6 +67,7 @@ export function ProductCard({ item, testId }: { item: ProductItem; testId?: stri
       testId={testId}
       href="/marketplace"
       imageSrc={image}
+      fallbackPhoto={CATEGORY_PHOTOS.product.src}
       fallbackIcon={Package}
       tone="info"
       tag={t('kinds.product')}
@@ -78,6 +83,7 @@ export function ServiceCard({ item, testId }: { item: ServiceItem; testId?: stri
     <MediaCard
       testId={testId}
       href="/marketplace?tab=services"
+      fallbackPhoto={CATEGORY_PHOTOS.service.src}
       fallbackIcon={Wrench}
       tone="success"
       tag={t('kinds.service')}
@@ -97,6 +103,7 @@ export function EventTile({ event, testId }: { event: Event; testId?: string }) 
       testId={testId}
       href={`/events/${encodeURIComponent(event.id)}`}
       imageSrc={cover}
+      fallbackPhoto={CATEGORY_PHOTOS.event.src}
       fallbackIcon={CalendarDays}
       tone="danger"
       tag={t('kinds.event')}

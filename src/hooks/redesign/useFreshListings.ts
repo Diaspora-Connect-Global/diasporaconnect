@@ -17,6 +17,7 @@ export type OpportunityItem = {
   commitmentType?: string | null;
   deadline?: string | null;
   createdAt?: string | null;
+  isSavedByCurrentUser?: boolean | null;
   owner?: { name?: string | null } | null;
 };
 export type ProductItem = { id: string; title: string; price: number; currency?: string | null; images?: string[] | null };

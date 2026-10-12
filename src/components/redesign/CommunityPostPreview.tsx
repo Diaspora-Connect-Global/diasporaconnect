@@ -1,8 +1,8 @@
 'use client';
 
-import { MessageSquare } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { PostReactionRow } from './PostReactionRow';
 import { formatDateProximity } from '@/macros/time';
 import { toCdnUrl } from '@/lib/cdn';
 import { displayName } from '@/lib/displayName';
@@ -35,7 +35,7 @@ export function CommunityPostPreview({ post }: { post: Post }) {
     .slice(0, 2);
   const when = formatDateProximity(post.createdAt);
   return (
-    <article data-testid="community-post-preview" className="flex h-full min-w-0 flex-col gap-3 rounded-xl border border-border-subtle bg-surface-default p-3.5">
+    <article data-testid="community-post-preview" className="flex h-full min-w-0 flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm">
       <header className="flex items-center gap-2.5">
         <Avatar src={avatar} fallback={isOrg ? '/GLOBE.png' : '/PROFILE.png'} />
         <div className="min-w-0">
@@ -43,6 +43,7 @@ export function CommunityPostPreview({ post }: { post: Post }) {
           {when && <p className="truncate text-xs text-muted-foreground">{when}</p>}
         </div>
       </header>
+      <Link href={`/post/${encodeURIComponent(post.id)}`} prefetch={false} className="flex flex-col gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
       <p className="line-clamp-4 whitespace-pre-line break-words text-sm text-text-primary">{post.text}</p>
       {images.length > 0 && (
         <div className={`grid gap-1.5 ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
@@ -52,20 +53,14 @@ export function CommunityPostPreview({ post }: { post: Post }) {
           ))}
         </div>
       )}
-      <footer className="mt-auto flex items-center justify-between gap-2 pt-1 text-xs text-muted-foreground">
-        <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5">
-          {(post.engagementCounts?.likes ?? 0) > 0 && <span>{t('reactions', { count: post.engagementCounts.likes })}</span>}
-          {(post.engagementCounts?.comments ?? 0) > 0 && (
-            <span className="inline-flex items-center gap-1">
-              <MessageSquare className="size-3.5" aria-hidden />
-              {t('comments', { count: post.engagementCounts.comments })}
-            </span>
-          )}
-        </span>
-        <Link href={`/post/${encodeURIComponent(post.id)}`} prefetch={false} className="shrink-0 font-medium text-text-brand hover:underline">
-          {t('openPost')}
-        </Link>
-      </footer>
+      </Link>
+      <PostReactionRow
+        postId={post.id}
+        likes={post.engagementCounts?.likes ?? 0}
+        comments={post.engagementCounts?.comments ?? 0}
+        mine={post.userEngagement?.myReaction ?? null}
+        hasLiked={post.userEngagement?.hasLiked}
+      />
     </article>
   );
 }
