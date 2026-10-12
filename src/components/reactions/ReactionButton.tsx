@@ -17,8 +17,6 @@
  *  - Keyboard                     : ArrowUp opens and focuses the picker; arrows
  *                                   move, Enter/Space chooses, Escape closes and
  *                                   focus returns here.
- *  - Non-drag alternative (WCAG 2.5.7): the small chevron opens the picker with
- *                                   an ordinary click/tap.
  *
  * Presentational and controlled: callers keep their own optimistic update +
  * rollback; `onSelect(kind | null)` is the same callback the old rail used.
@@ -33,7 +31,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { ChevronUp } from 'lucide-react';
 import {
     DEFAULT_REACTION,
     REACTION_LABEL_KEY,
@@ -258,17 +255,6 @@ function ReactionButtonInner({ selected, onSelect, variant = 'card', className }
             >
                 <Icon className={compact ? 'size-4' : 'size-[1.25rem]'} aria-hidden />
                 <span aria-hidden>{label}</span>
-            </button>
-            <button
-                type="button"
-                data-testid="reaction-more"
-                aria-haspopup="true"
-                aria-expanded={open}
-                aria-label={t('moreReactions')}
-                onClick={() => (open ? closePicker(false) : (void loadPicker(), openPicker(true)))}
-                className="ml-0.5 grid size-6 shrink-0 touch-manipulation place-items-center rounded-full text-text-secondary hover:bg-surface-subtle hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
-            >
-                <ChevronUp className="size-3.5" aria-hidden />
             </button>
             {open && (
                 <ReactionPicker

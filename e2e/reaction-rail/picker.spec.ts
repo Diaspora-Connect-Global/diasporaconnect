@@ -112,17 +112,9 @@ test('switching reactions and re-picking the current one removes it', async () =
     await context.close();
 });
 
-test('the "more reactions" chevron opens the picker with an ordinary click (no hover or drag needed)', async () => {
+test('there is no separate "more reactions" control — one React button only', async () => {
     const { context, page } = await open();
-    const more = card(page).getByTestId('reaction-more');
-    const box = (await more.boundingBox())!;
-    expect(box.width).toBeGreaterThanOrEqual(24);
-    expect(box.height).toBeGreaterThanOrEqual(24);
-    await more.click();
-    await expect(picker(page)).toBeVisible();
-    await expect(more).toHaveAttribute('aria-expanded', 'true');
-    await picker(page).getByRole('button', { name: 'Sad' }).click();
-    await expect(trigger(page)).toHaveAttribute('data-reaction', 'SAD');
+    await expect(card(page).getByTestId('reaction-more')).toHaveCount(0);
     await context.close();
 });
 
