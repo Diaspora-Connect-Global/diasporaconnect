@@ -4505,7 +4505,8 @@
     "community": "Community",
     "more": "More",
     "messages": "Messages",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "tagline": "Connect · Trade · Build"
   },
   "more": {
     "metaTitle": "More",
@@ -5210,13 +5211,16 @@
       "comments": "{count, plural, one {# comment} other {# comments}}",
       "openPost": "Open post",
       "unknownAuthor": "A member",
-      "photoCount": "{count, plural, one {# photo} other {# photos}}"
+      "photoCount": "{count, plural, one {# photo} other {# photos}}",
+      "share": "Share"
     },
     "communityPosts": {
       "title": "From your community",
       "subtitle": "Recent posts from the communities you belong to.",
       "viewCommunity": "View community"
-    }
+    },
+    "saveItem": "Save",
+    "unsaveItem": "Remove from saved"
   },
   "homePage": {
     "greeting": {

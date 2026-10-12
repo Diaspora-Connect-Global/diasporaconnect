@@ -4505,7 +4505,8 @@
     "community": "Community",
     "more": "Altro",
     "messages": "Messaggi",
-    "notifications": "Notifiche"
+    "notifications": "Notifiche",
+    "tagline": "Connetti · Scambia · Costruisci"
   },
   "more": {
     "metaTitle": "Altro",
@@ -5210,13 +5211,16 @@
       "comments": "{count, plural, one {# commento} other {# commenti}}",
       "openPost": "Apri il post",
       "unknownAuthor": "Un membro",
-      "photoCount": "{count, plural, one {# foto} other {# foto}}"
+      "photoCount": "{count, plural, one {# foto} other {# foto}}",
+      "share": "Condividi"
     },
     "communityPosts": {
       "title": "Dalla tua community",
       "subtitle": "Post recenti dalle community di cui fai parte.",
       "viewCommunity": "Vai alla community"
-    }
+    },
+    "saveItem": "Salva",
+    "unsaveItem": "Rimuovi dai salvati"
   },
   "homePage": {
     "greeting": {

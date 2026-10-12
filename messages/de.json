@@ -4505,7 +4505,8 @@
     "community": "Community",
     "more": "Mehr",
     "messages": "Nachrichten",
-    "notifications": "Benachrichtigungen"
+    "notifications": "Benachrichtigungen",
+    "tagline": "Vernetzen · Handeln · Aufbauen"
   },
   "more": {
     "metaTitle": "Mehr",
@@ -5210,13 +5211,16 @@
       "comments": "{count, plural, one {# Kommentar} other {# Kommentare}}",
       "openPost": "Beitrag öffnen",
       "unknownAuthor": "Ein Mitglied",
-      "photoCount": "{count, plural, one {# Foto} other {# Fotos}}"
+      "photoCount": "{count, plural, one {# Foto} other {# Fotos}}",
+      "share": "Teilen"
     },
     "communityPosts": {
       "title": "Aus deiner Community",
       "subtitle": "Neue Beiträge aus den Communities, zu denen du gehörst.",
       "viewCommunity": "Community ansehen"
-    }
+    },
+    "saveItem": "Speichern",
+    "unsaveItem": "Aus Gespeichertem entfernen"
   },
   "homePage": {
     "greeting": {

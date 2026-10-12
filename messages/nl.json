@@ -4505,7 +4505,8 @@
     "community": "Gemeenschap",
     "more": "Meer",
     "messages": "Berichten",
-    "notifications": "Meldingen"
+    "notifications": "Meldingen",
+    "tagline": "Verbinden · Handelen · Bouwen"
   },
   "more": {
     "metaTitle": "Meer",
@@ -5210,13 +5211,16 @@
       "comments": "{count, plural, one {# reactie} other {# reacties}}",
       "openPost": "Bericht openen",
       "unknownAuthor": "Een lid",
-      "photoCount": "{count, plural, one {# foto} other {# foto's}}"
+      "photoCount": "{count, plural, one {# foto} other {# foto's}}",
+      "share": "Delen"
     },
     "communityPosts": {
       "title": "Uit je community",
       "subtitle": "Recente berichten uit de communities waartoe je behoort.",
       "viewCommunity": "Community bekijken"
-    }
+    },
+    "saveItem": "Opslaan",
+    "unsaveItem": "Verwijderen uit opgeslagen"
   },
   "homePage": {
     "greeting": {

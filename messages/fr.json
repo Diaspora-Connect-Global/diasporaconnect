@@ -4505,7 +4505,8 @@
     "community": "Communauté",
     "more": "Plus",
     "messages": "Messages",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "tagline": "Connecter · Échanger · Bâtir"
   },
   "more": {
     "metaTitle": "Plus",
@@ -5210,13 +5211,16 @@
       "comments": "{count, plural, one {# commentaire} other {# commentaires}}",
       "openPost": "Ouvrir la publication",
       "unknownAuthor": "Un membre",
-      "photoCount": "{count, plural, one {# photo} other {# photos}}"
+      "photoCount": "{count, plural, one {# photo} other {# photos}}",
+      "share": "Partager"
     },
     "communityPosts": {
       "title": "De votre communauté",
       "subtitle": "Publications récentes des communautés dont vous faites partie.",
       "viewCommunity": "Voir la communauté"
-    }
+    },
+    "saveItem": "Enregistrer",
+    "unsaveItem": "Retirer des enregistrements"
   },
   "homePage": {
     "greeting": {

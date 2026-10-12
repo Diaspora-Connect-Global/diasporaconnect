@@ -18,3 +18,27 @@ export const REDESIGN_IMAGES = {
   /** Community hero. */
   communityHero: { src: '/images/redesign/independence-arch-wide.webp', width: 1280, height: 902 },
 } as const satisfies Record<string, RedesignImage>;
+
+const cat = (name: string, height = 480): RedesignImage => ({ src: `/images/redesign/cat-${name}.webp`, width: 720, height });
+
+/** Stand-in photo per listing category, used only when the item has no photo of its own. */
+export const CATEGORY_PHOTOS = {
+  property: cat('property'),
+  job: cat('job'),
+  service: cat('service', 477),
+  product: cat('product'),
+  investment: cat('investment', 405),
+  event: cat('event'),
+  legal: cat('legal'),
+} as const satisfies Record<string, RedesignImage>;
+
+export type CategoryPhotoKey = keyof typeof CATEGORY_PHOTOS;
+
+const CIRCLE_COVERS: RedesignImage[] = [cat('team', 472), cat('villa'), cat('markets')];
+
+/** A stable placeholder cover for a circle with no image (same circle, same photo). */
+export function circleCoverPlaceholder(seed: string): RedesignImage {
+  let h = 0;
+  for (let i = 0; i < seed.length; i += 1) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return CIRCLE_COVERS[h % CIRCLE_COVERS.length];
+}
