@@ -25,9 +25,9 @@ export function LatestListings() {
   ];
   if (cards.length === 0) return null;
   return (
-    <Section labelledBy="home-latest-title" testId="home-latest">
+    <Section labelledBy="home-latest-title" testId="home-latest" className="@container">
       <SectionHeader id="home-latest-title" title={t('title')} subtitle={t('subtitle')} href="/discover" viewAllLabel={tAll('viewAll')} />
-      <ul className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-3 @[48rem]:grid-cols-4">
         {cards.map((c, i) => (
           <li key={i} className="min-w-0">
             {c}

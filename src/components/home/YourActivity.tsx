@@ -140,9 +140,9 @@ export function YourActivity() {
 
   if (items.length === 0) return null;
   return (
-    <Section labelledBy="home-activity-title" testId="home-activity">
+    <Section labelledBy="home-activity-title" testId="home-activity" className="@container">
       <SectionHeader id="home-activity-title" title={t('title')} />
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-3 @[26rem]:grid-cols-2 @[36rem]:grid-cols-3">
         {items.map((i) => (
           <li key={i.key} className="min-w-0">
             {i.node}

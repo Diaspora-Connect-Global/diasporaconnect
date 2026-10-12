@@ -55,7 +55,7 @@ export function ActivityCard({
         </span>
         {image && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={image} alt="" width={48} height={48} loading="lazy" decoding="async" className="size-12 shrink-0 rounded-lg object-cover" />
+          <img src={image} alt="" width={48} height={48} loading="lazy" decoding="async" className="hidden size-12 shrink-0 rounded-lg object-cover @[17rem]:block" />
         )}
       </span>
       {pct !== null && (
@@ -69,7 +69,7 @@ export function ActivityCard({
       </span>
     </>
   );
-  const cls = 'flex h-full min-w-0 flex-col rounded-xl border border-border-subtle bg-surface-default p-3.5 shadow-sm';
+  const cls = '@container flex h-full min-w-0 flex-col rounded-xl border border-border-subtle bg-surface-default p-3.5 shadow-sm';
   return href ? (
     <Link href={href} prefetch={false} data-testid={testId} className={`${cls} transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand`}>
       {body}

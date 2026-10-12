@@ -13,9 +13,9 @@ export function CommunityPosts({ href = '/community', testId = 'home-community-p
   const { posts } = useCommunityPostPreview(3);
   if (posts.length === 0) return null;
   return (
-    <Section labelledBy={`${testId}-title`} testId={testId}>
+    <Section labelledBy={`${testId}-title`} testId={testId} className="@container">
       <SectionHeader id={`${testId}-title`} title={t(titleKey)} subtitle={t(subtitleKey)} href={href} viewAllLabel={tAll('viewCommunity')} />
-      <ul className="grid gap-3 md:grid-cols-3">
+      <ul className="grid gap-3 @[28rem]:grid-cols-2 @[44rem]:grid-cols-3">
         {posts.map((p) => (
           <li key={p.id} className="min-w-0">
             <CommunityPostPreview post={p} />

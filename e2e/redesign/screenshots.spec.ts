@@ -1,4 +1,4 @@
-/** Screenshots of Home / Discover / Community at 360 / 768 / 1280 into .artifacts/redesign-screenshots/. Evidence only: skipped unless REDESIGN_SCREENSHOTS=1. */
+/** Screenshots of Home / Discover / Community at 360-1536 into .artifacts/redesign-screenshots/. Evidence only: skipped unless REDESIGN_SCREENSHOTS=1. */
 import { test, type Browser } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,7 +8,7 @@ import { FUTURE, POSTS, open } from './fixtures';
 
 test.skip(process.env.REDESIGN_SCREENSHOTS !== '1', 'set REDESIGN_SCREENSHOTS=1 to capture');
 const OUT = path.join(process.cwd(), '.artifacts/redesign-screenshots');
-const SIZES = [360, 768, 1280] as const;
+const SIZES = [360, 768, 1024, 1280, 1440, 1536] as const;
 
 let browser: Browser;
 test.beforeAll(async () => {
