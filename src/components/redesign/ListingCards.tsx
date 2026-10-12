@@ -3,6 +3,8 @@
 import type { LucideIcon } from 'lucide-react';
 import { Briefcase, Building2, CalendarDays, GraduationCap, HandHeart, Landmark, MapPin, Package, TrendingUp, Wrench } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { TONE_CLASS } from '@/components/more/MoreLinkCard';
 import { MediaCard } from './MediaCard';
 import { OpportunityBookmark } from './OpportunityBookmark';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
@@ -54,6 +56,59 @@ export function OpportunityCard({ item, testId }: { item: OpportunityItem; testI
         deadline ? <span className="text-xs font-medium text-muted-foreground">{t('closes', { date: format.dateTime(deadline, { dateStyle: 'medium' }) })}</span> : undefined
       }
     />
+  );
+}
+
+const LOOKS_LIKE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-|^[0-9a-f]{16,}$/i;
+
+/**
+ * Job card, laid out like the mockup's job row: icon tile, title, who is hiring,
+ * where, then the commitment (Full-time…) and the closing date. No salary: the
+ * unit of `compensationMin/Max` is not confirmed, and a wrong unit is a 100×
+ * error. The bookmark is a sibling of the link, never nested inside it.
+ */
+export function JobCard({ item, testId }: { item: OpportunityItem; testId?: string }) {
+  const t = useTranslations('redesign');
+  const format = useFormatter();
+  const place = item.location?.trim() || (item.deliveryMode === 'REMOTE' || item.deliveryMode === 'ONLINE' ? t('remote') : '');
+  const org = item.owner?.name?.trim();
+  const hiring = org && !LOOKS_LIKE_ID.test(org) ? org : '';
+  const commitment = item.commitmentType && t.has(`commitmentTypes.${item.commitmentType}`) ? t(`commitmentTypes.${item.commitmentType}`) : '';
+  const deadline = item.deadline && !Number.isNaN(new Date(item.deadline).getTime()) ? new Date(item.deadline) : null;
+  return (
+    <div className="relative h-full min-w-0">
+      <Link
+        href={`/opportunities/${encodeURIComponent(item.id)}`}
+        prefetch={false}
+        data-testid={testId}
+        className="group flex h-full min-w-0 flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-default p-3.5 shadow-sm transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+      >
+        <div className="flex min-w-0 items-start gap-3">
+          <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${TONE_CLASS.warning}`}>
+            <Briefcase className="size-5" strokeWidth={1.75} aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary">{item.title}</h3>
+            {hiring && <p className="truncate text-xs text-text-secondary">{hiring}</p>}
+            {place && (
+              <p className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="size-3.5 shrink-0" aria-hidden />
+                <span className="truncate">{place}</span>
+              </p>
+            )}
+          </div>
+        </div>
+        {(commitment || deadline) && (
+          <div className="mt-auto flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pr-9 text-xs">
+            {commitment && <span className={`rounded-md px-2 py-0.5 font-medium ${TONE_CLASS.success}`}>{commitment}</span>}
+            {deadline && <span className="font-medium text-muted-foreground">{t('closes', { date: format.dateTime(deadline, { dateStyle: 'medium' }) })}</span>}
+          </div>
+        )}
+      </Link>
+      <div className="absolute bottom-2.5 right-2.5 z-10">
+        <OpportunityBookmark id={item.id} saved={!!item.isSavedByCurrentUser} />
+      </div>
+    </div>
   );
 }
 

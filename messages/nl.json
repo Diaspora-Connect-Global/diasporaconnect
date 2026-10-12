@@ -4656,13 +4656,17 @@
       "realEstate": "Vastgoed"
     },
     "sections": {
+      "latest": {
+        "title": "Nieuwste kansen",
+        "subtitle": "Nieuw vastgoed, diensten, investeringen en banen op DiaspoPlug."
+      },
       "jobs": {
         "title": "Nieuwste banen",
         "subtitle": "Recent geplaatste vacatures."
       },
       "services": {
         "title": "Diensten",
-        "subtitle": "Diensten die het platform uitlicht."
+        "subtitle": "Diensten van aanbieders op DiaspoPlug."
       },
       "investments": {
         "title": "Nieuwste investeringen",
@@ -4674,7 +4678,7 @@
       },
       "products": {
         "title": "Uitgelichte producten",
-        "subtitle": "Producten die het platform uitlicht."
+        "subtitle": "Producten van verkopers op DiaspoPlug."
       },
       "events": {
         "title": "Aankomende evenementen",
@@ -4696,10 +4700,16 @@
         "newest": "Nieuwste",
         "closing": "Sluit binnenkort",
         "applications": "Meeste aanmeldingen"
-      }
+      },
+      "active": "{count, plural, one {# filter actief} other {# filters actief}}"
     },
     "noResults": "Er is nog niets dat bij deze filters past.",
-    "searchEverything": "Alles doorzoeken op “{query}”"
+    "searchEverything": "Alles doorzoeken op “{query}”",
+    "help": {
+      "title": "Hulp nodig om iets geregeld te krijgen in Afrika?",
+      "body": "Vind aanbieders voor juridische zaken, vastgoed, bouw en meer.",
+      "cta": "Bekijk diensten"
+    }
   },
   "eventPage": {
     "back": "Terug",
@@ -5222,7 +5232,16 @@
       "viewCommunity": "Community bekijken"
     },
     "saveItem": "Opslaan",
-    "unsaveItem": "Verwijderen uit opgeslagen"
+    "unsaveItem": "Verwijderen uit opgeslagen",
+    "commitmentTypes": {
+      "FULL_TIME": "Voltijd",
+      "PART_TIME": "Deeltijd",
+      "CONTRACT": "Contract",
+      "ONE_TIME": "Eenmalig",
+      "FLEXIBLE": "Flexibel",
+      "PROJECT_BASED": "Projectmatig",
+      "ONGOING": "Doorlopend"
+    }
   },
   "homePage": {
     "greeting": {

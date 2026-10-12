@@ -4656,13 +4656,17 @@
       "realEstate": "Real estate"
     },
     "sections": {
+      "latest": {
+        "title": "Latest opportunities",
+        "subtitle": "New property, services, investments and jobs from across DiaspoPlug."
+      },
       "jobs": {
         "title": "Newest jobs",
         "subtitle": "Recently posted employment opportunities."
       },
       "services": {
         "title": "Services",
-        "subtitle": "Services the platform features."
+        "subtitle": "Services offered by providers on DiaspoPlug."
       },
       "investments": {
         "title": "Newest investments",
@@ -4674,7 +4678,7 @@
       },
       "products": {
         "title": "Featured products",
-        "subtitle": "Products the platform features."
+        "subtitle": "Products from vendors on DiaspoPlug."
       },
       "events": {
         "title": "Upcoming events",
@@ -4696,10 +4700,16 @@
         "newest": "Newest",
         "closing": "Closing soon",
         "applications": "Most applications"
-      }
+      },
+      "active": "{count, plural, one {# filter on} other {# filters on}}"
     },
     "noResults": "Nothing matches these filters yet.",
-    "searchEverything": "Search everything for “{query}”"
+    "searchEverything": "Search everything for “{query}”",
+    "help": {
+      "title": "Need help getting something done in Africa?",
+      "body": "Find service providers for legal work, property, construction and more.",
+      "cta": "Browse services"
+    }
   },
   "eventPage": {
     "back": "Back",
@@ -5222,7 +5232,16 @@
       "viewCommunity": "View community"
     },
     "saveItem": "Save",
-    "unsaveItem": "Remove from saved"
+    "unsaveItem": "Remove from saved",
+    "commitmentTypes": {
+      "FULL_TIME": "Full-time",
+      "PART_TIME": "Part-time",
+      "CONTRACT": "Contract",
+      "ONE_TIME": "One-off",
+      "FLEXIBLE": "Flexible",
+      "PROJECT_BASED": "Project-based",
+      "ONGOING": "Ongoing"
+    }
   },
   "homePage": {
     "greeting": {

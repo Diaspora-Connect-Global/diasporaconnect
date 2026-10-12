@@ -4656,13 +4656,17 @@
       "realEstate": "Immobilier"
     },
     "sections": {
+      "latest": {
+        "title": "Dernières opportunités",
+        "subtitle": "Nouveaux biens immobiliers, services, investissements et emplois sur DiaspoPlug."
+      },
       "jobs": {
         "title": "Derniers emplois",
         "subtitle": "Offres d’emploi publiées récemment."
       },
       "services": {
         "title": "Services",
-        "subtitle": "Services mis en avant par la plateforme."
+        "subtitle": "Services proposés par des prestataires sur DiaspoPlug."
       },
       "investments": {
         "title": "Derniers investissements",
@@ -4674,7 +4678,7 @@
       },
       "products": {
         "title": "Produits en vedette",
-        "subtitle": "Produits mis en avant par la plateforme."
+        "subtitle": "Produits de vendeurs sur DiaspoPlug."
       },
       "events": {
         "title": "Événements à venir",
@@ -4696,10 +4700,16 @@
         "newest": "Plus récentes",
         "closing": "Bientôt clôturées",
         "applications": "Plus de candidatures"
-      }
+      },
+      "active": "{count, plural, one {# filtre actif} other {# filtres actifs}}"
     },
     "noResults": "Rien ne correspond encore à ces filtres.",
-    "searchEverything": "Tout rechercher pour « {query} »"
+    "searchEverything": "Tout rechercher pour « {query} »",
+    "help": {
+      "title": "Besoin d’aide pour faire avancer les choses en Afrique ?",
+      "body": "Trouvez des prestataires pour le juridique, l’immobilier, la construction et plus encore.",
+      "cta": "Voir les services"
+    }
   },
   "eventPage": {
     "back": "Retour",
@@ -5222,7 +5232,16 @@
       "viewCommunity": "Voir la communauté"
     },
     "saveItem": "Enregistrer",
-    "unsaveItem": "Retirer des enregistrements"
+    "unsaveItem": "Retirer des enregistrements",
+    "commitmentTypes": {
+      "FULL_TIME": "Temps plein",
+      "PART_TIME": "Temps partiel",
+      "CONTRACT": "Contrat",
+      "ONE_TIME": "Ponctuel",
+      "FLEXIBLE": "Flexible",
+      "PROJECT_BASED": "Par projet",
+      "ONGOING": "Continu"
+    }
   },
   "homePage": {
     "greeting": {

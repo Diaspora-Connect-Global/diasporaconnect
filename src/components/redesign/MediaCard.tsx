@@ -58,7 +58,8 @@ export function MediaCard({
         <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3.5">
           {tag && <span className={`w-fit max-w-full truncate rounded-md px-2 py-0.5 text-[11px] font-medium ${TONE_CLASS[tone]}`}>{tag}</span>}
           <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary">{title}</h3>
-          {meta && <div className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">{meta}</div>}
+          {/* With no footer the meta line is the last one, so it keeps clear of the action button too. */}
+          {meta && <div className={`flex min-w-0 items-center gap-1 text-xs text-muted-foreground ${action && !footer ? 'pr-8' : ''}`}>{meta}</div>}
           {footer && <div className={`mt-auto pt-1 text-sm font-semibold text-text-primary ${action ? 'pr-9' : ''}`}>{footer}</div>}
         </div>
       </Link>

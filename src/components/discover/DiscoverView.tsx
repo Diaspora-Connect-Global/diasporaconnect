@@ -3,34 +3,28 @@
 import { useCallback, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Briefcase, Building2, CalendarDays, Package, Search, TrendingUp, Wrench, type LucideIcon } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
 import { PageHero } from '@/components/redesign/PageHero';
 import { CategoryTileRow } from '@/components/redesign/CategoryTileRow';
 import { LazyMount } from '@/components/redesign/LazyMount';
 import { CommunityPosts } from '@/components/home/HomeCommunityPosts';
-import { RefinePanel } from './RefinePanel';
-import { EventsSection, OpportunitySection, ProductsSection, ServicesSection } from './DiscoverSections';
-import { DISCOVER_CATEGORY_KEYS, DISCOVER_TONES, parseCategories, parseSort, type DiscoverCategoryKey, type DiscoverSort } from './discoverCategories';
+import { DiscoverHelpCard, RefinePanel } from './RefinePanel';
+import { EventsSection, LatestSection, OpportunitySection, ProductsSection, ServicesSection, useLatestMix } from './DiscoverSections';
+import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_SECTION_ORDER, DISCOVER_TONES, parseCategories, parseSort, type DiscoverCategoryKey, type DiscoverSort } from './discoverCategories';
 
-const ICONS: Record<DiscoverCategoryKey, LucideIcon> = {
-  services: Wrench,
-  products: Package,
-  jobs: Briefcase,
-  investments: TrendingUp,
-  realEstate: Building2,
-  events: CalendarDays,
-};
-
-const OVERVIEW_LIMIT = 4;
+/** Overview: one row of 4 per section, fetched with one spare so the "Latest" row can take an item without leaving a gap. */
+const OVERVIEW_SHOWN = 4;
+const OVERVIEW_FETCH = OVERVIEW_SHOWN + 1;
 const EXPANDED_LIMIT = 12;
 /** Sections mounted (and queried) immediately; the rest wait until they near the viewport. */
 const EAGER_SECTIONS = 2;
 
 /**
- * `/discover`: hero search, category tiles and real, queryable sections
- * (jobs, services, investments, real estate, products, events, community posts).
+ * `/discover`: hero search, category tiles, a "Latest opportunities" row mixing
+ * the newest of each kind, then real, queryable sections (services, jobs,
+ * investments, real estate, products, events, community posts).
  * The URL carries the filters (`?cat=jobs,events&loc=Accra&sort=closing`), so a
  * view can be shared and the back button works. A section with nothing to show
  * is not rendered.
@@ -77,19 +71,25 @@ export function DiscoverView() {
   };
 
   const filtered = categories.length > 0;
-  const limit = filtered ? EXPANDED_LIMIT : OVERVIEW_LIMIT;
+  const limit = filtered ? EXPANDED_LIMIT : OVERVIEW_FETCH;
+  const shown = filtered ? EXPANDED_LIMIT : OVERVIEW_SHOWN;
+  // The mixed row is part of the untouched overview only; any refinement shows the plain sections.
+  const overview = !filtered && !location && sort === 'newest';
+  const mix = useLatestMix(OVERVIEW_FETCH, overview);
+  // How many Latest cards fit in one row (reported by the row itself); exactly those leave the sections below.
+  const [mixCapacity, setMixCapacity] = useState(3);
+  const mixShown = useMemo(() => mix.slice(0, mixCapacity), [mix, mixCapacity]);
+  const mixIds = useMemo(() => new Set(mixShown.map((e) => e.id)), [mixShown]);
   // Products and services have no place to filter on, so a location filter leaves them out.
-  const visible = DISCOVER_CATEGORY_KEYS.filter((k) => (!filtered || categories.includes(k)) && !(location && (k === 'services' || k === 'products')));
+  const visible = DISCOVER_SECTION_ORDER.filter((k) => (!filtered || categories.includes(k)) && !(location && (k === 'services' || k === 'products')));
 
   const renderSection = (k: DiscoverCategoryKey) => {
-    const common = { limit, expanded: filtered, onViewAll: () => update({ cat: [k] }) };
+    const common = { limit, shown, expanded: filtered, exclude: overview ? mixIds : undefined, onViewAll: () => update({ cat: [k] }) };
     switch (k) {
       case 'jobs':
-        return <OpportunitySection {...common} k="jobs" type="EMPLOYMENT" location={location} sort={sort} />;
       case 'investments':
-        return <OpportunitySection {...common} k="investments" type="INVESTMENT" location={location} sort={sort} />;
       case 'realEstate':
-        return <OpportunitySection {...common} k="realEstate" category="REAL_ESTATE_INFRASTRUCTURE" location={location} sort={sort} />;
+        return <OpportunitySection {...common} k={k} location={location} sort={sort} />;
       case 'services':
         return <ServicesSection {...common} />;
       case 'products':
@@ -130,18 +130,24 @@ export function DiscoverView() {
 
         <CategoryTileRow
           label={t('categoriesHeading')}
-          tiles={DISCOVER_CATEGORY_KEYS.map((k) => ({ key: k, label: t(`categories.${k}`), icon: ICONS[k], tone: DISCOVER_TONES[k], active: categories.includes(k) }))}
+          tiles={DISCOVER_CATEGORY_KEYS.map((k) => ({ key: k, label: t(`categories.${k}`), icon: DISCOVER_ICONS[k], tone: DISCOVER_TONES[k], active: categories.includes(k) }))}
           onSelect={(k) => toggle(k as DiscoverCategoryKey)}
         />
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
           {/* Phones: the refine panel sits above the sections; desktop: right rail. */}
           <div className="lg:col-start-2 lg:row-start-1">
-            <div className="lg:sticky lg:top-0">
+            <div className="space-y-5 lg:sticky lg:top-0">
               <RefinePanel categories={categories} location={location} sort={sort} onToggleCategory={toggle} onLocation={(loc) => update({ loc })} onSort={(so) => update({ sort: so })} onClear={() => update({ cat: [], loc: '', sort: 'newest' })} />
+              {!(categories.length === 1 && categories[0] === 'services') && (
+                <div className="hidden lg:block">
+                  <DiscoverHelpCard onBrowseServices={() => update({ cat: ['services'], loc: '' })} />
+                </div>
+              )}
             </div>
           </div>
           <div className="min-w-0 space-y-5 lg:col-start-1 lg:row-start-1" data-testid="discover-sections" aria-label={tRefine('title')}>
+            {overview && <LatestSection entries={mixShown} onCapacity={setMixCapacity} />}
             {visible.map((k, i) => (
               <div key={`${k}-${limit}-${location}-${sort}`} className="empty:hidden">{i < EAGER_SECTIONS ? renderSection(k) : <LazyMount root={scrollEl} minHeight={120}>{renderSection(k)}</LazyMount>}</div>
             ))}

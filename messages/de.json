@@ -4656,13 +4656,17 @@
       "realEstate": "Immobilien"
     },
     "sections": {
+      "latest": {
+        "title": "Neueste Möglichkeiten",
+        "subtitle": "Neue Immobilien, Dienstleistungen, Investitionen und Jobs auf DiaspoPlug."
+      },
       "jobs": {
         "title": "Neueste Jobs",
         "subtitle": "Kürzlich veröffentlichte Stellenangebote."
       },
       "services": {
         "title": "Dienste",
-        "subtitle": "Von der Plattform hervorgehobene Dienste."
+        "subtitle": "Dienste von Anbietern auf DiaspoPlug."
       },
       "investments": {
         "title": "Neueste Investitionen",
@@ -4674,7 +4678,7 @@
       },
       "products": {
         "title": "Ausgewählte Produkte",
-        "subtitle": "Von der Plattform hervorgehobene Produkte."
+        "subtitle": "Produkte von Verkäufern auf DiaspoPlug."
       },
       "events": {
         "title": "Kommende Veranstaltungen",
@@ -4696,10 +4700,16 @@
         "newest": "Neueste",
         "closing": "Bald endend",
         "applications": "Meiste Bewerbungen"
-      }
+      },
+      "active": "{count, plural, one {# Filter aktiv} other {# Filter aktiv}}"
     },
     "noResults": "Zu diesen Filtern gibt es noch nichts.",
-    "searchEverything": "Alles nach „{query}“ durchsuchen"
+    "searchEverything": "Alles nach „{query}“ durchsuchen",
+    "help": {
+      "title": "Brauchst du Hilfe, um etwas in Afrika zu erledigen?",
+      "body": "Finde Anbieter für Rechtliches, Immobilien, Bau und mehr.",
+      "cta": "Dienste ansehen"
+    }
   },
   "eventPage": {
     "back": "Zurück",
@@ -5222,7 +5232,16 @@
       "viewCommunity": "Community ansehen"
     },
     "saveItem": "Speichern",
-    "unsaveItem": "Aus Gespeichertem entfernen"
+    "unsaveItem": "Aus Gespeichertem entfernen",
+    "commitmentTypes": {
+      "FULL_TIME": "Vollzeit",
+      "PART_TIME": "Teilzeit",
+      "CONTRACT": "Vertrag",
+      "ONE_TIME": "Einmalig",
+      "FLEXIBLE": "Flexibel",
+      "PROJECT_BASED": "Projektbasiert",
+      "ONGOING": "Fortlaufend"
+    }
   },
   "homePage": {
     "greeting": {
