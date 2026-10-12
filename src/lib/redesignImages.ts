@@ -17,6 +17,8 @@ export const REDESIGN_IMAGES = {
   homeHero: { src: '/images/redesign/independence-arch-wide.webp', width: 1280, height: 902 },
   /** Community hero. */
   communityHero: { src: '/images/redesign/independence-arch-wide.webp', width: 1280, height: 902 },
+  /** Home left column "Build stronger connections" card (the same team photo as `cat-team`). */
+  connectCard: { src: '/images/redesign/cat-team.webp', width: 720, height: 472 },
 } as const satisfies Record<string, RedesignImage>;
 
 const cat = (name: string, height = 480): RedesignImage => ({ src: `/images/redesign/cat-${name}.webp`, width: 720, height });

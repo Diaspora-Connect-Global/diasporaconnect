@@ -28,6 +28,6 @@ production release, where every one of these is replaced by brand photography an
 | `cat-product.webp` | products | 1488459716781-31db52582fe9 |
 | `cat-investment.webp` | investments, grants | 1500382017468-9049fed747ef |
 | `cat-event.webp` | events | 1540575467063-178a50c2df87 |
-| `cat-team.webp` | circle / scholarship | 1521737604893-d14cc237f11d |
+| `cat-team.webp` | circle / scholarship / Home left column "Build stronger connections" card | 1521737604893-d14cc237f11d |
 | `cat-markets.webp` | circle / finance | 1551288049-bebda4e38f71 |
 | `cat-legal.webp` | legal services | 1589829545856-d10d557cf95f |
