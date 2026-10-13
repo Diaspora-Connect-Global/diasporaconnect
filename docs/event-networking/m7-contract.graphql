@@ -1,0 +1,197 @@
+# Event Networking M7 — event day, feedback, post-event recap.
+#
+# PROPOSED contract written by the web team from the UI built against it
+# (src/services/gql/networkingEventDay.ts). Nothing here exists in the gateway yet.
+# Names are a proposal; change them freely and tell the web team, the documents
+# are one file.
+#
+# Rules the UI relies on
+#  - Every refusal: extensions.code = EVENT_NETWORKING_* (never FORBIDDEN /
+#    UNAUTHENTICATED, which would sign the user out). Codes used by the UI:
+#      EVENT_NETWORKING_FEATURE_UNAVAILABLE, EVENT_NETWORKING_MEETING_NOT_FOUND,
+#      EVENT_NETWORKING_NOT_PARTICIPANT, EVENT_NETWORKING_INVALID_ARGUMENT,
+#      EVENT_NETWORKING_RATE_LIMITED, EVENT_NETWORKING_CONFLICT,
+#      EVENT_NETWORKING_EVENT_DAY_WINDOW_CLOSED   (outside start-30min .. end+15min)
+#      EVENT_NETWORKING_MEETING_NOT_CONFIRMED     (not CONFIRMED / not in person)
+#      EVENT_NETWORKING_CANT_FIND_COOLDOWN
+#      EVENT_NETWORKING_LOCATION_INVALID
+#      EVENT_NETWORKING_FEEDBACK_CLOSED, EVENT_NETWORKING_FEEDBACK_NOT_OPEN
+#  - Nobody is identified by user id: people are opaque `handle`s (as in M5).
+#  - Location pins live only in Redis (TTL 15 min). The gateway must REDACT the
+#    variables of eventNetworkingShareLocation (latitude, longitude,
+#    accuracyMeters) from request logs, and the response of
+#    eventNetworkingMeetingEventDay (counterpartPin) too.
+#  - All operations are called with fetchPolicy no-cache.
+
+# ---------------------------------------------------------------- Event day --
+
+type EventNetworkingCounterpartPin {
+  latitude: Float!
+  longitude: Float!
+  accuracyMeters: Int
+  "When the pin disappears (share time + 15 minutes)."
+  expiresAt: String!
+}
+
+type EventNetworkingEventDayState {
+  "When I marked myself arrived."
+  myArrivedAt: String
+  counterpartArrivedAt: String
+  "Last time the OTHER person pressed 'I can't find you'. Cleared once I mark arrived."
+  counterpartCantFindAt: String
+  "Earliest moment I may press 'I can't find you' again (null = now). Suggested cool-down: 2 minutes, max 3 per meeting."
+  cantFindAvailableAt: String
+  "When MY share ends; null when I am not sharing."
+  mySharingExpiresAt: String
+  "The other person's pin, only while they share; otherwise null. Never visible to organisers."
+  counterpartPin: EventNetworkingCounterpartPin
+  "A real street address for the venue, only when the organiser supplied one (drives 'Open in Maps'). Never a guess."
+  venueAddress: String
+}
+
+input EventNetworkingShareLocationInput {
+  latitude: Float!
+  longitude: Float!
+  accuracyMeters: Int
+}
+
+extend type Query {
+  "State for ONE confirmed in-person meeting, between start - 30 min and end + 15 min. Participants only."
+  eventNetworkingMeetingEventDay(eventId: ID!, meetingId: ID!): EventNetworkingEventDayState
+}
+
+extend type Mutation {
+  "Idempotent: the first call stamps arrivedAt, later calls return the same state."
+  eventNetworkingMarkArrived(eventId: ID!, meetingId: ID!): EventNetworkingEventDayState
+  "Rate-limited. Notifies the other person once per press. Refuses with EVENT_NETWORKING_CANT_FIND_COOLDOWN."
+  eventNetworkingCantFindYou(eventId: ID!, meetingId: ID!): EventNetworkingEventDayState
+  "Stores ONE pin in Redis for 15 minutes (re-sharing replaces it). The UI asks consent every time before this call."
+  eventNetworkingShareLocation(eventId: ID!, meetingId: ID!, input: EventNetworkingShareLocationInput!): EventNetworkingEventDayState
+  "Deletes my pin immediately. Idempotent."
+  eventNetworkingStopSharingLocation(eventId: ID!, meetingId: ID!): EventNetworkingEventDayState
+}
+
+# ----------------------------------------------------------------- Feedback --
+
+enum EventNetworkingFeedbackSubjectType { MEETING CIRCLE }
+
+enum EventNetworkingFeedbackAttendance {
+  "Meeting: we both met."
+  MET
+  "Meeting: I was there, the other person was not."
+  I_ATTENDED_THEY_DID_NOT
+  "Meeting: the other person was there, I was not."
+  THEY_ATTENDED_I_DID_NOT
+  "Meeting: it was rescheduled or cancelled instead."
+  RESCHEDULED_OR_CANCELLED
+  "Circle: I attended."
+  ATTENDED
+  "Circle: I did not attend."
+  DID_NOT_ATTEND
+}
+
+enum EventNetworkingFeedbackOutcome {
+  EXCHANGED_CONTACTS
+  POTENTIAL_COLLABORATION
+  BUSINESS_LEAD
+  JOB_OR_OPPORTUNITY
+  MENTORSHIP
+  INVESTMENT_CONVERSATION
+  OTHER
+}
+
+input EventNetworkingFeedbackInput {
+  attendance: EventNetworkingFeedbackAttendance!
+  "1..5. Required when attendance is MET, I_ATTENDED_THEY_DID_NOT or ATTENDED; must be null otherwise."
+  usefulness: Int
+  outcomes: [EventNetworkingFeedbackOutcome!]
+  "<= 1000 chars. Meetings: private to the author. Circles: shown to organisers anonymously ONLY when >= 5 people responded."
+  comment: String
+}
+
+type EventNetworkingFeedback {
+  subjectType: EventNetworkingFeedbackSubjectType!
+  attendance: EventNetworkingFeedbackAttendance!
+  usefulness: Int
+  outcomes: [EventNetworkingFeedbackOutcome!]!
+  comment: String
+  submittedAt: String!
+  updatedAt: String
+  "Last moment the answer can still be changed."
+  editableUntil: String
+  editable: Boolean!
+}
+
+extend type Query {
+  "My own answer for a meeting or circle (null if none). Never anyone else's."
+  eventNetworkingMyFeedback(eventId: ID!, subjectType: EventNetworkingFeedbackSubjectType!, subjectId: ID!): EventNetworkingFeedback
+}
+
+extend type Mutation {
+  "Upsert (submit or update) my answer for a meeting. Independent of the other person's answer. EVENT_NETWORKING_FEEDBACK_CLOSED after the window."
+  eventNetworkingSubmitMeetingFeedback(eventId: ID!, meetingId: ID!, input: EventNetworkingFeedbackInput!): EventNetworkingFeedback
+  "Upsert my answer for a circle (the circle I joined)."
+  eventNetworkingSubmitCircleFeedback(eventId: ID!, circleId: ID!, input: EventNetworkingFeedbackInput!): EventNetworkingFeedback
+}
+
+# -------------------------------------------------------------------- Recap --
+
+enum EventNetworkingOrganiserMembership { MEMBER PENDING NOT_MEMBER UNAVAILABLE }
+enum EventNetworkingOrganiserKind { COMMUNITY ASSOCIATION }
+
+type EventNetworkingFeedbackPromptPerson {
+  handle: String!
+  displayName: String
+  avatarUrl: String
+  username: String
+}
+
+type EventNetworkingFeedbackPrompt {
+  subjectType: EventNetworkingFeedbackSubjectType!
+  "Opaque; only ever sent back to the submit mutations / feedback query."
+  subjectId: ID!
+  "Circle title, or the other person's display name for a meeting."
+  title: String!
+  counterpart: EventNetworkingFeedbackPromptPerson
+  startAt: String
+  endAt: String
+  feedbackClosesAt: String
+}
+
+type EventNetworkingRecapOrganiser {
+  kind: EventNetworkingOrganiserKind!
+  entityId: ID!
+  name: String!
+  membership: EventNetworkingOrganiserMembership!
+}
+
+"The viewer's OWN recap. Never contains another person's data or answers."
+type EventNetworkingRecap {
+  matchesCount: Int!
+  "Meetings I reported I attended (my answers only; scheduled is not held)."
+  meetingsHeldCount: Int!
+  circlesJoinedCount: Int!
+  "Newest first, capped at 20."
+  pendingFeedback: [EventNetworkingFeedbackPrompt!]!
+  pendingFeedbackTotal: Int!
+  "Null for events without an organiser community."
+  organiser: EventNetworkingRecapOrganiser
+  "When networking access ends (event end + configured post-event window, default 14 days)."
+  networkingEndsAt: String
+  networkingOpen: Boolean!
+  timezone: String
+}
+
+extend type Query {
+  eventNetworkingMyRecap(eventId: ID!): EventNetworkingRecap
+}
+
+# ------------------------------------------------------- Needs from backend --
+#  1. "Stay connected" reuses the EXISTING eventNetworkingConnect(eventId, handle).
+#     No new operation; feedback must not auto-create a connection.
+#  2. Feedback entry points exist for circles only in the recap list for now;
+#     the circle room has no button yet.
+#  3. Notifications: "X can't find you" (to the other participant), and the
+#     post-event feedback prompt deep link = /events/{id}/networking?tab=recap.
+#  4. The recap tab shows only when the event has ended; the gateway should
+#     answer eventNetworkingMyRecap any time after the event starts.

@@ -6433,5 +6433,180 @@
       "communities": "Gemeenschappen",
       "communitiesHint": "Vind je gemeenschap of vereniging"
     }
+  },
+  "networkingEventDay": {
+    "day": {
+      "title": "Afspraakdag",
+      "thisPerson": "deze persoon",
+      "startsAt": "Begint om {time}",
+      "where": "Waar afspreken",
+      "noPoint": "Er is geen ontmoetingsplek ingesteld. Stuur {name} een bericht om een plek af te spreken.",
+      "openVenueMap": "Locatie openen in Maps",
+      "opensNewTab": "(opent in een nieuw tabblad)",
+      "viewProfile": "Profiel bekijken",
+      "message": "Bericht",
+      "arrived": "Ik ben er",
+      "arrivedSaid": "Aankomst genoteerd.",
+      "arrivedAt": "Je bent aangekomen om {time}.",
+      "otherArrivedAt": "{name} is aangekomen om {time}.",
+      "cantFind": "Ik kan je niet vinden",
+      "cantFindHint": "{name} weet dan dat je aan het zoeken bent. Niemand krijgt de schuld.",
+      "cantFindSent": "We hebben {name} laten weten dat je aan het zoeken bent.",
+      "cantFindCooldown": "Je kunt het over {time} opnieuw vragen.",
+      "cantFindNotice": "{name} zoekt je. Ga naar de ontmoetingsplek of deel je locatie.",
+      "locationTitle": "Hulp met locatie",
+      "locationBody": "Optioneel. Deelt 15 minuten lang één locatiepunt met {name}. Standaard wordt er niets gedeeld.",
+      "share": "Mijn locatie delen",
+      "locating": "Je locatie wordt bepaald…",
+      "sharing": "Je deelt je locatie. Resterende tijd:",
+      "sharingStarted": "Je deelt je locatie.",
+      "sharingAnnounce": "Je deelt je locatie nog ongeveer {count, plural, one {# minuut} other {# minuten}}.",
+      "stop": "Stoppen met delen",
+      "stopped": "Je deelt je locatie niet meer.",
+      "expired": "Het delen van je locatie is afgelopen.",
+      "otherSharing": "{name} deelt een locatiepunt met je.",
+      "openPin": "Locatie van {name} openen in Maps",
+      "online": {
+        "title": "Online afspraak",
+        "body": "Deze afspraak is online, dus er is geen aankomstmelding of locatie delen. Gebruik de link om deel te nemen.",
+        "join": "Deelnemen aan de afspraak"
+      },
+      "geo": {
+        "denied": "Toegang tot je locatie is geblokkeerd. Je kunt dit toestaan in de site-instellingen van je browser, of {name} gewoon een bericht sturen waar je bent.",
+        "unavailable": "We konden je locatie niet bepalen. Controleer of locatievoorzieningen aanstaan en probeer het opnieuw.",
+        "timeout": "Het bepalen van je locatie duurde te lang. Probeer het opnieuw, het liefst buiten of met wifi.",
+        "unsupported": "Deze browser kan geen locatie delen.",
+        "retry": "Opnieuw proberen"
+      }
+    },
+    "consent": {
+      "title": "Je locatie {minutes} minuten delen?",
+      "lead": "We vragen het elke keer, voordat je browser om je positie vraagt.",
+      "whatLabel": "Wat:",
+      "what": "Je huidige positie, één keer vastgelegd als één punt. Dit is geen live volgen.",
+      "whoLabel": "Met wie:",
+      "who": "Alleen met {name}. Organisatoren en andere deelnemers kunnen het niet zien.",
+      "howLongLabel": "Hoe lang:",
+      "howLong": "{minutes} minuten. Daarna wordt het verwijderd en nooit bewaard.",
+      "stopAnytime": "Je kunt op elk moment stoppen met delen.",
+      "cancel": "Nu niet",
+      "confirm": "{minutes} minuten delen"
+    },
+    "feedback": {
+      "titleMeeting": "Hoe was je afspraak met {name}?",
+      "titleCircle": "Hoe was {circle}?",
+      "introMeeting": "Duurt ongeveer een minuut en is optioneel. Je antwoord is van jou alleen: het hangt niet af van wat {name} zegt en laat dat ook niet zien.",
+      "introCircle": "Duurt ongeveer een minuut en is optioneel.",
+      "thisPerson": "deze persoon",
+      "loading": "Laden…",
+      "give": "Feedback geven",
+      "save": "Feedback opslaan",
+      "update": "Feedback bijwerken",
+      "saving": "Opslaan…",
+      "edit": "Antwoord wijzigen",
+      "close": "Sluiten",
+      "needAttendance": "Kies wat er is gebeurd.",
+      "needUsefulness": "Kies hoe nuttig het was.",
+      "attendance": {
+        "legendMeeting": "Wat is er gebeurd?",
+        "legendCircle": "Heb je deelgenomen?",
+        "MET": "We hebben elkaar ontmoet",
+        "I_ATTENDED_THEY_DID_NOT": "Ik was er, de ander niet",
+        "THEY_ATTENDED_I_DID_NOT": "De ander was er, ik niet",
+        "RESCHEDULED_OR_CANCELLED": "Verplaatst of geannuleerd",
+        "ATTENDED": "Ik heb deelgenomen",
+        "DID_NOT_ATTEND": "Ik heb niet deelgenomen"
+      },
+      "usefulness": {
+        "legend": "Hoe nuttig was het?",
+        "low": "Niet nuttig",
+        "high": "Heel nuttig",
+        "option": "{value} van 5"
+      },
+      "outcomes": {
+        "legend": "Wat kwam eruit voort? (optioneel)",
+        "EXCHANGED_CONTACTS": "Contactgegevens uitgewisseld",
+        "POTENTIAL_COLLABORATION": "Mogelijke samenwerking",
+        "BUSINESS_LEAD": "Zakelijke lead",
+        "JOB_OR_OPPORTUNITY": "Baan of kans",
+        "MENTORSHIP": "Mentorschap",
+        "INVESTMENT_CONVERSATION": "Gesprek over investeren",
+        "OTHER": "Anders"
+      },
+      "comment": {
+        "label": "Nog iets? (optioneel)",
+        "count": "{count} / {max}",
+        "privateMeeting": "Alleen jij ziet deze opmerking. {name} en de organisatoren zien hem nooit.",
+        "sharedCircle": "Organisatoren zien opmerkingen over kringen zonder je naam, en pas als minstens {min} mensen hebben gereageerd. Tot die tijd ziet niemand hem."
+      },
+      "stayConnected": {
+        "label": "In contact blijven: stuur {name} een verbindingsverzoek",
+        "hint": "Een goede afspraak verbindt je nooit automatisch. {name} kiest zelf of het verzoek wordt geaccepteerd."
+      },
+      "saved": {
+        "title": "Bedankt, je feedback is opgeslagen.",
+        "editable": "Je kunt hem wijzigen tot {date}.",
+        "connectSent": "We hebben {name} een verbindingsverzoek gestuurd.",
+        "connectExisting": "Jij en {name} zijn al verbonden, of er staat al een verzoek open.",
+        "connectFailed": "Je feedback is opgeslagen. Het verbindingsverzoek kon nu niet worden verstuurd."
+      },
+      "existing": {
+        "closed": "De periode voor feedback is voorbij. Hieronder zie je je antwoord.",
+        "editable": "Je hebt geantwoord op {date}. Je kunt je antwoord wijzigen tot {until}.",
+        "answered": "Je hebt geantwoord op {date}."
+      }
+    },
+    "recap": {
+      "tab": "Terugblik",
+      "title": "Jouw netwerk-terugblik",
+      "subtitle": "Wat je bij dit evenement hebt gedaan. Alleen jij ziet deze pagina.",
+      "loading": "Je terugblik wordt geladen",
+      "unavailable": "Je terugblik is nog niet beschikbaar.",
+      "stats": {
+        "matches": "Matches",
+        "meetings": "Afspraken waar je bij was",
+        "circles": "Kringen waar je lid van werd"
+      },
+      "feedback": {
+        "title": "Wacht op jouw feedback",
+        "subtitle": "Kort en optioneel.",
+        "empty": "Je bent helemaal bij.",
+        "give": "Feedback geven",
+        "more": "En nog {count}. Ze verschijnen hier zodra je deze hebt beantwoord.",
+        "kind": {
+          "MEETING": "Afspraak",
+          "CIRCLE": "Kring"
+        }
+      },
+      "organiser": {
+        "title": "Blijf in contact met {name}",
+        "body": "Word lid van de community om te horen wat er hierna komt.",
+        "join": "Ga naar {name}",
+        "pending": "Je verzoek om lid te worden is in behandeling.",
+        "member": "Je bent lid."
+      },
+      "ends": "Netwerken blijft open tot {date}.",
+      "closed": "Netwerken is gesloten voor dit evenement."
+    },
+    "errors": {
+      "featureUnavailable": "Dit is nog niet beschikbaar.",
+      "unavailable": "Netwerken is tijdelijk niet beschikbaar. Probeer het zo meteen opnieuw.",
+      "notFound": "We konden die afspraak niet vinden.",
+      "notParticipant": "Alleen de twee mensen van de afspraak kunnen dit doen.",
+      "invalid": "Dat klopte niet. Controleer het en probeer het opnieuw.",
+      "rateLimited": "Je doet dat te vaak. Wacht even.",
+      "conflict": "Dit is gewijzigd terwijl je bezig was. Laad opnieuw en probeer het nog eens.",
+      "windowClosed": "Hulp op de afspraakdag is alleen beschikbaar vanaf 30 minuten voor de afspraak tot 15 minuten na afloop.",
+      "cantFindCooldown": "Je hebt net gevraagd. Wacht even voordat je het opnieuw vraagt.",
+      "locationInvalid": "We konden die locatie niet gebruiken. Probeer het opnieuw.",
+      "notConfirmed": "Dit werkt alleen voor een bevestigde afspraak ter plekke.",
+      "feedbackClosed": "De periode voor feedback is voorbij.",
+      "feedbackNotOpen": "Feedback kan pas als de afspraak voorbij is.",
+      "connectCooldown": "Je kunt deze persoon nog geen nieuw verbindingsverzoek sturen.",
+      "connectionLimit": "Je hebt je limiet voor verbindingsverzoeken voorlopig bereikt.",
+      "connectRefused": "Die verbinding kon niet worden gemaakt.",
+      "refused": "Dat kan nu niet.",
+      "generic": "Er ging iets mis. Probeer het opnieuw."
+    }
   }
 }

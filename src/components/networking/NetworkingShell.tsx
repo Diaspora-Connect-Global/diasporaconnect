@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { formatInZone } from '@/lib/eventCalendar';
 import { focusRing } from './primitives';
 
-export type NetworkingTab = 'discover' | 'recommended' | 'people' | 'interested' | 'matches' | 'interests' | 'meetings' | 'circles';
+export type NetworkingTab = 'discover' | 'recommended' | 'people' | 'interested' | 'matches' | 'interests' | 'meetings' | 'circles' | 'recap';
 
 export interface NetworkingEventContext {
   id: string;
@@ -65,12 +65,14 @@ export function NetworkingHeader({ event, title }: { event: NetworkingEventConte
   );
 }
 
-export function NetworkingTabs({ eventId, active, interests, circles, meetings = false }: { eventId: string; active: NetworkingTab; interests: boolean; circles: boolean; meetings?: boolean }) {
+export function NetworkingTabs({ eventId, active, interests, circles, meetings = false, recap = false }: { eventId: string; active: NetworkingTab; interests: boolean; circles: boolean; meetings?: boolean; recap?: boolean }) {
   const t = useTranslations('networking.tabs');
+  const tRecap = useTranslations('networkingEventDay.recap');
   const tabs: NetworkingTab[] = ['discover', 'recommended', 'people'];
   if (interests) tabs.push('interested', 'matches', 'interests');
   if (meetings) tabs.push('meetings');
   if (circles) tabs.push('circles');
+  if (recap) tabs.push('recap');
   return (
     <nav aria-label={t('label')} className="overflow-x-auto rounded-2xl border border-border-subtle bg-surface-default">
       <ul className="flex min-w-max gap-1 px-2">
@@ -84,7 +86,7 @@ export function NetworkingTabs({ eventId, active, interests, circles, meetings =
                 data-testid={`tab-${tab}`}
                 className={`inline-flex min-h-11 items-center border-b-2 px-4 text-sm font-medium ${on ? 'border-border-brand text-text-brand' : 'border-transparent text-muted-foreground hover:text-text-primary'} ${focusRing}`}
               >
-                {t(tab)}
+                {tab === 'recap' ? tRecap('tab') : t(tab)}
               </Link>
             </li>
           );

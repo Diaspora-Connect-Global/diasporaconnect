@@ -24,14 +24,32 @@ export const CIRCLES_UI_ENABLED = false;
  */
 export const MEETINGS_UI_ENABLED = false;
 
+/**
+ * Event day (M7): the arrival / "I can't find you" / share-my-location card inside a
+ * confirmed in-person meeting (gateway: `eventNetworkingMarkArrived` …, NOT deployed).
+ * While false the card is absent and no event-day operation is ever sent.
+ */
+export const EVENT_DAY_UI_ENABLED = false;
+
+/**
+ * Feedback after meetings and circles, and the post-event recap tab (gateway:
+ * `eventNetworkingSubmitMeetingFeedback`, `eventNetworkingMyRecap` …, NOT deployed).
+ * While false no feedback entry point, recap tab or operation exists.
+ */
+export const FEEDBACK_UI_ENABLED = false;
+
 export interface NetworkingFeatureFlags {
   interests: boolean;
   circles: boolean;
   meetings: boolean;
+  eventDay: boolean;
+  feedback: boolean;
 }
 
 export const NETWORKING_FEATURES: NetworkingFeatureFlags = {
   interests: INTERESTS_UI_ENABLED,
   circles: CIRCLES_UI_ENABLED,
   meetings: MEETINGS_UI_ENABLED,
+  eventDay: EVENT_DAY_UI_ENABLED,
+  feedback: FEEDBACK_UI_ENABLED,
 };
