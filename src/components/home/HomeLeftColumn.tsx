@@ -125,7 +125,7 @@ function GroupsCard() {
     <section aria-labelledby="home-left-groups" data-testid="home-left-groups" className={cardCls}>
       <div className="flex items-center justify-between px-1 pb-1">
         <h2 id="home-left-groups" className="text-sm font-bold text-text-primary">{t('featuredGroups')}</h2>
-        <Link href="/search" prefetch={false} className={`text-xs font-medium text-text-brand hover:underline ${linkFocus}`}>{t('viewAll')}</Link>
+        <Link href="/groups" prefetch={false} className={`text-xs font-medium text-text-brand hover:underline ${linkFocus}`}>{t('viewAll')}</Link>
       </div>
       <ul>
         {groups.map((g) => (

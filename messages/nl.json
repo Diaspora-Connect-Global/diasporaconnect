@@ -756,7 +756,6 @@
           "MODERATOR": "Moderator",
           "MEMBER": "Lid"
         },
-        "backToCommunity": "Gemeenschap",
         "openChat": "Groepschat openen",
         "youOwn": "Je bent eigenaar van deze groep",
         "about": "Over",
@@ -766,7 +765,8 @@
         "since": "Sinds {date}",
         "createdOn": "Aangemaakt op {date}",
         "publicHint": "Iedereen kan zien wie in deze groep zit en lid worden.",
-        "privateHint": "Alleen leden zien wie erin zit. Lid worden moet worden goedgekeurd."
+        "privateHint": "Alleen leden zien wie erin zit. Lid worden moet worden goedgekeurd.",
+        "backToGroups": "Alle groepen"
       }
     },
     "viewCommunity": "Gemeenschap bekijken",
@@ -6247,5 +6247,37 @@
     "connectTitle": "Bouw sterkere verbindingen.",
     "connectBody": "Sluit je aan bij een community die je doelen steunt, deel je verhaal en maak deel uit van iets groters.",
     "connectCta": "Communities ontdekken"
+  },
+  "groupsPage": {
+    "metaTitle": "Groepen",
+    "eyebrow": "Groepen",
+    "title": "Vind je mensen.",
+    "subtitle": "Word lid van groepen rond je interesses, werk en stad — of begin je eigen groep.",
+    "searchLabel": "Groepen zoeken",
+    "searchPlaceholder": "Zoek groepen op naam of onderwerp…",
+    "searchButton": "Zoeken",
+    "yourGroups": "Jouw groepen",
+    "yourGroupsEmpty": "Je bent nog geen lid van een groep. Word hieronder lid of begin je eigen groep.",
+    "showAll": "Alles tonen ({count})",
+    "showLess": "Minder tonen",
+    "create": "Groep aanmaken",
+    "createHint": "Nieuwe groepen zijn privé: jij kiest wie erin zit, anderen kunnen vragen om lid te worden.",
+    "discoverTitle": "Groepen ontdekken",
+    "discoverSubtitle": "Groepen waar je lid van kunt worden op DiaspoPlug.",
+    "resultsTitle": "Resultaten voor ‘{query}’",
+    "clearSearch": "Zoekopdracht wissen",
+    "loadFailed": "Groepen konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "noResults": "Geen groepen gevonden voor ‘{query}’.",
+    "empty": "Er zijn nu geen groepen om lid van te worden.",
+    "members": "{count, plural, one {# lid} other {# leden}}",
+    "join": "Lid worden",
+    "requestToJoin": "Verzoek om lid te worden",
+    "requested": "Aangevraagd",
+    "open": "Openen",
+    "loadMore": "Meer laden",
+    "joinedToast": "Je bent lid geworden van de groep.",
+    "requestedToast": "Je verzoek is verstuurd.",
+    "failedToast": "Dat is niet gelukt. Probeer het opnieuw."
   }
 }

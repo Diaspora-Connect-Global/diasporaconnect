@@ -130,6 +130,26 @@ export const SEARCH_GROUPS = gql`
 `;
 
 /**
+ * The /groups directory: one page of the group search (an empty `query` lists
+ * every group the viewer may see) with the total, for "Load more".
+ */
+export const GROUPS_DIRECTORY = gql`
+  query GroupsDirectory($query: String!, $limit: Int, $offset: Int) {
+    searchGroups(query: $query, limit: $limit, offset: $offset) {
+      total
+      groups {
+        id
+        name
+        description
+        privacy
+        memberCount
+        avatarUrl
+      }
+    }
+  }
+`;
+
+/**
  * Get members of a specific group.
  *
  * @example

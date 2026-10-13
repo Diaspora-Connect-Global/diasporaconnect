@@ -40,6 +40,7 @@ test('groups to join leave out the ones already joined; private ones say "Reques
     await expect(groups).not.toContainText('Already Joined');
     await expect(groups.getByRole('button', { name: 'Join', exact: true })).toHaveCount(1);
     await expect(groups.getByRole('button', { name: 'Request to join' })).toHaveCount(1);
+    await expect(groups.getByRole('link', { name: 'View all' })).toHaveAttribute('href', '/en/groups');
     await page.context().close();
 });
 

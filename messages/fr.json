@@ -755,7 +755,6 @@
           "MODERATOR": "Modérateur",
           "MEMBER": "Membre"
         },
-        "backToCommunity": "Communauté",
         "openChat": "Ouvrir le chat du groupe",
         "youOwn": "Ce groupe vous appartient",
         "about": "À propos",
@@ -765,7 +764,8 @@
         "since": "Depuis {date}",
         "createdOn": "Créé le {date}",
         "publicHint": "Tout le monde peut voir qui fait partie de ce groupe et le rejoindre.",
-        "privateHint": "Seuls les membres voient qui en fait partie. L’adhésion doit être approuvée."
+        "privateHint": "Seuls les membres voient qui en fait partie. L’adhésion doit être approuvée.",
+        "backToGroups": "Tous les groupes"
       }
     },
     "viewCommunity": "Voir la communauté",
@@ -6247,5 +6247,37 @@
     "connectTitle": "Créez des liens plus forts.",
     "connectBody": "Rejoignez une communauté qui soutient vos objectifs, partagez votre histoire et faites partie de quelque chose de plus grand.",
     "connectCta": "Découvrir les communautés"
+  },
+  "groupsPage": {
+    "metaTitle": "Groupes",
+    "eyebrow": "Groupes",
+    "title": "Trouvez les vôtres.",
+    "subtitle": "Rejoignez des groupes selon vos intérêts, votre métier et votre ville — ou créez le vôtre.",
+    "searchLabel": "Rechercher des groupes",
+    "searchPlaceholder": "Rechercher un groupe par nom ou sujet…",
+    "searchButton": "Rechercher",
+    "yourGroups": "Vos groupes",
+    "yourGroupsEmpty": "Vous n’avez encore rejoint aucun groupe. Rejoignez-en un ci-dessous ou créez le vôtre.",
+    "showAll": "Tout afficher ({count})",
+    "showLess": "Afficher moins",
+    "create": "Créer un groupe",
+    "createHint": "Les nouveaux groupes sont privés : vous choisissez qui en fait partie, les autres peuvent demander à rejoindre.",
+    "discoverTitle": "Découvrir des groupes",
+    "discoverSubtitle": "Des groupes que vous pouvez rejoindre sur DiaspoPlug.",
+    "resultsTitle": "Résultats pour « {query} »",
+    "clearSearch": "Effacer la recherche",
+    "loadFailed": "Impossible de charger les groupes.",
+    "retry": "Réessayer",
+    "noResults": "Aucun groupe ne correspond à « {query} ».",
+    "empty": "Aucun groupe à rejoindre pour le moment.",
+    "members": "{count, plural, one {# membre} other {# membres}}",
+    "join": "Rejoindre",
+    "requestToJoin": "Demander à rejoindre",
+    "requested": "Demande envoyée",
+    "open": "Ouvrir",
+    "loadMore": "Charger plus",
+    "joinedToast": "Vous avez rejoint le groupe.",
+    "requestedToast": "Votre demande a été envoyée.",
+    "failedToast": "Cela n’a pas fonctionné. Veuillez réessayer."
   }
 }

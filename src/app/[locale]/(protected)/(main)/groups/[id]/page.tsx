@@ -241,7 +241,7 @@ export default function GroupDetailPage() {
                         title={t('groups.detail.notFoundTitle')}
                         description={t('groups.detail.notFoundBody')}
                         action={
-                            <ButtonType1 onClick={() => router.push('/community')}>
+                            <ButtonType1 onClick={() => router.push('/groups')}>
                                 {t('groups.detail.browse')}
                             </ButtonType1>
                         }
@@ -263,9 +263,9 @@ export default function GroupDetailPage() {
     return (
         <div className="h-app-inner overflow-y-auto scrollbar-hide">
           <div className="mx-auto w-full space-y-5 px-4 py-4 pb-10 lg:w-[80vw] lg:px-0 lg:py-6">
-            <Link href="/community" prefetch={false} data-testid="group-back" className="inline-flex items-center gap-2 rounded-md text-sm text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
+            <Link href="/groups" prefetch={false} data-testid="group-back" className="inline-flex items-center gap-2 rounded-md text-sm text-text-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
                 <ArrowLeft className="size-4" aria-hidden />
-                {t('groups.detail.backToCommunity')}
+                {t('groups.detail.backToGroups')}
             </Link>
 
             {/* Header: cover band, avatar, name, facts, the one action that matters for this viewer. */}
@@ -358,8 +358,7 @@ export default function GroupDetailPage() {
                                 <EmptyState size="sm" icon={Lock} title={t('groups.detail.membersHidden')} />
                             </div>
                         ) : members.length ? (
-                            <div className="@container">
-                                <ul className="grid gap-2 @[34rem]:grid-cols-2">
+                            <ul className="-mx-2 divide-y divide-border-subtle">
                                     {members.map((m) => {
                                         const name = personName(m.profile, tIdentity('unknownUser'));
                                         const place = [m.profile?.city, m.profile?.residenceCountry].filter(Boolean).join(', ');
@@ -370,7 +369,7 @@ export default function GroupDetailPage() {
                                                 <Link
                                                     href={profileUrl({ userId: m.userId })}
                                                     prefetch={false}
-                                                    className="flex min-w-0 items-center gap-3 rounded-xl border border-border-subtle p-3 transition-colors hover:border-border-brand hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                                                    className="flex min-w-0 items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-brand"
                                                 >
                                                     <Avatar className="size-11 shrink-0">
                                                         <AvatarImage src={toCdnUrl(m.profile?.avatarUrl) || undefined} alt="" />
@@ -389,8 +388,7 @@ export default function GroupDetailPage() {
                                             </li>
                                         );
                                     })}
-                                </ul>
-                            </div>
+                            </ul>
                         ) : (
                             <div className="py-6">
                                 <EmptyState size="sm" icon={Users} title={t('groups.detail.noMembers')} />

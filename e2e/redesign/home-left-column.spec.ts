@@ -44,6 +44,7 @@ test('featured groups leave out joined ones; Join and Request call the real muta
     await expect(groups).toContainText('8 members');
     await expect(groups).not.toContainText('Already Joined');
     await expect(groups.getByText(/0 members/)).toHaveCount(0);
+    await expect(groups.getByRole('link', { name: 'View all' })).toHaveAttribute('href', '/en/groups');
     await groups.getByRole('button', { name: 'Join', exact: true }).click();
     await expect.poll(() => graphql.calls.filter((c) => c.name === 'JoinGroup').length).toBe(1);
     expect(graphql.calls.find((c) => c.name === 'JoinGroup')?.variables).toEqual({ joinGroupId: 'g-1' });

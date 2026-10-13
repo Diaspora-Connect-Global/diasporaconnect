@@ -755,7 +755,6 @@
           "MODERATOR": "Moderator",
           "MEMBER": "Mitglied"
         },
-        "backToCommunity": "Community",
         "openChat": "Gruppenchat öffnen",
         "youOwn": "Diese Gruppe gehört dir",
         "about": "Über die Gruppe",
@@ -765,7 +764,8 @@
         "since": "Seit {date}",
         "createdOn": "Erstellt am {date}",
         "publicHint": "Alle können sehen, wer in dieser Gruppe ist, und beitreten.",
-        "privateHint": "Nur Mitglieder sehen, wer dabei ist. Der Beitritt muss genehmigt werden."
+        "privateHint": "Nur Mitglieder sehen, wer dabei ist. Der Beitritt muss genehmigt werden.",
+        "backToGroups": "Alle Gruppen"
       }
     },
     "viewCommunity": "Community anzeigen",
@@ -6247,5 +6247,37 @@
     "connectTitle": "Stärkere Verbindungen aufbauen.",
     "connectBody": "Tritt einer Community bei, die deine Ziele unterstützt, teile deine Geschichte und werde Teil von etwas Größerem.",
     "connectCta": "Communities entdecken"
+  },
+  "groupsPage": {
+    "metaTitle": "Gruppen",
+    "eyebrow": "Gruppen",
+    "title": "Finde deine Leute.",
+    "subtitle": "Tritt Gruppen zu deinen Interessen, deiner Arbeit und deiner Stadt bei – oder gründe deine eigene.",
+    "searchLabel": "Gruppen durchsuchen",
+    "searchPlaceholder": "Gruppen nach Name oder Thema suchen…",
+    "searchButton": "Suchen",
+    "yourGroups": "Deine Gruppen",
+    "yourGroupsEmpty": "Du bist noch in keiner Gruppe. Tritt unten einer bei oder gründe deine eigene.",
+    "showAll": "Alle anzeigen ({count})",
+    "showLess": "Weniger anzeigen",
+    "create": "Gruppe erstellen",
+    "createHint": "Neue Gruppen sind privat: Du wählst aus, wer dabei ist, andere können eine Anfrage stellen.",
+    "discoverTitle": "Gruppen entdecken",
+    "discoverSubtitle": "Gruppen, denen du auf DiaspoPlug beitreten kannst.",
+    "resultsTitle": "Ergebnisse für „{query}“",
+    "clearSearch": "Suche löschen",
+    "loadFailed": "Gruppen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "noResults": "Keine Gruppen passen zu „{query}“.",
+    "empty": "Gerade gibt es keine Gruppen zum Beitreten.",
+    "members": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
+    "join": "Beitreten",
+    "requestToJoin": "Beitritt anfragen",
+    "requested": "Angefragt",
+    "open": "Öffnen",
+    "loadMore": "Mehr laden",
+    "joinedToast": "Du bist der Gruppe beigetreten.",
+    "requestedToast": "Deine Beitrittsanfrage wurde gesendet.",
+    "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut."
   }
 }

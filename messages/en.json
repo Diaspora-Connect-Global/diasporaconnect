@@ -756,7 +756,6 @@
           "MODERATOR": "Moderator",
           "MEMBER": "Member"
         },
-        "backToCommunity": "Community",
         "openChat": "Open group chat",
         "youOwn": "You own this group",
         "about": "About",
@@ -766,7 +765,8 @@
         "since": "Since {date}",
         "createdOn": "Created on {date}",
         "publicHint": "Anyone can see who's in this group and join.",
-        "privateHint": "Only members can see who's in it. Joining needs approval."
+        "privateHint": "Only members can see who's in it. Joining needs approval.",
+        "backToGroups": "All groups"
       }
     },
     "viewCommunity": "View community",
@@ -6247,5 +6247,37 @@
     "connectTitle": "Build stronger connections.",
     "connectBody": "Join a community that supports your goals, share your story and be part of something bigger.",
     "connectCta": "Explore Communities"
+  },
+  "groupsPage": {
+    "metaTitle": "Groups",
+    "eyebrow": "Groups",
+    "title": "Find your people.",
+    "subtitle": "Join groups around your interests, work and city — or start your own.",
+    "searchLabel": "Search groups",
+    "searchPlaceholder": "Search groups by name or topic…",
+    "searchButton": "Search",
+    "yourGroups": "Your groups",
+    "yourGroupsEmpty": "You haven't joined any groups yet. Join one below or start your own.",
+    "showAll": "Show all ({count})",
+    "showLess": "Show less",
+    "create": "Create a group",
+    "createHint": "New groups are private: you pick who's in, and others can ask to join.",
+    "discoverTitle": "Discover groups",
+    "discoverSubtitle": "Groups you can join on DiaspoPlug.",
+    "resultsTitle": "Results for “{query}”",
+    "clearSearch": "Clear search",
+    "loadFailed": "We couldn't load groups.",
+    "retry": "Try again",
+    "noResults": "No groups match “{query}”.",
+    "empty": "There are no groups to join right now.",
+    "members": "{count, plural, one {# member} other {# members}}",
+    "join": "Join",
+    "requestToJoin": "Request to join",
+    "requested": "Requested",
+    "open": "Open",
+    "loadMore": "Load more",
+    "joinedToast": "You joined the group.",
+    "requestedToast": "Your request to join has been sent.",
+    "failedToast": "That didn't work. Please try again."
   }
 }

@@ -31,7 +31,7 @@ export function FeaturedGroups() {
 
   return (
     <Section labelledBy="community-groups-title" testId="community-groups">
-      <SectionHeader id="community-groups-title" title={t('title')} subtitle={t('subtitle')} href="/search" viewAllLabel={tAll('viewAll')} />
+      <SectionHeader id="community-groups-title" title={t('title')} subtitle={t('subtitle')} href="/groups" viewAllLabel={tAll('viewAll')} />
       <ul className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {groups.map((g) => (
           <li key={g.id} className="min-w-0">

@@ -755,7 +755,6 @@
           "MODERATOR": "Moderatore",
           "MEMBER": "Membro"
         },
-        "backToCommunity": "Community",
         "openChat": "Apri la chat del gruppo",
         "youOwn": "Questo gruppo è tuo",
         "about": "Informazioni",
@@ -765,7 +764,8 @@
         "since": "Dal {date}",
         "createdOn": "Creato il {date}",
         "publicHint": "Chiunque può vedere chi fa parte del gruppo e unirsi.",
-        "privateHint": "Solo i membri vedono chi ne fa parte. L’adesione va approvata."
+        "privateHint": "Solo i membri vedono chi ne fa parte. L’adesione va approvata.",
+        "backToGroups": "Tutti i gruppi"
       }
     },
     "viewCommunity": "Vedi community",
@@ -6247,5 +6247,37 @@
     "connectTitle": "Costruisci legami più forti.",
     "connectBody": "Unisciti a una community che sostiene i tuoi obiettivi, condividi la tua storia e fai parte di qualcosa di più grande.",
     "connectCta": "Esplora le community"
+  },
+  "groupsPage": {
+    "metaTitle": "Gruppi",
+    "eyebrow": "Gruppi",
+    "title": "Trova la tua gente.",
+    "subtitle": "Unisciti a gruppi sui tuoi interessi, il tuo lavoro e la tua città — o creane uno tuo.",
+    "searchLabel": "Cerca gruppi",
+    "searchPlaceholder": "Cerca gruppi per nome o argomento…",
+    "searchButton": "Cerca",
+    "yourGroups": "I tuoi gruppi",
+    "yourGroupsEmpty": "Non fai ancora parte di nessun gruppo. Unisciti a uno qui sotto o creane uno tuo.",
+    "showAll": "Mostra tutti ({count})",
+    "showLess": "Mostra meno",
+    "create": "Crea un gruppo",
+    "createHint": "I nuovi gruppi sono privati: scegli tu chi entra, gli altri possono chiedere di unirsi.",
+    "discoverTitle": "Scopri i gruppi",
+    "discoverSubtitle": "Gruppi a cui puoi unirti su DiaspoPlug.",
+    "resultsTitle": "Risultati per “{query}”",
+    "clearSearch": "Cancella ricerca",
+    "loadFailed": "Impossibile caricare i gruppi.",
+    "retry": "Riprova",
+    "noResults": "Nessun gruppo corrisponde a “{query}”.",
+    "empty": "Al momento non ci sono gruppi a cui unirsi.",
+    "members": "{count, plural, one {# membro} other {# membri}}",
+    "join": "Unisciti",
+    "requestToJoin": "Chiedi di unirti",
+    "requested": "Richiesta inviata",
+    "open": "Apri",
+    "loadMore": "Carica altri",
+    "joinedToast": "Ti sei unito al gruppo.",
+    "requestedToast": "La tua richiesta è stata inviata.",
+    "failedToast": "Non ha funzionato. Riprova."
   }
 }

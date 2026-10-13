@@ -77,6 +77,9 @@ test('members: role badges, occupation and place, links to profiles, never an id
     await expect(members.getByRole('link', { name: /Kofi Mensah/ })).toContainText('Admin');
     await expect(members.getByRole('link', { name: /Esi Boateng/ })).not.toContainText('Member');
     await expect(members.getByRole('link', { name: /Esi Boateng/ })).toHaveAttribute('href', '/en/00000000-0000-4000-8000-0000000a0f03');
+    // A plain list: one member per row, all aligned on the same left edge.
+    const xs = await members.getByRole('link').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().x)));
+    expect(new Set(xs).size).toBe(1);
     await expect(page.getByTestId('group-info')).toContainText("Anyone can see who's in this group and join.");
     expect(await page.locator('body').innerText()).not.toMatch(UUID);
     await page.context().close();
@@ -112,13 +115,13 @@ test('pending request shows Requested (disabled); the owner sees ownership and t
     await owner.page.context().close();
 });
 
-test('singular count, no cap, back to Community, and no horizontal scroll on a phone', async () => {
+test('singular count, no cap, back to all groups, and no horizontal scroll on a phone', async () => {
     const { page } = await open(browser, PAGE, DATA(MEMBER, { memberCount: 1, maxMembers: null }) as never, { width: 360, height: 800 });
     const header = page.getByTestId('group-header');
     await expect(header).toContainText('1 member', { timeout: 90_000 });
     await expect(header).not.toContainText('1 members');
-    await expect(page.getByTestId('group-back')).toHaveText('Community');
-    await expect(page.getByTestId('group-back')).toHaveAttribute('href', '/en/community');
+    await expect(page.getByTestId('group-back')).toHaveText('All groups');
+    await expect(page.getByTestId('group-back')).toHaveAttribute('href', '/en/groups');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(0);
     await page.context().close();

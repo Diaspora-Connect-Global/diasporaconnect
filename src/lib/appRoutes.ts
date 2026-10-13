@@ -53,6 +53,7 @@ export const APP_ROUTE_PATTERNS: readonly string[] = [
   '/events/[id]/ticket',
   '/events/create',
   '/feed',
+  '/groups',
   '/groups/[id]',
   '/help',
   '/home',
