@@ -6601,5 +6601,180 @@
       "insights": "Aperçus",
       "growth": "Croissance de la communauté"
     }
+  },
+  "networkingEventDay": {
+    "day": {
+      "title": "Jour du rendez-vous",
+      "thisPerson": "cette personne",
+      "startsAt": "Commence à {time}",
+      "where": "Lieu du rendez-vous",
+      "noPoint": "Aucun point de rencontre n'a été défini. Écrivez à {name} pour convenir d'un lieu.",
+      "openVenueMap": "Ouvrir le lieu dans Maps",
+      "opensNewTab": "(s'ouvre dans un nouvel onglet)",
+      "viewProfile": "Voir le profil",
+      "message": "Message",
+      "arrived": "Je suis sur place",
+      "arrivedSaid": "Arrivée enregistrée.",
+      "arrivedAt": "Votre arrivée a été enregistrée à {time}.",
+      "otherArrivedAt": "Arrivée de {name} à {time}.",
+      "cantFind": "Je ne vous trouve pas",
+      "cantFindHint": "{name} reçoit un message : vous êtes à sa recherche. Personne n'est blâmé.",
+      "cantFindSent": "Nous avons prévenu {name} que vous cherchez cette personne.",
+      "cantFindCooldown": "Vous pourrez redemander dans {time}.",
+      "cantFindNotice": "{name} vous cherche. Rendez-vous au point de rencontre ou partagez votre position.",
+      "locationTitle": "Aide par la position",
+      "locationBody": "Facultatif. Partage un repère avec {name} pendant 15 minutes. Rien n'est partagé par défaut.",
+      "share": "Partager ma position",
+      "locating": "Recherche de votre position…",
+      "sharing": "Vous partagez votre position. Temps restant :",
+      "sharingStarted": "Vous partagez votre position.",
+      "sharingAnnounce": "Vous partagez votre position encore environ {count, plural, one {# minute} other {# minutes}}.",
+      "stop": "Arrêter le partage",
+      "stopped": "Vous avez arrêté de partager votre position.",
+      "expired": "Le partage de votre position est terminé.",
+      "otherSharing": "{name} partage un repère de position avec vous.",
+      "openPin": "Ouvrir la position de {name} dans Maps",
+      "online": {
+        "title": "Rendez-vous en ligne",
+        "body": "Ce rendez-vous a lieu en ligne : il n'y a donc ni arrivée ni partage de position. Utilisez le lien pour le rejoindre.",
+        "join": "Rejoindre le rendez-vous"
+      },
+      "geo": {
+        "denied": "L'accès à la position est bloqué. Vous pouvez l'autoriser dans les paramètres du site de votre navigateur, ou simplement écrire à {name} pour dire où vous êtes.",
+        "unavailable": "Nous n'avons pas pu déterminer votre position. Vérifiez que la localisation est activée, puis réessayez.",
+        "timeout": "La recherche de votre position a pris trop de temps. Réessayez, idéalement en extérieur ou en Wi-Fi.",
+        "unsupported": "Ce navigateur ne peut pas partager de position.",
+        "retry": "Réessayer"
+      }
+    },
+    "consent": {
+      "title": "Partager votre position pendant {minutes} minutes ?",
+      "lead": "Nous demandons à chaque fois, avant que votre navigateur ne demande votre position.",
+      "whatLabel": "Quoi :",
+      "what": "Votre position actuelle, relevée une seule fois sous forme d'un repère. Ce n'est pas un suivi en direct.",
+      "whoLabel": "Qui :",
+      "who": "Seulement {name}. Les organisateurs et les autres participants ne la voient pas.",
+      "howLongLabel": "Combien de temps :",
+      "howLong": "{minutes} minutes. Ensuite elle est supprimée et jamais conservée.",
+      "stopAnytime": "Vous pouvez arrêter le partage à tout moment.",
+      "cancel": "Pas maintenant",
+      "confirm": "Partager pendant {minutes} minutes"
+    },
+    "feedback": {
+      "titleMeeting": "Comment s'est passé votre rendez-vous avec {name} ?",
+      "titleCircle": "Comment était {circle} ?",
+      "introMeeting": "Cela prend environ une minute et c'est facultatif. Votre réponse n'appartient qu'à vous : elle ne dépend pas de ce que dit {name} et ne le montre pas.",
+      "introCircle": "Cela prend environ une minute et c'est facultatif.",
+      "thisPerson": "cette personne",
+      "loading": "Chargement…",
+      "give": "Donner un avis",
+      "save": "Enregistrer l'avis",
+      "update": "Mettre à jour l'avis",
+      "saving": "Enregistrement…",
+      "edit": "Modifier la réponse",
+      "close": "Fermer",
+      "needAttendance": "Indiquez ce qui s'est passé.",
+      "needUsefulness": "Indiquez à quel point c'était utile.",
+      "attendance": {
+        "legendMeeting": "Que s'est-il passé ?",
+        "legendCircle": "Avez-vous participé ?",
+        "MET": "Nous nous sommes rencontrés",
+        "I_ATTENDED_THEY_DID_NOT": "J'étais là, l'autre personne non",
+        "THEY_ATTENDED_I_DID_NOT": "L'autre personne était là, moi non",
+        "RESCHEDULED_OR_CANCELLED": "Reporté ou annulé",
+        "ATTENDED": "J'ai participé",
+        "DID_NOT_ATTEND": "Je n'ai pas participé"
+      },
+      "usefulness": {
+        "legend": "À quel point était-ce utile ?",
+        "low": "Pas utile",
+        "high": "Très utile",
+        "option": "{value} sur 5"
+      },
+      "outcomes": {
+        "legend": "Qu'en est-il ressorti ? (facultatif)",
+        "EXCHANGED_CONTACTS": "Échange de contacts",
+        "POTENTIAL_COLLABORATION": "Collaboration possible",
+        "BUSINESS_LEAD": "Piste commerciale",
+        "JOB_OR_OPPORTUNITY": "Emploi ou opportunité",
+        "MENTORSHIP": "Mentorat",
+        "INVESTMENT_CONVERSATION": "Discussion d'investissement",
+        "OTHER": "Autre"
+      },
+      "comment": {
+        "label": "Autre chose ? (facultatif)",
+        "count": "{count} / {max}",
+        "privateMeeting": "Vous seul voyez ce commentaire. {name} et les organisateurs ne le voient jamais.",
+        "sharedCircle": "Les organisateurs voient les commentaires sur les cercles sans votre nom, et seulement lorsqu'au moins {min} personnes ont répondu. D'ici là, personne ne le voit."
+      },
+      "stayConnected": {
+        "label": "Rester en contact : envoyer une demande de connexion à {name}",
+        "hint": "Un bon rendez-vous ne vous connecte jamais automatiquement. {name} choisit d'accepter ou non."
+      },
+      "saved": {
+        "title": "Merci, votre avis est enregistré.",
+        "editable": "Vous pouvez le modifier jusqu'au {date}.",
+        "connectSent": "Nous avons envoyé une demande de connexion à {name}.",
+        "connectExisting": "Vous et {name} êtes déjà connectés, ou une demande est déjà en cours.",
+        "connectFailed": "Votre avis est enregistré. La demande de connexion n'a pas pu être envoyée pour le moment."
+      },
+      "existing": {
+        "closed": "La période pour donner un avis est terminée. Votre réponse s'affiche ci-dessous.",
+        "editable": "Vous avez répondu le {date}. Vous pouvez la modifier jusqu'au {until}.",
+        "answered": "Vous avez répondu le {date}."
+      }
+    },
+    "recap": {
+      "tab": "Bilan",
+      "title": "Votre bilan de réseautage",
+      "subtitle": "Ce que vous avez fait lors de cet événement. Vous seul voyez cette page.",
+      "loading": "Chargement de votre bilan",
+      "unavailable": "Votre bilan n'est pas encore disponible.",
+      "stats": {
+        "matches": "Correspondances",
+        "meetings": "Rendez-vous auxquels vous avez assisté",
+        "circles": "Cercles rejoints"
+      },
+      "feedback": {
+        "title": "Votre avis est attendu",
+        "subtitle": "Court et facultatif.",
+        "empty": "Vous êtes à jour.",
+        "give": "Donner un avis",
+        "more": "Et {count} autres. Elles apparaissent ici au fur et à mesure de vos réponses.",
+        "kind": {
+          "MEETING": "Rendez-vous",
+          "CIRCLE": "Cercle"
+        }
+      },
+      "organiser": {
+        "title": "Gardez le contact avec {name}",
+        "body": "Rejoignez sa communauté pour savoir ce qui vient ensuite.",
+        "join": "Aller sur {name}",
+        "pending": "Votre demande d'adhésion est en attente.",
+        "member": "Vous en êtes membre."
+      },
+      "ends": "Le réseautage reste ouvert jusqu'au {date}.",
+      "closed": "Le réseautage est terminé pour cet événement."
+    },
+    "errors": {
+      "featureUnavailable": "Ce n'est pas encore disponible.",
+      "unavailable": "Le réseautage est temporairement indisponible. Veuillez réessayer dans un instant.",
+      "notFound": "Nous n'avons pas trouvé ce rendez-vous.",
+      "notParticipant": "Seules les deux personnes du rendez-vous peuvent le faire.",
+      "invalid": "Cela ne semble pas correct. Veuillez vérifier et réessayer.",
+      "rateLimited": "Vous le faites trop souvent. Veuillez patienter un peu.",
+      "conflict": "Cela a changé pendant votre modification. Rechargez et réessayez.",
+      "windowClosed": "L'aide du jour J n'est disponible que de 30 minutes avant le rendez-vous jusqu'à 15 minutes après sa fin.",
+      "cantFindCooldown": "Vous venez de demander. Veuillez patienter avant de redemander.",
+      "locationInvalid": "Nous n'avons pas pu utiliser cette position. Veuillez réessayer.",
+      "notConfirmed": "Cela ne fonctionne que pour un rendez-vous en personne confirmé.",
+      "feedbackClosed": "La période pour donner un avis est terminée.",
+      "feedbackNotOpen": "Les avis ouvrent une fois le rendez-vous terminé.",
+      "connectCooldown": "Vous ne pouvez pas encore envoyer une autre demande de connexion à cette personne.",
+      "connectionLimit": "Vous avez atteint votre limite de demandes de connexion pour le moment.",
+      "connectRefused": "Cette connexion n'a pas pu être établie.",
+      "refused": "Ce n'est pas possible pour le moment.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
+    }
   }
 }

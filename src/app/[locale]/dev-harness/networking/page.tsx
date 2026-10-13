@@ -8,6 +8,9 @@ const PAGES: Array<[string, string]> = [
   ['person', 'Person view (add ?missing=1 for the not-found screen)'],
   ['circles', 'Circles discovery'],
   ['circle-room', 'Circle room'],
+  ['event-day', 'Event day: meeting-day card (add ?state=before | window | arrived | other-arrived | sharing | other-sharing | they-cant-find | online | after | geo-denied | geo-unavailable | geo-timeout, &ttl=SECONDS, &cooldown=SECONDS)'],
+  ['feedback', 'Feedback sheets for a meeting and a circle (add ?state=empty | submitted | closed, &connected=existing)'],
+  ['recap', 'Post-event recap tab (add ?state=default | empty | member | pending | closed | caught-up | many)'],
   ['gate', 'Gate messages (add ?state=unavailableYet | disabled | notOpenYet | closed | notEligible | needsSetup | withdrawn | revoked | error)'],
 ];
 

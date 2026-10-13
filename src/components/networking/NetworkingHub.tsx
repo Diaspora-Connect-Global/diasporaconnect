@@ -15,6 +15,8 @@ import { RevealConfirmDialog } from './InterestParts';
 import { CirclesDiscovery } from './CirclesParts';
 import MeetingsPanel from './meetings/MeetingsPanel';
 import MeetingRequestButton from './meetings/MeetingRequestButton';
+import RecapPanel from './recap/RecapPanel';
+import { useEventEnded } from './recap/useRecap';
 import { useMeetingsApi, useMyMeetings } from './meetings/useMeetings';
 import { NetworkingHeader, type NetworkingTab } from './NetworkingShell';
 import { draftFromParticipation, preferencesInput, profileInput, type NetworkingDraft } from './draft';
@@ -40,13 +42,14 @@ import {
   type DirectoryFilter,
 } from '@/services/gql/networking';
 
-const TABS: NetworkingTab[] = ['discover', 'people', 'interested', 'matches', 'interests', 'meetings', 'circles'];
+const TABS: NetworkingTab[] = ['discover', 'people', 'interested', 'matches', 'interests', 'meetings', 'circles', 'recap'];
 
-function parseTab(raw: string | null, f: { interests: boolean; circles: boolean; meetings: boolean }): NetworkingTab {
+function parseTab(raw: string | null, f: { interests: boolean; circles: boolean; meetings: boolean; recap: boolean }): NetworkingTab {
   const tab = (TABS as string[]).includes(raw ?? '') ? (raw as NetworkingTab) : 'discover';
   if ((tab === 'interested' || tab === 'matches' || tab === 'interests') && !f.interests) return 'discover';
   if (tab === 'meetings' && !f.meetings) return 'discover';
   if (tab === 'circles' && !f.circles) return 'discover';
+  if (tab === 'recap' && !f.recap) return 'discover';
   return tab;
 }
 
@@ -55,12 +58,15 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
   const router = useRouter();
   const search = useSearchParams();
   const features = NETWORKING_FEATURES;
-  const tab = parseTab(search.get('tab'), features);
   const focusFilter = isValidFilterField(search.get('filter')) ? (search.get('filter') as FilterField) : null;
 
   const base = useNetworkingBase(eventId);
   const report = useReportRefusal();
   const ready = base.gate === 'ready' || base.gate === 'paused';
+  // The Recap tab exists only behind FEEDBACK_UI_ENABLED and only once the event has ended.
+  const eventEnded = useEventEnded(features.feedback ? base.context.endAt : null);
+  const hubFeatures = { ...features, recap: features.feedback && eventEnded };
+  const tab = parseTab(search.get('tab'), hubFeatures);
 
   const [draft, setDraft] = useState<NetworkingDraft | null>(null);
   const [baseline, setBaseline] = useState('');
@@ -211,6 +217,8 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
         onChanged={meetingsList.reload}
         api={meetingsApi}
       />
+    ) : tab === 'recap' ? (
+      <RecapPanel eventId={eventId} />
     ) : tab === 'circles' ? (
       <CirclesDiscovery
         eventId={eventId}
@@ -231,7 +239,7 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
       <HubView
         event={base.context}
         tab={tab}
-        features={features}
+        features={hubFeatures}
         tabContent={tabContent}
         draft={current}
         onDraft={setDraft}

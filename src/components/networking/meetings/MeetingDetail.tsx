@@ -12,6 +12,10 @@ import { buildGoogleCalendarUrl, downloadIcs } from '@/lib/eventCalendar';
 import { isHttpsUrl } from '@/lib/meetingTime';
 import { profileUrl } from '@/lib/profileUrl';
 import type { MeetingOutcome, MeetingsApi } from './useMeetings';
+import EventDaySlot from '../eventday/EventDaySlot';
+import type { EventDayConfig } from '../eventday/EventDayCard';
+import FeedbackEntry, { type FeedbackConfig } from '../feedback/FeedbackEntry';
+import { EVENT_DAY_UI_ENABLED, FEEDBACK_UI_ENABLED } from '@/lib/networkingFeatures';
 import { MEETING_MAX_PROPOSALS, type Meeting, type MeetingSlot, type MeetingSlotSuggestions } from '@/services/gql/networkingMeetings';
 
 type Panel = null | 'propose' | 'reschedule';
@@ -27,12 +31,18 @@ export default function MeetingDetail({
   eventTitle,
   api,
   onChanged,
+  eventDay,
+  feedback,
 }: {
   meeting: Meeting;
   eventId: string;
   eventTitle: string;
   api: MeetingsApi;
   onChanged?: (meeting: Meeting) => void;
+  /** M7 (dev harness only): a fixture-backed event-day config. Real pages rely on EVENT_DAY_UI_ENABLED. */
+  eventDay?: EventDayConfig;
+  /** M7 (dev harness only): a fixture-backed feedback config. Real pages rely on FEEDBACK_UI_ENABLED. */
+  feedback?: FeedbackConfig;
 }) {
   const t = useTranslations('networking.meetings');
   const te = useTranslations('networking.errors');
@@ -128,6 +138,7 @@ export default function MeetingDetail({
         {meeting.note && <Row label={t('detail.note')}><span className="whitespace-pre-wrap">{meeting.note}</span></Row>}
       </dl>
       <ZoneNote timezone={tz} atIso={meeting.slot?.startAt} />
+      {meeting.status === 'CONFIRMED' && (eventDay || EVENT_DAY_UI_ENABLED) && <EventDaySlot meeting={meeting} eventId={eventId} config={eventDay} />}
 
       {answering && (
         <fieldset data-testid="proposals" className="space-y-2">
@@ -209,6 +220,8 @@ export default function MeetingDetail({
           onCancel={() => setPanel(null)}
         />
       )}
+
+      {(feedback || FEEDBACK_UI_ENABLED) && <FeedbackEntry meeting={meeting} eventId={eventId} config={feedback} />}
 
       {(calendar || username) && (
         <div className="flex flex-wrap gap-2 border-t border-border-subtle pt-4" data-testid="detail-links">

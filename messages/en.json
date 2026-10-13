@@ -6601,5 +6601,180 @@
       "insights": "Insights",
       "growth": "Community growth"
     }
+  },
+  "networkingEventDay": {
+    "day": {
+      "title": "Meeting day",
+      "thisPerson": "this person",
+      "startsAt": "Starts at {time}",
+      "where": "Where to meet",
+      "noPoint": "No meeting point was set. Message {name} to agree where to meet.",
+      "openVenueMap": "Open venue in Maps",
+      "opensNewTab": "(opens in a new tab)",
+      "viewProfile": "View profile",
+      "message": "Message",
+      "arrived": "I've arrived",
+      "arrivedSaid": "Marked as arrived.",
+      "arrivedAt": "You arrived at {time}.",
+      "otherArrivedAt": "{name} arrived at {time}.",
+      "cantFind": "I can't find you",
+      "cantFindHint": "Lets {name} know you are looking for them. Nobody is blamed.",
+      "cantFindSent": "We let {name} know you are looking for them.",
+      "cantFindCooldown": "You can ask again in {time}.",
+      "cantFindNotice": "{name} is looking for you. Head to the meeting point, or share your location.",
+      "locationTitle": "Location help",
+      "locationBody": "Optional. Shares one pin with {name} for 15 minutes. Nothing is shared by default.",
+      "share": "Share my location",
+      "locating": "Finding your location…",
+      "sharing": "Sharing your location. Time left:",
+      "sharingStarted": "Sharing your location.",
+      "sharingAnnounce": "Sharing your location for about {count, plural, one {# more minute} other {# more minutes}}.",
+      "stop": "Stop sharing",
+      "stopped": "You stopped sharing your location.",
+      "expired": "Your location sharing ended.",
+      "otherSharing": "{name} is sharing a location pin with you.",
+      "openPin": "Open {name}'s pin in Maps",
+      "online": {
+        "title": "Online meeting",
+        "body": "This meeting is online, so there is no arrival or location sharing. Use the link to join.",
+        "join": "Join the meeting"
+      },
+      "geo": {
+        "denied": "Location access is blocked. You can allow it in your browser's site settings, or just message {name} to say where you are.",
+        "unavailable": "We couldn't work out your location. Check that location services are on, then try again.",
+        "timeout": "Finding your location took too long. Try again, ideally outdoors or on Wi-Fi.",
+        "unsupported": "This browser can't share a location.",
+        "retry": "Try again"
+      }
+    },
+    "consent": {
+      "title": "Share your location for {minutes} minutes?",
+      "lead": "We ask every time, before your browser asks for your position.",
+      "whatLabel": "What:",
+      "what": "Your current position, taken once as a single pin. This is not live tracking.",
+      "whoLabel": "Who:",
+      "who": "Only {name}. Organisers and other attendees cannot see it.",
+      "howLongLabel": "How long:",
+      "howLong": "{minutes} minutes. Then it is deleted and never kept.",
+      "stopAnytime": "You can stop sharing at any time.",
+      "cancel": "Not now",
+      "confirm": "Share for {minutes} minutes"
+    },
+    "feedback": {
+      "titleMeeting": "How was your meeting with {name}?",
+      "titleCircle": "How was {circle}?",
+      "introMeeting": "Takes about a minute and is optional. Your answer is yours alone: it does not depend on, or show, what {name} says.",
+      "introCircle": "Takes about a minute and is optional.",
+      "thisPerson": "this person",
+      "loading": "Loading…",
+      "give": "Give feedback",
+      "save": "Save feedback",
+      "update": "Update feedback",
+      "saving": "Saving…",
+      "edit": "Change answer",
+      "close": "Close",
+      "needAttendance": "Choose what happened.",
+      "needUsefulness": "Choose how useful it was.",
+      "attendance": {
+        "legendMeeting": "What happened?",
+        "legendCircle": "Did you take part?",
+        "MET": "We met",
+        "I_ATTENDED_THEY_DID_NOT": "I was there, they weren't",
+        "THEY_ATTENDED_I_DID_NOT": "They were there, I wasn't",
+        "RESCHEDULED_OR_CANCELLED": "Rescheduled or cancelled",
+        "ATTENDED": "I took part",
+        "DID_NOT_ATTEND": "I did not take part"
+      },
+      "usefulness": {
+        "legend": "How useful was it?",
+        "low": "Not useful",
+        "high": "Very useful",
+        "option": "{value} out of 5"
+      },
+      "outcomes": {
+        "legend": "What came out of it? (optional)",
+        "EXCHANGED_CONTACTS": "Exchanged contacts",
+        "POTENTIAL_COLLABORATION": "Potential collaboration",
+        "BUSINESS_LEAD": "Business lead",
+        "JOB_OR_OPPORTUNITY": "Job or opportunity",
+        "MENTORSHIP": "Mentorship",
+        "INVESTMENT_CONVERSATION": "Investment conversation",
+        "OTHER": "Other"
+      },
+      "comment": {
+        "label": "Anything else? (optional)",
+        "count": "{count} / {max}",
+        "privateMeeting": "Only you can see this comment. {name} and the organisers never see it.",
+        "sharedCircle": "Organisers see circle comments without your name, and only once at least {min} people have responded. Until then, nobody sees it."
+      },
+      "stayConnected": {
+        "label": "Stay connected: send {name} a connection request",
+        "hint": "A good meeting never connects you automatically. {name} chooses whether to accept."
+      },
+      "saved": {
+        "title": "Thanks, your feedback is saved.",
+        "editable": "You can change it until {date}.",
+        "connectSent": "We sent {name} a connection request.",
+        "connectExisting": "You and {name} are already connected, or a request is already open.",
+        "connectFailed": "Your feedback is saved. The connection request could not be sent right now."
+      },
+      "existing": {
+        "closed": "The feedback window has closed. Your answer is shown below.",
+        "editable": "You answered on {date}. You can change it until {until}.",
+        "answered": "You answered on {date}."
+      }
+    },
+    "recap": {
+      "tab": "Recap",
+      "title": "Your networking recap",
+      "subtitle": "What you did at this event. Only you can see this page.",
+      "loading": "Loading your recap",
+      "unavailable": "Your recap is not available yet.",
+      "stats": {
+        "matches": "Matches",
+        "meetings": "Meetings you attended",
+        "circles": "Circles you joined"
+      },
+      "feedback": {
+        "title": "Waiting for your feedback",
+        "subtitle": "Short and optional.",
+        "empty": "You're all caught up.",
+        "give": "Give feedback",
+        "more": "And {count} more. They appear here as you answer these.",
+        "kind": {
+          "MEETING": "Meeting",
+          "CIRCLE": "Circle"
+        }
+      },
+      "organiser": {
+        "title": "Keep in touch with {name}",
+        "body": "Join their community to hear what comes next.",
+        "join": "Go to {name}",
+        "pending": "Your request to join is pending.",
+        "member": "You are a member."
+      },
+      "ends": "Networking stays open until {date}.",
+      "closed": "Networking has closed for this event."
+    },
+    "errors": {
+      "featureUnavailable": "This is not available yet.",
+      "unavailable": "Networking is temporarily unavailable. Please try again in a moment.",
+      "notFound": "We could not find that meeting.",
+      "notParticipant": "Only the two people in the meeting can do this.",
+      "invalid": "That did not look right. Please check and try again.",
+      "rateLimited": "You are doing that too often. Please wait a little.",
+      "conflict": "This changed while you were editing. Reload and try again.",
+      "windowClosed": "Meeting-day help is only available from 30 minutes before the meeting until 15 minutes after it ends.",
+      "cantFindCooldown": "You asked a moment ago. Please wait before asking again.",
+      "locationInvalid": "We could not use that location. Please try again.",
+      "notConfirmed": "This only works for a confirmed in-person meeting.",
+      "feedbackClosed": "The feedback window has closed.",
+      "feedbackNotOpen": "Feedback opens once the meeting is over.",
+      "connectCooldown": "You can't send another connection request to this person yet.",
+      "connectionLimit": "You have reached your connection request limit for now.",
+      "connectRefused": "That connection could not be made.",
+      "refused": "That is not possible right now.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

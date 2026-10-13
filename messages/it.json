@@ -6601,5 +6601,180 @@
       "insights": "Spunti",
       "growth": "Crescita della community"
     }
+  },
+  "networkingEventDay": {
+    "day": {
+      "title": "Giorno dell'incontro",
+      "thisPerson": "questa persona",
+      "startsAt": "Inizia alle {time}",
+      "where": "Dove incontrarsi",
+      "noPoint": "Non è stato impostato un punto d'incontro. Scrivi a {name} per accordarvi su un luogo.",
+      "openVenueMap": "Apri il luogo in Maps",
+      "opensNewTab": "(si apre in una nuova scheda)",
+      "viewProfile": "Vedi profilo",
+      "message": "Messaggio",
+      "arrived": "Sono qui",
+      "arrivedSaid": "Arrivo registrato.",
+      "arrivedAt": "Il tuo arrivo è stato registrato alle {time}.",
+      "otherArrivedAt": "Arrivo di {name} alle {time}.",
+      "cantFind": "Non ti trovo",
+      "cantFindHint": "{name} riceve un avviso: sei alla sua ricerca. Nessuno viene incolpato.",
+      "cantFindSent": "Abbiamo avvisato {name} che stai cercando questa persona.",
+      "cantFindCooldown": "Potrai chiedere di nuovo tra {time}.",
+      "cantFindNotice": "{name} ti sta cercando. Vai al punto d'incontro oppure condividi la tua posizione.",
+      "locationTitle": "Aiuto con la posizione",
+      "locationBody": "Facoltativo. Condivide un segnaposto con {name} per 15 minuti. Per impostazione predefinita non viene condiviso nulla.",
+      "share": "Condividi la mia posizione",
+      "locating": "Ricerca della tua posizione…",
+      "sharing": "Stai condividendo la tua posizione. Tempo rimasto:",
+      "sharingStarted": "Stai condividendo la tua posizione.",
+      "sharingAnnounce": "Stai condividendo la tua posizione per circa {count, plural, one {# minuto} other {# minuti}}.",
+      "stop": "Interrompi la condivisione",
+      "stopped": "Hai interrotto la condivisione della posizione.",
+      "expired": "La condivisione della tua posizione è terminata.",
+      "otherSharing": "{name} sta condividendo con te un segnaposto di posizione.",
+      "openPin": "Apri la posizione di {name} in Maps",
+      "online": {
+        "title": "Incontro online",
+        "body": "Questo incontro è online, quindi non ci sono arrivo né condivisione della posizione. Usa il link per partecipare.",
+        "join": "Partecipa all'incontro"
+      },
+      "geo": {
+        "denied": "L'accesso alla posizione è bloccato. Puoi consentirlo nelle impostazioni del sito del tuo browser, oppure scrivere a {name} per dire dove sei.",
+        "unavailable": "Non siamo riusciti a determinare la tua posizione. Controlla che i servizi di localizzazione siano attivi e riprova.",
+        "timeout": "La ricerca della posizione ha richiesto troppo tempo. Riprova, meglio all'aperto o con il Wi-Fi.",
+        "unsupported": "Questo browser non può condividere la posizione.",
+        "retry": "Riprova"
+      }
+    },
+    "consent": {
+      "title": "Condividere la tua posizione per {minutes} minuti?",
+      "lead": "Lo chiediamo ogni volta, prima che il browser chieda la tua posizione.",
+      "whatLabel": "Cosa:",
+      "what": "La tua posizione attuale, rilevata una sola volta come singolo segnaposto. Non è un tracciamento in tempo reale.",
+      "whoLabel": "Con chi:",
+      "who": "Solo {name}. Gli organizzatori e gli altri partecipanti non possono vederla.",
+      "howLongLabel": "Per quanto tempo:",
+      "howLong": "{minutes} minuti. Poi viene eliminata e non viene mai conservata.",
+      "stopAnytime": "Puoi interrompere la condivisione in qualsiasi momento.",
+      "cancel": "Non ora",
+      "confirm": "Condividi per {minutes} minuti"
+    },
+    "feedback": {
+      "titleMeeting": "Com'è andato l'incontro con {name}?",
+      "titleCircle": "Com'era {circle}?",
+      "introMeeting": "Richiede circa un minuto ed è facoltativo. La tua risposta è solo tua: non dipende da ciò che dice {name} e non lo mostra.",
+      "introCircle": "Richiede circa un minuto ed è facoltativo.",
+      "thisPerson": "questa persona",
+      "loading": "Caricamento…",
+      "give": "Lascia un feedback",
+      "save": "Salva il feedback",
+      "update": "Aggiorna il feedback",
+      "saving": "Salvataggio…",
+      "edit": "Cambia la risposta",
+      "close": "Chiudi",
+      "needAttendance": "Scegli cosa è successo.",
+      "needUsefulness": "Scegli quanto è stato utile.",
+      "attendance": {
+        "legendMeeting": "Cosa è successo?",
+        "legendCircle": "Hai partecipato?",
+        "MET": "Ci siamo incontrati",
+        "I_ATTENDED_THEY_DID_NOT": "C'ero io, l'altra persona no",
+        "THEY_ATTENDED_I_DID_NOT": "C'era l'altra persona, io no",
+        "RESCHEDULED_OR_CANCELLED": "Rinviato o annullato",
+        "ATTENDED": "Ho partecipato",
+        "DID_NOT_ATTEND": "Non ho partecipato"
+      },
+      "usefulness": {
+        "legend": "Quanto è stato utile?",
+        "low": "Poco utile",
+        "high": "Molto utile",
+        "option": "{value} su 5"
+      },
+      "outcomes": {
+        "legend": "Cosa ne è uscito? (facoltativo)",
+        "EXCHANGED_CONTACTS": "Scambio di contatti",
+        "POTENTIAL_COLLABORATION": "Possibile collaborazione",
+        "BUSINESS_LEAD": "Opportunità commerciale",
+        "JOB_OR_OPPORTUNITY": "Lavoro o opportunità",
+        "MENTORSHIP": "Mentoring",
+        "INVESTMENT_CONVERSATION": "Conversazione sugli investimenti",
+        "OTHER": "Altro"
+      },
+      "comment": {
+        "label": "Qualcos'altro? (facoltativo)",
+        "count": "{count} / {max}",
+        "privateMeeting": "Solo tu puoi vedere questo commento. {name} e gli organizzatori non lo vedono mai.",
+        "sharedCircle": "Gli organizzatori vedono i commenti sui circoli senza il tuo nome, e solo quando hanno risposto almeno {min} persone. Fino ad allora non li vede nessuno."
+      },
+      "stayConnected": {
+        "label": "Resta in contatto: invia una richiesta di collegamento a {name}",
+        "hint": "Un buon incontro non ti collega mai in automatico. {name} sceglie se accettare."
+      },
+      "saved": {
+        "title": "Grazie, il tuo feedback è stato salvato.",
+        "editable": "Puoi modificarlo fino al {date}.",
+        "connectSent": "Abbiamo inviato a {name} una richiesta di collegamento.",
+        "connectExisting": "Tu e {name} siete già collegati, oppure c'è già una richiesta aperta.",
+        "connectFailed": "Il tuo feedback è stato salvato. Al momento non è stato possibile inviare la richiesta di collegamento."
+      },
+      "existing": {
+        "closed": "Il periodo per il feedback è terminato. Qui sotto trovi la tua risposta.",
+        "editable": "Hai risposto il {date}. Puoi modificare la risposta fino al {until}.",
+        "answered": "Hai risposto il {date}."
+      }
+    },
+    "recap": {
+      "tab": "Riepilogo",
+      "title": "Il tuo riepilogo del networking",
+      "subtitle": "Cosa hai fatto a questo evento. Solo tu vedi questa pagina.",
+      "loading": "Caricamento del tuo riepilogo",
+      "unavailable": "Il tuo riepilogo non è ancora disponibile.",
+      "stats": {
+        "matches": "Abbinamenti",
+        "meetings": "Incontri a cui hai partecipato",
+        "circles": "Circoli a cui partecipi"
+      },
+      "feedback": {
+        "title": "In attesa del tuo feedback",
+        "subtitle": "Breve e facoltativo.",
+        "empty": "Sei in pari.",
+        "give": "Lascia un feedback",
+        "more": "E altri {count}. Compaiono qui man mano che rispondi a questi.",
+        "kind": {
+          "MEETING": "Incontro",
+          "CIRCLE": "Circolo"
+        }
+      },
+      "organiser": {
+        "title": "Resta in contatto con {name}",
+        "body": "Unisciti alla community per sapere cosa succede dopo.",
+        "join": "Vai a {name}",
+        "pending": "La tua richiesta di adesione è in attesa.",
+        "member": "Ne fai parte."
+      },
+      "ends": "Il networking resta aperto fino al {date}.",
+      "closed": "Il networking per questo evento è chiuso."
+    },
+    "errors": {
+      "featureUnavailable": "Non è ancora disponibile.",
+      "unavailable": "Il networking è temporaneamente non disponibile. Riprova tra un momento.",
+      "notFound": "Non abbiamo trovato quell'incontro.",
+      "notParticipant": "Solo le due persone dell'incontro possono farlo.",
+      "invalid": "Qualcosa non quadra. Controlla e riprova.",
+      "rateLimited": "Lo stai facendo troppo spesso. Aspetta un po'.",
+      "conflict": "È cambiato mentre modificavi. Ricarica e riprova.",
+      "windowClosed": "L'aiuto del giorno dell'incontro è disponibile solo da 30 minuti prima dell'incontro fino a 15 minuti dopo la sua fine.",
+      "cantFindCooldown": "Hai appena chiesto. Aspetta prima di chiedere di nuovo.",
+      "locationInvalid": "Non abbiamo potuto usare quella posizione. Riprova.",
+      "notConfirmed": "Funziona solo per un incontro di persona confermato.",
+      "feedbackClosed": "Il periodo per il feedback è terminato.",
+      "feedbackNotOpen": "Il feedback si apre quando l'incontro è finito.",
+      "connectCooldown": "Non puoi ancora inviare un'altra richiesta di collegamento a questa persona.",
+      "connectionLimit": "Per ora hai raggiunto il limite di richieste di collegamento.",
+      "connectRefused": "Non è stato possibile creare quel collegamento.",
+      "refused": "Al momento non è possibile.",
+      "generic": "Qualcosa è andato storto. Riprova."
+    }
   }
 }

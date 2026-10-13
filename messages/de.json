@@ -6601,5 +6601,180 @@
       "insights": "Einblicke",
       "growth": "Wachstum der Community"
     }
+  },
+  "networkingEventDay": {
+    "day": {
+      "title": "Treffen heute",
+      "thisPerson": "diese Person",
+      "startsAt": "Beginnt um {time}",
+      "where": "Treffpunkt",
+      "noPoint": "Es wurde kein Treffpunkt festgelegt. Schreib {name}, um einen Ort zu vereinbaren.",
+      "openVenueMap": "Ort in Maps öffnen",
+      "opensNewTab": "(öffnet in einem neuen Tab)",
+      "viewProfile": "Profil ansehen",
+      "message": "Nachricht",
+      "arrived": "Ich bin da",
+      "arrivedSaid": "Als angekommen markiert.",
+      "arrivedAt": "Du bist um {time} angekommen.",
+      "otherArrivedAt": "{name} ist um {time} angekommen.",
+      "cantFind": "Ich finde dich nicht",
+      "cantFindHint": "{name} erfährt, dass du auf der Suche bist. Niemand wird beschuldigt.",
+      "cantFindSent": "Wir haben {name} Bescheid gesagt, dass du auf der Suche bist.",
+      "cantFindCooldown": "Du kannst in {time} erneut fragen.",
+      "cantFindNotice": "{name} sucht dich. Geh zum Treffpunkt oder teile deinen Standort.",
+      "locationTitle": "Hilfe per Standort",
+      "locationBody": "Optional. Teilt 15 Minuten lang einen Standortpunkt mit {name}. Standardmäßig wird nichts geteilt.",
+      "share": "Meinen Standort teilen",
+      "locating": "Standort wird ermittelt …",
+      "sharing": "Du teilst deinen Standort. Verbleibende Zeit:",
+      "sharingStarted": "Du teilst jetzt deinen Standort.",
+      "sharingAnnounce": "Du teilst deinen Standort noch etwa {count, plural, one {# Minute} other {# Minuten}}.",
+      "stop": "Teilen beenden",
+      "stopped": "Du teilst deinen Standort nicht mehr.",
+      "expired": "Das Teilen deines Standorts ist beendet.",
+      "otherSharing": "{name} teilt einen Standortpunkt mit dir.",
+      "openPin": "Standort von {name} in Maps öffnen",
+      "online": {
+        "title": "Online-Treffen",
+        "body": "Dieses Treffen findet online statt, daher gibt es weder Ankunftsmeldung noch Standortfreigabe. Nutze den Link, um beizutreten.",
+        "join": "Dem Treffen beitreten"
+      },
+      "geo": {
+        "denied": "Der Standortzugriff ist blockiert. Du kannst ihn in den Website-Einstellungen deines Browsers erlauben oder {name} einfach per Nachricht sagen, wo du bist.",
+        "unavailable": "Wir konnten deinen Standort nicht bestimmen. Prüfe, ob die Ortungsdienste eingeschaltet sind, und versuche es erneut.",
+        "timeout": "Die Standortsuche hat zu lange gedauert. Versuche es erneut, am besten im Freien oder mit WLAN.",
+        "unsupported": "Dieser Browser kann keinen Standort teilen.",
+        "retry": "Erneut versuchen"
+      }
+    },
+    "consent": {
+      "title": "Standort {minutes} Minuten lang teilen?",
+      "lead": "Wir fragen jedes Mal nach, bevor dein Browser nach deiner Position fragt.",
+      "whatLabel": "Was:",
+      "what": "Deine aktuelle Position, einmal erfasst, als einzelner Punkt. Das ist keine Live-Verfolgung.",
+      "whoLabel": "Mit wem:",
+      "who": "Nur mit {name}. Veranstalter und andere Teilnehmende können ihn nicht sehen.",
+      "howLongLabel": "Wie lange:",
+      "howLong": "{minutes} Minuten. Danach wird der Punkt gelöscht und nicht aufbewahrt.",
+      "stopAnytime": "Du kannst das Teilen jederzeit beenden.",
+      "cancel": "Jetzt nicht",
+      "confirm": "{minutes} Minuten lang teilen"
+    },
+    "feedback": {
+      "titleMeeting": "Wie war dein Treffen mit {name}?",
+      "titleCircle": "Wie war {circle}?",
+      "introMeeting": "Dauert etwa eine Minute und ist freiwillig. Deine Antwort gehört dir allein: Sie hängt nicht davon ab, was {name} antwortet, und zeigt es auch nicht.",
+      "introCircle": "Dauert etwa eine Minute und ist freiwillig.",
+      "thisPerson": "diese Person",
+      "loading": "Wird geladen …",
+      "give": "Feedback geben",
+      "save": "Feedback speichern",
+      "update": "Feedback aktualisieren",
+      "saving": "Wird gespeichert …",
+      "edit": "Antwort ändern",
+      "close": "Schließen",
+      "needAttendance": "Wähle aus, was passiert ist.",
+      "needUsefulness": "Wähle aus, wie nützlich es war.",
+      "attendance": {
+        "legendMeeting": "Was ist passiert?",
+        "legendCircle": "Hast du teilgenommen?",
+        "MET": "Wir haben uns getroffen",
+        "I_ATTENDED_THEY_DID_NOT": "Ich war da, die andere Person nicht",
+        "THEY_ATTENDED_I_DID_NOT": "Die andere Person war da, ich nicht",
+        "RESCHEDULED_OR_CANCELLED": "Verschoben oder abgesagt",
+        "ATTENDED": "Ich habe teilgenommen",
+        "DID_NOT_ATTEND": "Ich habe nicht teilgenommen"
+      },
+      "usefulness": {
+        "legend": "Wie nützlich war es?",
+        "low": "Nicht nützlich",
+        "high": "Sehr nützlich",
+        "option": "{value} von 5"
+      },
+      "outcomes": {
+        "legend": "Was ist dabei herausgekommen? (optional)",
+        "EXCHANGED_CONTACTS": "Kontakte ausgetauscht",
+        "POTENTIAL_COLLABORATION": "Mögliche Zusammenarbeit",
+        "BUSINESS_LEAD": "Geschäftskontakt",
+        "JOB_OR_OPPORTUNITY": "Job oder Gelegenheit",
+        "MENTORSHIP": "Mentoring",
+        "INVESTMENT_CONVERSATION": "Investitionsgespräch",
+        "OTHER": "Sonstiges"
+      },
+      "comment": {
+        "label": "Noch etwas? (optional)",
+        "count": "{count} / {max}",
+        "privateMeeting": "Nur du kannst diesen Kommentar sehen. {name} und die Veranstalter sehen ihn nie.",
+        "sharedCircle": "Veranstalter sehen Kommentare zu Kreisen ohne deinen Namen, und erst, wenn mindestens {min} Personen geantwortet haben. Bis dahin sieht ihn niemand."
+      },
+      "stayConnected": {
+        "label": "In Kontakt bleiben: {name} eine Verbindungsanfrage senden",
+        "hint": "Ein gutes Treffen verbindet dich nie automatisch. {name} entscheidet, ob die Anfrage angenommen wird."
+      },
+      "saved": {
+        "title": "Danke, dein Feedback ist gespeichert.",
+        "editable": "Du kannst es bis {date} ändern.",
+        "connectSent": "Wir haben {name} eine Verbindungsanfrage gesendet.",
+        "connectExisting": "Du und {name} seid bereits verbunden, oder es gibt schon eine offene Anfrage.",
+        "connectFailed": "Dein Feedback ist gespeichert. Die Verbindungsanfrage konnte gerade nicht gesendet werden."
+      },
+      "existing": {
+        "closed": "Der Zeitraum für Feedback ist vorbei. Unten siehst du deine Antwort.",
+        "editable": "Du hast am {date} geantwortet. Du kannst die Antwort bis {until} ändern.",
+        "answered": "Du hast am {date} geantwortet."
+      }
+    },
+    "recap": {
+      "tab": "Rückblick",
+      "title": "Dein Networking-Rückblick",
+      "subtitle": "Was du bei dieser Veranstaltung gemacht hast. Nur du siehst diese Seite.",
+      "loading": "Dein Rückblick wird geladen",
+      "unavailable": "Dein Rückblick ist noch nicht verfügbar.",
+      "stats": {
+        "matches": "Matches",
+        "meetings": "Treffen, an denen du teilgenommen hast",
+        "circles": "Kreise, denen du beigetreten bist"
+      },
+      "feedback": {
+        "title": "Dein Feedback fehlt noch",
+        "subtitle": "Kurz und freiwillig.",
+        "empty": "Du bist auf dem neuesten Stand.",
+        "give": "Feedback geben",
+        "more": "Und {count} weitere. Sie erscheinen hier, sobald du diese beantwortet hast.",
+        "kind": {
+          "MEETING": "Treffen",
+          "CIRCLE": "Kreis"
+        }
+      },
+      "organiser": {
+        "title": "Bleib in Kontakt mit {name}",
+        "body": "Tritt der Community bei, um zu erfahren, was als Nächstes kommt.",
+        "join": "Zu {name}",
+        "pending": "Deine Beitrittsanfrage ist noch offen.",
+        "member": "Du bist Mitglied."
+      },
+      "ends": "Das Networking bleibt bis {date} geöffnet.",
+      "closed": "Das Networking für diese Veranstaltung ist beendet."
+    },
+    "errors": {
+      "featureUnavailable": "Das ist noch nicht verfügbar.",
+      "unavailable": "Networking ist vorübergehend nicht verfügbar. Bitte versuche es gleich noch einmal.",
+      "notFound": "Wir konnten dieses Treffen nicht finden.",
+      "notParticipant": "Nur die beiden Personen des Treffens können das tun.",
+      "invalid": "Das hat nicht gepasst. Bitte prüfe es und versuche es erneut.",
+      "rateLimited": "Du machst das zu oft. Bitte warte einen Moment.",
+      "conflict": "Das hat sich während des Bearbeitens geändert. Lade neu und versuche es erneut.",
+      "windowClosed": "Die Hilfe am Treffentag ist nur ab 30 Minuten vor dem Treffen bis 15 Minuten nach dessen Ende verfügbar.",
+      "cantFindCooldown": "Du hast gerade erst gefragt. Bitte warte, bevor du erneut fragst.",
+      "locationInvalid": "Wir konnten diesen Standort nicht verwenden. Bitte versuche es erneut.",
+      "notConfirmed": "Das funktioniert nur bei einem bestätigten Treffen vor Ort.",
+      "feedbackClosed": "Der Zeitraum für Feedback ist vorbei.",
+      "feedbackNotOpen": "Feedback ist erst nach dem Treffen möglich.",
+      "connectCooldown": "Du kannst dieser Person noch keine weitere Verbindungsanfrage senden.",
+      "connectionLimit": "Du hast dein Limit für Verbindungsanfragen vorerst erreicht.",
+      "connectRefused": "Diese Verbindung konnte nicht hergestellt werden.",
+      "refused": "Das ist gerade nicht möglich.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+    }
   }
 }
