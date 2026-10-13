@@ -6433,5 +6433,155 @@
       "communities": "Community",
       "communitiesHint": "Trova la tua community o associazione"
     }
+  },
+  "networkingAnalytics": {
+    "tab": "Analisi",
+    "title": "Analisi del networking",
+    "intro": "Come procede il networking a questo evento, in totali.",
+    "aggregatesOnly": "Vedi solo totali. Nomi, decisioni, messaggi e posizioni non vengono mai mostrati né esportati.",
+    "lastUpdated": "Ultimo aggiornamento: {time}",
+    "export": "Esporta CSV",
+    "loading": "Caricamento dell’analisi…",
+    "retry": "Riprova",
+    "fewerThan5": "meno di 5",
+    "none": "—",
+    "noneLabel": "ancora nessuno in questo gruppo",
+    "noOne": "Ancora nessuno in questo gruppo.",
+    "tooFew": "I numeri compaiono quando un gruppo ha almeno 5 persone.",
+    "filters": {
+      "title": "Filtri",
+      "from": "Dal",
+      "to": "Al",
+      "status": "Stato nel networking",
+      "circle": "Cerchio",
+      "meetingStatus": "Stato dell’incontro",
+      "industry": "Settore",
+      "format": "Formato di partecipazione",
+      "any": "Qualsiasi",
+      "reset": "Azzera i filtri",
+      "rangeInvalid": "La data di inizio è successiva alla data di fine, quindi il filtro non è stato applicato.",
+      "note": "Prima si applicano i filtri, poi si nascondono i numeri piccoli. Un filtro stretto può mostrare «meno di 5» ovunque."
+    },
+    "status": {
+      "ACTIVE": "Attivo",
+      "PAUSED": "In pausa",
+      "WITHDRAWN": "Ritirato",
+      "REVOKED": "Rimosso"
+    },
+    "meetingStatus": {
+      "CONFIRMED": "Confermato",
+      "RESCHEDULE_PROPOSED": "Nuovo orario proposto",
+      "COMPLETED": "Concluso",
+      "CANCELLED": "Annullato"
+    },
+    "format": {
+      "IN_PERSON": "Di persona",
+      "ONLINE": "Online"
+    },
+    "kpi": {
+      "participants": "Partecipanti al networking",
+      "connected": "Persone che si sono collegate",
+      "rate": "Tasso di collegamento",
+      "meetings": "Incontri confermati",
+      "held": "Incontri segnalati come avvenuti",
+      "useful": "Contatti utili",
+      "circles": "Partecipanti ai cerchi",
+      "growth": "Crescita della community",
+      "registered": "Partecipanti registrati",
+      "currentlyActive": "Attivi al momento",
+      "sessions": "Sessioni di cerchio in programma"
+    },
+    "help": {
+      "participants": "Persone che hanno aderito al networking almeno una volta, anche se poi hanno messo in pausa o lasciato.",
+      "connected": "Persone che hanno creato un nuovo collegamento tramite questo evento, accettato entro 30 giorni dalla fine. I collegamenti già esistenti non vengono contati.",
+      "rate": "Persone che si sono collegate divise per i partecipanti al networking.",
+      "meetings": "Incontri confermati da entrambe le persone. Un incontro spostato conta una sola volta.",
+      "held": "Incontri in cui almeno una persona ha detto di essersi incontrata. Una prenotazione da sola non conta come incontro avvenuto.",
+      "useful": "Persone che hanno segnalato un risultato utile (per esempio una collaborazione, un cliente o una presentazione), sul totale di chi ha dato un riscontro.",
+      "circles": "Persone diverse che sono entrate in un cerchio. Le adesioni ai cerchi sono indicate a parte e non vengono sommate.",
+      "growth": "Partecipanti che non erano membri e sono entrati nella community organizzatrice da questo evento entro 7 giorni dalla fine."
+    },
+    "sub": {
+      "ofRegistered": "{n} partecipanti registrati",
+      "activeNow": "{n} attivi ora",
+      "ofParticipants": "{num} su {den} partecipanti al networking",
+      "sessions": "{n} sessioni di cerchio in programma (contate a parte)",
+      "sessionsSmall": "Sessioni di cerchio in programma: meno di 5 (contate a parte)",
+      "sessionsNone": "Le sessioni di cerchio sono contate a parte",
+      "ofMeetings": "su {n} incontri nel periodo di riscontro",
+      "respondents": "{num} su {den} persone che hanno dato un riscontro",
+      "memberships": "{n} adesioni ai cerchi (una persona può entrare in più cerchi)",
+      "notMembers": "{num} su {den} partecipanti che non erano ancora membri"
+    },
+    "buckets": {
+      "title": "Incontri segnalati come avvenuti",
+      "intro": "Ogni incontro rientra in un solo gruppo. Una risposta mancante è «Nessuna risposta», mai una mancata presenza.",
+      "population": "{n} incontri il cui orario è passato o che sono stati annullati dopo la conferma",
+      "populationLabel": "Incontri nel periodo di riscontro",
+      "populationSmall": "In questo gruppo ci sono meno di 5 incontri, quindi non viene mostrata alcuna suddivisione.",
+      "both": "Entrambi hanno detto di essersi incontrati",
+      "one": "Una persona ha detto di essersi incontrata",
+      "nonAttendance": "Mancata presenza segnalata",
+      "noResponse": "Nessuna risposta",
+      "rescheduledOrCancelled": "Spostato o annullato",
+      "other": "Altra risposta",
+      "notDrawn": "I gruppi con meno di 5 sono elencati ma non disegnati.",
+      "heldNote": "«Segnalati come avvenuti» sono i primi due gruppi insieme."
+    },
+    "circles": {
+      "title": "Partecipazione ai cerchi",
+      "intro": "Persone uniche e adesioni sono mostrate separatamente e mai sommate.",
+      "name": "Cerchio",
+      "participants": "Persone",
+      "memberships": "Adesioni",
+      "empty": "Nessun cerchio da mostrare."
+    },
+    "insights": {
+      "title": "Spunti dai profili di networking",
+      "intro": "Dalle scelte fatte nei profili di networking. Le note libere e l’attività privata non vengono mai usate.",
+      "denominator": "Basato su {n} partecipanti con un profilo di networking",
+      "denominatorLabel": "Partecipanti con un profilo di networking",
+      "denominatorSmall": "Meno di 5 partecipanti hanno un profilo di networking, quindi gli spunti sono nascosti.",
+      "multi": "Le persone possono scegliere più opzioni, quindi le percentuali possono sommarsi a più del 100%.",
+      "empty": "Niente da mostrare. Una scelta compare quando almeno 5 persone l’hanno selezionata.",
+      "kind": {
+        "INDUSTRIES": "Settori principali",
+        "NEEDS": "Esigenze principali",
+        "OFFERS": "Offerte principali",
+        "MARKETS": "Mercati principali",
+        "CIRCLE_TOPICS": "Temi dei cerchi (quota delle adesioni)"
+      }
+    },
+    "growth": {
+      "title": "Crescita della community",
+      "intro": "Persone entrate nella community organizzatrice da questo evento. Un’iscrizione vicina alla data dell’evento non conta senza un collegamento registrato.",
+      "existing": "Partecipanti già membri",
+      "newApproved": "Nuovi membri da questo evento",
+      "pending": "Richieste ancora in attesa",
+      "notJoined": "Partecipanti idonei che non sono entrati",
+      "bySource": "Da dove arrivano i nuovi membri",
+      "source": {
+        "EVENT_PAGE": "Pagina dell’evento",
+        "EVENT_PROMPT": "Invito durante l’evento",
+        "EVENT_FOLLOWUP": "Promemoria dopo l’evento"
+      }
+    },
+    "csv": {
+      "section": "Sezione",
+      "metric": "Indicatore",
+      "value": "Valore",
+      "numerator": "Numeratore",
+      "denominator": "Denominatore",
+      "event": "Evento",
+      "generatedAt": "Generato il",
+      "filters": "Filtri",
+      "people": "Persone",
+      "connections": "Collegamenti",
+      "meetings": "Incontri",
+      "contacts": "Contatti",
+      "circles": "Cerchi",
+      "insights": "Spunti",
+      "growth": "Crescita della community"
+    }
   }
 }

@@ -24,14 +24,24 @@ export const CIRCLES_UI_ENABLED = false;
  */
 export const MEETINGS_UI_ENABLED = false;
 
+/**
+ * Organiser networking analytics (M8): the Analytics tab on the event manage page
+ * (gateway: `eventNetworkingAnalytics`, NOT built). Contract:
+ * `docs/event-networking/m8-contract.graphql`. While false the tab is absent and no
+ * analytics operation is ever sent.
+ */
+export const ANALYTICS_UI_ENABLED = false;
+
 export interface NetworkingFeatureFlags {
   interests: boolean;
   circles: boolean;
   meetings: boolean;
+  analytics: boolean;
 }
 
 export const NETWORKING_FEATURES: NetworkingFeatureFlags = {
   interests: INTERESTS_UI_ENABLED,
   circles: CIRCLES_UI_ENABLED,
   meetings: MEETINGS_UI_ENABLED,
+  analytics: ANALYTICS_UI_ENABLED,
 };

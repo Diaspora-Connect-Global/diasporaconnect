@@ -6433,5 +6433,155 @@
       "communities": "Gemeenschappen",
       "communitiesHint": "Vind je gemeenschap of vereniging"
     }
+  },
+  "networkingAnalytics": {
+    "tab": "Analyse",
+    "title": "Netwerkanalyse",
+    "intro": "Hoe het netwerken op dit evenement verloopt, in totalen.",
+    "aggregatesOnly": "Je ziet alleen totalen. Namen, keuzes, berichten en locaties worden nooit getoond of geëxporteerd.",
+    "lastUpdated": "Laatst bijgewerkt: {time}",
+    "export": "CSV exporteren",
+    "loading": "Analyse laden…",
+    "retry": "Opnieuw proberen",
+    "fewerThan5": "minder dan 5",
+    "none": "—",
+    "noneLabel": "nog niemand in deze groep",
+    "noOne": "Nog niemand in deze groep.",
+    "tooFew": "Cijfers verschijnen zodra een groep minstens 5 mensen heeft.",
+    "filters": {
+      "title": "Filters",
+      "from": "Van",
+      "to": "Tot",
+      "status": "Netwerkstatus",
+      "circle": "Kring",
+      "meetingStatus": "Status van de afspraak",
+      "industry": "Branche",
+      "format": "Deelnamevorm",
+      "any": "Alle",
+      "reset": "Filters wissen",
+      "rangeInvalid": "De startdatum ligt na de einddatum, dus het filter is niet toegepast.",
+      "note": "Eerst worden de filters toegepast, daarna worden kleine aantallen verborgen. Een smal filter kan overal “minder dan 5” tonen."
+    },
+    "status": {
+      "ACTIVE": "Actief",
+      "PAUSED": "Gepauzeerd",
+      "WITHDRAWN": "Gestopt",
+      "REVOKED": "Verwijderd"
+    },
+    "meetingStatus": {
+      "CONFIRMED": "Bevestigd",
+      "RESCHEDULE_PROPOSED": "Nieuw tijdstip voorgesteld",
+      "COMPLETED": "Afgerond",
+      "CANCELLED": "Geannuleerd"
+    },
+    "format": {
+      "IN_PERSON": "Op locatie",
+      "ONLINE": "Online"
+    },
+    "kpi": {
+      "participants": "Netwerkdeelnemers",
+      "connected": "Mensen die contact legden",
+      "rate": "Contactpercentage",
+      "meetings": "Bevestigde afspraken",
+      "held": "Afspraken gemeld als gehouden",
+      "useful": "Nuttige contacten",
+      "circles": "Deelnemers aan kringen",
+      "growth": "Groei van de community",
+      "registered": "Aangemelde deelnemers",
+      "currentlyActive": "Nu actief",
+      "sessions": "Geplande kringsessies"
+    },
+    "help": {
+      "participants": "Mensen die minstens één keer aan het netwerken zijn begonnen, ook als ze later pauzeerden of stopten.",
+      "connected": "Mensen die via dit evenement een nieuw contact hebben gelegd, geaccepteerd binnen 30 dagen na afloop. Bestaande contacten tellen niet mee.",
+      "rate": "Mensen die contact legden gedeeld door het aantal netwerkdeelnemers.",
+      "meetings": "Afspraken die door beide mensen zijn bevestigd. Een verplaatste afspraak telt één keer.",
+      "held": "Afspraken waarbij minstens één persoon zei dat het gesprek heeft plaatsgevonden. Een boeking alleen telt niet als een afspraak die doorging.",
+      "useful": "Mensen die een nuttig resultaat meldden (zoals een samenwerking, klant of introductie), van iedereen die feedback gaf.",
+      "circles": "Verschillende mensen die zich bij een kring aansloten. Lidmaatschappen van kringen staan apart en worden er niet bij opgeteld.",
+      "growth": "Deelnemers die nog geen lid waren en via dit evenement binnen 7 dagen na afloop lid werden van de organiserende community."
+    },
+    "sub": {
+      "ofRegistered": "{n} aangemelde deelnemers",
+      "activeNow": "{n} nu actief",
+      "ofParticipants": "{num} van de {den} netwerkdeelnemers",
+      "sessions": "{n} kringsessies gepland (apart geteld)",
+      "sessionsSmall": "Geplande kringsessies: minder dan 5 (apart geteld)",
+      "sessionsNone": "Kringsessies worden apart geteld",
+      "ofMeetings": "van {n} afspraken in de feedbackperiode",
+      "respondents": "{num} van de {den} mensen die feedback gaven",
+      "memberships": "{n} lidmaatschappen van kringen (één persoon kan zich bij meer kringen aansluiten)",
+      "notMembers": "{num} van de {den} deelnemers die nog geen lid waren"
+    },
+    "buckets": {
+      "title": "Afspraken gemeld als gehouden",
+      "intro": "Elke afspraak valt in precies één groep. Een ontbrekend antwoord is “Geen reactie”, nooit niet-verschijnen.",
+      "population": "{n} afspraken waarvan de tijd voorbij is of die na bevestiging zijn geannuleerd",
+      "populationLabel": "Afspraken in de feedbackperiode",
+      "populationSmall": "Minder dan 5 afspraken vallen in deze groep, dus er wordt geen verdeling getoond.",
+      "both": "Beiden zeiden dat ze elkaar spraken",
+      "one": "Eén persoon zei dat ze elkaar spraken",
+      "nonAttendance": "Niet-verschijnen gemeld",
+      "noResponse": "Geen reactie",
+      "rescheduledOrCancelled": "Verplaatst of geannuleerd",
+      "other": "Ander antwoord",
+      "notDrawn": "Groepen met minder dan 5 staan in de lijst maar worden niet getekend.",
+      "heldNote": "“Gemeld als gehouden” zijn de eerste twee groepen samen."
+    },
+    "circles": {
+      "title": "Deelname aan kringen",
+      "intro": "Unieke mensen en lidmaatschappen worden apart getoond en nooit bij elkaar opgeteld.",
+      "name": "Kring",
+      "participants": "Mensen",
+      "memberships": "Lidmaatschappen",
+      "empty": "Geen kringen om te tonen."
+    },
+    "insights": {
+      "title": "Inzichten uit netwerkprofielen",
+      "intro": "Op basis van wat mensen in hun netwerkprofiel kozen. Vrije tekst en privé-activiteit worden nooit gebruikt.",
+      "denominator": "Gebaseerd op {n} deelnemers met een netwerkprofiel",
+      "denominatorLabel": "Deelnemers met een netwerkprofiel",
+      "denominatorSmall": "Minder dan 5 deelnemers hebben een netwerkprofiel, dus de inzichten worden verborgen.",
+      "multi": "Mensen kunnen meerdere opties kiezen, dus de percentages kunnen samen meer dan 100% zijn.",
+      "empty": "Niets om te tonen. Een keuze verschijnt zodra minstens 5 mensen haar kozen.",
+      "kind": {
+        "INDUSTRIES": "Meest gekozen branches",
+        "NEEDS": "Meest genoemde behoeften",
+        "OFFERS": "Meest genoemde aanbod",
+        "MARKETS": "Meest genoemde markten",
+        "CIRCLE_TOPICS": "Onderwerpen van kringen (aandeel van lidmaatschappen)"
+      }
+    },
+    "growth": {
+      "title": "Groei van de community",
+      "intro": "Mensen die via dit evenement lid werden van de organiserende community. Lid worden rond de tijd van het evenement telt niet mee zonder vastgelegde koppeling.",
+      "existing": "Deelnemers die al lid waren",
+      "newApproved": "Nieuwe leden via dit evenement",
+      "pending": "Aanvragen die nog openstaan",
+      "notJoined": "Geschikte deelnemers die geen lid werden",
+      "bySource": "Waar nieuwe leden vandaan kwamen",
+      "source": {
+        "EVENT_PAGE": "Evenementpagina",
+        "EVENT_PROMPT": "Oproep tijdens het evenement",
+        "EVENT_FOLLOWUP": "Opvolging na het evenement"
+      }
+    },
+    "csv": {
+      "section": "Onderdeel",
+      "metric": "Maatstaf",
+      "value": "Waarde",
+      "numerator": "Teller",
+      "denominator": "Noemer",
+      "event": "Evenement",
+      "generatedAt": "Gemaakt op",
+      "filters": "Filters",
+      "people": "Mensen",
+      "connections": "Contacten",
+      "meetings": "Afspraken",
+      "contacts": "Nuttige contacten",
+      "circles": "Kringen",
+      "insights": "Inzichten",
+      "growth": "Groei van de community"
+    }
   }
 }
