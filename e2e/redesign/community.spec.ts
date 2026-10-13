@@ -24,7 +24,7 @@ test('hero, left navigation with real pages only, and your communities', async (
     const { page } = await open(browser, '/community', DATA);
     await expect(page.getByRole('heading', { level: 1, name: 'Community' })).toBeVisible({ timeout: 90_000 });
     const nav = page.getByTestId('community-nav');
-    for (const [name, href] of [['Home', '/en/home'], ['Discover people', '/en/search'], ['Groups & circles', '/en/circles'], ['Events', '/en/events']]) {
+    for (const [name, href] of [['Home', '/en/home'], ['Discover people', '/en/people'], ['Groups & circles', '/en/circles'], ['Events', '/en/events']]) {
         await expect(nav.getByRole('link', { name })).toHaveAttribute('href', href);
     }
     await expect(page.getByText('Help & Resources')).toHaveCount(0);

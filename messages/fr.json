@@ -5011,7 +5011,26 @@
       "icsFile": "Télécharger le fichier agenda",
       "timesIn": "Horaires en {zone}",
       "notConfirmed": "Votre billet est disponible une fois votre inscription confirmée.",
-      "backToEvent": "Retour à l'événement"
+      "backToEvent": "Retour à l'événement",
+      "guest": "Invité",
+      "pdfFailed": "Impossible de créer le PDF du billet. Veuillez réessayer.",
+      "loadFailed": "Ce billet n’a pas pu être chargé.",
+      "download": "Télécharger le billet",
+      "kicker": "DiaspoPlug · Billet et reçu",
+      "holder": "Titulaire du billet",
+      "dateTime": "Date et heure",
+      "location": "Lieu",
+      "ticketType": "Billet",
+      "eventTicket": "Billet d’événement",
+      "freeAdmission": "Entrée gratuite",
+      "free": "Gratuit",
+      "qrAlt": "Code d’enregistrement de ce billet",
+      "showAtEntry": "Présentez ce code à l’entrée.",
+      "receipt": "Reçu",
+      "description": "Description",
+      "amount": "Montant",
+      "totalPaid": "Total payé",
+      "proofNote": "Présentez ce billet à l’entrée, imprimé ou sur votre téléphone. Il fait office de preuve d’inscription et de reçu."
     },
     "create": {
       "organiserLabel": "Organisé par",
@@ -5354,7 +5373,8 @@
     "composer": {
       "prompt": "Partagez une actualité, posez une question ou lancez une discussion…",
       "post": "Publication",
-      "photo": "Ajouter une photo"
+      "photo": "Ajouter une photo",
+      "group": "Groupe"
     },
     "tabs": {
       "label": "Fil",
@@ -6279,5 +6299,139 @@
     "joinedToast": "Vous avez rejoint le groupe.",
     "requestedToast": "Votre demande a été envoyée.",
     "failedToast": "Cela n’a pas fonctionné. Veuillez réessayer."
+  },
+  "savedPage": {
+    "title": "Enregistrés",
+    "subtitle": "Tous les posts, événements et opportunités que vous avez sauvegardés.",
+    "tabsLabel": "Type de contenu",
+    "tabs": {
+      "posts": "Posts",
+      "events": "Événements",
+      "opportunities": "Opportunités"
+    },
+    "empty": {
+      "posts": "Aucun post enregistré. Marquez un post pour le voir ici.",
+      "events": "Aucun événement enregistré.",
+      "opportunities": "Aucune opportunité enregistrée."
+    },
+    "virtual": "Événement virtuel",
+    "paid": "Payant",
+    "deadline": "Date limite : {date}",
+    "loadMore": "Charger plus"
+  },
+  "requestsPage": {
+    "title": "Mes demandes",
+    "subtitle": "Suivez vos demandes de service, demandes de connexion et candidatures.",
+    "sections": {
+      "connections": "Demandes de connexion",
+      "services": "Demandes de service",
+      "membership": "Adhésions"
+    },
+    "received": "Reçues",
+    "sent": "Envoyées",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "pending": "En attente",
+    "acceptedToast": "Connexion acceptée",
+    "declinedToast": "Demande refusée",
+    "acceptFailed": "Impossible d’accepter la demande. Veuillez réessayer.",
+    "declineFailed": "Impossible de refuser la demande. Veuillez réessayer.",
+    "emptyConnections": "Aucune demande de connexion en attente.",
+    "emptyServices": "Aucune demande de service pour l’instant.",
+    "membershipHint": "Les demandes d’adhésion en attente sont gérées sur les pages Communauté et Associations.",
+    "communityLabel": "Communauté",
+    "communityHint": "Groupes et communautés auxquels vous avez demandé à adhérer",
+    "associationLabel": "Associations",
+    "associationHint": "Associations auxquelles vous avez demandé à adhérer",
+    "submitted": "Soumis le {date}",
+    "viewAllServices": "Voir toutes les demandes de service",
+    "status": {
+      "SUBMITTED": "Soumise",
+      "APPROVED": "Approuvée",
+      "REJECTED": "Rejetée",
+      "IN_PROGRESS": "En cours",
+      "PENDING": "En attente"
+    }
+  },
+  "createGroup": {
+    "title": "Créer un groupe",
+    "nameLabel": "Nom du groupe",
+    "namePlaceholder": "ex. Ghanéens à Berlin",
+    "nameError": "Le nom du groupe doit comporter au moins 2 caractères.",
+    "descLabel": "Description (facultatif)",
+    "descPlaceholder": "De quoi parle ce groupe ?",
+    "privacyLabel": "Confidentialité",
+    "privacy": {
+      "PUBLIC": "Public",
+      "PRIVATE": "Privé"
+    },
+    "maxMembersLabel": "Limite de membres (facultatif)",
+    "maxMembersPlaceholder": "ex. 500",
+    "cancel": "Annuler",
+    "submit": "Créer le groupe",
+    "close": "Fermer la boîte de dialogue",
+    "successToast": "Groupe \"{name}\" créé !",
+    "errorToast": "Impossible de créer le groupe. Veuillez réessayer."
+  },
+  "eventsPage": {
+    "eyebrow": "Événements",
+    "title": "Retrouvez votre communauté — sur place et en ligne.",
+    "subtitle": "Des événements de communautés et d’associations sur DiaspoPlug. Inscrivez-vous en un geste et suivez ceux auxquels vous participez.",
+    "searchLabel": "Rechercher des événements",
+    "searchPlaceholder": "Rechercher un événement par nom ou lieu…",
+    "filtersLabel": "Filtrer les événements",
+    "filters": {
+      "all": "Tous",
+      "free": "Gratuits",
+      "paid": "Payants",
+      "inPerson": "Sur place",
+      "online": "En ligne"
+    },
+    "upcoming": "Événements à venir",
+    "upcomingCount": "{count, plural, one {# événement} other {# événements}}",
+    "noUpcoming": "Aucun événement à venir pour le moment.",
+    "noMatches": "Aucun événement à venir ne correspond.",
+    "free": "Gratuit",
+    "paid": "Payant",
+    "online": "En ligne",
+    "membersOnly": "Réservé aux membres",
+    "moreActions": "Plus d’actions",
+    "showPast": "Événements passés ({count})",
+    "hidePast": "Masquer les événements passés"
+  },
+  "peoplePage": {
+    "metaTitle": "Personnes",
+    "eyebrow": "Personnes",
+    "title": "Trouvez les vôtres dans la diaspora.",
+    "subtitle": "Rencontrez des personnes qui partagent vos communautés, votre métier et vos racines, et développez votre réseau.",
+    "searchLabel": "Rechercher des personnes",
+    "searchPlaceholder": "Rechercher une personne par nom…",
+    "searchButton": "Rechercher",
+    "suggestedTitle": "Suggestions pour vous",
+    "suggestedSubtitle": "Selon vos communautés et vos relations.",
+    "resultsTitle": "Résultats pour « {query} »",
+    "clearSearch": "Effacer la recherche",
+    "loadFailed": "Impossible de charger les personnes.",
+    "retry": "Réessayer",
+    "noResults": "Personne ne correspond à « {query} ».",
+    "noSuggestions": "Pas encore de suggestions. Rejoignez des communautés et des groupes pour rencontrer des personnes.",
+    "loadMore": "Charger plus",
+    "mutual": "{count, plural, one {# relation en commun} other {# relations en commun}}",
+    "sharedOne": "Dans {name}",
+    "sharedMore": "Dans {name} et {count, plural, one {# autre} other {# autres}}",
+    "connect": "Se connecter",
+    "requested": "Demande envoyée",
+    "accept": "Accepter",
+    "message": "Message",
+    "verified": "Vérifié",
+    "links": {
+      "title": "D’autres façons de se connecter",
+      "requests": "Demandes de connexion",
+      "requestsHint": "Les personnes qui souhaitent se connecter avec vous",
+      "groups": "Groupes",
+      "groupsHint": "Rejoignez des groupes selon vos intérêts",
+      "communities": "Communautés",
+      "communitiesHint": "Trouvez votre communauté ou association"
+    }
   }
 }

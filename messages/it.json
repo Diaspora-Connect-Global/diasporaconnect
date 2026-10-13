@@ -5011,7 +5011,26 @@
       "icsFile": "Scarica il file del calendario",
       "timesIn": "Orari in {zone}",
       "notConfirmed": "Il suo biglietto è disponibile quando la sua iscrizione è confermata.",
-      "backToEvent": "Torna all'evento"
+      "backToEvent": "Torna all'evento",
+      "guest": "Ospite",
+      "pdfFailed": "Impossibile creare il PDF del biglietto. Riprova.",
+      "loadFailed": "Impossibile caricare questo biglietto.",
+      "download": "Scarica il biglietto",
+      "kicker": "DiaspoPlug · Biglietto e ricevuta",
+      "holder": "Intestatario del biglietto",
+      "dateTime": "Data e ora",
+      "location": "Luogo",
+      "ticketType": "Biglietto",
+      "eventTicket": "Biglietto dell’evento",
+      "freeAdmission": "Ingresso gratuito",
+      "free": "Gratuito",
+      "qrAlt": "Codice di check-in di questo biglietto",
+      "showAtEntry": "Mostra questo codice all’ingresso.",
+      "receipt": "Ricevuta",
+      "description": "Descrizione",
+      "amount": "Importo",
+      "totalPaid": "Totale pagato",
+      "proofNote": "Mostra questo biglietto all’ingresso, stampato o sul telefono. È la prova della tua iscrizione e la tua ricevuta."
     },
     "create": {
       "organiserLabel": "Organizzato da",
@@ -5354,7 +5373,8 @@
     "composer": {
       "prompt": "Condividi un aggiornamento, fai una domanda o avvia una discussione…",
       "post": "Post",
-      "photo": "Aggiungi foto"
+      "photo": "Aggiungi foto",
+      "group": "Gruppo"
     },
     "tabs": {
       "label": "Feed",
@@ -6279,5 +6299,139 @@
     "joinedToast": "Ti sei unito al gruppo.",
     "requestedToast": "La tua richiesta è stata inviata.",
     "failedToast": "Non ha funzionato. Riprova."
+  },
+  "savedPage": {
+    "title": "Salvati",
+    "subtitle": "Tutti i post, gli eventi e le opportunità che hai salvato.",
+    "tabsLabel": "Tipo di contenuto",
+    "tabs": {
+      "posts": "Post",
+      "events": "Eventi",
+      "opportunities": "Opportunità"
+    },
+    "empty": {
+      "posts": "Nessun post salvato. Aggiungi un post ai preferiti per vederlo qui.",
+      "events": "Nessun evento salvato.",
+      "opportunities": "Nessuna opportunità salvata."
+    },
+    "virtual": "Evento virtuale",
+    "paid": "A pagamento",
+    "deadline": "Scadenza: {date}",
+    "loadMore": "Carica altri"
+  },
+  "requestsPage": {
+    "title": "Le mie richieste",
+    "subtitle": "Monitora le richieste di servizio, le richieste di connessione e le candidature.",
+    "sections": {
+      "connections": "Richieste di connessione",
+      "services": "Richieste di servizio",
+      "membership": "Adesioni a comunità"
+    },
+    "received": "Ricevute",
+    "sent": "Inviate",
+    "accept": "Accetta",
+    "decline": "Rifiuta",
+    "pending": "In attesa",
+    "acceptedToast": "Connessione accettata",
+    "declinedToast": "Richiesta rifiutata",
+    "acceptFailed": "Impossibile accettare la richiesta. Riprova.",
+    "declineFailed": "Impossibile rifiutare la richiesta. Riprova.",
+    "emptyConnections": "Nessuna richiesta di connessione in sospeso.",
+    "emptyServices": "Nessuna richiesta di servizio.",
+    "membershipHint": "Le richieste di adesione in sospeso sono gestite nelle pagine Comunità e Associazioni.",
+    "communityLabel": "Comunità",
+    "communityHint": "Gruppi e comunità a cui hai chiesto di aderire",
+    "associationLabel": "Associazioni",
+    "associationHint": "Associazioni a cui hai chiesto di aderire",
+    "submitted": "Inviata il {date}",
+    "viewAllServices": "Visualizza tutte le richieste di servizio",
+    "status": {
+      "SUBMITTED": "Inviata",
+      "APPROVED": "Approvata",
+      "REJECTED": "Rifiutata",
+      "IN_PROGRESS": "In lavorazione",
+      "PENDING": "In attesa"
+    }
+  },
+  "createGroup": {
+    "title": "Crea un gruppo",
+    "nameLabel": "Nome del gruppo",
+    "namePlaceholder": "es. Ghanesi a Berlino",
+    "nameError": "Il nome del gruppo deve essere di almeno 2 caratteri.",
+    "descLabel": "Descrizione (facoltativa)",
+    "descPlaceholder": "Di cosa parla questo gruppo?",
+    "privacyLabel": "Privacy",
+    "privacy": {
+      "PUBLIC": "Pubblico",
+      "PRIVATE": "Privato"
+    },
+    "maxMembersLabel": "Limite di membri (facoltativo)",
+    "maxMembersPlaceholder": "es. 500",
+    "cancel": "Annulla",
+    "submit": "Crea gruppo",
+    "close": "Chiudi finestra di dialogo",
+    "successToast": "Gruppo \"{name}\" creato!",
+    "errorToast": "Impossibile creare il gruppo. Riprova."
+  },
+  "eventsPage": {
+    "eyebrow": "Eventi",
+    "title": "Incontra la tua community — dal vivo e online.",
+    "subtitle": "Eventi di community e associazioni su DiaspoPlug. Iscriviti con un tocco e tieni traccia di quelli a cui partecipi.",
+    "searchLabel": "Cerca eventi",
+    "searchPlaceholder": "Cerca eventi per nome o luogo…",
+    "filtersLabel": "Filtra eventi",
+    "filters": {
+      "all": "Tutti",
+      "free": "Gratuiti",
+      "paid": "A pagamento",
+      "inPerson": "Dal vivo",
+      "online": "Online"
+    },
+    "upcoming": "Prossimi eventi",
+    "upcomingCount": "{count, plural, one {# evento} other {# eventi}}",
+    "noUpcoming": "Non ci sono ancora eventi in programma.",
+    "noMatches": "Nessun evento in programma corrisponde.",
+    "free": "Gratuito",
+    "paid": "A pagamento",
+    "online": "Online",
+    "membersOnly": "Solo membri",
+    "moreActions": "Altre azioni",
+    "showPast": "Eventi passati ({count})",
+    "hidePast": "Nascondi eventi passati"
+  },
+  "peoplePage": {
+    "metaTitle": "Persone",
+    "eyebrow": "Persone",
+    "title": "Trova la tua gente nella diaspora.",
+    "subtitle": "Conosci persone che condividono le tue community, il tuo lavoro e le tue radici, e amplia la tua rete.",
+    "searchLabel": "Cerca persone",
+    "searchPlaceholder": "Cerca persone per nome…",
+    "searchButton": "Cerca",
+    "suggestedTitle": "Suggerimenti per te",
+    "suggestedSubtitle": "In base alle tue community e ai tuoi collegamenti.",
+    "resultsTitle": "Risultati per “{query}”",
+    "clearSearch": "Cancella ricerca",
+    "loadFailed": "Impossibile caricare le persone.",
+    "retry": "Riprova",
+    "noResults": "Nessuno corrisponde a “{query}”.",
+    "noSuggestions": "Ancora nessun suggerimento. Unisciti a community e gruppi per conoscere persone.",
+    "loadMore": "Carica altri",
+    "mutual": "{count, plural, one {# collegamento in comune} other {# collegamenti in comune}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} e {count, plural, one {# altra} other {# altre}}",
+    "connect": "Collegati",
+    "requested": "Richiesta inviata",
+    "accept": "Accetta",
+    "message": "Messaggio",
+    "verified": "Verificato",
+    "links": {
+      "title": "Altri modi per connettersi",
+      "requests": "Richieste di collegamento",
+      "requestsHint": "Persone che vogliono collegarsi con te",
+      "groups": "Gruppi",
+      "groupsHint": "Unisciti a gruppi sui tuoi interessi",
+      "communities": "Community",
+      "communitiesHint": "Trova la tua community o associazione"
+    }
   }
 }

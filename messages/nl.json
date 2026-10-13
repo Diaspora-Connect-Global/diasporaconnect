@@ -5011,7 +5011,26 @@
       "icsFile": "Agendabestand downloaden",
       "timesIn": "Tijden in {zone}",
       "notConfirmed": "Uw ticket is beschikbaar zodra uw inschrijving is bevestigd.",
-      "backToEvent": "Terug naar het evenement"
+      "backToEvent": "Terug naar het evenement",
+      "guest": "Gast",
+      "pdfFailed": "De ticket-pdf kon niet worden gemaakt. Probeer het opnieuw.",
+      "loadFailed": "Dit ticket kon niet worden geladen.",
+      "download": "Ticket downloaden",
+      "kicker": "DiaspoPlug · Ticket en bon",
+      "holder": "Tickethouder",
+      "dateTime": "Datum en tijd",
+      "location": "Locatie",
+      "ticketType": "Ticket",
+      "eventTicket": "Evenementticket",
+      "freeAdmission": "Gratis toegang",
+      "free": "Gratis",
+      "qrAlt": "Incheckcode voor dit ticket",
+      "showAtEntry": "Laat deze code zien bij de ingang.",
+      "receipt": "Bon",
+      "description": "Omschrijving",
+      "amount": "Bedrag",
+      "totalPaid": "Totaal betaald",
+      "proofNote": "Laat dit ticket bij de ingang zien, geprint of op je telefoon. Het is je bewijs van inschrijving en je bon."
     },
     "create": {
       "organiserLabel": "Georganiseerd door",
@@ -5354,7 +5373,8 @@
     "composer": {
       "prompt": "Deel een update, stel een vraag of start een discussie…",
       "post": "Bericht",
-      "photo": "Foto toevoegen"
+      "photo": "Foto toevoegen",
+      "group": "Groep"
     },
     "tabs": {
       "label": "Feed",
@@ -6279,5 +6299,139 @@
     "joinedToast": "Je bent lid geworden van de groep.",
     "requestedToast": "Je verzoek is verstuurd.",
     "failedToast": "Dat is niet gelukt. Probeer het opnieuw."
+  },
+  "savedPage": {
+    "title": "Opgeslagen",
+    "subtitle": "Alle posts, evenementen en kansen die je hebt opgeslagen.",
+    "tabsLabel": "Inhoudstype",
+    "tabs": {
+      "posts": "Posts",
+      "events": "Evenementen",
+      "opportunities": "Kansen"
+    },
+    "empty": {
+      "posts": "Nog geen opgeslagen posts. Sla een post op om het hier te zien.",
+      "events": "Nog geen opgeslagen evenementen.",
+      "opportunities": "Nog geen opgeslagen kansen."
+    },
+    "virtual": "Virtueel evenement",
+    "paid": "Betaald",
+    "deadline": "Deadline: {date}",
+    "loadMore": "Meer laden"
+  },
+  "requestsPage": {
+    "title": "Mijn verzoeken",
+    "subtitle": "Beheer je serviceverzoeken, verbindingsverzoeken en lidmaatschapsaanvragen.",
+    "sections": {
+      "connections": "Verbindingsverzoeken",
+      "services": "Serviceverzoeken",
+      "membership": "Gemeenschapslidmaatschappen"
+    },
+    "received": "Ontvangen",
+    "sent": "Verzonden",
+    "accept": "Accepteren",
+    "decline": "Weigeren",
+    "pending": "In behandeling",
+    "acceptedToast": "Verbinding geaccepteerd",
+    "declinedToast": "Verzoek geweigerd",
+    "acceptFailed": "Kon het verzoek niet accepteren. Probeer het opnieuw.",
+    "declineFailed": "Kon het verzoek niet weigeren. Probeer het opnieuw.",
+    "emptyConnections": "Geen openstaande verbindingsverzoeken.",
+    "emptyServices": "Nog geen serviceverzoeken.",
+    "membershipHint": "Openstaande lidmaatschapsverzoeken worden beheerd op de Gemeenschap- en Associatiepaginas.",
+    "communityLabel": "Gemeenschap",
+    "communityHint": "Groepen en gemeenschappen waarbij je je hebt aangemeld",
+    "associationLabel": "Verenigingen",
+    "associationHint": "Verenigingen waarbij je je hebt aangemeld",
+    "submitted": "Ingediend op {date}",
+    "viewAllServices": "Alle serviceverzoeken bekijken",
+    "status": {
+      "SUBMITTED": "Ingediend",
+      "APPROVED": "Goedgekeurd",
+      "REJECTED": "Afgewezen",
+      "IN_PROGRESS": "In behandeling",
+      "PENDING": "In behandeling"
+    }
+  },
+  "createGroup": {
+    "title": "Groep aanmaken",
+    "nameLabel": "Groepsnaam",
+    "namePlaceholder": "bijv. Ghanezen in Berlijn",
+    "nameError": "De groepsnaam moet minimaal 2 tekens bevatten.",
+    "descLabel": "Beschrijving (optioneel)",
+    "descPlaceholder": "Waar gaat deze groep over?",
+    "privacyLabel": "Privacy",
+    "privacy": {
+      "PUBLIC": "Openbaar",
+      "PRIVATE": "Privé"
+    },
+    "maxMembersLabel": "Ledenlimiet (optioneel)",
+    "maxMembersPlaceholder": "bijv. 500",
+    "cancel": "Annuleren",
+    "submit": "Groep aanmaken",
+    "close": "Dialoogvenster sluiten",
+    "successToast": "Groep \"{name}\" aangemaakt!",
+    "errorToast": "Kon de groep niet aanmaken. Probeer het opnieuw."
+  },
+  "eventsPage": {
+    "eyebrow": "Evenementen",
+    "title": "Ontmoet je gemeenschap — op locatie en online.",
+    "subtitle": "Evenementen van gemeenschappen en verenigingen op DiaspoPlug. Meld je met één tik aan en houd bij waar je naartoe gaat.",
+    "searchLabel": "Evenementen zoeken",
+    "searchPlaceholder": "Zoek evenementen op naam of plaats…",
+    "filtersLabel": "Evenementen filteren",
+    "filters": {
+      "all": "Alle",
+      "free": "Gratis",
+      "paid": "Betaald",
+      "inPerson": "Op locatie",
+      "online": "Online"
+    },
+    "upcoming": "Komende evenementen",
+    "upcomingCount": "{count, plural, one {# evenement} other {# evenementen}}",
+    "noUpcoming": "Er zijn nog geen komende evenementen.",
+    "noMatches": "Geen komende evenementen gevonden.",
+    "free": "Gratis",
+    "paid": "Betaald",
+    "online": "Online",
+    "membersOnly": "Alleen voor leden",
+    "moreActions": "Meer acties",
+    "showPast": "Eerdere evenementen ({count})",
+    "hidePast": "Eerdere evenementen verbergen"
+  },
+  "peoplePage": {
+    "metaTitle": "Mensen",
+    "eyebrow": "Mensen",
+    "title": "Vind je mensen in de diaspora.",
+    "subtitle": "Leer mensen kennen die je gemeenschappen, je werk en je roots delen, en breid je netwerk uit.",
+    "searchLabel": "Mensen zoeken",
+    "searchPlaceholder": "Zoek mensen op naam…",
+    "searchButton": "Zoeken",
+    "suggestedTitle": "Voorgesteld voor jou",
+    "suggestedSubtitle": "Op basis van je gemeenschappen en connecties.",
+    "resultsTitle": "Resultaten voor ‘{query}’",
+    "clearSearch": "Zoekopdracht wissen",
+    "loadFailed": "Mensen konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "noResults": "Niemand gevonden voor ‘{query}’.",
+    "noSuggestions": "Nog geen voorstellen. Word lid van gemeenschappen en groepen om mensen te leren kennen.",
+    "loadMore": "Meer laden",
+    "mutual": "{count, plural, one {# gezamenlijke connectie} other {# gezamenlijke connecties}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} en {count, plural, one {# andere} other {# andere}}",
+    "connect": "Verbinden",
+    "requested": "Aangevraagd",
+    "accept": "Accepteren",
+    "message": "Bericht",
+    "verified": "Geverifieerd",
+    "links": {
+      "title": "Meer manieren om te verbinden",
+      "requests": "Connectieverzoeken",
+      "requestsHint": "Mensen die met je willen verbinden",
+      "groups": "Groepen",
+      "groupsHint": "Word lid van groepen rond je interesses",
+      "communities": "Gemeenschappen",
+      "communitiesHint": "Vind je gemeenschap of vereniging"
+    }
   }
 }

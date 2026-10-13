@@ -25,8 +25,8 @@ export const MORE_SECTIONS: readonly MoreSection[] = [
   {
     key: 'yourStuff',
     items: [
-      { key: 'requests', tone: 'info', sheet: 'requests' },
-      { key: 'saved', tone: 'danger', sheet: 'saved' },
+      { key: 'requests', tone: 'info', href: '/requests' },
+      { key: 'saved', tone: 'danger', href: '/saved' },
       // "Tickets & orders" in the mockup: only tickets have a page (the Events
       // Attending tab, its default); buyer orders have none, so they are not claimed.
       { key: 'tickets', tone: 'brand', href: '/events' },

@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
+
+
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type { LucideIcon } from 'lucide-react';
@@ -24,9 +25,8 @@ import {
 import { useRouter } from '@/i18n/navigation';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
 import { MoreLinkCard } from './MoreLinkCard';
-import { MoreLinkSheet } from './MoreLinkSheet';
 import { MoreRail } from './MoreRail';
-import { MORE_SECTIONS, type MoreSheetKey } from './moreLinks';
+import { MORE_SECTIONS } from './moreLinks';
 
 const ITEM_ICONS: Record<string, LucideIcon> = {
   requests: ClipboardList,
@@ -106,12 +106,6 @@ function MoreHero() {
  */
 export function MoreView() {
   const t = useTranslations('more');
-  const [sheet, setSheet] = useState<MoreSheetKey | null>(null);
-  const openerRef = useRef<HTMLElement | null>(null);
-  const openSheet = (key: MoreSheetKey) => {
-    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    setSheet(key);
-  };
 
   return (
     <div className="h-app-inner overflow-y-auto scrollbar-hide bg-background">
@@ -139,14 +133,9 @@ export function MoreView() {
                       title: t(`items.${item.key}.title`),
                       subtitle: t(`items.${item.key}.subtitle`),
                     };
-                    const sheetKey = item.sheet;
                     return (
                       <li key={item.key} className="min-w-0">
-                        {sheetKey ? (
-                          <MoreLinkCard {...common} onOpen={() => openSheet(sheetKey)} />
-                        ) : (
-                          <MoreLinkCard {...common} href={item.href ?? '/more'} />
-                        )}
+                        <MoreLinkCard {...common} href={item.href ?? '/more'} />
                       </li>
                     );
                   })}
@@ -155,11 +144,9 @@ export function MoreView() {
             ))}
           </div>
 
-          <MoreRail onOpenSaved={() => openSheet('saved')} />
+          <MoreRail />
         </div>
       </div>
-
-      <MoreLinkSheet sheet={sheet} returnFocusTo={openerRef} onOpenChange={(open) => !open && setSheet(null)} />
     </div>
   );
 }

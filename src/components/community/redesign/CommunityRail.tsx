@@ -37,7 +37,7 @@ function SuggestedPeople() {
     if (!ok) setSent((p) => { const n = new Set(p); n.delete(userId); return n; });
   };
   return (
-    <RailCard id="community-people-title" title={t('people')} href="/search" viewAllLabel={tAll('viewAll')} testId="community-people">
+    <RailCard id="community-people-title" title={t('people')} href="/people" viewAllLabel={tAll('viewAll')} testId="community-people">
       <ul className="space-y-3">
         {people.map(({ profile }) => {
           const name = displayName(profile, tIdentity('unknownUser'));

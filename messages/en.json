@@ -5011,7 +5011,26 @@
       "icsFile": "Download calendar file",
       "timesIn": "Times in {zone}",
       "notConfirmed": "Your ticket is available once your registration is confirmed.",
-      "backToEvent": "Back to the event"
+      "backToEvent": "Back to the event",
+      "guest": "Guest",
+      "pdfFailed": "Could not create the ticket PDF. Please try again.",
+      "loadFailed": "This ticket could not be loaded.",
+      "download": "Download ticket",
+      "kicker": "DiaspoPlug · Ticket & receipt",
+      "holder": "Ticket holder",
+      "dateTime": "Date & time",
+      "location": "Location",
+      "ticketType": "Ticket",
+      "eventTicket": "Event ticket",
+      "freeAdmission": "Free admission",
+      "free": "Free",
+      "qrAlt": "Check-in code for this ticket",
+      "showAtEntry": "Show this code at the entrance.",
+      "receipt": "Receipt",
+      "description": "Description",
+      "amount": "Amount",
+      "totalPaid": "Total paid",
+      "proofNote": "Show this ticket, printed or on your phone, at the entrance. It is your proof of registration and your receipt."
     },
     "create": {
       "organiserLabel": "Organised by",
@@ -5354,7 +5373,8 @@
     "composer": {
       "prompt": "Share an update, ask a question or start a discussion…",
       "post": "Post",
-      "photo": "Add photo"
+      "photo": "Add photo",
+      "group": "Group"
     },
     "tabs": {
       "label": "Feed",
@@ -6279,5 +6299,139 @@
     "joinedToast": "You joined the group.",
     "requestedToast": "Your request to join has been sent.",
     "failedToast": "That didn't work. Please try again."
+  },
+  "savedPage": {
+    "title": "Saved",
+    "subtitle": "All the posts, events and opportunities you have bookmarked.",
+    "tabsLabel": "Content type",
+    "tabs": {
+      "posts": "Posts",
+      "events": "Events",
+      "opportunities": "Opportunities"
+    },
+    "empty": {
+      "posts": "No saved posts yet. Bookmark a post to see it here.",
+      "events": "No saved events yet. Save an event to see it here.",
+      "opportunities": "No saved opportunities yet. Bookmark an opportunity to see it here."
+    },
+    "virtual": "Virtual event",
+    "paid": "Paid",
+    "deadline": "Deadline: {date}",
+    "loadMore": "Load more"
+  },
+  "requestsPage": {
+    "title": "My Requests",
+    "subtitle": "Track your service requests, connection requests, and membership applications.",
+    "sections": {
+      "connections": "Connection Requests",
+      "services": "Service Requests",
+      "membership": "Community Memberships"
+    },
+    "received": "Received",
+    "sent": "Sent",
+    "accept": "Accept",
+    "decline": "Decline",
+    "pending": "Pending",
+    "acceptedToast": "Connection accepted",
+    "declinedToast": "Request declined",
+    "acceptFailed": "Could not accept the request. Please try again.",
+    "declineFailed": "Could not decline the request. Please try again.",
+    "emptyConnections": "No pending connection requests.",
+    "emptyServices": "No service requests yet.",
+    "membershipHint": "Pending membership requests are managed on the Community and Association pages.",
+    "communityLabel": "Community",
+    "communityHint": "Groups and communities you applied to join",
+    "associationLabel": "Associations",
+    "associationHint": "Associations you applied to join",
+    "submitted": "Submitted {date}",
+    "viewAllServices": "View all service requests",
+    "status": {
+      "SUBMITTED": "Submitted",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "IN_PROGRESS": "In progress",
+      "PENDING": "Pending"
+    }
+  },
+  "createGroup": {
+    "title": "Create a Group",
+    "nameLabel": "Group name",
+    "namePlaceholder": "e.g. Ghanaians in Berlin",
+    "nameError": "Group name must be at least 2 characters.",
+    "descLabel": "Description (optional)",
+    "descPlaceholder": "What is this group about?",
+    "privacyLabel": "Privacy",
+    "privacy": {
+      "PUBLIC": "Public",
+      "PRIVATE": "Private"
+    },
+    "maxMembersLabel": "Member limit (optional)",
+    "maxMembersPlaceholder": "e.g. 500",
+    "cancel": "Cancel",
+    "submit": "Create Group",
+    "close": "Close dialog",
+    "successToast": "Group \"{name}\" created!",
+    "errorToast": "Could not create the group. Please try again."
+  },
+  "eventsPage": {
+    "eyebrow": "Events",
+    "title": "Meet your community — in person and online.",
+    "subtitle": "Events from communities and associations across DiaspoPlug. Register in a tap and keep track of where you're going.",
+    "searchLabel": "Search events",
+    "searchPlaceholder": "Search events by name or place…",
+    "filtersLabel": "Filter events",
+    "filters": {
+      "all": "All",
+      "free": "Free",
+      "paid": "Paid",
+      "inPerson": "In person",
+      "online": "Online"
+    },
+    "upcoming": "Upcoming events",
+    "upcomingCount": "{count, plural, one {# event} other {# events}}",
+    "noUpcoming": "There are no upcoming events yet.",
+    "noMatches": "No upcoming events match.",
+    "free": "Free",
+    "paid": "Paid",
+    "online": "Online",
+    "membersOnly": "Members only",
+    "moreActions": "More actions",
+    "showPast": "Past events ({count})",
+    "hidePast": "Hide past events"
+  },
+  "peoplePage": {
+    "metaTitle": "People",
+    "eyebrow": "People",
+    "title": "Find your people across the diaspora.",
+    "subtitle": "Meet people who share your communities, your work and your roots, and grow your network.",
+    "searchLabel": "Search people",
+    "searchPlaceholder": "Search people by name…",
+    "searchButton": "Search",
+    "suggestedTitle": "Suggested for you",
+    "suggestedSubtitle": "Based on your communities and connections.",
+    "resultsTitle": "Results for “{query}”",
+    "clearSearch": "Clear search",
+    "loadFailed": "We couldn't load people.",
+    "retry": "Try again",
+    "noResults": "No one matches “{query}”.",
+    "noSuggestions": "No suggestions yet. Join communities and groups to meet people.",
+    "loadMore": "Load more",
+    "mutual": "{count, plural, one {# mutual connection} other {# mutual connections}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} and {count, plural, one {# other} other {# others}}",
+    "connect": "Connect",
+    "requested": "Requested",
+    "accept": "Accept",
+    "message": "Message",
+    "verified": "Verified",
+    "links": {
+      "title": "More ways to connect",
+      "requests": "Connection requests",
+      "requestsHint": "People who asked to connect with you",
+      "groups": "Groups",
+      "groupsHint": "Join groups around your interests",
+      "communities": "Communities",
+      "communitiesHint": "Find your community or association"
+    }
   }
 }

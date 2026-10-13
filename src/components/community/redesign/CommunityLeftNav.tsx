@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 
 const ITEMS: { key: 'home' | 'people' | 'circles' | 'events'; href: string; icon: LucideIcon }[] = [
   { key: 'home', href: '/home', icon: Home },
-  { key: 'people', href: '/search', icon: UserSearch },
+  { key: 'people', href: '/people', icon: UserSearch },
   { key: 'circles', href: '/circles', icon: UsersRound },
   { key: 'events', href: '/events', icon: CalendarDays },
 ];

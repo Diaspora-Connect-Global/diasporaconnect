@@ -5011,7 +5011,26 @@
       "icsFile": "Kalenderdatei herunterladen",
       "timesIn": "Zeiten in {zone}",
       "notConfirmed": "Ihr Ticket ist verfügbar, sobald Ihre Anmeldung bestätigt ist.",
-      "backToEvent": "Zurück zur Veranstaltung"
+      "backToEvent": "Zurück zur Veranstaltung",
+      "guest": "Gast",
+      "pdfFailed": "Das Ticket-PDF konnte nicht erstellt werden. Bitte versuche es erneut.",
+      "loadFailed": "Dieses Ticket konnte nicht geladen werden.",
+      "download": "Ticket herunterladen",
+      "kicker": "DiaspoPlug · Ticket & Beleg",
+      "holder": "Ausgestellt für",
+      "dateTime": "Datum & Uhrzeit",
+      "location": "Ort",
+      "ticketType": "Ticket",
+      "eventTicket": "Event-Ticket",
+      "freeAdmission": "Freier Eintritt",
+      "free": "Kostenlos",
+      "qrAlt": "Check-in-Code für dieses Ticket",
+      "showAtEntry": "Zeig diesen Code am Eingang.",
+      "receipt": "Beleg",
+      "description": "Beschreibung",
+      "amount": "Betrag",
+      "totalPaid": "Gesamt bezahlt",
+      "proofNote": "Zeig dieses Ticket am Eingang – ausgedruckt oder auf dem Handy. Es ist dein Anmeldenachweis und dein Beleg."
     },
     "create": {
       "organiserLabel": "Organisiert von",
@@ -5354,7 +5373,8 @@
     "composer": {
       "prompt": "Teile ein Update, stelle eine Frage oder starte eine Diskussion …",
       "post": "Beitrag",
-      "photo": "Foto hinzufügen"
+      "photo": "Foto hinzufügen",
+      "group": "Gruppe"
     },
     "tabs": {
       "label": "Feed",
@@ -6279,5 +6299,139 @@
     "joinedToast": "Du bist der Gruppe beigetreten.",
     "requestedToast": "Deine Beitrittsanfrage wurde gesendet.",
     "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut."
+  },
+  "savedPage": {
+    "title": "Gespeichert",
+    "subtitle": "Alle Beiträge, Veranstaltungen und Möglichkeiten, die du gespeichert hast.",
+    "tabsLabel": "Inhaltstyp",
+    "tabs": {
+      "posts": "Beiträge",
+      "events": "Veranstaltungen",
+      "opportunities": "Möglichkeiten"
+    },
+    "empty": {
+      "posts": "Noch keine gespeicherten Beiträge. Markiere einen Beitrag, um ihn hier zu sehen.",
+      "events": "Noch keine gespeicherten Veranstaltungen.",
+      "opportunities": "Noch keine gespeicherten Möglichkeiten."
+    },
+    "virtual": "Online-Veranstaltung",
+    "paid": "Kostenpflichtig",
+    "deadline": "Frist: {date}",
+    "loadMore": "Mehr laden"
+  },
+  "requestsPage": {
+    "title": "Meine Anfragen",
+    "subtitle": "Verwalte deine Serviceanfragen, Verbindungsanfragen und Mitgliedschaftsbewerbungen.",
+    "sections": {
+      "connections": "Verbindungsanfragen",
+      "services": "Serviceanfragen",
+      "membership": "Gemeinschaftsmitgliedschaften"
+    },
+    "received": "Erhalten",
+    "sent": "Gesendet",
+    "accept": "Annehmen",
+    "decline": "Ablehnen",
+    "pending": "Ausstehend",
+    "acceptedToast": "Verbindung angenommen",
+    "declinedToast": "Anfrage abgelehnt",
+    "acceptFailed": "Die Anfrage konnte nicht angenommen werden. Bitte erneut versuchen.",
+    "declineFailed": "Die Anfrage konnte nicht abgelehnt werden. Bitte erneut versuchen.",
+    "emptyConnections": "Keine ausstehenden Verbindungsanfragen.",
+    "emptyServices": "Noch keine Serviceanfragen.",
+    "membershipHint": "Ausstehende Mitgliedschaftsanfragen werden auf den Gemeinschafts- und Vereinsseiten verwaltet.",
+    "communityLabel": "Gemeinschaft",
+    "communityHint": "Gruppen und Gemeinschaften, denen du beitreten möchtest",
+    "associationLabel": "Vereine",
+    "associationHint": "Vereine, denen du beitreten möchtest",
+    "submitted": "Eingereicht am {date}",
+    "viewAllServices": "Alle Serviceanfragen anzeigen",
+    "status": {
+      "SUBMITTED": "Eingereicht",
+      "APPROVED": "Genehmigt",
+      "REJECTED": "Abgelehnt",
+      "IN_PROGRESS": "In Bearbeitung",
+      "PENDING": "Ausstehend"
+    }
+  },
+  "createGroup": {
+    "title": "Gruppe erstellen",
+    "nameLabel": "Gruppenname",
+    "namePlaceholder": "z. B. Ghanaer in Berlin",
+    "nameError": "Der Gruppenname muss mindestens 2 Zeichen lang sein.",
+    "descLabel": "Beschreibung (optional)",
+    "descPlaceholder": "Worum geht es in dieser Gruppe?",
+    "privacyLabel": "Sichtbarkeit",
+    "privacy": {
+      "PUBLIC": "Öffentlich",
+      "PRIVATE": "Privat"
+    },
+    "maxMembersLabel": "Mitgliederlimit (optional)",
+    "maxMembersPlaceholder": "z. B. 500",
+    "cancel": "Abbrechen",
+    "submit": "Gruppe erstellen",
+    "close": "Dialog schliessen",
+    "successToast": "Gruppe \"{name}\" wurde erstellt!",
+    "errorToast": "Die Gruppe konnte nicht erstellt werden. Bitte erneut versuchen."
+  },
+  "eventsPage": {
+    "eyebrow": "Events",
+    "title": "Triff deine Community – vor Ort und online.",
+    "subtitle": "Events von Communitys und Vereinen auf DiaspoPlug. Melde dich mit einem Tipp an und behalte im Blick, wohin du gehst.",
+    "searchLabel": "Events durchsuchen",
+    "searchPlaceholder": "Events nach Name oder Ort suchen…",
+    "filtersLabel": "Events filtern",
+    "filters": {
+      "all": "Alle",
+      "free": "Kostenlos",
+      "paid": "Kostenpflichtig",
+      "inPerson": "Vor Ort",
+      "online": "Online"
+    },
+    "upcoming": "Kommende Events",
+    "upcomingCount": "{count, plural, one {# Event} other {# Events}}",
+    "noUpcoming": "Noch keine kommenden Events.",
+    "noMatches": "Keine kommenden Events passen.",
+    "free": "Kostenlos",
+    "paid": "Kostenpflichtig",
+    "online": "Online",
+    "membersOnly": "Nur für Mitglieder",
+    "moreActions": "Weitere Aktionen",
+    "showPast": "Vergangene Events ({count})",
+    "hidePast": "Vergangene Events ausblenden"
+  },
+  "peoplePage": {
+    "metaTitle": "Personen",
+    "eyebrow": "Personen",
+    "title": "Finde deine Leute in der Diaspora.",
+    "subtitle": "Lerne Menschen kennen, die deine Communitys, deine Arbeit und deine Wurzeln teilen, und erweitere dein Netzwerk.",
+    "searchLabel": "Personen suchen",
+    "searchPlaceholder": "Personen nach Name suchen…",
+    "searchButton": "Suchen",
+    "suggestedTitle": "Vorschläge für dich",
+    "suggestedSubtitle": "Basierend auf deinen Communitys und Kontakten.",
+    "resultsTitle": "Ergebnisse für „{query}“",
+    "clearSearch": "Suche löschen",
+    "loadFailed": "Personen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "noResults": "Niemand passt zu „{query}“.",
+    "noSuggestions": "Noch keine Vorschläge. Tritt Communitys und Gruppen bei, um Menschen kennenzulernen.",
+    "loadMore": "Mehr laden",
+    "mutual": "{count, plural, one {# gemeinsamer Kontakt} other {# gemeinsame Kontakte}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} und {count, plural, one {# weiteren} other {# weiteren}}",
+    "connect": "Vernetzen",
+    "requested": "Angefragt",
+    "accept": "Annehmen",
+    "message": "Nachricht",
+    "verified": "Verifiziert",
+    "links": {
+      "title": "Weitere Wege zum Vernetzen",
+      "requests": "Kontaktanfragen",
+      "requestsHint": "Personen, die sich mit dir vernetzen möchten",
+      "groups": "Gruppen",
+      "groupsHint": "Tritt Gruppen zu deinen Interessen bei",
+      "communities": "Communitys",
+      "communitiesHint": "Finde deine Community oder deinen Verein"
+    }
   }
 }

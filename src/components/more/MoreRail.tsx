@@ -52,7 +52,7 @@ function memberSinceYear(createdAt: string | null | undefined): number | null {
  * support + legal links. Every value is real; nothing is shown when the server
  * has nothing to say.
  */
-export function MoreRail({ onOpenSaved }: { onOpenSaved: () => void }) {
+export function MoreRail() {
   const t = useTranslations('more.rail');
   const tLegal = useTranslations('legal');
   const tHeader = useTranslations('home.header');
@@ -125,11 +125,11 @@ export function MoreRail({ onOpenSaved }: { onOpenSaved: () => void }) {
             </Link>
           </li>
           <li>
-            <button type="button" aria-haspopup="dialog" onClick={onOpenSaved} className={ROW_CLASS}>
+            <Link href="/saved" prefetch={false} className={ROW_CLASS}>
               <Bookmark className="size-5 shrink-0" strokeWidth={1.75} aria-hidden />
               <span className="flex-1">{t('savedItems')}</span>
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-            </button>
+            </Link>
           </li>
         </ul>
       </section>

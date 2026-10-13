@@ -17,5 +17,7 @@ import { usePathname } from '@/i18n/navigation';
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const wide = pathname === '/home' || pathname === '/';
-  return <div className={`h-app-inner min-w-0 lg:mx-auto ${wide ? 'lg:w-[min(92vw,1400px)]' : 'lg:w-[60vw]'}`}>{children}</div>;
+  // The redesigned events list (grid + "Your events" rail) uses the header's 80vw frame, like Discover and Groups.
+  const frame = pathname === '/events' ? 'lg:w-[80vw]' : 'lg:w-[60vw]';
+  return <div className={`h-app-inner min-w-0 lg:mx-auto ${wide ? 'lg:w-[min(92vw,1400px)]' : frame}`}>{children}</div>;
 }
