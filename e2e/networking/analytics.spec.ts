@@ -148,7 +148,9 @@ test.describe('analytics harness', () => {
             await expect(page.getByTestId('kpi-connected-value')).toHaveAttribute('data-state', 'suppressed');
             await expect(page.getByTestId('kpi-connected-value')).toHaveText('fewer than 5');
             await expect(page.getByTestId('kpi-meetings-value')).toHaveText('fewer than 5');
-            await expect(page.getByTestId('too-few')).toBeVisible();
+            // The whole-cohort note shows only when the participant count itself is under K (empty: 0; small has 6).
+            if (state === 'empty') await expect(page.getByTestId('too-few')).toBeVisible();
+            else await expect(page.getByTestId('too-few')).toHaveCount(0);
             const shown = await page.locator('[data-state="value"]').allTextContents();
             for (const s of shown.filter((x) => !x.includes('%'))) expect(intOf(s)).toBeGreaterThanOrEqual(5);
             // the leaked "3" and the circle row's 3/4 never appear as a figure
@@ -165,8 +167,10 @@ test.describe('analytics harness', () => {
         await expect(small.page.getByTestId('kpi-useful-value')).toHaveText('—');
         await expect(small.page.getByTestId('kpi-useful')).toContainText('No one in this group yet.');
         await expect(small.page.getByTestId('kpi-growth-value')).toHaveText('—');
-        await expect(small.page.getByTestId('buckets-population')).toContainText('No one in this group yet.');
-        await expect(small.page.getByTestId('analytics-panel')).not.toContainText('0%');
+        // A group of 0 is still a count under K, so it reads "fewer than 5" like any small group (the stricter rule).
+        await expect(small.page.getByTestId('buckets-population')).toContainText('Fewer than 5 meetings are in this group');
+        // A standalone 0% (not the "100%" in the multi-select note).
+        expect(await small.page.getByTestId('analytics-panel').innerText()).not.toMatch(/(^|[^\d.])0(\.0)?\s?%/);
         await small.close();
         const empty = await harness('empty');
         await loaded(empty.page);
@@ -211,12 +215,12 @@ test.describe('analytics harness', () => {
         await loaded(page);
         expect((await loads(page)).length).toBe(1);
         expect((await loads(page))[0].filters).toEqual({});
-        await page.getByLabel('Circle').selectOption('c-founders');
+        await page.getByLabel('Circle', { exact: true }).selectOption('c-founders');
         await expect.poll(async () => (await loads(page)).length).toBe(2);
         expect((await loads(page))[1].filters).toEqual({ circleKey: 'c-founders' });
-        await page.getByLabel('Networking status').selectOption('ACTIVE');
-        await page.getByLabel('Attendance format').selectOption('ONLINE');
-        await page.getByLabel('Meeting status').selectOption('COMPLETED');
+        await page.getByLabel('Networking status', { exact: true }).selectOption('ACTIVE');
+        await page.getByLabel('Attendance format', { exact: true }).selectOption('ONLINE');
+        await page.getByLabel('Meeting status', { exact: true }).selectOption('COMPLETED');
         await expect.poll(async () => (await loads(page)).length).toBe(5);
         expect((await loads(page))[4].filters).toEqual({ circleKey: 'c-founders', networkingStatus: 'ACTIVE', attendanceFormat: 'ONLINE', meetingStatus: 'COMPLETED' });
         await page.getByTestId('filter-from').fill('2030-12-01');
@@ -238,7 +242,7 @@ test.describe('analytics harness', () => {
     test('a narrow filter (one industry) shrinks the cohort: every cell becomes "fewer than 5"', async () => {
         const { page, close } = await harness('full');
         await loaded(page);
-        await page.getByLabel('Industry').selectOption('FINANCE');
+        await page.getByLabel('Industry', { exact: true }).selectOption('FINANCE');
         await expect(page.getByTestId('kpi-participants-value')).toHaveAttribute('data-state', 'suppressed', READY);
         await expect(page.getByTestId('kpi-participants-value')).toHaveText('fewer than 5');
         await expect(page.getByTestId('kpi-rate-value')).toHaveText('fewer than 5');
