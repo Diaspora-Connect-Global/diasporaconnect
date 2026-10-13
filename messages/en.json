@@ -6451,5 +6451,155 @@
       "communities": "Communities",
       "communitiesHint": "Find your community or association"
     }
+  },
+  "networkingAnalytics": {
+    "tab": "Analytics",
+    "title": "Networking analytics",
+    "intro": "How networking at this event is going, as totals.",
+    "aggregatesOnly": "You see totals only. Names, decisions, messages and locations are never shown or exported.",
+    "lastUpdated": "Last updated {time}",
+    "export": "Export CSV",
+    "loading": "Loading analytics…",
+    "retry": "Try again",
+    "fewerThan5": "fewer than 5",
+    "none": "—",
+    "noneLabel": "no one in this group yet",
+    "noOne": "No one in this group yet.",
+    "tooFew": "Numbers appear once a group has at least 5 people.",
+    "filters": {
+      "title": "Filters",
+      "from": "From",
+      "to": "To",
+      "status": "Networking status",
+      "circle": "Circle",
+      "meetingStatus": "Meeting status",
+      "industry": "Industry",
+      "format": "Attendance format",
+      "any": "Any",
+      "reset": "Clear filters",
+      "rangeInvalid": "The start date is after the end date, so the filter was not applied.",
+      "note": "Filters apply first, then small numbers are hidden. A narrow filter can show “fewer than 5” everywhere."
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "WITHDRAWN": "Withdrew",
+      "REVOKED": "Removed"
+    },
+    "meetingStatus": {
+      "CONFIRMED": "Confirmed",
+      "RESCHEDULE_PROPOSED": "New time proposed",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "format": {
+      "IN_PERSON": "In person",
+      "ONLINE": "Online"
+    },
+    "kpi": {
+      "participants": "Networking participants",
+      "connected": "People who connected",
+      "rate": "Connection rate",
+      "meetings": "Confirmed meetings",
+      "held": "Meetings reported held",
+      "useful": "Useful contacts",
+      "circles": "Circle participants",
+      "growth": "Community growth",
+      "registered": "Registered attendees",
+      "currentlyActive": "Currently active",
+      "sessions": "Scheduled circle sessions"
+    },
+    "help": {
+      "participants": "People who joined networking at least once, even if they paused or left later.",
+      "connected": "People who made a new connection through this event, accepted within 30 days after it ended. Connections that already existed are not counted.",
+      "rate": "People who connected divided by networking participants.",
+      "meetings": "Meetings confirmed by both people. A rescheduled meeting counts once.",
+      "held": "Meetings where at least one person said they met. A booking alone does not count as a meeting that happened.",
+      "useful": "People who reported a useful outcome (such as a partnership, customer or introduction), out of everyone who gave feedback.",
+      "circles": "Different people who joined a circle. Circle memberships are listed separately and not added to this.",
+      "growth": "Attendees who were not members and joined the organising community from this event within 7 days after it ended."
+    },
+    "sub": {
+      "ofRegistered": "{n} registered attendees",
+      "activeNow": "{n} active now",
+      "ofParticipants": "{num} of {den} networking participants",
+      "sessions": "{n} circle sessions scheduled (counted separately)",
+      "sessionsSmall": "Circle sessions scheduled: fewer than 5 (counted separately)",
+      "sessionsNone": "Circle sessions are counted separately",
+      "ofMeetings": "of {n} meetings with a feedback window",
+      "respondents": "{num} of {den} people who gave feedback",
+      "memberships": "{n} circle memberships (one person can join several)",
+      "notMembers": "{num} of {den} attendees who were not yet members"
+    },
+    "buckets": {
+      "title": "Meetings reported held",
+      "intro": "Every meeting is in exactly one group. A missing answer is “No response”, never non-attendance.",
+      "population": "{n} meetings whose time has passed or that were cancelled after confirmation",
+      "populationLabel": "Meetings in the feedback group",
+      "populationSmall": "Fewer than 5 meetings are in this group, so no breakdown is shown.",
+      "both": "Both said they met",
+      "one": "One person said they met",
+      "nonAttendance": "Non-attendance reported",
+      "noResponse": "No response",
+      "rescheduledOrCancelled": "Rescheduled or cancelled",
+      "other": "Other answer",
+      "notDrawn": "Groups with fewer than 5 are listed but not drawn.",
+      "heldNote": "“Reported held” is the first two groups together."
+    },
+    "circles": {
+      "title": "Circle participation",
+      "intro": "Unique people and memberships are shown separately and never added together.",
+      "name": "Circle",
+      "participants": "People",
+      "memberships": "Memberships",
+      "empty": "No circles to show."
+    },
+    "insights": {
+      "title": "Networking profile insights",
+      "intro": "From what people chose in their networking profile. Free-text notes and private activity are never used.",
+      "denominator": "Based on {n} participants with a networking profile",
+      "denominatorLabel": "Participants with a networking profile",
+      "denominatorSmall": "Fewer than 5 participants have a networking profile, so insights are hidden.",
+      "multi": "People can choose several options, so percentages can add up to more than 100%.",
+      "empty": "Nothing to show. A choice is listed once at least 5 people picked it.",
+      "kind": {
+        "INDUSTRIES": "Top industries",
+        "NEEDS": "Top needs",
+        "OFFERS": "Top offers",
+        "MARKETS": "Top markets",
+        "CIRCLE_TOPICS": "Circle topics (share of memberships)"
+      }
+    },
+    "growth": {
+      "title": "Community growth",
+      "intro": "People who joined the organising community from this event. Joining around the time of the event does not count without a recorded link.",
+      "existing": "Attendees who were already members",
+      "newApproved": "New members from this event",
+      "pending": "Requests still pending",
+      "notJoined": "Eligible attendees who have not joined",
+      "bySource": "Where new members joined from",
+      "source": {
+        "EVENT_PAGE": "Event page",
+        "EVENT_PROMPT": "Prompt during the event",
+        "EVENT_FOLLOWUP": "Follow-up after the event"
+      }
+    },
+    "csv": {
+      "section": "Section",
+      "metric": "Metric",
+      "value": "Value",
+      "numerator": "Numerator",
+      "denominator": "Denominator",
+      "event": "Event",
+      "generatedAt": "Generated at",
+      "filters": "Filters",
+      "people": "People",
+      "connections": "Connections",
+      "meetings": "Meetings",
+      "contacts": "Contacts",
+      "circles": "Circles",
+      "insights": "Insights",
+      "growth": "Community growth"
+    }
   }
 }

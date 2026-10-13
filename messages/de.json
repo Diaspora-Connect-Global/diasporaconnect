@@ -6451,5 +6451,155 @@
       "communities": "Communitys",
       "communitiesHint": "Finde deine Community oder deinen Verein"
     }
+  },
+  "networkingAnalytics": {
+    "tab": "Analyse",
+    "title": "Networking-Analyse",
+    "intro": "So läuft das Networking bei dieser Veranstaltung, als Summen.",
+    "aggregatesOnly": "Du siehst nur Summen. Namen, Entscheidungen, Nachrichten und Standorte werden nie angezeigt oder exportiert.",
+    "lastUpdated": "Zuletzt aktualisiert: {time}",
+    "export": "CSV exportieren",
+    "loading": "Analyse wird geladen…",
+    "retry": "Erneut versuchen",
+    "fewerThan5": "weniger als 5",
+    "none": "—",
+    "noneLabel": "noch niemand in dieser Gruppe",
+    "noOne": "Noch niemand in dieser Gruppe.",
+    "tooFew": "Zahlen erscheinen, sobald eine Gruppe mindestens 5 Personen umfasst.",
+    "filters": {
+      "title": "Filter",
+      "from": "Von",
+      "to": "Bis",
+      "status": "Networking-Status",
+      "circle": "Kreis",
+      "meetingStatus": "Treffen-Status",
+      "industry": "Branche",
+      "format": "Teilnahmeformat",
+      "any": "Alle",
+      "reset": "Filter zurücksetzen",
+      "rangeInvalid": "Das Startdatum liegt nach dem Enddatum, daher wurde der Filter nicht angewendet.",
+      "note": "Zuerst werden die Filter angewendet, danach kleine Zahlen ausgeblendet. Ein enger Filter kann überall „weniger als 5“ zeigen."
+    },
+    "status": {
+      "ACTIVE": "Aktiv",
+      "PAUSED": "Pausiert",
+      "WITHDRAWN": "Ausgetreten",
+      "REVOKED": "Entfernt"
+    },
+    "meetingStatus": {
+      "CONFIRMED": "Bestätigt",
+      "RESCHEDULE_PROPOSED": "Neuer Termin vorgeschlagen",
+      "COMPLETED": "Abgeschlossen",
+      "CANCELLED": "Abgesagt"
+    },
+    "format": {
+      "IN_PERSON": "Vor Ort",
+      "ONLINE": "Online"
+    },
+    "kpi": {
+      "participants": "Networking-Teilnehmende",
+      "connected": "Vernetzte Personen",
+      "rate": "Vernetzungsquote",
+      "meetings": "Bestätigte Treffen",
+      "held": "Als stattgefunden gemeldete Treffen",
+      "useful": "Nützliche Kontakte",
+      "circles": "Teilnehmende in Kreisen",
+      "growth": "Wachstum der Community",
+      "registered": "Angemeldete Teilnehmende",
+      "currentlyActive": "Aktuell aktiv",
+      "sessions": "Geplante Kreis-Sitzungen"
+    },
+    "help": {
+      "participants": "Personen, die dem Networking mindestens einmal beigetreten sind, auch wenn sie später pausiert oder aufgehört haben.",
+      "connected": "Personen, die über diese Veranstaltung eine neue Verbindung geknüpft haben, angenommen innerhalb von 30 Tagen nach dem Ende. Bereits bestehende Verbindungen zählen nicht.",
+      "rate": "Vernetzte Personen geteilt durch Networking-Teilnehmende.",
+      "meetings": "Treffen, die von beiden Personen bestätigt wurden. Ein verschobenes Treffen zählt einmal.",
+      "held": "Treffen, bei denen mindestens eine Person sagte, dass sie stattgefunden haben. Eine Buchung allein zählt nicht als stattgefundenes Treffen.",
+      "useful": "Personen, die ein nützliches Ergebnis gemeldet haben (zum Beispiel eine Partnerschaft, einen Kunden oder eine Vorstellung), bezogen auf alle, die Feedback gegeben haben.",
+      "circles": "Verschiedene Personen, die einem Kreis beigetreten sind. Mitgliedschaften in Kreisen werden getrennt aufgeführt und nicht dazugerechnet.",
+      "growth": "Teilnehmende, die noch keine Mitglieder waren und der veranstaltenden Community über diese Veranstaltung innerhalb von 7 Tagen nach dem Ende beigetreten sind."
+    },
+    "sub": {
+      "ofRegistered": "{n} angemeldete Teilnehmende",
+      "activeNow": "{n} aktuell aktiv",
+      "ofParticipants": "{num} von {den} Networking-Teilnehmenden",
+      "sessions": "{n} Kreis-Sitzungen geplant (separat gezählt)",
+      "sessionsSmall": "Geplante Kreis-Sitzungen: weniger als 5 (separat gezählt)",
+      "sessionsNone": "Kreis-Sitzungen werden separat gezählt",
+      "ofMeetings": "von {n} Treffen mit Feedback-Zeitraum",
+      "respondents": "{num} von {den} Personen mit Feedback",
+      "memberships": "{n} Kreis-Mitgliedschaften (eine Person kann mehreren beitreten)",
+      "notMembers": "{num} von {den} Teilnehmenden, die noch keine Mitglieder waren"
+    },
+    "buckets": {
+      "title": "Als stattgefunden gemeldete Treffen",
+      "intro": "Jedes Treffen gehört zu genau einer Gruppe. Eine fehlende Antwort heißt „Keine Antwort“, niemals Nichterscheinen.",
+      "population": "{n} Treffen, deren Zeit vorbei ist oder die nach der Bestätigung abgesagt wurden",
+      "populationLabel": "Treffen im Feedback-Zeitraum",
+      "populationSmall": "Weniger als 5 Treffen gehören zu dieser Gruppe, daher wird keine Aufteilung gezeigt.",
+      "both": "Beide sagten, dass sie sich getroffen haben",
+      "one": "Eine Person sagte, dass sie sich getroffen haben",
+      "nonAttendance": "Nichterscheinen gemeldet",
+      "noResponse": "Keine Antwort",
+      "rescheduledOrCancelled": "Verschoben oder abgesagt",
+      "other": "Andere Antwort",
+      "notDrawn": "Gruppen mit weniger als 5 werden aufgeführt, aber nicht gezeichnet.",
+      "heldNote": "„Als stattgefunden gemeldet“ sind die ersten beiden Gruppen zusammen."
+    },
+    "circles": {
+      "title": "Teilnahme an Kreisen",
+      "intro": "Einzelne Personen und Mitgliedschaften werden getrennt gezeigt und nie addiert.",
+      "name": "Kreis",
+      "participants": "Personen",
+      "memberships": "Mitgliedschaften",
+      "empty": "Keine Kreise vorhanden."
+    },
+    "insights": {
+      "title": "Einblicke aus den Networking-Profilen",
+      "intro": "Aus dem, was Personen in ihrem Networking-Profil gewählt haben. Freitexte und private Aktivitäten werden nie verwendet.",
+      "denominator": "Basis: {n} Teilnehmende mit Networking-Profil",
+      "denominatorLabel": "Teilnehmende mit Networking-Profil",
+      "denominatorSmall": "Weniger als 5 Teilnehmende haben ein Networking-Profil, daher werden keine Einblicke gezeigt.",
+      "multi": "Personen können mehrere Optionen wählen, daher können sich die Prozentwerte auf mehr als 100 % summieren.",
+      "empty": "Nichts anzuzeigen. Eine Auswahl wird aufgeführt, sobald mindestens 5 Personen sie gewählt haben.",
+      "kind": {
+        "INDUSTRIES": "Häufigste Branchen",
+        "NEEDS": "Häufigste Bedarfe",
+        "OFFERS": "Häufigste Angebote",
+        "MARKETS": "Häufigste Märkte",
+        "CIRCLE_TOPICS": "Themen der Kreise (Anteil der Mitgliedschaften)"
+      }
+    },
+    "growth": {
+      "title": "Wachstum der Community",
+      "intro": "Personen, die der veranstaltenden Community über diese Veranstaltung beigetreten sind. Ein Beitritt rund um den Veranstaltungstermin zählt ohne erfasste Verknüpfung nicht.",
+      "existing": "Teilnehmende, die bereits Mitglieder waren",
+      "newApproved": "Neue Mitglieder durch diese Veranstaltung",
+      "pending": "Noch offene Anfragen",
+      "notJoined": "Berechtigte Teilnehmende ohne Beitritt",
+      "bySource": "Woher neue Mitglieder kamen",
+      "source": {
+        "EVENT_PAGE": "Veranstaltungsseite",
+        "EVENT_PROMPT": "Hinweis während der Veranstaltung",
+        "EVENT_FOLLOWUP": "Nachfassen nach der Veranstaltung"
+      }
+    },
+    "csv": {
+      "section": "Bereich",
+      "metric": "Kennzahl",
+      "value": "Wert",
+      "numerator": "Zähler",
+      "denominator": "Nenner",
+      "event": "Veranstaltung",
+      "generatedAt": "Erstellt am",
+      "filters": "Filter",
+      "people": "Personen",
+      "connections": "Verbindungen",
+      "meetings": "Treffen",
+      "contacts": "Kontakte",
+      "circles": "Kreise",
+      "insights": "Einblicke",
+      "growth": "Wachstum der Community"
+    }
   }
 }

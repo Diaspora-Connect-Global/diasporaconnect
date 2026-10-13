@@ -1,0 +1,156 @@
+# Event Networking M8 — organiser analytics: the GraphQL contract the web UI is built against.
+#
+# STATUS: expected SDL for the backend team. The web UI (src/components/networking/analytics,
+# src/services/gql/networkingAnalytics.ts) is finished against this and switched OFF by
+# ANALYTICS_UI_ENABLED in src/lib/networkingFeatures.ts. Flip the flag only after these
+# operations are deployed. Definitions: backend docs/event-networking/analytics.md and README §2.12.
+#
+# RULES THE SERVER OWNS (the UI re-checks them but never relies on that):
+#  * Aggregates only: no user id, name, decision, message, pin or individual feedback in any type.
+#  * Computed from persisted records at read time, one event per call; counts never summed across events.
+#  * Suppression runs AFTER filters. Any count 0..4, or a ratio whose numerator or denominator is 0..4,
+#    is returned with suppressed = true and value = null (do not send the number).
+#    A ratio with denominator exactly 0 sets noDenominator = true (UI shows "—", never 0%).
+#  * No differencing: when exactly one sibling cell is suppressed, also suppress the smallest visible
+#    sibling (buckets, circle rows, growth sources). Never expose a remainder / "other" cell computed by
+#    subtraction. Insight items below 5 are omitted, not grouped.
+#  * Percentages are derived by the client from numerator / denominator (one decimal), so none are sent.
+#  * Caller must be event owner/admin, event manager, networking manager or platform admin
+#    (permission-matrix.md). Anyone else: EVENT_NETWORKING_NOT_FOUND.
+#  * Errors: extensions.code = EVENT_NETWORKING_* (NOT_FOUND, FEATURE_UNAVAILABLE, INVALID_ARGUMENT,
+#    RATE_LIMITED, UNAVAILABLE). NEVER FORBIDDEN / UNAUTHENTICATED (those sign the user out).
+#  * Cache the result for ~60 s per (event, filters). Every export the user makes happens client-side from
+#    this response; audit "view analytics" in event_admin_audit if required (the UI does one query per
+#    filter change, no polling).
+
+type NetworkingStat {
+  "null when suppressed"
+  value: Int
+  suppressed: Boolean!
+}
+
+type NetworkingRate {
+  numerator: NetworkingStat!
+  denominator: NetworkingStat!
+  "denominator is exactly 0"
+  noDenominator: Boolean!
+  suppressed: Boolean!
+}
+
+type NetworkingMeetingBuckets {
+  "Feedback population: COMPLETED meetings plus meetings cancelled after confirmation"
+  population: NetworkingStat!
+  "Both participants answered MET"
+  both: NetworkingStat!
+  "Exactly one answered MET"
+  one: NetworkingStat!
+  "No MET and at least one DID_NOT_ATTEND / ATTENDED_ONLY"
+  nonAttendance: NetworkingStat!
+  "Neither answered. NEVER non-attendance"
+  noResponse: NetworkingStat!
+  "Cancelled after confirmation, or any RESCHEDULED answer"
+  rescheduledOrCancelled: NetworkingStat!
+  "Only OTHER answers"
+  other: NetworkingStat!
+  "both + one"
+  reportedHeld: NetworkingStat!
+}
+
+type NetworkingCircleRow {
+  "Opaque key, usable as filters.circleKey. The UI never renders it."
+  key: String!
+  name: String!
+  "Unique people with a counted membership"
+  participants: NetworkingStat!
+  "Counted memberships (bookings). Never added to participants"
+  memberships: NetworkingStat!
+}
+
+enum NetworkingInsightKind { INDUSTRIES NEEDS OFFERS MARKETS CIRCLE_TOPICS }
+
+type NetworkingInsightItem {
+  code: String!
+  "Already localised for the viewer's Accept-Language"
+  label: String!
+  "Items with a count below 5 are not returned"
+  count: NetworkingStat!
+}
+
+type NetworkingInsightGroup {
+  kind: NetworkingInsightKind!
+  items: [NetworkingInsightItem!]!
+}
+
+enum NetworkingGrowthSource { EVENT_PAGE EVENT_PROMPT EVENT_FOLLOWUP }
+
+type NetworkingGrowthSourceRow {
+  source: NetworkingGrowthSource!
+  count: NetworkingStat!
+}
+
+type NetworkingCommunityGrowth {
+  "false unless the event is owned by a community or association; all other fields are then null"
+  applicable: Boolean!
+  existingMembers: NetworkingStat
+  "Approved within 7 days after the event end, with a recorded source_event_id"
+  newApproved: NetworkingStat
+  pending: NetworkingStat
+  notJoined: NetworkingStat
+  "newApproved / registered attendees who were not members"
+  joinRate: NetworkingRate
+  bySource: [NetworkingGrowthSourceRow!]!
+}
+
+type NetworkingAnalytics {
+  generatedAt: String!
+  registeredAttendees: NetworkingStat!
+  "Participations ever activated"
+  participants: NetworkingStat!
+  "Currently ACTIVE or PAUSED"
+  currentlyActive: NetworkingStat!
+  "Distinct users in an attributed pair (30-day attribution rule)"
+  peopleConnected: NetworkingStat!
+  "peopleConnected / participants"
+  connectionRate: NetworkingRate!
+  confirmedMeetings: NetworkingStat!
+  "Shown beside confirmedMeetings, never added to it"
+  scheduledCircleSessions: NetworkingStat!
+  meetings: NetworkingMeetingBuckets!
+  "Respondents with a useful outcome / respondents who submitted any meeting or circle feedback"
+  usefulContacts: NetworkingRate!
+  circleParticipants: NetworkingStat!
+  circleMemberships: NetworkingStat!
+  circles: [NetworkingCircleRow!]!
+  "Participants with a non-draft networking profile"
+  insightsDenominator: NetworkingStat!
+  insights: [NetworkingInsightGroup!]!
+  growth: NetworkingCommunityGrowth!
+}
+
+enum NetworkingAnalyticsParticipationStatus { ACTIVE PAUSED WITHDRAWN REVOKED }
+enum NetworkingAnalyticsMeetingStatus { CONFIRMED RESCHEDULE_PROPOSED COMPLETED CANCELLED }
+enum NetworkingAnalyticsFormat { IN_PERSON ONLINE }
+
+input NetworkingAnalyticsFilterInput {
+  "YYYY-MM-DD in the event's timezone (activity time of each record), inclusive"
+  from: String
+  to: String
+  networkingStatus: NetworkingAnalyticsParticipationStatus
+  circleKey: String
+  meetingStatus: NetworkingAnalyticsMeetingStatus
+  "Industry taxonomy code"
+  industry: String
+  attendanceFormat: NetworkingAnalyticsFormat
+}
+
+type NetworkingAnalyticsFilterOptions {
+  circles: [NetworkingFilterCircle!]!
+  industries: [NetworkingFilterIndustry!]!
+}
+type NetworkingFilterCircle { key: String!, name: String! }
+type NetworkingFilterIndustry { code: String!, label: String! }
+
+extend type Query {
+  eventNetworkingAnalytics(eventId: ID!, filters: NetworkingAnalyticsFilterInput): NetworkingAnalytics
+  eventNetworkingAnalyticsFilterOptions(eventId: ID!): NetworkingAnalyticsFilterOptions
+}

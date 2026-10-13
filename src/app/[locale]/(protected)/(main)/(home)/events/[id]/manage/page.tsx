@@ -37,6 +37,8 @@ import { TextInput, TextArea, Select } from "@/components/custom/input";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import MeetingSettingsSection from "@/components/networking/meetings/MeetingSettingsSection";
+import AnalyticsSection from "@/components/networking/analytics/AnalyticsSection";
+import { NETWORKING_FEATURES } from "@/lib/networkingFeatures";
 import { ApprovalsManageTab, StaffManageTab } from "@/components/events/manage/PeopleManageTabs";
 import { ProgrammeManageTab, SpeakersManageTab, UpdatesManageTab } from "@/components/events/manage/ContentManageTabs";
 import { circleUserDisplayName, useCircleUsers } from "@/hooks/useCircleUsers";
@@ -51,7 +53,7 @@ import PageLoader from "@/components/custom/PageLoader";
 import { CircularImageCropper } from "@/lib/imagecropper";
 
 type Tab = 'overview' | 'registrations' | 'attendance' | 'tickets' | 'promoCodes' | 'formBuilder' | 'settings'
-  | 'approvals' | 'programme' | 'speakers' | 'updates' | 'staff';
+  | 'approvals' | 'programme' | 'speakers' | 'updates' | 'staff' | 'analytics';
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <BarChart2 className="w-4 h-4" /> },
@@ -71,7 +73,7 @@ const ORGANISER_TABS: { id: Tab; icon: React.ReactNode }[] = [
   { id: 'updates', icon: <Megaphone className="w-4 h-4" /> },
   { id: 'staff', icon: <ShieldCheck className="w-4 h-4" /> },
 ];
-const ALL_TAB_IDS = new Set<string>([...TABS.map((x) => x.id), ...ORGANISER_TABS.map((x) => x.id)]);
+const ALL_TAB_IDS = new Set<string>([...TABS.map((x) => x.id), ...ORGANISER_TABS.map((x) => x.id), ...(NETWORKING_FEATURES.analytics ? ['analytics'] : [])]);
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -891,6 +893,7 @@ export default function EventManagePage() {
   const params = useParams();
   const eventId = params.id as string;
   const tManage = useTranslations('eventPage.manage');
+  const tAnalytics = useTranslations('networkingAnalytics');
   // `?tab=` deep-links from the event page's empty states. Read once from the URL
   // (no useSearchParams, which would force a Suspense boundary on the whole page).
   const [activeTab, setActiveTab] = useState<Tab>(() => {
@@ -956,7 +959,7 @@ export default function EventManagePage() {
 
         {/* Tabs */}
         <div className="flex gap-1 overflow-x-auto scrollbar-hide border-b border-border-subtle pb-0">
-          {[...TABS.map((x) => ({ ...x, label: x.label })), ...(isOrganiserEvent ? ORGANISER_TABS.map((x) => ({ ...x, label: tManage(`tabs.${x.id}`) })) : [])].map((tab) => (
+          {[...TABS.map((x) => ({ ...x, label: x.label })), ...(isOrganiserEvent ? ORGANISER_TABS.map((x) => ({ ...x, label: tManage(`tabs.${x.id}`) })) : []), ...(NETWORKING_FEATURES.analytics ? [{ id: 'analytics' as Tab, label: tAnalytics('tab'), icon: <BarChart2 className="w-4 h-4" /> }] : [])].map((tab) => (
             <button
               key={tab.id}
               role="tab"
@@ -988,6 +991,7 @@ export default function EventManagePage() {
           {isOrganiserEvent && activeTab === 'speakers' && <SpeakersManageTab eventId={eventId} />}
           {isOrganiserEvent && activeTab === 'updates' && <UpdatesManageTab eventId={eventId} />}
           {isOrganiserEvent && activeTab === 'staff' && <StaffManageTab eventId={eventId} />}
+          {NETWORKING_FEATURES.analytics && activeTab === 'analytics' && <AnalyticsSection eventId={eventId} eventTitle={event?.title ?? ''} />}
         </div>
       </div>
     </div>
