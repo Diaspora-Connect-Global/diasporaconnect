@@ -3285,6 +3285,24 @@
         "project": "Project",
         "projectProgress": "Project {percent}%",
         "challengeLive": "Challenge loopt"
+      },
+      "eyebrow": "Kringen",
+      "heroTitle": "Kleine kringen. Samen echt iets doen.",
+      "heroSubtitle": "Een kring is een kleine groep vrienden die zichzelf regelt: praat, stel gezamenlijke doelen en ga samen uitdagingen aan.",
+      "searchButton": "Zoeken",
+      "resultsTitle": "Kringen voor ‘{query}’",
+      "clearSearch": "Zoekopdracht wissen",
+      "noResults": "Geen kringen gevonden voor ‘{query}’.",
+      "discoverSubtitle": "Kringen die openstaan voor nieuwe leden.",
+      "startCta": "Begin een kring",
+      "how": {
+        "title": "Zo werken kringen",
+        "smallTitle": "Klein en persoonlijk",
+        "smallBody": "Een paar vrienden, geen menigte. Iedereen kent elkaar.",
+        "goalsTitle": "Doelen en uitdagingen",
+        "goalsBody": "Stel gezamenlijke doelen, voer projecten uit en ga samen uitdagingen aan.",
+        "voteTitle": "Samen besloten",
+        "voteBody": "Leden besluiten samen door te stemmen; niemand leidt de kring alleen."
       }
     },
     "create": {

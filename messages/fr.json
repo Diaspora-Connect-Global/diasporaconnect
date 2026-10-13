@@ -3285,6 +3285,24 @@
         "project": "Projet",
         "projectProgress": "Projet {percent} %",
         "challengeLive": "Défi en cours"
+      },
+      "eyebrow": "Cercles",
+      "heroTitle": "De petits cercles. De vrais projets, ensemble.",
+      "heroSubtitle": "Un cercle est un petit groupe d’amis qui s’organise lui-même : discutez, fixez des objectifs communs et relevez des défis ensemble.",
+      "searchButton": "Rechercher",
+      "resultsTitle": "Cercles correspondant à « {query} »",
+      "clearSearch": "Effacer la recherche",
+      "noResults": "Aucun cercle ne correspond à « {query} ».",
+      "discoverSubtitle": "Des cercles ouverts aux nouveaux membres.",
+      "startCta": "Créer un cercle",
+      "how": {
+        "title": "Comment fonctionnent les cercles",
+        "smallTitle": "Petit et personnel",
+        "smallBody": "Quelques amis, pas une foule. Tout le monde se connaît.",
+        "goalsTitle": "Objectifs et défis",
+        "goalsBody": "Fixez des objectifs communs, menez des projets et relevez des défis ensemble.",
+        "voteTitle": "Décidé ensemble",
+        "voteBody": "Les membres décident ensemble par vote ; personne ne dirige le cercle seul."
       }
     },
     "create": {

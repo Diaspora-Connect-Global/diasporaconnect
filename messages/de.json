@@ -3285,6 +3285,24 @@
         "project": "Projekt",
         "projectProgress": "Projekt {percent} %",
         "challengeLive": "Challenge läuft"
+      },
+      "eyebrow": "Kreise",
+      "heroTitle": "Kleine Kreise. Gemeinsam etwas bewegen.",
+      "heroSubtitle": "Ein Kreis ist eine kleine Gruppe vertrauter Menschen, die sich selbst organisiert: redet, setzt gemeinsame Ziele und nehmt Herausforderungen an.",
+      "searchButton": "Suchen",
+      "resultsTitle": "Kreise zu „{query}“",
+      "clearSearch": "Suche löschen",
+      "noResults": "Keine Kreise passen zu „{query}“.",
+      "discoverSubtitle": "Kreise, die offen für neue Mitglieder sind.",
+      "startCta": "Kreis gründen",
+      "how": {
+        "title": "So funktionieren Kreise",
+        "smallTitle": "Klein und persönlich",
+        "smallBody": "Ein paar vertraute Menschen, keine Menge. Alle kennen sich.",
+        "goalsTitle": "Ziele und Herausforderungen",
+        "goalsBody": "Setzt gemeinsame Ziele, startet Projekte und nehmt Herausforderungen an.",
+        "voteTitle": "Gemeinsam entschieden",
+        "voteBody": "Mitglieder entscheiden gemeinsam per Abstimmung; niemand leitet den Kreis allein."
       }
     },
     "create": {

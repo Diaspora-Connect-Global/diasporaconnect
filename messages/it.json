@@ -3285,6 +3285,24 @@
         "project": "Progetto",
         "projectProgress": "Progetto {percent}%",
         "challengeLive": "Sfida in corso"
+      },
+      "eyebrow": "Cerchie",
+      "heroTitle": "Piccole cerchie. Cose vere, fatte insieme.",
+      "heroSubtitle": "Una cerchia è un piccolo gruppo di amici che si gestisce da sé: parlate, fissate obiettivi comuni e affrontate sfide insieme.",
+      "searchButton": "Cerca",
+      "resultsTitle": "Cerchie per “{query}”",
+      "clearSearch": "Cancella ricerca",
+      "noResults": "Nessuna cerchia corrisponde a “{query}”.",
+      "discoverSubtitle": "Cerchie aperte a nuovi membri.",
+      "startCta": "Crea una cerchia",
+      "how": {
+        "title": "Come funzionano le cerchie",
+        "smallTitle": "Piccole e personali",
+        "smallBody": "Pochi amici, non una folla. Tutti si conoscono.",
+        "goalsTitle": "Obiettivi e sfide",
+        "goalsBody": "Fissate obiettivi comuni, portate avanti progetti e affrontate sfide insieme.",
+        "voteTitle": "Decise insieme",
+        "voteBody": "I membri decidono insieme votando; nessuno guida la cerchia da solo."
       }
     },
     "create": {

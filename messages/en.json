@@ -3285,6 +3285,24 @@
         "project": "Project",
         "projectProgress": "Project {percent}%",
         "challengeLive": "Challenge Live"
+      },
+      "eyebrow": "Circles",
+      "heroTitle": "Small circles. Real things done together.",
+      "heroSubtitle": "A circle is a small group of friends that runs itself: talk, set shared goals and take on challenges together.",
+      "searchButton": "Search",
+      "resultsTitle": "Circles matching “{query}”",
+      "clearSearch": "Clear search",
+      "noResults": "No circles match “{query}”.",
+      "discoverSubtitle": "Circles that are open to new members.",
+      "startCta": "Start a circle",
+      "how": {
+        "title": "How circles work",
+        "smallTitle": "Small and personal",
+        "smallBody": "A handful of friends, not a crowd. Everyone knows everyone.",
+        "goalsTitle": "Goals and challenges",
+        "goalsBody": "Set shared goals, run projects and take on challenges together.",
+        "voteTitle": "Decided together",
+        "voteBody": "Members decide together by voting; no one runs the circle alone."
       }
     },
     "create": {
