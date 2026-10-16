@@ -81,9 +81,13 @@ export function mapsPointUrl(latitude: number, longitude: number): string | null
   return `https://www.google.com/maps/search/?api=1&query=${latitude.toFixed(6)},${longitude.toFixed(6)}`;
 }
 
-/** A map link for a real street address supplied by the organiser. Null when there is none. */
+/**
+ * A map link for a real street address supplied by the organiser. Null when there is none.
+ * A spot inside the venue ("Hall A", "Stand 4") is not an address: searching a map for it
+ * sends people across town. An address has a comma (street, city) or a number, and some length.
+ */
 export function mapsAddressUrl(address: string | null | undefined): string | null {
   const a = (address ?? '').trim();
-  if (a.length < 6) return null;
+  if (a.length < 8 || !(/,/.test(a) || /\d/.test(a))) return null;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}`;
 }
