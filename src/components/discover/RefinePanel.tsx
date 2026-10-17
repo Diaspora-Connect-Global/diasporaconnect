@@ -114,7 +114,6 @@ export function RefinePanel({
           <select id="discover-sort" value={sort} onChange={(e) => onSort(e.target.value as DiscoverSort)} className={field}>
             <option value="newest">{t('sort.newest')}</option>
             <option value="closing">{t('sort.closing')}</option>
-            <option value="applications">{t('sort.applications')}</option>
           </select>
         </div>
       </div>

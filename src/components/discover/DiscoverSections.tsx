@@ -6,14 +6,15 @@ import { useTranslations } from 'next-intl';
 import { Section } from '@/components/redesign/Section';
 import { SectionHeader } from '@/components/redesign/SectionHeader';
 import { EventTile, JobCard, OpportunityCard, ProductCard, ServiceCard } from '@/components/redesign/ListingCards';
-import { useFeaturedProducts, useFeaturedServices, useOpportunities, type OpportunityItem } from '@/hooks/redesign/useFreshListings';
+import { useFeaturedProducts, useFeaturedServices, useOpportunities, type OpportunityItem, type OpportunitySortBy } from '@/hooks/redesign/useFreshListings';
 import { LIST_EVENTS, getEventLocationDisplay, type Event, type ListEventsData } from '@/services/gql/events';
 import type { DiscoverCategoryKey, DiscoverSort } from './discoverCategories';
 
-const SORT_INPUT: Record<DiscoverSort, { sortBy: 'createdAt' | 'deadline' | 'applicationCount'; sortOrder: 'ASC' | 'DESC' }> = {
-  newest: { sortBy: 'createdAt', sortOrder: 'DESC' },
-  closing: { sortBy: 'deadline', sortOrder: 'ASC' },
-  applications: { sortBy: 'applicationCount', sortOrder: 'DESC' },
+// opportunity-service accepts only CREATED_AT | DEADLINE | COMPENSATION | RELEVANCE and refuses
+// anything else with an INTERNAL error, which the gateway's circuit breaker counts as an outage.
+const SORT_INPUT: Record<DiscoverSort, { sortBy: OpportunitySortBy; sortOrder: 'ASC' | 'DESC' }> = {
+  newest: { sortBy: 'CREATED_AT', sortOrder: 'DESC' },
+  closing: { sortBy: 'DEADLINE', sortOrder: 'ASC' },
 };
 
 type OppKey = 'jobs' | 'investments' | 'realEstate';

@@ -27,10 +27,13 @@ type OppsData = { listOpportunities?: { total?: number; opportunities?: Opportun
 type ProductsData = { getFeaturedProducts?: { products?: ProductItem[] | null } | null };
 type ServicesData = { getFeaturedMarketplaceServices?: { services?: ServiceItem[] | null } | null };
 
+/** The sort keys opportunity-service accepts (anything else is refused). */
+export type OpportunitySortBy = 'CREATED_AT' | 'DEADLINE' | 'COMPENSATION' | 'RELEVANCE';
+
 /** Newest opportunities, optionally of one `type` / `category`. Every field read is null-guarded. */
-export function useOpportunities(input: { type?: string; category?: string; location?: string; searchTerm?: string; sortBy?: 'createdAt' | 'deadline' | 'applicationCount'; sortOrder?: 'ASC' | 'DESC'; limit: number }, skip = false) {
+export function useOpportunities(input: { type?: string; category?: string; location?: string; searchTerm?: string; sortBy?: OpportunitySortBy; sortOrder?: 'ASC' | 'DESC'; limit: number }, skip = false) {
   const { data, loading } = useQuery<OppsData>(LIST_OPPORTUNITIES, {
-    variables: { input: { offset: 0, sortBy: 'createdAt', sortOrder: 'DESC', ...input } },
+    variables: { input: { offset: 0, sortBy: 'CREATED_AT', sortOrder: 'DESC', ...input } },
     fetchPolicy: 'cache-first',
     skip,
     ...SILENT,

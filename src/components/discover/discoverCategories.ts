@@ -41,7 +41,8 @@ export function parseCategories(raw: string | null): DiscoverCategoryKey[] {
   return DISCOVER_CATEGORY_KEYS.filter((k) => wanted.has(k));
 }
 
-export type DiscoverSort = 'newest' | 'closing' | 'applications';
+// No "most applications" sort: opportunity-service cannot sort by it, and a label must describe the real order.
+export type DiscoverSort = 'newest' | 'closing';
 export function parseSort(raw: string | null): DiscoverSort {
-  return raw === 'closing' || raw === 'applications' ? raw : 'newest';
+  return raw === 'closing' ? raw : 'newest';
 }
