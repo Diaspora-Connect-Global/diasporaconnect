@@ -102,8 +102,8 @@ export function normalizeLegacyAppPath(path: string): string {
 
   if ((r = /^\/posts\/([^/]+)$/.exec(pathname))) return `/post/${r[1]}${rest}`;
   if ((r = /^\/profile\/([^/]+)$/.exec(pathname))) return `/${r[1]}`;
-  if (/^\/connections\/requests(\/.*)?$/.test(pathname)) return '/profile?m=friends&t=3';
-  if (/^\/connections(\/.*)?$/.test(pathname)) return '/profile?m=friends';
+  if (/^\/connections\/requests(\/.*)?$/.test(pathname)) return '/friends?tab=requests';
+  if (/^\/connections(\/.*)?$/.test(pathname)) return '/friends?tab=friends';
   if ((r = /^\/messages\/group\/([^/]+)(\/.*)?$/.exec(pathname))) {
     return `/chat?t=groups&ct=group&gid=${reencode(r[1])}`;
   }
@@ -283,7 +283,7 @@ function resolvePrimaryPath(
   // New follower → their profile
   if (t === 'follow.new') {
     const follower = pickString(d, ['followerId']);
-    return follower ? `/${enc(follower)}` : '/profile?m=friends';
+    return follower ? `/${enc(follower)}` : '/friends?tab=friends';
   }
 
   // Payments, payouts, vendor status, KYC
@@ -323,7 +323,7 @@ function resolvePrimaryPath(
 
   // Suggested people
   if (t === 'friend.suggestion' || t === 'alumni.match' || t === 'colleague.match') {
-    return '/profile?m=friends&t=2';
+    return '/friends?tab=discover';
   }
 
   // Post comment / reply: open the post and deep-link to the triggering comment

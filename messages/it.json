@@ -6786,5 +6786,42 @@
       "refused": "Al momento non è possibile.",
       "generic": "Qualcosa è andato storto. Riprova."
     }
+  },
+  "friendsPage": {
+    "metaTitle": "Amici",
+    "title": "Amici",
+    "subtitle": "Trova persone, rispondi alle richieste e resta in contatto con i tuoi amici.",
+    "tabsLabel": "Sezioni degli amici",
+    "tabs": {
+      "discover": "Scopri",
+      "requests": "Richieste",
+      "sent": "Inviate",
+      "friends": "Amici"
+    },
+    "discoverSearchLabel": "Cerca persone",
+    "discoverSearchPlaceholder": "Cerca persone per nome…",
+    "filterLabel": "Filtra questo elenco",
+    "filterPlaceholder": "Filtra per nome…",
+    "searchButton": "Cerca",
+    "clearSearch": "Cancella la ricerca",
+    "suggestedTitle": "Suggeriti per te",
+    "resultsTitle": "Risultati per “{query}”",
+    "browseAll": "Sfoglia tutte le persone",
+    "loading": "Caricamento…",
+    "loadFailed": "Impossibile caricare questo elenco.",
+    "retry": "Riprova",
+    "loadMore": "Carica altri",
+    "requested": "Richiesta inviata",
+    "mutual": "{count, plural, one {# collegamento in comune} other {# collegamenti in comune}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} e {count, plural, one {# altra} other {# altre}}",
+    "empty": {
+      "discover": "Nessun suggerimento al momento. Prova a cercare qualcuno per nome.",
+      "requests": "Nessuna richiesta di amicizia in attesa.",
+      "sent": "Non hai richieste in attesa di risposta.",
+      "friends": "Non hai ancora aggiunto amici. Scopri persone per iniziare."
+    },
+    "noMatch": "Nessuno corrisponde a “{query}”.",
+    "verified": "Verificato"
   }
 }

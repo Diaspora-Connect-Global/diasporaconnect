@@ -59,7 +59,7 @@ test.describe('isKnownAppPath', () => {
         '/home', '/discover', '/more', '/fr/discover', '/de/more',
         // Deep links the More page uses.
         '/events?tab=saved', '/opportunities?tab=saved', '/marketplace?tab=services', '/profile?posts=saved',
-        '/profile?m=friends&t=3',
+        '/friends', '/friends?tab=requests', '/friends?tab=sent', '/de/friends?tab=friends',
     ];
     for (const p of valid) test(`accepts ${p}`, () => expect(isKnownAppPath(p)).toBe(true));
 
@@ -85,8 +85,8 @@ test.describe('normalizeLegacyAppPath', () => {
     const cases: Array<[string, string]> = [
         [`/posts/${ID}?commentId=${ID2}`, `/post/${ID}?commentId=${ID2}`],
         [`/profile/${ID}`, `/${ID}`],
-        ['/connections/requests', '/profile?m=friends&t=3'],
-        ['/connections', '/profile?m=friends'],
+        ['/connections/requests', '/friends?tab=requests'],
+        ['/connections', '/friends?tab=friends'],
         [`/messages/group/${GID}/extra`, `/chat?t=groups&ct=group&gid=${GID}`],
         [`/messages/${ID}`, '/chat?t=direct'],
         ['/vendor/payouts', '/vendors/payouts'],
@@ -125,10 +125,10 @@ const community = { ownerType: 'COMMUNITY', ownerEntityId: ID, caseId: ID2 };
 const fixtures: Fixture[] = [
     { type: 'connection.requested', data: { requesterId: ID2, receiverId: ID }, oldUrl: '/connections/requests', newUrl: `/${ID2}`, expected: `/${ID2}` },
     { type: 'connection.accepted', data: { requesterId: ID, receiverId: ID2 }, oldUrl: `/profile/${ID2}`, newUrl: `/${ID2}` },
-    { type: 'connection.rejected', data: {}, oldUrl: '/connections', newUrl: '/profile?m=friends' },
+    { type: 'connection.rejected', data: {}, oldUrl: '/connections', newUrl: '/friends?tab=friends' },
     { type: 'skill.endorsed', data: {}, oldUrl: '/profile#skills', newUrl: '/profile?tab=about', expected: '/profile?tab=about' },
     { type: 'follow.new', data: { followerId: ID2 }, oldUrl: `/profile/${ID2}`, newUrl: `/${ID2}`, expected: `/${ID2}` },
-    { type: 'follow.new', data: {}, oldUrl: '/profile/x', newUrl: '/profile?m=friends', expected: '/profile?m=friends' },
+    { type: 'follow.new', data: {}, oldUrl: '/profile/x', newUrl: '/friends?tab=friends', expected: '/friends?tab=friends' },
     { type: 'post.liked', data: { postId: ID }, oldUrl: `/posts/${ID}`, newUrl: `/post/${ID}`, expected: `/post/${ID}` },
     { type: 'post.commented', data: { postId: ID, commentId: ID2 }, oldUrl: `/posts/${ID}`, newUrl: `/post/${ID}?commentId=${ID2}`, expected: `/post/${ID}?commentId=${ID2}` },
     { type: 'post.mentioned', data: { postId: ID }, oldUrl: `/posts/${ID}`, newUrl: `/post/${ID}` },
@@ -172,7 +172,7 @@ const fixtures: Fixture[] = [
     { type: 'opportunity.application.received', data: { opportunityId: ID }, oldUrl: `/opportunities/${ID}/applications`, newUrl: `/opportunities/${ID}` },
     { type: 'opportunity.application.received', data: {}, oldUrl: `/opportunities/${ID}/applications`, newUrl: `/opportunities/${ID}` },
     { type: 'membership.approved', data: { entityId: ID }, oldUrl: `/community/${ID}`, newUrl: `/community/${ID}` },
-    { type: 'friend.suggestion', data: {}, oldUrl: '/connections', newUrl: '/profile?m=friends&t=2', expected: '/profile?m=friends&t=2' },
+    { type: 'friend.suggestion', data: {}, oldUrl: '/connections', newUrl: '/friends?tab=discover', expected: '/friends?tab=discover' },
     { type: 'digest.whats_new', data: {}, oldUrl: '/', newUrl: '/' },
     { type: 'system.announcement', data: {} },
 ];
