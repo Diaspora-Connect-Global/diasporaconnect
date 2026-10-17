@@ -6579,6 +6579,7 @@
       "notJoined": "Berechtigte Teilnehmende ohne Beitritt",
       "bySource": "Woher neue Mitglieder kamen",
       "source": {
+        "EVENT_REGISTRATION": "Anmeldung zur Veranstaltung",
         "EVENT_PAGE": "Veranstaltungsseite",
         "EVENT_PROMPT": "Hinweis während der Veranstaltung",
         "EVENT_FOLLOWUP": "Nachfassen nach der Veranstaltung"

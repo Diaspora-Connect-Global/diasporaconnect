@@ -6579,6 +6579,7 @@
       "notJoined": "Participants éligibles qui n’ont pas rejoint",
       "bySource": "D’où viennent les nouveaux membres",
       "source": {
+        "EVENT_REGISTRATION": "Inscription à l’événement",
         "EVENT_PAGE": "Page de l’événement",
         "EVENT_PROMPT": "Invitation pendant l’événement",
         "EVENT_FOLLOWUP": "Relance après l’événement"

@@ -66,7 +66,7 @@ export interface InsightGroup {
   items: InsightItem[];
 }
 
-export type GrowthSource = 'EVENT_PAGE' | 'EVENT_PROMPT' | 'EVENT_FOLLOWUP';
+export type GrowthSource = 'EVENT_REGISTRATION' | 'EVENT_PAGE' | 'EVENT_PROMPT' | 'EVENT_FOLLOWUP';
 
 export interface GrowthSourceRow {
   source: GrowthSource;

@@ -81,7 +81,7 @@ type NetworkingInsightGroup {
   items: [NetworkingInsightItem!]!
 }
 
-enum NetworkingGrowthSource { EVENT_PAGE EVENT_PROMPT EVENT_FOLLOWUP }
+enum NetworkingGrowthSource { EVENT_REGISTRATION EVENT_PAGE EVENT_PROMPT EVENT_FOLLOWUP }
 
 type NetworkingGrowthSourceRow {
   source: NetworkingGrowthSource!

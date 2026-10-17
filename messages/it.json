@@ -6579,6 +6579,7 @@
       "notJoined": "Partecipanti idonei che non sono entrati",
       "bySource": "Da dove arrivano i nuovi membri",
       "source": {
+        "EVENT_REGISTRATION": "Iscrizione all’evento",
         "EVENT_PAGE": "Pagina dell’evento",
         "EVENT_PROMPT": "Invito durante l’evento",
         "EVENT_FOLLOWUP": "Promemoria dopo l’evento"

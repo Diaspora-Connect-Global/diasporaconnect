@@ -6579,6 +6579,7 @@
       "notJoined": "Eligible attendees who have not joined",
       "bySource": "Where new members joined from",
       "source": {
+        "EVENT_REGISTRATION": "Registration for the event",
         "EVENT_PAGE": "Event page",
         "EVENT_PROMPT": "Prompt during the event",
         "EVENT_FOLLOWUP": "Follow-up after the event"

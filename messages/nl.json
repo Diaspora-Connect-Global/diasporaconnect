@@ -6579,6 +6579,7 @@
       "notJoined": "Geschikte deelnemers die geen lid werden",
       "bySource": "Waar nieuwe leden vandaan kwamen",
       "source": {
+        "EVENT_REGISTRATION": "Aanmelding voor het evenement",
         "EVENT_PAGE": "Evenementpagina",
         "EVENT_PROMPT": "Oproep tijdens het evenement",
         "EVENT_FOLLOWUP": "Opvolging na het evenement"
