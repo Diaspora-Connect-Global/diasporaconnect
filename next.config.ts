@@ -65,6 +65,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // Dev server only: Next 16 blocks its dev resources (HMR, client chunks) for any origin other
+  // than localhost, so opening http://127.0.0.1:3000 rendered the page but never hydrated it — an
+  // endless spinner. No effect on production builds.
+  allowedDevOrigins: ['127.0.0.1'],
   // Do not advertise the framework — one less fingerprinting signal.
   poweredByHeader: false,
   async headers() {
