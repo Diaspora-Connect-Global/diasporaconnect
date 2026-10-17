@@ -87,6 +87,30 @@ export function eventCodeOf(source: unknown): string {
   return walk(source, 0);
 }
 
+/**
+ * `extensions.retryAfterSeconds` (a non-negative whole number) from the first error that carries
+ * one, else null. 0 means "no more tries"; null means the server did not say.
+ */
+export function retryAfterSecondsOf(source: unknown): number | null {
+  const seen = new Set<unknown>();
+  const walk = (node: unknown, depth: number): number | null => {
+    if (!node || typeof node !== 'object' || depth > 4 || seen.has(node)) return null;
+    seen.add(node);
+    const n = node as Record<string, unknown>;
+    for (const list of [n.errors, n.graphQLErrors]) {
+      if (!Array.isArray(list)) continue;
+      for (const e of list) {
+        const v = ((e as Loose)?.extensions as Loose | undefined)?.retryAfterSeconds;
+        if (typeof v === 'number' && Number.isFinite(v) && v >= 0) return Math.min(Math.floor(v), 86_400);
+      }
+    }
+    const own = (n.extensions as Loose | undefined)?.retryAfterSeconds;
+    if (typeof own === 'number' && Number.isFinite(own) && own >= 0) return Math.min(Math.floor(own), 86_400);
+    return walk(n.error, depth + 1) ?? walk(n.cause, depth + 1) ?? walk(n.networkError, depth + 1);
+  };
+  return walk(source, 0);
+}
+
 /** Turn a failed result (or thrown error) into a translatable reason. */
 export function eventRefusal(source: unknown): EventRefusal {
   const code = eventCodeOf(source);

@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-import { eventCodeOf } from '@/lib/eventRefusal';
+import { eventCodeOf, retryAfterSecondsOf } from '@/lib/eventRefusal';
 
 /**
  * Event networking, M7: event day, feedback and the post-event recap.
@@ -124,6 +124,8 @@ export interface FeedbackInput {
   usefulness?: number | null;
   outcomes?: FeedbackOutcome[];
   comment?: string | null;
+  /** Meetings only: the stored "stay connected" preference (the Connect call is separate). */
+  stayConnected?: boolean;
 }
 
 const FEEDBACK = `subjectType attendance usefulness outcomes comment submittedAt updatedAt editableUntil editable`;
@@ -201,6 +203,8 @@ const KEY_BY_CODE: Readonly<Record<string, string>> = {
   EVENT_NETWORKING_FEATURE_UNAVAILABLE: 'featureUnavailable',
   EVENT_FEATURE_UNAVAILABLE: 'featureUnavailable',
   EVENT_NETWORKING_UNAVAILABLE: 'unavailable',
+  EVENT_NETWORKING_NOT_OPEN: 'refused',
+  EVENT_NETWORKING_CIRCLE_NOT_FOUND: 'refused',
   EVENT_NETWORKING_MEETING_NOT_FOUND: 'notFound',
   EVENT_NETWORKING_NOT_FOUND: 'notFound',
   EVENT_NETWORKING_NOT_PARTICIPANT: 'notParticipant',
@@ -222,10 +226,12 @@ export interface EventDayFailure {
   ok: false;
   code: string;
   key: string;
+  /** CANT_FIND_COOLDOWN only: seconds until the next press (0 = no presses left); null when the server did not say. */
+  retryAfterSeconds?: number | null;
 }
 
 export function eventDayFailure(source: unknown): EventDayFailure {
   const code = eventCodeOf(source);
   const key = KEY_BY_CODE[code] ?? (code.startsWith('EVENT_NETWORKING_') ? 'refused' : 'generic');
-  return { ok: false, code, key };
+  return code === 'EVENT_NETWORKING_CANT_FIND_COOLDOWN' ? { ok: false, code, key, retryAfterSeconds: retryAfterSecondsOf(source) } : { ok: false, code, key };
 }

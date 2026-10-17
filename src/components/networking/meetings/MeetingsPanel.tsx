@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { PersonAvatar } from '../primitives';
@@ -50,6 +51,17 @@ export default function MeetingsPanel({
   const t = useTranslations('networking.meetings');
   const te = useTranslations('networking.errors');
   const [open, setOpen] = useState<Meeting | null>(null);
+  // A notification link (`?meeting=`) opens that meeting once, when it is in the loaded list.
+  const wanted = useSearchParams().get('meeting');
+  const opened = useRef(false);
+  useEffect(() => {
+    if (!wanted || opened.current) return;
+    const m = meetings.find((x) => x.meetingId === wanted);
+    if (m) {
+      opened.current = true;
+      setOpen(m);
+    }
+  }, [wanted, meetings]);
   return (
     <div data-testid="panel-meetings" className="space-y-4">
       <p className="text-sm text-muted-foreground">{t('panel.intro')}</p>

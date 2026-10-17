@@ -44,6 +44,8 @@ export interface CsvText {
   generatedAt: string;
   /** Human-readable applied filters, e.g. [['Circle', 'Founders']]. */
   filters: Array<[string, string]>;
+  /** Localised label for a taxonomy code; the server's English label is the fallback. */
+  codeLabel?: (code: string, fallback: string) => string;
 }
 
 export function buildAnalyticsCsv(data: NetworkingAnalytics, text: CsvText): string {
@@ -95,7 +97,7 @@ export function buildAnalyticsCsv(data: NetworkingAnalytics, text: CsvText): str
   data.insights.forEach((g) =>
     g.items.forEach((i) => {
       // A code below 5 is left out, never turned into a "fewer than 5" row or an "other" cell.
-      if (cellOf(i.count).kind === 'value') rows.push([t('csv.insights'), `${t(`insights.kind.${g.kind}`)}: ${i.label}`, count(i.count), '', '']);
+      if (cellOf(i.count).kind === 'value') rows.push([t('csv.insights'), `${t(`insights.kind.${g.kind}`)}: ${text.codeLabel ? text.codeLabel(i.code, i.label) : i.label}`, count(i.count), '', '']);
     }),
   );
   if (data.growth.applicable) {

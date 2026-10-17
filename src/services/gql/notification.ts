@@ -381,6 +381,36 @@ function resolvePrimaryPath(
     return '/notification';
   }
 
+  // Event networking, event day. Before the generic rules below, which would send all of these to
+  // the event page. Ids come from `data.eventId` / `data.meetingId` / `data.circleId`.
+  if (t === 'event.networking.cant_find') {
+    const eid = pickString(d, ['eventId']);
+    if (!eid) return '/events';
+    const mid = pickString(d, ['meetingId']);
+    // Confirmed meetings sit under "Upcoming"; `meeting` opens that meeting's detail (the event-day card).
+    return `/events/${enc(eid)}/networking?tab=meetings&f=UPCOMING${mid ? `&meeting=${enc(mid)}` : ''}`;
+  }
+  // Feedback prompts and the post-event follow-up both live in the Recap tab.
+  if (t === 'event.networking.feedback' || t === 'event.networking.followup') {
+    const eid = pickString(d, ['eventId']);
+    return eid ? `/events/${enc(eid)}/networking?tab=recap` : '/events';
+  }
+  // M6 networking circles: the circle room, else the circles tab.
+  if (t.startsWith('event.networking.group.')) {
+    const eid = pickString(d, ['eventId']);
+    if (!eid) return '/events';
+    const cid = pickString(d, ['circleId']);
+    return cid ? `/events/${enc(eid)}/networking/circles/${enc(cid)}` : `/events/${enc(eid)}/networking?tab=circles`;
+  }
+
+  // Other networking notices (interest, match, reminder, meeting.*) → the matching networking tab.
+  if (t.startsWith('event.networking.')) {
+    const eid = pickString(d, ['eventId']);
+    if (!eid) return '/events';
+    const tab = t.startsWith('event.networking.meeting.') ? 'meetings' : t === 'event.networking.match' ? 'matches' : t === 'event.networking.interest' ? 'interested' : null;
+    return `/events/${enc(eid)}/networking${tab ? `?tab=${tab}` : ''}`;
+  }
+
   // Events → event detail when we have an id, else the events list. Owner-facing
   // types open the manage page.
   if (t.startsWith('event.')) {

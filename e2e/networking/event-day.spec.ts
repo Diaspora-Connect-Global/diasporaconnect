@@ -7,6 +7,8 @@
  * must show nothing of it and send no event-day operation.
  */
 import { test, expect, type Browser, type Page } from '@playwright/test';
+import { eventDayFailure } from '../../src/services/gql/networkingEventDay';
+import { retryAfterSecondsOf } from '../../src/lib/eventRefusal';
 import { openBrowser } from '../support/browser';
 import { EVENT_ID, openPage } from '../support/eventFixtures';
 import { networkingOverrides, UUID } from '../support/networkingFixtures';
@@ -327,5 +329,24 @@ test.describe('flag off (production default): real routes show nothing and send 
         await expect(page.getByTestId('feedback-entry')).toHaveCount(0);
         expect(m7Ops(graphql.ops)).toEqual([]);
         await page.context().close();
+    });
+});
+
+test.describe('refusal details (pure)', () => {
+    const refused = (extensions: Record<string, unknown>) => ({ data: null, errors: [{ message: 'x', extensions }] });
+
+    test('CANT_FIND_COOLDOWN carries retryAfterSeconds (0 = no presses left)', () => {
+        const f = eventDayFailure(refused({ code: 'EVENT_NETWORKING_CANT_FIND_COOLDOWN', retryAfterSeconds: 90 }));
+        expect(f).toMatchObject({ ok: false, key: 'cantFindCooldown', retryAfterSeconds: 90 });
+        expect(eventDayFailure(refused({ code: 'EVENT_NETWORKING_CANT_FIND_COOLDOWN', retryAfterSeconds: 0 })).retryAfterSeconds).toBe(0);
+        expect(eventDayFailure(refused({ code: 'EVENT_NETWORKING_CANT_FIND_COOLDOWN' })).retryAfterSeconds).toBeNull();
+        expect(retryAfterSecondsOf(refused({ code: 'X', retryAfterSeconds: -5 }))).toBeNull();
+    });
+
+    test('the extra codes read as the generic refusal', () => {
+        for (const code of ['EVENT_NETWORKING_CIRCLE_NOT_FOUND', 'EVENT_NETWORKING_NOT_OPEN']) {
+            expect(eventDayFailure(refused({ code })).key).toBe('refused');
+        }
+        expect(eventDayFailure(refused({ code: 'EVENT_NETWORKING_UNAVAILABLE' })).key).toBe('unavailable');
     });
 });

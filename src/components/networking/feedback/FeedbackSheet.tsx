@@ -64,7 +64,7 @@ export default function FeedbackSheet({
   const submit = async ({ input, stayConnected }: FeedbackFormValue) => {
     setBusy(true);
     setErrorKey(null);
-    const out = await api.submit(subject, input);
+    const out = await api.submit(subject, subject.type === 'MEETING' ? { ...input, stayConnected } : input);
     if (!out.ok) {
       setBusy(false);
       setErrorKey(out.key);

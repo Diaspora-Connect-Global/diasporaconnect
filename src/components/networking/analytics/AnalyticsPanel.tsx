@@ -14,6 +14,7 @@ import {
 import { useAnalyticsData, useFilterOptions, type AnalyticsApi } from './useAnalytics';
 import { cellOf, rateOf, type Cell, type RateCell } from './stats';
 import { buildAnalyticsCsv, csvFilename } from './csv';
+import { taxonomyMessageKey } from '@/lib/networkingTaxonomy';
 import { BigFigure, Card, CellText, KpiTile, StackedBar, ValueBar, useFormats, type BarRow } from './parts';
 
 const FIELD = 'h-11 w-full rounded-lg border border-border-subtle bg-surface-default px-3 text-base text-text-primary md:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand';
@@ -41,9 +42,23 @@ function downloadCsv(csv: string, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/**
+ * Insight / industry names come from the server in English (`label`); the web translates them by
+ * `code` through the networking taxonomy messages and keeps the server label when it has no entry
+ * (a code added after this release).
+ */
+export function useCodeLabel(): (code: string, fallback: string) => string {
+  const tn = useTranslations('networking');
+  return (code, fallback) => {
+    const key = taxonomyMessageKey(code);
+    return (tn as unknown as { has: (k: string) => boolean }).has(key) ? tn(key as never) : fallback;
+  };
+}
+
 export default function AnalyticsPanel({ api, eventTitle }: { api: AnalyticsApi; eventTitle: string }) {
   const t = useTranslations('networkingAnalytics');
   const te = useTranslations('networking.errors');
+  const codeLabel = useCodeLabel();
   const { dateTime } = useFormats();
   const [draft, setDraft] = useState<AnalyticsFilters>(EMPTY);
   const [applied, setApplied] = useState<AnalyticsFilters>(EMPTY);
@@ -67,7 +82,7 @@ export default function AnalyticsPanel({ api, eventTitle }: { api: AnalyticsApi;
     if (applied.networkingStatus) appliedLabels.push([t('filters.status'), t(`status.${applied.networkingStatus}`)]);
     if (applied.circleKey) appliedLabels.push([t('filters.circle'), options.circles.find((c) => c.key === applied.circleKey)?.name ?? '']);
     if (applied.meetingStatus) appliedLabels.push([t('filters.meetingStatus'), t(`meetingStatus.${applied.meetingStatus}`)]);
-    if (applied.industry) appliedLabels.push([t('filters.industry'), options.industries.find((i) => i.code === applied.industry)?.label ?? '']);
+    if (applied.industry) appliedLabels.push([t('filters.industry'), (() => { const o = options.industries.find((i) => i.code === applied.industry); return o ? codeLabel(o.code, o.label) : ''; })()]);
     if (applied.attendanceFormat) appliedLabels.push([t('filters.format'), t(`format.${applied.attendanceFormat}`)]);
     const csv = buildAnalyticsCsv(q.data, {
       t: (k) => t(k as never),
@@ -76,6 +91,7 @@ export default function AnalyticsPanel({ api, eventTitle }: { api: AnalyticsApi;
       eventTitle,
       generatedAt: q.data.generatedAt,
       filters: appliedLabels,
+      codeLabel,
     });
     downloadCsv(csv, csvFilename(eventTitle));
   };
@@ -129,7 +145,7 @@ export default function AnalyticsPanel({ api, eventTitle }: { api: AnalyticsApi;
           <Field id="an-industry" label={t('filters.industry')}>
             <select id="an-industry" data-testid="filter-industry" className={FIELD} value={draft.industry ?? ''} onChange={(e) => set({ industry: e.target.value })}>
               <option value="">{t('filters.any')}</option>
-              {options.industries.map((i) => <option key={i.code} value={i.code}>{i.label}</option>)}
+              {options.industries.map((i) => <option key={i.code} value={i.code}>{codeLabel(i.code, i.label)}</option>)}
             </select>
           </Field>
           <Field id="an-format" label={t('filters.format')}>
@@ -317,6 +333,7 @@ function CirclesCard({ data }: { data: NetworkingAnalytics }) {
 
 function InsightsCard({ data }: { data: NetworkingAnalytics }) {
   const t = useTranslations('networkingAnalytics');
+  const codeLabel = useCodeLabel();
   const { num, pct } = useFormats();
   const den = cellOf(data.insightsDenominator);
   const memberships = cellOf(data.circleMemberships);
@@ -346,7 +363,7 @@ function InsightsCard({ data }: { data: NetworkingAnalytics }) {
                       {items.map((i) => (
                         <ValueBar
                           key={i.code}
-                          label={i.label}
+                          label={codeLabel(i.code, i.label)}
                           count={num(i.n)}
                           percentText={base.kind === 'value' ? pct(i.n / base.n) : null}
                           ratio={base.kind === 'value' ? i.n / base.n : 0.02}

@@ -101,9 +101,13 @@ function InPerson({ meeting, eventId, config, clock }: { meeting: Meeting; event
   const [geo, setGeo] = useState<LocateFailureReason | null>(null);
   const [consent, setConsent] = useState(false);
   const [announce, setAnnounce] = useState('');
+  // From a refused press: when I may press again (retryAfterSeconds), or that no presses are left.
+  const [pressAgainAt, setPressAgainAt] = useState<string | null>(null);
+  const [noPressesLeft, setNoPressesLeft] = useState(false);
 
   const sharingUntil = day?.mySharingExpiresAt ?? null;
-  const cooldownUntil = day?.cantFindAvailableAt ?? null;
+  const stateCooldown = day?.cantFindAvailableAt ?? null;
+  const cooldownUntil = pressAgainAt && (!stateCooldown || Date.parse(pressAgainAt) > Date.parse(stateCooldown)) ? pressAgainAt : stateCooldown;
   // One-second ticks only while something visibly counts down.
   const probe = clock();
   const ticking = remainingMs(sharingUntil, probe) > 0 || remainingMs(cooldownUntil, probe) > 0;
@@ -113,6 +117,8 @@ function InPerson({ meeting, eventId, config, clock }: { meeting: Meeting; event
   const cooldownLeft = remainingMs(cooldownUntil, nowMs);
   const pin = day?.counterpartPin && remainingMs(day.counterpartPin.expiresAt, nowMs) > 0 ? day.counterpartPin : null;
 
+  const clockRef = useRef(clock);
+  clockRef.current = clock;
   const apiRef = useRef(api);
   apiRef.current = api;
   const sharingRef = useRef(false);
@@ -125,6 +131,12 @@ function InPerson({ meeting, eventId, config, clock }: { meeting: Meeting; event
       setDay(out.state);
       setErrorKey(null);
       if (said) setAnnounce(said);
+      setNoPressesLeft(false);
+    } else if (out.key === 'cantFindCooldown' && typeof out.retryAfterSeconds === 'number') {
+      // Not an error to show: the button counts down (or says there are no presses left).
+      setErrorKey(null);
+      if (out.retryAfterSeconds > 0) setPressAgainAt(new Date(clockRef.current() + out.retryAfterSeconds * 1000).toISOString());
+      else setNoPressesLeft(true);
     } else {
       setErrorKey(out.key);
     }
@@ -273,7 +285,7 @@ function InPerson({ meeting, eventId, config, clock }: { meeting: Meeting; event
         )}
         <button
           type="button"
-          disabled={busy !== null || cooldownLeft > 0}
+          disabled={busy !== null || cooldownLeft > 0 || noPressesLeft}
           onClick={() => void run('cantfind', () => api.cantFind(meetingId), td('cantFindSent', { name }))}
           className={btnQuiet}
           data-testid="eventday-cant-find"
@@ -283,7 +295,7 @@ function InPerson({ meeting, eventId, config, clock }: { meeting: Meeting; event
         </button>
       </div>
       <p id="eventday-cant-find-hint" className="-mt-2 text-xs text-muted-foreground" data-testid="eventday-cant-find-hint">
-        {cooldownLeft > 0 ? td('cantFindCooldown', { time: formatCountdown(cooldownLeft) }) : td('cantFindHint', { name })}
+        {noPressesLeft ? td('cantFindNone') : cooldownLeft > 0 ? td('cantFindCooldown', { time: formatCountdown(cooldownLeft) }) : td('cantFindHint', { name })}
       </p>
 
       <div className="space-y-3 border-t border-border-subtle pt-4">
