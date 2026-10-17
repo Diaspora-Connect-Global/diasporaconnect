@@ -6791,5 +6791,42 @@
     "open": "Open menu",
     "title": "Menu",
     "close": "Close menu"
+  },
+  "friendsPage": {
+    "metaTitle": "Friends",
+    "title": "Friends",
+    "subtitle": "Find people, answer requests and keep up with your friends.",
+    "tabsLabel": "Friends sections",
+    "tabs": {
+      "discover": "Discover",
+      "requests": "Requests",
+      "sent": "Sent",
+      "friends": "Friends"
+    },
+    "discoverSearchLabel": "Search people",
+    "discoverSearchPlaceholder": "Search people by name…",
+    "filterLabel": "Filter this list",
+    "filterPlaceholder": "Filter by name…",
+    "searchButton": "Search",
+    "clearSearch": "Clear search",
+    "suggestedTitle": "Suggested for you",
+    "resultsTitle": "Results for “{query}”",
+    "browseAll": "Browse all people",
+    "loading": "Loading…",
+    "loadFailed": "We couldn't load this list.",
+    "retry": "Try again",
+    "loadMore": "Load more",
+    "requested": "Requested",
+    "mutual": "{count, plural, one {# mutual connection} other {# mutual connections}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} and {count, plural, one {# other} other {# others}}",
+    "empty": {
+      "discover": "No suggestions right now. Try searching for someone by name.",
+      "requests": "No friend requests waiting for you.",
+      "sent": "You have no requests waiting for an answer.",
+      "friends": "You haven't added any friends yet. Discover people to get started."
+    },
+    "noMatch": "No one matches “{query}”.",
+    "verified": "Verified"
   }
 }

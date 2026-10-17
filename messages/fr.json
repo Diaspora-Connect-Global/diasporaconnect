@@ -6791,5 +6791,42 @@
     "open": "Ouvrir le menu",
     "title": "Menu",
     "close": "Fermer le menu"
+  },
+  "friendsPage": {
+    "metaTitle": "Amis",
+    "title": "Amis",
+    "subtitle": "Trouvez des personnes, répondez aux demandes et gardez le contact avec vos amis.",
+    "tabsLabel": "Sections de la liste d’amis",
+    "tabs": {
+      "discover": "Découvrir",
+      "requests": "Demandes",
+      "sent": "Envoyées",
+      "friends": "Amis"
+    },
+    "discoverSearchLabel": "Rechercher des personnes",
+    "discoverSearchPlaceholder": "Rechercher une personne par nom…",
+    "filterLabel": "Filtrer cette liste",
+    "filterPlaceholder": "Filtrer par nom…",
+    "searchButton": "Rechercher",
+    "clearSearch": "Effacer la recherche",
+    "suggestedTitle": "Suggestions pour vous",
+    "resultsTitle": "Résultats pour « {query} »",
+    "browseAll": "Voir toutes les personnes",
+    "loading": "Chargement…",
+    "loadFailed": "Impossible de charger cette liste.",
+    "retry": "Réessayer",
+    "loadMore": "Charger plus",
+    "requested": "Demande envoyée",
+    "mutual": "{count, plural, one {# relation en commun} other {# relations en commun}}",
+    "sharedOne": "Dans {name}",
+    "sharedMore": "Dans {name} et {count, plural, one {# autre} other {# autres}}",
+    "empty": {
+      "discover": "Aucune suggestion pour le moment. Essayez de rechercher quelqu’un par son nom.",
+      "requests": "Aucune demande d’ami en attente.",
+      "sent": "Vous n’avez aucune demande en attente de réponse.",
+      "friends": "Vous n’avez pas encore d’amis. Découvrez des personnes pour commencer."
+    },
+    "noMatch": "Personne ne correspond à « {query} ».",
+    "verified": "Vérifié"
   }
 }

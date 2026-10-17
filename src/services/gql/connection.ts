@@ -55,21 +55,25 @@ export const GET_MY_CONNECTIONS = gql`
         acceptedAt
         requester {
           userId
+          username
           firstName
           lastName
           email
           avatarUrl
           sector
+          headline
           trustScore
           trustTier
         }
         receiver {
           userId
+          username
           firstName
           lastName
           email
           avatarUrl
           sector
+          headline
           trustScore
           trustTier
         }
@@ -369,6 +373,7 @@ export const GET_ALL_PENDING_CONNECTIONS = gql`
         connectionStatus
         requester {
           userId
+          username
           firstName
           lastName
           email
@@ -383,6 +388,7 @@ export const GET_ALL_PENDING_CONNECTIONS = gql`
         }
         receiver {
           userId
+          username
           firstName
           lastName
           email

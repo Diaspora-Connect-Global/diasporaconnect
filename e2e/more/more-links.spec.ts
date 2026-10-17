@@ -111,7 +111,7 @@ test.describe('More page', () => {
         await page.keyboard.press('Enter');
         const sheet = page.getByRole('dialog', { name: 'My Requests' });
         await expect(sheet).toBeVisible();
-        expect(await linkPaths(page, '[role="dialog"]')).toEqual(['/en/community', '/en/association', '/en/profile?m=friends&t=3']);
+        expect(await linkPaths(page, '[role="dialog"]')).toEqual(['/en/community', '/en/association', '/en/friends?tab=requests']);
         await page.keyboard.press('Escape');
         await expect(sheet).toHaveCount(0);
         await expect(requests).toBeFocused();

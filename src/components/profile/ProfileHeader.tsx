@@ -23,8 +23,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useRouter as useLocaleRouter } from "@/i18n/navigation";
-import CustomDialog from "../custom/customDialog";
-import FriendListModal from "./FriendListModal";
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { FriendType, TypeOfFriend } from "../friends/TypeOfFriend";
@@ -97,21 +96,17 @@ export function ProfileHeader({
   const profileUrl = () =>
     absoluteProfileUrl({ username, userId: userData?.userId ?? userId });
 
-  // Check if friendList modal should be open based on query param
-  const friendListOpen = searchParams.get('m') === 'friends';
+  // The friends list is its own page. Old links (`/profile?m=friends&t=3`, the account
+  // menu, bookmarked notifications) still arrive here, so forward them once.
+  const legacyFriendsLink = isOwnProfile && searchParams.get('m') === 'friends';
+  const legacyTab = searchParams.get('t');
+  useEffect(() => {
+    if (!legacyFriendsLink) return;
+    const tab = ({ '1': 'friends', '2': 'discover', '3': 'requests', '4': 'sent' } as Record<string, string>)[legacyTab ?? ''];
+    localeRouter.replace(tab ? `/friends?tab=${tab}` : '/friends?tab=friends');
+  }, [legacyFriendsLink, legacyTab, localeRouter]);
 
-  const openFriendList = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('m', 'friends');
-    router.push(`?${params.toString()}`);
-  };
-
-  const closeFriendList = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('m');
-    params.delete('t');
-    router.push(`?${params.toString()}`);
-  };
+  const openFriendList = () => localeRouter.push('/friends?tab=friends');
 
   /** "Edit profile" opens the About tab, where every section is editable in place. */
   const openAboutTab = () => {
@@ -283,16 +278,6 @@ export function ProfileHeader({
           )}
         </div>
       </CardContent>
-
-      <CustomDialog
-        contentClassName="min-w-[100dvw] h-[100dvh]"
-        title={t('friendList')}
-        open={friendListOpen}
-        onOpenChange={closeFriendList}
-        showFooter={false}
-      >
-        <FriendListModal onClose={closeFriendList} />
-      </CustomDialog>
     </Card>
   );
 }

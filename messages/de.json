@@ -6791,5 +6791,42 @@
     "open": "Menü öffnen",
     "title": "Menü",
     "close": "Menü schließen"
+  },
+  "friendsPage": {
+    "metaTitle": "Freunde",
+    "title": "Freunde",
+    "subtitle": "Finde Leute, beantworte Anfragen und bleib mit deinen Freunden in Kontakt.",
+    "tabsLabel": "Bereiche der Freundesliste",
+    "tabs": {
+      "discover": "Entdecken",
+      "requests": "Anfragen",
+      "sent": "Gesendet",
+      "friends": "Freunde"
+    },
+    "discoverSearchLabel": "Personen suchen",
+    "discoverSearchPlaceholder": "Personen nach Namen suchen…",
+    "filterLabel": "Diese Liste filtern",
+    "filterPlaceholder": "Nach Namen filtern…",
+    "searchButton": "Suchen",
+    "clearSearch": "Suche zurücksetzen",
+    "suggestedTitle": "Für dich vorgeschlagen",
+    "resultsTitle": "Ergebnisse für „{query}“",
+    "browseAll": "Alle Personen ansehen",
+    "loading": "Wird geladen…",
+    "loadFailed": "Diese Liste konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loadMore": "Mehr laden",
+    "requested": "Angefragt",
+    "mutual": "{count, plural, one {# gemeinsamer Kontakt} other {# gemeinsame Kontakte}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} und {count, plural, one {# weiteren} other {# weiteren}}",
+    "empty": {
+      "discover": "Im Moment gibt es keine Vorschläge. Suche doch nach jemandem per Namen.",
+      "requests": "Keine Freundschaftsanfragen für dich offen.",
+      "sent": "Du hast keine Anfragen, die auf eine Antwort warten.",
+      "friends": "Du hast noch keine Freunde hinzugefügt. Entdecke Leute, um loszulegen."
+    },
+    "noMatch": "Niemand passt zu „{query}“.",
+    "verified": "Verifiziert"
   }
 }
