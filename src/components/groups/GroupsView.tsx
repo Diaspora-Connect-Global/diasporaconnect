@@ -15,7 +15,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
 import { toCdnUrl } from '@/lib/cdn';
 import { cn } from '@/lib/utils';
-import { GET_MY_GROUPS, GROUPS_DIRECTORY, JOIN_GROUP, REQUEST_TO_JOIN_GROUP, type GetMyGroupsResponse } from '@/services/gql/groups';
+import { GET_MY_GROUPS, GROUPS_DIRECTORY, RANKED_GROUPS, JOIN_GROUP, REQUEST_TO_JOIN_GROUP, type GetMyGroupsResponse } from '@/services/gql/groups';
 
 // The create dialog lives with the chat; load it only when someone opens it.
 const StartConversationModal = dynamic(() => import('@/components/chats/modals/StartConversationModal').then((m) => m.StartConversationModal), { ssr: false });
@@ -26,8 +26,11 @@ const MY_GROUPS_SHOWN = 6;
 const MY_GROUPS_VARS = { limit: 50, offset: 0 };
 const SILENT = { context: { silentErrors: true } } as const;
 
-type DirectoryGroup = { id: string; name: string; description?: string | null; privacy?: string | null; memberCount?: number | null; avatarUrl?: string | null };
+type DirectoryGroup = { id: string; name: string; description?: string | null; privacy?: string | null; memberCount?: number | null; avatarUrl?: string | null; viewerMembershipStatus?: string | null; rankReason?: string | null };
 type DirectoryData = { searchGroups?: { total?: number | null; groups?: DirectoryGroup[] | null } | null };
+type RankedData = { rankedGroups?: { nextCursor?: string | null; items?: Array<{ rankReason?: string | null; group?: DirectoryGroup | null } | null> | null } | null };
+/** Reason codes the web has copy for; anything else (a newer backend code) shows no label. */
+const REASONS = new Set(['POPULAR', 'ACTIVE', 'NEW', 'FROM_YOUR_COMMUNITY', 'SIMILAR_TO_YOUR_GROUPS']);
 type Outcome = 'joined' | 'requested';
 
 function GroupAvatar({ src, size = 'md' }: { src?: string | null; size?: 'sm' | 'md' }) {
@@ -58,20 +61,32 @@ export function GroupsView() {
   const [loadingMore, setLoadingMore] = useState(false);
 
   const { data: mineData, loading: mineLoading } = useQuery<GetMyGroupsResponse>(GET_MY_GROUPS, { variables: MY_GROUPS_VARS, fetchPolicy: 'cache-and-network', ...SILENT });
-  const { data, loading, error, fetchMore, refetch } = useQuery<DirectoryData>(GROUPS_DIRECTORY, {
+  // Browsing lists the ranked groups (with a reason each); a search lists every match.
+  const browsing = !query;
+  const ranked = useQuery<RankedData>(RANKED_GROUPS, { variables: { limit: PAGE_SIZE }, skip: !browsing, fetchPolicy: 'cache-and-network', notifyOnNetworkStatusChange: false, ...SILENT });
+  const found = useQuery<DirectoryData>(GROUPS_DIRECTORY, {
     variables: { query, limit: PAGE_SIZE, offset: 0 },
+    skip: browsing,
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: false,
     ...SILENT,
   });
+  const { loading, error, refetch } = browsing ? ranked : found;
+  const data = browsing ? ranked.data : found.data;
   const [joinGroup] = useMutation<{ joinGroup?: { success?: boolean; message?: string } | null }>(JOIN_GROUP, { refetchQueries: [{ query: GET_MY_GROUPS, variables: MY_GROUPS_VARS }] });
   const [requestToJoin] = useMutation<{ requestToJoinGroup?: { success?: boolean; message?: string } | null }>(REQUEST_TO_JOIN_GROUP);
 
   const myGroups = useMemo(() => (mineData?.getMyGroups?.groups ?? []).filter((g) => g && g.id && g.name), [mineData]);
   const myIds = useMemo(() => new Set(myGroups.map((g) => g.id)), [myGroups]);
-  const fetched = useMemo(() => (data?.searchGroups?.groups ?? []).filter((g): g is DirectoryGroup => !!g && !!g.id && !!g.name), [data]);
-  const total = data?.searchGroups?.total ?? fetched.length;
-  const hasMore = fetched.length < total;
+  const fetched = useMemo<DirectoryGroup[]>(() => {
+    if (browsing) {
+      return (ranked.data?.rankedGroups?.items ?? []).flatMap((i) => (i?.group && i.group.id && i.group.name ? [{ ...i.group, rankReason: i.rankReason ?? null }] : []));
+    }
+    return (found.data?.searchGroups?.groups ?? []).filter((g): g is DirectoryGroup => !!g && !!g.id && !!g.name);
+  }, [browsing, ranked.data, found.data]);
+  const total = found.data?.searchGroups?.total ?? fetched.length;
+  const nextCursor = ranked.data?.rankedGroups?.nextCursor ?? null;
+  const hasMore = browsing ? !!nextCursor : fetched.length < total;
   // Browsing hides groups you are already in (they are on the right); a search shows every match. A group joined on
   // this visit stays in place, marked, so the list does not jump under the pointer.
   const listed = useMemo(() => (query ? fetched : fetched.filter((g) => !myIds.has(g.id) || outcome[g.id])), [fetched, myIds, query, outcome]);
@@ -112,15 +127,28 @@ export function GroupsView() {
     if (loadingMore) return;
     setLoadingMore(true);
     try {
-      await fetchMore({
-        variables: { offset: fetched.length },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          const next = fetchMoreResult?.searchGroups;
-          if (!next) return prev;
-          const seen = new Set((prev.searchGroups?.groups ?? []).map((g) => g.id));
-          return { searchGroups: { ...next, groups: [...(prev.searchGroups?.groups ?? []), ...(next.groups ?? []).filter((g) => !seen.has(g.id))] } };
-        },
-      });
+      if (browsing) {
+        await ranked.fetchMore({
+          variables: { cursor: nextCursor },
+          updateQuery: (prev, { fetchMoreResult }) => {
+            const next = fetchMoreResult?.rankedGroups;
+            if (!next) return prev;
+            const before = prev.rankedGroups?.items ?? [];
+            const seen = new Set(before.map((i) => i?.group?.id));
+            return { rankedGroups: { ...next, items: [...before, ...(next.items ?? []).filter((i) => !seen.has(i?.group?.id))] } };
+          },
+        });
+      } else {
+        await found.fetchMore({
+          variables: { offset: fetched.length },
+          updateQuery: (prev, { fetchMoreResult }) => {
+            const next = fetchMoreResult?.searchGroups;
+            if (!next) return prev;
+            const seen = new Set((prev.searchGroups?.groups ?? []).map((g) => g.id));
+            return { searchGroups: { ...next, groups: [...(prev.searchGroups?.groups ?? []), ...(next.groups ?? []).filter((g) => !seen.has(g.id))] } };
+          },
+        });
+      }
     } finally {
       setLoadingMore(false);
     }
@@ -130,7 +158,10 @@ export function GroupsView() {
   const button = 'inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60';
 
   const renderAction = (g: DirectoryGroup) => {
-    const state = outcome[g.id] ?? (myIds.has(g.id) ? 'joined' : null);
+    const known = g.viewerMembershipStatus === 'ACTIVE' ? 'joined' : g.viewerMembershipStatus === 'PENDING' ? 'requested' : null;
+    const state = outcome[g.id] ?? known ?? (myIds.has(g.id) ? 'joined' : null);
+    // A group the viewer is banned from offers no action.
+    if (!state && g.viewerMembershipStatus === 'BANNED') return null;
     if (state === 'joined') {
       return (
         <Link href={`/groups/${encodeURIComponent(g.id)}`} prefetch={false} className={`${button} border border-border-subtle bg-surface-default text-text-primary hover:bg-surface-subtle`}>
@@ -280,6 +311,12 @@ export function GroupsView() {
                             </span>
                             <span aria-hidden>·</span>
                             <span>{t('members', { count: g.memberCount ?? 0 })}</span>
+                            {g.rankReason && REASONS.has(g.rankReason) && (
+                              <>
+                                <span aria-hidden>·</span>
+                                <span data-testid="group-reason" className="font-medium text-text-brand">{t(`reason.${g.rankReason}`)}</span>
+                              </>
+                            )}
                           </span>
                           {g.description?.trim() && <span className="mt-1 line-clamp-1 block text-xs text-text-secondary">{g.description}</span>}
                         </span>

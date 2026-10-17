@@ -367,7 +367,7 @@ export default function GroupDetailPage() {
                                         return (
                                             <li key={m.id} className="min-w-0">
                                                 <Link
-                                                    href={profileUrl({ userId: m.userId })}
+                                                    href={profileUrl({ username: m.profile?.username, userId: m.userId })}
                                                     prefetch={false}
                                                     className="flex min-w-0 items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-brand"
                                                 >

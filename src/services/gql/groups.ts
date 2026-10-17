@@ -144,6 +144,32 @@ export const GROUPS_DIRECTORY = gql`
         privacy
         memberCount
         avatarUrl
+        viewerMembershipStatus
+      }
+    }
+  }
+`;
+
+/**
+ * The /groups browse list: groups the viewer can join, ranked for them, each with a
+ * reason CODE (translated by the web). Keyset-paged by the opaque `nextCursor`.
+ */
+export const RANKED_GROUPS = gql`
+  query RankedGroups($limit: Int, $cursor: String) {
+    rankedGroups(limit: $limit, cursor: $cursor) {
+      success
+      nextCursor
+      items {
+        rankReason
+        group {
+          id
+          name
+          description
+          privacy
+          memberCount
+          avatarUrl
+          viewerMembershipStatus
+        }
       }
     }
   }
@@ -209,6 +235,7 @@ export const GET_GROUP_PAGE_MEMBERS = gql`
         joinedAt
         createdAt
         profile {
+          username
           avatarUrl
           firstName
           lastName

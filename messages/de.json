@@ -5386,7 +5386,8 @@
       "joinedToast": "Du bist der Gruppe beigetreten.",
       "requestedToast": "Deine Anfrage wurde gesendet.",
       "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut.",
-      "requestShort": "Anfragen"
+      "requestShort": "Anfragen",
+      "requested": "Angefragt"
     },
     "composer": {
       "prompt": "Teile ein Update, stelle eine Frage oder starte eine Diskussion …",
@@ -6316,7 +6317,14 @@
     "loadMore": "Mehr laden",
     "joinedToast": "Du bist der Gruppe beigetreten.",
     "requestedToast": "Deine Beitrittsanfrage wurde gesendet.",
-    "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut."
+    "failedToast": "Das hat nicht geklappt. Bitte versuche es erneut.",
+    "reason": {
+      "POPULAR": "Beliebt",
+      "ACTIVE": "Zuletzt aktiv",
+      "NEW": "Neu",
+      "FROM_YOUR_COMMUNITY": "Aus deiner Gemeinschaft",
+      "SIMILAR_TO_YOUR_GROUPS": "Ähnlich wie deine Gruppen"
+    }
   },
   "savedPage": {
     "title": "Gespeichert",
@@ -6646,7 +6654,8 @@
         "timeout": "Die Standortsuche hat zu lange gedauert. Versuche es erneut, am besten im Freien oder mit WLAN.",
         "unsupported": "Dieser Browser kann keinen Standort teilen.",
         "retry": "Erneut versuchen"
-      }
+      },
+      "cantFindNone": "Du hast alle „Ich finde dich nicht“-Hinweise für dieses Treffen verbraucht."
     },
     "consent": {
       "title": "Standort {minutes} Minuten lang teilen?",

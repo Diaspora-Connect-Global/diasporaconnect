@@ -5386,7 +5386,8 @@
       "joinedToast": "Je bent lid geworden van de groep.",
       "requestedToast": "Je verzoek is verstuurd.",
       "failedToast": "Dat is niet gelukt. Probeer het opnieuw.",
-      "requestShort": "Aanvragen"
+      "requestShort": "Aanvragen",
+      "requested": "Aangevraagd"
     },
     "composer": {
       "prompt": "Deel een update, stel een vraag of start een discussie…",
@@ -6316,7 +6317,14 @@
     "loadMore": "Meer laden",
     "joinedToast": "Je bent lid geworden van de groep.",
     "requestedToast": "Je verzoek is verstuurd.",
-    "failedToast": "Dat is niet gelukt. Probeer het opnieuw."
+    "failedToast": "Dat is niet gelukt. Probeer het opnieuw.",
+    "reason": {
+      "POPULAR": "Populair",
+      "ACTIVE": "Recent actief",
+      "NEW": "Nieuw",
+      "FROM_YOUR_COMMUNITY": "Uit je gemeenschap",
+      "SIMILAR_TO_YOUR_GROUPS": "Vergelijkbaar met je groepen"
+    }
   },
   "savedPage": {
     "title": "Opgeslagen",
@@ -6646,7 +6654,8 @@
         "timeout": "Het bepalen van je locatie duurde te lang. Probeer het opnieuw, het liefst buiten of met wifi.",
         "unsupported": "Deze browser kan geen locatie delen.",
         "retry": "Opnieuw proberen"
-      }
+      },
+      "cantFindNone": "Je hebt al je “ik kan je niet vinden”-berichten voor deze afspraak gebruikt."
     },
     "consent": {
       "title": "Je locatie {minutes} minuten delen?",

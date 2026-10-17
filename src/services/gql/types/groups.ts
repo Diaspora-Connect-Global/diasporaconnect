@@ -87,8 +87,12 @@ export enum MemberStatus {
  * };
  * ```
  */
+/** The caller's own relation to a group; null/undefined when the lookup failed. */
+export type GroupViewerMembershipStatus = 'NONE' | 'PENDING' | 'ACTIVE' | 'BANNED';
+
 export interface Group {
   id: string;
+  viewerMembershipStatus?: GroupViewerMembershipStatus | null;
   name: string;
   description?: string;
   avatarUrl?: string;
@@ -115,7 +119,7 @@ export interface Group {
  */
 export interface GroupMember {
   /** The roster's profile summary; `occupation` is selected by GET_GROUP_MEMBERS only. */
-  profile: Profile & { occupation?: string | null };
+  profile: Profile & { occupation?: string | null; username?: string | null };
   id: string;
   groupId: string;
   userId: string;

@@ -27,6 +27,7 @@ const LOOKS_LIKE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-|^[0-9a-f]{16,}$/i;
 
 type Person = {
   userId: string;
+  username?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   avatarUrl?: string | null;
@@ -286,7 +287,7 @@ export function PeopleView() {
                   const about = [p.headline?.trim() || p.sector?.trim(), where].filter(Boolean).join(' · ');
                   return (
                     <li key={p.userId} className="flex min-w-0 items-center gap-3 px-2 py-3">
-                      <Link href={profileUrl({ userId: p.userId })} prefetch={false} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
+                      <Link href={profileUrl({ username: p.username, userId: p.userId })} prefetch={false} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
                         <PersonAvatar src={p.avatarUrl} />
                         <span className="min-w-0 flex-1">
                           <span className="flex min-w-0 items-center gap-1">

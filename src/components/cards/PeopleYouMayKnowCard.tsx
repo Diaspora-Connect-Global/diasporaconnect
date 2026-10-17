@@ -7,9 +7,12 @@ import { Link } from '@/i18n/navigation';
 import { UserBadge, type Tier } from '@/components/custom/userBadge';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
 import { mapTrustScoreToTier } from '@/lib/userTier';
+import { profileUrl } from '@/lib/profileUrl';
 
 interface PeopleYouMayKnowCardProps {
   userId: string;
+  /** When set the profile link is `/@username`. */
+  username?: string | null;
   profileImage: string;
   name: string;
   /**
@@ -34,6 +37,7 @@ interface PeopleYouMayKnowCardProps {
 
 export default function PeopleYouMayKnowCard({
   userId,
+  username,
   profileImage,
   name,
   matchReason,
@@ -98,7 +102,7 @@ export default function PeopleYouMayKnowCard({
   return (
     <div className="h-[2.5rem] flex space-x-6 items-center justify-between transition-colors rounded-lg">
       <Link
-        href={`/${userId}`}
+        href={profileUrl({ username, userId })}
         className="flex min-w-0 flex-1 items-center gap-[0.5rem] rounded-md mr-2 outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-text-brand"
       >
         <div className="h-[1.5rem] w-[1.5rem] flex-shrink-0">

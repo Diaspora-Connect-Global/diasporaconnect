@@ -955,6 +955,7 @@ export const RECOMMENDED_PEOPLE = gql`
       items {
         profile {
           userId
+          username
           firstName
           lastName
           avatarUrl

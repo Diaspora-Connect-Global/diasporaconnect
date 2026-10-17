@@ -5386,7 +5386,8 @@
       "joinedToast": "You joined the group.",
       "requestedToast": "Your request was sent.",
       "failedToast": "We could not do that. Please try again.",
-      "requestShort": "Request"
+      "requestShort": "Request",
+      "requested": "Requested"
     },
     "composer": {
       "prompt": "Share an update, ask a question or start a discussion…",
@@ -6316,7 +6317,14 @@
     "loadMore": "Load more",
     "joinedToast": "You joined the group.",
     "requestedToast": "Your request to join has been sent.",
-    "failedToast": "That didn't work. Please try again."
+    "failedToast": "That didn't work. Please try again.",
+    "reason": {
+      "POPULAR": "Popular",
+      "ACTIVE": "Active lately",
+      "NEW": "New",
+      "FROM_YOUR_COMMUNITY": "From your community",
+      "SIMILAR_TO_YOUR_GROUPS": "Similar to your groups"
+    }
   },
   "savedPage": {
     "title": "Saved",
@@ -6646,7 +6654,8 @@
         "timeout": "Finding your location took too long. Try again, ideally outdoors or on Wi-Fi.",
         "unsupported": "This browser can't share a location.",
         "retry": "Try again"
-      }
+      },
+      "cantFindNone": "You have used all your “can’t find you” messages for this meeting."
     },
     "consent": {
       "title": "Share your location for {minutes} minutes?",

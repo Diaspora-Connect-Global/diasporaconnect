@@ -5386,7 +5386,8 @@
       "joinedToast": "Ti sei unito al gruppo.",
       "requestedToast": "La tua richiesta è stata inviata.",
       "failedToast": "Non è stato possibile. Riprova.",
-      "requestShort": "Richiedi"
+      "requestShort": "Richiedi",
+      "requested": "Richiesta inviata"
     },
     "composer": {
       "prompt": "Condividi un aggiornamento, fai una domanda o avvia una discussione…",
@@ -6316,7 +6317,14 @@
     "loadMore": "Carica altri",
     "joinedToast": "Ti sei unito al gruppo.",
     "requestedToast": "La tua richiesta è stata inviata.",
-    "failedToast": "Non ha funzionato. Riprova."
+    "failedToast": "Non ha funzionato. Riprova.",
+    "reason": {
+      "POPULAR": "Popolare",
+      "ACTIVE": "Attivo di recente",
+      "NEW": "Nuovo",
+      "FROM_YOUR_COMMUNITY": "Dalla tua comunità",
+      "SIMILAR_TO_YOUR_GROUPS": "Simile ai tuoi gruppi"
+    }
   },
   "savedPage": {
     "title": "Salvati",
@@ -6646,7 +6654,8 @@
         "timeout": "La ricerca della posizione ha richiesto troppo tempo. Riprova, meglio all'aperto o con il Wi-Fi.",
         "unsupported": "Questo browser non può condividere la posizione.",
         "retry": "Riprova"
-      }
+      },
+      "cantFindNone": "Hai usato tutti i messaggi «Non ti trovo» per questo incontro."
     },
     "consent": {
       "title": "Condividere la tua posizione per {minutes} minuti?",

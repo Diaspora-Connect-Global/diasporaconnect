@@ -115,6 +115,7 @@ export function PeopleYouMayKnow() {
                                 <PeopleYouMayKnowCard
                                     key={suggestion.profile.userId}
                                     userId={suggestion.profile.userId}
+                                    username={suggestion.profile.username}
                                     profileImage={toCdnUrl(suggestion.profile.avatarUrl)}
                                     name={displayName}
                                     matchReason={reasonCopy}

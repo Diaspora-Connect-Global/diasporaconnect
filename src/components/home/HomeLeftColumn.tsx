@@ -94,7 +94,7 @@ function CommunitiesCard() {
   );
 }
 
-function GroupRowItem({ g, busy, done, onAct }: { g: GroupRow; busy: boolean; done: boolean; onAct: (g: GroupRow) => void }) {
+function GroupRowItem({ g, busy, done, requested, onAct }: { g: GroupRow; busy: boolean; done: boolean; requested: boolean; onAct: (g: GroupRow) => void }) {
   const t = useTranslations('communityPage.groups');
   return (
     <li className="flex items-center gap-3 rounded-lg px-1 py-2">
@@ -107,11 +107,11 @@ function GroupRowItem({ g, busy, done, onAct }: { g: GroupRow; busy: boolean; do
       </Link>
       <button
         type="button"
-        disabled={busy || done}
+        disabled={busy || done || requested}
         onClick={() => onAct(g)}
         className="shrink-0 rounded-full border border-border-brand px-3 py-1 text-xs font-semibold text-text-brand transition-colors hover:bg-surface-subtle disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
       >
-        {g.privacy === 'PRIVATE' ? t('requestShort') : t('join')}
+        {requested ? t('requested') : g.privacy === 'PRIVATE' ? t('requestShort') : t('join')}
       </button>
     </li>
   );
@@ -119,7 +119,7 @@ function GroupRowItem({ g, busy, done, onAct }: { g: GroupRow; busy: boolean; do
 
 function GroupsCard() {
   const t = useTranslations('homeLeft');
-  const { groups, busy, done, act } = useGroupsToJoin(SHOWN_GROUPS);
+  const { groups, busy, done, requested, act } = useGroupsToJoin(SHOWN_GROUPS);
   if (groups.length === 0) return null;
   return (
     <section aria-labelledby="home-left-groups" data-testid="home-left-groups" className={cardCls}>
@@ -129,7 +129,7 @@ function GroupsCard() {
       </div>
       <ul>
         {groups.map((g) => (
-          <GroupRowItem key={g.id} g={g} busy={busy === g.id} done={done.has(g.id)} onAct={act} />
+          <GroupRowItem key={g.id} g={g} busy={busy === g.id} done={done.has(g.id)} requested={requested.has(g.id)} onAct={act} />
         ))}
       </ul>
     </section>

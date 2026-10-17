@@ -44,6 +44,20 @@ test('groups to join leave out the ones already joined; private ones say "Reques
     await page.context().close();
 });
 
+test('a group the server says is PENDING reads Requested after a reload; ACTIVE ones are not offered', async () => {
+    const status = (g: Record<string, unknown>, viewerMembershipStatus: string) => ({ ...g, viewerMembershipStatus });
+    const { page } = await open(browser, '/community', {
+        ...DATA,
+        RedesignGroupsToJoin: { searchGroups: { __typename: 'GroupList', groups: [status(group('g-1', 'Young Professionals'), 'NONE'), status(group('g-3', 'Private Investors', 'PRIVATE'), 'PENDING'), status(group('g-4', 'Already In'), 'ACTIVE')] } },
+    });
+    const groups = page.getByTestId('community-groups');
+    await expect(groups).toBeVisible({ timeout: 90_000 });
+    await expect(groups).not.toContainText('Already In');
+    await expect(groups.getByRole('button', { name: 'Requested' })).toBeDisabled();
+    await expect(groups.getByRole('button', { name: 'Join', exact: true })).toHaveCount(1);
+    await page.context().close();
+});
+
 test('groups section is hidden when there are none', async () => {
     const { page } = await open(browser, '/community', { ...DATA, RedesignGroupsToJoin: { searchGroups: null } });
     await expect(page.getByTestId('community-composer')).toBeVisible({ timeout: 90_000 });

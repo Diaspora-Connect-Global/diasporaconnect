@@ -44,6 +44,7 @@ export const REDESIGN_GROUPS_TO_JOIN = gql`
         privacy
         memberCount
         avatarUrl
+        viewerMembershipStatus
       }
     }
   }

@@ -25,7 +25,7 @@ function GroupAvatar({ src }: { src?: string | null }) {
 export function FeaturedGroups() {
   const t = useTranslations('communityPage.groups');
   const tAll = useTranslations('redesign');
-  const { groups, busy, done, act } = useGroupsToJoin(SHOWN);
+  const { groups, busy, done, requested, act } = useGroupsToJoin(SHOWN);
 
   if (groups.length === 0) return null;
 
@@ -47,11 +47,11 @@ export function FeaturedGroups() {
               {g.description && <p className="line-clamp-2 text-xs text-muted-foreground">{g.description}</p>}
               <button
                 type="button"
-                disabled={busy === g.id || done.has(g.id)}
+                disabled={busy === g.id || done.has(g.id) || requested.has(g.id)}
                 onClick={() => act(g)}
                 className="mt-auto w-full rounded-full bg-surface-brand px-3 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2"
               >
-                {g.privacy === 'PRIVATE' ? t('request') : t('join')}
+                {requested.has(g.id) ? t('requested') : g.privacy === 'PRIVATE' ? t('request') : t('join')}
               </button>
             </div>
           </li>

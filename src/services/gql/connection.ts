@@ -436,6 +436,7 @@ export const SEARCH_USERS = gql`
       hasMore
       profiles {
         userId
+        username
         firstName
         lastName
         sector

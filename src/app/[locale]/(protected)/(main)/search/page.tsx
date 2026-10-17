@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { NoResults } from '@/components/feedback';
 import PageLoader from '@/components/custom/PageLoader';
+import { profileUrl } from '@/lib/profileUrl';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -93,7 +94,7 @@ function generateVariants(query: string): string[] {
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface UserProfile {
-  userId: string; firstName: string; lastName: string;
+  userId: string; username?: string | null; firstName: string; lastName: string;
   headline?: string; sector?: string; residenceCountry?: string;
   avatarUrl?: string; connectionStatus?: string;
 }
@@ -176,7 +177,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 function PeopleCard({ profile, query }: { profile: UserProfile; query: string }) {
   const name = `${profile.firstName} ${profile.lastName}`;
   return (
-    <Link href={`/${profile.userId}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
+    <Link href={profileUrl({ username: profile.username, userId: profile.userId })} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <Avatar src={profile.avatarUrl} name={name} />
       <div className="flex-1 min-w-0">
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={name} query={query} /></p>
