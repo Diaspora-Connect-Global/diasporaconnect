@@ -6786,5 +6786,29 @@
       "refused": "Al momento non è possibile.",
       "generic": "Qualcosa è andato storto. Riprova."
     }
+  },
+  "accountPanel": {
+    "panelTitle": "Il tuo account",
+    "accountFallback": "Il tuo account",
+    "items": {
+      "profile": "Il mio profilo",
+      "network": "La mia rete",
+      "saved": "Salvati",
+      "requests": "Le mie richieste",
+      "wallet": "Portafoglio",
+      "settings": "Impostazioni e privacy",
+      "contact": "Contattaci"
+    },
+    "signOut": "Esci",
+    "confirm": {
+      "title": "Uscire?",
+      "body": "Sei sicuro di voler uscire?",
+      "allDevices": "Verrai disconnesso da tutti i tuoi dispositivi.",
+      "cancel": "Annulla",
+      "action": "Esci",
+      "working": "Uscita in corso…",
+      "done": "Sei uscito dall'account.",
+      "failed": "Il server non è raggiungibile, ma su questo dispositivo sei uscito dall'account."
+    }
   }
 }

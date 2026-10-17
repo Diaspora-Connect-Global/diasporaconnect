@@ -6786,5 +6786,29 @@
       "refused": "Das ist gerade nicht möglich.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
     }
+  },
+  "accountPanel": {
+    "panelTitle": "Dein Konto",
+    "accountFallback": "Dein Konto",
+    "items": {
+      "profile": "Mein Profil",
+      "network": "Mein Netzwerk",
+      "saved": "Gespeichert",
+      "requests": "Meine Anfragen",
+      "wallet": "Wallet",
+      "settings": "Einstellungen & Datenschutz",
+      "contact": "Kontakt"
+    },
+    "signOut": "Abmelden",
+    "confirm": {
+      "title": "Abmelden?",
+      "body": "Möchtest du dich wirklich abmelden?",
+      "allDevices": "Du wirst auf allen deinen Geräten abgemeldet.",
+      "cancel": "Abbrechen",
+      "action": "Abmelden",
+      "working": "Abmeldung läuft…",
+      "done": "Du wurdest abgemeldet.",
+      "failed": "Der Server war nicht erreichbar, aber du bist auf diesem Gerät abgemeldet."
+    }
   }
 }
