@@ -4,6 +4,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { ArrowRight, Briefcase, ChevronRight, Compass, Users, UsersRound } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { QuickActionRow } from '@/components/redesign/QuickActionRow';
+import { YourActivity } from '@/components/home/YourActivity';
 import { RailCard } from '@/components/redesign/RailCard';
 import { useUpcomingRegistrations } from '@/hooks/redesign/useUpcomingRegistrations';
 import { useMyCirclesPreview } from '@/hooks/redesign/useMyCirclesPreview';
@@ -27,6 +28,7 @@ export function HomeRail({ idPrefix }: { idPrefix: string }) {
 
   return (
     <div className="space-y-4" data-testid={`home-rail-${idPrefix}`}>
+      <YourActivity idPrefix={idPrefix} />
       <Link
         href="/community"
         prefetch={false}

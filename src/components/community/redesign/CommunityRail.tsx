@@ -65,10 +65,15 @@ function SuggestedPeople() {
   );
 }
 
+/** Trending hashtags (shared by the rail card and the phone drawer). */
+export function useTrendingTags() {
+  const { data } = useQuery<{ trendingHashtags?: { id: string; tag: string; usageCount?: number | null }[] | null }>(GET_TRENDING_HASHTAGS, { variables: { input: { limit: 5, timeRange: '7d' } }, fetchPolicy: 'cache-first', ...SILENT });
+  return (data?.trendingHashtags ?? []).filter((h) => h && h.tag).slice(0, 5);
+}
+
 function TrendingTopics() {
   const t = useTranslations('communityPage.rail');
-  const { data } = useQuery<{ trendingHashtags?: { id: string; tag: string; usageCount?: number | null }[] | null }>(GET_TRENDING_HASHTAGS, { variables: { input: { limit: 5, timeRange: '7d' } }, fetchPolicy: 'cache-first', ...SILENT });
-  const tags = (data?.trendingHashtags ?? []).filter((h) => h && h.tag).slice(0, 5);
+  const tags = useTrendingTags();
   if (tags.length === 0) return null;
   return (
     <RailCard id="community-topics-title" title={t('topics')} testId="community-topics">
@@ -89,12 +94,10 @@ function TrendingTopics() {
   );
 }
 
-function UpcomingEvents() {
-  const t = useTranslations('communityPage.rail');
-  const tAll = useTranslations('redesign');
-  const format = useFormatter();
+/** The next three upcoming public events (shared by the rail card and the phone drawer). */
+export function useUpcomingPublicEvents(): Event[] {
   const { data } = useQuery<ListEventsData>(LIST_EVENTS, { variables: { input: { limit: 20, offset: 0 } }, fetchPolicy: 'cache-first', ...SILENT });
-  const events = useMemo(() => {
+  return useMemo(() => {
     const now = Date.now();
     return (data?.listEvents?.events ?? [])
       .filter((e): e is Event => !!e && !!e.id && !!e.startAt)
@@ -102,6 +105,13 @@ function UpcomingEvents() {
       .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
       .slice(0, 3);
   }, [data]);
+}
+
+function UpcomingEvents() {
+  const t = useTranslations('communityPage.rail');
+  const tAll = useTranslations('redesign');
+  const format = useFormatter();
+  const events = useUpcomingPublicEvents();
   if (events.length === 0) return null;
   return (
     <RailCard id="community-events-title" title={t('events')} href="/events" viewAllLabel={tAll('viewAll')} testId="community-events">

@@ -5302,7 +5302,7 @@
     "activity": {
       "title": "Jouw activiteit",
       "event": "Evenement waarvoor je bent aangemeld",
-      "registered": "Aangemeld · {date}",
+      "registered": "Aangemeld",
       "request": "Serviceaanvraag",
       "requestSubtitle": "Aanvraag {number}",
       "requestStatus": {
@@ -6786,5 +6786,10 @@
       "refused": "Dat kan nu niet.",
       "generic": "Er ging iets mis. Probeer het opnieuw."
     }
+  },
+  "railMenu": {
+    "open": "Menu openen",
+    "title": "Menu",
+    "close": "Menu sluiten"
   }
 }

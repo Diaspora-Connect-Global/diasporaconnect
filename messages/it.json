@@ -5302,7 +5302,7 @@
     "activity": {
       "title": "La tua attività",
       "event": "Evento a cui sei iscritto",
-      "registered": "Iscritto · {date}",
+      "registered": "Iscritto",
       "request": "Richiesta di servizio",
       "requestSubtitle": "Richiesta {number}",
       "requestStatus": {
@@ -6786,5 +6786,10 @@
       "refused": "Al momento non è possibile.",
       "generic": "Qualcosa è andato storto. Riprova."
     }
+  },
+  "railMenu": {
+    "open": "Apri il menu",
+    "title": "Menu",
+    "close": "Chiudi il menu"
   }
 }

@@ -5302,7 +5302,7 @@
     "activity": {
       "title": "Deine Aktivität",
       "event": "Veranstaltung, für die du angemeldet bist",
-      "registered": "Angemeldet · {date}",
+      "registered": "Angemeldet",
       "request": "Serviceanfrage",
       "requestSubtitle": "Anfrage {number}",
       "requestStatus": {
@@ -6786,5 +6786,10 @@
       "refused": "Das ist gerade nicht möglich.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
     }
+  },
+  "railMenu": {
+    "open": "Menü öffnen",
+    "title": "Menü",
+    "close": "Menü schließen"
   }
 }

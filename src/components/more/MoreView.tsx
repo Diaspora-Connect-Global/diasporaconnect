@@ -26,24 +26,9 @@ import { useRouter } from '@/i18n/navigation';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
 import { MoreLinkCard } from './MoreLinkCard';
 import { MoreRail } from './MoreRail';
+import { ITEM_ICONS } from './moreIcons';
 import { MORE_SECTIONS } from './moreLinks';
 
-const ITEM_ICONS: Record<string, LucideIcon> = {
-  requests: ClipboardList,
-  saved: Bookmark,
-  tickets: Ticket,
-  businesses: Building2,
-  services: Wrench,
-  listings: Tag,
-  applications: BriefcaseBusiness,
-  payments: CreditCard,
-  circles: UsersRound,
-  events: CalendarDays,
-  conversations: MessageSquareMore,
-  marketplace: Store,
-  opportunities: Lightbulb,
-  createPost: SquarePen,
-};
 
 function MoreHero() {
   const t = useTranslations('more');

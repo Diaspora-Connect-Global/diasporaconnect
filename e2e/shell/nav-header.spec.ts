@@ -1,7 +1,7 @@
 /**
  * The app shell's navigation: Home · Discover · Community · More, the Messages
  * and Notifications icons with their badges, the account menu, and the phone
- * bottom bar (no hamburger drawer, no left sidebar).
+ * bottom bar (no left sidebar; the rail-menu drawer only exists on pages with side rails, see rail-menu.spec.ts).
  *
  * Part 1 is pure (no browser): which section each path lights up.
  * Part 2 drives the REAL authenticated routes with a seeded session and an
@@ -122,7 +122,7 @@ test.describe('desktop header', () => {
 });
 
 test.describe('phone header', () => {
-    test('bottom bar with the four sections; top bar keeps search, Messages, Notifications and the account — no drawer', async () => {
+    test('bottom bar with the four sections; top bar keeps search, Messages, Notifications the account and the menu-drawer button', async () => {
         const page = await open('/en/more', { width: 390, height: 844 });
         const bottom = page.getByRole('navigation').last();
         await expect(bottom.getByRole('link')).toHaveText(['Home', 'Discover', 'Community', 'More']);
@@ -135,8 +135,9 @@ test.describe('phone header', () => {
         await expect(header.getByRole('link', { name: /^Messages/ })).toBeVisible();
         await expect(header.getByRole('link', { name: /^Notifications/ })).toBeVisible();
         await expect(header.getByRole('button', { name: 'Profile' })).toBeVisible();
-        // The only visible header buttons are search and the account menu (the hamburger is gone).
-        await expect(header.getByRole('button')).toHaveCount(2);
+        // Search, the account menu and the menu-drawer button (on every page below lg).
+        await expect(header.getByRole('button')).toHaveCount(3);
+        await expect(page.getByTestId('rail-menu-button')).toBeVisible();
         await expect(page.getByTestId('chat-nav-badge')).toHaveText('3');
         await page.context().close();
     });

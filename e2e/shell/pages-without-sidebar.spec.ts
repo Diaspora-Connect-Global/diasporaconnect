@@ -92,14 +92,14 @@ for (const route of homeRoutes()) {
     });
 }
 
-test('/home keeps both feed views (You / Following) now that the sidebar is gone', async () => {
+test('/home feed has the same For you / Latest / Following tabs and category filter as /community', async () => {
     const { page } = await open('/home', { width: 1280, height: 800 });
-    const views = page.getByRole('group', { name: 'Which posts to show' });
-    await expect(views).toBeVisible({ timeout: 90_000 });
-    await expect(views.getByRole('button', { name: 'You' })).toHaveAttribute('aria-pressed', 'true');
-    await views.getByRole('button', { name: 'Following' }).click();
-    await expect(views.getByRole('button', { name: 'Following' })).toHaveAttribute('aria-pressed', 'true');
-    expect(await page.evaluate(() => sessionStorage.getItem('viewFilter'))).toBe('following');
+    const tabs = page.getByRole('tablist', { name: /./ });
+    await expect(tabs).toBeVisible({ timeout: 90_000 });
+    await expect(tabs.getByRole('tab', { name: 'For you' })).toHaveAttribute('aria-selected', 'true');
+    await tabs.getByRole('tab', { name: 'Following' }).click();
+    await expect(tabs.getByRole('tab', { name: 'Following' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('community-feed-filter')).toBeVisible();
     await page.context().close();
 });
 
@@ -127,13 +127,13 @@ test('/community: "Your communities" lists memberships, pending requests and ass
     expect(Math.round(frame.width)).toBe(1024);
     await page.context().close();
 
-    // …stacked above it on a phone.
+    // …and on a phone it moves into the header's menu drawer instead of stacking above the feed.
     const phone = await open('/community', { width: 360, height: 740 });
-    const pc = phone.page.getByTestId('your-communities');
-    await expect(pc.getByRole('heading', { name: 'Your communities' })).toBeVisible({ timeout: 90_000 });
-    const pd = (await phone.page.getByTestId('community-feed').boundingBox())!;
-    const pcb = (await pc.boundingBox())!;
-    expect(pd.y).toBeGreaterThan(pcb.y + pcb.height - 1);
+    await expect(phone.page.getByTestId('community-feed')).toBeVisible({ timeout: 90_000 });
+    await expect(phone.page.getByTestId('your-communities')).toBeHidden();
+    await phone.page.getByTestId('rail-menu-button').click();
+    await expect(phone.page.getByTestId('rail-menu-drawer').getByRole('heading', { name: 'Your communities' })).toBeVisible();
+    await phone.page.keyboard.press('Escape');
     const size = await phone.page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth }));
     expect(size.sw).toBeLessThanOrEqual(size.iw);
     await phone.page.context().close();
