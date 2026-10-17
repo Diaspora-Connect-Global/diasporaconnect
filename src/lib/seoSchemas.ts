@@ -7,6 +7,7 @@
  */
 import { BASE, SITE_NAME } from './seo';
 
+import { compensationMajor } from '@/lib/compensation';
 /** Home → Section → {title} breadcrumb. `section` e.g. { name: 'Events', path: '/events' }. */
 export function breadcrumbSchema(
   locale: string,
@@ -114,6 +115,7 @@ type OpportunityForSchema = {
   deadline?: string | null;
   type?: string | null;
   location?: string | null;
+  /** integer MINOR units (x100) */
   compensationMin?: number | null;
   compensationMax?: number | null;
   compensationCurrency?: string | null;
@@ -130,8 +132,8 @@ export function jobPostingSchema(o: OpportunityForSchema, url: string) {
             currency: (o.compensationCurrency || 'USD').toUpperCase(),
             value: {
               '@type': 'QuantitativeValue',
-              ...(o.compensationMin != null ? { minValue: o.compensationMin } : {}),
-              ...(o.compensationMax != null ? { maxValue: o.compensationMax } : {}),
+              ...(o.compensationMin != null ? { minValue: compensationMajor(o.compensationMin) } : {}),
+              ...(o.compensationMax != null ? { maxValue: compensationMajor(o.compensationMax) } : {}),
               unitText: 'YEAR',
             },
           },

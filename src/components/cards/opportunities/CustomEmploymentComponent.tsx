@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { UserBadge } from "@/components/custom/userBadge";
 import { resolveUserTier } from "@/lib/userTier";
 
+import { compensationText } from '@/lib/compensation';
 const isUUID = (s?: string | null) =>
     !!s && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
@@ -61,13 +62,11 @@ function formatCompensation(
     currency?: string | null,
     compensationType?: string | null,
 ) {
-    if (!min && !max) return null;
-    const fmt = (n: number) => n.toLocaleString();
-    const cur = currency ?? '';
+    // min/max are integer minor units; compensationText divides by 100 once via formatMoney.
+    const text = compensationText(min, max, currency);
+    if (!text) return null;
     const typeLabel = compensationType ? ` (${compensationType.replace(/_/g, ' ').toLowerCase()})` : '';
-    if (min && max) return `${cur} ${fmt(min)} – ${fmt(max)}${typeLabel}`;
-    if (min) return `${cur} ${fmt(min)}+${typeLabel}`;
-    return `Up to ${cur} ${fmt(max!)}${typeLabel}`;
+    return `${text}${typeLabel}`;
 }
 
 function formatEnumLabel(value?: string | null) {

@@ -15,6 +15,10 @@ export type OpportunityItem = {
   location?: string | null;
   deliveryMode?: string | null;
   commitmentType?: string | null;
+  /** Integer MINOR units (x100) of compensationCurrency. */
+  compensationMin?: number | null;
+  compensationMax?: number | null;
+  compensationCurrency?: string | null;
   deadline?: string | null;
   createdAt?: string | null;
   isSavedByCurrentUser?: boolean | null;

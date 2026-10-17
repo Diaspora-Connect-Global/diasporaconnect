@@ -42,7 +42,7 @@ const MANY = {
     RedesignFeaturedServices: { getFeaturedMarketplaceServices: { __typename: 'ServiceList', services: [1, 2, 3, 4, 5].map(svc) } },
     ListOpportunities: (v: Record<string, unknown>) => {
         const input = (v.input ?? {}) as { type?: string };
-        const rows = input.type === 'EMPLOYMENT' ? [job(1, { owner: { __typename: 'OpportunityOwner', name: 'Tech Solutions Ltd' }, commitmentType: 'FULL_TIME', compensationMin: 800, compensationMax: 1200, compensationCurrency: 'USD' }), ...[2, 3, 4, 5, 6].map((i) => job(i))] : [];
+        const rows = input.type === 'EMPLOYMENT' ? [job(1, { owner: { __typename: 'OpportunityOwner', name: 'Tech Solutions Ltd' }, commitmentType: 'FULL_TIME', compensationMin: 80000, compensationMax: 120000, compensationCurrency: 'USD' }), job(2, { compensationMin: 250000, compensationCurrency: 'USD' }), job(3, { compensationMax: 90000, compensationCurrency: 'USD' }), ...[4, 5, 6].map((i) => job(i))] : [];
         return { listOpportunities: { __typename: 'OpportunityList', total: rows.length, opportunities: rows } };
     },
 };
@@ -58,14 +58,20 @@ test('each overview section is one row: 3 cards beside the rail at 1280px, the r
     await page.context().close();
 });
 
-test('job cards say who is hiring and the commitment, and never show a salary', async () => {
+test('job cards say who is hiring, the commitment and the pay (API sends integer minor units, shown once ÷100)', async () => {
     const { page } = await open(browser, '/discover?cat=jobs', MANY);
     const first = page.getByTestId('discover-card-jobs').first();
     await expect(first).toContainText('Job number 1', { timeout: 90_000 });
     await expect(first).toContainText('Tech Solutions Ltd');
     await expect(first).toContainText('Full-time');
     await expect(first).toContainText('Accra, Ghana');
-    await expect(first).not.toContainText(/800|1,200|USD/);
+    // 80000 / 120000 minor units = $800.00 – $1,200.00 (NOT $80,000.00 – $120,000.00)
+    await expect(first.getByTestId('job-pay')).toHaveText(/\$800\.00\s*–\s*\$1,200\.00/);
+    await expect(first).not.toContainText('80,000');
+    // One bound only: "From" / "Up to"; no pay at all: nothing rendered.
+    await expect(page.getByTestId('discover-card-jobs').nth(1).getByTestId('job-pay')).toHaveText('From $2,500.00');
+    await expect(page.getByTestId('discover-card-jobs').nth(2).getByTestId('job-pay')).toHaveText('Up to $900.00');
+    await expect(page.getByTestId('discover-card-jobs').nth(3).getByTestId('job-pay')).toHaveCount(0);
     // Filtered views show more than one row and no Latest row.
     await expect(page.getByTestId('discover-card-jobs')).toHaveCount(6);
     await expect(page.getByTestId('discover-section-latest')).toHaveCount(0);

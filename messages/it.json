@@ -5288,6 +5288,8 @@
     "remote": "Da remoto",
     "closes": "Scade il {date}",
     "priceFrom": "Da {price}",
+    "salaryFrom": "Da {amount}",
+    "salaryUpTo": "Fino a {amount}",
     "kinds": {
       "opportunity": "Opportunità",
       "realEstate": "Immobiliare",

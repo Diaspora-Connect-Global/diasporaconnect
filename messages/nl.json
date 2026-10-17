@@ -5288,6 +5288,8 @@
     "remote": "Op afstand",
     "closes": "Sluit op {date}",
     "priceFrom": "Vanaf {price}",
+    "salaryFrom": "Vanaf {amount}",
+    "salaryUpTo": "Tot {amount}",
     "kinds": {
       "opportunity": "Kans",
       "realEstate": "Vastgoed",

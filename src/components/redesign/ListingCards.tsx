@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { Briefcase, Building2, CalendarDays, GraduationCap, HandHeart, Landmark, MapPin, Package, TrendingUp, Wrench } from 'lucide-react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 import { MediaCard } from './MediaCard';
@@ -12,6 +12,7 @@ import { toCdnUrl } from '@/lib/cdn';
 import { formatMoney } from '@/types/money';
 import { getEventCoverImage, getEventLocationDisplay, type Event } from '@/services/gql/events';
 import type { OpportunityItem, ProductItem, ServiceItem } from '@/hooks/redesign/useFreshListings';
+import { compensationParts } from '@/lib/compensation';
 import type { MoreTone } from '@/components/more/moreLinks';
 
 const OPPORTUNITY_LOOK: Record<string, { icon: LucideIcon; tone: MoreTone }> = {
@@ -63,13 +64,16 @@ const LOOKS_LIKE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-|^[0-9a-f]{16,}$/i;
 
 /**
  * Job card, laid out like the mockup's job row: icon tile, title, who is hiring,
- * where, then the commitment (Full-time…) and the closing date. No salary: the
- * unit of `compensationMin/Max` is not confirmed, and a wrong unit is a 100×
- * error. The bookmark is a sibling of the link, never nested inside it.
+ * where, then the commitment (Full-time…), the pay and the closing date. Pay is
+ * `compensationMin/Max` in integer MINOR units; `compensationParts` -> `formatMoney`
+ * is the one ÷100. The bookmark is a sibling of the link, never nested inside it.
  */
 export function JobCard({ item, testId }: { item: OpportunityItem; testId?: string }) {
   const t = useTranslations('redesign');
   const format = useFormatter();
+  const locale = useLocale();
+  const pay = compensationParts(item.compensationMin, item.compensationMax, item.compensationCurrency, locale);
+  const payText = !pay ? '' : pay.kind === 'range' ? `${pay.min} – ${pay.max}` : pay.kind === 'from' ? t('salaryFrom', { amount: pay.min }) : t('salaryUpTo', { amount: pay.max });
   const place = item.location?.trim() || (item.deliveryMode === 'REMOTE' || item.deliveryMode === 'ONLINE' ? t('remote') : '');
   const org = item.owner?.name?.trim();
   const hiring = org && !LOOKS_LIKE_ID.test(org) ? org : '';
@@ -98,9 +102,10 @@ export function JobCard({ item, testId }: { item: OpportunityItem; testId?: stri
             )}
           </div>
         </div>
-        {(commitment || deadline) && (
+        {(commitment || payText || deadline) && (
           <div className="mt-auto flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pr-9 text-xs">
             {commitment && <span className={`rounded-md px-2 py-0.5 font-medium ${TONE_CLASS.success}`}>{commitment}</span>}
+            {payText && <span data-testid="job-pay" className="font-medium text-success">{payText}</span>}
             {deadline && <span className="font-medium text-muted-foreground">{t('closes', { date: format.dateTime(deadline, { dateStyle: 'medium' }) })}</span>}
           </div>
         )}

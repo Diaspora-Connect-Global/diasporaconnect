@@ -5288,6 +5288,8 @@
     "remote": "Remote",
     "closes": "Closes {date}",
     "priceFrom": "From {price}",
+    "salaryFrom": "From {amount}",
+    "salaryUpTo": "Up to {amount}",
     "kinds": {
       "opportunity": "Opportunity",
       "realEstate": "Real estate",
